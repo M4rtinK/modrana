@@ -1,0 +1,35 @@
+== Buy
+Supermarket|amenity=supermarket
+DIY|tourism=diy
+
+== Eat
+Pub food|amenity=pub;food=yes
+Restaurant|amenity=restaurant
+Cafe|amenity=cafe
+Fast food|amenity=fast_food
+
+== Sleep
+Hotel|tourism=hotel
+Hostel|tourism=hostel
+
+== Help
+Police_Stn|amenity=police
+Fire_Stn|amenity=fire
+Hospital|amenity=hospital
+Ranger|amenity=ranger_station
+Pharmacy|amenity=pharmacy
+
+== Hire
+Car hire|amenity=car_hire
+Bike hire|amenity=bike_hire
+Ski hire|amenity=ski_hire
+
+== Park
+Car park|amenity=parking
+Free car park|amenity=parking;cost=free
+Bike park|amenity=cycle_parking
+Lay-by|amenity=layby
+
+== Repair
+Bike shop|amenity=bike_shop
+Garage|amenity=garage

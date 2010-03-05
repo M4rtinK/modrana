@@ -1,0 +1,237 @@
+#!/usr/bin/python
+#----------------------------------------------------------------------------
+# Projection code (lat/long to screen conversions)
+#----------------------------------------------------------------------------
+# Copyright 2007-2008, Oliver White
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#----------------------------------------------------------------------------
+from base_module import ranaModule
+from tilenames import *
+import geo
+import math #TODO: temporary import, remove this
+
+def getModule(m,d):
+  return(Projection(m,d))
+
+class Projection(ranaModule):
+  def __init__(self, m, d):
+    ranaModule.__init__(self, m, d)
+    
+    self.xyValid = False
+    self.llValid = False
+    self.needsEdgeFind = False
+    
+    # Scale is the number of display pixels per projected unit
+    self.scale = tileSizePixels()
+    
+  def isValid(self):
+    """Test if the module contains all the information needed to do conversions"""
+    return(self.xyValid and self.llValid)
+  
+  def setView(self,x,y,w,h):
+    """Setup the display"""
+    self.w = w
+    self.h = h
+    self.xc = x + self.w
+    self.yc = y + self.h
+    self.xyValid = True
+    if(self.needsEdgeFind):
+      self.findEdges()
+    
+  def recentre(self,lat,lon,zoom = None):
+    """Move the projection to a particular geographic location
+    (with optional zoom level)"""
+    self.lat = lat
+    self.lon = lon
+    if(zoom != None):
+      self.implementNewZoom(zoom)
+      # note: implementNewZoom calls findEdges, hence the else: statement
+    else:
+      self.findEdges()
+    self.llValid = True
+    
+  def setZoom(self, value, isAdjustment=False):
+    """Change the zoom level, keeping same map centre
+    if isAdjustment is true, then value is relative to current zoom
+    otherwise it's an absolute value"""
+    if(isAdjustment):
+      # TODO: maybe we don't want all zoom levels?
+      self.implementNewZoom(self.zoom + value)
+    else:
+      self.implementNewZoom(value)
+  
+  def limitZoom(self):
+    """Check the zoom level, and move it if necessary to one of
+    the 'allowed' zoom levels"""
+    if(self.zoom < 6):
+      self.zoom = 6
+
+  def implementNewZoom(self, zoom):
+    """Change the zoom level"""
+    self.zoom = int(zoom)
+    self.limitZoom()
+    self.findEdges()
+    self.set('needRedraw', True)
+  
+  def findEdges(self):
+    """Update the projection meta-info based on its fundamental parameters"""
+    if(not self.xyValid or not self.llValid):
+      # If the display is not known yet, then we can't do anything, but we'll
+      # mark it as something that needs doing as soon as the display 
+      # becomes valid
+      self.needsEdgeFind = True
+      return
+    
+    # Find the map centre in projection units
+    self.px, self.py = latlon2xy(self.lat,self.lon,self.zoom)
+    # Find the map edges in projection units
+    self.px1 = self.px - 0.5 * self.w / self.scale
+    self.px2 = self.px + 0.5 * self.w / self.scale
+    self.py1 = self.py - 0.5 * self.h / self.scale
+    self.py2 = self.py + 0.5 * self.h / self.scale
+    
+    # Store width and height in projection units, just to save time later
+    self.pdx = self.px2 - self.px1
+    self.pdy = self.py2 - self.py1
+    
+    # Calculate the bounding box 
+    # ASSUMPTION: (that the projection is regular and north-up)
+    self.N,self.W = xy2latlon(self.px1, self.py1, self.zoom)
+    self.S,self.E = xy2latlon(self.px2, self.py2, self.zoom)
+
+    # Mark the meta-info as valid
+    self.needsEdgeFind = False
+  
+  def screenPos(self,px,py):
+    """Given a position on screen (where 0,0 is top-left and 1,1 is bottom right) get the coordinates"""
+    x = self.xc + ((px - 1) * self.w)
+    y = self.yc + ((py - 1) * self.h)
+    return(x,y)
+  
+  def pxpy2xy(self,px,py):
+    """Convert projection units to display units"""
+    x = self.w * (px - self.px1) / self.pdx
+    y = self.h * (py - self.py1) / self.pdy
+    return(x,y)
+  
+  def nudge(self,dx,dy):
+    """Move the map by a number of pixels relative to its current position"""
+    if(dx == 0 and dy == 0):
+      return
+    # Calculate the lat/long of the pixel offset by dx,dy from the centre,
+    # and centre the map on that
+    newXC = self.px - dx / self.scale
+    newYC = self.py - dy / self.scale
+    self.lat,self.lon = xy2latlon(newXC,newYC, self.zoom)
+    self.findEdges()
+
+  def ll2xy(self,lat,lon):
+    """Convert geographic units to display units"""
+    px,py = latlon2xy(lat,lon,self.zoom)
+    x = (px - self.px1) * self.scale
+    y = (py - self.py1) * self.scale
+    return(x,y)
+  
+  def xy2ll(self,x,y):
+    """Convert display units to geographic units"""
+    px = self.px1 + x / self.scale
+    py = self.py1 + y / self.scale
+    lat,lon = xy2latlon(px, py, self.zoom)
+    return(lat,lon)
+  
+  def onscreen(self,x,y):
+    """Test if a position (in display units) is visible"""
+    return(x >= 0 and x < self.w and y >= 0 and y < self.h)
+  
+  def relXY(self,x,y):
+    return(x/self.w, y/self.h)
+
+  def km2px(self, distanceInKm):
+    """(experimental) km to screen pixel conversion"""
+    pi = 3.1415926535897931 # we just use this as pi instead of importing math
+    R = 6371.0 # km to the center of Earth
+    C = 2*pi*R # circumference of Earth
+    degreesPerKm = 360/C # how many degrees is a kilometre
+    degreesPerPixel = ((self.N - self.S)/self.h) # how many degrees is a pixel (with current zoom)
+    """we get degrees equivalent from kilometers and then convert it to pixels"""
+    return (distanceInKm * degreesPerKm)/degreesPerPixel
+
+# doesnt seem to work correctly
+#  def px2km(self, distanceInPixel):
+#    """(experimental) screen pixel to km conversion"""
+#    pi = 3.1415926535897931 # we just use this as pi instead of importing math
+#    R = 6371.0 # km to the center of Earth
+#    C = 2*pi*R # circumference of Earth
+#    degreesPerKm = 360/C # how many degrees is a kilometre
+#    degreesPerPixel = ((self.N - self.S)/self.h) # how many degrees is a pixel (with current zoom)
+#    return (distanceInPixel * degreesPerPixel)/degreesPerKm
+
+  def screenRadius(self):
+    """Return the centerpoint and radius of a circle encompassing the screen."""
+    (centreXpixel,centreYpixel) = self.screenPos(0.5,0.5)
+    (centreX, centreY) = self.xy2ll(centreXpixel, centreYpixel)
+    #ASUMPTION: screen is rectangular
+    (cornerXpixel,cornerYpixel) = self.screenPos(0, 0) # we take the coordinates of one corner of the screen
+    (cornerX,cornerY) = self.xy2ll(cornerXpixel, cornerYpixel) # we convert them to projection coordinates
+    (anotherCornerXpixel,anotherCornerYpixel) = self.screenPos(1, 1) # we take the coordinates of another corner of the screen
+    (anotherCornerX,anotherCornerY) = self.xy2ll(anotherCornerXpixel, anotherCornerYpixel) # we convert them to projection coordinates
+    """radius = diagonla/2"""
+    radius = geo.distance(anotherCornerX, anotherCornerY, cornerX , cornerY)/2.0
+    return(centreX, centreY, radius) # we return the centre coordinates and the radius
+
+  def radiusEdges(self, lat, lon, radiusInKm):
+    """return edges of a box around the given point and radius
+    (for downloading tiles for a given radius around a point)"""
+    (x,y) = self.ll2xy(lat, lon)
+    radiusInPixel = self.km2px(radiusInKm)
+    side = radiusInPixel*2
+#    px1 = x - 0.5 * side / self.scale
+#    px2 = x + 0.5 * side / self.scale
+#    py1 = y - 0.5 * side / self.scale
+#    py2 = y + 0.5 * side / self.scale
+    px1 = x - 0.5 * side
+    px2 = x + 0.5 * side
+    py1 = y - 0.5 * side
+    py2 = y + 0.5 * side
+    return(px1,py1,px2,py2)
+
+  def num2deg(self, xtile, ytile):
+    """tile to degrees, implementation from OSM wiki"""
+    zoom = 15 # for testing we use zl 15
+    n = 2.0 ** zoom
+    lon_deg = xtile / n * 360.0 - 180.0
+    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * ytile / n)))
+    lat_deg = math.degrees(lat_rad)
+    return(lat_deg, lon_deg)
+
+#  def shiftllPoint(self, x, y, distanceInKm, where='west'):
+#    """shift points coordinates by a given distance in km,
+#    may not work very well in polar regions (or near Greenwich)"""
+#    R = 6371.0
+#    C = 2*math.pi*R
+#    gradesPerKm = 360/C
+#    shiftBy = gradesPerKm * distanceInKm
+#    if where == 'west':
+#      return(x-shiftBy)
+#    elif where == 'east':
+#      return(x+shiftBy)
+#    elif where == 'north':
+#      return(y+shiftBy)
+#    elif where == 'south':
+#      return(y-shiftBy)
+
+
+
+

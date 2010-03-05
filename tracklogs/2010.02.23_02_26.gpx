@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx 
+	xmlns="http://www.topografix.com/GPX/1/1" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" 
+	creator="www.OpenRouteService.org" version="1.1">
+	<trk>
+		<name>Route_2010.2.23_226</name>
+		<trkseg>
+					<trkpt lon="16.6201293" lat="49.1915478"/>
+					<trkpt lon="16.620136307527957" lat="49.19157777971279"/>
+					<trkpt lon="16.6200421" lat="49.1915998"/>
+					<trkpt lon="16.6201673" lat="49.1916799"/>
+					<trkpt lon="16.6216827" lat="49.1936554"/>
+					<trkpt lon="16.6219339" lat="49.1938976"/>
+					<trkpt lon="16.6233063863674" lat="49.19357764152191"/>
+					<trkpt lon="16.6233064" lat="49.1935777"/>
+		</trkseg>
+	</trk>
+</gpx> 

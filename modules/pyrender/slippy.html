@@ -1,0 +1,119 @@
+<html>
+<head>
+    <title>OpenStreetMap</title>
+    <script src="http://openlayers.org/api/OpenLayers.js"></script> 
+    <script src="http://openstreetmap.org/openlayers/OpenStreetMap.js"></script>
+
+    <script type="text/javascript">
+      function getUrlParam( name )
+      {
+      name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+      var regexS = "[\\?&]"+name+"=([^&#]*)";
+      var regex = new RegExp( regexS );
+      var results = regex.exec( window.location.href );
+      if( results == null )
+      return "";
+      else
+      return results[1];
+      }
+
+        // Default map position if not overridden by URL parameters
+	var lon = getUrlParam("lon");
+	var lat = getUrlParam("lat");
+	var zoom = getUrlParam("zoom");
+	if (lon=="") lon=-0.11768
+	if (lat=="") lat=51.50869
+	if (zoom=="") zoom=15
+	        
+        var map; //complex object of type OpenLayers.Map 
+
+        //Initialise the 'map' object
+        function init() {
+          
+            map = new OpenLayers.Map ("map", {
+                controls:[
+                    new OpenLayers.Control.Navigation(),
+                    new OpenLayers.Control.Permalink(),
+                    new OpenLayers.Control.LayerSwitcher(),
+                    new OpenLayers.Control.PanZoomBar()],
+                maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+                maxResolution: 156543.0399,
+                numZoomLevels: 19,
+                units: 'meters',
+                projection: new OpenLayers.Projection("EPSG:900913"),
+                displayProjection: new OpenLayers.Projection("EPSG:4326")
+            } );
+                
+
+            // Define the map layer
+            // Note that we use a predefined layer that will be
+            // kept up to date with URL changes
+            // Here we define just one layer, but providing a choice
+            // of several layers is also quite simple
+            // Other defined layers are OpenLayers.Layer.OSM.Mapnik and OpenLayers.Layer.OSM.Maplint
+            layerTilesAtHome = new OpenLayers.Layer.OSM.Osmarender("Osmarender");
+
+            var baseColours = new Array(
+              "white",
+              "black",
+              "canvas",
+              "blue",
+              "green"
+              );
+            for(loop1 in baseColours)
+            {
+              baseLayerObject = new OpenLayers.Layer.OSM(
+                  ""+baseColours[loop1],
+                  "/blank/"+baseColours[loop1]+"/",
+                {isBaseLayer:true,
+                  border:0});
+              map.addLayer(baseLayerObject);
+            }
+            
+            var layerNames = new Array(
+              "default",
+              "labels",
+              "underground",
+              "water",
+              "power",
+              "cycle",
+              "landuse",
+              "boundaries",
+              "buildings",
+              "noname",
+              "unfinished"
+              );
+
+            var first = true;
+            for (loop2 in layerNames)
+            {
+              layerObject = new OpenLayers.Layer.OSM(
+                  "" + layerNames[loop2],
+                  "/"+layerNames[loop2]+"/",
+                {
+                isBaseLayer:false,
+                visibility:first,
+                border:0
+                });
+            map.addLayer(layerObject);
+            first = false;
+            }
+
+            map.addLayer(layerTilesAtHome);
+
+            var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+            map.setCenter (lonLat, zoom);
+        }
+        
+    </script>
+</head>
+
+<!-- body.onload is called once the page is loaded (call the 'init' function) -->
+<body onload="init();">
+
+    <!-- define a DIV into which the map will appear. Make it take up the whole window -->
+    <div style="width:100%; height:100%" id="map"></div>
+    
+</body>
+
+</html>
