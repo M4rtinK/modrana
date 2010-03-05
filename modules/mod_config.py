@@ -61,6 +61,7 @@ class config(ranaModule):
     m = self.m.get('loadTracklog', None)
     if(m != None):
       files = os.listdir('tracklogs')
+      files = filter(lambda x: x != '.svn', files)
       for file in files:
         m.load('tracklogs/'+file)
 
