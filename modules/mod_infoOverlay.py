@@ -33,6 +33,7 @@ class infoOverlay(ranaModule):
     self.mode = 0
     self.isGraphical = False
     self.modes = ['pos', 'gps', 'road', 'speed', 'maxSpeed', 'bearing', 'time']
+    self.unitString = ""
 
   def get_none(self):
     pass
@@ -59,13 +60,13 @@ class infoOverlay(ranaModule):
       self.lines.append('No data')
 
   def get_speed(self):
-    self.lines.append('Speed: %1.1f mph' % self.get('speed', 0))
+    self.lines.append('Speed: %1.1f ' % self.get('speed', 0) + self.unitString)
   
   def get_bearing(self):
-    self.lines.append('Bearing: %03.0f' % self.get('bearing', 0))
+    self.lines.append('Bearing: %03.0f ' % self.get('bearing', 0))
   def get_maxSpeed(self):
-    self.lines.append('Max: %1.1f mph' % self.get('maxSpeed', 0))
-    self.lines.append('Average: %1.1f mph' % self.get('avgSpeed', 0))
+    self.lines.append('Max: %1.1f ' % self.get('maxSpeed', 0) + self.unitString)
+    self.lines.append('Average: %1.1f ' % self.get('avgSpeed', 0) + self.unitString)
   
   def get_time(self):
     now = datetime.now()
@@ -80,7 +81,13 @@ class infoOverlay(ranaModule):
     self.isGraphical = False
     fn = getattr(self, "get_%s" % self.modes[self.mode], self.get_none)
     fn()
-    
+
+    # Detect which units we are using and set the description acordingly
+    if self.get("unitType", "kmh") == "kmh":
+      self.unitString = "km/h"
+    else:
+      self.unitString = "mph"
+
     # Detect changes to the lines being displayed,
     # and ask for redraw if they change
     if(len(self.lines) != len(self.oldlines) or self.isGraphical):

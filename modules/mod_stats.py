@@ -66,16 +66,36 @@ class stats(ranaModule):
         pos[1]) # degrees
 
       speed = distance / dt # m/sec
-      speedMh = speed * 2.23693629  # miles/hour
-      if(speedMh < 10000):
-        self.set('speed', speedMh)
-        self.set('bearing', bearing)
+
+      unitType = self.get("unitType", "kmh") # which unit do we use ?
+
+
+      self.set('bearing', bearing)
+      average = 0
+      if speed < 4000:
         if(speed > self.maxSpeed):
-          self.set('maxSpeed', speedMh)
+  #          self.set('maxSpeed', speed) # in m/sec
           self.maxSpeed = speed
-        self.avg1 += speedMh
+        self.avg1 += speed
         self.avg2 += dt
-        self.set('avgSpeed', self.avg1/self.avg2)
+        average = self.avg1/self.avg2
+
+
+
+
+      if unitType == "kmh":
+        speedUnitPerHour = speed * 3.6 # kilometers/hour
+        maxSpeedUnitPerHour = self.maxSpeed * 3.6
+        averageSpeedUnitPerHour = average * 3.6
+
+      else:
+        speedUnitPerHour = speed * 2.23693629  # miles/hour
+        maxSpeedUnitPerHour = self.maxSpeed * 2.23693629
+        averageSpeedUnitPerHour = currentAverage * 2.23693629
+
+      self.set('maxSpeed', maxSpeedUnitPerHour)
+      self.set('avgSpeed', averageSpeedUnitPerHour)
+      self.set('speed', speedUnitPerHour)
 
     self.lastpos = pos
 

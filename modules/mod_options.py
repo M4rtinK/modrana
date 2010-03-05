@@ -54,13 +54,17 @@ class options(ranaModule):
 
     self.addBoolOption("Debug squares", "debugSquares", "debug", False)
 
-#    self.addBoolOption("Debug squares", "debugSquares", "view", False)
-
     self.addOption("Tracklogs", "showTracklog",
     [(None, "Dont draw tracklogs"),
      ("Simple", "Draw simple tracklogs")],
      "view",
      False)
+
+    self.addOption("Units", "unitType",
+                 [("kmh","use kilometers"),
+                  ("mph", "use miles")],
+                   "view",
+                   "km/h")
 
     self.addOption("Network", "network",
       [("off","No use of network"),
