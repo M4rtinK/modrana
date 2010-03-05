@@ -67,7 +67,7 @@ class showGPX(ranaModule):
         cr.fill()
       cr.stroke()
       cr.fill()
-    print proj.zoom
+#    print proj.zoom
 
 #    testRadius = 5 # 5 km
 #    """ Znojmo cooridnates """
@@ -121,7 +121,7 @@ class showGPX(ranaModule):
       if (screenToClusterDistance - (screenRadius + clusterRadius)) >= 0:
         continue # we dont see this cluster se we skip it
       clusterNr = GPXTracklog.clusters.index(cluster)
-      print "Cluster nr %d" % clusterNr
+      #print "Cluster nr %d" % clusterNr
       """now we need to draw lines to connect neighboring clusters"""
       prevClusterNr = clusterNr - 1
       nextClusterNr = clusterNr + 1

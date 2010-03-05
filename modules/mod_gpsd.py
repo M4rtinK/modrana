@@ -60,6 +60,36 @@ class gpsd2(ranaModule):
       
   def gpsStatus(self):
     return(self.socket_cmd("M"))
+
+# it seems that at least with gpsfake, wee get only Empty as response
+#  def DOP(self):
+#    """return (three) estimated position errors in meters (DOP)"""
+#    dop = self.socket_cmd("e")
+#    print dop
+
+  def bearing(self):
+    """return bearing as reported by gpsd"""
+    return self.socket_cmd("t")
+    
+  def elevation(self):
+    """return speed as reported by gpsd
+    (meters above mean sea level)"""
+    return self.socket_cmd("a")
+
+  def speed(self):
+    """return speed in m/sec
+    because gpsd reports knots/sec, we will convert this to m/sec"""
+    knotsPerSec = self.socket_cmd("v")
+    mPerSec = knotsPerSec * 0.514444444444444
+    return mPerSec
+
+  def GPSTime(self):
+    """return a string representing gps time
+    in this format: D=yyyy-mm-ddThh:nmm:ss.ssZ (fractional seccond are not guarantied)
+    (for tagging trackpoints with acurate timestamp ?)"""
+    timeFromGPS = self.socket_cmd("d")
+    return timeFromGPS
+
   
   def satellites(self):
     list = self.socket_cmd('y')
