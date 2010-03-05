@@ -50,9 +50,11 @@ class options(ranaModule):
     to be needed in all installations"""
     self.addBoolOption("Centre map", "centre", "view", True)
 
-    self.addBoolOption("Debug circles", "debugCircles", "view", False)
+    self.addBoolOption("Debug circles", "debugCircles", "debug", False)
 
-    self.addBoolOption("Debug squares", "debugSquares", "view", False)
+    self.addBoolOption("Debug squares", "debugSquares", "debug", False)
+
+#    self.addBoolOption("Debug squares", "debugSquares", "view", False)
 
     self.addOption("Tracklogs", "showTracklog",
     [(None, "Dont draw tracklogs"),
