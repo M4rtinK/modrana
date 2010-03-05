@@ -59,18 +59,20 @@ class stats(ranaModule):
         pos[0],
         pos[1]) * 1000.0 # metres
 
-      bearing = geo.bearing(
-        self.lastpos[0],
-        self.lastpos[1],
-        pos[0],
-        pos[1]) # degrees
+# from now on we get bearing from gpsd
+#      bearing = geo.bearing(
+#        self.lastpos[0],
+#        self.lastpos[1],
+#        pos[0],
+#        pos[1]) # degrees
 
-      speed = distance / dt # m/sec
+#      speed = distance / dt # m/sec
+      speed = self.get('metersPerSecSpeed', 0)
 
       unitType = self.get("unitType", "kmh") # which unit do we use ?
 
 
-      self.set('bearing', bearing)
+#      self.set('bearing', bearing)
       average = 0
       if speed < 4000:
         if(speed > self.maxSpeed):
@@ -80,9 +82,6 @@ class stats(ranaModule):
         self.avg2 += dt
         average = self.avg1/self.avg2
 
-
-
-
       if unitType == "kmh":
         speedUnitPerHour = speed * 3.6 # kilometers/hour
         maxSpeedUnitPerHour = self.maxSpeed * 3.6
@@ -91,7 +90,7 @@ class stats(ranaModule):
       else:
         speedUnitPerHour = speed * 2.23693629  # miles/hour
         maxSpeedUnitPerHour = self.maxSpeed * 2.23693629
-        averageSpeedUnitPerHour = currentAverage * 2.23693629
+        averageSpeedUnitPerHour = average * 2.23693629
 
       self.set('maxSpeed', maxSpeedUnitPerHour)
       self.set('avgSpeed', averageSpeedUnitPerHour)

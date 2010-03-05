@@ -70,18 +70,16 @@ class gpsd2(ranaModule):
   def bearing(self):
     """return bearing as reported by gpsd"""
     return self.socket_cmd("t")
+
     
   def elevation(self):
     """return speed as reported by gpsd
     (meters above mean sea level)"""
-    return self.socket_cmd("a")
+    return float(self.socket_cmd("a"))
 
   def speed(self):
-    """return speed in m/sec
-    because gpsd reports knots/sec, we will convert this to m/sec"""
-    knotsPerSec = self.socket_cmd("v")
-    mPerSec = knotsPerSec * 0.514444444444444
-    return mPerSec
+    """return speed in knots/sec as reported by gpsd"""
+    return self.socket_cmd("v")
 
   def GPSTime(self):
     """return a string representing gps time
@@ -129,10 +127,24 @@ class gpsd2(ranaModule):
         #print("unknown")
       else:
         lat,lon = [float(ll) for ll in result.split(' ')]
-        self.status = "OK"
         self.set('pos', (lat,lon))
         self.set('pos_source', 'GPSD')
         self.set('needRedraw', True)
+        self.status = "OK"
+
+        bearing = self.bearing()
+        if bearing != None:
+          self.set('bearing', float(bearing))
+
+        speed = self.speed()
+        if speed != None:
+          speed = float(speed) * 0.514444444444444 # knots/sec to m/sec
+          self.set('metersPerSecSpeed', speed)
+        
+
+
+        
+        
         self.satellites()
         #print(self.get('pos', None))
         #print(time())
