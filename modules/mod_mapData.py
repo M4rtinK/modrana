@@ -99,11 +99,11 @@ class mapData(ranaModule):
                                     tilesToDownload)
 #    self.stopThreading = False
     self.set("stopDl", False)
-    t = threading.Thread(target=self.getFiles, args=(urlsAndFilenames,))
+#    t = threading.Thread(target=self.getFiles, args=(urlsAndFilenames,))
+#    t.start()
+    t = threading.Thread(target=self.getFilesSize, args=(urlsAndFilenames,))
     t.start()
 #    self.stopThreading = True
-
-
 
   def getTileUrl(self,x,y,z,layer): #TODO: share this with mapTiles
       """Return url for given tile coorindates and layer"""
@@ -120,8 +120,77 @@ class mapData(ranaModule):
           z,x,y,
           extension)
       return url
-#  class FileGetter(threading.Thread):
-#    def __init__(self, ):
+
+  class SizeGetter(threading.Thread):
+      def __init__(self, url):
+          self.url = url
+          self.size = 0
+          threading.Thread.__init__(self)
+
+      def getSize(self):
+          return self.size
+
+      def run(self):
+          try:
+              url = self.url
+              urlInfo = urllib.urlopen(url).info() # open url and get mime info
+              self.size = int(urlInfo['Content-Length']) # size in bytes
+  #            print "file has %s bytes" % self.size
+          except IOError:
+              print "Could not open document: %s" % url
+
+  def getFilesSize(self, urlsAndFilenames):
+    self.totalSize = 0
+    urls = map(lambda x: x[0], urlsAndFilenames)
+#    count = 0
+#    for urlFilename in urlsAndFilenames:
+#      url = urlFilename[0]
+#      urlInfo = urllib.urlopen(url).info()
+#      currentFileSize = int(urlInfo['Content-Length']) # in bytes
+##      print "current file size: d%" % currentFileSize
+#      count = count + 1
+#      print "file %d of %d" % (count, length)
+#      totalSize += currentFileSize
+#    print "total size: %d" % totalSize
+    def producer(q, urls):
+        for url in urls:
+            thread = self.SizeGetter(url)
+            thread.start()
+            q.put(thread, True)
+        print "producer quiting"
+        return
+
+    finished = []
+    def consumer(q, total_files):
+        totalSize = 0
+        count = 0
+        while len(finished) < total_files:
+            thread = q.get(True)
+            thread.join()
+            count = count + 1
+            totalSize = totalSize + thread.getSize()
+#            print "%d is the actual size" % totalSize
+            print "%d od %d" % (count, total_files)
+            if (count == total_files):
+              print "consumer quiting"
+              self.totalSize = totalSize
+              return
+        return
+    # we respect a multiple of the limit as for batch dl
+    # (because we actually dont download anything and it is faster)
+    maxThreads = self.get('maxBatchThreads', 5) * 5
+    q = Queue(maxThreads)
+    prod_thread = threading.Thread(target=producer, args=(q, urls))
+    cons_thread = threading.Thread(target=consumer, args=(q, len(urls)))
+    prod_thread.start()
+    cons_thread.start()
+    prod_thread.join()
+    cons_thread.join()
+#    print ("total size is %1.2f MB") % (self.totalSize/(1024.0*1024.0))
+    return (self.totalSize/(1024.0*1024.0))
+
+
+
 # adapted from: http://www.artfulcode.net/articles/multi-threading-python/
   class FileGetter(threading.Thread):
     def __init__(self, url, filename):
@@ -130,8 +199,8 @@ class mapData(ranaModule):
 #        self.result = None
         threading.Thread.__init__(self)
 
-#    def get_result(self):
-#        return self.result
+    def getResult(self):
+        return self.result
 
     def run(self):
         try:
@@ -142,6 +211,7 @@ class mapData(ranaModule):
             print "download of %s finished" % filename
         except IOError:
             print "Could not open document: %s" % url
+
 
   def getFiles(self, urlsAndFilenames):
         def producer(q, urlsAndFilenames):
@@ -157,12 +227,18 @@ class mapData(ranaModule):
 
         finished = []
         def consumer(q, total_files):
+            results = []
+            count = 0
             while len(finished) < total_files:
                 thread = q.get(True)
                 thread.join()
+                count = count + 1
+                print "%d tiles finished downloading" % count
+                results.append(thread.getResult())
 #                print "%d tiles remaining" % (len(finished) - total_files)
                 if self.get("stopDl", None) == True:
                   print "consumer: stopping Threads"
+                  print results
                   break
         maxThreads = self.get('maxBatchThreads', 5)
         q = Queue(maxThreads)

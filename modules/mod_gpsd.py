@@ -75,7 +75,7 @@ class gpsd2(ranaModule):
   def elevation(self):
     """return speed as reported by gpsd
     (meters above mean sea level)"""
-    return float(self.socket_cmd("a"))
+    return self.socket_cmd("a")
 
   def speed(self):
     """return speed in knots/sec as reported by gpsd"""
@@ -140,15 +140,10 @@ class gpsd2(ranaModule):
         if speed != None:
           speed = float(speed) * 0.514444444444444 # knots/sec to m/sec
           self.set('metersPerSecSpeed', speed)
-        
-
-
-        
-        
+             
         self.satellites()
         #print(self.get('pos', None))
         #print(time())
-
   
 if __name__ == "__main__":
   d = {}
