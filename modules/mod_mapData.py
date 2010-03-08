@@ -47,7 +47,10 @@ class mapData(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.stopThreading = True
-    self.currentTilesToGet = []
+    self.currentDownloadList = [] # list of files and urls for the current download batch
+    self.sizeThreadingStatus = 0 # used for reporting status of the size computation threads
+    self.currentTilesToGet = [] # used for reporting the (actual) size of the tiles for download
+    self.set("sizeStatus", 'unknown') # this informs about the state of the size computation
 
   def listTiles(self, route):
     """List all tiles touched by a polyline"""
@@ -60,7 +63,7 @@ class mapData(ranaModule):
         tiles[tile] = True
     return(tiles.keys())
 
-  def addToQueue(self, tilesToDownload):
+  def checkTiles(self, tilesToDownload):
     """
     Get tiles that need to be downloaded and look if we dont already have some of these tiles,
     then generate a set of ('url','filename') touples and send them to the threaded downloader
@@ -76,7 +79,7 @@ class mapData(ranaModule):
     self.currentTilesToGet = tilesToDownload # this is for displaying the tiles for debugging reasons
     layer = self.get('layer', None) # TODO: manual layer setting
     maplayers = self.get('maplayers', None) # a distionary describing supported maplayers
-    extension = maplayers[layer]['type'] # what is the extension for current layer ?
+    extension = maplayers[layer]['type'] # what is the extension for the current layer ?
     alreadyDownloadedTiles = set(os.listdir('cache/images')) # already dowloaded tiles
     tileFolderPath = self.get('tileFolder', None) # where should we store the downloaded tiles
 
@@ -101,9 +104,14 @@ class mapData(ranaModule):
     self.set("stopDl", False)
 #    t = threading.Thread(target=self.getFiles, args=(urlsAndFilenames,))
 #    t.start()
-    t = threading.Thread(target=self.getFilesSize, args=(urlsAndFilenames,))
-    t.start()
+
+    self.currentDownloadList = urlsAndFilenames
+
+
 #    self.stopThreading = True
+
+  def addToQueue(self, tilesToDownload):
+    return
 
   def getTileUrl(self,x,y,z,layer): #TODO: share this with mapTiles
       """Return url for given tile coorindates and layer"""
@@ -141,44 +149,40 @@ class mapData(ranaModule):
 
   def getFilesSize(self, urlsAndFilenames):
     self.totalSize = 0
+    self.sizeThreadingStatus = 0
     urls = map(lambda x: x[0], urlsAndFilenames)
-#    count = 0
-#    for urlFilename in urlsAndFilenames:
-#      url = urlFilename[0]
-#      urlInfo = urllib.urlopen(url).info()
-#      currentFileSize = int(urlInfo['Content-Length']) # in bytes
-##      print "current file size: d%" % currentFileSize
-#      count = count + 1
-#      print "file %d of %d" % (count, length)
-#      totalSize += currentFileSize
-#    print "total size: %d" % totalSize
-    def producer(q, urls):
-        for url in urls:
-            thread = self.SizeGetter(url)
-            thread.start()
-            q.put(thread, True)
-        print "producer quiting"
-        return
+    self.set("sizeStatus", 'inProgress')
 
-    finished = []
+    def producer(q, urls):
+      for url in urls:
+          thread = self.SizeGetter(url)
+          thread.start()
+          q.put(thread, True)
+      print "producer quiting"
+      return
+
     def consumer(q, total_files):
-        totalSize = 0
-        count = 0
-        while len(finished) < total_files:
-            thread = q.get(True)
-            thread.join()
-            count = count + 1
-            totalSize = totalSize + thread.getSize()
-#            print "%d is the actual size" % totalSize
-            print "%d od %d" % (count, total_files)
-            if (count == total_files):
-              print "consumer quiting"
-              self.totalSize = totalSize
-              return
-        return
+      """get data from threads when they finish"""
+      totalSize = 0 # initialize
+      count = 0
+      while count < total_files:
+          thread = q.get(True)
+          thread.join()
+          count = count + 1 # count how many threads have been processed
+          totalSize = totalSize + thread.getSize()
+          self.sizeThreadingStatus = count
+          print "%d od %d" % (count, total_files)
+#          if (count == total_files):
+#            print "consumer quiting"
+#            self.totalSize = totalSize
+#            return
+      print "consumer quiting"
+      self.totalSize = totalSize
+      self.set('sizeStatus', 'known')
+      return
     # we respect a multiple of the limit as for batch dl
     # (because we actually dont download anything and it is faster)
-    maxThreads = self.get('maxBatchThreads', 5) * 5
+    maxThreads = self.get('maxBatchThreads', 5) * 10
     q = Queue(maxThreads)
     prod_thread = threading.Thread(target=producer, args=(q, urls))
     cons_thread = threading.Thread(target=consumer, args=(q, len(urls)))
@@ -250,7 +254,7 @@ class mapData(ranaModule):
         cons_thread.join()
 
   def handleMessage(self, message):
-    if(message == "download"):
+    if(message == "refreshTilecount"):
       size = int(self.get("downloadSize", 4))
       type = self.get("downloadType")
       if(type != "data"):
@@ -277,13 +281,25 @@ class mapData(ranaModule):
         loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
         activeTracklogIndex = int(self.get('activeTracklog', 0))
         GPXTracklog = loadedTracklogs[activeTracklogIndex]
-        """because we dont need all the information in the origuinal list and
+        """because we dont need all the information in the original list and
         also might need to add interpolated points, we make a local copy of
         the original list"""
         #latLonOnly = filter(lambda x: [x.latitude,x.longitude])
         trackpointsListCopy = map(lambda x: {'latitude': x.latitude,'longitude': x.longitude}, GPXTracklog.trackpointsList[0])[:]
         tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, z)
-        self.addToQueue(tilesToDownload) # the tiles downloaded
+        self.checkTiles(tilesToDownload) # the tiles to be checked
+
+    if(message == "getSize"):
+      """will now ask the server and find the combined size if tiles in the batch"""
+      self.set("sizeStatus", 'unknown') # first we set the size as unknown
+      urlsAndFilenames = self.currentDownloadList
+      print "getting size"
+      if len(urlsAndFilenames) == 0:
+        print "cant get combined size, the list is empty"
+        return
+      t = threading.Thread(target=self.getFilesSize, args=(urlsAndFilenames,))
+      t.start()
+
 
   def expand(self, tileset, amount=1):
     """Given a list of tiles, expand the coverage around those tiles"""
@@ -389,6 +405,78 @@ class mapData(ranaModule):
 
     localAddPointsToLine(lat1, lon1, lat2, lon2, maxDistance) # call the local function
     return pointsBetween
+
+  def drawMenu(self, cr, menuName):
+    # is this menu the correct menu ?
+    if menuName != ('batchTileDl'):
+      return # we arent the active menu so we dont do anything
+    elif menuName == 'batchTileDl':
+      (x1,y1,w,h) = self.get('viewport', None)
+      self.set('dataMenu', 'edit')
+      menus = self.m.get("menu",None)
+#      if self.get('setUpEditMenu', True) == True:
+#        menus.setupEditBatchMenu()
+#        self.set('setUpEditMenu', False)
+
+      if w > h:
+        cols = 4
+        rows = 3
+      elif w < h:
+        cols = 3
+        rows = 4
+      elif w == h:
+        cols = 4
+        rows = 4
+
+      dx = w / cols
+      dy = h / rows
+      # * draw "escape" button
+      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "menu:rebootDataMenu|set:menu:main")
+      # * draw "edit" button
+      menus.drawButton(cr, (x1+w)-2*dx, y1, dx, dy, "edit", "edit", "menu:setupEditBatchMenu|set:menu:editBatch")
+      # * draw "start" button
+      menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "start", "start", "mapData:download")
+      # * draw the combined info area and size button (aka "box")
+      boxX = x1
+      boxY = y1+dx
+      menus.drawButton(cr, boxX, boxY, w, h-dy, "", "3h", "mapData:getSize")
+
+      sizeText = self.getSizeText()
+      print self.get('sizeStatus', None)
+      sizeTextX = boxX + dx/6
+      sizeTextY = boxY + dx/4
+      self.showText(cr, sizeText, sizeTextX, sizeTextY, w-40, fontsize=40)
+
+#    elif menuName == 'editBatch':
+#      return
+  def getSizeText(self):
+    status = self.get("sizeStatus", 'unknown')
+    if status == 'unknown':
+      return ("total size is unknown (click to compute)")
+    elif status == 'inProgress':
+      totalTileCount = len(self.currentDownloadList)
+      currentTileCount = self.sizeThreadingStatus
+      text = "Checking: %d of %d tiles complete" % (currentTileCount, totalTileCount)
+      return text
+    elif status == 'known':
+      sizeInMB = self.totalSize/(1024*1024)
+      text = "Total size for download: %1.2f MB" % (sizeInMB)
+      return text
+
+
+  def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
+    if(text):
+      cr.set_font_size(fontsize)
+      stats = cr.text_extents(text)
+      (textwidth, textheight) = stats[2:4]
+
+      if(widthLimit and textwidth > widthLimit):
+        cr.set_font_size(fontsize * widthLimit / textwidth)
+        stats = cr.text_extents(text)
+        (textwidth, textheight) = stats[2:4]
+
+      cr.move_to(x, y+textheight)
+      cr.show_text(text)
 
   def tilesetSvgSnippet(self, f, tileset, colour):
     for tile in tileset:

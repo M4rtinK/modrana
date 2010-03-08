@@ -255,20 +255,62 @@ class menus(ranaModule):
     for i in("Show map", "Go to", "Route to", "Delete"):
       self.addItem('poi', i, i, '')
 
-  def setupDataSubMenu(self):
-    self.clearMenu('data2', "set:menu:data")
-    self.addItem('data2', '5 km', 'generic', 'set:downloadSize:4|mapData:download|set:menu:None')
-    self.addItem('data2', '10 km', 'generic', 'set:downloadSize:8|mapData:download|set:menu:None')
-    self.addItem('data2', '20 km', 'generic', 'set:downloadSize:16|mapData:download|set:menu:None')
-    self.addItem('data2', '40 km', 'generic', 'set:downloadSize:32|mapData:download|set:menu:None')
-    self.addItem('data2', '80 km', 'generic', 'set:downloadSize:64|mapData:download|set:menu:None')
-    self.addItem('data2', 'Fill disk', 'generic', 'set:downloadSize:0|mapData:download|set:menu:None')
-    self.addItem('data2', 'Stop Download', 'generic', 'set:stopDl:True|set:menu:None')
+  def setupEditBatchMenu(self):
+    """this is a menu for editing settings of a batch before running the said batch"""
+    self.clearMenu('editBatch', "mapData:refreshTilecount|set:menu:batchTileDl")
+    # on exit from the editation menu refresh the tilecount
+    self.addItem('editBatch', 'where', 'generic', 'set:menu:data')
+    self.addItem('editBatch', 'radius', 'generic', 'set:menu:data2')
+    self.addItem('editBatch', 'Zoom down', 'generic', 'set:menu:zoomDown')
+    self.addItem('editBatch', 'Zoom up', 'generic', 'set:menu:zoomUp')
+    self.setupDataMenu('editBatch', 'editBatch')
+    self.setupDataSubMenu('editBatch', 'editBatch')
+    self.setupZoomDownMenu('editBatch', 'editBatch')
+    self.setupZoomUpMenu('editBatch', 'editBatch')
+#    self.set('setUpEditMenu', True)
+
+  def setupZoomUpMenu(self, nextMenu='batchTileDl', prevMenu='data'):
+    """in this menu, we set the maximal zoom level UP from the current zoomlevel (eq less detail)"""
+    self.clearMenu('zoomUp', "set:menu:%s" % prevMenu)
+    if nextMenu == 'batchTileDl':
+      """if the next menu is the batch tile download menu (eq we are not called from the edit menu)
+      we also send a message to refresh the tilecount after pressing the button
+      (the edit menu sends the refresh message on exit so it would be redundant)"""
+      nextMenu = nextMenu + '|mapData:refreshTilecount'
+    self.addItem('zoomUp', '+ 1 up', 'generic', 'set:zoomUpSize:1|set:menu:%s' % nextMenu)
+    self.addItem('zoomUp', '+ 2 up', 'generic', 'set:setZoomPlus:2|set:menu:%s' % nextMenu)
+    self.addItem('zoomUp', '+ 3 up', 'generic', 'set:minZoomPlus:3|set:menu:%s' % nextMenu)
+    self.addItem('zoomUp', '+ 5 up', 'generic', 'set:minZoomPlus:5|set:menu:%s' % nextMenu)
+    self.addItem('zoomUp', '+ 8 up', 'generic', 'set:minZoomPlus:8|set:menu:%s' % nextMenu)
+    self.addItem('zoomUp', 'max up', 'generic', 'set:minZoomPlus:50|set:menu:%s' % nextMenu)
+
+  def setupZoomDownMenu(self, nextMenu='zoomUp', prevMenu='data'):
+    """in this menu, we set the maximal zoom level DOWN from the current zoomlevel (eq more detail)"""
+    self.clearMenu('zoomDown', "set:menu:%s" % prevMenu)
+    self.addItem('zoomDown', '+ 1 down', 'generic', 'set:setZoomPlus:1|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', '+ 2 down', 'generic', 'set:setZoomPlus:2|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', '+ 3 down', 'generic', 'set:setZoomPlus:3|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', '+ 5 down', 'generic', 'set:setZoomPlus:5|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', '+ 8 down', 'generic', 'set:setZoomPlus:8|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', 'max down', 'generic', 'set:setZoomPlus:50|set:menu:%s' % nextMenu)
+    self.setupZoomUpMenu()
+
+  def setupDataSubMenu(self, nextMenu='zoomDown', prevMenu='data'):
+    """here we set the radius for download"""
+    self.clearMenu('data2', "set:menu:%s" % prevMenu)
+#    self.addItem('data2', '5 km', 'generic', 'set:downloadSize:4|mapData:download|set:menu:editBatch')
+    self.addItem('data2', '5 km', 'generic', 'set:downloadSize:4|set:menu:%s' % nextMenu)
+    self.addItem('data2', '10 km', 'generic', 'set:downloadSize:8|set:menu:%s' % nextMenu)
+    self.addItem('data2', '20 km', 'generic', 'set:downloadSize:16|set:menu:%s' % nextMenu)
+    self.addItem('data2', '40 km', 'generic', 'set:downloadSize:32|set:menu:%s' % nextMenu)
+    self.addItem('data2', '80 km', 'generic', 'set:downloadSize:64|set:menu:%s' % nextMenu)
+    self.addItem('data2', 'Fill disk', 'generic', 'set:downloadSize:0|set:menu:%s' % nextMenu)
+    self.setupZoomDownMenu()
     
-  def setupDataMenu(self):
-    self.clearMenu('data')
-    self.addItem('data', 'Around here', 'generic', 'set:downloadType:data|set:downloadArea:here|set:menu:data2')
-    self.addItem('data', 'Around route', 'generic', 'set:downloadType:data|set:downloadArea:route|set:menu:data2')
+  def setupDataMenu(self, nextMenu='data2', prevMenu='main'):
+    self.clearMenu('data', "set:menu:%s" % prevMenu)
+    self.addItem('data', 'Around here', 'generic', 'set:downloadType:data|set:downloadArea:here|set:menu:%s' % nextMenu)
+    self.addItem('data', 'Around route', 'generic', 'set:downloadType:data|set:downloadArea:route|set:menu:%s' % nextMenu)
     self.setupDataSubMenu()
 
   def setupGeneralMenus(self):
@@ -293,9 +335,17 @@ class menus(ranaModule):
     self.clearMenu('options', "set:menu:main") # will be filled by mod_options
 #    self.clearMenu('routeProfile', "set:menu:main") # will be filled by mod_routeProfile
     self.lists['places'] = 'placenames'
+#    self.set('setUpEditMenu', True)
+
 
   def firstTime(self):
     self.set("menu",None)
+
+  def handleMessage(self, message):
+    if (message == "rebootDataMenu"):
+      self.setupDataMenu() # we are returning from the batch menu, data menu needs to be "rebooted"
+    if(message == "setupEditBatchMenu"):
+      self.setupEditBatchMenu()
     
 if(__name__ == "__main__"):
   a = menus({},{'viewport':(0,0,600,800)})
