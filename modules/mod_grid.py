@@ -38,12 +38,12 @@ class grid(ranaModule):
       return
     if(not proj.isValid()):
       return
-    self.drawCorners(cr, proj)
+#    self.drawCorners(cr, proj)
     self.drawScalebar(cr, proj)
 
   def drawScalebar(self, cr, proj):
-    (x1,y1) = proj.screenPos(0.05, 0.85)
-    (x2,y2) = proj.screenPos(0.25, 0.85)
+    (x1,y1) = proj.screenPos(0.05, 0.97)
+    (x2,y2) = proj.screenPos(0.25, 0.97)
     
     (lat1,lon1) = proj.xy2ll(x1,y1)
     (lat2,lon2) = proj.xy2ll(x2,y2)

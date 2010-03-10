@@ -75,6 +75,7 @@ class infoOverlay(ranaModule):
   
 
   def update(self):
+    return #TODO: rewrite this
     # The get_xxx functions all fill-in the self.lines array with
     # text to display, where xxx is the selected mode
     self.lines = []
@@ -153,6 +154,7 @@ class infoOverlay(ranaModule):
       x += dx
       
   def drawMapOverlay(self, cr):
+    return #TODO: rewrite this
     """Draw an overlay on top of the map, showing various information
     about position etc."""
     (x,y,w,h) = self.get('viewport')
