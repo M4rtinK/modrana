@@ -21,11 +21,18 @@ from base_module import ranaModule
 from time import sleep
 from tilenames import *
 from time import clock
-from Queue import Queue
+import time
 import os
+import statvfs
+import sys
 import geo
 import string
-import urllib, threading
+import urllib, urllib2, threading
+from threadpool import threadpool
+from threading import Thread
+import socket
+timeout = 10 # this sets timeout for all sockets
+socket.setdefaulttimeout(timeout)
 
 
 
@@ -48,9 +55,9 @@ class mapData(ranaModule):
     ranaModule.__init__(self, m, d)
     self.stopThreading = True
     self.currentDownloadList = [] # list of files and urls for the current download batch
-    self.sizeThreadingStatus = 0 # used for reporting status of the size computation threads
     self.currentTilesToGet = [] # used for reporting the (actual) size of the tiles for download
-    self.set("sizeStatus", 'unknown') # this informs about the state of the size computation
+    self.sizeThread = None
+    self.getFilesThread = None
 
   def listTiles(self, route):
     """List all tiles touched by a polyline"""
@@ -68,13 +75,6 @@ class mapData(ranaModule):
     Get tiles that need to be downloaded and look if we dont already have some of these tiles,
     then generate a set of ('url','filename') touples and send them to the threaded downloader
     """
-#    #print tilesToDownload
-#    for tile in tilesToDownload:
-#      #print tile
-#      (x,y,z) = tile
-#      # for now, just get them without updating screen
-#      tiledata.GetOsmTileData(z,x,y)
-#      print xy2latlon(x, y, z)
 
     self.currentTilesToGet = tilesToDownload # this is for displaying the tiles for debugging reasons
     layer = self.get('layer', None) # TODO: manual layer setting
@@ -101,7 +101,6 @@ class mapData(ranaModule):
                                     namingLambdaWithPath(x)),
                                     tilesToDownload)
 #    self.stopThreading = False
-    self.set("stopDl", False)
 #    t = threading.Thread(target=self.getFiles, args=(urlsAndFilenames,))
 #    t.start()
 
@@ -129,72 +128,6 @@ class mapData(ranaModule):
           extension)
       return url
 
-  class SizeGetter(threading.Thread):
-      def __init__(self, url):
-          self.url = url
-          self.size = 0
-          threading.Thread.__init__(self)
-
-      def getSize(self):
-          return self.size
-
-      def run(self):
-          try:
-              url = self.url
-              urlInfo = urllib.urlopen(url).info() # open url and get mime info
-              self.size = int(urlInfo['Content-Length']) # size in bytes
-  #            print "file has %s bytes" % self.size
-          except IOError:
-              print "Could not open document: %s" % url
-
-  def getFilesSize(self, urlsAndFilenames):
-    self.totalSize = 0
-    self.sizeThreadingStatus = 0
-    urls = map(lambda x: x[0], urlsAndFilenames)
-    self.set("sizeStatus", 'inProgress')
-
-    def producer(q, urls):
-      for url in urls:
-          thread = self.SizeGetter(url)
-          thread.start()
-          q.put(thread, True)
-      print "producer quiting"
-      return
-
-    def consumer(q, total_files):
-      """get data from threads when they finish"""
-      totalSize = 0 # initialize
-      count = 0
-      while count < total_files:
-          thread = q.get(True)
-          thread.join()
-          count = count + 1 # count how many threads have been processed
-          totalSize = totalSize + thread.getSize()
-          self.sizeThreadingStatus = count
-          print "%d od %d" % (count, total_files)
-#          if (count == total_files):
-#            print "consumer quiting"
-#            self.totalSize = totalSize
-#            return
-      print "consumer quiting"
-      self.totalSize = totalSize
-      self.set('sizeStatus', 'known')
-      return
-    # we respect a multiple of the limit as for batch dl
-    # (because we actually dont download anything and it is faster)
-    maxThreads = self.get('maxBatchThreads', 5) * 10
-    q = Queue(maxThreads)
-    prod_thread = threading.Thread(target=producer, args=(q, urls))
-    cons_thread = threading.Thread(target=consumer, args=(q, len(urls)))
-    prod_thread.start()
-    cons_thread.start()
-    prod_thread.join()
-    cons_thread.join()
-#    print ("total size is %1.2f MB") % (self.totalSize/(1024.0*1024.0))
-    return (self.totalSize/(1024.0*1024.0))
-
-
-
 # adapted from: http://www.artfulcode.net/articles/multi-threading-python/
   class FileGetter(threading.Thread):
     def __init__(self, url, filename):
@@ -215,43 +148,6 @@ class mapData(ranaModule):
             print "download of %s finished" % filename
         except IOError:
             print "Could not open document: %s" % url
-
-
-  def getFiles(self, urlsAndFilenames):
-        def producer(q, urlsAndFilenames):
-            for urlFilename in urlsAndFilenames:
-                url = urlFilename[0]
-                filename = urlFilename[1]
-                thread = self.FileGetter(url, filename)
-                thread.start()
-                q.put(thread, True)
-                if self.get("stopDl", None) == True:
-                  print "producer: stopping Threads"
-                  break
-
-        finished = []
-        def consumer(q, total_files):
-            results = []
-            count = 0
-            while len(finished) < total_files:
-                thread = q.get(True)
-                thread.join()
-                count = count + 1
-                print "%d tiles finished downloading" % count
-                results.append(thread.getResult())
-#                print "%d tiles remaining" % (len(finished) - total_files)
-                if self.get("stopDl", None) == True:
-                  print "consumer: stopping Threads"
-                  print results
-                  break
-        maxThreads = self.get('maxBatchThreads', 5)
-        q = Queue(maxThreads)
-        prod_thread = threading.Thread(target=producer, args=(q, urlsAndFilenames))
-        cons_thread = threading.Thread(target=consumer, args=(q, len(urlsAndFilenames)))
-        prod_thread.start()
-        cons_thread.start()
-        prod_thread.join()
-        cons_thread.join()
 
   def handleMessage(self, message):
     if(message == "refreshTilecount"):
@@ -297,9 +193,130 @@ class mapData(ranaModule):
       if len(urlsAndFilenames) == 0:
         print "cant get combined size, the list is empty"
         return
-      t = threading.Thread(target=self.getFilesSize, args=(urlsAndFilenames,))
-      t.start()
+      urls = map(lambda x: x[0], urlsAndFilenames)
 
+      self.totalSize = 0
+      sizeThread = self.GetSize(urls, 10) # the seccond parameter is the max number of threads TODO: tweak this
+      sizeThread.start()
+      self.sizeThread = sizeThread
+
+    if(message == "download"):
+      """get tilelist and download the tiles using threads"""
+      urlsAndFilenames = self.currentDownloadList
+      urlsFilenamesInString = map(lambda x: (x[0]+"*"+x[1]), urlsAndFilenames)
+      print "starting download"
+      if len(urlsAndFilenames) == 0:
+        print "cant download an empty list"
+        return
+
+      getFilesThread = self.GetFiles(urlsFilenamesInString, 10)
+      getFilesThread.start()
+      self.getFilesThread = getFilesThread
+
+
+
+
+  class GetSize(Thread):
+    """a class for getting size of files on and url list"""
+    def __init__(self, urls, maxThreads):
+      Thread.__init__(self)
+      self.urls=urls
+      self.maxThreads=maxThreads
+      self.processed = 0
+      self.urlCount = len(urls)
+      self.totalSize = 0
+#      self.set("sizeStatus", 'inProgress') # the size is being processed
+
+    def getSizeForURL(self, url):
+      try:
+        urlInfo = urllib.urlopen(url).info() # open url and get mime info
+        size = int(urlInfo['Content-Length']) # size in bytes
+      except IOError:
+        print "Could not open document: %s" % url
+        size = 0 # the url errored out, so we just say it  has zero size
+      return size
+
+    def processURLSize(self, request, result):
+      """process the ruseult from the getSize threads"""
+      self.processed = self.processed + 1
+#      print "**** Size from request #%s: %r b" % (request.requestID, result)
+      self.totalSize+=result
+      print "**** Total size: %r B, %d/%d done" % (self.totalSize, self.processed, self.urlCount)
+
+    def run(self):
+      urls=self.urls
+      maxThreads=self.maxThreads
+      requests = threadpool.makeRequests(self.getSizeForURL, urls, self.processURLSize)
+      mainPool = threadpool.ThreadPool(maxThreads)
+      for req in requests:
+          mainPool.putRequest(req)
+      print "Added %d URLS to check for size." % self.urlCount
+      while True:
+          try:
+              time.sleep(0.5)
+              mainPool.poll()
+              print "Main thread working...",
+              print "(active worker threads: %i)" % (threading.activeCount()-1, )
+          except threadpool.NoResultsPending:
+              print "**** No pending results."
+              break
+      if mainPool.dismissedWorkers:
+          print "Joining all dismissed worker threads..."
+          mainPool.joinAllDismissedWorkers()
+
+
+  class GetFiles(Thread):
+    def __init__(self, urlsAndFilenames, maxThreads):
+      Thread.__init__(self)
+      self.urlsAndFilenames = urlsAndFilenames
+      self.maxThreads = maxThreads
+      self.processed = 0
+      self.urlCount = len(urlsAndFilenames)
+
+    def saveTileForURL(self, urlAndFilename):
+      (url, filename) = urlAndFilename.split('*')
+      try:
+        urllib.urlretrieve(url,filename) # open url and get mime info
+      except IOError:
+        print "Could not open document: %s" % url
+        return "nok"
+      return "ok"
+
+    def processSaveTile(self, request, result):
+      #TODO: redownload failed tiles
+      self.processed = self.processed + 1
+      self.tileThreadingStatus = self.processed
+      print "**** Downloading: %d of %d tiles done. Status:%r" % (self.processed, self.urlCount, result)
+
+    def run(self):
+      urlsAndFilenames = self.urlsAndFilenames
+      maxThreads = self.maxThreads
+      requests = threadpool.makeRequests(self.saveTileForURL, urlsAndFilenames, self.processSaveTile)
+      mainPool = threadpool.ThreadPool(maxThreads)
+      for req in requests:
+          mainPool.putRequest(req)
+      print "Added %d URLS to check for size." % self.urlCount
+      while True:
+          try:
+              time.sleep(0.5)
+              mainPool.poll()
+              print "Main thread working...",
+              print "(active worker threads: %i)" % (threading.activeCount()-1, )
+          except threadpool.NoResultsPending:
+              print "**** No pending results."
+              break
+      if mainPool.dismissedWorkers:
+          print "Joining all dismissed worker threads..."
+          mainPool.joinAllDismissedWorkers()
+
+#  def handleThreExc(self, request, exc_info):
+#        if not isinstance(exc_info, tuple):
+#            # Something is seriously wrong...
+#            print request
+#            print exc_info
+#            raise SystemExit
+#        print "**** Exception occured in request #%s: %s" % \
+#          (request.requestID, exc_info)
 
   def expand(self, tileset, amount=1):
     """Given a list of tiles, expand the coverage around those tiles"""
@@ -414,6 +431,9 @@ class mapData(ranaModule):
       (x1,y1,w,h) = self.get('viewport', None)
       self.set('dataMenu', 'edit')
       menus = self.m.get("menu",None)
+      sizeThread = self.sizeThread
+      getFilesThread = self.getFilesThread
+      self.set("batchMenuEntered", True)
 #      if self.get('setUpEditMenu', True) == True:
 #        menus.setupEditBatchMenu()
 #        self.set('setUpEditMenu', False)
@@ -438,30 +458,74 @@ class mapData(ranaModule):
       menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "start", "start", "mapData:download")
       # * draw the combined info area and size button (aka "box")
       boxX = x1
-      boxY = y1+dx
-      menus.drawButton(cr, boxX, boxY, w, h-dy, "", "3h", "mapData:getSize")
+      boxY = y1+dy
+      boxW = w
+      boxH = h-dy
+      menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "3h", "mapData:getSize")
 
-      sizeText = self.getSizeText()
-      print self.get('sizeStatus', None)
-      sizeTextX = boxX + dx/6
-      sizeTextY = boxY + dx/4
-      self.showText(cr, sizeText, sizeTextX, sizeTextY, w-40, fontsize=40)
+      # * display information about download status
+      getFilesText = self.getFilesText(getFilesThread)
+      getFilesTextX = boxX + dx/8
+      getFilesTextY = boxY + boxH*1/4
+      self.showText(cr, getFilesText, getFilesTextX, getFilesTextY, w-dx/4, 40)
+
+      # * display information about size of the tiles
+      sizeText = self.getSizeText(sizeThread)
+      sizeTextX = boxX + dx/8
+      sizeTextY = boxY + boxH*2/4
+      self.showText(cr, sizeText, sizeTextX, sizeTextY, w-dx/4, 40)
+
+      # * display information about free space available (for the filesystem with the tilefolder)
+      freeSpaceText = self.getFreeSpaceText()
+      freeSpaceTextX = boxX + dx/8
+      freeSpaceTextY = boxY + boxH * 3/4
+      self.showText(cr, freeSpaceText, freeSpaceTextX, freeSpaceTextY, w-dx/4, 40)
 
 #    elif menuName == 'editBatch':
 #      return
-  def getSizeText(self):
-    status = self.get("sizeStatus", 'unknown')
-    if status == 'unknown':
-      return ("total size is unknown (click to compute)")
-    elif status == 'inProgress':
-      totalTileCount = len(self.currentDownloadList)
-      currentTileCount = self.sizeThreadingStatus
+  def getFilesText(self, getFilesThread):
+    """return a string describing status of the download threads"""
+    tileCount = len(self.currentDownloadList)
+    if tileCount == 0:
+      return "All tiles for this area are available."
+    elif getFilesThread == None:
+      return ( "Press Start to download %d tiles." % tileCount)
+    elif getFilesThread.isAlive() == True:
+      totalTileCount = getFilesThread.urlCount
+      currentTileCount = getFilesThread.processed
+      text = "Downloading: %d of %d tiles complete" % (currentTileCount, totalTileCount)
+      return text
+    elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
+      text = "Download complete."
+      return text
+
+  def getSizeText(self, sizeThread):
+    """return a string describing status of the size counting threads"""
+    tileCount = len(self.currentDownloadList)
+    if tileCount == 0:
+      return ""
+    if sizeThread == None:
+      return ("Total size of tiles is unknown (click to compute).")
+    elif sizeThread.isAlive() == True:
+      totalTileCount = sizeThread.urlCount
+      currentTileCount = sizeThread.processed
       text = "Checking: %d of %d tiles complete" % (currentTileCount, totalTileCount)
       return text
-    elif status == 'known':
-      sizeInMB = self.totalSize/(1024*1024)
+    elif sizeThread.isAlive() == False:
+      sizeInMB = sizeThread.totalSize/(1024.0*1024.0)
       text = "Total size for download: %1.2f MB" % (sizeInMB)
       return text
+
+  def getFreeSpaceText(self):
+    """return a string describing the space available on the filesystem where the tilefolder is"""
+    path = self.get('tileFolder', None)
+    f = os.statvfs(path)
+    freeSpaceInBytes = (f.f_bsize * f.f_bavail)
+    freeSpaceInMB = freeSpaceInBytes/(1024.0*1024.0)
+    text = "Free space available: %1.1f MB" % freeSpaceInMB
+    return text
+
+
 
 
   def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):

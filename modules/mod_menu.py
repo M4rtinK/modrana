@@ -312,6 +312,8 @@ class menus(ranaModule):
     self.addItem('data', 'Around here', 'generic', 'set:downloadType:data|set:downloadArea:here|set:menu:%s' % nextMenu)
     self.addItem('data', 'Around route', 'generic', 'set:downloadType:data|set:downloadArea:route|set:menu:%s' % nextMenu)
     self.setupDataSubMenu()
+    if self.get("batchMenuEntered", None) == True:
+      self.addItem('data', 'back to dl', 'generic', 'set:menu:batchTileDl')
 
   def setupGeneralMenus(self):
     self.clearMenu('main', "set:menu:None")
