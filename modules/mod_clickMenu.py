@@ -43,15 +43,16 @@ class clickMenu(ranaModule):
   def drawMapOverlay(self, cr):
     """Draw an overlay on top of the map, showing various information
     about position etc."""
-    (x,y,w,h) = self.get('viewport')
-
-    dt = time() - self.lastWaypointAddTime
-    if(dt > 0 and dt < self.messageLingerTime):
-      self.drawNewWaypoint(cr, x+0.5*w, y+0.5*h, w*0.3)
-    else:
-	    m = self.m.get('clickHandler', None)
-	    if(m != None):
-	      m.registerXYWH(x+0.25*w,y+0.25*h,w*0.5,h*0.5, "clickMenu:addWaypoint")
+#    waypoins will be done in another way, so this is disabled for the time being
+#    (x,y,w,h) = self.get('viewport')
+#
+#    dt = time() - self.lastWaypointAddTime
+#    if(dt > 0 and dt < self.messageLingerTime):
+#      self.drawNewWaypoint(cr, x+0.5*w, y+0.5*h, w*0.3)
+#    else:
+#	    m = self.m.get('clickHandler', None)
+#	    if(m != None):
+#	      m.registerXYWH(x+0.25*w,y+0.25*h,w*0.5,h*0.5, "clickMenu:addWaypoint")
 
   def drawNewWaypoint(self, cr, x,y,size):
     text = self.lastWaypoint

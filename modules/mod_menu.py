@@ -19,6 +19,7 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import cairo
+import time
 from listable_menu import listable_menu
 
 def getModule(m,d):
@@ -32,22 +33,42 @@ class menus(ranaModule):
     self.lists = {}
     self.listOffset = 0
     self.setupGeneralMenus()
+    self.lastActivity = int(time.time())
 
   def drawMapOverlay(self, cr):
     """Draw an overlay on top of the map, showing various information
     about position etc."""
+    hideDelay = self.get('hideDelay', 'never')
     (x,y,w,h) = self.get('viewport')
 
-    dx = w / 5.0
+    # Where is the map?
+    proj = self.m.get('projection', None)
+
+    dx = min(w,h) / 5.0
     dy = dx
-    
+
+    m = self.m.get('clickHandler', None)
+    if(m != None):
+      m.registerDraggable(x,y,x+w,y+h, "mapView") # handler for dragging the map
+      m.registerXYWH(x,y,x+w,y+h, "menu:screenClicked")
+
+    if hideDelay != 'never': # is button hiding on ?
+      currentTimestamp = int(time.time())
+      lastActivity = self.lastActivity
+      if (currentTimestamp - lastActivity) > int(hideDelay): # have we reached the timeout ?
+        (x1,y1) = proj.screenPos(0.6, -0.96)
+        text = "tap screen to show menu"
+        self.drawText(cr, text, x1, y1, w/3, h, 0) # draw a reminder
+        return
+
+
+
     self.drawButton(cr, x+dx, y, dx, dy, '', "zoom_out", "mapView:zoomOut")
     self.drawButton(cr, x, y, dx, dy, '', "hint", "set:menu:main")
     self.drawButton(cr, x, y+dy, dx, dy, '', "zoom_in", "mapView:zoomIn")
 
-    m = self.m.get('clickHandler', None)
-    if(m != None):
-      m.registerDraggable(x,y,x+w,y+h, "mapView")
+
+
 
   def drawText(self,cr,text,x,y,w,h,border=0):
     if(not text):
@@ -346,8 +367,10 @@ class menus(ranaModule):
   def handleMessage(self, message):
     if (message == "rebootDataMenu"):
       self.setupDataMenu() # we are returning from the batch menu, data menu needs to be "rebooted"
-    if(message == "setupEditBatchMenu"):
+    elif(message == "setupEditBatchMenu"):
       self.setupEditBatchMenu()
+    elif(message == 'screenClicked'):
+      self.lastActivity = int(time.time())
     
 if(__name__ == "__main__"):
   a = menus({},{'viewport':(0,0,600,800)})

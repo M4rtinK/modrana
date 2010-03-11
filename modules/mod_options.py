@@ -66,6 +66,16 @@ class options(ranaModule):
                    "view",
                    "km/h")
 
+    self.addOption("Hide main buttons", "hideDelay",
+                 [("never","never hide buttons"),
+                  ("5","hide buttons after 5 seconds"),
+                  ("15","hide buttons after 15 seconds"),
+                  ("30","hide buttons after 30 seconds"),
+                  ("60","hide buttons after 1 minute"),
+                  ("120", "hide buttons after 2 minutes")],
+                   "view",
+                   "never")
+
     self.addOption("Network", "network",
       [("off","No use of network"),
        ("minimal", "Only for important data"),
