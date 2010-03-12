@@ -34,6 +34,7 @@ class menus(ranaModule):
     self.listOffset = 0
     self.setupGeneralMenus()
     self.lastActivity = int(time.time())
+    self.fullscreen = False
 
   def drawMapOverlay(self, cr):
     """Draw an overlay on top of the map, showing various information
@@ -349,7 +350,7 @@ class menus(ranaModule):
     self.addItem('main', 'centre', 'centre', 'toggle:centred|set:menu:None')
     self.addItem('main', 'profile', 'profile', 'set:menu:routeProfile')
     self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManager')
-#    self.addItem('main', 'debug', 'debug', 'set:menu:debug')
+    self.addItem('main', 'fullscreen', 'fullscreen', 'menu:fullscreenTogle|set:menu:None')
     self.setupTransportMenu()
     self.setupSearchMenus()
     self.setupMaplayerMenus()
@@ -371,6 +372,16 @@ class menus(ranaModule):
       self.setupEditBatchMenu()
     elif(message == 'screenClicked'):
       self.lastActivity = int(time.time())
+    elif(message == 'fullscreenTogle'):
+      # toggle fullscreen TODO: automatic fullscreen detection
+      if self.fullscreen == True:
+        self.mainWindow.get_toplevel().unfullscreen()
+        self.fullscreen = False
+        print "going out of fullscreen"
+      else:
+        self.mainWindow.get_toplevel().fullscreen()
+        self.fullscreen = True
+        print "going to fullscreen"
     
 if(__name__ == "__main__"):
   a = menus({},{'viewport':(0,0,600,800)})

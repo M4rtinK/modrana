@@ -18,8 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-from rdiff_backup.Globals import null_separator
-import re
+#import re
 import random
 from time import *
 

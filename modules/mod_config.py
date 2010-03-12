@@ -34,13 +34,10 @@ class config(ranaModule):
     # Option: load a GPX replay
 #    m = self.m.get('replayGpx', None)
 #    if(m != None):
-#      m.load('znojmo-brno.gpx')
-#      #file = open('znojmo-brno.gpx', 'r')
-      #print(file.read())
-    #self.m['replayGpx'].load('znojmo-brno.gpx')
-  
+#      m.load('track.gpx')
+
     # Option: set your start position
-    self.set("pos", (48.855556, 16.048889))
+    self.set("pos", (49.2, 16.616667)) # Brno
     #self.set("centred", False)  # don't keep the map centred on the start position
     #  self.set("pos_source", "default")
 

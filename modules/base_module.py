@@ -24,6 +24,7 @@ class ranaModule:
     self.status = ''
     self.moduleName = '' # will be provided by rana.py
     self.device = '' # will be provided by rana.py
+    self.mainWindow = None # will be provided by rana.py (a gdk.Window)
     
   def module_exists(self, module):
     """Test whether a named module is loaded"""

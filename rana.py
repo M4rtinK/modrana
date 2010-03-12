@@ -150,6 +150,11 @@ class MapWidget(gtk.Widget):
     self.style.attach(self.window)
     self.style.set_background(self.window, gtk.STATE_NORMAL)
     self.window.move_resize(*self.allocation)
+
+    # alow the modules to manipulate the window TODO: do this more elegantly (using signals ?)
+    for name in self.m: 
+      self.m[name].mainWindow = self.window
+
   def do_size_request(self, allocation):
     pass
   def do_size_allocate(self, allocation):
@@ -218,7 +223,7 @@ class GuiBase:
     # Create the map
     self.mapWidget = MapWidget()
     event_box.add(self.mapWidget)
-    
+
     # Finalise the window
     win.show_all()
     gtk.main()
