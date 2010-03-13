@@ -87,46 +87,46 @@ class mapTiles(ranaModule):
     self.threads = {}
     self.set('maplayers', maplayers) # export the maplyers definition for use by other modules
   
-  def drawMapOverlay(self, cr):
-    """Draw an "own position" marker (TODO: probably should be in different module)"""
-
-    # Where are we?
-    pos = self.get('pos', None)
-    if(pos == None):
-      return
-    (lat,lon) = pos
-
-    # Where is the map?
-    proj = self.m.get('projection', None)
-    if(proj == None):
-      return
-    if(not proj.isValid()):
-      return
-
-    # Where are we on the map?
-    x1,y1 = proj.ll2xy(lat,lon)
-
-    # What are we?
-    angle = self.get('bearing', 0)
-    #print(angle)
-
-    # Draw yellow/black triangle showing us
-    cr.set_source_rgb(1.0, 1.0, 0.0)
-    cr.save()
-    cr.translate(x1,y1)
-    cr.rotate(radians(angle))
-    cr.move_to(-10, 15)
-    cr.line_to( 10, 15)
-    cr.line_to(  0, -15)
-    cr.fill()
-    cr.set_source_rgb(0.0, 0.0, 0.0)
-    cr.set_line_width(3)
-    cr.move_to(-10, 15)
-    cr.line_to( 10, 15)
-    cr.line_to(  0, -15)
-    cr.close_path()
-    cr.stroke()
-    cr.restore()
+#  def drawMapOverlay(self, cr):
+#    """Draw an "own position" marker (TODO: probably should be in different module)"""
+#
+#    # Where are we?
+#    pos = self.get('pos', None)
+#    if(pos == None):
+#      return
+#    (lat,lon) = pos
+#
+#    # Where is the map?
+#    proj = self.m.get('projection', None)
+#    if(proj == None):
+#      return
+#    if(not proj.isValid()):
+#      return
+#
+#    # Where are we on the map?
+#    x1,y1 = proj.ll2xy(lat,lon)
+#
+#    # What are we?
+#    angle = self.get('bearing', 0)
+#    #print(angle)
+#
+#    # Draw yellow/black triangle showing us
+#    cr.set_source_rgb(1.0, 1.0, 0.0)
+#    cr.save()
+#    cr.translate(x1,y1)
+#    cr.rotate(radians(angle))
+#    cr.move_to(-10, 15)
+#    cr.line_to( 10, 15)
+#    cr.line_to(  0, -15)
+#    cr.fill()
+#    cr.set_source_rgb(0.0, 0.0, 0.0)
+#    cr.set_line_width(3)
+#    cr.move_to(-10, 15)
+#    cr.line_to( 10, 15)
+#    cr.line_to(  0, -15)
+#    cr.close_path()
+#    cr.stroke()
+#    cr.restore()
 
   def drawMap(self, cr):
     """Draw map tile images"""

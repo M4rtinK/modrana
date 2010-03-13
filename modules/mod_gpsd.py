@@ -32,6 +32,9 @@ class gpsd2(ranaModule):
     self.tt = 0
     self.position_regexp = re.compile('P=(.*?)\s*$')
     self.connected = False
+    self.set('speed', None)
+    self.set('bearing', None)
+    self.set('elevation', None)
     try:
       self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       self.s.connect(("127.0.0.1", 2947)) #TODO: set this from options
