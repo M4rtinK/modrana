@@ -221,9 +221,12 @@ class mapTiles(ranaModule):
         self.images[name] = surface
       else:
         #print(filename)
-        self.images[name]  = cairo.ImageSurface.create_from_png(filename)
+        try:
+          self.images[name]  = cairo.ImageSurface.create_from_png(filename)
+        except:
+          print "corrupted tile image detected: %s" % name
       return(name)
-    
+
     # Image not found anywhere - resort to downloading it
     if(self.get('threadedDownload',True)):
       self.threads[name] = tileLoader(x,y,z,layer,filename)

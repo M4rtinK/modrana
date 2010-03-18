@@ -30,9 +30,9 @@ import string
 import urllib, urllib2, threading
 from threadpool import threadpool
 from threading import Thread
-import socket
-timeout = 10 # this sets timeout for all sockets
-socket.setdefaulttimeout(timeout)
+#import socket
+#timeout = 30 # this sets timeout for all sockets
+#socket.setdefaulttimeout(timeout)
 
 
 
@@ -103,14 +103,11 @@ class mapData(ranaModule):
 #    self.stopThreading = False
 #    t = threading.Thread(target=self.getFiles, args=(urlsAndFilenames,))
 #    t.start()
+    return urlsAndFilenames
 
+  def addToQueue(self, urlsAndFilenames):
+    """load urls and filenames to download que"""
     self.currentDownloadList = urlsAndFilenames
-
-
-#    self.stopThreading = True
-
-  def addToQueue(self, tilesToDownload):
-    return
 
   def getTileUrl(self,x,y,z,layer): #TODO: share this with mapTiles
       """Return url for given tile coorindates and layer"""
@@ -159,8 +156,19 @@ class mapData(ranaModule):
       
       location = self.get("downloadArea", "here") # here or route
 
-      # Which zoom level are map tiles stored at
-      z = tiledata.DownloadLevel()
+      z = self.get('z', 15) # this is the currewnt zoomlevel as show on the map screen
+      minZ = z - int(self.get('zoomUpSize', 0)) # how many zoomlevels up (from current zoomelevel) should we download ?
+      if minZ < 0:
+        minZ = 0
+      maxZ = z + int(self.get('zoomDownSize', 0)) # how many zoomlevels down (from current zoomlevel) should we download ?
+      if maxZ > 17:
+        maxZ = 17 #TODO: make layer specific
+#      z = currentZ # current Zoomlevel
+      diffZ = maxZ - minZ
+      midZ = int(minZ + (diffZ/2.0))
+      if midZ < 15:
+        midZ = maxZ
+      print "max: %d, min: %d, diff: %d, middle:%d" % (maxZ, minZ, diffZ, midZ)
 
       if(location == "here"):  
         # Find which tile we're on
@@ -168,9 +176,14 @@ class mapData(ranaModule):
         if(pos != None):
           (lat,lon) = pos
           # be advised: the xy in this case are not screen coordinates but tile coordinates
-          (x,y) = latlon2xy(lat,lon,z)
-          tilesAroundHere = (self.spiral(x,y,z,size)) # get tiles around our position
-          self.addToQueue(tilesAroundHere) # get them downloaded
+          (x,y) = latlon2xy(lat,lon,midZ)
+          tilesAroundHere = set(self.spiral(x,y,midZ,size)) # get tiles around our position as a set
+          # now get the tiles from other zoomlevels as specified
+          zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundHere, z, maxZ, minZ)
+          # check which tiles we already have
+          # this method also return a (url,filename) list of tiles we dont have
+          urlsAndFilenames = self.checkTiles(zoomlevelExtendedTiles)
+          self.addToQueue(urlsAndFilenames) # load the files to download que variable
 
       if(location == "route"):
         loadTl = self.m.get('loadTracklog', None) # get the tracklog module
@@ -182,8 +195,12 @@ class mapData(ranaModule):
         the original list"""
         #latLonOnly = filter(lambda x: [x.latitude,x.longitude])
         trackpointsListCopy = map(lambda x: {'latitude': x.latitude,'longitude': x.longitude}, GPXTracklog.trackpointsList[0])[:]
-        tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, z)
-        self.checkTiles(tilesToDownload) # the tiles to be checked
+        tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, midZ)
+        zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, z, maxZ, minZ)
+        # check which tiles we already have
+        # this method also return a (url,filename) list of tiles we dont have
+        urlsAndFilenames = self.checkTiles(zoomlevelExtendedTiles)
+        self.addToQueue(urlsAndFilenames) # load the files to download que variable
 
     if(message == "getSize"):
       """will now ask the server and find the combined size if tiles in the batch"""
@@ -213,8 +230,79 @@ class mapData(ranaModule):
       getFilesThread.start()
       self.getFilesThread = getFilesThread
 
+  def addOtherZoomlevels(self, tiles, tilesZ, maxZ, minZ):
+    """expand the tile coverage to other zoomlevels
+    maxZ = maximum NUMERICAL zoom, 17 for eaxmple
+    minZ = minimum NUMERICAL zoom, 0 for example
+    we use two different methods to get the needed tiles:
+    * spliting the tiles from one zoomlevel down to the other
+    * rounding the tiles cooridnates to get tiles from one zoomlevel up
+    we choose a zoomlevel (tilesZ) and then split down and round down from it
+    * tilesZ is determined in the handle message method,
+    it is the zoomlevel on which we compute which tiles are in our download radius
+    -> if tilesZ is too low, this initial tile finding can take too long
+    -> if tilesZ is too high, the tiles could be much larger than our dl. radius and we would
+    be downloading much more tiles than needed
+    => for now, if we get tilesZ (called midZ in handle message) that is lower than 15,
+    we set it to the lowest zoomlevel, so we get dont get too much unneeded tiles when splitting
+    """
+    start = clock()
+    extendedTiles = tiles.copy()
 
+    """start of the tile splitting code"""
+    previousZoomlevelTiles = None # we will splitt the tiles from the previous zoomlevel
+    print "splittong down"
+    for z in range(tilesZ, maxZ): # to max zoom (fo each z we split one zoomlevel down)
+      newTilesFromSplit = set() # tiles from the splitting go there
+      if previousZoomlevelTiles == None: # this is the first iteration
+        previousZoomlevelTiles = tiles.copy()
+      for tile in previousZoomlevelTiles:
+        x = tile[0]
+        y = tile[1]
+        """
+        now we split each tile to 4 tiles on a higher zoomlevel nr
+        see: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Subtiles
+        for a tile with cooridnates x,y:
+        2x,2y  |2x+1,2y
+        2x,2y+1|2x+1,2y+1
+        """
+        leftUpperTile = (2*x, 2*y, z+1)
+        rightUpperTile = (2*x+1, 2*y, z+1)
+        leftLowerTile = (2*x, 2*y+1, z+1)
+        rightLowerTile = (2*x+1, 2*y+1, z+1)
+        newTilesFromSplit.add(leftUpperTile)
+        newTilesFromSplit.add(rightUpperTile)
+        newTilesFromSplit.add(leftLowerTile)
+        newTilesFromSplit.add(rightLowerTile)
+      extendedTiles.update(newTilesFromSplit) # add the new tiles to the main set
+      print "we are at z=%d, %d new tiles" % (z, len(newTilesFromSplit))
+      previousZoomlevelTiles = newTilesFromSplit # set the new tiles s as prev. tiles for next iteration
 
+    """start of the tile cooridnates rounding code"""
+    previousZoomlevelTiles = None # we will the tile cooridnates to get tiles for the upper level
+    print "rounding up"
+    for z in range(tilesZ, minZ, -1):
+      newTilesFromRounding = set() # tiles from the rounding go there
+      if previousZoomlevelTiles == None: # this is the first iteration
+        previousZoomlevelTiles = tiles.copy()
+      for tile in previousZoomlevelTiles:
+        x = tile[0]
+        y = tile[1]
+        """as per: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Subtiles
+        we divide each cooridnate with 2 to get the upper tile
+        some upper tiles can be found up to four times, so this could be most probably
+        optimized if need be (for charting the Jupiter, Sun or a Dyson sphere ? :)"""
+        upperTileX = int(x/2.0)
+        upperTileY = int(y/2.0)
+        upperTile = (upperTileX,upperTileY, z)
+        newTilesFromRounding.add(upperTile)
+      extendedTiles.update(newTilesFromRounding) # add the new tiles to the main set
+      print "we are at z=%d, %d new tiles" % (z, len(newTilesFromSplit))
+      previousZoomlevelTiles = newTilesFromRounding # set the new tiles s as prev. tiles for next iteration
+
+      print "nr of tiles after extend: %d" % len(extendedTiles)
+    print "Extend took %1.2f ms" % (1000 * (clock() - start))
+    return extendedTiles   
 
   class GetSize(Thread):
     """a class for getting size of files on and url list"""

@@ -300,21 +300,21 @@ class menus(ranaModule):
       (the edit menu sends the refresh message on exit so it would be redundant)"""
       nextMenu = nextMenu + '|mapData:refreshTilecount'
     self.addItem('zoomUp', '+ 1 up', 'generic', 'set:zoomUpSize:1|set:menu:%s' % nextMenu)
-    self.addItem('zoomUp', '+ 2 up', 'generic', 'set:setZoomPlus:2|set:menu:%s' % nextMenu)
-    self.addItem('zoomUp', '+ 3 up', 'generic', 'set:minZoomPlus:3|set:menu:%s' % nextMenu)
-    self.addItem('zoomUp', '+ 5 up', 'generic', 'set:minZoomPlus:5|set:menu:%s' % nextMenu)
-    self.addItem('zoomUp', '+ 8 up', 'generic', 'set:minZoomPlus:8|set:menu:%s' % nextMenu)
-    self.addItem('zoomUp', 'max up', 'generic', 'set:minZoomPlus:50|set:menu:%s' % nextMenu)
+    self.addItem('zoomUp', '+ 2 up', 'generic', 'set:zoomUpSize:2|set:menu:%s' % nextMenu)
+    self.addItem('zoomUp', '+ 3 up', 'generic', 'set:zoomUpSize:3|set:menu:%s' % nextMenu)
+    self.addItem('zoomUp', '+ 5 up', 'generic', 'set:zoomUpSize:5|set:menu:%s' % nextMenu)
+    self.addItem('zoomUp', '+ 8 up', 'generic', 'set:zoomUpSize:8|set:menu:%s' % nextMenu)
+    self.addItem('zoomUp', 'max up', 'generic', 'set:zoomUpSize:50|set:menu:%s' % nextMenu)
 
   def setupZoomDownMenu(self, nextMenu='zoomUp', prevMenu='data'):
     """in this menu, we set the maximal zoom level DOWN from the current zoomlevel (eq more detail)"""
     self.clearMenu('zoomDown', "set:menu:%s" % prevMenu)
-    self.addItem('zoomDown', '+ 1 down', 'generic', 'set:setZoomPlus:1|set:menu:%s' % nextMenu)
-    self.addItem('zoomDown', '+ 2 down', 'generic', 'set:setZoomPlus:2|set:menu:%s' % nextMenu)
-    self.addItem('zoomDown', '+ 3 down', 'generic', 'set:setZoomPlus:3|set:menu:%s' % nextMenu)
-    self.addItem('zoomDown', '+ 5 down', 'generic', 'set:setZoomPlus:5|set:menu:%s' % nextMenu)
-    self.addItem('zoomDown', '+ 8 down', 'generic', 'set:setZoomPlus:8|set:menu:%s' % nextMenu)
-    self.addItem('zoomDown', 'max down', 'generic', 'set:setZoomPlus:50|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', '+ 1 down', 'generic', 'set:zoomDownSize:1|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', '+ 2 down', 'generic', 'set:zoomDownSize:2|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', '+ 3 down', 'generic', 'set:zoomDownSize:3|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', '+ 5 down', 'generic', 'set:zoomDownSize:5|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', '+ 8 down', 'generic', 'set:zoomDownSize:8|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', 'max down', 'generic', 'set:zoomDownSize:50|set:menu:%s' % nextMenu)
     self.setupZoomUpMenu()
 
   def setupDataSubMenu(self, nextMenu='zoomDown', prevMenu='data'):
