@@ -48,7 +48,7 @@ class showGPX(ranaModule):
     mapDt = self.m.get('mapData', None) # get the mapdata module
     tilesToDownload = mapDt.currentTilesToGet
 
-    if tilesToDownload != None or self.get('debugSquares', None):
+    if tilesToDownload != None and self.get('debugSquares', False) == True:
       cr.set_source_rgb(0,0, 0.5)
       cr.set_line_width(self.linewidth)
       for tile in tilesToDownload:

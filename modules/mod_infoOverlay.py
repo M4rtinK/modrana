@@ -154,7 +154,7 @@ class infoOverlay(ranaModule):
       x += dx
       
   def drawMapOverlay(self, cr):
-    print "zoom from infoOverlay:%d" % int(self.get("z", 15))
+#    print "zoom from infoOverlay:%d" % int(self.get("z", 15))
     return #TODO: rewrite this
     """Draw an overlay on top of the map, showing various information
     about position etc."""

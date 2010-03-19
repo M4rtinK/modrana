@@ -185,7 +185,7 @@ class mapData(ranaModule):
           # check which tiles we already have
           # this method also return a (url,filename) list of tiles we dont have
           urlsAndFilenames = self.checkTiles(zoomlevelExtendedTiles)
-          self.addToQueue(urlsAndFilenames) # load the files to download que variable
+          self.addToQueue(urlsAndFilenames) # load the files to the download que variable
 
       if(location == "route"):
         loadTl = self.m.get('loadTracklog', None) # get the tracklog module
@@ -202,7 +202,21 @@ class mapData(ranaModule):
         # check which tiles we already have
         # this method also return a (url,filename) list of tiles we dont have
         urlsAndFilenames = self.checkTiles(zoomlevelExtendedTiles)
-        self.addToQueue(urlsAndFilenames) # load the files to download que variable
+        self.addToQueue(urlsAndFilenames) # load the files to the download que variable
+
+      if(location == "view"):
+        proj = self.m.get('projection', None)
+        (screenCenterX,screenCenterY) = proj.screenPos(0.5, 0.5) # get pixel coordinates for the screen center
+        (lat,lon) = proj.xy2ll(screenCenterX,screenCenterY) # convert to geographic coordinates
+        (x,y) = latlon2xy(lat,lon,midZ) # convert to tile coordinates
+        tilesAroundView = set(self.spiral(x,y,midZ,size)) # get tiles around these coordinates
+        # now get the tiles from other zoomlevels as specified
+        zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundView, midZ, maxZ, minZ)
+        # check which tiles we already have
+        # this method also return a (url,filename) list of tiles we dont have
+        urlsAndFilenames = self.checkTiles(zoomlevelExtendedTiles)
+        self.addToQueue(urlsAndFilenames) # load the files to the download que variable
+        
 
     if(message == "getSize"):
       """will now ask the server and find the combined size if tiles in the batch"""

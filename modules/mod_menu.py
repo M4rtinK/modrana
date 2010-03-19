@@ -330,9 +330,11 @@ class menus(ranaModule):
     self.setupZoomDownMenu()
     
   def setupDataMenu(self, nextMenu='data2', prevMenu='main'):
+    """we can download tiles around "here" (GPS cooridnates), route or the current view"""
     self.clearMenu('data', "set:menu:%s" % prevMenu)
     self.addItem('data', 'Around here', 'generic', 'set:downloadType:data|set:downloadArea:here|set:menu:%s' % nextMenu)
     self.addItem('data', 'Around route', 'generic', 'set:downloadType:data|set:downloadArea:route|set:menu:%s' % nextMenu)
+    self.addItem('data', 'Around view', 'generic', 'set:downloadType:data|set:downloadArea:view|set:menu:%s' % nextMenu)
     self.setupDataSubMenu()
     if self.get("batchMenuEntered", None) == True:
       self.addItem('data', 'back to dl', 'generic', 'set:menu:batchTileDl')
