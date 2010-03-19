@@ -74,6 +74,16 @@ class config(ranaModule):
     self.set('maxBatchThreads', 5)
     # Option: Folder for storing downloaded tile images (there should be a slash at the end)
     self.set('tileFolder', 'cache/images/')
+    # this sets the number of threads for bach tile download
+    # even values of 10 can lead to 3000+ open sockets on a fast internet connection
+    # handle with care :)
+    self.set('maxDlThreads', 5)
+    # this sets the number of threads used for determining the size of the batch (from http headers)
+    # NOTE: even though we are downloading only the headers,
+    # for a few tousand tiles this can be an unrivila amount of data
+    # (so use this with caution on metered connections)
+    self.set('maxSizeThreads', 20)
+
 
 
 

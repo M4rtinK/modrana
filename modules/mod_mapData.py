@@ -58,6 +58,8 @@ class mapData(ranaModule):
     self.currentTilesToGet = [] # used for reporting the (actual) size of the tiles for download
     self.sizeThread = None
     self.getFilesThread = None
+    self.aliasForSet = self.set
+    self.lastMenuRedraw = 0
 
   def listTiles(self, route):
     """List all tiles touched by a polyline"""
@@ -179,7 +181,7 @@ class mapData(ranaModule):
           (x,y) = latlon2xy(lat,lon,midZ)
           tilesAroundHere = set(self.spiral(x,y,midZ,size)) # get tiles around our position as a set
           # now get the tiles from other zoomlevels as specified
-          zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundHere, z, maxZ, minZ)
+          zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundHere, midZ, maxZ, minZ)
           # check which tiles we already have
           # this method also return a (url,filename) list of tiles we dont have
           urlsAndFilenames = self.checkTiles(zoomlevelExtendedTiles)
@@ -196,7 +198,7 @@ class mapData(ranaModule):
         #latLonOnly = filter(lambda x: [x.latitude,x.longitude])
         trackpointsListCopy = map(lambda x: {'latitude': x.latitude,'longitude': x.longitude}, GPXTracklog.trackpointsList[0])[:]
         tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, midZ)
-        zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, z, maxZ, minZ)
+        zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
         # check which tiles we already have
         # this method also return a (url,filename) list of tiles we dont have
         urlsAndFilenames = self.checkTiles(zoomlevelExtendedTiles)
@@ -213,7 +215,9 @@ class mapData(ranaModule):
       urls = map(lambda x: x[0], urlsAndFilenames)
 
       self.totalSize = 0
-      sizeThread = self.GetSize(urls, 10) # the seccond parameter is the max number of threads TODO: tweak this
+      maxThreads = self.get('maxSizeThreads', 5)
+      sizeThread = self.GetSize(urls, maxThreads) # the seccond parameter is the max number of threads TODO: tweak this
+      print  "getSize received, starting sizeThread"
       sizeThread.start()
       self.sizeThread = sizeThread
 
@@ -225,8 +229,8 @@ class mapData(ranaModule):
       if len(urlsAndFilenames) == 0:
         print "cant download an empty list"
         return
-
-      getFilesThread = self.GetFiles(urlsFilenamesInString, 10)
+      maxThreads = self.get('maxDlThreads', 5)
+      getFilesThread = self.GetFiles(urlsFilenamesInString, maxThreads)
       getFilesThread.start()
       self.getFilesThread = getFilesThread
 
@@ -251,7 +255,7 @@ class mapData(ranaModule):
 
     """start of the tile splitting code"""
     previousZoomlevelTiles = None # we will splitt the tiles from the previous zoomlevel
-    print "splittong down"
+    print "splitting down"
     for z in range(tilesZ, maxZ): # to max zoom (fo each z we split one zoomlevel down)
       newTilesFromSplit = set() # tiles from the splitting go there
       if previousZoomlevelTiles == None: # this is the first iteration
@@ -275,7 +279,7 @@ class mapData(ranaModule):
         newTilesFromSplit.add(leftLowerTile)
         newTilesFromSplit.add(rightLowerTile)
       extendedTiles.update(newTilesFromSplit) # add the new tiles to the main set
-      print "we are at z=%d, %d new tiles" % (z, len(newTilesFromSplit))
+      print "we are at z=%d, %d new tiles from %d" % (z, len(newTilesFromSplit), (z+1))
       previousZoomlevelTiles = newTilesFromSplit # set the new tiles s as prev. tiles for next iteration
 
     """start of the tile cooridnates rounding code"""
@@ -297,7 +301,7 @@ class mapData(ranaModule):
         upperTile = (upperTileX,upperTileY, z)
         newTilesFromRounding.add(upperTile)
       extendedTiles.update(newTilesFromRounding) # add the new tiles to the main set
-      print "we are at z=%d, %d new tiles" % (z, len(newTilesFromSplit))
+      print "we are at z=%d, %d new tiles" % (z, len(newTilesFromRounding))
       previousZoomlevelTiles = newTilesFromRounding # set the new tiles s as prev. tiles for next iteration
 
       print "nr of tiles after extend: %d" % len(extendedTiles)
@@ -306,22 +310,28 @@ class mapData(ranaModule):
 
   class GetSize(Thread):
     """a class for getting size of files on and url list"""
-    def __init__(self, urls, maxThreads):
+    def __init__(self, urls, maxThreads=11):
       Thread.__init__(self)
       self.urls=urls
       self.maxThreads=maxThreads
       self.processed = 0
       self.urlCount = len(urls)
       self.totalSize = 0
+      self.finished = False
 #      self.set("sizeStatus", 'inProgress') # the size is being processed
 
     def getSizeForURL(self, url):
+      """NOTE: getting size info for a sigle tile seems to take from 30 to 130ms on fast connection"""
+#      start = clock()
       try:
-        urlInfo = urllib.urlopen(url).info() # open url and get mime info
+        url = urllib.urlopen(url) # open url and get mime info
+        urlInfo = url.info()
         size = int(urlInfo['Content-Length']) # size in bytes
+        url.close()
       except IOError:
         print "Could not open document: %s" % url
         size = 0 # the url errored out, so we just say it  has zero size
+#      print "Size lookup took %1.2f ms" % (1000 * (clock() - start))
       return size
 
     def processURLSize(self, request, result):
@@ -329,28 +339,33 @@ class mapData(ranaModule):
       self.processed = self.processed + 1
 #      print "**** Size from request #%s: %r b" % (request.requestID, result)
       self.totalSize+=result
-      print "**** Total size: %r B, %d/%d done" % (self.totalSize, self.processed, self.urlCount)
+#      print "**** Total size: %r B, %d/%d done" % (self.totalSize, self.processed, self.urlCount)
 
     def run(self):
+      start = clock()
       urls=self.urls
       maxThreads=self.maxThreads
       requests = threadpool.makeRequests(self.getSizeForURL, urls, self.processURLSize)
       mainPool = threadpool.ThreadPool(maxThreads)
-      for req in requests:
-          mainPool.putRequest(req)
+      print "GetSize: mainPool created"
+#      for req in requests:
+#          mainPool.putRequest(req)
+      map(lambda x: mainPool.putRequest(x) ,requests)
       print "Added %d URLS to check for size." % self.urlCount
       while True:
           try:
-              time.sleep(0.5)
+              time.sleep(0.5) # this governs how often we check status of the worker threads
               mainPool.poll()
               print "Main thread working...",
               print "(active worker threads: %i)" % (threading.activeCount()-1, )
           except threadpool.NoResultsPending:
               print "**** No pending results."
+              print "Total size lookup took %1.2f ms" % (1000 * (clock() - start))
+              self.finished = True
               break
-      if mainPool.dismissedWorkers:
-          print "Joining all dismissed worker threads..."
-          mainPool.joinAllDismissedWorkers()
+#      if mainPool.dismissedWorkers:
+#          print "Joining all dismissed worker threads..."
+#          mainPool.joinAllDismissedWorkers()
 
 
   class GetFiles(Thread):
@@ -360,6 +375,7 @@ class mapData(ranaModule):
       self.maxThreads = maxThreads
       self.processed = 0
       self.urlCount = len(urlsAndFilenames)
+      self.finished = False
 
     def saveTileForURL(self, urlAndFilename):
       (url, filename) = urlAndFilename.split('*')
@@ -374,15 +390,17 @@ class mapData(ranaModule):
       #TODO: redownload failed tiles
       self.processed = self.processed + 1
       self.tileThreadingStatus = self.processed
-      print "**** Downloading: %d of %d tiles done. Status:%r" % (self.processed, self.urlCount, result)
+#      print "**** Downloading: %d of %d tiles done. Status:%r" % (self.processed, self.urlCount, result)
 
     def run(self):
       urlsAndFilenames = self.urlsAndFilenames
       maxThreads = self.maxThreads
       requests = threadpool.makeRequests(self.saveTileForURL, urlsAndFilenames, self.processSaveTile)
       mainPool = threadpool.ThreadPool(maxThreads)
-      for req in requests:
-          mainPool.putRequest(req)
+      print "GetFiles: mainPool created"
+#      for req in requests:
+#          mainPool.putRequest(req)
+      map(lambda x: mainPool.putRequest(x) ,requests)
       print "Added %d URLS to check for size." % self.urlCount
       while True:
           try:
@@ -392,10 +410,11 @@ class mapData(ranaModule):
               print "(active worker threads: %i)" % (threading.activeCount()-1, )
           except threadpool.NoResultsPending:
               print "**** No pending results."
+              self.finished = True
               break
-      if mainPool.dismissedWorkers:
-          print "Joining all dismissed worker threads..."
-          mainPool.joinAllDismissedWorkers()
+#      if mainPool.dismissedWorkers:
+#          print "Joining all dismissed worker threads..."
+#          mainPool.joinAllDismissedWorkers()
 
 #  def handleThreExc(self, request, exc_info):
 #        if not isinstance(exc_info, tuple):
@@ -448,6 +467,15 @@ class mapData(ranaModule):
     return(s.tiles)
 
   def update(self):
+#    """because it seems, that unless we force redraw the window
+#    the threads will be stuck, we poke them while they are running
+#    TODO: maybe the this could be done more elegantly ?"""
+#    if self.sizeThread != None and self.sizeThread.finished == False:
+#      self.set('needRedraw', True)
+#      print "refreshing the GetSize thread"
+#    if self.getFilesThread != None and self.getFilesThread.finished == False:
+#      self.set('needRedraw', True)
+##      print "refreshing the GetFiles thread"
     pass
 
   def getTilesForRoute(self, route, radius, z):
@@ -515,59 +543,65 @@ class mapData(ranaModule):
     # is this menu the correct menu ?
     if menuName != ('batchTileDl'):
       return # we arent the active menu so we dont do anything
-    elif menuName == 'batchTileDl':
-      (x1,y1,w,h) = self.get('viewport', None)
-      self.set('dataMenu', 'edit')
-      menus = self.m.get("menu",None)
-      sizeThread = self.sizeThread
-      getFilesThread = self.getFilesThread
-      self.set("batchMenuEntered", True)
-#      if self.get('setUpEditMenu', True) == True:
-#        menus.setupEditBatchMenu()
-#        self.set('setUpEditMenu', False)
 
-      if w > h:
-        cols = 4
-        rows = 3
-      elif w < h:
-        cols = 3
-        rows = 4
-      elif w == h:
-        cols = 4
-        rows = 4
+#    if self.getFilesThread != None and self.getFilesThread.finished == False:
+#      self.set('needRedraw', True)
 
-      dx = w / cols
-      dy = h / rows
-      # * draw "escape" button
-      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "menu:rebootDataMenu|set:menu:main")
-      # * draw "edit" button
-      menus.drawButton(cr, (x1+w)-2*dx, y1, dx, dy, "edit", "edit", "menu:setupEditBatchMenu|set:menu:editBatch")
-      # * draw "start" button
-      menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "start", "start", "mapData:download")
-      # * draw the combined info area and size button (aka "box")
-      boxX = x1
-      boxY = y1+dy
-      boxW = w
-      boxH = h-dy
-      menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "3h", "mapData:getSize")
+    """in order for the threeds to work normally, it is needed to pause the main loop for a while
+    * this works only for this menu, in other menus (even the edit  menu) the threads will be slow to start
+    * when looking at map, the threads behave as expected :)
+    * so, when downloading:
+    -> look at the map OR the batch progress :)**"""
+    time.sleep(0.5)
+    (x1,y1,w,h) = self.get('viewport', None)
+    self.set('dataMenu', 'edit')
+    menus = self.m.get("menu",None)
+    sizeThread = self.sizeThread
+    getFilesThread = self.getFilesThread
+    self.set("batchMenuEntered", True)
 
-      # * display information about download status
-      getFilesText = self.getFilesText(getFilesThread)
-      getFilesTextX = boxX + dx/8
-      getFilesTextY = boxY + boxH*1/4
-      self.showText(cr, getFilesText, getFilesTextX, getFilesTextY, w-dx/4, 40)
+    if w > h:
+      cols = 4
+      rows = 3
+    elif w < h:
+      cols = 3
+      rows = 4
+    elif w == h:
+      cols = 4
+      rows = 4
 
-      # * display information about size of the tiles
-      sizeText = self.getSizeText(sizeThread)
-      sizeTextX = boxX + dx/8
-      sizeTextY = boxY + boxH*2/4
-      self.showText(cr, sizeText, sizeTextX, sizeTextY, w-dx/4, 40)
+    dx = w / cols
+    dy = h / rows
+    # * draw "escape" button
+    menus.drawButton(cr, x1, y1, dx, dy, "", "up", "menu:rebootDataMenu|set:menu:main")
+    # * draw "edit" button
+    menus.drawButton(cr, (x1+w)-2*dx, y1, dx, dy, "edit", "edit", "menu:setupEditBatchMenu|set:menu:editBatch")
+    # * draw "start" button
+    menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "start", "start", "mapData:download")
+    # * draw the combined info area and size button (aka "box")
+    boxX = x1
+    boxY = y1+dy
+    boxW = w
+    boxH = h-dy
+    menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "3h", "mapData:getSize")
 
-      # * display information about free space available (for the filesystem with the tilefolder)
-      freeSpaceText = self.getFreeSpaceText()
-      freeSpaceTextX = boxX + dx/8
-      freeSpaceTextY = boxY + boxH * 3/4
-      self.showText(cr, freeSpaceText, freeSpaceTextX, freeSpaceTextY, w-dx/4, 40)
+    # * display information about download status
+    getFilesText = self.getFilesText(getFilesThread)
+    getFilesTextX = boxX + dx/8
+    getFilesTextY = boxY + boxH*1/4
+    self.showText(cr, getFilesText, getFilesTextX, getFilesTextY, w-dx/4, 40)
+
+    # * display information about size of the tiles
+    sizeText = self.getSizeText(sizeThread)
+    sizeTextX = boxX + dx/8
+    sizeTextY = boxY + boxH*2/4
+    self.showText(cr, sizeText, sizeTextX, sizeTextY, w-dx/4, 40)
+
+    # * display information about free space available (for the filesystem with the tilefolder)
+    freeSpaceText = self.getFreeSpaceText()
+    freeSpaceTextX = boxX + dx/8
+    freeSpaceTextY = boxY + boxH * 3/4
+    self.showText(cr, freeSpaceText, freeSpaceTextX, freeSpaceTextY, w-dx/4, 40)
 
 #    elif menuName == 'editBatch':
 #      return
