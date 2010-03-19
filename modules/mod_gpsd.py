@@ -43,7 +43,10 @@ class gpsd2(ranaModule):
       self.status = "No GPSD running"
  
   def socket_cmd(self, cmd):
-    self.s.send("%s\r\n" % cmd)
+    try:
+      self.s.send("%s\r\n" % cmd)
+    except:
+      print "something is wrong with the gps daemon"
     result = self.s.recv(8192)
     #print "Reply: %s" % result
     expect = 'GPSD,' + cmd.upper() + '='

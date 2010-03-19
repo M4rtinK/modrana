@@ -158,8 +158,8 @@ class showGPX(ranaModule):
         cr.line_to(x, y)
       cr.stroke()
       cr.fill()
-    if pointsDrawn > 0:
-      print "Nr of trackpoints drawn: %d" % pointsDrawn
+#    if pointsDrawn > 0:
+#      print "Nr of trackpoints drawn: %d" % pointsDrawn
 #    print "Redraw took %1.2f ms" % (1000 * (clock() - start))
 
 
