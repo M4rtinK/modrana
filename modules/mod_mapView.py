@@ -38,7 +38,7 @@ class mapView(ranaModule):
       self.set('z', max(z - 1, 8))
   
   def dragEvent(self,startX,startY,dx,dy,x,y):
-    self.set("centered",False)
+    self.set("centred",False) # turrn off centering after dragging the map (like in TangoGPS)
 
 #    if(not self.get("centred",True)):
     if(True): #
