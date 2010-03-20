@@ -100,7 +100,8 @@ class menus(ranaModule):
         
   def drawButton(self, cr, x1, y1, w, h, text='', icon='generic', action=''):
     """Draw a clickable button, with icon image and text"""
-    
+    """NOTE: # delimits the different captions: text_down#text_middle#text_up
+       text_up is NOT YET IMPLEMENTED"""
     # Draw icon
     if(icon != None):
       m = self.m.get('icons', None)
@@ -109,7 +110,12 @@ class menus(ranaModule):
 
     # Draw text
     cr.set_source_rgb(0, 0, 0.3)
-    self.drawText(cr, text, x1, y1+0.5*h, w, 0.4*h, 0.15)
+    textList = text.split('#')
+    if len(textList) == 1:
+      self.drawText(cr, textList[0], x1, y1+0.5*h, w, 0.4*h, 0.15)
+    elif len(textList) >= 2:
+      self.drawText(cr, textList[0], x1, y1+0.5*h, w, 0.4*h, 0.15)
+      self.drawText(cr, textList[1], x1, y1+0.2*h, w, 0.4*h, 0.15)
 
     # Make clickable
     if(action != None):
@@ -281,15 +287,33 @@ class menus(ranaModule):
     """this is a menu for editing settings of a batch before running the said batch"""
     self.clearMenu('editBatch', "mapData:refreshTilecount|set:menu:batchTileDl")
     # on exit from the editation menu refresh the tilecount
-    self.addItem('editBatch', 'where', 'generic', 'set:menu:data')
-    self.addItem('editBatch', 'radius', 'generic', 'set:menu:data2')
-    self.addItem('editBatch', 'Zoom down', 'generic', 'set:menu:zoomDown')
-    self.addItem('editBatch', 'Zoom up', 'generic', 'set:menu:zoomUp')
-    self.setupDataMenu('editBatch', 'editBatch')
-    self.setupDataSubMenu('editBatch', 'editBatch')
-    self.setupZoomDownMenu('editBatch', 'editBatch')
-    self.setupZoomUpMenu('editBatch', 'editBatch')
-#    self.set('setUpEditMenu', True)
+
+    # we show the values of the settings
+    location = self.get("downloadArea", "here")
+    z = self.get('z', 15)
+    zoomUp = int(self.get('zoomUpSize', 0))
+    zoomDown = int(self.get('zoomDownSize', 0))
+    minZ = z - zoomUp
+    if minZ < 0:
+      minZ = 0
+      zoomUp = z
+    maxZ = z + zoomDown
+    if maxZ > 17: # TODO: extend this when aditional zoomlevels are supported
+      maxZ = 17
+      zoomDown = maxZ - z
+    radius = int(self.get("downloadSize", 4))*1.25 # to get km, we multiply with 1.25
+
+    # add the buttons for the varius settings
+    self.addItem('editBatch', 'where#now: %s' % location, 'generic', 'set:menu:data')
+    self.addItem('editBatch', 'radius#now: %dkm' % radius, 'generic', 'set:menu:data2')
+    self.addItem('editBatch', 'Zoom down#now: %d - %d = %d' % (z,zoomDown,maxZ), 'generic', 'set:menu:zoomDown')
+    self.addItem('editBatch', 'Zoom up#now: %d - %d = %d' % (z,zoomUp,minZ), 'generic', 'set:menu:zoomUp')
+
+    # on exit from submenu, we need to refresh the editBacht menu, so we also send setupEditBatchMenu
+    self.setupDataMenu('editBatch|menu:setupEditBatchMenu', 'editBatch')
+    self.setupDataSubMenu('editBatch|menu:setupEditBatchMenu', 'editBatch')
+    self.setupZoomDownMenu('editBatch|menu:setupEditBatchMenu', 'editBatch')
+    self.setupZoomUpMenu('editBatch|menu:setupEditBatchMenu', 'editBatch')
 
   def setupZoomUpMenu(self, nextMenu='batchTileDl', prevMenu='data'):
     """in this menu, we set the maximal zoom level UP from the current zoomlevel (eq less detail)"""
@@ -326,7 +350,7 @@ class menus(ranaModule):
     self.addItem('data2', '20 km', 'generic', 'set:downloadSize:16|set:menu:%s' % nextMenu)
     self.addItem('data2', '40 km', 'generic', 'set:downloadSize:32|set:menu:%s' % nextMenu)
     self.addItem('data2', '80 km', 'generic', 'set:downloadSize:64|set:menu:%s' % nextMenu)
-    self.addItem('data2', 'Fill disk', 'generic', 'set:downloadSize:0|set:menu:%s' % nextMenu)
+    self.addItem('data2', '160 km', 'generic', 'set:downloadSize:128|set:menu:%s' % nextMenu)
     self.setupZoomDownMenu()
     
   def setupDataMenu(self, nextMenu='data2', prevMenu='main'):
