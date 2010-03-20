@@ -154,7 +154,12 @@ class mapTiles(ranaModule):
           self.drawImage(cr,name,x1,y1)
 
   def update(self):
-    # TODO: detect images finished downloading, and request update
+    """monitor if the automatic tile downalods finished and then remove them from the dictionary
+    (also automagicaly refreshes the screen onse new tiles are avalabale, even when not centered)"""
+    if len(self.threads) == 0:
+      pass
+    for index in filter(lambda x: self.threads[x].finished == 1, self.threads):
+      del self.threads[index]
     pass
   
   def drawImage(self,cr, name, x,y):
