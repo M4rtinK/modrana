@@ -44,31 +44,37 @@ maplayers = {
     {
     'label':'OSM T@h',
     'tiles':'http://tah.openstreetmap.org/Tiles/tile/',
-    'type':'png'
+    'type':'png',
+    'maxZoom': 17
     },
   'mapnik':
     {
     'label':'Mapnik',
     'tiles':'http://tile.openstreetmap.org/',
-    'type':'png'
+    'type':'png',
+    'maxZoom': 18
     },
   'gmap':
     {
     'label':'Google maps',
     'tiles':'http://mt1.google.com/vt/',
-    'type':'png'
+    'type':'png',
+    'maxZoom': 21
     },
   'gsat':
     {
     'label':'Google satelite',
     'tiles':'http://khm1.google.com/kh/v=54',
-    'type':'jpg'
+    'type':'jpg',
+    'maxZoom': 20
     },
   'cycle':
     {
     'label':'Cycle map',
-    'tiles':'http://thunderflames.org/tiles/cycle/',
-    'type':'png'
+#    'tiles':'http://thunderflames.org/tiles/cycle/', # this urls is probably broken
+    'tiles':'http://andy.sandbox.cloudmade.com/tiles/cycle/',
+    'type':'png',
+    'maxZoom': 15
     },
   'localhost':
     {

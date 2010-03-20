@@ -163,7 +163,15 @@ class mapData(ranaModule):
       if minZ < 0:
         minZ = 0
       maxZ = z + int(self.get('zoomDownSize', 0)) # how many zoomlevels down (from current zoomlevel) should we download ?
-      if maxZ > 17:
+
+      layer = self.get('layer', None)
+      maplayers = self.get('maplayers', None)
+      if maplayers == None:
+        maxZoomLimit == 17
+      else:
+        maxZoomLimit = maplayers[layer]['maxZoom']
+
+      if maxZ > maxZoomLimit:
         maxZ = 17 #TODO: make layer specific
 #      z = currentZ # current Zoomlevel
       diffZ = maxZ - minZ

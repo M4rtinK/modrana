@@ -110,12 +110,13 @@ class menus(ranaModule):
 
     # Draw text
     cr.set_source_rgb(0, 0, 0.3)
-    textList = text.split('#')
-    if len(textList) == 1:
-      self.drawText(cr, textList[0], x1, y1+0.5*h, w, 0.4*h, 0.15)
-    elif len(textList) >= 2:
-      self.drawText(cr, textList[0], x1, y1+0.5*h, w, 0.4*h, 0.15)
-      self.drawText(cr, textList[1], x1, y1+0.2*h, w, 0.4*h, 0.15)
+    if text != None:
+      textList = text.split('#')
+      if len(textList) == 1 and text != None:
+        self.drawText(cr, textList[0], x1, y1+0.5*h, w, 0.4*h, 0.15)
+      elif len(textList) >= 2:
+        self.drawText(cr, textList[0], x1, y1+0.5*h, w, 0.4*h, 0.15)
+        self.drawText(cr, textList[1], x1, y1+0.2*h, w, 0.4*h, 0.15)
 
     # Make clickable
     if(action != None):
@@ -297,8 +298,18 @@ class menus(ranaModule):
     if minZ < 0:
       minZ = 0
       zoomUp = z
+
     maxZ = z + zoomDown
-    if maxZ > 17: # TODO: extend this when aditional zoomlevels are supported
+
+    layer = self.get('layer', None)
+    maplayers = self.get('maplayers', None)
+    print maplayers[layer]['maxZoom']
+    if maplayers == None:
+      maxZoomLimit == 17
+    else:
+      maxZoomLimit = maplayers[layer]['maxZoom']
+
+    if maxZ > maxZoomLimit:
       maxZ = 17
       zoomDown = maxZ - z
     radius = int(self.get("downloadSize", 4))*1.25 # to get km, we multiply with 1.25
