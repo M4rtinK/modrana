@@ -2,7 +2,7 @@
 # vim: set sw=4 sts=4 et tw=80 fileencoding=utf-8:
 #
 """upoints - Modules for working with points on Earth"""
-# Copyright (C) 2007-2008  James Rowe
+# Copyright (C) 2007-2010  James Rowe
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@
 
 __version__ = "0.11.0"
 __date__ = "2008-05-20"
-__author__ = "James Rowe <jnrowe@ukfsn.org>"
-__copyright__ = "Copyright (C) 2007-2008 James Rowe"
+__author__ = "James Rowe <jnrowe@gmail.com>"
+__copyright__ = "Copyright (C) 2007-2010 James Rowe"
 __license__ = "GNU General Public License Version 3"
-__credits__ = "Cédric Dufour, Kelly Turner, Simon Woods"
-__history__ = "See Mercurial repository"
+__credits__ = "Cédric Dufour, Thomas Traber, Kelly Turner, Simon Woods"
+__history__ = "See git repository"
 
 from email.utils import parseaddr
 
@@ -41,9 +41,9 @@ other such location databases.
 .. _xplanet: http://xplanet.sourceforge.net/
 .. _NOAA: http://weather.noaa.gov/
 
-The `upoints.point` module is the simplest interface available, and is mainly
-useful as a naïve object for simple calculation and subclassing for specific
-usage.  An example of how to use it follows:
+The :mod:`upoints.point` module is the simplest interface available, and is
+mainly useful as a naïve object for simple calculation and subclassing for
+specific usage.  An example of how to use it follows:
 
 >>> Home = point.Point(52.015, -0.221)
 >>> Telford = point.Point(52.6333, -2.5000)
@@ -55,18 +55,14 @@ usage.  An example of how to use it follows:
 293
 >>> import datetime
 >>> Home.sun_events(datetime.date(2007, 6, 28))
-(datetime.time(3, 42), datetime.time(20, 25))
+(datetime.time(3, 42), datetime.time(20, 24))
 >>> Home.sunrise(datetime.date(2007, 6, 28))
 datetime.time(3, 42)
 >>> Home.sunset(datetime.date(2007, 6, 28))
-datetime.time(20, 25)
+datetime.time(20, 24)
 
-:version: %s
-:author: `%s <mailto:%s>`__
-:copyright: %s
-:status: WIP
-:license: %s
-""" % ((__version__, ) + parseaddr(__author__) + (__copyright__, __license__))
+.. moduleauthor:: `%s <mailto:%s>`__
+""" % parseaddr(__author__)
 
 from upoints import (baken, cellid, cities, geonames, gpx, kml, nmea, osm,
                      point, trigpoints, tzdata, utils, weather_stations, xearth)

@@ -2,7 +2,7 @@
 # vim: set sw=4 sts=4 et tw=80 fileencoding=utf-8:
 #
 """nmea - Imports GPS NMEA-formatted data files"""
-# Copyright (C) 2007-2008  James Rowe
+# Copyright (C) 2007-2010  James Rowe
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,8 +26,7 @@ from operator import xor
 from upoints import (point, utils)
 
 def calc_checksum(sentence):
-    """
-    Calculate a NMEA 0183 checksum for the given sentence
+    """Calculate a NMEA 0183 checksum for the given sentence
 
     NMEA checksums are a simple XOR of all the characters in the sentence
     between the leading "$" symbol, and the "*" checksum separator.
@@ -41,62 +40,58 @@ def calc_checksum(sentence):
     >>> calc_checksum("GPGGA,142058,5308.6414,N,00300.9257,W,1,04,5.6,1374.6,M,34.5,M,,")
     107
 
-    :Parameters:
-        sentence : `str`
-            NMEA 0183 formatted sentence
+    :type sentence: ``str``
+    :param sentence: NMEA 0183 formatted sentence
+
     """
     if sentence.startswith("$"):
         sentence = sentence[1:]
-    if "*" in sentence:
-        sentence = sentence.split("*")[0]
+    sentence = sentence.split("*")[0]
     return reduce(xor, map(ord, sentence))
 
 def nmea_latitude(latitude):
-    """
-    Generate a NMEA-formatted latitude pair
+    """Generate a NMEA-formatted latitude pair
 
     >>> nmea_latitude(53.144023333333337)
     ('5308.6414', 'N')
 
-    :Parameters:
-        latitude : `float` or coercible to `float`
-            Latitude to convert
-    :rtype: `tuple`
+    :type latitude: ``float`` or coercible to ``float``
+    :param latitude: Latitude to convert
+    :rtype: ``tuple``
     :return: NMEA-formatted latitude values
+
     """
     return ("%02i%07.4f" % utils.to_dms(abs(latitude), "dm"),
             "N" if latitude >= 0 else "S")
 
 def nmea_longitude(longitude):
-    """
-    Generate a NMEA-formatted longitude pair
+    """Generate a NMEA-formatted longitude pair
 
     >>> nmea_longitude(-3.0154283333333334)
     ('00300.9257', 'W')
 
-    :Parameters:
-        longitude : `float` or coercible to `float`
-            Longitude to convert
-    :rtype: `tuple`
+    :type longitude: ``float`` or coercible to ``float``
+    :param longitude: Longitude to convert
+    :rtype: ``tuple``
     :return: NMEA-formatted longitude values
+
     """
     return ("%03i%07.4f" % utils.to_dms(abs(longitude), "dm"),
             "E" if longitude >= 0 else "W")
 
 def parse_latitude(latitude, hemisphere):
-    """
-    Parse a NMEA-formatted latitude pair
+    """Parse a NMEA-formatted latitude pair
 
     >>> parse_latitude("5308.6414", "N")
     53.144023333333337
 
-    :Parameters:
-        latitude : `str`
-            Latitude in DDMM.MMMM
-        hemisphere : `str`
-            North or South
-    :rtype: `float`
+    :type latitude: ``str``
+    :param latitude: Latitude in DDMM.MMMM
+    :type hemisphere: ``str``
+    :param hemisphere: North or South
+    :rtype: ``float``
     :return: Decimal representation of latitude
+
     """
     latitude = int(latitude[:2]) + float(latitude[2:]) / 60
     if hemisphere == "S":
@@ -106,19 +101,18 @@ def parse_latitude(latitude, hemisphere):
     return latitude
 
 def parse_longitude(longitude, hemisphere):
-    """
-    Parse a NMEA-formatted longitude pair
+    """Parse a NMEA-formatted longitude pair
 
     >>> parse_longitude("00300.9257", "W")
     -3.0154283333333334
 
-    :Parameters:
-        longitude : `str`
-            Longitude in DDDMM.MMMM
-        hemisphere : `str`
-            East or West
-    :rtype: `float`
+    :type longitude: ``str``
+    :param longitude: Longitude in DDDMM.MMMM
+    :type hemisphere: ``str``
+    :param hemisphere: East or West
+    :rtype: ``float``
     :return: Decimal representation of longitude
+
     """
     longitude = int(longitude[:3]) + float(longitude[3:]) / 60
     if hemisphere == "W":
@@ -127,6 +121,7 @@ def parse_longitude(longitude, hemisphere):
         raise ValueError("Incorrect North/South value `%s'" % hemisphere)
     return longitude
 
+#: NMEA's mapping of code to reading type
 MODE_INDICATOR = {
     "A": "Autonomous",
     "D": "Differential",
@@ -134,32 +129,15 @@ MODE_INDICATOR = {
     "M": "Manual",
     "S": "Simulated",
     "N": "Invalid",
-} #: NMEA's mapping of code to reading type
+}
 
 class LoranPosition(point.Point):
-    """
-    Class for representing a GPS NMEA-formatted Loran-C position
-
-    :since: 0.8.0
-
-    :Ivariables:
-        latitude
-            Unit's latitude
-        longitude
-            Unit's longitude
-        time
-            Time the position was taken
-        status
-            GPS status
-        mode
-            Type of reading
-    """
+    """Class for representing a GPS NMEA-formatted Loran-C position"""
 
     __slots__ = ('time', 'status', 'mode')
 
     def __init__(self, latitude, longitude, time, status, mode=None):
-        """
-        Initialise a new `LoranPosition` object
+        """Initialise a new ``LoranPosition`` object
 
         >>> LoranPosition(53.1440233333, -3.01542833333,
         ...               datetime.time(14, 20, 58, 14), True, None)
@@ -170,17 +148,17 @@ class LoranPosition(point.Point):
         LoranPosition(53.1440233333, -3.01542833333,
                       datetime.time(14, 20, 58, 14), True, 'A')
 
-        :Parameters:
-            latitude : `float` or coercible to `float`
-                Fix's latitude
-            longitude : `float` or coercible to `float`
-                Fix's longitude
-            time : ``datetime.time``
-                Time the fix was taken
-            status : `bool`
-                Whether the data is active
-            mode : `str`
-                Type of reading
+        :type latitude: ``float`` or coercible to ``float``
+        :param latitude: Fix's latitude
+        :type longitude: ``float`` or coercible to ``float``
+        :param longitude: Fix's longitude
+        :type time: :class:`datetime.time`
+        :param time: Time the fix was taken
+        :type status: ``bool``
+        :param status: Whether the data is active
+        :type mode: ``str``
+        :param mode: Type of reading
+
         """
         super(LoranPosition, self).__init__(latitude, longitude)
         self.time = time
@@ -188,8 +166,7 @@ class LoranPosition(point.Point):
         self.mode = mode
 
     def __str__(self, talker="GP"):
-        """
-        Pretty printed position string
+        """Pretty printed position string
 
         >>> print(LoranPosition(53.1440233333, -3.01542833333,
         ...                     datetime.time(14, 20, 58), True, None))
@@ -198,11 +175,11 @@ class LoranPosition(point.Point):
         ...                     datetime.time(14, 20, 58), True, "A"))
         $GPGLL,5308.6414,N,00300.9257,W,142058.00,A,A*72
 
-        :Parameters:
-            talker : `str`
-                Talker ID
-        :rtype: `str`
-        :return: Human readable string representation of `Position` object
+        :type talker: ``str``
+        :param talker: Talker ID
+        :rtype: ``str``
+        :return: Human readable string representation of ``Position`` object
+
         """
         if not len(talker) == 2:
             raise ValueError("Talker ID must be two characters `%s'" % talker)
@@ -215,11 +192,10 @@ class LoranPosition(point.Point):
         if self.mode:
             data.append(self.mode)
         data = ",".join(data)
-        return "$%s*%X\r" % (data, calc_checksum(data))
+        return "$%s*%02X\r" % (data, calc_checksum(data))
 
     def mode_string(self):
-        """
-        Return a string version of the reading mode information
+        """Return a string version of the reading mode information
 
         >>> position = LoranPosition(53.1440233333, -3.01542833333,
         ...                          datetime.time(14, 20, 58), True, None)
@@ -229,24 +205,23 @@ class LoranPosition(point.Point):
         >>> print(position.mode_string())
         Autonomous
 
-        :rtype: `str`
+        :rtype: ``str``
         :return: Quality information as string
+
         """
         return MODE_INDICATOR.get(self.mode, "Unknown")
 
     @staticmethod
     def parse_elements(elements):
-        """
-        Parse position data elements
+        """Parse position data elements
 
         >>> LoranPosition.parse_elements(["52.32144", "N", "00300.9257", "W",
         ...                               "14205914", "A"])
         LoranPosition(52.0053573333, -3.01542833333, datetime.time(14, 20, 59, 140000), True, None)
 
-        :Parameters:
-            elements : `list`
-                Data values for fix
-        :rtype: `Fix`
+        :type elements: ``list``
+        :param elements: Data values for fix
+        :rtype: ``Fix``
         :return: Fix object representing data
         """
         if not len(elements) in (6, 7):
@@ -264,30 +239,10 @@ class LoranPosition(point.Point):
 
 
 class Position(point.Point):
-    """
-    Class for representing a GPS NMEA-formatted position
+    """Class for representing a GPS NMEA-formatted position
 
-    :since: 0.8.0
+    .. versionadded:: 0.8.0
 
-    :Ivariables:
-        time
-            Time the position was taken
-        status
-            GPS status
-        latitude
-            Unit's latitude
-        longitude
-            Unit's longitude
-        speed
-            Unit's speed in knots
-        track
-            Track angle
-        date
-            Date when position was taken
-        variation
-            Magnetic variation
-        mode
-            Type of reading
     """
 
     __slots__ = ('time', 'status', 'speed', 'track', 'date', 'variation',
@@ -295,33 +250,32 @@ class Position(point.Point):
 
     def __init__(self, time, status, latitude, longitude, speed, track, date,
                  variation, mode=None):
-        """
-        Initialise a new `Position` object
+        """Initialise a new ``Position`` object
 
         >>> Position(datetime.time(14, 20, 58), True, 53.1440233333, -3.01542833333,
         ...          109394.7, 202.9, datetime.date(2007, 11, 19), 5.0)
         Position(datetime.time(14, 20, 58), True, 53.1440233333, -3.01542833333,
                  109394.7, 202.9, datetime.date(2007, 11, 19), 5.0, None)
 
-        :Parameters:
-            time : ``datetime.time``
-                Time the fix was taken
-            status : `bool`
-                Whether the data is active
-            latitude : `float` or coercible to `float`
-                Fix's latitude
-            longitude : `float` or coercible to `float`
-                Fix's longitude
-            speed : `float` or coercible to `float`
-                Ground speed
-            track : `float` or coercible to `float`
-                Track angle
-            date : ``datetime.date``
-                Date when position was taken
-            variation : `float` or coercible to `float`
-                Magnetic variation
-            mode : `str`
-                Type of reading
+        :type time: :class:`datetime.time`
+        :param time: Time the fix was taken
+        :type status: ``bool``
+        :param status: Whether the data is active
+        :type latitude: ``float`` or coercible to ``float``
+        :param latitude: Fix's latitude
+        :type longitude: ``float`` or coercible to ``float``
+        :param longitude: Fix's longitude
+        :type speed: ``float`` or coercible to ``float``
+        :param speed: Ground speed
+        :type track: ``float`` or coercible to ``float``
+        :param track: Track angle
+        :type date: :class:`datetime.date`
+        :param date: Date when position was taken
+        :type variation: ``float`` or coercible to ``float``
+        :param variation: Magnetic variation
+        :type mode: ``str``
+        :param mode: Type of reading
+
         """
         super(Position, self).__init__(latitude, longitude)
         self.time = time
@@ -333,16 +287,16 @@ class Position(point.Point):
         self.mode = mode
 
     def __str__(self):
-        """
-        Pretty printed position string
+        """Pretty printed position string
 
         >>> print(Position(datetime.time(14, 20, 58), True, 53.1440233333,
         ...                -3.01542833333, 109394.7, 202.9,
         ...                datetime.date(2007, 11, 19), 5.0))
         $GPRMC,142058,A,5308.6414,N,00300.9257,W,109394.7,202.9,191107,5,E*41
 
-        :rtype: `str`
-        :return: Human readable string representation of `Position` object
+        :rtype: ``str``
+        :return: Human readable string representation of ``Position`` object
+
         """
         data = ["GPRMC"]
         data.append(self.time.strftime("%H%M%S"))
@@ -360,11 +314,10 @@ class Position(point.Point):
         if self.mode:
             data.append(self.mode)
         data = ",".join(data)
-        return "$%s*%X\r" % (data, calc_checksum(data))
+        return "$%s*%02X\r" % (data, calc_checksum(data))
 
     def mode_string(self):
-        """
-        Return a string version of the reading mode information
+        """Return a string version of the reading mode information
 
         >>> position = Position(datetime.time(14, 20, 58), True, 53.1440233333,
         ...                     -3.01542833333, 109394.7, 202.9,
@@ -375,15 +328,15 @@ class Position(point.Point):
         >>> print(position.mode_string())
         Autonomous
 
-        :rtype: `str`
+        :rtype: ``str``
         :return: Quality information as string
+
         """
         return MODE_INDICATOR.get(self.mode, "Unknown")
 
     @staticmethod
     def parse_elements(elements):
-        """
-        Parse position data elements
+        """Parse position data elements
 
         >>> Position.parse_elements(["142058", "A", "5308.6414", "N",
         ...                          "00300.9257", "W", "109394.7", "202.9",
@@ -396,11 +349,11 @@ class Position(point.Point):
         Position(datetime.time(14, 21), True, 52.015, -3.27766666667, 123142.7,
                  188.1, datetime.date(2007, 11, 19), 5.0, 'A')
 
-        :Parameters:
-            elements : `list`
-                Data values for fix
-        :rtype: `Fix`
-        :return: Fix object representing data
+        :type elements: ``list``
+        :param elements: Data values for position
+        :rtype: ``Position``
+        :return: Position object representing data
+
         """
         if not len(elements) in (11, 12):
             raise ValueError("Invalid RMC position data")
@@ -426,37 +379,10 @@ class Position(point.Point):
 
 
 class Fix(point.Point):
-    """
-    Class for representing a GPS NMEA-formatted system fix
+    """Class for representing a GPS NMEA-formatted system fix
 
-    :since: 0.8.0
+    .. versionadded:: 0.8.0
 
-    :Ivariables:
-        time
-            Time the fix was taken
-        latitude
-            Fix's latitude
-        longitude
-            Fix's longitude
-        quality
-            Mode under which the fix was taken
-        satellites
-            Number of tracked satellites
-        dilution
-            Horizontal dilution at reported position
-        altitude
-            Altitude above MSL
-        geoid_delta
-            Height of geoid's MSL above WGS84 ellipsoid
-        dgps_delta
-            Number of seconds since last DGPS sync
-        dgps_station
-            Identifier of the last synced DGPS station
-        mode
-            Type of reading
-    :Ivariables:
-        fix_quality
-            List of fix quality integer to string representations
     """
 
     __slots__ = ('time', 'quality', 'satellites', 'dilution', 'altitude',
@@ -477,8 +403,7 @@ class Fix(point.Point):
     def __init__(self, time, latitude, longitude, quality, satellites, dilution,
                  altitude, geoid_delta, dgps_delta=None, dgps_station=None,
                  mode=None):
-        """
-        Initialise a new `Fix` object
+        """Initialise a new ``Fix`` object
 
         >>> Fix(datetime.time(14, 20, 27), 52.1380333333, -2.56861166667, 1, 4,
         ...     5.6, 1052.3, 34.5)
@@ -489,29 +414,29 @@ class Fix(point.Point):
         Fix(datetime.time(14, 20, 27), 52.1380333333, -2.56861166667, 1, 4,
             5.6, 1052.3, 34.5, 12, 4, None)
 
-        :Parameters:
-            time : ``datetime.time``
-                Time the fix was taken
-            latitude : `float` or coercible to `float`
-                Fix's latitude
-            longitude : `float` or coercible to `float`
-                Fix's longitude
-            quality : `int`
-                Mode under which the fix was taken
-            satellites : `int`
-                Number of tracked satellites
-            dilution : `float`
-                Horizontal dilution at reported position
-            altitude : `float` or coercible to `float`
-                Altitude above MSL
-            geoid_delta : `float` or coercible to `float`
-                Height of geoid's MSL above WGS84 ellipsoid
-            dgps_delta : `float` or coercible to `float`
-                Number of seconds since last DGPS sync
-            dgps_station : `int`
-                Identifier of the last synced DGPS station
-            mode : `str`
-                Type of reading
+        :type time: :class:`datetime.time`
+        :param time: Time the fix was taken
+        :type latitude: ``float`` or coercible to ``float``
+        :param latitude: Fix's latitude
+        :type longitude: ``float`` or coercible to ``float``
+        :param longitude: Fix's longitude
+        :type quality: ``int``
+        :param quality: Mode under which the fix was taken
+        :type satellites: ``int``
+        :param satellites: Number of tracked satellites
+        :type dilution: ``float``
+        :param dilution: Horizontal dilution at reported position
+        :type altitude: ``float`` or coercible to ``float``
+        :param altitude: Altitude above MSL
+        :type geoid_delta: ``float`` or coercible to ``float``
+        :param geoid_delta: Height of geoid's MSL above WGS84 ellipsoid
+        :type dgps_delta: ``float`` or coercible to ``float``
+        :param dgps_delta: Number of seconds since last DGPS sync
+        :type dgps_station: ``int``
+        :param dgps_station: Identifier of the last synced DGPS station
+        :type mode: ``str``
+        :param mode: Type of reading
+
         """
         super(Fix, self).__init__(latitude, longitude)
         self.time = time
@@ -525,8 +450,7 @@ class Fix(point.Point):
         self.mode = mode
 
     def __str__(self):
-        """
-        Pretty printed location string
+        """Pretty printed location string
 
         >>> print(Fix(datetime.time(14, 20, 27), 52.1380333333, -2.56861166667,
         ...           1, 4, 5.6, 1052.3, 34.5))
@@ -535,9 +459,10 @@ class Fix(point.Point):
         ...           1, 4, 5.6, 1052.3, 34.5, 12, 4))
         $GPGGA,142027,5208.2820,N,00234.1167,W,1,04,5.6,1052.3,M,34.5,M,12.0,0004*78
 
-        :rtype: `str`
-        :return: Human readable string representation of `Fix` object
-        """
+        :rtype: ``str``
+        :return: Human readable string representation of ``Fix`` object
+
+       """
         data = ["GPGGA"]
         data.append(self.time.strftime("%H%M%S"))
         data.extend(nmea_latitude(self.latitude))
@@ -552,26 +477,25 @@ class Fix(point.Point):
         data.append("%.1f" % self.dgps_delta if self.dgps_delta else "")
         data.append("%04i" % self.dgps_station if self.dgps_station else "")
         data = ",".join(data)
-        return "$%s*%X\r" % (data, calc_checksum(data))
+        return "$%s*%02X\r" % (data, calc_checksum(data))
 
     def quality_string(self):
-        """
-        Return a string version of the quality information
+        """Return a string version of the quality information
 
         >>> fix = Fix(datetime.time(14, 20, 58), 53.1440233333, -3.01542833333,
         ...           1, 4, 5.6, 1374.6, 34.5, None, None)
         >>> print(fix.quality_string())
         GPS
 
-        :rtype: `str`
+        :rtype: ``str``
         :return: Quality information as string
+
         """
         return self.fix_quality[self.quality]
 
     @staticmethod
     def parse_elements(elements):
-        """
-        Parse essential fix's data elements
+        """Parse essential fix's data elements
 
         >>> Fix.parse_elements(["142058", "5308.6414", "N", "00300.9257", "W", "1",
         ...                     "04", "5.6", "1374.6", "M", "34.5", "M", "", ""])
@@ -582,11 +506,11 @@ class Fix(point.Point):
         Fix(datetime.time(14, 21), 52.015, -3.27766666667, 1, 4, 5.6, 1000.0, 34.5,
             None, None, None)
 
-        :Parameters:
-            elements : `list`
+        :type elements: ``list``
                 Data values for fix
-        :rtype: `Fix`
+        :rtype: ``Fix``
         :return: Fix object representing data
+
         """
         if not len(elements) in (14, 15):
             raise ValueError("Invalid GGA fix data")
@@ -626,56 +550,47 @@ class Fix(point.Point):
 
 
 class Waypoint(point.Point):
-    """
-    Class for representing a NMEA-formatted waypoint
+    """Class for representing a NMEA-formatted waypoint
 
-    :since: 0.8.0
+    .. versionadded:: 0.8.0
 
-    :Ivariables:
-        latitude
-            Waypoint's latitude
-        longitude
-            Waypoint's longitude
-        name
-            Waypoint's name
     """
 
     __slots__ = ('name', )
 
     def __init__(self, latitude, longitude, name):
-        """
-        Initialise a new `Waypoint` object
+        """Initialise a new ``Waypoint`` object
 
         >>> Waypoint(52.015, -0.221, "Home")
         Waypoint(52.015, -0.221, 'HOME')
 
-        :Parameters:
-            latitude : `float` or coercible to `float`
-                Waypoint's latitude
-            longitude : `float` or coercible to `float`
-                Waypoint's longitude
-            name : `str`
-                Comment for waypoint
+        :type latitude: ``float`` or coercible to ``float``
+        :param latitude: Waypoint's latitude
+        :type longitude: ``float`` or coercible to ``float``
+        :param longitude: Waypoint's longitude
+        :type name: ``str``
+        :param name: Comment for waypoint
+
         """
         super(Waypoint, self).__init__(latitude, longitude)
         self.name = name.upper()
 
     def __str__(self):
-        """
-        Pretty printed location string
+        """Pretty printed location string
 
         >>> print(Waypoint(52.015, -0.221, "Home"))
         $GPWPL,5200.9000,N,00013.2600,W,HOME*5E
 
-        :rtype: `str`
-        :return: Human readable string representation of `Waypoint` object
+        :rtype: ``str``
+        :return: Human readable string representation of ``Waypoint`` object
+
         """
         data = ["GPWPL"]
         data.extend(nmea_latitude(self.latitude))
         data.extend(nmea_longitude(self.longitude))
         data.append(self.name)
         data = ",".join(data)
-        text = "$%s*%X\r" % (data, calc_checksum(data))
+        text = "$%s*%02X\r" % (data, calc_checksum(data))
         if len(text) > 81:
             raise ValueError("All NMEA sentences must be less than 82 bytes "
                              "including line endings")
@@ -683,18 +598,17 @@ class Waypoint(point.Point):
 
     @staticmethod
     def parse_elements(elements):
-        """
-        Parse waypoint data elements
+        """Parse waypoint data elements
 
         >>> Waypoint.parse_elements(["5200.9000", "N", "00013.2600", "W",
         ...                          "HOME"])
         Waypoint(52.015, -0.221, 'HOME')
 
-        :Parameters:
-            elements : `list`
-                Data values for fix
-        :rtype: `Fix`
-        :return: Fix object representing data
+        :type elements: ``list``
+        :param elements: Data values for fix
+        :rtype: ``Waypoint``
+        :return: ``Waypoint`` object representing data
+
         """
         if not len(elements) == 5:
             raise ValueError("Invalid WPL waypoint data")
@@ -707,30 +621,27 @@ class Waypoint(point.Point):
 
 
 class Locations(point.Points):
-    """
-    Class for representing a group of GPS location objects
+    """Class for representing a group of GPS location objects
 
-    :since: 0.8.0
+    .. versionadded:: 0.8.0
+
     """
 
     def __init__(self, gpsdata_file=None):
-        """
-        Initialise a new `Locations` object
-        """
+        """Initialise a new ``Locations`` object"""
         super(Locations, self).__init__()
+        self._gpsdata_file = gpsdata_file
         if gpsdata_file:
             self.import_locations(gpsdata_file)
 
     def import_locations(self, gpsdata_file, checksum=True):
-        """
-        Import GPS NMEA-formatted data files
+        """Import GPS NMEA-formatted data files
 
-        `import_locations()` returns a list of `Fix` objects representing
-        the fix sentences found in the GPS data.
+        ``import_locations()`` returns a list of `Fix` objects representing the
+        fix sentences found in the GPS data.
 
-        It expects data files in NMEA 0183 format, as specified in `the
-        official documentation <http://www.nmea.org/pub/0183/>`__, which is
-        ASCII text such as::
+        It expects data files in NMEA 0183 format, as specified in `the official
+        documentation`_, which is ASCII text such as::
 
             $GPGSV,6,6,21,32,65,170,35*48
             $GPGGA,142058,5308.6414,N,00300.9257,W,1,04,5.6,1374.6,M,34.5,M,,*6B
@@ -749,8 +660,8 @@ class Locations(point.Points):
         future versions will probably support tracks and waypoints.  Other than
         that the data is out of scope for ``upoints``.
 
-        The above file when processed by `import_locations()` will return
-        the following `list` object::
+        The above file when processed by ``import_locations()`` will return the
+        following ``list`` object::
 
             [Fix(datetime.time(14, 20, 58), 53.1440233333, -3.01542833333, 1, 4,
                  5.6, 1374.6, 34.5, None, None),
@@ -772,20 +683,24 @@ class Locations(point.Points):
         $GPGGA,142100,5200.9000,N,00316.6600,W,1,04,5.6,1000.0,M,34.5,M,,*68
         $GPRMC,142100,A,5200.9000,N,00316.6600,W,123142.7,188.1,191107,5,E,A*21
 
-        :note: The standard is quite specific in that sentences *must* be less
-               than 82 bytes, while it would be nice to add yet another validity
-               check it isn't all that uncommon for devices to break this
-               requirement in their "extensions" to the standard.
-        :todo: Add optional check for message length, on by default
+        .. note::
+           The standard is quite specific in that sentences *must* be less than
+           82 bytes, while it would be nice to add yet another validity check it
+           isn't all that uncommon for devices to break this requirement in
+           their "extensions" to the standard.
+        .. todo:: Add optional check for message length, on by default
 
-        :Parameters:
-            gpsdata_file : `file`, `list` or `str`
-                NMEA data to read
-            checksum : `bool`
-                Whether checksums should be tested
-        :rtype: `list`
+        :type gpsdata_file: ``file``, ``list`` or ``str``
+        :param gpsdata_file: NMEA data to read
+        :type checksum: ``bool``
+        :param checksum: Whether checksums should be tested
+        :rtype: ``list``
         :return: Series of locations taken from the data
+
+        .. _the official documentation: http://www.nmea.org/pub/0183/
+
         """
+        self._gpsdata_file = gpsdata_file
         data = utils.prepare_read(gpsdata_file)
 
         parsers = {

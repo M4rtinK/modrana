@@ -2,7 +2,7 @@
 # vim: set sw=4 sts=4 et tw=80 fileencoding=utf-8:
 #
 """xearth - Imports xearth-style marker files"""
-# Copyright (C) 2007-2008  James Rowe
+# Copyright (C) 2007-2010  James Rowe
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,38 +18,35 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+__doc__ += """.
+
+.. moduleauthor:: James Rowe <jnrowe@gmail.com>
+.. versionadded:: 0.2.0
+"""
+
 from upoints import (point, utils)
 
 class Xearth(point.Point):
     """Class for representing a location from a Xearth marker
 
-    :since: 0.2.0
-
-    :Ivariables:
-        latitude
-            Location's latitude
-        longitude
-            Locations's longitude
-        comment
-            Location's comment
+    .. versionadded:: 0.2.0
 
     """
 
     __slots__ = ('comment', )
 
     def __init__(self, latitude, longitude, comment=None):
-        """Initialise a new `Xearth` object
+        """Initialise a new ``Xearth`` object
 
         >>> Xearth(52.015, -0.221, "James Rowe's house")
         Xearth(52.015, -0.221, "James Rowe's house")
 
-        :Parameters:
-            latitude : `float` or coercible to `float`
-                Location's latitude
-            longitude : `float` or coercible to `float`
-                Location's longitude
-            comment : `str`
-                Comment for location
+        :type latitude: ``float`` or coercible to ``float``
+        :param latitude: Location's latitude
+        :type longitude: ``float`` or coercible to ``float``
+        :param longitude: Location's longitude
+        :type comment: ``str``
+        :param comment: Comment for location
 
         """
         super(Xearth, self).__init__(latitude, longitude)
@@ -58,7 +55,9 @@ class Xearth(point.Point):
     def __str__(self, mode="dd"):
         """Pretty printed location string
 
-        :see: `point.Point`
+        .. seealso:
+
+           :class:`point.Point`
 
         >>> print(Xearth(52.015, -0.221))
         N52.015°; W000.221°
@@ -69,11 +68,10 @@ class Xearth(point.Point):
         >>> print(Xearth(52.015, -0.221, "James Rowe's house"))
         James Rowe's house (N52.015°; W000.221°)
 
-        :Parameters:
-            mode : `str`
-                Coordinate formatting system to use
-        :rtype: `str`
-        :return: Human readable string representation of `Xearth` object
+        :type mode: ``str``
+        :param mode: Coordinate formatting system to use
+        :rtype: ``str``
+        :return: Human readable string representation of ``Xearth`` object
 
         """
         text = super(Xearth, self).__str__(mode)
@@ -85,27 +83,28 @@ class Xearth(point.Point):
 
 
 class Xearths(point.KeyedPoints):
-    """Class for representing a group of `Xearth` objects
+    """Class for representing a group of :class:`Xearth` objects
 
-    :since: 0.5.1
+    .. versionadded:: 0.5.1
 
     """
 
     def __init__(self, marker_file=None):
-        """Initialise a new `Xearths` object"""
+        """Initialise a new ``Xearths`` object"""
         super(Xearths, self).__init__()
+        self._marker_file = marker_file
         if marker_file:
             self.import_locations(marker_file)
 
     def __str__(self):
-        """`Xearth` objects rendered for use with Xearth/Xplanet
+        """``Xearth`` objects rendered for use with Xearth/Xplanet
 
         >>> markers = Xearths(open("xearth"))
         >>> print(markers)
         52.015000 -0.221000 "Home"
         52.633300 -2.500000 "Telford"
 
-        :rtype: `str`
+        :rtype: ``str``
         :return: Xearth/Xplanet marker file formatted output
 
         """
@@ -114,10 +113,9 @@ class Xearths(point.KeyedPoints):
     def import_locations(self, marker_file):
         """Parse Xearth data files
 
-        `import_locations()` returns a dictionary with keys containing the
-        `xearth <http://www.cs.colorado.edu/~tuna/xearth/>`__ name, and values
-        consisting of a `Xearth` object and a string containing any comment
-        found in the marker file.
+        ``import_locations()`` returns a dictionary with keys containing the
+        xearth_ name, and values consisting of a :class:`Xearth` object and
+        a string containing any comment found in the marker file.
 
         It expects Xearth marker files in the following format::
 
@@ -128,16 +126,16 @@ class Xearths(point.KeyedPoints):
 
         Any empty line or line starting with a '#' is ignored.  All data lines
         are whitespace-normalised, so actual layout should have no effect.  The
-        above file processed by `import_locations()` will return the
-        following `dict` object::
+        above file processed by ``import_locations()`` will return the following
+        ``dict`` object::
 
             {'Home': point.Point(52.015, -0.221, "James Rowe's home"),
              'Telford': point.Point(52.6333, -2.5, None)}
 
-        :note: This function also handles the extended `xplanet
-            <http://xplanet.sourceforge.net/>`__ marker files whose points can
-            optionally contain added xplanet specific keywords for defining
-            colours and fonts.
+        .. note:
+           This function also handles the extended xplanet_ marker files whose
+           points can optionally contain added xplanet specific keywords for
+           defining colours and fonts.
 
         >>> markers = Xearths(open("xearth"))
         >>> for key, value in sorted(markers.items()):
@@ -145,13 +143,16 @@ class Xearths(point.KeyedPoints):
         Home - James Rowe's home (N52.015°; W000.221°)
         Telford - N52.633°; W002.500°
 
-        :Parameters:
-            marker_file : `file`, `list` or `str`
-                Xearth marker data to read
-        :rtype: `dict`
+        :type marker_file: ``file``, ``list`` or ``str``
+        :param marker_file: Xearth marker data to read
+        :rtype: ``dict``
         :return: Named locations with optional comments
 
+        .. _xearth: http://www.cs.colorado.edu/~tuna/xearth/
+        .. _xplanet: http://xplanet.sourceforge.net/
+
         """
+        self._marker_file = marker_file
         data = utils.prepare_read(marker_file)
 
         for line in data:

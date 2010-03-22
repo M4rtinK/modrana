@@ -2,7 +2,7 @@
 # vim: set sw=4 sts=4 et tw=80 fileencoding=utf-8:
 #
 """cities - Imports GNU miscfiles cities data files"""
-# Copyright (C) 2007-2008  James Rowe
+# Copyright (C) 2007-2010  James Rowe
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,11 +18,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+__doc__ += """.
+
+.. moduleauthor:: James Rowe <jnrowe@gmail.com>
+.. versionadded:: 0.2.0
+"""
+
 import logging
 import time
 
 from upoints import (point, trigpoints, utils)
 
+#: GNU miscfiles cities.dat template
 TEMPLATE = """\
 ID          : %s
 Type        : %s
@@ -36,40 +43,14 @@ Location    : %s
  Latitude   : %s
  Elevation  : %s
 Date        : %s
-Entered-By  : %s""" #: GNU miscfiles cities.dat template
+Entered-By  : %s"""
 
 class City(trigpoints.Trigpoint):
-    """Class for representing an entry from the GNU miscfiles cities data file
+    """Class for representing an entry from the `GNU miscfiles`_ cities data file
 
-    :since: 0.2.0
+    .. versionadded:: 0.2.0
 
-    :Ivariables:
-        identifier
-            Numeric identifier for object
-        name
-            Place name
-        ptype
-            Place type
-        population
-            Place population, if known
-        size
-            Place Size
-        country
-            Country the place is in
-        region
-            Region the place is in
-        location
-            Body, always Earth in miscfiles 1.4.2
-        latitude
-            Place's latitude
-        longitude
-            Place's longitude
-        altitude
-            Place's elevation
-        date
-            Entry date
-        entered
-            Entry's author
+    .. _GNU miscfiles: http://www.gnu.org/directory/miscfiles.html
 
     """
 
@@ -79,7 +60,7 @@ class City(trigpoints.Trigpoint):
     def __init__(self, identifier, name, ptype, region, country, location,
                  population, size, latitude, longitude, altitude, date,
                  entered):
-        """Initialise a new `City` object
+        """Initialise a new ``City`` object
 
         >>> City(498, "Zwickau", "City", "Sachsen", "DE", "Earth", 108835,
         ...      None, 12.5, 50.72, None, (1997, 4, 10, 0, 0, 0, 3, 100, -1),
@@ -88,33 +69,32 @@ class City(trigpoints.Trigpoint):
              12.5, 50.72, None, (1997, 4, 10, 0, 0, 0, 3, 100, -1),
              'M.Dowling@tu-bs.de')
 
-        :Parameters:
-            identifier : `int`
-                Numeric identifier for object
-            name : `str`
-                Place name
-            ptype : `str`
-                Type of place
-            region : `str` or `None`
-                Region place can be found
-            country : `str` or `None`
-                Country name place can be found
-            location : `str`
-                Body place can be found
-            population : `int` or `None`
-                Place's population
-            size : `int` or `None`
-                Place's area
-            latitude : `float`
-                Station's latitude
-            longitude : `float`
-                Station's longitude
-            altitude : `int` or `None`
-                Station's elevation
-            date : ``time.struct_time``
-                Date the entry was added
-            entered : `str` or `None`
-                Entry's author
+        :type identifier: ``int``
+        :param identifier: Numeric identifier for object
+        :type name: ``str``
+        :param name: Place name
+        :type ptype: ``str``
+        :param ptype: Type of place
+        :type region: ``str`` or ``None``
+        :param region: Region place can be found
+        :type country: ``str`` or ``None``
+        :param country: Country name place can be found
+        :type location: ``str``
+        :param location: Body place can be found
+        :type population: ``int`` or ``None``
+        :param population: Place's population
+        :type size: ``int`` or ``None``
+        :param size: Place's area
+        :type latitude: ``float``
+        :param latitude: Station's latitude
+        :type longitude: ``float``
+        :param longitude: Station's longitude
+        :type altitude: ``int`` or ``None``
+        :param altitude: Station's elevation
+        :type date: ``time.struct_time``
+        :param date: Date the entry was added
+        :type entered: ``str`` or ``None``
+        :param entered: Entry's author
 
         """
         super(City, self).__init__(latitude, longitude, altitude, name)
@@ -149,12 +129,11 @@ class City(trigpoints.Trigpoint):
         Date        : 19970410
         Entered-By  : M.Dowling@tu-bs.de
 
-        :Parameters:
-            mode : `None`
-                Dummy parameter to maintain signature of
-                `trigpoints.Trigpoint.__str__`
-        :rtype: `str`
-        :return: Human readable string representation of `City` object
+        :type mode: ``None``
+        :param mode: Dummy parameter to maintain signature of
+            ``trigpoints.Trigpoint.__str__``
+        :rtype: ``str``
+        :return: Human readable string representation of ``City`` object
 
         """
         values = map(utils.value_or_empty,
@@ -170,25 +149,25 @@ class City(trigpoints.Trigpoint):
 
 
 class Cities(point.Points):
-    """Class for representing a group of `City` objects
+    """Class for representing a group of :class:`City` objects
 
-    :since: 0.5.1
+    .. versionadded:: 0.5.1
 
     """
 
     def __init__(self, data=None):
-        """Initialise a new `Cities` object"""
+        """Initialise a new ``Cities`` object"""
         super(Cities, self).__init__()
+        self._data = data
         if data:
             self.import_locations(data)
 
     def import_locations(self, data):
-        """Parse GNU miscfiles cities data files
+        """Parse `GNU miscfiles`_ cities data files
 
-        `import_locations()` returns a list containing `City` objects.
+        ``import_locations()`` returns a list containing :class:`City` objects.
 
-        It expects data files in the same format that `GNU miscfiles
-        <http://www.gnu.org/directory/miscfiles.html>`__  provided,
+        It expects data files in the same format that `GNU miscfiles`_ provides,
         that is::
 
             ID          : 1
@@ -219,7 +198,7 @@ class Cities(point.Points):
             Date        : 19961206
             Entered-By  : Rob.Hooft@EMBL-Heidelberg.DE
 
-        When processed by `import_locations()` will return `list` object in
+        When processed by ``import_locations()`` will return ``list`` object in
         the following style::
 
             [City(1, "City", 210700, None, "Aberdeen", "UK", "Scotland",
@@ -241,14 +220,18 @@ class Cities(point.Points):
         >>> manual_list = cities_file.read().split("//\\n")
         >>> cities = Cities(manual_list)
 
-        :Parameters:
-            data : `file`, `list` or `str`
-                NOAA station data to read
-        :rtype: `list`
-        :return: Places as `City` objects
+        :type data: ``file``, ``list`` or ``str``
+        :param data:
+            :abbr:`NOAA (National Oceanographic and Atmospheric Administration)`
+            station data to read
+        :rtype: ``list``
+        :return: Places as ``City`` objects
         :raise TypeError: Invalid value for data
 
+        .. _GNU miscfiles: http://www.gnu.org/directory/miscfiles.html
+
         """
+        self._data = data
         if hasattr(data, "read"):
             data = data.read().split("//\n")
         elif isinstance(data, list):

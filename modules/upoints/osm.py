@@ -2,7 +2,7 @@
 # vim: set sw=4 sts=4 et tw=80 fileencoding=utf-8:
 #
 """osm - Imports OpenStreetMap data files"""
-# Copyright (C) 2007-2008  James Rowe
+# Copyright (C) 2007-2010  James Rowe
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import datetime
 import logging
 import urllib
 
+from operator import attrgetter
 from xml.etree import ElementTree
 
 try:
@@ -39,10 +39,9 @@ from upoints import (__version__, point, utils)
 def _parse_flags(element):
     """Parse OSM XML element for generic data
 
-    :Parameters:
-        element : ET.Element
-            Element to parse
-    :rtype: `tuple`
+    :type element: :class:`ET.Element`
+    :param element: Element to parse
+    :rtype: ``tuple``
     :return: Generic OSM data for object instantiation
 
     """
@@ -50,7 +49,7 @@ def _parse_flags(element):
     user = element.get("user")
     timestamp = element.get("timestamp")
     if timestamp:
-        timestamp = Timestamp.parse_isoformat(timestamp)
+        timestamp = utils.Timestamp.parse_isoformat(timestamp)
     tags = {}
     for tag in element.findall("tag"):
         key = tag.get("k")
@@ -62,10 +61,9 @@ def _parse_flags(element):
 def _get_flags(osm_obj):
     """Create element independent flags output
 
-    :Parameters:
-        osm_obj
-            Object with OSM-style metadata
-    :rtype: `list`
+    :type osm_obj: :class:`Node`
+    :param osm_obj: Object with OSM-style metadata
+    :rtype: ``list``
     :return: Human readable flags output
 
     """
@@ -85,7 +83,7 @@ def get_area_url(location, distance):
     """Generate URL for downloading OSM data within a region
 
     This function defines a boundary box where the edges touch a circle of
-    `distance` kilometres in radius.  It is important to note that the box is
+    ``distance`` kilometres in radius.  It is important to note that the box is
     neither a square, nor bounded within the circle.
 
     The bounding box is strictly a trapezoid whose north and south edges are
@@ -100,176 +98,29 @@ def get_area_url(location, distance):
     >>> get_area_url(point.Point(52.015, -0.221), 12)
     'http://api.openstreetmap.org/api/0.5/map?bbox=-0.396457433591,51.9070136086,-0.045542566409,52.1229863914'
 
-    :Parameters:
-        location : `Point`-like object
-            Centre of the region
-        distance : `int`
-            Boundary distance in kilometres
-    :rtype: `str`
-    :return: URL that can be used to fetch the OSM data within `distance` of
-        `location`
+    :type location: :class:`Point`-like object
+    :param location: Centre of the region
+    :type distance: ``int``
+    :param distance: Boundary distance in kilometres
+    :rtype: ``str``
+    :return: URL that can be used to fetch the OSM data within ``distance`` of
+        ``location``
 
     """
     locations = [location.destination(i, distance) for i in range(0, 360, 90)]
-    latitudes = [i.latitude for i in locations]
-    longitudes = [i.longitude for i in locations]
+    latitudes = map(attrgetter("latitude"), locations)
+    longitudes = map(attrgetter("longitude"), locations)
 
-    west = min(longitudes)
-    south = min(latitudes)
-    east = max(longitudes)
-    north = max(latitudes)
+    bounds = (min(longitudes), min(latitudes), max(longitudes), max(latitudes))
 
     return ("http://api.openstreetmap.org/api/0.5/map?bbox="
-            + ",".join(map(str, (west, south, east, north))))
+            + ",".join(map(str, bounds)))
 
-class TzOffset(datetime.tzinfo):
-    """Time offset from UTC
-
-    :Ivariables:
-        __offset
-            Number of minutes offset from UTC
-
-    """
-
-    def __init__(self, tzstring):
-        """Initialise a new `TzOffset` object
-
-        >>> TzOffset("+00:00").utcoffset()
-        datetime.timedelta(0)
-        >>> TzOffset("-00:00").utcoffset()
-        datetime.timedelta(0)
-        >>> TzOffset("+05:30").utcoffset()
-        datetime.timedelta(0, 19800)
-        >>> TzOffset("-08:00").utcoffset()
-        datetime.timedelta(-1, 57600)
-
-        :Parameters:
-            tzstring : `str`
-                ISO 8601 style timezone definition
-
-        """
-        super(TzOffset, self).__init__(self)
-        hours, minutes = map(int, tzstring.split(":"))
-
-        self.__offset = datetime.timedelta(hours=hours, minutes=minutes)
-
-    def __repr__(self):
-        """Self-documenting string representation
-
-        >>> TzOffset("+00:00")
-        TzOffset('+00:00')
-        >>> TzOffset("-00:00")
-        TzOffset('+00:00')
-        >>> TzOffset("+05:30")
-        TzOffset('+05:30')
-        >>> TzOffset("-08:00")
-        TzOffset('-08:00')
-
-        :rtype: `str`
-        :return: String to recreate `Node` object
-
-        """
-        return utils.repr_assist(self, {"tzstring": self.as_timezone()})
-
-    def dst(self, dt=None):
-        """Daylight Savings Time offset
-
-        :note: This method is only for compatibility with the ``tzinfo``
-            interface, and does nothing
-
-        :Parameters:
-            dt : Any
-                For compatibility with parent classes
-
-        """
-        return datetime.timedelta(0)
-
-    def as_timezone(self):
-        """Create a human-readable timezone string
-
-        :rtype: `str`
-        :return: Human-readable timezone definition
-
-        """
-        offset = self.utcoffset()
-        hours, minutes = divmod(offset.seconds/60, 60)
-        if offset.days == -1:
-            hours = -24 + hours
-
-        return '%+03i:%02i' % (hours, minutes)
-
-    def utcoffset(self, dt=None):
-        """Return the offset in minutes from UTC
-
-        :Parameters:
-            dt : Any
-                For compatibility with parent classes
-
-        """
-        return self.__offset
-
-
-class Timestamp(datetime.datetime):
-    """Class for representing an OSM timestamp value"""
-
-    def isoformat(self):
-        """Generate an ISO 8601 formatted time stamp
-
-        :rtype: `str`
-        :return: ISO 8601 formatted time stamp
-
-        """
-        text = [self.strftime("%Y-%m-%dT%H:%M:%S"), ]
-        if self.tzinfo:
-            text.append(self.tzinfo.as_timezone())
-        else:
-            text.append("+00:00")
-        return "".join(text)
-
-    @staticmethod
-    def parse_isoformat(timestamp):
-        """Parse an ISO 8601 formatted time stamp
-
-        >>> Timestamp.parse_isoformat("2008-02-06T13:33:26+00:00")
-        Timestamp(2008, 2, 6, 13, 33, 26, tzinfo=TzOffset('+00:00'))
-        >>> Timestamp.parse_isoformat("2008-02-06T13:33:26+05:30")
-        Timestamp(2008, 2, 6, 13, 33, 26, tzinfo=TzOffset('+05:30'))
-        >>> Timestamp.parse_isoformat("2008-02-06T13:33:26-08:00")
-        Timestamp(2008, 2, 6, 13, 33, 26, tzinfo=TzOffset('-08:00'))
-
-        :Parameters:
-            timestamp : `str`
-                Timestamp to parse
-        :rtype: `Timestamp`
-        :return: Parsed timestamp
-
-        """
-        zone = TzOffset(timestamp[-6:])
-        timestamp = Timestamp.strptime(timestamp[:-6],
-                                       "%Y-%m-%dT%H:%M:%S")
-        timestamp = timestamp.replace(tzinfo=zone)
-        return timestamp
 
 class Node(point.Point):
     """Class for representing a node element from OSM data files
 
-    :since: 0.9.0
-
-    :Ivariables:
-        ident
-            Node's unique indentifier
-        latitude
-            Node's latitude
-        longitude
-            Node's longitude
-        visible
-            Whether the node is visible
-        user
-            User who logged the node
-        timestamp
-            The date and time a node was logged
-        tags
-            Tags associated with the node
+    .. versionadded:: 0.9.0
 
     """
 
@@ -277,31 +128,30 @@ class Node(point.Point):
 
     def __init__(self, ident, latitude, longitude, visible=False, user=None,
                  timestamp=None, tags=None):
-        """Initialise a new `Node` object
+        """Initialise a new ``Node`` object
 
         >>> Node(0, 52, 0)
         Node(0, 52.0, 0.0, False, None, None, None)
-        >>> Node(0, 52, 0, True, "jnrowe", Timestamp(2008, 1, 25))
+        >>> Node(0, 52, 0, True, "jnrowe", utils.Timestamp(2008, 1, 25))
         Node(0, 52.0, 0.0, True, 'jnrowe',
              Timestamp(2008, 1, 25, 0, 0), None)
         >>> Node(0, 52, 0, tags={"key": "value"})
         Node(0, 52.0, 0.0, False, None, None, {'key': 'value'})
 
-        :Parameters:
-            ident : `int`
-                Unique identifier for the node
-            latitude : `float` or coercible to `float`
-                Nodes's latitude
-            longitude : `float` or coercible to `float`
-                Node's longitude
-            visible : `bool`
-                Whether the node is visible
-            user : `str`
-                User who logged the node
-            timestamp : `str`
-                The date and time a node was logged
-            tags : `dict`
-                Tags associated with the node
+        :type ident: ``int``
+        :param ident: Unique identifier for the node
+        :type latitude: ``float`` or coercible to ``float``
+        :param latitude: Nodes's latitude
+        :type longitude: ``float`` or coercible to ``float``
+        :param longitude: Node's longitude
+        :type visible: ``bool``
+        :param visible: Whether the node is visible
+        :type user: ``str``
+        :param user: User who logged the node
+        :type timestamp: ``str``
+        :param timestamp: The date and time a node was logged
+        :type tags: ``dict``
+        :param tags: Tags associated with the node
 
         """
         super(Node, self).__init__(latitude, longitude)
@@ -318,17 +168,16 @@ class Node(point.Point):
         >>> print(Node(0, 52, 0))
         Node 0 (52°00'00"N, 000°00'00"E)
         >>> print(Node(0, 52, 0, True, "jnrowe",
-        ...            Timestamp(2008, 1, 25)))
+        ...            utils.Timestamp(2008, 1, 25)))
         Node 0 (52°00'00"N, 000°00'00"E) [visible, user: jnrowe, timestamp:
         2008-01-25T00:00:00+00:00]
         >>> print(Node(0, 52, 0, tags={"key": "value"}))
         Node 0 (52°00'00"N, 000°00'00"E) [key: value]
 
-        :Parameters:
-            mode : `str`
-                Coordinate formatting system to use
-        :rtype: `str`
-        :return: Human readable string representation of `Node` object
+        :type mode: ``str``
+        :param mode: Coordinate formatting system to use
+        :rtype: ``str``
+        :return: Human readable string representation of ``Node`` object
 
         """
         text = ["Node %i (%s)" % (self.ident, super(Node, self).__str__(mode)), ]
@@ -344,12 +193,12 @@ class Node(point.Point):
         >>> ET.tostring(Node(0, 52, 0).toosm())
          '<node id="0" lat="52.0" lon="0.0" visible="false" />'
         >>> ET.tostring(Node(0, 52, 0, True, "jnrowe",
-        ...                  Timestamp(2008, 1, 25)).toosm())
+        ...                  utils.Timestamp(2008, 1, 25)).toosm())
         '<node id="0" lat="52.0" lon="0.0" timestamp="2008-01-25T00:00:00+00:00" user="jnrowe" visible="true" />'
         >>> ET.tostring(Node(0, 52, 0, tags={"key": "value"}).toosm())
         '<node id="0" lat="52.0" lon="0.0" visible="false"><tag k="key" v="value" /></node>'
 
-        :rtype: ``ET.Element``
+        :rtype: :class:`ET.Element`
         :return: OSM node element
 
         """
@@ -377,12 +226,11 @@ class Node(point.Point):
         >>> Home.get_area_url(12)
         'http://api.openstreetmap.org/api/0.5/map?bbox=-0.175398634277,51.8920136086,0.175398634277,52.1079863914'
 
-        :Parameters:
-            distance : `int`
-                Boundary distance in kilometres
-        :rtype: `str`
-        :return: URL that can be used to fetch the OSM data within `distance`
-            of `location`
+        :type distance: ``int``
+        :param distance: Boundary distance in kilometres
+        :rtype: ``str``
+        :return: URL that can be used to fetch the OSM data within ``distance``
+            of ``location``
 
         """
         return get_area_url(self, distance)
@@ -395,10 +243,9 @@ class Node(point.Point):
         >>> # support a reliable way __repr__ method.
         >>> Home.fetch_area_osm(3) # doctest: +SKIP
 
-        :Parameters:
-            distance : `int`
-                Boundary distance in kilometres
-        :rtype: `Osm`
+        :type distance: ``int``
+        :param distance: Boundary distance in kilometres
+        :rtype: :class:`Osm`
         :return: All the data OSM has on a region imported for use
 
         """
@@ -408,11 +255,10 @@ class Node(point.Point):
     def parse_elem(element):
         """Parse a OSM node XML element
 
-        :Parameters:
-            element : ``ET.Element``
-                XML Element to parse
-        :rtype: `Node`
-        :return: `Node` object representing parsed element
+        :type element: :class:`ET.Element`
+        :param element: XML Element to parse
+        :rtype: ``Node``
+        :return: ``Node`` object representing parsed element
 
         """
         ident = int(element.get("id"))
@@ -427,19 +273,7 @@ class Node(point.Point):
 class Way(point.Points):
     """Class for representing a way element from OSM data files
 
-    :since: 0.9.0
-
-    :Ivariables:
-        ident
-            Way's unique indentifier
-        visible
-            Whether the way is visible
-        user
-            User who logged the way
-        timestamp
-            The date and time a way was logged
-        tags
-            Tags associated with the way
+    .. versionadded:: 0.9.0
 
     """
 
@@ -447,21 +281,20 @@ class Way(point.Points):
 
     def __init__(self, ident, nodes, visible=False, user=None, timestamp=None,
                  tags=None):
-        """Initialise a new `Way` object
+        """Initialise a new ``Way`` object
 
-        :Parameters:
-            ident : `int`
-                Unique identifier for the way
-            nodes : `list` of `str` objects
-                Identifiers of the nodes that form this way
-            visible : `bool`
-                Whether the way is visible
-            user : `str`
-                User who logged the way
-            timestamp : `str`
-                The date and time a way was logged
-            tags : `dict`
-                Tags associated with the way
+        :type ident: ``int``
+        :param ident: Unique identifier for the way
+        :type nodes: ``list`` of ``str`` objects
+        :param nodes: Identifiers of the nodes that form this way
+        :type visible: ``bool``
+        :param visible: Whether the way is visible
+        :type user: ``str``
+        :param user: User who logged the way
+        :type timestamp: ``str``
+        :param timestamp: The date and time a way was logged
+        :type tags: ``dict``
+        :param tags: Tags associated with the way
 
         """
         super(Way, self).__init__()
@@ -479,14 +312,14 @@ class Way(point.Points):
 
         >>> Way(0, (0, 1, 2))
         Way(0, [0, 1, 2], False, None, None, None)
-        >>> Way(0, (0, 1, 2), True, "jnrowe", Timestamp(2008, 1, 25))
+        >>> Way(0, (0, 1, 2), True, "jnrowe", utils.Timestamp(2008, 1, 25))
         Way(0, [0, 1, 2], True, 'jnrowe', Timestamp(2008, 1, 25, 0, 0),
             None)
         >>> Way(0, (0, 1, 2), tags={"key": "value"})
         Way(0, [0, 1, 2], False, None, None, {'key': 'value'})
 
-        :rtype: `str`
-        :return: String to recreate `Way` object
+        :rtype: ``str``
+        :return: String to recreate ``Way`` object
 
         """
         return utils.repr_assist(self, {"nodes": self[:]})
@@ -497,18 +330,18 @@ class Way(point.Points):
         >>> print(Way(0, (0, 1, 2)))
         Way 0 (nodes: 0, 1, 2)
         >>> print(Way(0, (0, 1, 2), True, "jnrowe",
-        ...           Timestamp(2008, 1, 25)))
+        ...           utils.Timestamp(2008, 1, 25)))
         Way 0 (nodes: 0, 1, 2) [visible, user: jnrowe, timestamp: 2008-01-25T00:00:00+00:00]
         >>> print(Way(0, (0, 1, 2), tags={"key": "value"}))
         Way 0 (nodes: 0, 1, 2) [key: value]
         >>> nodes = [
         ...     Node(0, 52.015749, -0.221765, True, "jnrowe",
-        ...          Timestamp(2008, 1, 25, 12, 52, 11), None),
+        ...          utils.Timestamp(2008, 1, 25, 12, 52, 11), None),
         ...     Node(1, 52.015761, -0.221767, True, None,
-        ...          Timestamp(2008, 1, 25, 12, 53, 14),
+        ...          utils.Timestamp(2008, 1, 25, 12, 53, 14),
         ...          {"created_by": "hand", "highway": "crossing"}),
         ...     Node(2, 52.015754, -0.221766, True, "jnrowe",
-        ...          Timestamp(2008, 1, 25, 12, 52, 30),
+        ...          utils.Timestamp(2008, 1, 25, 12, 52, 30),
         ...          {"amenity": "pub"}),
         ... ]
         >>> print(Way(0, (0, 1, 2), tags={"key": "value"}).__str__(nodes))
@@ -517,11 +350,10 @@ class Way(point.Points):
             Node 1 (52°00'56"N, 000°13'18"W) [visible, timestamp: 2008-01-25T12:53:14+00:00, highway: crossing, created_by: hand]
             Node 2 (52°00'56"N, 000°13'18"W) [visible, user: jnrowe, timestamp: 2008-01-25T12:52:30+00:00, amenity: pub]
 
-        :Parameters:
-            nodes : `list`
-                Nodes to be used in expanding references
-        :rtype: `str`
-        :return: Human readable string representation of `Way` object
+        :type nodes: ``list``
+        :param nodes: Nodes to be used in expanding references
+        :rtype: ``str``
+        :return: Human readable string representation of ``Way`` object
 
         """
         text = ["Way %i" % (self.ident), ]
@@ -542,12 +374,13 @@ class Way(point.Points):
 
         >>> ET.tostring(Way(0, (0, 1, 2)).toosm())
         '<way id="0" visible="false"><nd ref="0" /><nd ref="1" /><nd ref="2" /></way>'
-        >>> ET.tostring(Way(0, (0, 1, 2), True, "jnrowe", Timestamp(2008, 1, 25)).toosm())
+        >>> ET.tostring(Way(0, (0, 1, 2), True, "jnrowe",
+        ...                 utils.Timestamp(2008, 1, 25)).toosm())
         '<way id="0" timestamp="2008-01-25T00:00:00+00:00" user="jnrowe" visible="true"><nd ref="0" /><nd ref="1" /><nd ref="2" /></way>'
         >>> ET.tostring(Way(0, (0, 1, 2), tags={"key": "value"}).toosm())
         '<way id="0" visible="false"><tag k="key" v="value" /><nd ref="0" /><nd ref="1" /><nd ref="2" /></way>'
 
-        :rtype: ``ET.Element``
+        :rtype: :class:`ET.Element`
         :return: OSM way element
 
         """
@@ -572,10 +405,9 @@ class Way(point.Points):
     def parse_elem(element):
         """Parse a OSM way XML element
 
-        :Parameters:
-            element : ``ET.Element``
-                XML Element to parse
-        :rtype: `Node`
+        :type element: :class:`ET.Element`
+        :param element: XML Element to parse
+        :rtype: ``Way``
         :return: `Way` object representing parsed element
 
         """
@@ -588,35 +420,26 @@ class Way(point.Points):
 class Osm(point.Points):
     """Class for representing an OSM region
 
-    :since: 0.9.0
+    .. versionadded:: 0.9.0
 
     """
 
     def __init__(self, osm_file=None):
-        """Initialise a new `Osm` object"""
+        """Initialise a new ``Osm`` object"""
         super(Osm, self).__init__()
+        self._osm_file = osm_file
         if osm_file:
             self.import_locations(osm_file)
         self.generator = "upoints/%s" % __version__
         self.version = "0.5"
 
-    def __repr__(self):
-        """Self-documenting string representation
-
-        :rtype: `str`
-        :return: String to recreate `Osm` object
-
-        """
-        return utils.repr_assist(self)
-
     def import_locations(self, osm_file):
         """Import OSM data files
 
-        `import_locations()` returns a list of `Node` and `Way` objects.
+        ``import_locations()`` returns a list of ``Node`` and ``Way`` objects.
 
-        It expects data files conforming to the `OpenStreetMap 0.5 DTD
-        <http://wiki.openstreetmap.org/index.php/OSM_Protocol_Version_0.5/DTD>`__,
-        which is XML such as::
+        It expects data files conforming to the `OpenStreetMap 0.5 DTD`_, which
+        is XML such as::
 
             <?xml version="1.0" encoding="UTF-8"?>
             <osm version="0.5" generator="upoints/0.9.0">
@@ -637,40 +460,42 @@ class Osm(point.Points):
               </way>
             </osm>
 
-        The reader uses `Python <http://www.python.org/>`__'s `ElementTree`
-        module, so should be very fast when importing data.  The above file
-        processed by `import_locations()` will return the following `Osm`
-        object::
+        The reader uses the :mod:`ElementTree` module, so should be very fast
+        when importing data.  The above file processed by ``import_locations()``
+        will return the following `Osm` object::
 
             Osm([
                 Node(0, 52.015749, -0.221765, True, "jnrowe",
-                     Timestamp(2008, 1, 25, 12, 52, 11), None),
+                     utils.Timestamp(2008, 1, 25, 12, 52, 11), None),
                 Node(1, 52.015761, -0.221767, True,
-                     Timestamp(2008, 1, 25, 12, 53), None,
+                     utils.Timestamp(2008, 1, 25, 12, 53), None,
                      {"created_by": "hand", "highway": "crossing"}),
                 Node(2, 52.015754, -0.221766, True, "jnrowe",
-                     Timestamp(2008, 1, 25, 12, 52, 30),
+                     utils.Timestamp(2008, 1, 25, 12, 52, 30),
                      {"amenity": "pub"}),
                 Way(0, [0, 1, 2], True, None,
-                    Timestamp(2008, 1, 25, 13, 00),
+                    utils.Timestamp(2008, 1, 25, 13, 00),
                     {"ref": "My Way", "highway": "primary"})],
                 generator="upoints/0.9.0")
 
         >>> region = Osm(open("osm"))
-        >>> for node in sorted(filter(lambda x: isinstance(x, Node), region),
-        ...                    key=lambda x: x.ident):
+        >>> for node in sorted([x for x in region if isinstance(x, Node)],
+        ...                    key=attrgetter("ident")):
         ...     print(node)
         Node 0 (52°00'56"N, 000°13'18"W) [visible, user: jnrowe, timestamp: 2008-01-25T12:52:11+00:00]
         Node 1 (52°00'56"N, 000°13'18"W) [visible, timestamp: 2008-01-25T12:53:00+00:00, highway: crossing, created_by: hand]
         Node 2 (52°00'56"N, 000°13'18"W) [visible, user: jnrowe, timestamp: 2008-01-25T12:52:30+00:00, amenity: pub]
 
-        :Parameters:
-            osm_file : `file`, `list` or `str`
-                OpenStreetMap data to read
-        :rtype: `Osm`
+        :type osm_file: ``file``, ``list`` or ``str``
+        :param osm_file: OpenStreetMap data to read
+        :rtype: ``Osm``
         :return: Nodes and ways from the data
 
+        .. _OpenStreetMap 0.5 DTD:
+            http://wiki.openstreetmap.org/index.php/OSM_Protocol_Version_0.5/DTD
+
         """
+        self._osm_file = osm_file
         data = utils.prepare_xml_read(osm_file)
 
         # This would be a lot simpler if OSM exports defined a namespace
@@ -701,7 +526,7 @@ class Osm(point.Points):
         <osm generator="upoints/..." version="0.5"><node id="0" lat="52.015749" lon="-0.221765" timestamp="2008-01-25T12:52:11+00:00" user="jnrowe" visible="true" /><node id="1" lat="52.015761" lon="-0.221767" timestamp="2008-01-25T12:53:00+00:00" visible="true"><tag k="highway" v="crossing" /><tag k="created_by" v="hand" /></node><node id="2" lat="52.015754" lon="-0.221766" timestamp="2008-01-25T12:52:30+00:00" user="jnrowe" visible="true"><tag k="amenity" v="pub" /></node><way id="0" timestamp="2008-01-25T13:00:00+00:00" visible="true"><tag k="ref" v="My Way" /><tag k="highway" v="primary" /><nd ref="0" /><nd ref="1" /><nd ref="2" /></way></osm>
 
         """
-        osm = ET.Element('osm', {"generator": "upoints/%s" % self.generator,
+        osm = ET.Element('osm', {"generator": self.generator,
                                  "version": self.version})
         for obj in self:
             osm.append(obj.toosm())

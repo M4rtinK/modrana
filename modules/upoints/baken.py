@@ -2,7 +2,7 @@
 # vim: set sw=4 sts=4 et tw=80 fileencoding=utf-8:
 #
 """baken - Imports baken data files"""
-# Copyright (C) 2007-2008  James Rowe
+# Copyright (C) 2007-2010  James Rowe
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,36 +22,16 @@ import ConfigParser
 import logging
 import re
 
+from operator import attrgetter
+
 from upoints import (point, utils)
 
 class Baken(point.Point):
-    """Class for representing location from baken data files
+    """Class for representing location from baken_ data files
 
-    :since: 0.4.0
+    .. versionadded:: 0.4.0
 
-    :Ivariables:
-        latitude
-            Location's latitude
-        longitude
-            Locations's longitude
-        antenna
-            Location's antenna type
-        direction
-            Antenna's direction
-        frequency
-            Transmitter's frequency
-        height
-            Antenna's height
-        locator
-            Location's locator string
-        mode
-            Transmitter's mode
-        operator
-            Transmitter's operator
-        power
-            Transmitter's power
-        qth
-            Location's qth
+    .. _baken: http://www.qsl.net:80/g4klx/
 
     """
 
@@ -61,7 +41,7 @@ class Baken(point.Point):
     def __init__(self, latitude, longitude, antenna=None, direction=None,
                  frequency=None, height=None, locator=None, mode=None,
                  operator=None, power=None, qth=None):
-        """Initialise a new `Baken` object
+        """Initialise a new ``Baken`` object
 
         >>> Baken(14.460, 20.680, None, None, None, 0.000, None, None, None,
         ...       None, None)
@@ -76,29 +56,28 @@ class Baken(point.Point):
         LookupError: Unable to instantiate baken object, no latitude or
         locator string
 
-        :Parameters:
-            latitude : `float` or coercible to `float`
-                Location's latitude
-            longitude : `float` or coercible to `float`
-                Location's longitude
-            antenna : `str`
-                Location's antenna type
-            direction : `tuple` of `int`
-                Antenna's direction
-            frequency : `float`
-                Transmitter's frequency
-            height : `float`
-                Antenna's height
-            locator : `str`
-                Location's Maidenhead locator string
-            mode : `str`
-                Transmitter's mode
-            operator : `tuple` of `str`
-                Transmitter's operator
-            power : `float`
-                Transmitter's power
-            qth : `str`
-                Location's qth
+        :type latitude: ``float`` or coercible to ``float``
+        :param latitude: Location's latitude
+        :type longitude: ``float`` or coercible to ``float``
+        :param longitude: Location's longitude
+        :type antenna: ``str``
+        :param antenna: Location's antenna type
+        :type direction: ``tuple`` of ``int``
+        :param direction: Antenna's direction
+        :type frequency: ``float``
+        :param frequency: Transmitter's frequency
+        :type height: ``float``
+        :param height: Antenna's height
+        :type locator: ``str``
+        :param locator: Location's Maidenhead locator string
+        :type mode: ``str``
+        :param mode: Transmitter's mode
+        :type operator: ``tuple`` of ``str``
+        :param operator: Transmitter's operator
+        :type power: ``float``
+        :param power: Transmitter's power
+        :type qth: ``str``
+        :param qth: Location's qth
         :raise LookupError: No position data to use
 
         """
@@ -131,15 +110,15 @@ class Baken(point.Point):
         Baken(44.3125, 8.45833333333, '2 x Turnstile', None, 50.0, 460.0,
               'JN44FH', 'A1A', None, 25, None)
 
-        :Parameters:
-            value : `str`
-                New Maidenhead locator string
+        :type value : ``str``
+        :param value: New Maidenhead locator string
 
         """
         self._locator = value
         self._latitude, self._longitude = utils.from_grid_locator(value)
-    locator = property(lambda self: self._locator,
-                       lambda self, value: self._set_locator(value))
+    locator = property(attrgetter("_locator"),
+                       lambda self, value: self._set_locator(value),
+                       doc="Property to handle locator to latitude/longitude")
 
     def __str__(self, mode="dms"):
         """Pretty printed location string
@@ -151,11 +130,10 @@ class Baken(point.Point):
         ...             "IO93BF", "A1A", None, 25, None))
         IO93BF (53°13'45"N, 001°52'30"W)
 
-        :Parameters:
-            mode : `str`
-                Coordinate formatting system to use
-        :rtype: `str`
-        :return: Human readable string representation of `Baken` object
+        :type mode: ``str``
+        :param mode: Coordinate formatting system to use
+        :rtype: ``str``
+        :return: Human readable string representation of ``Baken`` object
 
         """
         text = super(Baken, self).__str__(mode)
@@ -165,9 +143,9 @@ class Baken(point.Point):
 
 
 class Bakens(point.KeyedPoints):
-    """Class for representing a group of `Baken` objects
+    """Class for representing a group of :class:`Baken` objects
 
-    :since: 0.5.1
+    .. versionadded:: 0.5.1
 
     """
 
@@ -180,11 +158,14 @@ class Bakens(point.KeyedPoints):
     def import_locations(self, baken_file):
         """Import baken data files
 
-        `import_locations()` returns a dictionary with keys containing the
-        section title, and values consisting of a collection `Baken` objects.
+        ``import_locations()`` returns a dictionary with keys containing the
+        section title, and values consisting of a collection :class:`Baken`
+        objects.
 
-        It expects data files in the format used by the baken amateur radio
-        package, which is Windows INI style files such as::
+        It expects data files in the format used by the baken_ amateur radio
+        package, which is Windows INI style files such as:
+
+        .. code-block:: ini
 
             [Abeche, Chad]
             latitude=14.460000
@@ -199,10 +180,9 @@ class Bakens(point.KeyedPoints):
             height=460
             mode=A1A
 
-        The reader uses `Python <http://www.python.org/>`__'s `ConfigParser`
-        module, so should be reasonably robust against encodings and such.  The
-        above file processed by `import_locations()` will return the following
-        `dict` object::
+        The reader uses the :mod:`ConfigParser` module, so should be reasonably
+        robust against encodings and such.  The above file processed by
+        ``import_locations()`` will return the following ``dict`` object::
 
             {"Abeche, Chad": Baken(14.460, 20.680, None, None, None, 0.000,
                                    None, None, None, None, None),
@@ -219,13 +199,15 @@ class Bakens(point.KeyedPoints):
         >>> len(locations)
         0
 
-        :Parameters:
-            baken_file : `file`, `list` or `str`
-                Baken data to read
-        :rtype: `dict`
+        :type baken_file: ``file``, ``list`` or ``str``
+        :param baken_file: Baken data to read
+        :rtype: ``dict``
         :return: Named locations and their associated values
 
+        .. _baken: http://www.qsl.net:80/g4klx/
+
         """
+        self._baken_file = baken_file
         data = ConfigParser.ConfigParser()
         if hasattr(baken_file, "readlines"):
             data.readfp(baken_file)
@@ -236,7 +218,7 @@ class Bakens(point.KeyedPoints):
         else:
             raise TypeError("Unable to handle data of type `%s`"
                             % type(baken_file))
-        valid_locator = re.compile("[A-Z]{2}[0-9]{2}[A-Z]{2}")
+        valid_locator = re.compile(r"[A-Z]{2}\d{2}[A-Z]{2}")
         for name in data.sections():
             elements = {}
             for item in ("latitude", "longitude", "antenna", "direction",

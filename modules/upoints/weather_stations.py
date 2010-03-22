@@ -2,7 +2,7 @@
 # vim: set sw=4 sts=4 et tw=80 fileencoding=utf-8:
 #
 """weather_stations - Imports weather station data files"""
-# Copyright (C) 2007-2008  James Rowe
+# Copyright (C) 2007-2010  James Rowe
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+__doc__ += """.
+
+.. moduleauthor:: James Rowe <jnrowe@gmail.com>
+.. versionadded:: 0.2.0
+"""
+
+
 import logging
 
 from upoints import (point, trigpoints, utils)
@@ -25,33 +32,7 @@ from upoints import (point, trigpoints, utils)
 class Station(trigpoints.Trigpoint):
     """Class for representing a weather station from a NOAA data file
 
-    :since: 0.2.0
-
-    :Ivariables:
-        alt_id
-            Alternate location identifier(either ICAO or WMO)
-        name
-            Station's name
-        state
-            State name, if station is in the US
-        country
-            Country name
-        wmo
-            WMO region code
-        latitude
-            Station's latitude
-        longitude
-            Station's longitude
-        ua_latitude
-            Station's upper air latitude
-        ua_longitude
-            Station's upper air longitude
-        altitude
-            Station's elevation
-        ua_altitude
-            Station's upper air elevation
-        rbsn
-            True if station belongs to RSBN
+    .. versionadded:: 0.2.0
 
     """
 
@@ -60,7 +41,7 @@ class Station(trigpoints.Trigpoint):
 
     def __init__(self, alt_id, name, state, country, wmo, latitude, longitude,
                  ua_latitude, ua_longitude, altitude, ua_altitude, rbsn):
-        """Initialise a new `Station` object
+        """Initialise a new ``Station`` object
 
         >>> Station('EGLL', 'London / Heathrow Airport', None,
         ...         'United Kingdom', 6, 51.4833333333, -0.45, None, None, 24,
@@ -68,31 +49,30 @@ class Station(trigpoints.Trigpoint):
         Station('EGLL', 'London / Heathrow Airport', None, 'United Kingdom', 6,
                 51.4833333333, -0.45, None, None, 24, 0, True)
 
-        :Parameters:
-            alt_id : `str` or `None`
-                Alternate location identifier
-            name : `str`
-                Station's name
-            state : `str` or `None`
-                State name, if station is in the US
-            country : `str`
-                Country name
-            wmo : `int`
-                WMO region code
-            latitude : `float`
-                Station's latitude
-            longitude : `float`
-                Station's longitude
-            ua_latitude : `float` or `None`
-                Station's upper air latitude
-            ua_longitude : `float` or `None`
-                Station's upper air longitude
-            altitude : `int` or `None`
-                Station's elevation
-            ua_altitude : `int` or `None`
-                Station's upper air elevation
-            rbsn : `bool`
-                True if station belongs to RSBN
+        :type alt_id: ``str`` or ``None``
+        :param alt_id: Alternate location identifier
+        :type name: ``str``
+        :param name: Station's name
+        :type state: ``str`` or ``None``
+        :param state: State name, if station is in the US
+        :type country: ``str``
+        :param country: Country name
+        :type wmo: ``int``
+        :param wmo: WMO region code
+        :type latitude: ``float``
+        :param latitude: Station's latitude
+        :type longitude: ``float``
+        :param longitude: Station's longitude
+        :type ua_latitude: ``float`` or ``None``
+        :param ua_latitude: Station's upper air latitude
+        :type ua_longitude: ``float`` or ``None``
+        :param ua_longitude: Station's upper air longitude
+        :type altitude: ``int`` or ``None``
+        :param altitude: Station's elevation
+        :type ua_altitude: ``int`` or ``None``
+        :param ua_altitude: Station's upper air elevation
+        :type rbsn: ``bool``
+        :param rbsn: True if station belongs to RSBN
 
         """
         super(Station, self).__init__(latitude, longitude, altitude, name)
@@ -108,7 +88,9 @@ class Station(trigpoints.Trigpoint):
     def __str__(self, mode="dd"):
         """Pretty printed location string
 
-        :see: `trigpoints.point.Point`
+        .. seealso::
+
+           :type :class:`trigpoints.point.Point`
 
         >>> Heathrow = Station("EGLL", "London / Heathrow Airport", None,
         ...                    "United Kingdom", 6, 51.048333, -0.450000, None,
@@ -123,11 +105,10 @@ class Station(trigpoints.Trigpoint):
         >>> print(Heathrow)
         London / Heathrow Airport (N51.048°; W000.450°)
 
-        :Parameters:
-            mode : `str`
-                Coordinate formatting system to use
-        :rtype: `str`
-        :return: Human readable string representation of `Station` object
+        :type mode: ``str``
+        :param mode: Coordinate formatting system to use
+        :rtype: ``str``
+        :return: Human readable string representation of ``Station`` object
 
         """
         text = super(Station.__base__, self).__str__(mode)
@@ -141,23 +122,24 @@ class Station(trigpoints.Trigpoint):
 class Stations(point.KeyedPoints):
     """Class for representing a group of `Station` objects
 
-    :since: 0.5.1
+    .. versionadded:: 0.5.1
 
     """
 
     def __init__(self, data=None, index="WMO"):
         """Initialise a new `Stations` object"""
         super(Stations, self).__init__()
+        self._data = data
+        self._index = index
         if data:
             self.import_locations(data, index)
 
     def import_locations(self, data, index="WMO"):
         """Parse NOAA weather station data files
 
-        `import_locations()` returns a dictionary with keys containing either
-        the WMO or ICAO identifier, and values that are `Station` objects that
-        describes the large variety of data exported by `NOAA
-        <http://weather.noaa.gov/>`__.
+        ``import_locations()`` returns a dictionary with keys containing either
+        the WMO or ICAO identifier, and values that are ``Station`` objects that
+        describes the large variety of data exported by NOAA_.
 
         It expects data files in one of the following formats::
 
@@ -171,12 +153,13 @@ class Stations(point.KeyedPoints):
             AYMO;--;---;Manus Island/Momote;;Papua New Guinea;5;02-03-43S;147-25-27E;;;4;;
             AYPY;94;035;Moresby;;Papua New Guinea;5;09-26S;147-13E;09-26S;147-13E;38;49;P
 
-        Files containing the data in this format can be downloaded from NOAA's
-        site in their `station location page
-        <http://weather.noaa.gov/tg/site.shtml>`__.
+        Files containing the data in this format can be downloaded from
+        the :abbr:`NOAA (National Oceanographic and Atmospheric
+        Administration)`'s site in their `station location page`_.
 
-        WMO indexed files downloaded from the NOAA site when processed by
-        `import_locations()` will return `dict` object of the following
+        WMO indexed files downloaded from the :abbr:`NOAA (National
+        Oceanographic and Atmospheric Administration)` site when processed by
+        ``import_locations()`` will return ``dict`` object of the following
         style::
 
             {'00000': Station('PABL', 'Buckland, Buckland Airport', 'AK',
@@ -187,7 +170,7 @@ class Stations(point.KeyedPoints):
              '01002': Station(None, 'Grahuken', None, 'Norway', 6, 79.783333,
                               13.533333, None, None, 15, False)}
 
-        And `dict` objects such as the following will be created when ICAO
+        And ``dict`` objects such as the following will be created when ICAO
         indexed data files are processed::
 
             {'AYMD': Station("94", "014", "Madang", None, "Papua New Guinea",
@@ -222,17 +205,21 @@ class Stations(point.KeyedPoints):
         ...     print("%s - %s" % (key, value))
         KBRX - Bordeaux (N41.933°; W104.950°)
         KCQB - Chandler, Chandler Municipal Airport (N35.724°; W096.820°)
+        KTYR - Tyler, Tyler Pounds Field (N32.359°; W095.404°)
 
-        :Parameters:
-            data : `file`, `list` or `str`
-                NOAA station data to read
-            index : `str`
-                The identifier type used in the file
-        :rtype: `dict`
+        :type data: ``file``, ``list`` or ``str``
+        :param data: NOAA station data to read
+        :type index: ``str``
+        :param index: The identifier type used in the file
+        :rtype: ``dict``
         :return: WMO locations with `Station` objects
         :raise FileFormatError: Unknown file format
 
+        .. _NOAA: http://weather.noaa.gov/
+        .. _station location page: http://weather.noaa.gov/tg/site.shtml
+
         """
+        self._data = data
         data = utils.prepare_read(data)
 
         for line in data:
