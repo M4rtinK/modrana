@@ -198,6 +198,8 @@ class mapData(ranaModule):
       if(location == "route"):
         loadTl = self.m.get('loadTracklog', None) # get the tracklog module
         loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
+        if loadedTracklogs == None or len(loadedTracklogs) == 0:
+          return
         activeTracklogIndex = int(self.get('activeTracklog', 0))
         GPXTracklog = loadedTracklogs[activeTracklogIndex]
         """because we dont need all the information in the original list and

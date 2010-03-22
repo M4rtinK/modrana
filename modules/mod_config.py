@@ -21,6 +21,7 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import os #TODO: testing import, remove this
+from time import clock
 
 def getModule(m,d):
   return(config(m,d))
@@ -55,12 +56,14 @@ class config(ranaModule):
     # Option: whether to centre on your position
     #self.set('centred', False)
 
-    m = self.m.get('loadTracklog', None)
+    start = clock()
+    m = self.m.get('loadTracklog', None) #TODO: move this somewhere else
     if(m != None):
       files = os.listdir('tracklogs')
       files = filter(lambda x: x != '.svn', files)
       for file in files:
         m.load('tracklogs/'+file)
+      print "Loading tracklogs took %1.2f ms" % (1000 * (clock() - start))
 
 
       #m.load('Znaim-Wien.gpx')

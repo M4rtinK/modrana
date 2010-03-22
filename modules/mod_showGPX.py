@@ -18,11 +18,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-from upoints import gpx
-import random
+#from upoints import gpx
+#import random
 import geo
 import math
-from time import clock
+#from time import clock
 
 def getModule(m,d):
   return(showGPX(m,d))

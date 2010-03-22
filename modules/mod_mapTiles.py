@@ -213,23 +213,27 @@ class mapTiles(ranaModule):
         # looks like there is no create_from_jpeg() in cairo
         # this solution has been found on:
         # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
-        pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
-        #x = pixbuf.get_width()
-        #y = pixbuf.get_height()
-        # Google sat images are 256 by 256 px, we dont need to check the size
-        x = 256
-        y = 256
-        ''' create a new cairo surface to place the image on '''
-        surface = cairo.ImageSurface(0,x,y)
-        ''' create a context to the new surface '''
-        ct = cairo.Context(surface)
-        ''' create a GDK formatted Cairo context to the new Cairo native context '''
-        ct2 = gtk.gdk.CairoContext(ct)
-        ''' draw from the pixbuf to the new surface '''
-        ct2.set_source_pixbuf(pixbuf,0,0)
-        ct2.paint()
-        ''' surface now contains the image in a Cairo surface '''
-        self.images[name] = surface
+        try:
+          pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
+          #x = pixbuf.get_width()
+          #y = pixbuf.get_height()
+          # Google sat images are 256 by 256 px, we dont need to check the size
+          x = 256
+          y = 256
+          ''' create a new cairo surface to place the image on '''
+          surface = cairo.ImageSurface(0,x,y)
+          ''' create a context to the new surface '''
+          ct = cairo.Context(surface)
+          ''' create a GDK formatted Cairo context to the new Cairo native context '''
+          ct2 = gtk.gdk.CairoContext(ct)
+          ''' draw from the pixbuf to the new surface '''
+          ct2.set_source_pixbuf(pixbuf,0,0)
+          ct2.paint()
+          ''' surface now contains the image in a Cairo surface '''
+          self.images[name] = surface
+        except:
+          print "the tile image is corrupted nad/or there are no tiles for this zoomlevel"
+
       else:
         #print(filename)
         try:

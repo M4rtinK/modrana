@@ -21,6 +21,7 @@
 from base_module import ranaModule
 from upoints import gpx
 import geo
+#from time import clock
 
 def getModule(m,d):
   return(loadTracklog(m,d))
