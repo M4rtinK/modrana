@@ -36,85 +36,123 @@ class tracklogManager(ranaModule):
     #print "Updated %d times" % (self.get('num_updates'))
 
   def handleMessage(self, message):
+    print "handling"
     if(message == "up"):
       if(self.scroll > 0):
         self.scroll -= 1
     if(message == "down"):
+      print "down"
       self.scroll += 1
     if(message == "reset"):
       self.scroll = 0
     self.set("needRedraw", True)
 
+    if message == 'getElevation':
+      print "getting elevation info"
+      online = self.m.get("onlineServices",None)
+      loadTl = self.m.get('loadTracklog', None) # get the tracklog module
+      loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
+      index = int(self.get('activeTracklog', 0)) # get the active tracklog
+      activeTracklog = loadedTracklogs[index]
+#      print activeTracklog.trackpointsList
+      for trackpoint in activeTracklog.trackpointsList[0]:
+        lat = trackpoint.latitude
+        lon = trackpoint.longitude
+        onlineElevation = int(online.elevFromGeonames(lat,lon))
+        trackpoint.elevation = onlineElevation
+        print onlineElevation
+      activeTracklog.checkElevation()
+      activeTracklog.replaceFile()
+
   def drawMenu(self, cr, menuName):
     # is this menu the correct menu ?
-    if menuName != 'tracklogManager':
+    if menuName != 'tracklogManager' or 'tracklogInfo':
+      # setup the viewport
+      (x1,y1,w,h) = self.get('viewport', None)
+      dx = w / 3
+      dy = h / 4
+    else:
       return # we arent the active menu so we dont do anything
-    (x1,y1,w,h) = self.get('viewport', None)
-    menus = self.m.get("menu",None)
-    loadTl = self.m.get('loadTracklog', None) # get the tracklog module
-    loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
-#    tracklistsWithElevation = filter(lambda x: x.elevation == True, loadedTracklogs)
-#    tracklog = tracklistsWithElevation[0].trackpointsList[0]
 
-#    if w > h:
-#      cols = 4
-#      rows = 3
-#    elif w < h:
-#      cols = 3
-#      rows = 4
-#    elif w == h:
-#      cols = 4
-#      rows = 4
-#
-#    dx = w / cols
-#    dy = h / rows
+    if menuName == 'tracklogManager':
+      menus = self.m.get("menu",None)
+      loadTl = self.m.get('loadTracklog', None) # get the tracklog module
+      loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
+  #    tracklistsWithElevation = filter(lambda x: x.elevation == True, loadedTracklogs)
+  #    tracklog = tracklistsWithElevation[0].trackpointsList[0]
 
-    dx = w / 3
-    dy = h / 4
-    # * draw "escape" button
-    menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:main")
-    # * scroll up
-    menus.drawButton(cr, x1+dx, y1, dx, dy, "", "up_list", "%s:up" % self.moduleName)
-    # * scroll down
-    menus.drawButton(cr, x1+2*dx, y1, dx, dy, "", "down_list", "%s:down" % self.moduleName)
+  #    if w > h:
+  #      cols = 4
+  #      rows = 3
+  #    elif w < h:
+  #      cols = 3
+  #      rows = 4
+  #    elif w == h:
+  #      cols = 4
+  #      rows = 4
+  #
+  #    dx = w / cols
+  #    dy = h / rows
 
-    loadTl = self.m.get('loadTracklog', None) # get the tracklog module
-    loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
-    list = loadedTracklogs
-    category = ""
-#    describeFunction = self.describeTracklog(self, item, category, index)
+      # * draw "escape" button
+      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:main")
+      # * scroll up
+      menus.drawButton(cr, x1+dx, y1, dx, dy, "", "up_list", "%s:up" % self.moduleName)
+      # * scroll down
+      menus.drawButton(cr, x1+2*dx, y1, dx, dy, "", "down_list", "%s:down" % self.moduleName)
+
+      loadTl = self.m.get('loadTracklog', None) # get the tracklog module
+      loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
+      list = loadedTracklogs
+      category = ""
+  #    describeFunction = self.describeTracklog(self, item, category, index)
 
 
-    # One option per row
-    for row in (0,1,2):
-      index = self.scroll + row
-      numItems = len(list)
-      if(0 <= index < numItems):
+      # One option per row
+      for row in (0,1,2):
+        index = self.scroll + row
+        numItems = len(list)
+        if(0 <= index < numItems):
 
-        (text1,text2,onClick) = self.describeTracklog(list[index], category, loadedTracklogs)
+          (text1,text2,onClick) = self.describeTracklog(list[index], category, loadedTracklogs)
 
-        y = y1 + (row+1) * dy
+          y = y1 + (row+1) * dy
 
-        # Draw background and make clickable
-        menus.drawButton(cr,
-          x1,
-          y,
-          w,
-          dy,
-          "",
-          "3h", # background for a 3x1 icon
-          onClick)
+          # Draw background and make clickable
+          menus.drawButton(cr,
+            x1,
+            y,
+            w,
+            dy,
+            "",
+            "3h", # background for a 3x1 icon
+            onClick)
 
-        border = 20
+          border = 20
 
-        self.showText(cr, text1, x1+border, y+border, w-2*border)
+          self.showText(cr, text1, x1+border, y+border, w-2*border)
 
-        # 2nd line: current value
-        self.showText(cr, text2, x1 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
+          # 2nd line: current value
+          self.showText(cr, text2, x1 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
 
-        # in corner: row number
-        self.showText(cr, "%d/%d" % (index+1, numItems), x1+0.85*w, y+border, w * 0.15 - border, 20)
-    return
+          # in corner: row number
+          self.showText(cr, "%d/%d" % (index+1, numItems), x1+0.85*w, y+border, w * 0.15 - border, 20)
+      return
+
+    elif menuName == 'tracklogInfo':
+#      print "tracklogInfo"
+      menus = self.m.get("menu",None)
+      loadTl = self.m.get('loadTracklog', None) # get the tracklog module
+      loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
+      index = int(self.get('activeTracklog', 0)) # get the active tracklog
+      activeTracklog = loadedTracklogs[index]
+#      print activeTracklog
+      # * draw "escape" button
+#      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:main")
+      menus.clearMenu('tracklogInfo', "set:menu:main")
+      menus.addItem('tracklogInfo', 'det Elevation', 'generic', 'tracklogManager:getElevation')
+
+
 
   def describeTracklog(self, item, category, loadedTracklogs):
 #    longName = name = item.getTracklogName()
@@ -124,7 +162,7 @@ class tracklogManager(ranaModule):
 
     action = "set:menu:main"
 #    action += "|set:menu_poi_location:%f,%f" % (item['lat'], item['lon'])
-    action += "|set:activeTracklog:%d" % loadedTracklogs.index(item)
+    action += "|set:activeTracklog:%d|set:menu:tracklogInfo" % loadedTracklogs.index(item)
 #    action += "|set:menu:poi"
     name = item.getTracklogName().split('/').pop()
     elevation = ""
@@ -151,6 +189,11 @@ class tracklogManager(ranaModule):
 
       cr.move_to(x, y+textheight)
       cr.show_text(text)
+
+
+
+
+
 
 
 if(__name__ == "__main__"):

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<gpx version="1.1" creator="PocketGPSWorld.com"
+xmlns="http://www.topografix.com/GPX/1/1"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+              <trk>
+                <trkseg>
+                  <trkpt lat="52.015" lon="-0.221">
+                    <name>Home</name>
+                    <desc>My place</desc>
+                  </trkpt>
+                  <trkpt lat="52.167" lon="0.390">
+                    <name>MSR</name>
+                    <desc>Microsoft Research, Cambridge</desc>
+                  </trkpt>
+                </trkseg>
+              </trk>
+            </gpx>
+

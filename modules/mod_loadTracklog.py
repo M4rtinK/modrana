@@ -152,7 +152,9 @@ class GPXTracklog(tracklog):
       (centreX,centreY,radius) = geo.circleAroundPointCluster(cluster)
       self.clusters.append(clusterOfPoints(cluster, centreX, centreY, radius))
 
-    
+    self.checkElevation()
+
+  def checkElevation(self):
     pointsWithElevation = filter(lambda x: x.elevation != None, self.trackpointsList[0])
     if pointsWithElevation: # do we have some points with known elevation ?
       self.elevation = True
@@ -182,6 +184,18 @@ class GPXTracklog(tracklog):
       self.routeInfo['lastElevation'] = lastElevation
     else:
       self.elevation = False
+
+  def replaceFile(self):
+    """
+    we output the tree structure of the gpx xml back to the file
+    this can also meen, that some info that we didnt load to the tree will be lost
+    also atributes that were changed after the initial load will be written in the current (changed) state
+    """
+    f = open(self.tracklogFilename, "w") # open the old file
+    xmlTree = self.trackpointsList.export_gpx_file() # get the element tree
+    xmlTree.write(f) # overwrite the old file with the new structure
+    print "%s has been replaced by current in memory version" % self.tracklogFilename
+
 
 class clusterOfPoints():
   """A basic class representing a cluster of nearby points."""
