@@ -385,7 +385,6 @@ class menus(ranaModule):
     self.addItem('main', 'download', 'generic', 'set:menu:data')
     self.addItem('main', 'mode', 'transport', 'set:menu:transport')
     self.addItem('main', 'centre', 'centre', 'toggle:centred|set:menu:None')
-    self.addItem('main', 'profile', 'profile', 'set:menu:routeProfile')
     self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManager')
     self.addItem('main', 'fullscreen', 'fullscreen', 'menu:fullscreenTogle|set:menu:None')
     self.setupTransportMenu()

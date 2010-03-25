@@ -87,6 +87,8 @@ class config(ranaModule):
     # (so use this with caution on metered connections)
     self.set('maxSizeThreads', 20)
 
+    # Google API key
+    self.set('googleAPIKey', 'ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw')
 
 
 

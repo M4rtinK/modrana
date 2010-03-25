@@ -146,11 +146,26 @@ class tracklogManager(ranaModule):
       loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
       index = int(self.get('activeTracklog', 0)) # get the active tracklog
       activeTracklog = loadedTracklogs[index]
+      profile = self.m.get('routeProfile', None)
+
 #      print activeTracklog
       # * draw "escape" button
-#      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:main")
-      menus.clearMenu('tracklogInfo', "set:menu:main")
-      menus.addItem('tracklogInfo', 'det Elevation', 'generic', 'tracklogManager:getElevation')
+      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:tracklogManager")
+      # * draw "tools" button
+      menus.drawButton(cr, x1+dx, y1, dx, dy, "tools", "generic", "set:menu:tracklogTools")
+      # * draw "show button" button
+      menus.drawButton(cr, x1+2*dx, y1, dx, dy, "show on map", "generic", "set:menu:main")
+      # * draw "route profile"
+      menus.drawButton(cr, x1, y1+dy, w, dy, "", "2h", "set:menu:routeProfile")
+      profile.lineChart(cr, activeTracklog, x1, y1+dy, w, dy)
+
+      # set up the tools submenu
+      menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")
+      menus.addItem('tracklogTools', 'get Elevation', 'generic', 'tracklogManager:getElevation')
+
+      online = self.m.get('onlineServices', None)
+      online.getGmapsInstance()
+
 
 
 

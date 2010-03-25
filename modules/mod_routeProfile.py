@@ -64,12 +64,12 @@ class routeProfile(ranaModule):
     print activeTracklogIndex
     tracklog = loadedTracklogs[activeTracklogIndex]
     if tracklog.elevation == True:
-      self.lineChart(cr, tracklog, w, h)
+      self.lineChart(cr, tracklog, 0, 0, w, h)
     # * draw "escape" button
-    menus.drawButton(cr, x1, y1, dx, dy, "", "up_transp_gama", "set:menu:main")
+    menus.drawButton(cr, x1, y1, dx, dy, "", "up_transp_gama", "set:menu:tracklogInfo")
     return
 
-  def lineChart(self, cr, tracklog, w, h):
+  def lineChart(self, cr, tracklog, x, y, w, h):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
 
     list = tracklog.trackpointsList[0]
@@ -110,7 +110,7 @@ class routeProfile(ranaModule):
     chart = pycha.line.LineChart(surface, options)
     chart.addDataset(dataSet)
     chart.render()
-    cr.set_source_surface(surface, 0, 0)
+    cr.set_source_surface(surface, x, y)
     cr.paint()
 #    cr.move_to(0, 680)
 #    cr.line_to(480,680)

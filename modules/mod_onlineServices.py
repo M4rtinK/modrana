@@ -19,6 +19,7 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import urllib
+import googlemaps
 
 def getModule(m,d):
   return(onlineServices(m,d))
@@ -44,6 +45,15 @@ class onlineServices(ranaModule):
       "onlineServices: getting elevation from geonames retuned an error"
       return 0
     return query.read()
+
+  def getGmapsInstance(self):
+    key = self.get('googleAPIKey', None)
+    if key == None:
+      print "onlineServices: a google API key is needed for using the google maps services"
+      return None
+    gmap = googlemaps.GoogleMaps(key)
+    return gmap
+
 
 if(__name__ == "__main__"):
   a = example({}, {})
