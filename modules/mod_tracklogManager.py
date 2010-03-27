@@ -66,13 +66,15 @@ class tracklogManager(ranaModule):
 
   def drawMenu(self, cr, menuName):
     # is this menu the correct menu ?
-    if menuName != 'tracklogManager' or 'tracklogInfo':
+    if menuName == 'tracklogManager' or menuName == 'tracklogInfo':
       # setup the viewport
       (x1,y1,w,h) = self.get('viewport', None)
       dx = w / 3
       dy = h / 4
+      print dy
     else:
       return # we arent the active menu so we dont do anything
+
 
     if menuName == 'tracklogManager':
       menus = self.m.get("menu",None)
@@ -175,9 +177,10 @@ class tracklogManager(ranaModule):
 #    print loadedTracklogs.index(item)
 
 
-    action = "set:menu:main"
+#    action = "set:menu:main"
+    action = ""
 #    action += "|set:menu_poi_location:%f,%f" % (item['lat'], item['lon'])
-    action += "|set:activeTracklog:%d|set:menu:tracklogInfo" % loadedTracklogs.index(item)
+    action += "set:activeTracklog:%d|set:menu:tracklogInfo" % loadedTracklogs.index(item)
 #    action += "|set:menu:poi"
     name = item.getTracklogName().split('/').pop()
     elevation = ""

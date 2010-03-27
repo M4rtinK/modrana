@@ -47,12 +47,26 @@ class onlineServices(ranaModule):
     return query.read()
 
   def getGmapsInstance(self):
+    """get a google maps wrapper instance"""
     key = self.get('googleAPIKey', None)
     if key == None:
       print "onlineServices: a google API key is needed for using the google maps services"
       return None
     gmap = googlemaps.GoogleMaps(key)
     return gmap
+
+  def googleLocalQuery(self, query):
+    gmap = self.getGmapsInstance()
+    numresults = int(self.get('GLSResults', 8))
+    local = gmap.local_search(query, numresults)
+    return local
+
+  def googleLocalQueryLL(self, query, lat, lon):
+    separator = " "
+    LL = "%f,%f" % (lat,lon)
+    queryWithLL = query + separator + LL
+    local = self.googleLocalQuery(queryWithLL)
+    return local
 
 
 if(__name__ == "__main__"):

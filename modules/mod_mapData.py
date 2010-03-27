@@ -577,6 +577,7 @@ class mapData(ranaModule):
     * so, when downloading:
     -> look at the map OR the batch progress :)**"""
     time.sleep(0.5)
+    self.set('needRedraw', True)
     (x1,y1,w,h) = self.get('viewport', None)
     self.set('dataMenu', 'edit')
     menus = self.m.get("menu",None)

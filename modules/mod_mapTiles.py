@@ -24,6 +24,7 @@ import os
 import sys
 import urllib
 import gtk
+import time
 from tilenames import *
 sys.path.append("modules/pyrender")
 import renderer_default as RenderModule
@@ -91,6 +92,8 @@ class mapTiles(ranaModule):
     ranaModule.__init__(self, m, d)
     self.images = {}
     self.threads = {}
+#    self.oldZ = None
+#    self.oldThreadCount = None
     self.set('maplayers', maplayers) # export the maplyers definition for use by other modules
   
 #  def drawMapOverlay(self, cr):
@@ -161,12 +164,40 @@ class mapTiles(ranaModule):
 
   def update(self):
     """monitor if the automatic tile downalods finished and then remove them from the dictionary
-    (also automagicaly refreshes the screen onse new tiles are avalabale, even when not centered)"""
+    (also automagicaly refreshes the screen once new tiles are avalabale, even when not centered)"""
+
     if len(self.threads) == 0:
-      pass
+      return
+
+    time.sleep(0.001) # without this  short (1ms ?) sleep, the threads wont get processing time to report results
     for index in filter(lambda x: self.threads[x].finished == 1, self.threads):
+      self.set('needRedraw', True)
       del self.threads[index]
-    pass
+    return
+
+    """seems that some added error handling in the download thread class can replace this,
+       but it left here for testing purposses"""
+#    z = self.get('z', 15)
+#    """when we change zoomlevel and the number of threads does not change,
+#       we clear the threads set, this is usefull, because:
+#       * failed downloads dont acumulate and will be tried again when we visit this zoomlevel again
+#       * tile downloads that dont actualy exist (eq tiles from max+1 zoomlevel) dont acumulate
+#       it is important to have the "self.threads" set empty when we are not downloading anything,
+#       because othervise we are wasting time on the "refresh on finished tile download" logic and also
+#       the set could theoreticaly cause a memmory leak if not periodicaly cleared from wrong items
+#
+#       this method was chosen instead of a timeout, because it would be hard to set a timeout,
+#       that would work on gprs and a fast connection
+#    """
+#    if self.oldZ != z:
+##      print "resetting z"
+#      self.oldZ = z
+#      if len(self.threads) == self.oldThreadCount:
+#        print "clearing thread set"
+#        self.threads = {}
+#        self.oldThreadCount = len(self.threads)
+#    self.oldThreadCount = len(self.threads)
+    
   
   def drawImage(self,cr, name, x,y):
     """Draw a tile image"""
@@ -310,10 +341,15 @@ class tileLoader(Thread):
     Thread.__init__(self)
     
   def run(self):
-    downloadTile( \
-      self.x,
-      self.y,
-      self.z,
-      self.layer,
-      self.filename)
-    self.finished = 1
+    try:
+      downloadTile( \
+        self.x,
+        self.y,
+        self.z,
+        self.layer,
+        self.filename)
+      self.finished = 1
+    except:
+      print "mapTiles: download thread reports error"
+      time.sleep(10) # dont DOS the system, when we temorarily loose internet connection or other error occurs
+      self.finished = 1 # finished thread can be removed from the set and retryed

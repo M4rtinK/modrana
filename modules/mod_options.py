@@ -61,10 +61,10 @@ class options(ranaModule):
      False)
 
     self.addOption("Units", "unitType",
-                 [("kmh","use kilometers"),
-                  ("mph", "use miles")],
+                 [("km","use kilometers"),
+                  ("mile", "use miles")],
                    "view",
-                   "km/h")
+                   "km")
 
     self.addOption("Hide main buttons", "hideDelay",
                  [("never","never hide buttons"),
@@ -99,6 +99,20 @@ class options(ranaModule):
       self.addOption("Map images", "layer", tileOptions, "map", None)
     self.addBoolOption("Old tracklogs", "old_tracklogs", "map", False)
     self.addBoolOption("Latest tracklog", "tracklog", "map", True)
+
+    self.addOption("Google local search ordering", "GLSOrdering",
+      [("default","ordering from Google"),
+       ("distance", "order by distance")
+      ],
+       "Online services",
+       "default")
+
+    self.addOption("Google local search results", "GLSResults",
+      [("8","max 8 results"),
+       ("16", "max 16 results"),
+       ("32", "max 32 results")],
+       "Online services",
+       "8")
 
     # Add all our categories to the "options" menu
     self.menuModule = self.m.get("menu", None)
