@@ -379,6 +379,7 @@ class menus(ranaModule):
     #self.addItem('main', 'map', 'generic', 'set:menu:layers')
     self.addItem('main', 'places', 'city', 'set:menu:placenames_categories')
     self.addItem('main', 'waypoints', 'waypoints', 'set:menu:waypoints_categories')
+    self.addItem('main', 'POI', 'POI', 'set:menu:poi')
     self.addItem('main', 'search', 'business', 'set:menu:search')
     #self.addItem('main', 'view', 'view', 'set:menu:view')
     self.addItem('main', 'options', 'options', 'set:menu:options')
@@ -397,6 +398,33 @@ class menus(ranaModule):
     self.lists['places'] = 'placenames'
 #    self.set('setUpEditMenu', True)
 
+  def drawTextToSquare(self, cr, x, y, w, h, text):
+    """draw lines of text to a square text box, | is used as a delimiter"""
+#    (x1,y1,w1,h1) = self.get('viewport', None)
+#    dx = w / 3
+#    dy = h / 4
+    border = 20
+    lines = text.split('|')
+    lineCount = len(lines)
+    lineSpace = (h-3*border)/lineCount
+    i = 0
+    for line in lines:
+      self.showText(cr, line, x+border, y+i*lineSpace+2*border, w-2*border)
+      i = i + 1
+
+  def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
+    if(text):
+      cr.set_font_size(fontsize)
+      stats = cr.text_extents(text)
+      (textwidth, textheight) = stats[2:4]
+
+      if(widthLimit and textwidth > widthLimit):
+        cr.set_font_size(fontsize * widthLimit / textwidth)
+        stats = cr.text_extents(text)
+        (textwidth, textheight) = stats[2:4]
+
+      cr.move_to(x, y+textheight)
+      cr.show_text(text)
 
   def firstTime(self):
     self.set("menu",None)

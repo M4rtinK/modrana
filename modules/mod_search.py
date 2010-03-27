@@ -117,7 +117,7 @@ class search(ranaModule):
 
   def drawMenu(self, cr, menuName):
     # is this menu the correct menu ?
-    if menuName != 'searchResults':
+    if menuName != 'searchResults' and menuName != 'searchResultsItem':
       return # we arent the active menu so we dont do anything
     else:
       # setup the viewport
@@ -141,19 +141,8 @@ class search(ranaModule):
       menus.drawButton(cr, x1+dx, y1, dx, dy, "", "up_list", "%s:up" % self.moduleName)
       # * scroll down
       menus.drawButton(cr, x1+2*dx, y1, dx, dy, "", "down_list", "%s:down" % self.moduleName)
-
-      position = self.get("pos", None) # our lat lon coordinates
-      list = []
-      for item in self.localSearchResults['responseData']['results']: # we iterate over the local search results
-        if position != None:
-          (lat1,lon1) = position
-          (lat2,lon2) = (float(item['lat']), float(item['lng']))
-          distance = geo.distance(lat1,lon1,lat2,lon2)
-          tupple = (distance, item)
-          list.append(tupple) # we pack each result into a tupple with ist distance from us
-        else:
-          tupple = (0, item) # in this case, we dont know our position, so we say the distance is 0
-          list.append(tupple)
+      
+      list = self.updateDistance()
 
       if self.get('GLSOrdering', 'default') == 'distance': # if ordering by distance is turned on, sort the list
         list.sort()
@@ -189,17 +178,29 @@ class search(ranaModule):
 
           # in corner: row number
           self.showText(cr, "%d/%d" % (index+1, numItems), x1+0.85*w, y + 0.42 * dy, w * 0.15 - border, 20)
-      return
+
+    if menuName == 'searchResultsItem':
+      """draw the menu describing a single GLS result"""
+      list = self.updateDistance()
+
+      if self.get('GLSOrdering', 'default') == 'distance': # if ordering by distance is turned on, sort the list
+        list.sort()
+
+      resultNumber = int(self.get('searchResultsItemNr', 0))
+      result = list[resultNumber]
+      self.drawGLSResultMenu(cr, result)
+
+    return
 
   def describeItem(self, index, category, list):
 #    longName = name = item.getTracklogName()
 #    print filter(lambda x: x.getTracklogName() == longName, loadedTracklogs)
 #    print loadedTracklogs.index(item)
-
-    action = "set:menu:main"
+    action = "set:menu:searchResultsItem"
+    action += "|set:searchResultsItemNr:%d" % index
 #    action += "|set:menu_poi_location:%f,%f" % (item['lat'], item['lon'])
 #    action += "|set:activeTracklog:%d|set:menu:tracklogInfo" % list['responseData']['results'][item]['titleNoFormatting']
-#    action += "|set:menu:poi"
+#    action += "|set:menu:"
 #    name = item.getTracklogName().split('/').pop()
     name = "%s" % list[index][1]['titleNoFormatting']
 
@@ -227,6 +228,57 @@ class search(ranaModule):
       cr.move_to(x, y+textheight)
       cr.show_text(text)
 
+  def updateDistance(self):
+      position = self.get("pos", None) # our lat lon coordinates
+      list = []
+      for item in self.localSearchResults['responseData']['results']: # we iterate over the local search results
+        if position != None:
+          (lat1,lon1) = position
+          (lat2,lon2) = (float(item['lat']), float(item['lng']))
+          distance = geo.distance(lat1,lon1,lat2,lon2)
+          tupple = (distance, item)
+          list.append(tupple) # we pack each result into a tupple with ist distance from us
+        else:
+          tupple = (0, item) # in this case, we dont know our position, so we say the distance is 0
+          list.append(tupple)
+      return list
+
+  def updateItemDistance(self):
+      position = self.get("pos", None) # our lat lon coordinates
+      if position != None:
+        (lat1,lon1) = position
+        (lat2,lon2) = (float(item['lat']), float(item['lng']))
+        distance = geo.distance(lat1,lon1,lat2,lon2)
+      else:
+        distance = 0 # in this case, we dont know our position, so we say the distance is 0
+      return distance
+
+
+  def drawGLSResultMenu(self, cr, resultTupple):
+    """draw an info screen for a Google local search result"""
+    (x1,y1,w,h) = self.get('viewport', None)
+    dx = w / 3
+    dy = h / 4
+
+    (distance, result) = resultTupple
+    menus = self.m.get("menu",None)
+    units = self.m.get('units', None)
+    distanceString = units.km2CurrentUnitString(float(distance))
+    # * draw "escape" button
+    menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:searchResults")
+    # * draw info box
+    menus.drawButton(cr, x1, y1+dy, w, h-dy, "", "3h", "set:menu:routeProfile")
+    text = "%s (%s)" % (result['titleNoFormatting'],distanceString)
+    text += "|%s" % result['streetAddress']
+    text += "|%s, %s, %s" % (result['city'],result['region'],result['country'])
+    for phoneNumber in result['phoneNumbers']:
+      type = ""
+      if phoneNumber['type'] != "":
+        type = " (%s)" % phoneNumber['type']
+      text += "|%s%s" % (phoneNumber['number'], type)
+    text += "|coordinates: %f, %f" % (float(result['lat']),float(result['lng']))
+
+    menus.drawTextToSquare(cr, x1, y1+dy, w, h-dy, text)
 
 
   def firstTime(self):
