@@ -28,8 +28,9 @@ class search(ranaModule):
   """Search for POI"""
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
-    self.localSearchResults = None
+    self.localSearchResults = None # GLS results from onlineServices
     self.scroll = 0
+    self.list = None # processed results: (distancefrom pos, rusult, absolut index)  
     self.filters = {
       'Sleep':{
         'Hotel':'tourism=hotel',
@@ -79,17 +80,18 @@ class search(ranaModule):
         proj = self.m.get('projection', None)
         if proj == None:
           return
-        ll = self.get('showGLSResultLL', None)
-        if ll == None:
+        if self.list == None:
           return
-        list = ll.split(',')
-        lat = float(list[0])
-        lon = float(list[1])
+        resultNr = self.get('searchResultsItemNr', None)
+        tupple = filter(lambda x: x[2] == int(resultNr), self.list).pop()
+        result = tupple[1]
+        lat = float(result['lat'])
+        lon = float(result['lng'])
         self.set("centred",False) # turn off centering before moving screen to the result
         proj.recentre(lat, lon)
       if (message == 'clearSearch'):
         self.localSearchResults = None
-        ll = self.set('showGLSResultLL', None)
+        self.list = None
       self.set("needRedraw", True)
       return
 
@@ -266,6 +268,7 @@ class search(ranaModule):
           tupple = (0, item, index) # in this case, we dont know our position, so we say the distance is 0
           list.append(tupple)
         index = index + 1
+      self.list = list
       return list
 
   def updateItemDistance(self):
@@ -294,7 +297,7 @@ class search(ranaModule):
     # * draw "escape" button
     menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:searchResults")
     # * draw "show" button
-    menus.drawButton(cr, x1+dx, y1, dx, dy, "show", "generic", "search:reset|set:menu:None|set:showGLSResultLL:%f,%f|search:centerOnResult" % (lat,lon))
+    menus.drawButton(cr, x1+dx, y1, dx, dy, "show", "generic", "search:reset|set:menu:None|set:searchResultsItemNr:%d|search:centerOnResult" % index)
     # * draw "add POI" button
     menus.drawButton(cr, x1+2*dx, y1, dx, dy, "add POI", "generic", "search:reset|set:menu:searchResults")
     # * draw info box
@@ -330,21 +333,15 @@ class search(ranaModule):
     proj = self.m.get('projection', None)
     captions = self.get('drawGLSResultCaptions', True)
 
-    ll = self.get('showGLSResultLL', None)
+    highlightNr = int(self.get('searchResultsItemNr', None))
 
     # highlight the currently selected result on the map
-    if ll != None:
-      list = ll.split(',')
-      lat = float(list[0])
-      lon = float(list[1])
-      (x,y) = proj.ll2xy(lat, lon)
-      cr.set_line_width(8)
-      cr.set_source_rgba(0, 0, 1, 0.7)
-      cr.arc(x, y, 15, 0, 2.0 * math.pi)
-      cr.stroke()
-      cr.fill()
 
-    for point in self.localSearchResults['responseData']['results']:
+
+    for tupple in self.list:
+      (distance, point, index) = tupple
+      if index == highlightNr: # the highlighted result is draw in the end
+        continue
       (lat,lon) = (float(point['lat']), float(point['lng']))
       (x,y) = proj.ll2xy(lat, lon)
       cr.set_source_rgb(0.0, 0.0, 0.0)
@@ -368,23 +365,67 @@ class search(ranaModule):
       border = 2
       cr.set_line_width(2)
       cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
-      (rx,xy,rw,rh) = (x - border+10, y + border+h*0.2, w + 4*border, -(h*1.4))
-      cr.rectangle(rx,xy,rw,rh) # create the transparent background rectangle
+      (rx,ry,rw,rh) = (x - border+10, y + border+h*0.2, w + 4*border, -(h*1.4))
+      cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
+      m = self.m.get('clickHandler', None)
+      # register clickable area
+      if(m != None):
+        m.registerXYWH(rx,ry-(-rh),rw,-rh, "search:reset|set:searchResultsItemNr:%d|set:menu:searchResultsItem" % index)
       cr.fill()
-
+      # draw the actual text
       cr.set_source_rgba(1, 1, 1, 0.95) # slightly trasparent white
       cr.move_to(x+10,y)
       cr.show_text(text) # show the trasparent result caption
       cr.stroke()
-
-
       cr.fill()
 
+    if highlightNr != None: # is there some search result to highlight ?
+      tupple = filter(lambda x: x[2] == int(highlightNr), self.list).pop()
+      result = tupple[1]
+      lat = float(result['lat'])
+      lon = float(result['lng'])
+      (x,y) = proj.ll2xy(lat, lon)
 
+      # draw the highlighting circle
+      cr.set_line_width(8)
+      cr.set_source_rgba(0, 0, 1, 0.55) # transparent blue
+      cr.arc(x, y, 15, 0, 2.0 * math.pi)
+      cr.stroke()
+      cr.fill()
 
+      # draw the point
+      cr.set_source_rgb(0.0, 0.0, 0.0)
+      cr.set_line_width(10)
+      cr.arc(x, y, 3, 0, 2.0 * math.pi)
+      cr.stroke()
+      cr.set_source_rgb(1.0, 0.0, 0.0)
+      cr.set_line_width(8)
+      cr.arc(x, y, 2, 0, 2.0 * math.pi)
+      cr.stroke()
 
+      # draw a caption with transparent background
+      text = "%s" % result['titleNoFormatting'] # result caption
+      cr.set_font_size(20)
+      extents = cr.text_extents(text) # get the text extents
+      (w,h) = (extents[2], extents[3])
+      border = 2
+      cr.set_line_width(2)
+      cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
+      (rx,ry,rw,rh) = (x - border+12, y + border+h*0.2 + 6, w + 4*border, -(h*1.4))
+      cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
+      cr.fill()
 
-
+      # register clickable area
+      m = self.m.get('clickHandler', None)
+      if(m != None):
+        m.registerXYWH(rx,ry-(-rh),rw,-rh, "search:reset|set:searchResultsItemNr:%d|set:menu:searchResultsItem" % highlightNr)
+      cr.fill()
+      
+      # draw the actual text
+      cr.set_source_rgba(1, 1, 0, 0.95) # slightly trasparent white
+      cr.move_to(x+15,y+7)
+      cr.show_text(text) # show the trasparent result caption
+      cr.stroke()
 
   def firstTime(self):
     m = self.m.get("menu", None)
