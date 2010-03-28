@@ -64,12 +64,9 @@ class search(ranaModule):
       }
 
   def handleMessage(self, message):
-#      m = message.split('=')
-#      if len(m) <= 1:
-#        print "search: message not in the correct format"
-#        return
     # without this if, we would search also for the commands that move the listable menu
-    if message=="up" or message=="down" or message=="reset": # lets hope no one needs to search for reset, up or down :)
+    # lets hope no one needs to search for reset, up or down :)
+    if message=="up" or message=="down" or message=="reset" or message == 'centerOnResult' or message=='clearSearch':
       if(message == "up"):
         if(self.scroll > 0):
           self.scroll -= 1
@@ -78,6 +75,21 @@ class search(ranaModule):
         self.scroll += 1
       if(message == "reset"):
         self.scroll = 0
+      if (message == "centerOnResult"):
+        proj = self.m.get('projection', None)
+        if proj == None:
+          return
+        ll = self.get('showGLSResultLL', None)
+        if ll == None:
+          return
+        list = ll.split(',')
+        lat = float(list[0])
+        lon = float(list[1])
+        self.set("centred",False) # turn off centering before moving screen to the result
+        proj.recentre(lat, lon)
+      if (message == 'clearSearch'):
+        self.localSearchResults = None
+        ll = self.set('showGLSResultLL', None)
       self.set("needRedraw", True)
       return
 
@@ -188,7 +200,13 @@ class search(ranaModule):
         list.sort()
 
       resultNumber = int(self.get('searchResultsItemNr', 0))
-      result = list[resultNumber]
+
+      """
+         because the results can be ordered in different manners, we use the absolute index,
+         which is created from the initial ordering
+         without this,(with distance sort) we would get different results for a key, if we moved fast enoght :)
+      """
+      result = filter(lambda x: x[2] == resultNumber, list).pop() # get the result for the ABSOLUTE key
       self.drawGLSResultMenu(cr, result)
 
     return
@@ -198,11 +216,15 @@ class search(ranaModule):
 #    print filter(lambda x: x.getTracklogName() == longName, loadedTracklogs)
 #    print loadedTracklogs.index(item)
     action = "set:menu:searchResultsItem"
-    action += "|set:searchResultsItemNr:%d" % index
-#    action += "|set:menu_poi_location:%f,%f" % (item['lat'], item['lon'])
+    action += "|set:searchResultsItemNr:%d" % list[index][2] # here we use the ABSOLUTE index, not the relative one
 #    action += "|set:activeTracklog:%d|set:menu:tracklogInfo" % list['responseData']['results'][item]['titleNoFormatting']
 #    action += "|set:menu:"
 #    name = item.getTracklogName().split('/').pop()
+
+#    lat = list[index][1]['lat']
+#    lon = list[index][1]['lng']
+#    action += "|set:searchResultShowLatLon:%s,%s" % (lat,lon)
+
     name = "%s" % list[index][1]['titleNoFormatting']
 
     units = self.m.get('units', None)
@@ -232,16 +254,18 @@ class search(ranaModule):
   def updateDistance(self):
       position = self.get("pos", None) # our lat lon coordinates
       list = []
+      index = 0
       for item in self.localSearchResults['responseData']['results']: # we iterate over the local search results
         if position != None:
           (lat1,lon1) = position
           (lat2,lon2) = (float(item['lat']), float(item['lng']))
           distance = geo.distance(lat1,lon1,lat2,lon2)
-          tupple = (distance, item)
+          tupple = (distance, item, index)
           list.append(tupple) # we pack each result into a tupple with ist distance from us
         else:
-          tupple = (0, item) # in this case, we dont know our position, so we say the distance is 0
+          tupple = (0, item, index) # in this case, we dont know our position, so we say the distance is 0
           list.append(tupple)
+        index = index + 1
       return list
 
   def updateItemDistance(self):
@@ -261,14 +285,16 @@ class search(ranaModule):
     dx = w / 3
     dy = h / 4
 
-    (distance, result) = resultTupple
+    (distance, result,index) = resultTupple
+    lat = float(result['lat'])
+    lon = float(result['lng'])
     menus = self.m.get("menu",None)
     units = self.m.get('units', None)
     distanceString = units.km2CurrentUnitString(float(distance))
     # * draw "escape" button
     menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:searchResults")
     # * draw "show" button
-    menus.drawButton(cr, x1+dx, y1, dx, dy, "show", "generic", "search:reset|set:menu:None")
+    menus.drawButton(cr, x1+dx, y1, dx, dy, "show", "generic", "search:reset|set:menu:None|set:showGLSResultLL:%f,%f|search:centerOnResult" % (lat,lon))
     # * draw "add POI" button
     menus.drawButton(cr, x1+2*dx, y1, dx, dy, "add POI", "generic", "search:reset|set:menu:searchResults")
     # * draw info box
@@ -292,7 +318,7 @@ class search(ranaModule):
     except:
       text += "|%s" % "no phone numbers found"
 
-    text += "|coordinates: %f, %f" % (float(result['lat']),float(result['lng']))
+    text += "|coordinates: %f, %f" % (lat,lon)
 
     menus.drawTextToSquare(cr, x1, y1+dy, w, h-dy, text) # dsiplay the text in the box
 
@@ -302,6 +328,22 @@ class search(ranaModule):
     if self.localSearchResults == None:
       return
     proj = self.m.get('projection', None)
+    captions = self.get('drawGLSResultCaptions', True)
+
+    ll = self.get('showGLSResultLL', None)
+
+    # highlight the currently selected result on the map
+    if ll != None:
+      list = ll.split(',')
+      lat = float(list[0])
+      lon = float(list[1])
+      (x,y) = proj.ll2xy(lat, lon)
+      cr.set_line_width(8)
+      cr.set_source_rgba(0, 0, 1, 0.7)
+      cr.arc(x, y, 15, 0, 2.0 * math.pi)
+      cr.stroke()
+      cr.fill()
+
     for point in self.localSearchResults['responseData']['results']:
       (lat,lon) = (float(point['lat']), float(point['lng']))
       (x,y) = proj.ll2xy(lat, lon)
@@ -313,32 +355,36 @@ class search(ranaModule):
       cr.set_line_width(8)
       cr.arc(x, y, 2, 0, 2.0 * math.pi)
       cr.stroke()
-      text = "%s" % point['titleNoFormatting']
-#      cr.set_source_rgb(1.0, 1.0, 1.0)
+
+      if captions == False:
+        continue
+      # draw caption with transparent background
+      text = "%s" % point['titleNoFormatting'] # result caption
 
       cr.set_font_size(20)
-      extents = cr.text_extents(text)
+      extents = cr.text_extents(text) # get the text extents
       (w,h) = (extents[2], extents[3])
 
       border = 2
-#      cr.move_to(x,y)
       cr.set_line_width(2)
-      cr.set_source_rgba(0, 0, 1, 0.45)
+      cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
       (rx,xy,rw,rh) = (x - border+10, y + border+h*0.2, w + 4*border, -(h*1.4))
-      cr.rectangle(rx,xy,rw,rh)
-#      cr.rectangle(x - 10 , y + border+8, w +4*border + 20, -(h+4*border))
+      cr.rectangle(rx,xy,rw,rh) # create the transparent background rectangle
       cr.fill()
 
-      cr.set_source_rgba(1, 1, 1, 0.95)
-#      cr.set_source_rgb(1.0, 1.0, 1.0)
+      cr.set_source_rgba(1, 1, 1, 0.95) # slightly trasparent white
       cr.move_to(x+10,y)
-      cr.show_text(text)
+      cr.show_text(text) # show the trasparent result caption
       cr.stroke()
 
 
       cr.fill()
 
-    pass
+
+
+
+
+
 
   def firstTime(self):
     m = self.m.get("menu", None)
@@ -350,4 +396,5 @@ class search(ranaModule):
         m.addItem('search', category, category.lower(), 'set:menu:search_'+category)
         for name,filter in items.items():
           m.addItem('search_'+category, name, name.lower(), "set:menu:searchResults|search:"+filter)
+      m.addItem('search', 'clear', 'clear', 'search:clearSearch|set:menu:None')
         

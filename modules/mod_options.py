@@ -56,9 +56,9 @@ class options(ranaModule):
 
     self.addOption("Tracklogs", "showTracklog",
     [(None, "Dont draw tracklogs"),
-     ("Simple", "Draw simple tracklogs")],
+     ("simple", "Draw simple tracklogs")],
      "view",
-     False)
+     None)
 
     self.addOption("Units", "unitType",
                  [("km","use kilometers"),
@@ -113,6 +113,13 @@ class options(ranaModule):
        ("32", "max 32 results")],
        "Online services",
        "8")
+
+
+    self.addOption("Google local search captions", "drawGLSResultCaptions",
+      [("True","draw captions"),
+       ("False", "dont draw captions")],
+       "Online services",
+       "True")
 
     # Add all our categories to the "options" menu
     self.menuModule = self.m.get("menu", None)

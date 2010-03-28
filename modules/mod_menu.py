@@ -270,6 +270,7 @@ class menus(ranaModule):
         section = line[3:].strip()
         sectionID = 'search_'+section.lower()
         self.addItem('search', section, section.lower(), 'set:menu:'+sectionID)
+        print sectionID
         self.clearMenu(sectionID)
       else:
         details = line.strip()

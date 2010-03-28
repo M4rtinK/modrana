@@ -44,7 +44,6 @@ class showGPX(ranaModule):
     if(not proj.isValid()):
       return
 
-
     mapDt = self.m.get('mapData', None) # get the mapdata module
     tilesToDownload = mapDt.currentTilesToGet
 
@@ -88,7 +87,7 @@ class showGPX(ranaModule):
       elif self.get('showTracklog', None) == 'colored':
         self.drawColoredTracklog(cr, GPXTracklog)
 
-      if self.get('debugCircles', None) == True:
+      if self.get('debugCircles', None) == None:
         self.drawDebugCircles(cr, GPXTracklog)
 
   def point(self, cr, x, y):

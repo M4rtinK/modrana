@@ -69,8 +69,6 @@ class config(ranaModule):
       #m.load('Znaim-Wien.gpx')
       #m.load('znojmo-brno.gpx')
 
-    # Option: what tracklogs to paint: None, 'simple', 'colored', 'colored-dotted'
-    self.set("showTracklog", 'simple')
     # Option: True => draw circles for debuging of the track drawing mechanism optimalization
     #self.set('debugCircles', False)
     # Option: Number of threads for batch-downloading tiles
