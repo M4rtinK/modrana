@@ -313,6 +313,29 @@ class search(ranaModule):
       cr.set_line_width(8)
       cr.arc(x, y, 2, 0, 2.0 * math.pi)
       cr.stroke()
+      text = "%s" % point['titleNoFormatting']
+#      cr.set_source_rgb(1.0, 1.0, 1.0)
+
+      cr.set_font_size(20)
+      extents = cr.text_extents(text)
+      (w,h) = (extents[2], extents[3])
+
+      border = 2
+#      cr.move_to(x,y)
+      cr.set_line_width(2)
+      cr.set_source_rgba(0, 0, 1, 0.45)
+      (rx,xy,rw,rh) = (x - border+10, y + border+h*0.2, w + 4*border, -(h*1.4))
+      cr.rectangle(rx,xy,rw,rh)
+#      cr.rectangle(x - 10 , y + border+8, w +4*border + 20, -(h+4*border))
+      cr.fill()
+
+      cr.set_source_rgba(1, 1, 1, 0.95)
+#      cr.set_source_rgb(1.0, 1.0, 1.0)
+      cr.move_to(x+10,y)
+      cr.show_text(text)
+      cr.stroke()
+
+
       cr.fill()
 
     pass
