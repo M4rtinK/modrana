@@ -19,6 +19,7 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import geo
+import math
 
 def getModule(m,d):
   return(search(m,d))
@@ -27,7 +28,7 @@ class search(ranaModule):
   """Search for POI"""
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
-    self.localSearchResults = ""
+    self.localSearchResults = None
     self.scroll = 0
     self.filters = {
       'Sleep':{
@@ -136,7 +137,7 @@ class search(ranaModule):
       menus = self.m.get("menu",None)
 
       # * draw "escape" button
-      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:main")
+      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:search")
       # * scroll up
       menus.drawButton(cr, x1+dx, y1, dx, dy, "", "up_list", "%s:up" % self.moduleName)
       # * scroll down
@@ -266,20 +267,55 @@ class search(ranaModule):
     distanceString = units.km2CurrentUnitString(float(distance))
     # * draw "escape" button
     menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:searchResults")
+    # * draw "show" button
+    menus.drawButton(cr, x1+dx, y1, dx, dy, "show", "generic", "search:reset|set:menu:None")
+    # * draw "add POI" button
+    menus.drawButton(cr, x1+2*dx, y1, dx, dy, "add POI", "generic", "search:reset|set:menu:searchResults")
     # * draw info box
-    menus.drawButton(cr, x1, y1+dy, w, h-dy, "", "3h", "set:menu:routeProfile")
+    menus.drawButton(cr, x1, y1+dy, w, h-dy, "", "3h", "set:menu:None")
+
+    # * draw details from the search result
     text = "%s (%s)" % (result['titleNoFormatting'],distanceString)
-    text += "|%s" % result['streetAddress']
-    text += "|%s, %s, %s" % (result['city'],result['region'],result['country'])
-    for phoneNumber in result['phoneNumbers']:
-      type = ""
-      if phoneNumber['type'] != "":
-        type = " (%s)" % phoneNumber['type']
-      text += "|%s%s" % (phoneNumber['number'], type)
+
+    try: # the adress can be unknown
+      for addressLine in result['addressLines']:
+        text += "|%s" % addressLine
+    except:
+      text += "|%s" % "no adress found"
+
+    try: # it seems, that this entry is no guarantied
+      for phoneNumber in result['phoneNumbers']:
+        type = ""
+        if phoneNumber['type'] != "":
+          type = " (%s)" % phoneNumber['type']
+        text += "|%s%s" % (phoneNumber['number'], type)
+    except:
+      text += "|%s" % "no phone numbers found"
+
     text += "|coordinates: %f, %f" % (float(result['lat']),float(result['lng']))
 
-    menus.drawTextToSquare(cr, x1, y1+dy, w, h-dy, text)
+    menus.drawTextToSquare(cr, x1, y1+dy, w, h-dy, text) # dsiplay the text in the box
 
+  def drawMapOverlay(self, cr):
+    """Draw overlay that's part of the map"""
+    # draw the GLS results on the map
+    if self.localSearchResults == None:
+      return
+    proj = self.m.get('projection', None)
+    for point in self.localSearchResults['responseData']['results']:
+      (lat,lon) = (float(point['lat']), float(point['lng']))
+      (x,y) = proj.ll2xy(lat, lon)
+      cr.set_source_rgb(0.0, 0.0, 0.0)
+      cr.set_line_width(10)
+      cr.arc(x, y, 3, 0, 2.0 * math.pi)
+      cr.stroke()
+      cr.set_source_rgb(1.0, 0.0, 0.0)
+      cr.set_line_width(8)
+      cr.arc(x, y, 2, 0, 2.0 * math.pi)
+      cr.stroke()
+      cr.fill()
+
+    pass
 
   def firstTime(self):
     m = self.m.get("menu", None)
