@@ -67,7 +67,7 @@ class search(ranaModule):
   def handleMessage(self, message):
     # without this if, we would search also for the commands that move the listable menu
     # lets hope no one needs to search for reset, up or down :)
-    if message=="up" or message=="down" or message=="reset" or message == 'centerOnResult' or message=='clearSearch':
+    if message=="up" or message=="down" or message=="reset" or message == 'centerOnResult' or message=='clearSearch' or message=='storePOI':
       if(message == "up"):
         if(self.scroll > 0):
           self.scroll -= 1
@@ -92,6 +92,17 @@ class search(ranaModule):
       if (message == 'clearSearch'):
         self.localSearchResults = None
         self.list = None
+      if (message == 'storePOI'):
+        store = self.m.get('storePOI', None)
+        if store == None:
+          return
+        resultNr = self.get('searchResultsItemNr', None)
+        if resultNr == None:
+          return
+        tupple = filter(lambda x: x[2] == int(resultNr), self.list).pop()
+        result = tupple[1]
+        store.storeGLSResult(result)
+
       self.set("needRedraw", True)
       return
 
@@ -299,7 +310,7 @@ class search(ranaModule):
     # * draw "show" button
     menus.drawButton(cr, x1+dx, y1, dx, dy, "show", "generic", "search:reset|set:menu:None|set:searchResultsItemNr:%d|search:centerOnResult" % index)
     # * draw "add POI" button
-    menus.drawButton(cr, x1+2*dx, y1, dx, dy, "add POI", "generic", "search:reset|set:menu:searchResults")
+    menus.drawButton(cr, x1+2*dx, y1, dx, dy, "add to POI", "generic", "search:reset|search:storePOI|set:menu:searchResults")
     # * draw info box
     menus.drawButton(cr, x1, y1+dy, w, h-dy, "", "3h", "set:menu:None")
 

@@ -75,6 +75,8 @@ class config(ranaModule):
     self.set('maxBatchThreads', 5)
     # Option: Folder for storing downloaded tile images (there should be a slash at the end)
     self.set('tileFolder', 'cache/images/')
+    # Option: Folder for storing POI file representations (there should be a slash at the end)
+    self.set('POIFolder', 'data/poi/')
     # this sets the number of threads for bach tile download
     # even values of 10 can lead to 3000+ open sockets on a fast internet connection
     # handle with care :)

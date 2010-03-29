@@ -68,6 +68,20 @@ class onlineServices(ranaModule):
     local = self.googleLocalQuery(queryWithLL)
     return local
 
+  def googleDirections(self ,start, destination):
+    '''
+    Get driving directions from Google.
+    start and directions can be either coordinates tupples or address strings
+    '''
+    directions = gmaps.directions(start, destination)
+    return directions
+
+  def googleGeocode(self, adress):
+    pass
+
+  def googleReverseGeocode(self, lat, lon):
+    pass
+
 
 if(__name__ == "__main__"):
   a = example({}, {})
