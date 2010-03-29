@@ -145,28 +145,24 @@ class search(ranaModule):
     # is this menu the correct menu ?
     if menuName != 'searchResults' and menuName != 'searchResultsItem':
       return # we arent the active menu so we dont do anything
-    else:
-      # setup the viewport
-      (x1,y1,w,h) = self.get('viewport', None)
-      dx = w / 3
-      dy = h / 4
-
-#      if w>h:
-#        buttons = "left"
-#      elif w<h:
-#        buttons = "up"
-#      elif w==h:
-#        buttons = "up"
 
     if menuName == 'searchResults':
       menus = self.m.get("menu",None)
 
+      # get coordinate allocation for the menu elements
+      (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
+      (x1,y1) = e1
+      (x2,y2) = e2
+      (x3,y3) = e3
+      (x4,y4) = e4
+      (w1,h1,dx,dy) = alloc
+
       # * draw "escape" button
       menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:search")
       # * scroll up
-      menus.drawButton(cr, x1+dx, y1, dx, dy, "", "up_list", "%s:up" % self.moduleName)
+      menus.drawButton(cr, x2, y2, dx, dy, "", "up_list", "%s:up" % self.moduleName)
       # * scroll down
-      menus.drawButton(cr, x1+2*dx, y1, dx, dy, "", "down_list", "%s:down" % self.moduleName)
+      menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % self.moduleName)
       
       list = self.updateDistance()
 
@@ -183,11 +179,12 @@ class search(ranaModule):
 
           (text1,text2,onClick) = self.describeItem(index, category, list)
 
-          y = y1 + (row+1) * dy
+          y = y4 + (row) * dy
+          w = w1 - (x4-x1)
 
           # Draw background and make clickable
           menus.drawButton(cr,
-            x1,
+            x4,
             y,
             w,
             dy,
@@ -197,13 +194,13 @@ class search(ranaModule):
 
           border = 20
 
-          self.showText(cr, text1, x1+border, y+border, w-2*border)
+          self.showText(cr, text1, x4+border, y+border, w-2*border)
 
           # 2nd line: current value
-          self.showText(cr, text2, x1 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
+          self.showText(cr, text2, x4 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
 
           # in corner: row number
-          self.showText(cr, "%d/%d" % (index+1, numItems), x1+0.85*w, y + 0.42 * dy, w * 0.15 - border, 20)
+          self.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y + 0.42 * dy, w * 0.15 - border, 20)
 
     if menuName == 'searchResultsItem':
       """draw the menu describing a single GLS result"""
@@ -295,24 +292,32 @@ class search(ranaModule):
 
   def drawGLSResultMenu(self, cr, resultTupple):
     """draw an info screen for a Google local search result"""
-    (x1,y1,w,h) = self.get('viewport', None)
-    dx = w / 3
-    dy = h / 4
+
+
+    # get coordinate allocation for the menu elements
+    menus = self.m.get("menu",None)
+    (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
+    (x1,y1) = e1
+    (x2,y2) = e2
+    (x3,y3) = e3
+    (x4,y4) = e4
+    (w,h,dx,dy) = alloc
 
     (distance, result,index) = resultTupple
     lat = float(result['lat'])
     lon = float(result['lng'])
-    menus = self.m.get("menu",None)
     units = self.m.get('units', None)
     distanceString = units.km2CurrentUnitString(float(distance))
     # * draw "escape" button
     menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:searchResults")
     # * draw "show" button
-    menus.drawButton(cr, x1+dx, y1, dx, dy, "show", "generic", "search:reset|set:menu:None|set:searchResultsItemNr:%d|search:centerOnResult" % index)
+    menus.drawButton(cr, x2, y2, dx, dy, "show", "generic", "search:reset|set:menu:None|set:searchResultsItemNr:%d|search:centerOnResult" % index)
     # * draw "add POI" button
-    menus.drawButton(cr, x1+2*dx, y1, dx, dy, "add to POI", "generic", "search:reset|search:storePOI|set:menu:searchResults")
+    menus.drawButton(cr, x3, y3, dx, dy, "add to POI", "generic", "search:reset|search:storePOI|set:menu:searchResults")
     # * draw info box
-    menus.drawButton(cr, x1, y1+dy, w, h-dy, "", "3h", "set:menu:None")
+    w4 = w - x4
+    h4 = h - y4
+    menus.drawButton(cr, x4, y4, w4, h4, "", "box480", "set:menu:None")
 
     # * draw details from the search result
     text = "%s (%s)" % (result['titleNoFormatting'],distanceString)
@@ -334,7 +339,7 @@ class search(ranaModule):
 
     text += "|coordinates: %f, %f" % (lat,lon)
 
-    menus.drawTextToSquare(cr, x1, y1+dy, w, h-dy, text) # dsiplay the text in the box
+    menus.drawTextToSquare(cr, x4, y4, w4, h4, text) # dsiplay the text in the box
 
   def drawMapOverlay(self, cr):
     """Draw overlay that's part of the map"""

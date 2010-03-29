@@ -68,10 +68,13 @@ class tracklogManager(ranaModule):
     # is this menu the correct menu ?
     if menuName == 'tracklogManager' or menuName == 'tracklogInfo':
       # setup the viewport
-      (x1,y1,w,h) = self.get('viewport', None)
-      dx = w / 3
-      dy = h / 4
-      print dy
+      menus = self.m.get("menu",None)
+      (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
+      (x1,y1) = e1
+      (x2,y2) = e2
+      (x3,y3) = e3
+      (x4,y4) = e4
+      (w1,h1,dx,dy) = alloc
     else:
       return # we arent the active menu so we dont do anything
 
@@ -83,25 +86,12 @@ class tracklogManager(ranaModule):
   #    tracklistsWithElevation = filter(lambda x: x.elevation == True, loadedTracklogs)
   #    tracklog = tracklistsWithElevation[0].trackpointsList[0]
 
-  #    if w > h:
-  #      cols = 4
-  #      rows = 3
-  #    elif w < h:
-  #      cols = 3
-  #      rows = 4
-  #    elif w == h:
-  #      cols = 4
-  #      rows = 4
-  #
-  #    dx = w / cols
-  #    dy = h / rows
-
       # * draw "escape" button
       menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:main")
       # * scroll up
-      menus.drawButton(cr, x1+dx, y1, dx, dy, "", "up_list", "%s:up" % self.moduleName)
+      menus.drawButton(cr, x2, y2, dx, dy, "", "up_list", "%s:up" % self.moduleName)
       # * scroll down
-      menus.drawButton(cr, x1+2*dx, y1, dx, dy, "", "down_list", "%s:down" % self.moduleName)
+      menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % self.moduleName)
 
       loadTl = self.m.get('loadTracklog', None) # get the tracklog module
       loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
@@ -118,11 +108,13 @@ class tracklogManager(ranaModule):
 
           (text1,text2,onClick) = self.describeTracklog(list[index], category, loadedTracklogs)
 
-          y = y1 + (row+1) * dy
+#          y = y1 + (row+1) * dy
+          y = y4 + (row) * dy
+          w = w1 - (x4-x1)
 
           # Draw background and make clickable
           menus.drawButton(cr,
-            x1,
+            x4,
             y,
             w,
             dy,
@@ -132,13 +124,13 @@ class tracklogManager(ranaModule):
 
           border = 20
 
-          self.showText(cr, text1, x1+border, y+border, w-2*border)
+          self.showText(cr, text1, x4+border, y+border, w-2*border)
 
           # 2nd line: current value
-          self.showText(cr, text2, x1 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
+          self.showText(cr, text2, x4 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
 
           # in corner: row number
-          self.showText(cr, "%d/%d" % (index+1, numItems), x1+0.85*w, y+border, w * 0.15 - border, 20)
+          self.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y+border, w * 0.15 - border, 20)
       return
 
     elif menuName == 'tracklogInfo':
@@ -150,16 +142,17 @@ class tracklogManager(ranaModule):
       activeTracklog = loadedTracklogs[index]
       profile = self.m.get('routeProfile', None)
 
-#      print activeTracklog
+      w = w1 - (x4-x1)
+
       # * draw "escape" button
       menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:tracklogManager")
       # * draw "tools" button
-      menus.drawButton(cr, x1+dx, y1, dx, dy, "tools", "generic", "set:menu:tracklogTools")
+      menus.drawButton(cr, x2, y2, dx, dy, "tools", "generic", "set:menu:tracklogTools")
       # * draw "show button" button
-      menus.drawButton(cr, x1+2*dx, y1, dx, dy, "show on map", "generic", "set:menu:main")
+      menus.drawButton(cr, x3, y3, dx, dy, "show on map", "generic", "set:menu:main")
       # * draw "route profile"
-      menus.drawButton(cr, x1, y1+dy, w, dy, "", "2h", "set:menu:routeProfile")
-      profile.lineChart(cr, activeTracklog, x1, y1+dy, w, dy)
+      menus.drawButton(cr, x4, y4, w, dy, "", "3h", "set:menu:routeProfile")
+      profile.lineChart(cr, activeTracklog, x4, y4, w, dy)
 
       # set up the tools submenu
       menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")

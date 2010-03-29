@@ -404,14 +404,65 @@ class menus(ranaModule):
 #    (x1,y1,w1,h1) = self.get('viewport', None)
 #    dx = w / 3
 #    dy = h / 4
-    border = 20
+    border = 30
+    spacing = 20
     lines = text.split('|')
     lineCount = len(lines)
-    lineSpace = (h-3*border)/lineCount
+    lineSpace = (h-2*spacing)/lineCount
     i = 0
     for line in lines:
-      self.showText(cr, line, x+border, y+i*lineSpace+2*border, w-2*border)
+      self.showText(cr, line, x+border, y+i*lineSpace+1*spacing, w-2*border)
       i = i + 1
+
+  def threePlusOneMenuCoords(self):
+    """
+    get element coordinates for a menu,
+    that combines three normal and one big button/area
+    * becuse we want the big button/area to be cca square,
+      we move the buttons to the upper part of the screen in portrait mode
+      and to the left in landscape
+
+    """
+    (x1,y1,w1,h1) = self.get('viewport', None)
+
+    if w1 > h1:
+      cols = 4
+      rows = 3
+    elif w1 < h1:
+      cols = 3
+      rows = 4
+    elif w1 == h1:
+      cols = 4
+      rows = 4
+
+    dx = w1 / cols
+    dy = h1 / rows
+
+    if w1>h1:
+#        buttons = "landscape"
+      (elem1) = (x1, y1)
+      (elem2) = (x1, y1+1*dy)
+      (elem3) = (x1, y1+2*dy)
+      (elem4) = (x1+dx, y1)
+
+
+    elif w1<=h1:
+#        buttons = "portrait"
+      (elem1) = (x1, y1)
+      (elem2) = (x1+dx, y1)
+      (elem3) = (x1+2*dx, y1)
+      (elem4) = (x1, y1+dy)
+
+    alloc = (w1,h1,dx,dy)
+
+    return(elem1,elem2,elem3,elem4,alloc)
+
+  def listableMenuCoords(self):
+    """listable menu is basicly the same as the three plus one menu,
+    eq the listable entries are in the place of the square element"""
+    return self.threePlusOneMenuCoords()
+
+
 
   def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
     if(text):

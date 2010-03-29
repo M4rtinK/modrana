@@ -182,19 +182,30 @@ class options(ranaModule):
     # Find the screen
     if not self.d.has_key('viewport'):
       return
-    (x1,y1,w,h) = self.get('viewport', None)
+#    (x1,y1,w,h) = self.get('viewport', None)
+#
+#    dx = w / 3
+#    dy = h / 4
 
-    dx = w / 3
-    dy = h / 4
+
     
     if(self.menuModule):
+      
+      # elements allocation
+      (e1,e2,e3,e4,alloc) = self.menuModule.threePlusOneMenuCoords()
+      (x1,y1) = e1
+      (x2,y2) = e2
+      (x3,y3) = e3
+      (x4,y4) = e4
+      (w1,h1,dx,dy) = alloc
+
       # Top row:
       # * parent menu
       self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:options")
       # * scroll up
-      self.menuModule.drawButton(cr, x1+dx, y1, dx, dy, "", "up_list", "options:up")
+      self.menuModule.drawButton(cr, x2, y2, dx, dy, "", "up_list", "options:up")
       # * scroll down
-      self.menuModule.drawButton(cr, x1+2*dx, y1, dx, dy, "", "down_list", "options:down")
+      self.menuModule.drawButton(cr, x3, y3, dx, dy, "", "down_list", "options:down")
 
       options = self.options[menuName]
 
@@ -230,11 +241,13 @@ class options(ranaModule):
           onClick += "|options:save"
           onClick += "|set:needRedraw:1"
 
-          y = y1 + (row+1) * dy
+#          y = y1 + (row+1) * dy
+          y = y4 + (row) * dy
+          w = w1 - (x4-x1)
           
           # Draw background and make clickable
           self.menuModule.drawButton(cr,
-            x1,
+            x4,
             y,
             w,
             dy,
@@ -245,13 +258,13 @@ class options(ranaModule):
           border = 20
 
           # 1st line: option name
-          self.showText(cr, title+":", x1+border, y+border, w-2*border)
+          self.showText(cr, title+":", x4+border, y+border, w-2*border)
 
           # 2nd line: current value
-          self.showText(cr, valueDescription, x1 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
+          self.showText(cr, valueDescription, x4 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
 
           # in corner: row number
-          self.showText(cr, "%d/%d" % (index+1, numItems), x1+0.85*w, y+border, w * 0.15 - border, 20)
+          self.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y+border, w * 0.15 - border, 20)
 
             
   def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
