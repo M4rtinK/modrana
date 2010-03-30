@@ -176,8 +176,18 @@ class mapData(ranaModule):
 #      z = currentZ # current Zoomlevel
       diffZ = maxZ - minZ
       midZ = int(minZ + (diffZ/2.0))
-      if midZ < 15:
+
+      """well, its not exactly middle, its jut a value that decides, if we split down or just round up
+         splitting from a zoomlevel too high can lead to much more tiles than requested
+         for example, we want tiles for a 10 km radius but we choose to split from a zoomlevel, where a tile is
+         20km*20km and our radius intersects four of these tiles, when we split these tiles, we get tiles for an
+         are of 40km*40km, instead of the requested 10km
+         therefore, zoom level 15 is used as the minimum number for splitting tiles down
+         when the maximum zoomlevel from the range requested is less than 15, we dont split at all"""
+      if midZ < 15 and maxZ < 15:
         midZ = maxZ
+      else:
+        midZ = 15
       print "max: %d, min: %d, diff: %d, middle:%d" % (maxZ, minZ, diffZ, midZ)
 
       if(location == "here"):  
@@ -280,6 +290,7 @@ class mapData(ranaModule):
     """start of the tile splitting code"""
     previousZoomlevelTiles = None # we will splitt the tiles from the previous zoomlevel
     print "splitting down"
+    print range(tilesZ,maxZ)
     for z in range(tilesZ, maxZ): # to max zoom (fo each z we split one zoomlevel down)
       newTilesFromSplit = set() # tiles from the splitting go there
       if previousZoomlevelTiles == None: # this is the first iteration
