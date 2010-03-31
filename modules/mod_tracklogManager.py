@@ -54,15 +54,16 @@ class tracklogManager(ranaModule):
       loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
       index = int(self.get('activeTracklog', 0)) # get the active tracklog
       activeTracklog = loadedTracklogs[index]
-#      print activeTracklog.trackpointsList
-      for trackpoint in activeTracklog.trackpointsList[0]:
-        lat = trackpoint.latitude
-        lon = trackpoint.longitude
-        onlineElevation = int(online.elevFromGeonames(lat,lon))
-        trackpoint.elevation = onlineElevation
-        print onlineElevation
-      activeTracklog.checkElevation()
-      activeTracklog.replaceFile()
+      # generate a list of (lat,lon) tupples
+      latLonList = map(lambda x: (x.latitude,x.longitude), activeTracklog.trackpointsList[0])
+      # this method returns (lat,lon, elev) tupples, where the elev comes from an online service
+      onlineElevList = online.elevFromGeonamesBatch(latLonList)
+      index = 0
+      for onlinePoint in onlineElevList: # add the new elevation data to the tracklog
+        activeTracklog.trackpointsList[0][index].elevation = onlinePoint[2]
+        index = index + 1
+      activeTracklog.checkElevation() # update the elevation statistics in the tracklog object
+      activeTracklog.replaceFile() # replace the old tracklog file
 
   def drawMenu(self, cr, menuName):
     # is this menu the correct menu ?

@@ -46,6 +46,53 @@ class onlineServices(ranaModule):
       return 0
     return query.read()
 
+  def elevFromGeonamesBatch(self, latLonList):
+    """
+    get elevation in meters for the specified latitude and longitude from geonames
+    it is possible to ask for up to 20 coordinates at once
+    """
+    maxCoordinates = 20 #geonames only allows 20 coordinates per query
+    latLonElevList = []
+    tempList = []
+#    mainLength = len(latLonList)
+    while len(latLonList) > 0:
+
+      tempList = latLonList[0:maxCoordinates]
+      latLonList = latLonList[maxCoordinates:len(latLonList)]
+
+      lats = ""
+      lons = ""
+      for point in tempList:
+        lats += "%f," % point[0]
+        lons += "%f," % point[1]
+
+# TODO: maybe add switching ?
+#      url = 'http://ws.geonames.org/astergdem?lats=%s&lngs=%s' % (lats,lons)
+      url = 'http://ws.geonames.org/srtm3?lats=%s&lngs=%s' % (lats,lons)
+      try:
+        query = urllib.urlopen(url)
+      except:
+        "onlineServices: getting elevation from geonames retuned an error"
+        results = "0"
+        for i in range(1, len(tempList)):
+          results = results + " 0"
+      try:
+        results = query.read().split('\r\n')
+        query.close()
+      except:
+        "onlineServices: elevation string from geonames has a wrong format"
+        results = "0"
+        for i in range(1, len(tempList)):
+          results = results + " 0"
+
+      index = 0
+      for point in tempList: # add the results to the new list with elevation
+        latLonElevList.append((point[0],point[1],results[index]))
+        index = index +1
+
+    return latLonElevList
+
+
   def getGmapsInstance(self):
     """get a google maps wrapper instance"""
     key = self.get('googleAPIKey', None)
