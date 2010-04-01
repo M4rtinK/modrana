@@ -152,8 +152,20 @@ class tracklogManager(ranaModule):
       # * draw "show button" button
       menus.drawButton(cr, x3, y3, dx, dy, "show on map", "generic", "set:menu:main")
       # * draw "route profile"
-      menus.drawButton(cr, x4, y4, w, dy, "", "3h", "set:menu:routeProfile")
+      menus.drawButton(cr, x4, y4, w, dy, "", "box480", "set:menu:routeProfile")
       profile.lineChart(cr, activeTracklog, x4, y4, w, dy)
+      # * draw an info box
+      menus.drawButton(cr, x4, y4+dy, w, h1-(y4+dy), "", "3h", "set:menu:tracklogInfo")
+      track = activeTracklog
+
+      text = "number of points: %d|" % len(track.trackpointsList[0])
+      if track.elevation == True:
+        text += "|maximum elevation: %d meters|minimum elevation: %d meters" % (track.routeInfo['maxElevation'], track.routeInfo['minElevation'])
+        text += "|elevation of the first point: %d meters" % track.routeInfo['firstElevation']
+        text += "|elevation of the last point: %d meters" % track.routeInfo['lastElevation']
+
+      menus.drawTextToSquare(cr, x4, y4+dy, w, h1-(y4+dy), text)
+
 
       # set up the tools submenu
       menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")

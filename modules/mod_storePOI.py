@@ -32,8 +32,9 @@ class storePOI(ranaModule):
     ranaModule.__init__(self, m, d)
     self.folder = self.get('POIFolder', 'data/poi/')
     self.GLSResultFolder = self.folder + 'gls/'
-    self.points = {}
-    self.points['GLS'] = []
+    self.filename = self.folder + 'poi.txt'
+    self.points = []
+#    self.points['GLS'] = []
     self.load()
     
   def update(self):
@@ -43,39 +44,67 @@ class storePOI(ranaModule):
 #    #print "Updated %d times" % (self.get('num_updates'))
 
   def load(self):
-    # load GLS Results from files
+    """load POI from file"""
 #    start = time.clock()
-    GLSfiles = os.listdir(self.GLSResultFolder)
-    for file in GLSfiles:
-      f = open(self.GLSResultFolder + file,'r')
-      result = cPickle.load(f)
+    try:
+      f = open(self.filename, 'r')
+      self.points = cPickle.load(f)
       f.close()
-      self.points['GLS'].append(result)
+    except:
+      print "storePOI: loding POI from file failed"
 #    print "Loading POI took %1.2f ms" % (1000 * (time.clock() - start))
-    pass
+  def save(self):
+    """save all poi in the main list to file"""
+    try:
+      f = open(self.filename, 'w')
+      cPickle.dump(self.points, f)
+      f.close()
+    except:
+      print "storePoi: saving POI to file failed"
 
-  def storeGLSResult(self, GLSResult):
-    timestamp = time.strftime("%Y%m%dT%H%M%S")
-    self.GLSResultExtension = '.gls'
-    path = self.folder + timestamp + self.GLSResultFolder
-    print path
-    f = open(path, 'w')
-    cPickle.dump(GLSResult,f)
-    f.close()
 
-  def loadGLSResultFromFile(self, f):
-    GLSResult = cPickle.load(f)
-    return GLSResult
+  def storeGLSResult(self, result):
+    name = result['titleNoFormatting']
+    lat = float(result['lat'])
+    lon = float(result['lng'])
+    cathegory = "gls"
+
+    newPOI = POI(name, cathegory, lat, lon)
+
+    text = "%s" % (result['titleNoFormatting'])
+
+    try: # the adress can be unknown
+      for addressLine in result['addressLines']:
+        text += "|%s" % addressLine
+    except:
+      text += "|%s" % "no adress found"
+
+    try: # it seems, that this entry is no guarantied
+      for phoneNumber in result['phoneNumbers']:
+        type = ""
+        if phoneNumber['type'] != "":
+          type = " (%s)" % phoneNumber['type']
+        text += "|%s%s" % (phoneNumber['number'], type)
+    except:
+      text += "|%s" % "no phone numbers found"
+
+    newPOI.setDescription(text)
+    
+    self.points.append(newPOI)
+    self.save()
 
 class POI():
   """A basic class representing a POI."""
-  def __init__(self, trackpointsList, tracklogFilename):
-    self.name = None
-    self.description = None
-    self.cathegory = None
-    self.lat = None
-    self.lon = None
-    self.GLSResult = None # optional
+  def __init__(self, name, cathegory, lat, lon):
+    self.name = name
+    self.cathegory = cathegory
+    self.description = ""
+    self.lat = lat
+    self.lon = lon
+
+  def setDescription(self, description):
+    self.description = description
+#    self.GLSResult = None # optional
 
 
 if(__name__ == "__main__"):
