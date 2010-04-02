@@ -60,6 +60,7 @@ class mapData(ranaModule):
     self.getFilesThread = None
     self.aliasForSet = self.set
     self.lastMenuRedraw = 0
+    self.notificateOnce = True
 
   def listTiles(self, route):
     """List all tiles touched by a polyline"""
@@ -652,9 +653,13 @@ class mapData(ranaModule):
       totalTileCount = getFilesThread.urlCount
       currentTileCount = getFilesThread.processed
       text = "Downloading: %d of %d tiles complete" % (currentTileCount, totalTileCount)
+      self.notificateOnce = True
       return text
     elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
       text = "Download complete."
+      if self.notificateOnce == True:
+        self.sendMessage('notification:Download complete.#10')
+      self.notificateOnce = False
       return text
 
   def getSizeText(self, sizeThread):
@@ -699,6 +704,14 @@ class mapData(ranaModule):
 
       cr.move_to(x, y+textheight)
       cr.show_text(text)
+
+  def sendMessage(self,message):
+    m = self.m.get("messages", None)
+    if(m != None):
+      print "mapData: Sending message: " + message
+      m.routeMessage(message)
+    else:
+      print "mapData: No message handler, cant send message."
 
   def tilesetSvgSnippet(self, f, tileset, colour):
     for tile in tileset:

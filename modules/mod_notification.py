@@ -33,6 +33,7 @@ class notification(ranaModule):
     self.position = 'middle'
     self.expirationTimestamp = time.time()
     self.draw = False
+
     
   def update(self):
 #    # Get and set functions are used to access global data
@@ -42,14 +43,19 @@ class notification(ranaModule):
 
   def handleMessage(self, message):
     """the first part is the message, that will be displayed,
-       there can also by some parameters, delimited by |"""
-    list = message.split('|')
+       there can also by some parameters, delimited by #"""
+    list = message.split('#')
     # TODO: supprot setting timeout and position
     timeout = self.timeout
     self.position = 'middle'
-    self.expirationTimestamp = time.time() + timeout
     self.notificationText = list[0]
     self.draw = True # enable drawing of notifications
+    if len(list) == 2:
+      try:
+        timeout = int(list[1]) # override the default timeout
+      except:
+        print "notification: wron timeout, using default 5 secconds"
+    self.expirationTimestamp = time.time() + timeout
 
 
   def drawMenu(self,cr,menuName):
