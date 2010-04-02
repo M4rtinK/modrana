@@ -283,7 +283,7 @@ class menus(ranaModule):
   def setupPoiMenu(self):
     self.clearMenu('poi', "set:menu:None")
     for i in("Show map", "Go to", "Route to", "Delete"):
-      self.addItem('poi', i, i, '')
+      self.addItem('poi', i, i, 'set:menu:showPOI')
 
   def setupEditBatchMenu(self):
     """this is a menu for editing settings of a batch before running the said batch"""
@@ -462,7 +462,88 @@ class menus(ranaModule):
     eq the listable entries are in the place of the square element"""
     return self.threePlusOneMenuCoords()
 
+  def drawListableMenuControls(self, cr, menuName, parent):
+    """draw the controls for a listable menu"""
+    (e1,e2,e3,e4,alloc) = self.threePlusOneMenuCoords()
+    (x1,y1) = e1
+    (x2,y2) = e2
+    (x3,y3) = e3
+#    (x4,y4) = e4
+    (w1,h1,dx,dy) = alloc
+    # * draw "escape" button
+    self.drawButton(cr, x1, y1, dx, dy, "", "up", "%s:reset|set:menu:%s" % (parent,parent))
+    # * scroll up
+    self.drawButton(cr, x2, y2, dx, dy, "", "up_list", "%s:up" % menuName)
+    # * scroll down
+    self.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % menuName)
 
+  def drawListableMenuItems(self, cr, list, scroll, describeItem):
+    """draw the items for a listable menu"""
+    (e1,e2,e3,e4,alloc) = self.listableMenuCoords()
+    (x1,y1) = e1
+#    (x2,y2) = e2
+#    (x3,y3) = e3
+    (x4,y4) = e4
+    (w1,h1,dx,dy) = alloc
+
+    category = ""
+
+    for row in (0,1,2): # TODO: dynamic adjustment (how to guess the screensize vs dpi ?)
+      index = scroll + row
+      numItems = len(list)
+      if(0 <= index < numItems):
+
+        (text1,text2,onClick) = describeItem(index, category, list)
+
+        y = y4 + (row) * dy
+        w = w1 - (x4-x1)
+
+        # Draw background and make clickable
+        self.drawButton(cr,
+          x4,
+          y,
+          w,
+          dy,
+          "",
+          "3h", # background for a 3x1 icon
+          onClick)
+
+        border = 20
+
+        self.showText(cr, text1, x4+border, y+border, w-2*border)
+
+        # 2nd line: current value
+        self.showText(cr, text2, x4 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
+
+        # in corner: row number
+        self.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y + 0.42 * dy, w * 0.15 - border, 20)
+
+  def drawThreePlusOneMenu(self, cr, menuName, parent, button1, button2, box):
+    """draw a three plus on menu"""
+    (e1,e2,e3,e4,alloc) = self.threePlusOneMenuCoords()
+    (x1,y1) = e1
+    (x2,y2) = e2
+    (x3,y3) = e3
+    (x4,y4) = e4
+    (w,h,dx,dy) = alloc
+
+    (text1, icon1, action1) = button1
+    (text2, icon2, action2) = button2
+    (boxTextLines, boxAction) = box
+
+    # * draw "escape" button
+    self.drawButton(cr, x1, y1, dx, dy, "", "up", "%s:reset|set:menu:%s" % (menuName, parent))
+    # * draw the first button
+    self.drawButton(cr, x2, y2, dx, dy, text1, icon1, action1)
+    # * draw the second button
+    self.drawButton(cr, x3, y3, dx, dy, text2, icon2, action2)
+    # * draw info box
+    w4 = w - x4
+    h4 = h - y4
+    self.drawButton(cr, x4, y4, w4, h4, "", "box480", boxAction)
+    # * draw text to the box
+    text = boxTextLines
+    self.drawTextToSquare(cr, x4, y4, w4, h4, text) # display the text in the box
 
   def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
     if(text):

@@ -1,3 +1,4 @@
+
 #!/usr/bin/python
 #----------------------------------------------------------------------------
 # Search for POI
@@ -311,7 +312,7 @@ class search(ranaModule):
     # * draw "escape" button
     menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:searchResults")
     # * draw "show" button
-    menus.drawButton(cr, x2, y2, dx, dy, "show", "generic", "search:reset|set:menu:None|set:searchResultsItemNr:%d|search:centerOnResult" % index)
+    menus.drawButton(cr, x2, y2, dx, dy, "on map#show", "generic", "search:reset|set:menu:None|set:searchResultsItemNr:%d|search:centerOnResult" % index)
     # * draw "add POI" button
     menus.drawButton(cr, x3, y3, dx, dy, "add to POI", "generic", "search:reset|search:storePOI|set:menu:searchResults")
     # * draw info box
@@ -339,7 +340,7 @@ class search(ranaModule):
 
     text += "|coordinates: %f, %f" % (lat,lon)
 
-    menus.drawTextToSquare(cr, x4, y4, w4, h4, text) # dsiplay the text in the box
+    menus.drawTextToSquare(cr, x4, y4, w4, h4, text) # display the text in the box
 
   def drawMapOverlay(self, cr):
     """Draw overlay that's part of the map"""

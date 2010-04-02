@@ -67,9 +67,9 @@ class storePOI(ranaModule):
     name = result['titleNoFormatting']
     lat = float(result['lat'])
     lon = float(result['lng'])
-    cathegory = "gls"
+    category = "gls"
 
-    newPOI = POI(name, cathegory, lat, lon)
+    newPOI = POI(name, category, lat, lon)
 
     text = "%s" % (result['titleNoFormatting'])
 
@@ -95,9 +95,9 @@ class storePOI(ranaModule):
 
 class POI():
   """A basic class representing a POI."""
-  def __init__(self, name, cathegory, lat, lon):
+  def __init__(self, name, category, lat, lon):
     self.name = name
-    self.cathegory = cathegory
+    self.category = category
     self.description = ""
     self.lat = lat
     self.lon = lon
