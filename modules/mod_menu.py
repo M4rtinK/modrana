@@ -286,6 +286,7 @@ class menus(ranaModule):
       self.addItem('poi', i, i, 'set:menu:showPOI')
       
     self.addItem('poi', 'Route to', 'generic', "set:menu:showPOIRoute")
+    self.addItem('poi', 'route#clear', 'generic', "route:clear|set:menu:main")
 
   def setupEditBatchMenu(self):
     """this is a menu for editing settings of a batch before running the said batch"""
