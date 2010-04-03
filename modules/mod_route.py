@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #---------------------------------------------------------------------------
-# Does routing using pyroutelib2
+# Finds routes using Google Direction (and possibly other services in the future).
 #---------------------------------------------------------------------------
 # Copyright 2007-2008, Oliver White
 #
@@ -41,39 +41,31 @@ class route(ranaModule):
     
   def handleMessage(self, message):
     if(message == "route"): # simple route, from here to selected point
-      to_pos = self.get("selected_pos", None)
-      if(to_pos):
-        to_lat,to_lon = [float(a) for a in to_pos.split(",")]
+      toPos = self.get("selectedPos", None)
+      if(toPos):
+        toLat,toLon = [float(a) for a in toPos.split(",")]
 
-        from_pos = self.get("pos", None)
-        if(from_pos):
-          (from_lat, from_lon) = from_pos
-          #print "Routing %1.3f,%1.3f to %1.3f,%1.3f" % (from_lat, from_lon, to_lat, to_lon)
+        fromPos = self.get("pos", None)
+        if(fromPos):
+          (fromLat, fromLon) = fromPos
+          print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
 
           # TODO: wait message
-          self.doRoute(from_lat, from_lon, to_lat, to_lon)
+          self.doRoute(fromLat, fromLon, toLat, toLon)
           self.set("menu",None)
 
-  def doRoute(self, from_lat, from_lon, to_lat, to_lon):
+  def doRoute(self, fromLat, fromLon, toLat, toLon):
     """Route from one point to another, and set that as the active route"""
-    data = LoadOsm(self.get('transport', 'cycle'))
+    online = self.m.get('onlineServices', None)
+    if online == None:
+      return
+    directions = online.googleDirectionsLL(fromLat, fromLon, toLat, toLon)
+    if directions == None:
+      return
+    polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
+    route = self.decode_line(polyline) # we decode the polyline to a list of points
 
-    node1 = data.findNode(from_lat, from_lon)
-    node2 = data.findNode(to_lat, to_lon)
-    print "Routing from node %d to %d..." %(node1,node2)
-
-    router = Router(data)
-    result, route = router.doRoute(node1, node2)
-    
-    if result == 'success':
-      self.route = []
-      for node_id in route:
-        node = data.rnodes[node_id]
-        self.route.append((node[0], node[1]))
-      print "Route discovered"
-    else:
-      print "Error in routing: " + result
-      
+    self.route = route
 
   def drawMapOverlay(self, cr):
     """Draw a route"""
@@ -87,9 +79,11 @@ class route(ranaModule):
       return
     cr.set_source_rgb(0,0, 0.5)
     cr.set_line_width(7)
+
     first = True
-    for p in self.route:
-      (lat,lon) = p
+    route = self.route
+    for point in route:
+      (lat,lon) = (point[0],point[1])
       x,y = proj.ll2xy(lat,lon)
       if(first):
         cr.move_to(x,y)
@@ -98,6 +92,60 @@ class route(ranaModule):
         cr.line_to(x,y)
       
     cr.stroke()
+
+  #from: http://seewah.blogspot.com/2009/11/gpolyline-decoding-in-python.html
+  def decode_line(self, encoded):
+
+    """Decodes a polyline that was encoded using the Google Maps method.
+
+    See http://code.google.com/apis/maps/documentation/polylinealgorithm.html
+
+    This is a straightforward Python port of Mark McClure's JavaScript polyline decoder
+    (http://facstaff.unca.edu/mcmcclur/GoogleMaps/EncodePolyline/decode.js)
+    and Peter Chng's PHP polyline decode
+    (http://unitstep.net/blog/2008/08/02/decoding-google-maps-encoded-polylines-using-php/)
+    """
+
+    encoded_len = len(encoded)
+    index = 0
+    array = []
+    lat = 0
+    lng = 0
+
+    while index < encoded_len:
+
+        b = 0
+        shift = 0
+        result = 0
+
+        while True:
+            b = ord(encoded[index]) - 63
+            index = index + 1
+            result |= (b & 0x1f) << shift
+            shift += 5
+            if b < 0x20:
+                break
+
+        dlat = ~(result >> 1) if result & 1 else result >> 1
+        lat += dlat
+
+        shift = 0
+        result = 0
+
+        while True:
+            b = ord(encoded[index]) - 63
+            index = index + 1
+            result |= (b & 0x1f) << shift
+            shift += 5
+            if b < 0x20:
+                break
+
+        dlng = ~(result >> 1) if result & 1 else result >> 1
+        lng += dlng
+
+        array.append((lat * 1e-5, lng * 1e-5))
+
+    return array
     
 if(__name__ == '__main__'):
   d = {'transport':'car'}

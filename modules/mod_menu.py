@@ -282,8 +282,10 @@ class menus(ranaModule):
     
   def setupPoiMenu(self):
     self.clearMenu('poi', "set:menu:None")
-    for i in("Show map", "Go to", "Route to", "Delete"):
+    for i in("Show map", "Go to", "Delete"):
       self.addItem('poi', i, i, 'set:menu:showPOI')
+      
+    self.addItem('poi', 'Route to', 'generic', "set:menu:showPOIRoute")
 
   def setupEditBatchMenu(self):
     """this is a menu for editing settings of a batch before running the said batch"""
@@ -462,7 +464,7 @@ class menus(ranaModule):
     eq the listable entries are in the place of the square element"""
     return self.threePlusOneMenuCoords()
 
-  def drawListableMenuControls(self, cr, menuName, parent):
+  def drawListableMenuControls(self, cr, menuName, parent, scrollMenu):
     """draw the controls for a listable menu"""
     (e1,e2,e3,e4,alloc) = self.threePlusOneMenuCoords()
     (x1,y1) = e1
@@ -473,9 +475,9 @@ class menus(ranaModule):
     # * draw "escape" button
     self.drawButton(cr, x1, y1, dx, dy, "", "up", "%s:reset|set:menu:%s" % (parent,parent))
     # * scroll up
-    self.drawButton(cr, x2, y2, dx, dy, "", "up_list", "%s:up" % menuName)
+    self.drawButton(cr, x2, y2, dx, dy, "", "up_list", "%s:up" % scrollMenu)
     # * scroll down
-    self.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % menuName)
+    self.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % scrollMenu)
 
   def drawListableMenuItems(self, cr, list, scroll, describeItem):
     """draw the items for a listable menu"""

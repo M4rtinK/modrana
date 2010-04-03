@@ -36,7 +36,7 @@ class showPOI(ranaModule):
     pass
   
   def drawMenu(self, cr, menuName):
-    if menuName == 'showPOI' or menuName == 'showPOIDetail' :
+    if menuName == 'showPOI' or menuName == 'showPOIDetail' or menuName == 'showPOIRoute':
       store = self.m.get('storePOI', None)
       if store == None:
         print "showPOI: no POI storage module, quiting"
@@ -47,8 +47,8 @@ class showPOI(ranaModule):
       if menus == None:
         return
       if menuName == 'showPOI':
-        parent = 'main'
-        menus.drawListableMenuControls(cr, menuName, parent)
+        parent = 'poi'
+        menus.drawListableMenuControls(cr, menuName, parent, menuName)
         menus.drawListableMenuItems(cr, points, self.scroll, self.describeItem)
       if menuName == 'showPOIDetail':
         parent = 'showPOI'
@@ -56,11 +56,18 @@ class showPOI(ranaModule):
         button2 = ("tools", "generic", "set:menu:showPOIDetail")
         activePOINr = int(self.get('activePOINr', 0))
         point = points[activePOINr]
-        box = (point.description, "set:menu:showPOIDetail")
+        text = point.description + "|coordinates: %f, %f" % (point.lat, point.lon)
+        box = (text , "set:menu:showPOIDetail")
         menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
+      if menuName == 'showPOIRoute':
+        parent = 'poi'
+        scrollMenu = 'showPOI'
+        menus.drawListableMenuControls(cr, menuName, parent, scrollMenu)
+        menus.drawListableMenuItems(cr, points, self.scroll, self.describeItem4Routing)
+
 
   def describeItem(self, index, category, list):
-    action = "set:menu:showPOIDetail"
+    action = "set:activePOINr:%d|set:menu:showPOIDetail" % index
 #    action += "|set:searchResultsItemNr:%d" % list[index][2] # here we use the ABSOLUTE index, not the relative one
 
     name = "%s" % list[index].name
@@ -72,6 +79,19 @@ class showPOI(ranaModule):
       description = "Google Local Search result"
     else:
       description = ""
+
+    return(
+      name,
+      description,
+      action)
+
+  def describeItem4Routing(self, index, category, list):
+    """override the default action"""
+    (name, description, action) = self.describeItem(index, category, list)
+
+    lat = list[index].lat
+    lon = list[index].lon
+    action = "set:selectedPos:%f,%f|route:route|set:menu:None" % (lat,lon)
 
     return(
       name,

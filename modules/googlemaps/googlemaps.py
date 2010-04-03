@@ -438,7 +438,8 @@ class GoogleMaps(object):
         """
         params = {
             'q':        'from:%s to:%s' % (origin, destination),
-            'output':   'json',
+#            'output':   'json',
+            'output':   'js', #modRana:NOTE:modified to js to get polyline data
             'oe':       'utf8',
             'key':      self.api_key,
         }

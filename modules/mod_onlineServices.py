@@ -120,8 +120,14 @@ class onlineServices(ranaModule):
     Get driving directions from Google.
     start and directions can be either coordinates tupples or address strings
     '''
-    directions = gmaps.directions(start, destination)
+    gmap = self.getGmapsInstance()
+    directions = gmap.directions(start, destination)
     return directions
+
+  def googleDirectionsLL(self ,lat1, lon1, lat2, lon2):
+    start = (lat1, lon1)
+    destination = (lat2, lon2)
+    return self.googleDirections(start, destination)
 
   def googleGeocode(self, adress):
     pass
