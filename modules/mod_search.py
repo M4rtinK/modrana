@@ -35,22 +35,37 @@ class search(ranaModule):
     self.filters = {
       'Sleep':{
         'Hotel':'tourism=hotel',
-        'Hostel':'tourism=hostel'},
+        'Hostel':'tourism=hostel',
+        'Motel':'tourism=motel',
+        'Camp':'amenity=camp'},
       'Buy':{
         'Supermarket':'amenity=supermarket',
+        'Hypermarket':'amenity=hypermarket',
+        'Shopping center':'amenity=shopping_center',
+        'Gas station':'amenity=gas_station',
         'Outdoor':'shop=outdoor',
-        'DIY':'search:tourism=diy'},
+        'DIY':'search:tourism=diy',
+        'Bank':'amenity=bank',
+        'ATM':'amenity=atm',
+        'Bookstore':'search:tourism=bookstore',
+        'Computer store':'search:tourism=computer_store '},
       'Food':{
         'Pub food':'amenity=pub;food=yes',
+        'Food':'amenity=food',
         'Restaurant':'amenity=restaurant',
         'Cafe':'amenity=cafe',
+        'Pizza':'amenity=pizza',
         'Fast food':'amenity=fast_food'},
       'Help':{
-        'Police Stn':'amenity=police',
+#        'Police Stn':'amenity=police',
+        'Police Station':'amenity=police',
         'Fire Stn':'amenity=fire',
+        'Information center':'amenity=information',
         'Hospital':'amenity=hospital',
         'Ranger':'amenity=ranger_station',
-        'Pharmacy':'amenity=pharmacy'},
+        'Pharmacy':'amenity=pharmacy',
+        'Law':'amenity=law',
+        'Embassy':'amenity=law'},
       'Hire':{
         'Car hire':'amenity=car_hire',
         'Bike hire':'amenity=bike_hire',
@@ -60,9 +75,36 @@ class search(ranaModule):
         'Free car park':'amenity=parking;cost=free',
         'Bike park':'amenity=cycle_parking',
         'Lay-by':'amenity=layby'},
+      'Travel':{
+        'Airport':'amenity=airport',
+        'Heliport':'amenity=heliport',
+        'Spaceport':'amenity=spaceport',
+        'Train station':'amenity=train_station',
+        'Bus':'amenity=bus',
+        'Tram':'amenity=Tram',
+        'Subway station':'amenity=subway_station',
+        'Station':'amenity=station',
+        'Ferry':'amenity=ferry',
+        'Harbour':'amenity=harbour'},
       'Repair':{
         'Bike shop':'amenity=bike_shop',
         'Garage':'amenity=garage'},
+      'Internet':{
+        'Hotspot':'amenity=hotspot',
+        'Wireless internet':'amenity=wireless_internet',
+        'Category: Internet cafe':'amenity=internet_cafe', # TODO: improve this, it finds more internet cafais but looks ugly :)
+        'Library':'amenity=library',
+        'Free wifi':'amenity=free_wifi'},
+      'Tourism':{
+        'Sightseeing':'amenity=sightseeing',
+        'Tourist information':'amenity=tourist_information',
+        'Cinema':'amenity=cinema',
+        'Theater':'amenity=theater',
+        'Gallery':'amenity=gallery',
+        'Museum':'amenity=museum',
+        'Wine celar':'amenity=wine_celar', # TODO: improve this, it finds more internet cafais but looks ugly :)
+        'National park':'amenity=national_park',
+        'Swimming pool':'amenity=swimming_pool'},
       }
 
   def handleMessage(self, message):
