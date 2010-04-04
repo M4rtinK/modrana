@@ -68,7 +68,7 @@ class search(ranaModule):
   def handleMessage(self, message):
     # without this if, we would search also for the commands that move the listable menu
     # lets hope no one needs to search for reset, up or down :)
-    if message=="up" or message=="down" or message=="reset" or message == 'centerOnResult' or message=='clearSearch' or message=='storePOI':
+    if message=="up" or message=="down" or message=="reset" or message=='clearSearch' or message=='storePOI':
       if(message == "up"):
         if(self.scroll > 0):
           self.scroll -= 1
@@ -77,19 +77,6 @@ class search(ranaModule):
         self.scroll += 1
       if(message == "reset"):
         self.scroll = 0
-      if (message == "centerOnResult"):
-        proj = self.m.get('projection', None)
-        if proj == None:
-          return
-        if self.list == None:
-          return
-        resultNr = self.get('searchResultsItemNr', None)
-        tupple = filter(lambda x: x[2] == int(resultNr), self.list).pop()
-        result = tupple[1]
-        lat = float(result['lat'])
-        lon = float(result['lng'])
-        self.set("centred",False) # turn off centering before moving screen to the result
-        proj.recentre(lat, lon)
       if (message == 'clearSearch'):
         self.localSearchResults = None
         self.list = None
@@ -312,7 +299,8 @@ class search(ranaModule):
     # * draw "escape" button
     menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:searchResults")
     # * draw "show" button
-    menus.drawButton(cr, x2, y2, dx, dy, "on map#show", "generic", "search:reset|set:menu:None|set:searchResultsItemNr:%d|search:centerOnResult" % index)
+    action2 = "search:reset|set:menu:None|set:searchResultsItemNr:%d|mapView:recentre %f %f" % (index, lat, lon)
+    menus.drawButton(cr, x2, y2, dx, dy, "on map#show", "generic", action2)
     # * draw "add POI" button
     menus.drawButton(cr, x3, y3, dx, dy, "add to POI", "generic", "search:reset|search:storePOI|set:menu:searchResults")
     # * draw info box
