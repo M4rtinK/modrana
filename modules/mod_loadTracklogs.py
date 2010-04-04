@@ -62,11 +62,14 @@ class loadTracklogs(ranaModule):
 
     files = os.listdir('tracklogs')
     files = filter(lambda x: x != '.svn', files)
-    for file in files:
-      self.loadTracklog('tracklogs/'+file)
 
     self.cleanCache(files)
 
+#    enabledTracklogs = self.get('enabledTracklogs', None)
+#    if enabledTracklogs != None:
+    for file in files:
+      self.loadTracklog('tracklogs/'+file)
+      
     self.save()
     print "Loading tracklogs took %1.2f ms" % (1000 * (clock() - start))
 
@@ -93,7 +96,7 @@ class loadTracklogs(ranaModule):
 
   def loadTracklog(self, filename):
     """load a GPX file to datastructure"""
-#    start = clock()
+    start = clock()
     self.filename = filename
     file = open(filename, 'r')
 
@@ -106,7 +109,7 @@ class loadTracklogs(ranaModule):
     else:
       print "No file"
 
-#    print "Loading %s took %1.2f ms" % (filename,(1000 * (clock() - start)))
+    print "Loading %s took %1.2f ms" % (filename,(1000 * (clock() - start)))
 
   def simplePythagoreanDistance(self, x1,y1,x2,y2):
       dx = x2 - x1
@@ -201,11 +204,11 @@ class GPXTracklog(tracklog):
     self.save = save
 
     if filename in cache:
-#      print "loading from cache"
-      self.clusters = cache[filename]
-
+      print "loading from cache"
+      self.clusters = cache[filename].clusters
+      
     else:
-      print "%s: creating clusters" % filename
+      print "creating clusters: %s" % filename
       clusterDistance = 5 # cluster points to clusters about 5 kilometers in diameter
       self.clusters = []
 
@@ -214,17 +217,14 @@ class GPXTracklog(tracklog):
         (centreX,centreY,radius) = geo.circleAroundPointCluster(cluster)
         self.clusters.append(clusterOfPoints(cluster, centreX, centreY, radius))
         
-      cache[filename] = self.clusters
-
+      ci = CacheItem(self.clusters)
+      cache[filename] = ci
 
     self.checkElevation()
 
-
-
-    
-
   def modified(self):
     """the tracklog has been modified, recount all the statistics and clusters"""
+    # TODO: implement this ? :D
     pass
 
   def checkElevation(self):
@@ -271,6 +271,12 @@ class GPXTracklog(tracklog):
     del self.cache[self.tracklogFilename] # the file has been modified, so it must be cached again
     self.save() # save the cache to disk
 
+
+class CacheItem():
+  """class representing a cache item"""
+  def __init__(self, clusters, routeInfo=None):
+    self.clusters = clusters
+    self.routeInfo = routeInfo
 
 class clusterOfPoints():
   """A basic class representing a cluster of nearby points."""

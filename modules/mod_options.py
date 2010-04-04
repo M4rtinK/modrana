@@ -280,6 +280,11 @@ class options(ranaModule):
 
       cr.move_to(x, y+textheight)
       cr.show_text(text)
+
+  def shutdown(self):
+    """save the dictionary on exit"""
+    self.save()
+
   
 if(__name__ == "__main__"):
   a = options({},{'viewport':(0,0,600,800)})

@@ -45,7 +45,6 @@ class Projection(ranaModule):
   
   def setView(self,x,y,w,h):
     """Setup the display"""
-    print "setting view"
     self.w = w
     self.h = h
     self.xc = x + self.w

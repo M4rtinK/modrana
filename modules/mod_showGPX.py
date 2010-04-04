@@ -80,7 +80,14 @@ class showGPX(ranaModule):
 #    cr.fill()
     loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
     loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
-    for GPXTracklog in loadedTracklogs: # we draw all loaded tracklogs by default
+
+    visibleTracklogs = self.get('visibleTracklogs', None)
+
+    visibleTracklogs = filter(lambda x: x.tracklogName in visibleTracklogs, loadedTracklogs)
+    visibleIndexes = map(lambda x: loadedTracklogs.index(x), visibleTracklogs)
+
+    for i in visibleIndexes: # we draw all loaded tracklogs by default
+      GPXTracklog = loadedTracklogs[i]
       if self.get('showTracklog', None) == 'simple':
         self.drawSimpleTrack(cr, GPXTracklog)
 
@@ -252,6 +259,31 @@ class showGPX(ranaModule):
     # Get and set functions are used to access global data
     self.set('num_updates', self.get('num_updates', 0) + 1)
     #print "Updated %d times" % (self.get('num_updates'))
+
+  def handleMessage(self, message):
+    if message == "toggleVisible":
+      filename = self.get('showTrackFilename', None)
+      if filename == None:
+        return
+      visibleTracklogs = self.get('visibleTracklogs', set())
+      if filename in visibleTracklogs:
+        visibleTracklogs.discard(filename)
+      else:
+        visibleTracklogs.add(filename)
+      self.set('visibleTracklogs', visibleTracklogs)
+
+    elif message == 'allVisible':
+      m = self.m.get('loadTracklogs', None)
+      if m == None:
+        return
+      filenames = map(lambda x: x.tracklogFilename, m.tracklogs)
+      self.set('visibleTracklogs', set(filenames))
+      
+    elif message == 'inVisible':
+      self.set('visibleTracklogs', set())
+
+
+
 
 
 

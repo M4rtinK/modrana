@@ -36,6 +36,21 @@ class mapView(ranaModule):
       self.set('z', z + 1)
     elif(message == 'zoomOut'):
       self.set('z', max(z - 1, 8))
+
+    elif(message):
+      try:
+        list = message.split(' ')
+        lat = float(list[1])
+        lon = float(list[2])
+        if len(list) == 4:
+          zoom = int(list[3])
+        else:
+          zoom = z
+        proj = self.m.get('projection', None)
+        self.set("centred",False) # turn off centering before moving screen to the coordinates
+        proj.recentre(lat, lon, zoom)
+      except:
+        print "mapView: cant recentre cooridnates"
   
   def dragEvent(self,startX,startY,dx,dy,x,y):
     self.set("centred",False) # turn off centering after dragging the map (like in TangoGPS)

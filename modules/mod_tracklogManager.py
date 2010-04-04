@@ -145,18 +145,22 @@ class tracklogManager(ranaModule):
 
       w = w1 - (x4-x1)
 
+      track = activeTracklog
+
       # * draw "escape" button
       menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:tracklogManager")
       # * draw "tools" button
       menus.drawButton(cr, x2, y2, dx, dy, "tools", "generic", "set:menu:tracklogTools")
       # * draw "show button" button
-      menus.drawButton(cr, x3, y3, dx, dy, "show on map", "generic", "set:menu:main")
+      firstPoint = track.trackpointsList[0][0]
+      (lat,lon) = (firstPoint.latitude, firstPoint.longitude)
+      action3 = "mapView:recentre %f %f|set:showTrackFilename:%s|showGPX:toggleVisible|set:menu:None" % (lat, lon, track.tracklogFilename)
+      menus.drawButton(cr, x3, y3, dx, dy, "show on map", "generic", action3)
       # * draw "route profile"
       menus.drawButton(cr, x4, y4, w, dy, "", "box480", "set:menu:routeProfile")
       profile.lineChart(cr, activeTracklog, x4, y4, w, dy)
       # * draw an info box
       menus.drawButton(cr, x4, y4+dy, w, h1-(y4+dy), "", "3h", "set:menu:tracklogInfo")
-      track = activeTracklog
 
       text = "number of points: %d|" % len(track.trackpointsList[0])
       if track.elevation == True:
@@ -169,7 +173,11 @@ class tracklogManager(ranaModule):
 
       # set up the tools submenu
       menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")
-      menus.addItem('tracklogTools', 'get Elevation', 'generic', 'tracklogManager:getElevation')
+      menus.addItem('tracklogTools', 'elevation#get', 'generic', 'tracklogManager:getElevation|set:menu:tracklogInfo')
+      menus.addItem('tracklogTools', 'visible#toggle', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|set:menu:tracklogInfo' % track.tracklogFilename)
+      menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogInfo')
+      menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogInfo')
+
 
       online = self.m.get('onlineServices', None)
       online.getGmapsInstance()
