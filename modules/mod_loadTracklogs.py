@@ -46,8 +46,6 @@ class loadTracklogs(ranaModule):
     self.set('num_updates', self.get('num_updates', 0) + 1)
     #print "Updated %d times" % (self.get('num_updates'))
 
-    print 'tracklogs/2010.02.23_02_19.gpx' in self.cache
-
   def load(self):
     start = clock()
 
@@ -269,7 +267,7 @@ class GPXTracklog(tracklog):
     f = open(self.tracklogFilename, "w") # open the old file
     xmlTree = self.trackpointsList.export_gpx_file() # get the element tree
     xmlTree.write(f) # overwrite the old file with the new structure
-    print "%s has been replaced by current in memory version" % self.tracklogFilename
+    print "%s has been replaced by the current in memory version" % self.tracklogFilename
     del self.cache[self.tracklogFilename] # the file has been modified, so it must be cached again
     self.save() # save the cache to disk
 

@@ -154,8 +154,9 @@ class options(ranaModule):
       f.close()
       for k,v in newData.items():
         self.set(k,v)
+      print newData
     except IOError:
-      pass
+      print "options: error while loading the saved options"
       
   def optionsFilename(self):
     return("data/options.bin")
