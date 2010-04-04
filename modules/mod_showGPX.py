@@ -78,7 +78,7 @@ class showGPX(ranaModule):
 #    self.point(cr, px2, py2)
 #    cr.stroke()
 #    cr.fill()
-    loadTl = self.m.get('loadTracklog', None) # get the tracklog module
+    loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
     loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
     for GPXTracklog in loadedTracklogs: # we draw all loaded tracklogs by default
       if self.get('showTracklog', None) == 'simple':
@@ -87,7 +87,7 @@ class showGPX(ranaModule):
       elif self.get('showTracklog', None) == 'colored':
         self.drawColoredTracklog(cr, GPXTracklog)
 
-      if self.get('debugCircles', None) == None:
+      if self.get('debugCircles', None) == True:
         self.drawDebugCircles(cr, GPXTracklog)
 
   def point(self, cr, x, y):

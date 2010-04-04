@@ -57,7 +57,7 @@ class routeProfile(ranaModule):
     dy = h / rows
 
     menus = self.m.get("menu",None)
-    loadTl = self.m.get('loadTracklog', None) # get the tracklog module
+    loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
     loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
     #tracklistsWithElevation = filter(lambda x: x.elevation == True, loadedTracklogs)
     activeTracklogIndex = int(self.get('activeTracklog', 0))

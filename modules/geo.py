@@ -79,6 +79,36 @@ def clusterTrackpoints(trackpointsList , cluster_distance):
 
   return clusters
 
+def old_clusterTrackpoints(trackpointsList , cluster_distance):
+  """
+  Groups points that are less than cluster_distance pixels apart at
+  a given zoom level into a cluster.
+  """
+  points = [{'latitude': point.latitude,'longitude': point.longitude} for point in trackpointsList[0]]
+  clusters = []
+  while len(points) > 0:
+      point1 = points.pop()
+      cluster = []
+      for point2 in points[:]:
+
+          pixel_distance = distance(point1['latitude'],
+                                    point1['longitude'],
+                                    point2['latitude'],
+                                    point2['longitude'])
+
+          if pixel_distance < cluster_distance:
+              points.remove(point2)
+              cluster.append(point2)
+
+      # add the first point to the cluster
+      if len(cluster) > 0:
+          cluster.append(point1)
+          clusters.append(cluster)
+      else:
+          clusters.append([point1])
+
+  return clusters
+
 def circleAroundPointCluster(cluster):
   """Find a cricle around a given point cluster and return its centre and radius"""
 

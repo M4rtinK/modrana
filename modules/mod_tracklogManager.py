@@ -50,7 +50,7 @@ class tracklogManager(ranaModule):
     if message == 'getElevation':
       print "getting elevation info"
       online = self.m.get("onlineServices",None)
-      loadTl = self.m.get('loadTracklog', None) # get the tracklog module
+      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
       loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
       index = int(self.get('activeTracklog', 0)) # get the active tracklog
       activeTracklog = loadedTracklogs[index]
@@ -82,7 +82,7 @@ class tracklogManager(ranaModule):
 
     if menuName == 'tracklogManager':
       menus = self.m.get("menu",None)
-      loadTl = self.m.get('loadTracklog', None) # get the tracklog module
+      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
       loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
   #    tracklistsWithElevation = filter(lambda x: x.elevation == True, loadedTracklogs)
   #    tracklog = tracklistsWithElevation[0].trackpointsList[0]
@@ -94,7 +94,7 @@ class tracklogManager(ranaModule):
       # * scroll down
       menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % self.moduleName)
 
-      loadTl = self.m.get('loadTracklog', None) # get the tracklog module
+      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
       loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
       list = loadedTracklogs
       category = ""
@@ -137,7 +137,7 @@ class tracklogManager(ranaModule):
     elif menuName == 'tracklogInfo':
 #      print "tracklogInfo"
       menus = self.m.get("menu",None)
-      loadTl = self.m.get('loadTracklog', None) # get the tracklog module
+      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
       loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
       index = int(self.get('activeTracklog', 0)) # get the active tracklog
       activeTracklog = loadedTracklogs[index]

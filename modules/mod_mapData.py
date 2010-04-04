@@ -207,7 +207,7 @@ class mapData(ranaModule):
           self.addToQueue(urlsAndFilenames) # load the files to the download que variable
 
       if(location == "route"):
-        loadTl = self.m.get('loadTracklog', None) # get the tracklog module
+        loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
         loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
         if loadedTracklogs == None or len(loadedTracklogs) == 0:
           return

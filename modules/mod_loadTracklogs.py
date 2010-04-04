@@ -21,26 +21,81 @@
 from base_module import ranaModule
 from upoints import gpx
 import geo
+import os
+import cPickle
+import marshal
+from time import clock
 #from time import clock
 
 def getModule(m,d):
-  return(loadTracklog(m,d))
+  return(loadTracklogs(m,d))
 
-class loadTracklog(ranaModule):
+class loadTracklogs(ranaModule):
   """A sample pyroute module"""
   
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.tracklogs = [] # this list will store the object representing tracklists
     #self.set('tracklogs', self.tracklogs) # now we make the list easily acessible to other modules
-    
+    self.cachePath = 'cache/tracklogs/tracklog_cache.txt'
+    self.cache = {}
+    self.load()
+
   def update(self):
     # Get and set functions are used to access global data
     self.set('num_updates', self.get('num_updates', 0) + 1)
     #print "Updated %d times" % (self.get('num_updates'))
 
-  def load(self, filename):
+    print 'tracklogs/2010.02.23_02_19.gpx' in self.cache
+
+  def load(self):
+    start = clock()
+
+    try:
+      f = open(self.cachePath, 'r')
+      cache = cPickle.load(f)
+
+      self.cache = cache
+    except:
+      print "loadTracklogs: loading cache from file failed"
+      self.cache = {}
+
+    print "Loading from cache took %1.2f ms" % (1000 * (clock() - start))
+
+    files = os.listdir('tracklogs')
+    files = filter(lambda x: x != '.svn', files)
+    for file in files:
+      self.loadTracklog('tracklogs/'+file)
+
+    self.cleanCache(files)
+
+    self.save()
+    print "Loading tracklogs took %1.2f ms" % (1000 * (clock() - start))
+
+  def cleanCache(self, files):
+    """remove files that are not present from the cache"""
+    filenames = map(lambda x: 'tracklogs/'+x, files)
+
+    garbage = filter(lambda x: x not in filenames, self.cache)
+
+    for g in garbage:
+      del self.cache[g]
+
+
+  def save(self):
+    try:
+      f = open(self.cachePath, 'w')
+      cPickle.dump(self.cache, f)
+      f.close()
+    except:
+      print "loadTracklogs: cant store tracklog data to cache, tracklogs wil be loaded from files next time"
+
+#  def saveClusters(self, clusters):
+
+
+  def loadTracklog(self, filename):
     """load a GPX file to datastructure"""
+#    start = clock()
     self.filename = filename
     file = open(filename, 'r')
 
@@ -48,15 +103,12 @@ class loadTracklog(ranaModule):
       track = gpx.Trackpoints() # create new Trackpoints object
       track.import_locations(file) # load a gpx file into it
       file.close()
-      self.tracklogs.append(GPXTracklog(track, filename))
-
-#      # TODO: testing code, remove this
-#      cluster_distance = 5
-#      cl = self.clusterTrackpoints(track, cluster_distance)
-#      self.set("tempClusters", cl)
+      self.tracklogs.append(GPXTracklog(track, filename, self.cache, self.save))
 
     else:
       print "No file"
+
+#    print "Loading %s took %1.2f ms" % (filename,(1000 * (clock() - start)))
 
   def simplePythagoreanDistance(self, x1,y1,x2,y2):
       dx = x2 - x1
@@ -139,20 +191,43 @@ class tracklog():
 
 class GPXTracklog(tracklog):
   """A class representing a GPX tracklog."""
-  def __init__(self, trackpointsList, tracklogFilename):
+  def __init__(self, trackpointsList, tracklogFilename, cache, save):
     tracklog.__init__(self, trackpointsList, tracklogFilename)
     tracklog.tracklogType = 'gpx'
     self.routeInfo = {} # a dictionary for storing route information
     # TODO: set this automaticaly
-    clusterDistance = 5 # cluster points to clusters about 5 kilometers in diameter
-    self.clusters = []
 
-    rawClusters = geo.clusterTrackpoints(trackpointsList, clusterDistance) # we cluster the points
-    for cluster in rawClusters: # now we find for erach cluster a circle encompasing all points
-      (centreX,centreY,radius) = geo.circleAroundPointCluster(cluster)
-      self.clusters.append(clusterOfPoints(cluster, centreX, centreY, radius))
+    filename = self.tracklogFilename
+
+    self.cache = cache
+    self.save = save
+
+    if filename in cache:
+#      print "loading from cache"
+      self.clusters = cache[filename]
+
+    else:
+      print "%s: creating clusters" % filename
+      clusterDistance = 5 # cluster points to clusters about 5 kilometers in diameter
+      self.clusters = []
+
+      rawClusters = geo.clusterTrackpoints(trackpointsList, clusterDistance) # we cluster the points
+      for cluster in rawClusters: # now we find for each cluster a circle encompasing all points
+        (centreX,centreY,radius) = geo.circleAroundPointCluster(cluster)
+        self.clusters.append(clusterOfPoints(cluster, centreX, centreY, radius))
+        
+      cache[filename] = self.clusters
+
 
     self.checkElevation()
+
+
+
+    
+
+  def modified(self):
+    """the tracklog has been modified, recount all the statistics and clusters"""
+    pass
 
   def checkElevation(self):
     pointsWithElevation = filter(lambda x: x.elevation != None, self.trackpointsList[0])
@@ -195,6 +270,8 @@ class GPXTracklog(tracklog):
     xmlTree = self.trackpointsList.export_gpx_file() # get the element tree
     xmlTree.write(f) # overwrite the old file with the new structure
     print "%s has been replaced by current in memory version" % self.tracklogFilename
+    del self.cache[self.tracklogFilename] # the file has been modified, so it must be cached again
+    self.save() # save the cache to disk
 
 
 class clusterOfPoints():

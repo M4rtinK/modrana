@@ -56,15 +56,6 @@ class config(ranaModule):
     # Option: whether to centre on your position
     #self.set('centred', False)
 
-    start = clock()
-    m = self.m.get('loadTracklog', None) #TODO: move this somewhere else
-    if(m != None):
-      files = os.listdir('tracklogs')
-      files = filter(lambda x: x != '.svn', files)
-      for file in files:
-        m.load('tracklogs/'+file)
-      print "Loading tracklogs took %1.2f ms" % (1000 * (clock() - start))
-
 
       #m.load('Znaim-Wien.gpx')
       #m.load('znojmo-brno.gpx')
