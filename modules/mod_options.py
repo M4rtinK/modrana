@@ -48,7 +48,7 @@ class options(ranaModule):
     function by calling addOption.  That would be best if your module is
     only occasionally used, this function is best if the option is likely
     to be needed in all installations"""
-    self.addBoolOption("Centre map", "centre", "view", True)
+    self.addBoolOption("Centre map", "centred", "view", True)
 
     self.addBoolOption("Debug circles", "debugCircles", "debug", False)
 
@@ -154,7 +154,6 @@ class options(ranaModule):
       f.close()
       for k,v in newData.items():
         self.set(k,v)
-      print newData
     except IOError:
       print "options: error while loading the saved options"
       

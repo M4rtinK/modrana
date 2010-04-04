@@ -44,7 +44,7 @@ class config(ranaModule):
 
     # Option: set the initial view
     # WARNING: this locks to these coordinates, unless set to false
-    self.set("centreOn", False)
+    # self.set("centreOn", False)
     
     # Option: set the map tiles
     # osma, mapnik, etc - see mod_mapTiles for list

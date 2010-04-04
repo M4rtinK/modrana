@@ -26,6 +26,7 @@ def getModule(m,d):
   return(Projection(m,d))
 
 class Projection(ranaModule):
+  """Projection code (lat/long to screen conversions)"""
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     
@@ -35,6 +36,8 @@ class Projection(ranaModule):
     
     # Scale is the number of display pixels per projected unit
     self.scale = tileSizePixels()
+
+    self.set('centred', True) # set centering to True at start to get setView to run
     
   def isValid(self):
     """Test if the module contains all the information needed to do conversions"""
@@ -42,6 +45,7 @@ class Projection(ranaModule):
   
   def setView(self,x,y,w,h):
     """Setup the display"""
+    print "setting view"
     self.w = w
     self.h = h
     self.xc = x + self.w
@@ -132,6 +136,7 @@ class Projection(ranaModule):
       return
     # Calculate the lat/long of the pixel offset by dx,dy from the centre,
     # and centre the map on that
+
     newXC = self.px - dx / self.scale
     newYC = self.py - dy / self.scale
     self.lat,self.lon = xy2latlon(newXC,newYC, self.zoom)
