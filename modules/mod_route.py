@@ -42,6 +42,7 @@ class route(ranaModule):
     self.directions = []
     self.start = None
     self.destination = None
+    self.text = None
     
   def handleMessage(self, message):
     if (message == "clear"):
@@ -49,6 +50,7 @@ class route(ranaModule):
       self.directions = []
       self.start = None
       self.destination = None
+      self.text = None
 
 
     if(message == "route"): # simple route, from here to selected point
@@ -78,8 +80,11 @@ class route(ranaModule):
 
     self.route = route
     self.directions = directions
-    self.start = (fromLat,fromLon)
-    self.destination = (toLat, toLon)
+    # reverse geocode the start and destination coordinates (for the info menu)
+    startAddress = online.googleReverseGeocode(fromLat,fromLon)
+    destinationAddress = online.googleReverseGeocode(toLat,toLon)
+    self.start = (fromLat, fromLon, startAddress)
+    self.destination = (toLat, toLon, destinationAddress)
 
   def drawMapOverlay(self, cr):
     """Draw a route"""
@@ -223,7 +228,64 @@ class route(ranaModule):
         array.append((lat * 1e-5, lng * 1e-5))
 
     return array
+
+
+  def drawMenu(self, cr, menuName):
+    if menuName != 'currentRoute':
+      return
+
+    menus = self.m.get("menu",None)
+    if menus == None:
+      return
+    parent = 'route'
+
+    if self.route == []:
+      action = "set:menu:None"
+    else:
+      (lat,lon) = self.route[0]
+      action = "mapView:recentre %f %f|set:menu:None" % (lat, lon)
+
+    button1 = ("map#show on", "generic", action)
+    button2 = ("tools", "generic", "set:menu:currentRoute")
+#    activePOINr = int(self.get('activePOINr', 0))
+#    point = points[activePOINr]
+
+    if self.route == []:
+      text = "There is currently no active route."
+    elif self.text == None: # the new text for the infobox only once
+      dir = self.directions
+      duration = dir['Directions']['Duration']['html'] # a string describing the estimated time to finish the route
+      units = self.m.get('units', None) # get the correct units
+      distance = units.m2CurrentUnitString(float(dir['Directions']['Distance']['meters']))
+      steps = len(dir['Directions']['Routes'][0]['Steps']) # number of steps
+
+      start = ""
+      startAddress = self.start[2]
+      (lat1,lon1) = (self.start[0],self.start[1])
+      for item in startAddress.split(','):
+        start += "|%s" % item
+  #    start += "|(%f,%f)" % (lat1,lon1)
+
+      destination = ""
+      destinationAddress = self.destination[2]
+      (lat2,lon2) = (self.destination[0],self.destination[1])
+      for item in destinationAddress.split(','):
+        destination += "|%s" % item
+  #    destination += "|(%f,%f)" % (lat2,lon2)
+
+      text = "%s" % start
+      text+= "|%s" % destination
+      text+= "||%s in about %s and %s steps" % (distance, duration, steps)
+      text+= "|(%f,%f)->(%f,%f)" % (lat1,lon1,lat2,lon2)
+
+      self.text = text
+    else:
+      text = self.text
+
+    box = (text , "set:menu:currentRoute")
+    menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
     
+
 if(__name__ == '__main__'):
   d = {'transport':'car'}
   a = route({},d)

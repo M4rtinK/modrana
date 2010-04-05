@@ -378,11 +378,20 @@ class menus(ranaModule):
     if self.get("batchMenuEntered", None) == True:
       self.addItem('data', 'back to dl', 'generic', 'set:menu:batchTileDl')
 
+  def setupRouteMenu(self):
+     self.clearMenu('route')
+     self.addItem('route', 'Point to Point', 'generic', 'set:menu:None')
+     self.addItem('route', 'Here to Point', 'generic', 'set:menu:None')
+     self.addItem('route', 'Here to POI', 'generic', 'set:menu:showPOIRoute')
+     self.addItem('route', 'Clear', 'generic', 'route:clear|set:menu:None')
+     self.addItem('route', 'Current', 'generic', 'set:menu:currentRoute')
+
   def setupGeneralMenus(self):
     self.clearMenu('main', "set:menu:None")
     #self.addItem('main', 'map', 'generic', 'set:menu:layers')
     self.addItem('main', 'places', 'city', 'set:menu:placenames_categories')
-    self.addItem('main', 'waypoints', 'waypoints', 'set:menu:waypoints_categories')
+#    self.addItem('main', 'waypoints', 'waypoints', 'set:menu:waypoints_categories')
+    self.addItem('main', 'route', 'route', 'set:menu:route')
     self.addItem('main', 'POI', 'POI', 'set:menu:poi')
     self.addItem('main', 'search', 'business', 'set:menu:search')
     #self.addItem('main', 'view', 'view', 'set:menu:view')
@@ -397,6 +406,7 @@ class menus(ranaModule):
     self.setupMaplayerMenus()
     self.setupPoiMenu()
     self.setupDataMenu()
+    self.setupRouteMenu()
     self.clearMenu('options', "set:menu:main") # will be filled by mod_options
 #    self.clearMenu('routeProfile', "set:menu:main") # will be filled by mod_routeProfile
     self.lists['places'] = 'placenames'

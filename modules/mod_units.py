@@ -33,6 +33,12 @@ class units(ranaModule):
     self.set('num_updates', self.get('num_updates', 0) + 1)
     #print "Updated %d times" % (self.get('num_updates'))
 
+  def m2km(self, m):
+    return (m / 1000.0) # m to km
+
+  def km2m(self, km):
+    return (km * 1000) # km to m
+
   def km2Miles(self, km):
     return (km * 0.621371192)  # km to miles
   
@@ -42,6 +48,10 @@ class units(ranaModule):
       return km
     else:
       return (km * 0.621371192)  # km to miles
+
+  def m2CurrentUnitString(self, m):
+    km = self.m2km(m)
+    return self.km2CurrentUnitString(km)
 
   def km2CurrentUnitString(self, km):
     """return current unit in string with unit descriptor, rounded to two decimal places"""

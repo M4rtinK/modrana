@@ -354,6 +354,7 @@ class search(ranaModule):
     text = "%s (%s)" % (result['titleNoFormatting'],distanceString)
 
     try: # the adress can be unknown
+      print result['addressLines']
       for addressLine in result['addressLines']:
         text += "|%s" % addressLine
     except:

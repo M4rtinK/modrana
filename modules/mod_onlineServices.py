@@ -133,7 +133,9 @@ class onlineServices(ranaModule):
     pass
 
   def googleReverseGeocode(self, lat, lon):
-    pass
+    gmap = self.getGmapsInstance()
+    address = gmap.latlng_to_address(lat,lon)
+    return address
 
 
 if(__name__ == "__main__"):
