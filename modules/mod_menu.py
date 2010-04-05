@@ -380,7 +380,7 @@ class menus(ranaModule):
 
   def setupRouteMenu(self):
      self.clearMenu('route')
-     self.addItem('route', 'Point to Point', 'generic', 'set:menu:None')
+     self.addItem('route', 'Point to Point', 'generic', 'set:menu:None|route:selectTwoPoints')
      self.addItem('route', 'Here to Point', 'generic', 'set:menu:None')
      self.addItem('route', 'Here to POI', 'generic', 'set:menu:showPOIRoute')
      self.addItem('route', 'Clear', 'generic', 'route:clear|set:menu:None')

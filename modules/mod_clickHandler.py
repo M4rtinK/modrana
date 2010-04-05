@@ -55,6 +55,7 @@ class clickHandler(ranaModule):
         m = self.m.get("messages", None)
         if(m != None):
           print "Clicked, sending " + action
+          self.set('lastClickXY', "%d,%d" % (x,y))
           m.routeMessage(action)
         else:
           print "No message handler to receive clicks"

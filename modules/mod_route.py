@@ -43,6 +43,7 @@ class route(ranaModule):
     self.start = None
     self.destination = None
     self.text = None
+    self.selectTwoPoints = False
     
   def handleMessage(self, message):
     if (message == "clear"):
@@ -51,7 +52,10 @@ class route(ranaModule):
       self.start = None
       self.destination = None
       self.text = None
+      self.selectTwoPoints = False
 
+    if(message == "selectTwoPoints"):
+      self.selectTwoPoints = True
 
     if(message == "route"): # simple route, from here to selected point
       toPos = self.get("selectedPos", None)
@@ -90,13 +94,18 @@ class route(ranaModule):
     """Draw a route"""
     start1 = clock()
     # Where is the map?
+    if self.selectTwoPoints == True:
+      self.drawTwoPointsMenu(cr)
+
+    if(not len(self.route)):
+      return
     proj = self.m.get('projection', None)
     if(proj == None):
       return
     if(not proj.isValid()):
       return
-    if(not len(self.route)):
-      return
+
+
 
     route = self.route
 
@@ -229,6 +238,16 @@ class route(ranaModule):
 
     return array
 
+  def drawTwoPointsMenu(self, cr):
+    (x,y,w,h) = self.get('viewport')
+    dx = min(w,h) / 5.0
+    dy = dx
+    menus = self.m.get('menu', None)
+    x1 = (x+w)-dx
+    y1 = (y-dy)+h
+    menus.drawButton(cr, x1, y1, dx, dy, '', "generic", "mapView:zoomOut")
+    menus.drawButton(cr, x1-dx, y1, dx, dy, '', "generic", "set:menu:main")
+    menus.drawButton(cr, x1-2*dx, y1, dx, dy, '', "generic", "mapView:zoomIn")
 
   def drawMenu(self, cr, menuName):
     if menuName != 'currentRoute':
