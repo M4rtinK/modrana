@@ -23,13 +23,13 @@ import sys
 import math
 from time import clock
 
-if(__name__ == '__main__'):
-  sys.path.append('pyroutelib2')
-else:
-  sys.path.append('modules/pyroutelib2')
+#if(__name__ == '__main__'):
+#  sys.path.append('pyroutelib2')
+#else:
+#  sys.path.append('modules/pyroutelib2')
 
-from loadOsm import *
-from route import Router
+#from loadOsm import *
+#from route import Router
 
 def getModule(m,d):
   return(route(m,d))
@@ -44,6 +44,13 @@ class route(ranaModule):
     self.destination = None
     self.text = None
     self.selectTwoPoints = False
+    self.selectOnePoint = False
+
+    self.expectStart = False
+    self.expectEnd = False
+
+    self.set('startPos', None)
+    self.set('endPos', None)
     
   def handleMessage(self, message):
     if (message == "clear"):
@@ -53,11 +60,113 @@ class route(ranaModule):
       self.destination = None
       self.text = None
       self.selectTwoPoints = False
+      self.selectOnePoint = False
+
+      self.expectStart = False
+      self.expectEnd = False
+
+      self.set('startPos', None)
+      self.set('endPos', None)
+
+    if(message == 'expectStart'):
+      self.expectStart = True
+      self.set('needRedraw', True) # we need to show the changed buttons
+
+    if(message == 'setStart'):
+      if self.selectOnePoint:
+        self.set('endPos', None)
+      proj = self.m.get('projection', None)
+      if proj != None and self.expectStart == True:
+        lastClick = self.get('lastClickXY', None)
+        (x, y) = lastClick
+        """
+        x and y must be floats, otherwise strang rounding errors occur, whan converting to lat lon coridnates
+        """
+        (lat, lon) = proj.xy2ll(x, y)
+        self.set('startPos', (lat,lon))
+        self.testStart = (lat,lon)
+
+      self.expectStart = False
+      self.set('needRedraw', True) # refresh the screen to show the new point
+
+    if(message == 'expectEnd'):
+      self.expectEnd = True
+      self.set('needRedraw', True) # we need to show the changed buttons
+
+    if(message == 'setEnd'):
+      if self.selectOnePoint:
+        self.set('startPos', None)
+      proj = self.m.get('projection', None)
+      if proj != None and self.expectEnd == True:
+        lastClick = self.get('lastClickXY', None)
+        (x, y) = lastClick
+        """
+        x and y must be floats, otherwise strang rounding errors occur, whan converting to lat lon coridnates
+        """
+        (lat, lon) = proj.xy2ll(x, y)
+        self.set('endPos', (lat,lon))
+
+      self.expectEnd = False
+      self.set('needRedraw', True) # refresh the screen to show the new point
 
     if(message == "selectTwoPoints"):
+      self.set('startPos', None)
+      self.set('endPos', None)
+      self.selectOnePoint = False
       self.selectTwoPoints = True
 
+    if(message == "selectOnePoint"):
+      self.set('startPos', None)
+      self.set('endPos', None)
+      self.selectTwoPoints = True # we reuse the p2p menu
+      self.selectOnePoint = True
+
+    if(message == "p2pRoute"): # simple route, from here to selected point
+      toPos = self.get("endPos", None)
+      if(toPos):
+        toLat,toLon = toPos
+
+        fromPos = self.get("startPos", None)
+        if(fromPos):
+          fromLat,fromLon = fromPos
+
+          print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
+
+          # TODO: wait message (would it be needed when using internet routing ?)
+          self.doRoute(fromLat, fromLon, toLat, toLon)
+          self.set('needRedraw', True) # show the new route
+
+    if(message == "p2posRoute"): # simple route, from here to selected point
+      startPos = self.get('startPos', None)
+      endPos = self.get('endPos', None)
+      pos = self.get('pos', None)
+      if pos == None: # well, we dont know where we are, so we dont know here to go :)
+        return
+
+      if startPos == None and endPos == None: # we know where we are, but we dont know where we should go :)
+        return
+
+      if startPos != None: # we want a route from somewhere to our current position
+        fromPos = startPos
+        toPos = pos
+
+      if endPos != None: # we go from here to somewhere
+        fromPos = pos
+        toPos = endPos
+
+      (toLat,toLon) = toPos
+      (fromLat,fromLon) = fromPos
+
+      print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
+
+      # TODO: wait message (would it be needed when using internet routing ?)
+      self.doRoute(fromLat, fromLon, toLat, toLon)
+      self.set('needRedraw', True) # show the new route
+
     if(message == "route"): # simple route, from here to selected point
+      # disable the point selection guis
+      self.selectTwoPoints = False
+      self.selectOnePoint = False
       toPos = self.get("selectedPos", None)
       if(toPos):
         toLat,toLon = [float(a) for a in toPos.split(",")]
@@ -67,9 +176,9 @@ class route(ranaModule):
           (fromLat, fromLon) = fromPos
           print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
 
-          # TODO: wait message (would it bee neede when using internet routing ?)
+          # TODO: wait message (would it be needed when using internet routing ?)
           self.doRoute(fromLat, fromLon, toLat, toLon)
-          self.set("menu",None)
+          self.set('needRedraw', True) # show the new route
 
   def doRoute(self, fromLat, fromLon, toLat, toLon):
     """Route from one point to another, and set that as the active route"""
@@ -90,6 +199,23 @@ class route(ranaModule):
     self.start = (fromLat, fromLon, startAddress)
     self.destination = (toLat, toLon, destinationAddress)
 
+  def update(self):
+    self.set('num_updates', self.get('num_updates', 0) + 1)
+
+    """register areas for manual point imput"""
+
+    if self.expectStart:
+      clickHandler = self.m.get('clickHandler', None)
+      (x,y,w,h) = self.get('viewport')
+      if clickHandler != None:
+        clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setStart')
+
+    if self.expectEnd:
+      clickHandler = self.m.get('clickHandler', None)
+      (x,y,w,h) = self.get('viewport')
+      if clickHandler != None:
+        clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setEnd')
+
   def drawMapOverlay(self, cr):
     """Draw a route"""
     start1 = clock()
@@ -104,8 +230,6 @@ class route(ranaModule):
       return
     if(not proj.isValid()):
       return
-
-
 
     route = self.route
 
@@ -141,7 +265,7 @@ class route(ranaModule):
 
     cr.fill()
 
-    # draw the stepp point background (under the polyline, it seems to look better this way)
+    # draw the step point background (under the polyline, it seems to look better this way)
 
     cr.set_source_rgb(0, 0, 0)
     cr.set_line_width(10)
@@ -245,9 +369,66 @@ class route(ranaModule):
     menus = self.m.get('menu', None)
     x1 = (x+w)-dx
     y1 = (y-dy)+h
-    menus.drawButton(cr, x1, y1, dx, dy, '', "generic", "mapView:zoomOut")
-    menus.drawButton(cr, x1-dx, y1, dx, dy, '', "generic", "set:menu:main")
-    menus.drawButton(cr, x1-2*dx, y1, dx, dy, '', "generic", "mapView:zoomIn")
+
+    startIcon = "generic_alpha"
+    endIcon = "generic_alpha"
+    if self.expectStart:
+      startIcon = "generic_alpha_red"
+    if self.expectEnd:
+      endIcon = "generic_alpha_green"
+
+    routingAction = 'route:p2pRoute'
+    if self.selectOnePoint == True:
+      routingAction = 'route:p2posRoute'
+
+    menus.drawButton(cr, x1-dx, y1, dx, dy, 'start', startIcon, "route:expectStart")
+    menus.drawButton(cr, x1, y1-dy, dx, dy, 'end', endIcon, "route:expectEnd")
+    menus.drawButton(cr, x1, y1, dx, dy, 'route', "generic_alpha", routingAction)
+    # "flush" cairo operations
+    cr.stroke()
+    cr.fill()
+
+    # draw point selectors
+
+    proj = self.m.get('projection', None)
+    fromPos = self.get('startPos', None)
+    toPos = self.get('endPos', None)
+    if fromPos != None:
+      print "drawing start point"
+      cr.set_line_width(10)
+      cr.set_source_rgb(1, 0, 0)
+      (lat,lon) = fromPos
+
+      (x, y) = proj.ll2xy(lat, lon)
+
+      cr.arc(x, y, 3, 0, 2.0 * math.pi)
+      cr.stroke()
+      cr.fill()
+
+      cr.set_line_width(8)
+      cr.set_source_rgba(1, 0, 0, 0.95) # transparent red
+      cr.arc(x, y, 15, 0, 2.0 * math.pi)
+      cr.stroke()
+      cr.fill()
+
+    if toPos != None:
+      print "drawing start point"
+      cr.set_line_width(10)
+      cr.set_source_rgb(0, 1, 0)
+      (lat,lon) = toPos
+      (x, y) = proj.ll2xy(lat, lon)
+      cr.arc(x, y, 2, 0, 2.0 * math.pi)
+      cr.stroke()
+      cr.fill()
+
+      cr.set_line_width(8)
+      cr.set_source_rgba(0, 1, 0, 0.95) # transparent green
+      cr.arc(x, y, 15, 0, 2.0 * math.pi)
+      cr.stroke()
+      cr.fill()
+
+    if toPos != None:
+      print "drawing end point"
 
   def drawMenu(self, cr, menuName):
     if menuName != 'currentRoute':
@@ -266,8 +447,6 @@ class route(ranaModule):
 
     button1 = ("map#show on", "generic", action)
     button2 = ("tools", "generic", "set:menu:currentRoute")
-#    activePOINr = int(self.get('activePOINr', 0))
-#    point = points[activePOINr]
 
     if self.route == []:
       text = "There is currently no active route."

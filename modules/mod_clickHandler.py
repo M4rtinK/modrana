@@ -48,14 +48,15 @@ class clickHandler(ranaModule):
     self.register(area, action)
     
   def handleClick(self, x,y):
-    #print "Clicked at %d,%d" % (x,y)
+#    print "Clicked at %d,%d" % (x,y)
     for area in self.areas:
       (rect, action) = area
       if(rect.contains(x,y)):
         m = self.m.get("messages", None)
         if(m != None):
           print "Clicked, sending " + action
-          self.set('lastClickXY', "%d,%d" % (x,y))
+#          self.set('lastClickXY', "%f,%f" % (x,y))
+          self.set('lastClickXY', (x,y))
           m.routeMessage(action)
         else:
           print "No message handler to receive clicks"

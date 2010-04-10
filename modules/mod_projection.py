@@ -154,7 +154,7 @@ class Projection(ranaModule):
     py = self.py1 + y / self.scale
     lat,lon = xy2latlon(px, py, self.zoom)
     return(lat,lon)
-  
+
   def onscreen(self,x,y):
     """Test if a position (in display units) is visible"""
     return(x >= 0 and x < self.w and y >= 0 and y < self.h)
