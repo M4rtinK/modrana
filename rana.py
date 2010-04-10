@@ -271,7 +271,7 @@ if __name__ == "__main__":
   'square' (480*480) -> this is for testing screens with equal sides
   'ipaq' (240*320) -> old Ipaqs (and and other Pocket PCs) had this resolution
   """
-  device = 'neo'
+  device = 'n900'
   program = GuiBase(device)
 
  

@@ -144,7 +144,8 @@ def circleAroundPointCluster(cluster):
   return(centreX, centreY, radius)
 
 
-
+#def preiodicalElevationList(trackpointsList):
+#  distanceList = map(lambda x: x, trackpointsList)
 
 
 

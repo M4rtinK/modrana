@@ -68,11 +68,11 @@ class route(ranaModule):
       self.set('startPos', None)
       self.set('endPos', None)
 
-    if(message == 'expectStart'):
+    elif(message == 'expectStart'):
       self.expectStart = True
       self.set('needRedraw', True) # we need to show the changed buttons
 
-    if(message == 'setStart'):
+    elif(message == 'setStart'):
       if self.selectOnePoint:
         self.set('endPos', None)
       proj = self.m.get('projection', None)
@@ -89,11 +89,11 @@ class route(ranaModule):
       self.expectStart = False
       self.set('needRedraw', True) # refresh the screen to show the new point
 
-    if(message == 'expectEnd'):
+    elif(message == 'expectEnd'):
       self.expectEnd = True
       self.set('needRedraw', True) # we need to show the changed buttons
 
-    if(message == 'setEnd'):
+    elif(message == 'setEnd'):
       if self.selectOnePoint:
         self.set('startPos', None)
       proj = self.m.get('projection', None)
@@ -109,19 +109,19 @@ class route(ranaModule):
       self.expectEnd = False
       self.set('needRedraw', True) # refresh the screen to show the new point
 
-    if(message == "selectTwoPoints"):
+    elif(message == "selectTwoPoints"):
       self.set('startPos', None)
       self.set('endPos', None)
       self.selectOnePoint = False
       self.selectTwoPoints = True
 
-    if(message == "selectOnePoint"):
+    elif(message == "selectOnePoint"):
       self.set('startPos', None)
       self.set('endPos', None)
       self.selectTwoPoints = True # we reuse the p2p menu
       self.selectOnePoint = True
 
-    if(message == "p2pRoute"): # simple route, from here to selected point
+    elif(message == "p2pRoute"): # simple route, from here to selected point
       toPos = self.get("endPos", None)
       if(toPos):
         toLat,toLon = toPos
@@ -136,7 +136,7 @@ class route(ranaModule):
           self.doRoute(fromLat, fromLon, toLat, toLon)
           self.set('needRedraw', True) # show the new route
 
-    if(message == "p2posRoute"): # simple route, from here to selected point
+    elif(message == "p2posRoute"): # simple route, from here to selected point
       startPos = self.get('startPos', None)
       endPos = self.get('endPos', None)
       pos = self.get('pos', None)
@@ -163,7 +163,7 @@ class route(ranaModule):
       self.doRoute(fromLat, fromLon, toLat, toLon)
       self.set('needRedraw', True) # show the new route
 
-    if(message == "route"): # simple route, from here to selected point
+    elif(message == "route"): # simple route, from here to selected point
       # disable the point selection guis
       self.selectTwoPoints = False
       self.selectOnePoint = False
@@ -179,6 +179,18 @@ class route(ranaModule):
           # TODO: wait message (would it be needed when using internet routing ?)
           self.doRoute(fromLat, fromLon, toLat, toLon)
           self.set('needRedraw', True) # show the new route
+
+    elif(message == 'storeRoute'):
+      loadTracklogs = self.m.get('loadTracklogs', None)
+      if loadTracklogs == None:
+        print "route: cant store route without the loadTracklog module"
+        return
+      if self.route == []:
+        print "route: the route is empty, so it will not be stored"
+        return
+
+      loadTracklogs.storeRoute(self.route) # TODO: rewrite this when we support more routing providers
+      
 
   def doRoute(self, fromLat, fromLon, toLat, toLon):
     """Route from one point to another, and set that as the active route"""
@@ -431,57 +443,60 @@ class route(ranaModule):
       print "drawing end point"
 
   def drawMenu(self, cr, menuName):
-    if menuName != 'currentRoute':
-      return
+    if menuName == 'currentRoute':
+      menus = self.m.get("menu",None)
+      if menus == None:
+        print "route: no menus module, no menus will be drawn"
+        return
 
-    menus = self.m.get("menu",None)
-    if menus == None:
-      return
-    parent = 'route'
+      parent = 'route'
 
-    if self.route == []:
-      action = "set:menu:None"
-    else:
-      (lat,lon) = self.route[0]
-      action = "mapView:recentre %f %f|set:menu:None" % (lat, lon)
+      if self.route == []:
+        action = "set:menu:None"
+      else:
+        (lat,lon) = self.route[0]
+        action = "mapView:recentre %f %f|set:menu:None" % (lat, lon)
 
-    button1 = ("map#show on", "generic", action)
-    button2 = ("tools", "generic", "set:menu:currentRoute")
+      button1 = ("map#show on", "generic", action)
+      button2 = ("tools", "generic", "set:menu:currentRouteTools")
 
-    if self.route == []:
-      text = "There is currently no active route."
-    elif self.text == None: # the new text for the infobox only once
-      dir = self.directions
-      duration = dir['Directions']['Duration']['html'] # a string describing the estimated time to finish the route
-      units = self.m.get('units', None) # get the correct units
-      distance = units.m2CurrentUnitString(float(dir['Directions']['Distance']['meters']))
-      steps = len(dir['Directions']['Routes'][0]['Steps']) # number of steps
+      if self.route == []:
+        text = "There is currently no active route."
+      elif self.text == None: # the new text for the infobox only once
+        dir = self.directions
+        duration = dir['Directions']['Duration']['html'] # a string describing the estimated time to finish the route
+        units = self.m.get('units', None) # get the correct units
+        distance = units.m2CurrentUnitString(float(dir['Directions']['Distance']['meters']))
+        steps = len(dir['Directions']['Routes'][0]['Steps']) # number of steps
 
-      start = ""
-      startAddress = self.start[2]
-      (lat1,lon1) = (self.start[0],self.start[1])
-      for item in startAddress.split(','):
-        start += "|%s" % item
-  #    start += "|(%f,%f)" % (lat1,lon1)
+        start = ""
+        startAddress = self.start[2]
+        (lat1,lon1) = (self.start[0],self.start[1])
+        for item in startAddress.split(','):
+          start += "|%s" % item
+    #    start += "|(%f,%f)" % (lat1,lon1)
 
-      destination = ""
-      destinationAddress = self.destination[2]
-      (lat2,lon2) = (self.destination[0],self.destination[1])
-      for item in destinationAddress.split(','):
-        destination += "|%s" % item
-  #    destination += "|(%f,%f)" % (lat2,lon2)
+        destination = ""
+        destinationAddress = self.destination[2]
+        (lat2,lon2) = (self.destination[0],self.destination[1])
+        for item in destinationAddress.split(','):
+          destination += "|%s" % item
+    #    destination += "|(%f,%f)" % (lat2,lon2)
 
-      text = "%s" % start
-      text+= "|%s" % destination
-      text+= "||%s in about %s and %s steps" % (distance, duration, steps)
-      text+= "|(%f,%f)->(%f,%f)" % (lat1,lon1,lat2,lon2)
+        text = "%s" % start
+        text+= "|%s" % destination
+        text+= "||%s in about %s and %s steps" % (distance, duration, steps)
+        text+= "|(%f,%f)->(%f,%f)" % (lat1,lon1,lat2,lon2)
 
-      self.text = text
-    else:
-      text = self.text
+        self.text = text
+      else:
+        text = self.text
 
-    box = (text , "set:menu:currentRoute")
-    menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
+      box = (text , "set:menu:currentRoute")
+      menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
+
+      menus.clearMenu('currentRouteTools', "set:menu:currentRoute")
+      menus.addItem('currentRouteTools', 'tracklog#save as', 'generic', 'route:storeRoute|set:menu:currentRoute')
     
 
 if(__name__ == '__main__'):

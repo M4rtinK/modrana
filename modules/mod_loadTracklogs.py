@@ -23,8 +23,9 @@ from upoints import gpx
 import geo
 import os
 import cPickle
-import marshal
+#import marshal
 from time import clock
+from time import gmtime, strftime
 #from time import clock
 
 def getModule(m,d):
@@ -39,6 +40,7 @@ class loadTracklogs(ranaModule):
     #self.set('tracklogs', self.tracklogs) # now we make the list easily acessible to other modules
     self.cachePath = 'cache/tracklogs/tracklog_cache.txt'
     self.cache = {}
+    self.tracklogFolder = 'tracklogs'
     self.load()
 
   def update(self):
@@ -60,7 +62,7 @@ class loadTracklogs(ranaModule):
 
     print "Loading from cache took %1.2f ms" % (1000 * (clock() - start))
 
-    files = os.listdir('tracklogs')
+    files = os.listdir(self.tracklogFolder)
     files = filter(lambda x: x != '.svn', files)
 
     self.cleanCache(files)
@@ -110,6 +112,27 @@ class loadTracklogs(ranaModule):
       print "No file"
 
     print "Loading %s took %1.2f ms" % (filename,(1000 * (clock() - start)))
+
+  def storeRoute(self, route, name=""):
+    """store a route, found by Google Directions to a GPX file, then load this file to tracklogs list"""
+    newTracklog = gpx.Trackpoints()
+    print route
+    trackpoints = map(lambda x: gpx.Trackpoint(x[0],x[1]), route)
+    newTracklog.append(trackpoints)
+    xmlTree = newTracklog.export_gpx_file()
+    print newTracklog
+
+    timeString = strftime("%Y%b%d#%H-%M-%S", gmtime())
+    folder = self.tracklogFolder
+    # gdr = Google Directions Result, TODO: alternate prefixes when we have more routing providers
+    name = name.encode('ascii', 'ignore')
+    filename = "" + folder + "/gdr_" + name + timeString + ".gpx"
+    f = open(filename, 'w')
+    xmlTree.write(f)
+    f.close()
+    self.loadTracklog(filename)
+
+
 
   def simplePythagoreanDistance(self, x1,y1,x2,y2):
       dx = x2 - x1
@@ -270,6 +293,10 @@ class GPXTracklog(tracklog):
     print "%s has been replaced by the current in memory version" % self.tracklogFilename
     del self.cache[self.tracklogFilename] # the file has been modified, so it must be cached again
     self.save() # save the cache to disk
+
+
+#  def periodicalElevationList(self):
+
 
 
 class CacheItem():

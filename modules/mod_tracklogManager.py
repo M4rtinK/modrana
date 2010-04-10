@@ -158,7 +158,10 @@ class tracklogManager(ranaModule):
       menus.drawButton(cr, x3, y3, dx, dy, "show on map", "generic", action3)
       # * draw "route profile"
       menus.drawButton(cr, x4, y4, w, dy, "", "box480", "set:menu:routeProfile")
-      profile.lineChart(cr, activeTracklog, x4, y4, w, dy)
+
+      if activeTracklog.elevation == True:
+        profile.lineChart(cr, activeTracklog, x4, y4, w, dy)
+
       # * draw an info box
       menus.drawButton(cr, x4, y4+dy, w, h1-(y4+dy), "", "3h", "set:menu:tracklogInfo")
 
