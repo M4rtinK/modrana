@@ -132,7 +132,7 @@ class routeProfile(ranaModule):
 
     if w <= 610:
       yTick = 7
-      labelTick = 25
+      labelTick = 20
       fontSize = 11
     else:
       yTick = 10

@@ -238,7 +238,7 @@ class GPXTracklog(tracklog):
       self.perElevList = cache[filename].perElevList
       
     else:
-      print "creating clusters: %s" % filename
+      print "creating clusters,routeInfo and perElevLisst: %s" % filename
       clusterDistance = 5 # cluster points to clusters about 5 kilometers in diameter
       self.clusters = []
 
@@ -248,7 +248,6 @@ class GPXTracklog(tracklog):
         self.clusters.append(clusterOfPoints(cluster, centreX, centreY, radius))
 
       self.checkElevation()
-      print "mark"
 
       if self.elevation == True:
         self.getPerElev()

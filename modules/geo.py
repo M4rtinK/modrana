@@ -147,23 +147,45 @@ def circleAroundPointCluster(cluster):
 def perElevList(trackpointsList, numPoints=200):
   """determine elevation in regual interval, numPoints gives the number of intervals"""
   points = [{'lat': point.latitude,'lon': point.longitude, 'elev': point.elevation} for point in trackpointsList[0]]
-  firstPoint = (points[0])
-  fLat = firstPoint['lat']
-  fLon = firstPoint['lon']
-  # create a list, where we have have (distance from starting point, elevation)
-  distanceList = map(lambda x: (distance(fLat, fLon, x['lat'], x['lon']),x['elev']) , points)
+
+  # create a list, where we have (cumulative distance from starting point, elevation)
+  distanceList = []
+  distanceList.append((0,points[0]['elev']))
+  prevIndex = 0
+  totalDist = 0
+  for point in points[1:]:
+    prevPoint = points[prevIndex]
+    (pLat,pLon) = (prevPoint['lat'], prevPoint['lon'])
+    (lat,lon,elev) = (point['lat'], point['lon'], point['elev'])
+    dist = distance(pLat, pLon, lat, lon)
+    prevIndex = prevIndex + 1
+    totalDist+= dist
+    distanceList.append((totalDist,elev))
+
   trackLength = distanceList[-1][0]
   delta = trackLength / numPoints
   for i in range(1,numPoints): # like this, we should always be between two points with known elevation
     currentDistance = i * delta
-    distanceList.append((currentDistance, None)) # we add the new
+    distanceList.append((currentDistance, None)) # we add the new points in regular intervals
 
-  distanceList.sort()
+  distanceList.sort() # now we sort the list by distance
 
   periodicElevationList = []
   periodicElevationList.append(distanceList[0]) # add the first point of the track
   index = 0
 #  print "length: %d" % len(distanceList)
+
+  """when we find a point with unknown elevation, we:
+     * find the first points with known elevation to the "left" and "right"
+     * elevation of these points create a virtual right triangle,
+       where the opposite side is the elevation difference
+     * using trigonometric calculations, we find the interpolated elevation of the current periodic point
+
+     then we store the point in our new list and thats it
+
+     we are doing this, to get carts with uniform x axis distribution,
+     even when the points in the tracklog are no uniformly distributed (e.g. routiong results)
+  """
   for point in distanceList:
     if point[1] == None:
       prevIndex = index-1
@@ -209,17 +231,8 @@ def perElevList(trackpointsList, numPoints=200):
 
     index = index + 1
 
-
-
-#  print distanceList
-#  print periodicElevationList
   periodicElevationList.append(distanceList[-1]) # add the last point of the track
   return(periodicElevationList)
-
-
-
-#  print distanceList
-
 
 
 
