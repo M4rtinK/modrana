@@ -81,7 +81,7 @@ class showGPX(ranaModule):
     loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
     loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
 
-    visibleTracklogs = self.get('visibleTracklogs', None)
+    visibleTracklogs = self.get('visibleTracklogs', set())
 
     visibleTracklogs = filter(lambda x: x.tracklogName in visibleTracklogs, loadedTracklogs)
     visibleIndexes = map(lambda x: loadedTracklogs.index(x), visibleTracklogs)
