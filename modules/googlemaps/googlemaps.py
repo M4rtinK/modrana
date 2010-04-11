@@ -19,10 +19,32 @@ An easy-to-use Python wrapper for the Google Maps and Local Search APIs.
 
 import urllib
 import urllib2
+#try:
+#    import json
+#except ImportError:
+#    import simplejson as json       # pylint: disable-msg=F0401
+
+
+# modified for better compatibility
+
+"""first we try json, than simplejson and then the simlejson package,
+   that is included in the local_simplejson folder
+
+   althought it should work without an in-OS-installed simplejson package,
+   proper package has binary speedups, so it is prefered to install it if possible
+
+"""
+
 try:
+  try:
     import json
-except ImportError:
+  except ImportError:
     import simplejson as json       # pylint: disable-msg=F0401
+except:
+  import sys
+  sys.path.append("modules/googlemaps/local_simplejson")
+  print "googlemaps: using integrated non-binary simplejson, instal proper simplejson package for better speed"
+  import simplejson as json
 
 
 VERSION = '1.0.2'
