@@ -191,6 +191,9 @@ class route(ranaModule):
 
       loadTracklogs.storeRoute(self.route) # TODO: rewrite this when we support more routing providers
       
+      length = len(loadTracklogs.tracklogs)
+      self.set('activeTracklog', "%d" % (length-1)) # jump to the new tracklog
+      
 
   def doRoute(self, fromLat, fromLon, toLat, toLon):
     """Route from one point to another, and set that as the active route"""
@@ -496,7 +499,7 @@ class route(ranaModule):
       menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
 
       menus.clearMenu('currentRouteTools', "set:menu:currentRoute")
-      menus.addItem('currentRouteTools', 'tracklog#save as', 'generic', 'route:storeRoute|set:menu:currentRoute')
+      menus.addItem('currentRouteTools', 'tracklog#save as', 'generic', 'route:storeRoute|set:menu:tracklogInfo')
     
 
 if(__name__ == '__main__'):
