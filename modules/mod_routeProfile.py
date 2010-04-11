@@ -69,24 +69,106 @@ class routeProfile(ranaModule):
     menus.drawButton(cr, x1, y1, dx, dy, "", "up_transp_gama", "set:menu:tracklogInfo")
     return
 
+#  def lineChart(self, cr, tracklog, x, y, w, h):
+#    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
+#
+#    list = tracklog.trackpointsList[0]
+#    lines = tuple(map(lambda x: ("", float(x.elevation)), list))
+#
+#    dataSet = (
+#        ('lines', [(i, l[1]) for i, l in enumerate(lines)]),
+#        )
+#
+#    options = {
+#        'axis': {
+#            'x': {
+#                #'ticks': [dict(v=i, label=l[0]) for i, l in enumerate(lines)],
+#                #'ticks' : [1:3,2,3,],
+#            },
+#            'y': {
+#                'tickCount': 10, #number of data points on the Y axis
+#            }
+#        },
+#        'background': {
+#            'color': '#eeeeff',
+#            'lineColor': '#444444'
+#        },
+#        'colorScheme': {
+#            'name': 'gradient',
+#            'args': {
+#                'initialColor': 'blue',
+#            },
+#        },
+#        'legend': {
+#            'hide': True,
+#        },
+#        'padding': {
+#            'left': 55,
+#            'bottom': 40,
+#        }
+#    }
+#    chart = pycha.line.LineChart(surface, options)
+#    chart.addDataset(dataSet)
+#    chart.render()
+#    cr.set_source_surface(surface, x, y)
+#    cr.paint()
+
   def lineChart(self, cr, tracklog, x, y, w, h):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
 
-    list = tracklog.trackpointsList[0]
-    lines = tuple(map(lambda x: ("", float(x.elevation)), list))
-    
+    title = tracklog.tracklogName
+
+    list = tracklog.perElevList
+
+    minimum = min(map(lambda x: x[1], list))
+    maximum = max(map(lambda x: x[1], list))
+#
+#    list = map(lambda x: (x[0],(x[1]-minimum)), list)
+
+    lines = tuple(map(lambda x: (x[0], x[1]), list))
+
+    units = self.m.get('units', None)
+    length = int(len(list))
+
+    if w <= 610:
+      yTick = 7
+      labelTick = 25
+      fontSize = 11
+    else:
+      yTick = 10
+      labelTick = 20
+      fontSize = 15
+
+    if units == None:
+      xTicks = [dict(v=r, label=list[r][0]) for r in range(0,length,labelTick)]
+    else:
+      xTicks = [dict(v=r, label=units.km2CurrentUnitString(list[r][0])) for r in range(0,length,labelTick)]
+
+#    list = tracklog.trackpointsList[0]
+#    lines = tuple(map(lambda x: ("", float(x.elevation)), list))
+
     dataSet = (
         ('lines', [(i, l[1]) for i, l in enumerate(lines)]),
         )
 
     options = {
         'axis': {
+        
+            'tickFontSize' : fontSize,
+            'labelFontSize': 12,
+
             'x': {
-                #'ticks': [dict(v=i, label=l[0]) for i, l in enumerate(lines)],
-                #'ticks' : [1:3,2,3,],
+                  'ticks': xTicks,
+                  'label' : "distance",
+#                  'tickCount': 10, #number of data points on the X axis
+#                 'ticks':[dict(v=i, label=l[1]) for i, l in enumerate(lines)],
             },
             'y': {
-                'tickCount': 10, #number of data points on the Y axis
+#                'interval' : 200,
+                'range' : (minimum-15,maximum+30),
+                'tickCount': yTick, #number of data points on the Y axis
+#                'rotate' : 35,
+                'label' : "elevation",
             }
         },
         'background': {
@@ -103,19 +185,18 @@ class routeProfile(ranaModule):
             'hide': True,
         },
         'padding': {
-            'left': 55,
+            'left': 60,
+            'right': 35,
             'bottom': 40,
-        }
+        },
+        'title' : title,
+        'titleFontSize': 16,
     }
     chart = pycha.line.LineChart(surface, options)
     chart.addDataset(dataSet)
     chart.render()
     cr.set_source_surface(surface, x, y)
     cr.paint()
-#    cr.move_to(0, 680)
-#    cr.line_to(480,680)
-#    cr.stroke()
-#    cr.fill()
 
 if(__name__ == "__main__"):
   a = routeProfile({}, {})

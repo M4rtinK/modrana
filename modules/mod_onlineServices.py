@@ -87,7 +87,7 @@ class onlineServices(ranaModule):
 
       index = 0
       for point in tempList: # add the results to the new list with elevation
-        latLonElevList.append((point[0],point[1],results[index]))
+        latLonElevList.append((point[0],point[1],int(results[index])))
         index = index +1
 
     return latLonElevList

@@ -144,8 +144,82 @@ def circleAroundPointCluster(cluster):
   return(centreX, centreY, radius)
 
 
-#def preiodicalElevationList(trackpointsList):
-#  distanceList = map(lambda x: x, trackpointsList)
+def perElevList(trackpointsList, numPoints=200):
+  """determine elevation in regual interval, numPoints gives the number of intervals"""
+  points = [{'lat': point.latitude,'lon': point.longitude, 'elev': point.elevation} for point in trackpointsList[0]]
+  firstPoint = (points[0])
+  fLat = firstPoint['lat']
+  fLon = firstPoint['lon']
+  # create a list, where we have have (distance from starting point, elevation)
+  distanceList = map(lambda x: (distance(fLat, fLon, x['lat'], x['lon']),x['elev']) , points)
+  trackLength = distanceList[-1][0]
+  delta = trackLength / numPoints
+  for i in range(1,numPoints): # like this, we should always be between two points with known elevation
+    currentDistance = i * delta
+    distanceList.append((currentDistance, None)) # we add the new
+
+  distanceList.sort()
+
+  periodicElevationList = []
+  periodicElevationList.append(distanceList[0]) # add the first point of the track
+  index = 0
+#  print "length: %d" % len(distanceList)
+  for point in distanceList:
+    if point[1] == None:
+      prevIndex = index-1
+      while distanceList[prevIndex][1] == None:
+        prevIndex = prevIndex - 1
+      prevPoint = distanceList[prevIndex]
+
+      nextIndex = index+1
+      while distanceList[nextIndex][1] == None:
+        nextIndex = nextIndex + 1
+      nextPoint = distanceList[nextIndex]
+
+#      print prevPoint
+#      print point
+#      print nextPoint
+
+      prevElev = prevPoint[1]
+      nextElev = nextPoint[1]
+
+      newElev = None
+      if prevElev == nextElev:
+        newElev = prevElev
+
+      elif prevElev > nextElev:
+        oposite = abs(prevPoint[1]-nextPoint[1])
+        adjecent = abs(prevPoint[0]-nextPoint[0])
+        beta = atan(oposite/adjecent)
+        alpha = pi - beta - pi/2
+        adjecentPart = nextPoint[0] - point[0]
+        dElev =  adjecentPart / tan(alpha)
+        newElev = nextElev + dElev
+
+      elif prevElev < nextElev:
+        oposite = abs(prevPoint[1]-nextPoint[1])
+        adjecent = abs(prevPoint[0]-nextPoint[0])
+        beta = atan(oposite/adjecent)
+        alpha = pi - beta - pi/2
+        adjecentPart = point[0] - prevPoint[0]
+        dElev = adjecentPart / tan(alpha)
+        newElev = prevElev + dElev
+
+      periodicElevationList.append((point[0],newElev))
+
+    index = index + 1
+
+
+
+#  print distanceList
+#  print periodicElevationList
+  periodicElevationList.append(distanceList[-1]) # add the last point of the track
+  return(periodicElevationList)
+
+
+
+#  print distanceList
+
 
 
 

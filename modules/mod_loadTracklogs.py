@@ -116,11 +116,9 @@ class loadTracklogs(ranaModule):
   def storeRoute(self, route, name=""):
     """store a route, found by Google Directions to a GPX file, then load this file to tracklogs list"""
     newTracklog = gpx.Trackpoints()
-    print route
     trackpoints = map(lambda x: gpx.Trackpoint(x[0],x[1]), route)
     newTracklog.append(trackpoints)
     xmlTree = newTracklog.export_gpx_file()
-    print newTracklog
 
     timeString = strftime("%Y%b%d#%H-%M-%S", gmtime())
     folder = self.tracklogFolder
@@ -218,7 +216,7 @@ class GPXTracklog(tracklog):
   def __init__(self, trackpointsList, tracklogFilename, cache, save):
     tracklog.__init__(self, trackpointsList, tracklogFilename)
     tracklog.tracklogType = 'gpx'
-    self.routeInfo = {} # a dictionary for storing route information
+    self.routeInfo = None # a dictionary for storing route information
     # TODO: set this automaticaly
 
     filename = self.tracklogFilename
@@ -226,9 +224,18 @@ class GPXTracklog(tracklog):
     self.cache = cache
     self.save = save
 
+    self.elevation = None
+
+    self.perElevList = None
+
+
     if filename in cache:
       print "loading from cache"
       self.clusters = cache[filename].clusters
+      self.routeInfo = cache[filename].routeInfo
+      if self.routeInfo != None:
+        self.elevation = True
+      self.perElevList = cache[filename].perElevList
       
     else:
       print "creating clusters: %s" % filename
@@ -239,21 +246,36 @@ class GPXTracklog(tracklog):
       for cluster in rawClusters: # now we find for each cluster a circle encompasing all points
         (centreX,centreY,radius) = geo.circleAroundPointCluster(cluster)
         self.clusters.append(clusterOfPoints(cluster, centreX, centreY, radius))
-        
-      ci = CacheItem(self.clusters)
+
+      self.checkElevation()
+      print "mark"
+
+      if self.elevation == True:
+        self.getPerElev()
+      else:
+        self.perElevList = None
+
+      ci = CacheItem(self.clusters, self.routeInfo, self.perElevList)
       cache[filename] = ci
 
-    self.checkElevation()
+#    self.checkElevation()
+#
+#    if self.elevation == True:
+#      self.getPerElev()
+
 
   def modified(self):
     """the tracklog has been modified, recount all the statistics and clusters"""
     # TODO: implement this ? :D
-    pass
+    self.checkElevation() # update the elevation statistics
+    if self.elevation == True:
+      self.getPerElev() # update the periodic elevation data
 
   def checkElevation(self):
     pointsWithElevation = filter(lambda x: x.elevation != None, self.trackpointsList[0])
     if pointsWithElevation: # do we have some points with known elevation ?
       self.elevation = True
+      self.routeInfo = {}
       # there we have the poinsts, that contain the highest, lowest, first and last point
       firstPoint = pointsWithElevation[0]
       lastPoint = pointsWithElevation[len(pointsWithElevation)-1]
@@ -269,10 +291,10 @@ class GPXTracklog(tracklog):
       lastElevation = float(lastPoint.elevation)
       """because there are many possible statiastics about a given route with elevation,
       we will store them in a disctionary, so new onec can be quickly added as needed"""
-      self.routeInfo['firstPoint'] = firstPoint
-      self.routeInfo['lastPoint'] = lastPoint
-      self.routeInfo['maxElevationPoint'] = maxElevationPoint
-      self.routeInfo['minElevationPoint'] = minElevationPoint
+#      self.routeInfo['firstPoint'] = firstPoint
+#      self.routeInfo['lastPoint'] = lastPoint
+#      self.routeInfo['maxElevationPoint'] = maxElevationPoint
+#      self.routeInfo['minElevationPoint'] = minElevationPoint
       self.routeInfo['maxElevation'] = maxElevation
       self.routeInfo['minElevation'] = minElevation
       self.routeInfo['middle'] = middle
@@ -295,15 +317,17 @@ class GPXTracklog(tracklog):
     self.save() # save the cache to disk
 
 
-#  def periodicalElevationList(self):
+  def getPerElev(self):
+    self.perElevList = geo.perElevList(self.trackpointsList)
 
 
 
 class CacheItem():
   """class representing a cache item"""
-  def __init__(self, clusters, routeInfo=None):
+  def __init__(self, clusters, routeInfo=None, perElevList=None):
     self.clusters = clusters
     self.routeInfo = routeInfo
+    self.perElevList = perElevList
 
 class clusterOfPoints():
   """A basic class representing a cluster of nearby points."""

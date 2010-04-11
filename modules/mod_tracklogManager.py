@@ -62,7 +62,7 @@ class tracklogManager(ranaModule):
       for onlinePoint in onlineElevList: # add the new elevation data to the tracklog
         activeTracklog.trackpointsList[0][index].elevation = onlinePoint[2]
         index = index + 1
-      activeTracklog.checkElevation() # update the elevation statistics in the tracklog object
+      activeTracklog.modified() # make the tracklog update
       activeTracklog.replaceFile() # replace the old tracklog file
 
   def drawMenu(self, cr, menuName):
@@ -182,8 +182,8 @@ class tracklogManager(ranaModule):
       menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogInfo')
 
 
-      online = self.m.get('onlineServices', None)
-      online.getGmapsInstance()
+#      online = self.m.get('onlineServices', None)
+#      online.getGmapsInstance()
 
 
 
