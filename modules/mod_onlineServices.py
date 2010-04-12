@@ -121,7 +121,29 @@ class onlineServices(ranaModule):
     start and directions can be either coordinates tupples or address strings
     '''
     gmap = self.getGmapsInstance()
-    directions = gmap.directions(start, destination)
+
+    # respect travel mode
+    mode = self.get('mode', None)
+    if mode != None:
+      type = ""
+      if mode == 'cycle':
+        type = "b"
+      elif mode == 'foot':
+        type = "w"
+      elif mode == 'train' or mode == 'bus':
+        type = 'r'
+
+      dir = {'dirflg': type}
+
+      try:
+        directions = gmap.directions(start, destination, dir)
+      except:
+        print "onlineServices:Gdirections:bad response to travel mode:%s, using default" % mode
+        directions = gmap.directions(start, destination)
+
+    else:
+      directions = gmap.directions(start, destination)
+
     return directions
 
   def googleDirectionsLL(self ,lat1, lon1, lat2, lon2):

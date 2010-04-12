@@ -424,7 +424,7 @@ class GoogleMaps(object):
             results['responseData']['results'] = results['responseData']['results'][:numresults]
         return results
 
-    def directions(self, origin, destination, **kwargs):
+    def directions(self, origin, destination, dir={}, **kwargs):
         """
         Get driving directions from `origin` to `destination`.
 
@@ -460,12 +460,12 @@ class GoogleMaps(object):
         """
         params = {
             'q':        'from:%s to:%s' % (origin, destination),
-#            'output':   'json',
             'output':   'js', #modRana:NOTE:modified to js to get polyline data
             'oe':       'utf8',
             'key':      self.api_key,
         }
         params.update(kwargs)
+        params.update(dir) #modRana: add mode parameter
 
         url, response = fetch_json(self._DIRECTIONS_QUERY_URL, params=params)
         status_code = response['Status']['code']

@@ -248,12 +248,16 @@ class menus(ranaModule):
     for(label, mode) in { \
       'Bike':'cycle',
       'Walk':'foot',
-      'MTB':'cycle',
+#      'MTB':'cycle',
       'Car':'car',
-      'Hike':'foot',
-      'FastBike':'cycle',
+#      'Hike':'foot',
+#      'FastBike':'cycle',
       'Train':'train',
-      'HGV':'hgv'}.items():
+      'Bus':'bus',
+
+#      'Train':'train',
+#      'HGV':'hgv'
+      }.items():
       self.addItem(
         'transport',                       # menu
         label,                             # label
