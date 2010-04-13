@@ -35,12 +35,61 @@ class gpsd2(ranaModule):
     self.set('speed', None)
     self.set('bearing', None)
     self.set('elevation', None)
-    try:
-      self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      self.s.connect(("127.0.0.1", 2947)) #TODO: set this from options
-      self.connected = True
-    except socket.error:
-      self.status = "No GPSD running"
+    self.lControl = None
+    self.lDevice = None
+    self.location = None
+    self.status = "Unknown"
+
+
+  def firstTime(self):
+    if self.device == 'n900':
+      try:
+        import location
+        self.location = location
+        try:
+          self.lControl = location.GPSDControl.get_default()
+          self.lDevice = location.GPSDevice()
+        except:
+          print "gpsd:N900 - cant create location objects"
+
+        try:
+          self.lControl.set_properties(preferred_method=location.METHOD_USER_SELECTED)
+        except:
+          print "gpsd:N900 - cant set prefered location method"
+
+        try:
+          self.lControl.set_properties(preferred_interval=location.INTERVAL_1S)
+        except:
+          print "gpsd:N900 - cant set prefered location interval"
+        try:
+          self.lControl.start()
+          print "** gpsd:N900 - GPS successfully activated **"
+          self.connected = True
+        except:
+          print "gpsd:N900 - opening the GPS device failed"
+          self.status = "No GPSD running"
+      except:
+        self.status = "No GPSD running"
+        print "gpsd:N900 - importing location module failed, please install the python-location package"
+        self.sendMessage('notification:install python-location package to enable GPS#7')
+
+    else:
+
+      try:
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect(("127.0.0.1", 2947)) #TODO: set this from options
+        self.connected = True
+      except socket.error:
+        self.status = "No GPSD running"
+
+  def sendMessage(self,message):
+    m = self.m.get("messages", None)
+    if(m != None):
+      print "mapData: Sending message: " + message
+      m.routeMessage(message)
+    else:
+      print "mapData: No message handler, cant send message."
+
  
   def socket_cmd(self, cmd):
     try:
@@ -126,6 +175,55 @@ class gpsd2(ranaModule):
     if(not self.connected):
       self.status = "Not connected"
       #print("not connected")
+    elif self.device == 'n900':
+      """
+    from:  http://wiki.maemo.org/PyMaemo/Using_Location_API
+    result tupple in order:
+    * mode: The mode of the fix
+    * fields: A bitfield representing which items of this tuple contain valid data
+    * time: The timestamp of the update (location.GPS_DEVICE_TIME_SET)
+    * ept: Time accuracy
+    * latitude: Fix latitude (location.GPS_DEVICE_LATLONG_SET)
+    * longitude: Fix longitude (location.GPS_DEVICE_LATLONG_SET)
+    * eph: Horizontal position accuracy
+    * altitude: Fix altitude in meters (location.GPS_DEVICE_ALTITUDE_SET)
+    * double epv: Vertical position accuracy
+    * track: Direction of motion in degrees (location.GPS_DEVICE_TRACK_SET)
+    * epd: Track accuracy
+    * speed: Current speed in km/h (location.GPS_DEVICE_SPEED_SET)
+    * eps: Speed accuracy
+    * climb: Current rate of climb in m/s (location.GPS_DEVICE_CLIMB_SET)
+    * epc: Climb accuracy
+
+      """
+      location = self.location
+      try:
+        if self.lDevice.fix:
+          fix = self.lDevice.fix
+
+          if fix[1] & location.GPS_DEVICE_LATLONG_SET:
+            (lat,lon) = device.fix[4:6]
+            self.set('pos', (lat,lon))
+
+          if fix[1] & location.GPS_DEVICE_TRACK_SET:
+            bearing = fix[9]
+            self.set('bearing', bearing)
+
+          if fix[1] & location.GPS_DEVICE_SPEED_SET:
+            speed = fix[11]/3.6 # km/h -> metres per second
+            self.set('metersPerSecSpeed', speed)
+
+  #        if fix[1] & location.GPS_DEVICE_ALTITUDE_SET:
+  #          elev = fix[7]
+  #          self.set('metersPerSecSpeed', speed)
+
+          else:
+            self.status = "Unknown"
+            print "gpsd:N900 - getting fix failed (on a regular update)"
+      except:
+        self.status = "Unknown"
+        print "gpsd:N900 - getting fix failed (on a regular update + exception)"
+
     else:
       result = self.socket_cmd("p")
       if(not result):
@@ -150,7 +248,15 @@ class gpsd2(ranaModule):
         self.satellites()
         #print(self.get('pos', None))
         #print(time())
-  
+
+  def shutdown(self):
+    try:
+      self.lControl.stop()
+    except:
+      print "gpsd:N900 - closing the GPS device failed"
+
+
+
 if __name__ == "__main__":
   d = {}
   a = gpsd2({},d)

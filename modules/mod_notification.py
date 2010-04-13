@@ -66,7 +66,10 @@ class notification(ranaModule):
   def drawScreenOverlay(self, cr):
     """We want the notification to work even over the map."""
     if self.draw == True:
-      self.drawNotification(cr)
+      try:
+        self.drawNotification(cr)
+      except:
+        print "notification: drawing notification failed"
 
   def drawNotification(self, cr):
     """Draw the notifications on the screen on top of everything."""
