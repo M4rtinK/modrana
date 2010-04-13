@@ -25,10 +25,10 @@ pygtk.require('2.0')
 import gobject
 import gtk
 import sys
-import cairo
+#import cairo
 import os
-from math import sqrt
-from time import clock
+#from math import sqrt
+#from time import clock
 from gtk import gdk
 
 

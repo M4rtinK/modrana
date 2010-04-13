@@ -233,7 +233,7 @@ class route(ranaModule):
 
   def drawMapOverlay(self, cr):
     """Draw a route"""
-    start1 = clock()
+#    start1 = clock()
     # Where is the map?
     if self.selectTwoPoints == True:
       self.drawTwoPointsMenu(cr)
@@ -251,13 +251,14 @@ class route(ranaModule):
     # as you can see, for some reason, the cooridnates in direction steps are reversed, (lon,lat,0)
     steps = map(lambda x: (x['Point']['coordinates'][1],x['Point']['coordinates'][0]), self.directions['Directions']['Routes'][0]['Steps'])
 
-    steps.append(route[len(route)-1])
+    steps.append(route[-1])
 
     # now we convert geographic cooridnates to screen coordinates, so we dont need to do it twice
     steps = map(lambda x: (proj.ll2xy(x[0],x[1])), steps)
 
     # geo to screen at once
-    route = map(lambda x: (proj.ll2xy(x[0],x[1])), route)
+#    route = map(lambda x: (proj.ll2xy(x[0],x[1])), route)
+    route = [proj.ll2xy(x[0],x[1]) for x in route]
 
     start = proj.ll2xy(self.start[0], self.start[1])
     destination = proj.ll2xy(self.destination[0], self.destination[1])
@@ -273,7 +274,7 @@ class route(ranaModule):
 
     # line from the destination point to end of the route
     (x,y) = destination
-    (x1,y1) = steps[len(steps)-1]
+    (x1,y1) = steps[-1]
     cr.move_to(x,y)
     cr.line_to(x1,y1)
     cr.stroke()
@@ -292,23 +293,19 @@ class route(ranaModule):
 
     cr.fill()
 
-
-
     cr.set_source_rgb(0, 0, 0.5)
     cr.set_line_width(10)
 
     # draw the points from the polyline as a polyline :)
-    first = True
-    
-    for point in route:
-#      (lat,lon) = (point[0],point[1])
-#      x,y = proj.ll2xy(lat,lon)
-      (x,y) = (point)
-      if(first):
-        cr.move_to(x,y)
-        first = False
-      else:
-        cr.line_to(x,y)
+
+    (x,y) = route[0]
+    cr.move_to(x,y)
+
+    # well, this SHOULD be faster and this is a performance critical section after all...
+#    map(lambda x: cr.line_to(x[0],x[1]), route[1:]) # lambda drawing :)
+    # according to numerous sources, list comprehensions should be faster than for loops and map+lambda
+    # if its faster in this case too has not been determined
+    [cr.line_to(x[0],x[1])for x in route[1:]] # list comprehension drawing :D
     cr.stroke()
 
     # draw the step points over then polyline
@@ -320,7 +317,7 @@ class route(ranaModule):
       cr.stroke()
     cr.fill()
 
-    print "Redraw took %1.2f ms" % (1000 * (clock() - start1))
+#    print "Redraw took %1.9f ms" % (1000 * (clock() - start1))
 
 
   #from: http://seewah.blogspot.com/2009/11/gpolyline-decoding-in-python.html

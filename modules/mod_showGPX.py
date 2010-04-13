@@ -22,7 +22,7 @@ from base_module import ranaModule
 #import random
 import geo
 import math
-#from time import clock
+from time import clock
 
 def getModule(m,d):
   return(showGPX(m,d))
@@ -34,7 +34,7 @@ class showGPX(ranaModule):
     ranaModule.__init__(self, m, d)
     self.linewidth = 7 #with of the line denoting GPX tracks
 
-    
+  
 
   def drawMapOverlay(self, cr):
     """get a file, load it and display it on the map"""
@@ -110,8 +110,8 @@ class showGPX(ranaModule):
         return math.sqrt(dx**2 + dy**2)
 
   def drawSimpleTrack(self, cr, GPXTracklog):
-  # start = clock()
-    pointsDrawn = 0
+#    pointsDrawn = 0
+#    start = clock()
     proj = self.m.get('projection', None)
     (screenCentreX,screenCentreY,screenRadius) = proj.screenRadius()
     cr.set_source_rgb(0,0, 0.5)
@@ -153,20 +153,20 @@ class showGPX(ranaModule):
         #self.point(cr, x1, y1)
         #self.point(cr, x2, y2)
 
-      first = True
-      for point in cluster.pointsList:
-        (lat,lon) = (point['latitude'], point['longitude'])
-        (x,y) = proj.ll2xy(lat,lon)
-        if first:
-          cr.move_to(x, y)
-          first = False
-        pointsDrawn = pointsDrawn + 1
-        cr.line_to(x, y)
-      cr.stroke()
-      cr.fill()
-#    if pointsDrawn > 0:
-#      print "Nr of trackpoints drawn: %d" % pointsDrawn
-#    print "Redraw took %1.2f ms" % (1000 * (clock() - start))
+      # get a list of onscreen coordinates
+#      points = map(lambda x: proj.ll2xy(x['latitude'], x['longitude']), cluster.pointsList)
+      points = [proj.ll2xy(x['latitude'], x['longitude']) for x in cluster.pointsList]
+      # draw these coordinates
+      (x,y) = points[0]
+      cr.move_to(x,y) # go the the first point
+      [cr.line_to(x[0],x[1])for x in points[1:]] # extend the line over the other points in the cluster
+
+    cr.stroke()
+    cr.fill()
+
+  #    if pointsDrawn > 0:
+  #    print "Nr of trackpoints drawn: %d" % pointsDrawn
+  #    print "Redraw took %1.2f ms" % (1000 * (clock() - start))
 
 
   def drawColoredTracklog(self, cr, GPXTracklog):
