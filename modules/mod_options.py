@@ -174,10 +174,13 @@ class options(ranaModule):
     if(message == "up"):
       if(self.scroll > 0):
         self.scroll -= 1
+        self.set("needRedraw", True)
     elif(message == "down"):
       self.scroll += 1
+      self.set("needRedraw", True)
     elif(message == "reset_scroll"):
       self.scroll = 0
+      self.set("needRedraw", True)
     elif(message == "save"):
       self.save()
     

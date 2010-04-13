@@ -112,6 +112,7 @@ class showPOI(ranaModule):
       self.set('needRedraw', True)
     if(message == "reset"):
       self.scroll = 0
+      self.set("needRedraw", True)
 
 
 

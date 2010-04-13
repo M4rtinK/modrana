@@ -114,11 +114,14 @@ class search(ranaModule):
       if(message == "up"):
         if(self.scroll > 0):
           self.scroll -= 1
+          self.set("needRedraw", True)
       if(message == "down"):
         print "down"
         self.scroll += 1
+        self.set("needRedraw", True)
       if(message == "reset"):
         self.scroll = 0
+        self.set("needRedraw", True)
       if (message == 'clearSearch'):
         self.localSearchResults = None
         self.list = None
