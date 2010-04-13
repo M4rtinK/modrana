@@ -271,7 +271,18 @@ if __name__ == "__main__":
   'square' (480*480) -> this is for testing screens with equal sides
   'ipaq' (240*320) -> old Ipaqs (and and other Pocket PCs) had this resolution
   """
-  device = 'n900'
+
+  print " == modRana Starting == "
+
+  try:
+    import sys
+    device = sys.argv[1].lower()
+    print " device string (first parameter): %s " % sys.argv[1]
+  except:
+    device = 'neo'
+    print " no device string in first parameter, using: %s" % device
+
+
   program = GuiBase(device)
 
  
