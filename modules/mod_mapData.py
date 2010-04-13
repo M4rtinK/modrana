@@ -30,9 +30,10 @@ import string
 import urllib, urllib2, threading
 from threadpool import threadpool
 from threading import Thread
-#import socket
-#timeout = 30 # this sets timeout for all sockets
-#socket.setdefaulttimeout(timeout)
+
+import socket
+timeout = 30 # this sets timeout for all sockets
+socket.setdefaulttimeout(timeout)
 
 
 
@@ -249,6 +250,11 @@ class mapData(ranaModule):
         return
       urls = map(lambda x: x[0], urlsAndFilenames)
 
+      if self.sizeThread != None:
+        if self.sizeThread.finished == False:
+          print "size check already in progress"
+          return
+
       self.totalSize = 0
       maxThreads = self.get('maxSizeThreads', 5)
       sizeThread = self.GetSize(urls, maxThreads) # the seccond parameter is the max number of threads TODO: tweak this
@@ -264,10 +270,17 @@ class mapData(ranaModule):
       if len(urlsAndFilenames) == 0:
         print "cant download an empty list"
         return
+
+      if self.getFilesThread != None:
+        if self.getFilesThread.finished == False:
+          print "download already in progress"
+          return
+        
       maxThreads = self.get('maxDlThreads', 5)
       getFilesThread = self.GetFiles(urlsFilenamesInString, maxThreads)
       getFilesThread.start()
       self.getFilesThread = getFilesThread
+
 
   def addOtherZoomlevels(self, tiles, tilesZ, maxZ, minZ):
     """expand the tile coverage to other zoomlevels
@@ -354,6 +367,7 @@ class mapData(ranaModule):
       self.urlCount = len(urls)
       self.totalSize = 0
       self.finished = False
+      self.quit = False
 #      self.set("sizeStatus", 'inProgress') # the size is being processed
 
     def getSizeForURL(self, url):
@@ -394,10 +408,14 @@ class mapData(ranaModule):
               mainPool.poll()
               print "Main thread working...",
               print "(active worker threads: %i)" % (threading.activeCount()-1, )
+              if self.quit == True:
+                print "get size quiting"
+                break
           except threadpool.NoResultsPending:
               print "**** No pending results."
               print "Total size lookup took %1.2f ms" % (1000 * (clock() - start))
               self.finished = True
+              mainPool.dismissWorkers(maxThreads)
               break
 #      if mainPool.dismissedWorkers:
 #          print "Joining all dismissed worker threads..."
@@ -412,6 +430,7 @@ class mapData(ranaModule):
       self.processed = 0
       self.urlCount = len(urlsAndFilenames)
       self.finished = False
+      self.quit = False
 
     def saveTileForURL(self, urlAndFilename):
       (url, filename) = urlAndFilename.split('*')
@@ -441,12 +460,16 @@ class mapData(ranaModule):
       while True:
           try:
               time.sleep(0.5)
-              mainPool.poll()
+              print mainPool.poll()
               print "Main thread working...",
               print "(active worker threads: %i)" % (threading.activeCount()-1, )
+              if self.quit == True:
+                print "get size quiting"
+                break
           except threadpool.NoResultsPending:
               print "**** No pending results."
               self.finished = True
+              mainPool.dismissWorkers(maxThreads)
               break
 #      if mainPool.dismissedWorkers:
 #          print "Joining all dismissed worker threads..."
@@ -755,6 +778,18 @@ class mapData(ranaModule):
      
     f.write("</svg>\n")
 
+  def shutdown(self):
+    if self.sizeThread:
+      try:
+        self.sizeThread.quit=True
+      except:
+        print "error while shutting down size thread"
+
+    if self.getFilesThread:
+      try:
+        self.getFilesThread.quit=True
+      except:
+        print "error while shutting down files thread"
 
 
 if(__name__ == "__main__"):
