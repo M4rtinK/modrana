@@ -156,6 +156,16 @@ class options(ranaModule):
         self.set(k,v)
     except IOError:
       print "options: error while loading the saved options"
+
+    self.overrideOptions()
+
+  def overrideOptions(self):
+    """
+    without this, there would not be any projcetion values at start,
+    becuase modRana does not know, what part of the map to show
+    """
+    self.set('centred', True) # set centering to True at start to get setView to run
+
       
   def optionsFilename(self):
     return("data/options.bin")
