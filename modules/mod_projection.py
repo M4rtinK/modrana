@@ -37,7 +37,11 @@ class Projection(ranaModule):
     # Scale is the number of display pixels per projected unit
     self.scale = tileSizePixels()
 
-#    self.set('centred', True) # set centering to True at start to get setView to run
+  def firstTime(self):
+    # make absolutely sure that centering is turned on
+    # otherwise we dont know what to show -> black screen => NOT GOOD :)
+    self.set('centred', True) # set centering to True at start to get setView to run
+
     
   def isValid(self):
     """Test if the module contains all the information needed to do conversions"""

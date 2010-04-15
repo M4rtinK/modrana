@@ -196,7 +196,9 @@ class GuiBase:
     if(device == 'eee'): # test for use with asus eee
       win.resize(800,600)
       win.move(gtk.gdk.screen_width() - 900, 50)
-    elif(device == 'n900'): # test for use with asus eee
+    elif(device == 'n900'): # test for use with nokie N900
+      win.resize(800,480)
+    elif(device == 'q7'): # test for use with Smart Q7
       win.resize(800,480)
       win.move(gtk.gdk.screen_width() - 900, 50)
     elif(device == 'n95'): # test for use with nokia 95

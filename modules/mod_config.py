@@ -22,6 +22,7 @@
 from base_module import ranaModule
 import os #TODO: testing import, remove this
 from time import clock
+from configobj import ConfigObj
 
 def getModule(m,d):
   return(config(m,d))
@@ -30,8 +31,17 @@ class config(ranaModule):
   """Handle configuration, options, and setup"""
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
+    self.userConfigPath = 'user_config.conf'
+    self.userConfig = None
 
   def firstTime(self):
+
+    self.set('userConfig', None) # zero the user config in case there were values stored from the last time
+
+    # load the user config file
+
+    self.parseUserConfig(self.userConfigPath)
+
     # Option: load a GPX replay
 #    m = self.m.get('replayGpx', None)
 #    if(m != None):
@@ -83,4 +93,18 @@ class config(ranaModule):
 
 
 
-    pass
+  def parseUserConfig(self, path):
+    """Par user created configuration file."""
+
+    config = ConfigObj(path)
+
+    self.userConfig = config
+
+#    self.set('userConfig', config.dict.copy())
+##    print config['cycle']['OSD']['speed']
+##    self.m.get('showOSD')
+#    print self.get('userConfig', None)
+
+
+
+
