@@ -203,6 +203,10 @@ class route(ranaModule):
     directions = online.googleDirectionsLL(fromLat, fromLon, toLat, toLon)
     if directions == None:
       return
+
+    # remove any possible prev. route description, so new a new one for this route is created
+    self.text = None 
+
     polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
     route = self.decode_line(polyline) # we decode the polyline to a list of points
 
