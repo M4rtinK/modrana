@@ -35,12 +35,12 @@ def getModule(m,d):
 
 
 maplayers = {
-  'pyrender':
-    {
-    'label':'pyrender',
-    'pyrender':True,
-    'type':'png'
-    },
+#  'pyrender':
+#    {
+#    'label':'pyrender',
+#    'pyrender':True,
+#    'type':'png'
+#    },
   'osma':
     {
     'label':'OSM T@h',
@@ -115,12 +115,13 @@ maplayers = {
     'type':'png',
     'maxZoom': 15
     },
-  'localhost':
-    {
-    'label':'Localhost',
-    'tiles':'http://localhost:1280/default/',
-    'type':'png'
-    }
+#  'localhost': # not much usable right now
+#    {
+#    'label':'Localhost',
+#    'tiles':'http://localhost:1280/default/',
+#    'maxZoom': 15,
+#    'type':'png'
+#    }
   };
 
   
