@@ -98,6 +98,7 @@ class options(ranaModule):
       tileOptions = [("","None")]
       for name,layer in tiles.layers().items():
         tileOptions.append((name, layer.get('label',name)))
+      tileOptions.sort()
       self.addOption("Map images", "layer", tileOptions, "map", None)
     self.addBoolOption("Old tracklogs", "old_tracklogs", "map", False)
     self.addBoolOption("Latest tracklog", "tracklog", "map", True)

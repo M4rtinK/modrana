@@ -69,6 +69,44 @@ maplayers = {
     'type':'jpg',
     'maxZoom': 20
     },
+  'vmap':
+    {
+    'label':'Virtual Earth-map',
+    'tiles':'http://tiles.virtualearth.net/tiles/r',
+    'type':'png',
+    'maxZoom': 19 # currently, there are "no tile" images on zl 20, at least for Brno
+    },
+  'vsat':
+    {
+    'label':'Virtual Earth-sat',
+    'tiles':'http://tiles.virtualearth.net/tiles/h',
+    'type':'jpg',
+    'maxZoom': 19 # there are areas, where the resolution is unusably small
+    },
+  'ymap':
+    {
+    'label':'Yahoo map',
+    'tiles':'http://maps.yimg.com/hx/tl?&s=256',
+    # tiles up to u=12 are png, 11 and up is jpg
+    # luckily our jpg handler seems to be extension independent
+    # SIDE EFFECT: producing some pngs with .jpg extension :)
+    'type':'jpg', 
+    'maxZoom': 17
+    },
+  'ysat':
+    {
+    'label':'Yahoo sat',
+    'tiles':'http://maps.yimg.com/ae/ximg?&t=a&s=256',
+    'type':'jpg',
+    'maxZoom': 15
+    },
+  'yover':
+    {
+    'label':'Yahoo overlay',
+    'tiles':'http://maps.yimg.com/ae/ximg?&t=h&s=256',
+    'type':'jpg',
+    'maxZoom': 15
+    },
   'cycle':
     {
     'label':'Cycle map',
@@ -95,47 +133,6 @@ class mapTiles(ranaModule):
 #    self.oldZ = None
 #    self.oldThreadCount = None
     self.set('maplayers', maplayers) # export the maplyers definition for use by other modules
-  
-#  def drawMapOverlay(self, cr):
-#    """Draw an "own position" marker (TODO: probably should be in different module)"""
-#
-#    # Where are we?
-#    pos = self.get('pos', None)
-#    if(pos == None):
-#      return
-#    (lat,lon) = pos
-#
-#    # Where is the map?
-#    proj = self.m.get('projection', None)
-#    if(proj == None):
-#      return
-#    if(not proj.isValid()):
-#      return
-#
-#    # Where are we on the map?
-#    x1,y1 = proj.ll2xy(lat,lon)
-#
-#    # What are we?
-#    angle = self.get('bearing', 0)
-#    #print(angle)
-#
-#    # Draw yellow/black triangle showing us
-#    cr.set_source_rgb(1.0, 1.0, 0.0)
-#    cr.save()
-#    cr.translate(x1,y1)
-#    cr.rotate(radians(angle))
-#    cr.move_to(-10, 15)
-#    cr.line_to( 10, 15)
-#    cr.line_to(  0, -15)
-#    cr.fill()
-#    cr.set_source_rgb(0.0, 0.0, 0.0)
-#    cr.set_line_width(3)
-#    cr.move_to(-10, 15)
-#    cr.line_to( 10, 15)
-#    cr.line_to(  0, -15)
-#    cr.close_path()
-#    cr.stroke()
-#    cr.restore()
 
   def drawMap(self, cr):
     """Draw map tile images"""
@@ -149,7 +146,7 @@ class mapTiles(ranaModule):
     if(not proj.isValid()):
       return
 
-    layer = self.get('layer','pyrender')
+    layer = self.get('layer','osma')
     # Cover the whole map view with tiles
     for x in range(int(floor(proj.px1)), int(ceil(proj.px2))):
       for y in range(int(floor(proj.py1)), int(ceil(proj.py2))):
@@ -290,6 +287,10 @@ class mapTiles(ranaModule):
   def layers(self):
     return(maplayers)
 
+  def getTileUrl(self, x, y, z, layer):
+    """Wrapper, that makes it possible to use this function from other modules."""
+    return getTileUrl(x, y, z, layer)
+
 def downloadTile(x,y,z,layer,filename):
   """Downloads an image"""
   layerDetails = maplayers.get(layer, None)
@@ -313,7 +314,6 @@ def downloadTile(x,y,z,layer,filename):
 #        layerDetails.get('type','png'))
 
   urllib.urlretrieve(url, filename)
-  #print(url)
 
 def getTileUrl(x,y,z,layer): #TODO: share this with mapData
     """Return url for given tile coorindates and layer"""
@@ -322,13 +322,45 @@ def getTileUrl(x,y,z,layer): #TODO: share this with mapData
       url = '%s&x=%d&y=%d&z=%d' % (
         layerDetails['tiles'],
         x,y,z)
-    else:
+    elif layer == 'vmap' or layer == 'vsat': # handle Virtual Earth maps and satelite
+      quadKey = QuadTree(x, y, z)
+      url = '%s%s.%s?g=452' % ( #  dont know what the g argument is, maybe revision ? but its not optional
+                                layerDetails['tiles'], # get the url
+                                quadKey, # get the tile identificator
+                                layerDetails['type'] # get the correct extension (also works with png for
+                                )                    #  both maps and sat, but the original url is specific)
+    elif layer == 'ymap' or layer == 'ysat' or layer == 'yover': # handle Yaho maps, sat, overlay
+      y = ((2**(z-1) - 1) - y)
+      z = z + 1
+      url = '%s&x=%d&y=%d&z=%d&r=1' % ( # I have no idea what the r parameter is, r=0 or no r => grey square
+                                layerDetails['tiles'],
+                                x,y,z)
+    else: # OSM, Open Cycle, T@H
       url = '%s%d/%d/%d.%s' % (
         layerDetails['tiles'],
         z,x,y,
         layerDetails.get('type','png'))
     return url
+
   
+# modified from: http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/globalmaptiles.py (GPL)
+def QuadTree(tx, ty, zoom ):
+		"Converts OSM type tile coordinates to Microsoft QuadTree"
+
+		quadKey = ""
+#		ty = (2**zoom - 1) - ty
+		for i in range(zoom, 0, -1):
+			digit = 0
+			mask = 1 << (i-1)
+			if (tx & mask) != 0:
+				digit += 1
+			if (ty & mask) != 0:
+				digit += 2
+			quadKey += str(digit)
+
+		return quadKey
+
+
 class tileLoader(Thread):
   """Downloads an image (in a thread)"""
   def __init__(self, x,y,z,layer,filename):

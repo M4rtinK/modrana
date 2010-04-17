@@ -28,7 +28,6 @@ class stats(ranaModule):
   """Handles messages"""
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
-    self.lastpos = [0,0]
     self.lastT = None
     self.maxSpeed = 0
     self.avg1 = 0
@@ -38,7 +37,7 @@ class stats(ranaModule):
     # Run scheduledUpdate every second
     t = time()
     if(self.lastT == None):
-      self.scheduledUpdate(t, 0, True)
+      self.scheduledUpdate(t, 1, True) # dt should not be 0 because we use it for division
       self.lastT = t
     else:
       dt = t - self.lastT
@@ -52,37 +51,19 @@ class stats(ranaModule):
     if(pos == None):
       return # TODO: zero any stats
 
-    if(not firstTime):
-      distance = geo.distance(
-        self.lastpos[0],
-        self.lastpos[1],
-        pos[0],
-        pos[1]) * 1000.0 # metres
+    speed = self.get('metersPerSecSpeed', 0)
 
-# from now on we get bearing from gpsd
-#      bearing = geo.bearing(
-#        self.lastpos[0],
-#        self.lastpos[1],
-#        pos[0],
-#        pos[1]) # degrees
+    average = 0
 
-#      speed = distance / dt # m/sec
-      speed = self.get('metersPerSecSpeed', 0)
+    if(speed > self.maxSpeed):
+      self.maxSpeed = speed
+    self.avg1 += speed
+    self.avg2 += dt
+    average = self.avg1/self.avg2
 
-
-      average = 0
-
-      if(speed > self.maxSpeed):
-        self.maxSpeed = speed
-      self.avg1 += speed
-      self.avg2 += dt
-      average = self.avg1/self.avg2
-
-      self.set('maxSpeed', self.maxSpeed * 3.6)
-      self.set('avgSpeed', average * 3.6)
-      self.set('speed', speed * 3.6)
-
-    self.lastpos = pos
+    self.set('maxSpeed', self.maxSpeed * 3.6)
+    self.set('avgSpeed', average * 3.6)
+    self.set('speed', speed * 3.6)
 
 if(__name__ == '__main__'):
   d = {'pos':[51, -1]}

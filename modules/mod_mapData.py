@@ -115,19 +115,25 @@ class mapData(ranaModule):
 
   def getTileUrl(self,x,y,z,layer): #TODO: share this with mapTiles
       """Return url for given tile coorindates and layer"""
-      maplayers = self.get('maplayers', None)
-      extension = maplayers.get('type', 'png')
-      layerDetails = maplayers.get(layer, None)
-      if layer == 'gmap' or layer == 'gsat':
-        url = '%s&x=%d&y=%d&z=%d' % (
-          layerDetails['tiles'],
-          x,y,z)
-      else:
-        url = '%s%d/%d/%d.%s' % (
-          layerDetails['tiles'],
-          z,x,y,
-          extension)
+      mapTiles = self.m.get('mapTiles', None)
+      url = mapTiles.getTileUrl(x,y,z,layer)
       return url
+
+#  def getTileUrl(self,x,y,z,layer): #TODO: share this with mapTiles
+#      """Return url for given tile coorindates and layer"""
+#      maplayers = self.get('maplayers', None)
+#      extension = maplayers.get('type', 'png')
+#      layerDetails = maplayers.get(layer, None)
+#      if layer == 'gmap' or layer == 'gsat':
+#        url = '%s&x=%d&y=%d&z=%d' % (
+#          layerDetails['tiles'],
+#          x,y,z)
+#      else:
+#        url = '%s%d/%d/%d.%s' % (
+#          layerDetails['tiles'],
+#          z,x,y,
+#          extension)
+#      return url
 
 # adapted from: http://www.artfulcode.net/articles/multi-threading-python/
   class FileGetter(threading.Thread):

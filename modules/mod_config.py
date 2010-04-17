@@ -49,7 +49,7 @@ class config(ranaModule):
 #      m.load('track.gpx')
 
     # Option: set your start position
-    self.set("pos", (49.2, 16.616667)) # Brno
+#    self.set("pos", (49.2, 16.616667)) # Brno
     #self.set("centred", False)  # don't keep the map centred on the start position
     #  self.set("pos_source", "default")
 
@@ -61,7 +61,8 @@ class config(ranaModule):
     # osma, mapnik, etc - see mod_mapTiles for list
     # currently: gmap,gsat,mapnik,osma,cycle,pyrender,localhost
     # NOTE: cycle map seems to be missing some z14 tiles
-    self.set('layer',"osma")
+
+#    self.set('layer',"osma")
 
 
     # Option: whether to centre on your position

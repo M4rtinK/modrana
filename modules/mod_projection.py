@@ -37,10 +37,42 @@ class Projection(ranaModule):
     # Scale is the number of display pixels per projected unit
     self.scale = tileSizePixels()
 
+#    self.initView()
+
+
   def firstTime(self):
     # make absolutely sure that centering is turned on
     # otherwise we dont know what to show -> black screen => NOT GOOD :)
+    if self.get("pos", None) == None:
+      self.set("pos", (49.2, 16.616667)) # Brno
+
+    (lat,lon) = self.get("pos", None)
+    self.recentre(lat, lon)
+
+    z = int(self.get('z', 15))
+    self.zoom = z
+
+    viewport = self.get('viewport', None)
+    if viewport == None:
+     (sx,sy,sw,sh) = (0,0,200,200)
+    else:
+     (sx,sy,sw,sh) = viewport
+    self.setView(sx, sy, sw, sh)
+
+    self.findEdges()
+
     self.set('centred', True) # set centering to True at start to get setView to run
+
+#  def firstTime(self):
+#    # make absolutely sure that centering is turned on
+#    # otherwise we dont know what to show -> black screen => NOT GOOD :)
+#    if self.get("pos", None) == None:
+#      self.set("pos", (49.2, 16.616667)) # Brno
+#
+#    (lat,lon) = self.get("pos", None)
+#    self.recentre(lat, lon)
+#    self.findEdges()
+#    self.set('centred', True) # set centering to True at start to get setView to run
 
     
   def isValid(self):

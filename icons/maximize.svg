@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg3819"
+   version="1.1"
+   inkscape:version="0.47pre4 r22446"
+   sodipodi:docname="maximize.svg"
+   inkscape:export-filename="/home/melf-san/data/coding/gps/modrana/icons/bitmap/maximize.png"
+   inkscape:export-xdpi="92"
+   inkscape:export-ydpi="92">
+  <defs
+     id="defs3821">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective3827" />
+    <inkscape:perspective
+       id="perspective3796"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective5074"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#ffffff"
+     borderopacity="0.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="0"
+     inkscape:zoom="5.6"
+     inkscape:cx="425.74025"
+     inkscape:cy="188.00454"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1280"
+     inkscape:window-height="952"
+     inkscape:window-x="4"
+     inkscape:window-y="44"
+     inkscape:window-maximized="0"
+     inkscape:snap-grids="false">
+    <inkscape:grid
+       type="xygrid"
+       id="grid3595" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata3824">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       id="rect8666"
+       x="395"
+       y="807.36218"
+       inkscape:export-xdpi="92.212929"
+       width="111.12024"
+       height="111.12024"
+       ry="22"
+       inkscape:export-filename="/home/melf-san/data/coding/gps/rana3/icons/bitmap/generic_alpha_white.png"
+       inkscape:export-ydpi="92.212929"
+       rx="22"
+       style="fill:#ffffff;fill-opacity:0;stroke:#000000;stroke-width:6;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:0.27450982;stroke-dasharray:none" />
+    <rect
+       style="fill:#ffffff;fill-opacity:0.70388344999999997;stroke:#3d60fa;stroke-width:6;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:0.65098041;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect5062"
+       width="55"
+       height="55"
+       x="435"
+       y="847.36218"
+       rx="15.070569"
+       ry="17.818537" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:3.66781402;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 462.53572,841.09718 0,-28.40109 -7.96939,6.08595 7.96939,-6.08595 7.96939,6.08595"
+       id="path5064"
+       inkscape:transform-center-y="7.1723571" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:3.67757225;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 428.69494,874.55888 -28.5699,0 6.12212,7.96451 -6.12212,-7.96451 6.12212,-7.96451"
+       id="path5064-4"
+       inkscape:transform-center-x="-7.2149918" />
+  </g>
+</svg>

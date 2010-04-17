@@ -43,9 +43,6 @@ class showOSD(ranaModule):
     if self.m.get('config', {}):
       config = self.m.get('config', None).userConfig
 
-#      relevant [item in osd, for   ]
-#      maxElevationPoint = (max(pointsWithElevation, key=lambda x: x.elevation))
-
       mode = self.get('mode', None)
       if mode == None:
         return
@@ -104,12 +101,10 @@ class showOSD(ranaModule):
 #        (w,h) = (extents[2], extents[3])
 
       lines  = text.split('|')
-      print lines
       border = 10
       (w,h) = (0,0)
       yOffset = []
       for line in lines:
-        print (w,h)
         extents = cr.text_extents(line)
         (w,h) = (max(w,extents[2]), h + extents[3] + border)
         yOffset.append(y+h)
