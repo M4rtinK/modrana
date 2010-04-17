@@ -100,21 +100,9 @@ class config(ranaModule):
       config = ConfigObj(path)
 
       if 'enabled' in config:
-        self.userConfig = config
+        if config['enabled'] == 'True':
+          self.userConfig = config
     except:
       print "config: loading user_config.conf failed"
       print "config: check the syntax"
       print "config: and if the config file is present in the main directory"
-
-
-
-
-
-#    self.set('userConfig', config.dict.copy())
-##    print config['cycle']['OSD']['speed']
-##    self.m.get('showOSD')
-#    print self.get('userConfig', None)
-
-
-
-

@@ -64,6 +64,7 @@ class menus(ranaModule):
         (x1,y1) = proj.screenPos(0.6, -0.96)
         text = "tap screen to show menu"
         self.drawText(cr, text, x1, y1, w/3, h, 0) # draw a reminder
+        cr.stroke()
         return
 
     # default main button coordinates
@@ -71,8 +72,8 @@ class menus(ranaModule):
     buttons['menu'] = (x,y) # main menu button coordinates
     buttons['zoom_in'] = (x,y+dx) # zoom in button coordinates
     buttons['zoom_out'] = (x+dx,y) # zoom out button coordinates
-    buttons['fullscreen'] = (x+w-dx, y) # fullscreen button coordinates
-    buttons['centre'] = (x, y+h-dy) # centre button coordinates
+    buttons['fullscreen'] = (x, y+h-dy) # fullscreen button coordinates
+    buttons['centre'] = (x+w-dx, y) # centre button coordinates
     buttons['scalebar'] = proj.screenPos(0.15, 0.97) # scalebar coordinates
     plusIcon = 'zoom_in'
     minusIcon = 'zoom_out'
@@ -85,6 +86,13 @@ class menus(ranaModule):
         plusIcon = 'plus'
         minusIcon = 'minus'
         item = self.userConfig[mode]['override_main_buttons']
+
+        if 'icon_size' in item:
+          size = float(item['icon_size'])
+          dx = size * min(w,h)
+          dy = dx
+
+
 
         for key in buttons:
           if key in item:

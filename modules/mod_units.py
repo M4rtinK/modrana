@@ -65,15 +65,26 @@ class units(ranaModule):
       return "%1.2f miles" % (km * 0.621371192)  # km to miles
     
   def km2CurrentUnitPerHourString(self, km):
+    """return a string with the speed rouded to the current unit
+       %f1.2 speed_unit_per_hour
+       example: 5.25 kmh
+       """
+    unitType = self.get("unitType", "km")
+    if unitType == 'km':
+      return "%1.0f kmh" % km
+    else:
+      return "%1.0f mph" % (km * 0.621371192) #  km to miles
+
+  def km2CurrentUnitPerHourStringTwoDP(self, km):
     """return a string with the speed rouded to two decimal places with the current unit
        %f1.2 speed_unit_per_hour
        example: 5.25 kmh
        """
     unitType = self.get("unitType", "km")
     if unitType == 'km':
-      return "%1.2f kmh" % km
+      return "%1.0f kmh" % km
     else:
-      return "%1.2f mph" % (km * 0.621371192) #  km to miles
+      return "%1.0f mph" % (km * 0.621371192) #  km to miles
 
   def currentUnitPerHourString(self):
     unitType = self.get("unitType", "km")
