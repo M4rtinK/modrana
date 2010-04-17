@@ -32,15 +32,16 @@ class config(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.userConfigPath = 'user_config.conf'
-    self.userConfig = None
+    self.userConfig = {}
+
+    self.parseUserConfig(self.userConfigPath)
 
   def firstTime(self):
 
-    self.set('userConfig', None) # zero the user config in case there were values stored from the last time
 
     # load the user config file
 
-    self.parseUserConfig(self.userConfigPath)
+#    self.parseUserConfig(self.userConfigPath)
 
     # Option: load a GPX replay
 #    m = self.m.get('replayGpx', None)
@@ -95,10 +96,19 @@ class config(ranaModule):
 
   def parseUserConfig(self, path):
     """Par user created configuration file."""
+    try:
+      config = ConfigObj(path)
 
-    config = ConfigObj(path)
+      if 'enabled' in config:
+        self.userConfig = config
+    except:
+      print "config: loading user_config.conf failed"
+      print "config: check the syntax"
+      print "config: and if the config file is present in the main directory"
 
-    self.userConfig = config
+
+
+
 
 #    self.set('userConfig', config.dict.copy())
 ##    print config['cycle']['OSD']['speed']

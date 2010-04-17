@@ -54,6 +54,8 @@ class options(ranaModule):
 
     self.addBoolOption("Debug squares", "debugSquares", "debug", False)
 
+
+    # * the view submenu *
     self.addOption("Tracklogs", "showTracklog",
     [(None, "Dont draw tracklogs"),
      ("simple", "Draw simple tracklogs")],

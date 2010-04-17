@@ -33,6 +33,7 @@ class gpsd2(ranaModule):
     self.position_regexp = re.compile('P=(.*?)\s*$')
     self.connected = False
     self.set('speed', None)
+    self.set('metersPerSecSpeed', None)
     self.set('bearing', None)
     self.set('elevation', None)
     self.lControl = None
@@ -250,10 +251,11 @@ class gpsd2(ranaModule):
         #print(time())
 
   def shutdown(self):
-    try:
-      self.lControl.stop()
-    except:
-      print "gpsd:N900 - closing the GPS device failed"
+    if self.device == 'n900':
+      try:
+        self.lControl.stop()
+      except:
+        print "gpsd:N900 - closing the GPS device failed"
 
 
 

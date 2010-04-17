@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
+import time
 
 def getModule(m,d):
   return(showOSD(m,d))
@@ -28,9 +29,9 @@ class showOSD(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.items = None
-    self.avail = set(
-                      'speed'
-                      )
+#    self.avail = set(
+#                      'speed'
+#                      )
     
   def update(self):
     # Get and set functions are used to access global data
@@ -39,7 +40,7 @@ class showOSD(ranaModule):
 
   def drawScreenOverlay(self, cr):
 #    if items:
-    if True:
+    if self.m.get('config', {}):
       config = self.m.get('config', None).userConfig
 
 #      relevant [item in osd, for   ]
@@ -51,34 +52,63 @@ class showOSD(ranaModule):
 
       if mode not in config:
         return
+      if 'OSD' in config[mode]:
+        items = config[mode]['OSD']
+        for item in items:
+          self.drawWidget(cr,items[item],item)
 
-      items = config[mode]['OSD']
-      print items
 
-      if 'speed' in items:
 
-        item = items['speed']
+  def drawWidget(self, cr, item, type):
+        print type
+        if type == 'speed':
+          speed = self.get('speed', 0)
+          units = self.m.get('units', None)
+          speedString = units.km2CurrentUnitPerHourString(speed)
+          self.drawTextWidget(cr, item, speedString)
+        elif type == 'time':
+          timeString = time.strftime("%H:%M")
+          print timeString
+          self.drawTextWidget(cr, item, timeString)
+        elif type == 'coordinates':
+          pos = self.get('pos', None)
+          if pos == None:
+            return
+          posString = "%f,%f" % pos
+          self.drawTextWidget(cr, item, posString)
 
-        x = float(item['x'])
-        y = float(item['y'])
-        w = float(item['w'])
-        h = float(item['h'])
-        fontSize = 30
-        speed = self.get('speed', 0)
-        units = self.m.get('units', None)
-        speedString = units.km2CurrentUnitPerHourString(speed)
+
+
+  def drawTextWidget(self,cr ,item ,text):
+      if 'px' and 'py' in item:
+        proj = self.m.get('projection', None)
+        (px,py) = float(item['px']), float(item['py'])
+        (x, y) = proj.screenPos(px,py)
+
+        if 'font_size' in item:
+          fontSize = int(item['font_size'])
+        else:
+          fontSize = 30
+        cr.set_font_size(fontSize)
+
+        if 'pw' and 'ph' in item: # are the width and height set ?
+          w = proj.screenWidth(float(item['pw']))
+          h = proj.screenHeight(float(item['ph']))
+        else: # width and height are not set, we ge them from the text size
+          extents = cr.text_extents(text)
+          (w,h) = (extents[2], extents[3])
+
+
+
   #      stats = self.m.get('stats', None)
   #      proj = self.m.get('projection', None)
   #      (x1,y1) = proj.screenPos(0.5, 0.5) # middle fo the screen
-        cr.set_font_size(fontSize)
-        text = speedString
         cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
-        extents = cr.text_extents(text)
-        (w,h) = (extents[2], extents[3])
+
   #      (x,y) = (x1-w/2.0,y1-h/2.0)
         cr.set_line_width(2)
         cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
-        (rx,ry,rw,rh) = (x-0.25*w, y-h*1.5, w*1.5, (h*2))
+        (rx,ry,rw,rh) = (x, y-h*1.4, w*1.2, (h*2))
         cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
         cr.fill()
         cr.set_source_rgba(1, 1, 1, 0.95) # slightly trasparent white
@@ -89,7 +119,23 @@ class showOSD(ranaModule):
 
 
 
+# from PyCha.color module
+def hex2rgb(hexstring, digits=2):
+    """Converts a hexstring color to a rgb tuple.
 
+    Example: #ff0000 -> (1.0, 0.0, 0.0)
+
+    digits is an integer number telling how many characters should be
+    interpreted for each component in the hexstring.
+    """
+    if isinstance(hexstring, (tuple, list)):
+        return hexstring
+
+    top = float(int(digits * 'f', 16))
+    r = int(hexstring[1:digits+1], 16)
+    g = int(hexstring[digits+1:digits*2+1], 16)
+    b = int(hexstring[digits*2+1:digits*3+1], 16)
+    return r / top, g / top, b / top
 
 if(__name__ == "__main__"):
   a = example({}, {})

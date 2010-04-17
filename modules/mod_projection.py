@@ -126,6 +126,22 @@ class Projection(ranaModule):
     x = self.xc + ((px - 1) * self.w)
     y = self.yc + ((py - 1) * self.h)
     return(x,y)
+
+  def screenWidth(self, pw):
+    """Proportional width to pixels(0=0, 1=full screen height)."""
+    if pw > 1:
+      pw = 1
+    if pw < 0:
+      pw = 0
+    return (pw * self.w)
+
+  def screenHeight(self, py):
+    """Proportional height to pixels (0=0, 1=full screen height)."""
+    if py > 1:
+      py = 1
+    if py < 0:
+      py = 0
+    return (py * self.h)
   
   def pxpy2xy(self,px,py):
     """Convert projection units to display units"""
@@ -223,6 +239,18 @@ class Projection(ranaModule):
     lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * ytile / n)))
     lat_deg = math.degrees(lat_rad)
     return(lat_deg, lon_deg)
+
+  def pixelBearing(self, x1, y1, x2, y2):
+    """Bearing from one point to another in degrees (0-360) from pixel coordinates"""
+    dX = x2-y1
+    dY = y2-y1
+    y = sin(radians(dY)) * cos(radians(x2))
+    x = cos(radians(x1)) * sin(radians(x2)) - \
+            sin(radians(x1)) * cos(radians(x2)) * cos(radians(dY))
+    bearing = degrees(atan2(y, x))
+    if(bearing < 0.0):
+      bearing += 360.0
+    return(bearing)
 
 
 #  def shiftllPoint(self, x, y, distanceInKm, where='west'):

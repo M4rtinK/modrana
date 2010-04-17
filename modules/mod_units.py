@@ -75,6 +75,21 @@ class units(ranaModule):
     else:
       return "%1.2f mph" % (km * 0.621371192) #  km to miles
 
+  def currentUnitPerHourString(self):
+    unitType = self.get("unitType", "km")
+    if unitType == 'km':
+      return "kmh"
+    else:
+      return "mph"
+
+
+  def currentUnitString(self):
+    unitType = self.get("unitType", "km")
+    if unitType == 'km':
+      return "km"
+    else:
+      return "miles"
+
 
 if(__name__ == "__main__"):
   a = example({}, {})

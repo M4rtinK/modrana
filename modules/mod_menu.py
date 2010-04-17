@@ -20,6 +20,8 @@
 from base_module import ranaModule
 import cairo
 import time
+import math
+import geo
 from listable_menu import listable_menu
 
 def getModule(m,d):
@@ -35,6 +37,8 @@ class menus(ranaModule):
     self.setupGeneralMenus()
     self.lastActivity = int(time.time())
     self.fullscreen = False
+    self.mainScreenCoords = {}
+    self.userConfig = {}
 
   def drawMapOverlay(self, cr):
     """Draw an overlay on top of the map, showing various information
@@ -62,11 +66,98 @@ class menus(ranaModule):
         self.drawText(cr, text, x1, y1, w/3, h, 0) # draw a reminder
         return
 
+    # default main button coordinates
+    buttons = {}
+    buttons['menu'] = (x,y) # main menu button coordinates
+    buttons['zoom_in'] = (x,y+dx) # zoom in button coordinates
+    buttons['zoom_out'] = (x+dx,y) # zoom out button coordinates
+    buttons['fullscreen'] = (x+w-dx, y) # fullscreen button coordinates
+    buttons['centre'] = (x, y+h-dy) # centre button coordinates
+    buttons['scalebar'] = proj.screenPos(0.15, 0.97) # scalebar coordinates
+    plusIcon = 'zoom_in'
+    minusIcon = 'zoom_out'
+
+    # possible main button coordinates override
+    mode = self.get('mode', None)
+    if mode in self.userConfig:
+      if 'override_main_buttons' in self.userConfig[mode]:
+        # we dont know the orientation, so we use generic icons
+        plusIcon = 'plus'
+        minusIcon = 'minus'
+        item = self.userConfig[mode]['override_main_buttons']
+
+        for key in buttons:
+          if key in item:
+            (px,py,ndx,ndy) = [float(i) for i in item[key]]
+            buttons[key] = (px*w+dx*ndx,py*h+dy*ndy)
+
+
+    # main buttons
+
+
 
     menuIcon = self.get('mode', 'car')
-    self.drawButton(cr, x+dx, y, dx, dy, '', "zoom_out", "mapView:zoomOut")
-    self.drawButton(cr, x, y, dx, dy, 'menu', menuIcon, "set:menu:main")
-    self.drawButton(cr, x, y+dy, dx, dy, '', "zoom_in", "mapView:zoomIn")
+
+    (x1,y1) = buttons['zoom_out']
+    self.drawButton(cr, x1, y1, dx, dy, '', minusIcon, "mapView:zoomOut")
+    (x1,y1) = buttons['menu']
+    self.drawButton(cr, x1, y1, dx, dy, 'menu', menuIcon, "set:menu:main")
+    (x1,y1) = buttons['zoom_in']
+    self.drawButton(cr, x1, y1, dx, dy, '', plusIcon, "mapView:zoomIn")
+
+    
+    # draw the maximize icon
+    if self.fullscreen:
+      icon = 'minimize'
+    else:
+      icon = 'maximize'
+
+    (x1,y1) = buttons['fullscreen']
+    self.drawButton(cr, x1, y1, dx, dy, "", icon, "menu:fullscreenTogle")
+
+    (x1,y1) = buttons['centre']
+    self.drawButton(cr, x1, y1, dx, dy, "", 'blue_border', "toggle:centred")
+
+    cr.stroke()
+    cr.save()
+    (centreX,centreY) = (x1+dx/2.0,y1+dy/2.0)
+    cr.translate(centreX,centreY)
+    cr.set_line_width(6)
+    cr.set_source_rgba(0, 0, 1, 0.45)
+    cr.arc(0, 0, 15, 0, 2.0 * math.pi)
+    cr.stroke()
+    cr.fill()
+
+    if not self.get('centred', False): # draw the position indicator indicator :)
+      pos = self.get('pos', None)
+      if pos != None:
+        (lat1,lon1) = pos
+        (lat, lon) = proj.xy2ll(centreX, centreY)
+        angle = geo.bearing(lat1,lon1,lat,lon)
+        cr.rotate(math.radians(angle))
+
+        (pointX,pointY) = (0,y+dy/3.0)
+    else:
+      (pointX,pointY) = (0,0)
+
+    cr.set_source_rgb(0.0, 0.0, 0.0)
+    cr.set_line_width(10)
+    cr.arc(pointX, pointY, 3, 0, 2.0 * math.pi)
+    cr.stroke()
+    cr.set_source_rgb(1.0, 0.0, 0.0)
+    cr.set_line_width(8)
+    cr.arc(pointX, pointY, 2, 0, 2.0 * math.pi)
+    cr.stroke()
+    cr.fill()
+
+    cr.restore()
+
+    (x1,y1) = buttons['scalebar']
+    self.drawScalebar(cr, proj,x1,y1,w)
+
+
+
+
 
 
 
@@ -575,8 +666,56 @@ class menus(ranaModule):
       cr.move_to(x, y+textheight)
       cr.show_text(text)
 
+  def drawScalebar(self, cr, proj, x1, y1, w):
+
+    (x2,y2) = (x1+0.2*w,y1)
+
+#    (x1,y1) = proj.screenPos(0.05, 0.97)
+#    (x2,y2) = proj.screenPos(0.25, 0.97)
+
+    (lat1,lon1) = proj.xy2ll(x1,y1)
+    (lat2,lon2) = proj.xy2ll(x2,y2)
+
+    dist = geo.distance(lat1,lon1,lat2,lon2)
+    text = "%1.1f km" % dist
+
+    cr.set_source_rgb(0,0,0)
+    cr.move_to(x1,y1)
+    cr.line_to(x2,y2)
+    cr.stroke()
+
+    self.boxedText(cr, x1, y1-4, text, 12, 1)
+
+  def boxedText(self, cr, x,y,text, size=12, align=1, border=2, fg=(0,0,0), bg=(1,1,1)):
+
+    cr.set_font_size(12)
+    extents = cr.text_extents(text)
+    (w,h) = (extents[2], extents[3])
+
+    x1 = x
+    if(align in (9,6,3)):
+      x1 -= w
+    elif(align in (8,5,2)):
+      x1 -= 0.5 * w
+
+    y1 = y
+    if(align in (7,8,9)):
+      y1 += h
+    elif(align in (4,5,6)):
+      y1 += 0.5 * h
+
+    cr.set_source_rgb(bg[0],bg[1],bg[2])
+    cr.rectangle(x1 - border, y1 + border, w +2*border, -(h+2*border))
+    cr.fill()
+
+    cr.set_source_rgb(fg[0],fg[1],fg[2])
+    cr.move_to(x1,y1)
+    cr.show_text(text)
+    cr.fill()
+
   def firstTime(self):
     self.set("menu",None)
+    self.userConfig = self.m.get('config', None).userConfig
 
   def handleMessage(self, message):
     if (message == "rebootDataMenu"):
