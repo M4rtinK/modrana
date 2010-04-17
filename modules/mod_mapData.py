@@ -163,6 +163,16 @@ class mapData(ranaModule):
       if(type != "data"):
         print "Error: mod_mapData can't download %s" % type
         return
+
+      # update the info when refreshing tilecount and and no dl/size estimation is active
+
+      if self.sizeThread:
+        if self.sizeThread.isAlive() == False:
+          self.sizeThread = None
+
+      if self.getFilesThread:
+        if self.getFilesThread.isAlive() == False:
+          self.getFilesThread = None
       
       location = self.get("downloadArea", "here") # here or route
 
