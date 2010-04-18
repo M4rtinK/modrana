@@ -189,7 +189,7 @@ class GuiBase:
   def __init__(self, device):
     # Create the window
     win = gtk.Window()
-    win.set_title('Rana')
+    win.set_title('modRana')
     win.connect('delete-event', gtk.main_quit)
 
 
