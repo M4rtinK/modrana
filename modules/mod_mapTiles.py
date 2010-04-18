@@ -242,7 +242,6 @@ class mapTiles(ranaModule):
     layerType = layerInfo.get('type','png')
 
     filename = "%s/%s.%s" % (self.tileFolder, name, layerType)
-    print filename
     if(os.path.exists(filename)):
       if(layerType == 'jpg'):
         #self.images[name]  = cairo.ImageSurface.create_from_jpeg(filename)
