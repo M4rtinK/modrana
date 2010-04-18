@@ -325,10 +325,10 @@ def getTileUrl(x,y,z,layer): #TODO: share this with mapData
         x,y,z)
     elif layer == 'vmap' or layer == 'vsat': # handle Virtual Earth maps and satelite
       quadKey = QuadTree(x, y, z)
-      url = '%s%s.%s?g=452' % ( #  dont know what the g argument is, maybe revision ? but its not optional
+      url = '%s%s?g=452' % ( #  dont know what the g argument is, maybe revision ? but its not optional
                                 layerDetails['tiles'], # get the url
-                                quadKey, # get the tile identificator
-                                layerDetails['type'] # get the correct extension (also works with png for
+                                quadKey # get the tile identificator
+                                #layerDetails['type'] # get the correct extension (also works with png for
                                 )                    #  both maps and sat, but the original url is specific)
     elif layer == 'ymap' or layer == 'ysat' or layer == 'yover': # handle Yaho maps, sat, overlay
       y = ((2**(z-1) - 1) - y)

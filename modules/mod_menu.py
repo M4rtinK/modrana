@@ -165,11 +165,6 @@ class menus(ranaModule):
 
 
 
-
-
-
-
-
   def drawText(self,cr,text,x,y,w,h,border=0):
     if(not text):
       return
@@ -474,7 +469,8 @@ class menus(ranaModule):
     """we can download tiles around "here" (GPS cooridnates), route or the current view"""
     self.clearMenu('data', "set:menu:%s" % prevMenu)
     self.addItem('data', 'Around here', 'generic', 'set:downloadType:data|set:downloadArea:here|set:menu:%s' % nextMenu)
-    self.addItem('data', 'Around route', 'generic', 'set:downloadType:data|set:downloadArea:route|set:menu:%s' % nextMenu)
+#    self.addItem('data', 'Around route', 'generic', 'set:downloadType:data|set:downloadArea:route|set:menu:%s' % nextMenu)
+    self.addItem('data', 'Around route', 'generic', 'set:downloadType:data|set:downloadArea:route|set:menu:chooseRouteForDl')
     self.addItem('data', 'Around view', 'generic', 'set:downloadType:data|set:downloadArea:view|set:menu:%s' % nextMenu)
     self.setupDataSubMenu()
     if self.get("batchMenuEntered", None) == True:
@@ -512,7 +508,9 @@ class menus(ranaModule):
     self.clearMenu('options', "set:menu:main") # will be filled by mod_options
 #    self.clearMenu('routeProfile', "set:menu:main") # will be filled by mod_routeProfile
     self.lists['places'] = 'placenames'
-#    self.set('setUpEditMenu', True)
+
+    self.set('editBatchMenuActive', False) # at startup, the edit batch menu is inactive
+
 
   def drawTextToSquare(self, cr, x, y, w, h, text):
     """draw lines of text to a square text box, | is used as a delimiter"""
@@ -728,8 +726,10 @@ class menus(ranaModule):
   def handleMessage(self, message):
     if (message == "rebootDataMenu"):
       self.setupDataMenu() # we are returning from the batch menu, data menu needs to be "rebooted"
+      self.set('editBatchMenuActive', False)
     elif(message == "setupEditBatchMenu"):
       self.setupEditBatchMenu()
+      self.set('editBatchMenuActive', True)
     elif(message == 'screenClicked'):
       self.lastActivity = int(time.time())
     elif(message == 'fullscreenTogle'):

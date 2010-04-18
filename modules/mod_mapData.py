@@ -62,6 +62,7 @@ class mapData(ranaModule):
     self.aliasForSet = self.set
     self.lastMenuRedraw = 0
     self.notificateOnce = True
+    self.scroll = 0
 
   def listTiles(self, route):
     """List all tiles touched by a polyline"""
@@ -297,6 +298,18 @@ class mapData(ranaModule):
       getFilesThread.start()
       self.getFilesThread = getFilesThread
 
+    if(message == "up"):
+      if(self.scroll > 0):
+        self.scroll -= 1
+        self.set('needRedraw', True)
+    if(message == "down"):
+      print "down"
+      self.scroll += 1
+      self.set('needRedraw', True)
+    if(message == "reset"):
+      self.scroll = 0
+      self.set("needRedraw", True)
+
 
   def addOtherZoomlevels(self, tiles, tilesZ, maxZ, minZ):
     """expand the tile coverage to other zoomlevels
@@ -320,7 +333,6 @@ class mapData(ranaModule):
     """start of the tile splitting code"""
     previousZoomlevelTiles = None # we will splitt the tiles from the previous zoomlevel
     print "splitting down"
-    print range(tilesZ,maxZ)
     for z in range(tilesZ, maxZ): # to max zoom (fo each z we split one zoomlevel down)
       newTilesFromSplit = set() # tiles from the splitting go there
       if previousZoomlevelTiles == None: # this is the first iteration
@@ -350,7 +362,9 @@ class mapData(ranaModule):
     """start of the tile cooridnates rounding code"""
     previousZoomlevelTiles = None # we will the tile cooridnates to get tiles for the upper level
     print "rounding up"
-    for z in range(tilesZ, minZ, -1):
+    r = range(minZ, tilesZ) # we go from the tile-z up, e.g. a seqence of progresivly smaller integers
+    r.reverse()
+    for z in r:
       newTilesFromRounding = set() # tiles from the rounding go there
       if previousZoomlevelTiles == None: # this is the first iteration
         previousZoomlevelTiles = tiles.copy()
@@ -616,71 +630,101 @@ class mapData(ranaModule):
 
   def drawMenu(self, cr, menuName):
     # is this menu the correct menu ?
-    if menuName != ('batchTileDl'):
-      return # we arent the active menu so we dont do anything
+    if menuName == 'batchTileDl':
+      """in order for the threeds to work normally, it is needed to pause the main loop for a while
+      * this works only for this menu, in other menus (even the edit  menu) the threads will be slow to start
+      * when looking at map, the threads behave as expected :)
+      * so, when downloading:
+      -> look at the map OR the batch progress :)**"""
+      time.sleep(0.5)
+      self.set('needRedraw', True)
+      (x1,y1,w,h) = self.get('viewport', None)
+      self.set('dataMenu', 'edit')
+      menus = self.m.get("menu",None)
+      sizeThread = self.sizeThread
+      getFilesThread = self.getFilesThread
+      self.set("batchMenuEntered", True)
 
-#    if self.getFilesThread != None and self.getFilesThread.finished == False:
-#      self.set('needRedraw', True)
+      if w > h:
+        cols = 4
+        rows = 3
+      elif w < h:
+        cols = 3
+        rows = 4
+      elif w == h:
+        cols = 4
+        rows = 4
 
-    """in order for the threeds to work normally, it is needed to pause the main loop for a while
-    * this works only for this menu, in other menus (even the edit  menu) the threads will be slow to start
-    * when looking at map, the threads behave as expected :)
-    * so, when downloading:
-    -> look at the map OR the batch progress :)**"""
-    time.sleep(0.5)
-    self.set('needRedraw', True)
-    (x1,y1,w,h) = self.get('viewport', None)
-    self.set('dataMenu', 'edit')
-    menus = self.m.get("menu",None)
-    sizeThread = self.sizeThread
-    getFilesThread = self.getFilesThread
-    self.set("batchMenuEntered", True)
+      dx = w / cols
+      dy = h / rows
+      # * draw "escape" button
+      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "menu:rebootDataMenu|set:menu:main")
+      # * draw "edit" button
+      menus.drawButton(cr, (x1+w)-2*dx, y1, dx, dy, "edit", "edit", "menu:setupEditBatchMenu|set:menu:editBatch")
+      # * draw "start" button
+      menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "start", "start", "mapData:download")
+      # * draw the combined info area and size button (aka "box")
+      boxX = x1
+      boxY = y1+dy
+      boxW = w
+      boxH = h-dy
+      menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "3h", "mapData:getSize")
 
-    if w > h:
-      cols = 4
-      rows = 3
-    elif w < h:
-      cols = 3
-      rows = 4
-    elif w == h:
-      cols = 4
-      rows = 4
+      # * display information about download status
+      getFilesText = self.getFilesText(getFilesThread)
+      getFilesTextX = boxX + dx/8
+      getFilesTextY = boxY + boxH*1/4
+      self.showText(cr, getFilesText, getFilesTextX, getFilesTextY, w-dx/4, 40)
 
-    dx = w / cols
-    dy = h / rows
-    # * draw "escape" button
-    menus.drawButton(cr, x1, y1, dx, dy, "", "up", "menu:rebootDataMenu|set:menu:main")
-    # * draw "edit" button
-    menus.drawButton(cr, (x1+w)-2*dx, y1, dx, dy, "edit", "edit", "menu:setupEditBatchMenu|set:menu:editBatch")
-    # * draw "start" button
-    menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "start", "start", "mapData:download")
-    # * draw the combined info area and size button (aka "box")
-    boxX = x1
-    boxY = y1+dy
-    boxW = w
-    boxH = h-dy
-    menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "3h", "mapData:getSize")
+      # * display information about size of the tiles
+      sizeText = self.getSizeText(sizeThread)
+      sizeTextX = boxX + dx/8
+      sizeTextY = boxY + boxH*2/4
+      self.showText(cr, sizeText, sizeTextX, sizeTextY, w-dx/4, 40)
 
-    # * display information about download status
-    getFilesText = self.getFilesText(getFilesThread)
-    getFilesTextX = boxX + dx/8
-    getFilesTextY = boxY + boxH*1/4
-    self.showText(cr, getFilesText, getFilesTextX, getFilesTextY, w-dx/4, 40)
+      # * display information about free space available (for the filesystem with the tilefolder)
+      freeSpaceText = self.getFreeSpaceText()
+      freeSpaceTextX = boxX + dx/8
+      freeSpaceTextY = boxY + boxH * 3/4
+      self.showText(cr, freeSpaceText, freeSpaceTextX, freeSpaceTextY, w-dx/4, 40)
 
-    # * display information about size of the tiles
-    sizeText = self.getSizeText(sizeThread)
-    sizeTextX = boxX + dx/8
-    sizeTextY = boxY + boxH*2/4
-    self.showText(cr, sizeText, sizeTextX, sizeTextY, w-dx/4, 40)
+    if menuName == 'chooseRouteForDl':
 
-    # * display information about free space available (for the filesystem with the tilefolder)
-    freeSpaceText = self.getFreeSpaceText()
-    freeSpaceTextX = boxX + dx/8
-    freeSpaceTextY = boxY + boxH * 3/4
-    self.showText(cr, freeSpaceText, freeSpaceTextX, freeSpaceTextY, w-dx/4, 40)
 
-#    elif menuName == 'editBatch':
-#      return
+      menus = self.m.get('menu', None)
+      tracks = self.m.get('loadTracklogs', None).tracklogs
+
+      def describeTracklog(index, category, tracks):
+
+        track = tracks[index]
+
+        action = "set:activeTracklog:%d" % index
+
+        status = self.get('editBatchMenuActive', False)
+        if status:
+          action+= '|menu:setupEditBatchMenu|set:menu:editBatch'
+        else:
+          action+= '|set:menu:data2'
+        name = track.getTracklogName().split('/').pop()
+        desc = "tracklog"
+        if track.perElevList:
+          length = track.perElevList[-1][0]
+          units = self.m.get('units', None)
+          desc+=", %s" % units.km2CurrentUnitString(length)
+        return (name,desc,action)
+
+
+      status = self.get('editBatchMenuActive', False)
+      if status:
+        parent = 'editBatch'
+      else:
+        parent = 'data'
+      scrollMenu = 'mapData'
+      menus.drawListableMenuControls(cr, menuName, parent, scrollMenu)
+      menus.drawListableMenuItems(cr, tracks, self.scroll, describeTracklog)
+
+
+
   def getFilesText(self, getFilesThread):
     """return a string describing status of the download threads"""
     tileCount = len(self.currentDownloadList)
