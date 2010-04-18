@@ -143,6 +143,9 @@ class options(ranaModule):
             self.set(variable, default)
 
   def save(self):
+    if 'tileFolder' in self.d: #TODO: do this more elegantly
+      del self.d['tileFolder']
+
     try:
       f = open(self.optionsFilename(), "w")
       marshal.dump(self.d, f)

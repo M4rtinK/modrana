@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import os #TODO: testing import, remove this
+import os
 from time import clock
 from configobj import ConfigObj
 
@@ -77,7 +77,8 @@ class config(ranaModule):
     # Option: Number of threads for batch-downloading tiles
     self.set('maxBatchThreads', 5)
     # Option: Folder for storing downloaded tile images (there should be a slash at the end)
-    self.set('tileFolder', 'cache/images/')
+#    self.set('tileFolder', '/tmp/images')
+#    self.set('tileFolder', 'cache/images')
     # Option: Folder for storing POI file representations (there should be a slash at the end)
     self.set('POIFolder', 'data/poi/')
     # this sets the number of threads for bach tile download
@@ -97,13 +98,50 @@ class config(ranaModule):
 
   def parseUserConfig(self, path):
     """Par user created configuration file."""
+
+    tilePath = 'cache/images'
+
     try:
       config = ConfigObj(path)
-
       if 'enabled' in config:
         if config['enabled'] == 'True':
           self.userConfig = config
+          
+          if 'tile_folder' in config:
+            tilePath = config['tile_folder']
+
+          if self.device in config: #TODO: modules for specific devices
+            devSpecific = config[self.device] 
+            if 'tile_folder' in devSpecific:
+              tilePath = devSpecific['tile_folder']
+
     except:
       print "config: loading user_config.conf failed"
       print "config: check the syntax"
       print "config: and if the config file is present in the main directory"
+
+
+    print "asdasdasdasd"
+    print self.get('tileFolder', None)
+    self.setTileFolder(tilePath)
+
+  def setTileFolder(self, path):
+    createDir = False
+    try:
+      os.listdir(path)
+      self.set('tileFolder', path)
+    except:
+      createDir = True
+
+    if createDir:
+      try:
+        os.makedirs(path)
+        print "config: creating tile folder: %s" % path
+        self.set('tileFolder', path)
+      except:
+        print "config: this folder cannot be used/created: %s" % path
+        print "config: using default path: cache/images"
+        self.set('tileFolder', 'cache/images')
+
+
+

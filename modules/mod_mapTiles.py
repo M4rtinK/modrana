@@ -135,6 +135,11 @@ class mapTiles(ranaModule):
 #    self.oldThreadCount = None
     self.set('maplayers', maplayers) # export the maplyers definition for use by other modules
 
+  def firstTime(self):
+    # the config folder should set the tile folder path by now
+    self.tileFolder = self.get('tileFolder', '/tmp/images')
+
+
   def drawMap(self, cr):
     """Draw map tile images"""
     (sx,sy,sw,sh) = self.get('viewport')
@@ -235,7 +240,9 @@ class mapTiles(ranaModule):
       return
 
     layerType = layerInfo.get('type','png')
-    filename = "cache/images/%s.%s" % (name, layerType)
+
+    filename = "%s/%s.%s" % (self.tileFolder, name, layerType)
+    print filename
     if(os.path.exists(filename)):
       if(layerType == 'jpg'):
         #self.images[name]  = cairo.ImageSurface.create_from_jpeg(filename)
