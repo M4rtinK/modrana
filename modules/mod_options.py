@@ -78,7 +78,7 @@ class options(ranaModule):
                    "view",
                    "never")
 
-    self.addOption("Network", "network",
+    self.addOption("Network (not impl. yet)", "network",
       [("off","No use of network"),
        ("minimal", "Only for important data"),
        ("full", "Unlimited use of network")],
