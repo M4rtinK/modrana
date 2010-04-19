@@ -150,6 +150,7 @@ class Projection(ranaModule):
     """When the window resizes, set the view accordingly."""
     self.setView(0, 0, newW, newH)
     self.nudge(0,0) # to make the resized screen redraw
+    self.set('needRedraw', True)
 
 
   def screenPos(self,px,py):
