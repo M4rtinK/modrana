@@ -217,11 +217,20 @@ class gpsd2(ranaModule):
 
   #        if fix[1] & location.GPS_DEVICE_ALTITUDE_SET:
   #          elev = fix[7]
-  #          self.set('metersPerSecSpeed', speed)
+  #          self.set('elevation', elev)
 
-          else:
-            self.status = "Unknown"
-            print "gpsd:N900 - getting fix failed (on a regular update)"
+          # TODO: remove when not needed
+          if self.get('n900GPSDebug', False):
+            print "fix tupple:"
+            print fix
+            print "pos,bearing,speed:"
+            print self.get('pos', None)
+            print self.get('bearing', None)
+            print self.get('speed', None)
+
+        else:
+          self.status = "Unknown"
+          print "gpsd:N900 - getting fix failed (on a regular update)"
       except:
         self.status = "Unknown"
         print "gpsd:N900 - getting fix failed (on a regular update + exception)"
@@ -260,6 +269,7 @@ class gpsd2(ranaModule):
     if self.device == 'n900':
       try:
         self.lControl.stop()
+        print "gpsd:N900 - GPS device successfully stopped"
       except:
         print "gpsd:N900 - closing the GPS device failed"
 

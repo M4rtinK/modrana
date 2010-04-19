@@ -50,9 +50,14 @@ class options(ranaModule):
     to be needed in all installations"""
     self.addBoolOption("Centre map", "centred", "view", True)
 
+
+    # * the debug submenu
     self.addBoolOption("Debug circles", "debugCircles", "debug", False)
 
     self.addBoolOption("Debug squares", "debugSquares", "debug", False)
+
+    self.addBoolOption("Show N900 GPS-fix", "n900GPSDebug", "debug", False)
+
 
 
     # * the view submenu *

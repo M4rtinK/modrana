@@ -109,7 +109,6 @@ class config(ranaModule):
           
           if 'tile_folder' in config:
             tilePath = config['tile_folder']
-
           device = 'n900' #TODO: make deivce specific
           if device in config: #TODO: modules for specific devices
             devSpecific = config[device] 
@@ -128,6 +127,7 @@ class config(ranaModule):
     try:
       os.listdir(path)
       self.set('tileFolder', path)
+      print "** using tile folder: %s **" % path
     except:
       createDir = True
 

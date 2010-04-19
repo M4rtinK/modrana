@@ -145,6 +145,8 @@ class menus(ranaModule):
         cr.rotate(math.radians(angle))
 
         (pointX,pointY) = (0,y+dy/3.0)
+      else:
+        (pointX,pointY) = (0,0)
     else:
       (pointX,pointY) = (0,0)
 
