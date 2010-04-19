@@ -85,8 +85,9 @@ class mapData(ranaModule):
     layer = self.get('layer', None) # TODO: manual layer setting
     maplayers = self.get('maplayers', None) # a distionary describing supported maplayers
     extension = maplayers[layer]['type'] # what is the extension for the current layer ?
-    alreadyDownloadedTiles = set(os.listdir('cache/images')) # already dowloaded tiles
     tileFolderPath = self.get('tileFolder', None) # where should we store the downloaded tiles
+    print "tiles for the batch will be downloaded to: %s" % tileFolderPath
+    alreadyDownloadedTiles = set(os.listdir(tileFolderPath)) # already dowloaded tiles
 
     namingLambda = lambda x: "%s_%d_%d_%d.%s" % (layer,x[2],x[0],x[1],extension) # tile filenames
 
@@ -94,7 +95,7 @@ class mapData(ranaModule):
     print "Downloading %d new tiles." % len(tilesToDownload)
 
     # lambda for making tile filenames with path
-    namingLambdaWithPath = lambda x: "%s%s_%d_%d_%d.%s" % (tileFolderPath,layer,x[2],x[0],x[1],extension)
+    namingLambdaWithPath = lambda x: "%s/%s_%d_%d_%d.%s" % (tileFolderPath,layer,x[2],x[0],x[1],extension)
     """
     Now we generate a list for the threaded downloader,
     the list is formated like this: ('url', 'folder+filename')

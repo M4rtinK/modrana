@@ -29,6 +29,10 @@ from tilenames import *
 sys.path.append("modules/pyrender")
 import renderer_default as RenderModule
 
+import socket
+timeout = 30 # this sets timeout for all sockets
+socket.setdefaulttimeout(timeout)
+
 def getModule(m,d):
   return(mapTiles(m,d))
 
@@ -137,7 +141,7 @@ class mapTiles(ranaModule):
 
   def firstTime(self):
     # the config folder should set the tile folder path by now
-    self.tileFolder = self.get('tileFolder', '/tmp/images')
+    self.tileFolder = self.get('tileFolder', 'cache/images')
 
 
   def drawMap(self, cr):
@@ -390,7 +394,17 @@ class tileLoader(Thread):
         self.layer,
         self.filename)
       self.finished = 1
-    except:
+    except Exception, e:
       print "mapTiles: download thread reports error"
+      print "** we were doing this, when an exception occured:"
+      print "** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s" % ( \
+                                                                          self.x,
+                                                                          self.y,
+                                                                          self.z,
+                                                                          self.layer,
+                                                                          self.filename)
+      print "** this exception occured: %s" % e
+
+
       time.sleep(10) # dont DOS the system, when we temorarily loose internet connection or other error occurs
       self.finished = 1 # finished thread can be removed from the set and retryed

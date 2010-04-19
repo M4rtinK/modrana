@@ -17,13 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+import global_device_id # used for communicating the device id to other modules
 class ranaModule:
   def __init__(self, modules={}, data={}):
     self.m = modules
     self.d = data
     self.status = ''
     self.moduleName = '' # will be provided by rana.py
-    self.device = '' # will be provided by rana.py
+    self.device = global_device_id.device
     self.mainWindow = None # will be provided by rana.py (a gdk.Window)
     
   def module_exists(self, module):

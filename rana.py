@@ -25,6 +25,7 @@ pygtk.require('2.0')
 import gobject
 import gtk
 import sys
+import global_device_id # used for communicating the device id to other modules
 #import cairo
 import os
 #from math import sqrt
@@ -55,6 +56,9 @@ class MapWidget(gtk.Widget):
     self.timer2 = gobject.timeout_add(100, update2, self) #default 10
     self.d = {} # List of data
     self.m = {} # List of modules
+
+    global_device_id.device = device
+
     self.loadModules('modules') # name of the folder with modules
   def loadModules(self, module_path):
     """Load all modules from the specified directory"""
@@ -67,7 +71,6 @@ class MapWidget(gtk.Widget):
         a = __import__(f[0:-3])
         self.m[name] = a.getModule(self.m,self.d)
         self.m[name].moduleName = name
-        self.m[name].device = device # we tell the modules which device we are on
         print " * %s: %s" % (name, self.m[name].__doc__)
 
     print "Loaded all modules, initialising"
