@@ -110,8 +110,9 @@ class config(ranaModule):
           if 'tile_folder' in config:
             tilePath = config['tile_folder']
 
-          if self.device in config: #TODO: modules for specific devices
-            devSpecific = config[self.device] 
+          device = 'n900' #TODO: make deivce specific
+          if device in config: #TODO: modules for specific devices
+            devSpecific = config[device] 
             if 'tile_folder' in devSpecific:
               tilePath = devSpecific['tile_folder']
 
