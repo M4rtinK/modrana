@@ -148,8 +148,8 @@ class Projection(ranaModule):
 
   def handleResize(self, newW, newH):
     """When the window resizes, set the view accordingly."""
-    self.setView(0, 0, newW, newH)
-    self.nudge(0,0) # to make the resized screen redraw
+    self.setView(0, 0, newW, newH) # set the screen to new resolution
+    self.findEdges() # find edges for this new resolution
     self.set('needRedraw', True)
 
 
