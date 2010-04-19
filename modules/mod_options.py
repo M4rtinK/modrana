@@ -91,17 +91,18 @@ class options(ranaModule):
       options.append((i, "%d sec" % i))
     self.addOption("Frequency", "log_period", options, "logging", 2)
 
-    self.addBoolOption("Vector maps", "vmap", "map", True)
+#    self.addBoolOption("Vector maps", "vmap", "map", True)
 
     tiles = self.m.get("mapTiles", None)
     if(tiles):
       tileOptions = [("","None")]
-      for name,layer in tiles.layers().items():
+      layers = tiles.layers().items()
+      layers.sort()
+      for name,layer in layers:
         tileOptions.append((name, layer.get('label',name)))
-      tileOptions.sort()
-      self.addOption("Map images", "layer", tileOptions, "map", None)
-    self.addBoolOption("Old tracklogs", "old_tracklogs", "map", False)
-    self.addBoolOption("Latest tracklog", "tracklog", "map", True)
+      self.addOption("Map images", "layer", tileOptions, "map", "mapnik")
+#    self.addBoolOption("Old tracklogs", "old_tracklogs", "map", False)
+#    self.addBoolOption("Latest tracklog", "tracklog", "map", True)
 
     self.addOption("Google local search ordering", "GLSOrdering",
       [("default","ordering from Google"),
