@@ -59,9 +59,10 @@ class showOSD(ranaModule):
     if type == 'speed':
       speed = self.get('speed', 0)
       units = self.m.get('units', None)
-#      speedString = "%1.0f|" % units.km2CurrentUnit(speed)
-#      speedString+= units.currentUnitPerHourString()
-      speedString = units.km2CurrentUnitPerHourString(speed)
+      if speed == None:
+        speedString = "? %s" % units.currentUnitString()
+      else:
+        speedString = units.km2CurrentUnitPerHourString(speed)
       self.drawMultilineTextWidget(cr, item, speedString)
     elif type == 'time':
       timeString = time.strftime("%H:%M")

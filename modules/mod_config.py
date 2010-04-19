@@ -120,9 +120,6 @@ class config(ranaModule):
       print "config: check the syntax"
       print "config: and if the config file is present in the main directory"
 
-
-    print "asdasdasdasd"
-    print self.get('tileFolder', None)
     self.setTileFolder(tilePath)
 
   def setTileFolder(self, path):

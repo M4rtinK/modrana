@@ -161,6 +161,11 @@ class MapWidget(gtk.Widget):
     self.allocation = allocation
     if self.flags() & gtk.REALIZED:
       self.window.move_resize(*allocation)
+    newW = allocation[2]
+    newH = allocation[3]
+    for m in self.m.values(): # enable resize handling by modules
+        m.handleResize(newW, newH)
+#    self.forceRedraw() # redraw window contents after resize
   def _expose_cairo(self, event, cr):
     self.rect = self.allocation
     self.d['viewport'] = (self.rect.x, self.rect.y, self.rect.width, self.rect.height)

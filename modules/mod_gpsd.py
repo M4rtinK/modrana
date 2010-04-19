@@ -212,7 +212,8 @@ class gpsd2(ranaModule):
 
           if fix[1] & location.GPS_DEVICE_SPEED_SET:
             speed = fix[11]/3.6 # km/h -> metres per second
-            self.set('metersPerSecSpeed', speed)
+            self.set('speed', fix[11]) # km/h
+            self.set('metersPerSecSpeed', speed) # m/s
 
   #        if fix[1] & location.GPS_DEVICE_ALTITUDE_SET:
   #          elev = fix[7]
@@ -242,9 +243,14 @@ class gpsd2(ranaModule):
           self.set('bearing', float(bearing))
 
         speed = self.speed()
+
         if speed != None:
           speed = float(speed) * 0.514444444444444 # knots/sec to m/sec
           self.set('metersPerSecSpeed', speed)
+          self.set('speed', speed * 3.6)
+        else:
+          self.set('metersPerSecSpeed', None)
+          self.set('speed', None)
              
         self.satellites()
         #print(self.get('pos', None))

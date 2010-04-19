@@ -49,9 +49,11 @@ class stats(ranaModule):
     """Called every dt seconds"""
     pos = self.get('pos', None)
     if(pos == None):
-      return # TODO: zero any stats
+      return # TODO: zero stats
 
-    speed = self.get('metersPerSecSpeed', 0)
+    speed = self.get('speed', None)
+    if speed == None: # we have no data, so we do no statistics
+      return
 
     average = 0
 
@@ -61,9 +63,9 @@ class stats(ranaModule):
     self.avg2 += dt
     average = self.avg1/self.avg2
 
-    self.set('maxSpeed', self.maxSpeed * 3.6)
-    self.set('avgSpeed', average * 3.6)
-    self.set('speed', speed * 3.6)
+    self.set('maxSpeed', self.maxSpeed)
+    self.set('avgSpeed', average)
+
 
 if(__name__ == '__main__'):
   d = {'pos':[51, -1]}

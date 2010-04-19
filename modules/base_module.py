@@ -71,6 +71,9 @@ class ranaModule:
   def dragEvent(self,startX,startY,dx,dy,x,y):
     """Handles notification of a drag event"""
     pass
+  def handleResize(self,newW, newH):
+    """Handles notification of a window resize (also fullscreen/unfullscreen)"""
+    pass
   def shutdown(self):
     """Program is about to shutdown (don't rely solely on this for anything important like saving someone's tracklog!)"""
     pass

@@ -61,12 +61,15 @@ class positionMarker(ranaModule):
     # What are we?
     angle = self.get('bearing', 0)
 
-    if self.get('speed', 0) > 1: # do we look like we are moving ?
+    speed = self.get('speed', 0)
+    if speed == None:
+      self.drawStandingCircle(cr, x1, y1)
+    elif speed < 1: # do we look like we are moving ?
+      self.drawStandingCircle(cr, x1, y1) # draw tangogps style marker without bearing
+    else:
       self.drawMovingCircle(cr, x1, y1, angle) # draw tangogps style marker with bearing
 #     Draw yellow/black triangle showing us
 #      self.drawArrow(cr, x1, y1, angle)
-    else:
-      self.drawStandingCircle(cr, x1, y1) # draw tangogps style marker without bearing
 
 
   def drawMovingCircle(self, cr, x1, y1, angle):
