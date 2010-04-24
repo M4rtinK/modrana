@@ -137,7 +137,8 @@ configVariables = {
     'max_zoom':'maxZoom',
     'min_zoom':'minZoom',
     'type':'type',
-    'folder_prefix':'folderPrefix'
+    'folder_prefix':'folderPrefix',
+    'coordinates':'coordinates',
                   }
 mapConfigPath = 'map_config.conf'
 
@@ -373,24 +374,25 @@ def downloadTile(x,y,z,layer,filename):
 def getTileUrl(x,y,z,layer): #TODO: share this with mapData
     """Return url for given tile coorindates and layer"""
     layerDetails = maplayers.get(layer, None)
-    if layer == 'gmap' or layer == 'gsat':
+    coords = layerDetails['coordinates']
+    if coords == 'google':
       url = '%s&x=%d&y=%d&z=%d' % (
         layerDetails['tiles'],
         x,y,z)
-    elif layer == 'vmap' or layer == 'vsat': # handle Virtual Earth maps and satelite
+    elif coords == 'quadtree': # handle Virtual Earth maps and satelite
       quadKey = QuadTree(x, y, z)
       url = '%s%s?g=452' % ( #  dont know what the g argument is, maybe revision ? but its not optional
                                 layerDetails['tiles'], # get the url
                                 quadKey # get the tile identificator
                                 #layerDetails['type'] # get the correct extension (also works with png for
                                 )                    #  both maps and sat, but the original url is specific)
-    elif layer == 'ymap' or layer == 'ysat' or layer == 'yover': # handle Yaho maps, sat, overlay
+    elif coords == 'yahoo': # handle Yaho maps, sat, overlay
       y = ((2**(z-1) - 1) - y)
       z = z + 1
       url = '%s&x=%d&y=%d&z=%d&r=1' % ( # I have no idea what the r parameter is, r=0 or no r => grey square
                                 layerDetails['tiles'],
                                 x,y,z)
-    else: # OSM, Open Cycle, T@H
+    else: # OSM, Open Cycle, T@H -> equivalent to coords == osm
       url = '%s%d/%d/%d.%s' % (
         layerDetails['tiles'],
         z,x,y,
