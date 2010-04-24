@@ -1,3 +1,4 @@
+import os.path
 #!/usr/bin/python
 #----------------------------------------------------------------------------
 # Display map tile images (+ position cursor)
@@ -272,7 +273,12 @@ class mapTiles(ranaModule):
     """Check that an image is loaded, and try to load it if not"""
     
     # First: is the image already in memory?
-    name = self.imageName(x,y,z,layer)
+    """
+    TODO: test, if a smpler name is more efficinet
+    at least we dont need to look to the layer properties dictionary like this
+    """
+#    name = self.imageName(x,y,z,layer) # make this inline
+    name = "%s_%d_%d_%d" % (layer,z,x,y)
     if name in self.images.keys():
       return(name)
 
@@ -287,8 +293,13 @@ class mapTiles(ranaModule):
       return
 
     layerType = layerInfo.get('type','png')
+    layerPrefix = layerInfo.get('folderPrefix','OSM')
 
-    filename = "%s/%s.%s" % (self.tileFolder, name, layerType)
+#    filename = "%s/%s.%s" % (self.tileFolder, name, layerType)
+    filename = self.tileFolder + (self.imagePath(x,y,z,layerPrefix, layerType))
+
+#    tangoStylePath = '/home/melf-san/Maps/'
+#    filename = tangoStylePath + (self.imagePath(x,y,z,layerPrefix, layerType))
     if(os.path.exists(filename)):
 #      if(layerType == 'jpg'):
       """The method using pixbufs seems to be MUCH faster for jpegs and pngs alike.
@@ -328,6 +339,12 @@ class mapTiles(ranaModule):
 
     # Image not found anywhere - resort to downloading it
     if(self.get('threadedDownload',True)):
+      folder = self.tileFolder + self.imageFolder(x, z, layerPrefix) # target folder
+      if not os.path.exists(folder): # does it exist ?
+        try:
+          os.makedirs(folder) # create the folder
+        except:
+          print "mapTiles: cant crate folder %s for %s" % (folder,filename)
       self.threads[name] = tileLoader(x,y,z,layer,filename)
       self.threads[name].start()
       return(None)
@@ -339,6 +356,20 @@ class mapTiles(ranaModule):
     """Get a unique name for a tile image 
     (suitable for use as part of filenames, dictionary keys, etc)"""
     return("%s_%d_%d_%d" % (layer,z,x,y))
+
+  def imagePath(self,x,y,z,prefix, extension):
+    """Get a unique name for a tile image
+    (suitable for use as part of filenames, dictionary keys, etc)"""
+    return("%s/%d/%d/%d.%s" % (prefix,z,x,y,extension))
+
+  def imageFolder(self,x,z,prefix):
+    """Get a unique name for a tile image
+    (suitable for use as part of filenames, dictionary keys, etc)"""
+    return("%s/%d/%d" % (prefix,z,x))
+
+  def imageY(z,extension):
+    return (('%d.%s') % (z, extension))
+
 
   def layers(self):
     return(maplayers)
