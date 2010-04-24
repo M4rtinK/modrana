@@ -25,6 +25,7 @@ import sys
 import urllib
 import gtk
 import time
+from configobj import ConfigObj
 from tilenames import *
 sys.path.append("modules/pyrender")
 import renderer_default as RenderModule
@@ -38,95 +39,136 @@ def getModule(m,d):
 
 
 
-maplayers = {
-#  'pyrender':
+#maplayers = {
+##  'pyrender':
+##    {
+##    'label':'pyrender',
+##    'pyrender':True,
+##    'type':'png'
+##    },
+#  'osma':
 #    {
-#    'label':'pyrender',
-#    'pyrender':True,
-#    'type':'png'
+#    'label':'OSM T@h',
+#    'tiles':'http://tah.openstreetmap.org/Tiles/tile/',
+#    'type':'png',
+#    'maxZoom': 17
 #    },
-  'osma':
-    {
-    'label':'OSM T@h',
-    'tiles':'http://tah.openstreetmap.org/Tiles/tile/',
-    'type':'png',
-    'maxZoom': 17
-    },
-  'mapnik':
-    {
-    'label':'Mapnik',
-    'tiles':'http://tile.openstreetmap.org/',
-    'type':'png',
-    'maxZoom': 18
-    },
-  'gmap':
-    {
-    'label':'Google maps',
-    'tiles':'http://mt1.google.com/vt/',
-    'type':'png',
-    'maxZoom': 21
-    },
-  'gsat':
-    {
-    'label':'Google satelite',
-    'tiles':'http://khm1.google.com/kh/v=54',
-    'type':'jpg',
-    'maxZoom': 20
-    },
-  'vmap':
-    {
-    'label':'Virtual Earth-map',
-    'tiles':'http://tiles.virtualearth.net/tiles/r',
-    'type':'png',
-    'maxZoom': 19 # currently, there are "no tile" images on zl 20, at least for Brno
-    },
-  'vsat':
-    {
-    'label':'Virtual Earth-sat',
-    'tiles':'http://tiles.virtualearth.net/tiles/h',
-    'type':'jpg',
-    'maxZoom': 19 # there are areas, where the resolution is unusably small
-    },
-  'ymap':
-    {
-    'label':'Yahoo map',
-    'tiles':'http://maps.yimg.com/hx/tl?&s=256',
-    # tiles up to u=12 are png, 11 and up is jpg
-    # luckily our jpg handler seems to be extension independent
-    # SIDE EFFECT: producing some pngs with .jpg extension :)
-    'type':'jpg', 
-    'maxZoom': 17
-    },
-  'ysat':
-    {
-    'label':'Yahoo sat',
-    'tiles':'http://maps.yimg.com/ae/ximg?&t=a&s=256',
-    'type':'jpg',
-    'maxZoom': 15
-    },
-  'yover':
-    {
-    'label':'Yahoo overlay',
-    'tiles':'http://maps.yimg.com/ae/ximg?&t=h&s=256',
-    'type':'jpg',
-    'maxZoom': 15
-    },
-  'cycle':
-    {
-    'label':'Cycle map',
-#    'tiles':'http://thunderflames.org/tiles/cycle/', # this urls is probably broken
-    'tiles':'http://andy.sandbox.cloudmade.com/tiles/cycle/',
-    'type':'png',
-    'maxZoom': 15
-    },
-#  'localhost': # not much usable right now
+#  'mapnik':
 #    {
-#    'label':'Localhost',
-#    'tiles':'http://localhost:1280/default/',
-#    'maxZoom': 15,
-#    'type':'png'
-#    }
-  };
+#    'label':'Mapnik',
+#    'tiles':'http://tile.openstreetmap.org/',
+#    'type':'png',
+#    'maxZoom': 18
+#    },
+#  'gmap':
+#    {
+#    'label':'Google maps',
+#    'tiles':'http://mt1.google.com/vt/',
+#    'type':'png',
+#    'maxZoom': 21
+#    },
+#  'gsat':
+#    {
+#    'label':'Google satelite',
+#    'tiles':'http://khm1.google.com/kh/v=54',
+#    'type':'jpg',
+#    'maxZoom': 20
+#    },
+#  'vmap':
+#    {
+#    'label':'Virtual Earth-map',
+#    'tiles':'http://tiles.virtualearth.net/tiles/r',
+#    'type':'png',
+#    'maxZoom': 19 # currently, there are "no tile" images on zl 20, at least for Brno
+#    },
+#  'vsat':
+#    {
+#    'label':'Virtual Earth-sat',
+#    'tiles':'http://tiles.virtualearth.net/tiles/h',
+#    'type':'jpg',
+#    'maxZoom': 19 # there are areas, where the resolution is unusably small
+#    },
+#  'ymap':
+#    {
+#    'label':'Yahoo map',
+#    'tiles':'http://maps.yimg.com/hx/tl?&s=256',
+#    # tiles up to u=12 are png, 11 and up is jpg
+#    # luckily our jpg handler seems to be extension independent
+#    # SIDE EFFECT: producing some pngs with .jpg extension :)
+#    'type':'jpg',
+#    'maxZoom': 17
+#    },
+#  'ysat':
+#    {
+#    'label':'Yahoo sat',
+#    'tiles':'http://maps.yimg.com/ae/ximg?&t=a&s=256',
+#    'type':'jpg',
+#    'maxZoom': 15
+#    },
+#  'yover':
+#    {
+#    'label':'Yahoo overlay',
+#    'tiles':'http://maps.yimg.com/ae/ximg?&t=h&s=256',
+#    'type':'jpg',
+#    'maxZoom': 15
+#    },
+#  'cycle':
+#    {
+#    'label':'Cycle map',
+##    'tiles':'http://thunderflames.org/tiles/cycle/', # this urls is probably broken
+#    'tiles':'http://andy.sandbox.cloudmade.com/tiles/cycle/',
+#    'type':'png',
+#    'maxZoom': 15
+#    },
+##  'localhost': # not much usable right now
+##    {
+##    'label':'Localhost',
+##    'tiles':'http://localhost:1280/default/',
+##    'maxZoom': 15,
+##    'type':'png'
+##    }
+#  };
+
+
+maplayers = {}
+configVariables = {
+    'label':'label',
+    'url':'tiles',
+    'max_zoom':'maxZoom',
+    'min_zoom':'minZoom',
+    'type':'type',
+    'folder_prefix':'folderPrefix'
+                  }
+mapConfigPath = 'map_config.conf'
+
+
+def allNeededIn(needed, dict):
+  for key in needed:
+    if key in dict:
+      continue
+    else:
+      return False
+  return True  
+
+try:
+  config = ConfigObj(mapConfigPath)
+  for layer in config:
+    if allNeededIn(configVariables.keys(), config[layer].keys()): # check if all neded keys are available
+      tempDict = {}
+      for var in configVariables:
+        tempDict[configVariables[var]] = config[layer][var]
+      tempDict['minZoom'] = int(tempDict['minZoom']) # convert strings to integers
+      tempDict['maxZoom'] = int(tempDict['maxZoom'])
+    else:
+      print "mapTiles: layer is badly defined/formated: %s" % layer
+
+
+    maplayers[layer] = tempDict
+
+except Exception, e:
+  print "mapTiles: loading map_config.conf failed: %s" % e
+
+
 
   
 class mapTiles(ranaModule):

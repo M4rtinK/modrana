@@ -45,6 +45,7 @@ class Projection(ranaModule):
     # otherwise we dont know what to show -> black screen => NOT GOOD :)
     if self.get("pos", None) == None:
       self.set("pos", (49.2, 16.616667)) # Brno
+#      self.set("pos", (49.233056, 17.666944)) # Zlin
 
     (lat,lon) = self.get("pos", None)
     self.recentre(lat, lon)

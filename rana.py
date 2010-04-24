@@ -277,6 +277,7 @@ if __name__ == "__main__":
   'neo' (480*640)
   'n95' (480*640)
   'eee' (800*600)
+  'q7'  (800*480)
   'n900' (800*480) -> for now can also be used for the Q7 or Q5 (same resolution)
   'square' (480*480) -> this is for testing screens with equal sides
   'ipaq' (240*320) -> old Ipaqs (and and other Pocket PCs) had this resolution
