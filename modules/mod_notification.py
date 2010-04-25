@@ -45,7 +45,7 @@ class notification(ranaModule):
     """the first part is the message, that will be displayed,
        there can also by some parameters, delimited by #"""
     list = message.split('#')
-    # TODO: supprot setting timeout and position
+    # TODO: support setting timeout and position
     timeout = self.timeout
     self.position = 'middle'
     self.notificationText = list[0]

@@ -108,6 +108,40 @@ def makeRequests(callable_, args_list, callback=None,
             )
     return requests
 
+def makeRequestsWithTuples(callable_, args_list, callback=None,
+        exc_callback=_handle_thread_exception):
+    """Create several work requests for same callable with different arguments.
+
+    Convenience function for creating several work requests for the same
+    callable where each invocation of the callable receives different values
+    for its arguments.
+
+    ``args_list`` contains the parameters for each invocation of callable.
+    Each item in ``args_list`` should be either a 2-item tuple of the list of
+    positional arguments and a dictionary of keyword arguments or a single,
+    non-tuple argument.
+
+    See docstring for ``WorkRequest`` for info on ``callback`` and
+    ``exc_callback``.
+
+    modRana : as above but with tuples
+
+    """
+    requests = []
+    for item in args_list:
+#        if isinstance(item, tuple):
+        if False:
+            requests.append(
+                WorkRequest(callable_, item[0], item[1], callback=callback,
+                    exc_callback=exc_callback)
+            )
+        else:
+            requests.append(
+                WorkRequest(callable_, [item], None, callback=callback,
+                    exc_callback=exc_callback)
+            )
+    return requests
+
 
 # classes
 class WorkerThread(threading.Thread):
@@ -153,7 +187,9 @@ class WorkerThread(threading.Thread):
                     self._requests_queue.put(request)
                     break
                 try:
+#                    print request
                     result = request.callable(*request.args, **request.kwds)
+#                    result = request.callable(*request.args, **request.kwds)
                     self._results_queue.put((request, result))
                 except:
                     request.exception = True

@@ -437,6 +437,7 @@ class menus(ranaModule):
       we also send a message to refresh the tilecount after pressing the button
       (the edit menu sends the refresh message on exit so it would be redundant)"""
       nextMenu = nextMenu + '|mapData:refreshTilecount'
+    self.addItem('zoomUp', '+ 0 up', 'generic', 'set:zoomUpSize:0|set:menu:%s' % nextMenu)
     self.addItem('zoomUp', '+ 1 up', 'generic', 'set:zoomUpSize:1|set:menu:%s' % nextMenu)
     self.addItem('zoomUp', '+ 2 up', 'generic', 'set:zoomUpSize:2|set:menu:%s' % nextMenu)
     self.addItem('zoomUp', '+ 3 up', 'generic', 'set:zoomUpSize:3|set:menu:%s' % nextMenu)
@@ -447,6 +448,7 @@ class menus(ranaModule):
   def setupZoomDownMenu(self, nextMenu='zoomUp', prevMenu='data'):
     """in this menu, we set the maximal zoom level DOWN from the current zoomlevel (eq more detail)"""
     self.clearMenu('zoomDown', "set:menu:%s" % prevMenu)
+    self.addItem('zoomDown', '+ 0 down', 'generic', 'set:zoomDownSize:0|set:menu:%s' % nextMenu)
     self.addItem('zoomDown', '+ 1 down', 'generic', 'set:zoomDownSize:1|set:menu:%s' % nextMenu)
     self.addItem('zoomDown', '+ 2 down', 'generic', 'set:zoomDownSize:2|set:menu:%s' % nextMenu)
     self.addItem('zoomDown', '+ 3 down', 'generic', 'set:zoomDownSize:3|set:menu:%s' % nextMenu)

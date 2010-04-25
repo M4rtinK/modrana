@@ -108,7 +108,7 @@ class config(ranaModule):
           self.userConfig = config
           
           if 'tile_folder' in config:
-            tilePath = config['tile_folder']
+            tilePath = "%s/" % config['tile_folder'] # make sure the path ends with /
           device = self.device
           if device in config: #TODO: modules for specific devices
             devSpecific = config[device] 

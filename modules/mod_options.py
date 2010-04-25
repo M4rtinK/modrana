@@ -54,7 +54,8 @@ class options(ranaModule):
     # * the debug submenu
     self.addBoolOption("Debug circles", "debugCircles", "debug", False)
 
-    self.addBoolOption("Debug squares", "debugSquares", "debug", False)
+#    self.addBoolOption("Debug squares", "debugSquares", "debug", False)
+    self.addBoolOption("Remove dups berofe batch dl", "checkTiles", "debug", False)
 
     self.addBoolOption("Show N900 GPS-fix", "n900GPSDebug", "debug", False)
 
@@ -149,9 +150,6 @@ class options(ranaModule):
             self.set(variable, default)
 
   def save(self):
-    if 'tileFolder' in self.d: #TODO: do this more elegantly
-      del self.d['tileFolder']
-
     try:
       f = open(self.optionsFilename(), "w")
       marshal.dump(self.d, f)
@@ -164,6 +162,8 @@ class options(ranaModule):
       f = open(self.optionsFilename(), "r")
       newData = marshal.load(f)
       f.close()
+      if 'tileFolder' in newData: #TODO: do this more elegantly
+        del newData['tileFolder']
       for k,v in newData.items():
         self.set(k,v)
     except IOError:
@@ -177,6 +177,7 @@ class options(ranaModule):
     becuase modRana does not know, what part of the map to show
     """
     self.set('centred', True) # set centering to True at start to get setView to run
+    self.set('editBatchMenuActive', False)
 
       
   def optionsFilename(self):

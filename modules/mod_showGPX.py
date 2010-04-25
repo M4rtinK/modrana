@@ -44,28 +44,28 @@ class showGPX(ranaModule):
     if(not proj.isValid()):
       return
 
-    mapDt = self.m.get('mapData', None) # get the mapdata module
-    tilesToDownload = mapDt.currentTilesToGet
+#    mapDt = self.m.get('mapData', None) # get the mapdata module
+#    tilesToDownload = mapDt.currentTilesToGet
 
-    if tilesToDownload != None and self.get('debugSquares', False) == True:
-      cr.set_source_rgb(0,0, 0.5)
-      cr.set_line_width(self.linewidth)
-      for tile in tilesToDownload:
-        (lat,lon) = proj.num2deg(tile[0],tile[1])
-        (x,y) = proj.ll2xy(lat, lon)
-        #print (tile[0],tile[1])
-        #print proj.num2deg(x,y)
-        #self.point(cr, x, y)
-        if (15 - proj.zoom) > 0:
-          size = 256/2**(15 - proj.zoom)
-        else:
-          size = 256 * (2**(proj.zoom - 15))
-        #print size
-        self.boxFromULCorner(cr, x, y, size)
-        cr.stroke()
-        cr.fill()
-      cr.stroke()
-      cr.fill()
+#    if tilesToDownload != None and self.get('debugSquares', False) == True:
+#      cr.set_source_rgb(0,0, 0.5)
+#      cr.set_line_width(self.linewidth)
+#      for tile in tilesToDownload:
+#        (lat,lon) = proj.num2deg(tile[0],tile[1])
+#        (x,y) = proj.ll2xy(lat, lon)
+#        #print (tile[0],tile[1])
+#        #print proj.num2deg(x,y)
+#        #self.point(cr, x, y)
+#        if (15 - proj.zoom) > 0:
+#          size = 256/2**(15 - proj.zoom)
+#        else:
+#          size = 256 * (2**(proj.zoom - 15))
+#        #print size
+#        self.boxFromULCorner(cr, x, y, size)
+#        cr.stroke()
+#        cr.fill()
+#      cr.stroke()
+#      cr.fill()
 #    print proj.zoom
 
 #    testRadius = 5 # 5 km
