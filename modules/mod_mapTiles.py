@@ -30,6 +30,7 @@ from configobj import ConfigObj
 from tilenames import *
 sys.path.append("modules/pyrender")
 import renderer_default as RenderModule
+from time import clock
 
 import socket
 timeout = 30 # this sets timeout for all sockets
@@ -37,99 +38,6 @@ socket.setdefaulttimeout(timeout)
 
 def getModule(m,d):
   return(mapTiles(m,d))
-
-
-
-#maplayers = {
-##  'pyrender':
-##    {
-##    'label':'pyrender',
-##    'pyrender':True,
-##    'type':'png'
-##    },
-#  'osma':
-#    {
-#    'label':'OSM T@h',
-#    'tiles':'http://tah.openstreetmap.org/Tiles/tile/',
-#    'type':'png',
-#    'maxZoom': 17
-#    },
-#  'mapnik':
-#    {
-#    'label':'Mapnik',
-#    'tiles':'http://tile.openstreetmap.org/',
-#    'type':'png',
-#    'maxZoom': 18
-#    },
-#  'gmap':
-#    {
-#    'label':'Google maps',
-#    'tiles':'http://mt1.google.com/vt/',
-#    'type':'png',
-#    'maxZoom': 21
-#    },
-#  'gsat':
-#    {
-#    'label':'Google satelite',
-#    'tiles':'http://khm1.google.com/kh/v=54',
-#    'type':'jpg',
-#    'maxZoom': 20
-#    },
-#  'vmap':
-#    {
-#    'label':'Virtual Earth-map',
-#    'tiles':'http://tiles.virtualearth.net/tiles/r',
-#    'type':'png',
-#    'maxZoom': 19 # currently, there are "no tile" images on zl 20, at least for Brno
-#    },
-#  'vsat':
-#    {
-#    'label':'Virtual Earth-sat',
-#    'tiles':'http://tiles.virtualearth.net/tiles/h',
-#    'type':'jpg',
-#    'maxZoom': 19 # there are areas, where the resolution is unusably small
-#    },
-#  'ymap':
-#    {
-#    'label':'Yahoo map',
-#    'tiles':'http://maps.yimg.com/hx/tl?&s=256',
-#    # tiles up to u=12 are png, 11 and up is jpg
-#    # luckily our jpg handler seems to be extension independent
-#    # SIDE EFFECT: producing some pngs with .jpg extension :)
-#    'type':'jpg',
-#    'maxZoom': 17
-#    },
-#  'ysat':
-#    {
-#    'label':'Yahoo sat',
-#    'tiles':'http://maps.yimg.com/ae/ximg?&t=a&s=256',
-#    'type':'jpg',
-#    'maxZoom': 15
-#    },
-#  'yover':
-#    {
-#    'label':'Yahoo overlay',
-#    'tiles':'http://maps.yimg.com/ae/ximg?&t=h&s=256',
-#    'type':'jpg',
-#    'maxZoom': 15
-#    },
-#  'cycle':
-#    {
-#    'label':'Cycle map',
-##    'tiles':'http://thunderflames.org/tiles/cycle/', # this urls is probably broken
-#    'tiles':'http://andy.sandbox.cloudmade.com/tiles/cycle/',
-#    'type':'png',
-#    'maxZoom': 15
-#    },
-##  'localhost': # not much usable right now
-##    {
-##    'label':'Localhost',
-##    'tiles':'http://localhost:1280/default/',
-##    'maxZoom': 15,
-##    'type':'png'
-##    }
-#  };
-
 
 maplayers = {}
 configVariables = {
@@ -200,13 +108,30 @@ class mapTiles(ranaModule):
     if(not proj.isValid()):
       return
 
+    (px1,px2,py1,py2) = (proj.px1,proj.px2,proj.py1,proj.py2)
+
+    # upper left tile
+    cx = int(px1)
+    cy = int(py1)
+    # upper left tile coodinates to screen coordinates
+    cx1,cy1 = proj.pxpy2xy(cx,cy)
+    cx1,cy1 = int(cx1),int(cy1)
+
+    wTiles =  len(range(int(floor(px1)), int(ceil(px2)))) # how many tiles wide
+    hTiles =  len(range(int(floor(py1)), int(ceil(py2)))) # how many tiles high
+
     layer = self.get('layer','osma')
     # Cover the whole map view with tiles
-    for x in range(int(floor(proj.px1)), int(ceil(proj.px2))):
-      for y in range(int(floor(proj.py1)), int(ceil(proj.py2))):
+    for ix in range(0, wTiles):
+      for iy in range(0, hTiles):
         
-        # Convert corner to screen coordinates
-        x1,y1 = proj.pxpy2xy(x,y)
+        # get tile cooridnates by incrementing the upper left tile cooridnates
+        x = cx+ix
+        y = cy+iy
+
+        # get screen coordinates by incrementing upper left tile screen coordinates
+        x1 = cx1 + 256*ix
+        y1 = cy1 + 256*iy
 
         # Try to load and display images
         name = self.loadImage(x,y,z,layer)
@@ -265,7 +190,7 @@ class mapTiles(ranaModule):
     # Display the image
     cr.set_source_surface(self.images[name],0,0)
     cr.paint()
-    
+
     # Return the cairo projection to what it was
     cr.restore()
     
