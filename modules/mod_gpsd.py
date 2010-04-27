@@ -50,24 +50,24 @@ class gpsd2(ranaModule):
         try:
           self.lControl = location.GPSDControl.get_default()
           self.lDevice = location.GPSDevice()
-        except:
-          print "gpsd:N900 - cant create location objects"
+        except Exception, e:
+          print "gpsd:N900 - cant create location objects: %s" % e
 
         try:
           self.lControl.set_properties(preferred_method=location.METHOD_USER_SELECTED)
-        except:
-          print "gpsd:N900 - cant set prefered location method"
+        except Exception, e:
+          print "gpsd:N900 - cant set prefered location method: %s" % e
 
         try:
           self.lControl.set_properties(preferred_interval=location.INTERVAL_1S)
-        except:
-          print "gpsd:N900 - cant set prefered location interval"
+        except Exception, e:
+          print "gpsd:N900 - cant set prefered location interval: %s" % e
         try:
           self.lControl.start()
           print "** gpsd:N900 - GPS successfully activated **"
           self.connected = True
-        except:
-          print "gpsd:N900 - opening the GPS device failed"
+        except Exception, e:
+          print "gpsd:N900 - opening the GPS device failed: %s" % e
           self.status = "No GPSD running"
       except:
         self.status = "No GPSD running"
@@ -201,9 +201,8 @@ class gpsd2(ranaModule):
       try:
         if self.lDevice.fix:
           fix = self.lDevice.fix
-
           if fix[1] & location.GPS_DEVICE_LATLONG_SET:
-            (lat,lon) = device.fix[4:6]
+            (lat,lon) = fix[4:6]
             self.set('pos', (lat,lon))
 
           if fix[1] & location.GPS_DEVICE_TRACK_SET:
@@ -221,19 +220,21 @@ class gpsd2(ranaModule):
 
           # TODO: remove when not needed
           if self.get('n900GPSDebug', False):
-            print "fix tupple:"
+            print "## N900 GPS debugging info ##"
+            print "fix tupple from the Location API:"
             print fix
-            print "pos,bearing,speed:"
+            print "position,bearing,speed (in descending order):"
             print self.get('pos', None)
             print self.get('bearing', None)
             print self.get('speed', None)
+            print "#############################"
 
         else:
           self.status = "Unknown"
           print "gpsd:N900 - getting fix failed (on a regular update)"
-      except:
+      except Exception, e:
         self.status = "Unknown"
-        print "gpsd:N900 - getting fix failed (on a regular update + exception)"
+        print "gpsd:N900 - getting fix failed (on a regular update + exception: %s)" % e
 
     else:
       result = self.socket_cmd("p")
