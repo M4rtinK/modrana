@@ -24,6 +24,7 @@ import cairo
 import os
 import sys
 import urllib
+import urllib2
 import gtk
 import time
 from configobj import ConfigObj
@@ -35,6 +36,13 @@ from time import clock
 import socket
 timeout = 30 # this sets timeout for all sockets
 socket.setdefaulttimeout(timeout)
+
+
+#loadImage = None
+#def setLoadimage(function):
+#  loadImage = function
+#  print function
+#  return
 
 def getModule(m,d):
   return(mapTiles(m,d))
@@ -90,6 +98,8 @@ class mapTiles(ranaModule):
 #    self.oldZ = None
 #    self.oldThreadCount = None
     self.set('maplayers', maplayers) # export the maplyers definition for use by other modules
+#    setLoadimage(self.loadImage) # shortcut for the download thread
+
 
   def firstTime(self):
     # the config folder should set the tile folder path by now
@@ -194,7 +204,7 @@ class mapTiles(ranaModule):
     # Return the cairo projection to what it was
     cr.restore()
     
-  def loadImage(self,x,y,z, layer):
+  def loadImage(self,x,y,z, layer, ):
     """Check that an image is loaded, and try to load it if not"""
     
     # First: is the image already in memory?
@@ -270,7 +280,7 @@ class mapTiles(ranaModule):
           os.makedirs(folder) # create the folder
         except:
           print "mapTiles: cant crate folder %s for %s" % (folder,filename)
-      self.threads[name] = tileLoader(x,y,z,layer,filename)
+      self.threads[name] = self.tileLoader(x,y,z,layer,filename, self)
       self.threads[name].start()
       return(None)
     else:
@@ -303,29 +313,88 @@ class mapTiles(ranaModule):
     """Wrapper, that makes it possible to use this function from other modules."""
     return getTileUrl(x, y, z, layer)
 
-def downloadTile(x,y,z,layer,filename):
-  """Downloads an image"""
-  layerDetails = maplayers.get(layer, None)
-  if(layerDetails == None):
-    return
-  if(layerDetails.get('pyrender',False)):
-    # Generate from local data
-    renderer = RenderModule.RenderClass()
-    renderer.RenderTile(z,x,y, 'default', filename) # TODO: pyrender layers
-  else:
-    url = getTileUrl(x,y,z,layer)
-    # Download from network
-#    if layer == 'gmap' or layer == 'gsat':
-#      url = '%s&x=%d&y=%d&z=%d' % (
-#        layerDetails['tiles'],
-#        x,y,z)
-#    else:
-#      url = '%s%d/%d/%d.%s' % (
-#        layerDetails['tiles'],
-#        z,x,y,
-#        layerDetails.get('type','png'))
+  class tileLoader(Thread):
+    """Downloads an image (in a thread)"""
+    def __init__(self, x,y,z,layer,filename, callback):
+      self.x = x
+      self.y = y
+      self.z = z
+      self.layer = layer
+      self.finished = 0
+      self.filename = filename
+      self.callback = callback
+      Thread.__init__(self)
 
-  urllib.urlretrieve(url, filename)
+    def run(self):
+      try:
+        self.downloadTile( \
+          self.x,
+          self.y,
+          self.z,
+          self.layer,
+          self.filename)
+        self.finished = 1
+      except Exception, e:
+        print "mapTiles: download thread reports error"
+        print "** we were doing this, when an exception occured:"
+        print "** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s" % ( \
+                                                                            self.x,
+                                                                            self.y,
+                                                                            self.z,
+                                                                            self.layer,
+                                                                            self.filename)
+        print "** this exception occured: %s" % e
+
+
+        time.sleep(10) # dont DOS the system, when we temorarily loose internet connection or other error occurs
+        self.finished = 1 # finished thread can be removed from the set and retryed
+
+    def downloadTile(self,x,y,z,layer,filename):
+      """Downloads an image"""
+#      layerDetails = maplayers.get(layer, None)
+    #  if(layerDetails == None):
+    #    return
+    #  if(layerDetails.get('pyrender',False)):
+    #    # Generate from local data
+    #    renderer = RenderModule.RenderClass()
+    #    renderer.RenderTile(z,x,y, 'default', filename) # TODO: pyrender layers
+    #  else:
+      url = getTileUrl(x,y,z,layer)
+
+      request = urllib2.urlopen(url)
+      content = request.read()
+      request.close()
+      name = "%s_%d_%d_%d" % (layer,z,x,y)
+      pl = gtk.gdk.PixbufLoader()
+      pl.write(content)
+
+      # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
+      #x = pixbuf.get_width()
+      #y = pixbuf.get_height()
+      # Google sat images are 256 by 256 px, we dont need to check the size
+      x = 256
+      y = 256
+      ''' create a new cairo surface to place the image on '''
+      surface = cairo.ImageSurface(0,x,y)
+      ''' create a context to the new surface '''
+      ct = cairo.Context(surface)
+      ''' create a GDK formatted Cairo context to the new Cairo native context '''
+      ct2 = gtk.gdk.CairoContext(ct)
+      ''' draw from the pixbuf to the new surface '''
+      ct2.set_source_pixbuf(pl.get_pixbuf(),0,0)
+      ct2.paint()
+      ''' surface now contains the image in a Cairo surface '''
+      self.callback.images[name] = surface #TODO: remove "old" images from cache (possible memmory leak ?)
+
+      pl.close()
+
+      f = open(filename, 'w') # write the tile to file
+      f.write(content)
+      f.close()
+
+      del content
+
+#      urllib.urlretrieve(url, filename)
 
 def getTileUrl(x,y,z,layer): #TODO: share this with mapData
     """Return url for given tile coorindates and layer"""
@@ -374,37 +443,3 @@ def QuadTree(tx, ty, zoom ):
 		return quadKey
 
 
-class tileLoader(Thread):
-  """Downloads an image (in a thread)"""
-  def __init__(self, x,y,z,layer,filename):
-    self.x = x
-    self.y = y
-    self.z = z
-    self.layer = layer
-    self.finished = 0
-    self.filename = filename
-    Thread.__init__(self)
-    
-  def run(self):
-    try:
-      downloadTile( \
-        self.x,
-        self.y,
-        self.z,
-        self.layer,
-        self.filename)
-      self.finished = 1
-    except Exception, e:
-      print "mapTiles: download thread reports error"
-      print "** we were doing this, when an exception occured:"
-      print "** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s" % ( \
-                                                                          self.x,
-                                                                          self.y,
-                                                                          self.z,
-                                                                          self.layer,
-                                                                          self.filename)
-      print "** this exception occured: %s" % e
-
-
-      time.sleep(10) # dont DOS the system, when we temorarily loose internet connection or other error occurs
-      self.finished = 1 # finished thread can be removed from the set and retryed
