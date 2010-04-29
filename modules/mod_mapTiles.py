@@ -133,14 +133,13 @@ class mapTiles(ranaModule):
     layer = self.get('layer','osma')
     # Cover the whole map view with tiles
 
-    (alpha1, alpha2) = (1, 0)
     if self.get('overlay', False): # is the overlay on ?
       ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
       (alpha1, alpha2) = (float(ratio[0]),float(ratio[1])) # convert it to floats
 
       layer2 = self.get('layer2', 'mapnik') # get the background layer
 
-      # draw the background layer
+      # draw the composited layer
       for ix in range(0, wTiles):
         for iy in range(0, hTiles):
 
@@ -153,9 +152,11 @@ class mapTiles(ranaModule):
           y1 = cy1 + 256*iy
 
           # Try to load and display images
-          name = self.loadImage(x,y,z,layer2)
-          if(name != None):
-            self.drawImage(cr,name,x1,y1,alpha2)
+          nameBack = self.loadImage(x,y,z,layer2)
+          nameOver = self.loadImage(x,y,z,layer)
+          if(nameBack and nameOver != None):
+            self.drawCompositeImage(cr,nameOver,nameBack,x1,y1,alpha1,alpha2)
+      return
 
 
     # draw the normal layer
@@ -173,7 +174,7 @@ class mapTiles(ranaModule):
         # Try to load and display images
         name = self.loadImage(x,y,z,layer)
         if(name != None):
-          self.drawImage(cr,name,x1,y1,alpha1)
+          self.drawImage(cr,name,x1,y1)
 
 
 
@@ -217,7 +218,7 @@ class mapTiles(ranaModule):
 #    self.oldThreadCount = len(self.threads)
     
   
-  def drawImage(self,cr, name, x,y, alpha=1):
+  def drawImage(self,cr, name, x,y):
     """Draw a tile image"""
     
     # If it's not in memory, then stop here
@@ -231,8 +232,30 @@ class mapTiles(ranaModule):
     
     # Display the image
     cr.set_source_surface(self.images[name],0,0)
+    cr.paint()
+
+
+    # Return the cairo projection to what it was
+    cr.restore()
+
+  def drawCompositeImage(self,cr, nameOver, nameBack, x,y, alpha1=1, alpha2=1):
+    """Draw a composited tile image"""
+
+    # If it's not in memory, then stop here
+    if not nameOver and nameBack in self.images.keys():
+      print "Not loaded"
+      return
+
+    # Move the cairo projection onto the area where we want to draw the image
+    cr.save()
+    cr.translate(x,y)
+
+    # Display the image
+    cr.set_source_surface(self.images[nameBack],0,0) # draw the background
+    cr.paint_with_alpha(alpha2)
+    cr.set_source_surface(self.images[nameOver],0,0) # draw the overlay
+    cr.paint_with_alpha(alpha1)
 #    cr.paint()
-    cr.paint_with_alpha(alpha)
 
     # Return the cairo projection to what it was
     cr.restore()
