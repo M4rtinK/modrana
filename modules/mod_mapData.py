@@ -1,4 +1,3 @@
-import os.path
 #!/usr/bin/python
 #----------------------------------------------------------------------------
 # Handles downloading of map data

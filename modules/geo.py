@@ -160,7 +160,7 @@ def perElevList(trackpointsList, numPoints=200):
     dist = distance(pLat, pLon, lat, lon)
     prevIndex = prevIndex + 1
     totalDist+= dist
-    distanceList.append((totalDist,elev))
+    distanceList.append((totalDist,elev,point['lat'],point['lon']))
 
   trackLength = distanceList[-1][0]
   delta = trackLength / numPoints

@@ -184,6 +184,8 @@ class options(ranaModule):
       f.close()
       if 'tileFolder' in newData: #TODO: do this more elegantly
         del newData['tileFolder']
+      if 'tracklogFolder' in newData: #TODO: do this more elegantly
+        del newData['tracklogFolder']
       for k,v in newData.items():
         self.set(k,v)
     except IOError:

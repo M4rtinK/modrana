@@ -180,6 +180,7 @@ class tracklogManager(ranaModule):
       menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")
       menus.addItem('tracklogTools', 'elevation#get', 'generic', 'tracklogManager:getElevation|set:menu:tracklogInfo')
       menus.addItem('tracklogTools', 'visible#toggle', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|set:menu:tracklogInfo' % track.tracklogFilename)
+      menus.addItem('tracklogTools', 'active#set', 'generic', 'set:currentTrack:%s|set:menu:None' % track.tracklogFilename)
       menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogInfo')
       menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogInfo')
 

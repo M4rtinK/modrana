@@ -101,6 +101,8 @@ class config(ranaModule):
 
     tilePath = 'cache/images'
 
+    tracklogFolder = 'tracklogs'
+
     try:
       config = ConfigObj(path)
       if 'enabled' in config:
@@ -109,6 +111,8 @@ class config(ranaModule):
           
           if 'tile_folder' in config:
             tilePath = "%s/" % config['tile_folder'] # make sure the path ends with /
+          if 'tracklog_folder' in config:
+            tracklogFolder = "%s/" % config['tracklog_folder'] # make sure the path ends with /
           device = self.device
           if device in config: #TODO: modules for specific devices
             devSpecific = config[device] 
@@ -121,6 +125,8 @@ class config(ranaModule):
       print "config: and if the config file is present in the main directory"
 
     self.setTileFolder(tilePath)
+    print "** using tracklog folder: %s **" % tracklogFolder
+    self.set('tracklogFolder', tracklogFolder)
 
   def setTileFolder(self, path):
     createDir = False

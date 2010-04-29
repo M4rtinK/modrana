@@ -190,7 +190,7 @@ class route(ranaModule):
         return
 
       loadTracklogs.storeRoute(self.route) # TODO: rewrite this when we support more routing providers
-      
+
       length = len(loadTracklogs.tracklogs)
       self.set('activeTracklog', "%d" % (length-1)) # jump to the new tracklog
       

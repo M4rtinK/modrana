@@ -40,8 +40,20 @@ class loadTracklogs(ranaModule):
     #self.set('tracklogs', self.tracklogs) # now we make the list easily acessible to other modules
     self.cachePath = 'cache/tracklogs/tracklog_cache.txt'
     self.cache = {}
-    self.tracklogFolder = 'tracklogs'
+    self.tracklogFolder = 'tracklogs/'
+
+  def firstTime(self):
+    folder = self.get('tracklogFolder', 'tracklogs/')
+
+    print folder
+
+    if folder != None:
+      self.tracklogFolder = folder
+    else:
+      self.tracklogFolder = 'tracklogs/'
+
     self.load()
+
 
   def update(self):
     # Get and set functions are used to access global data
@@ -62,16 +74,21 @@ class loadTracklogs(ranaModule):
 
     print "Loading from cache took %1.2f ms" % (1000 * (clock() - start))
 
-    files = os.listdir(self.tracklogFolder)
-    files = filter(lambda x: x != '.svn', files)
+    files = []
+    if os.path.exists(self.tracklogFolder):
+      files = os.listdir(self.tracklogFolder)
+      files = filter(lambda x: x != '.svn', files)
 
-    self.cleanCache(files)
-
-#    enabledTracklogs = self.get('enabledTracklogs', None)
-#    if enabledTracklogs != None:
-    for file in files:
-      self.loadTracklog('tracklogs/'+file)
       
+      print self.tracklogFolder
+      print os.path.exists(self.tracklogFolder)
+      for file in files:
+        try:
+          self.loadTracklog(self.tracklogFolder + file)
+        except:
+          "loading tracklog failed: %s" % file
+      
+    self.cleanCache(files)
     self.save()
     print "Loading tracklogs took %1.2f ms" % (1000 * (clock() - start))
 
@@ -125,7 +142,7 @@ class loadTracklogs(ranaModule):
     # gdr = Google Directions Result, TODO: alternate prefixes when we have more routing providers
     name = name.encode('ascii', 'ignore')
     filename = "" + folder + "/gdr_" + name + timeString + ".gpx"
-    f = open(filename, 'w')
+    f = open(filename, 'w') # TODO: handle the exception that occurs when there is not tracklog folder :)
     xmlTree.write(f)
     f.close()
     self.loadTracklog(filename)
