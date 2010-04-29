@@ -132,9 +132,36 @@ class mapTiles(ranaModule):
 
     layer = self.get('layer','osma')
     # Cover the whole map view with tiles
+
+    (alpha1, alpha2) = (1, 0)
+    if self.get('overlay', False): # is the overlay on ?
+      ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
+      (alpha1, alpha2) = (float(ratio[0]),float(ratio[1])) # convert it to floats
+
+      layer2 = self.get('layer2', 'mapnik') # get the background layer
+
+      # draw the background layer
+      for ix in range(0, wTiles):
+        for iy in range(0, hTiles):
+
+          # get tile cooridnates by incrementing the upper left tile cooridnates
+          x = cx+ix
+          y = cy+iy
+
+          # get screen coordinates by incrementing upper left tile screen coordinates
+          x1 = cx1 + 256*ix
+          y1 = cy1 + 256*iy
+
+          # Try to load and display images
+          name = self.loadImage(x,y,z,layer2)
+          if(name != None):
+            self.drawImage(cr,name,x1,y1,alpha2)
+
+
+    # draw the normal layer
     for ix in range(0, wTiles):
       for iy in range(0, hTiles):
-        
+
         # get tile cooridnates by incrementing the upper left tile cooridnates
         x = cx+ix
         y = cy+iy
@@ -146,7 +173,12 @@ class mapTiles(ranaModule):
         # Try to load and display images
         name = self.loadImage(x,y,z,layer)
         if(name != None):
-          self.drawImage(cr,name,x1,y1)
+          self.drawImage(cr,name,x1,y1,alpha1)
+
+
+
+
+
 
   def update(self):
     """monitor if the automatic tile downalods finished and then remove them from the dictionary
@@ -185,7 +217,7 @@ class mapTiles(ranaModule):
 #    self.oldThreadCount = len(self.threads)
     
   
-  def drawImage(self,cr, name, x,y):
+  def drawImage(self,cr, name, x,y, alpha=1):
     """Draw a tile image"""
     
     # If it's not in memory, then stop here
@@ -199,7 +231,8 @@ class mapTiles(ranaModule):
     
     # Display the image
     cr.set_source_surface(self.images[name],0,0)
-    cr.paint()
+#    cr.paint()
+    cr.paint_with_alpha(alpha)
 
     # Return the cairo projection to what it was
     cr.restore()

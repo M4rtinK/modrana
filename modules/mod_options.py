@@ -107,6 +107,26 @@ class options(ranaModule):
       for name,layer in layers:
         tileOptions.append((name, layer.get('label',name)))
       self.addOption("Map images", "layer", tileOptions, "map", "mapnik")
+
+      self.addBoolOption("Map as overlay", "overlay", "map", False)
+
+      self.addOption("Background map", "layer2", tileOptions, "map", "osma")
+
+      self.addOption("Transparency ratio:", "transpRatio",
+              [("0.25,1","overlay:25%"),
+              ("0.5,1","overlay:50%"),
+              ("0.75,1","overlay:75%"),
+              ("1,1","overlay:100%")],
+               "map",
+               "0.5,1")
+#             [("0.5,0.5","over:50%,back:50%"),
+#              ("0.25,0.75","over:25%,back:75%"),
+#              ("0.75,0.25","over:75%,back:50%")],
+#               "map",
+#               "0.5,0.5")
+
+
+
 #    self.addBoolOption("Old tracklogs", "old_tracklogs", "map", False)
 #    self.addBoolOption("Latest tracklog", "tracklog", "map", True)
 
