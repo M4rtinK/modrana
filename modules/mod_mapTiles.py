@@ -450,8 +450,7 @@ class mapTiles(ranaModule):
         ct2.paint()
         ''' surface now contains the image in a Cairo surface '''
         self.callback.images[name] = surface #TODO: remove "old" images from cache (possible memmory leak ?)
-      else:
-        print "test"
+
       pl.close()
 
       # like this, currupted tiles should not get past the pixbuf loader and be stored
