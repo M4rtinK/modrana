@@ -150,7 +150,7 @@ def perElevList(trackpointsList, numPoints=200):
 
   # create a list, where we have (cumulative distance from starting point, elevation)
   distanceList = []
-  distanceList.append((0,points[0]['elev']))
+  distanceList.append((0,points[0]['elev'],points[0]['lat'],points[0]['lon']))
   prevIndex = 0
   totalDist = 0
   for point in points[1:]:
@@ -202,6 +202,11 @@ def perElevList(trackpointsList, numPoints=200):
 #      print point
 #      print nextPoint
 
+
+
+
+
+
       prevElev = prevPoint[1]
       nextElev = nextPoint[1]
 
@@ -227,11 +232,29 @@ def perElevList(trackpointsList, numPoints=200):
         dElev = adjecentPart / tan(alpha)
         newElev = prevElev + dElev
 
-      periodicElevationList.append((point[0],newElev))
+      # add cooridnates to periodic points
+      (lat1,lon1) = prevPoint[2:4]
+      (lat2,lon2) = nextPoint[2:4]
+#      (lat,lon) = point[2:4]
+      d = distance(lat1,lon1,lat2,lon2) # distance between the two known points
+      dPart = point[0] - prevPoint[0] # distance to the periodic point
+
+      actual = dPart/d # the actual distance fraction
+      rest = 1 - actual # how much remains
+
+      # get the periodic point coordinates, depending on its distance from known points
+      lat = (rest*lat1)+(actual*lat2)
+      lon = (rest*lon1)+(actual*lon2)
+
+#      print (d,dPart)
+#      print (actual,rest)
+
+      periodicElevationList.append((point[0],newElev, lat, lon))
 
     index = index + 1
 
   periodicElevationList.append(distanceList[-1]) # add the last point of the track
+
   return(periodicElevationList)
 
 

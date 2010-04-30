@@ -97,6 +97,9 @@ class showGPX(ranaModule):
       if self.get('debugCircles', None) == True:
         self.drawDebugCircles(cr, GPXTracklog)
 
+      if self.get('debugSquares', None) == True:
+        self.drawDebugSquares(cr, GPXTracklog)
+
   def point(self, cr, x, y):
     s = 10 #default 2
     cr.rectangle(x-s,y-s,2*s,2*s)
@@ -236,6 +239,19 @@ class showGPX(ranaModule):
       cr.set_source_rgb(0, 0, 0)
       cr.stroke()
       cr.fill()
+
+  def drawDebugSquares(self, cr, GPXTracklog):
+    proj = self.m.get('projection', None)
+    points = GPXTracklog.perElevList
+
+    for point in points:
+      (lat,lon) = point[2:4]
+      (x,y) = proj.ll2xy(lat, lon)
+      cr.move_to(x,y)
+      self.point(cr, x, y)
+      cr.stroke()
+
+    cr.fill()
 
   def drawLineSegment(self, cr, x1, y1, x2, y2):
     cr.move_to(x1,y1)

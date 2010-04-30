@@ -67,6 +67,20 @@ class tracklogManager(ranaModule):
       activeTracklog.modified() # make the tracklog update
       activeTracklog.replaceFile() # replace the old tracklog file
 
+    if message == 'loadTrackProfile':
+      # get the data needed for drawing the dynamic route profile in the osd
+      filename = self.get('currentTrack', None)
+      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
+      loadedTracklogs = loadTl.tracklogs
+      track = filter(lambda x: x.tracklogFilename == filename, loadedTracklogs).pop()
+      self.m.get('showOSD', None).routeProfileData = track.perElevList
+
+    if message == 'unLoadTrackProfile':
+      self.m.get('showOSD', None).routeProfileData = None
+
+
+
+
   def drawMenu(self, cr, menuName):
     # is this menu the correct menu ?
     if menuName == 'tracklogManager' or menuName == 'tracklogInfo':
@@ -80,6 +94,7 @@ class tracklogManager(ranaModule):
       (w1,h1,dx,dy) = alloc
     else:
       return # we arent the active menu so we dont do anything
+
 
 
     if menuName == 'tracklogManager':
@@ -180,7 +195,8 @@ class tracklogManager(ranaModule):
       menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")
       menus.addItem('tracklogTools', 'elevation#get', 'generic', 'tracklogManager:getElevation|set:menu:tracklogInfo')
       menus.addItem('tracklogTools', 'visible#toggle', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|set:menu:tracklogInfo' % track.tracklogFilename)
-      menus.addItem('tracklogTools', 'active#set', 'generic', 'set:currentTrack:%s|set:menu:None' % track.tracklogFilename)
+      menus.addItem('tracklogTools', 'active#set', 'generic', 'set:currentTrack:%s|tracklogManager:loadTrackProfile|set:menu:None' % track.tracklogFilename)
+      menus.addItem('tracklogTools', 'inactive#set', 'generic', 'set:currentTrack:None|tracklogManager:unLoadTrackProfile|set:menu:None')
       menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogInfo')
       menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogInfo')
 

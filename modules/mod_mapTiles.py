@@ -391,14 +391,16 @@ class mapTiles(ranaModule):
           self.filename)
         self.finished = 1
       except Exception, e:
+        url = getTileUrl(self.x,self.y,self.z,self.layer)
         print "mapTiles: download thread reports error"
         print "** we were doing this, when an exception occured:"
-        print "** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s" % ( \
+        print "** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s, url: %s" % ( \
                                                                             self.x,
                                                                             self.y,
                                                                             self.z,
                                                                             self.layer,
-                                                                            self.filename)
+                                                                            self.filename,
+                                                                            url)
         print "** this exception occured: %s" % e
 
 
@@ -422,28 +424,37 @@ class mapTiles(ranaModule):
       request.close()
       name = "%s_%d_%d_%d" % (layer,z,x,y)
       pl = gtk.gdk.PixbufLoader()
-      pl.write(content)
 
-      # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
-      #x = pixbuf.get_width()
-      #y = pixbuf.get_height()
-      # Google sat images are 256 by 256 px, we dont need to check the size
-      x = 256
-      y = 256
-      ''' create a new cairo surface to place the image on '''
-      surface = cairo.ImageSurface(0,x,y)
-      ''' create a context to the new surface '''
-      ct = cairo.Context(surface)
-      ''' create a GDK formatted Cairo context to the new Cairo native context '''
-      ct2 = gtk.gdk.CairoContext(ct)
-      ''' draw from the pixbuf to the new surface '''
-      ct2.set_source_pixbuf(pl.get_pixbuf(),0,0)
-      ct2.paint()
-      ''' surface now contains the image in a Cairo surface '''
-      self.callback.images[name] = surface #TODO: remove "old" images from cache (possible memmory leak ?)
+      if pl.write(content) == False:
+        "mapTiles:loading image failed"
+        return
 
+      time.sleep(0.01) # wait while the loader finishes loading TODO: use signals for this
+
+      pixbuf = pl.get_pixbuf()
+      if pixbuf:
+        # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
+        #x = pixbuf.get_width()
+        #y = pixbuf.get_height()
+        # Google sat images are 256 by 256 px, we dont need to check the size
+        x = 256
+        y = 256
+        ''' create a new cairo surface to place the image on '''
+        surface = cairo.ImageSurface(0,x,y)
+        ''' create a context to the new surface '''
+        ct = cairo.Context(surface)
+        ''' create a GDK formatted Cairo context to the new Cairo native context '''
+        ct2 = gtk.gdk.CairoContext(ct)
+        ''' draw from the pixbuf to the new surface '''
+        ct2.set_source_pixbuf(pixbuf,0,0)
+        ct2.paint()
+        ''' surface now contains the image in a Cairo surface '''
+        self.callback.images[name] = surface #TODO: remove "old" images from cache (possible memmory leak ?)
+      else:
+        print "test"
       pl.close()
 
+      # like this, currupted tiles should not get past the pixbuf loader and be stored
       f = open(filename, 'w') # write the tile to file
       f.write(content)
       f.close()

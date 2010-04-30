@@ -19,6 +19,10 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import time
+import gtk
+import pycha.line
+import cairo
+import geo
 
 def getModule(m,d):
   return(showOSD(m,d))
@@ -29,6 +33,7 @@ class showOSD(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.items = None
+    self.routeProfileData = None
 #    self.avail = set(
 #                      'speed'
 #                      )
@@ -39,7 +44,7 @@ class showOSD(ranaModule):
     #print "Updated %d times" % (self.get('num_updates'))
 
   def drawScreenOverlay(self, cr):
-#    if items:
+    """ draw currenty active information widgets TODO: just draw object from list"""
     if self.m.get('config', {}):
       config = self.m.get('config', None).userConfig
 
@@ -80,6 +85,8 @@ class showOSD(ranaModule):
       statString = "max:%s|" % units.km2CurrentUnitPerHourStringTwoDP(maxSpeed)
       statString+= "avg:%s" % units.km2CurrentUnitPerHourStringTwoDP(avg)
       self.drawMultilineTextWidget(cr, item, statString)
+    elif type == 'route_profile':
+      self.drawRouteProfile(cr, item)
 
 
   def drawMultilineTextWidget(self,cr ,item ,text=""):
@@ -134,6 +141,13 @@ class showOSD(ranaModule):
     cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
     cr.fill()
 
+  def drawBackgroundExact(self, cr, x, y, w, h, source=None):
+    cr.set_line_width(2)
+    cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
+    (rx,ry,rw,rh) = (x, y, w, h)
+    cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
+    cr.fill()
+
   def drawText(self, cr, x, y, text, source=None):
     cr.set_source_rgba(1, 1, 1, 0.95) # slightly transparent white
     cr.move_to(x+10,y)
@@ -142,6 +156,190 @@ class showOSD(ranaModule):
     cr.fill()
 
 # from PyCha.color module
+
+  def drawRouteProfile(self, cr, item):
+    """draw a dynamic route profile as a part of the osd"""
+    if self.routeProfileData == None:
+      text = "activete a trackglog|to show route profile"
+      item['font_size'] = 20
+      self.drawMultilineTextWidget(cr, item, text)
+      return
+
+#    profile = self.routeProfileData
+#    print item
+
+    proj = self.m.get('projection', None)
+    (px,py) = float(item['px']), float(item['py'])
+    (x, y) = proj.screenPos(px,py)
+
+    if 'pw' and 'ph' in item:
+      (pw,ph) = float(item['pw']), float(item['ph'])
+    else:
+      (pw,ph) = (0.2,0.15)
+    (w, h) = proj.screenPos(pw,ph)
+
+    segmentLength = 5
+    if 'segment_length' in item:
+      segmentLength = float(item['segment_length'])
+
+    pos = self.get('pos', None)
+    if pos == None:
+      return
+#    print profile
+
+#    (sx,sy) = proj.screenPos(0.5, 0.5)
+#    (sLat,sLon) = proj.xy2ll(sx, sy)
+
+    (pLat,pLon) = pos
+
+    # list order: distance from pos/screen center, lat, lon, distance from start, elevation
+    distList = [(geo.distance(pLat,pLon,i[2],i[3]),i[2],i[3],i[0],i[1]) for i in self.routeProfileData]
+#    distList.sort()
+
+    l = [k[0] for k in distList] # make a list with only distances to our position
+
+
+    nearestIndex = l.index(min(l)) # get index of the shortest distance
+    nearestPoint = distList[nearestIndex] # get the nearest point
+
+    # * build the dataset *
+
+    # prepare
+
+    step = distList[1][3] # distance between the periodic points
+    totalLength = len(distList)
+
+    nrPoints = int(segmentLength / step) # how many points re in the range ?
+
+    leftAdd = 0
+    rightAdd = 0
+
+    leftIndex = nearestIndex - nrPoints/2
+    rightIndex = nearestIndex + nrPoints/2
+#    print leftAdd, leftIndex, nearestIndex, rightIndex, rightAdd
+    if leftIndex < 0:
+      leftAdd = abs(leftIndex)
+      leftIndex = 0
+    if rightIndex > totalLength-1:
+      rightAdd = rightIndex - (totalLength-1)
+      rightIndex = totalLength-1
+
+
+#    print totalLength
+#    print leftAdd, leftIndex, nearestIndex, rightIndex, rightAdd
+
+    # build
+
+    zeroes = [(0,0,0,0,0)] # simulates no data areas
+
+    profile = []
+
+    profile.extend(zeroes*leftAdd) # possible front padding
+    profile.extend(distList[leftIndex:rightIndex]) # add the current segment
+    profile.extend(zeroes*rightAdd) # possible end padding
+
+#    mostDistantPoint = distList[-1]
+
+#    (nx,ny) = proj.ll2xy(nearestPoint[1],nearestPoint[2])
+#    cr.set_source_rgb(1,1,0)
+#    cr.rectangle(nx,ny,20,20)
+#    cr.stroke()
+#    cr.fill()
+
+    self.drawBackgroundExact(cr, x, y, w, h)
+    self.drawLinechart(cr, x, y, w, h, profile)
+
+
+    # draw current elevation indicator
+    cr.set_source_rgb(1,1,0)
+    cr.set_line_width(3)
+    cr.move_to(x+w/2.0,y)
+    cr.line_to(x+w/2.0,y+h)
+    cr.stroke()
+    cr.fill()
+
+
+  def drawLinechart(self, cr, x, y, w, h, profile):
+    """draw a linechart, showing a segment of the route"""
+
+    w = int(w)
+    h = int(h)
+
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
+    list = profile
+
+    minimum = min(map(lambda x: x[4], list))
+    maximum = max(map(lambda x: x[4], list))
+
+    lines = tuple(map(lambda x: (x[3], x[4]), list))
+
+    dataSet = (
+        ('lines', [(i, l[1]) for i, l in enumerate(lines)]),
+        )
+
+    options = {
+        'axis': {
+
+            'lineWidth':1,
+            'lineColor':'#0000ff',
+            'labelFontSize': 12,
+
+            'x': {
+            },
+            'y': {
+                'range' : (minimum-15,maximum+30),
+            }
+        },
+        'background': {
+            'hide':True,
+            'color': '#eeeeff',
+#            'lineColor': '#444444'
+            'lineColor': '#eeeeff',
+            'lineWidth':10
+        },
+        'colorScheme': {
+            'name': 'gradient',
+            'args': {
+#                'initialColor': 'blue',
+                'initialColor': '#eeeeff',
+            },
+        },
+        'legend': {
+            'hide': True,
+        },
+        'stroke': {
+            'hide': False,
+            'color':'#eeeeff',
+            'width':3
+        },
+        'yvals': {
+            'hide': True,
+            'color':'#eeeeff',
+        },
+        'xvals': {
+            'hide': True,
+            'color':'#eeeeff',
+        },
+        'padding': {
+            'left': 0,
+            'right': 0,
+            'bottom': 0,
+        },
+        'shouldFill':False,
+        'lineWidth':10,
+    }
+    chart = pycha.line.LineChart(surface, options)
+    chart.addDataset(dataSet)
+    chart.render()
+    cr.set_source_surface(surface, x, y)
+    cr.paint()
+
+
+
+def parseColour(self, inputString):
+  color = gtk.gdk.color_parse(inputString)
+  return color
+
 def hex2rgb(hexstring, digits=2):
     """Converts a hexstring color to a rgb tuple.
 

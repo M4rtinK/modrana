@@ -53,6 +53,7 @@ class options(ranaModule):
 
     # * the debug submenu
     self.addBoolOption("Debug circles", "debugCircles", "debug", False)
+    self.addBoolOption("Debug squares", "debugSquares", "debug", False)
 
 #    self.addBoolOption("Debug squares", "debugSquares", "debug", False)
     self.addBoolOption("Remove dups berofe batch dl", "checkTiles", "debug", False)

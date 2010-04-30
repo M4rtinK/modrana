@@ -22,6 +22,8 @@ import pycha.line
 #from lines import lines
 import sys
 import cairo
+import geo
+import gtk
 
 def getModule(m,d):
   return(routeProfile(m,d))
@@ -61,57 +63,38 @@ class routeProfile(ranaModule):
     loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
     #tracklistsWithElevation = filter(lambda x: x.elevation == True, loadedTracklogs)
     activeTracklogIndex = int(self.get('activeTracklog', 0))
-    print activeTracklogIndex
     tracklog = loadedTracklogs[activeTracklogIndex]
     if tracklog.elevation == True:
       self.lineChart(cr, tracklog, 0, 0, w, h)
+      
     # * draw "escape" button
     menus.drawButton(cr, x1, y1, dx, dy, "", "up_transp_gama", "set:menu:tracklogInfo")
-    return
 
-#  def lineChart(self, cr, tracklog, x, y, w, h):
-#    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
-#
-#    list = tracklog.trackpointsList[0]
-#    lines = tuple(map(lambda x: ("", float(x.elevation)), list))
-#
-#    dataSet = (
-#        ('lines', [(i, l[1]) for i, l in enumerate(lines)]),
-#        )
-#
-#    options = {
-#        'axis': {
-#            'x': {
-#                #'ticks': [dict(v=i, label=l[0]) for i, l in enumerate(lines)],
-#                #'ticks' : [1:3,2,3,],
-#            },
-#            'y': {
-#                'tickCount': 10, #number of data points on the Y axis
-#            }
-#        },
-#        'background': {
-#            'color': '#eeeeff',
-#            'lineColor': '#444444'
-#        },
-#        'colorScheme': {
-#            'name': 'gradient',
-#            'args': {
-#                'initialColor': 'blue',
-#            },
-#        },
-#        'legend': {
-#            'hide': True,
-#        },
-#        'padding': {
-#            'left': 55,
-#            'bottom': 40,
-#        }
-#    }
-#    chart = pycha.line.LineChart(surface, options)
-#    chart.addDataset(dataSet)
-#    chart.render()
-#    cr.set_source_surface(surface, x, y)
-#    cr.paint()
+    # * draw current elevation/position indicator
+    pos = self.get('pos', None)
+    if pos != None:
+      (pLat,pLon) = pos
+      l = [geo.distance(pLat,pLon,i[2],i[3]) for i in tracklog.perElevList]
+      totalLength = len(tracklog.perElevList)
+      nearestIndex = l.index(min(l)) # get index of the shortest distance
+      step = (w-60-35)/totalLength # width minus padding divided by number of points
+
+      currentPositionX = 60+nearestIndex*step
+
+#      cr.set_source_rgba(1,1,1,1)
+#      cr.set_line_width(5)
+      cr.move_to(currentPositionX,0+30)
+      cr.line_to(currentPositionX,h-40)
+#      cr.stroke_preserve()
+      cr.set_source_rgba(1.0, 0.5,0,1)
+      cr.set_line_width(3)
+      cr.stroke()
+      cr.fill()
+
+#      nearestPoint = tracklog.perElevList[nearestIndex] # get the nearest point
+#      proj = self.m.get('projection', None)
+#      (nLat,nLon) = (nearestPoint[2],nearestPoint[3])
+    return
 
   def lineChart(self, cr, tracklog, x, y, w, h):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
