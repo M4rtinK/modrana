@@ -287,7 +287,8 @@ class showOSD(ranaModule):
             'x': {
             },
             'y': {
-                'range' : (minimum-15,maximum+30),
+                'range' : (minimum-h/20,maximum+h/20),
+#                'range' : (minimum,maximum),
             }
         },
         'background': {
