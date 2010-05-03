@@ -21,6 +21,7 @@ from base_module import ranaModule
 
 import sys
 import math
+import gtk
 from time import clock
 
 #if(__name__ == '__main__'):
@@ -495,6 +496,37 @@ class route(ranaModule):
         self.text = text
       else:
         text = self.text
+
+#      entry = gtk.Entry(max=0)
+
+      print self.mainWindow
+      print self.topWindow
+
+#      window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+#      window.set_size_request(200, 100)
+#      window.set_title("GTK Entry")
+##      window.connect("delete_event", lambda w,e: gtk.main_quit())
+#
+#      vbox = gtk.VBox(False, 0)
+#      window.add(vbox)
+#      vbox.show()
+#
+#      entry = gtk.Entry()
+#      entry.set_max_length(50)
+##      entry.connect("activate", self.enter_callback, entry)
+#      entry.set_text("hello")
+#      entry.insert_text(" world", len(entry.get_text()))
+#      entry.select_region(0, len(entry.get_text()))
+#      vbox.pack_start(entry, True, True, 0)
+#      entry.show()
+
+
+
+#      print self.mainWindow.get_toplevel().add(entry)
+
+      print "test"
+      
+
 
       box = (text , "set:menu:currentRoute")
       menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)

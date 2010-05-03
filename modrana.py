@@ -57,6 +57,8 @@ class MapWidget(gtk.Widget):
     self.d = {} # List of data
     self.m = {} # List of modules
 
+    self.topWindow = None
+
     global_device_id.device = device
 
     self.loadModules('modules') # name of the folder with modules
@@ -157,6 +159,7 @@ class MapWidget(gtk.Widget):
     # alow the modules to manipulate the window TODO: do this more elegantly (using signals ?)
     for name in self.m: 
       self.m[name].mainWindow = self.window
+      self.m[name].topWindow = self.topWindow
 
   def do_size_request(self, allocation):
     pass
@@ -232,6 +235,7 @@ class GuiBase:
     
     # Create the map
     self.mapWidget = MapWidget()
+    self.mapWidget.topWindow=win
     event_box.add(self.mapWidget)
 
     # Finalise the window
