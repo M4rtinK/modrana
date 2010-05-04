@@ -22,6 +22,8 @@ from base_module import ranaModule
 import sys
 import math
 import gtk
+import gobject
+from time import sleep
 from time import clock
 
 #if(__name__ == '__main__'):
@@ -46,13 +48,19 @@ class route(ranaModule):
     self.text = None
     self.selectTwoPoints = False
     self.selectOnePoint = False
+    self.once = True
+    self.entry = None
 
     self.expectStart = False
     self.expectEnd = False
 
+    self.startAddress = None
+    self.destinationAddress = None
+    self.expectTextEntry = None
+
     self.set('startPos', None)
     self.set('endPos', None)
-    
+
   def handleMessage(self, message):
     if (message == "clear"):
       self.route = []
@@ -194,6 +202,29 @@ class route(ranaModule):
 
       length = len(loadTracklogs.tracklogs)
       self.set('activeTracklog', "%d" % (length-1)) # jump to the new tracklog
+
+
+    elif(message == 'startInput'):
+      entry = self.m.get('textEntry', None)
+      if entry == None:
+        return
+      entry.entryBox('Input the start address')
+      self.expectTextEntry = 'start'
+
+    elif(message == 'destinationInput'):
+      entry = self.m.get('textEntry', None)
+      if entry == None:
+        return
+      entry.entryBox('Input the start address')
+      self.expectTextEntry = 'destination'
+
+    elif(message == 'addressRoute'):
+      if self.startAddress and self.destinationAddress:
+        print "address routing"
+        self.doAddressRoute(self.startAddress,self.destinationAddress)
+      else:
+        print "cant route, start or destionation (or both) not set"
+
       
 
   def doRoute(self, fromLat, fromLon, toLat, toLon):
@@ -218,6 +249,34 @@ class route(ranaModule):
     destinationAddress = online.googleReverseGeocode(toLat,toLon)
     self.start = (fromLat, fromLon, startAddress)
     self.destination = (toLat, toLon, destinationAddress)
+
+  def doAddressRoute(self, start, destination):
+    """Route from one point to another, and set that as the active route"""
+    online = self.m.get('onlineServices', None)
+    if online == None:
+      return
+    print "routing from %s to %s" % (start,destination)
+    directions = online.googleDirections(start, destination)
+    if directions == None:
+      return
+
+    # remove any possible prev. route description, so new a new one for this route is created
+    self.text = None
+
+    polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
+    route = self.decode_line(polyline) # we decode the polyline to a list of points
+
+    self.route = route
+    self.directions = directions
+    # reverse geocode the start and destination coordinates (for the info menu)
+#    startAddress = online.googleReverseGeocode(fromLat,fromLon)
+#    destinationAddress = online.googleReverseGeocode(toLat,toLon)
+#    self.start = (fromLat, fromLon, startAddress)
+#    self.destination = (toLat, toLon, destinationAddress)
+    self.start = (50, 50, "startAddress")
+    self.destination = (50, 50, "destinationAddress")
+
+
 
   def update(self):
     self.set('num_updates', self.get('num_updates', 0) + 1)
@@ -447,6 +506,12 @@ class route(ranaModule):
     if toPos != None:
       print "drawing end point"
 
+#  def respondToText(self, entry, dialog, response):
+#        print "responce"
+#        print entry.get_text()
+#        print "hiding now"
+#        dialog.destroy()
+
   def drawMenu(self, cr, menuName):
     if menuName == 'currentRoute':
       menus = self.m.get("menu",None)
@@ -497,42 +562,81 @@ class route(ranaModule):
       else:
         text = self.text
 
-#      entry = gtk.Entry(max=0)
+#      print self.get('textEntry', None)
 
-      print self.mainWindow
-      print self.topWindow
+      if self.once:
+        self.once = False
 
-#      window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-#      window.set_size_request(200, 100)
-#      window.set_title("GTK Entry")
-##      window.connect("delete_event", lambda w,e: gtk.main_quit())
-#
-#      vbox = gtk.VBox(False, 0)
-#      window.add(vbox)
-#      vbox.show()
-#
-#      entry = gtk.Entry()
-#      entry.set_max_length(50)
-##      entry.connect("activate", self.enter_callback, entry)
-#      entry.set_text("hello")
-#      entry.insert_text(" world", len(entry.get_text()))
-#      entry.select_region(0, len(entry.get_text()))
-#      vbox.pack_start(entry, True, True, 0)
-#      entry.show()
-
-
-
-#      print self.mainWindow.get_toplevel().add(entry)
-
-      print "test"
-      
-
+#        entry = self.m.get('textEntry', None)
+#        entry.entryBox("Enter destination")
 
       box = (text , "set:menu:currentRoute")
       menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
 
       menus.clearMenu('currentRouteTools', "set:menu:currentRoute")
       menus.addItem('currentRouteTools', 'tracklog#save as', 'generic', 'route:storeRoute|set:menu:tracklogInfo')
+
+    if menuName == "showAdressRoute":
+      
+      menus = self.m.get("menu",None)
+      if menus == None:
+        print "route: no menus module, no menus will be drawn"
+        return
+
+
+#      print self.get('textEntry', "")
+#      print self.get('textEntryDone', "")
+#      print self.expectTextEntry
+#      print self.startAddress
+#      print self.destinationAddress
+
+      if self.expectTextEntry:
+        print "1"
+        if self.expectTextEntry == 'start' and self.get('textEntryDone', False):
+          self.startAddress = self.get('textEntry', "")
+          self.set('textEntry', None)
+          self.expectTextEntry = None
+        elif self.expectTextEntry == 'destination' and self.get('textEntryDone', False):
+          self.destinationAddress = self.get('textEntry', "")
+          self.set('textEntry', None)
+          self.expectTextEntry = None
+
+
+      (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
+      (x1,y1) = e1
+      (x2,y2) = e2
+      (x3,y3) = e3
+      (x4,y4) = e4
+      (w1,h1,dx,dy) = alloc
+
+      # * draw "escape" button
+      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:main")
+      # * route
+      menus.drawButton(cr, x2, y2, dx, dy, "route", "generic", "route:addressRoute|set:menu:None")
+      # * tools
+#      menus.drawButton(cr, x3, y3, dx, dy, "tools", "generic", "set:menu:main")
+
+      menus.clearMenu('currentRouteTools', "set:menu:currentRoute")
+      
+      menus.drawButton(cr, x4, y4, w1-x4, dy,  "start", "3h", "route:startInput")
+      menus.drawButton(cr, x4, y4+2*dy, w1-x4, dy, "destination", "3h", "route:destinationInput")
+      menus.drawButton(cr, x4, y4+dy, (w1-x4)/2, dy, "as start#position", "2h", "set:menu:main")
+      menus.drawButton(cr, x4+(w1-x4)/2, y4+dy, (w1-x4)/2, dy, "as destination#position", "2h", "set:menu:main")
+
+
+      if self.startAddress == None:
+        startText = "click to input starting adres"
+      else:
+        startText = self.startAddress
+      if self.destinationAddress == None:
+        destinationText = "click to input destination adres"
+      else:
+        destinationText = self.destinationAddress
+
+      menus.showText(cr, startText, x4+w1/20, y4+dy/5, w1-x4-(w1/20)*2)
+      menus.showText(cr, destinationText, x4+w1/20, y4+2*dy+dy/5, w1-x4-(w1/20)*2)
+
+
     
 
 if(__name__ == '__main__'):

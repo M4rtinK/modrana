@@ -485,6 +485,7 @@ class menus(ranaModule):
      self.addItem('route', 'Point to Point', 'generic', 'set:menu:None|route:selectTwoPoints')
      self.addItem('route', 'Here to Point#Point to Here', 'generic', 'set:menu:None|route:selectOnePoint')
      self.addItem('route', 'Here to POI', 'generic', 'set:menu:showPOIRoute')
+     self.addItem('route', 'to Address#Address', 'generic', 'set:menu:showAdressRoute')
      self.addItem('route', 'Clear', 'generic', 'route:clear|set:menu:None')
      self.addItem('route', 'route#Current', 'generic', 'set:menu:currentRoute')
 

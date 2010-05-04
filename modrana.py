@@ -46,7 +46,9 @@ class MapWidget(gtk.Widget):
     'realize': 'override',
     'expose-event' : 'override',
     'size-allocate': 'override',
-    'size-request': 'override'
+    'size-request': 'override',
+#    'test-signal' : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+#                              (gobject.TYPE_FLOAT,))
     }
   def __init__(self):
     gtk.Widget.__init__(self)
@@ -61,7 +63,18 @@ class MapWidget(gtk.Widget):
 
     global_device_id.device = device
 
+#    self.connect('test-signal', self.getTextCallback)
+
     self.loadModules('modules') # name of the folder with modules
+
+
+#  def do_test_signal(self, number):
+#          print 'number %f' % number
+#
+#  def getTextCallback(self,entry, dialog):
+#    print "text callback"
+
+
   def loadModules(self, module_path):
     """Load all modules from the specified directory"""
     sys.path.append(module_path)
@@ -88,7 +101,7 @@ class MapWidget(gtk.Widget):
     for m in self.m.values():
       m.update()
     self.checkForRedraw()
-  
+
   def checkForRedraw(self):
     if(self.d.get("needRedraw", False)):
       self.forceRedraw()
@@ -160,6 +173,7 @@ class MapWidget(gtk.Widget):
     for name in self.m: 
       self.m[name].mainWindow = self.window
       self.m[name].topWindow = self.topWindow
+      self.m[name].modrana = self # make this class accessible from modules
 
   def do_size_request(self, allocation):
     pass
@@ -235,7 +249,7 @@ class GuiBase:
     
     # Create the map
     self.mapWidget = MapWidget()
-    self.mapWidget.topWindow=win
+    self.mapWidget.topWindow=win # make the main widown accessible from modules
     event_box.add(self.mapWidget)
 
     # Finalise the window

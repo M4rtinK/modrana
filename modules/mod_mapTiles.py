@@ -425,33 +425,30 @@ class mapTiles(ranaModule):
       name = "%s_%d_%d_%d" % (layer,z,x,y)
       pl = gtk.gdk.PixbufLoader()
 
-      if pl.write(content) == False:
-        "mapTiles:loading image failed"
-        return
+      pl.write(content)
 
-      time.sleep(0.01) # wait while the loader finishes loading TODO: use signals for this
+#      if pl.write(content) == False:
+#        print "mapTiles:loading image failed"
+#        return
 
-      pixbuf = pl.get_pixbuf()
-      if pixbuf:
-        # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
-        #x = pixbuf.get_width()
-        #y = pixbuf.get_height()
-        # Google sat images are 256 by 256 px, we dont need to check the size
-        x = 256
-        y = 256
-        ''' create a new cairo surface to place the image on '''
-        surface = cairo.ImageSurface(0,x,y)
-        ''' create a context to the new surface '''
-        ct = cairo.Context(surface)
-        ''' create a GDK formatted Cairo context to the new Cairo native context '''
-        ct2 = gtk.gdk.CairoContext(ct)
-        ''' draw from the pixbuf to the new surface '''
-        ct2.set_source_pixbuf(pixbuf,0,0)
-        ct2.paint()
-        ''' surface now contains the image in a Cairo surface '''
-        self.callback.images[name] = surface #TODO: remove "old" images from cache (possible memmory leak ?)
-
-      pl.close()
+      pl.close() # this  blocks until the image is completely loaded
+      # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
+      #x = pixbuf.get_width()
+      #y = pixbuf.get_height()
+      # Google sat images are 256 by 256 px, we dont need to check the size
+      x = 256
+      y = 256
+      ''' create a new cairo surface to place the image on '''
+      surface = cairo.ImageSurface(0,x,y)
+      ''' create a context to the new surface '''
+      ct = cairo.Context(surface)
+      ''' create a GDK formatted Cairo context to the new Cairo native context '''
+      ct2 = gtk.gdk.CairoContext(ct)
+      ''' draw from the pixbuf to the new surface '''
+      ct2.set_source_pixbuf(pl.get_pixbuf(),0,0)
+      ct2.paint()
+      ''' surface now contains the image in a Cairo surface '''
+      self.callback.images[name] = surface #TODO: remove "old" images from cache (possible memmory leak ?)
 
       # like this, currupted tiles should not get past the pixbuf loader and be stored
       f = open(filename, 'w') # write the tile to file
@@ -460,8 +457,7 @@ class mapTiles(ranaModule):
 
       del content
 
-#      urllib.urlretrieve(url, filename)
-
+      
 def getTileUrl(x,y,z,layer): #TODO: share this with mapData
     """Return url for given tile coorindates and layer"""
     layerDetails = maplayers.get(layer, None)

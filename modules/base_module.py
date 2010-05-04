@@ -27,6 +27,7 @@ class ranaModule:
     self.device = global_device_id.device
     self.mainWindow = None # will be provided by modrana.py (a gdk.Window) -> the Widget main window
     self.topWindow = None # will be provided by modrana.py (a gdk.Window) -> the modRana top window
+    self.modrana = None # will be provided by modrana.py (well this is actualy modrana)
     
   def module_exists(self, module):
     """Test whether a named module is loaded"""
