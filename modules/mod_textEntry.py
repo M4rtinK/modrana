@@ -38,21 +38,27 @@ class textEntry(ranaModule):
     self.set('textEntry', None)
     self.set('textEntryDone', False)
 
-  def respondToTextEntry(self, entry, dialog, response):
+  def respondToTextEntry(self, entry, dialog, response,instance,key):
       print "responding to text entry"
-      self.set('textEntry', entry.get_text())
-      self.set('textEntryDone', True)
-      print "quiting"
+#      self.set('textEntry', entry.get_text())
+#      self.set('textEntryDone', True)
+      self.respond(entry.get_text(), instance,key)
+      print "text entry dialog is quiting"
       dialog.destroy()
 
-  def respondToDialog(self, dialog, response_id,entry):
+  def respondToDialog(self, dialog, response_id,entry,instance,key):
       print "responding to dialog"
-      self.set('textEntry', entry.get_text())
-      self.set('textEntryDone', True)
-      print "quiting"
+#      self.set('textEntry', entry.get_text())
+#      self.set('textEntryDone', True)
+      self.respond(entry.get_text(), instance,key)
+      print "text entry dialog is quiting"
       dialog.destroy()
 
-  def entryBox(self, label="Text entry"):
+  def respond(self, result, instance, key):
+    instance.handleTextEntryResult(key,result)
+
+
+  def entryBox(self, instance,key, label="Text entry", initialText=""):
       dialog = gtk.Dialog(
         label,
         None,
@@ -70,9 +76,10 @@ class textEntry(ranaModule):
 #      dialog.set_markup('Please enter your <b>name</b>:')
       #create the text input field
       entry = gtk.Entry()
+      entry.set_text(initialText)
       #allow the user to press enter to do ok
-      entry.connect("activate", self.respondToTextEntry, dialog, gtk.RESPONSE_OK)
-      dialog.connect("response", self.respondToDialog,entry)
+      entry.connect("activate", self.respondToTextEntry, dialog, gtk.RESPONSE_OK, instance,key)
+      dialog.connect("response", self.respondToDialog,entry, instance,key)
       #create a horizontal box to pack the entry and a label
       hbox = gtk.HBox()
       hbox.pack_start(gtk.Label(), False, 5, 5)

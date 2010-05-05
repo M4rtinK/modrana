@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-
+import googlemaps # for handling google directions exceptions
 import sys
 import math
 import gtk
@@ -56,7 +56,6 @@ class route(ranaModule):
 
     self.startAddress = None
     self.destinationAddress = None
-    self.expectTextEntry = None
 
     self.set('startPos', None)
     self.set('endPos', None)
@@ -208,15 +207,22 @@ class route(ranaModule):
       entry = self.m.get('textEntry', None)
       if entry == None:
         return
-      entry.entryBox('Input the start address')
-      self.expectTextEntry = 'start'
+      entryText = ""
+      if self.startAddress:
+        entryText = self.startAddress
+      entry.entryBox(self ,'start','Input the start address',entryText)
+#      self.expectTextEntry = 'start'
 
     elif(message == 'destinationInput'):
       entry = self.m.get('textEntry', None)
       if entry == None:
         return
-      entry.entryBox('Input the start address')
-      self.expectTextEntry = 'destination'
+      entryText = ""
+      if self.destinationAddress:
+        entryText = self.destinationAddress
+
+      entry.entryBox(self,'destination','Input the start address',entryText)
+#      self.expectTextEntry = 'destination'
 
     elif(message == 'addressRoute'):
       if self.startAddress and self.destinationAddress:
@@ -224,6 +230,19 @@ class route(ranaModule):
         self.doAddressRoute(self.startAddress,self.destinationAddress)
       else:
         print "cant route, start or destionation (or both) not set"
+
+    elif(message == 'posToStart'):
+      pos = self.get('pos', None)
+      if pos:
+        posString = "%f,%f" % pos
+        self.startAddress = posString
+
+    elif(message == 'posToDestination'):
+      pos = self.get('pos', None)
+      if pos:
+        posString = "%f,%f" % pos
+        self.destinationAddress = posString
+
 
       
 
@@ -256,7 +275,14 @@ class route(ranaModule):
     if online == None:
       return
     print "routing from %s to %s" % (start,destination)
-    directions = online.googleDirections(start, destination)
+    directions = None
+    try:
+      directions = online.googleDirections(start, destination)
+    except googlemaps.googlemaps.GoogleMapsError, e:
+      if e.status == 602: # address/addresses not found
+        print "address not found"
+        self.sendMessage('notification:one or both of the adresses were not found#5')
+
     if directions == None:
       return
 
@@ -268,15 +294,33 @@ class route(ranaModule):
 
     self.route = route
     self.directions = directions
+
+    (fromLat, fromLon) = route[0]
+    (toLat, toLon) = route[-1]
     # reverse geocode the start and destination coordinates (for the info menu)
-#    startAddress = online.googleReverseGeocode(fromLat,fromLon)
-#    destinationAddress = online.googleReverseGeocode(toLat,toLon)
-#    self.start = (fromLat, fromLon, startAddress)
-#    self.destination = (toLat, toLon, destinationAddress)
-    self.start = (50, 50, "startAddress")
-    self.destination = (50, 50, "destinationAddress")
+    startAddress = online.googleReverseGeocode(fromLat,fromLon)
+    destinationAddress = online.googleReverseGeocode(toLat,toLon)
+    self.start = (fromLat, fromLon, startAddress)
+    self.destination = (toLat, toLon, destinationAddress)
 
 
+  def firstTime(self):
+    """Load stored addresses at startup.
+      TODO: toggle for this, privacy reasons perhaps ?"""
+    startAddress = self.get('startAddress', None)
+    if startAddress:
+      self.startAddress = startAddress
+    destinationAddress = self.get('destinationAddress', None)
+    if destinationAddress:
+      self.destinationAddress = destinationAddress
+
+  def sendMessage(self,message):
+    m = self.m.get("messages", None)
+    if(m != None):
+      print "mapData: Sending message: " + message
+      m.routeMessage(message)
+    else:
+      print "mapData: No message handler, cant send message."
 
   def update(self):
     self.set('num_updates', self.get('num_updates', 0) + 1)
@@ -512,6 +556,17 @@ class route(ranaModule):
 #        print "hiding now"
 #        dialog.destroy()
 
+  def handleTextEntryResult(self, key, result):
+    if key == 'start':
+      self.startAddress = result
+      self.set('startAddress', result)
+    elif key == 'destination':
+      self.destinationAddress = result
+      self.set('destinationAddress', result)
+
+    self.set('needRedraw', True)
+
+
   def drawMenu(self, cr, menuName):
     if menuName == 'currentRoute':
       menus = self.m.get("menu",None)
@@ -590,17 +645,6 @@ class route(ranaModule):
 #      print self.startAddress
 #      print self.destinationAddress
 
-      if self.expectTextEntry:
-        print "1"
-        if self.expectTextEntry == 'start' and self.get('textEntryDone', False):
-          self.startAddress = self.get('textEntry', "")
-          self.set('textEntry', None)
-          self.expectTextEntry = None
-        elif self.expectTextEntry == 'destination' and self.get('textEntryDone', False):
-          self.destinationAddress = self.get('textEntry', "")
-          self.set('textEntry', None)
-          self.expectTextEntry = None
-
 
       (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
       (x1,y1) = e1
@@ -620,8 +664,8 @@ class route(ranaModule):
       
       menus.drawButton(cr, x4, y4, w1-x4, dy,  "start", "3h", "route:startInput")
       menus.drawButton(cr, x4, y4+2*dy, w1-x4, dy, "destination", "3h", "route:destinationInput")
-      menus.drawButton(cr, x4, y4+dy, (w1-x4)/2, dy, "as start#position", "2h", "set:menu:main")
-      menus.drawButton(cr, x4+(w1-x4)/2, y4+dy, (w1-x4)/2, dy, "as destination#position", "2h", "set:menu:main")
+      menus.drawButton(cr, x4, y4+dy, (w1-x4)/2, dy, "as start#position", "2h", "route:posToStart")
+      menus.drawButton(cr, x4+(w1-x4)/2, y4+dy, (w1-x4)/2, dy, "as destination#position", "2h", "route:posToDestination")
 
 
       if self.startAddress == None:
@@ -636,8 +680,6 @@ class route(ranaModule):
       menus.showText(cr, startText, x4+w1/20, y4+dy/5, w1-x4-(w1/20)*2)
       menus.showText(cr, destinationText, x4+w1/20, y4+2*dy+dy/5, w1-x4-(w1/20)*2)
 
-
-    
 
 if(__name__ == '__main__'):
   d = {'transport':'car'}

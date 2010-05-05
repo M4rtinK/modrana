@@ -77,6 +77,11 @@ class ranaModule:
   def handleResize(self,newW, newH):
     """Handles notification of a window resize (also fullscreen/unfullscreen)"""
     pass
+
+  def handleTextEntryResult(self, key):
+    """Handle a text returned from text input interface"""
+    pass
+
   def shutdown(self):
     """Program is about to shutdown (don't rely solely on this for anything important like saving someone's tracklog!)"""
     pass
