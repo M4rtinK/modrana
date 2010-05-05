@@ -281,7 +281,7 @@ class route(ranaModule):
     except googlemaps.googlemaps.GoogleMapsError, e:
       if e.status == 602: # address/addresses not found
         print "address not found"
-        self.sendMessage('notification:adress/es not found#5')
+        self.sendMessage('notification:adress(es) not found#5')
 
     if directions == None:
       return
