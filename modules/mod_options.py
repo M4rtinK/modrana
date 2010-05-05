@@ -78,12 +78,13 @@ class options(ranaModule):
     self.addOption("Hide main buttons", "hideDelay",
                  [("never","never hide buttons"),
                   ("5","hide buttons after 5 seconds"),
+                  ("10","hide buttons after 10 seconds"),
                   ("15","hide buttons after 15 seconds"),
                   ("30","hide buttons after 30 seconds"),
                   ("60","hide buttons after 1 minute"),
                   ("120", "hide buttons after 2 minutes")],
                    "view",
-                   "never")
+                   "10")
 
     self.addOption("Network (not impl. yet)", "network",
       [("off","No use of network"),
