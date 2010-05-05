@@ -55,6 +55,12 @@ class textEntry(ranaModule):
       dialog.destroy()
 
   def respond(self, result, instance, key):
+    menu = self.m.get('menu', None)
+    if menu:
+        fullscreen = menu.fullscreen
+        if fullscreen:
+          self.mainWindow.get_toplevel().fullscreen()
+
     instance.handleTextEntryResult(key,result)
 
 
@@ -92,6 +98,12 @@ class textEntry(ranaModule):
       (width, height) = dialog.get_size() # get the current size
       (x,y,w,h) = self.get('viewport')
       dialog.resize(w,height) # resize the dialog to the width of the window and leave height the same
+      dialog.set_keep_above(True)
+      menu = self.m.get('menu', None)
+      if menu:
+        fullscreen = menu.fullscreen
+        if fullscreen:
+          self.mainWindow.get_toplevel().unfullscreen()
       dialog.show_all()
 
 

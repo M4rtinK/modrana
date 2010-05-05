@@ -281,7 +281,7 @@ class route(ranaModule):
     except googlemaps.googlemaps.GoogleMapsError, e:
       if e.status == 602: # address/addresses not found
         print "address not found"
-        self.sendMessage('notification:one or both of the adresses were not found#5')
+        self.sendMessage('notification:adress/es not found#5')
 
     if directions == None:
       return
@@ -664,8 +664,8 @@ class route(ranaModule):
       
       menus.drawButton(cr, x4, y4, w1-x4, dy,  "start", "3h", "route:startInput")
       menus.drawButton(cr, x4, y4+2*dy, w1-x4, dy, "destination", "3h", "route:destinationInput")
-      menus.drawButton(cr, x4, y4+dy, (w1-x4)/2, dy, "as start#position", "2h", "route:posToStart")
-      menus.drawButton(cr, x4+(w1-x4)/2, y4+dy, (w1-x4)/2, dy, "as destination#position", "2h", "route:posToDestination")
+      menus.drawButton(cr, x4, y4+dy, (w1-x4)/2, dy, "as start#position", "2h", "route:posToStart|set:needRedraw:True")
+      menus.drawButton(cr, x4+(w1-x4)/2, y4+dy, (w1-x4)/2, dy, "as destination#position", "2h", "route:posToDestination|set:needRedraw:True")
 
 
       if self.startAddress == None:
