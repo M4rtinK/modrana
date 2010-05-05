@@ -89,6 +89,9 @@ class textEntry(ranaModule):
       #add it and show it
       dialog.vbox.pack_end(hbox, True, True, 0)
       self.clearEntry()
+      (width, height) = dialog.get_size() # get the current size
+      (x,y,w,h) = self.get('viewport')
+      dialog.resize(w,height) # resize the dialog to the width of the window and leave height the same
       dialog.show_all()
 
 

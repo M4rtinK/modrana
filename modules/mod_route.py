@@ -221,7 +221,7 @@ class route(ranaModule):
       if self.destinationAddress:
         entryText = self.destinationAddress
 
-      entry.entryBox(self,'destination','Input the start address',entryText)
+      entry.entryBox(self,'destination','Input the destination address',entryText)
 #      self.expectTextEntry = 'destination'
 
     elif(message == 'addressRoute'):
