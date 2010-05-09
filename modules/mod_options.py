@@ -132,6 +132,7 @@ class options(ranaModule):
 #    self.addBoolOption("Old tracklogs", "old_tracklogs", "map", False)
 #    self.addBoolOption("Latest tracklog", "tracklog", "map", True)
 
+    # * online services submenu
     self.addOption("Google local search ordering", "GLSOrdering",
       [("default","ordering from Google"),
        ("distance", "order by distance")
@@ -152,6 +153,11 @@ class options(ranaModule):
        ("False", "dont draw captions")],
        "Online services",
        "True")
+
+    # * online routing submenu
+    self.addBoolOption("Avoid major highways ", "routingAvoidHighways", "Online routing", False)
+
+    self.addBoolOption("Avoid toll roads", "routingAvoidToll", "Online routing", False)
 
     # Add all our categories to the "options" menu
     self.menuModule = self.m.get("menu", None)

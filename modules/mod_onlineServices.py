@@ -122,6 +122,12 @@ class onlineServices(ranaModule):
     '''
     gmap = self.getGmapsInstance()
 
+    otherOptions=""
+    if self.get('routingAvoidHighways', False): # optionally avoid highways
+      otherOptions = otherOptions + 'h'
+    if self.get('routingAvoidToll', False): # optionally avoid toll roads
+      otherOptions = otherOptions + 't'
+
     # respect travel mode
     mode = self.get('mode', None)
     if mode != None:
@@ -133,7 +139,8 @@ class onlineServices(ranaModule):
       elif mode == 'train' or mode == 'bus':
         type = 'r'
 
-      dir = {'dirflg': type}
+      parameters = type + otherOptions # combine type and aother parameters
+      dir = {'dirflg': parameters}  # create a dictionary entry with all current parameters
 
       try:
         directions = gmap.directions(start, destination, dir)
