@@ -160,7 +160,7 @@ class showOSD(ranaModule):
   def drawRouteProfile(self, cr, item):
     """draw a dynamic route profile as a part of the osd"""
     if self.routeProfileData == None:
-      text = "activete a trackglog|to show route profile"
+      text = "activate a trackglog|to show route profile"
       item['font_size'] = 20
       self.drawMultilineTextWidget(cr, item, text)
       return
