@@ -45,18 +45,21 @@ class routeProfile(ranaModule):
     if menuName != 'routeProfile':
       return # we arent the active menu so we dont do anything
     (x1,y1,w,h) = self.get('viewport', None)
-    if w > h:
-      cols = 4
-      rows = 3
-    elif w < h:
-      cols = 3
-      rows = 4
-    elif w == h:
-      cols = 4
-      rows = 4
+#    if w > h:
+#      cols = 4
+#      rows = 3
+#    elif w < h:
+#      cols = 3
+#      rows = 4
+#    elif w == h:
+#      cols = 4
+#      rows = 4
+#
+#    dx = w / cols
+#    dy = h / rows
 
-    dx = w / cols
-    dy = h / rows
+    dx = min(w,h) / 5.0
+    dy = dx
 
     menus = self.m.get("menu",None)
     loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
