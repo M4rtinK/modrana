@@ -34,6 +34,9 @@ class showOSD(ranaModule):
     ranaModule.__init__(self, m, d)
     self.items = None
     self.routeProfileData = None
+    self.nearestPoint = None
+    self.nearestIndex = None
+    self.distanceList = None # sorted distances from current position
 #    self.avail = set(
 #                      'speed'
 #                      )
@@ -56,6 +59,11 @@ class showOSD(ranaModule):
         return
       if 'OSD' in config[mode]:
         items = config[mode]['OSD']
+        # we dont know the nearest poin when refreshing the screen
+        # TODO: dont search for nearest point on every refresh ?
+        self.nearestPoint = None
+        self.nearestIndex = None
+        self.distanceList = None
         for item in items:
           self.drawWidget(cr,items[item],item)
 
@@ -87,6 +95,21 @@ class showOSD(ranaModule):
       self.drawMultilineTextWidget(cr, item, statString)
     elif type == 'route_profile':
       self.drawRouteProfile(cr, item)
+    elif type == 'route_remaining_length':
+      if self.routeProfileData == None:
+        text = "activate a track | to show rem. length"
+        self.drawMultilineTextWidget(cr, item, text)
+        return
+      else:
+        if self.distanceList == None: # was the neerest point already determined ?
+          if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
+            return
+        currentLength = self.routeProfileData[self.nearestIndex][0]
+        remainingLength = self.routeProfileData[-1][0] - currentLength
+      units = self.m.get('units', None) # get the unit conversion module
+      text = "%s from start|" % units.km2CurrentUnitPerHourStringTwoDP(currentLength)
+      text+= "%s to destination" % units.km2CurrentUnitPerHourStringTwoDP(remainingLength)
+      self.drawMultilineTextWidget(cr, item, text)
 
 
   def drawMultilineTextWidget(self,cr ,item ,text=""):
@@ -157,6 +180,31 @@ class showOSD(ranaModule):
 
 # from PyCha.color module
 
+  def findNearestPoint(self):
+    """find the nearest point of the active tracklog(nearest to our position)"""
+    pos = self.get('pos', None)
+    if pos == None:
+      return False
+#    print profile
+
+#    (sx,sy) = proj.screenPos(0.5, 0.5)
+#    (sLat,sLon) = proj.xy2ll(sx, sy)
+
+    (pLat,pLon) = pos
+
+    # list order: distance from pos/screen center, lat, lon, distance from start, elevation
+    distList = [(geo.distance(pLat,pLon,i[2],i[3]),i[2],i[3],i[0],i[1]) for i in self.routeProfileData]
+#    distList.sort()
+
+    l = [k[0] for k in distList] # make a list with only distances to our position
+
+
+    self.nearestIndex = l.index(min(l)) # get index of the shortest distance
+    self.nearestPoint = distList[self.nearestIndex] # get the nearest point
+    self.distanceList = distList
+    return True
+
+
   def drawRouteProfile(self, cr, item):
     """draw a dynamic route profile as a part of the osd"""
     if self.routeProfileData == None:
@@ -182,25 +230,13 @@ class showOSD(ranaModule):
     if 'segment_length' in item:
       segmentLength = float(item['segment_length'])
 
-    pos = self.get('pos', None)
-    if pos == None:
-      return
-#    print profile
+    if self.distanceList == None: # was the neerest point already determined ?
+      if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
+        return
 
-#    (sx,sy) = proj.screenPos(0.5, 0.5)
-#    (sLat,sLon) = proj.xy2ll(sx, sy)
-
-    (pLat,pLon) = pos
-
-    # list order: distance from pos/screen center, lat, lon, distance from start, elevation
-    distList = [(geo.distance(pLat,pLon,i[2],i[3]),i[2],i[3],i[0],i[1]) for i in self.routeProfileData]
-#    distList.sort()
-
-    l = [k[0] for k in distList] # make a list with only distances to our position
-
-
-    nearestIndex = l.index(min(l)) # get index of the shortest distance
-    nearestPoint = distList[nearestIndex] # get the nearest point
+    distList = self.distanceList
+    nearestIndex = self.nearestIndex # get index of the shortest distance
+#    nearestPoint = self.nearestPoint # get the nearest point
 
     # * build the dataset *
 
