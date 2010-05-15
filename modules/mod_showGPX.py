@@ -287,6 +287,7 @@ class showGPX(ranaModule):
       else:
         visibleTracklogs.add(filename)
       self.set('visibleTracklogs', visibleTracklogs)
+      self.set('showTracklog', 'simple')
 
     elif message == 'allVisible':
       m = self.m.get('loadTracklogs', None)
@@ -294,9 +295,11 @@ class showGPX(ranaModule):
         return
       filenames = map(lambda x: x.tracklogFilename, m.tracklogs)
       self.set('visibleTracklogs', set(filenames))
+      self.set('showTracklog', 'simple')
       
     elif message == 'inVisible':
       self.set('visibleTracklogs', set())
+      self.set('showTracklog', None)
 
 
 
