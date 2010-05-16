@@ -191,9 +191,6 @@ class showOSD(ranaModule):
         self.drawText(cr, x, yOffset[i], line)
         i = i + 1
 
-
-
-
   def drawBackground(self, cr, x, y, w, h, source=None):
     cr.set_line_width(2)
     cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
@@ -320,8 +317,11 @@ class showOSD(ranaModule):
 #    cr.stroke()
 #    cr.fill()
 
+    minimum = min(map(lambda x: x[4], profile))
+    maximum = max(map(lambda x: x[4], profile))
+
     self.drawBackgroundExact(cr, x, y, w, h)
-    self.drawLinechart(cr, x, y, w, h, profile)
+    self.drawLinechart(cr, x, y, w, 0.8*h, maximum, minimum, profile)
 
 
     # draw current elevation indicator
@@ -332,8 +332,22 @@ class showOSD(ranaModule):
     cr.stroke()
     cr.fill()
 
+    cr.set_source_rgb(1,1,1)
+    lengthString = '%1.2f km' % segmentLength
+    maxString = "max: %1.0f m" % maximum
+    minString = "min: %1.0f m" % minimum
+    current = "%1.0f m" % self.nearestPoint[4]
 
-  def drawLinechart(self, cr, x, y, w, h, profile):
+    menu = self.m.get('menu', None) # we use a function from this module to draw text
+    menu.drawText(cr, maxString, x, y, w*0.35, 0.15*h)
+    menu.drawText(cr, minString, x+0.63*w, y, w*0.35, 0.15*h)
+    menu.drawText(cr, lengthString, x, y+0.8*h, w*0.45, 0.15*h)
+    cr.set_source_rgb(1,1,0)
+    menu.drawText(cr, current, x+w/1.9, y+0.8*h, w*0.3, 0.15*h)
+
+
+
+  def drawLinechart(self, cr, x, y, w, h, maximum, minimum,profile):
     """draw a linechart, showing a segment of the route"""
 
     w = int(w)
@@ -342,8 +356,8 @@ class showOSD(ranaModule):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
     list = profile
 
-    minimum = min(map(lambda x: x[4], list))
-    maximum = max(map(lambda x: x[4], list))
+#    minimum = min(map(lambda x: x[4], list))
+#    maximum = max(map(lambda x: x[4], list))
 
     lines = tuple(map(lambda x: (x[3], x[4]), list))
 
