@@ -101,6 +101,14 @@ class units(ranaModule):
     else:
       return "miles"
 
+  def currentSpeedUnitToMS(self, currentSpeedUnit):
+    "convert current speed unit to meters per second"
+    unitType = self.get("unitType", "km")
+    if unitType == 'km':
+      return currentSpeedUnit * 0.277778
+    else:
+      return currentSpeedUnit * 0.44704
+
 
 if(__name__ == "__main__"):
   a = example({}, {})

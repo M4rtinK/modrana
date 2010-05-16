@@ -95,6 +95,39 @@ class showOSD(ranaModule):
       self.drawMultilineTextWidget(cr, item, statString)
     elif type == 'route_profile':
       self.drawRouteProfile(cr, item)
+    elif type == 'time_to_start':
+      if self.routeProfileData == None:
+        text = "activate a track | to show time to start"
+        self.drawMultilineTextWidget(cr, item, text)
+        return
+      else:
+        if self.distanceList == None: # was the neerest point already determined ?
+          if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
+            return
+      avgSpeed = self.get('avgSpeed', 0)
+      units = self.m.get('units', None) # get the unit conversion module
+      avgSpeedMPS = units.currentSpeedUnitToMS(avgSpeed)
+      currentLength = (self.routeProfileData[self.nearestIndex][0])*1000 # rem. length in meters
+      timeString = self.timeString(currentLength/avgSpeedMPS)
+      text = 'to start:|%s h:m' % timeString
+      self.drawMultilineTextWidget(cr, item, text)
+    elif type == 'time_to_destination':
+      if self.routeProfileData == None:
+        text = "activate a track | to show time to dest."
+        self.drawMultilineTextWidget(cr, item, text)
+        return
+      else:
+        if self.distanceList == None: # was the neerest point already determined ?
+          if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
+            return
+      avgSpeed = self.get('avgSpeed', 0)
+      units = self.m.get('units', None) # get the unit conversion module
+      avgSpeedMPS = units.currentSpeedUnitToMS(avgSpeed)
+      currentLength = self.routeProfileData[self.nearestIndex][0]
+      remainingLength = (self.routeProfileData[-1][0] - currentLength)*1000 # rem. length in meters
+      timeString = self.timeString(remainingLength/avgSpeedMPS)
+      text = 'to destination|%s h:m' % timeString
+      self.drawMultilineTextWidget(cr, item, text)
     elif type == 'route_remaining_length':
       if self.routeProfileData == None:
         text = "activate a track | to show rem. length"
@@ -105,12 +138,17 @@ class showOSD(ranaModule):
           if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
             return
         currentLength = self.routeProfileData[self.nearestIndex][0]
-        remainingLength = self.routeProfileData[-1][0] - currentLength
+        remainingLength = self.routeProfileData[-1][0] - currentLength #TODO: from actual current position
       units = self.m.get('units', None) # get the unit conversion module
       text = "%s from start|" % units.km2CurrentUnitPerHourStringTwoDP(currentLength)
       text+= "%s to destination" % units.km2CurrentUnitPerHourStringTwoDP(remainingLength)
       self.drawMultilineTextWidget(cr, item, text)
 
+  def timeString(self, seconds):
+    """convert seconds to h:m:s string"""
+    minutes,seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    return '%02d:%02d' % (hours,minutes)
 
   def drawMultilineTextWidget(self,cr ,item ,text=""):
     if 'px' and 'py' in item:
