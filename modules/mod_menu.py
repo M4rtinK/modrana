@@ -737,6 +737,7 @@ class menus(ranaModule):
       self.set('editBatchMenuActive', True)
     elif(message == 'screenClicked'):
       self.lastActivity = int(time.time())
+      self.set('needRedraw', True)
     elif(message == 'fullscreenTogle'):
       # toggle fullscreen TODO: automatic fullscreen detection
       if self.fullscreen == True:
