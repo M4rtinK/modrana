@@ -193,6 +193,12 @@ class menus(ranaModule):
     cr.set_font_size(test_fontsize / ratio)
     cr.move_to(x, y + h)
     cr.show_text(text)
+
+  def drawToggleButtonOld(self, cr, x1, y1, w, h, textIconAction, index):
+    """draw an automatic togglable icon
+       textActionIcon -> a dictionary of text strings/actions/icons
+    """
+    self.drawButton(cr, x1, y1, w, h, textIconAction[index][0], textIconAction[index][1], textIconAction[index][2])
         
   def drawButton(self, cr, x1, y1, w, h, text='', icon='generic', action=''):
     """Draw a clickable button, with icon image and text"""
@@ -294,10 +300,17 @@ class menus(ranaModule):
         item = menu.get(id, None)
         if(item == None):
           return
-        
+
         # Draw it
-        (text, icon, action) = item
-        self.drawButton(cr, x1+x*dx, y1+y*dy, dx, dy, text, icon, action)
+        type = item[3]
+        if type=='simple':
+          (text, icon, action, type) = item
+          self.drawButton(cr, x1+x*dx, y1+y*dy, dx, dy, text, icon, action)
+        elif type=='toggle':
+          index = item[1]
+          (text, icon, action) = item[0][index]
+          action+='|menu:toggle#%s#%s|set:needRedraw:True' % (menuName,id)
+          self.drawButton(cr, x1+x*dx, y1+y*dy, dx, dy, text, icon, action)
         id += 1
 
   def register(self, menu, type, module):
@@ -320,7 +333,24 @@ class menus(ranaModule):
       i += 1
       if(i > 20):
         print "Menu full, can't add %s" % text
-    self.menus[menu][pos] = (text, icon, action)
+    type = "simple"
+    self.menus[menu][pos] = (text, icon, action, type)
+
+
+  def addToggleItem(self, menu, textIconAction, index=0, pos=None):
+    """
+    add a togglable item to the menu
+    textIconAction is a list of texts icons and actions -> (text,icon,action)
+    """
+    i = 0
+    while(pos == None):
+      if(self.menus[menu].get(i, None) == None):
+        pos = i
+      i += 1
+      if(i > 20):
+        print "Menu full, can't add %s" % text
+    type = 'toggle'
+    self.menus[menu][pos] = (textIconAction, index, None, type)
 
   def setupProfile(self):
     self.clearMenu('data2', "set:menu:main")
@@ -503,6 +533,7 @@ class menus(ranaModule):
     self.addItem('main', 'mode', 'transport', 'set:menu:transport')
     self.addItem('main', 'centre', 'centre', 'toggle:centred|set:menu:None')
     self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManager')
+    self.addItem('main', 'log a track', 'generic', 'set:menu:tracklog')
     self.addItem('main', 'fullscreen', 'fullscreen', 'menu:fullscreenTogle|set:menu:None')
     self.setupTransportMenu()
     self.setupSearchMenus()
@@ -663,6 +694,46 @@ class menus(ranaModule):
     text = boxTextLines
     self.drawTextToSquare(cr, x4, y4, w4, h4, text) # display the text in the box
 
+  def drawSixPlusOneMenu(self, cr, menuName, parent, fiveButtons, box):
+    """draw a three plus on menu
+    + support for toggle buttons"""
+    (e1,e2,e3,e4,alloc) = self.threePlusOneMenuCoords()
+    (x1,y1) = e1
+    (x2,y2) = e2
+    (x3,y3) = e3
+    (x4,y4) = e4
+    (w,h,dx,dy) = alloc
+
+
+
+    """button: (index,[[text1,icon1,action1],..,[textN,iconN,actionN]])"""
+
+    (boxTextLines, boxAction) = box
+
+    # * draw "escape" button
+    self.drawButton(cr, x1, y1, dx, dy, "", "up", "%s:reset|set:menu:%s" % (menuName, parent))
+    # * draw the first button
+    self.drawToggleButtonOld(cr, x2, y2, dx, dy, fiveButtons[0][0],fiveButtons[0][1])
+    # * draw the second button
+    self.drawToggleButtonOld(cr, x3, y3, dx, dy, fiveButtons[1][0],fiveButtons[1][1])
+    # * draw the third button
+    self.drawToggleButtonOld(cr, x4, y4, dx, dy, fiveButtons[2][0],fiveButtons[2][1])
+    # * draw the fourth button
+    self.drawToggleButtonOld(cr, x4+dx, y4, dx, dy, fiveButtons[3][0],fiveButtons[3][1])
+    # * draw the fifth button
+    self.drawToggleButtonOld(cr, x4+2*dx, y4, dx, dy, fiveButtons[4][0],fiveButtons[4][1])
+
+    # * draw info box
+    w4 = w - x4
+    h4 = h - (y4+dy)
+    self.drawButton(cr, x4, y4+dy, w4, h4, "", "box480", boxAction)
+    # * draw text to the box
+    text = boxTextLines
+    self.drawTextToSquare(cr, x4, y4+dy, w4, h4, text) # display the text in the box
+
+
+
+
   def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
     if(text):
       cr.set_font_size(fontsize)
@@ -729,6 +800,8 @@ class menus(ranaModule):
     self.userConfig = self.m.get('config', None).userConfig
 
   def handleMessage(self, message):
+    messageList = message.split('#')
+    message = messageList[0]
     if (message == "rebootDataMenu"):
       self.setupDataMenu() # we are returning from the batch menu, data menu needs to be "rebooted"
       self.set('editBatchMenuActive', False)
@@ -748,6 +821,17 @@ class menus(ranaModule):
         self.mainWindow.get_toplevel().fullscreen()
         self.fullscreen = True
         print "going to fullscreen"
+    elif(message == 'toggle' and len(messageList) >= 3):
+      # toggle a button
+      menu = messageList[1]
+      pos = int(messageList[2])
+      (textIconAction, currentIndex, notUsed, type) = self.menus[menu][pos]
+      maxIndex = len(textIconAction) # maxIndex => number of toggle values
+      newIndex = (currentIndex + 1)%maxIndex # make the index ovelap
+      # create a new tuple with updated index
+      # TODO: maybe use a list instead of a tupple ?
+      self.menus[menu][pos] = (textIconAction, newIndex, notUsed, type)
+
     
 if(__name__ == "__main__"):
   a = menus({},{'viewport':(0,0,600,800)})

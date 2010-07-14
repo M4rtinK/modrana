@@ -35,6 +35,18 @@ def simplePythagoreanDistance(x1, y1, x2, y2):
   dy = y2 - y1
   return sqrt(dx**2 + dy**2)
 
+def combinedistance(pointList):
+  """return combined distance for a list of ordered points
+  NOTE: not tested yet !!"""
+  combinedDistance = 0
+  (lat1,lon1) = pointList[0]
+  for point in pointList[1:]:
+    (lat2,lon2) = point
+    combinedDistance+=distance(lat1, lon1, lat2, lon2)
+    (lat1,lon1) = (lat2,lon2)
+  return combinedDistance
+
+
 def bearing(lat1,lon1,lat2,lon2):
   """Bearing from one point to another in degrees (0-360)"""
   dLat = lat2-lat1

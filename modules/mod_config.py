@@ -101,7 +101,7 @@ class config(ranaModule):
 
     tilePath = 'cache/images'
 
-    tracklogFolder = 'tracklogs'
+    tracklogFolder = 'tracklogs/'
 
     try:
       config = ConfigObj(path)

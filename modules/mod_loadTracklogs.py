@@ -137,7 +137,7 @@ class loadTracklogs(ranaModule):
     newTracklog.append(trackpoints)
     xmlTree = newTracklog.export_gpx_file()
 
-    timeString = strftime("%Y%b%d#%H-%M-%S", gmtime())
+    timeString = strftime("%Y%m%d#%H-%M-%S", gmtime())
     folder = self.tracklogFolder
     # gdr = Google Directions Result, TODO: alternate prefixes when we have more routing providers
     name = name.encode('ascii', 'ignore')
