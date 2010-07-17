@@ -82,7 +82,7 @@ class tracklog(ranaModule):
     elif message == "stopLogging":
       print "stopping the logging"
       self.stopLogging()
-
+      
     elif message == "setNewLoggingInterval":
       print "setting new log interval"
       self.logInterval=int(self.get('tracklogLogInterval', 1))
@@ -188,9 +188,19 @@ class tracklog(ranaModule):
 
   def stopLogging(self):
       self.saveLogIncrement()
+      path = self.currentLogPath
       self.clean()
       self.loggingEnabled = False
       self.startButtonIndex=0
+      # now we make the tracklog manager aware, that there is a new log
+      loadTl = self.m.get('loadTracklogs', None)
+      if loadTl:
+        # we also set the correct cathegory ('log')
+        loadTl.setTracklogPathCathegory(path, 'log')
+        # refresh the list of available tracklogs
+        # the list also includes info abotut the category
+        # therefore we set the cathegory first
+        loadTl.listAvailableTracklogs()
 
 
   def clean(self):

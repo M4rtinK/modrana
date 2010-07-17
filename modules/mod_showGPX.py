@@ -84,6 +84,9 @@ class showGPX(ranaModule):
     # find what tracklogs are not loaded and load them
     notLoaded = filter(lambda x: x not in loadedTracklogs.keys(), visibleTracklogs)
     if notLoaded:
+      # remove possible nonexitant tracks from the not loaded tracks
+      self.removeNonexistentTracks(notLoaded)
+      # load the existing not loaded tracks
       loadTl.loadPathList(notLoaded)
 
     for path in visibleTracklogs:
@@ -99,6 +102,35 @@ class showGPX(ranaModule):
 
       if self.get('debugSquares', None) == True:
         self.drawDebugSquares(cr, GPXTracklog)
+
+  def removeNonexistentTracks(self, tracks):
+    """remove tracks that dont exist,
+       both from "tracks" and the persistent list,
+       then return the tracks that do exist """
+    loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
+    if loadTl:
+      # do we know which tracks exist ?
+      if loadTl.tracklogPathList == None:
+        # look what tracklogs are available
+        loadTl.listAvailableTracklogs()
+      # look which files exist and which dont
+      nonexistent = filter(lambda x: x not in loadTl.tracklogPathList, tracks)
+      # remove nonexistent treacks:
+      
+      # from the persistent list
+      visibleTracklogs = self.get('visibleTracklogs', set())
+      visibleTracklogs = filter(lambda x: x not in nonexistent, visibleTracklogs)
+      self.set('visibleTracklogs', visibleTracklogs)
+
+      # from the input list
+      tracks = filter(lambda x: x not in nonexistent, tracks)
+
+      # return the existing tracks
+      return tracks
+
+
+
+
 
   def point(self, cr, x, y):
     s = 10 #default 2
@@ -281,7 +313,7 @@ class showGPX(ranaModule):
       if path in visibleTracklogs:
         visibleTracklogs.discard(path)
       else:
-        visibleTracklogs.add(path)
+        visibleTracklogs.append(path)
       self.set('visibleTracklogs', visibleTracklogs)
       self.set('showTracklog', 'simple')
 

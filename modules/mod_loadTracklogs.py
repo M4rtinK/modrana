@@ -74,11 +74,11 @@ class loadTracklogs(ranaModule):
             print "not loading cache (already loaded)"
           # Second, try to load the tracklog (if its not loaded)
 
-            try:
-              self.loadTracklog(path)
-              "tracklog successfully loaded"
-            except:
-              "loading tracklog failed: %s" % path
+          try:
+            self.loadTracklog(path)
+            print "tracklog successfully loaded"
+          except:
+            print "loading tracklog failed: %s" % path
 
           # Third, assure consistency of the cache
           print "assuring cache consistency"
@@ -134,8 +134,13 @@ class loadTracklogs(ranaModule):
     path = self.tracklogList[index]['path']
     return path
 
+  def setTracklogPathCathegory(self,path,cathegory):
+    catData = self.get('tracklogPathCathegory', {})
+    catData[path] = cathegory
+    self.set('tracklogPathCathegory', catData)
 
   def listAvailableTracklogs(self):
+    print "** making a list of available tracklogs"
     files = []
     if os.path.exists(self.tracklogFolder):
       files = os.listdir(self.tracklogFolder)
@@ -144,7 +149,7 @@ class loadTracklogs(ranaModule):
       newFiles = []
       pathList = []
       for file in files:
-        path = self.tracklogFolder +'/'+file
+        path = self.tracklogFolder + file
         filename = file
         lastModifiedEpochSecs = os.path.getmtime(path)
         lastModified = strftime("%d.%m.%Y %H:%M:%S",gmtime(lastModifiedEpochSecs))
@@ -160,7 +165,6 @@ class loadTracklogs(ranaModule):
           catData[path] = 'misc'
           cat = 'misc'
 
-
         item={'path':path,
               'filename':filename,
               'lastModified':lastModified,
@@ -172,7 +176,6 @@ class loadTracklogs(ranaModule):
         newFiles.append(item)
         pathList.append(path)
 
-      print "** making a list of available tracklogs"
       print "*  using this tracklog folder:"
       print self.tracklogFolder
       print "*  does it exist ?"
@@ -182,26 +185,6 @@ class loadTracklogs(ranaModule):
       self.tracklogPathList = pathList
       self.tracklogList = newFiles
       self.set('tracklogPathCathegory', catData)
-
-      # check if there are any uncathegorized tracklogs
-#      catData = self.get('tracklogPathCathegory', {})
-#      catTracks = catData.keys()
-#      uncatTracks = filter(lambda x: x not in catTracks, pathList)
-#      if uncatTracks != []:
-#        # we cathegorize the uncat. tracks
-#        for path in uncatTracks:
-#          catData.append({path:'misc'})
-#        # save then new cathegory list to the persistent dictionary
-#        self.set('tracklogPathCathegory', catData)
-
-      return newFiles
-#      for file in files:
-#        try:
-#          self.loadTracklog(self.tracklogFolder + file)
-#        except:
-#          "loading tracklog failed: %s" % file
-    else:
-      return([])
 
   # from:
   # http://www.5dollarwhitebox.org/drupal/node/84
@@ -283,29 +266,29 @@ class loadTracklogs(ranaModule):
     self.sendMessage('notification:%d tracks loaded in %1.2f ms#1' % (count, elapsed) )
 
 
-  def loadTracklog(self, filename, notify=True):
+  def loadTracklog(self, path, notify=True):
     """load a GPX file to datastructure"""
     if self.cache == {}:
       self.loadCache()
     if self.tracklogList == None:
       self.listAvailableTracklogs()
     start = clock()
-    self.filename = filename
-    file = open(filename, 'r')
+    self.filename = path
+    file = open(path, 'r')
 
     if notify:
-      self.sendMessage('notification:loading %s#1' % filename)
+      self.sendMessage('notification:loading %s#1' % path)
 
     if(file): # TODO: add handling of other than GPX files
       track = gpx.Trackpoints() # create new Trackpoints object
       track.import_locations(file) # load a gpx file into it
       file.close()
-      self.tracklogs[filename] = (GPXTracklog(track, filename, self.cache, self.save))
+      self.tracklogs[path] = (GPXTracklog(track, path, self.cache, self.save))
 
     else:
       print "No file"
 
-    print "Loading %s took %1.2f ms" % (filename,(1000 * (clock() - start)))
+    print "Loading %s took %1.2f ms" % (path,(1000 * (clock() - start)))
     if notify:
       self.sendMessage('notification:loaded in %1.2f ms' % (1000 * (clock() - start)))
 
@@ -320,11 +303,16 @@ class loadTracklogs(ranaModule):
     folder = self.tracklogFolder
     # gdr = Google Directions Result, TODO: alternate prefixes when we have more routing providers
     name = name.encode('ascii', 'ignore')
-    filename = "" + folder + "/gdr_" + name + timeString + ".gpx"
-    f = open(filename, 'w') # TODO: handle the exception that occurs when there is not tracklog folder :)
+    path = "" + folder + "gdr_" + name + timeString + ".gpx"
+    f = open(path, 'w') # TODO: handle the exception that occurs when there is not tracklog folder :)
     xmlTree.write(f)
     f.close()
-    self.loadTracklog(filename)
+    
+    self.setTracklogPathCathegory(path, 'online')
+    self.listAvailableTracklogs()
+    index = self.tracklogPathList.index(path)
+    self.set('activeTracklog', index)
+    # TODO: incremental addition of new tracklogs
 
 
 

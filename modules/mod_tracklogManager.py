@@ -30,12 +30,15 @@ class tracklogManager(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.scroll = 0
-    self.tracklogList = None
+    self.currentNumItems = 0
     self.LTModule = None
     self.cathegoriesSetUp = False
 
   def firstTime(self):
     self.LTModule = self.m.get('loadTracklogs', None)
+    # we dont know what tracklogs are awailable yet
+    # but we dont need that to setup the cathegories menu
+    self.setupCathegoriesMenu()
 
 
     
@@ -51,9 +54,10 @@ class tracklogManager(ranaModule):
         self.scroll -= 1
         self.set("needRedraw", True)
     if(message == "down"):
-      print "down"
-      self.scroll += 1
-      self.set("needRedraw", True)
+      if (self.scroll + 1) < self.currentNumItems:
+        print "down"
+        self.scroll += 1
+        self.set("needRedraw", True)
     if(message == "reset"):
       self.scroll = 0
       self.set("needRedraw", True)
@@ -128,17 +132,16 @@ class tracklogManager(ranaModule):
       return # we arent the active menu so we dont do anything
 
     if menuName == 'tracklogManagerCathegories':
-      print "cathegories"
       if not self.cathegoriesSetUp:
         self.setupCathegoriesMenu()
         self.cathegoriesSetUp = True
 
     elif menuName == 'tracklogManager':
-      if self.tracklogList == None:
-        # looks if there are any tracklogs in the tracklog folder
-        if self.LTModule:
-          # list available tracklogs
-          self.tracklogList = self.LTModule.listAvailableTracklogs()
+      # are there any tracklogs in the tracklog folder ?
+      if self.LTModule.tracklogList == None:
+        # list available tracklogs
+        self.LTModule.listAvailableTracklogs()
+
       menus = self.m.get("menu",None)
 
       # * draw "escape" button
@@ -149,12 +152,14 @@ class tracklogManager(ranaModule):
       menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % self.moduleName)
 
       cathegory = self.get('currentTracCat', 'misc')
-      list = filter(lambda x: x['cat'] == cathegory, self.tracklogList)
+      print cathegory
+      list = filter(lambda x: x['cat'] == cathegory, self.LTModule.tracklogList)
 
       # One option per row
       for row in (0,1,2):
         index = self.scroll + row
         numItems = len(list)
+        self.currentNumItems = numItems
         if(0 <= index < numItems):
 
           (text1,text2,onClick) = self.describeTracklog(list[index], cathegory)
@@ -234,7 +239,11 @@ class tracklogManager(ranaModule):
 
   def getActiveTracklog(self):
     path = self.LTModule.getActiveTracklogPath()
+    if path not in self.LTModule.tracklogs:
+      self.LTModule.loadTracklog(path)
+      self.LTModule.save()
     return self.LTModule.tracklogs[path]
+
 
   def describeTracklog(self, item, category):
     # describe a tracklog item

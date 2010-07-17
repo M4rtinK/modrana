@@ -314,14 +314,6 @@ class route(ranaModule):
     if destinationAddress:
       self.destinationAddress = destinationAddress
 
-  def sendMessage(self,message):
-    m = self.m.get("messages", None)
-    if(m != None):
-      print "mapData: Sending message: " + message
-      m.routeMessage(message)
-    else:
-      print "mapData: No message handler, cant send message."
-
   def update(self):
     self.set('num_updates', self.get('num_updates', 0) + 1)
 
