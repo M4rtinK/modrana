@@ -91,6 +91,21 @@ class tracklog(ranaModule):
       print "setting new save interval"
       self.saveInterval=int(self.get('tracklogSaveInterval', 10))
 
+    elif(message == 'nameInput'):
+      entry = self.m.get('textEntry', None)
+      if entry == None:
+        return
+      entryText = ""
+      logNameEntry = self.get('logNameEntry', None)
+      if logNameEntry:
+        entryText = logNameEntry
+      entry.entryBox(self ,'logNameEntry','Write tracklog name',entryText)
+#      self.expectTextEntry = 'start'
+
+
+  def handleTextEntryResult(self, key, result):
+    if key == 'logNameEntry':
+      self.set('logNameEntry', result)
 
 #  def saveMinimal(self, filename):
 #    try:
@@ -184,6 +199,9 @@ class tracklog(ranaModule):
     """generate a unique name for a log"""
     timeString = time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
     prefix = "log"
+    logNameEntry = self.get('logNameEntry', None)
+    if logNameEntry:
+      prefix = logNameEntry
     return prefix + "_" + timeString
 
   def stopLogging(self):
@@ -379,7 +397,7 @@ class tracklog(ranaModule):
                   ], self.startButtonIndex ],
                   [ [["stop", "stop", "tracklog:stopLogging"]], 0 ],
                   [ [["split", "generic", "set:menu:showPOIDetail"]], 0 ],
-                  [ [["rename", "generic", "set:menu:showPOIDetail"]], 0 ],
+                  [ [["name#enter", "generic", "tracklog:nameInput"]], 0 ],
                   [ [["tools", "generic", "set:menu:tracklogTools"]], 0 ],
                   ]
 
@@ -392,7 +410,12 @@ class tracklog(ranaModule):
       else:
         text+= "logging is OFF"
 
-      text+= "||logging interval %d s, saving every %d s" % (self.logInterval, self.saveInterval)
+      if not self.loggingEnabled:
+        text+= "||%s" % self.generateLogName()
+      else:
+        text+= "||%s" % self.currentLogName
+
+      text+= "|||logging interval %d s, saving every %d s" % (self.logInterval, self.saveInterval)
       if self.loggingStartTimestamp:
         elapsedSeconds = (int(time.time()) - self.loggingStartTimestamp)
         text+= "|elapsed time: %s" % time.strftime('%H:%M:%S', time.gmtime(elapsedSeconds))
