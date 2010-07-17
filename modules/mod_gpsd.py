@@ -262,7 +262,17 @@ class gpsd2(ranaModule):
           self.set('metersPerSecSpeed', None)
           self.set('speed', None)
              
-        self.satellites()
+#        self.satellites()
+
+        elevation = self.elevation()
+        if elevation:
+          self.set('elevation', elevation)
+        else:
+          self.set('elevation', None)
+
+
+
+
         #print(self.get('pos', None))
         #print(time())
 

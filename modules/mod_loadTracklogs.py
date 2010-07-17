@@ -36,23 +36,55 @@ class loadTracklogs(ranaModule):
   
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
-    self.tracklogs = [] # this list will store the object representing tracklists
+    self.tracklogs = {} # dictionary of all loaded tracklogs, path is the key
     #self.set('tracklogs', self.tracklogs) # now we make the list easily acessible to other modules
     self.cachePath = 'cache/tracklogs/tracklog_cache.txt'
     self.cache = {}
     self.tracklogFolder = 'tracklogs/'
+    self.tracklogList = None
+    self.tracklogPathList = None
+    self.tracklogFilenameList = None
 
   def firstTime(self):
     folder = self.get('tracklogFolder', 'tracklogs/')
-
-    print folder
 
     if folder != None:
       self.tracklogFolder = folder
     else:
       self.tracklogFolder = 'tracklogs/'
 
-    self.load()
+#    self.load()
+
+  def handleMessage(self, message):
+    if message == 'loadActive':
+      # load the active tracklog
+      index = int(self.get('activeTracklog', None))
+      if index != None and self.tracklogList:
+        activeTracklog = self.tracklogList[index]
+        filename = activeTracklog['filename']
+        path = activeTracklog['path']
+        print "loading tracklog: %s" % filename
+
+        # Zeroeth, is the tracklog already loaded ?
+        if path not in self.tracklogs.keys():
+          # First, is the cache loaded ?
+          if self.cache == {}:
+            self.loadCache()
+          else:
+            print "not loading cache (already loaded)"
+          # Second, try to load the tracklog (if its not loaded)
+
+            try:
+              self.loadTracklog(path)
+              "tracklog successfully loaded"
+            except:
+              "loading tracklog failed: %s" % path
+
+          # Third, assure consistency of the cache
+          print "assuring cache consistency"
+          self.save()
+          self.cleanCache()
+          print "cache consistency assured"
 
 
   def update(self):
@@ -60,47 +92,168 @@ class loadTracklogs(ranaModule):
     self.set('num_updates', self.get('num_updates', 0) + 1)
     #print "Updated %d times" % (self.get('num_updates'))
 
-  def load(self):
+  def loadCache(self):
+    # unpickle the cache from file
+    print "loading cache"
     start = clock()
-
     try:
       f = open(self.cachePath, 'r')
-      cache = cPickle.load(f)
-
-      self.cache = cache
+      self.cache = cPickle.load(f)
     except:
       print "loadTracklogs: loading cache from file failed"
       self.cache = {}
+    print "Loading cache took %1.2f ms" % (1000 * (clock() - start))
 
-    print "Loading from cache took %1.2f ms" % (1000 * (clock() - start))
-
-    files = []
-    if os.path.exists(self.tracklogFolder):
-      files = os.listdir(self.tracklogFolder)
-      files = filter(lambda x: x != '.svn', files)
-
-      
-      print self.tracklogFolder
-      print os.path.exists(self.tracklogFolder)
-      for file in files:
-        try:
-          self.loadTracklog(self.tracklogFolder + file)
-        except:
-          "loading tracklog failed: %s" % file
-      
-    self.cleanCache(files)
-    self.save()
-    print "Loading tracklogs took %1.2f ms" % (1000 * (clock() - start))
-
-  def cleanCache(self, files):
+  def cleanCache(self):
     """remove files that are not present from the cache"""
-    filenames = map(lambda x: 'tracklogs/'+x, files)
-
-    garbage = filter(lambda x: x not in filenames, self.cache)
+    paths = [x['path'] for x in self.tracklogList]
+    garbage = filter(lambda x: x not in paths, self.cache)
+    print garbage
 
     for g in garbage:
       del self.cache[g]
 
+  def deleteTrackFromCache(self, file):
+    # self explanatory
+    del self.cache[file]
+
+#  def getActiveTracklog(self):
+#    index = int(self.get('activeTracklog', 0))
+#    self.getTracklogForIndex(index)
+#
+#  def getTracklogForIndex(self,index):
+#    path = self.tracklogList[index]['path']
+##    print self.tracklogs
+#    print path
+##    print self.tracklogs[path]
+#    tracklog = self.tracklogs[path]
+#    return tracklog
+
+  def getActiveTracklogPath(self):
+    index = int(self.get('activeTracklog', 0))
+    path = self.tracklogList[index]['path']
+    return path
+
+
+  def listAvailableTracklogs(self):
+    files = []
+    if os.path.exists(self.tracklogFolder):
+      files = os.listdir(self.tracklogFolder)
+      files = filter(lambda x: x != '.svn', files)
+      catData = self.get('tracklogPathCathegory', {})
+      newFiles = []
+      pathList = []
+      for file in files:
+        path = self.tracklogFolder +'/'+file
+        filename = file
+        lastModifiedEpochSecs = os.path.getmtime(path)
+        lastModified = strftime("%d.%m.%Y %H:%M:%S",gmtime(lastModifiedEpochSecs))
+        size = self.convertBytes(os.path.getsize(path))
+        splitFilename = filename.split('.')
+        extension = ""
+        if len(splitFilename)>=2:
+          extension = splitFilename[-1]
+
+        if path in catData:
+          cat = catData[path]
+        else:
+          catData[path] = 'misc'
+          cat = 'misc'
+
+
+        item={'path':path,
+              'filename':filename,
+              'lastModified':lastModified,
+              'size':size,
+              'type':extension,
+              'index':files.index(file),
+              'cat':cat
+               }
+        newFiles.append(item)
+        pathList.append(path)
+
+      print "** making a list of available tracklogs"
+      print "*  using this tracklog folder:"
+      print self.tracklogFolder
+      print "*  does it exist ?"
+      print os.path.exists(self.tracklogFolder)
+      print "*  there are %d tracklogs available" % len(files)
+      self.tracklogFilenameList = files
+      self.tracklogPathList = pathList
+      self.tracklogList = newFiles
+      self.set('tracklogPathCathegory', catData)
+
+      # check if there are any uncathegorized tracklogs
+#      catData = self.get('tracklogPathCathegory', {})
+#      catTracks = catData.keys()
+#      uncatTracks = filter(lambda x: x not in catTracks, pathList)
+#      if uncatTracks != []:
+#        # we cathegorize the uncat. tracks
+#        for path in uncatTracks:
+#          catData.append({path:'misc'})
+#        # save then new cathegory list to the persistent dictionary
+#        self.set('tracklogPathCathegory', catData)
+
+      return newFiles
+#      for file in files:
+#        try:
+#          self.loadTracklog(self.tracklogFolder + file)
+#        except:
+#          "loading tracklog failed: %s" % file
+    else:
+      return([])
+
+  # from:
+  # http://www.5dollarwhitebox.org/drupal/node/84
+  def convertBytes(self, bytes):
+      bytes = float(bytes)
+      if bytes >= 1099511627776:
+          terabytes = bytes / 1099511627776
+          size = '%.2fTB' % terabytes
+      elif bytes >= 1073741824:
+          gigabytes = bytes / 1073741824
+          size = '%.2fGB' % gigabytes
+      elif bytes >= 1048576:
+          megabytes = bytes / 1048576
+          size = '%.2fMB' % megabytes
+      elif bytes >= 1024:
+          kilobytes = bytes / 1024
+          size = '%.2fKB' % kilobytes
+      else:
+          size = '%.2fb' % bytes
+      return size
+
+#  def load(self):
+#    start = clock()
+#
+#    try:
+#      f = open(self.cachePath, 'r')
+#      cache = cPickle.load(f)
+#
+#      self.cache = cache
+#    except:
+#      print "loadTracklogs: loading cache from file failed"
+#      self.cache = {}
+#
+#    print "Loading from cache took %1.2f ms" % (1000 * (clock() - start))
+#
+#    files = []
+#    if os.path.exists(self.tracklogFolder):
+#      files = os.listdir(self.tracklogFolder)
+#      files = filter(lambda x: x != '.svn', files)
+#
+#
+#      print self.tracklogFolder
+#      print os.path.exists(self.tracklogFolder)
+#      for file in files:
+#        try:
+#          self.loadTracklog(self.tracklogFolder + file)
+#        except:
+#          "loading tracklog failed: %s" % file
+#
+#    self.cleanCache(files)
+#    self.save()
+#    print "Loading tracklogs took %1.2f ms" % (1000 * (clock() - start))
 
   def save(self):
     try:
@@ -112,23 +265,49 @@ class loadTracklogs(ranaModule):
 
 #  def saveClusters(self, clusters):
 
+  def loadPathList(self, pathList):
+    print "loading path list"
+    start = clock()
+    count = len(pathList)
+    index = 1
+    self.sendMessage('notification:loading %d tracklogs#1' % count)
+    for path in pathList:
+      self.loadTracklog(path, False)
+      self.sendMessage('notification:%d of %d loaded#1' % (index, count))
+      index = index + 1
 
-  def loadTracklog(self, filename):
+    elapsed = (1000 * (clock() - start))
+    print "Loading tracklogs took %1.2f ms" % elapsed
+    self.save()
+    self.cleanCache()
+    self.sendMessage('notification:%d tracks loaded in %1.2f ms#1' % (count, elapsed) )
+
+
+  def loadTracklog(self, filename, notify=True):
     """load a GPX file to datastructure"""
+    if self.cache == {}:
+      self.loadCache()
+    if self.tracklogList == None:
+      self.listAvailableTracklogs()
     start = clock()
     self.filename = filename
     file = open(filename, 'r')
+
+    if notify:
+      self.sendMessage('notification:loading %s#1' % filename)
 
     if(file): # TODO: add handling of other than GPX files
       track = gpx.Trackpoints() # create new Trackpoints object
       track.import_locations(file) # load a gpx file into it
       file.close()
-      self.tracklogs.append(GPXTracklog(track, filename, self.cache, self.save))
+      self.tracklogs[filename] = (GPXTracklog(track, filename, self.cache, self.save))
 
     else:
       print "No file"
 
     print "Loading %s took %1.2f ms" % (filename,(1000 * (clock() - start)))
+    if notify:
+      self.sendMessage('notification:loaded in %1.2f ms' % (1000 * (clock() - start)))
 
   def storeRoute(self, route, name=""):
     """store a route, found by Google Directions to a GPX file, then load this file to tracklogs list"""
@@ -245,7 +424,6 @@ class GPXTracklog(tracklog):
 
     self.perElevList = None
 
-
     if filename in cache:
       print "loading from cache"
       self.clusters = cache[filename].clusters
@@ -255,7 +433,7 @@ class GPXTracklog(tracklog):
       self.perElevList = cache[filename].perElevList
       
     else:
-      print "creating clusters,routeInfo and perElevLisst: %s" % filename
+      print "creating clusters,routeInfo and perElevList: %s" % filename
       clusterDistance = 5 # cluster points to clusters about 5 kilometers in diameter
       self.clusters = []
 
@@ -273,6 +451,7 @@ class GPXTracklog(tracklog):
 
       ci = CacheItem(self.clusters, self.routeInfo, self.perElevList)
       cache[filename] = ci
+      
 
 #    self.checkElevation()
 #

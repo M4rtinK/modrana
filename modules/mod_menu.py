@@ -308,7 +308,14 @@ class menus(ranaModule):
           self.drawButton(cr, x1+x*dx, y1+y*dy, dx, dy, text, icon, action)
         elif type=='toggle':
           index = item[1]
-          (text, icon, action) = item[0][index]
+          toggleCount = len(item[0])
+          nextIndex = (index + 1)%toggleCount
+          # like this, text and corresponding actions can be written on a single line
+          # eq: "save every 3 s", "nice icon", "set:saveInterval:3s"
+          text = item[0][index][0]
+          icon = item[0][nextIndex][1]
+          action = item[0][nextIndex][2]
+
           action+='|menu:toggle#%s#%s|set:needRedraw:True' % (menuName,id)
           self.drawButton(cr, x1+x*dx, y1+y*dy, dx, dy, text, icon, action)
         id += 1
@@ -337,7 +344,7 @@ class menus(ranaModule):
     self.menus[menu][pos] = (text, icon, action, type)
 
 
-  def addToggleItem(self, menu, textIconAction, index=0, pos=None):
+  def addToggleItem(self, menu, textIconAction, index=0, pos=None, uniqueName=None):
     """
     add a togglable item to the menu
     textIconAction is a list of texts icons and actions -> (text,icon,action)
@@ -350,7 +357,21 @@ class menus(ranaModule):
       if(i > 20):
         print "Menu full, can't add %s" % text
     type = 'toggle'
-    self.menus[menu][pos] = (textIconAction, index, None, type)
+    if uniqueName:
+      perzist = self.get('persistentToggleButtons', None)
+      if perzist == None:
+        self.set('persistentToggleButtons', {})
+        perzist = {}
+
+      if uniqueName in perzist:
+        index = perzist[uniqueName]
+      else:
+        perzist[uniqueName] = index
+        self.set('persistentToggleButtons', perzist)
+
+
+
+    self.menus[menu][pos] = (textIconAction, index, uniqueName, type)
 
   def setupProfile(self):
     self.clearMenu('data2', "set:menu:main")
@@ -532,7 +553,7 @@ class menus(ranaModule):
     self.addItem('main', 'download', 'generic', 'set:menu:data')
     self.addItem('main', 'mode', 'transport', 'set:menu:transport')
     self.addItem('main', 'centre', 'centre', 'toggle:centred|set:menu:None')
-    self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManager')
+    self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManagerCathegories')
     self.addItem('main', 'log a track', 'generic', 'set:menu:tracklog')
     self.addItem('main', 'fullscreen', 'fullscreen', 'menu:fullscreenTogle|set:menu:None')
     self.setupTransportMenu()
@@ -825,12 +846,20 @@ class menus(ranaModule):
       # toggle a button
       menu = messageList[1]
       pos = int(messageList[2])
-      (textIconAction, currentIndex, notUsed, type) = self.menus[menu][pos]
+      (textIconAction, currentIndex, uniqueName, type) = self.menus[menu][pos]
       maxIndex = len(textIconAction) # maxIndex => number of toggle values
       newIndex = (currentIndex + 1)%maxIndex # make the index ovelap
       # create a new tuple with updated index
       # TODO: maybe use a list instead of a tupple ?
-      self.menus[menu][pos] = (textIconAction, newIndex, notUsed, type)
+
+      if uniqueName:
+        perzist = self.get('persistentToggleButtons', None)
+        if perzist and uniqueName in perzist:
+          perzist[uniqueName] = newIndex
+          self.set('persistentToggleButtons', perzist)
+
+      self.set(uniqueName, newIndex)
+      self.menus[menu][pos] = (textIconAction, newIndex, uniqueName, type)
 
     
 if(__name__ == "__main__"):

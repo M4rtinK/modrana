@@ -286,11 +286,8 @@ class mapTiles(ranaModule):
     layerType = layerInfo.get('type','png')
     layerPrefix = layerInfo.get('folderPrefix','OSM')
 
-#    filename = "%s/%s.%s" % (self.tileFolder, name, layerType)
     filename = self.tileFolder + (self.imagePath(x,y,z,layerPrefix, layerType))
 
-#    tangoStylePath = '/home/melf-san/Maps/'
-#    filename = tangoStylePath + (self.imagePath(x,y,z,layerPrefix, layerType))
     if(os.path.exists(filename)):
 #      if(layerType == 'jpg'):
       """The method using pixbufs seems to be MUCH faster for jpegs and pngs alike.
@@ -329,7 +326,11 @@ class mapTiles(ranaModule):
       return(name)
 
     # Image not found anywhere - resort to downloading it
-    if(self.get('threadedDownload',True)):
+
+    # Are we allowed to download it ? (network=='full')
+    if(self.get('network','full')=='full'):
+      # use threads
+#      if(self.get('threadedDownload',True)):
       folder = self.tileFolder + self.imageFolder(x, z, layerPrefix) # target folder
       if not os.path.exists(folder): # does it exist ?
         try:
@@ -339,9 +340,11 @@ class mapTiles(ranaModule):
       self.threads[name] = self.tileLoader(x,y,z,layer,filename, self)
       self.threads[name].start()
       return(None)
-    else:
-      downloadTile(x,y,z,layer,filename)
-      return(name)
+      # serial download
+#      else:
+#        print filenam
+#        downloadTile(x,y,z,layer,filename)
+#        return(name)
 
   def imageName(self,x,y,z,layer):
     """Get a unique name for a tile image 
@@ -360,7 +363,6 @@ class mapTiles(ranaModule):
 
   def imageY(z,extension):
     return (('%d.%s') % (z, extension))
-
 
   def layers(self):
     return(maplayers)

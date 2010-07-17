@@ -86,12 +86,19 @@ class options(ranaModule):
                    "view",
                    "10")
 
-    self.addOption("Network (not impl. yet)", "network",
-      [("off","No use of network"),
-       ("minimal", "Only for important data"),
+    self.addOption("Network", "network",
+#      [("off","No use of network"),
+      [("minimal", "Only for important data"),
        ("full", "Unlimited use of network")],
        "network",
-       "off")
+       "full")
+
+#    self.addOption("Network", "threadedDownload",
+##      [("off","No use of network"),
+#      [("True", "Use threads for download"),
+#       ("False", "Dont use threads for download")],
+#       "network",
+#       "on")
 
     self.addBoolOption("Logging", "logging", "logging", True)
     options = []

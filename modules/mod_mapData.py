@@ -82,8 +82,6 @@ class mapData(ranaModule):
     """
     print "Checking if there are duplicated tiles"
     start = clock()
-
-
 #    self.currentTilesToGet = tilesToDownload # this is for displaying the tiles for debugging reasons
     tileFolder = self.get('tileFolder', None) # where should we store the downloaded tiles
     layer = self.get('layer', None) # TODO: manual layer setting

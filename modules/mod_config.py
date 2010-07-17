@@ -119,10 +119,11 @@ class config(ranaModule):
             if 'tile_folder' in devSpecific:
               tilePath = devSpecific['tile_folder']
 
-    except:
+    except Exception, e:
       print "config: loading user_config.conf failed"
       print "config: check the syntax"
       print "config: and if the config file is present in the main directory"
+      print "config: this happended:\n%s\nconfig: thats all" % e
 
     self.setTileFolder(tilePath)
     print "** using tracklog folder: %s **" % tracklogFolder

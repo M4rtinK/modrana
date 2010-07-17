@@ -19,6 +19,7 @@
 #----------------------------------------------------------------------------
 from base_module import ranaModule
 import cairo
+import gtk
 import os
 
 def getModule(m,d):
@@ -33,12 +34,21 @@ class icons(ranaModule):
     self.load('blank')
     self.load('generic')
     
-  def load(self,name):
+  def load(self,name,w=None,h=None):
+#    if name=='start':
+#      print (w, h)
+#      pixbuf = gtk.gdk.pixbuf_new_from_file_at_size('icons/bitmap/start.svg',w,h)
+#      image = cairo.ImageSurface(0,w,h)
+#      ct = cairo.Context(image)
+#      ct2 = gtk.gdk.CairoContext(ct)
+#      ct2.set_source_pixbuf(pixbuf,0,0)
+#      ct2.paint()
+#    else:
     filename = "icons/bitmap/%s.png" % name
     if(not os.path.exists(filename)):
       print "Can't load %s" % filename
       return(0)
-    
+
     image = cairo.ImageSurface.create_from_png(filename) #TODO: improve this by the pixbuff method ?
     if(not image):
       return(0)
@@ -51,7 +61,7 @@ class icons(ranaModule):
     if not name in self.images.keys():
       if(name in self.cantLoad):
         name = 'generic'
-      elif(not self.load(name)):
+      elif(not self.load(name,w,h)):
         self.cantLoad.append(name)
         name='generic'
         

@@ -34,8 +34,6 @@ class showGPX(ranaModule):
     ranaModule.__init__(self, m, d)
     self.linewidth = 7 #with of the line denoting GPX tracks
 
-  
-
   def drawMapOverlay(self, cr):
     """get a file, load it and display it on the map"""
     proj = self.m.get('projection', None)
@@ -78,16 +76,18 @@ class showGPX(ranaModule):
 #    self.point(cr, px2, py2)
 #    cr.stroke()
 #    cr.fill()
-    loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
-    loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
 
     visibleTracklogs = self.get('visibleTracklogs', set())
+    loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
+    loadedTracklogs = loadTl.tracklogs # get list of all loaded tracklogs
 
-    visibleTracklogs = filter(lambda x: x.tracklogName in visibleTracklogs, loadedTracklogs)
-    visibleIndexes = map(lambda x: loadedTracklogs.index(x), visibleTracklogs)
+    # find what tracklogs are not loaded and load them
+    notLoaded = filter(lambda x: x not in loadedTracklogs.keys(), visibleTracklogs)
+    if notLoaded:
+      loadTl.loadPathList(notLoaded)
 
-    for i in visibleIndexes: # we draw all loaded tracklogs by default
-      GPXTracklog = loadedTracklogs[i]
+    for path in visibleTracklogs:
+      GPXTracklog = loadedTracklogs[path]
       if self.get('showTracklog', None) == 'simple':
         self.drawSimpleTrack(cr, GPXTracklog)
 
@@ -266,11 +266,6 @@ class showGPX(ranaModule):
     else:
       return x
 
-
-
-
-
-    
   def update(self):
     # Get and set functions are used to access global data
     self.set('num_updates', self.get('num_updates', 0) + 1)
@@ -278,33 +273,29 @@ class showGPX(ranaModule):
 
   def handleMessage(self, message):
     if message == "toggleVisible":
-      filename = self.get('showTrackFilename', None)
-      if filename == None:
+      loadTl = self.m.get('loadTracklogs', None)
+      if loadTl == None:
         return
+      path = loadTl.getActiveTracklogPath()
       visibleTracklogs = self.get('visibleTracklogs', set())
-      if filename in visibleTracklogs:
-        visibleTracklogs.discard(filename)
+      if path in visibleTracklogs:
+        visibleTracklogs.discard(path)
       else:
-        visibleTracklogs.add(filename)
+        visibleTracklogs.add(path)
       self.set('visibleTracklogs', visibleTracklogs)
       self.set('showTracklog', 'simple')
 
     elif message == 'allVisible':
-      m = self.m.get('loadTracklogs', None)
-      if m == None:
+      loadTl = self.m.get('loadTracklogs', None)
+      if loadTl == None:
         return
-      filenames = map(lambda x: x.tracklogFilename, m.tracklogs)
-      self.set('visibleTracklogs', set(filenames))
+      paths = [x['path'] for x in loadTl.tracklogList]
+      self.set('visibleTracklogs', paths)
       self.set('showTracklog', 'simple')
       
     elif message == 'inVisible':
       self.set('visibleTracklogs', set())
       self.set('showTracklog', None)
-
-
-
-
-
 
 if(__name__ == "__main__"):
   a = example({}, {})

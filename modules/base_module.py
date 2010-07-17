@@ -82,6 +82,14 @@ class ranaModule:
     """Handle a text returned from text input interface"""
     pass
 
+  def sendMessage(self,message):
+    m = self.m.get("messages", None)
+    if(m != None):
+      print "Sending message: " + message
+      m.routeMessage(message)
+    else:
+      print "No message handler, cant send message."
+
   def shutdown(self):
     """Program is about to shutdown (don't rely solely on this for anything important like saving someone's tracklog!)"""
     pass

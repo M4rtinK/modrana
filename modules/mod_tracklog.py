@@ -83,6 +83,14 @@ class tracklog(ranaModule):
       print "stopping the logging"
       self.stopLogging()
 
+    elif message == "setNewLoggingInterval":
+      print "setting new log interval"
+      self.logInterval=int(self.get('tracklogLogInterval', 1))
+
+    elif message == "setNewSavingInterval":
+      print "setting new save interval"
+      self.saveInterval=int(self.get('tracklogSaveInterval', 10))
+
 
 #  def saveMinimal(self, filename):
 #    try:
@@ -121,7 +129,6 @@ class tracklog(ranaModule):
           (lat2,lon2) = currentCoords
           self.distance+=geo.distance(lat1,lon1,lat2,lon2)
           self.lastCoords = currentCoords
-        print self.distance
 
       if (currentTimestamp - self.lastSavedTimestamp)>self.saveInterval:
         print "saving log increment"
@@ -163,7 +170,6 @@ class tracklog(ranaModule):
   def saveLogIncrement(self):
     """save current log increment
     TODO: support for more log types"""
-    print self.currentLogGPX
     newTrackpoints = map(lambda x: gpx.Trackpoint(x[0],x[1]), self.currentTempLog)
 
     if len(self.currentLogGPX)==0:
@@ -173,7 +179,6 @@ class tracklog(ranaModule):
     self.saveGPXLog(self.currentLogGPX, self.currentLogPath)
     #the current temporary log segment has been saved to disk, we can empty it
     self.currentTempLog = []
-    print self.currentLogGPX[0]
 
   def generateLogName(self):
     """generate a unique name for a log"""
@@ -256,7 +261,6 @@ class tracklog(ranaModule):
   def point(self, cr, x, y):
     s = 2 #default 2
     cr.rectangle(x-s,y-s,2*s,2*s)
-    #print(x,y)
 
   def line(self, cr, x, y):
     """ draws a line from xb*yb to xe*ye """
@@ -286,13 +290,53 @@ class tracklog(ranaModule):
     menus = self.m.get('menu', None)
     if menus:
       # add the buttons
+
+      # * escape button
       menus.clearMenu('tracklogTools', "set:menu:tracklog")
+
+      # * logging interval button
+
+      baseAction = '|tracklog:setNewLoggingInterval'
       textIconAction = [
-                        ('state1', 'icon1', 'menu:hi1'),
-                        ('state2', 'icon2', 'menu:hi2'),
-                        ('state3', 'icon3', 'menu:hi3')
+                        ('1 s#log every', '', 'set:tracklogLogInterval:1'+baseAction),
+                        ('2 s#log every', '', 'set:tracklogLogInterval:2'+baseAction),
+                        ('5 s#log every', '', 'set:tracklogLogInterval:5'+baseAction),
+                        ('10 s#log every', '', 'set:tracklogLogInterval10:'+baseAction),
+                        ('20 s#log every', '', 'set:tracklogLogInterval:20'+baseAction),
+                        ('30 s#log every', '', 'set:tracklogLogInterval:30'+baseAction),
+                        ('1 min#log every', '', 'set:tracklogLogInterval:60'+baseAction),
+                        ('2 min#log every', '', 'set:tracklogLogInterval:120'+baseAction)
                         ]
-      menus.addToggleItem('tracklogTools', textIconAction, 0)
+      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsLogInterval')
+      
+      # * saving interval button
+      baseAction = '|tracklog:setNewSavingInterval'
+      textIconAction = [
+                        ('10 s#save every', '', 'set:tracklogSaveInterval:10'+baseAction),
+                        ('20 s#save every', '', 'set:tracklogSaveInterval:20'+baseAction),
+                        ('30 s#save every', '', 'set:tracklogSaveInterval:30'+baseAction),
+                        ('1 min#save every', '', 'set:tracklogSaveInterval:60'+baseAction),
+                        ('2 min s#save every', '', 'set:tracklogSaveInterval:120'+baseAction),
+                        ('5 min s#save every', '', 'set:tracklogSaveInterval:300'+baseAction),
+                        ('10 min s#save every', '', 'set:tracklogSaveInterval:600'+baseAction)
+                        ]
+      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsSaveInterval')
+
+      # * elevation toggle
+      textIconAction = [
+                        ('OFF #elevation', '', 'set:tracklogLogElevation:False'),
+                        ('ON #elevation', '', 'set:tracklogLogElevation:True')
+                        ]
+      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsElevation')
+
+      # * time toggle
+      textIconAction = [
+                  ('OFF #time', '', 'set:tracklogLogeTime:False'),
+                  ('ON #time', '', 'set:tracklogLogTime:True')
+                  ]
+      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsTime')
+
+
 
 
   def drawMenu(self, cr, menuName):
@@ -320,10 +364,10 @@ class tracklog(ranaModule):
 
       fiveButtons=[
                   [ [
-                    ["start", "generic", "tracklog:incrementStartIndex|tracklog:startLogging|set:needRedraw:True"],
-                    ["pause", "generic", "tracklog:incrementStartIndex|tracklog:pauseLogging|set:needRedraw:True"]
+                    ["start", "start", "tracklog:incrementStartIndex|tracklog:startLogging|set:needRedraw:True"],
+                    ["pause", "pause", "tracklog:incrementStartIndex|tracklog:pauseLogging|set:needRedraw:True"]
                   ], self.startButtonIndex ],
-                  [ [["stop", "generic", "tracklog:stopLogging"]], 0 ],
+                  [ [["stop", "stop", "tracklog:stopLogging"]], 0 ],
                   [ [["split", "generic", "set:menu:showPOIDetail"]], 0 ],
                   [ [["rename", "generic", "set:menu:showPOIDetail"]], 0 ],
                   [ [["tools", "generic", "set:menu:tracklogTools"]], 0 ],
@@ -338,9 +382,10 @@ class tracklog(ranaModule):
       else:
         text+= "logging is OFF"
 
-      text+= "||logging interval %ds, saving every %ds" % (self.logInterval, self.saveInterval)
+      text+= "||logging interval %d s, saving every %d s" % (self.logInterval, self.saveInterval)
       if self.loggingStartTimestamp:
-        text+= "|elapsed time %ds" % (int(time.time()) - self.loggingStartTimestamp)
+        elapsedSeconds = (int(time.time()) - self.loggingStartTimestamp)
+        text+= "|elapsed time: %s" % time.strftime('%H:%M:%S', time.gmtime(elapsedSeconds))
 
       currentSpeed = self.get('speed',0)
       if currentSpeed:

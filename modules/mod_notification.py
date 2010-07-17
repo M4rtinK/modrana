@@ -39,7 +39,7 @@ class notification(ranaModule):
 #    # Get and set functions are used to access global data
 #    self.set('num_updates', self.get('num_updates', 0) + 1)
 #    #print "Updated %d times" % (self.get('num_updates'))
-    pass
+    self.set('num_updates', self.get('num_updates', 0) + 1)
 
   def handleMessage(self, message):
     """the first part is the message, that will be displayed,
@@ -54,7 +54,7 @@ class notification(ranaModule):
       try:
         timeout = int(list[1]) # override the default timeout
       except:
-        print "notification: wron timeout, using default 5 secconds"
+        print "notification: wrong timeout, using default 5 secconds"
     self.expirationTimestamp = time.time() + timeout
 
 
