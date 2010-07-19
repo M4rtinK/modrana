@@ -93,6 +93,14 @@ class tracklogManager(ranaModule):
     elif message == 'unLoadTrackProfile':
       self.m.get('showOSD', None).routeProfileData = None
 
+    elif message == 'askDeleteActiveTracklog':
+      ask = self.m.get('askMenu', None)
+      path = self.LTModule.getActiveTracklogPath()
+      question = "do you really want to delete:|%s|?" % path
+      yesAction = "tracklogManager:deleteActiveTracklog|set:menu:tracklogManager"
+      noAction = "set:menu:tracklogInfo"
+      ask.setupAskYesNo(question, yesAction, noAction)
+
     elif message == 'deleteActiveTracklog':
       path = self.LTModule.getActiveTracklogPath()
       if path:
@@ -252,7 +260,7 @@ class tracklogManager(ranaModule):
       menus.addItem('tracklogTools', 'inactive#set', 'generic', 'set:currentTrack:None|tracklogManager:unLoadTrackProfile|set:menu:None')
       menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogInfo')
       menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogInfo')
-      menus.addItem('tracklogTools', 'tracklog#delete', 'generic', 'tracklogManager:deleteActiveTracklog|set:menu:tracklogManager')
+      menus.addItem('tracklogTools', 'tracklog#delete', 'generic', 'tracklogManager:askDeleteActiveTracklog')
 
 
 #      online = self.m.get('onlineServices', None)

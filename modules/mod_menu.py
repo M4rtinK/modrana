@@ -584,6 +584,27 @@ class menus(ranaModule):
       self.showText(cr, line, x+border, y+i*lineSpace+1*spacing, w-2*border)
       i = i + 1
 
+  def drawThreeItemHorizontalMenu(self, cr, first, second, third):
+    """draw a menu, that consists from three horizontal buttons
+       this is mostly intended for asking YES/NO questions
+       the three parameters are tupples, like this:
+       (text,icon,action)"""
+    (x1,y1,w,h) = self.get('viewport', None)
+#    dx = w1
+    dy = h/3
+
+    # portrait and landscape are the same, in this case
+    self.drawButton(cr, x1, y1, w, dy, '', first[1], first[2])
+    self.drawTextToSquare(cr, x1, y1, w, dy, first[0])
+
+    self.drawButton(cr, x1, y1+dy, w, dy, '', second[1], second[2])
+    self.drawTextToSquare(cr, x1, y1+dy, w, dy, second[0])
+    
+    self.drawButton(cr, x1, y1+2*dy, w, dy, '', third[1], third[2])
+    self.drawTextToSquare(cr, x1, y1+2*dy, w, dy, third[0])
+
+
+
   def threePlusOneMenuCoords(self):
     """
     get element coordinates for a menu,

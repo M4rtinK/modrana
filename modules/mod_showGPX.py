@@ -311,9 +311,9 @@ class showGPX(ranaModule):
       path = loadTl.getActiveTracklogPath()
       visibleTracklogs = self.get('visibleTracklogs', set())
       if path in visibleTracklogs:
-        visibleTracklogs.discard(path)
+        visibleTracklogs.remove(path)
       else:
-        visibleTracklogs.append(path)
+        visibleTracklogs.add(path)
       self.set('visibleTracklogs', visibleTracklogs)
       self.set('showTracklog', 'simple')
 
@@ -322,7 +322,7 @@ class showGPX(ranaModule):
       if loadTl == None:
         return
       paths = [x['path'] for x in loadTl.tracklogList]
-      self.set('visibleTracklogs', paths)
+      self.set('visibleTracklogs', set(paths))
       self.set('showTracklog', 'simple')
       
     elif message == 'inVisible':
