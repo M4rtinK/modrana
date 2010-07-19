@@ -320,8 +320,8 @@ class loadTracklogs(ranaModule):
     xmlTree.write(f)
     f.close()
     
-    self.setTracklogPathCathegory(path, 'online')
     self.listAvailableTracklogs()
+    self.setTracklogPathCathegory(path, 'online')
     index = self.tracklogPathList.index(path)
     self.set('activeTracklog', index)
     # TODO: incremental addition of new tracklogs
