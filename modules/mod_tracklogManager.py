@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from gpod.gpod import LT_OBJDIR
 from base_module import ranaModule
 import math
 import os
