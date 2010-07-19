@@ -129,6 +129,13 @@ class loadTracklogs(ranaModule):
 #    tracklog = self.tracklogs[path]
 #    return tracklog
 
+  def getIndexForPath(self,path):
+    """get index for the tracklog with corresponding path
+       from the main tracklog lists"""
+       
+    return self.tracklogPathList.index(path)
+
+
   def getActiveTracklogPath(self):
     index = int(self.get('activeTracklog', 0))
     path = self.tracklogList[index]['path']
@@ -137,7 +144,12 @@ class loadTracklogs(ranaModule):
   def setTracklogPathCathegory(self,path,cathegory):
     catData = self.get('tracklogPathCathegory', {})
     catData[path] = cathegory
+    # update the persistent list
     self.set('tracklogPathCathegory', catData)
+
+    index = self.getIndexForPath(path)
+    # update the current in memmory list
+    self.tracklogList[index]['cat'] = cathegory
 
   def listAvailableTracklogs(self):
     print "** making a list of available tracklogs"

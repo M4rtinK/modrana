@@ -83,7 +83,7 @@ class tracklogManager(ranaModule):
 
     elif message == 'loadTrackProfile':
       # get the data needed for drawing the dynamic route profile in the osd
-      filename = self.get('currentTrack', None)
+#      filename = self.get('currentTrack', None)
 #      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
 #      loadedTracklogs = loadTl.tracklogs
 #      track = filter(lambda x: x.tracklogFilename == filename, loadedTracklogs).pop()
@@ -106,6 +106,15 @@ class tracklogManager(ranaModule):
       if path:
         self.deleteTracklog(path)
         self.set('activeTracklog', None)
+
+    elif message == 'setActiveTracklogToCurrentCat':
+      path = self.LTModule.getActiveTracklogPath()
+      currentCathegory = self.get('currentTracCat', None)
+      if currentCathegory:
+        print "changing cathegory for:"
+        print "%s" % path
+        print "to: %s" % currentCathegory
+        self.LTModule.setTracklogPathCathegory(path, currentCathegory)
 
 
   def deleteTracklog(self, path):
@@ -137,14 +146,26 @@ class tracklogManager(ranaModule):
     cathegories = self.get('tracklogCathegories', None)
     if cathegories == None:
       cathegories = self.setDefaultCathegories()
-    menu = 'tracklogManagerCathegories'
 
+    # setup the cathegory dashboard
+    menu = 'tracklogManagerCathegories'
+    nextAction = '|set:menu:tracklogManager'
     menus.clearMenu(menu, "set:menu:main")
     for cathegory in cathegories:
       catId = cathegory[0]
       text = cathegory[1]
       icon = cathegory[2]
-      menus.addItem(menu, text, icon, "set:currentTracCat:%s|set:menu:tracklogManager" % catId)
+      menus.addItem(menu, text, icon, "set:currentTracCat:%s" % catId + nextAction)
+
+    # setup the set cathegory menu
+    menu = 'tracklogSetCathegory'
+    nextAction = '|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogInfo'
+    menus.clearMenu(menu, "|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogInfo")
+    for cathegory in cathegories:
+      catId = cathegory[0]
+      text = cathegory[1]
+      icon = cathegory[2]
+      menus.addItem(menu, text, icon, "set:currentTracCat:%s" % catId + nextAction)
 
   def drawMenu(self, cr, menuName):
     # is this menu the correct menu ?
@@ -181,7 +202,6 @@ class tracklogManager(ranaModule):
       menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % self.moduleName)
 
       cathegory = self.get('currentTracCat', 'misc')
-      print cathegory
       list = filter(lambda x: x['cat'] == cathegory, self.LTModule.tracklogList)
 
       # One option per row
@@ -260,6 +280,7 @@ class tracklogManager(ranaModule):
       menus.addItem('tracklogTools', 'inactive#set', 'generic', 'set:currentTrack:None|tracklogManager:unLoadTrackProfile|set:menu:None')
       menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogInfo')
       menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogInfo')
+      menus.addItem('tracklogTools', 'cathegory#set', 'generic', 'set:menu:tracklogSetCathegory')
       menus.addItem('tracklogTools', 'tracklog#delete', 'generic', 'tracklogManager:askDeleteActiveTracklog')
 
 
