@@ -366,9 +366,6 @@ class tracklog(ranaModule):
       menus.addItem('tracklogTools', 'folder#go to', 'generic', 'set:currentTracCat:log|set:menu:tracklogManager')
 
 
-
-
-
   def drawMenu(self, cr, menuName):
     if menuName == 'tracklog':
       # is the submenu initialized ?

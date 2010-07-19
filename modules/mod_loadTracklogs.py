@@ -326,8 +326,6 @@ class loadTracklogs(ranaModule):
     self.set('activeTracklog', index)
     # TODO: incremental addition of new tracklogs
 
-
-
   def simplePythagoreanDistance(self, x1,y1,x2,y2):
       dx = x2 - x1
       dy = y2 - y1
