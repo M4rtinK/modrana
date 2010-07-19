@@ -94,7 +94,15 @@ class mapTiles(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.images = {}
+    self.imagesQueue = [] #a chronological list of loaded images
     self.threads = {}
+    self.maxImagesInMemmory = 100 # to avoid a memmory leak
+    """ TODO: analyse memmory usage,
+              set approrpiate value,
+              platform dependendt value,
+              user configurable
+    """
+
 #    self.oldZ = None
 #    self.oldThreadCount = None
     self.set('maplayers', maplayers) # export the maplyers definition for use by other modules
@@ -185,6 +193,8 @@ class mapTiles(ranaModule):
     """monitor if the automatic tile downalods finished and then remove them from the dictionary
     (also automagicaly refreshes the screen once new tiles are avalabale, even when not centered)"""
 
+#    print "nr images: %d" % len(self.images)
+    
     if len(self.threads) == 0:
       return
 
@@ -216,7 +226,18 @@ class mapTiles(ranaModule):
 #        self.threads = {}
 #        self.oldThreadCount = len(self.threads)
 #    self.oldThreadCount = len(self.threads)
-    
+
+  def trimCache(self):
+    """to avoid a memmory leak, the maximum size of the image cache is fixed
+       when we reech the maximum size, we start removin images,
+       starting from the oldes ones
+       we remove one image at a time
+       """
+#    print "trimming"
+    first = self.imagesQueue[0]
+    del self.images[first]
+    del self.imagesQueue[0]
+#    print "images queue length:%d" % len(self.imagesQueue)
   
   def drawImage(self,cr, name, x,y):
     """Draw a tile image"""
@@ -313,7 +334,17 @@ class mapTiles(ranaModule):
         ct2.set_source_pixbuf(pixbuf,0,0)
         ct2.paint()
         ''' surface now contains the image in a Cairo surface '''
-        self.images[name] = surface #TODO: remove "old" images from cache (possible memmory leak ?)
+        self.images[name] = surface
+        self.imagesQueue.append(name)
+
+        # check cache size
+        # if there are too many images, delete them
+        if len(self.images) > self.maxImagesInMemmory:
+          self.trimCache()
+
+
+
+
       except:
         print "the tile image is corrupted nad/or there are no tiles for this zoomlevel"
 
@@ -450,7 +481,13 @@ class mapTiles(ranaModule):
       ct2.set_source_pixbuf(pl.get_pixbuf(),0,0)
       ct2.paint()
       ''' surface now contains the image in a Cairo surface '''
-      self.callback.images[name] = surface #TODO: remove "old" images from cache (possible memmory leak ?)
+      self.callback.images[name] = surface
+      self.callback.imagesQueue.append(name)
+      
+      # check cache size
+      # if there are too many images, delete them
+      if len(self.callback.images) > self.callback.maxImagesInMemmory:
+        self.callback.trimCache()
 
       # like this, currupted tiles should not get past the pixbuf loader and be stored
       f = open(filename, 'w') # write the tile to file
