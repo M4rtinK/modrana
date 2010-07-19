@@ -20,6 +20,7 @@
 from gpod.gpod import LT_OBJDIR
 from base_module import ranaModule
 import math
+import os
 
 def getModule(m,d):
   return(tracklogManager(m,d))
@@ -53,16 +54,16 @@ class tracklogManager(ranaModule):
       if(self.scroll > 0):
         self.scroll -= 1
         self.set("needRedraw", True)
-    if(message == "down"):
+    elif(message == "down"):
       if (self.scroll + 1) < self.currentNumItems:
         print "down"
         self.scroll += 1
         self.set("needRedraw", True)
-    if(message == "reset"):
+    elif(message == "reset"):
       self.scroll = 0
       self.set("needRedraw", True)
 
-    if message == 'getElevation':
+    elif message == 'getElevation':
       print "getting elevation info"
       online = self.m.get("onlineServices",None)
 #      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
@@ -80,7 +81,7 @@ class tracklogManager(ranaModule):
       activeTracklog.modified() # make the tracklog update
       activeTracklog.replaceFile() # replace the old tracklog file
 
-    if message == 'loadTrackProfile':
+    elif message == 'loadTrackProfile':
       # get the data needed for drawing the dynamic route profile in the osd
       filename = self.get('currentTrack', None)
 #      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
@@ -89,8 +90,28 @@ class tracklogManager(ranaModule):
       track = self.getActiveTracklog()
       self.m.get('showOSD', None).routeProfileData = track.perElevList
 
-    if message == 'unLoadTrackProfile':
+    elif message == 'unLoadTrackProfile':
       self.m.get('showOSD', None).routeProfileData = None
+
+    elif message == 'deleteActiveTracklog':
+      path = self.LTModule.getActiveTracklogPath()
+      if path:
+        self.deleteTracklog(path)
+        self.set('activeTracklog', None)
+
+
+  def deleteTracklog(self, path):
+    # delete a tracklog
+    print "deleting tracklog:%s" % path
+    # from cache
+    self.LTModule.deleteTrackFromCache(path)
+    # from loaded tracklogs
+    del self.LTModule.tracklogs[path]
+    # delete the tracklog file
+    os.remove(path)
+    
+    # relist all tracklogs
+    self.LTModule.listAvailableTracklogs()
 
   def setDefaultCathegories(self):
     # set a default set of cathegories and return it
@@ -231,6 +252,7 @@ class tracklogManager(ranaModule):
       menus.addItem('tracklogTools', 'inactive#set', 'generic', 'set:currentTrack:None|tracklogManager:unLoadTrackProfile|set:menu:None')
       menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogInfo')
       menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogInfo')
+      menus.addItem('tracklogTools', 'tracklog#delete', 'generic', 'tracklogManager:deleteActiveTracklog|set:menu:tracklogManager')
 
 
 #      online = self.m.get('onlineServices', None)

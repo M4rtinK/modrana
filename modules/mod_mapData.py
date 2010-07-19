@@ -681,7 +681,7 @@ class mapData(ranaModule):
       # * draw "escape" button
       menus.drawButton(cr, x1, y1, dx, dy, "", "up", "menu:rebootDataMenu|set:menu:main")
       # * draw "edit" button
-      menus.drawButton(cr, (x1+w)-2*dx, y1, dx, dy, "edit", "edit", "menu:setupEditBatchMenu|set:menu:editBatch")
+      menus.drawButton(cr, (x1+w)-2*dx, y1, dx, dy, "edit", "tools", "menu:setupEditBatchMenu|set:menu:editBatch")
       # * draw "start" button
       menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "start", "start", "mapData:download")
       # * draw the combined info area and size button (aka "box")

@@ -363,6 +363,8 @@ class tracklog(ranaModule):
                   ('ON #time', '', 'set:tracklogLogTime:True')
                   ]
       menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsTime')
+      menus.addItem('tracklogTools', 'folder#go to', 'generic', 'set:currentTracCat:log|set:menu:tracklogManager')
+
 
 
 
@@ -396,9 +398,9 @@ class tracklog(ranaModule):
                     ["pause", "pause", "tracklog:incrementStartIndex|tracklog:pauseLogging|set:needRedraw:True"]
                   ], self.startButtonIndex ],
                   [ [["stop", "stop", "tracklog:stopLogging"]], 0 ],
-                  [ [["split", "generic", "set:menu:showPOIDetail"]], 0 ],
+                  [ [["split", "split", "tracklog:stopLogging|tracklog:startLogging"]], 0 ],
                   [ [["name#enter", "generic", "tracklog:nameInput"]], 0 ],
-                  [ [["tools", "generic", "set:menu:tracklogTools"]], 0 ],
+                  [ [["tools", "tools", "set:menu:tracklogTools"]], 0 ],
                   ]
 
 
@@ -411,11 +413,11 @@ class tracklog(ranaModule):
         text+= "logging is OFF"
 
       if not self.loggingEnabled:
-        text+= "||%s" % self.generateLogName()
+        text+= "|||%s" % self.generateLogName()
       else:
-        text+= "||%s" % self.currentLogName
+        text+= "|||%s" % self.currentLogName
 
-      text+= "|||logging interval %d s, saving every %d s" % (self.logInterval, self.saveInterval)
+      text+= "||logging interval %d s, saving every %d s" % (self.logInterval, self.saveInterval)
       if self.loggingStartTimestamp:
         elapsedSeconds = (int(time.time()) - self.loggingStartTimestamp)
         text+= "|elapsed time: %s" % time.strftime('%H:%M:%S', time.gmtime(elapsedSeconds))
