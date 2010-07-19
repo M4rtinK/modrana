@@ -496,6 +496,10 @@ class route(ranaModule):
     menus.drawButton(cr, x1-dx, y1, dx, dy, 'start', startIcon, "route:expectStart")
     menus.drawButton(cr, x1, y1-dy, dx, dy, 'end', endIcon, "route:expectEnd")
     menus.drawButton(cr, x1, y1, dx, dy, 'route', "generic_alpha", routingAction)
+
+    if self.route:
+      menus.drawButton(cr, x1-dy, y1-dx, dx, dy, 'info#route', "generic_alpha", 'set:menu:currentRouteBackToMap')
+
     # "flush" cairo operations
     cr.stroke()
     cr.fill()
@@ -560,13 +564,17 @@ class route(ranaModule):
 
 
   def drawMenu(self, cr, menuName):
-    if menuName == 'currentRoute':
+    if menuName == 'currentRoute' or menuName == 'currentRouteBackToMap':
       menus = self.m.get("menu",None)
       if menus == None:
         print "route: no menus module, no menus will be drawn"
         return
 
-      parent = 'route'
+      # if called from the osd menu, go back to map at escape
+      if menuName == 'currentRouteBackToMap':
+        parent = 'None'
+      else:
+        parent = 'route'
 
       if self.route == []:
         action = "set:menu:None"
