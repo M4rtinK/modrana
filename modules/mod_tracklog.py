@@ -73,23 +73,28 @@ class tracklog(ranaModule):
       elif self.loggingEnabled == True & self.loggingPaused == True:
         print "resuming the logging"
         self.loggingPaused = False
+      self.set('needRedraw', True)
 
     elif message == "pauseLogging":
       print "pausing the logging"
       self.saveLogIncrement()
       self.loggingPaused = True
+      self.set('needRedraw', True)
 
     elif message == "stopLogging":
       print "stopping the logging"
       self.stopLogging()
+      self.set('needRedraw', True)
       
     elif message == "setNewLoggingInterval":
       print "setting new log interval"
       self.logInterval=int(self.get('tracklogLogInterval', 1))
+      self.set('needRedraw', True)
 
     elif message == "setNewSavingInterval":
       print "setting new save interval"
       self.saveInterval=int(self.get('tracklogSaveInterval', 10))
+      self.set('needRedraw', True)
 
     elif(message == 'nameInput'):
       entry = self.m.get('textEntry', None)
@@ -100,6 +105,7 @@ class tracklog(ranaModule):
       if logNameEntry:
         entryText = logNameEntry
       entry.entryBox(self ,'logNameEntry','Write tracklog name',entryText)
+      self.set('needRedraw', True)
 #      self.expectTextEntry = 'start'
 
 
@@ -149,6 +155,7 @@ class tracklog(ranaModule):
         print "saving log increment"
         self.saveLogIncrement()
         self.lastSavedTimestamp = currentTimestamp
+        self.set('needRedraw', True)
 
   def initLog(self,type='gpx',name=None):
     """start a new log, zero the apropriate variables, etc."""
@@ -214,11 +221,9 @@ class tracklog(ranaModule):
       loadTl = self.m.get('loadTracklogs', None)
       if loadTl:
         # we also set the correct cathegory ('log')
+        print path
         loadTl.setTracklogPathCathegory(path, 'log')
-        # refresh the list of available tracklogs
-        # the list also includes info abotut the category
-        # therefore we set the cathegory first
-        loadTl.listAvailableTracklogs()
+        # this procedure autorefreshes the list
 
 
   def clean(self):
@@ -432,7 +437,7 @@ class tracklog(ranaModule):
         distanceString = self.units.km2CurrentUnitString(self.distance)
         text+= "||distance traveled %s" % distanceString
 
-      box = (text , "set:menu:showPOIDetail")
+      box = (text , "set:menu:tracklog")
       menus.drawSixPlusOneMenu(cr, menuName, parent, fiveButtons, box)
 
     else:

@@ -33,6 +33,7 @@ class notification(ranaModule):
     self.position = 'middle'
     self.expirationTimestamp = time.time()
     self.draw = False
+    self.redrawn = None
 
     
   def update(self):
@@ -56,6 +57,7 @@ class notification(ranaModule):
       except:
         print "notification: wrong timeout, using default 5 secconds"
     self.expirationTimestamp = time.time() + timeout
+    self.set('needRedraw', True) # make sure the notification is displayed
 
 
   def drawMenu(self,cr,menuName):

@@ -260,7 +260,6 @@ class search(ranaModule):
 #    print loadedTracklogs.index(item)
     action = "set:menu:searchResultsItem"
     action += "|set:searchResultsItemNr:%d" % list[index][2] # here we use the ABSOLUTE index, not the relative one
-#    action += "|set:activeTracklog:%d|set:menu:tracklogInfo" % list['responseData']['results'][item]['titleNoFormatting']
 #    action += "|set:menu:"
 #    name = item.getTracklogName().split('/').pop()
 

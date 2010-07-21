@@ -712,10 +712,10 @@ class mapData(ranaModule):
       print tracks
 
       def describeTracklog(index, category, tracks):
-
+        """describe a tracklog list item"""
         track = tracks[index]
 
-        action = "set:activeTracklog:%d|loadTracklogs:loadActive" % index
+        action = "set:activeTracklogPath:%s|loadTracklogs:loadActive" % track['path']
 
         status = self.get('editBatchMenuActive', False)
         if status == True:

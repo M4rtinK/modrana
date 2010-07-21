@@ -65,10 +65,7 @@ class tracklogManager(ranaModule):
     elif message == 'getElevation':
       print "getting elevation info"
       online = self.m.get("onlineServices",None)
-#      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
-#      loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
-#      index = int(self.get('activeTracklog', 0)) # get the active tracklog
-      activeTracklog = self.getActiveTracklog()
+      activeTracklog = self.LTModule.getActiveTracklog()
       # generate a list of (lat,lon) tupples
       latLonList = map(lambda x: (x.latitude,x.longitude), activeTracklog.trackpointsList[0])
       # this method returns (lat,lon, elev) tupples, where the elev comes from an online service
@@ -86,7 +83,7 @@ class tracklogManager(ranaModule):
 #      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
 #      loadedTracklogs = loadTl.tracklogs
 #      track = filter(lambda x: x.tracklogFilename == filename, loadedTracklogs).pop()
-      track = self.getActiveTracklog()
+      track = self.LTModule.getActiveTracklog()
       self.m.get('showOSD', None).routeProfileData = track.perElevList
 
     elif message == 'unLoadTrackProfile':
@@ -104,7 +101,7 @@ class tracklogManager(ranaModule):
       path = self.LTModule.getActiveTracklogPath()
       if path:
         self.deleteTracklog(path)
-        self.set('activeTracklog', None)
+        self.set('activeTracklogPath', None)
 
     elif message == 'setActiveTracklogToCurrentCat':
       path = self.LTModule.getActiveTracklogPath()
@@ -239,7 +236,7 @@ class tracklogManager(ranaModule):
 
     elif menuName == 'tracklogInfo':
       menus = self.m.get("menu",None)
-      track = self.getActiveTracklog()
+      track = self.LTModule.getActiveTracklog()
       profile = self.m.get('routeProfile', None)
 
       w = w1 - (x4-x1)
@@ -283,23 +280,10 @@ class tracklogManager(ranaModule):
       menus.addItem('tracklogTools', 'tracklog#delete', 'generic', 'tracklogManager:askDeleteActiveTracklog')
 
 
-#      online = self.m.get('onlineServices', None)
-#      online.getGmapsInstance()
-
-
-  def getActiveTracklog(self):
-    path = self.LTModule.getActiveTracklogPath()
-    if path not in self.LTModule.tracklogs:
-      self.LTModule.loadTracklog(path)
-      self.LTModule.save()
-    return self.LTModule.tracklogs[path]
-
-
   def describeTracklog(self, item, category):
     # describe a tracklog item
     action = ""
-    action += "set:activeTracklog:%s|loadTracklogs:loadActive|set:menu:tracklogInfo" % item['index']
-#    action += "|set:menu:poi"
+    action += "set:activeTracklogPath:%s|loadTracklogs:loadActive|set:menu:tracklogInfo" % item['path']
     name = item['filename']
     description = 'type: ' + item['type'] + '   size:' + item['size'] + '   last modified:' + item['lastModified']
 

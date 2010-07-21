@@ -197,10 +197,7 @@ class route(ranaModule):
         print "route: the route is empty, so it will not be stored"
         return
 
-      loadTracklogs.storeRoute(self.route) # TODO: rewrite this when we support more routing providers
-
-      length = len(loadTracklogs.tracklogs)
-      self.set('activeTracklog', "%d" % (length-1)) # jump to the new tracklog
+      loadTracklogs.storeRouteAndSetActive(self.route, '', 'online') # TODO: rewrite this when we support more routing providers
 
 
     elif(message == 'startInput'):
@@ -629,7 +626,7 @@ class route(ranaModule):
       menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
 
       menus.clearMenu('currentRouteTools', "set:menu:currentRoute")
-      menus.addItem('currentRouteTools', 'tracklog#save as', 'generic', 'route:storeRoute|set:menu:tracklogInfo')
+      menus.addItem('currentRouteTools', 'tracklog#save as', 'generic', 'route:storeRoute|set:currentTracCat:online|set:menu:tracklogInfo')
 
     if menuName == "showAdressRoute":
       

@@ -77,7 +77,7 @@ class showGPX(ranaModule):
 #    cr.stroke()
 #    cr.fill()
 
-    visibleTracklogs = self.get('visibleTracklogs', set())
+    visibleTracklogs = set(self.get('visibleTracklogs', set()))
     loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
     loadedTracklogs = loadTl.tracklogs # get list of all loaded tracklogs
 
@@ -118,8 +118,8 @@ class showGPX(ranaModule):
       # remove nonexistent treacks:
       
       # from the persistent list
-      visibleTracklogs = self.get('visibleTracklogs', set())
-      visibleTracklogs = filter(lambda x: x not in nonexistent, visibleTracklogs)
+      visibleTracklogs = set(self.get('visibleTracklogs', set()))
+      visibleTracklogs = set(filter(lambda x: x not in nonexistent, visibleTracklogs))
       self.set('visibleTracklogs', visibleTracklogs)
 
       # from the input list

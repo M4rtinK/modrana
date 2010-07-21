@@ -107,8 +107,11 @@ class showOSD(ranaModule):
       avgSpeed = self.get('avgSpeed', 0)
       units = self.m.get('units', None) # get the unit conversion module
       avgSpeedMPS = units.currentSpeedUnitToMS(avgSpeed)
-      currentLength = (self.routeProfileData[self.nearestIndex][0])*1000 # rem. length in meters
-      timeString = self.timeString(currentLength/avgSpeedMPS)
+      currentLength = (self.routeProfileData[self.nearestIndex][0])*1000.0 # rem. length in meters
+      if avgSpeedMPS == 0 or avgSpeedMPS == 0.0:
+        timeString = "start moving"
+      else:
+        timeString = self.timeString(currentLength/avgSpeedMPS)
       text = 'to start:|%s h:m' % timeString
       self.drawMultilineTextWidget(cr, item, text)
     elif type == 'time_to_destination':
@@ -125,7 +128,10 @@ class showOSD(ranaModule):
       avgSpeedMPS = units.currentSpeedUnitToMS(avgSpeed)
       currentLength = self.routeProfileData[self.nearestIndex][0]
       remainingLength = (self.routeProfileData[-1][0] - currentLength)*1000 # rem. length in meters
-      timeString = self.timeString(remainingLength/avgSpeedMPS)
+      if avgSpeedMPS == 0 or avgSpeedMPS == 0.0:
+        timeString = "start moving"
+      else:
+        timeString = self.timeString(remainingLength/avgSpeedMPS)
       text = 'to destination|%s h:m' % timeString
       self.drawMultilineTextWidget(cr, item, text)
     elif type == 'route_remaining_length':
@@ -243,7 +249,7 @@ class showOSD(ranaModule):
   def drawRouteProfile(self, cr, item):
     """draw a dynamic route profile as a part of the osd"""
     if self.routeProfileData == None:
-      text = "activate a trackglog|to show route profile"
+      text = "activate a tracklog|to show route profile"
       item['font_size'] = 20
       self.drawMultilineTextWidget(cr, item, text)
       return

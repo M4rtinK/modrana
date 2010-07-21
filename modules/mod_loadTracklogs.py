@@ -58,12 +58,9 @@ class loadTracklogs(ranaModule):
   def handleMessage(self, message):
     if message == 'loadActive':
       # load the active tracklog
-      index = int(self.get('activeTracklog', None))
-      if index != None and self.tracklogList:
-        activeTracklog = self.tracklogList[index]
-        filename = activeTracklog['filename']
-        path = activeTracklog['path']
-        print "loading tracklog: %s" % filename
+      path = self.get('activeTracklogPath', None)
+      if path != None and self.tracklogList:
+        print "loading tracklog: %s" % path
 
         # Zeroeth, is the tracklog already loaded ?
         if path not in self.tracklogs.keys():
@@ -106,7 +103,7 @@ class loadTracklogs(ranaModule):
 
   def cleanCache(self):
     """remove files that are not present from the cache"""
-    paths = [x['path'] for x in self.tracklogList]
+    paths = self.tracklogPathList
     garbage = filter(lambda x: x not in paths, self.cache)
     print garbage
 
@@ -115,10 +112,15 @@ class loadTracklogs(ranaModule):
 
   def deleteTrackFromCache(self, file):
     # self explanatory
-    del self.cache[file]
+    if file in self.cache:
+      del self.cache[file]
 
   def getActiveTracklog(self):
     path = self.getActiveTracklogPath()
+    # is the tracklog loaded ?
+    if path not in self.tracklogs.keys():
+      self.loadTracklog(path)
+      self.save()
     return self.tracklogs[path]
 #
 #  def getTracklogForIndex(self,index):
@@ -144,11 +146,19 @@ class loadTracklogs(ranaModule):
 
 
   def getActiveTracklogPath(self):
-    index = int(self.get('activeTracklog', 0))
-    path = self.tracklogList[index]['path']
+    path = self.get('activeTracklogPath', None)
     return path
 
   def setTracklogPathCathegory(self,path,cathegory):
+    """set a cathegory for tracklog identified by path"""
+    # does the path/tracklog exist ?
+    if path not in self.tracklogPathList:
+      # we try to reload the tracklog list
+      self.listAvailableTracklogs()
+      if path not in self.tracklogPathList:
+        return # tracklog does not exist, so we return
+
+    # tracklog exists so we can set its cathegory
     catData = self.get('tracklogPathCathegory', {})
     catData[path] = cathegory
     # update the persistent list
@@ -267,6 +277,9 @@ class loadTracklogs(ranaModule):
 
 #  def saveClusters(self, clusters):
 
+  def setPathAsActiveTracklog(self):
+    pass
+
   def loadPathList(self, pathList):
     print "loading path list"
     start = clock()
@@ -293,7 +306,13 @@ class loadTracklogs(ranaModule):
       self.listAvailableTracklogs()
     start = clock()
     self.filename = path
-    file = open(path, 'r')
+
+    file = None
+
+    try:
+      file = open(path, 'r')
+    except:
+      print "loading tracklo failed: %s" % path
 
     if notify:
       self.sendMessage('notification:loading %s#1' % path)
@@ -311,7 +330,11 @@ class loadTracklogs(ranaModule):
     if notify:
       self.sendMessage('notification:loaded in %1.2f ms' % (1000 * (clock() - start)))
 
-  def storeRoute(self, route, name=""):
+  def storeRouteAndSetActive(self, route, name='', cat='misc'):
+    path = self.storeRoute(route, name, cat)
+    self.set('activeTracklogPath', path)
+
+  def storeRoute(self, route, name="", cat='misc'):
     """store a route, found by Google Directions to a GPX file, then load this file to tracklogs list"""
     newTracklog = gpx.Trackpoints()
     trackpoints = map(lambda x: gpx.Trackpoint(x[0],x[1]), route)
@@ -328,9 +351,8 @@ class loadTracklogs(ranaModule):
     f.close()
     
     self.listAvailableTracklogs()
-    self.setTracklogPathCathegory(path, 'online')
-    index = self.tracklogPathList.index(path)
-    self.set('activeTracklog', index)
+    self.setTracklogPathCathegory(path, cat)
+    return path
     # TODO: incremental addition of new tracklogs
 
   def simplePythagoreanDistance(self, x1,y1,x2,y2):
