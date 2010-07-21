@@ -350,18 +350,18 @@ class tracklog(ranaModule):
                         ]
       menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsSaveInterval')
 
-      # * elevation toggle
-      textIconAction = [
-                        ('OFF #elevation', '', 'set:tracklogLogElevation:False'),
-                        ('ON #elevation', '', 'set:tracklogLogElevation:True')
-                        ]
-      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsElevation')
-
-      # * time toggle
-      textIconAction = [
-                  ('OFF #time', '', 'set:tracklogLogeTime:False'),
-                  ('ON #time', '', 'set:tracklogLogTime:True')
-                  ]
+#      # * elevation toggle
+#      textIconAction = [
+#                        ('OFF #elevation', '', 'set:tracklogLogElevation:False'),
+#                        ('ON #elevation', '', 'set:tracklogLogElevation:True')
+#                        ]
+#      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsElevation')
+#
+#      # * time toggle
+#      textIconAction = [
+#                  ('OFF #time', '', 'set:tracklogLogeTime:False'),
+#                  ('ON #time', '', 'set:tracklogLogTime:True')
+#                  ]
       menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsTime')
       menus.addItem('tracklogTools', 'folder#go to', 'generic', 'set:currentTracCat:log|set:menu:tracklogManager')
 
