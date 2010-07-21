@@ -53,7 +53,7 @@ class showPOI(ranaModule):
       if menuName == 'showPOIDetail':
         parent = 'showPOI'
         button1 = ("map#show on", "generic", "set:menu:None")
-        button2 = ("tools", "generic", "set:menu:showPOIDetail")
+        button2 = ("tools", "tools", "set:menu:showPOIDetail")
         activePOINr = int(self.get('activePOINr', 0))
         point = points[activePOINr]
         text = point.description + "|coordinates: %f, %f" % (point.lat, point.lon)

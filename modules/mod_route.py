@@ -580,7 +580,7 @@ class route(ranaModule):
         action = "mapView:recentre %f %f|set:menu:None" % (lat, lon)
 
       button1 = ("map#show on", "generic", action)
-      button2 = ("tools", "generic", "set:menu:currentRouteTools")
+      button2 = ("tools", "tools", "set:menu:currentRouteTools")
 
       if self.route == []:
         text = "There is currently no active route."

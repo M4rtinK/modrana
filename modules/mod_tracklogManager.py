@@ -244,7 +244,7 @@ class tracklogManager(ranaModule):
       # * draw "escape" button
       menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:tracklogManager")
       # * draw "tools" button
-      menus.drawButton(cr, x2, y2, dx, dy, "tools", "generic", "set:menu:tracklogTools")
+      menus.drawButton(cr, x2, y2, dx, dy, "tools", "tools", "set:menu:tracklogTools")
       # * draw "show button" button
       firstPoint = track.trackpointsList[0][0]
       (lat,lon) = (firstPoint.latitude, firstPoint.longitude)
