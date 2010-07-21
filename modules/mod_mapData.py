@@ -228,11 +228,7 @@ class mapData(ranaModule):
 
       if(location == "route"):
         loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
-        loadedTracklogs = loadTl.tracklogs # get list of all tracklogs
-        if loadedTracklogs == None or len(loadedTracklogs) == 0:
-          return
-        activeTracklogIndex = int(self.get('activeTracklog', 0))
-        GPXTracklog = loadedTracklogs[activeTracklogIndex]
+        GPXTracklog = loadTl.getActiveTracklog()
         """because we dont need all the information in the original list and
         also might need to add interpolated points, we make a local copy of
         the original list"""
@@ -254,7 +250,6 @@ class mapData(ranaModule):
         zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundView, midZ, maxZ, minZ)
 
         self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-        
 
     if(message == "getSize"):
       """will now ask the server and find the combined size if tiles in the batch"""
@@ -713,25 +708,26 @@ class mapData(ranaModule):
 
 
       menus = self.m.get('menu', None)
-      tracks = self.m.get('loadTracklogs', None).tracklogs
+      tracks = self.m.get('loadTracklogs', None).getTracklogList()
+      print tracks
 
       def describeTracklog(index, category, tracks):
 
         track = tracks[index]
 
-        action = "set:activeTracklog:%d" % index
+        action = "set:activeTracklog:%d|loadTracklogs:loadActive" % index
 
         status = self.get('editBatchMenuActive', False)
         if status == True:
           action+= '|menu:setupEditBatchMenu|set:menu:editBatch'
         else:
           action+= '|set:menu:data2'
-        name = track.getTracklogName().split('/').pop()
-        desc = "tracklog"
-        if track.perElevList:
-          length = track.perElevList[-1][0]
-          units = self.m.get('units', None)
-          desc+=", %s" % units.km2CurrentUnitString(length)
+        name = tracks[index]['filename']
+        desc = 'cat.: ' + track['cat'] + '   size:' + track['size'] + '   last modified:' + track['lastModified']
+#        if track.perElevList:
+#          length = track.perElevList[-1][0]
+#          units = self.m.get('units', None)
+#          desc+=", %s" % units.km2CurrentUnitString(length)
         return (name,desc,action)
 
 

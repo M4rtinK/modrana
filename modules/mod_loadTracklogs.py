@@ -117,9 +117,9 @@ class loadTracklogs(ranaModule):
     # self explanatory
     del self.cache[file]
 
-#  def getActiveTracklog(self):
-#    index = int(self.get('activeTracklog', 0))
-#    self.getTracklogForIndex(index)
+  def getActiveTracklog(self):
+    path = self.getActiveTracklogPath()
+    return self.tracklogs[path]
 #
 #  def getTracklogForIndex(self,index):
 #    path = self.tracklogList[index]['path']
@@ -128,6 +128,13 @@ class loadTracklogs(ranaModule):
 ##    print self.tracklogs[path]
 #    tracklog = self.tracklogs[path]
 #    return tracklog
+
+  def getTracklogList(self):
+    if self.tracklogList:
+      return self.tracklogList
+    else:
+      self.listAvailableTracklogs()
+      return self.tracklogList
 
   def getIndexForPath(self,path):
     """get index for the tracklog with corresponding path
