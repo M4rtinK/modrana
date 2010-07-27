@@ -44,10 +44,7 @@ class showGPX(ranaModule):
     else:
       print "No file"
   def drawMapOverlay(self, cr):
-    """get a file, load it and display it on the map"""
-    cr.set_source_rgb(0,0, 0.5)
-    cr.set_line_width(7)
-    for point in self.tracks[filename][0]:
+    pass
 
       
 
