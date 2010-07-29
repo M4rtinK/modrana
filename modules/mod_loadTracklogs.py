@@ -41,9 +41,9 @@ class loadTracklogs(ranaModule):
     self.cachePath = 'cache/tracklogs/tracklog_cache.txt'
     self.cache = {}
     self.tracklogFolder = 'tracklogs/'
-    self.tracklogList = None
-    self.tracklogPathList = None
-    self.tracklogFilenameList = None
+    self.tracklogList = []
+    self.tracklogPathList = []
+    self.tracklogFilenameList = []
 
   def firstTime(self):
     folder = self.get('tracklogFolder', 'tracklogs/')
