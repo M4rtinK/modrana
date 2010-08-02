@@ -214,9 +214,9 @@ class gpsd2(ranaModule):
             self.set('speed', fix[11]) # km/h
             self.set('metersPerSecSpeed', speed) # m/s
 
-  #        if fix[1] & location.GPS_DEVICE_ALTITUDE_SET:
-  #          elev = fix[7]
-  #          self.set('elevation', elev)
+          if fix[1] & location.GPS_DEVICE_ALTITUDE_SET:
+            elev = fix[7]
+            self.set('elevation', elev)
 
           # TODO: remove when not needed
           if self.get('n900GPSDebug', False):
