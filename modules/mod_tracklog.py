@@ -23,6 +23,7 @@ import random
 from upoints import gpx
 import time
 import geo
+import sys
 
 def getModule(m,d):
   return(tracklog(m,d))
@@ -140,8 +141,9 @@ class tracklog(ranaModule):
       if (currentTimestamp - self.lastTimestamp)>self.logInterval:
         print "updating the log"
         (lat,lon) = self.get('pos', None)
-        currentPosition = (lat,lon)
-        self.currentTempLog.append(currentPosition)
+        elevation = self.get('elevation', None) # TODO: add elevation logging support
+        currentLatLonElevTime = (lat,lon, elevation, time.strftime("%Y-%m-%dT%H:%M:%S"))
+        self.currentTempLog.append(currentLatLonElevTime)
         self.lastTimestamp = currentTimestamp
         # update traveled distance
         currentCoords = self.get('pos', None)
@@ -175,6 +177,14 @@ class tracklog(ranaModule):
 
     if type=='gpx':
       self.currentLogGPX = gpx.Trackpoints()
+      # set tracklog metadata
+      self.currentLogGPX.name = name
+      self.currentLogGPX.time = time.gmtime()
+
+#      self.currentLogGPX.author = "modRana - a flexible GPS navigation system"
+#      self.currentLogGPX.link = "http://nlp.fi.muni.cz/trac/gps_navigace"
+
+
       self.currentLogPath = tracklogFolder + name + ".gpx"
       self.saveGPXLog(self.currentLogGPX, self.currentLogPath)
 
@@ -184,7 +194,7 @@ class tracklog(ranaModule):
 
   def saveGPXLog(self, GPXTracklog, path):
       f = open(self.currentLogPath,'w')
-      xmlTree = self.currentLogGPX.export_gpx_file()
+      xmlTree = self.currentLogGPX.export_gpx_file("1.1")
       xmlTree.write(f)
       f.close()
 
@@ -192,7 +202,14 @@ class tracklog(ranaModule):
   def saveLogIncrement(self):
     """save current log increment
     TODO: support for more log types"""
-    newTrackpoints = map(lambda x: gpx.Trackpoint(x[0],x[1]), self.currentTempLog)
+    """
+    GPX Trackpoint takes parameters in this order:
+    latitude, longitude, name=None, description=None, elevation=None, time=None
+
+    """
+
+
+    newTrackpoints = map(lambda x: gpx.Trackpoint(x[0],x[1],None,None,x[2],x[3]), self.currentTempLog)
 
     if len(self.currentLogGPX)==0:
       self.currentLogGPX.append(newTrackpoints)
@@ -221,7 +238,6 @@ class tracklog(ranaModule):
       loadTl = self.m.get('loadTracklogs', None)
       if loadTl:
         # we also set the correct cathegory ('log')
-        print path
         loadTl.setTracklogPathCathegory(path, 'log')
         # this procedure autorefreshes the list
 

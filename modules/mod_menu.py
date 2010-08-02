@@ -208,7 +208,7 @@ class menus(ranaModule):
     if(icon != None):
       m = self.m.get('icons', None)
       if(m != None):
-        m.draw(cr,icon,x1,y1,w,h)
+          m.draw(cr,icon,x1,y1,w,h)
 
     # Draw text
     cr.set_source_rgb(0, 0, 0.3)
@@ -696,7 +696,7 @@ class menus(ranaModule):
           w,
           dy,
           "",
-          "3h", # background for a 3x1 icon
+          "generic", # background for a 3x1 icon
           onClick)
 
         border = 20
@@ -731,7 +731,7 @@ class menus(ranaModule):
     # * draw info box
     w4 = w - x4
     h4 = h - y4
-    self.drawButton(cr, x4, y4, w4, h4, "", "box480", boxAction)
+    self.drawButton(cr, x4, y4, w4, h4, "", "generic", boxAction)
     # * draw text to the box
     text = boxTextLines
     self.drawTextToSquare(cr, x4, y4, w4, h4, text) # display the text in the box
@@ -768,7 +768,7 @@ class menus(ranaModule):
     # * draw info box
     w4 = w - x4
     h4 = h - (y4+dy)
-    self.drawButton(cr, x4, y4+dy, w4, h4, "", "box480", boxAction)
+    self.drawButton(cr, x4, y4+dy, w4, h4, "", "generic", boxAction)
     # * draw text to the box
     text = boxTextLines
     self.drawTextToSquare(cr, x4, y4+dy, w4, h4, text) # display the text in the box

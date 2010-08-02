@@ -684,7 +684,7 @@ class mapData(ranaModule):
       boxY = y1+dy
       boxW = w
       boxH = h-dy
-      menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "3h", "mapData:getSize")
+      menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "generic", "mapData:getSize")
 
       # * display information about download status
       getFilesText = self.getFilesText(getFilesThread)

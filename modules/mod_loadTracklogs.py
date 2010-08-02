@@ -105,7 +105,7 @@ class loadTracklogs(ranaModule):
     """remove files that are not present from the cache"""
     paths = self.tracklogPathList
     garbage = filter(lambda x: x not in paths, self.cache)
-    print garbage
+
 
     for g in garbage:
       del self.cache[g]
@@ -122,6 +122,11 @@ class loadTracklogs(ranaModule):
       self.loadTracklog(path)
       self.save()
     return self.tracklogs[path]
+
+  def getTracklogForPath(self, path):
+    # return a tracklog coresponding to the path specified
+    return self.tracklogs[path]
+
 #
 #  def getTracklogForIndex(self,index):
 #    path = self.tracklogList[index]['path']
@@ -137,6 +142,18 @@ class loadTracklogs(ranaModule):
     else:
       self.listAvailableTracklogs()
       return self.tracklogList
+
+  def getTracklogPathList(self):
+    if self.tracklogPathList:
+      return self.tracklogPathList
+    else:
+      self.listAvailableTracklogs()
+      return self.tracklogPathList
+
+  def getLoadedTracklogPathList(self):
+      """return a list of loaded tracklog paths"""
+      return self.tracklogs.keys()
+
 
   def getIndexForPath(self,path):
     """get index for the tracklog with corresponding path
@@ -300,10 +317,15 @@ class loadTracklogs(ranaModule):
 
   def loadTracklog(self, path, notify=True):
     """load a GPX file to datastructure"""
+    # is the cache loaded
     if self.cache == {}:
+      # load the cache
       self.loadCache()
-    if self.tracklogList == None:
+
+    # just to be sure, refresh the tracklog list if needed
+    if self.tracklogList == []:
       self.listAvailableTracklogs()
+
     start = clock()
     self.filename = path
 
@@ -319,7 +341,11 @@ class loadTracklogs(ranaModule):
 
     if(file): # TODO: add handling of other than GPX files
       track = gpx.Trackpoints() # create new Trackpoints object
-      track.import_locations(file) # load a gpx file into it
+#      print track
+      # lets assume we have only GPX 1.1 files TODO: 1.1 and 1.0
+      track.import_locations(file, "1.1") # load a gpx file into it
+#      print file
+#      print track
       file.close()
       self.tracklogs[path] = (GPXTracklog(track, path, self.cache, self.save))
 
@@ -447,9 +473,16 @@ class GPXTracklog(tracklog):
     self.cache = cache
     self.save = save
 
+    self.clusters = []
+
     self.elevation = None
 
     self.perElevList = None
+
+    # dowe have any points to process ?
+    if self.trackpointsList == []:
+      # no points, we are done :)
+      return
 
     if filename in cache:
       print "loading from cache"

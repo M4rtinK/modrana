@@ -110,7 +110,7 @@ class poiModule(ranaModule):
             w,
             dy,
             "",
-            "3h", # background for a 3x1 icon
+            "generic", # background for a 3x1 icon
             onClick)
 
           border = 20

@@ -29,7 +29,7 @@ import global_device_id # used for communicating the device id to other modules
 #import cairo
 import os
 #from math import sqrt
-#from time import clock
+from time import clock
 from gtk import gdk
 
 
@@ -131,7 +131,7 @@ class MapWidget(gtk.Widget):
       pass
     
   def draw(self, cr):
-    #start = clock()
+    start = clock()
     for m in self.m.values():
       m.beforeDraw()
 
@@ -144,7 +144,7 @@ class MapWidget(gtk.Widget):
       cr.set_source_rgb(0.2,0.2,0.2)
       cr.rectangle(0,0,self.rect.width,self.rect.height)
       cr.fill()
-      
+
       # Draw the base map, the map overlays, and the screen overlays
       for m in self.m.values():
         m.drawMap(cr)
@@ -153,7 +153,9 @@ class MapWidget(gtk.Widget):
       for m in self.m.values():
         m.drawScreenOverlay(cr)
 
-    #print "Redraw took %1.2f ms" % (1000 * (clock() - start))
+    # enable redraw speed debugging
+    if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
+      print "Redraw took %1.2f ms" % (1000 * (clock() - start))
     
   def do_realize(self):
     self.set_flags(self.flags() | gtk.REALIZED)

@@ -112,6 +112,13 @@ class tracklogManager(ranaModule):
         print "to: %s" % currentCathegory
         self.LTModule.setTracklogPathCathegory(path, currentCathegory)
 
+    elif message == 'setupColorMenu':
+      m = self.m.get('showGPX', None)
+      if m:
+        m.setupChooseDistColorMenu('tracklogTools', '|showGPX:colorFromRegister|tracklogManager:setupToolsSubmenu|set:menu:tracklogTools')
+
+    elif message == 'setupToolsSubmenu':
+      self.setupToolsSubmenu()
 
   def deleteTracklog(self, path):
     # delete a tracklog
@@ -183,10 +190,6 @@ class tracklogManager(ranaModule):
         self.cathegoriesSetUp = True
 
     elif menuName == 'tracklogManager':
-      # are there any tracklogs in the tracklog folder ?
-      if self.LTModule.tracklogList == None:
-        # list available tracklogs
-        self.LTModule.listAvailableTracklogs()
 
       menus = self.m.get("menu",None)
 
@@ -198,7 +201,7 @@ class tracklogManager(ranaModule):
       menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % self.moduleName)
 
       cathegory = self.get('currentTracCat', 'misc')
-      list = filter(lambda x: x['cat'] == cathegory, self.LTModule.tracklogList)
+      list = filter(lambda x: x['cat'] == cathegory, self.LTModule.getTracklogList())
 
       # One option per row
       for row in (0,1,2):
@@ -220,7 +223,7 @@ class tracklogManager(ranaModule):
             w,
             dy,
             "",
-            "3h", # background for a 3x1 icon
+            "generic", # background for a 3x1 icon
             onClick)
 
           border = 20
@@ -245,21 +248,32 @@ class tracklogManager(ranaModule):
       menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:tracklogManager")
       # * draw "tools" button
       menus.drawButton(cr, x2, y2, dx, dy, "tools", "tools", "set:menu:tracklogTools")
+
       # * draw "show button" button
-      firstPoint = track.trackpointsList[0][0]
-      (lat,lon) = (firstPoint.latitude, firstPoint.longitude)
-      action3 = "mapView:recentre %f %f|set:showTrackFilename:%s|showGPX:toggleVisible|set:menu:None" % (lat, lon, track.tracklogFilename)
-      menus.drawButton(cr, x3, y3, dx, dy, "show on map", "generic", action3)
+
+      if track.trackpointsList:
+        firstPoint = track.trackpointsList[0][0]
+        (lat,lon) = (firstPoint.latitude, firstPoint.longitude)
+        action3 = "mapView:recentre %f %f|set:showTrackFilename:%s|showGPX:makeVisible|set:menu:None" % (lat, lon, track.tracklogFilename)
+        menus.drawButton(cr, x3, y3, dx, dy, "show on map", "generic", action3)
+      else:
+        menus.drawButton(cr, x3, y3, dx, dy, "can't show on map#no points", "generic", 'set:menu:tracklogInfo')
       # * draw "route profile"
-      menus.drawButton(cr, x4, y4, w, dy, "", "box480", "set:menu:routeProfile")
+      menus.drawButton(cr, x4, y4, w, dy, "", "generic", "set:menu:routeProfile")
 
       if track.elevation == True:
         profile.lineChart(cr, track, x4, y4, w, dy)
 
       # * draw an info box
-      menus.drawButton(cr, x4, y4+dy, w, h1-(y4+dy), "", "3h", "set:menu:tracklogInfo")
+      menus.drawButton(cr, x4, y4+dy, w, h1-(y4+dy), "", "generic", "set:menu:tracklogInfo")
+      
+      pointcount = 0
+      if track.trackpointsList:
+        pointcount = len(track.trackpointsList[0])
+      else:
+        pointcount = 0
 
-      text = "number of points: %d|" % len(track.trackpointsList[0])
+      text = "number of points: %d|" % pointcount
       if track.elevation == True:
         text += "|maximum elevation: %d meters|minimum elevation: %d meters" % (track.routeInfo['maxElevation'], track.routeInfo['minElevation'])
         text += "|elevation of the first point: %d meters" % track.routeInfo['firstElevation']
@@ -267,17 +281,37 @@ class tracklogManager(ranaModule):
 
       menus.drawTextToSquare(cr, x4, y4+dy, w, h1-(y4+dy), text)
 
+      self.setupToolsSubmenu()
 
-      # set up the tools submenu
-      menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")
-      menus.addItem('tracklogTools', 'elevation#get', 'generic', 'tracklogManager:getElevation|set:menu:tracklogInfo')
-      menus.addItem('tracklogTools', 'visible#toggle', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|set:menu:tracklogInfo' % track.tracklogFilename)
-      menus.addItem('tracklogTools', 'active#set', 'generic', 'set:currentTrack:%s|tracklogManager:loadTrackProfile|set:menu:None' % track.tracklogFilename)
-      menus.addItem('tracklogTools', 'inactive#set', 'generic', 'set:currentTrack:None|tracklogManager:unLoadTrackProfile|set:menu:None')
-      menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogInfo')
-      menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogInfo')
-      menus.addItem('tracklogTools', 'cathegory#set', 'generic', 'set:menu:tracklogSetCathegory')
-      menus.addItem('tracklogTools', 'tracklog#delete', 'generic', 'tracklogManager:askDeleteActiveTracklog')
+
+  def setupToolsSubmenu(self):
+    # setup the tools submenu
+    menus = self.m.get("menu",None)
+    track = self.LTModule.getActiveTracklog()
+    
+    # is the current track visible ?
+    visibleTracklogs = self.get('visibleTracklogsDict', {})
+    currentPath = self.LTModule.getActiveTracklogPath()
+    isVisible = (currentPath in visibleTracklogs)
+
+    menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")
+    menus.addItem('tracklogTools', 'elevation#get', 'generic', 'tracklogManager:getElevation|set:menu:tracklogInfo')
+    menus.addItem('tracklogTools', 'active#set', 'generic', 'set:currentTrack:%s|tracklogManager:loadTrackProfile|set:menu:None' % track.tracklogFilename)
+    menus.addItem('tracklogTools', 'inactive#set', 'generic', 'set:currentTrack:None|tracklogManager:unLoadTrackProfile|set:menu:None')
+    if isVisible:
+      menus.addItem('tracklogTools', 'toggle#visible', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|tracklogManager:setupToolsSubmenu' % track.tracklogFilename)
+    else:
+      menus.addItem('tracklogTools', 'toggle#invisible', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|tracklogManager:setupToolsSubmenu' % track.tracklogFilename)
+    menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogInfo')
+    menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogInfo')
+
+    if isVisible:
+      colorName = visibleTracklogs[currentPath]['colorName']
+      menus.addItem('tracklogTools', 'change color#%s' % colorName, 'generic', 'tracklogManager:setupColorMenu|set:menu:chooseDistColor')
+
+    menus.addItem('tracklogTools', 'cathegory#set', 'generic', 'set:menu:tracklogSetCathegory')
+    menus.addItem('tracklogTools', 'tracklog#delete', 'generic', 'tracklogManager:askDeleteActiveTracklog')
+
 
 
   def describeTracklog(self, item, category):

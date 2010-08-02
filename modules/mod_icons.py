@@ -32,7 +32,7 @@ class icons(ranaModule):
     self.images = {}
     self.cantLoad = []
     self.load('blank')
-    self.load('generic')
+#    self.load('generic')
     
   def load(self,name,w=None,h=None):
 #    if name=='start':
@@ -58,12 +58,23 @@ class icons(ranaModule):
     return(1)
   
   def draw(self,cr,name,x,y,w,h):
-    if not name in self.images.keys():
+    if name == 'generic':
+      self.roundedRectangle(cr, x, y, w, h)
+      return
+    elif not name in self.images.keys():
       if(name in self.cantLoad):
-        name = 'generic'
+        self.roundedRectangle(cr, x, y, w, h)
+        return
       elif(not self.load(name,w,h)):
         self.cantLoad.append(name)
-        name='generic'
+        self.roundedRectangle(cr, x, y, w, h)
+        return
+#    if not name in self.images.keys():
+#      if(name in self.cantLoad):
+#        name = 'generic'
+#      elif(not self.load(name,w,h)):
+#        self.cantLoad.append(name)
+#        name='generic'
         
     icon = self.images[name]
     cr.save()
@@ -72,4 +83,41 @@ class icons(ranaModule):
     cr.set_source_surface(icon['image'],0,0)
     cr.paint()
     cr.restore()
+
+  # ported from
+  #http://www.cairographics.org/samples/rounded_rectangle/
+  def roundedRectangle(self, cr, x, y, width, height, fill=(146,170,243,1), outline=(60,96,250,1)):
+    """draw a rounded rectangle, fill and outline set the fill and outline rgba color
+       r,g,b from 0 to 255, a from 0 to 1"""
+    pi = 3.1415926535897931
+    aspect        = 1.0     #/* aspect ratio */
+#    corner_radius = height / 10.0   #/* and corner curvature radius */
+    corner_radius = height / 7   #/* and corner curvature radius */
+
+    radius = corner_radius / aspect
+    degrees = pi / 180.0
+
+    # correcting for the line width
+    # we also leave a line about one pixel wide free on all sides
+
+    x         = x+5
+    y         = y+5
+    width         = width-9
+    height        = height-9
+
+    cr.new_sub_path()
+    cr.arc (x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees)
+    cr.arc (x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees)
+    cr.arc (x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees)
+    cr.arc (x + radius, y + radius, radius, 180 * degrees, 270 * degrees)
+    cr.close_path()
+
+    # inscape to cairo conversion :)
+    (r1, g1, b1, a1) = (fill[0]/256.0,fill[1]/256.0,fill[2]/256.0,fill[3])
+    (r2, g2, b2, a2) = (outline[0]/256.0,outline[1]/256.0,outline[2]/256.0,outline[3])
+    cr.set_source_rgba(r1, g1, b1, a1)
+    cr.fill_preserve ()
+    cr.set_source_rgba(r2, g2, b2, a2)
+    cr.set_line_width(8.0)
+    cr.stroke()
   

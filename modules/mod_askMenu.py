@@ -53,7 +53,7 @@ class askMenu(ranaModule):
 
 
   def drawAskYesNo(self,cr,question,yesAction,noAction):
-    first = (question,'3h','')
+    first = (question,'generic','')
     second = ('YES','yeslong',yesAction)
     third = ('NO','nolong',noAction)
     self.menus.drawThreeItemHorizontalMenu(cr, first, second, third)

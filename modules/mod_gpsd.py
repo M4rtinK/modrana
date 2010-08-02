@@ -129,7 +129,7 @@ class gpsd2(ranaModule):
 
     
   def elevation(self):
-    """return speed as reported by gpsd
+    """return elevation as reported by gpsd
     (meters above mean sea level)"""
     return self.socket_cmd("a")
 

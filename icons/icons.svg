@@ -32,11 +32,11 @@
      bordercolor="#666666"
      pagecolor="#ffffff"
      id="base"
-     showgrid="true"
+     showgrid="false"
      inkscape:grid-points="false"
-     inkscape:zoom="2"
-     inkscape:cx="1325.8715"
-     inkscape:cy="-685.44864"
+     inkscape:zoom="1"
+     inkscape:cx="1448.0331"
+     inkscape:cy="-1086.3341"
      inkscape:window-x="-4"
      inkscape:window-y="21"
      inkscape:current-layer="svg2"
@@ -55,11 +55,15 @@
      inkscape:bbox-paths="true"
      inkscape:bbox-nodes="true"
      inkscape:snap-bbox-edge-midpoints="true"
-     inkscape:snap-bbox-midpoints="true">
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-global="true">
     <sodipodi:guide
        orientation="horizontal"
        position="32.975534"
        id="guide5056" />
+    <inkscape:grid
+       type="xygrid"
+       id="grid5900" />
   </sodipodi:namedview>
   <metadata
      id="metadata13">
@@ -69,7 +73,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -7447,6 +7451,13 @@
        inkscape:vp_y="0 : 1000 : 0"
        inkscape:vp_x="0 : 0.5 : 1"
        sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective5856"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
   </defs>
   <rect
      id="rect14063"
@@ -7543,7 +7554,7 @@
      inkscape:export-filename="\\192.168.1.127\pub\icons\bitmap\tracklogs.png"
      inkscape:export-ydpi="92.212929"
      rx="22"
-     style="fill:#92aaf3;fill-opacity:1;stroke:#3d60fa;stroke-width:6;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+     style="fill:#92aaf3;fill-opacity:1;stroke:#3c60fa;stroke-width:6;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
   <rect
      id="rect5863"
      x="-112.59692"
@@ -9095,14 +9106,14 @@
   <image
      sodipodi:absref="\\192.168.1.127\misto\icons\source\Map_symbol_dining_02.png"
      xlink:href="source\Map_symbol_dining_02.png"
-     inkscape:export-ydpi="92.212929"
-     inkscape:export-xdpi="92.212929"
-     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\business.png"
-     width="58.501156"
-     height="58.501156"
-     id="image19429"
+     y="165.23032"
      x="810.98877"
-     y="165.23032" />
+     id="image19429"
+     height="58.501156"
+     width="58.501156"
+     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\business.png"
+     inkscape:export-xdpi="92.212929"
+     inkscape:export-ydpi="92.212929" />
   <g
      id="g19228"
      transform="matrix(0.4583615,0,0,0.4583615,846.43845,182.46319)"
@@ -9185,14 +9196,14 @@
   <image
      sodipodi:absref="\\192.168.1.127\misto\icons\source\212px-Modern_clock_chris_kemps_01.svg.png"
      xlink:href="source\212px-Modern_clock_chris_kemps_01.svg.png"
-     inkscape:export-ydpi="92.212929"
-     inkscape:export-xdpi="92.212929"
-     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\events.png"
-     width="47.793228"
-     height="47.567787"
-     id="image19885"
+     y="447.87241"
      x="895.08459"
-     y="447.87241" />
+     id="image19885"
+     height="47.567787"
+     width="47.793228"
+     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\events.png"
+     inkscape:export-xdpi="92.212929"
+     inkscape:export-ydpi="92.212929" />
   <rect
      id="rect19888"
      x="7.0809593"
@@ -9500,14 +9511,14 @@
   <image
      sodipodi:absref="\\192.168.1.127\misto\icons\source\Map_symbol_dining_02.png"
      xlink:href="source\Map_symbol_dining_02.png"
-     inkscape:export-ydpi="92.212929"
-     inkscape:export-xdpi="92.212929"
-     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\viewMenu.png"
-     width="19.165253"
-     height="19.165253"
-     id="image19965"
+     y="323.7113"
      x="48.273346"
-     y="323.7113" />
+     id="image19965"
+     height="19.165253"
+     width="19.165253"
+     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\viewMenu.png"
+     inkscape:export-xdpi="92.212929"
+     inkscape:export-ydpi="92.212929" />
   <g
      id="g19967"
      transform="matrix(0.1501614,0,0,0.1501614,59.886787,329.35686)"
@@ -14059,7 +14070,7 @@
        inkscape:export-xdpi="92.212929"
        inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\waypoint.png"
        transform="matrix(0.58448962,0,0,0.58448962,461.419,594.08693)"
-       d="m 1094.5719,764.37421 a 6.1228209,6.1228209 0 1 1 -12.2456,0 6.1228209,6.1228209 0 1 1 12.2456,0 z"
+       d="m 1094.5719,764.37421 c 0,3.38154 -2.7413,6.12282 -6.1228,6.12282 -3.3815,0 -6.1228,-2.74128 -6.1228,-6.12282 0,-3.38154 2.7413,-6.12282 6.1228,-6.12282 3.3815,0 6.1228,2.74128 6.1228,6.12282 z"
        sodipodi:ry="6.1228209"
        sodipodi:rx="6.1228209"
        sodipodi:cy="764.37421"
@@ -14200,7 +14211,7 @@
        sodipodi:cy="764.37421"
        sodipodi:rx="6.1228209"
        sodipodi:ry="6.1228209"
-       d="m 1094.5719,764.37421 a 6.1228209,6.1228209 0 1 1 -12.2456,0 6.1228209,6.1228209 0 1 1 12.2456,0 z"
+       d="m 1094.5719,764.37421 c 0,3.38154 -2.7413,6.12282 -6.1228,6.12282 -3.3815,0 -6.1228,-2.74128 -6.1228,-6.12282 0,-3.38154 2.7413,-6.12282 6.1228,-6.12282 3.3815,0 6.1228,2.74128 6.1228,6.12282 z"
        transform="matrix(0.58448962,0,0,0.58448962,368.15923,632.60739)"
        inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\waypoint.png"
        inkscape:export-xdpi="92.212929"
@@ -14860,5 +14871,141 @@
        id="path8297-8"
        style="fill:none;stroke:#000000;stroke-width:34.99968338;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        d="m 241.70075,414.19989 c 0.007,46.18129 -37.42819,83.62241 -83.60947,83.62241 -46.18129,0 -83.616619,-37.44112 -83.609476,-83.62241 -0.0071,-46.18129 37.428186,-83.62241 83.609476,-83.62241 46.18128,0 83.61661,37.44112 83.60947,83.62241 l 0,0 z" />
+  </g>
+  <g
+     id="icon_tracklogs"
+     inkscape:label="#g5909">
+    <g
+       id="g5902">
+      <rect
+         id="rect5157-0-1"
+         x="1385.5234"
+         y="1426.202"
+         inkscape:export-xdpi="92.212929"
+         width="111.12024"
+         height="111.12024"
+         ry="22"
+         inkscape:export-filename="\\192.168.1.127\pub\icons\bitmap\log.png"
+         inkscape:export-ydpi="92.212929"
+         rx="22"
+         style="fill:#92aaf3;fill-opacity:1;stroke:#3d60fa;stroke-width:6;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    </g>
+    <path
+       inkscape:export-ydpi="92.212929"
+       inkscape:export-xdpi="92.212929"
+       inkscape:export-filename="/home/owhite/OpenStreetmap/rana/icons/bitmap/opt_logging.png"
+       transform="translate(1727.8067,1381.3037)"
+       d="m -275.7742,84.377518 a 4.4479709,4.4479709 0 1 1 -8.89594,0 4.4479709,4.4479709 0 1 1 8.89594,0 z"
+       sodipodi:ry="4.4479709"
+       sodipodi:rx="4.4479709"
+       sodipodi:cy="84.377518"
+       sodipodi:cx="-280.22217"
+       id="path5161-0-7"
+       style="fill:#ffff00;fill-opacity:1;stroke:none"
+       sodipodi:type="arc" />
+    <use
+       inkscape:export-ydpi="92.212929"
+       inkscape:export-xdpi="92.212929"
+       inkscape:export-filename="/home/owhite/OpenStreetmap/rana/icons/bitmap/opt_logging.png"
+       style="fill:#ffff00"
+       height="600"
+       width="1000"
+       transform="translate(-10.389685,1.5151749)"
+       id="use5167-1-4"
+       xlink:href="#path5161-0-7"
+       y="0"
+       x="0" />
+    <use
+       inkscape:export-ydpi="92.212929"
+       inkscape:export-xdpi="92.212929"
+       inkscape:export-filename="/home/owhite/OpenStreetmap/rana/icons/bitmap/opt_logging.png"
+       style="fill:#ffff00"
+       height="600"
+       width="1000"
+       transform="translate(-11.688485,3.2467749)"
+       id="use5169-4-0"
+       xlink:href="#use5167-1-4"
+       y="0"
+       x="0" />
+    <use
+       inkscape:export-ydpi="92.212929"
+       inkscape:export-xdpi="92.212929"
+       inkscape:export-filename="/home/owhite/OpenStreetmap/rana/icons/bitmap/opt_logging.png"
+       style="fill:#ffff00"
+       height="600"
+       width="1000"
+       transform="translate(-12.121385,4.3290749)"
+       id="use5171-60-9"
+       xlink:href="#use5169-4-0"
+       y="0"
+       x="0" />
+    <use
+       inkscape:export-ydpi="92.212929"
+       inkscape:export-xdpi="92.212929"
+       inkscape:export-filename="/home/owhite/OpenStreetmap/rana/icons/bitmap/opt_logging.png"
+       style="fill:#ffff00"
+       height="600"
+       width="1000"
+       transform="translate(-11.039085,-0.21642515)"
+       id="use5173-7-4"
+       xlink:href="#use5171-60-9"
+       y="0"
+       x="0" />
+    <use
+       inkscape:export-ydpi="92.212929"
+       inkscape:export-xdpi="92.212929"
+       inkscape:export-filename="/home/owhite/OpenStreetmap/rana/icons/bitmap/opt_logging.png"
+       style="fill:#ffff00"
+       height="600"
+       width="1000"
+       transform="translate(-7.3593844,-7.7923251)"
+       id="use5175-1-8"
+       xlink:href="#use5173-7-4"
+       y="0"
+       x="0" />
+    <use
+       inkscape:export-ydpi="92.212929"
+       inkscape:export-xdpi="92.212929"
+       inkscape:export-filename="/home/owhite/OpenStreetmap/rana/icons/bitmap/opt_logging.png"
+       style="fill:#ffff00"
+       height="600"
+       width="1000"
+       transform="translate(10.822715,0.43287485)"
+       id="use5177-7-8"
+       xlink:href="#path5161-0-7"
+       y="0"
+       x="0" />
+    <use
+       inkscape:export-ydpi="92.212929"
+       inkscape:export-xdpi="92.212929"
+       inkscape:export-filename="/home/owhite/OpenStreetmap/rana/icons/bitmap/opt_logging.png"
+       style="fill:#ffff00"
+       height="600"
+       width="1000"
+       transform="translate(11.039215,0.43287485)"
+       id="use5179-7-2"
+       xlink:href="#use5177-7-8"
+       y="0"
+       x="0" />
+    <path
+       inkscape:export-ydpi="92.212929"
+       inkscape:export-xdpi="92.212929"
+       inkscape:export-filename="/home/owhite/OpenStreetmap/rana/icons/bitmap/opt_logging.png"
+       sodipodi:type="arc"
+       style="fill:#00ff00;fill-opacity:1;stroke:none"
+       id="use5181-7-4"
+       sodipodi:cx="-280.22217"
+       sodipodi:cy="84.377518"
+       sodipodi:rx="4.4479709"
+       sodipodi:ry="4.4479709"
+       d="m -275.7742,84.377518 a 4.4479709,4.4479709 0 1 1 -8.89594,0 4.4479709,4.4479709 0 1 1 8.89594,0 z"
+       transform="translate(1760.2747,1381.953)" />
+    <path
+       inkscape:export-filename="/home/owhite/OpenStreetmap/rana/icons/bitmap/opt_logging.png"
+       inkscape:export-ydpi="92.212929"
+       style="fill:#000000"
+       inkscape:export-xdpi="92.212929"
+       d="m 1475.8354,1454.7598 2.2212,4.0527 -3.8877,7.1738 1.0639,0.5614 3.5166,-6.4306 2.8245,5.1718 0.048,0.139 0.3711,0.4675 0.2283,0.1848 0.2323,0.1398 0.2777,0.1398 c 0.6751,0.3121 1.4798,0.236 2.1301,-0.092 l -4.7224,-8.7143 4.0744,-7.5014 c 0.6064,0.099 1.2359,-0.5188 1.1572,-1.1167 -0.03,-0.3036 -0.1712,-0.6034 -0.4158,-0.7913 l -7.2684,-5.4995 -0.1389,-0.095 -0.3225,-0.1849 -0.28,-0.1397 -0.3225,-0.094 -0.3256,-0.045 -0.3711,-0.049 -0.3225,0 -0.3256,0.049 -0.3224,0.094 -0.6473,0.2788 -0.4159,0.2796 -3.427,2.9361 c -0.4097,0.2547 -0.5879,0.8037 -0.6481,1.2556 -0.051,1.9841 -0.5269,4.5382 2.0831,4.7991 l 0,-4.5653 1.5276,-1.2588 0,7.0371 4.8612,0 0,-7.1769 4.8613,3.6824 -3.704,6.8499 -1.0192,-1.866 -0.045,-0.045 -0.049,-0.1398 -0.045,-0.094 0,-0.6065 -4.8612,0 0,0.4667 -0.045,0.1398 -0.048,0.094 0,0.1398 -0.045,0.045 -3.4718,6.3855 -3.4718,-6.3855 -0.045,-0.045 -0.049,-0.1398 -0.045,-0.094 0,-0.2338 -0.049,-0.091 0,-0.2819 -4.8127,0 c 0.027,0.2423 -0.012,0.4667 -0.045,0.7004 -1.7297,3.1489 -4.1199,6.2396 -5.1383,9.7371 -0.2075,0.9738 0.2925,2.1417 1.2028,2.5634 l 6.3889,-11.7879 4.6746,8.618 -0.1389,0.4217 -0.045,0.2788 -0.048,0.2788 0,0.2795 0.048,0.2788 c 0.2623,0.8317 0.4552,1.1617 1.2028,1.6323 l 0.4158,-0.7012 c 0.7893,0.7556 1.9196,0.9373 2.8724,0.4216 l -1.5284,-2.8903 4.6291,-8.618 z m -9.6771,-1.8171 -4.8126,0 0,-5.1718 -3.2396,5.1718 c -0.6002,-0.3883 -0.9945,-1.0919 -0.9736,-1.8172 -0.046,-0.6127 0.1689,-0.6849 0.3255,-1.119 l 4.258,-6.8491 0.093,-0.094 0.1844,-0.2307 0.1867,-0.1879 0.2291,-0.1856 c 0.8225,-0.5001 1.8532,-0.5824 2.6849,-0.048 0.4552,0.3331 0.6087,0.5971 0.8803,1.0739 l 0.093,0.2788 0.09,0.2788 0,4.3315 3.0559,3.0309 c -0.925,0.8464 -2.1548,0.8161 -3.0559,-0.049 l 0,1.5865 z m 8.472,-14.2116 c 0.1296,-3.0968 4.4238,-3.3422 4.8605,-0.1879 -0.024,3.3492 -4.6322,3.4797 -4.8605,0.1879 z m -12.3596,0 c 0.072,-3.0813 4.43,-3.3578 4.8158,-0.1879 0.055,3.3275 -4.6499,3.4859 -4.8158,0.1879"
+       id="path5159-7-5" />
   </g>
 </svg>

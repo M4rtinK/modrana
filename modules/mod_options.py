@@ -52,6 +52,8 @@ class options(ranaModule):
 
 
     # * the debug submenu
+
+    self.addBoolOption("Print redraw time to terminal", "showRedrawTime", "debug", False)
     self.addBoolOption("Debug circles", "debugCircles", "debug", False)
     self.addBoolOption("Debug squares", "debugSquares", "debug", False)
 
@@ -317,7 +319,7 @@ class options(ranaModule):
             w,
             dy,
             None,
-            "3h", # background for a 3x1 icon
+            "generic", # background for a 3x1 icon
             onClick)
 
           border = 20
@@ -329,7 +331,7 @@ class options(ranaModule):
           self.showText(cr, valueDescription, x4 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
 
           # in corner: row number
-          self.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y+border, w * 0.15 - border, 20)
+          self.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y+3*border, w * 0.15 - border, 20)
 
             
   def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):

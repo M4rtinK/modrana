@@ -70,6 +70,11 @@ class routeProfile(ranaModule):
     # * draw "escape" button
     menus.drawButton(cr, x1, y1, dx, dy, "", "up_transp_gama", "set:menu:tracklogInfo")
 
+
+    if tracklog.trackpointsList == []:
+      # there are no points to graph, so we quit
+      return
+
     # * draw current elevation/position indicator
     pos = self.get('pos', None)
     if pos != None:

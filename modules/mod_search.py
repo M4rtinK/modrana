@@ -222,7 +222,7 @@ class search(ranaModule):
             w,
             dy,
             "",
-            "3h", # background for a 3x1 icon
+            "generic", # background for a 3x1 icon
             onClick)
 
           border = 20
@@ -350,7 +350,7 @@ class search(ranaModule):
     # * draw info box
     w4 = w - x4
     h4 = h - y4
-    menus.drawButton(cr, x4, y4, w4, h4, "", "box480", "set:menu:None")
+    menus.drawButton(cr, x4, y4, w4, h4, "", "generic", "set:menu:None")
 
     # * draw details from the search result
     text = "%s (%s)" % (result['titleNoFormatting'],distanceString)

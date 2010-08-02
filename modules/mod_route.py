@@ -591,6 +591,10 @@ class route(ranaModule):
         distance = units.m2CurrentUnitString(float(dir['Directions']['Distance']['meters']))
         steps = len(dir['Directions']['Routes'][0]['Steps']) # number of steps
 
+#        for step in dir['Directions']['Routes'][0]['Steps']:
+#          print step
+
+
         start = ""
         startAddress = self.start[2]
         (lat1,lon1) = (self.start[0],self.start[1])
@@ -659,10 +663,10 @@ class route(ranaModule):
 
       menus.clearMenu('currentRouteTools', "set:menu:currentRoute")
       
-      menus.drawButton(cr, x4, y4, w1-x4, dy,  "start", "3h", "route:startInput")
-      menus.drawButton(cr, x4, y4+2*dy, w1-x4, dy, "destination", "3h", "route:destinationInput")
-      menus.drawButton(cr, x4, y4+dy, (w1-x4)/2, dy, "as start#position", "2h", "route:posToStart|set:needRedraw:True")
-      menus.drawButton(cr, x4+(w1-x4)/2, y4+dy, (w1-x4)/2, dy, "as destination#position", "2h", "route:posToDestination|set:needRedraw:True")
+      menus.drawButton(cr, x4, y4, w1-x4, dy,  "start", "generic", "route:startInput")
+      menus.drawButton(cr, x4, y4+2*dy, w1-x4, dy, "destination", "generic", "route:destinationInput")
+      menus.drawButton(cr, x4, y4+dy, (w1-x4)/2, dy, "as start#position", "generic", "route:posToStart|set:needRedraw:True")
+      menus.drawButton(cr, x4+(w1-x4)/2, y4+dy, (w1-x4)/2, dy, "as destination#position", "generic", "route:posToDestination|set:needRedraw:True")
 
 
       if self.startAddress == None:

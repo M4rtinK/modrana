@@ -9,12 +9,12 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
+   width="117.12024"
+   height="117.12024"
    id="svg3819"
    version="1.1"
-   inkscape:version="0.47pre4 r22446"
-   sodipodi:docname="Nový dokument 3">
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="box.svg">
   <defs
      id="defs3821">
     <inkscape:perspective
@@ -39,9 +39,9 @@
      borderopacity="0.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="0"
-     inkscape:zoom="0.35"
-     inkscape:cx="350"
-     inkscape:cy="177.14286"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="95.327287"
+     inkscape:cy="10.004336"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -58,14 +58,15 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(-390.01132,-805.23065)">
     <rect
        id="rect8666"
        x="393.01132"

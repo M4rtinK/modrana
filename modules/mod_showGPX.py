@@ -22,6 +22,7 @@ from base_module import ranaModule
 #import random
 import geo
 import math
+import gtk
 from time import clock
 
 def getModule(m,d):
@@ -33,6 +34,48 @@ class showGPX(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.linewidth = 7 #with of the line denoting GPX tracks
+    self.distinctColors=[
+                        'black',
+                        'blue',
+                        'green',
+                        'pink',
+                        'cyan',
+                        'red',
+                        'gold',
+                        'magenta',
+                        'yellow'
+                        ]
+    self.colorIndex=0
+
+  def setupChooseDistColorMenu(self, parent, additionalActions=""):
+    """setup a menu for choosing from the distinct colors
+    when a color is chosen, the 'colorRegister'
+    perzistent variable is set to the color name
+    also, (the same) aditional actions can be appended to the buttons"""
+    menus = self.m.get("menu",None)
+    # * draw "escape" button
+    menus.clearMenu('chooseDistColor', "set:menu:%s" % parent)
+    # * draw the color buttons
+    if additionalActions: # check if the required pipe character
+      if additionalActions[0] != '|':
+        additionalActions = '|' + additionalActions
+
+    for color in self.distinctColors:
+      menus.addItem('chooseDistColor', '%s' % color, 'generic', 'set:distinctColorRegister:%s%s' % (color,additionalActions))
+
+
+  def getDistinctColorName(self):
+    """loop over a list of distinct colors"""
+    distinctColor = self.distinctColors[self.colorIndex]
+    colorCount = len(self.distinctColors)
+    self.colorIndex = (self.colorIndex+1)%colorCount
+    return distinctColor
+
+  def getDistinctColorList(self):
+    if self.distinctColors:
+      return self.distinctColors
+    else:
+      return ['navy'] # one navy ought be enoght for anybody
 
   def drawMapOverlay(self, cr):
     """get a file, load it and display it on the map"""
@@ -77,22 +120,24 @@ class showGPX(ranaModule):
 #    cr.stroke()
 #    cr.fill()
 
-    visibleTracklogs = set(self.get('visibleTracklogs', set()))
+    visibleTracklogs = self.get('visibleTracklogsDict', {})
     loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
-    loadedTracklogs = loadTl.tracklogs # get list of all loaded tracklogs
+    loadedTracklogsPathList = loadTl.getLoadedTracklogPathList()
 
     # find what tracklogs are not loaded and load them
-    notLoaded = filter(lambda x: x not in loadedTracklogs.keys(), visibleTracklogs)
+    notLoaded = filter(lambda x: x not in loadedTracklogsPathList, visibleTracklogs)
     if notLoaded:
       # remove possible nonexitant tracks from the not loaded tracks
-      self.removeNonexistentTracks(notLoaded)
+      notLoaded = self.removeNonexistentTracks(notLoaded)
       # load the existing not loaded tracks
       loadTl.loadPathList(notLoaded)
 
-    for path in visibleTracklogs:
-      GPXTracklog = loadedTracklogs[path]
+    for path in visibleTracklogs.keys():
+      GPXTracklog = loadTl.getTracklogForPath(path)
+      colorName = visibleTracklogs[path]['colorName']
+
       if self.get('showTracklog', None) == 'simple':
-        self.drawSimpleTrack(cr, GPXTracklog)
+        self.drawSimpleTrack(cr, GPXTracklog, colorName)
 
       elif self.get('showTracklog', None) == 'colored':
         self.drawColoredTracklog(cr, GPXTracklog)
@@ -109,18 +154,18 @@ class showGPX(ranaModule):
        then return the tracks that do exist """
     loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
     if loadTl:
-      # do we know which tracks exist ?
-      if loadTl.tracklogPathList == None:
-        # look what tracklogs are available
-        loadTl.listAvailableTracklogs()
+      availiblePaths = loadTl.getTracklogPathList()
+
       # look which files exist and which dont
-      nonexistent = filter(lambda x: x not in loadTl.tracklogPathList, tracks)
-      # remove nonexistent treacks:
+      nonexistent = filter(lambda x: x not in availiblePaths, tracks)
+      # remove nonexistent tracks:
       
       # from the persistent list
-      visibleTracklogs = set(self.get('visibleTracklogs', set()))
-      visibleTracklogs = set(filter(lambda x: x not in nonexistent, visibleTracklogs))
-      self.set('visibleTracklogs', visibleTracklogs)
+      visibleTracklogs = self.get('visibleTracklogsDict', {})
+      for nItem in nonexistent:
+        if nItem in visibleTracklogs:
+          del visibleTracklogs[nItem]
+      self.set('visibleTracklogsDict', visibleTracklogs)
 
       # from the input list
       tracks = filter(lambda x: x not in nonexistent, tracks)
@@ -128,8 +173,47 @@ class showGPX(ranaModule):
       # return the existing tracks
       return tracks
 
+  def getActiveTracklogPath(self):
+    loadTl = self.m.get('loadTracklogs', None)
+    if loadTl == None:
+      return
+    return loadTl.getActiveTracklogPath()
+
+  def makeTrackVisible(self,path):
+    """
+    make a tracklog visible
+    """
+    visibleTracklogs = self.get('visibleTracklogsDict', {})
+    if path in visibleTracklogs:
+      return
+    else:
+      visibleTracklogs[path] = {'colorName' : self.getDistinctColorName()}
+      self.set('visibleTracklogsDict', visibleTracklogs)
+    self.set('showTracklog', 'simple')
+    return
 
 
+  def makeTrackInvisible(self,path):
+    """
+    make a tracklog invisible = dont draw it
+    """
+    visibleTracklogs = self.get('visibleTracklogsDict', {})
+    if path in visibleTracklogs:
+      del visibleTracklogs[path]
+    self.set('visibleTracklogsDict', visibleTracklogs)
+
+
+  def isVisible(self,path):
+    """check if a tracklog is visible
+       returns False or True"""
+    visibleTracklogs = self.get('visibleTracklogsDict', {})
+    return (path in visibleTracklogs)
+
+  def setTrackColor(self,path,colorName):
+    visibleTracklogs = self.get('visibleTracklogsDict', {})
+    if path in visibleTracklogs:
+      visibleTracklogs[path]['colorName'] = colorName
+      self.set('visibleTracklogsDict', visibleTracklogs)
 
 
   def point(self, cr, x, y):
@@ -144,12 +228,13 @@ class showGPX(ranaModule):
         dy = y2 - y1
         return math.sqrt(dx**2 + dy**2)
 
-  def drawSimpleTrack(self, cr, GPXTracklog):
+  def drawSimpleTrack(self, cr, GPXTracklog, colorName='navy'):
 #    pointsDrawn = 0
 #    start = clock()
     proj = self.m.get('projection', None)
     (screenCentreX,screenCentreY,screenRadius) = proj.screenRadius()
-    cr.set_source_rgb(0,0, 0.5)
+#    cr.set_source_rgb(0,0, 0.5)
+    cr.set_source_color(gtk.gdk.color_parse(colorName))
     cr.set_line_width(self.linewidth)
     numberOfClusters = len(GPXTracklog.clusters) # how many clusters do we have in this tracklog ?
     for cluster in GPXTracklog.clusters: # we draw all clusters in tracklog
@@ -305,29 +390,49 @@ class showGPX(ranaModule):
 
   def handleMessage(self, message):
     if message == "toggleVisible":
-      loadTl = self.m.get('loadTracklogs', None)
-      if loadTl == None:
-        return
-      path = loadTl.getActiveTracklogPath()
-      visibleTracklogs = self.get('visibleTracklogs', set())
-      if path in visibleTracklogs:
-        visibleTracklogs.remove(path)
+      path = self.getActiveTracklogPath()
+      if self.isVisible(path):
+        self.makeTrackInvisible(path)
       else:
-        visibleTracklogs.add(path)
-      self.set('visibleTracklogs', visibleTracklogs)
-      self.set('showTracklog', 'simple')
+        self.makeTrackVisible(path)
+
+    elif message == 'makeVisible':
+      """
+      make a tracklog visible
+      do nothing when the tracklog is already visible
+      """
+      path = self.getActiveTracklogPath()
+      self.makeTrackVisible(path)
 
     elif message == 'allVisible':
+      # make all available tracklogs visible
       loadTl = self.m.get('loadTracklogs', None)
       if loadTl == None:
         return
-      paths = [x['path'] for x in loadTl.tracklogList]
-      self.set('visibleTracklogs', set(paths))
+
+      availableTracklogs = loadTl.getTracklogPathList()
+
+      visibleTracklogs = self.get('visibleTracklogsDict', {})
+
+      for path in availableTracklogs:
+        # dont override already set colors
+        if path not in visibleTracklogs.keys():
+          visibleTracklogs[path] = {'colorName' : self.getDistinctColorName()}
+
+      self.set('visibleTracklogsDict', visibleTracklogs)
       self.set('showTracklog', 'simple')
       
     elif message == 'inVisible':
-      self.set('visibleTracklogs', set())
+      self.set('visibleTracklogsDict', {})
       self.set('showTracklog', None)
+
+    elif message == 'colorFromRegister':
+      path = self.getActiveTracklogPath()
+      # set the color from the color register
+      colorName = self.get('distinctColorRegister', 'navy')
+      self.setTrackColor(path, colorName)
+
+
 
 if(__name__ == "__main__"):
   a = example({}, {})
