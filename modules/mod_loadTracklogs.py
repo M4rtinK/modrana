@@ -49,7 +49,13 @@ class loadTracklogs(ranaModule):
     folder = self.get('tracklogFolder', 'tracklogs/')
 
     if folder != None:
-      self.tracklogFolder = folder
+      
+      # make sure there is a slash on the end
+      # TODO: check if this is too platform specific
+      if folder[-1] == '/':
+        self.tracklogFolder = folder
+      else:
+        self.tracklogFolder = (folder+'/')
     else:
       self.tracklogFolder = 'tracklogs/'
 
@@ -187,6 +193,19 @@ class loadTracklogs(ranaModule):
 
   def listAvailableTracklogs(self):
     print "** making a list of available tracklogs"
+
+
+
+
+
+
+
+
+
+
+
+
+
     files = []
     if os.path.exists(self.tracklogFolder):
       files = os.listdir(self.tracklogFolder)
