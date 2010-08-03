@@ -48,6 +48,7 @@ class tracklog(ranaModule):
     self.currentLogGPX = None #a GPX tree for current log
     self.currentTempLog = None #a temporary log segment before saving to file
     self.currentLogName = None #name of the current log
+    self.currentLogFileName = None #name of the current log
     self.currentLogPath = None #path to the current log
     self.maxSpeed = None
     self.avg1 = 0
@@ -56,6 +57,7 @@ class tracklog(ranaModule):
     self.distance = None
     self.units = self.m.get('units') #maybe this is faster ?
     self.toolsMenuDone = False
+    self.category='log'
 
 #    self.startupTimestamp = time.strftime("%Y%m%dT%H%M%S")
 
@@ -184,19 +186,24 @@ class tracklog(ranaModule):
 #      self.currentLogGPX.author = "modRana - a flexible GPS navigation system"
 #      self.currentLogGPX.link = "http://nlp.fi.muni.cz/trac/gps_navigace"
 
-
-      self.currentLogPath = tracklogFolder + name + ".gpx"
-      self.saveGPXLog(self.currentLogGPX, self.currentLogPath)
+      filename = name + ".gpx"
+      self.currentLogFileName = filename
+      self.currentLogPath = tracklogFolder + self.category + '/' + filename
+      self.saveGPXLog(self.currentLogGPX, self.currentLogFileName)
 
     self.lastTimestamp = self.lastSavedTimestamp = int(time.time())
     self.lastCoords = self.get('pos', None)
     print "log file initialized"
 
-  def saveGPXLog(self, GPXTracklog, path):
-      f = open(self.currentLogPath,'w')
-      xmlTree = self.currentLogGPX.export_gpx_file("1.1")
-      xmlTree.write(f)
-      f.close()
+  def saveGPXLog(self, GPXTracklog, filename):
+#      f = open(self.currentLogPath,'w')
+#      xmlTree = self.currentLogGPX.export_gpx_file("1.1")
+#      xmlTree.write(f)
+#      f.close()
+    loadTl = self.m.get('loadTracklogs', None)
+    if loadTl:
+      loadTl.storeTracklog(GPXTracklog, filename, self.category, "GPX", False)
+
 
 
   def saveLogIncrement(self):
@@ -215,7 +222,7 @@ class tracklog(ranaModule):
       self.currentLogGPX.append(newTrackpoints)
     else:
       self.currentLogGPX[0].extend(newTrackpoints)
-    self.saveGPXLog(self.currentLogGPX, self.currentLogPath)
+    self.saveGPXLog(self.currentLogGPX, self.currentLogFileName)
     #the current temporary log segment has been saved to disk, we can empty it
     self.currentTempLog = []
 
@@ -230,16 +237,17 @@ class tracklog(ranaModule):
 
   def stopLogging(self):
       self.saveLogIncrement()
-      path = self.currentLogPath
+#      path = self.currentLogPath
       self.clean()
       self.loggingEnabled = False
       self.startButtonIndex=0
       # now we make the tracklog manager aware, that there is a new log
       loadTl = self.m.get('loadTracklogs', None)
       if loadTl:
-        # we also set the correct cathegory ('log')
-        loadTl.setTracklogPathCathegory(path, 'log')
-        # this procedure autorefreshes the list
+#        # we also set the correct cathegory ('log')
+#        loadTl.setTracklogPathCategory(path, 'log')
+        loadTl.listAvailableTracklogs() #TODO: incremental addition
+
 
 
   def clean(self):

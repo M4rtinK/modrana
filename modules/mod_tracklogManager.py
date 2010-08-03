@@ -29,10 +29,9 @@ class tracklogManager(ranaModule):
   
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
-    self.scroll = 0
+    self.scrollDict = {}
     self.currentNumItems = 0
     self.LTModule = None
-    self.cathegoriesSetUp = False
 
   def firstTime(self):
     self.LTModule = self.m.get('loadTracklogs', None)
@@ -48,19 +47,27 @@ class tracklogManager(ranaModule):
     #print "Updated %d times" % (self.get('num_updates'))
 
   def handleMessage(self, message):
-    print "handling"
-    if(message == "up"):
-      if(self.scroll > 0):
-        self.scroll -= 1
+    if message in ["up","down","reset"]:
+      currentCat = self.get('currentTracCat', '')
+      # is scrolling index for this category set ?
+      if not currentCat in self.scrollDict:
+        self.scrollDict[currentCat] = 0
+      # load scrolling index for category
+      scroll = self.scrollDict[currentCat]
+      if(message == "up"):
+        if(scroll > 0):
+          scroll -= 1
+          self.set("needRedraw", True)
+      elif(message == "down"):
+        if (scroll + 1) < self.currentNumItems:
+          print "down"
+          scroll += 1
+          self.set("needRedraw", True)
+      elif(message == "reset"):
+        scroll = 0
         self.set("needRedraw", True)
-    elif(message == "down"):
-      if (self.scroll + 1) < self.currentNumItems:
-        print "down"
-        self.scroll += 1
-        self.set("needRedraw", True)
-    elif(message == "reset"):
-      self.scroll = 0
-      self.set("needRedraw", True)
+      # save the result
+      self.scrollDict[currentCat] = scroll
 
     elif message == 'getElevation':
       print "getting elevation info"
@@ -82,7 +89,7 @@ class tracklogManager(ranaModule):
 #      filename = self.get('currentTrack', None)
 #      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
 #      loadedTracklogs = loadTl.tracklogs
-#      track = filter(lambda x: x.tracklogFilename == filename, loadedTracklogs).pop()
+#      track = filter(lambda x: x.filename == filename, loadedTracklogs).pop()
       track = self.LTModule.getActiveTracklog()
       self.m.get('showOSD', None).routeProfileData = track.perElevList
 
@@ -110,7 +117,7 @@ class tracklogManager(ranaModule):
         print "changing cathegory for:"
         print "%s" % path
         print "to: %s" % currentCathegory
-        self.LTModule.setTracklogPathCathegory(path, currentCathegory)
+        self.LTModule.setTracklogPathCategory(path, currentCathegory)
 
     elif message == 'setupColorMenu':
       m = self.m.get('showGPX', None)
@@ -119,6 +126,14 @@ class tracklogManager(ranaModule):
 
     elif message == 'setupToolsSubmenu':
       self.setupToolsSubmenu()
+
+  def getScroll(self):
+    currentCat = self.get('currentTracCat', '')
+    if not currentCat in self.scrollDict:
+        self.scrollDict[currentCat] = 0
+    return self.scrollDict[currentCat]
+
+
 
   def deleteTracklog(self, path):
     # delete a tracklog
@@ -133,41 +148,31 @@ class tracklogManager(ranaModule):
     # relist all tracklogs
     self.LTModule.listAvailableTracklogs()
 
-  def setDefaultCathegories(self):
-    # set a default set of cathegories and return it
-    defaultCathegories = [('misc',"misc",'generic'),
-                          ('online',"online",'generic'),
-                          ('log',"logs",'generic')
-                          ]
-    self.set('tracklogCathegories', defaultCathegories)
-    return defaultCathegories
-
-
   def setupCathegoriesMenu(self):
     # setup the cathegories menu
-    menus = menus = self.m.get("menu",None)
-    cathegories = self.get('tracklogCathegories', None)
-    if cathegories == None:
-      cathegories = self.setDefaultCathegories()
+
+    menus = self.m.get("menu",None)
 
     # setup the cathegory dashboard
     menu = 'tracklogManagerCathegories'
     nextAction = '|set:menu:tracklogManager'
     menus.clearMenu(menu, "set:menu:main")
-    for cathegory in cathegories:
-      catId = cathegory[0]
-      text = cathegory[1]
-      icon = cathegory[2]
+    
+    categories = self.LTModule.getCatList()
+    for category in categories:
+      catId = category
+      text = category
+      icon = "generic"
       menus.addItem(menu, text, icon, "set:currentTracCat:%s" % catId + nextAction)
 
     # setup the set cathegory menu
     menu = 'tracklogSetCathegory'
     nextAction = '|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogInfo'
     menus.clearMenu(menu, "|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogInfo")
-    for cathegory in cathegories:
-      catId = cathegory[0]
-      text = cathegory[1]
-      icon = cathegory[2]
+    for category in categories:
+      catId = category
+      text = category
+      icon = "generic"
       menus.addItem(menu, text, icon, "set:currentTracCat:%s" % catId + nextAction)
 
   def drawMenu(self, cr, menuName):
@@ -185,9 +190,8 @@ class tracklogManager(ranaModule):
       return # we arent the active menu so we dont do anything
 
     if menuName == 'tracklogManagerCathegories':
-      if not self.cathegoriesSetUp:
-        self.setupCathegoriesMenu()
-        self.cathegoriesSetUp = True
+      self.setupCathegoriesMenu()
+
 
     elif menuName == 'tracklogManager':
 
@@ -200,17 +204,18 @@ class tracklogManager(ranaModule):
       # * scroll down
       menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % self.moduleName)
 
-      cathegory = self.get('currentTracCat', 'misc')
-      list = filter(lambda x: x['cat'] == cathegory, self.LTModule.getTracklogList())
+      # get current category
+      cat = self.get('currentTracCat', '')
+      list = self.LTModule.getTracPathsInCat(cat)
 
       # One option per row
       for row in (0,1,2):
-        index = self.scroll + row
+        index = self.getScroll() + row
         numItems = len(list)
         self.currentNumItems = numItems
         if(0 <= index < numItems):
 
-          (text1,text2,onClick) = self.describeTracklog(list[index], cathegory)
+          (text1,text2,onClick) = self.describeTracklog(list[index], cat)
 
 #          y = y1 + (row+1) * dy
           y = y4 + (row) * dy
@@ -239,13 +244,20 @@ class tracklogManager(ranaModule):
 
     elif menuName == 'tracklogInfo':
       menus = self.m.get("menu",None)
+      # * draw "escape" button
+      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:tracklogManager")
       track = self.LTModule.getActiveTracklog()
+      # is there an active tracklog ?
+      if track == None:
+        """ there is no active tracklog,
+           so we dont draw the rest of the menu
+           we also dont setup the tools sub menu
+           """
+        return
       profile = self.m.get('routeProfile', None)
 
       w = w1 - (x4-x1)
 
-      # * draw "escape" button
-      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:tracklogManager")
       # * draw "tools" button
       menus.drawButton(cr, x2, y2, dx, dy, "tools", "tools", "set:menu:tracklogTools")
 
@@ -254,7 +266,7 @@ class tracklogManager(ranaModule):
       if track.trackpointsList:
         firstPoint = track.trackpointsList[0][0]
         (lat,lon) = (firstPoint.latitude, firstPoint.longitude)
-        action3 = "mapView:recentre %f %f|set:showTrackFilename:%s|showGPX:makeVisible|set:menu:None" % (lat, lon, track.tracklogFilename)
+        action3 = "mapView:recentre %f %f|set:showTrackFilename:%s|showGPX:makeVisible|set:menu:None" % (lat, lon, track.filename)
         menus.drawButton(cr, x3, y3, dx, dy, "show on map", "generic", action3)
       else:
         menus.drawButton(cr, x3, y3, dx, dy, "can't show on map#no points", "generic", 'set:menu:tracklogInfo')
@@ -266,7 +278,7 @@ class tracklogManager(ranaModule):
 
       # * draw an info box
       menus.drawButton(cr, x4, y4+dy, w, h1-(y4+dy), "", "generic", "set:menu:tracklogInfo")
-      
+
       pointcount = 0
       if track.trackpointsList:
         pointcount = len(track.trackpointsList[0])
@@ -296,12 +308,12 @@ class tracklogManager(ranaModule):
 
     menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")
     menus.addItem('tracklogTools', 'elevation#get', 'generic', 'tracklogManager:getElevation|set:menu:tracklogInfo')
-    menus.addItem('tracklogTools', 'active#set', 'generic', 'set:currentTrack:%s|tracklogManager:loadTrackProfile|set:menu:None' % track.tracklogFilename)
+    menus.addItem('tracklogTools', 'active#set', 'generic', 'set:currentTrack:%s|tracklogManager:loadTrackProfile|set:menu:None' % track.filename)
     menus.addItem('tracklogTools', 'inactive#set', 'generic', 'set:currentTrack:None|tracklogManager:unLoadTrackProfile|set:menu:None')
     if isVisible:
-      menus.addItem('tracklogTools', 'toggle#visible', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|tracklogManager:setupToolsSubmenu' % track.tracklogFilename)
+      menus.addItem('tracklogTools', 'toggle#visible', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|tracklogManager:setupToolsSubmenu' % track.filename)
     else:
-      menus.addItem('tracklogTools', 'toggle#invisible', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|tracklogManager:setupToolsSubmenu' % track.tracklogFilename)
+      menus.addItem('tracklogTools', 'toggle#invisible', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|tracklogManager:setupToolsSubmenu' % track.filename)
     menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogInfo')
     menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogInfo')
 
@@ -309,8 +321,8 @@ class tracklogManager(ranaModule):
       colorName = visibleTracklogs[currentPath]['colorName']
       menus.addItem('tracklogTools', 'change color#%s' % colorName, 'generic', 'tracklogManager:setupColorMenu|set:menu:chooseDistColor')
 
-    menus.addItem('tracklogTools', 'cathegory#set', 'generic', 'set:menu:tracklogSetCathegory')
-    menus.addItem('tracklogTools', 'tracklog#delete', 'generic', 'tracklogManager:askDeleteActiveTracklog')
+#    menus.addItem('tracklogTools', 'cathegory#set', 'generic', 'set:menu:tracklogSetCathegory')
+#    menus.addItem('tracklogTools', 'tracklog#delete', 'generic', 'tracklogManager:askDeleteActiveTracklog')
 
 
 

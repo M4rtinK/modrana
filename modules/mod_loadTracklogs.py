@@ -1,3 +1,4 @@
+import os.path
 #!/usr/bin/python
 #----------------------------------------------------------------------------
 # Sample of a Rana module.
@@ -22,6 +23,7 @@ from base_module import ranaModule
 from upoints import gpx
 import geo
 import os
+import glob
 import cPickle
 #import marshal
 from time import clock
@@ -43,7 +45,8 @@ class loadTracklogs(ranaModule):
     self.tracklogFolder = 'tracklogs/'
     self.tracklogList = []
     self.tracklogPathList = []
-    self.tracklogFilenameList = []
+    self.categoryList = []
+
 
   def firstTime(self):
     folder = self.get('tracklogFolder', 'tracklogs/')
@@ -172,84 +175,89 @@ class loadTracklogs(ranaModule):
     path = self.get('activeTracklogPath', None)
     return path
 
-  def setTracklogPathCathegory(self,path,cathegory):
-    """set a cathegory for tracklog identified by path"""
-    # does the path/tracklog exist ?
-    if path not in self.tracklogPathList:
-      # we try to reload the tracklog list
-      self.listAvailableTracklogs()
-      if path not in self.tracklogPathList:
-        return # tracklog does not exist, so we return
 
-    # tracklog exists so we can set its cathegory
-    catData = self.get('tracklogPathCathegory', {})
-    catData[path] = cathegory
-    # update the persistent list
-    self.set('tracklogPathCathegory', catData)
-
-    index = self.getIndexForPath(path)
-    # update the current in memmory list
-    self.tracklogList[index]['cat'] = cathegory
 
   def listAvailableTracklogs(self):
     print "** making a list of available tracklogs"
 
-
-
-
-
-
-
-
-
-
-
-
-
-    files = []
-    if os.path.exists(self.tracklogFolder):
-      files = os.listdir(self.tracklogFolder)
-      files = filter(lambda x: x != '.svn', files)
-      catData = self.get('tracklogPathCathegory', {})
-      newFiles = []
-      pathList = []
-      for file in files:
-        path = self.tracklogFolder + file
-        filename = file
+    tf = self.tracklogFolder
+    # does the tracklog folder exist ?
+    if not os.path.exists(tf):
+      return # no tracklog folder, nothing to list
+    # get the available directories,
+    # each directory represents a category
+    currentFolders = os.listdir(tf)
+    # leave just nonhidden folders
+    currentFolders = filter(lambda x: os.path.isdir(tf+x) and x[0]!='.', currentFolders)
+    # add files from all available folders
+    availableFiles = []
+    pathList = []
+    for folder in currentFolders:
+      #TODO: suport other tracklogs
+      folderFiles = glob.glob(tf+folder+'/*.gpx')
+      folderFiles.extend(glob.glob(tf+folder+'/*.GPX'))
+      # remove possible folders
+      folderFiles = filter(lambda x: os.path.isfile(x), folderFiles)
+      for file in folderFiles:
+        path = file
+        filename = os.path.split(file)[1]
         lastModifiedEpochSecs = os.path.getmtime(path)
         lastModified = strftime("%d.%m.%Y %H:%M:%S",gmtime(lastModifiedEpochSecs))
         size = self.convertBytes(os.path.getsize(path))
-        splitFilename = filename.split('.')
-        extension = ""
-        if len(splitFilename)>=2:
-          extension = splitFilename[-1]
-
-        if path in catData:
-          cat = catData[path]
-        else:
-          catData[path] = 'misc'
-          cat = 'misc'
-
+        extension = os.path.splitext(path)[1]
+        cat = folder
         item={'path':path,
-              'filename':filename,
+              'filename': filename,
               'lastModified':lastModified,
               'size':size,
-              'type':extension,
-              'index':files.index(file),
+              'type':extension[1:],
               'cat':cat
                }
-        newFiles.append(item)
-        pathList.append(path)
+        availableFiles.append(item)
+      pathList.extend(folderFiles)
 
-      print "*  using this tracklog folder:"
-      print self.tracklogFolder
-      print "*  does it exist ?"
-      print os.path.exists(self.tracklogFolder)
-      print "*  there are %d tracklogs available" % len(files)
-      self.tracklogFilenameList = files
-      self.tracklogPathList = pathList
-      self.tracklogList = newFiles
-      self.set('tracklogPathCathegory', catData)
+    self.categoryList = currentFolders
+
+    print "*  using this tracklog folder:"
+    print self.tracklogFolder
+    print "*  does it exist ?"
+    print os.path.exists(self.tracklogFolder)
+    print "*  there are %d tracklogs available" % len(availableFiles)
+    self.tracklogPathList = pathList
+    self.tracklogList = availableFiles
+
+  def getCatList(self):
+    # return the list of available categories
+    if not self.categoryList:
+      self.listAvailableTracklogs()
+    return self.categoryList
+
+  def getTracPathsInCat(self, cat):
+    # return a list of tracklogs in a given cvategory
+    if not self.tracklogList:
+      self.listAvailableTracklogs()
+    return filter(lambda x: x['cat'] == cat,  self.tracklogList)
+
+  
+  def setTracklogPathCategory(self,path,cathegory):
+    pass
+#    """set a cathegory for tracklog identified by path"""
+#    # does the path/tracklog exist ?
+#    if path not in self.tracklogPathList:
+#      # we try to reload the tracklog list
+#      self.listAvailableTracklogs()
+#      if path not in self.tracklogPathList:
+#        return # tracklog does not exist, so we return
+#
+#    # tracklog exists so we can set its cathegory
+#    catData = self.get('tracklogPathCathegory', {})
+#    catData[path] = cathegory
+#    # update the persistent list
+#    self.set('tracklogPathCathegory', catData)
+#
+#    index = self.getIndexForPath(path)
+#    # update the current in memmory list
+#    self.tracklogList[index]['cat'] = cathegory
 
   # from:
   # http://www.5dollarwhitebox.org/drupal/node/84
@@ -313,8 +321,8 @@ class loadTracklogs(ranaModule):
 
 #  def saveClusters(self, clusters):
 
-  def setPathAsActiveTracklog(self):
-    pass
+  def setPathAsActiveTracklog(self, path):
+    self.set('activeTracklogPath', path)
 
   def loadPathList(self, pathList):
     print "loading path list"
@@ -366,7 +374,10 @@ class loadTracklogs(ranaModule):
 #      print file
 #      print track
       file.close()
-      self.tracklogs[path] = (GPXTracklog(track, path, self.cache, self.save))
+
+      type="GPX" #TODO: more formats support
+
+      self.tracklogs[path] = GPXTracklog(track, path, type, self.cache, self.save)
 
     else:
       print "No file"
@@ -380,25 +391,60 @@ class loadTracklogs(ranaModule):
     self.set('activeTracklogPath', path)
 
   def storeRoute(self, route, name="", cat='misc'):
-    """store a route, found by Google Directions to a GPX file, then load this file to tracklogs list"""
+    """store a route, found by Google Directions to a GPX file,
+       then load this file to tracklogs list,
+       return resulting path
+       or None when storing fails"""
     newTracklog = gpx.Trackpoints()
     trackpoints = map(lambda x: gpx.Trackpoint(x[0],x[1]), route)
     newTracklog.append(trackpoints)
-    xmlTree = newTracklog.export_gpx_file()
 
     timeString = strftime("%Y%m%d#%H-%M-%S", gmtime())
-    folder = self.tracklogFolder
     # gdr = Google Directions Result, TODO: alternate prefixes when we have more routing providers
+
     name = name.encode('ascii', 'ignore')
-    path = "" + folder + "gdr_" + name + timeString + ".gpx"
-    f = open(path, 'w') # TODO: handle the exception that occurs when there is not tracklog folder :)
-    xmlTree.write(f)
-    f.close()
-    
-    self.listAvailableTracklogs()
-    self.setTracklogPathCathegory(path, cat)
-    return path
-    # TODO: incremental addition of new tracklogs
+    filename = "gdr_" + name + timeString + ".gpx"
+    # TODO: store to more formats ?
+    return self.storeTracklog(newTracklog, filename, cat, "GPX")
+
+
+  def storeTracklog(self,tracklog,filename,cat,type,refresh="True"):
+    """store tracklog and return the resulting path"""
+    folder = self.tracklogFolder
+    path = folder + cat +'/'
+    # does the directory exist ?
+    if not os.path.exists(path):
+      # try to create the directory
+      try:
+        os.makedirs(path)
+      except:
+        self.sendMessage('notification:Error: tracks folder unusable#3')
+        return None
+    # is it a directory ?
+    if not os.path.isdir(path):
+      self.sendMessage('Error: tracks folder unusable#3')
+      return None
+
+    if type=="GPX":
+      # try to create the file
+      try:
+        xmlTree = tracklog.export_gpx_file()
+        f = open(path+filename, 'w')
+        xmlTree.write(f)
+        f.close()
+      except:
+        self.sendMessage('notification:Error: saving tracklog failed#3')
+        return None
+
+    """refresh the available tracklog list,
+    so the new tracklog shows up"""
+    if refresh:
+      self.listAvailableTracklogs()
+    # TODO: incremental addition of new tracklogs without relisting
+    print "%s" % filename
+    print "saved successfully"
+    return (path+filename)
+
 
   def simplePythagoreanDistance(self, x1,y1,x2,y2):
       dx = x2 - x1
@@ -447,47 +493,51 @@ class loadTracklogs(ranaModule):
 
 class tracklog():
   """A basic class representing a tracklog."""
-  def __init__(self, trackpointsList, tracklogFilename):
+  def __init__(self, trackpointsList, filename, type):
     self.trackpointsList = trackpointsList # here will be the actual list of trackpoints
-    self.tracklogFilename = tracklogFilename # the filename as used when loading the list from file
-    self.tracklogType = None
+    self.filename = filename # the filename as used when loading the list from file
+    self.type = type
     """
   tracklog types: (for now)
   'gpx'= a GPX tracklog
   'kml'= a KML tracklog
   'nmea' = a NMEA log file
   """
-    self.tracklogName = tracklogFilename # custom name for the tracklog, by default the filename
+    self.tracklogName = filename # custom name for the tracklog, by default the filename
     self.tracklogDescription = "" # description of the tracklog
 
-  def getTracklogFilename(self):
-    return self.tracklogFilename
+  def getFilename(self):
+    return self.filename
 
-  def getTracklogName(self):
+  def getName(self):
     """returns tracklog name"""
     return self.tracklogName
 
-  def setTracklogName(name):
+  def setName(name):
     """sets tracklog name"""
     self.tracklogName = name
 
-  def getTracklogDescription(self):
+  def getType(self):
+    """returns tracklog name"""
+    return self.type
+  
+  def getDescription(self):
     """returns tracklog description"""
     return self.tracklogDescription
 
-  def setTracklogDescription(description):
+  def setDescription(description):
     """sets tracklog description"""
     self.tracklogDescription = description
 
 class GPXTracklog(tracklog):
   """A class representing a GPX tracklog."""
-  def __init__(self, trackpointsList, tracklogFilename, cache, save):
-    tracklog.__init__(self, trackpointsList, tracklogFilename)
-    tracklog.tracklogType = 'gpx'
+  def __init__(self, trackpointsList, filename, type, cache, save):
+    tracklog.__init__(self, trackpointsList, filename, type)
+    tracklog.type = 'GPX'
     self.routeInfo = None # a dictionary for storing route information
     # TODO: set this automaticaly
 
-    filename = self.tracklogFilename
+    filename = self.filename
 
     self.cache = cache
     self.save = save
@@ -583,11 +633,11 @@ class GPXTracklog(tracklog):
     this can also meen, that some info that we didnt load to the tree will be lost
     also atributes that were changed after the initial load will be written in the current (changed) state
     """
-    f = open(self.tracklogFilename, "w") # open the old file
+    f = open(self.filename, "w") # open the old file
     xmlTree = self.trackpointsList.export_gpx_file() # get the element tree
     xmlTree.write(f) # overwrite the old file with the new structure
-    print "%s has been replaced by the current in memory version" % self.tracklogFilename
-    del self.cache[self.tracklogFilename] # the file has been modified, so it must be cached again
+    print "%s has been replaced by the current in memory version" % self.filename
+    del self.cache[self.filename] # the file has been modified, so it must be cached again
     self.save() # save the cache to disk
 
 
