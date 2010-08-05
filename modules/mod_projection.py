@@ -27,6 +27,23 @@ def getModule(m,d):
 
 class Projection(ranaModule):
   """Projection code (lat/long to screen conversions)"""
+
+  """
+  HOW DOES IT WORK:
+  - there are basically two modes:
+  * current position tracking
+   => set view + rencentre + 2*find edges
+  * map dragging
+   => nudge + 1*find edges
+
+  TODO:
+  - why is find edges called twice for position tracking ?
+  - dont redraw the whole map for a small nudge
+   -> currently even for a 1 pixel nudge, the whol screen is redrawn
+  - use a mechanism similar to nudging for faster tracklog drawing
+   -> shoft the trackpoints so no ll2xy would be needed
+
+  """
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     
@@ -74,6 +91,7 @@ class Projection(ranaModule):
     return(self.xyValid and self.llValid)
   
   def setView(self,x,y,w,h):
+#    print "setting view xywh:%d,%d,%d,%d" % (x,y,w,h)
     """Setup the display"""
     self.w = w
     self.h = h
@@ -84,6 +102,7 @@ class Projection(ranaModule):
       self.findEdges()
     
   def recentre(self,lat,lon,zoom = None):
+#    print "recentring to: %f,%f" % (lat,lon)
     """Move the projection to a particular geographic location
     (with optional zoom level)"""
     self.lat = lat
@@ -119,6 +138,7 @@ class Projection(ranaModule):
     self.set('needRedraw', True)
   
   def findEdges(self):
+#    print "find edges %f,%f" % (self.lat,self.lon)
     """Update the projection meta-info based on its fundamental parameters"""
     if(not self.xyValid or not self.llValid):
       # If the display is not known yet, then we can't do anything, but we'll
@@ -183,6 +203,7 @@ class Projection(ranaModule):
     return(x,y)
   
   def nudge(self,dx,dy):
+#    print "nudging by: %d,%d" % (dx,dy)
     """Move the map by a number of pixels relative to its current position"""
     if(dx == 0 and dy == 0):
       return
