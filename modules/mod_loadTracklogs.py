@@ -138,7 +138,10 @@ class loadTracklogs(ranaModule):
 
   def getTracklogForPath(self, path):
     # return a tracklog coresponding to the path specified
-    return self.tracklogs[path]
+    if path in self.tracklogs.keys():
+      return self.tracklogs[path]
+    else:
+      return None
 
 #
 #  def getTracklogForIndex(self,index):
@@ -378,6 +381,8 @@ class loadTracklogs(ranaModule):
         track.import_locations(file, "1.1") # load a gpx file into it
       except Exception, e:
         print "loading tracklog failed: %s" % e
+        if notify:
+          self.sendMessage('notification:loading tracklog failed#2')
         return
 #      print file
 #      print track
@@ -387,12 +392,12 @@ class loadTracklogs(ranaModule):
 
       self.tracklogs[path] = GPXTracklog(track, path, type, self.cache, self.save)
 
+      print "Loading %s took %1.2f ms" % (path,(1000 * (clock() - start)))
+      if notify:
+        self.sendMessage('notification:loaded in %1.2f ms' % (1000 * (clock() - start)))
     else:
       print "No file"
 
-    print "Loading %s took %1.2f ms" % (path,(1000 * (clock() - start)))
-    if notify:
-      self.sendMessage('notification:loaded in %1.2f ms' % (1000 * (clock() - start)))
 
   def storeRouteAndSetActive(self, route, name='', cat='misc'):
     path = self.storeRoute(route, name, cat)

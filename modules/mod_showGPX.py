@@ -232,6 +232,13 @@ class showGPX(ranaModule):
 #    pointsDrawn = 0
 #    start = clock()
     proj = self.m.get('projection', None)
+
+    #are the projection and screen usable ?
+    if proj == None or GPXTracklog == None:
+      # we dont have WHAT to draw or HOW or BOTH :D
+      print "draw track: skipping one track (tracklog or projection == None)"
+      return
+
     (screenCentreX,screenCentreY,screenRadius) = proj.screenRadius()
 #    cr.set_source_rgb(0,0, 0.5)
     cr.set_source_color(gtk.gdk.color_parse(colorName))
