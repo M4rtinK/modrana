@@ -130,7 +130,11 @@ class loadTracklogs(ranaModule):
     if path not in self.tracklogs.keys():
       self.loadTracklog(path)
       self.save()
-    return self.tracklogs[path]
+    # was the tracklog loaded successfully ?
+    if path not in self.tracklogs.keys():
+      return None
+    else:
+      return self.tracklogs[path]
 
   def getTracklogForPath(self, path):
     # return a tracklog coresponding to the path specified
@@ -370,7 +374,11 @@ class loadTracklogs(ranaModule):
       track = gpx.Trackpoints() # create new Trackpoints object
 #      print track
       # lets assume we have only GPX 1.1 files TODO: 1.1 and 1.0
-      track.import_locations(file, "1.1") # load a gpx file into it
+      try:
+        track.import_locations(file, "1.1") # load a gpx file into it
+      except Exception, e:
+        print "loading tracklog failed: %s" % e
+        return
 #      print file
 #      print track
       file.close()
