@@ -35,7 +35,8 @@ class mapView(ranaModule):
     if(message == 'zoomIn'):
       self.set('z', z + 1)
     elif(message == 'zoomOut'):
-      self.set('z', max(z - 1, 8))
+#      self.set('z', max(z - 1, 8))
+      self.set('z', max(z - 1, 6))
 
     elif(message):
       try:
