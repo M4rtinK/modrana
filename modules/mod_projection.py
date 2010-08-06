@@ -20,7 +20,7 @@
 from base_module import ranaModule
 from tilenames import *
 import geo
-import math #TODO: temporary import, remove this
+from math import *
 
 def getModule(m,d):
   return(Projection(m,d))
@@ -84,6 +84,18 @@ class Projection(ranaModule):
     self.findEdges()
 
     self.set('centred', True) # set centering to True at start to get setView to run
+
+#    px, py = latlon2xy(self.lat,self.lon,15)
+#    px1 = px - 0.5 * w / scale
+#    px2 = px + 0.5 * w / scale
+#    py1 = py - 0.5 * h / scale
+#    py2 = py + 0.5 * h / scale
+#    pdx = px2 - px1
+#    pdy = py2 - py1
+#
+#    self.z15px1 = px1
+#    self.z15pdx = pdx
+#    self.z15pdy = pdy
 
     
   def isValid(self):
@@ -195,12 +207,36 @@ class Projection(ranaModule):
     if py < 0:
       py = 0
     return (py * self.h)
-  
-  def pxpy2xy(self,px,py):
-    """Convert projection units to display units"""
-    x = self.w * (px - self.px1) / self.pdx
-    y = self.h * (py - self.py1) / self.pdy
-    return(x,y)
+
+#  def screenBBoxLL(self):
+#    """get lat,lon of upper left and lower right screen corners
+#       -> get the screen bounding box in geograhical units"""
+#    (lat1,lon1) = self.xy2ll(0,0)
+#    (lat2,lon2) = self.xy2ll(self.w,self.h)
+#
+#    return (lat1,lon1,lat2,lon2)
+#
+#  def screenBBoxpxpy(self):
+#    """get lat,lon of upper left and lower right screen corners
+#       -> get the screen bounding box in geograhical units"""
+#    (lat1,lon1) = self.xy2ll(0,0)
+#    (lat2,lon2) = self.xy2ll(self.w,self.h)
+#
+#    return (lat1,lon1,lat2,lon2)
+
+  def getCurrentPospxpy(self):
+    """returns pxpy coordinates of the current position, or None"""
+    pos = self.get('pos', None)
+    if pos:
+      (lat,lon) = pos
+      return (self.ll2pxpy(lat, lon))
+
+  def getCurrentPosxy(self):
+    """returns pxpy coordinates of the current position, or None"""
+    pos = self.get('pos', None)
+    if pos:
+      (lat,lon) = pos
+      return (self.ll2xy(lat, lon))
   
   def nudge(self,dx,dy):
 #    print "nudging by: %d,%d" % (dx,dy)
@@ -222,6 +258,34 @@ class Projection(ranaModule):
     y = (py - self.py1) * self.scale
     return(x,y)
   
+  def ll2pxpy(self,lat,lon):
+    """Convert geographic units to projection units"""
+    px,py = latlon2xy(lat,lon,self.zoom)
+    return(px,py)
+
+  def ll2pxpyRel(self,lat,lon):
+    """Convert geographic units to relative projection units"""
+    px = (lon + 180) / 360
+    py = (1 - log(tan(radians(lat)) + sec(radians(lat))) / pi) / 2
+    return(px,py)
+
+  def pxpyRel2xy(self,px,py):
+    """Convert relative projection units
+    to display units"""
+
+    n = 2**self.zoom
+    (px,py) = (px*n,py*n)
+    x = self.w * (px - self.px1) / self.pdx
+    y = self.h * (py - self.py1) / self.pdy
+    return(x,y)
+  
+  def pxpy2xy(self,px,py):
+    """Convert projection units to display units"""
+    x = self.w * (px - self.px1) / self.pdx
+    y = self.h * (py - self.py1) / self.pdy
+    return(x,y)
+
+
   def xy2ll(self,x,y):
     """Convert display units to geographic units"""
     px = self.px1 + x / self.scale

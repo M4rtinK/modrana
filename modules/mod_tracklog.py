@@ -19,11 +19,11 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 #import re
-import random
+import gtk
 from upoints import gpx
 import time
 import geo
-import sys
+
 
 def getModule(m,d):
   return(tracklog(m,d))
@@ -58,6 +58,9 @@ class tracklog(ranaModule):
     self.units = self.m.get('units') #maybe this is faster ?
     self.toolsMenuDone = False
     self.category='log'
+    self.traceColor = 'blue'
+    self.traceIndex = 0
+    self.pxpyIndex = []
 
 #    self.startupTimestamp = time.strftime("%Y%m%dT%H%M%S")
 
@@ -109,8 +112,19 @@ class tracklog(ranaModule):
         entryText = logNameEntry
       entry.entryBox(self ,'logNameEntry','Write tracklog name',entryText)
       self.set('needRedraw', True)
-#      self.expectTextEntry = 'start'
 
+    elif(message == 'clearTrace'):
+      self.pxpyIndex=[]
+
+    elif message == 'setupColorMenu':
+      m = self.m.get('showGPX', None)
+      if m:
+        m.setupChooseDistColorMenu('tracklog', '|tracklog:colorFromRegister|set:menu:None')
+
+    elif message == 'colorFromRegister':
+      # set the color from the color register
+      colorName = self.get('distinctColorRegister', 'blue')
+      self.traceColor = colorName
 
   def handleTextEntryResult(self, key, result):
     if key == 'logNameEntry':
@@ -148,6 +162,7 @@ class tracklog(ranaModule):
         self.currentTempLog.append(currentLatLonElevTime)
         self.lastTimestamp = currentTimestamp
         # update traveled distance
+        self.storeCurrentPosition()
         currentCoords = self.get('pos', None)
         if (self.lastCoords!=None and currentCoords!=None):
           (lat1,lon1) = self.lastCoords
@@ -170,6 +185,7 @@ class tracklog(ranaModule):
     self.avgSpeed = 0
     self.currentTempLog = []
     self.distance = 0
+    self.pxpyIndex = []
     tracklogFolder = self.get('tracklogFolder', None)
 
     if name==None:
@@ -257,6 +273,55 @@ class tracklog(ranaModule):
     self.loggingStartTimestamp = None
 #    self.maxSpeed = None
 #    self.avgSpeed = None
+
+
+  def storeCurrentPosition(self):
+    pos = self.get('pos', None)
+    proj =self.m.get('projection', None)
+
+    if pos and proj:
+      (lat,lon) = pos
+      (px,py) = proj.ll2pxpyRel(lat, lon)
+      index = self.traceIndex
+      """
+      for not, latLonIndex is unsorted, if we sort it according
+      to lat + lon + index to speed up filter, we would need another list in
+      insert order
+      """
+      self.pxpyIndex.append((px,py,index))
+      self.traceIndex+=1
+
+#    proj = self.m.get('projection', None)
+#    if proj:
+##      (lat,lon) = self.get('pos', None)
+#      (lat,lon) = (48.0,16.0)
+##      print proj.ll2pxpy(lat, lon)
+#      print (lat,lon)
+#      (px,py) =  proj.ll2pxpy(lat, lon)
+#      print (px, py)
+#      (x,y) = proj.pxpy2xy(px, py)
+#      print (x,y)
+#      print proj.xy2ll(x, y)
+
+
+#  def getVisiblePoints(self):
+#    # get only the points, that are currently visible
+#    proj = self.m.get('projection', None)
+#    if proj:
+#      print self.LatLonIndex
+#      (lat1,lon1,lat2,lon2) = proj.screenBBoxLL()
+#      print (lat1,lon1,lat2,lon2)
+#      print "filtering"
+#      # first get only point for available latitude range
+#      visiblePoints = filter(lambda x: lat1 >= x[0] >= lat2, self.LatLonIndex)
+#      print visiblePoints
+#      visiblePoints = filter(lambda x: lon1 <= x[1] <= lon2, visiblePoints)
+#      print visiblePoints
+#      # now sort the list of visible points according to the index
+#      visiblePoints = sorted(visiblePoints, key=lambda x: x[2])
+#      print visiblePoints
+#      return visiblePoints
+
 
 #  def load(self, filename):
 #    # TODO: share this with replayGpx
@@ -393,6 +458,8 @@ class tracklog(ranaModule):
 #                  ]
       menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsTime')
       menus.addItem('tracklogTools', 'folder#go to', 'generic', 'set:currentTracCat:log|set:menu:tracklogManager')
+      menus.addItem('tracklogTools', 'trace#clear', 'generic', 'tracklog:clearTrace|set:menu:None')
+      menus.addItem('tracklogTools', 'color#change', 'generic', 'tracklog:setupColorMenu|set:menu:chooseDistColor')
 
 
   def drawMenu(self, cr, menuName):
@@ -466,6 +533,102 @@ class tracklog(ranaModule):
 
     else:
       return # we arent the active menu so we dont do anything
+
+  def drawMapOverlay(self, cr):
+    proj = self.m.get('projection', None)
+
+    if proj and self.pxpyIndex:
+#      cr.set_source_rgba(0, 0, 1, 1)
+      cr.set_source_color(gtk.gdk.color_parse(self.traceColor))
+      cr.set_line_width(10)
+
+      """
+      log trace drawing algorithm
+      adapted from TangoGPS source (tracks.c)
+      works surprisingly good :)
+      TODO: use the medoulo method for drawing stored tracklogs
+      """
+
+      posXY = proj.getCurrentPosxy()
+      if posXY and self.loggingEnabled and not(self.loggingPaused):
+        (x,y) = posXY
+        cr.move_to(x,y)
+      else:
+        (px,py,index) = self.pxpyIndex[-1]
+        (x,y) = proj.pxpyRel2xy(px, py)
+        cr.move_to(x,y)
+
+      z = proj.zoom
+
+      if z < 16 and z > 10:
+        modulo = 2**(16-z)
+      elif (z <= 10):
+        modulo = 32
+      else:
+        modulo = 1
+
+      maxDraw = 300
+      drawCount = 0
+      counter=0
+#
+#
+      for point in reversed(self.pxpyIndex): #draw the track
+        counter+=1
+        if counter%modulo==0:
+          drawCount+=1
+          if drawCount>maxDraw:
+            break
+          (px,py,index) = point
+          (x,y) = proj.pxpyRel2xy(px, py)
+          cr.line_to(x,y)
+          
+      # draw a track to current position (if known):
+
+      print z, modulo
+      print counter, drawCount
+
+      cr.stroke()
+      cr.fill()
+
+"""old method using a 2d array,
+   that was found to be too slow"""
+#    proj = self.m.get('projection', None)
+#    if proj:
+#      visiblePoints = self.getVisiblePoints()
+#      if visiblePoints:
+#        print "trying to draw"
+#        print len(visiblePoints)
+#        cr.set_source_rgba(0, 0, 1, 1)
+#        cr.set_line_width(10)
+#
+#        (lat,lon,prevIndex) = visiblePoints[0]
+#        (x,y) = proj.ll2xy(lat,lon)
+#        cr.move_to(x,y)
+#
+#        for point in visiblePoints[1:]:
+#          (lat,lon,index) = point
+#          (x,y) = proj.ll2xy(lat,lon)
+#          if prevIndex+1 == index:
+#            cr.line_to(x,y)
+#          else:
+#            cr.stroke()
+#            prevPoint = self.LatLonIndex[index-1]
+#            (lat,lon,index) = prevPoint
+#            (x1,y1) = proj.ll2xy(lat,lon)
+#
+#            cr.move_to(x1,y1)
+#            cr.line_to(x,y)
+#          prevIndex = index
+#
+#        pos = self.get('pos', None)
+#        if pos:
+#          (lat,lon) = pos
+#          (x,y) = proj.ll2xy(lat,lon)
+#          cr.line_to(x,y)
+#
+#        cr.stroke()
+#        cr.fill()
+
     
   def shutdown(self):
     # try to save and stop the log

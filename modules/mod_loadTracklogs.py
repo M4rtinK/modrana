@@ -141,16 +141,12 @@ class loadTracklogs(ranaModule):
     if path in self.tracklogs.keys():
       return self.tracklogs[path]
     else:
-      return None
-
-#
-#  def getTracklogForIndex(self,index):
-#    path = self.tracklogList[index]['path']
-##    print self.tracklogs
-#    print path
-##    print self.tracklogs[path]
-#    tracklog = self.tracklogs[path]
-#    return tracklog
+      # try to load the track
+      track = self.loadTracklog(path)
+      if track: # return the loaded track
+        return track
+      else: # something went wrong, return None
+        return None
 
   def getTracklogList(self):
     if self.tracklogList:
@@ -240,7 +236,7 @@ class loadTracklogs(ranaModule):
     return self.categoryList
 
   def getTracPathsInCat(self, cat):
-    # return a list of tracklogs in a given cvategory
+    # return a list of tracklogs in a given category
     if not self.tracklogList:
       self.listAvailableTracklogs()
     return filter(lambda x: x['cat'] == cat,  self.tracklogList)
