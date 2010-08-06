@@ -590,8 +590,10 @@ class tracklog(ranaModule):
       cr.stroke()
       cr.fill()
 
-"""old method using a 2d array,
-   that was found to be too slow"""
+#
+#   old method using a 2d array,
+#   that was found to be too slow
+#
 #    proj = self.m.get('projection', None)
 #    if proj:
 #      visiblePoints = self.getVisiblePoints()
