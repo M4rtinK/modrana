@@ -48,6 +48,36 @@ class messageModule(ranaModule):
       elif(module == "*"):
         for m in self.m.items():
           m.handleMessage(text)
+
+      elif(module == 'ms'): # short for message + single simple string
+        (module, key, string) = text.split(':', 3)
+        m = self.m.get(module, None)
+        if(m != None):
+          m.handleMessage(key,'ms',string)
+        else:
+          print "Message addressed to %s which isn't loaded" % module
+
+      elif(module == 'ml'): # short for message + list of strings
+        (module, key, semicolonSepList) = text.split(':', 3)
+        list = semicolonSepList.split(';')
+        m = self.m.get(module, None)
+        if(m != None):
+          m.handleMessage(key,'ml',list)
+        else:
+          print "Message addressed to %s which isn't loaded" % module
+
+      elif(module == 'md'): # short for message + dictionary of string:string key:value pairs
+        (module, key, semicolonSepDict) = text.split(':', 3)
+        d = {}
+        for keyValue in semicolonSepDict.split(';'):
+          (key, value) = keyValue.split('=',1)
+          d[key] = value
+        m = self.m.get(module, None)
+        if(m != None):
+          m.handleMessage(key,'md',d)
+        else:
+          print "Message addressed to %s which isn't loaded" % module
+
       else:
         m = self.m.get(module, None)
         if(m != None):
