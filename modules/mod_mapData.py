@@ -160,7 +160,7 @@ class mapData(ranaModule):
         except IOError:
             print "Could not open document: %s" % url
 
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     if(message == "refreshTilecount"):
       size = int(self.get("downloadSize", 4))
       type = self.get("downloadType")

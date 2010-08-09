@@ -107,7 +107,7 @@ class search(ranaModule):
         'Swimming pool':'amenity=swimming_pool'},
       }
 
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     # without this if, we would search also for the commands that move the listable menu
     # lets hope no one needs to search for reset, up or down :)
     if message=="up" or message=="down" or message=="reset" or message=='clearSearch' or message=='storePOI':

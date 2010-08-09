@@ -46,7 +46,7 @@ class tracklogManager(ranaModule):
     self.set('num_updates', self.get('num_updates', 0) + 1)
     #print "Updated %d times" % (self.get('num_updates'))
 
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     if message in ["up","down","reset"]:
       currentCat = self.get('currentTracCat', '')
       # is scrolling index for this category set ?

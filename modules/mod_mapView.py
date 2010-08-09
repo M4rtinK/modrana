@@ -30,7 +30,7 @@ class mapView(ranaModule):
     ranaModule.__init__(self, m, d)
     self.updateTime = 0
     
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     z = self.get('z', 15)
     if(message == 'zoomIn'):
       self.set('z', z + 1)

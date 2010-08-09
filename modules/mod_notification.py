@@ -42,7 +42,7 @@ class notification(ranaModule):
 #    #print "Updated %d times" % (self.get('num_updates'))
     self.set('num_updates', self.get('num_updates', 0) + 1)
 
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     """the first part is the message, that will be displayed,
        there can also by some parameters, delimited by #"""
     list = message.split('#')

@@ -28,7 +28,7 @@ class poiModule(ranaModule):
     self.needUpdate = False
     self.scroll = 0
 
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     if(message == "up"):
       if(self.scroll > 0):
         self.scroll -= 1

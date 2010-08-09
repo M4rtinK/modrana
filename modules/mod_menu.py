@@ -411,6 +411,10 @@ class menus(ranaModule):
         label.lower(),                     # icon
         'set:mode:'+mode+"|set:menu:None") # action
 
+  def setupSearchWhereMenu(self):
+    self.clearMenu('searchWhere')
+    self.addItem('searchWhere', 'test', 'generic', 'ms:search:fooKey:teststring')
+
   def setupSearchMenus(self):
     """Create a load of menus that are just filters for OSM tags"""
     f = open("data/search_menu.txt", "r")
@@ -547,7 +551,7 @@ class menus(ranaModule):
 #    self.addItem('main', 'waypoints', 'waypoints', 'set:menu:waypoints_categories')
     self.addItem('main', 'route', 'route', 'set:menu:route')
     self.addItem('main', 'POI', 'poi', 'set:menu:poi')
-    self.addItem('main', 'search', 'business', 'set:menu:search')
+    self.addItem('main', 'search', 'business', 'set:menu:searchWhere')
     #self.addItem('main', 'view', 'view', 'set:menu:view')
     self.addItem('main', 'options', 'options', 'set:menu:options')
     self.addItem('main', 'download', 'download', 'set:menu:data')
@@ -558,6 +562,7 @@ class menus(ranaModule):
 #    self.addItem('main', 'fullscreen', 'fullscreen', 'menu:fullscreenTogle|set:menu:None')
     self.setupTransportMenu()
     self.setupSearchMenus()
+    self.setupSearchWhereMenu()
     self.setupMaplayerMenus()
     self.setupPoiMenu()
     self.setupDataMenu()
@@ -841,7 +846,7 @@ class menus(ranaModule):
     self.set("menu",None)
     self.userConfig = self.m.get('config', None).userConfig
 
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     messageList = message.split('#')
     message = messageList[0]
     if (message == "rebootDataMenu"):

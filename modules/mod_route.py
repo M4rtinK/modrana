@@ -60,7 +60,7 @@ class route(ranaModule):
     self.set('startPos', None)
     self.set('endPos', None)
 
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     if (message == "clear"):
       self.route = []
       self.directions = []

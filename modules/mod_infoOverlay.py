@@ -103,7 +103,7 @@ class infoOverlay(ranaModule):
     self.set('lookup_road', self.modes[self.mode] == 'road')
     self.set('lookup_place', self.modes[self.mode] == 'road')
 
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     if(message == 'nextField'):
       self.mode += 1
       if(self.mode >= len(self.modes)):

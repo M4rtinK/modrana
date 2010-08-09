@@ -65,7 +65,7 @@ class tracklog(ranaModule):
 #    self.startupTimestamp = time.strftime("%Y%m%dT%H%M%S")
 
 
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     if message == "incrementStartIndex":
       self.startButtonIndex = (self.startButtonIndex+1)%2 # when we go to 2, we return to 0
     elif message == "startLogging":

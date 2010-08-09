@@ -39,7 +39,7 @@ class route(ranaModule):
     ranaModule.__init__(self, m, d)
     self.route = []
     
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     if(message == "route"): # simple route, from here to selected point
       to_pos = self.get("selected_pos", None)
       if(to_pos):

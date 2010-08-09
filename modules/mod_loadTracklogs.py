@@ -64,7 +64,7 @@ class loadTracklogs(ranaModule):
 
 #    self.load()
 
-  def handleMessage(self, message):
+  def handleMessage(self, message, type, args):
     if message == 'loadActive':
       # load the active tracklog
       path = self.get('activeTracklogPath', None)
