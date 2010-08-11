@@ -81,6 +81,6 @@ class messageModule(ranaModule):
       else:
         m = self.m.get(module, None)
         if(m != None):
-          m.handleMessage(text)
+          m.handleMessage(text, None, None)
         else:
           print "Message addressed to %s which isn't loaded" % module

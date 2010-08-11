@@ -31,7 +31,8 @@ class search(ranaModule):
     ranaModule.__init__(self, m, d)
     self.localSearchResults = None # GLS results from onlineServices
     self.scroll = 0
-    self.list = None # processed results: (distancefrom pos, rusult, absolut index)  
+    self.list = None # processed results: (distancefrom pos, rusult, absolut index)
+    self.where='position'
     self.filters = {
       'Sleep':{
         'Hotel':'tourism=hotel',
@@ -51,6 +52,8 @@ class search(ranaModule):
         'Computer store':'search:tourism=computer_store '},
       'Food':{
         'Pub food':'amenity=pub;food=yes',
+        'Pub':'amenity=pub',
+        'Bar':'amenity=bar',
         'Food':'amenity=food',
         'Restaurant':'amenity=restaurant',
         'Cafe':'amenity=cafe',
@@ -110,68 +113,89 @@ class search(ranaModule):
   def handleMessage(self, message, type, args):
     # without this if, we would search also for the commands that move the listable menu
     # lets hope no one needs to search for reset, up or down :)
-    if message=="up" or message=="down" or message=="reset" or message=='clearSearch' or message=='storePOI':
-      if(message == "up"):
-        if(self.scroll > 0):
-          self.scroll -= 1
-          self.set("needRedraw", True)
-      if(message == "down"):
-        print "down"
-        self.scroll += 1
+    
+    if(message == "up"):
+      if(self.scroll > 0):
+        self.scroll -= 1
         self.set("needRedraw", True)
-      if(message == "reset"):
-        self.scroll = 0
-        self.set("needRedraw", True)
-      if (message == 'clearSearch'):
-        self.localSearchResults = None
-        self.list = None
-      if (message == 'storePOI'):
-        store = self.m.get('storePOI', None)
-        if store == None:
-          return
-        resultNr = self.get('searchResultsItemNr', None)
-        if resultNr == None:
-          return
-        tupple = filter(lambda x: x[2] == int(resultNr), self.list).pop()
-        result = tupple[1]
-        store.storeGLSResult(result)
-
+    elif(message == "down"):
+      print "down"
+      self.scroll += 1
       self.set("needRedraw", True)
-      return
+    elif(message == "reset"):
+      self.scroll = 0
+      self.set("needRedraw", True)
+    elif (message == 'clearSearch'):
+      self.localSearchResults = None
+      self.list = None
+    elif (message == 'storePOI'):
+      store = self.m.get('storePOI', None)
+      if store == None:
+        return
+      resultNr = self.get('searchResultsItemNr', None)
+      if resultNr == None:
+        return
+      tupple = filter(lambda x: x[2] == int(resultNr), self.list).pop()
+      result = tupple[1]
+      store.storeGLSResult(result)
 
+    elif (message=='setWhere'):
+      if type=='ms' and args:
+        self.where = args
+        print self.where
 
-    online = self.m.get('onlineServices', None)
-    if online == None:
-      print "search: online services module not pressent"
-      return
+    elif (message=='searchThis'):
+      if type=='ms' and args:
+        print self.where
+        searchTerm = args
+        online = self.m.get('onlineServices', None)
+        if online == None:
+          print "search: online services module not pressent"
+          return
 
-    position = self.get('pos', None)
-    if position == None:
-      print "search: our position is not known"
-      return
+        if self.where=='position':
+          print "search:near position"
+          pos = self.get('pos', None)
+          if pos == None:
+            print "search: our position is not known"
+            return
+          else:
+            (lat,lon) = pos
+        elif self.where=='view':
+          print "search:near view"
+          proj = self.m.get('projection', None)
+          if proj:
+            centrell = proj.getScreenCentrell()
+            if centrell:
+              (lat,lon) = centrell
+            else:
+              print "search: screen center cooridnates unknown"
+              return
 
-    try:
-      searchList = []
-      filters = self.filters
-      for topLevel in filters: # iterate over the filter cathegories
-        for key in filters[topLevel]: # iterate over the search keywords
-          if filters[topLevel][key] == message: # is this the search word for the current amenity ?
-            searchList.append(key) # add the matching search word to the list
-      term = searchList[0] # we have a list, because an amenity can have theoreticaly more "providers"
+        try:
+          searchList = []
+          filters = self.filters
+          for topLevel in filters: # iterate over the filter cathegories
+            for key in filters[topLevel]: # iterate over the search keywords
+              if filters[topLevel][key] == searchTerm: # is this the search word for the current amenity ?
+                searchList.append(key) # add the matching search word to the list
+          term = searchList[0] # we have a list, because an amenity can have theoreticaly more "providers"
 
-    except:
-      print "search: key not present in the filter dictionary, using the key as search term"
-      term = message
+        except:
+          print "search: key not present in the filter dictionary, using the key as search term"
+          term = searchTerm
 
-    (lat,lon) = position
-    sufix = " near %f,%f" % (lat,lon)
-    query = term + sufix
-    print query
-    local = online.googleLocalQuery(query)
-    if local['responseStatus'] != 200:
-      print "search: google returned %d return code" % local['responseStatus']
-    print ("search: local search returned %d results") % len(local['responseData']['results'])
-    self.localSearchResults = local
+        sufix = " near %f,%f" % (lat,lon)
+        query = term + sufix
+        print query
+        local = online.googleLocalQuery(query)
+        if local['responseStatus'] != 200:
+          print "search: google returned %d return code" % local['responseStatus']
+        print ("search: local search returned %d results") % len(local['responseData']['results'])
+        self.localSearchResults = local
+
+    self.set("needRedraw", True)
+    return
 
 
   def drawMenu(self, cr, menuName):
@@ -486,6 +510,6 @@ class search(ranaModule):
         m.clearMenu("search_"+category, 'set:menu:search')
         m.addItem('search', category, category.lower(), 'set:menu:search_'+category)
         for name,filter in items.items():
-          m.addItem('search_'+category, name, name.lower(), "set:menu:searchResults|search:"+filter)
+          m.addItem('search_'+category, name, name.lower(), "set:menu:searchResults|ms:search:searchThis:"+filter)
       m.addItem('search', 'clear', 'clear', 'search:clearSearch|set:menu:None')
         

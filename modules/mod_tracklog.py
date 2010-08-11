@@ -597,8 +597,8 @@ class tracklog(ranaModule):
           
       # draw a track to current position (if known):
 
-      print z, modulo
-      print counter, drawCount
+#      print z, modulo
+#      print counter, drawCount
 
       cr.stroke()
       cr.fill()

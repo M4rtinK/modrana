@@ -413,7 +413,17 @@ class menus(ranaModule):
 
   def setupSearchWhereMenu(self):
     self.clearMenu('searchWhere')
-    self.addItem('searchWhere', 'test', 'generic', 'ms:search:fooKey:teststring')
+    self.addItem('searchWhere', 'view#near', 'generic', 'ms:search:setWhere:view|set:menu:search')
+    self.addItem('searchWhere', 'position#near', 'generic', 'ms:search:setWhere:position|set:menu:search')
+    """
+    TODO:
+    * near tracklog
+     * start
+     * end
+     * AROUND (is this doable ? maybe use points from perElevList...)
+    * near address
+    * near POI (when POI rework is finished)
+    """
 
   def setupSearchMenus(self):
     """Create a load of menus that are just filters for OSM tags"""

@@ -237,6 +237,12 @@ class Projection(ranaModule):
     if pos:
       (lat,lon) = pos
       return (self.ll2xy(lat, lon))
+
+  def getScreenCentrell(self):
+    if self.lat and self.lon:
+      return ((self.lat,self.lon))
+    else:
+      return None
   
   def nudge(self,dx,dy):
 #    print "nudging by: %d,%d" % (dx,dy)
