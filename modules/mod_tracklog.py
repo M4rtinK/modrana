@@ -55,7 +55,6 @@ class tracklog(ranaModule):
     self.avg2 = 0
     self.avgSpeed = None
     self.distance = None
-    self.units = self.m.get('units') #maybe this is faster ?
     self.toolsMenuDone = False
     self.category='log'
     self.traceColor = 'blue'
@@ -496,6 +495,7 @@ class tracklog(ranaModule):
                   [ [["tools", "tools", "set:menu:tracklogTools"]], 0 ],
                   ]
 
+      units = self.m.get('units', None)
 
       text = ""
       if self.loggingEnabled:
@@ -515,17 +515,30 @@ class tracklog(ranaModule):
         elapsedSeconds = (int(time.time()) - self.loggingStartTimestamp)
         text+= "|elapsed time: %s" % time.strftime('%H:%M:%S', time.gmtime(elapsedSeconds))
 
-      currentSpeed = self.get('speed',0)
+      currentSpeed = self.get('speed',0)      
       if currentSpeed:
-        text+="||current speed: %s" % self.units.km2CurrentUnitPerHourString(currentSpeed)
+        if units:
+          currentSpeedString = units.km2CurrentUnitPerHourString(currentSpeed)
+        else:
+          currentSpeedString = "%f kmh" % currentSpeed
+        text+="||current speed: %s" % currentSpeedString
       else:
         text+="||current speed unknown"
+
       if self.maxSpeed:
-        avgString = self.units.km2CurrentUnitPerHourString(self.avgSpeed)
-        maxString = self.units.km2CurrentUnitPerHourString(self.maxSpeed)
+        if units:
+          avgString = units.km2CurrentUnitPerHourString(self.avgSpeed)
+          maxString = units.km2CurrentUnitPerHourString(self.maxSpeed)
+        else:
+          avgString = "%f kmh" % self.avgSpeed
+          maxString = "%f kmh" % self.maxSpeed
         text+= "||max: %s, average: %s" % (maxString, avgString)
+
       if self.distance:
-        distanceString = self.units.km2CurrentUnitString(self.distance)
+        if units:
+          distanceString = units.km2CurrentUnitString(self.distance)
+        else:
+          distanceString = "%f km" % self.distance
         text+= "||distance traveled %s" % distanceString
 
       box = (text , "set:menu:tracklog")
