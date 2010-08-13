@@ -455,7 +455,7 @@ class tracklog(ranaModule):
 #                  ('OFF #time', '', 'set:tracklogLogeTime:False'),
 #                  ('ON #time', '', 'set:tracklogLogTime:True')
 #                  ]
-      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsTime')
+#      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsTime')
       menus.addItem('tracklogTools', 'folder#go to', 'generic', 'set:currentTracCat:log|set:menu:tracklogManager')
       menus.addItem('tracklogTools', 'trace#clear', 'generic', 'tracklog:clearTrace|set:menu:None')
       menus.addItem('tracklogTools', 'color#change', 'generic', 'tracklog:setupColorMenu|set:menu:chooseDistColor')
@@ -559,7 +559,7 @@ class tracklog(ranaModule):
       log trace drawing algorithm
       adapted from TangoGPS source (tracks.c)
       works surprisingly good :)
-      TODO: use the medoulo method for drawing stored tracklogs
+      TODO: use the modulo method for drawing stored tracklogs
       """
 
       posXY = proj.getCurrentPosxy()
