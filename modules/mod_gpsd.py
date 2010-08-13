@@ -245,7 +245,7 @@ class gpsd2(ranaModule):
         lat,lon = [float(ll) for ll in result.split(' ')]
         self.set('pos', (lat,lon))
         self.set('pos_source', 'GPSD')
-        self.set('needRedraw', True)
+#        self.set('needRedraw', True)
         self.status = "OK"
 
         bearing = self.bearing()
@@ -270,9 +270,17 @@ class gpsd2(ranaModule):
         else:
           self.set('elevation', None)
 
-
-
-
+    # make the screen refresh after the update
+    # even when centering is turned off
+    # TODO: make this more efficinet !
+    # * only redraw when the position actually changes
+    # * do we need to dedraw when we momentarily dont know the position ?
+    # * redraw only the needed part of the screen
+    # -> make scrolling more efficinet
+    #  * reuse the alredy drawn area ?
+    #  * dont overdraw the whole screen for a simple nudge ?
+    #  * draw the new area with a delay/after the drag ended ?
+    self.set('needRedraw', True)
         #print(self.get('pos', None))
         #print(time())
 
