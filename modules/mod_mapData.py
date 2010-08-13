@@ -292,6 +292,12 @@ class mapData(ranaModule):
       getFilesThread.start()
       self.getFilesThread = getFilesThread
 
+    if(message == "stopDownloadThreads"):
+      self.stopBatchDownloadThreads()
+
+    if(message == 'stopSizeThreads'):
+      self.stopSizeThreads()
+
     if(message == "up"):
       if(self.scroll > 0):
         self.scroll -= 1
@@ -678,14 +684,19 @@ class mapData(ranaModule):
       # * draw "edit" button
       menus.drawButton(cr, (x1+w)-2*dx, y1, dx, dy, "edit", "tools", "menu:setupEditBatchMenu|set:menu:editBatch")
       # * draw "start" button
-      menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "start", "start", "mapData:download")
+      if self.getFilesThread:
+        menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "stop", "stop", "mapData:stopDownloadThreads")
+      else:
+        menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "start", "start", "mapData:download")
       # * draw the combined info area and size button (aka "box")
       boxX = x1
       boxY = y1+dy
       boxW = w
       boxH = h-dy
-      menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "generic", "mapData:getSize")
-
+      if self.sizeThread:
+        menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "generic", "mapData:stopSizeThreads")
+      else:
+        menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "generic", "mapData:getSize")
       # * display information about download status
       getFilesText = self.getFilesText(getFilesThread)
       getFilesTextX = boxX + dx/8
@@ -854,18 +865,32 @@ class mapData(ranaModule):
      
     f.write("</svg>\n")
 
-  def shutdown(self):
+
+  def stopSizeThreads(self):
     if self.sizeThread:
       try:
         self.sizeThread.quit=True
       except:
         print "error while shutting down size thread"
 
+    time.sleep(0.1) # make place for the tread to handle whats needed
+    self.sizeThread = None
+
+  def stopBatchDownloadThreads(self):
     if self.getFilesThread:
       try:
         self.getFilesThread.quit=True
       except:
         print "error while shutting down files thread"
+
+    time.sleep(0.1) # make place for the tread to handle whats needed
+    self.getFilesThread = None
+
+  def shutdown(self):
+    self.stopSizeThreads()
+    self.stopBatchDownloadThreads()
+
+
 
 
 if(__name__ == "__main__"):
