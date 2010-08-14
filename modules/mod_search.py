@@ -107,6 +107,7 @@ class search(ranaModule):
         'Museum':'amenity=museum',
         'Wine celar':'amenity=wine_celar', # TODO: improve this, it finds more internet cafais but looks ugly :)
         'National park':'amenity=national_park',
+        'WC':'amenity=wc',
         'Swimming pool':'amenity=swimming_pool'},
       }
 
