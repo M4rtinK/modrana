@@ -168,6 +168,18 @@ class options(ranaModule):
 
     self.addBoolOption("Avoid toll roads", "routingAvoidToll", "Online routing", False)
 
+
+    # * navigation
+    self.addOption("Point reached distance", "pointReachedDistance",
+      [(10,"10 m"),
+       (20,"20 m"),
+       (30,"30 m"),
+       (60,"60 m"),
+       (100,"100 m")],
+       "Navigation",
+       30)
+
+
     # Add all our categories to the "options" menu
     self.menuModule = self.m.get("menu", None)
     if(self.menuModule):

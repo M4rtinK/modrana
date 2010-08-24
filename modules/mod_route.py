@@ -23,6 +23,7 @@ import sys
 import math
 import gtk
 import gobject
+import re
 from time import sleep
 from time import clock
 
@@ -77,6 +78,9 @@ class route(ranaModule):
 
       self.set('startPos', None)
       self.set('endPos', None)
+
+      # stop Turn-by-turn navigation, that can be possibly running
+      self.sendMessage('turnByTurn:stop')
 
     elif(message == 'expectStart'):
       self.expectStart = True
@@ -264,7 +268,7 @@ class route(ranaModule):
     proj = self.m.get('projection', None)
     if proj:
       self.pxpyRoute = [proj.ll2pxpyRel(x[0],x[1]) for x in route]
-    self.directions = directions
+    self.processAndSaveDirections(directions,'gdirections')
     # reverse geocode the start and destination coordinates (for the info menu)
     startAddress = online.googleReverseGeocode(fromLat,fromLon)
     destinationAddress = online.googleReverseGeocode(toLat,toLon)
@@ -298,7 +302,7 @@ class route(ranaModule):
     proj = self.m.get('projection', None)
     if proj:
       self.pxpyRoute = [proj.ll2pxpyRel(x[0],x[1]) for x in route]
-    self.directions = directions
+    self.processAndSaveDirections(directions, 'gdirections')
 
     (fromLat, fromLon) = route[0]
     (toLat, toLon) = route[-1]
@@ -308,6 +312,39 @@ class route(ranaModule):
     self.start = (fromLat, fromLon, startAddress)
     self.destination = (toLat, toLon, destinationAddress)
 
+  def processAndSaveDirections(self, rawDirections, type):
+    """process a raw route to a unified format"""
+    if type == 'gdirections':
+    # add a fake destination step, so there is a "destination reached" message
+      destStep = {}
+      destStep[u'descriptionHtml'] = 'you <b>should</b> be near the destination'
+      (lat,lon) = self.route[-1]
+      # NOTE: steps have reversed coordinates
+      destStep[u'Point'] = {'coordinates':[lon,lat,0]}
+      destStep[u'Distance'] = {u'meters' : 100}
+      rawDirections['Directions']['Routes'][0]['Steps'].append(destStep) # add it to the end of the list
+
+      # make the direction messages pango compatible
+      i = 0
+      for step in rawDirections['Directions']['Routes'][0]['Steps']:
+        message = step['descriptionHtml']
+        message = re.sub(r'<div[^>]*?>', '\n<i>', message)
+        message = re.sub(r'</div[^>]*?>', '</i>', message)
+#        message = re.sub(r'<[^>]*?>', '<b>', message)
+#        message = re.sub(r'</div[^>]*?>', '</i>', message)
+        step['descriptionHtml'] = message
+        # get a special version for espeak
+        message = step['descriptionHtml']
+        message = re.sub(r'<div[^>]*?>', '<br>', message)
+        message = re.sub(r'</div[^>]*?>', '', message)
+        message = re.sub(r'<b>', '<emphasis level="strong">', message)
+        message = re.sub(r'</b>', '</emphasis>', message)
+        step['descriptionEspeak'] = message
+        step['visited'] = False
+        step['id'] = i
+        i = i + 1
+
+      self.directions = rawDirections
 
   def firstTime(self):
     """Load stored addresses at startup.
@@ -318,6 +355,13 @@ class route(ranaModule):
     destinationAddress = self.get('destinationAddress', None)
     if destinationAddress:
       self.destinationAddress = destinationAddress
+
+    """setup the first step selection menu"""
+    menus = self.m.get('menu', None)
+    if menus:
+      menus.clearMenu('routeSelectFirstStep', "set:menu:currentRouteTools")
+      menus.addItem('routeSelectFirstStep', 'step#first', 'generic', 'ms:turnByTurn:start:first|set:menu:None')
+      menus.addItem('routeSelectFirstStep', 'step#closest', 'generic', 'ms:turnByTurn:start:closest|set:menu:None')
 
   def update(self):
     self.set('num_updates', self.get('num_updates', 0) + 1)
@@ -354,21 +398,19 @@ class route(ranaModule):
     # as you can see, for some reason, the cooridnates in direction steps are reversed, (lon,lat,0)
     steps = map(lambda x: (x['Point']['coordinates'][1],x['Point']['coordinates'][0]), self.directions['Directions']['Routes'][0]['Steps'])
 
+    # draw the destination as a step point
     steps.append(self.route[-1])
 
     # now we convert geographic cooridnates to screen coordinates, so we dont need to do it twice
     steps = map(lambda x: (proj.ll2xy(x[0],x[1])), steps)
-
-    # geo to screen at once
-#    route = map(lambda x: (proj.ll2xy(x[0],x[1])), route)
-#    route = [proj.pxpyRel2xy(x[0],x[1]) for x in self.pxpyRoute]
 
     start = proj.ll2xy(self.start[0], self.start[1])
     destination = proj.ll2xy(self.destination[0], self.destination[1])
 
     # line from starting point to start of the route
     (x,y) = start
-    (x1,y1) = steps[0]
+    (px1,py1) = self.pxpyRoute[0]
+    (x1,y1) = proj.pxpyRel2xy(px1, py1)
     cr.set_source_rgba(0, 0, 0.5, 0.45)
     cr.set_line_width(10)
     cr.move_to(x,y)
@@ -377,7 +419,8 @@ class route(ranaModule):
 
     # line from the destination point to end of the route
     (x,y) = destination
-    (x1,y1) = steps[-1]
+    (px1,py1) = self.pxpyRoute[-1]
+    (x1,y1) = proj.pxpyRel2xy(px1, py1)
     cr.move_to(x,y)
     cr.line_to(x1,y1)
     cr.stroke()
@@ -472,6 +515,14 @@ class route(ranaModule):
 #    print "Redraw took %1.9f ms" % (1000 * (clock() - start1))
 
 
+  def getCurrentRoute(self):
+    # return the current route
+    return self.route
+
+  def getCurrentDirections(self):
+    # return the current route
+    return self.directions
+
   #from: http://seewah.blogspot.com/2009/11/gpolyline-decoding-in-python.html
   def decode_line(self, encoded):
 
@@ -562,7 +613,7 @@ class route(ranaModule):
     fromPos = self.get('startPos', None)
     toPos = self.get('endPos', None)
     if fromPos != None:
-      print "drawing start point"
+#      print "drawing start point"
       cr.set_line_width(10)
       cr.set_source_rgb(1, 0, 0)
       (lat,lon) = fromPos
@@ -580,7 +631,7 @@ class route(ranaModule):
       cr.fill()
 
     if toPos != None:
-      print "drawing start point"
+#      print "drawing start point"
       cr.set_line_width(10)
       cr.set_source_rgb(0, 1, 0)
       (lat,lon) = toPos
@@ -595,8 +646,8 @@ class route(ranaModule):
       cr.stroke()
       cr.fill()
 
-    if toPos != None:
-      print "drawing end point"
+#    if toPos != None:
+#      print "drawing end point"
 
 #  def respondToText(self, entry, dialog, response):
 #        print "responce"
@@ -683,9 +734,21 @@ class route(ranaModule):
 
       box = (text , "set:menu:currentRoute")
       menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
-
       menus.clearMenu('currentRouteTools', "set:menu:currentRoute")
       menus.addItem('currentRouteTools', 'tracklog#save as', 'generic', 'route:storeRoute|set:currentTracCat:online|set:menu:tracklogInfo')
+
+      # add turn-by-turn navigation buttons
+      tbt = self.m.get('turnByTurn', None)
+      if tbt:
+        if tbt.enabled():
+          menus.addItem('currentRouteTools', 'navigation#stop', 'generic', 'turnByTurn:stop|set:menu:None')
+          menus.addItem('currentRouteTools', 'navigation#restart', 'generic', 'turnByTurn:stop|set:menu:routeSelectFirstStep')
+          self.set('needRedraw', True) # refresh the screen to show the changed button
+        else:
+          menus.addItem('currentRouteTools', 'navigation#start', 'generic', 'set:menu:routeSelectFirstStep')
+
+
+
 
     if menuName == "showAdressRoute":
       

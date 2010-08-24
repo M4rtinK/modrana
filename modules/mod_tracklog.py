@@ -536,7 +536,8 @@ class tracklog(ranaModule):
 
       if self.distance:
         if units:
-          distanceString = units.km2CurrentUnitString(self.distance)
+          distanceString = units.km2CurrentUnitString(self.distance, 2)
+          print self.distance
         else:
           distanceString = "%f km" % self.distance
         text+= "||distance traveled %s" % distanceString

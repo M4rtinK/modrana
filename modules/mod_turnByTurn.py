@@ -1,0 +1,248 @@
+#!/usr/bin/python
+#----------------------------------------------------------------------------
+# A turn by turn navigation module.
+#----------------------------------------------------------------------------
+# Copyright 2007, Oliver White
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#---------------------------------------------------------------------------
+from base_module import ranaModule
+import geo
+import math
+import pango
+import pangocairo
+import subprocess
+
+def getModule(m,d):
+  return(turnByTurn(m,d))
+
+class turnByTurn(ranaModule):
+  """A turn by turn navigation module."""
+  
+  def __init__(self, m, d):
+    ranaModule.__init__(self, m, d)
+    self.goToInitialState()
+
+  def goToInitialState(self):
+    self.steps = []
+    self.currentStepIndex = None
+    self.espeakFirstTrigger = False
+    self.espeakSecondTrigger = False
+    self.espaekProcess = None
+
+    
+  def update(self):
+    # Get and set functions are used to access global data
+    self.set('num_updates', self.get('num_updates', 0) + 1)
+    #print "Updated %d times" % (self.get('num_updates'))
+
+
+  def handleMessage(self, message, type, args):
+    if message == 'start':
+      self.startTBT()
+      if type == 'ms':
+        if args == 'first':
+          self.currentStepIndex = 0
+        elif args == 'closest':
+          cs = self.getClosestStep()
+          id = cs['id']
+          self.currentStepIndex = id
+    elif message == 'stop':
+      self.stopTBT()
+
+  def drawScreenOverlay(self, cr):
+    if self.steps: # is there something relevant to draw ?
+      proj = self.m.get('projection', None) # we also need the projection module
+      
+      currentStep = self.getCurrentStep()
+      distance = currentStep['Distance']['meters']
+      pos = self.get('pos', None) # and current position
+      (lat1,lon1) = pos
+      lat2 = currentStep['Point']['coordinates'][1]
+      lon2 = currentStep['Point']['coordinates'][0]
+      currentDistance = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
+      pointReachedDistance = int(self.get('pointReachedDistance', 30))
+
+      if distance>=currentDistance:
+        """this means we reached an optimal distance for saying the message"""
+        if self.espeakFirstTrigger == False:
+          print "triggering espeak nr. 1"
+          outputFree = True
+          if self.espaekProcess:
+            if self.espaekProcess.poll() == None:
+              outputFree = False # espeak is talking at the moment
+          if outputFree:
+            plaintextMessage = currentStep['descriptionEspeak']
+            self.espeakSay(plaintextMessage, currentDistance)
+            self.espeakFirstTrigger = True # everything has been said :D
+      if currentDistance <= pointReachedDistance:
+        """this means we reached the point"""
+        self.switchToNextStep() # switch to next step
+        if self.espeakSecondTrigger == False:
+          print "triggering espeak nr. 2"
+          outputFree = True
+          if self.espaekProcess:
+            if self.espaekProcess.poll() == None:
+              outputFree = False # espeak is talking at the moment
+          if outputFree:
+            # say the message without distance
+            plaintextMessage = currentStep['descriptionEspeak']
+            self.espeakSay(plaintextMessage, 0)
+            self.markCurrentStepAsVisited() # mark this point as visited
+            self.espeakSecondTrigger = True # everything has been said, again :D
+
+      # draw the current step indicator circle
+      lat = currentStep['Point']['coordinates'][1]
+      lon = currentStep['Point']['coordinates'][0]
+
+      (pointX, pointY) = proj.ll2xy(lat, lon)
+      cr.set_source_rgb(1, 0, 0)
+      cr.set_line_width(4)
+      cr.arc(pointX, pointY, 12, 0, 2.0 * math.pi)
+      cr.stroke()
+      cr.fill()
+
+      # we need to have the viewport available
+      vport = self.get('viewport', None)
+      if vport:
+        # background
+        cr.set_source_rgba(0, 0, 1, 0.3)
+        (sx,sy,w,h) = vport
+        (bx,by,bw,bh) = (w*0.15,h*0.1,w*0.7,h*0.3)
+        cr.rectangle(bx,by,bw,bh)
+        cr.fill()
+        cr.set_source_rgba(1, 1, 1, 1)
+        pg = pangocairo.CairoContext(cr)
+        # create a layout for your drawing area
+        layout = pg.create_layout()
+        message = currentStep['descriptionHtml']
+
+        # display current distance to the next point
+        units = self.m.get('units', None)
+        if units:
+          distString = units.m2CurrentUnitString(currentDistance)
+
+        message = distString + "\n" + message
+
+        border = min(w/30.0,h/30.0)
+        layout.set_markup(message)
+        layout.set_font_description(pango.FontDescription("Sans Serif 20"))
+        # scale to text to fit into the box
+        (lw,lh) = layout.get_size()
+        if lw == 0 or lh == 0:
+          return
+        scale = float(pango.SCALE)
+        factor = min(((bw-2*border)/(lw/scale)),((bh-2*border)/(lh/scale)))
+        factor = min(factor, 1.0)
+        cr.move_to(bx+border,by+border)
+        cr.save()
+        cr.scale(factor,factor)
+        pg.show_layout(layout)
+        cr.restore()
+
+  def espeakSay(self, plaintextMessage, distanceMeters):
+    """say routing messages through espeak"""
+    units = self.m.get('units', None)
+    if units:
+      if distanceMeters == 0:
+        distString = ""
+      else:
+        distString = units.km2CurrentUnitString(distanceMeters/1000.0, 1, False)
+        distString = 'in <emphasis level="strong">'+ distString + '</emphasis><br>'
+      output = distString + plaintextMessage
+      print "saying: %s" % output
+      print plaintextMessage
+      self.espaekProcess = subprocess.Popen(['espeak', '-s 120','-m','"%s"' % output])
+
+  def getStartingStep(self, which='first'):
+    if self.steps:
+      if which == 'first':
+        return self.steps[0]
+      if which == 'closest':
+        return self.getClosestStep()
+
+  def getClosestStep(self):
+    proj = self.m.get('projection', None) # we also need the projection module
+    pos = self.get('pos', None) # and current position
+    if pos and proj:
+      (lat1,lon1) = pos
+      tempSteps = self.steps
+      for step in tempSteps:
+        lat2 = step['Point']['coordinates'][1]
+        lon2 = step['Point']['coordinates'][0]
+        step['currentDistance'] = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
+      closestStep = sorted(tempSteps, key=lambda x: x['currentDistance'])[0]
+      for step in self.steps:
+        print step['currentDistance']
+        print step['id']
+
+      print "adasdasd"
+      print closestStep['id']
+      return closestStep
+
+  def getCurrentStep(self):
+    """return current step"""
+    return self.steps[self.currentStepIndex]
+
+  def getCurrentStepVisitStatus(self):
+    """report visit status for  current step"""
+    return self.steps[self.currentStepIndex]['visited']
+
+  def markCurrentStepAsVisited(self):
+    """mark current step as visited"""
+    self.steps[self.currentStepIndex]['visited'] = True
+
+  def switchToNextStep(self):
+    """switch to next step and clean up"""
+    print "switching to next step"
+    maxIndex = len(self.steps) - 1
+    nextIndex = self.currentStepIndex + 1
+    if nextIndex <= maxIndex:
+      self.currentStepIndex = nextIndex
+      self.espeakFirstTrigger = False
+      self.espeakSecondTrigger = False
+
+  def enabled(self):
+    """return True if enabled, flase othervise"""
+    if self.steps:
+      return True
+    else:
+      return False
+
+  def startTBT(self):
+    # start Turn-by-turn navigation
+    self.sendMessage('notification:use at own risk, watch for cliffs, etc.#2')
+
+    m = self.m.get('route', None)
+    if m:
+     dirs = m.getCurrentDirections()
+     if dirs: # is the route nonempty ?
+       route = dirs['Directions']['Routes'][0]
+       self.steps = []
+       for step in route['Steps']:
+         step['currentDistance'] = None # add the currentDistance key
+         self.steps.append(step)
+       self.steps = dirs['Directions']['Routes'][0]['Steps']
+
+  def stopTBT(self):
+    # stop Turn-by-turn navigation
+    self.goToInitialState()
+
+
+
+if(__name__ == "__main__"):
+  a = example({}, {})
+  a.update()
+  a.update()
+  a.update()
