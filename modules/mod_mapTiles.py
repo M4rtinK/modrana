@@ -102,6 +102,8 @@ class mapTiles(ranaModule):
               platform dependendt value,
               user configurable
     """
+    self.tileDownloading = 'icons/bitmap/tile_downloading.png'
+    self.tileDownloadFailed = 'icons/bitmap/tile_download_failed.png'
 
 #    self.oldZ = None
 #    self.oldThreadCount = None
@@ -238,6 +240,7 @@ class mapTiles(ranaModule):
     del self.images[first]
     del self.imagesQueue[0]
 #    print "images queue length:%d" % len(self.imagesQueue)
+
   
   def drawImage(self,cr, name, x,y):
     """Draw a tile image"""
@@ -297,7 +300,8 @@ class mapTiles(ranaModule):
     # Second, is it already in the process of being downloaded?
     if name in self.threads.keys():
       if(not self.threads[name].finished):
-        return(None)
+        self.loadImageFromFile(self.tileDownloading,self.tileDownloading)
+        return(self.tileDownloading)
     
     # Third, is it in the disk cache?  (including ones recently-downloaded)
     layerInfo = maplayers.get(layer, None)
@@ -377,6 +381,32 @@ class mapTiles(ranaModule):
 #        downloadTile(x,y,z,layer,filename)
 #        return(name)
 
+  def loadImageFromFile(self,path,name):
+    pixbuf = gtk.gdk.pixbuf_new_from_file(path)
+    #x = pixbuf.get_width()
+    #y = pixbuf.get_height()
+    # Google sat images are 256 by 256 px, we dont need to check the size
+    x = 256
+    y = 256
+    ''' create a new cairo surface to place the image on '''
+    surface = cairo.ImageSurface(0,x,y)
+    ''' create a context to the new surface '''
+    ct = cairo.Context(surface)
+    ''' create a GDK formatted Cairo context to the new Cairo native context '''
+    ct2 = gtk.gdk.CairoContext(ct)
+    ''' draw from the pixbuf to the new surface '''
+    ct2.set_source_pixbuf(pixbuf,0,0)
+    ct2.paint()
+    ''' surface now contains the image in a Cairo surface '''
+    self.images[name] = surface
+    self.imagesQueue.append(name)
+
+    # check cache size
+    # if there are too many images, delete them
+    if len(self.images) > self.maxImagesInMemmory:
+      self.trimCache()
+
+
   def imageName(self,x,y,z,layer):
     """Get a unique name for a tile image 
     (suitable for use as part of filenames, dictionary keys, etc)"""
@@ -423,7 +453,34 @@ class mapTiles(ranaModule):
           self.layer,
           self.filename)
         self.finished = 1
+
+      # something is wrong with the server or url
+      except urllib2.HTTPError, e:
+        callback = self.callback
+        name = "%s_%d_%d_%d" % (self.layer,self.z,self.x,self.y)
+        errorTilePath = callback.tileDownloadFailed
+        callback.loadImageFromFile(errorTilePath,name)
+        """
+        like this, when tile download fails due to a http error,
+        the error tile is loaded instead
+        like this:
+         - modRana does not immediately try to download a tile that errors out
+         - the error tile is shown without modifieng the pipeline too much
+         - modRana will eventually try to download the tile again,
+           after it is flushed with old tiles from the memmory
+        """
+
+
+      # somethings is wrong with our connection
       except Exception, e:
+        self.printErrorMessage(self, e)
+
+
+
+        time.sleep(10) # dont DOS the system, when we temorarily loose internet connection or other error occurs
+        self.finished = 1 # finished thread can be removed from the set and retryed
+
+    def printErrorMessage(self, e):
         url = getTileUrl(self.x,self.y,self.z,self.layer)
         print "mapTiles: download thread reports error"
         print "** we were doing this, when an exception occured:"
@@ -435,10 +492,6 @@ class mapTiles(ranaModule):
                                                                             self.filename,
                                                                             url)
         print "** this exception occured: %s" % e
-
-
-        time.sleep(10) # dont DOS the system, when we temorarily loose internet connection or other error occurs
-        self.finished = 1 # finished thread can be removed from the set and retryed
 
     def downloadTile(self,x,y,z,layer,filename):
       """Downloads an image"""
