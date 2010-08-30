@@ -246,6 +246,21 @@ class route(ranaModule):
         posString = "%f,%f" % pos
         self.destinationAddress = posString
 
+    elif(message == 'reroute'):
+      if type == 'ms' and args == "fromPosToDest":
+        """reroute from current position to destination"""
+        # is there a destination and valid position ?
+        print "rerouting from current position to last destination"
+        pos = self.get('pos', None)
+        if self.destination and pos:
+          (pLat, pLon) = pos
+          (dLat, dLon) = (self.destination[0], self.destination[1])
+          self.doRoute(pLat, pLon, dLat, dLon)
+
+
+
+
+
 
       
 

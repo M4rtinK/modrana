@@ -34,11 +34,11 @@
      id="base"
      showgrid="false"
      inkscape:grid-points="false"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="1302.0122"
-     inkscape:cy="-1032.0328"
-     inkscape:window-x="-4"
-     inkscape:window-y="21"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="1191.1148"
+     inkscape:cy="-1240.8601"
+     inkscape:window-x="-32000"
+     inkscape:window-y="-32000"
      inkscape:current-layer="svg2"
      inkscape:object-paths="false"
      inkscape:grid-bbox="false"
@@ -7472,6 +7472,34 @@
        inkscape:vp_y="0 : 1000 : 0"
        inkscape:vp_x="0 : 0.5 : 1"
        sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective5999"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective5999-5"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective5922"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective5999-1"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
   </defs>
   <rect
      id="rect14063"
@@ -9120,14 +9148,14 @@
   <image
      sodipodi:absref="\\192.168.1.127\pub\icons\source\Map_symbol_dining_02.png"
      xlink:href="source\Map_symbol_dining_02.png"
-     inkscape:export-ydpi="92.212929"
-     inkscape:export-xdpi="92.212929"
-     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\business.png"
-     width="58.501156"
-     height="58.501156"
-     id="image19429"
+     y="165.23032"
      x="810.98877"
-     y="165.23032" />
+     id="image19429"
+     height="58.501156"
+     width="58.501156"
+     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\business.png"
+     inkscape:export-xdpi="92.212929"
+     inkscape:export-ydpi="92.212929" />
   <g
      id="g19228"
      transform="matrix(0.4583615,0,0,0.4583615,846.43845,182.46319)"
@@ -9210,14 +9238,14 @@
   <image
      sodipodi:absref="\\192.168.1.127\pub\icons\source\212px-Modern_clock_chris_kemps_01.svg.png"
      xlink:href="source\212px-Modern_clock_chris_kemps_01.svg.png"
-     inkscape:export-ydpi="92.212929"
-     inkscape:export-xdpi="92.212929"
-     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\events.png"
-     width="47.793228"
-     height="47.567787"
-     id="image19885"
+     y="447.87241"
      x="895.08459"
-     y="447.87241" />
+     id="image19885"
+     height="47.567787"
+     width="47.793228"
+     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\events.png"
+     inkscape:export-xdpi="92.212929"
+     inkscape:export-ydpi="92.212929" />
   <rect
      id="rect19888"
      x="7.0809593"
@@ -9525,14 +9553,14 @@
   <image
      sodipodi:absref="\\192.168.1.127\pub\icons\source\Map_symbol_dining_02.png"
      xlink:href="source\Map_symbol_dining_02.png"
-     inkscape:export-ydpi="92.212929"
-     inkscape:export-xdpi="92.212929"
-     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\viewMenu.png"
-     width="19.165253"
-     height="19.165253"
-     id="image19965"
+     y="323.7113"
      x="48.273346"
-     y="323.7113" />
+     id="image19965"
+     height="19.165253"
+     width="19.165253"
+     inkscape:export-filename="C:\home\oliver\pyroute\icons\bitmap\viewMenu.png"
+     inkscape:export-xdpi="92.212929"
+     inkscape:export-ydpi="92.212929" />
   <g
      id="g19967"
      transform="matrix(0.1501614,0,0,0.1501614,59.886787,329.35686)"
@@ -15032,40 +15060,47 @@
      rx="22"
      ry="0"
      inkscape:export-filename="\\192.168.1.127\pub\icons\bitmap\tile_download_failed.png"
-     inkscape:export-xdpi="92"
-     inkscape:export-ydpi="92" />
+     inkscape:export-xdpi="87.938934"
+     inkscape:export-ydpi="87.938934" />
   <text
      xml:space="preserve"
-     style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
-     x="1086.4484"
+     style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000080;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+     x="1084.4484"
      y="1668.1874"
      id="text2831-1"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan2833-7"
-       x="1086.4484"
+       x="1084.4484"
        y="1668.1874">tile download <tspan
-   style="font-weight:bold;fill:#de0000;fill-opacity:1"
+   style="font-weight:bold;fill:#ff0000;fill-opacity:1"
    id="tspan5921">failed</tspan></tspan><tspan
        sodipodi:role="line"
-       x="1086.4484"
+       x="1084.4484"
        y="1693.1874"
+       id="tspan5970"
+       style="font-style:italic">due to <tspan
+   style="fill:#ff0000"
+   id="tspan5972">mapserver error</tspan></tspan><tspan
+       sodipodi:role="line"
+       x="1084.4484"
+       y="1718.1874"
        id="tspan5915">you can try to:</tspan><tspan
        sodipodi:role="line"
-       x="1086.4484"
-       y="1718.1874"
-       id="tspan5909"
-       style="font-style:italic"> zoom up</tspan><tspan
-       sodipodi:role="line"
-       x="1086.4484"
+       x="1084.4484"
        y="1743.1874"
-       id="tspan5911"
-       style="font-style:italic"> switch to another layer</tspan><tspan
+       id="tspan5909"
+       style="font-style:italic;fill:#000080">  zoom up</tspan><tspan
        sodipodi:role="line"
-       x="1086.4484"
+       x="1084.4484"
        y="1768.1874"
+       id="tspan5911"
+       style="font-style:italic;fill:#000080">  switch to another layer</tspan><tspan
+       sodipodi:role="line"
+       x="1084.4484"
+       y="1793.1874"
        id="tspan5913"
-       style="font-style:italic"> try again later</tspan></text>
+       style="font-style:italic;fill:#000080">  try again later</tspan></text>
   <text
      xml:space="preserve"
      style="font-size:40px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
@@ -15077,7 +15112,7 @@
        x="1189.3536"
        y="1627.4261" /></text>
   <rect
-     style="fill:#00ff00;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     style="fill:#00ff00;fill-opacity:0.15277778;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
      id="rect5050-4"
      width="262"
      height="262"
@@ -15086,11 +15121,11 @@
      rx="22"
      ry="0"
      inkscape:export-filename="\\192.168.1.127\pub\icons\bitmap\tile_downloading.png"
-     inkscape:export-xdpi="86.292137"
-     inkscape:export-ydpi="86.292137" />
+     inkscape:export-xdpi="87.938934"
+     inkscape:export-ydpi="87.938934" />
   <text
      xml:space="preserve"
-     style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+     style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#00ff00;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
      x="1426.1113"
      y="1727.696"
      id="text2831-1-0"
@@ -15099,5 +15134,141 @@
        x="1426.1113"
        y="1727.696"
        id="tspan5913-4"
-       style="font-style:italic">Downloading...</tspan></text>
+       style="font-style:italic;fill:#00ff00">Downloading...</tspan></text>
+  <path
+     sodipodi:type="arc"
+     style="fill:#000080;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     id="path5989"
+     sodipodi:cx="907.21802"
+     sodipodi:cy="1724.2998"
+     sodipodi:rx="3.5355339"
+     sodipodi:ry="3.5355339"
+     d="m 910.75355,1724.2998 a 3.5355339,3.5355339 0 1 1 -7.07107,0 3.5355339,3.5355339 0 1 1 7.07107,0 z"
+     transform="translate(183.95867,39.435028)" />
+  <path
+     sodipodi:type="arc"
+     style="fill:#000080;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     id="path5989-5"
+     sodipodi:cx="907.21802"
+     sodipodi:cy="1724.2998"
+     sodipodi:rx="3.5355339"
+     sodipodi:ry="3.5355339"
+     d="m 910.75355,1724.2998 a 3.5355339,3.5355339 0 1 1 -7.07107,0 3.5355339,3.5355339 0 1 1 7.07107,0 z"
+     transform="translate(184.91577,63.153415)" />
+  <path
+     sodipodi:type="arc"
+     style="fill:#000080;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     id="path5989-1"
+     sodipodi:cx="907.21802"
+     sodipodi:cy="1724.2998"
+     sodipodi:rx="3.5355339"
+     sodipodi:ry="3.5355339"
+     d="m 910.75355,1724.2998 a 3.5355339,3.5355339 0 1 1 -7.07107,0 3.5355339,3.5355339 0 1 1 7.07107,0 z"
+     transform="translate(183.78188,13.802387)" />
+  <text
+     xml:space="preserve"
+     style="font-size:40px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+     x="1033.79"
+     y="1674.0952"
+     id="text5966"><tspan
+       sodipodi:role="line"
+       id="tspan5968"
+       x="1033.79"
+       y="1674.0952" /></text>
+  <text
+     xml:space="preserve"
+     style="font-size:40px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+     x="887.41901"
+     y="1845.9221"
+     id="text5974"><tspan
+       sodipodi:role="line"
+       id="tspan5976"
+       x="887.41901"
+       y="1845.9221" /></text>
+  <rect
+     style="fill:#aea4a4;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     id="rect5050-7"
+     width="262"
+     height="262"
+     x="1074.6171"
+     y="1865.5359"
+     rx="22"
+     ry="0"
+     inkscape:export-filename="\\192.168.1.127\pub\icons\bitmap\tile_network_error.png"
+     inkscape:export-xdpi="87.938934"
+     inkscape:export-ydpi="87.938934" />
+  <text
+     xml:space="preserve"
+     style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000080;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+     x="1084.2872"
+     y="1944.1375"
+     id="text2831-1-1"
+     sodipodi:linespacing="125%"><tspan
+       sodipodi:role="line"
+       id="tspan2833-7-1"
+       x="1084.2872"
+       y="1944.1375">tile download <tspan
+   style="font-size:20px;font-weight:bold;fill:#ff0000;fill-opacity:1"
+   id="tspan5921-5">failed</tspan></tspan><tspan
+       sodipodi:role="line"
+       x="1084.2872"
+       y="1969.1375"
+       id="tspan5970-2"
+       style="font-size:20px;font-style:italic">due to <tspan
+   style="font-size:20px;fill:#ff0000"
+   id="tspan6049">network error</tspan></tspan><tspan
+       sodipodi:role="line"
+       x="1084.2872"
+       y="1994.1375"
+       id="tspan5915-6">you can try to:</tspan><tspan
+       sodipodi:role="line"
+       x="1084.2872"
+       y="2019.1375"
+       id="tspan5911-4"
+       style="font-size:14px;font-style:italic;fill:#000080">  check your network connection</tspan><tspan
+       sodipodi:role="line"
+       x="1084.2872"
+       y="2044.1375"
+       style="font-size:14;font-style:italic;fill:#000080"
+       id="tspan6063">  switch to another layer</tspan><tspan
+       sodipodi:role="line"
+       x="1084.2872"
+       y="2069.1375"
+       id="tspan5913-2"
+       style="font-size:14;font-style:italic;fill:#000080">  try again later</tspan><tspan
+       sodipodi:role="line"
+       x="1084.2872"
+       y="2094.1375"
+       style="font-size:20px;font-style:italic;fill:#000080"
+       id="tspan6059" /></text>
+  <path
+     sodipodi:type="arc"
+     style="fill:#000080;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     id="path5989-3"
+     sodipodi:cx="907.21802"
+     sodipodi:cy="1724.2998"
+     sodipodi:rx="3.5355339"
+     sodipodi:ry="3.5355339"
+     d="m 910.75355,1724.2998 a 3.5355339,3.5355339 0 1 1 -7.07107,0 3.5355339,3.5355339 0 1 1 7.07107,0 z"
+     transform="translate(180.88258,303.01072)" />
+  <path
+     sodipodi:type="arc"
+     style="fill:#000080;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     id="path5989-5-2"
+     sodipodi:cx="907.21802"
+     sodipodi:cy="1724.2998"
+     sodipodi:rx="3.5355339"
+     sodipodi:ry="3.5355339"
+     d="m 910.75355,1724.2998 a 3.5355339,3.5355339 0 1 1 -7.07107,0 3.5355339,3.5355339 0 1 1 7.07107,0 z"
+     transform="translate(181.30935,319.12772)" />
+  <path
+     sodipodi:type="arc"
+     style="fill:#000080;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     id="path5989-1-2"
+     sodipodi:cx="907.21802"
+     sodipodi:cy="1724.2998"
+     sodipodi:rx="3.5355339"
+     sodipodi:ry="3.5355339"
+     d="m 910.75355,1724.2998 a 3.5355339,3.5355339 0 1 1 -7.07107,0 3.5355339,3.5355339 0 1 1 7.07107,0 z"
+     transform="translate(180.70578,286.92406)" />
 </svg>

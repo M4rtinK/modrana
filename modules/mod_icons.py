@@ -49,7 +49,13 @@ class icons(ranaModule):
       print "Can't load %s" % filename
       return(0)
 
-    image = cairo.ImageSurface.create_from_png(filename) #TODO: improve this by the pixbuff method ?
+    image = None
+    try:
+      image = cairo.ImageSurface.create_from_png(filename) #TODO: improve this by the pixbuff method ?
+    except Exception, e:
+      print '** the icon "%s" is possibly corrupted' % name
+      print "** filename: %s" % filename
+
     if(not image):
       return(0)
     w = float(image.get_width())

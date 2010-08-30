@@ -60,6 +60,16 @@ class turnByTurn(ranaModule):
           self.currentStepIndex = id
     elif message == 'stop':
       self.stopTBT()
+    elif message == 'reroute':
+      # 1. say rerouting is in progress
+      message = "rerouting"
+      self.espeakSay(message, 0)
+      # 2. get a new route from current position to destination
+      self.sendMessage("ms:route:reroute:fromPosToDest")
+      # 3. restart routing for to this new route from the closest point
+      self.sendMessage("ms:turnByTurn:start:closest")
+
+
 
   def drawScreenOverlay(self, cr):
     if self.steps: # is there something relevant to draw ?
@@ -74,6 +84,7 @@ class turnByTurn(ranaModule):
       currentDistance = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
       pointReachedDistance = int(self.get('pointReachedDistance', 30))
 
+      # TODO: maybe move the espeak messages from the display code ?
       if distance>=currentDistance:
         """this means we reached an optimal distance for saying the message"""
         if self.espeakFirstTrigger == False:
@@ -113,13 +124,15 @@ class turnByTurn(ranaModule):
       cr.stroke()
       cr.fill()
 
+      # draw the routing message box
+
       # we need to have the viewport available
       vport = self.get('viewport', None)
       if vport:
         # background
         cr.set_source_rgba(0, 0, 1, 0.3)
         (sx,sy,w,h) = vport
-        (bx,by,bw,bh) = (w*0.15,h*0.1,w*0.7,h*0.3)
+        (bx,by,bw,bh) = (w*0.15,h*0.1,w*0.7,h*0.4)
         cr.rectangle(bx,by,bw,bh)
         cr.fill()
         cr.set_source_rgba(1, 1, 1, 1)
@@ -133,7 +146,8 @@ class turnByTurn(ranaModule):
         if units:
           distString = units.m2CurrentUnitString(currentDistance)
 
-        message = distString + "\n" + message
+        note = "<sub> tap this box to reroute</sub>"
+        message = distString + "\n" + message + "\n\n" + note
 
         border = min(w/30.0,h/30.0)
         layout.set_markup(message)
@@ -150,6 +164,12 @@ class turnByTurn(ranaModule):
         cr.scale(factor,factor)
         pg.show_layout(layout)
         cr.restore()
+        # make clickable
+        clickHandler = self.m.get('clickHandler', None)
+        if clickHandler:
+          action = "turnByTurn:reroute"
+          clickHandler.registerXYWH(bx, by , bw, bh, action)
+
 
   def espeakSay(self, plaintextMessage, distanceMeters):
     """say routing messages through espeak"""

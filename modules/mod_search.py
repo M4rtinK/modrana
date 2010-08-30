@@ -140,14 +140,12 @@ class search(ranaModule):
       result = tupple[1]
       store.storeGLSResult(result)
 
-    elif (message=='setWhere'):
+    elif (message=='setWhere'): # set the search region
       if type=='ms' and args:
         self.where = args
-        print self.where
 
-    elif (message=='searchThis'):
+    elif (message=='searchThis'): # search for a term in the message string
       if type=='ms' and args:
-        print self.where
         searchTerm = args
         online = self.m.get('onlineServices', None)
         if online == None:
@@ -188,6 +186,7 @@ class search(ranaModule):
 
         sufix = " near %f,%f" % (lat,lon)
         query = term + sufix
+        print "query:"
         print query
         local = online.googleLocalQuery(query)
         if local['responseStatus'] != 200:
@@ -195,14 +194,20 @@ class search(ranaModule):
         print ("search: local search returned %d results") % len(local['responseData']['results'])
         self.localSearchResults = local
 
+    elif message == "customQuery":
+      # start input for custom query
+      entry = self.m.get('textEntry', None)
+      if entry:
+        entryText = ""
+        entry.entryBox(self, 'customQuery','Enter your search query',entryText)
+
     self.set("needRedraw", True)
-    return
 
 
   def drawMenu(self, cr, menuName):
     # is this menu the correct menu ?
-    if menuName != 'searchResults' and menuName != 'searchResultsItem':
-      return # we arent the active menu so we dont do anything
+#    if menuName != 'searchResults' and menuName != 'searchResultsItem':
+#      return # we arent the active menu so we dont do anything
 
     if menuName == 'searchResults':
       menus = self.m.get("menu",None)
@@ -260,7 +265,7 @@ class search(ranaModule):
           # in corner: row number
           self.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y + 0.42 * dy, w * 0.15 - border, 20)
 
-    if menuName == 'searchResultsItem':
+    elif menuName == 'searchResultsItem':
       """draw the menu describing a single GLS result"""
       list = self.updateDistance()
 
@@ -277,7 +282,8 @@ class search(ranaModule):
       result = filter(lambda x: x[2] == resultNumber, list).pop() # get the result for the ABSOLUTE key
       self.drawGLSResultMenu(cr, result)
 
-    return
+    elif menuName == 'searchCustomQuery':
+      self.drawSearchCustomQueryMenu(cr)
 
   def describeItem(self, index, category, list):
 #    longName = name = item.getTracklogName()
@@ -295,7 +301,7 @@ class search(ranaModule):
     name = "%s" % list[index][1]['titleNoFormatting']
 
     units = self.m.get('units', None)
-    distanceString = units.km2CurrentUnitString(list[index][0]) # use correct units
+    distanceString = units.km2CurrentUnitString(list[index][0], dp=2) # use correct units
 
     description = "%s" % distanceString
 
@@ -370,8 +376,10 @@ class search(ranaModule):
     # * draw "show" button
     action2 = "search:reset|set:menu:None|set:searchResultsItemNr:%d|mapView:recentre %f %f" % (index, lat, lon)
     menus.drawButton(cr, x2, y2, dx, dy, "on map#show", "generic", action2)
-    # * draw "add POI" button
-    menus.drawButton(cr, x3, y3, dx, dy, "add to POI", "generic", "search:reset|search:storePOI|set:menu:searchResults")
+#    # * draw "add POI" button
+#    menus.drawButton(cr, x3, y3, dx, dy, "add to POI", "generic", "search:reset|search:storePOI|set:menu:searchResults")
+    # * draw "tools" button
+    menus.drawButton(cr, x3, y3, dx, dy, "tools", "tools", "set:menu:searchResultTools")
     # * draw info box
     w4 = w - x4
     h4 = h - y4
@@ -381,7 +389,7 @@ class search(ranaModule):
     text = "%s (%s)" % (result['titleNoFormatting'],distanceString)
 
     try: # the adress can be unknown
-      print result['addressLines']
+#      print result['addressLines']
       for addressLine in result['addressLines']:
         text += "|%s" % addressLine
     except:
@@ -399,6 +407,11 @@ class search(ranaModule):
     text += "|coordinates: %f, %f" % (lat,lon)
 
     menus.drawTextToSquare(cr, x4, y4, w4, h4, text) # display the text in the box
+
+  def drawSearchCustomQueryMenu(self, cr):
+    menus = self.m.get("menu",None)
+    if menus:
+      menus.clearMenu('searchCustomQuery', 'set:menu:search')
 
   def drawMapOverlay(self, cr):
     """Draw overlay that's part of the map"""
@@ -512,5 +525,20 @@ class search(ranaModule):
         m.addItem('search', category, category.lower(), 'set:menu:search_'+category)
         for name,filter in items.items():
           m.addItem('search_'+category, name, name.lower(), "set:menu:searchResults|ms:search:searchThis:"+filter)
-      m.addItem('search', 'clear', 'clear', 'search:clearSearch|set:menu:None')
+#      m.addItem('search', 'clear', 'clear', 'search:clearSearch|set:menu:None')
+      m.addItem('search', 'query#custom', 'generic', 'search:customQuery')
+
+      # setup the searchResultTools submenu
+      m.clearMenu('searchResultTools', 'set:menu:searchResultsItem')
+      m.addItem('searchResultTools', "results#clear", 'generic', 'search:clearSearch|set:menu:None')
+      m.addItem('searchResultTools', "add to POI", "generic", "search:reset|search:storePOI|set:menu:searchResults")
+    # TODO: add "find route to"
+
+  def handleTextEntryResult(self, key, result):
+    # handle custom query input
+    if key == "customQuery":
+      message = "ms:search:searchThis:%s" % result
+      self.sendMessage(message)
+      self.set('menu', 'searchResults')
+
         

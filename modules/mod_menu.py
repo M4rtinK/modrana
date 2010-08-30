@@ -373,6 +373,14 @@ class menus(ranaModule):
 
     self.menus[menu][pos] = (textIconAction, index, uniqueName, type)
 
+  def addListableMenu(self, parrent, nameIconDescActionList, descFunction=None):
+    if descFunction == None: # use default description function
+      pass
+
+  def describeListItem(self, item):
+    pass
+
+
   def setupProfile(self):
     self.clearMenu('data2', "set:menu:main")
     self.setupDataSubMenu()
@@ -816,7 +824,14 @@ class menus(ranaModule):
     (lat2,lon2) = proj.xy2ll(x2,y2)
 
     dist = geo.distance(lat1,lon1,lat2,lon2)
-    text = "%1.1f km" % dist
+    # respect the current unit settings
+    unit = "km"
+    units = self.m.get('units', None)
+    if units:
+      unitString = units.km2CurrentUnitString(dist, 2, True)
+      text = unitString
+    else:
+      text = "%1.1f km" % unit
 
     cr.set_source_rgb(0,0,0)
     cr.move_to(x1,y1)
