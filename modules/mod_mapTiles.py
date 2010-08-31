@@ -256,8 +256,8 @@ class mapTiles(ranaModule):
     first = self.imagesQueue[0]
     del self.images[first]
     del self.imagesQueue[0]
-    print "images queue length:%d" % len(self.imagesQueue)
-    print "memmory cache length:%d" % len(self.imagesQueue)
+#    print "images queue length:%d" % len(self.imagesQueue)
+#    print "memmory cache length:%d" % len(self.imagesQueue)
 
   def removeNonexistingFromQueue(self):
     # remove nonexistant images from queue

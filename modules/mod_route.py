@@ -229,6 +229,11 @@ class route(ranaModule):
 
     elif(message == 'addressRoute'):
       if self.startAddress and self.destinationAddress:
+#        # remove possible markers from p2p routing
+#        if self.start:
+#          self.start = None
+#        if self.destination:
+#          self.destination = None
         print "address routing"
         self.doAddressRoute(self.startAddress,self.destinationAddress)
       else:
@@ -278,17 +283,10 @@ class route(ranaModule):
 
     polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
     route = self.decode_line(polyline) # we decode the polyline to a list of points
-
-    self.route = route
-    proj = self.m.get('projection', None)
-    if proj:
-      self.pxpyRoute = [proj.ll2pxpyRel(x[0],x[1]) for x in route]
-    self.processAndSaveDirections(directions,'gdirections')
-    # reverse geocode the start and destination coordinates (for the info menu)
-    startAddress = online.googleReverseGeocode(fromLat,fromLon)
-    destinationAddress = online.googleReverseGeocode(toLat,toLon)
-    self.start = (fromLat, fromLon, startAddress)
-    self.destination = (toLat, toLon, destinationAddress)
+    # handle the results
+    start = (fromLat, fromLon)
+    destination = (toLat, toLon)
+    self.processAndSaveResults(route, directions, start, destination)
 
   def doAddressRoute(self, start, destination):
     """Route from one point to another, and set that as the active route"""
@@ -312,7 +310,16 @@ class route(ranaModule):
 
     polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
     route = self.decode_line(polyline) # we decode the polyline to a list of points
+    # handle the results
+    if len(route) >= 2:
+      start = (route[0])
+      print start
+      destination = (route[-1])
+      print destination
+    self.processAndSaveResults(route, directions, start, destination)
     
+  def processAndSaveResults(self, route, directions, start=None, destination=None):
+    """process and save routing results"""
     self.route = route
     proj = self.m.get('projection', None)
     if proj:
@@ -322,11 +329,19 @@ class route(ranaModule):
     (fromLat, fromLon) = route[0]
     (toLat, toLon) = route[-1]
     # reverse geocode the start and destination coordinates (for the info menu)
+    online = self.m.get('onlineServices', None)
+    if online == None:
+      return
     startAddress = online.googleReverseGeocode(fromLat,fromLon)
     destinationAddress = online.googleReverseGeocode(toLat,toLon)
-    self.start = (fromLat, fromLon, startAddress)
-    self.destination = (toLat, toLon, destinationAddress)
 
+    if start:
+      (startLat, startLon) = start
+      self.start = (startLat, startLon, startAddress)
+    if destination:
+      (destLat, destLon) = destination
+      self.destination = (destLat, destLon, destinationAddress)
+    
   def processAndSaveDirections(self, rawDirections, type):
     """process a raw route to a unified format"""
     if type == 'gdirections':
@@ -418,6 +433,7 @@ class route(ranaModule):
 
     # now we convert geographic cooridnates to screen coordinates, so we dont need to do it twice
     steps = map(lambda x: (proj.ll2xy(x[0],x[1])), steps)
+
 
     start = proj.ll2xy(self.start[0], self.start[1])
     destination = proj.ll2xy(self.destination[0], self.destination[1])
