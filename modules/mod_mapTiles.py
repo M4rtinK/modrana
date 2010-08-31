@@ -531,7 +531,6 @@ class mapTiles(ranaModule):
     #    renderer.RenderTile(z,x,y, 'default', filename) # TODO: pyrender layers
     #  else:
       url = getTileUrl(x,y,z,layer)
-      print url
 
       request = urllib2.urlopen(url)
 #      request = urllib.urlopen(url)
