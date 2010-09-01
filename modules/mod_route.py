@@ -369,6 +369,7 @@ class route(ranaModule):
         message = re.sub(r'</div[^>]*?>', '', message)
         message = re.sub(r'<b>', '<emphasis level="strong">', message)
         message = re.sub(r'</b>', '</emphasis>', message)
+        message = re.sub(r'<wbr/>', ', ', message)
         step['descriptionEspeak'] = message
         step['visited'] = False
         step['id'] = i

@@ -23,6 +23,7 @@ import math
 import pango
 import pangocairo
 import subprocess
+import time
 
 def getModule(m,d):
   return(turnByTurn(m,d))
@@ -64,6 +65,7 @@ class turnByTurn(ranaModule):
       # 1. say rerouting is in progress
       message = "rerouting"
       self.espeakSay(message, 0)
+      time.sleep(2) #TODO: improve this
       # 2. get a new route from current position to destination
       self.sendMessage("ms:route:reroute:fromPosToDest")
       # 3. restart routing for to this new route from the closest point
