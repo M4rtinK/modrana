@@ -53,6 +53,7 @@ class MapWidget(gtk.Widget):
   def __init__(self):
     gtk.Widget.__init__(self)
     self.draw_gc = None
+    self.dmod = None # device specific module
     """ setting this both to 100 and 1 in mapView and gpsd fixes the arow orientation bug """
     self.timer1 = gobject.timeout_add(100, update1, self) #default 100
     self.timer2 = gobject.timeout_add(100, update2, self) #default 10
@@ -79,18 +80,41 @@ class MapWidget(gtk.Widget):
     """Load all modules from the specified directory"""
     sys.path.append(module_path)
     print "importing modules:"
+    start = clock()
     for f in os.listdir(module_path):
       if(f[0:4] == 'mod_' and f[-3:] == '.py'):
+        startM = clock()
         name = f[4:-3]
         filename = "%s\\%s" % ( module_path, f[0:-3]) # with directory name, but without .py extension
         a = __import__(f[0:-3])
         self.m[name] = a.getModule(self.m,self.d)
         self.m[name].moduleName = name
-        print " * %s: %s" % (name, self.m[name].__doc__)
+        print " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (clock() - startM)))
 
-    print "Loaded all modules, initialising"
+    # load device specific module
+    deviceModulesPath = module_path + "/device_modules/"
+    sys.path.append(deviceModulesPath)
+    deviceId = global_device_id.device
+    deviceModuleName = "device_" + deviceId + ".py"
+    if os.path.exists(deviceModulesPath + deviceModuleName):
+      print "Loading device specific module for %s" % deviceId
+      startM = clock()
+      name = "device"
+#      filename = "%s\\%s" % ( module_path, f[0:-3]) # with directory name, but without .py extension
+      a = __import__(deviceModuleName[0:-3])
+      self.m[name] = a.getModule(self.m,self.d)
+      self.m[name].moduleName = name
+      print " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (clock() - startM)))
+
+#    for k in self.m.keys():
+#      print k
+
+    print "Loaded all modules in %1.2f ms, initialising" % (1000 * (clock() - start))
+
+    start = clock()
     for m in self.m.values():
       m.firstTime()
+    print "Initialization complete in %1.2f ms" % (1000 * (clock() - start))
       
   def beforeDie(self):
     print "Shutting-down modules"
@@ -172,9 +196,10 @@ class MapWidget(gtk.Widget):
     self.window.move_resize(*self.allocation)
 
     # alow the modules to manipulate the window TODO: do this more elegantly (using signals ?)
-    for name in self.m: 
+    for name in self.m:
       self.m[name].mainWindow = self.window
       self.m[name].topWindow = self.topWindow
+      self.m[name].dmod = self.dmod
       self.m[name].modrana = self # make this class accessible from modules
 
   def do_size_request(self, allocation):

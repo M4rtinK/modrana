@@ -48,11 +48,9 @@ class options(ranaModule):
     function by calling addOption.  That would be best if your module is
     only occasionally used, this function is best if the option is likely
     to be needed in all installations"""
-    self.addBoolOption("Centre map", "centred", "view", True)
 
 
     # * the debug submenu
-
     self.addBoolOption("Print redraw time to terminal", "showRedrawTime", "debug", False)
     self.addBoolOption("Debug circles", "debugCircles", "debug", False)
     self.addBoolOption("Debug squares", "debugSquares", "debug", False)
@@ -65,11 +63,7 @@ class options(ranaModule):
 
 
     # * the view submenu *
-    self.addOption("Tracklogs", "showTracklog",
-    [(None, "Dont draw tracklogs"),
-     ("simple", "Draw simple tracklogs")],
-     "view",
-     None)
+
 
     self.addOption("Units", "unitType",
                  [("km","use kilometers"),
@@ -87,6 +81,21 @@ class options(ranaModule):
                   ("120", "hide buttons after 2 minutes")],
                    "view",
                    "10")
+
+    self.addOption("GUI Rotation", "rotationMode",
+                 [("auto","automatic","device:modeChanged"),
+                  ("landscape","landscape","device:modeChanged"),
+                  ("portrait","portrait","device:modeChanged")],
+                   "view",
+                   "auto")
+
+    self.addOption("Tracklogs", "showTracklog",
+    [(None, "Dont draw tracklogs"),
+     ("simple", "Draw simple tracklogs")],
+     "view",
+     None)
+     
+    self.addBoolOption("Centre map", "centred", "view", True)
 
     self.addOption("Network", "network",
 #      [("off","No use of network"),
@@ -309,7 +318,11 @@ class options(ranaModule):
           valueDescription = str(value)
           useNext = False
           for c in choices:
-            (cVal, cName) = c
+            cAction = None
+            if len(c) == 3:
+              (cVal, cName, cAction) = c
+            else:
+              (cVal, cName) = c
             if(useNext):
               nextChoice = c
               useNext = False
@@ -320,6 +333,8 @@ class options(ranaModule):
           # What should happen if this option is clicked -
           # set the associated option to the next value in sequence
           onClick = "set:%s:%s" % (variable, str(nextChoice[0]))
+          if cAction:
+            onClick += "|%s" % cAction
           onClick += "|options:save"
           onClick += "|set:needRedraw:1"
 
