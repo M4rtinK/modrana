@@ -154,11 +154,11 @@ class Projection(ranaModule):
     """Update the projection meta-info based on its fundamental parameters"""
     if(not self.xyValid or not self.llValid):
       # If the display is not known yet, then we can't do anything, but we'll
-      # mark it as something that needs doing as soon as the display 
+      # mark it as something that needs doing as soon as the display
       # becomes valid
       self.needsEdgeFind = True
       return
-    
+
     # Find the map centre in projection units
     self.px, self.py = latlon2xy(self.lat,self.lon,self.zoom)
     # Find the map edges in projection units
@@ -166,18 +166,31 @@ class Projection(ranaModule):
     self.px2 = self.px + 0.5 * self.w / self.scale
     self.py1 = self.py - 0.5 * self.h / self.scale
     self.py2 = self.py + 0.5 * self.h / self.scale
-    
+
     # Store width and height in projection units, just to save time later
     self.pdx = self.px2 - self.px1
     self.pdy = self.py2 - self.py1
-    
-    # Calculate the bounding box 
+
+    # Calculate the bounding box
     # ASSUMPTION: (that the projection is regular and north-up)
     self.N,self.W = xy2latlon(self.px1, self.py1, self.zoom)
     self.S,self.E = xy2latlon(self.px2, self.py2, self.zoom)
 
     # Mark the meta-info as valid
     self.needsEdgeFind = False
+
+  def findEdgesForZl(self, zl, scale, side=256):
+    """Get projection meta-info based on its fundamental parameters for a given zl"""
+    tileSide = side * scale
+#    tileSide = 256
+    # Find the map centre in projection units
+    px, py = latlon2xy(self.lat,self.lon,zl)
+    # Find the map edges in projection units
+    px1 = px - 0.5 * self.w / tileSide
+    px2 = px + 0.5 * self.w / tileSide
+    py1 = py - 0.5 * self.h / tileSide
+    py2 = py + 0.5 * self.h / tileSide
+    return (px1,px2,py1,py2)
 
   def handleResize(self, newW, newH):
     """When the window resizes, set the view accordingly."""

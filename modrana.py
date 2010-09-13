@@ -26,11 +26,12 @@ import gobject
 import gtk
 import sys
 import global_device_id # used for communicating the device id to other modules
-#import cairo
+import cairo
 import os
 #from math import sqrt
 from time import clock
 from gtk import gdk
+from math import radians
 
 
 def update1(mapWidget):
@@ -59,6 +60,9 @@ class MapWidget(gtk.Widget):
     self.timer2 = gobject.timeout_add(100, update2, self) #default 10
     self.d = {} # List of data
     self.m = {} # List of modules
+
+    self.mapRotationAngle = 0 # in radians
+    self.notMovingSpeed = 1 # in m/s
 
     self.topWindow = None
 
@@ -169,11 +173,38 @@ class MapWidget(gtk.Widget):
       cr.rectangle(0,0,self.rect.width,self.rect.height)
       cr.fill()
 
+      cr.save()
+      if (self.d.get("centred", False)):
+        if self.d.get("rotateMap", False):
+
+          # get the speed and angle
+          speed = self.d.get('speed', 0)
+          angle = self.d.get('bearing', 0)
+
+          proj = self.m['projection']
+          (lat, lon) = (proj.lat,proj.lon)
+          (x1,y1) = proj.ll2xy(lat, lon)
+
+          """
+          only if current direction angle and speed are known,
+          submit a new angle
+          like this, the map does not revert back to default orientation
+          on short GPS errors
+          """
+          if angle and speed:
+            if speed > self.notMovingSpeed: # do we look like we are moving ?
+              angle = 360 - angle
+              self.mapRotationAngle = radians(angle)
+          cr.translate(x1,y1) # translate to the rotation center
+          cr.rotate(self.mapRotationAngle) # do the rotation
+          cr.translate(-x1,-y1) # translate back
+
       # Draw the base map, the map overlays, and the screen overlays
       for m in self.m.values():
         m.drawMap(cr)
       for m in self.m.values():
         m.drawMapOverlay(cr)
+      cr.restore()
       for m in self.m.values():
         m.drawScreenOverlay(cr)
 

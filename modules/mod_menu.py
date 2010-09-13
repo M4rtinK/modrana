@@ -40,7 +40,8 @@ class menus(ranaModule):
     self.mainScreenCoords = {}
     self.userConfig = {}
 
-  def drawMapOverlay(self, cr):
+#  def drawMapOverlay(self, cr):
+  def drawScreenOverlay(self, cr):
     """Draw an overlay on top of the map, showing various information
     about position etc."""
     hideDelay = self.get('hideDelay', 'never')

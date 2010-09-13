@@ -81,6 +81,7 @@ class mapView(ranaModule):
       self.setCentre([float(a) for a in request.split(",")])
       
   def setCentre(self,pos):
+    """takes care for centering the map on current position"""
     proj = self.m.get('projection', None)
     if(proj == None):
       return(False)

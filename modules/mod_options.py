@@ -139,6 +139,15 @@ class options(ranaModule):
               ("1,1","overlay:100%")],
                "map",
                "0.5,1")
+               
+      self.addBoolOption("Rotate map in direction of travel", "rotateMap", "map", False)
+
+      self.addOption("Map scale", "mapScale",
+                   [(1,"1X"),
+                    (2,"2X"),
+                    (4,"4X")],
+                     "map",
+                     1)
 #             [("0.5,0.5","over:50%,back:50%"),
 #              ("0.25,0.75","over:25%,back:75%"),
 #              ("0.75,0.25","over:75%,back:50%")],

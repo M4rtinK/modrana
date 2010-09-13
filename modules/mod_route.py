@@ -411,7 +411,7 @@ class route(ranaModule):
       if clickHandler != None:
         clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setEnd')
 
-  def drawMapOverlay(self, cr):
+  def drawScreenOverlay(self, cr):
     """Draw a route"""
 #    start1 = clock()
     # Where is the map?
