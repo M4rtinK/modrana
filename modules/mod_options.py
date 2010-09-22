@@ -94,6 +94,12 @@ class options(ranaModule):
      ("simple", "Draw simple tracklogs")],
      "view",
      None)
+
+    self.addOption("Time format", "currentTimeFormat",
+                 [("24h","24 hours"),
+                  ("12h", "12 hours")],
+                   "view",
+                   "24h")
      
     self.addBoolOption("Centre map", "centred", "view", True)
 

@@ -30,6 +30,7 @@ import cairo
 import os
 #from math import sqrt
 from time import clock
+from time import time
 from gtk import gdk
 from math import radians
 
@@ -57,7 +58,7 @@ class MapWidget(gtk.Widget):
     self.dmod = None # device specific module
     """ setting this both to 100 and 1 in mapView and gpsd fixes the arow orientation bug """
     self.timer1 = gobject.timeout_add(100, update1, self) #default 100
-    self.timer2 = gobject.timeout_add(100, update2, self) #default 10
+    self.timer2 = gobject.timeout_add(10, update2, self) #default 10
     self.d = {} # List of data
     self.m = {} # List of modules
 
@@ -65,6 +66,14 @@ class MapWidget(gtk.Widget):
     self.notMovingSpeed = 1 # in m/s
 
     self.topWindow = None
+
+#    self.mapBuffer = None
+#    self.startX = 0
+#    self.startY = 0
+#    self.dragX = 0
+#    self.dragY = 0
+#    self.centerX = 0
+#    self.centerY = 0
 
     global_device_id.device = device
 
@@ -128,7 +137,6 @@ class MapWidget(gtk.Widget):
   def update(self):
     for m in self.m.values():
       m.update()
-    self.checkForRedraw()
 
   def checkForRedraw(self):
     if(self.d.get("needRedraw", False)):
@@ -147,7 +155,6 @@ class MapWidget(gtk.Widget):
     m = self.m.get("clickHandler",None)
     if(m != None):
       m.handleDrag(startX,startY,dx,dy,x,y)
-      self.update()
         
   def forceRedraw(self):
     """Make the window trigger a draw event.  
@@ -168,8 +175,7 @@ class MapWidget(gtk.Widget):
       for m in self.m.values():
         m.drawMenu(cr, menuName)
     else:
-      # map background
-      cr.set_source_rgb(0.2,0.2,0.2)
+      cr.set_source_rgb(0.2,0.2,0.2) # map background
       cr.rectangle(0,0,self.rect.width,self.rect.height)
       cr.fill()
 
@@ -199,7 +205,7 @@ class MapWidget(gtk.Widget):
           cr.rotate(self.mapRotationAngle) # do the rotation
           cr.translate(-x1,-y1) # translate back
 
-      # Draw the base map, the map overlays, and the screen overlays
+        # Draw the base map, the map overlays, and the screen overlays
       for m in self.m.values():
         m.drawMap(cr)
       for m in self.m.values():
@@ -211,6 +217,86 @@ class MapWidget(gtk.Widget):
     # enable redraw speed debugging
     if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
       print "Redraw took %1.2f ms" % (1000 * (clock() - start))
+
+#  def draw2(self, cr1):
+#    start = clock()
+#
+#
+##      cr.paint()
+##      print cr.get_target()
+##      print cr.get_target().get_width()
+##      print cr.get_target().get_height()
+#
+#    mapAndMapOverlayBuffer = self.getMapAndMapOverlayBuffer()
+#    if mapAndMapOverlayBuffer:
+#      cr1.set_source_surface(mapAndMapOverlayBuffer, float(self.centerX), float(self.centerY))
+#      cr1.paint()
+#    start1 = clock()
+#    for m in self.m.values():
+#      m.drawScreenOverlay(cr1)
+#
+#    # enable redraw speed debugging
+#    if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
+#      print "Redraw1 took %1.2f ms" % (1000 * (clock() - start))
+#      print "Redraw2 took %1.2f ms" % (1000 * (clock() - start1))
+#
+#  def getMapAndMapOverlayBuffer(self):
+#    if self.mapBuffer == None:
+#      self.mapBuffer = self.drawMapAndMapOverlay()
+#    return self.mapBuffer
+#
+#  def drawMapAndMapOverlay(self):
+#    mapAndMapOverlayBuffer = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.rect.width, self.rect.height)
+#    ct = cairo.Context(mapAndMapOverlayBuffer)
+#    cr = gtk.gdk.CairoContext(ct)
+#
+#    for m in self.m.values():
+#      m.beforeDraw()
+#
+#    menuName = self.d.get('menu', None)
+#    if(menuName != None):
+#      for m in self.m.values():
+#        m.drawMenu(cr1, menuName)
+#    else:
+#      # map background
+#      cr.set_source_rgb(0.2,0.2,0.2)
+#      cr.rectangle(0,0,self.rect.width,self.rect.height)
+#      cr.fill()
+#
+#      cr.save()
+#      if (self.d.get("centred", False)):
+#        if self.d.get("rotateMap", False):
+#
+#          # get the speed and angle
+#          speed = self.d.get('speed', 0)
+#          angle = self.d.get('bearing', 0)
+#
+#          proj = self.m['projection']
+#          (lat, lon) = (proj.lat,proj.lon)
+#          (x1,y1) = proj.ll2xy(lat, lon)
+#
+#          """
+#          only if current direction angle and speed are known,
+#          submit a new angle
+#          like this, the map does not revert back to default orientation
+#          on short GPS errors
+#          """
+#          if angle and speed:
+#            if speed > self.notMovingSpeed: # do we look like we are moving ?
+#              angle = 360 - angle
+#              self.mapRotationAngle = radians(angle)
+#          cr.translate(x1,y1) # translate to the rotation center
+#          cr.rotate(self.mapRotationAngle) # do the rotation
+#          cr.translate(-x1,-y1) # translate back
+#
+#      # Draw the base map, the map overlays, and the screen overlays
+#      for m in self.m.values():
+#        m.drawMap(cr)
+#      cr.restore()
+#      for m in self.m.values():
+#        m.drawMapOverlay(cr)
+#
+#      return mapAndMapOverlayBuffer
     
   def do_realize(self):
     self.set_flags(self.flags() | gtk.REALIZED)

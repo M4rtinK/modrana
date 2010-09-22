@@ -357,7 +357,7 @@ class route(ranaModule):
       # make the direction messages pango compatible
       i = 0
       for step in rawDirections['Directions']['Routes'][0]['Steps']:
-        message = step['descriptionHtml']
+        message = step['descriptionHtml'] #TODO: make a method for this
         message = re.sub(r'<div[^>]*?>', '\n<i>', message)
         message = re.sub(r'</div[^>]*?>', '</i>', message)
 #        message = re.sub(r'<[^>]*?>', '<b>', message)
@@ -370,6 +370,7 @@ class route(ranaModule):
         message = re.sub(r'<b>', '<emphasis level="strong">', message)
         message = re.sub(r'</b>', '</emphasis>', message)
         message = re.sub(r'<wbr/>', ', ', message)
+        message = re.sub(r'<wbr>', ', ', message)
         step['descriptionEspeak'] = message
         step['visited'] = False
         step['id'] = i
@@ -412,137 +413,141 @@ class route(ranaModule):
         clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setEnd')
 
   def drawScreenOverlay(self, cr):
-    """Draw a route"""
-#    start1 = clock()
-    # Where is the map?
     if self.selectTwoPoints == True:
       self.drawTwoPointsMenu(cr)
 
-    if(not len(self.route)):
-      return
-    proj = self.m.get('projection', None)
-    if(proj == None):
-      return
-    if(not proj.isValid()):
-      return
+  def drawMapOverlay(self, cr):
+    """Draw a route"""
+#    start1 = clock()
 
-    # as you can see, for some reason, the cooridnates in direction steps are reversed, (lon,lat,0)
-    steps = map(lambda x: (x['Point']['coordinates'][1],x['Point']['coordinates'][0]), self.directions['Directions']['Routes'][0]['Steps'])
+    if len(self.route):
+      # Where is the map?
+      proj = self.m.get('projection', None)
+      if(proj == None):
+        return
+      if(not proj.isValid()):
+        return
 
-    # draw the destination as a step point
-    steps.append(self.route[-1])
+      # as you can see, for some reason, the cooridnates in direction steps are reversed, (lon,lat,0)
+      steps = map(lambda x: (x['Point']['coordinates'][1],x['Point']['coordinates'][0]), self.directions['Directions']['Routes'][0]['Steps'])
 
-    # now we convert geographic cooridnates to screen coordinates, so we dont need to do it twice
-    steps = map(lambda x: (proj.ll2xy(x[0],x[1])), steps)
+      # draw the destination as a step point
+      steps.append(self.route[-1])
+
+      # now we convert geographic cooridnates to screen coordinates, so we dont need to do it twice
+      steps = map(lambda x: (proj.ll2xy(x[0],x[1])), steps)
 
 
-    start = proj.ll2xy(self.start[0], self.start[1])
-    destination = proj.ll2xy(self.destination[0], self.destination[1])
+      start = proj.ll2xy(self.start[0], self.start[1])
+      destination = proj.ll2xy(self.destination[0], self.destination[1])
 
-    # line from starting point to start of the route
-    (x,y) = start
-    (px1,py1) = self.pxpyRoute[0]
-    (x1,y1) = proj.pxpyRel2xy(px1, py1)
-    cr.set_source_rgba(0, 0, 0.5, 0.45)
-    cr.set_line_width(10)
-    cr.move_to(x,y)
-    cr.line_to(x1,y1)
-    cr.stroke()
-
-    # line from the destination point to end of the route
-    (x,y) = destination
-    (px1,py1) = self.pxpyRoute[-1]
-    (x1,y1) = proj.pxpyRel2xy(px1, py1)
-    cr.move_to(x,y)
-    cr.line_to(x1,y1)
-    cr.stroke()
-
-    cr.fill()
-
-    # draw the step point background (under the polyline, it seems to look better this way)
-
-    cr.set_source_rgb(0, 0, 0)
-    cr.set_line_width(10)
-
-    for step in steps:
-      (x,y) = (step)
-      cr.arc(x, y, 3, 0, 2.0 * math.pi)
+      # line from starting point to start of the route
+      (x,y) = start
+      (px1,py1) = self.pxpyRoute[0]
+      (x1,y1) = proj.pxpyRel2xy(px1, py1)
+      cr.set_source_rgba(0, 0, 0.5, 0.45)
+      cr.set_line_width(10)
+      cr.move_to(x,y)
+      cr.line_to(x1,y1)
       cr.stroke()
 
-    cr.fill()
-
-    cr.set_source_rgb(0, 0, 0.5)
-    cr.set_line_width(10)
-
-    # draw the points from the polyline as a polyline :)
-
-    (px,py) = self.pxpyRoute[0]
-    (x,y) = proj.pxpyRel2xy(px, py)
-    cr.move_to(x,y)
-
-    # well, this SHOULD be faster and this is a performance critical section after all...
-#    map(lambda x: cr.line_to(x[0],x[1]), route[1:]) # lambda drawing :)
-    # according to numerous sources, list comprehensions should be faster than for loops and map+lambda
-    # if its faster in this case too has not been determined
-
-
-    """
-    routing result drawing algorithm
-    adapted from TangoGPS source (tracks.c)
-    works surprisingly good :)
-    """
-
-    z = proj.zoom
-
-
-    # these setting seem to werk the best for routing results:
-    # (they have a different structure than loging traces,
-    # eq. long segments delimited by only two points, etc)
-    # basicly, routing results heva only the really nedded points -> less points than traces
-    if z < 16 and z > 10:
-      modulo = 2**(14-z)
-    elif (z <= 10):
-      modulo = 16
-    else:
-      modulo = 1
-
-#    maxDraw = 300
-#    drawCount = 0
-    counter=0
-#
-#
-    for point in self.pxpyRoute[1:]: #draw the track
-      counter+=1
-      if counter%modulo==0:
-#      if 1:
-#        drawCount+=1
-#        if drawCount>maxDraw:
-#          break
-        (px,py) = point
-        (x,y) = proj.pxpyRel2xy(px, py)
-        cr.line_to(x,y)
-
-    # make a line to the last point (the modulo method sometimes skips the end of the track)
-#    [cr.line_to(x[0],x[1])for x in route[1:]] # list comprehension drawing :D
-
-#    print drawCount
-#    print modulo
-
-    # make sure the last point is connected
-    (px,py) = self.pxpyRoute[-1]
-    (x,y) = proj.pxpyRel2xy(px, py)
-    cr.line_to(x,y)
-
-    cr.stroke()
-
-    # draw the step points over the polyline
-    cr.set_source_rgb(1, 1, 0)
-    cr.set_line_width(7)
-    for step in steps:
-      (x,y) = (step)
-      cr.arc(x, y, 2, 0, 2.0 * math.pi)
+      # line from the destination point to end of the route
+      (x,y) = destination
+      (px1,py1) = self.pxpyRoute[-1]
+      (x1,y1) = proj.pxpyRel2xy(px1, py1)
+      cr.move_to(x,y)
+      cr.line_to(x1,y1)
       cr.stroke()
-    cr.fill()
+
+      cr.fill()
+
+      # draw the step point background (under the polyline, it seems to look better this way)
+
+      cr.set_source_rgb(0, 0, 0)
+      cr.set_line_width(10)
+
+      for step in steps:
+        (x,y) = (step)
+        cr.arc(x, y, 3, 0, 2.0 * math.pi)
+        cr.stroke()
+
+      cr.fill()
+
+      cr.set_source_rgb(0, 0, 0.5)
+      cr.set_line_width(10)
+
+      # draw the points from the polyline as a polyline :)
+
+      (px,py) = self.pxpyRoute[0]
+      (x,y) = proj.pxpyRel2xy(px, py)
+      cr.move_to(x,y)
+
+      # well, this SHOULD be faster and this is a performance critical section after all...
+  #    map(lambda x: cr.line_to(x[0],x[1]), route[1:]) # lambda drawing :)
+      # according to numerous sources, list comprehensions should be faster than for loops and map+lambda
+      # if its faster in this case too has not been determined
+
+
+      """
+      routing result drawing algorithm
+      adapted from TangoGPS source (tracks.c)
+      works surprisingly good :)
+      """
+
+      z = proj.zoom
+
+
+      # these setting seem to werk the best for routing results:
+      # (they have a different structure than loging traces,
+      # eq. long segments delimited by only two points, etc)
+      # basicly, routing results heva only the really nedded points -> less points than traces
+      if z < 16 and z > 10:
+        modulo = 2**(14-z)
+      elif (z <= 10):
+        modulo = 16
+      else:
+        modulo = 1
+
+  #    maxDraw = 300
+  #    drawCount = 0
+      counter=0
+  #
+  #
+      for point in self.pxpyRoute[1:]: #draw the track
+        counter+=1
+        if counter%modulo==0:
+  #      if 1:
+  #        drawCount+=1
+  #        if drawCount>maxDraw:
+  #          break
+          (px,py) = point
+          (x,y) = proj.pxpyRel2xy(px, py)
+          cr.line_to(x,y)
+
+      # make a line to the last point (the modulo method sometimes skips the end of the track)
+  #    [cr.line_to(x[0],x[1])for x in route[1:]] # list comprehension drawing :D
+
+  #    print drawCount
+  #    print modulo
+
+      # make sure the last point is connected
+      (px,py) = self.pxpyRoute[-1]
+      (x,y) = proj.pxpyRel2xy(px, py)
+      cr.line_to(x,y)
+
+      cr.stroke()
+
+      # draw the step points over the polyline
+      cr.set_source_rgb(1, 1, 0)
+      cr.set_line_width(7)
+      for step in steps:
+        (x,y) = (step)
+        cr.arc(x, y, 2, 0, 2.0 * math.pi)
+        cr.stroke()
+      cr.fill()
+    # draw the the start/dest indicators over the route
+    if self.selectTwoPoints:
+      self.drawPointSelectors(cr)
 
 #    print "Redraw took %1.9f ms" % (1000 * (clock() - start1))
 
@@ -639,6 +644,7 @@ class route(ranaModule):
     cr.stroke()
     cr.fill()
 
+  def drawPointSelectors(self,cr):
     # draw point selectors
 
     proj = self.m.get('projection', None)

@@ -38,6 +38,7 @@ class turnByTurn(ranaModule):
   def goToInitialState(self):
     self.steps = []
     self.currentStepIndex = None
+    self.currentStepIndicator = None
     self.espeakFirstTrigger = False
     self.espeakSecondTrigger = False
     self.espaekProcess = None
@@ -71,7 +72,14 @@ class turnByTurn(ranaModule):
       # 3. restart routing for to this new route from the closest point
       self.sendMessage("ms:turnByTurn:start:closest")
 
-
+  def drawMapOverlay(self,cr):
+      if self.currentStepIndicator:
+        (pointX, pointY) = self.currentStepIndicator
+        cr.set_source_rgb(1, 0, 0)
+        cr.set_line_width(4)
+        cr.arc(pointX, pointY, 12, 0, 2.0 * math.pi)
+        cr.stroke()
+        cr.fill()
 
   def drawScreenOverlay(self, cr):
     if self.steps: # is there something relevant to draw ?
@@ -119,12 +127,13 @@ class turnByTurn(ranaModule):
       lat = currentStep['Point']['coordinates'][1]
       lon = currentStep['Point']['coordinates'][0]
 
-      (pointX, pointY) = proj.ll2xy(lat, lon)
-      cr.set_source_rgb(1, 0, 0)
-      cr.set_line_width(4)
-      cr.arc(pointX, pointY, 12, 0, 2.0 * math.pi)
-      cr.stroke()
-      cr.fill()
+      self.currentStepIndicator = proj.ll2xy(lat, lon)
+      print self.currentStepIndicator
+#      cr.set_source_rgb(1, 0, 0)
+#      cr.set_line_width(4)
+#      cr.arc(pointX, pointY, 12, 0, 2.0 * math.pi)
+#      cr.stroke()
+#      cr.fill()
 
       # draw the routing message box
 

@@ -78,8 +78,10 @@ class showOSD(ranaModule):
         speedString = units.km2CurrentUnitPerHourString(speed)
       self.drawMultilineTextWidget(cr, item, speedString)
     elif type == 'time':
-      timeString = time.strftime("%H:%M")
-      self.drawMultilineTextWidget(cr, item, timeString)
+      units = self.m.get('units', None)
+      if units:
+        timeString = units.getCurrentTimeString()
+        self.drawMultilineTextWidget(cr, item, timeString)
     elif type == 'coordinates':
       pos = self.get('pos', None)
       if pos == None:

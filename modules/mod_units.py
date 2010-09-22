@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
+import time
 
 def getModule(m,d):
   return(units(m,d))
@@ -190,6 +191,15 @@ class units(ranaModule):
       return currentSpeedUnit * 0.277778
     else:
       return currentSpeedUnit * 0.44704
+
+  def getCurrentTimeString(self, timeFormat=None):
+    """return a string with current time, the format can be set or a system defined one is used"""
+    if timeFormat == None:
+      timeFormat = self.get('currentTimeFormat', '24h')
+    if timeFormat == "12h":
+      return time.strftime("%I:%M %p")
+    else:
+      return time.strftime("%H:%M")
 
 
 if(__name__ == "__main__"):
