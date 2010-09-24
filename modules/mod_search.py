@@ -184,7 +184,7 @@ class search(ranaModule):
           print "search: key not present in the filter dictionary, using the key as search term"
           term = searchTerm
 
-        sufix = " near %f,%f" % (lat,lon)
+        sufix = " loc:%f,%f" % (lat,lon)
         query = term + sufix
         print "query:"
         print query
