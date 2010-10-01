@@ -374,12 +374,98 @@ class menus(ranaModule):
 
     self.menus[menu][pos] = (textIconAction, index, uniqueName, type)
 
-  def addListableMenu(self, parrent, nameIconDescActionList, descFunction=None):
+
+
+  def addListableMenu(self, items, parrentAction, descFunction=None, drawFunction=None):
     if descFunction == None: # use default description function
       pass
 
-  def describeListItem(self, item):
-    pass
+  class listableMenu:
+    def __init__(self, menus, items, parrentAction, descFunction=None, drawFunction=None, displayedItems=3):
+      self.descFunction = descFunction
+      if descFunction==None:
+        self.descFunction = self.describeListItem
+      self.drawFunction = drawFunction
+      if drawFunction==None:
+        self.drawFunction=self.drawListItem
+      self.index=0 #index of the first item in the current list view
+      self.displayedItems = displayedItems
+      self.items = items
+      self.parrentAction = parrentMenu
+      self.menus = menus
+
+
+
+    def describeListItem(self, item, index, maxIndex):
+      (mainText, secText, action) = item
+      indexString = "%d/%d" % (index,maxIndex)
+      return(mainText, secText, indexString, action)
+
+    def drawListItem(self, cr, item, x, y, w, h, index, descFunction=None):
+      """default list item drawing function"""
+      if descFunction==None:
+        descFunction=self.describeListItem
+      # * draw the background
+      self.menus.drawButton(x,y,w,h,'','generic', action)
+
+      # * draw the text
+      (mainText, secText, indexString) = descFunction(item, index, len(self.items))
+
+      border = 20
+
+      # 1st line: option name
+      self.menus.drawText(cr, title+":", x+border, y+border, w-2*border)
+
+      # 2nd line: current value
+      self.menus.drawText(cr, valueDescription, x + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
+
+      # in corner: row number
+      self.menus.drawText(cr, "%d/%d" % (index+1, numItems), x+0.85*w, y+3*border, w * 0.15 - border, 20)
+
+
+    def drawMenu(self, cr):
+      """draw a listable menu"""
+      (e1,e2,e3,e4,alloc) = self.menuModule.threePlusOneMenuCoords()
+      (x1,y1) = e1
+      (x2,y2) = e2
+      (x3,y3) = e3
+      (x4,y4) = e4
+      (w,h,dx,dy) = alloc
+
+      # * parent menu
+      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", parrentAction)
+      # * scroll up
+      self.menuModule.drawButton(cr, x2, y2, dx, dy, "", "up_list", "options:up")
+      # * scroll down
+      self.menuModule.drawButton(cr, x3, y3, dx, dy, "", "down_list", "options:down")
+
+
+      id = self.index
+      nrItems = self.displayedItems
+      visibleItems = self.items[id:(id+nrItems)]
+      if len(visibleItems): # there must be a nonzero amount of items to avoid a division by zero
+        # compute item sizes
+        itemBoxW = w-x4
+        itemBoxH = h-y4
+        itemW = itemBoxW
+        itemH = itemBoxH/len(visibleItems)
+        for item in visibleItems:
+          self.drawFunction(cr,item,x4,y4,itemW,itemH,id) #draw the item
+          y4 = y4 + itemH # move the drawing window
+          id = id + 1 # increment the current index
+
+    def scrollUp(self):
+      if self.index>=1:
+        self.index = self.index -1
+    def scrollDown(self):
+      if (self.index + 1) < len(self.items):
+        self.index = self.index + 1
+    def reset(self):
+      self.index = 0
+      
+
+
+
 
 
   def setupProfile(self):

@@ -24,6 +24,7 @@ import math
 import gtk
 import gobject
 import re
+import csv
 from time import sleep
 from time import clock
 
@@ -52,6 +53,7 @@ class route(ranaModule):
     self.selectOnePoint = False
     self.once = True
     self.entry = None
+    self.directionsFilterCSV = 'data/directions_filter.csv'
 
     self.expectStart = False
     self.expectEnd = False
@@ -355,28 +357,49 @@ class route(ranaModule):
       rawDirections['Directions']['Routes'][0]['Steps'].append(destStep) # add it to the end of the list
 
       # make the direction messages pango compatible
-      i = 0
-      for step in rawDirections['Directions']['Routes'][0]['Steps']:
-        message = step['descriptionHtml'] #TODO: make a method for this
-        message = re.sub(r'<div[^>]*?>', '\n<i>', message)
-        message = re.sub(r'</div[^>]*?>', '</i>', message)
+      filteredDirections = self.filterDirections(rawDirections)
+      self.directions = filteredDirections
+
+  def filterDirections(self, rawDirections):
+    i = 0
+    for step in rawDirections['Directions']['Routes'][0]['Steps']:
+      message = step['descriptionHtml'] #TODO: make a method for this
+      message = re.sub(r'<div[^>]*?>', '\n<i>', message)
+      message = re.sub(r'</div[^>]*?>', '</i>', message)
+      message = re.sub(r'<wbr/>', ', ', message)
+      message = re.sub(r'<wbr>', ', ', message)
 #        message = re.sub(r'<[^>]*?>', '<b>', message)
 #        message = re.sub(r'</div[^>]*?>', '</i>', message)
-        step['descriptionHtml'] = message
-        # get a special version for espeak
-        message = step['descriptionHtml']
-        message = re.sub(r'<div[^>]*?>', '<br>', message)
-        message = re.sub(r'</div[^>]*?>', '', message)
-        message = re.sub(r'<b>', '<emphasis level="strong">', message)
-        message = re.sub(r'</b>', '</emphasis>', message)
-        message = re.sub(r'<wbr/>', ', ', message)
-        message = re.sub(r'<wbr>', ', ', message)
-        step['descriptionEspeak'] = message
-        step['visited'] = False
-        step['id'] = i
-        i = i + 1
+      step['descriptionHtml'] = message
+      # get a special version for espeak
+      message = step['descriptionHtml']
+      message = re.sub(r'<div[^>]*?>', '<br>', message)
+      message = re.sub(r'</div[^>]*?>', '', message)
+      message = re.sub(r'<b>', '<emphasis level="strong">', message)
+      message = re.sub(r'</b>', '</emphasis>', message)
+      step['descriptionEspeak'] = message
+      step['visited'] = False
+      step['id'] = i
+      i = i + 1
 
-      self.directions = rawDirections
+    # apply external rules rom a CSV file
+    rawDirections = self.applyRulesFromCSVFile(rawDirections)
+
+    return rawDirections
+
+  def applyRulesFromCSVFile(self,rawDirections):
+      filename = self.directionsFilterCSV
+      CSVreader = csv.reader(open(filename, 'rb'), delimiter=';', quotechar='|')
+
+      for step in rawDirections['Directions']['Routes'][0]['Steps']:
+        message = step['descriptionEspeak']
+        for row in CSVreader:
+          if len(row)>=2:
+            # replace strings according to the csv file
+            message = re.sub(row[0], row[1], message)
+        step['descriptionEspeak'] = message
+      return rawDirections
+
 
   def firstTime(self):
     """Load stored addresses at startup.
