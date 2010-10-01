@@ -117,7 +117,7 @@ class mapData(ranaModule):
     url = self.getTileUrl(x, y, z, layer) # generate url
     filePath = tileFolder + mapTiles.imagePath(x, y, z, folderPrefix, extension)
     fileFolder = tileFolder + mapTiles.imageFolder(x, z, folderPrefix)
-    return (url,filePath, fileFolder)
+    return (url,filePath, fileFolder, folderPrefix, extension)
 
   def addToQueue(self, neededTiles):
     """load urls and filenames to download queue,
@@ -268,7 +268,7 @@ class mapData(ranaModule):
 
       self.totalSize = 0
       maxThreads = self.get('maxSizeThreads', 5)
-      sizeThread = self.GetSize(neededTiles, layer, self.getTileUrlAndPath, maxThreads) # the seccond parameter is the max number of threads TODO: tweak this
+      sizeThread = self.GetSize(self, neededTiles, layer, self.getTileUrlAndPath, maxThreads) # the seccond parameter is the max number of threads TODO: tweak this
       print  "getSize received, starting sizeThread"
       sizeThread.start()
       self.sizeThread = sizeThread
@@ -288,7 +288,7 @@ class mapData(ranaModule):
           return
         
       maxThreads = self.get('maxDlThreads', 5)
-      getFilesThread = self.GetFiles(neededTiles, layer, self.getTileUrlAndPath, maxThreads)
+      getFilesThread = self.GetFiles(self, neededTiles, layer, self.getTileUrlAndPath, maxThreads)
       getFilesThread.start()
       self.getFilesThread = getFilesThread
 
@@ -394,8 +394,9 @@ class mapData(ranaModule):
 
   class GetSize(Thread):
     """a class for getting size of files on and url list"""
-    def __init__(self, neededTiles, layer, namingFunction, maxThreads):
+    def __init__(self, callback, neededTiles, layer, namingFunction, maxThreads):
       Thread.__init__(self)
+      self.callback = callback
       self.neededTiles=neededTiles
       self.maxThreads=maxThreads
       self.layer=layer
@@ -412,14 +413,16 @@ class mapData(ranaModule):
 #      start = clock()
       try:
         (z,x,y) = (tile[2],tile[0],tile[1])
-        (url, filename, folder) = self.namingFunction(x, y, z, self.layer)
-        if not os.path.exists(filename):
-          url = urllib.urlopen(url) # open url and get mime info
-          urlInfo = url.info()
-          size = int(urlInfo['Content-Length']) # size in bytes
-          url.close()
-        else:
-          size = 0
+        (url, filename, folder, folderPrefix, layerType) = self.namingFunction(x, y, z, self.layer)
+        m = self.callback.m.get('storeTiles', None) # get the tile storage module
+        if m:
+          if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
+            url = urllib.urlopen(url) # open url and get mime info
+            urlInfo = url.info()
+            size = int(urlInfo['Content-Length']) # size in bytes
+            url.close()
+          else:
+            size = 0
       except IOError:
         print "Could not open document: %s" % url
         size = 0 # the url errored out, so we just say it  has zero size
@@ -443,15 +446,18 @@ class mapData(ranaModule):
 #      for req in requests:
 #          mainPool.putRequest(req)
       map(lambda x: mainPool.putRequest(x) ,requests)
+      del requests # requests can be quite long, make sure we dont leave them in memmory
       print "Added %d URLS to check for size." % self.urlCount
       while True:
           try:
               time.sleep(0.5) # this governs how often we check status of the worker threads
               mainPool.poll()
-              print "Main thread working...",
+              print "Main batch download thread working...",
               print "(active worker threads: %i)" % (threading.activeCount()-1, )
+              print "work requests pending: %s" % len(mainPool.workRequests)
               if self.quit == True:
                 print "get size quiting"
+                mainPool.dismissWorkers(maxThreads)
                 break
           except threadpool.NoResultsPending:
               print "**** No pending results."
@@ -465,8 +471,9 @@ class mapData(ranaModule):
 
 
   class GetFiles(Thread):
-    def __init__(self, neededTiles, layer, namingFunction, maxThreads):
+    def __init__(self, callback, neededTiles, layer, namingFunction, maxThreads):
       Thread.__init__(self)
+      self.callback = callback
       self.neededTiles = neededTiles
       self.maxThreads = maxThreads
       self.layer=layer
@@ -478,15 +485,18 @@ class mapData(ranaModule):
 
     def saveTileForURL(self, tile):
       (z,x,y) = (tile[2],tile[0],tile[1])
-      (url, filename, folder) = self.namingFunction(x, y, z, self.layer)
+      (url, filename, folder, folderPrefix, layerType) = self.namingFunction(x, y, z, self.layer)
 
       try:
-        if not os.path.exists(folder):
-          os.makedirs(folder)
-          urllib.urlretrieve(url,filename) # open url and seve it to file
-        else:
-          if not os.path.exists(filename):
-            urllib.urlretrieve(url,filename) # we dont download files we already have
+        m = self.callback.m.get('storeTiles', None) # get the tile storage module
+        if m:
+          # does the the file exist ?
+          # TODO: maybe make something like tile objects so we dont have to pass so many parameters ?
+          if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
+            request = urllib2.urlopen(url)
+            content = request.read()
+            request.close()
+            m.queueOrStoreTile(content, folderPrefix, z, x, y, layerType, filename, folder)
 
       except Exception, e:
         print "Saving tile %s failed: %s" % (url, e)
@@ -508,20 +518,22 @@ class mapData(ranaModule):
 #      for req in requests:
 #          mainPool.putRequest(req)
       map(lambda x: mainPool.putRequest(x) ,requests)
+      del requests # requests can be quite long, make sure we dont leave them in memmory
       print "Added %d URLS to check for size." % self.urlCount
       while True:
           try:
               time.sleep(0.5)
-              print mainPool.poll()
-              print "Main thread working...",
+              mainPool.poll()
+              print "Main batch size thread working...",
               print "(active worker threads: %i)" % (threading.activeCount()-1, )
+              print "work requests pending: %s" % len(mainPool.workRequests)
               if self.quit == True:
-                print "get size quiting"
+                print "get tiles quiting"
+                mainPool.dismissWorkers(maxThreads) # dismiss all workers
                 break
           except threadpool.NoResultsPending:
               print "**** No pending results."
               self.finished = True
-              mainPool.dismissWorkers(maxThreads)
               break
 #      if mainPool.dismissedWorkers:
 #          print "Joining all dismissed worker threads..."

@@ -154,6 +154,14 @@ class options(ranaModule):
                     (4,"4X")],
                      "map",
                      1)
+
+      self.addOption("Tile storage (EXPERIMENTAL)", "tileStorageType",
+                   [('files',"files (default, more space used)"),
+                    ('sqlite',"sqlite (new, less space used)")],
+                     "map",
+                     'files')
+
+
 #             [("0.5,0.5","over:50%,back:50%"),
 #              ("0.25,0.75","over:25%,back:75%"),
 #              ("0.75,0.25","over:75%,back:50%")],

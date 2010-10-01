@@ -228,7 +228,7 @@ class mapTiles(ranaModule):
 #    print "nr images: %d" % len(self.images)
 #    print "nr queue: %d" % len(self.imagesQueue)
 
-    
+
     if len(self.threads) == 0:
       return
 
@@ -372,67 +372,61 @@ class mapTiles(ranaModule):
 
     filename = self.tileFolder + (self.imagePath(x,y,z,layerPrefix, layerType))
 
-    if(os.path.exists(filename)):
-#      if(layerType == 'jpg'):
-      """The method using pixbufs seems to be MUCH faster for jpegs and pngs alike.
-         Therefore we use it as default."""
-      #self.images[name]  = cairo.ImageSurface.create_from_jpeg(filename)
-      # looks like there is no create_from_jpeg() in cairo
-      # this solution has been found on:
-      # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
-      try:
-        pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
-        #x = pixbuf.get_width()
-        #y = pixbuf.get_height()
-        # Google sat images are 256 by 256 px, we dont need to check the size
-        x = 256
-        y = 256
-        ''' create a new cairo surface to place the image on '''
-        surface = cairo.ImageSurface(0,x,y)
-        ''' create a context to the new surface '''
-        ct = cairo.Context(surface)
-        ''' create a GDK formatted Cairo context to the new Cairo native context '''
-        ct2 = gtk.gdk.CairoContext(ct)
-        ''' draw from the pixbuf to the new surface '''
-        ct2.set_source_pixbuf(pixbuf,0,0)
-        ct2.paint()
-        ''' surface now contains the image in a Cairo surface '''
-        self.storeInMemmoryAndEnqueue(surface, name)
-
-
-
-
-      except:
-        print "the tile image is corrupted nad/or there are no tiles for this zoomlevel"
-
-#      else:
-#        #print(filename)
-#        try:
-#          self.images[name]  = cairo.ImageSurface.create_from_png(filename)
-#        except:
-#          print "corrupted tile image detected: %s" % name
-      return(name)
+    storageType = self.get('tileStorageType', 'files')
+    if storageType == 'sqlite': # use the sqlite based storage method
+      m = self.m.get('storeTiles', None) # get the tile storage module
+      if m:
+        try:
+          buffer = m.getTile(layerPrefix, z, x, y, layerType)
+          if buffer:
+            pl = gtk.gdk.PixbufLoader()
+            pl.write(buffer)
+            pl.close()
+            pixbuf = pl.get_pixbuf()
+            self.storeInMemmoryAndEnqueue(self.pixbufToCairoImageSurface(pixbuf), name)
+            return(name)
+        except Exception, e:
+          print "loding tile from sqlite failed"
+          print "exception: ", e
+    else: #use the default method -> load from files
+      if (os.path.exists(filename)):
+        try:
+          pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
+          self.storeInMemmoryAndEnqueue(self.pixbufToCairoImageSurface(pixbuf), name)
+        except:
+          print "the tile image is corrupted nad/or there are no tiles for this zoomlevel"
+        return(name)
 
     # Image not found anywhere - resort to downloading it
 
     # Are we allowed to download it ? (network=='full')
     if(self.get('network','full')=='full'):
       # use threads
-#      if(self.get('threadedDownload',True)):
       folder = self.tileFolder + self.imageFolder(x, z, layerPrefix) # target folder
-      if not os.path.exists(folder): # does it exist ?
-        try:
-          os.makedirs(folder) # create the folder
-        except:
-          print "mapTiles: cant crate folder %s for %s" % (folder,filename)
-      self.threads[name] = self.tileLoader(x,y,z,layer,filename, self)
+      self.threads[name] = self.tileLoader(x,y,z,layer,layerPrefix,layerType, filename, folder, self)
       self.threads[name].start()
       return(None)
-      # serial download
-#      else:
-#        print filenam
-#        downloadTile(x,y,z,layer,filename)
-#        return(name)
+
+  def pixbufToCairoImageSurface(self, pixbuf):
+      # this solution has been found on:
+      # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
+
+      """Using pixbufs in place of surface_from_png seems to be MUCH faster for jpegs and pngs alike.
+         Therefore we use it as default."""
+
+      # Tile images are mostly 256 by 256 px, we dont need to check the size
+      x = 256
+      y = 256
+      ''' create a new cairo surface to place the image on '''
+      surface = cairo.ImageSurface(0,x,y)
+      ''' create a context to the new surface '''
+      ct = cairo.Context(surface)
+      ''' create a GDK formatted Cairo context to the new Cairo native context '''
+      ct2 = gtk.gdk.CairoContext(ct)
+      ''' draw from the pixbuf to the new surface '''
+      ct2.set_source_pixbuf(pixbuf,0,0)
+      ct2.paint()
+      return surface
 
   def loadImageFromFile(self,path,name):
     pixbuf = gtk.gdk.pixbuf_new_from_file(path)
@@ -481,11 +475,14 @@ class mapTiles(ranaModule):
 
   class tileLoader(Thread):
     """Downloads an image (in a thread)"""
-    def __init__(self, x,y,z,layer,filename, callback):
+    def __init__(self, x,y,z,layer,layerName,layerType,filename, folder, callback):
       self.x = x
       self.y = y
       self.z = z
       self.layer = layer
+      self.layerName = layerName
+      self.layerType = layerType
+      self.folder = folder
       self.finished = 0
       self.filename = filename
       self.callback = callback
@@ -498,7 +495,8 @@ class mapTiles(ranaModule):
           self.y,
           self.z,
           self.layer,
-          self.filename)
+          self.filename,
+          self.folder)
         self.finished = 1
 
       # something is wrong with the server or url
@@ -549,7 +547,7 @@ class mapTiles(ranaModule):
                                                                             url)
         print "** this exception occured: %s" % e
 
-    def downloadTile(self,x,y,z,layer,filename):
+    def downloadTile(self,x,y,z,layer,filename, folder):
       """Downloads an image"""
 #      layerDetails = maplayers.get(layer, None)
     #  if(layerDetails == None):
@@ -594,11 +592,13 @@ class mapTiles(ranaModule):
       self.callback.storeInMemmoryAndEnqueue(surface, name)
 
       # like this, currupted tiles should not get past the pixbuf loader and be stored
-      f = open(filename, 'w') # write the tile to file
-      f.write(content)
-      f.close()
-
+      m = self.callback.m.get('storeTiles', None)
+      if m:
+        m.queueOrStoreTile(content, self.layerName, self.z, self.x, self.y, self.layerType, filename, folder)
       del content
+
+
+
 
       
 def getTileUrl(x,y,z,layer): #TODO: share this with mapData
