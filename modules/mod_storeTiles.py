@@ -30,6 +30,7 @@ def getModule(m,d):
 
 class storeTiles(ranaModule):
   """Single-file-fs tile storage"""
+  #TODO: maybe run this in separate thread ?
   
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
@@ -37,6 +38,11 @@ class storeTiles(ranaModule):
     self.currentStorageVersion = 1
     self.maxDbFileSizeGibiBytes = 3.7 # maximum database file size (to avoid the FAT32 file size limitation) in GibiBytes
     self.sqliteTileBuffer = []
+    self.maxTilesInBuffer = 50
+    """if there are more tiles in the buffer than maxTilesInBuffer,
+       the whole buffer will be processed at once (flushed) to avoid a potencial memmory leak
+    """
+    self.processPerUpdate = 1 #how many tiles will be processed per update (updates should happen every 100ms)
 
   def firstTime(self):
     # the config folder should set the tile folder path by now
@@ -293,14 +299,20 @@ class storeTiles(ranaModule):
 
   def update(self):
     if self.sqliteTileBuffer:
-      """store all tile each update,
-      this can theoretically cause some peek slowdowns, but solves a potential memmory leak
-      that would happen if the tiles are not stored fast enought
-      TODO: do this more efficiently"""
+      """store number of tileseach update,
+      if there are more tiles than a given limit,
+      the whole buffer will be processed to avoid a potencial mommory leak
+      """
       print "%d in sqlite tile buffer" % len(self.sqliteTileBuffer)
-      while self.sqliteTileBuffer:
-        (tile, layerName, z, x, y, extension, filename, folder) = self.sqliteTileBuffer.pop()
-        self.storeTile(tile, layerName, z, x, y, extension)
+
+      if len(self.sqliteTileBuffer)<self.maxTilesInBuffer:
+        for i in range(0,self.processPerUpdate): # process a given number of tiles
+          (tile, layerName, z, x, y, extension, filename, folder) = self.sqliteTileBuffer.pop()
+          self.storeTile(tile, layerName, z, x, y, extension)
+      else: # upper limit reached, flush all tiles
+        while self.sqliteTileBuffer:
+          (tile, layerName, z, x, y, extension, filename, folder) = self.sqliteTileBuffer.pop()
+          self.storeTile(tile, layerName, z, x, y, extension)
 
 if(__name__ == "__main__"):
   a = example({}, {})
