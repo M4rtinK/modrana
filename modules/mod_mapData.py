@@ -28,6 +28,7 @@ import sys
 import geo
 import string
 import urllib, urllib2, threading
+import urllib3
 from threadpool import threadpool
 from threading import Thread
 
@@ -63,6 +64,8 @@ class mapData(ranaModule):
     self.lastMenuRedraw = 0
     self.notificateOnce = True
     self.scroll = 0
+    self.onlineRequestTimeout = 30
+
 
   def listTiles(self, route):
     """List all tiles touched by a polyline"""
@@ -407,6 +410,21 @@ class mapData(ranaModule):
       self.finished = False
       self.quit = False
 #      self.set("sizeStatus", 'inProgress') # the size is being processed
+      self.connPool = self.createConnectionPool()
+
+    def createConnectionPool(self):
+      if self.neededTiles:
+        tile = None
+        for t in self.neededTiles:
+          tile = t
+          break
+        (z,x,y) = (tile[2],tile[0],tile[1])
+        (url, filename, folder, folderPrefix, layerType) = self.namingFunction(x, y, z, self.layer)
+      else:
+        url = ""
+      timeout = self.callback.onlineRequestTimeout
+      connPool = urllib3.connection_from_url(url,timeout=timeout,maxsize=self.maxThreads, block=True)
+      return connPool
 
     def getSizeForURL(self, tile):
       """NOTE: getting size info for a sigle tile seems to take from 30 to 130ms on fast connection"""
@@ -417,10 +435,8 @@ class mapData(ranaModule):
         m = self.callback.m.get('storeTiles', None) # get the tile storage module
         if m:
           if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
-            url = urllib.urlopen(url) # open url and get mime info
-            urlInfo = url.info()
-            size = int(urlInfo['Content-Length']) # size in bytes
-            url.close()
+            request = self.connPool.urlopen('HEAD',url)
+            size = int(request.getheaders()['content-length'])
           else:
             size = 0
       except IOError:
@@ -443,8 +459,6 @@ class mapData(ranaModule):
       requests = threadpool.makeRequestsWithTuples(self.getSizeForURL, neededTiles, self.processURLSize)
       mainPool = threadpool.ThreadPool(maxThreads)
       print "GetSize: mainPool created"
-#      for req in requests:
-#          mainPool.putRequest(req)
       map(lambda x: mainPool.putRequest(x) ,requests)
       del requests # requests can be quite long, make sure we dont leave them in memmory
       print "Added %d URLS to check for size." % self.urlCount
@@ -482,6 +496,22 @@ class mapData(ranaModule):
       self.urlCount = len(neededTiles)
       self.finished = False
       self.quit = False
+      self.connPool = self.createConnectionPool()
+
+    def createConnectionPool(self):
+      if self.neededTiles:
+        tile = None
+        for t in self.neededTiles:
+          tile = t
+          break
+        (z,x,y) = (tile[2],tile[0],tile[1])
+        (url, filename, folder, folderPrefix, layerType) = self.namingFunction(x, y, z, self.layer)
+      else:
+        url = ""
+
+      timeout = self.callback.onlineRequestTimeout
+      connPool = urllib3.connection_from_url(url,timeout=timeout,maxsize=self.maxThreads, block=True)
+      return connPool
 
     def saveTileForURL(self, tile):
       (z,x,y) = (tile[2],tile[0],tile[1])
@@ -493,9 +523,8 @@ class mapData(ranaModule):
           # does the the file exist ?
           # TODO: maybe make something like tile objects so we dont have to pass so many parameters ?
           if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
-            request = urllib2.urlopen(url)
-            content = request.read()
-            request.close()
+            request = self.connPool.get_url(url)
+            content = request.data
             m.queueOrStoreTile(content, folderPrefix, z, x, y, layerType, filename, folder)
 
       except Exception, e:
@@ -515,8 +544,6 @@ class mapData(ranaModule):
       requests = threadpool.makeRequestsWithTuples(self.saveTileForURL, neededTiles, self.processSaveTile)
       mainPool = threadpool.ThreadPool(maxThreads)
       print "GetFiles: mainPool created"
-#      for req in requests:
-#          mainPool.putRequest(req)
       map(lambda x: mainPool.putRequest(x) ,requests)
       del requests # requests can be quite long, make sure we dont leave them in memmory
       print "Added %d URLS to check for size." % self.urlCount

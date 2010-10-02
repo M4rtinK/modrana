@@ -621,6 +621,7 @@ class menus(ranaModule):
     """here we set the radius for download"""
     self.clearMenu('data2', "set:menu:%s" % prevMenu)
 #    self.addItem('data2', '5 km', 'generic', 'set:downloadSize:4|mapData:download|set:menu:editBatch')
+    self.addItem('data2', '1 km', 'generic', 'set:downloadSize:1|set:menu:%s' % nextMenu)
     self.addItem('data2', '5 km', 'generic', 'set:downloadSize:4|set:menu:%s' % nextMenu)
     self.addItem('data2', '10 km', 'generic', 'set:downloadSize:8|set:menu:%s' % nextMenu)
     self.addItem('data2', '20 km', 'generic', 'set:downloadSize:16|set:menu:%s' % nextMenu)
@@ -924,6 +925,10 @@ class menus(ranaModule):
     cr.move_to(x1,y1)
     cr.line_to(x2,y2)
     cr.stroke()
+    
+# #   add zoomlevel
+#    z = self.get('z', 15)
+#    text = text + " (zl%d)" % z
 
     self.boxedText(cr, x1, y1-4, text, 12, 1)
 
