@@ -93,10 +93,6 @@ class loadTracklogs(ranaModule):
           print "cache consistency assured"
 
 
-  def update(self):
-    # Get and set functions are used to access global data
-    self.set('num_updates', self.get('num_updates', 0) + 1)
-    #print "Updated %d times" % (self.get('num_updates'))
 
   def loadCache(self):
     # unpickle the cache from file

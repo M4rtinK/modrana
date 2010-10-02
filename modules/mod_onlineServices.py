@@ -30,11 +30,6 @@ class onlineServices(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     
-#  def update(self):
-#    self.elevFromGeonames(50, 50)
-#    # Get and set functions are used to access global data
-#    self.set('num_updates', self.get('num_updates', 0) + 1)
-#    #print "Updated %d times" % (self.get('num_updates'))
 
   def elevFromGeonames(self, lat, lon):
     """get elevation in meters for the specified latitude and longitude from geonames"""

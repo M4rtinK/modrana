@@ -48,16 +48,6 @@ class showGPX(ranaModule):
 
       
 
-
-
-
-
-    
-  def update(self):
-    # Get and set functions are used to access global data
-    self.set('num_updates', self.get('num_updates', 0) + 1)
-    #print "Updated %d times" % (self.get('num_updates'))
-
 if(__name__ == "__main__"):
   a = example({}, {})
   a.update()

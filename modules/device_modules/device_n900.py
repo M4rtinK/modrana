@@ -45,9 +45,7 @@ class n900(deviceModule):
 
     
   def update(self):
-    # Get and set functions are used to access global data
-    self.set('num_updates', self.get('num_updates', 0) + 1)
-    #print "Updated %d times" % (self.get('num_updates'))
+    """initialize the automatic rotation"""
     if not self.done:
       if self.topWindow: #TODO: do this more efficiently
         self.startAutorotation()

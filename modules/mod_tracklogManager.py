@@ -40,11 +40,6 @@ class tracklogManager(ranaModule):
     self.setupCathegoriesMenu()
 
 
-    
-  def update(self):
-    # Get and set functions are used to access global data
-    self.set('num_updates', self.get('num_updates', 0) + 1)
-    #print "Updated %d times" % (self.get('num_updates'))
 
   def handleMessage(self, message, type, args):
     if message in ["up","down","reset"]:

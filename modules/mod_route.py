@@ -419,8 +419,6 @@ class route(ranaModule):
       menus.addItem('routeSelectFirstStep', 'step#closest', 'generic', 'ms:turnByTurn:start:closest|set:menu:None')
 
   def update(self):
-    self.set('num_updates', self.get('num_updates', 0) + 1)
-
     """register areas for manual point imput"""
 
     if self.expectStart:

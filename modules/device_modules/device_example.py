@@ -30,10 +30,6 @@ class device_example(deviceModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     
-  def update(self):
-    # Get and set functions are used to access global data
-    self.set('num_updates', self.get('num_updates', 0) + 1)
-    #print "Updated %d times" % (self.get('num_updates'))
 
 if(__name__ == "__main__"):
   a = device_example({}, {})

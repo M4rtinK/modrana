@@ -37,12 +37,6 @@ class storePOI(ranaModule):
 #    self.points['GLS'] = []
     self.load()
     
-  def update(self):
-    pass
-#    # Get and set functions are used to access global data
-#    self.set('num_updates', self.get('num_updates', 0) + 1)
-#    #print "Updated %d times" % (self.get('num_updates'))
-
   def load(self):
     """load POI from file"""
 #    start = time.clock()
