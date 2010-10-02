@@ -117,6 +117,7 @@ class MapWidget(gtk.Widget):
       a = __import__(deviceModuleName[0:-3])
       self.m[name] = a.getModule(self.m,self.d)
       self.m[name].moduleName = name
+      self.dmod = self.m[name]
       print " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (clock() - startM)))
 
 #    for k in self.m.keys():
@@ -126,6 +127,7 @@ class MapWidget(gtk.Widget):
 
     start = clock()
     for m in self.m.values():
+      m.dmod = self.dmod
       m.firstTime()
     print "Initialization complete in %1.2f ms" % (1000 * (clock() - start))
       

@@ -31,6 +31,10 @@ class deviceModule(ranaModule):
   def getDeviceName(self):
     return "unknown device"
 
+  def getLogFolderPath(self):
+    return "data/" # default log folder
+
+
 #  def getAutorotationSupported(self):
 #    return False
 #

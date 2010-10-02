@@ -32,8 +32,11 @@ class options(ranaModule):
     self.scroll = 0
     self.load()
   
-  def addBoolOption(self, title, variable, category='misc',default=None):
-    self.addOption(title,variable,((False,'OFF'),(True,'ON')),category,default)
+  def addBoolOption(self, title, variable, category='misc',default=None, action=None):
+    if action:
+      self.addOption(title,variable,((False,'OFF',action),(True,'ON',action)),category,default)
+    else:
+      self.addOption(title,variable,((False,'OFF'),(True,'ON')),category,default)
 
   def addOption(self, title, variable, choices, category='misc', default=None):
     newOption = (title,variable, choices,category,default)
@@ -52,6 +55,7 @@ class options(ranaModule):
 
     # * the debug submenu
     self.addBoolOption("Print redraw time to terminal", "showRedrawTime", "debug", False)
+    self.addBoolOption("Log modRana stdout to file", "loggingStatus", "debug", False, "log:checkLoggingStatus")
     self.addBoolOption("Debug circles", "debugCircles", "debug", False)
     self.addBoolOption("Debug squares", "debugSquares", "debug", False)
 

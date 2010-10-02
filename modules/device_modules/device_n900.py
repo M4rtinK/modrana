@@ -22,10 +22,10 @@
 from base_device_module import deviceModule
 
 def getModule(m,d):
-  return(n900(m,d))
+  return(device_n900(m,d))
 
-class n900(deviceModule):
-  """A sample modRana device-specific module"""
+class device_n900(deviceModule):
+  """A N900 modRana device-specific module"""
   
   def __init__(self, m, d):
     deviceModule.__init__(self, m, d)
@@ -89,6 +89,9 @@ class n900(deviceModule):
       return 1
     elif rotationMode == "portrait":
       return 2
+
+  def getLogFolderPath(self):
+    return "/home/user/MyDocs/" #N900 specific log folder
 
     
 

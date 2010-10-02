@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #----------------------------------------------------------------------------
-# Sample of a modRana device-specific module.
+# A SmartQ 7 modRana device-specific module.
 # It is a basic modRana module, that has some special features
 # and is loaded only on the correpsponding device.
 #----------------------------------------------------------------------------
@@ -21,16 +21,18 @@
 #---------------------------------------------------------------------------
 from base_device_module import deviceModule
 
-# NOTE: use the device_ prefix when naming the module
-
 def getModule(m,d):
-  return(device_example(m,d))
+  return(device_q7(m,d))
 
-class device_example(deviceModule):
-  """A sample modRana device-specific module"""
+class device_q7(deviceModule):
+  """A SmartQ 7 modRana device-specific module"""
   
   def __init__(self, m, d):
     deviceModule.__init__(self, m, d)
+
+  def getDeviceName(self):
+    return "Smart Devices SmartQ 7 MID "
+
     
 
 if(__name__ == "__main__"):
