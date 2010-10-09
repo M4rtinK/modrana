@@ -28,6 +28,9 @@ class units(ranaModule):
   
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
+    self.mileInMeters = 1609.344
+    self.mileInKiloMeters = 1.609344
+    self.yardsInMile = 1760
     
   def m2km(self, m):
     return (m / 1000.0) # m to km
@@ -45,9 +48,9 @@ class units(ranaModule):
     else:
       return (km * 0.621371192)  # km to miles
 
-  def m2CurrentUnitString(self, m):
+  def m2CurrentUnitString(self, m,dp=None, short=False):
     km = self.m2km(m)
-    return self.km2CurrentUnitString(km)
+    return self.km2CurrentUnitString(km,dp,short)
 
   def km2CurrentUnitString(self, km, dp=None, short=True):
     """return current unit in string with unit descriptor, rounded to two decimal places"""
@@ -56,12 +59,17 @@ class units(ranaModule):
     if unitType == 'km':
       if km <= 1: # we now count in meters
         dp = 0 # no need to count the odd centimeter with current GPS accuracy
-        small = True
         distance = km*1000
+        small = True
       else:
         distance = km
-    else:
-      distance = km *  0.621371192
+    else: # just miles for now
+      if km<self.mileInKiloMeters:
+        miles = km *  0.621371192
+        distance = miles*self.yardsInMile
+        small = True
+      else:
+        distance = km *  0.621371192
 
     # rounding
     if dp==None:
@@ -78,7 +86,7 @@ class units(ranaModule):
     #is it a string float representation ?
     if len(numberString.split('.')) > 1: # strip possible trailing zeroes
       numberString = numberString.rstrip('.0')
-
+      
     # short/lon unit name
     if unitType == 'km':
       if short:
@@ -92,8 +100,19 @@ class units(ranaModule):
         return "%s %s" % (numberString, smallUnitString)
       else:
         return "%s %s" % (numberString, unitString)
-    else:
-      return "%s miles" % numberString  # km to miles
+      
+    else: # miles
+      if short:
+        unitString = "miles"
+        smallUnitString = "yards"
+      else:
+        unitString = "miles"
+        smallUnitString = "yards"
+
+      if small:
+        return "%s %s" % (numberString, smallUnitString)
+      else:
+        return "%s %s" % (numberString, unitString)
 
   def km2CurrentUnitStringFullName(self, km):
     """return current unit in string with unit descriptor, rounded to two decimal places"""

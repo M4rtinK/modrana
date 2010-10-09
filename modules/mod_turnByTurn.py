@@ -149,7 +149,7 @@ class turnByTurn(ranaModule):
         # display current distance to the next point
         units = self.m.get('units', None)
         if units:
-          distString = units.m2CurrentUnitString(currentDistance)
+          distString = units.m2CurrentUnitString(currentDistance,2)
 
         note = "<sub> tap this box to reroute</sub>"
         message = distString + "\n" + message + "\n\n" + note
