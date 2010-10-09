@@ -17,20 +17,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from __future__ import with_statement # for python 2.5
 from base_module import ranaModule
-from time import sleep
 from tilenames import *
 from time import clock
 import time
 import os
-import statvfs
 import sys
 import geo
-import string
-import urllib, urllib2, threading
-import urllib3
-from threadpool import threadpool
 from threading import Thread
+import threading
+import urllib3
 
 import socket
 timeout = 30 # this sets timeout for all sockets
@@ -56,6 +53,7 @@ class mapData(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.stopThreading = True
+    self.dlListLock = threading.Lock() # well, its actually a set
     self.currentDownloadList = [] # list of files and urls for the current download batch
 #    self.currentTilesToGet = [] # used for reporting the (actual) size of the tiles for download
     self.sizeThread = None
@@ -133,35 +131,14 @@ class mapData(ranaModule):
     check = self.get('checkTiles', False)
     if check:
       neededTiles = self.checkTiles(neededTiles)
-
-    self.currentDownloadList = neededTiles # load the files to the download queue variable
+    with self.dlListLock: # make sure the set of needed tiles is acessed in an atomic way
+      self.currentDownloadList = neededTiles # load the files to the download queue variable
 
   def getTileUrl(self,x,y,z,layer):
       """Return url for given tile coorindates and layer"""
       mapTiles = self.m.get('mapTiles', None)
       url = mapTiles.getTileUrl(x,y,z,layer)
       return url
-
-# adapted from: http://www.artfulcode.net/articles/multi-threading-python/
-  class FileGetter(threading.Thread):
-    def __init__(self, url, filename):
-        self.url = url
-        self.filename = filename
-#        self.result = None
-        threading.Thread.__init__(self)
-
-    def getResult(self):
-        return self.result
-
-    def run(self):
-        try:
-            url = self.url
-            filename = self.filename
-            urllib.urlretrieve(url, filename)
-            self.result = filename
-            print "download of %s finished" % filename
-        except IOError:
-            print "Could not open document: %s" % url
 
   def handleMessage(self, message, type, args):
     if(message == "refreshTilecount"):
@@ -271,7 +248,7 @@ class mapData(ranaModule):
 
       self.totalSize = 0
       maxThreads = self.get('maxSizeThreads', 5)
-      sizeThread = self.GetSize(self, neededTiles, layer, self.getTileUrlAndPath, maxThreads) # the seccond parameter is the max number of threads TODO: tweak this
+      sizeThread = self.GetSize(self, neededTiles, layer, maxThreads) # the seccond parameter is the max number of threads TODO: tweak this
       print  "getSize received, starting sizeThread"
       sizeThread.start()
       self.sizeThread = sizeThread
@@ -291,7 +268,29 @@ class mapData(ranaModule):
           return
         
       maxThreads = self.get('maxDlThreads', 5)
-      getFilesThread = self.GetFiles(self, neededTiles, layer, self.getTileUrlAndPath, maxThreads)
+      """
+      2.Oct.2010 2:41 :D
+      after a lot of effort spent, I still can't get threaded download to realiably
+      work with sqlite sotrage without getting stuck
+      this currently happens only on the N900, not on PC (or I was simply not able to to reproduce it)
+      therefore, when on N900 with sqlite tile storage, use only simple singlethreaded download
+      """
+#      if self.device=='n900':
+#        storageType = self.get('tileStorageType', None)
+#        if storageType=='sqlite':
+#          mode='singleThreaded'
+#        else:
+#          mode='multiThreaded'
+#      else:
+#        mode='multiThreaded'
+      """
+      2.Oct.2010 3:42 ^^
+      scratch this
+      well, looks like the culprit was just the urlib3 socket pool with blocking turned on
+      so all the threads (even when doing it with a single thread) hanged on the block
+      it seems to be wotrking alright + its pretty fast too
+      """
+      getFilesThread = self.GetFiles(self, neededTiles, layer, maxThreads)
       getFilesThread.start()
       self.getFilesThread = getFilesThread
 
@@ -396,184 +395,232 @@ class mapData(ranaModule):
     return extendedTiles
 
   class GetSize(Thread):
-    """a class for getting size of files on and url list"""
-    def __init__(self, callback, neededTiles, layer, namingFunction, maxThreads):
+    """a class used for estimating the size of tiles for given set of coordinates,
+       it also removes locally available tiles from the set"""
+    def __init__(self, callback, neededTiles, layer, maxThreads):
       Thread.__init__(self)
       self.callback = callback
-      self.neededTiles=neededTiles
+      self.callbackSet=neededTiles # reference to the actual global set
+      self.neededTiles=neededTiles.copy() # local version
       self.maxThreads=maxThreads
       self.layer=layer
-      self.namingFunction=namingFunction
       self.processed = 0
       self.urlCount = len(neededTiles)
       self.totalSize = 0
       self.finished = False
       self.quit = False
-#      self.set("sizeStatus", 'inProgress') # the size is being processed
-      self.connPool = self.createConnectionPool()
+      url = self.getAnUrl(neededTiles)
+      self.connPool = self.createConnectionPool(url)
 
-    def createConnectionPool(self):
-      if self.neededTiles:
+    def createConnectionPool(self, url):
+      """create the connection pool -> to facilitate socket reuse"""
+      timeout = self.callback.onlineRequestTimeout
+      connPool = urllib3.connection_from_url(url,timeout=timeout,maxsize=self.maxThreads, block=False)
+      return connPool
+
+    def getAnUrl(self, neededTiles):
+      """get a random url so we can init the pool"""
+      if neededTiles:
         tile = None
-        for t in self.neededTiles:
+        for t in neededTiles:
           tile = t
           break
         (z,x,y) = (tile[2],tile[0],tile[1])
-        (url, filename, folder, folderPrefix, layerType) = self.namingFunction(x, y, z, self.layer)
+        (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
       else:
         url = ""
-      timeout = self.callback.onlineRequestTimeout
-      connPool = urllib3.connection_from_url(url,timeout=timeout,maxsize=self.maxThreads, block=True)
-      return connPool
+      return url
+
+    def run(self):
+      print "**!! batch tile size estimation is starting !!**"
+      maxThreads=self.maxThreads
+      shutdown = threading.Event()
+      localDlListLock = threading.Lock()
+      incrementLock = threading.Lock()
+      threads = []
+      for i in range(0,maxThreads): # start threads
+        """start download thread"""
+        t = Thread(target=self.getSizeWorker, args=(shutdown,incrementLock,localDlListLock))
+        t.daemon = True
+        t.start()
+        threads.append(t)
+      print "Added %d URLS to check for size." % self.urlCount
+      while True:
+        time.sleep(0.5) # this governs how often we check status of the worker threads
+        print "Batch size working...",
+        print "(threads: %i)," % (threading.activeCount()-1, ),
+        print"pending: %d, done: %d" % (len(self.neededTiles),self.processed)
+        if self.quit == True: # we were ordered to quit
+          print "***get size quiting"
+          shutdown.set() # dismiss all workers
+          self.finished = True
+          break
+        if not self.neededTiles: # we processed everything
+          print "***get size finished"
+          shutdown.set()
+          self.finished = True
+          break
+
+    def getSizeWorker(self, shutdown, incrementLock,localDlListLock):
+      """a worker thread method for estimating tile size"""
+      while 1:
+        if shutdown.isSet():
+          print "file size estimation thread is shutting down"
+          break
+        # try to get some work
+        with localDlListLock:
+          if self.neededTiles:
+            item = self.neededTiles.pop()
+        # try to retrieve size of a tile
+        size = 0
+        try:
+          size = self.getSizeForURL(item)
+        except Exception, e:
+          print "exception in a get size worker thread:\n%s" % e
+
+        # increment the counter or remove an available tile in a thread safe way
+        if size == None: #this signalizes that the tile is avauilable
+          with self.callback.dlListLock:
+            self.callbackSet.discard(item)
+          size = 0 # tiles we dont have dont need to be downloaded, therefore 0
+        with incrementLock:
+          self.processed+=1
+          self.totalSize+=size
 
     def getSizeForURL(self, tile):
-      """NOTE: getting size info for a sigle tile seems to take from 30 to 130ms on fast connection"""
-#      start = clock()
+      """get a size of a tile from its metadata
+           return size
+           return None if the tile is available
+           return 0 if there is an Exception"""
+      size = 0
       try:
+        # xet the coordinates
         (z,x,y) = (tile[2],tile[0],tile[1])
-        (url, filename, folder, folderPrefix, layerType) = self.namingFunction(x, y, z, self.layer)
+        # get the url and other info
+        (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
         m = self.callback.m.get('storeTiles', None) # get the tile storage module
+        # get the sotre tiles module
         if m:
-          if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
+          # does the tile exist ?
+          if m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
+            size = None # it exists, return None
+          else:
+            # the tile does not exist, get ist http header
             request = self.connPool.urlopen('HEAD',url)
             size = int(request.getheaders()['content-length'])
-          else:
-            size = 0
       except IOError:
         print "Could not open document: %s" % url
         size = 0 # the url errored out, so we just say it  has zero size
-#      print "Size lookup took %1.2f ms" % (1000 * (clock() - start))
+      except Exception, e:
+        print "error, while checking size of a tile"
+        print e
+        size = 0
       return size
-
-    def processURLSize(self, request, result):
-      """process the ruseult from the getSize threads"""
-      self.processed = self.processed + 1
-#      print "**** Size from request #%s: %r b" % (request.requestID, result)
-      self.totalSize+=result
-#      print "**** Total size: %r B, %d/%d done" % (self.totalSize, self.processed, self.urlCount)
-
-    def run(self):
-      start = clock()
-      neededTiles=self.neededTiles
-      maxThreads=self.maxThreads
-      requests = threadpool.makeRequestsWithTuples(self.getSizeForURL, neededTiles, self.processURLSize)
-      mainPool = threadpool.ThreadPool(maxThreads)
-      print "GetSize: mainPool created"
-      map(lambda x: mainPool.putRequest(x) ,requests)
-      del requests # requests can be quite long, make sure we dont leave them in memmory
-      print "Added %d URLS to check for size." % self.urlCount
-      while True:
-          try:
-              time.sleep(0.5) # this governs how often we check status of the worker threads
-              mainPool.poll()
-              print "Main batch download thread working...",
-              print "(active worker threads: %i)" % (threading.activeCount()-1, )
-              print "work requests pending: %s" % len(mainPool.workRequests)
-              if self.quit == True:
-                print "get size quiting"
-                mainPool.dismissWorkers(maxThreads)
-                break
-          except threadpool.NoResultsPending:
-              print "**** No pending results."
-              print "Total size lookup took %1.2f ms" % (1000 * (clock() - start))
-              self.finished = True
-              mainPool.dismissWorkers(maxThreads)
-              break
-#      if mainPool.dismissedWorkers:
-#          print "Joining all dismissed worker threads..."
-#          mainPool.joinAllDismissedWorkers()
-
+    
 
   class GetFiles(Thread):
-    def __init__(self, callback, neededTiles, layer, namingFunction, maxThreads):
+    """a class used for downloading tiles based on a given set of coordinates"""
+    def __init__(self, callback, neededTiles, layer, maxThreads):
       Thread.__init__(self)
       self.callback = callback
       self.neededTiles = neededTiles
       self.maxThreads = maxThreads
       self.layer=layer
-      self.namingFunction=namingFunction
       self.processed = 0
+      self.transfered = 0
       self.urlCount = len(neededTiles)
       self.finished = False
       self.quit = False
-      self.connPool = self.createConnectionPool()
+      url = self.getAnUrl(neededTiles)
+      self.connPool = self.createConnectionPool(url)
 
-    def createConnectionPool(self):
-      if self.neededTiles:
+    def getAnUrl(self, neededTiles):
+      """get a random url so we can init the pool"""
+      if neededTiles:
         tile = None
-        for t in self.neededTiles:
+        for t in neededTiles:
           tile = t
           break
         (z,x,y) = (tile[2],tile[0],tile[1])
-        (url, filename, folder, folderPrefix, layerType) = self.namingFunction(x, y, z, self.layer)
+        (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
       else:
         url = ""
+      return url
 
+
+    def createConnectionPool(self, url):
+      """create the connection pool -> to facilitate socket reuse"""
       timeout = self.callback.onlineRequestTimeout
-      connPool = urllib3.connection_from_url(url,timeout=timeout,maxsize=self.maxThreads, block=True)
+      connPool = urllib3.connection_from_url(url,timeout=timeout,maxsize=self.maxThreads, block=False)
       return connPool
 
-    def saveTileForURL(self, tile):
-      (z,x,y) = (tile[2],tile[0],tile[1])
-      (url, filename, folder, folderPrefix, layerType) = self.namingFunction(x, y, z, self.layer)
-
-      try:
-        m = self.callback.m.get('storeTiles', None) # get the tile storage module
-        if m:
-          # does the the file exist ?
-          # TODO: maybe make something like tile objects so we dont have to pass so many parameters ?
-          if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
-            request = self.connPool.get_url(url)
-            content = request.data
-            m.queueOrStoreTile(content, folderPrefix, z, x, y, layerType, filename, folder)
-
-      except Exception, e:
-        print "Saving tile %s failed: %s" % (url, e)
-        return "nok"
-      return "ok"
-
-    def processSaveTile(self, request, result):
-      #TODO: redownload failed tiles
-      self.processed = self.processed + 1
-      self.tileThreadingStatus = self.processed
-#      print "**** Downloading: %d of %d tiles done. Status:%r" % (self.processed, self.urlCount, result)
-
     def run(self):
-      neededTiles = self.neededTiles
+      print "**!! bath tile download is starting !!**"
       maxThreads = self.maxThreads
-      requests = threadpool.makeRequestsWithTuples(self.saveTileForURL, neededTiles, self.processSaveTile)
-      mainPool = threadpool.ThreadPool(maxThreads)
-      print "GetFiles: mainPool created"
-      map(lambda x: mainPool.putRequest(x) ,requests)
-      del requests # requests can be quite long, make sure we dont leave them in memmory
-      print "Added %d URLS to check for size." % self.urlCount
-      while True:
-          try:
-              time.sleep(0.5)
-              mainPool.poll()
-              print "Main batch size thread working...",
-              print "(active worker threads: %i)" % (threading.activeCount()-1, )
-              print "work requests pending: %s" % len(mainPool.workRequests)
-              if self.quit == True:
-                print "get tiles quiting"
-                mainPool.dismissWorkers(maxThreads) # dismiss all workers
-                break
-          except threadpool.NoResultsPending:
-              print "**** No pending results."
-              self.finished = True
-              break
-#      if mainPool.dismissedWorkers:
-#          print "Joining all dismissed worker threads..."
-#          mainPool.joinAllDismissedWorkers()
+      shutdown = threading.Event()
+      incrementLock = threading.Lock()
 
-#  def handleThreExc(self, request, exc_info):
-#        if not isinstance(exc_info, tuple):
-#            # Something is seriously wrong...
-#            print request
-#            print exc_info
-#            raise SystemExit
-#        print "**** Exception occured in request #%s: %s" % \
-#          (request.requestID, exc_info)
+      threads = []
+      for i in range(0,maxThreads): # start threads
+        """start download threads"""
+        t = Thread(target=self.getTilesWorker, args=(shutdown,incrementLock))
+        t.daemon = True
+        t.start()
+        threads.append(t)
+      print "minipool initialized"
+      print "Added %d URLS to download." % self.urlCount
+      while True:
+        time.sleep(0.5)
+        print "Batch tile dl working...",
+        print"(threads: %i)" % (threading.activeCount()-1, ),
+        print"pending: %d, done: %d" % (len(self.neededTiles),self.processed)
+        if self.quit == True: # we were ordered to quit
+          print "***get tiles quiting"
+          shutdown.set() # dismiss all workers
+          self.finished = True
+          break
+        if not self.neededTiles: # we processed everything
+          print "***get tiles finished"
+          shutdown.set()
+          self.finished = True
+          break
+
+    def getTilesWorker(self, shutdown, incrementLock):
+      while 1:
+        if shutdown.isSet():
+          print "file download thread is shutting down"
+          break
+        # try to get some work
+        try:
+          with self.callback.dlListLock:
+            item = self.neededTiles.pop()
+        except: # start the loop from beggining, so that shutdown can be checked and the thread can exit
+          print "waiting for more work"
+          time.sleep(2)
+          continue
+          
+        # try to retrieve and store the tile
+        try:
+          self.saveTileForURL(item)
+        except Exception, e:
+          # TODO: try to redownload failed tiles
+          print "exception in get files thread:\n%s" % e
+        # increment the counter in a thread safe way
+        with incrementLock:
+          self.processed+=1
+
+    def saveTileForURL(self, tile):
+      """save a tile for url created from its coordinates"""
+      (z,x,y) = (tile[2],tile[0],tile[1])
+      (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
+      m = self.callback.m.get('storeTiles', None) # get the tile storage module
+      if m:
+        # does the the file exist ?
+        # TODO: maybe make something like tile objects so we dont have to pass so many parameters ?
+        if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
+          request = self.connPool.get_url(url)
+          content = request.data
+          m.automaticStoreTile(content, folderPrefix, z, x, y, layerType, filename, folder, fromThread = True)
 
   def expand(self, tileset, amount=1):
     """Given a list of tiles, expand the coverage around those tiles"""
@@ -615,18 +662,6 @@ class mapData(ranaModule):
       s.moveY(d*2, 1)    # d*2 down
       s.moveX(d*2, 1)    # d*2 right
     return(s.tiles)
-
-  def update(self):
-#    """because it seems, that unless we force redraw the window
-#    the threads will be stuck, we poke them while they are running
-#    TODO: maybe the this could be done more elegantly ?"""
-#    if self.sizeThread != None and self.sizeThread.finished == False:
-#      self.set('needRedraw', True)
-#      print "refreshing the GetSize thread"
-#    if self.getFilesThread != None and self.getFilesThread.finished == False:
-#      self.set('needRedraw', True)
-##      print "refreshing the GetFiles thread"
-    pass
 
   def getTilesForRoute(self, route, radius, z):
     """get tilenamames for tiles around the route for given radius and zoom"""

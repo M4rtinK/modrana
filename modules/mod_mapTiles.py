@@ -594,8 +594,7 @@ class mapTiles(ranaModule):
       # like this, currupted tiles should not get past the pixbuf loader and be stored
       m = self.callback.m.get('storeTiles', None)
       if m:
-        m.queueOrStoreTile(content, self.layerName, self.z, self.x, self.y, self.layerType, filename, folder)
-      del content
+        m.automaticStoreTile(content, self.layerName, self.z, self.x, self.y, self.layerType, filename, folder, fromThread = True)
 
 
 

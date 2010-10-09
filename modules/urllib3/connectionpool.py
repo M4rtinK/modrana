@@ -1,6 +1,6 @@
-#modRana: not needed
-import logging
-log = logging.getLogger("connpool.log.txt")
+##modRana: logging not needed, therefore it was all disabled
+#import logging
+#log = logging.getLogger("connpool.log.txt")
 
 from Queue import Queue, Empty, Full
 from StringIO import StringIO
@@ -121,7 +121,7 @@ class HTTPConnectionPool(object):
         Return a fresh HTTPConnection.
         """
         self.num_connections += 1
-        log.info("Starting new HTTP connection (%d): %s" % (self.num_connections, self.host))
+#        log.info("Starting new HTTP connection (%d): %s" % (self.num_connections, self.host))
         return HTTPConnection(host=self.host, port=self.port)
 
     def _get_conn(self, timeout=None):
@@ -129,6 +129,14 @@ class HTTPConnectionPool(object):
         Get a connection. Will return a pooled connection if one is available.
         Otherwise, a fresh connection is returned.
         """
+        """
+        modRana note:
+        CAUTION, when you set the pool with blocking==True, it will eventually block FOREWER !! :D
+        why ? because no call sets the timeout parameter in this method, so the threas will slowly "evaporate"
+        from the pool and it will then block forever because no new connections are ever added to the pool
+        """
+
+
         conn = None
         try:
             conn = self.pool.get(block=self.block, timeout=timeout)
@@ -148,7 +156,8 @@ class HTTPConnectionPool(object):
             self.pool.put(conn, block=False)
         except Full, e:
             # This should never happen if self.block == True
-            log.warning("HttpConnectionPool is full, discarding connection: %s" % self.host)
+            pass
+#            log.warning("HttpConnectionPool is full, discarding connection: %s" % self.host)
 
     def is_same_host(self, url):
         return url.startswith('/') or get_host(url) == (self.scheme, self.host, self.port)
@@ -195,7 +204,7 @@ class HTTPConnectionPool(object):
             conn.request(method, url, body=body, headers=headers)
             conn.sock.settimeout(self.timeout)
             httplib_response = conn.getresponse()
-            log.debug("\"%s %s %s\" %s %s" % (method, url, conn._http_vsn_str, httplib_response.status, httplib_response.length))
+#            log.debug("\"%s %s %s\" %s %s" % (method, url, conn._http_vsn_str, httplib_response.status, httplib_response.length))
 
             # from_httplib will perform httplib_response.read() which will have
             # the side effect of letting us use this connection for another
@@ -210,12 +219,12 @@ class HTTPConnectionPool(object):
             raise TimeoutError("Request timed out after %f seconds" % self.timeout)
 
         except (HTTPException, SocketError), e:
-            log.warn("Retrying (%d attempts remain) after connection broken by '%r': %s" % (retries, e, url))
+#            log.warn("Retrying (%d attempts remain) after connection broken by '%r': %s" % (retries, e, url))
             return self.urlopen(method, url, body, headers, retries-1, redirect) # Try again
 
         # Handle redirection
         if redirect and response.status in [301, 302, 303, 307] and 'location' in response.headers: # Redirect, retry
-            log.info("Redirecting %s -> %s" % (url, response.headers.get('location')))
+#            log.info("Redirecting %s -> %s" % (url, response.headers.get('location')))
             return self.urlopen(method, response.headers.get('location'), body, headers, retries-1, redirect)
 
         return response
@@ -264,7 +273,7 @@ class HTTPSConnectionPool(HTTPConnectionPool):
         Return a fresh HTTPSConnection.
         """
         self.num_connections += 1
-        log.info("Starting new HTTPS connection (%d): %s" % (self.num_connections, self.host))
+#        log.info("Starting new HTTPS connection (%d): %s" % (self.num_connections, self.host))
         return HTTPSConnection(host=self.host, port=self.port)
 
 

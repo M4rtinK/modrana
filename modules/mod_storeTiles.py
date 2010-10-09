@@ -24,6 +24,8 @@ import sqlite3
 import os
 import time
 import glob
+import Queue
+from threading import Thread
 
 def getModule(m,d):
   return(storeTiles(m,d))
@@ -35,14 +37,19 @@ class storeTiles(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.layers = {}
+    self.threadLayers = {}
     self.currentStorageVersion = 1
     self.maxDbFileSizeGibiBytes = 3.7 # maximum database file size (to avoid the FAT32 file size limitation) in GibiBytes
-    self.sqliteTileBuffer = []
-    self.maxTilesInBuffer = 50
+    self.maxTilesInQueue = 50
+    self.sqliteTileQueue = Queue.Queue(self.maxTilesInQueue)
     """if there are more tiles in the buffer than maxTilesInBuffer,
        the whole buffer will be processed at once (flushed) to avoid a potencial memmory leak
     """
     self.processPerUpdate = 1 #how many tiles will be processed per update (updates should happen every 100ms)
+    self.commmitInterval=5 # how often we commit to the database (aonly happens when there is something in the queue)
+    self.lastCommit=time.time()
+    self.dirty = set() # a set of connections, that have uncommited data
+    self.startLoadingThread()
 
   def firstTime(self):
     # the config folder should set the tile folder path by now
@@ -57,23 +64,37 @@ class storeTiles(ranaModule):
   def getLookupDbPath(self, dbFolderPath):
     return "" + dbFolderPath + "/" + "lookup.sqlite" # get the path to the lookup db
 
-  def initializeDb(self, folderPrefix):
-    dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
-    if dbFolderPath not in self.layers:
-      self.initializeLookupDb(folderPrefix) # initialize the lookup db
-    if dbFolderPath in self.layers:
-      return dbFolderPath
-    else:
-      return None
+  def initializeDb(self, folderPrefix, accessType):
+    """there are two access types, "store" and "get"
+       we basically have two connection tables, store and get ones
+       the store connections are used only by the worker to store all the tiles it gets to its queue
+       the get connections are used by the main thread
+       when other threads query the database, they create a new connection and disconect it when done
 
-  def initializeLookupDb(self, folderPrefix):
+       we still get "database locked" from time to time,
+       * it may bee needed to use a mutex to control db access to fix this
+       * or disconnect all database connections ?
+    """
+    dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
+    if accessType in self.layers: # do we have an entry fro this acces type ?
+      if dbFolderPath in self.layers[accessType]:
+        return dbFolderPath # return the lookup connection
+      else:
+        self.initializeLookupDb(folderPrefix,accessType) # initialize the lookup db
+        return dbFolderPath
+    else:
+      self.layers[accessType]={} # create a new accestype entry
+      self.initializeLookupDb(folderPrefix,accessType) # initialize the lookup db
+      return dbFolderPath
+
+  def initializeLookupDb(self, folderPrefix, accessType):
     """initialize the lookup database"""
     dbFolderPath = self.getLayerDbFolderPath(folderPrefix) # get the layer folder path
 
     if not os.path.exists(dbFolderPath): # does the folder exist ?
       os.makedirs(dbFolderPath) # create the folder
 
-    lookupDbPath = self.getLookupDbPath(dbFolderPath)
+    lookupDbPath = self.getLookupDbPath(dbFolderPath) # get the path
 
     if dbFolderPath not in self.layers.keys():
       print "sqlite tiles: initializing db for layer: %s" % folderPrefix
@@ -87,51 +108,71 @@ class storeTiles(ranaModule):
         cursor.execute("create table version (v integer)")
         cursor.execute("insert into version values (?)", (self.currentStorageVersion,))
         connection.commit()
-      self.layers[dbFolderPath] = {'lookup':connection, 'stores':{}}
+      self.layers[accessType][dbFolderPath] = {'lookup':connection, 'stores':{}}
+
 
   def storeTile(self, tile, folderPrefix, z, x, y, extension):
-    dbFolderPath = self.initializeDb(folderPrefix)
+    accessType = "store"
+    dbFolderPath = self.initializeDb(folderPrefix,accessType)
     if dbFolderPath!=None:
-      lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
-      stores = self.layers[dbFolderPath]['stores']
-      
-      lookupCursor = lookupConn.cursor()
-      result = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension))
-      if not result.fetchone():
-        # store the tile as its not already in the database
+        lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
+    stores = self.layers[accessType][dbFolderPath]['stores'] # get a list of cached store connections
 
-        # get a store path
-        size = len(tile)
-        pathToStore = self.getAnAvailableStorePath(folderPrefix, size)
+    lookupCursor = lookupConn.cursor()
+    result = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension))
+    if not result.fetchone():
+      # store the tile as its not already in the database
 
-        # connect to the store
-        storeConn = self.connectToStore(stores, pathToStore)
+      # get a store path
+      size = len(tile)
+      pathToStore = self.getAnAvailableStorePath(folderPrefix, size)
 
-        # store the tile
-        integerTimestamp = int(time.time())
-        try:
-          ## 1. write in the lookup db (its easier to remove pointers to nonexisting stuff than to remove orphaned store items)
-          storeFilename = os.path.basename(pathToStore)
-          lookupQuery="insert into tiles (z, x, y, store_filename, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
-          lookupCursor = lookupConn.cursor()
-          lookupCursor.execute(lookupQuery,[z,x,y,storeFilename, extension, integerTimestamp])
-          lookupConn.commit()
+      # connect to the store
+      storeConn = self.connectToStore(stores, pathToStore, dbFolderPath, accessType)
 
-          ## 2. write in the store
-          storeQuery="insert into tiles (z, x, y, tile, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
-          storeCursor = storeConn.cursor()
-          storeCursor.execute(storeQuery,[z,x,y,sqlite3.Binary(tile), extension, integerTimestamp])
-          storeConn.commit()
-        except Exception, e:
-          pass #tile is already present, skip insert
+      # store the tile
+      integerTimestamp = int(time.time())
+      try:
+        ## 1. write in the lookup db (its easier to remove pointers to nonexisting stuff than to remove orphaned store items)
+        storeFilename = os.path.basename(pathToStore)
+        lookupQuery="insert into tiles (z, x, y, store_filename, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
+        lookupCursor = lookupConn.cursor()
+        lookupCursor.execute(lookupQuery,[z,x,y,storeFilename, extension, integerTimestamp])
+
+        ## 2. write in the store
+        storeQuery="insert into tiles (z, x, y, tile, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
+        storeCursor = storeConn.cursor()
+        storeCursor.execute(storeQuery,[z,x,y,sqlite3.Binary(tile), extension, integerTimestamp])
+        self.commitConnections([storeConn,lookupConn])
+      except Exception, e:
+        print "tile already present"
+        print e
+        pass #tile is already present, skip insert
+
+  def commitConnections(self,connections):
+    """store connections and commit them once in a while"""
+    for c in connections:
+      self.dirty.add(c)
 
 
-  def connectToStore(self, stores, pathToStore):
-    """connect to a store * use an existing connection or create a new one"""
+  def commitAll(self):
+    """commit are uncommited"""
+    while self.dirty:
+      conn = self.dirty.pop()
+      conn.commit()
+    print "committ OK"
+
+
+
+  def connectToStore(self, stores, pathToStore, dbFolderPath, accessType):
+    """connect to a store
+       * use an existing connection or create a new one"""
     if pathToStore in stores.keys():
       return stores[pathToStore] # there is already a connection to the store, return it
-    else:
-      return sqlite3.connect(pathToStore) #TODO: add some error handling
+    else: # create a new connection
+      storeConn = sqlite3.connect(pathToStore) #TODO: add some error handling
+      self.layers[accessType][dbFolderPath]['stores'][pathToStore] = storeConn # cache the connection
+      return storeConn
 
   def getAnAvailableStorePath(self, folderPrefix, size):
     """return a path to a store that can be used to store a tile specified by size"""
@@ -140,8 +181,9 @@ class storeTiles(ranaModule):
     if storeList: # there are already some stores
       availableStores = []
       for storePath in storeList: # iterate over the available stores
-        if self.willItFitIn(storePath, size):# add all stores that can be used to store the current object
-          availableStores.append(storePath)
+        cleanPath =  storePath.rstrip('-journal') # dont add sqlite journal files
+        if self.willItFitIn(cleanPath, size):# add all stores that can be used to store the current object
+          availableStores.append(cleanPath)
 
       if availableStores: # did we find some stores ?
         availableStorePath = availableStores.pop() # use one of the stores
@@ -204,9 +246,11 @@ class storeTiles(ranaModule):
     return folder + "/" + storeName
 
   def getTile(self, folderPrefix, z, x, y, extension):
-    dbFolderPath = self.initializeDb(folderPrefix)
+    """get a tile"""
+    accessType = "get"
+    dbFolderPath = self.initializeDb(folderPrefix, accessType)
     if dbFolderPath!=None:
-      lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
+      lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
       result = self.getTileFromDb(lookupConn, dbFolderPath, z, x, y, extension)
       if result: # is the result valid ?
         resultContent = result.fetchone() # get the result content
@@ -219,7 +263,7 @@ class storeTiles(ranaModule):
 
   def getTileFromDb(self, lookupConn, dbFolderPath, z, x, y, extension):
     """get a tile from the database"""
-    
+    accessType = "get"
     #look in the lookup db
     lookupCursor = lookupConn.cursor()
     lookupResult = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension)).fetchone()
@@ -227,8 +271,8 @@ class storeTiles(ranaModule):
       # now search in the store
       storeFilename = lookupResult[0]
       pathToStore = self.getStorePath(dbFolderPath, storeFilename)
-      stores = self.layers[dbFolderPath]['stores']
-      connectionToStore = self.connectToStore(stores, pathToStore)
+      stores = self.layers[accessType][dbFolderPath]['stores']
+      connectionToStore = self.connectToStore(stores, pathToStore, dbFolderPath, accessType)
       storeCursor = connectionToStore.cursor()
       result = storeCursor.execute("select tile, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension))
       return result
@@ -236,9 +280,11 @@ class storeTiles(ranaModule):
       return None
 
   def tileExists(self, filePath, folderPrefix, z, x, y, extension, fromThread=False):
+    """test if a tile exists
+       if fromThread=False, a new connection is created and disconnected again"""
     storageType = self.get('tileStorageType', 'files')
     if storageType == 'sqlite': # we are storing to the database
-      dbFolderPath = self.initializeDb(folderPrefix)
+      dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
       if dbFolderPath!=None: # is the database accessible ?
         if fromThread: # is this called from a thread ?
           # due to sqlite quirsk, connections can't be shared between threads
@@ -246,47 +292,55 @@ class storeTiles(ranaModule):
           lookupConn = sqlite3.connect(lookupDbPath)
         else:
           lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
-        lookupCursor = lookupConn.cursor() # get a cursor
-        lookupResult = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension)).fetchone()
+        query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
+        lookupResult = lookupConn.execute(query,(z, x, y, extension)).fetchone()
         if fromThread: # tidy up, just to be sure
-          lookupCursor.close()
           lookupConn.close()
         if lookupResult:
           return True # the tile is in the db
         else:
-          return False # the tile is not in the db
+            return False # the tile is not in the db
       else:
         return None # we cant decide if a tile is ind the db or not
     else: # we are storing to the filesystem
       return os.path.exists(filePath)
 
+  def worker(self):
+    """this is run by a thread that stores sqlite tiles to a db"""
+    while True:
+        item = self.sqliteTileQueue.get(block=True)
+        if item=='shutdown': # we put this to the queue to announce shutdown
+          print "\nshutdown imminent, commiting all tiles"
+          self.commitAll()
+          print "\nall tiles commited, breaking, goodbye :)"
+          break
+        (tile, folderPrefix, z, x, y, extension, filename, folder) = item # unpack the tupple
+        self.storeTile(tile, folderPrefix, z, x, y, extension) # store the tile
+        self.sqliteTileQueue.task_done()
+
+        dt = time.time() - self.lastCommit # check when the last commit was
+        if dt>self.commmitInterval:
+          self.commitAll() # commit all "dirty" connections
+          self.lastCommit = time.time() # update the last commit timestamp
 
 
-      
-  def test(self):
-    file = open("708.png", "rb")
-    tile = file.read()
-    file.close()
-    self.storeTileToDb(tile, "testing layer II", 11, 23, 45, "png")
-    self.storeTileToDb(tile, "testing layer II", 11, 25, 45, "png")
-    tile = self.getTileFromDb("testing layer II", 11, 23, 45, "png")
-    f = open("testovaci.png", "wb")
-    f.write(tile)
-    f.close()
+  def startLoadingThread(self):
+    """start the sqlite loading thread"""
+    t = Thread(target=self.worker)
+    """we need that the worker tidies up,
+       (commits all "dirty" conections)
+       so it is not daemonic"""
+#    t.daemon = True
+    t.start()
 
-  def queueOrStoreTile(self, tile, layerName, z, x, y, extension, filename, folder):
-    """store the tile if saving to files or save it to queue if saving to sqlite
 
-    this is really not ideal, say:
-       someone has a large screen, fast connectivity but slow cpu
-       if he scrolls/batch downloads too fast, modRana can theoretically be quite sloww while all the tiles are stored
-       on the other hand, there is no headache with managing temporary files,
-       solving empty folders not being liked by packaging scripts, etc.
+  def automaticStoreTile(self, tile, folderPrefix, z, x, y, extension, filename, folder, fromThread = False):
+    """store a tile to a file or db, depending on the current setting"""
 
-       """
     storageType = self.get('tileStorageType', 'files')
     if storageType == 'sqlite': # we are storing to the database
-      self.sqliteTileBuffer.append((tile, layerName, z, x, y, extension, filename, folder))
+      # put the tile to the storage queue, so that then worker can store it
+      self.sqliteTileQueue.put((tile, folderPrefix, z, x, y, extension, filename, folder), block=True, timeout=20)
     else: # we are storing to the filesystem
       if not os.path.exists(folder): # does it exist ?
         try:
@@ -297,22 +351,12 @@ class storeTiles(ranaModule):
       f.write(tile)
       f.close()
 
-  def update(self):
-    if self.sqliteTileBuffer:
-      """store number of tileseach update,
-      if there are more tiles than a given limit,
-      the whole buffer will be processed to avoid a potencial mommory leak
-      """
-      print "%d in sqlite tile buffer" % len(self.sqliteTileBuffer)
+  def shutdown(self):
+    self.sqliteTileQueue.put('shutdown',True) # try to commit possible uncommited tiles
 
-      if len(self.sqliteTileBuffer)<self.maxTilesInBuffer:
-        for i in range(0,self.processPerUpdate): # process a given number of tiles
-          (tile, layerName, z, x, y, extension, filename, folder) = self.sqliteTileBuffer.pop()
-          self.storeTile(tile, layerName, z, x, y, extension)
-      else: # upper limit reached, flush all tiles
-        while self.sqliteTileBuffer:
-          (tile, layerName, z, x, y, extension, filename, folder) = self.sqliteTileBuffer.pop()
-          self.storeTile(tile, layerName, z, x, y, extension)
+#  def update(self):
+#    if not self.sqliteTileQueue.empty():
+#      print "queue: %d" % self.sqliteTileQueue.qsize()
 
 if(__name__ == "__main__"):
   a = example({}, {})

@@ -358,7 +358,7 @@ class ThreadPool:
         """Wait for results, blocking until all have arrived."""
         while 1:
             try:
-                self.poll(True)
+              self.poll(True)
             except NoResultsPending:
                 break
 
