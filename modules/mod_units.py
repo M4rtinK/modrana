@@ -136,7 +136,7 @@ class units(ranaModule):
     # unit conversion
     if unitType == km:
       speed = km
-    else:
+    else: # miles
       speed = km * 0.621371192
 
     # rounding
