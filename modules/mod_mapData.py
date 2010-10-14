@@ -471,6 +471,9 @@ class mapData(ranaModule):
         with localDlListLock:
           if self.neededTiles:
             item = self.neededTiles.pop()
+          else:
+            print "no more work, worker quiting"
+            break
         # try to retrieve size of a tile
         size = 0
         try:
@@ -479,7 +482,7 @@ class mapData(ranaModule):
           print "exception in a get size worker thread:\n%s" % e
 
         # increment the counter or remove an available tile in a thread safe way
-        if size == None: #this signalizes that the tile is avauilable
+        if size == None: #this signalizes that the tile is available
           with self.callback.dlListLock:
             self.callbackSet.discard(item)
           size = 0 # tiles we dont have dont need to be downloaded, therefore 0
