@@ -123,63 +123,84 @@ class mapTiles(ranaModule):
 
   def drawMap(self, cr):
     """Draw map tile images"""
-    proj = self.m.get('projection', None)
-    if(proj == None):
-      return
-    if(not proj.isValid()):
-      return
+    try: # this should get rid of a fair share of the infamous "black screens"
+      proj = self.m.get('projection', None)
+      if(proj == None):
+        return
+      if(not proj.isValid()):
+        return
 
-    (sx,sy,sw,sh) = self.get('viewport') # get screen parameters
-    
-    scale = int(self.get('mapScale', 1)) # get the current scale
-    if scale == 1: # this will be most of the time, so it is first
-      z = int(self.get('z', 15))
-      (px1,px2,py1,py2) = (proj.px1,proj.px2,proj.py1,proj.py2) #use normal projection bbox
-      cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
-    else:
-      if scale == 2: # tiles are scaled to 512*512 and represent tiles from zl-1
-        z = int(self.get('z', 15)) - 1
-      elif scale == 4: # tiles are scaled to 1024*1024 and represent tiles from zl-2
-        z = int(self.get('z', 15)) - 2
-      else:
+      (sx,sy,sw,sh) = self.get('viewport') # get screen parameters
+
+      scale = int(self.get('mapScale', 1)) # get the current scale
+      if scale == 1: # this will be most of the time, so it is first
         z = int(self.get('z', 15))
+        (px1,px2,py1,py2) = (proj.px1,proj.px2,proj.py1,proj.py2) #use normal projection bbox
+        cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
+      else:
+        if scale == 2: # tiles are scaled to 512*512 and represent tiles from zl-1
+          z = int(self.get('z', 15)) - 1
+        elif scale == 4: # tiles are scaled to 1024*1024 and represent tiles from zl-2
+          z = int(self.get('z', 15)) - 2
+        else:
+          z = int(self.get('z', 15))
 
-      # we use tiles from an upper zl and strech them over lower zl
-      (px1,px2,py1,py2) = proj.findEdgesForZl(z, scale)
-      cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
+        # we use tiles from an upper zl and strech them over lower zl
+        (px1,px2,py1,py2) = proj.findEdgesForZl(z, scale)
+        cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
 
-    if self.get("rotateMap", False) and (self.get("centred", False)):
-      # due to the rotation, the map must be larger
-      # we take the longest side and render tiles in a square
-      longestSide = max(sw,sh)
-      add = (longestSide/2)/(self.tileSide)
-      # enlarge the bounding box
-      (px1,px2,py1,py2) = (px1-add,px2+add,py1-add,py2+add)
+      if self.get("rotateMap", False) and (self.get("centred", False)):
+        # due to the rotation, the map must be larger
+        # we take the longest side and render tiles in a square
+        longestSide = max(sw,sh)
+        add = (longestSide/2)/(self.tileSide)
+        # enlarge the bounding box
+        (px1,px2,py1,py2) = (px1-add,px2+add,py1-add,py2+add)
 
-    # get the range of tiles we need
-    wTiles =  len(range(int(floor(px1)), int(ceil(px2)))) # how many tiles wide
-    hTiles =  len(range(int(floor(py1)), int(ceil(py2)))) # how many tiles high
+      # get the range of tiles we need
+      wTiles =  len(range(int(floor(px1)), int(ceil(px2)))) # how many tiles wide
+      hTiles =  len(range(int(floor(py1)), int(ceil(py2)))) # how many tiles high
 
-    # upper left tile
-    cx = int(px1)
-    cy = int(py1)
-    # we need the "clean" cooridnates for the folowing conversion
-    (px1,px2,py1,py2) = cleanProjectionCoords
-    (pdx, pdy) = (px2 - px1,py2 - py1)
-    # upper left tile coodinates to screen coordinates
-    cx1,cy1 = (sw*(cx-px1)/pdx,sh*(cy-py1)/pdy) #this is basically the pxpy2xy function from mod_projection inlined
-    cx1,cy1 = int(cx1),int(cy1)
+      # upper left tile
+      cx = int(px1)
+      cy = int(py1)
+      # we need the "clean" cooridnates for the folowing conversion
+      (px1,px2,py1,py2) = cleanProjectionCoords
+      (pdx, pdy) = (px2 - px1,py2 - py1)
+      # upper left tile coodinates to screen coordinates
+      cx1,cy1 = (sw*(cx-px1)/pdx,sh*(cy-py1)/pdy) #this is basically the pxpy2xy function from mod_projection inlined
+      cx1,cy1 = int(cx1),int(cy1)
 
-    layer = self.get('layer','osma')
-    # Cover the whole map view with tiles
+      layer = self.get('layer','osma')
+      # Cover the whole map view with tiles
 
-    if self.get('overlay', False): # is the overlay on ?
-      ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
-      (alpha1, alpha2) = (float(ratio[0]),float(ratio[1])) # convert it to floats
+      if self.get('overlay', False): # is the overlay on ?
+        ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
+        (alpha1, alpha2) = (float(ratio[0]),float(ratio[1])) # convert it to floats
 
-      layer2 = self.get('layer2', 'mapnik') # get the background layer
+        layer2 = self.get('layer2', 'mapnik') # get the background layer
 
-      # draw the composited layer
+        # draw the composited layer
+        for ix in range(0, wTiles):
+          for iy in range(0, hTiles):
+
+            # get tile cooridnates by incrementing the upper left tile cooridnates
+            x = cx+ix
+            y = cy+iy
+
+            # get screen coordinates by incrementing upper left tile screen coordinates
+            x1 = cx1 + 256*ix*scale
+            y1 = cy1 + 256*iy*scale
+
+            # Try to load and display images
+            nameBack = self.loadImage(x,y,z,layer2)
+            nameOver = self.loadImage(x,y,z,layer)
+            if(nameBack and nameOver != None):
+              self.drawCompositeImage(cr,nameOver,nameBack,x1,y1,scale,alpha1,alpha2)
+        return
+
+
+      # draw the normal layer
       for ix in range(0, wTiles):
         for iy in range(0, hTiles):
 
@@ -192,29 +213,11 @@ class mapTiles(ranaModule):
           y1 = cy1 + 256*iy*scale
 
           # Try to load and display images
-          nameBack = self.loadImage(x,y,z,layer2)
-          nameOver = self.loadImage(x,y,z,layer)
-          if(nameBack and nameOver != None):
-            self.drawCompositeImage(cr,nameOver,nameBack,x1,y1,scale,alpha1,alpha2)
-      return
-
-
-    # draw the normal layer
-    for ix in range(0, wTiles):
-      for iy in range(0, hTiles):
-
-        # get tile cooridnates by incrementing the upper left tile cooridnates
-        x = cx+ix
-        y = cy+iy
-
-        # get screen coordinates by incrementing upper left tile screen coordinates
-        x1 = cx1 + 256*ix*scale
-        y1 = cy1 + 256*iy*scale
-
-        # Try to load and display images
-        name = self.loadImage(x,y,z,layer)
-        if(name != None):
-          self.drawImage(cr,name,x1,y1,scale)
+          name = self.loadImage(x,y,z,layer)
+          if(name != None):
+            self.drawImage(cr,name,x1,y1,scale)
+    except Exception, e:
+      print "mapTiles: expception while drawing the map layer:\n%s" % s
 
 
 

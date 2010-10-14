@@ -607,7 +607,7 @@ class mapData(ranaModule):
           self.saveTileForURL(item)
         except Exception, e:
           # TODO: try to redownload failed tiles
-          print "exception in get files thread:\n%s" % e
+          print "exception in get tiles thread:\n%s" % e
         # increment the counter in a thread safe way
         with incrementLock:
           self.processed+=1

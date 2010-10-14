@@ -314,14 +314,27 @@ class storeTiles(ranaModule):
           self.commitAll()
           print "\nall tiles commited, breaking, goodbye :)"
           break
-        (tile, folderPrefix, z, x, y, extension, filename, folder) = item # unpack the tupple
-        self.storeTile(tile, folderPrefix, z, x, y, extension) # store the tile
-        self.sqliteTileQueue.task_done()
+        """
+        the thread should not die due to an exception
+        or the queue fills up without anybody removing and processing the tiles
+        -> this would mean that all threads that need to store tiles
+           would wait forewer for the queue to empty
+        """
+        try:
+          (tile, folderPrefix, z, x, y, extension, filename, folder) = item # unpack the tupple
+          self.storeTile(tile, folderPrefix, z, x, y, extension) # store the tile
+          self.sqliteTileQueue.task_done()
+        except Exception, e:
+          print "sqlite storage worker -> exception during tile storage:\n%s" % e
 
         dt = time.time() - self.lastCommit # check when the last commit was
         if dt>self.commmitInterval:
-          self.commitAll() # commit all "dirty" connections
-          self.lastCommit = time.time() # update the last commit timestamp
+          try:
+            self.commitAll() # commit all "dirty" connections
+            self.lastCommit = time.time() # update the last commit timestamp
+          except Exception, e:
+            print "sqlite storage worker -> exception during mass db commit:\n%s" % e
+
 
 
   def startLoadingThread(self):
