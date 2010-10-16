@@ -91,7 +91,12 @@ class device_n900(deviceModule):
       return 2
 
   def getLogFolderPath(self):
-    return "/home/user/MyDocs/" #N900 specific log folder
+    return "/home/user/MyDocs/modrana_debug_log/" #N900 specific log folder
+
+  def getPOIFolderPath(self):
+    """override the default method with a N900 specific one"""
+    return "/home/user/MyDocs/.maps/"
+
 
     
 

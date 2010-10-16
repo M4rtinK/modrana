@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/python
 #----------------------------------------------------------------------------
 # A modRana logging module
@@ -19,6 +20,7 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import sys
+import time
 
 def getModule(m,d):
   return(log(m,d))
@@ -29,8 +31,8 @@ class log(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.savedStdout = None
-    self.logFilename = 'modrana_stdout.log.txt'
     self.fsock = None
+    self.currentLogPath = ""
 
   def firstTime(self):
     self.checkLoggingStatus()
@@ -48,7 +50,16 @@ class log(ranaModule):
 
   def getLogFilePath(self):
     logFolderPath = self.dmod.getLogFolderPath()
-    return("" + logFolderPath + "/" + self.logFilename)
+    # check if folder exists, if not, try to create it
+    if not os.path.exists(logFolderPath):
+      try:
+        os.makedirs(logFolderPath)
+      except:
+        print "debug log: creating log folder failed"
+
+    timeString = time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
+    fileName = 'modrana_stdout_%s.log.txt' % timeString
+    return("" + logFolderPath + "/" + fileName)
 
   def checkLoggingStatus(self):
     loggingStatus = self.get('loggingStatus', False)
@@ -58,13 +69,16 @@ class log(ranaModule):
       self.disableLogging()
 
   def enableLogging(self):
-    self.savedStdout = sys.stdout
-    if not self.fsock:
-      print "**log: opening stdout log file"
-      self.fsock = open(self.getLogFilePath(), 'w')
-    print "**log: redirectiong stdout to log file"
-    sys.stdout = self.fsock
-    print "**log: stdout redirected to (this :) log file"
+    try:
+      self.savedStdout = sys.stdout
+      if not self.fsock:
+        print "**log: opening stdout log file"
+        self.fsock = open(self.getLogFilePath(), 'w')
+      print "**log: redirectiong stdout to log file:\%s" % self.currentLogPath
+      sys.stdout = self.fsock
+      print "**log: stdout redirected to (this :) log file"
+    except Exception, e:
+      print "debug log: redirecting stdout to file failed:\n%s" % e
 
   def disableLogging(self):
     """disable logging"""
