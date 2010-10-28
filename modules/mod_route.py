@@ -459,7 +459,10 @@ class route(ranaModule):
         clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setEnd')
 
   def drawScreenOverlay(self, cr):
-    if self.selectTwoPoints == True:
+    if self.route: # current route info button
+      self.drawCurrentRouteInfoButton(cr)
+
+    if self.selectTwoPoints == True: # poin selection menu
       self.drawTwoPointsMenu(cr)
 
   def drawMapOverlay(self, cr):
@@ -660,6 +663,20 @@ class route(ranaModule):
 
     return array
 
+  def drawCurrentRouteInfoButton(self,cr):
+    (x,y,w,h) = self.get('viewport')
+    menus = self.m.get('menu', None)
+    dx = min(w,h) / 5.0
+    dy = dx
+    x1 = (x+w)-dx
+    y1 = (y-dy)+h
+    if self.selectTwoPoints:
+      """move to avoid colision with the point selection menu"""
+      x1 = x1-dx
+      y1 = y1-dy
+    menus.drawButton(cr, x1, y1, dx, dy, 'info#route', "generic_alpha", 'set:menu:currentRouteBackToMap')
+    
+
   def drawTwoPointsMenu(self, cr):
     (x,y,w,h) = self.get('viewport')
     dx = min(w,h) / 5.0
@@ -682,9 +699,6 @@ class route(ranaModule):
     menus.drawButton(cr, x1-dx, y1, dx, dy, 'start', startIcon, "route:expectStart")
     menus.drawButton(cr, x1, y1-dy, dx, dy, 'end', endIcon, "route:expectEnd")
     menus.drawButton(cr, x1, y1, dx, dy, 'route', "generic_alpha", routingAction)
-
-    if self.route:
-      menus.drawButton(cr, x1-dy, y1-dx, dx, dy, 'info#route', "generic_alpha", 'set:menu:currentRouteBackToMap')
 
     # "flush" cairo operations
     cr.stroke()
