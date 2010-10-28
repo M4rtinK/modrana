@@ -838,6 +838,7 @@ class route(ranaModule):
         else:
           menus.addItem('currentRouteTools', 'navigation#start', 'generic', 'set:menu:routeSelectFirstStep')
 
+      menus.addItem('currentRouteTools', 'clear', 'generic', 'route:clear|set:menu:None')
 
 
 
