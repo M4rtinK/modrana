@@ -201,6 +201,16 @@ class search(ranaModule):
         entryText = ""
         entry.entryBox(self, 'customQuery','Enter your search query',entryText)
 
+    elif message == "routeToActiveResult":
+      """get a route from current position to active search result
+         * center on the current position
+         -> we want to actually got to there :)"""
+      activeResultTupple = self.getActiveResultTupple()
+      activeResult = activeResultTupple[1]
+      lat = float(activeResult['lat'])
+      lon = float(activeResult['lng'])
+      self.sendMessage('md:route:route:type=pos2ll;toLat=%f;toLon=%f;show=start' % (lat,lon) )
+
     self.set("needRedraw", True)
 
 
@@ -279,11 +289,20 @@ class search(ranaModule):
          which is created from the initial ordering
          without this,(with distance sort) we would get different results for a key, if we moved fast enoght :)
       """
-      result = filter(lambda x: x[2] == resultNumber, list).pop() # get the result for the ABSOLUTE key
+      result = self.getResult(resultNumber, list)
       self.drawGLSResultMenu(cr, result)
 
     elif menuName == 'searchCustomQuery':
       self.drawSearchCustomQueryMenu(cr)
+
+  def getActiveResultTupple(self):
+    resultNumber = int(self.get('searchResultsItemNr', 0))
+    return self.getResult(resultNumber)
+
+  def getResult(self, resultNumber, list=None):
+    if list == None:
+      list = self.updateDistance()
+    return filter(lambda x: x[2] == resultNumber, list).pop() # get the result for the ABSOLUTE key
 
   def describeItem(self, index, category, list):
 #    longName = name = item.getTracklogName()
@@ -355,8 +374,7 @@ class search(ranaModule):
 
   def drawGLSResultMenu(self, cr, resultTupple):
     """draw an info screen for a Google local search result"""
-
-
+    
     # get coordinate allocation for the menu elements
     menus = self.m.get("menu",None)
     (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
@@ -529,8 +547,9 @@ class search(ranaModule):
 
       # setup the searchResultTools submenu
       m.clearMenu('searchResultTools', 'set:menu:searchResultsItem')
-      m.addItem('searchResultTools', "results#clear", 'generic', 'search:clearSearch|set:menu:None')
+      m.addItem('searchResultTools', "here#route", "generic", "search:routeToActiveResult")
       m.addItem('searchResultTools', "add to POI", "generic", "search:reset|search:storePOI")
+      m.addItem('searchResultTools', "results#clear", 'generic', 'search:clearSearch|set:menu:None')
     # TODO: add "find route to"
 
   def handleTextEntryResult(self, key, result):

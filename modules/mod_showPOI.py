@@ -229,7 +229,6 @@ class showPOI(ranaModule):
            and may need a regen"""
         self.listMenusDirty = True
 
-
       elif message == 'askDeleteActivePOI':
         ask = self.m.get('askMenu', None)
         if ask:
@@ -251,15 +250,24 @@ class showPOI(ranaModule):
            ,the menus might not be up to date
            and may need a regen"""
         self.activePOI.routeFrom('currentPosition')
-        self.activePOI.showOnMap()
+        self.sendMessage('mapView:recentreToPos')
+        self.drawActivePOIEnable()
+        self.set('menu', None)
+        
 
       elif message == 'drawActivePOI':
-        print "DRAW"
-        self.drawActivePOI = True
+        self.drawActivePOIEnable()
 
       elif message == 'dontDrawActivePOI':
-        self.drawActivePOI = False
+        self.drawActivePOIDisable()
 
+  def drawActivePOIEnable(self):
+    """enable drawing of the active POI"""
+    self.drawActivePOI = True
+
+  def drawActivePOIDisable(self):
+    """disable drawing of the active POI"""
+    self.drawActivePOI = False
 
   def handleTextEntryResult(self, key, result):
     # TODO: add input checking

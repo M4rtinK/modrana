@@ -247,7 +247,6 @@ class storePOI(ranaModule):
       if commit:
         self.storeToDb()
 
-
     def storeToDb(self):
       """store this POI object to the database"""
       self.callback.storePOI(self)

@@ -38,6 +38,13 @@ class mapView(ranaModule):
 #      self.set('z', max(z - 1, 8))
       self.set('z', max(z - 1, 6))
 
+    elif (message=='recentreToPos'):
+      pos = self.get('pos', None)
+      proj = self.m.get('projection', None)
+      if pos and proj:
+        (lat,lon) = pos
+        proj.recentre(lat, lon, z)
+
     elif(message):
       try:
         list = message.split(' ')

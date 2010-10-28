@@ -183,14 +183,32 @@ class route(ranaModule):
       if (type=='md'): # mesage-list based routing
         if args:
           type = args['type']
+          go = False
           if type=='ll2ll':
             (fromLat,fromLon) = (float(args['fromLat']),float(args['fromLon']))
             (toLat,toLon) = (float(args['toLat']),float(args['toLon']))
+            go = True
+          elif type=='pos2ll':
+            pos = self.get('pos', None)
+            if pos:
+              (fromLat,fromLon) = pos
+              (toLat,toLon) = (float(args['toLat']),float(args['toLon']))
+              go = True
+          if go: # are ve GO for routing ?
             print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
             try:
               self.doRoute(fromLat, fromLon, toLat, toLon)
             except:
               self.sendMessage('ml:notification:m:No route found;3')
+            if "show" in args:
+              """switch to map view and go to start/destination, if requested"""
+              where = args['show']
+              if where == 'start':
+                (cLat, cLon) = (fromLat,fromLon)
+              elif where == "destination":
+                (cLat, cLon) = (toLat,toLon)
+              self.sendMessage('mapView:recentre %f %f|set:menu:None' % (cLat,cLon))
+
             self.set('needRedraw', True) # show the new route
       else: # simple route, from here to selected point
         # disable the point selection guis
