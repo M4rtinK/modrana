@@ -18,9 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import time
 import cPickle
 import os
+import sqlite3
+import csv
 
 def getModule(m,d):
   return(storePOI(m,d))
@@ -30,65 +31,415 @@ class storePOI(ranaModule):
   
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
-    self.folder = self.get('POIFolder', 'data/poi/')
-    self.GLSResultFolder = self.folder + 'gls/'
-    self.filename = self.folder + 'poi.txt'
-    self.points = []
-#    self.points['GLS'] = []
-    self.load()
-    
-  def load(self):
-    """load POI from file"""
-#    start = time.clock()
-    try:
-      f = open(self.filename, 'r')
-      self.points = cPickle.load(f)
-      f.close()
-    except:
-      print "storePOI: loding POI from file failed"
-#    print "Loading POI took %1.2f ms" % (1000 * (time.clock() - start))
-  def save(self):
-    """save all poi in the main list to file"""
-    try:
-      f = open(self.filename, 'w')
-      cPickle.dump(self.points, f)
-      f.close()
-    except:
-      print "storePoi: saving POI to file failed"
+    self.db = None
+    self.tempOnlinePOI = None # temporary slot for an uncommited POI from online search
 
+  def firstTime(self):
+    self.connectToDb()
+    self.checkImport() # check if there ary any old POI to import
+
+  def connectToDb(self):
+    """connect to the database"""
+    POIFolderPath = self.dmod.getPOIFolderPath()
+    POIDBFilename = self.get('POIDBFilename', 'modrana_poi.db')
+    DBPath = "" + POIFolderPath + "/" + POIDBFilename
+
+    if os.path.exists(DBPath): # connect to db
+      try:
+        self.db = sqlite3.connect(DBPath)
+        print "connection to POI db in %s estabilshed" % DBPath
+      except Exception, e:
+        print "connecting to POI database failed:\n%s" % e
+    else: # create new db
+      try:
+        self.db = self.createDatabase(DBPath)
+      except Exception, e:
+        print "creating POI database failed:\n%s" % e
+
+  def disconnectFromDb(self):
+    print "storePOI: disconnecting from db"
+    self.db.close()
+        
+  def createDatabase(self, path):
+    """create a new database, including tables and initial data
+    return the connection object"""
+    print "storePOI: creating new database file in:\n%s" % path
+    conn = sqlite3.connect(path)
+
+    # create the category table
+    conn.execute('CREATE TABLE category (cat_id integer PRIMARY KEY,label text, desc text, enabled integer)')
+    # create the poi table
+    conn.execute('CREATE TABLE poi (poi_id integer PRIMARY KEY, lat real, lon real, label text, desc text, cat_id integer)')
+    # load the predefined categories
+    # (currently the same ones as in MaemoMapper)
+    defaultCats = [(1, u'Service Station', u'Stations for purchasing fuel for vehicles.', 1),
+                   (2, u'Residence', u'Houses, apartments, or other residences of import.', 1),
+                   (3, u'Restaurant', u'Places to eat or drink.', 1),
+                   (4, u'Shopping/Services', u'Places to shop or acquire services.', 1),
+                   (5, u'Recreation', u'Indoor or Outdoor places to have fun.', 1),
+                   (6, u'Transportation', u'Bus stops, airports, train stations, etc.', 1),
+                   (7, u'Lodging', u'Places to stay temporarily or for the night.', 1),
+                   (8, u'School', u'Elementary schools, college campuses, etc.', 1),
+                   (9, u'Business', u'General places of business.', 1),
+                   (10, u'Landmark', u'General landmarks.', 1),
+                   (11, u'Other', u'Miscellaneous category for everything else.', 1)]
+    for cat in defaultCats:
+      conn.execute('insert into category values(?,?,?,?)', cat)
+    # commit the chnages
+    conn.commit()
+    print "storePoi: new database file has been created"
+    return conn
+
+  def storePOI(self,POI):
+    """store a POI object to the database"""
+    if self.db:
+      values = POI.getDbOrder()
+      query = "replace into poi values(?,?,?,?,?,?)"
+      self.db.execute(query,values)
+      self.db.commit()
+
+  def deletePOI(self,id):
+    """delete a poi with given ID from the database"""
+    self.db.execute('delete from poi where poi_id=?', [id])
+    self.db.commit()
+
+  def getCategories(self):
+    """return a list of all available categories"""
+    if self.db:
+      return self.db.execute('select label,desc,cat_id from category').fetchall()
+
+  def getUsedCategories(self):
+    """return list of categories that have at least one POI"""
+    if self.db:
+      # find which POI categories are actually used
+      # TODO: investigate how this scales for many points
+      usedCatIds = self.db.execute('select distinct cat_id from poi').fetchall()
+      usedCategories = []
+      for catId in usedCatIds:
+        nameDescription = self.db.execute('select label,desc,cat_id from category where cat_id=?', catId).fetchone()
+        if nameDescription:
+          usedCategories.append(nameDescription)
+      return usedCategories #this should be a list of used category ids
+    else:
+      return None
+
+  def getCategoryForId(self, catId):
+    """return cat_id,label, desc, enabled froa agiven cat_id"""
+    result = self.db.execute('select cat_id,label,desc,enabled from category where cat_id=?', [catId]).fetchone()
+    return result
+
+  def getAllPOIFromCategory(self, catId):
+    """return a list of POI from a given category"""
+    if self.db:
+      result = self.db.execute('select label,lat,lon,poi_id from poi where cat_id=?', [catId]).fetchall()
+      return result
+    else:
+      return None
+
+  def getPOI(self, POIId):
+    """return a complete POI row from db fow a given POI Id"""
+    if self.db:
+      result = self.db.execute('select poi_id, lat, lon, label, desc, cat_id from poi where poi_id=?',[POIId]).fetchone()
+      if result:
+        (poi_id,lat,lon,label,desc,cat_id) = result
+        # make it more usable
+        POIObject = self.POI(self,label,desc,lat,lon,cat_id,poi_id)
+        return POIObject
+      else:
+        return None
+    else:
+      return None
+
+  class POI:
+    """this class reperesents a POI"""
+    def __init__(self,callaback,label,description,lat,lon,catId,id=None):
+      self.callback = callaback
+      self.id=id
+      self.lat=lat
+      self.lon=lon
+      self.label= u'%s' % label
+      self.description= u'%s' % description
+      self.categoryId=catId
+
+    def getMenus(self):
+      """convenience function for getting the menus object"""
+      return self.callback.m.get('menu', None)
+
+    def getId(self):
+      return self.id
+
+    def getLat(self):
+      return self.lat
+
+    def getLon(self):
+      return self.lon
+
+    def getName(self):
+      return self.label
+
+    def getDescription(self):
+      return self.description
+
+    def getCatId(self):
+      return self.categoryId
+
+    def getDbOrder(self):
+      """get the variables in the order, they are stored in the database"""
+      return (
+              self.getId(),
+              self.getLat(),
+              self.getLon(),
+              self.getName(),
+              self.getDescription(),
+              self.getCatId()
+              )
+
+    def drawMenu(self,cr):
+      menus = self.getMenus()
+      if menus:
+        button1 = ('map#show on', 'generic', 'mapView:recentre %f %f|showPOI:drawActivePOI|set:menu:None' % (self.lat,self.lon))
+        button2 = ('tools', 'tools', 'set:menu:POIDetailTools')
+        if self.label!=None and self.lat!=None and self.lon!=None and self.description!=None:
+          text = "%s\nlat:%f lon:%f\n%s" % (self.label,self.lat,self.lon,self.description)
+        else:
+          text = "POI is being initialized"
+        box = (text ,'')
+        menus.drawThreePlusOneMenu(cr, 'POIDetail', 'showPOI:checkMenus|set:menu:POIList', button1, button2, box)
+    
+    def drawToolsMenu(self,cr):
+      # setup the tools submenu
+      menus = self.getMenus()
+      if menus:
+        menus.clearMenu('POIDetailTools', "set:menu:POIDetail")
+        menus.addItem('POIDetailTools', 'here#route', 'generic', 'showPOI:routeToActivePOI')
+        menus.addItem('POIDetailTools', 'name#edit', 'generic', 'ms:showPOI:editActivePOI:name')
+        menus.addItem('POIDetailTools', 'description#edit', 'generic', 'ms:showPOI:editActivePOI:description')
+        menus.addItem('POIDetailTools', 'latitude#edit', 'generic', 'ms:showPOI:editActivePOI:lat')
+        menus.addItem('POIDetailTools', 'longitude#edit', 'generic', 'ms:showPOI:editActivePOI:lon')
+        menus.addItem('POIDetailTools', 'category#change', 'generic', 'ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit|set:menu:POICategoryChooser')
+        menus.addItem('POIDetailTools', 'POI#delete', 'generic', 'showPOI:askDeleteActivePOI')
+
+    def getValues(self):
+      return([self.id,self.lat,self.lon,self.label,self.description,self.categoryId])
+
+    def setName(self, newLabel, commit=True):
+      self.label = u'%s' % newLabel
+      if commit:
+        self.storeToDb()
+
+    def setDescription(self, newDescription, commit=True):
+      self.description = u'%s' % newDescription
+      if commit:
+        self.storeToDb()
+
+    def setLat(self, lat, commit=True):
+      self.lat = float(lat)
+      if commit:
+        self.storeToDb()
+
+    def setLon(self, lon, commit=True):
+      self.lon = float(lon)
+      if commit:
+        self.storeToDb()
+
+    def setCategory(self, newCatId, commit=True):
+      self.categoryId = newCatId
+      if commit:
+        self.storeToDb()
+
+
+    def storeToDb(self):
+      """store this POI object to the database"""
+      self.callback.storePOI(self)
+
+    def showOnMap(self):
+      """recentre to this POI and active point and label drawing"""
+      self.callback.sendMessage('mapView:recentre %f %f|showPOI:drawActivePOI|set:menu:None' % (self.lat,self.lon))
+
+    def routeFrom(self, fromWhere):
+      if fromWhere == 'currentPosition': # route from current position to this POI
+        pos = self.callback.get('pos', None)
+        if pos:
+          (fromLat, fromLon) = pos
+          self.callback.sendMessage('md:route:route:type=ll2ll;fromLat=%f;fromLon=%f;toLat=%f;toLon=%f;' % (fromLat,fromLon,self.getLat(),self.getLon()))
+
+  def getEmptyPOI(self):
+    """get a POI with all variables set to None"""
+    POIObject = self.POI(self,None,None,None,None,None,None)
+    return POIObject
+
+  def checkImport(self):
+    """check if there are any POI in the old format
+       and try to import them to the db (into the "other" category)
+       then rename the old poi file to prevent multiple imports"""
+
+    oldPOIPath = "data/poi/poi.txt"
+    if os.path.exists(oldPOIPath):
+      try:
+        renamedOldPOIPath = "data/poi/imported_old_poi.txt"
+        print "storePOI:importing old POI from: %s" % oldPOIPath
+        points = self.loadOld(oldPOIPath)
+        if points:
+          for point in points:
+            # create a new POI object
+            label = point.name
+            description = point.description.replace('|','\n')
+            lat = point.lat
+            lon = point.lon
+            catId = 11
+            newPOI = self.POI(self,label,description,lat,lon,catId)
+            newPOI.storeToDb()
+          print "storePOI: imported %d old POI" % len(points)
+          os.rename(oldPOIPath,renamedOldPOIPath)
+          print "storePOI: old POI file moved to: %s" % renamedOldPOIPath
+          self.sendMessage('ml:notification:m:%d old POI imported to category "Other";10' % len(points))
+      except Exception, e:
+        print "storePOI: import of old POI failed:\n%s" % e
+
+
+    
+  def loadOld(self, path):
+    """load POI from file - depreciated, used sqlite for POI storage"""
+    try:
+      f = open(path, 'r')
+      points = cPickle.load(f)
+      f.close()
+      return points
+    except Exception, e:
+      print "storePOI: loding POI from file failed:\n%s" % e
+      return None
+
+#  def saveOld(self):
+#    """save all poi in the main list to file"""
+#    try:
+#      f = open(self.filename, 'w')
+#      cPickle.dump(self.points, f)
+#      f.close()
+#    except:
+#      print "storePoi: saving POI to file failed"
+
+
+  def handleMessage(self, message, type, args):
+    if type=='ms' and message=='deletePOI':
+      """remove a poi with given id from database"""
+      if args:
+        id = int(args)
+        self.deletePOI(id) # remove the poi from database
+        # notify the showPOI module, that it might need to rebuild its menus
+        self.sendMessage('showPOI:listMenusDirty')
+    elif type=='ms' and message=='setCatAndCommit':
+      """set category and as this is the last needed input,
+         commit the new POI to db"""
+      catId = int(args)
+      # set the category to the one the user just selected
+      self.tempOnlinePOI.setCategory(catId, commit=False)
+      # commit the new online result based POI to db
+      self.tempOnlinePOI.storeToDb()
+      # signal that the showPOI menus may need to be regenerated
+      self.sendMessage('showPOI:listMenusDirty')
+      catInfo = self.getCategoryForId(catId)
+      catName = catInfo[1]
+      POIName = self.tempOnlinePOI.getName()
+      self.set('menu', 'searchResultsItem')
+      self.sendMessage('ml:notification:m:%s has been saved to %s;5' % (POIName, catName))
+
+    elif message == "reconnectToDb":
+      """this means, that we need to reconnect the database connection
+         * this is used for example as a notification,
+          that the user changed the default POI db path"""
+      self.disconnectFromDb()
+      self.connectToDb()
+
+    elif message == "dumpToCSV":
+      """dump db to CSV file"""
+      self.set('menu', None)
+      self.dumpToCSV()
+
+  def handleTextEntryResult(self, key, result):
+    if key=='onlineResultName':
+      """like this, the user can edit the name of the
+         result before saving it to POI"""
+      self.tempOnlinePOI.setName(result, commit=False)
+      self.sendMessage('ml:notification:m:Select a category for the new POI;3')
+      self.sendMessage('ml:showPOI:setupPOICategoryChooser:storePOI;setCatAndCommit')
+      self.set('menu', 'POICategoryChooser')
+
+  def dumpToCSV(self):
+    """dump the db content as a CSV file"""
+    units = self.m.get('units', None)
+    POIFolderPath = self.dmod.getPOIFolderPath()
+    self.sendMessage('ml:notification:m:POI export starting;5')
+    if units and self.db:
+      try:
+        filenameHash = units.getTimeHashString()
+
+        def CSVdump(path, rows):
+          """dump given list of rows to file"""
+          f = open(path, 'wb')
+          writer = csv.writer(f)
+          for row in rows:
+            writer.writerow(row)
+          f.close()
+
+        # dump the categories
+        rows = self.db.execute('select * from category').fetchall()
+        path = "" + POIFolderPath + "/" + filenameHash + "_category_dump.csv"
+        CSVdump(path, rows)
+
+        # dump the POI
+        rows = self.db.execute('select * from poi').fetchall()
+        path = "" + POIFolderPath + "/" + filenameHash + "_poi_dump.csv"
+        CSVdump(path, rows)
+
+        self.sendMessage('ml:notification:m:POI exported to: %s;5' % POIFolderPath)
+      except Exception, e:
+        print "storePOI: CSV dump failed:\n%s" % e
+        self.sendMessage('ml:notification:m:POI export failed;5')
+
+  def shutdown(self):
+    """disconnect from the database on shutdown"""
+    self.disconnectFromDb()
 
   def storeGLSResult(self, result):
+    """store a Google Local Search result to file"""
     name = result['titleNoFormatting']
     lat = float(result['lat'])
     lon = float(result['lng'])
-    category = "gls"
 
-    newPOI = POI(name, category, lat, lon)
+    newPOI = self.getEmptyPOI()
+    newPOI.setName(name, commit=False)
+    newPOI.setLat(lat, commit=False)
+    newPOI.setLon(lon, commit=False)
 
     text = "%s" % (result['titleNoFormatting'])
 
     try: # the adress can be unknown
       for addressLine in result['addressLines']:
-        text += "|%s" % addressLine
+        text += "\n%s" % addressLine
     except:
-      text += "|%s" % "no adress found"
+      text += "\n%s" % "no adress found"
 
     try: # it seems, that this entry is no guarantied
       for phoneNumber in result['phoneNumbers']:
         type = ""
         if phoneNumber['type'] != "":
           type = " (%s)" % phoneNumber['type']
-        text += "|%s%s" % (phoneNumber['number'], type)
+        text += "\n%s%s" % (phoneNumber['number'], type)
     except:
-      text += "|%s" % "no phone numbers found"
+      text += "\n%s" % "no phone numbers found"
 
-    newPOI.setDescription(text)
-    
-    self.points.append(newPOI)
-    self.save()
+    newPOI.setDescription(text, commit=False)
+    self.tempOnlinePOI = newPOI
+
+    # start the name and description entry chain
+    entry = self.m.get('textEntry', None)
+    if entry:
+      entry.entryBox(self,'onlineResultName','POI Name',name)
 
 class POI():
-  """A basic class representing a POI."""
+  """A basic class representing a POI.
+     DEPRECIATED, use the new version in the main class
+     this is there only becuase it is needed for import of old POI"""
   def __init__(self, name, category, lat, lon):
     self.name = name
     self.category = category

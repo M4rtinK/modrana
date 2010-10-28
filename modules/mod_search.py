@@ -386,25 +386,24 @@ class search(ranaModule):
     menus.drawButton(cr, x4, y4, w4, h4, "", "generic", "set:menu:None")
 
     # * draw details from the search result
-    text = "%s (%s)" % (result['titleNoFormatting'],distanceString)
+    text = "\n%s (%s)" % (result['titleNoFormatting'],distanceString)
 
     try: # the adress can be unknown
-#      print result['addressLines']
       for addressLine in result['addressLines']:
-        text += "|%s" % addressLine
+        text += "\n%s" % addressLine
     except:
-      text += "|%s" % "no adress found"
+      text += "\n%s" % "no adress found"
 
     try: # it seems, that this entry is no guarantied
       for phoneNumber in result['phoneNumbers']:
         type = ""
         if phoneNumber['type'] != "":
           type = " (%s)" % phoneNumber['type']
-        text += "|%s%s" % (phoneNumber['number'], type)
+        text += "\n%s%s" % (phoneNumber['number'], type)
     except:
-      text += "|%s" % "no phone numbers found"
+      text += "\n%s" % "no phone numbers found"
 
-    text += "|coordinates: %f, %f" % (lat,lon)
+    text += "\ncoordinates: %f, %f" % (lat,lon)
 
     menus.drawTextToSquare(cr, x4, y4, w4, h4, text) # display the text in the box
 
@@ -531,7 +530,7 @@ class search(ranaModule):
       # setup the searchResultTools submenu
       m.clearMenu('searchResultTools', 'set:menu:searchResultsItem')
       m.addItem('searchResultTools', "results#clear", 'generic', 'search:clearSearch|set:menu:None')
-      m.addItem('searchResultTools', "add to POI", "generic", "search:reset|search:storePOI|set:menu:searchResults")
+      m.addItem('searchResultTools', "add to POI", "generic", "search:reset|search:storePOI")
     # TODO: add "find route to"
 
   def handleTextEntryResult(self, key, result):

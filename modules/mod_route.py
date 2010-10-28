@@ -179,22 +179,35 @@ class route(ranaModule):
       self.doRoute(fromLat, fromLon, toLat, toLon)
       self.set('needRedraw', True) # show the new route
 
-    elif(message == "route"): # simple route, from here to selected point
-      # disable the point selection guis
-      self.selectTwoPoints = False
-      self.selectOnePoint = False
-      toPos = self.get("selectedPos", None)
-      if(toPos):
-        toLat,toLon = [float(a) for a in toPos.split(",")]
+    elif(message == "route"): # find a route
+      if (type=='md'): # mesage-list based routing
+        if args:
+          type = args['type']
+          if type=='ll2ll':
+            (fromLat,fromLon) = (float(args['fromLat']),float(args['fromLon']))
+            (toLat,toLon) = (float(args['toLat']),float(args['toLon']))
+            print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
+            try:
+              self.doRoute(fromLat, fromLon, toLat, toLon)
+            except:
+              self.sendMessage('ml:notification:m:No route found;3')
+            self.set('needRedraw', True) # show the new route
+      else: # simple route, from here to selected point
+        # disable the point selection guis
+        self.selectTwoPoints = False
+        self.selectOnePoint = False
+        toPos = self.get("selectedPos", None)
+        if(toPos):
+          toLat,toLon = [float(a) for a in toPos.split(",")]
 
-        fromPos = self.get("pos", None)
-        if(fromPos):
-          (fromLat, fromLon) = fromPos
-          print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
+          fromPos = self.get("pos", None)
+          if(fromPos):
+            (fromLat, fromLon) = fromPos
+            print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
 
-          # TODO: wait message (would it be needed when using internet routing ?)
-          self.doRoute(fromLat, fromLon, toLat, toLon)
-          self.set('needRedraw', True) # show the new route
+            # TODO: wait message (would it be needed when using internet routing ?)
+            self.doRoute(fromLat, fromLon, toLat, toLon)
+            self.set('needRedraw', True) # show the new route
 
     elif(message == 'storeRoute'):
       loadTracklogs = self.m.get('loadTracklogs', None)
@@ -264,12 +277,6 @@ class route(ranaModule):
           (dLat, dLon) = (self.destination[0], self.destination[1])
           self.doRoute(pLat, pLon, dLat, dLon)
 
-
-
-
-
-
-      
 
   def doRoute(self, fromLat, fromLon, toLat, toLon):
     """Route from one point to another, and set that as the active route"""
@@ -734,9 +741,9 @@ class route(ranaModule):
 
       # if called from the osd menu, go back to map at escape
       if menuName == 'currentRouteBackToMap':
-        parent = 'None'
+        parent = 'set:menu:None'
       else:
-        parent = 'route'
+        parent = 'set:menu:route'
 
       if self.route == []:
         action = "set:menu:None"
@@ -756,28 +763,24 @@ class route(ranaModule):
         distance = units.m2CurrentUnitString(float(dir['Directions']['Distance']['meters']))
         steps = len(dir['Directions']['Routes'][0]['Steps']) # number of steps
 
-#        for step in dir['Directions']['Routes'][0]['Steps']:
-#          print step
-
-
         start = ""
         startAddress = self.start[2]
         (lat1,lon1) = (self.start[0],self.start[1])
         for item in startAddress.split(','):
-          start += "|%s" % item
-    #    start += "|(%f,%f)" % (lat1,lon1)
+          start += "\n%s" % item
+    #    start += "\n(%f,%f)" % (lat1,lon1)
 
         destination = ""
         destinationAddress = self.destination[2]
         (lat2,lon2) = (self.destination[0],self.destination[1])
         for item in destinationAddress.split(','):
-          destination += "|%s" % item
-    #    destination += "|(%f,%f)" % (lat2,lon2)
+          destination += "\n%s" % item
+    #    destination += "\n(%f,%f)" % (lat2,lon2)
 
         text = "%s" % start
-        text+= "|%s" % destination
-        text+= "||%s in about %s and %s steps" % (distance, duration, steps)
-        text+= "|(%f,%f)->(%f,%f)" % (lat1,lon1,lat2,lon2)
+        text+= "\n%s" % destination
+        text+= "\n\n%s in about %s and %s steps" % (distance, duration, steps)
+        text+= "\n(%f,%f)->(%f,%f)" % (lat1,lon1,lat2,lon2)
 
         self.text = text
       else:
@@ -787,9 +790,6 @@ class route(ranaModule):
 
       if self.once:
         self.once = False
-
-#        entry = self.m.get('textEntry', None)
-#        entry.entryBox("Enter destination")
 
       box = (text , "set:menu:currentRoute")
       menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
@@ -815,13 +815,6 @@ class route(ranaModule):
       if menus == None:
         print "route: no menus module, no menus will be drawn"
         return
-
-
-#      print self.get('textEntry', "")
-#      print self.get('textEntryDone', "")
-#      print self.expectTextEntry
-#      print self.startAddress
-#      print self.destinationAddress
 
 
       (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()

@@ -104,8 +104,20 @@ class options(ranaModule):
                   ("12h", "12 hours")],
                    "view",
                    "24h")
+
+    self.addOption("Listable menu rows", "listableMenuRows",
+                 [(2,"2 rows"),
+                  (3,"3 rows"),
+                  (4,"4 rows"),
+                  (5,"5 rows"),
+                  (6,"6 rows")],
+                   "view",
+                   4)
      
     self.addBoolOption("Centre map", "centred", "view", True)
+
+
+
 
     self.addOption("Network", "network",
 #      [("off","No use of network"),
@@ -217,6 +229,23 @@ class options(ranaModule):
        (500,"500 m")],
        "Navigation",
        30)
+
+
+    # * POI
+    self.addOption("POI database", "POIDBFilename",
+      [("poi.db","shared with Mappero (EXPERIMENTAL)","storePOI:reconnectToDb"),
+       ("modrana_poi.db","modRana only (default)", "storePOI:reconnectToDb")],
+       "POI",
+       "modrana_poi.db")
+
+    """EportPOIDatabaseToCSV is just a dummy value,
+       we just need to send a dump message to storePOI"""
+    self.addOption("Export POI Database to CSV", "EportPOIDatabaseToCSV",
+      [("dump","click to export","storePOI:dumpToCSV"),
+       ("dump","click to export","storePOI:dumpToCSV")],
+       "POI",
+       "dump")
+
 
 
     # Add all our categories to the "options" menu

@@ -38,20 +38,37 @@ class notification(ranaModule):
 
   def handleMessage(self, message, type, args):
     """the first part is the message, that will be displayed,
-       there can also by some parameters, delimited by #"""
-    list = message.split('#')
-    # TODO: support setting timeout and position
-    timeout = self.timeout
-    self.position = 'middle'
-    self.notificationText = list[0]
-    self.draw = True # enable drawing of notifications
-    if len(list) == 2:
-      try:
-        timeout = int(list[1]) # override the default timeout
-      except:
-        print "notification: wrong timeout, using default 5 secconds"
-    self.expirationTimestamp = time.time() + timeout
-    self.set('needRedraw', True) # make sure the notification is displayed
+       there can also by some parameters, delimited by #
+       NEW: you can also use a message list for the notification
+            firts goes the message, then the timeout in secconds
+       """
+
+    if type=='ml' and message=='m':
+      """advanced message list based notification"""
+      if args:
+        timeout = self.timeout
+        self.position = 'middle'
+        self.notificationText = args[0]
+        self.draw = True # enable drawing of notifications
+        if len(args) >= 2:
+          timeout=int(args[1])
+          self.expirationTimestamp = time.time() + timeout
+          
+        self.set('needRedraw', True) # make sure the notification is displayed
+    else:
+      list = message.split('#')
+      # TODO: support setting timeout and position
+      timeout = self.timeout
+      self.position = 'middle'
+      self.notificationText = list[0]
+      self.draw = True # enable drawing of notifications
+      if len(list) == 2:
+        try:
+          timeout = int(list[1]) # override the default timeout
+        except:
+          print "notification: wrong timeout, using default 5 secconds"
+      self.expirationTimestamp = time.time() + timeout
+      self.set('needRedraw', True) # make sure the notification is displayed
 
 
   def drawMenu(self,cr,menuName):
@@ -92,14 +109,6 @@ class notification(ranaModule):
       cr.fill()
     else:
       self.draw = False # we are finished, disable drawing notifications
-
-
-
-
-
-
-
-
 
 if(__name__ == "__main__"):
   a = example({}, {})

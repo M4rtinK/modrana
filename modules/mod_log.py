@@ -38,7 +38,7 @@ class log(ranaModule):
     self.checkLoggingStatus()
 
   def handleMessage(self, message, type, args):
-    if message == "checkLoggingStatus":
+    if message == "checkLoggingStatus": # check if logging was enabled
       self.checkLoggingStatus()
 
   def update(self):
@@ -56,10 +56,11 @@ class log(ranaModule):
         os.makedirs(logFolderPath)
       except:
         print "debug log: creating log folder failed"
-
-    timeString = time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
-    fileName = 'modrana_stdout_%s.log.txt' % timeString
-    return("" + logFolderPath + "/" + fileName)
+    units = self.m.get('units', None)
+    if units:
+      timeHashString = units.getTimeHashString()
+      fileName = 'modrana_stdout_%s.log.txt' % timeHashString
+      return("" + logFolderPath + "/" + fileName)
 
   def checkLoggingStatus(self):
     loggingStatus = self.get('loggingStatus', False)

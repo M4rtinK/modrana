@@ -19,10 +19,11 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import cairo
+import pango
+import pangocairo
 import time
 import math
 import geo
-from listable_menu import listable_menu
 
 def getModule(m,d):
   return(menus(m,d))
@@ -166,7 +167,64 @@ class menus(ranaModule):
     (x1,y1) = buttons['scalebar']
     self.drawScalebar(cr, proj,x1,y1,w)
 
+  def needRedraw(self):
+    """conveninece function for asking for redraw"""
+    self.set('needRedraw', True)
 
+  def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
+    pg = pangocairo.CairoContext(cr)
+    # create a layout for your drawing area
+    layout = pg.create_layout()
+    layout.set_markup(text)
+    layout.set_font_description(pango.FontDescription("Sans Serif %d" % fontsize))
+    (lw,lh) = layout.get_size()
+    if lw == 0 or lh == 0:
+      return # no need to draw this + avoid a division by zero
+    if(widthLimit and lw > widthLimit):
+      scale = float(pango.SCALE)
+      factor = ((widthLimit/(lw/scale)))
+      factor = min(factor, 1.0)
+      cr.move_to(x,y)
+      cr.save()
+      cr.scale(factor,factor)
+      pg.show_layout(layout)
+      cr.restore()
+    else:
+      cr.move_to(x,y)
+      pg.show_layout(layout)
+
+## this ca be used when I can get it to behave like the old show_text based method
+#  def drawText(self,cr,text,x,y,w,h,border=0):
+#    """pango based text drawing method"""
+#    if(not text):
+#      return
+#    # Put a border around the area
+#    if(border != 0):
+#      x += w * border
+#      y += h * border
+#      w *= (1-2*border)
+#      h *= (1-2*border)
+#    pg = pangocairo.CairoContext(cr)
+#    # create a layout for your drawing area
+#    layout = pg.create_layout()
+#    layout.set_markup(text)
+#    layout.set_font_description(pango.FontDescription("Sans Serif 60"))
+#    (lw,lh) = layout.get_size()
+#    if lw == 0 or lh == 0:
+#      return # no need to draw this + avoid a division by zero
+#    scale = float(pango.SCALE)
+##    factor = min(((w)/(lw/scale)),((h)/(lh/scale)))
+#    factorW = (w)/(lw/scale)
+#    factorH = (h)/(lh/scale)
+##    factor = min(factor, 1.0)
+#    factor = min(factorW, factorH)
+#    cr.move_to(x,y)
+#    cr.save()
+#    cr.scale(factor,factor)
+#    ratio = max(lw / w, lh / h)
+#    cr.set_font_size(60 / ratio)
+#    pg.show_layout(layout)
+#    cr.restore()
 
   def drawText(self,cr,text,x,y,w,h,border=0):
     if(not text):
@@ -248,12 +306,18 @@ class menus(ranaModule):
       return
     (x1,y1,w,h) = self.get('viewport', None)
 
-    list = self.lists.get(menuName, None)
-    if(list != None):
-      m = self.m.get(list, None)
-      if(m != None):
-        listHelper = listable_menu(cr,x1,y1,w,h, self.m.get('clickHandler', None), self.listOffset)
-        m.drawList(cr, menuName, listHelper)
+#    list = self.lists.get(menuName, None)
+#    if(list != None):
+#      m = self.m.get(list, None)
+#      if(m != None):
+#        listHelper = listable_menu(cr,x1,y1,w,h, self.m.get('clickHandler', None), self.listOffset)
+#        m.drawList(cr, menuName, listHelper)
+#      return
+
+    # Is it a list ?
+    if menuName in self.lists.keys(): # TODO: optimize this
+      print "drawing list: %s" % menuName
+      self.lists[menuName].draw(cr) # draw the list
       return
     
     # Find the menu
@@ -265,6 +329,14 @@ class menus(ranaModule):
         self.set('needRedraw', True)
       return
 
+
+
+#    if(list != None):
+#      m = self.m.get(list, None)
+#      if(m != None):
+#        listHelper = listable_menu(cr,x1,y1,w,h, self.m.get('clickHandler', None), self.listOffset)
+#        m.drawList(cr, menuName, listHelper)
+#      return
 
 #    device = self.device
 #    if device == 'neo':
@@ -376,12 +448,16 @@ class menus(ranaModule):
 
 
 
-  def addListableMenu(self, items, parrentAction, descFunction=None, drawFunction=None):
-    if descFunction == None: # use default description function
-      pass
+  def addListableMenu(self, name, items, parrentAction, descFunction=None, drawFunction=None):
+    newListableMenu = self.listableMenu(name, self, items, parrentAction, descFunction, drawFunction,4)
+    self.lists[name] = newListableMenu
+    return newListableMenu
+      
 
   class listableMenu:
-    def __init__(self, menus, items, parrentAction, descFunction=None, drawFunction=None, displayedItems=3):
+    """a listable menu object"""
+    def __init__(self, name, menus, items, parrentAction, descFunction=None, drawFunction=None, displayedItems=3):
+      """use custom item and description drawing functions, or use the default ones"""
       self.descFunction = descFunction
       if descFunction==None:
         self.descFunction = self.describeListItem
@@ -391,64 +467,70 @@ class menus(ranaModule):
       self.index=0 #index of the first item in the current list view
       self.displayedItems = displayedItems
       self.items = items
-      self.parrentAction = parrentMenu
+      self.parrentAction = parrentAction
       self.menus = menus
-
-
+      self.name = name
 
     def describeListItem(self, item, index, maxIndex):
+      """default item description function
+         -> get the needed strings for the default item drawing function"""
       (mainText, secText, action) = item
-      indexString = "%d/%d" % (index,maxIndex)
+      indexString = "%d/%d" % (index+1,maxIndex)
       return(mainText, secText, indexString, action)
 
     def drawListItem(self, cr, item, x, y, w, h, index, descFunction=None):
       """default list item drawing function"""
       if descFunction==None:
         descFunction=self.describeListItem
+
+      # * get the data for this button
+      (mainText, secText, indexString, action) = descFunction(item, index, len(self.items))
       # * draw the background
-      self.menus.drawButton(x,y,w,h,'','generic', action)
+      self.menus.drawButton(cr,x,y,w,h,'','generic', action)
 
       # * draw the text
-      (mainText, secText, indexString) = descFunction(item, index, len(self.items))
-
       border = 20
 
       # 1st line: option name
-      self.menus.drawText(cr, title+":", x+border, y+border, w-2*border)
-
+      self.menus.drawText(cr, mainText, x+border, y+border, w-2*border,20)
       # 2nd line: current value
-      self.menus.drawText(cr, valueDescription, x + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
-
+      self.menus.drawText(cr, secText, x + 0.15 * w, y + 0.6 * h, w * 0.85 - border, 20)
       # in corner: row number
-      self.menus.drawText(cr, "%d/%d" % (index+1, numItems), x+0.85*w, y+3*border, w * 0.15 - border, 20)
+      self.menus.drawText(cr, indexString, x+0.85*w, y+3*border, w * 0.15 - border, 20)
 
-
-    def drawMenu(self, cr):
-      """draw a listable menu"""
-      (e1,e2,e3,e4,alloc) = self.menuModule.threePlusOneMenuCoords()
+    def draw(self, cr):
+      """draw the listable menu"""
+      (e1,e2,e3,e4,alloc) = self.menus.threePlusOneMenuCoords()
       (x1,y1) = e1
       (x2,y2) = e2
       (x3,y3) = e3
       (x4,y4) = e4
       (w,h,dx,dy) = alloc
 
+      # controls
       # * parent menu
-      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", parrentAction)
+      self.menus.drawButton(cr, x1, y1, dx, dy, "", "up", self.parrentAction)
       # * scroll up
-      self.menuModule.drawButton(cr, x2, y2, dx, dy, "", "up_list", "options:up")
+      self.menus.drawButton(cr, x2, y2, dx, dy, "", "up_list", "ml:menu:listMenu:%s;up" % self.name)
       # * scroll down
-      self.menuModule.drawButton(cr, x3, y3, dx, dy, "", "down_list", "options:down")
-
+      self.menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "ml:menu:listMenu:%s;down" % self.name)
 
       id = self.index
-      nrItems = self.displayedItems
+
+      # get the number of rows
+      globalCount = self.menus.get('listableMenuRows', None) # try to get the global one
+      if globalCount==None:
+        nrItems = self.displayedItems # use the default value
+      else:
+        nrItems = int(globalCount) # use the global one
       visibleItems = self.items[id:(id+nrItems)]
       if len(visibleItems): # there must be a nonzero amount of items to avoid a division by zero
         # compute item sizes
         itemBoxW = w-x4
         itemBoxH = h-y4
         itemW = itemBoxW
-        itemH = itemBoxH/len(visibleItems)
+#        itemH = itemBoxH/len(visibleItems)
+        itemH = itemBoxH/nrItems
         for item in visibleItems:
           self.drawFunction(cr,item,x4,y4,itemW,itemH,id) #draw the item
           y4 = y4 + itemH # move the drawing window
@@ -457,15 +539,13 @@ class menus(ranaModule):
     def scrollUp(self):
       if self.index>=1:
         self.index = self.index -1
+        self.menus.needRedraw()
     def scrollDown(self):
       if (self.index + 1) < len(self.items):
         self.index = self.index + 1
+        self.menus.needRedraw()
     def reset(self):
       self.index = 0
-      
-
-
-
 
 
   def setupProfile(self):
@@ -540,12 +620,23 @@ class menus(ranaModule):
 
     
   def setupPoiMenu(self):
-    self.clearMenu('poi', "set:menu:None")
-    for i in("Show map", "Go to", "Delete"):
-      self.addItem('poi', i, i, 'set:menu:showPOI')
-      
-    self.addItem('poi', 'Route to', 'generic', "set:menu:showPOIRoute")
-    self.addItem('poi', 'route#clear', 'generic', "route:clear|set:menu:main")
+    self.clearMenu('poi', "set:menu:main")
+    self.addItem('poi', 'POI#list', 'generic', "showPOI:setupCategoryList|set:menu:POICategories")
+    self.addItem('poi', 'POI#add new', 'generic', "set:menu:POIAddFromWhere")
+    POISelectedAction1 = "showPOI:centerOnActivePOI"
+    self.addItem('poi', 'POI#go to', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:POICategories" % POISelectedAction1)
+    POISelectedAction2 = "showPOI:routeToActivePOI"
+    self.addItem('poi', 'POI#route to', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:POICategories" % POISelectedAction2)
+    self.addItem('poi', 'search#online', 'generic', "set:menu:searchWhere")
+
+    self.addPOIPOIAddFromWhereMenu() # chain the "add from where menu"
+
+  def addPOIPOIAddFromWhereMenu(self):
+    self.clearMenu('POIAddFromWhere', "set:menu:poi")
+    self.addItem('POIAddFromWhere', 'entry#manual', 'generic', "ms:showPOI:storePOI:manualEntry")
+    self.addItem('POIAddFromWhere', 'position#current', 'generic', "ms:showPOI:storePOI:currentPosition")
+
+
 
   def setupEditBatchMenu(self):
     """this is a menu for editing settings of a batch before running the said batch"""
@@ -622,6 +713,7 @@ class menus(ranaModule):
     self.clearMenu('data2', "set:menu:%s" % prevMenu)
 #    self.addItem('data2', '5 km', 'generic', 'set:downloadSize:4|mapData:download|set:menu:editBatch')
     self.addItem('data2', '1 km', 'generic', 'set:downloadSize:1|set:menu:%s' % nextMenu)
+    self.addItem('data2', '2 km', 'generic', 'set:downloadSize:2|set:menu:%s' % nextMenu)
     self.addItem('data2', '5 km', 'generic', 'set:downloadSize:4|set:menu:%s' % nextMenu)
     self.addItem('data2', '10 km', 'generic', 'set:downloadSize:8|set:menu:%s' % nextMenu)
     self.addItem('data2', '20 km', 'generic', 'set:downloadSize:16|set:menu:%s' % nextMenu)
@@ -645,7 +737,8 @@ class menus(ranaModule):
      self.clearMenu('route')
      self.addItem('route', 'Point to Point', 'generic', 'set:menu:None|route:selectTwoPoints')
      self.addItem('route', 'Here to Point#Point to Here', 'generic', 'set:menu:None|route:selectOnePoint')
-     self.addItem('route', 'Here to POI', 'generic', 'set:menu:showPOIRoute')
+     POISelectedAction2 = "showPOI:routeToActivePOI"
+     self.addItem('route', 'Here to POI', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:POICategories" % POISelectedAction2)
      self.addItem('route', 'to Address#Address', 'generic', 'set:menu:showAdressRoute')
      self.addItem('route', 'Clear', 'generic', 'route:clear|set:menu:None')
      self.addItem('route', 'route#Current', 'generic', 'set:menu:currentRoute')
@@ -653,7 +746,7 @@ class menus(ranaModule):
   def setupGeneralMenus(self):
     self.clearMenu('main', "set:menu:None")
     #self.addItem('main', 'map', 'generic', 'set:menu:layers')
-    self.addItem('main', 'places', 'city', 'set:menu:placenames_categories')
+#    self.addItem('main', 'places', 'city', 'set:menu:placenames_categories')
 #    self.addItem('main', 'waypoints', 'waypoints', 'set:menu:waypoints_categories')
     self.addItem('main', 'route', 'route', 'set:menu:route')
     self.addItem('main', 'POI', 'poi', 'set:menu:poi')
@@ -687,7 +780,7 @@ class menus(ranaModule):
 #    dy = h / 4
     border = 30
     spacing = 20
-    lines = text.split('|')
+    lines = text.split('\n')
     lineCount = len(lines)
     lineSpace = (h-2*spacing)/lineCount
     i = 0
@@ -740,16 +833,14 @@ class menus(ranaModule):
     dx = w1 / cols
     dy = h1 / rows
 
-    if w1>h1:
-#        buttons = "landscape"
+    if w1>h1: # landscape
       (elem1) = (x1, y1)
       (elem2) = (x1, y1+1*dy)
       (elem3) = (x1, y1+2*dy)
       (elem4) = (x1+dx, y1)
 
 
-    elif w1<=h1:
-#        buttons = "portrait"
+    elif w1<=h1: # portrait
       (elem1) = (x1, y1)
       (elem2) = (x1+dx, y1)
       (elem3) = (x1+2*dx, y1)
@@ -820,7 +911,7 @@ class menus(ranaModule):
         # in corner: row number
         self.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y + 0.42 * dy, w * 0.15 - border, 20)
 
-  def drawThreePlusOneMenu(self, cr, menuName, parent, button1, button2, box):
+  def drawThreePlusOneMenu(self, cr, menuName, parentAction, button1, button2, box):
     """draw a three plus on menu"""
     (e1,e2,e3,e4,alloc) = self.threePlusOneMenuCoords()
     (x1,y1) = e1
@@ -834,7 +925,7 @@ class menus(ranaModule):
     (boxTextLines, boxAction) = box
 
     # * draw "escape" button
-    self.drawButton(cr, x1, y1, dx, dy, "", "up", "%s:reset|set:menu:%s" % (menuName, parent))
+    self.drawButton(cr, x1, y1, dx, dy, "", "up", "%s:reset|%s" % (menuName, parentAction))
     # * draw the first button
     self.drawButton(cr, x2, y2, dx, dy, text1, icon1, action1)
     # * draw the second button
@@ -885,9 +976,8 @@ class menus(ranaModule):
     self.drawTextToSquare(cr, x4, y4+dy, w4, h4, text) # display the text in the box
 
 
-
-
-  def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
+  def showTextOld(self,cr,text,x,y,widthLimit=None,fontsize=40):
+    """DEPRECIATED shof text funtion"""
     if(text):
       cr.set_font_size(fontsize)
       stats = cr.text_extents(text)
@@ -966,7 +1056,18 @@ class menus(ranaModule):
   def handleMessage(self, message, type, args):
     messageList = message.split('#')
     message = messageList[0]
-    if (message == "rebootDataMenu"):
+    if message=='listMenu':
+      """manipulate a listable menu
+         argument number one is name of the listable menu to manipulate"""
+      listMenuName = args[0]
+      print listMenuName
+      if listMenuName in self.lists.keys(): # do we have this menu ?
+        if args[1]=="up":
+          self.lists[listMenuName].scrollUp()
+        elif args[1]=="down":
+          self.lists[listMenuName].scrollDown()
+
+    elif (message == "rebootDataMenu"):
       self.setupDataMenu() # we are returning from the batch menu, data menu needs to be "rebooted"
       self.set('editBatchMenuActive', False)
     elif(message == "setupEditBatchMenu"):

@@ -506,14 +506,14 @@ class tracklog(ranaModule):
         text+= "logging is OFF"
 
       if not self.loggingEnabled:
-        text+= "|||%s" % self.generateLogName()
+        text+= "\n\n\n%s" % self.generateLogName()
       else:
-        text+= "|||%s" % self.currentLogName
+        text+= "\n\n\n%s" % self.currentLogName
 
-      text+= "||logging interval %d s, saving every %d s" % (self.logInterval, self.saveInterval)
+      text+= "\n\nlogging interval %d s, saving every %d s" % (self.logInterval, self.saveInterval)
       if self.loggingStartTimestamp:
         elapsedSeconds = (int(time.time()) - self.loggingStartTimestamp)
-        text+= "|elapsed time: %s" % time.strftime('%H:%M:%S', time.gmtime(elapsedSeconds))
+        text+= "\nelapsed time: %s" % time.strftime('%H:%M:%S', time.gmtime(elapsedSeconds))
 
       currentSpeed = self.get('speed',0)      
       if currentSpeed:
@@ -521,9 +521,9 @@ class tracklog(ranaModule):
           currentSpeedString = units.km2CurrentUnitPerHourString(currentSpeed)
         else:
           currentSpeedString = "%f kmh" % currentSpeed
-        text+="||current speed: %s" % currentSpeedString
+        text+="\n\ncurrent speed: %s" % currentSpeedString
       else:
-        text+="||current speed unknown"
+        text+="\n\ncurrent speed unknown"
 
       if self.maxSpeed:
         if units:
@@ -532,7 +532,7 @@ class tracklog(ranaModule):
         else:
           avgString = "%f kmh" % self.avgSpeed
           maxString = "%f kmh" % self.maxSpeed
-        text+= "||max: %s, average: %s" % (maxString, avgString)
+        text+= "\n\nmax: %s, average: %s" % (maxString, avgString)
 
       if self.distance:
         if units:
@@ -540,9 +540,10 @@ class tracklog(ranaModule):
           print self.distance
         else:
           distanceString = "%f km" % self.distance
-        text+= "||distance traveled %s" % distanceString
+        text+= "\n\ndistance traveled %s" % distanceString
 
       box = (text , "set:menu:tracklog")
+      print text
       menus.drawSixPlusOneMenu(cr, menuName, parent, fiveButtons, box)
 
     else:

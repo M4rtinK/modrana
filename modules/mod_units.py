@@ -215,6 +215,9 @@ class units(ranaModule):
     else:
       return time.strftime("%H:%M")
 
+  def getTimeHashString(self):
+    return time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
+
 
 if(__name__ == "__main__"):
   a = example({}, {})

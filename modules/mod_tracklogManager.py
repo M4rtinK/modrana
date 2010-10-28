@@ -280,11 +280,11 @@ class tracklogManager(ranaModule):
       else:
         pointcount = 0
 
-      text = "number of points: %d|" % pointcount
+      text = "number of points: %d\n" % pointcount
       if track.elevation == True:
-        text += "|maximum elevation: %d meters|minimum elevation: %d meters" % (track.routeInfo['maxElevation'], track.routeInfo['minElevation'])
-        text += "|elevation of the first point: %d meters" % track.routeInfo['firstElevation']
-        text += "|elevation of the last point: %d meters" % track.routeInfo['lastElevation']
+        text += "\nmaximum elevation: %d meters\nminimum elevation: %d meters" % (track.routeInfo['maxElevation'], track.routeInfo['minElevation'])
+        text += "\nelevation of the first point: %d meters" % track.routeInfo['firstElevation']
+        text += "\nelevation of the last point: %d meters" % track.routeInfo['lastElevation']
 
       menus.drawTextToSquare(cr, x4, y4+dy, w, h1-(y4+dy), text)
 

@@ -18,6 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
+import geo
+import math
 
 def getModule(m,d):
   return(showPOI(m,d))
@@ -27,91 +29,281 @@ class showPOI(ranaModule):
   
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
-    self.scroll = 0
+    self.activePOI = None
+    self.listMenusDirty = False
+    self.drawActivePOI = False
     
-  
+
   def drawMenu(self, cr, menuName):
-    if menuName == 'showPOI' or menuName == 'showPOIDetail' or menuName == 'showPOIRoute':
-      store = self.m.get('storePOI', None)
-      if store == None:
-        print "showPOI: no POI storage module, quiting"
-        return
-      points = store.points
-
-      menus = self.m.get('menu', None)
-      if menus == None:
-        return
-      if menuName == 'showPOI':
-        parent = 'poi'
-        menus.drawListableMenuControls(cr, menuName, parent, menuName)
-        menus.drawListableMenuItems(cr, points, self.scroll, self.describeItem)
-      if menuName == 'showPOIDetail':
-        parent = 'showPOI'
-        button1 = ("map#show on", "generic", "set:menu:None")
-        button2 = ("tools", "tools", "set:menu:showPOIDetail")
-        activePOINr = int(self.get('activePOINr', 0))
-        point = points[activePOINr]
-        text = point.description + "|coordinates: %f, %f" % (point.lat, point.lon)
-        box = (text , "set:menu:showPOIDetail")
-        menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
-      if menuName == 'showPOIRoute':
-        parent = 'poi'
-        scrollMenu = 'showPOI'
-        menus.drawListableMenuControls(cr, menuName, parent, scrollMenu)
-        menus.drawListableMenuItems(cr, points, self.scroll, self.describeItem4Routing)
-
-
-  def describeItem(self, index, category, list):
-    action = "set:activePOINr:%d|set:menu:showPOIDetail" % index
-#    action += "|set:searchResultsItemNr:%d" % list[index][2] # here we use the ABSOLUTE index, not the relative one
-
-    name = "%s" % list[index].name
-
-#    units = self.m.get('units', None)
-#    distanceString = units.km2CurrentUnitString(list[index][0]) # use correct units
-
-    if list[index].category == 'gls':
-      description = "Google Local Search result"
-    else:
-      description = ""
-
-    return(
-      name,
-      description,
-      action)
-
-  def describeItem4Routing(self, index, category, list):
-    """override the default action"""
-    (name, description, action) = self.describeItem(index, category, list)
-
-    lat = list[index].lat
-    lon = list[index].lon
-    action = "set:selectedPos:%f,%f|route:route|set:menu:None" % (lat,lon)
-
-    return(
-      name,
-      description,
-      action)
+    """make the POI Object draw the menu :D"""
+    if menuName=='POIDetail':
+      self.activePOI.drawMenu(cr)
+    elif menuName=='POIDetailTools':
+      self.activePOI.drawToolsMenu(cr)
 
   def drawMapOverlay(self, cr):
-    pass
+    if self.drawActivePOI:
+      proj = self.m.get('projection', None)
+      if proj and self.activePOI:
+        lat = self.activePOI.getLat()
+        lon = self.activePOI.getLon()
+        name = self.activePOI.getName()
+        distanceString = ""
+        pos = self.get('pos', None)
+        units = self.m.get('units', None)
+        if pos and units:
+          (lat1,lon1) = pos # current position coordinates
+          kiloMetricDistance = geo.distance(lat,lon,lat1,lon1)
+          unitString = units.km2CurrentUnitString(kiloMetricDistance, 0, True)
+          distanceString = " (%s)" % unitString
+
+
+        text = "" + name + distanceString
+        
+        (x,y) = proj.ll2xy(lat, lon)
+        # draw the highlighting circle
+        cr.set_line_width(8)
+        cr.set_source_rgba(0.1, 0.6, 0.1, 0.55) # highlight circle color
+        cr.arc(x, y, 15, 0, 2.0 * math.pi)
+        cr.stroke()
+        cr.fill()
+
+        # draw the point
+        cr.set_source_rgb(0.0, 0.0, 0.0)
+        cr.set_line_width(10)
+        cr.arc(x, y, 3, 0, 2.0 * math.pi)
+        cr.stroke()
+        cr.set_source_rgb(0.0, 0.0, 1.0)
+        cr.set_line_width(8)
+        cr.arc(x, y, 2, 0, 2.0 * math.pi)
+        cr.stroke()
+
+        # draw a caption with transparent background
+        cr.set_font_size(25)
+        extents = cr.text_extents(text) # get the text extents
+        (w,h) = (extents[2], extents[3])
+        border = 2
+        cr.set_line_width(2)
+        cr.set_source_rgba(0.1, 0.6, 0.1, 0.45) # trasparent blue
+        (rx,ry,rw,rh) = (x - border+12, y + border+h*0.2 + 6, w + 4*border, -(h*1.4))
+        cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
+        cr.fill()
+
+        # register clickable area
+        click = self.m.get('clickHandler', None)
+        if click:
+          """ make the POI caption clickable"""
+          click.registerXYWH(rx,ry-(-rh),rw,-rh, "set:menu:POIDetail")
+        cr.fill()
+
+        # draw the actual text
+#        cr.set_source_rgba(1, 1, 0, 0.95) # slightly trasparent white
+        cr.set_source_rgba(1, 1, 1, 0.95) # slightly trasparent white
+        cr.move_to(x+15,y+7)
+        cr.show_text(text) # show the trasparent result caption
+        cr.stroke()
 
   def handleMessage(self, message, type, args):
-    if(message == "up"):
-      if(self.scroll > 0):
-        self.scroll -= 1
-        self.set('needRedraw', True)
-    if(message == "down"):
-      print "down"
-      self.scroll += 1
-      self.set('needRedraw', True)
-    if(message == "reset"):
-      self.scroll = 0
-      self.set("needRedraw", True)
+    # messages that need the store and/or menus go here
+    store = self.m.get('storePOI', None)
+    menus = self.m.get('menu', None)
+    if store and menus:
+      if(message == "setupCategoryList"):
+        if type=='ml':
+          """this is used for executing something special instead of going to the POIDetail menu
+             after a POI is selected"""
+          POISelectedAction = args[0]
+          action = "ml:showPOI:setupPOIList:%s;%s|set:menu:POIList" % ("%d",POISelectedAction)
+        else:
+          action = "ms:showPOI:setupPOIList:%d|set:menu:POIList"
+        usedCategories = store.getUsedCategories()
+        # convert cat_id to actions
+        i = 0
+        for item in usedCategories:
+          (label,desc,cat_id) = item
+          buttonAction = action % cat_id
+          usedCategories[i] = (label,desc,buttonAction)
+          i = i + 1
+        menus.addListableMenu('POICategories', usedCategories,"set:menu:poi")
+      elif message=='setupPOIList':
+        if args:
+          if type=='ms':
+            catId = int(args)
+            action = 'set:menu:POIDetail' # use the default action
+          elif type=='ml':
+            """if the message is a message list, execute a custom action instead of the default POI detail menu
+               TODO: use this even for selecting the POIDetail menu ?"""
+            print args
+            catId=int(args[0])
+            action = args[1]
+          poiFromCategory = store.getAllPOIFromCategory(catId)
+          # convert the output to a listable menu comaptible state
+          i = 0
+          for item in poiFromCategory:
+            (label,lat,lon,poi_id) = item
+            subText = "lat: %f, lon: %f" % (lat,lon)
+            buttonAction = "ms:showPOI:setActivePOI:%d|%s" % (poi_id,action)
+            poiFromCategory[i] = (label,subText,buttonAction)
+            i = i + 1
+          menus.addListableMenu("POIList",poiFromCategory, 'set:menu:POICategories')
+      elif type=='ms' and message=='setActivePOI':
+        if args:
+          POIId = int(args)
+          self.activePOI = store.getPOI(POIId)
+      elif type=='ms' and message=='storePOI':
+        if args == "manualEntry":
+          """add all POI info manually"""
+          entry = self.m.get('textEntry', None)
+          if entry:
+            self.activePOI = store.getEmptyPOI() # set a blank POI as active
+            # start the chain of entry boxes
+            entry.entryBox(self,'newName','POI name',"")
+        elif args == "currentPosition":
+          """add current position as a new POI"""
+          entry = self.m.get('textEntry', None)
+          if entry:
+            pos = self.get('pos', None)
+            if pos:
+              self.activePOI = store.getEmptyPOI() # set a blank POI as active
+              (lat,lon) = pos
+              self.activePOI.setLat(lat, commit=False)
+              self.activePOI.setLon(lon, commit=False)
+              # start the entry box chain
+              entry.entryBox(self,'newCurrentPositionName','POI name',"")
+
+      elif type=='ms' and message=='editActivePOI':
+        entry = self.m.get('textEntry', None)
+        if args:
+          if entry:
+            if args=='name':
+              name = self.activePOI.getName()
+              entry.entryBox(self,'name','POI name',name)
+            if args=='description':
+              description = self.activePOI.getDescription()
+              entry.entryBox(self,'description','POI Description',description)
+            if args=='lat':
+              lat = str(self.activePOI.getLat())
+              entry.entryBox(self,'lat','POI Latitude',lat)
+            if args=='lon':
+              lon = str(self.activePOI.getLon())
+              entry.entryBox(self,'lon','POI Longitude',lon)
+
+      elif type=='ml' and message=='setupPOICategoryChooser':
+        """setup a category chooser menu"""
+        if args:
+          (menu,key) = args
+          cats = store.getCategories()
+          i = 0
+          for cat in cats:
+            (label,desc,cat_id) = cat
+            action = "ms:%s:%s:%d" % (menu,key,cat_id)
+            cats[i] = (label,desc,action)
+            i = i + 1
+          menus.addListableMenu('POICategoryChooser', cats,"set:menu:poi")
+
+      elif type=='ms' and message=='setCatAndCommit':
+        """selecting the category is the final stage of adding a POI"""
+        if args:
+          # set the category
+          catId = int(args)
+          self.activePOI.setCategory(catId, commit=False)
+          # comit the new POI to db
+          self.activePOI.storeToDb()
+          # mark list menus for regeneration
+          self.listMenusDirty = True
+          # go to the new POI menu
+          self.set('menu', 'POIDetail')
+
+      elif message=='checkMenus':
+        """check if the POI menus are "dirty" and need to be regenerated"""
+        if self.listMenusDirty:
+          self.sendMessage('showPOI:setupCategoryList')
+          if self.activePOI:
+            catId = self.activePOI.getCatId()
+            self.sendMessage('ms:showPOI:setupPOIList:%d' % catId)
+          self.listMenusDirty = False
+
+      elif message == 'listMenusDirty':
+        """something regarding the POI changed
+           ,the menus might not be up to date
+           and may need a regen"""
+        self.listMenusDirty = True
 
 
+      elif message == 'askDeleteActivePOI':
+        ask = self.m.get('askMenu', None)
+        if ask:
+          id = self.activePOI.getId()
+          name = self.activePOI.getName()
+          question = "Do you really want to delete:\n%s\nfrom the POI database ?" % name
+          yesAction = "ms:storePOI:deletePOI:%d|set:menu:poi" % id
+          noAction = "set:menu:POIDetailTools"
+          ask.setupAskYesNo(question, yesAction, noAction)
+
+      elif message == 'centerOnActivePOI':
+        """something regarding the POI changed
+           ,the menus might not be up to date
+           and may need a regen"""
+        self.activePOI.showOnMap()
+
+      elif message == 'routeToActivePOI':
+        """something regarding the POI changed
+           ,the menus might not be up to date
+           and may need a regen"""
+        self.activePOI.routeFrom('currentPosition')
+        self.activePOI.showOnMap()
+
+      elif message == 'drawActivePOI':
+        print "DRAW"
+        self.drawActivePOI = True
+
+      elif message == 'dontDrawActivePOI':
+        self.drawActivePOI = False
 
 
+  def handleTextEntryResult(self, key, result):
+    # TODO: add input checking
+    entry = self.m.get('textEntry', None)
+    if key=='name':
+      self.activePOI.setName(result)
+    elif key=='description':
+      self.activePOI.setDescription(result)
+    elif key=='lat':
+      self.activePOI.setLat(float(result))
+    elif key=='lon':
+      self.activePOI.setLon(float(result))
+
+    # new  poi will be coomited at once, so we disable the autocommit
+    # also, the events are chained, so one netry box follows the other
+    elif key=='newName':
+      self.activePOI.setName(result,commit=False)
+      entry.entryBox(self,'newDescription','POI Description',"")
+    elif key=='newDescription':
+      self.activePOI.setDescription(result,commit=False)
+      entry.entryBox(self,'newLat','POI Latitude',"")
+    elif key=='newLat':
+      self.activePOI.setLat(result,commit=False)
+      entry.entryBox(self,'newLon','POI Longitude',"")
+    elif key=='newLon':
+      self.activePOI.setLon(result,commit=False)
+      """final step:
+      setup the category chooser menu,
+      and make sure the POI is commited after a cetegory is chosen
+      """
+      self.sendMessage('ml:notification:Select a category for this POI:2')
+      self.sendMessage('ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit')
+      self.set('menu', 'POICategoryChooser')
+
+    # "current position as a new POI" entry chain
+    elif key=='newCurrentPositionName':
+      self.activePOI.setName(result,commit=False)
+      entry.entryBox(self,'newCurrentPositionDescription','POI Description',"")
+    elif key=='newCurrentPositionDescription':
+      self.activePOI.setDescription(result,commit=False)
+      # setting the category is the last step
+      self.sendMessage('ml:notification:Select a category for this POI:2')
+      self.sendMessage('ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit')
+      self.set('menu', 'POICategoryChooser')
 
 if(__name__ == "__main__"):
   a = example({}, {})
