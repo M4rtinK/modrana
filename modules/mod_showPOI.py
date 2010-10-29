@@ -17,9 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from __future__ import with_statement # for python 2.5
 from base_module import ranaModule
 import geo
 import math
+import threading
 
 def getModule(m,d):
   return(showPOI(m,d))
@@ -32,7 +34,19 @@ class showPOI(ranaModule):
     self.activePOI = None
     self.listMenusDirty = False
     self.drawActivePOI = False
-    
+    self.expectPoint = False
+    self.expectLock = threading.Lock()
+
+  def update(self):
+    if self.expectPoint:
+      self.makeMapClickable()
+
+  def makeMapClickable(self):
+    """make the whole map/screen clickable and send a specific message when clicked"""
+    clickHandler = self.m.get('clickHandler', None)
+    (x,y,w,h) = self.get('viewport')
+    if clickHandler:
+      clickHandler.registerXYWH(x, y, x+w, y+h, 'showPOI:stopExpecting|ms:showPOI:storePOI:fromMapDone')
 
   def drawMenu(self, cr, menuName):
     """make the POI Object draw the menu :D"""
@@ -170,6 +184,30 @@ class showPOI(ranaModule):
               self.activePOI.setLon(lon, commit=False)
               # start the entry box chain
               entry.entryBox(self,'newCurrentPositionName','POI name',"")
+        elif args == "fromMap":
+          with self.expectLock: # nobody expects a lock here
+            self.expectPoint = True # turn on registering the whole screen clickable
+          self.set('menu', None)
+          self.sendMessage('ml:notification:m:Tap on the map to add POI;3')
+          self.set('needRedraw', True)
+#          self.makeMapClickable() # make the map clickable right away
+        elif args == "fromMapDone": # this is after the point has been clicked
+          with self.expectLock:
+            if self.expectPoint == True:
+              self.expectPoint == False
+              self.expectPoint = False # disable the registering
+              proj = self.m.get('projection', None)
+              lastClick = self.get('lastClickXY', None)
+              entry = self.m.get('textEntry', None)
+              if proj and lastClick and entry:
+                (x, y) = lastClick
+                (lat, lon) = proj.xy2ll(x, y)
+                self.activePOI = store.getEmptyPOI() # set a blank POI as active
+                self.activePOI.setLat(lat, commit=False)
+                self.activePOI.setLon(lon, commit=False)
+                # start the entry box chain
+                """we misuse the current position chain"""
+                entry.entryBox(self,'newCurrentPositionName','POI name',"")
 
       elif type=='ms' and message=='editActivePOI':
         entry = self.m.get('textEntry', None)

@@ -634,6 +634,7 @@ class menus(ranaModule):
   def addPOIPOIAddFromWhereMenu(self):
     self.clearMenu('POIAddFromWhere', "set:menu:poi")
     self.addItem('POIAddFromWhere', 'entry#manual', 'generic', "ms:showPOI:storePOI:manualEntry")
+    self.addItem('POIAddFromWhere', 'map#from', 'generic', "ms:showPOI:storePOI:fromMap")
     self.addItem('POIAddFromWhere', 'position#current', 'generic', "ms:showPOI:storePOI:currentPosition")
 
 
