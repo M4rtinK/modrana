@@ -133,11 +133,11 @@ class options(ranaModule):
 #       "network",
 #       "on")
 
-    self.addBoolOption("Logging", "logging", "logging", True)
-    options = []
-    for i in (1,2,5,10,20,40,60):
-      options.append((i, "%d sec" % i))
-    self.addOption("Frequency", "log_period", options, "logging", 2)
+#    self.addBoolOption("Logging", "logging", "logging", True)
+#    options = []
+#    for i in (1,2,5,10,20,40,60):
+#      options.append((i, "%d sec" % i))
+#    self.addOption("Frequency", "log_period", options, "logging", 2)
 
 #    self.addBoolOption("Vector maps", "vmap", "map", True)
 
