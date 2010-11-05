@@ -491,7 +491,7 @@ class tracklog(ranaModule):
                   ], self.startButtonIndex ],
                   [ [["stop", "stop", "tracklog:stopLogging"]], 0 ],
                   [ [["split", "split", "tracklog:stopLogging|tracklog:startLogging"]], 0 ],
-                  [ [["name#enter", "generic", "tracklog:nameInput"]], 0 ],
+                  [ [["name#edit", "generic", "tracklog:nameInput"]], 0 ],
                   [ [["tools", "tools", "set:menu:tracklogTools"]], 0 ],
                   ]
 
@@ -499,16 +499,16 @@ class tracklog(ranaModule):
 
       text = ""
       if self.loggingEnabled:
-        text+= "logging is ON"
+        text+= '<span foreground="green">logging is ON</span>'
       elif self.loggingPaused:
         text+= "logging paused"
       else:
-        text+= "logging is OFF"
+        text+= '<span foreground="red">logging is OFF</span>'
 
       if not self.loggingEnabled:
-        text+= "\n\n\n%s" % self.generateLogName()
+        text+= "\n\n%s" % self.generateLogName()
       else:
-        text+= "\n\n\n%s" % self.currentLogName
+        text+= "\n\n%s" % self.currentLogName
 
       text+= "\n\nlogging interval %d s, saving every %d s" % (self.logInterval, self.saveInterval)
       if self.loggingStartTimestamp:
@@ -523,7 +523,7 @@ class tracklog(ranaModule):
           currentSpeedString = "%f kmh" % currentSpeed
         text+="\n\ncurrent speed: %s" % currentSpeedString
       else:
-        text+="\n\ncurrent speed unknown"
+        text+='\ncurrent speed <span foreground="red">unknown</span>'
 
       if self.maxSpeed:
         if units:
@@ -537,13 +537,11 @@ class tracklog(ranaModule):
       if self.distance:
         if units:
           distanceString = units.km2CurrentUnitString(self.distance, 2)
-          print self.distance
         else:
           distanceString = "%f km" % self.distance
         text+= "\n\ndistance traveled %s" % distanceString
 
       box = (text , "set:menu:tracklog")
-      print text
       menus.drawSixPlusOneMenu(cr, menuName, parent, fiveButtons, box)
 
     else:
