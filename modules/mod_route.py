@@ -204,6 +204,7 @@ class route(ranaModule):
             except Exception, e:
               traceback.print_exc(file=sys.stdout)
               self.sendMessage('ml:notification:m:No route found;3')
+              self.set('needRedraw', True)
             if "show" in args:
               """switch to map view and go to start/destination, if requested"""
               where = args['show']
@@ -305,8 +306,14 @@ class route(ranaModule):
     """Route from one point to another, and set that as the active route"""
     online = self.m.get('onlineServices', None)
     if online:
-#    directions = online.googleDirectionsLL(fromLat, fromLon, toLat, toLon)
-      online.googleDirectionsAsync((fromLat, fromLon), (toLat, toLon), self.handleRoute, "onlineRoute")
+      online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon), self.handleRoute, "onlineRoute")
+      
+  def doAddressRoute(self, start, destination):
+    """Route from one point to another, and set that as the active route"""
+    online = self.m.get('onlineServices', None)
+    if online:
+      print "routing from %s to %s" % (start,destination)
+      online.googleDirectionsAsync(start, destination, self.handleRoute, "onlineRouteAdress2Adress")
 
   def handleRoute(self, key, resultsTupple):
     """handle a routing result"""
@@ -315,38 +322,20 @@ class route(ranaModule):
         (directions, startAddress, destinationAddress) = resultsTupple
         # remove any possible prev. route description, so new a new one for this route is created
         self.text = None
-        if directions: # is there actually something in th directions ?
+        if directions: # is there actually something in the directions ?
           polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
           route = self.decode_line(polyline) # we decode the polyline to a list of points
           self.processAndSaveResults(route, directions, startAddress, destinationAddress)
-
-  def doAddressRoute(self, start, destination):
-    """Route from one point to another, and set that as the active route"""
-    online = self.m.get('onlineServices', None)
-    if online == None:
-      return
-    print "routing from %s to %s" % (start,destination)
-    directions = None
-    try:
-      directions = online.googleDirections(start, destination)
-    except googlemaps.googlemaps.GoogleMapsError, e:
-      if e.status == 602: # address/addresses not found
-        print "address not found"
-        self.sendMessage('notification:adress(es) not found#5')
-
-    if directions == None:
-      return
-
-    # remove any possible prev. route description, so new a new one for this route is created
-    self.text = None
-
-    polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
-    route = self.decode_line(polyline) # we decode the polyline to a list of points
-    # handle the results
-    if len(route) >= 2:
-      start = (route[0])
-      destination = (route[-1])
-    self.processAndSaveResults(route, directions, start, destination)
+    elif key == "onlineRouteAdress2Adress":
+      if len(resultsTupple) == 3:
+        (directions, startAddress, destinationAddress) = resultsTupple
+        # remove any possible prev. route description, so new a new one for this route is created
+        self.text = None
+        if directions: # is there actually something in the directions ?
+          polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
+          route = self.decode_line(polyline) # we decode the polyline to a list of points
+          self.processAndSaveResults(route, directions, startAddress, destinationAddress)
+    self.set('needRedraw', True)
     
   def processAndSaveResults(self, route, directions, startAddress, destinationAddress):
     """process and save routing results"""

@@ -121,12 +121,19 @@ class onlineServices(ranaModule):
     queryWithLL = query + separator + LL
     local = self.googleLocalQuery(queryWithLL)
     return local
-
-
-
+  
   def googleDirectionsAsync(self, start, destination, outputHandler, key):
     """a background running googledirections query
-       outputHandler will be proided with the results + the specified key string"""
+       -> verbatim start and destination will be used in route descritpion, no geocoding
+       outputHandler will be provided with the results + the specified key string"""
+    self.routingThread = self.Worker(self, "onlineRoute", (start, destination), outputHandler, key)
+    self.routingThread.daemon = True
+    self.routingThread.start()
+    
+  def googleDirectionsLLAsync(self, start, destination, outputHandler, key):
+    """a background running googledirections query
+    - Lat Lon pairsversion -> for geocoding the start/destination points (NOT first/last route points)
+       outputHandler will be provided with the results + the specified key string"""
     self.routingThread = self.Worker(self, "onlineRouteLL", (start, destination), outputHandler, key)
     self.routingThread.daemon = True
     self.routingThread.start()
@@ -163,19 +170,24 @@ class onlineServices(ranaModule):
       dir['hl'] = googleLanguageCode
 
       try:
+        print start, destination
         directions = gmap.directions(start, destination, dir)
       except:
         print "onlineServices:Gdirections:bad response to travel mode:%s, using default" % mode
         try:
           directions = gmap.directions(start, destination)
-        except Exception, e:
-          if e.status == 604:
-            print "onlineServices:Gdirections:ruting failed -> no route found" % e
-            self.sendMessage("ml:notification:m:No route found;3")
+        except googlemaps.googlemaps.GoogleMapsError, e:
+          if e.status == 602:
+            print "onlineServices:Gdirections:routing failed -> address not found" % e
+            self.sendMessage("ml:notification:m:Address(es) not found;5")
+          elif e.status == 604:
+            print "onlineServices:Gdirections:routing failed -> no route found" % e
+            self.sendMessage("ml:notification:m:No route found;5")
           else:
             print "onlineServices:Gdirections:ruting failed with exception:\n%s" % e
 
           directions = []
+          self.set('needRedraw', True)
 
     else:
       directions = gmap.directions(start, destination)
@@ -255,17 +267,17 @@ class onlineServices(ranaModule):
           # get the route
           directions = self.getOnlineRoute(start,destination)
 
-          if type == "onlineRouteLL":
+          if self.type == "onlineRouteLL":
             # reverse geocode the start and destination coordinates (for the info menu)
             (fromLat,fromLon) = start
             (toLat,toLon) = destination
-            self.setStatusMessage("geocoding start")
+            self.setStatusMessage("geocoding start...")
             startAddress = self.reverseGeocode(fromLat,fromLon)
-            self.setStatusMessage("geocoding destination")
+            self.setStatusMessage("geocoding destination...")
             destinationAddress = self.reverseGeocode(toLat,toLon)
           else:
-            startAddress = "start address unknown"
-            destinationAddress = "destination address unknown"
+            startAddress = start
+            destinationAddress = destination
           self.setStatusMessage("online routing done")
           # send the results to the output handler
           if self.returnResult: # check if our reulst is expected and should be returned to the oputpt handler
