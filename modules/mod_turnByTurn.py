@@ -59,7 +59,7 @@ class turnByTurn(ranaModule):
     elif message == 'reroute':
       # 1. say rerouting is in progress
       message = "rerouting"
-      self.espeakSay(message, 0)
+      self.espeakSay(message, 0, "en") # make sure rerouting said with english voice
       time.sleep(2) #TODO: improve this
       # 2. get a new route from current position to destination
       self.sendMessage("ms:route:reroute:fromPosToDest")
@@ -176,7 +176,7 @@ class turnByTurn(ranaModule):
           clickHandler.registerXYWH(bx, by , bw, bh, action)
 
 
-  def espeakSay(self, plaintextMessage, distanceMeters):
+  def espeakSay(self, plaintextMessage, distanceMeters, forceLanguageCode=False):
     """say routing messages through espeak"""
     units = self.m.get('units', None)
     if units:
@@ -184,11 +184,17 @@ class turnByTurn(ranaModule):
         distString = ""
       else:
         distString = units.km2CurrentUnitString(distanceMeters/1000.0, 1, False)
-        distString = 'in <emphasis level="strong">'+ distString + '</emphasis><br>'
+        distString = '<p xml:lang="en">in <emphasis level="strong">'+ distString + '</emphasis></p><br>'
+        # TODO: language specific distance strings
       output = distString + plaintextMessage
       print "saying: %s" % output
-      print plaintextMessage
-      self.espaekProcess = subprocess.Popen(['espeak', '-s 120','-m','"%s"' % output])
+      if forceLanguageCode:
+        espeakLanguageCode = forceLanguageCode
+      else:
+        # the espeak language code is the fisrt part of this whitespace delimited string
+        espeakLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[0]
+      languageParam = '-v%s' % espeakLanguageCode
+      self.espaekProcess = subprocess.Popen(['espeak', languageParam ,'-s 120','-m','"%s"' % output])
 
   def getStartingStep(self, which='first'):
     if self.steps:

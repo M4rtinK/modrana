@@ -25,6 +25,7 @@ pygtk.require('2.0')
 import gobject
 import gtk
 import sys
+import traceback
 import global_device_id # used for communicating the device id to other modules
 import cairo
 import os
@@ -208,10 +209,14 @@ class MapWidget(gtk.Widget):
           cr.translate(-x1,-y1) # translate back
 
         # Draw the base map, the map overlays, and the screen overlays
-      for m in self.m.values():
-        m.drawMap(cr)
-      for m in self.m.values():
-        m.drawMapOverlay(cr)
+      try:
+        for m in self.m.values():
+          m.drawMap(cr)
+        for m in self.m.values():
+          m.drawMapOverlay(cr)
+      except Exception, e:
+        print "modRana main loop: an exception occured:\n"
+        traceback.print_exc(file=sys.stdout) # find what went wrong
       cr.restore()
       for m in self.m.values():
         m.drawScreenOverlay(cr)

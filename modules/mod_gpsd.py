@@ -44,6 +44,20 @@ class gpsd2(ranaModule):
 
   def firstTime(self):
     if self.device == 'n900':
+      # start libLocation on the N900
+      if self.get('GPSEnabled', True): # is GPS enabled ?
+        self.libLocationStart()
+
+    else:
+
+      try:
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect(("127.0.0.1", 2947)) #TODO: set this from options
+        self.connected = True
+      except socket.error:
+        self.status = "No GPSD running"
+
+  def libLocationStart(self):
       try:
         import location
         self.location = location
@@ -74,14 +88,32 @@ class gpsd2(ranaModule):
         print "gpsd:N900 - importing location module failed, please install the python-location package"
         self.sendMessage('notification:install python-location package to enable GPS#7')
 
-    else:
+  def libLocationStop(self):
+    # stop the libLocation on N900
+    if self.lControl:
+      self.lControl.stop()
+      # cleanup
+      self.lControl = None
+      self.lDevice = None
+      self.location = None
 
-      try:
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect(("127.0.0.1", 2947)) #TODO: set this from options
-        self.connected = True
-      except socket.error:
-        self.status = "No GPSD running"
+  def handleMessage(self, message, type, args):
+    if message == "setPosLatLon" and type == "ml":
+      if args and len(args) == 2:
+        lat = float(args[0])
+        lon = float(args[1])
+        print "gps:setting current position to: %f,%f" % (lat,lon)
+        self.set('pos',(lat,lon))
+    elif message == "checkGPSEnabled":
+        state = self.get('GPSEnabled', True)
+        if state == True:
+          print "gps: enabling GPS"
+          if self.device == 'n900':
+            self.libLocationStart()
+        elif state == False:
+          print "gps: disabling GPS"
+          if self.device == 'n900':
+            self.libLocationStop()
 
   def sendMessage(self,message):
     m = self.m.get("messages", None)
@@ -172,6 +204,10 @@ class gpsd2(ranaModule):
     if(dt < 1): #default 2
       return
     self.tt = time()
+    if self.get('GPSEnabled', True) == False:
+      # just make sure the screen updates atleast once per seccond
+      self.set('needRedraw', True)
+      return
 
     if(not self.connected):
       self.status = "Not connected"
@@ -287,7 +323,7 @@ class gpsd2(ranaModule):
   def shutdown(self):
     if self.device == 'n900':
       try:
-        self.lControl.stop()
+        self.libLocationStop()
         print "gpsd:N900 - GPS device successfully stopped"
       except:
         print "gpsd:N900 - closing the GPS device failed"

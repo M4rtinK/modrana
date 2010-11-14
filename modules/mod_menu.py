@@ -21,6 +21,7 @@ from base_module import ranaModule
 import cairo
 import pango
 import pangocairo
+import gtk
 import time
 import math
 import geo
@@ -40,6 +41,7 @@ class menus(ranaModule):
     self.fullscreen = False
     self.mainScreenCoords = {}
     self.userConfig = {}
+    self.notificationModule = None
 
 #  def drawMapOverlay(self, cr):
   def drawScreenOverlay(self, cr):
@@ -167,11 +169,15 @@ class menus(ranaModule):
     (x1,y1) = buttons['scalebar']
     self.drawScalebar(cr, proj,x1,y1,w)
 
+    # master overlay hook
+    if self.notificationModule:
+      self.notificationModule.drawMasterOverlay(cr)
+
   def needRedraw(self):
     """conveninece function for asking for redraw"""
     self.set('needRedraw', True)
 
-  def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
+  def showText(self,cr,text,x,y,widthLimit=None,fontsize=40,colorString=None):
     pg = pangocairo.CairoContext(cr)
     # create a layout for your drawing area
     layout = pg.create_layout()
@@ -180,6 +186,8 @@ class menus(ranaModule):
     (lw,lh) = layout.get_size()
     if lw == 0 or lh == 0:
       return # no need to draw this + avoid a division by zero
+    if colorString: #optinaly set text color
+      cr.set_source_color(gtk.gdk.color_parse(colorString))
     if(widthLimit and lw > widthLimit):
       scale = float(pango.SCALE)
       factor = ((widthLimit/(lw/scale)))
@@ -372,6 +380,9 @@ class menus(ranaModule):
       for x in range(cols):
         item = menu.get(id, None)
         if(item == None):
+          # menu drawing is done, do the master overlay hook
+          if self.notificationModule:
+            self.notificationModule.drawMasterOverlay(cr)
           return
 
         # Draw it
@@ -445,7 +456,6 @@ class menus(ranaModule):
 
 
     self.menus[menu][pos] = (textIconAction, index, uniqueName, type)
-
 
 
   def addListableMenu(self, name, items, parrentAction, descFunction=None, drawFunction=None):
@@ -775,7 +785,7 @@ class menus(ranaModule):
 
 
   def drawTextToSquare(self, cr, x, y, w, h, text):
-    """draw lines of text to a square text box, | is used as a delimiter"""
+    """draw lines of text to a square text box, \n is used as a delimiter"""
 #    (x1,y1,w1,h1) = self.get('viewport', None)
 #    dx = w / 3
 #    dy = h / 4
@@ -1053,6 +1063,8 @@ class menus(ranaModule):
   def firstTime(self):
     self.set("menu",None)
     self.userConfig = self.m.get('config', None).userConfig
+    # get the notification module (to implement the master overlay)
+    self.notificationModule = self.m.get('notification', None)
 
   def handleMessage(self, message, type, args):
     messageList = message.split('#')

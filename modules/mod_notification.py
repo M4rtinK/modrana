@@ -34,13 +34,14 @@ class notification(ranaModule):
     self.expirationTimestamp = time.time()
     self.draw = False
     self.redrawn = None
-
+    self.backgroundWorkNotify = False
+    """this indicates if the notification about background processing should be shown"""
 
   def handleMessage(self, message, type, args):
     """the first part is the message, that will be displayed,
        there can also by some parameters, delimited by #
        NEW: you can also use a message list for the notification
-            firts goes the message, then the timeout in secconds
+            fitst goes the message, then the timeout in seconds
        """
 
     if type=='ml' and message=='m':
@@ -55,6 +56,12 @@ class notification(ranaModule):
           self.expirationTimestamp = time.time() + timeout
           
         self.set('needRedraw', True) # make sure the notification is displayed
+    elif type=='ml' and message=='backgroundWorkNotify':
+      if args:
+        if args[0] == "enable":
+          self.backgroundWorkNotify = True
+        if args[0] == "disable":
+          self.backgroundWorkNotify = False
     else:
       list = message.split('#')
       # TODO: support setting timeout and position
@@ -71,18 +78,14 @@ class notification(ranaModule):
       self.set('needRedraw', True) # make sure the notification is displayed
 
 
-  def drawMenu(self,cr,menuName):
-    """We want the notification to work even over the menu."""
-    if self.draw == True:
-      self.drawNotification(cr)
-
-  def drawScreenOverlay(self, cr):
-    """We want the notification to work even over the map."""
-    if self.draw == True:
-      try:
-        self.drawNotification(cr)
-      except:
-        print "notification: drawing notification failed"
+  def drawMasterOverlay(self,cr):
+    """this function is called by the menu module, both in map mode and menu mode
+    -> its bit of a hack, but we can """
+    self.drawNotification(cr)
+    if self.backgroundWorkNotify:
+      online = self.m.get('onlineServices', None)
+      if online:
+        online.drawOpInProgressOverlay(cr)
 
   def drawNotification(self, cr):
     """Draw the notifications on the screen on top of everything."""

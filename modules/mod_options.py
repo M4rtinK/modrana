@@ -118,13 +118,16 @@ class options(ranaModule):
 
 
 
-
+    # network
     self.addOption("Network", "network",
 #      [("off","No use of network"),
       [("minimal", "Only for important data"),
        ("full", "Unlimited use of network")],
        "network",
        "full")
+
+    # gps
+    self.addBoolOption("GPS", "GPSEnabled", "GPS", True, "gpsd:checkGPSEnabled")
 
 #    self.addOption("Network", "threadedDownload",
 ##      [("off","No use of network"),
@@ -218,6 +221,41 @@ class options(ranaModule):
 
 
     # * navigation
+
+    # in the first string: first one goes to espeak, the seccond part goes to Google
+    directionsLanguages =[('ca ca', 'Catalan'),
+                          ('zh-yue zh-TW', 'Chinese(Cantonese)'),
+                          ('zh zh-CN', 'Chinese(Mandarin)'),
+                          ('hr hr', 'Croatian'),
+                          ('cs cs', 'Czech'),
+                          ('nl nl', 'Dutch'),
+                          ('en en', 'English'),
+                          ('fi fi', 'Finnish'),
+                          ('fr fr', 'French'),
+                          ('de de', 'German'),
+                          ('el el', 'Greek'),
+                          ('hi hi', 'Hindi'),
+                          ('hu hu', 'Hungarian'),
+                          ('id id', 'Indonesian'),
+                          ('it it', 'Italian'),
+                          ('lv lv', 'Latvian'),
+                          ('no no', 'Norwegian'),
+                          ('pl pl', 'Polish'),
+                          ('pt pt-BR', 'Portuguese(Brazil)'),
+                          ('pt-pt pt-PT', 'Portuguese(European)'),
+                          ('ro ro', 'Romanian'),
+                          ('ru ru', 'Russian'),
+                          ('sr sr', 'Serbian'),
+                          ('sk sk', 'Slovak'),
+                          ('es es', 'Spanish'),
+                          ('ta ta', 'Tamil'),
+                          ('tr tr', 'Turkish'),
+                          ('vi vi', 'Vietnamese')]
+
+    self.addOption("Language for directions", "directionsLanguage",directionsLanguages,
+       "Navigation",
+       "en en") # TODO: use locale for default language ?
+
     self.addOption("Point reached distance", "pointReachedDistance",
       [(10,"10 m"),
        (20,"20 m"),
@@ -245,8 +283,6 @@ class options(ranaModule):
        ("dump","click to export","storePOI:dumpToCSV")],
        "POI",
        "dump")
-
-
 
     # Add all our categories to the "options" menu
     self.menuModule = self.m.get("menu", None)

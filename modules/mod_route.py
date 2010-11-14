@@ -25,6 +25,7 @@ import gtk
 import gobject
 import re
 import csv
+import traceback
 from time import sleep
 from time import clock
 
@@ -63,6 +64,8 @@ class route(ranaModule):
 
     self.set('startPos', None)
     self.set('endPos', None)
+
+    self.cancelButtonEnabled = False
 
   def handleMessage(self, message, type, args):
     if (message == "clear"):
@@ -198,7 +201,8 @@ class route(ranaModule):
             print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
             try:
               self.doRoute(fromLat, fromLon, toLat, toLon)
-            except:
+            except Exception, e:
+              traceback.print_exc(file=sys.stdout)
               self.sendMessage('ml:notification:m:No route found;3')
             if "show" in args:
               """switch to map view and go to start/destination, if requested"""
@@ -262,11 +266,6 @@ class route(ranaModule):
 
     elif(message == 'addressRoute'):
       if self.startAddress and self.destinationAddress:
-#        # remove possible markers from p2p routing
-#        if self.start:
-#          self.start = None
-#        if self.destination:
-#          self.destination = None
         print "address routing"
         self.doAddressRoute(self.startAddress,self.destinationAddress)
       else:
@@ -295,25 +294,31 @@ class route(ranaModule):
           (dLat, dLon) = (self.destination[0], self.destination[1])
           self.doRoute(pLat, pLon, dLat, dLon)
 
+    elif(message == 'cancelButton'): #enable/dsiable the background activity cancel button
+      if type == 'ms':
+       if args == "enable":
+         self.cancelButtonEnabled = True
+       elif args == "disable":
+         self.cancelButtonEnabled = False
 
   def doRoute(self, fromLat, fromLon, toLat, toLon):
     """Route from one point to another, and set that as the active route"""
     online = self.m.get('onlineServices', None)
-    if online == None:
-      return
-    directions = online.googleDirectionsLL(fromLat, fromLon, toLat, toLon)
-    if directions == None:
-      return
+    if online:
+#    directions = online.googleDirectionsLL(fromLat, fromLon, toLat, toLon)
+      online.googleDirectionsAsync((fromLat, fromLon), (toLat, toLon), self.handleRoute, "onlineRoute")
 
-    # remove any possible prev. route description, so new a new one for this route is created
-    self.text = None 
-
-    polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
-    route = self.decode_line(polyline) # we decode the polyline to a list of points
-    # handle the results
-    start = (fromLat, fromLon)
-    destination = (toLat, toLon)
-    self.processAndSaveResults(route, directions, start, destination)
+  def handleRoute(self, key, resultsTupple):
+    """handle a routing result"""
+    if key == "onlineRoute":
+      if len(resultsTupple) == 3:
+        (directions, startAddress, destinationAddress) = resultsTupple
+        # remove any possible prev. route description, so new a new one for this route is created
+        self.text = None
+        if directions: # is there actually something in th directions ?
+          polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
+          route = self.decode_line(polyline) # we decode the polyline to a list of points
+          self.processAndSaveResults(route, directions, startAddress, destinationAddress)
 
   def doAddressRoute(self, start, destination):
     """Route from one point to another, and set that as the active route"""
@@ -340,12 +345,10 @@ class route(ranaModule):
     # handle the results
     if len(route) >= 2:
       start = (route[0])
-      print start
       destination = (route[-1])
-      print destination
     self.processAndSaveResults(route, directions, start, destination)
     
-  def processAndSaveResults(self, route, directions, start=None, destination=None):
+  def processAndSaveResults(self, route, directions, startAddress, destinationAddress):
     """process and save routing results"""
     self.route = route
     proj = self.m.get('projection', None)
@@ -355,26 +358,19 @@ class route(ranaModule):
 
     (fromLat, fromLon) = route[0]
     (toLat, toLon) = route[-1]
-    # reverse geocode the start and destination coordinates (for the info menu)
-    online = self.m.get('onlineServices', None)
-    if online == None:
-      return
-    startAddress = online.googleReverseGeocode(fromLat,fromLon)
-    destinationAddress = online.googleReverseGeocode(toLat,toLon)
 
-    if start:
-      (startLat, startLon) = start
-      self.start = (startLat, startLon, startAddress)
-    if destination:
-      (destLat, destLon) = destination
-      self.destination = (destLat, destLon, destinationAddress)
+    self.startAddress = startAddress
+    self.start = (fromLat, fromLon)
+    self.destinationAddress = destinationAddress
+    self.destination = (toLat, toLon)
     
   def processAndSaveDirections(self, rawDirections, type):
     """process a raw route to a unified format"""
     if type == 'gdirections':
     # add a fake destination step, so there is a "destination reached" message
       destStep = {}
-      destStep[u'descriptionHtml'] = 'you <b>should</b> be near the destination'
+      destStep[u'descriptionHtml'] = '<p xml:lang="en">you <b>should</b> be near the destination<p>'
+      # TODO: make this multilingual
       (lat,lon) = self.route[-1]
       # NOTE: steps have reversed coordinates
       destStep[u'Point'] = {'coordinates':[lon,lat,0]}
@@ -461,15 +457,17 @@ class route(ranaModule):
   def drawScreenOverlay(self, cr):
     if self.route: # current route info button
       self.drawCurrentRouteInfoButton(cr)
+    elif self.cancelButtonEnabled:
+      self.drawCancelButton(cr) # draw the background activity cancel button
 
-    if self.selectTwoPoints == True: # poin selection menu
+    if self.selectTwoPoints == True: # point selection menu
       self.drawTwoPointsMenu(cr)
 
   def drawMapOverlay(self, cr):
     """Draw a route"""
 #    start1 = clock()
 
-    if len(self.route):
+    if self.route and self.directions:
       # Where is the map?
       proj = self.m.get('projection', None)
       if(proj == None):
@@ -485,7 +483,6 @@ class route(ranaModule):
 
       # now we convert geographic cooridnates to screen coordinates, so we dont need to do it twice
       steps = map(lambda x: (proj.ll2xy(x[0],x[1])), steps)
-
 
       start = proj.ll2xy(self.start[0], self.start[1])
       destination = proj.ll2xy(self.destination[0], self.destination[1])
@@ -675,7 +672,27 @@ class route(ranaModule):
       x1 = x1-dx
       y1 = y1-dy
     menus.drawButton(cr, x1, y1, dx, dy, 'info#route', "generic_alpha", 'set:menu:currentRouteBackToMap')
-    
+    if self.cancelButtonEnabled:
+      self.drawCancelButton(cr, (x1-dx,y1+dy,dx,dy)) # draw the cancel button botom left from the info button
+
+  def drawCancelButton(self,cr,coords=None):
+    """draw the cancel button
+    TODO: this and the other context buttons should be moved to a seprate module,
+    named contextMenuor something in the same style"""
+    menus = self.m.get('menu', None)
+    if menus:
+      if coords: #use the provided coords
+        (x1,y1,dx,dy) = coords
+      else: # use the bottom left corner
+        (x,y,w,h) = self.get('viewport')
+        dx = min(w,h) / 5.0
+        dy = dx
+        x1 = (x+w)-dx
+        y1 = (y-dy)+h
+        if self.selectTwoPoints: #check for the point selection menu
+          x1 = x1 - 2*dx
+      # the cancel button sends a cancel message to onlineServicesand disables itself
+      menus.drawButton(cr, x1, y1, dx, dy, 'search#cancel', "generic_alpha", 'onlineServices:cancelOperation')
 
   def drawTwoPointsMenu(self, cr):
     (x,y,w,h) = self.get('viewport')
@@ -744,15 +761,6 @@ class route(ranaModule):
       cr.stroke()
       cr.fill()
 
-#    if toPos != None:
-#      print "drawing end point"
-
-#  def respondToText(self, entry, dialog, response):
-#        print "responce"
-#        print entry.get_text()
-#        print "hiding now"
-#        dialog.destroy()
-
   def handleTextEntryResult(self, key, result):
     if key == 'start':
       self.startAddress = result
@@ -796,18 +804,16 @@ class route(ranaModule):
         steps = len(dir['Directions']['Routes'][0]['Steps']) # number of steps
 
         start = ""
-        startAddress = self.start[2]
+        startAddress = self.startAddress
         (lat1,lon1) = (self.start[0],self.start[1])
         for item in startAddress.split(','):
           start += "\n%s" % item
-    #    start += "\n(%f,%f)" % (lat1,lon1)
 
         destination = ""
-        destinationAddress = self.destination[2]
+        destinationAddress = self.destinationAddress
         (lat2,lon2) = (self.destination[0],self.destination[1])
         for item in destinationAddress.split(','):
           destination += "\n%s" % item
-    #    destination += "\n(%f,%f)" % (lat2,lon2)
 
         text = "%s" % start
         text+= "\n%s" % destination
@@ -817,8 +823,6 @@ class route(ranaModule):
         self.text = text
       else:
         text = self.text
-
-#      print self.get('textEntry', None)
 
       if self.once:
         self.once = False
@@ -883,7 +887,6 @@ class route(ranaModule):
 
       menus.showText(cr, startText, x4+w1/20, y4+dy/5, w1-x4-(w1/20)*2)
       menus.showText(cr, destinationText, x4+w1/20, y4+2*dy+dy/5, w1-x4-(w1/20)*2)
-
 
 if(__name__ == '__main__'):
   d = {'transport':'car'}

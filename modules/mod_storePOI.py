@@ -217,6 +217,7 @@ class storePOI(ranaModule):
         menus.addItem('POIDetailTools', 'latitude#edit', 'generic', 'ms:showPOI:editActivePOI:lat')
         menus.addItem('POIDetailTools', 'longitude#edit', 'generic', 'ms:showPOI:editActivePOI:lon')
         menus.addItem('POIDetailTools', 'category#change', 'generic', 'ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit|set:menu:POICategoryChooser')
+        menus.addItem('POIDetailTools', 'position#set as', 'generic', 'showPOI:centerOnActivePOI|ml:gpsd:setPosLatLon:%f;%f' % (self.lat,self.lon))
         menus.addItem('POIDetailTools', 'POI#delete', 'generic', 'showPOI:askDeleteActivePOI')
 
     def getValues(self):

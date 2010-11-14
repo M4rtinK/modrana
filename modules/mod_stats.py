@@ -28,6 +28,7 @@ class stats(ranaModule):
   """Handles messages"""
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
+    self.minimalSpeed = 2 #  in kmh, we don't update the avg speed if the current speed is like this
     self.lastT = None
     self.maxSpeed = 0
     self.avg1 = 0
@@ -52,7 +53,9 @@ class stats(ranaModule):
       return # TODO: zero stats
 
     speed = self.get('speed', None)
-    if speed == None: # we have no data, so we do no statistics
+    print speed
+    if speed == None or speed<=self.minimalSpeed:
+      """we have no data, or the speed is below the treshold (we are not moving)"""
       return
 
     average = 0

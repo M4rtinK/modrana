@@ -128,8 +128,6 @@ class tracklogManager(ranaModule):
         self.scrollDict[currentCat] = 0
     return self.scrollDict[currentCat]
 
-
-
   def deleteTracklog(self, path):
     # delete a tracklog
     print "deleting tracklog:%s" % path
@@ -302,6 +300,7 @@ class tracklogManager(ranaModule):
     isVisible = (currentPath in visibleTracklogs)
 
     menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")
+#    menus.addItem('tracklogTools', 'rename', 'generic', 'loadTracklogs:renameActiveTracklog|set:menu:tracklogInfo')
     menus.addItem('tracklogTools', 'elevation#get', 'generic', 'tracklogManager:getElevation|set:menu:tracklogInfo')
     menus.addItem('tracklogTools', 'active#set', 'generic', 'set:currentTrack:%s|tracklogManager:loadTrackProfile|set:menu:None' % track.filename)
     menus.addItem('tracklogTools', 'inactive#set', 'generic', 'set:currentTrack:None|tracklogManager:unLoadTrackProfile|set:menu:None')

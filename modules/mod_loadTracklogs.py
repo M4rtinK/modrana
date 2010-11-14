@@ -91,6 +91,12 @@ class loadTracklogs(ranaModule):
           self.save()
           self.cleanCache()
           print "cache consistency assured"
+#    elif message == 'renameActiveTracklog':
+#      activeTracklog = self.getActiveTracklog()
+#      if activeTracklog:
+#        pass
+#        # get current tracklog filename, sans extension
+#        # start an entry box
 
 
 
@@ -119,6 +125,24 @@ class loadTracklogs(ranaModule):
     # self explanatory
     if file in self.cache:
       del self.cache[file]
+
+#  def renameTracklog(track, newName=None):
+#    """rename a given tracklog file"""
+#    if newName:
+#      pass
+#    else:
+#      pass
+#
+#  def handleTextEntryResult(self, key, result):
+#    if key == "renameActiveTracklogEntry":
+#      pass
+#      # construct new path
+#      # test if the path exists
+#      # if it exists, ask user to overwrite or not
+#      # if it does not exist, try to do the actual rename
+#      # if renaming fails, trigger a notification
+#
+#
 
   def getActiveTracklog(self):
     path = self.getActiveTracklogPath()
@@ -534,6 +558,11 @@ class tracklog():
     """sets tracklog description"""
     self.tracklogDescription = description
 
+  def getLength(self):
+    """return length of the tracklog if known, None else"""
+    return None
+
+
 class GPXTracklog(tracklog):
   """A class representing a GPX tracklog."""
   def __init__(self, trackpointsList, filename, type, cache, save):
@@ -649,7 +678,12 @@ class GPXTracklog(tracklog):
   def getPerElev(self):
     self.perElevList = geo.perElevList(self.trackpointsList)
 
-
+#  def getLength(self):
+#    """return length of the tracklog if known, None else - GPX version"""
+#    if self.perElevList:
+#      print self.perElevList
+#    else:
+#      return None
 
 class CacheItem():
   """class representing a cache item"""
