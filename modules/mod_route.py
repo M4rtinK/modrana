@@ -335,6 +335,10 @@ class route(ranaModule):
           polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
           route = self.decode_line(polyline) # we decode the polyline to a list of points
           self.processAndSaveResults(route, directions, startAddress, destinationAddress)
+
+    autostart = self.get('autostartNavigation', 'disabled')
+    if autostart == 'first' or autostart == 'closest':
+      self.sendMessage('ms:turnByTurn:start:%s' % autostart)
     self.set('needRedraw', True)
     
   def processAndSaveResults(self, route, directions, startAddress, destinationAddress):

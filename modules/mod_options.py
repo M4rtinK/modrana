@@ -256,6 +256,13 @@ class options(ranaModule):
        "Navigation",
        "en en") # TODO: use locale for default language ?
 
+    self.addOption("Autostart navigation", "autostartNavigation",
+      [('disabled',"Disabled"),
+       ('first',"From first point"),
+       ('closest',"From closest point")],
+       "Navigation",
+       'disabled')
+
     self.addOption("Point reached distance", "pointReachedDistance",
       [(10,"10 m"),
        (20,"20 m"),
