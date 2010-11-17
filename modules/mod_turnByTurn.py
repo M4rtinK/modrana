@@ -122,7 +122,6 @@ class turnByTurn(ranaModule):
       lon = currentStep['Point']['coordinates'][0]
 
       self.currentStepIndicator = proj.ll2xy(lat, lon)
-      print self.currentStepIndicator
 #      cr.set_source_rgb(1, 0, 0)
 #      cr.set_line_width(4)
 #      cr.arc(pointX, pointY, 12, 0, 2.0 * math.pi)
@@ -214,12 +213,6 @@ class turnByTurn(ranaModule):
         lon2 = step['Point']['coordinates'][0]
         step['currentDistance'] = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
       closestStep = sorted(tempSteps, key=lambda x: x['currentDistance'])[0]
-      for step in self.steps:
-        print step['currentDistance']
-        print step['id']
-
-      print "adasdasd"
-      print closestStep['id']
       return closestStep
 
   def getCurrentStep(self):
