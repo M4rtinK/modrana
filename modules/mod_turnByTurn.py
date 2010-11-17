@@ -248,18 +248,18 @@ class turnByTurn(ranaModule):
 
   def startTBT(self):
     # start Turn-by-turn navigation
-    self.sendMessage('notification:use at own risk, watch for cliffs, etc.#2')
-
     m = self.m.get('route', None)
     if m:
-     dirs = m.getCurrentDirections()
-     if dirs: # is the route nonempty ?
-       route = dirs['Directions']['Routes'][0]
-       self.steps = []
-       for step in route['Steps']:
-         step['currentDistance'] = None # add the currentDistance key
-         self.steps.append(step)
-       self.steps = dirs['Directions']['Routes'][0]['Steps']
+      dirs = m.getCurrentDirections()
+      if dirs: # is the route nonempty ?
+        print dirs
+        self.sendMessage('notification:use at own risk, watch for cliffs, etc.#2')
+        route = dirs['Directions']['Routes'][0]
+        self.steps = []
+        for step in route['Steps']:
+          step['currentDistance'] = None # add the currentDistance key
+          self.steps.append(step)
+        self.steps = dirs['Directions']['Routes'][0]['Steps']
 
   def stopTBT(self):
     # stop Turn-by-turn navigation
