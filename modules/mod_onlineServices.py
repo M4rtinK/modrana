@@ -110,18 +110,37 @@ class onlineServices(ranaModule):
     return gmap
 
   def googleLocalQuery(self, query):
+    print "local search query: %s" % query
     gmap = self.getGmapsInstance()
     numresults = int(self.get('GLSResults', 8))
     local = gmap.local_search(query, numresults)
     return local
 
-  def googleLocalQueryLL(self, query, lat, lon):
-    separator = " "
-    LL = "%f,%f" % (lat,lon)
-    queryWithLL = query + separator + LL
-    local = self.googleLocalQuery(queryWithLL)
+  def googleLocalQueryLL(self, term, lat, lon):
+    query = self.constructGoogleQueryLL(term, lat, lon)
+    local = self.googleLocalQuery(query)
     return local
-  
+
+  def googleLocalQueryAsync(self,query,outputHandler, key):
+    """asynchronous Google Local Search query for """
+    print "onlineServices: GLS search"
+    # TODO: we use a single thread for both routing and search for now, maybe have separate ones ?
+    self.routingThread = self.Worker(self, "localSearchGoogle", ((query)), outputHandler, key)
+    self.routingThread.daemon = True
+    self.routingThread.start()
+
+
+  def googleLocalQueryLLAsync(self, term, lat, lon,outputHandler, key):
+    """asynchronous Google Local Search query for explicit lat, lon coordiantes"""
+    query = self.constructGoogleQueryLL(term, lat, lon)
+    self.googleLocalQueryAsync(query, outputHandler, key)
+
+  def constructGoogleQueryLL(self, term, lat, lon):
+    """get a correctly formated GLS query"""
+    sufix = " loc:%f,%f" % (lat,lon)
+    query = term + sufix
+    return query
+
   def googleDirectionsAsync(self, start, destination, outputHandler, key):
     """a background running googledirections query
        -> verbatim start and destination will be used in route descritpion, no geocoding
@@ -246,11 +265,11 @@ class onlineServices(ranaModule):
 
   class Worker(threading.Thread):
     """a worker thread for asynchronous online services access"""
-    def __init__(self,callback, type, argsTupple, outputHandler, key):
+    def __init__(self,callback, type, args, outputHandler, key):
       threading.Thread.__init__(self)
       self.callback = callback # should be a onlineServicess module instance
       self.type = type
-      self.argsTupple = argsTupple
+      self.args = args
       self.outputHandler = outputHandler
       self.key = key # a key for the output handler
       self.statusMessage = ""
@@ -258,10 +277,20 @@ class onlineServices(ranaModule):
       print "onlineServices: worker initialized"
     def run(self):
       print "onlineServices: worker starting"
+      if self.type == "localSearchGoogle":
+        if self.args:
+          print "onlineServices: performing GLS"
+          query = self.args
+          self.callback.enableOverlay()
+          self.setStatusMessage("online POI search in progress...")
+          result = self.callback.googleLocalQuery(query)
+          self.setStatusMessage("online POI search done   ")
+          if self.returnResult: # check if our result is expected and should be returned to the oputpt handler
+            self.outputHandler(self.key, result)
 
-      if self.type == "onlineRoute" or self.type == "onlineRouteLL":
-        if len(self.argsTupple) == 2:
-          (start, destination) = self.argsTupple
+      elif self.type == "onlineRoute" or self.type == "onlineRouteLL":
+        if self.args and len(self.args) == 2:
+          (start, destination) = self.args
           self.setStatusMessage("online routing in progress...")
           self.callback.enableOverlay()
           # get the route
@@ -278,12 +307,14 @@ class onlineServices(ranaModule):
           else:
             startAddress = start
             destinationAddress = destination
-          self.setStatusMessage("online routing done")
+          self.setStatusMessage("online routing done   ")
           # send the results to the output handler
           if self.returnResult: # check if our reulst is expected and should be returned to the oputpt handler
             self.outputHandler(self.key, (directions, startAddress, destinationAddress))
-          print "onlineServices: worker finished"
-          self.callback.stop()
+            
+      # cleanup
+      print "onlineServices: worker finished "
+      self.callback.stop()
 
     def getStatusMessage(self):
       return self.statusMessage

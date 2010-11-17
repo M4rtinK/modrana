@@ -45,11 +45,11 @@ class search(ranaModule):
         'Shopping center':'amenity=shopping_center',
         'Gas station':'amenity=gas_station',
         'Outdoor':'shop=outdoor',
-        'DIY':'search:tourism=diy',
+        'DIY':'tourism=diy',
         'Bank':'amenity=bank',
         'ATM':'amenity=atm',
-        'Bookstore':'search:tourism=bookstore',
-        'Computer store':'search:tourism=computer_store '},
+        'Bookstore':'tourism=bookstore',
+        'Computer store':'tourism=computer_store '},
       'Food':{
         'Pub food':'amenity=pub;food=yes',
         'Pub':'amenity=pub',
@@ -184,15 +184,12 @@ class search(ranaModule):
           print "search: key not present in the filter dictionary, using the key as search term"
           term = searchTerm
 
-        sufix = " loc:%f,%f" % (lat,lon)
-        query = term + sufix
-        print "query:"
-        print query
-        local = online.googleLocalQuery(query)
-        if local['responseStatus'] != 200:
-          print "search: google returned %d return code" % local['responseStatus']
-        print ("search: local search returned %d results") % len(local['responseData']['results'])
-        self.localSearchResults = local
+        # initiate asynchronous search, taht is running in a separate thread
+        online.googleLocalQueryLLAsync(term, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
+#        if local['responseStatus'] != 200:
+#          print "search: google returned %d return code" % local['responseStatus']
+#        print ("search: local search returned %d results") % len(local['responseData']['results'])
+#        self.localSearchResults = local
 
     elif message == "customQuery":
       # start input for custom query
@@ -213,12 +210,7 @@ class search(ranaModule):
 
     self.set("needRedraw", True)
 
-
   def drawMenu(self, cr, menuName):
-    # is this menu the correct menu ?
-#    if menuName != 'searchResults' and menuName != 'searchResultsItem':
-#      return # we arent the active menu so we dont do anything
-
     if menuName == 'searchResults':
       menus = self.m.get("menu",None)
 
@@ -344,22 +336,25 @@ class search(ranaModule):
       cr.show_text(text)
 
   def updateDistance(self):
-      position = self.get("pos", None) # our lat lon coordinates
-      list = []
-      index = 0
-      for item in self.localSearchResults['responseData']['results']: # we iterate over the local search results
-        if position != None:
-          (lat1,lon1) = position
-          (lat2,lon2) = (float(item['lat']), float(item['lng']))
-          distance = geo.distance(lat1,lon1,lat2,lon2)
-          tupple = (distance, item, index)
-          list.append(tupple) # we pack each result into a tupple with ist distance from us
-        else:
-          tupple = (0, item, index) # in this case, we dont know our position, so we say the distance is 0
-          list.append(tupple)
-        index = index + 1
-      self.list = list
-      return list
+      if self.localSearchResults:
+        position = self.get("pos", None) # our lat lon coordinates
+        list = []
+        index = 0
+        for item in self.localSearchResults['responseData']['results']: # we iterate over the local search results
+          if position != None:
+            (lat1,lon1) = position
+            (lat2,lon2) = (float(item['lat']), float(item['lng']))
+            distance = geo.distance(lat1,lon1,lat2,lon2)
+            tupple = (distance, item, index)
+            list.append(tupple) # we pack each result into a tupple with ist distance from us
+          else:
+            tupple = (0, item, index) # in this case, we dont know our position, so we say the distance is 0
+            list.append(tupple)
+          index = index + 1
+        self.list = list
+        return list
+      else:
+        print "search: error -> distance update on empty results"
 
   def updateItemDistance(self):
       position = self.get("pos", None) # our lat lon coordinates
@@ -541,7 +536,7 @@ class search(ranaModule):
         m.clearMenu("search_"+category, 'set:menu:search')
         m.addItem('search', category, category.lower(), 'set:menu:search_'+category)
         for name,filter in items.items():
-          m.addItem('search_'+category, name, name.lower(), "set:menu:searchResults|ms:search:searchThis:"+filter)
+          m.addItem('search_'+category, name, name.lower(), "ms:search:searchThis:"+filter)
 #      m.addItem('search', 'clear', 'clear', 'search:clearSearch|set:menu:None')
       m.addItem('search', 'query#custom', 'generic', 'search:customQuery')
 
@@ -559,4 +554,8 @@ class search(ranaModule):
       self.sendMessage(message)
       self.set('menu', 'searchResults')
 
-        
+  def handleSearchResult(self, key, results):
+    if key == "localSearchResultGoogle":
+      print "search: GLS result recieved"
+      self.localSearchResults = results
+      self.set('menu', 'searchResults')       
