@@ -304,13 +304,19 @@ class onlineServices(ranaModule):
             startAddress = self.reverseGeocode(fromLat,fromLon)
             self.setStatusMessage("geocoding destination...")
             destinationAddress = self.reverseGeocode(toLat,toLon)
+            # return the original start/dest cooridnates
+            startLL = start
+            destinationLL = destination
           else:
+            # signalize that the original start/dest cooridnates are unknown
             startAddress = start
             destinationAddress = destination
+            startLL = None
+            destinationLL = None
           self.setStatusMessage("online routing done   ")
           # send the results to the output handler
           if self.returnResult: # check if our reulst is expected and should be returned to the oputpt handler
-            self.outputHandler(self.key, (directions, startAddress, destinationAddress))
+            self.outputHandler(self.key, (directions, startAddress, destinationAddress, startLL, destinationLL))
             
       # cleanup
       print "onlineServices: worker finished "

@@ -318,30 +318,30 @@ class route(ranaModule):
   def handleRoute(self, key, resultsTupple):
     """handle a routing result"""
     if key == "onlineRoute":
-      if len(resultsTupple) == 3:
-        (directions, startAddress, destinationAddress) = resultsTupple
+      if len(resultsTupple) == 5:
+        (directions, startAddress, destinationAddress, start, destination) = resultsTupple
         # remove any possible prev. route description, so new a new one for this route is created
         self.text = None
         if directions: # is there actually something in the directions ?
           polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
           route = self.decode_line(polyline) # we decode the polyline to a list of points
-          self.processAndSaveResults(route, directions, startAddress, destinationAddress)
+          self.processAndSaveResults(route, directions, startAddress, destinationAddress, start, destination)
     elif key == "onlineRouteAdress2Adress":
-      if len(resultsTupple) == 3:
-        (directions, startAddress, destinationAddress) = resultsTupple
+      if len(resultsTupple) == 5:
+        (directions, startAddress, destinationAddress, start, destination) = resultsTupple
         # remove any possible prev. route description, so new a new one for this route is created
         self.text = None
         if directions: # is there actually something in the directions ?
           polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
           route = self.decode_line(polyline) # we decode the polyline to a list of points
-          self.processAndSaveResults(route, directions, startAddress, destinationAddress)
+          self.processAndSaveResults(route, directions, startAddress, destinationAddress, start, destination)
 
     autostart = self.get('autostartNavigation', 'disabled')
     if autostart == 'first' or autostart == 'closest':
       self.sendMessage('ms:turnByTurn:start:%s' % autostart)
     self.set('needRedraw', True)
     
-  def processAndSaveResults(self, route, directions, startAddress, destinationAddress):
+  def processAndSaveResults(self, route, directions, startAddress, destinationAddress, start, destination):
     """process and save routing results"""
     self.route = route
     proj = self.m.get('projection', None)
@@ -353,10 +353,16 @@ class route(ranaModule):
     (toLat, toLon) = route[-1]
 
     self.startAddress = startAddress
-    self.start = (fromLat, fromLon)
     self.destinationAddress = destinationAddress
-    self.destination = (toLat, toLon)
-    
+    """use cooridnates for start dest or use first/last point from the route
+       if start/dest coordinates are unknown (None)"""
+    if start !=None and destination != None:
+      self.start = start
+      self.destination = destination
+    else:
+      self.start = (fromLat, fromLon)
+      self.destination = (toLat, toLon)
+
   def processAndSaveDirections(self, rawDirections, type):
     """process a raw route to a unified format"""
     if type == 'gdirections':

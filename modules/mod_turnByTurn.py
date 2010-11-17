@@ -229,13 +229,15 @@ class turnByTurn(ranaModule):
 
   def switchToNextStep(self):
     """switch to next step and clean up"""
-    print "switching to next step"
     maxIndex = len(self.steps) - 1
     nextIndex = self.currentStepIndex + 1
     if nextIndex <= maxIndex:
       self.currentStepIndex = nextIndex
       self.espeakFirstTrigger = False
       self.espeakSecondTrigger = False
+      print "switching to next step"
+    else:
+      print "last step reached"
 
   def enabled(self):
     """return True if enabled, flase othervise"""

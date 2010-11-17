@@ -1073,7 +1073,6 @@ class menus(ranaModule):
       """manipulate a listable menu
          argument number one is name of the listable menu to manipulate"""
       listMenuName = args[0]
-      print listMenuName
       if listMenuName in self.lists.keys(): # do we have this menu ?
         if args[1]=="up":
           self.lists[listMenuName].scrollUp()
