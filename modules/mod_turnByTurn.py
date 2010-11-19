@@ -58,8 +58,8 @@ class turnByTurn(ranaModule):
       self.stopTBT()
     elif message == 'reroute':
       # 1. say rerouting is in progress
-      message = "rerouting"
-      self.espeakSay(message, 0, "en") # make sure rerouting said with english voice
+      voiceMessage = "rerouting"
+      self.espeakSay(voiceMessage, 0, "en") # make sure rerouting said with english voice
       time.sleep(2) #TODO: improve this
       # 2. get a new route from current position to destination
       self.sendMessage("ms:route:reroute:fromPosToDest")
@@ -252,7 +252,6 @@ class turnByTurn(ranaModule):
     if m:
       dirs = m.getCurrentDirections()
       if dirs: # is the route nonempty ?
-        print dirs
         self.sendMessage('notification:use at own risk, watch for cliffs, etc.#2')
         route = dirs['Directions']['Routes'][0]
         self.steps = []

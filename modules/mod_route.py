@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import googlemaps # for handling google directions exceptions
 import sys
 import math
 import gtk
@@ -26,6 +25,7 @@ import gobject
 import re
 import csv
 import traceback
+import unicodedata
 from time import sleep
 from time import clock
 
@@ -336,7 +336,7 @@ class route(ranaModule):
           route = self.decode_line(polyline) # we decode the polyline to a list of points
           self.processAndSaveResults(route, directions, startAddress, destinationAddress, start, destination)
 
-    autostart = self.get('autostartNavigation', 'disabled')
+    autostart = self.get('autostartNavigationDefaultOn', 'closest')
     if autostart == 'first' or autostart == 'closest':
       self.sendMessage('ms:turnByTurn:start:%s' % autostart)
     self.set('needRedraw', True)
@@ -393,6 +393,12 @@ class route(ranaModule):
       step['descriptionHtml'] = message
       # get a special version for espeak
       message = step['descriptionHtml']
+
+      """check if cyrillic -> russian voice is enabled"""
+      cyrillicVoice = self.get('voiceNavigationCyrillicVoice', 'ru')
+      if cyrillicVoice:
+        message = self.processCyrillicString(message, cyrillicVoice)
+
       message = re.sub(r'<div[^>]*?>', '<br>', message)
       message = re.sub(r'</div[^>]*?>', '', message)
       message = re.sub(r'<b>', '<emphasis level="strong">', message)
@@ -407,16 +413,59 @@ class route(ranaModule):
 
     return rawDirections
 
+  def processCyrillicString(self,inputString, voiceCode):
+    """test if a given string contains any words with cyrillic characters
+    if it does, tell espeak (by adding a sgml tag) to speak such words
+    using voiceCode"""
+    substrings = inputString.split(' ')
+    outputString = ""
+    cyrillicStringTemp = ""
+    for substring in substrings: # split the messager to words
+      cyrillicCharFound = False
+      # test if the word has any cyrillic characters (a single one is enought)
+      for character in substring:
+        try: # there are probably some characters that dont have a known name
+          unicodeName = unicodedata.name(unicode(character))
+          if unicodeName.find('CYRILLIC') != -1:
+            cyrillicCharFound = True
+            break
+        except:
+          """just skip this as the character is  most probably unknown"""
+          pass
+      if cyrillicCharFound: # the substring contains at least one cyrillics character
+        if cyrillicStringTemp: # append to the already "open" cyrillic string
+          cyrillicStringTemp += ' ' + substring
+        else: # create a new cyrillic string
+          """make espeak say this word in russian (or other voiceCode),
+          based on Cyrillic being detected in it"""
+          cyrillicStringTemp = '<p xml:lang="%s">%s' % (voiceCode, substring)
+
+      else: # no cyrillic found in this substring
+        if cyrillicStringTemp: # is there an "open" cyrillic string ?
+          cyrillicStringTemp = cyrillicStringTemp + '</p>' # close the string
+          # store it and the current substring
+          outputString += ' ' + cyrillicStringTemp + ' ' + substring
+          cyrillicStringTemp = ""
+        else: # no cyrillic string in progress
+          # just store the current substring
+          outputString = outputString + ' ' + substring
+    # cleanup
+    if cyrillicStringTemp: #is there an "open" cyrillic string ?
+      cyrillicStringTemp += '</p>' # close the string
+      outputString += ' ' + cyrillicStringTemp
+      cyrillicStringTemp = ""
+    return outputString
+
   def applyRulesFromCSVFile(self,rawDirections):
       filename = self.directionsFilterCSV
-      CSVreader = csv.reader(open(filename, 'rb'), delimiter=';', quotechar='|')
 
       for step in rawDirections['Directions']['Routes'][0]['Steps']:
         message = step['descriptionEspeak']
+        CSVreader = csv.reader(open(filename, 'rb'), delimiter=';', quotechar='|') #use an iterator
         for row in CSVreader:
           if len(row)>=2:
             # replace strings according to the csv file
-            message = re.sub(row[0], row[1], message)
+            message = re.sub(unicode(row[0]), unicode(row[1]), message, re.UNICODE)
         step['descriptionEspeak'] = message
       return rawDirections
 
