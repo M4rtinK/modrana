@@ -20,6 +20,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_device_module import deviceModule
+import time
+import osso
 
 def getModule(m,d):
   return(device_n900(m,d))
@@ -32,10 +34,20 @@ class device_n900(deviceModule):
     self.rotationObject = None
     # start the N900 specific automatic GUI rotation support
     self.done = False
+    
+    # screen blanking related
+    self.ossoContext = osso.Context("osso_test_device_on", "0.0.1", False)
+    self.ossoDevice = osso.DeviceState(self.ossoContext)
+    """according to documentation on:
+    (http://wiki.maemo.org/PyMaemo/Python-osso_examples#Device_State),
+    every display_blanking_pause() call pauses screenblank for 60 secconds,
+    to make sure, we request every 30 secconds"""
+    self.screenBlankPauseInterval = 30
+    self.lastScreenblankPauseRequest = time.time()
+
     print "N900 device specific module initialized"
     
   def firstTime(self):
-    pass
     rotationObject = self.startAutorotation()
     if rotationObject != False:
       print "N900 rotation object loaded"
@@ -43,7 +55,6 @@ class device_n900(deviceModule):
     else:
       print "N900 loading rotation object failed"
 
-    
   def update(self):
     """initialize the automatic rotation"""
     if not self.done:
@@ -51,13 +62,18 @@ class device_n900(deviceModule):
         self.startAutorotation()
         self.done = True
 
+    currentTime = time.time()
+    if (currentTime - self.lastScreenblankPauseRequest)>self.screenBlankPauseInterval:
+      # reaguest to pause screen blanking for 60 secconds every 30 secconds
+      self.pauseScreenBlanking()
+      self.lastScreenblankPauseRequest = currentTime
+
   def handleMessage(self, message, type, args):
     if message == 'modeChanged':
       rotationMode = self.get('rotationMode', None)
       if rotationMode:
         self.setRotationMode(rotationMode)
         print "rotation mode changed"
-
 
   def getDeviceName(self):
     return "Nokia N900"
@@ -76,8 +92,6 @@ class device_n900(deviceModule):
       print e
       print "intializing N900 rotation object failed"
 
-
-
   def setRotationMode(self, rotationMode):
     rotationModeNumber = self.getRotationModeNumber(rotationMode)
     self.rotationObject.set_mode(rotationModeNumber)
@@ -94,15 +108,15 @@ class device_n900(deviceModule):
     return "/home/user/MyDocs/modrana_debug_log/" #N900 specific log folder
 
   def getPOIFolderPath(self):
-    """override the default method with a N900 specific one"""
+    """get the N900 specific POI folder path"""
     return "/home/user/MyDocs/.maps/"
 
+  def screenBlankingControllSupported(self):
+    """it is possible to controll screen balnking on the N900"""
+    return True
 
-    
-
-
-
-  
+  def pauseScreenBlanking(self):
+    self.ossoDevice.display_blanking_pause()
 
 if(__name__ == "__main__"):
   a = n900({}, {})
