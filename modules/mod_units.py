@@ -134,15 +134,15 @@ class units(ranaModule):
     unitType = self.get("unitType", "km")
 
     # unit conversion
-    if unitType == km:
+    if unitType == 'km':
       speed = km
     else: # miles
       speed = km * 0.621371192
 
     # rounding
-    if dp==None:
+    if dp == None:
       numberString = "%1.0f" % speed
-    elif dp==0:
+    elif dp == 0:
       n = int(round(speed, 0))
       numberString = "%d" % n
     else:
