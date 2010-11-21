@@ -113,6 +113,7 @@ class gpsd2(ranaModule):
         elif state == False:
           print "gps: disabling GPS"
           if self.device == 'n900':
+            self.set('fixType', 0) # a disabled GPS cant see any satellites
             self.libLocationStop()
 
   def sendMessage(self,message):
@@ -237,6 +238,15 @@ class gpsd2(ranaModule):
       try:
         if self.lDevice.fix:
           fix = self.lDevice.fix
+
+          self.set('fixType', fix[0])
+          """from liblocation reference:
+          0 =	The device has not seen a satellite yet.
+          1 =	The device has no fix.
+          2 =	The device has latitude and longitude fix.
+          3 =	The device has latitude, longitude, and altitude. 
+          """
+
           if fix[1] & location.GPS_DEVICE_LATLONG_SET:
             (lat,lon) = fix[4:6]
             self.set('pos', (lat,lon))
@@ -246,9 +256,9 @@ class gpsd2(ranaModule):
             self.set('bearing', bearing)
 
           if fix[1] & location.GPS_DEVICE_SPEED_SET:
-            speed = fix[11]/3.6 # km/h -> metres per second
             self.set('speed', fix[11]) # km/h
-            self.set('metersPerSecSpeed', speed) # m/s
+            metersPerSecSpeed = fix[11]/3.6 # km/h -> metres per second
+            self.set('metersPerSecSpeed', metersPerSecSpeed) # m/s
 
           if fix[1] & location.GPS_DEVICE_ALTITUDE_SET:
             elev = fix[7]
