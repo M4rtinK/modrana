@@ -31,6 +31,11 @@ class units(ranaModule):
     self.mileInMeters = 1609.344
     self.mileInKiloMeters = 1.609344
     self.yardsInMile = 1760
+    """
+    # we consider 2km/h as as stationary 
+    (to filter out the standart GPS drift while not moving)
+    """
+    self.notMovingspeed  = 2
     
   def m2km(self, m):
     return (m / 1000.0) # m to km
@@ -217,6 +222,23 @@ class units(ranaModule):
 
   def getTimeHashString(self):
     return time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
+
+  def getNotMovingSpeedKM(self):
+    return self.notMovingspeed
+
+  def moving(self):
+    """return
+       True if the current speed is above the not moving threshodl,
+       False if below the treshodl
+       None if the current speed is unknown
+       """
+
+    currentspeedKMH = self.get('speed', None)
+    if currentspeedKMH !=None:
+      return (currentspeedKMH>self.notMovingspeed)
+    else:
+      # signalise that we cant decite this
+      return None
 
 
 if(__name__ == "__main__"):

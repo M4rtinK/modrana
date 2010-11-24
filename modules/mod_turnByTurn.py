@@ -49,11 +49,13 @@ class turnByTurn(ranaModule):
       self.startTBT()
       if type == 'ms':
         if args == 'first':
-          self.currentStepIndex = 0
+          if self.steps: # are there usable directions ?
+            self.currentStepIndex = 0
         elif args == 'closest':
-          cs = self.getClosestStep()
-          id = cs['id']
-          self.currentStepIndex = id
+          if self.steps: # are there usable directions ?
+            cs = self.getClosestStep()
+            id = cs['id']
+            self.currentStepIndex = id
     elif message == 'stop':
       self.stopTBT()
     elif message == 'reroute':

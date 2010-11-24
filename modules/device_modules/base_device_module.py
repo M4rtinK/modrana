@@ -37,7 +37,7 @@ class deviceModule(ranaModule):
   def getPOIFolderPath(self):
     return "data/poi/" # default log folder
 
-  def screenBlankingControllSupported(self):
+  def screenBlankingControlSupported(self):
     """ there is no universal way to control screen blanking,
     so its off by default
     -> it can be implemented and enabled in the coresponding device module"""

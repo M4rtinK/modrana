@@ -125,7 +125,7 @@ class menus(ranaModule):
       icon = 'maximize'
 
     (x1,y1) = buttons['fullscreen']
-    self.drawButton(cr, x1, y1, dx, dy, "", icon, "menu:fullscreenTogle")
+    self.drawButton(cr, x1, y1, dx, dy, "", icon, "ms:display:fullscreen:toggle")
 
     (x1,y1) = buttons['centre']
     self.drawButton(cr, x1, y1, dx, dy, "", 'blue_border', "toggle:centred")
@@ -769,7 +769,6 @@ class menus(ranaModule):
 #    self.addItem('main', 'centre', 'centre', 'toggle:centred|set:menu:None')
     self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManagerCathegories')
     self.addItem('main', 'log a track', 'log', 'set:menu:tracklog')
-#    self.addItem('main', 'fullscreen', 'fullscreen', 'menu:fullscreenTogle|set:menu:None')
     self.setupTransportMenu()
     self.setupSearchMenus()
     self.setupSearchWhereMenu()
@@ -1088,16 +1087,6 @@ class menus(ranaModule):
     elif(message == 'screenClicked'):
       self.lastActivity = int(time.time())
       self.set('needRedraw', True)
-    elif(message == 'fullscreenTogle'):
-      # toggle fullscreen TODO: automatic fullscreen detection
-      if self.fullscreen == True:
-        self.mainWindow.get_toplevel().unfullscreen()
-        self.fullscreen = False
-        print "going out of fullscreen"
-      else:
-        self.mainWindow.get_toplevel().fullscreen()
-        self.fullscreen = True
-        print "going to fullscreen"
     elif(message == 'toggle' and len(messageList) >= 3):
       # toggle a button
       menu = messageList[1]

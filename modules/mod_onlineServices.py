@@ -162,7 +162,6 @@ class onlineServices(ranaModule):
     Get driving directions from Google.
     start and directions can be either coordinates tupples or address strings
     '''
-    gmap = self.getGmapsInstance()
 
     otherOptions=""
     if self.get('routingAvoidHighways', False): # optionally avoid highways
@@ -173,44 +172,50 @@ class onlineServices(ranaModule):
     # respect travel mode
     mode = self.get('mode', None)
     if mode != None:
-      type = ""
       if mode == 'cycle':
         type = "b"
       elif mode == 'foot':
         type = "w"
       elif mode == 'train' or mode == 'bus':
         type = 'r'
+      else:
+        type = ""
 
-      parameters = type + otherOptions # combine type and aother parameters
-      dir = {'dirflg': parameters}  # create a dictionary entry with all current parameters
+       # combine type and aother parameters
+      dir = {}
       self.get('directionsLanguage', 'en en')
       # the google language code is the seccond part of this whitespace delimited string
       googleLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[1]
       dir['hl'] = googleLanguageCode
 
-      try:
-        print start, destination
-        directions = gmap.directions(start, destination, dir)
-      except:
-        print "onlineServices:Gdirections:bad response to travel mode:%s, using default" % mode
-        try:
-          directions = gmap.directions(start, destination)
-        except googlemaps.googlemaps.GoogleMapsError, e:
-          if e.status == 602:
-            print "onlineServices:Gdirections:routing failed -> address not found" % e
-            self.sendMessage("ml:notification:m:Address(es) not found;5")
-          elif e.status == 604:
-            print "onlineServices:Gdirections:routing failed -> no route found" % e
-            self.sendMessage("ml:notification:m:No route found;5")
-          else:
-            print "onlineServices:Gdirections:ruting failed with exception:\n%s" % e
+      directions = self.tryToGetDirections(start, destination, dir, type, otherOptions)
 
-          directions = []
-          self.set('needRedraw', True)
+      return directions
 
-    else:
+  def tryToGetDirections(self, start, destination, dir, travelMode, otherOptions, seccondTime=False):
+    gmap = self.getGmapsInstance()
+    parameters = travelMode + otherOptions
+    dir['dirflg'] = parameters
+    directions = ""
+    try:
       directions = gmap.directions(start, destination)
-
+    except googlemaps.googlemaps.GoogleMapsError, e:
+      if e.status == 602:
+        print "onlineServices:Gdirections:routing failed -> address not found" % e
+        self.sendMessage("ml:notification:m:Address(es) not found;5")
+      elif e.status == 604:
+        print "onlineServices:Gdirections:routing failed -> no route found" % e
+        self.sendMessage("ml:notification:m:No route found;5")
+      elif e.status == 400:
+        if not seccondTime: # guard against potential infinite loop for consequent 400 errors
+          print "onlineServices:Gdirections:bad response to travel mode, trying default travel mode"
+          self.set('needRedraw', True)
+          directions = self.tryToGetDirections(start, destination, dir, travelMode="", seccondTime=True)
+      else:
+        print "onlineServices:Gdirections:routing failed with exception googlemaps exception:\n%s" % e
+    except Exception, e:
+      print "onlineServices:Gdirections:routing failed with nongooglemaps exception:\n%s" % e
+    self.set('needRedraw', True)
     return directions
 
   def googleDirectionsLL(self ,lat1, lon1, lat2, lon2):

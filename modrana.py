@@ -20,6 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #----------------------------------------------------------------------------
+#import dbus.glib
 import pygtk
 pygtk.require('2.0')
 import gobject
@@ -126,9 +127,12 @@ class MapWidget(gtk.Widget):
 
     print "Loaded all modules in %1.2f ms, initialising" % (1000 * (clock() - start))
 
-    start = clock()
+    # make sure all modules have the device module befor calling firstTime()
     for m in self.m.values():
       m.dmod = self.dmod
+
+    start = clock()
+    for m in self.m.values():
       m.firstTime()
     print "Initialization complete in %1.2f ms" % (1000 * (clock() - start))
       
@@ -407,7 +411,7 @@ class GuiBase:
     win.show_all()
     gtk.main()
     self.mapWidget.beforeDie()
-    
+
   def pressed(self, event):
     self.dragstartx = event.x
     self.dragstarty = event.y

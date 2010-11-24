@@ -118,7 +118,7 @@ class options(ranaModule):
 
 
 
-    # network
+    # * network *
     self.addOption("Network", "network",
 #      [("off","No use of network"),
       [("minimal", "Only for important data"),
@@ -126,8 +126,23 @@ class options(ranaModule):
        "network",
        "full")
 
-    # gps
+    # * GPS *
     self.addBoolOption("GPS", "GPSEnabled", "GPS", True, "gpsd:checkGPSEnabled")
+
+    # * screen *
+    """only add if supported on device"""
+    display = self.m.get('display', None)
+    if display:
+      if display.screenBlankingControlSupported():
+        self.addOption("Keep display ON", "screenBlankingMode",
+        [("always", "always", "display:blankingModeChanged"),
+         ("moving", "while moving", "display:blankingModeChanged"),
+         ("movingInFullscreen", "while moving in fullscreen", "display:blankingModeChanged"),
+         ("fullscreen", "while in fullscreen", "display:blankingModeChanged"),
+         ("gpsFix", "while there is a GPS fix", "display:blankingModeChanged"), #TODO: while there is actually a GPS lock
+         ("never", "never", "display:blankingModeChanged")],
+         "Display",
+         "always")
 
 #    self.addOption("Network", "threadedDownload",
 ##      [("off","No use of network"),
