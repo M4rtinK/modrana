@@ -368,7 +368,8 @@ class route(ranaModule):
     if type == 'gdirections':
     # add a fake destination step, so there is a "destination reached" message
       destStep = {}
-      destStep[u'descriptionHtml'] = '<p xml:lang="en">you <b>should</b> be near the destination<p>'
+      destStep[u'descriptionEspeak'] = '<p xml:lang="en">you <b>should</b> be near the destination</p>'
+      destStep[u'descriptionHtml'] = 'you <b>should</b> be near the destination'
       # TODO: make this multilingual
       (lat,lon) = self.route[-1]
       # NOTE: steps have reversed coordinates
@@ -923,15 +924,16 @@ class route(ranaModule):
       menus.drawButton(cr, x4, y4+dy, (w1-x4)/2, dy, "as start#position", "generic", "route:posToStart|set:needRedraw:True")
       menus.drawButton(cr, x4+(w1-x4)/2, y4+dy, (w1-x4)/2, dy, "as destination#position", "generic", "route:posToDestination|set:needRedraw:True")
 
+      # try to get last used addresses
+      startText = self.get('startAddress', None)
+      destinationText = self.get('destinationAddress', None)
 
-      if self.startAddress == None:
+      # if there are no last used addresses, use defaults
+      if startText == None:
         startText = "click to input starting adres"
-      else:
-        startText = self.startAddress
-      if self.destinationAddress == None:
+
+      if destinationText == None:
         destinationText = "click to input destination adres"
-      else:
-        destinationText = self.destinationAddress
 
       menus.showText(cr, startText, x4+w1/20, y4+dy/5, w1-x4-(w1/20)*2)
       menus.showText(cr, destinationText, x4+w1/20, y4+2*dy+dy/5, w1-x4-(w1/20)*2)

@@ -171,26 +171,25 @@ class onlineServices(ranaModule):
 
     # respect travel mode
     mode = self.get('mode', None)
-    if mode != None:
-      if mode == 'cycle':
-        type = "b"
-      elif mode == 'foot':
-        type = "w"
-      elif mode == 'train' or mode == 'bus':
-        type = 'r'
-      else:
-        type = ""
+    if mode == 'cycle':
+      type = "b"
+    elif mode == 'foot':
+      type = "w"
+    elif mode == 'train' or mode == 'bus':
+      type = 'r'
+    else:
+      type = ""
 
-       # combine type and aother parameters
-      dir = {}
-      self.get('directionsLanguage', 'en en')
-      # the google language code is the seccond part of this whitespace delimited string
-      googleLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[1]
-      dir['hl'] = googleLanguageCode
+     # combine type and aother parameters
+    dir = {}
+    self.get('directionsLanguage', 'en en')
+    # the google language code is the seccond part of this whitespace delimited string
+    googleLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[1]
+    dir['hl'] = googleLanguageCode
 
-      directions = self.tryToGetDirections(start, destination, dir, type, otherOptions)
+    directions = self.tryToGetDirections(start, destination, dir, type, otherOptions)
 
-      return directions
+    return directions
 
   def tryToGetDirections(self, start, destination, dir, travelMode, otherOptions, seccondTime=False):
     gmap = self.getGmapsInstance()
@@ -282,6 +281,7 @@ class onlineServices(ranaModule):
       print "onlineServices: worker initialized"
     def run(self):
       print "onlineServices: worker starting"
+      print "worker: work type: %s" % self.type
       if self.type == "localSearchGoogle":
         if self.args:
           print "onlineServices: performing GLS"
@@ -296,6 +296,7 @@ class onlineServices(ranaModule):
       elif self.type == "onlineRoute" or self.type == "onlineRouteLL":
         if self.args and len(self.args) == 2:
           (start, destination) = self.args
+          print "worker: routing from",start," to ",destination
           self.setStatusMessage("online routing in progress...")
           self.callback.enableOverlay()
           # get the route
@@ -320,7 +321,7 @@ class onlineServices(ranaModule):
             destinationLL = None
           self.setStatusMessage("online routing done   ")
           # send the results to the output handler
-          if self.returnResult: # check if our reulst is expected and should be returned to the oputpt handler
+          if self.returnResult: # check if our result is expected and should be returned to the oputpt handler
             self.outputHandler(self.key, (directions, startAddress, destinationAddress, startLL, destinationLL))
             
       # cleanup
