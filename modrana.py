@@ -376,6 +376,9 @@ class GuiBase:
     if(device == 'eee'): # test for use with asus eee
       win.resize(800,600)
       win.move(gtk.gdk.screen_width() - 900, 50)
+    if(device == 'netbook'): # test for use with asus eee
+      win.resize(800,600)
+      win.move(gtk.gdk.screen_width() - 900, 50)
     elif(device == 'n900'): # test for use with nokie N900
       win.resize(800,480)
     elif(device == 'q7'): # test for use with Smart Q7
@@ -450,6 +453,7 @@ if __name__ == "__main__":
   'neo' (480*640)
   'n95' (480*640)
   'eee' (800*600)
+  'netbook' (800*600)
   'q7'  (800*480)
   'n900' (800*480) -> for now can also be used for the Q7 or Q5 (same resolution)
   'square' (480*480) -> this is for testing screens with equal sides
