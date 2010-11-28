@@ -117,6 +117,10 @@ class display(ranaModule):
         self.screenBlankingControlStop()
         self.checkConditionsStart(self.checkGPSFix)
         print "display: keep display ON -> while there is a GPS fix"
+      elif mode == 'centred':
+        self.screenBlankingControlStop()
+        self.checkConditionsStart(self.checkCentred)
+        print "display: keep display ON -> while there is a GPS fix"
 
   def screenBlankingControlStart(self):
     self.pauseScreenBlanking()
@@ -189,6 +193,20 @@ class display(ranaModule):
           self.unlockScreen()
           # keep screen on
           self.screenBlankingControlStart()
+
+  def checkCentred(self):
+    """check if we are centred on current position"""
+    if self.get('centred', None):
+      # OK, we are centred, check if blanking is being paused
+      if self.pauseScreenBlankingEnabled == False:
+        # unlock screen
+        self.unlockScreen()
+        # keep screen on
+        self.screenBlankingControlStart()
+    else:
+      # we are not centred, disable blanking pause if in progress
+      if self.pauseScreenBlankingEnabled == True:
+        self.screenBlankingControlStop()
         
   def update(self):
     if self.pauseScreenBlankingEnabled: # pause screen blanking for 60s

@@ -136,6 +136,7 @@ class options(ranaModule):
       if display.screenBlankingControlSupported():
         self.addOption("Keep display ON", "screenBlankingMode",
         [("always", "always", "display:blankingModeChanged"),
+         ("centred", "while centred", "display:blankingModeChanged"),
          ("moving", "while moving", "display:blankingModeChanged"),
          ("movingInFullscreen", "while moving in fullscreen", "display:blankingModeChanged"),
          ("fullscreen", "while in fullscreen", "display:blankingModeChanged"),
