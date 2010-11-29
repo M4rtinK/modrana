@@ -182,11 +182,9 @@ class onlineServices(ranaModule):
 
      # combine type and aother parameters
     dir = {}
-    self.get('directionsLanguage', 'en en')
     # the google language code is the seccond part of this whitespace delimited string
     googleLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[1]
     dir['hl'] = googleLanguageCode
-
     directions = self.tryToGetDirections(start, destination, dir, type, otherOptions)
 
     return directions
@@ -197,7 +195,7 @@ class onlineServices(ranaModule):
     dir['dirflg'] = parameters
     directions = ""
     try:
-      directions = gmap.directions(start, destination)
+      directions = gmap.directions(start, destination, dir)
     except googlemaps.googlemaps.GoogleMapsError, e:
       if e.status == 602:
         print "onlineServices:Gdirections:routing failed -> address not found" % e
@@ -211,7 +209,7 @@ class onlineServices(ranaModule):
           self.set('needRedraw', True)
           directions = self.tryToGetDirections(start, destination, dir, travelMode="", seccondTime=True)
       else:
-        print "onlineServices:Gdirections:routing failed with exception googlemaps exception:\n%s" % e
+        print "onlineServices:Gdirections:routing failed with exception googlemaps status code:%d" % e.status
     except Exception, e:
       print "onlineServices:Gdirections:routing failed with nongooglemaps exception:\n%s" % e
     self.set('needRedraw', True)
