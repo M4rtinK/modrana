@@ -42,8 +42,14 @@ class menus(ranaModule):
     self.mainScreenCoords = {}
     self.userConfig = {}
     self.notificationModule = None
+    self.hideMapSreenButtons = False
 
 #  def drawMapOverlay(self, cr):
+
+  def buttonsHidingOn(self):
+    """report whether button hiding is enabled"""
+    return self.hideMapSreenButtons
+
   def drawScreenOverlay(self, cr):
     """Draw an overlay on top of the map, showing various information
     about position etc."""
@@ -61,115 +67,121 @@ class menus(ranaModule):
       m.registerDraggable(x,y,x+w,y+h, "mapView") # handler for dragging the map
       m.registerXYWH(x,y,x+w,y+h, "menu:screenClicked")
 
+
+    #TODO: move this to update ? although this would work even when
+    # we are not drawing anything as there would be time difference from the last timestamp
+
     if hideDelay != 'never': # is button hiding on ?
       currentTimestamp = int(time.time())
       lastActivity = self.lastActivity
       if (currentTimestamp - lastActivity) > int(hideDelay): # have we reached the timeout ?
+        self.hideMapSreenButtons = True
         (x1,y1) = proj.screenPos(0.6, -0.96)
         text = "tap screen to show menu"
         self.drawText(cr, text, x1, y1, w/3, h, 0) # draw a reminder
         cr.stroke()
-        return
-
-    # default main button coordinates
-    buttons = {}
-    buttons['menu'] = (x,y) # main menu button coordinates
-    buttons['zoom_in'] = (x,y+dx) # zoom in button coordinates
-    buttons['zoom_out'] = (x+dx,y) # zoom out button coordinates
-    buttons['fullscreen'] = (x, y+h-dy) # fullscreen button coordinates
-    buttons['centre'] = (x+w-dx, y) # centre button coordinates
-    buttons['scalebar'] = proj.screenPos(0.15, 0.97) # scalebar coordinates
-    plusIcon = 'zoom_in'
-    minusIcon = 'zoom_out'
-
-    # possible main button coordinates override
-    mode = self.get('mode', None)
-    if mode in self.userConfig:
-      if 'override_main_buttons' in self.userConfig[mode]:
-        # we dont know the orientation, so we use generic icons
-        plusIcon = 'plus'
-        minusIcon = 'minus'
-        item = self.userConfig[mode]['override_main_buttons']
-
-        if 'icon_size' in item:
-          size = float(item['icon_size'])
-          dx = size * min(w,h)
-          dy = dx
-
-
-
-        for key in buttons:
-          if key in item:
-            (px,py,ndx,ndy) = [float(i) for i in item[key]]
-            buttons[key] = (px*w+dx*ndx,py*h+dy*ndy)
-
-
-    # main buttons
-
-
-
-    menuIcon = self.get('mode', 'car')
-
-    (x1,y1) = buttons['zoom_out']
-    self.drawButton(cr, x1, y1, dx, dy, '', minusIcon, "mapView:zoomOut")
-    (x1,y1) = buttons['menu']
-    self.drawButton(cr, x1, y1, dx, dy, 'menu', menuIcon, "set:menu:main")
-    (x1,y1) = buttons['zoom_in']
-    self.drawButton(cr, x1, y1, dx, dy, '', plusIcon, "mapView:zoomIn")
-
-    
-    # draw the maximize icon
-    if self.fullscreen:
-      icon = 'minimize'
-    else:
-      icon = 'maximize'
-
-    (x1,y1) = buttons['fullscreen']
-    self.drawButton(cr, x1, y1, dx, dy, "", icon, "ms:display:fullscreen:toggle")
-
-    (x1,y1) = buttons['centre']
-    self.drawButton(cr, x1, y1, dx, dy, "", 'blue_border', "toggle:centred")
-
-    cr.stroke()
-    cr.save()
-    (centreX,centreY) = (x1+dx/2.0,y1+dy/2.0)
-    cr.translate(centreX,centreY)
-    cr.set_line_width(6)
-    cr.set_source_rgba(0, 0, 1, 0.45)
-    cr.arc(0, 0, 15, 0, 2.0 * math.pi)
-    cr.stroke()
-    cr.fill()
-
-    if not self.get('centred', False): # draw the position indicator indicator :)
-      pos = self.get('pos', None)
-      if pos != None:
-        (lat1,lon1) = pos
-        (lat, lon) = proj.xy2ll(centreX, centreY)
-        angle = geo.bearing(lat1,lon1,lat,lon)
-        cr.rotate(math.radians(angle))
-
-        (pointX,pointY) = (0,y+dy/3.0)
       else:
-        (pointX,pointY) = (0,0)
-    else:
-      (pointX,pointY) = (0,0)
+        self.hideMapSreenButtons = False
 
-    cr.set_source_rgb(0.0, 0.0, 0.0)
-    cr.set_line_width(10)
-    cr.arc(pointX, pointY, 3, 0, 2.0 * math.pi)
-    cr.stroke()
-    cr.set_source_rgb(1.0, 0.0, 0.0)
-    cr.set_line_width(8)
-    cr.arc(pointX, pointY, 2, 0, 2.0 * math.pi)
-    cr.stroke()
-    cr.fill()
+        # default main button coordinates
+        buttons = {}
+        buttons['menu'] = (x,y) # main menu button coordinates
+        buttons['zoom_in'] = (x,y+dx) # zoom in button coordinates
+        buttons['zoom_out'] = (x+dx,y) # zoom out button coordinates
+        buttons['fullscreen'] = (x, y+h-dy) # fullscreen button coordinates
+        buttons['centre'] = (x+w-dx, y) # centre button coordinates
+        buttons['scalebar'] = proj.screenPos(0.15, 0.97) # scalebar coordinates
+        plusIcon = 'zoom_in'
+        minusIcon = 'zoom_out'
 
-    cr.restore()
+        # possible main button coordinates override
+        mode = self.get('mode', None)
+        if mode in self.userConfig:
+          if 'override_main_buttons' in self.userConfig[mode]:
+            # we dont know the orientation, so we use generic icons
+            plusIcon = 'plus'
+            minusIcon = 'minus'
+            item = self.userConfig[mode]['override_main_buttons']
 
-    (x1,y1) = buttons['scalebar']
-    self.drawScalebar(cr, proj,x1,y1,w)
+            if 'icon_size' in item:
+              size = float(item['icon_size'])
+              dx = size * min(w,h)
+              dy = dx
 
-    # master overlay hook
+
+
+            for key in buttons:
+              if key in item:
+                (px,py,ndx,ndy) = [float(i) for i in item[key]]
+                buttons[key] = (px*w+dx*ndx,py*h+dy*ndy)
+
+
+        # main buttons
+
+
+
+        menuIcon = self.get('mode', 'car')
+
+        (x1,y1) = buttons['zoom_out']
+        self.drawButton(cr, x1, y1, dx, dy, '', minusIcon, "mapView:zoomOut")
+        (x1,y1) = buttons['menu']
+        self.drawButton(cr, x1, y1, dx, dy, 'menu', menuIcon, "set:menu:main")
+        (x1,y1) = buttons['zoom_in']
+        self.drawButton(cr, x1, y1, dx, dy, '', plusIcon, "mapView:zoomIn")
+
+
+        # draw the maximize icon
+        if self.fullscreen:
+          icon = 'minimize'
+        else:
+          icon = 'maximize'
+
+        (x1,y1) = buttons['fullscreen']
+        self.drawButton(cr, x1, y1, dx, dy, "", icon, "ms:display:fullscreen:toggle")
+
+        (x1,y1) = buttons['centre']
+        self.drawButton(cr, x1, y1, dx, dy, "", 'blue_border', "toggle:centred")
+
+        cr.stroke()
+        cr.save()
+        (centreX,centreY) = (x1+dx/2.0,y1+dy/2.0)
+        cr.translate(centreX,centreY)
+        cr.set_line_width(6)
+        cr.set_source_rgba(0, 0, 1, 0.45)
+        cr.arc(0, 0, 15, 0, 2.0 * math.pi)
+        cr.stroke()
+        cr.fill()
+
+        if not self.get('centred', False): # draw the position indicator indicator :)
+          pos = self.get('pos', None)
+          if pos != None:
+            (lat1,lon1) = pos
+            (lat, lon) = proj.xy2ll(centreX, centreY)
+            angle = geo.bearing(lat1,lon1,lat,lon)
+            cr.rotate(math.radians(angle))
+
+            (pointX,pointY) = (0,y+dy/3.0)
+          else:
+            (pointX,pointY) = (0,0)
+        else:
+          (pointX,pointY) = (0,0)
+
+        cr.set_source_rgb(0.0, 0.0, 0.0)
+        cr.set_line_width(10)
+        cr.arc(pointX, pointY, 3, 0, 2.0 * math.pi)
+        cr.stroke()
+        cr.set_source_rgb(1.0, 0.0, 0.0)
+        cr.set_line_width(8)
+        cr.arc(pointX, pointY, 2, 0, 2.0 * math.pi)
+        cr.stroke()
+        cr.fill()
+
+        cr.restore()
+
+        (x1,y1) = buttons['scalebar']
+        self.drawScalebar(cr, proj,x1,y1,w)
+
+    # master overlay hook - should be visible even when the mapscreen buttons are hidden
     if self.notificationModule:
       self.notificationModule.drawMasterOverlay(cr)
 

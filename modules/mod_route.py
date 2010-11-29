@@ -504,13 +504,16 @@ class route(ranaModule):
         clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setEnd')
 
   def drawScreenOverlay(self, cr):
-    if self.route: # current route info button
-      self.drawCurrentRouteInfoButton(cr)
-    elif self.cancelButtonEnabled:
-      self.drawCancelButton(cr) # draw the background activity cancel button
+    menus = self.m.get('menu', None)
+    if menus:
+      if menus.buttonsHidingOn() == False: # check if the buttons should not be hidden
+        if self.route: # current route info button
+          self.drawCurrentRouteInfoButton(cr)
+        elif self.cancelButtonEnabled:
+          self.drawCancelButton(cr) # draw the background activity cancel button
 
-    if self.selectTwoPoints == True: # point selection menu
-      self.drawTwoPointsMenu(cr)
+        if self.selectTwoPoints == True: # point selection menu
+          self.drawTwoPointsMenu(cr)
 
   def drawMapOverlay(self, cr):
     """Draw a route"""
