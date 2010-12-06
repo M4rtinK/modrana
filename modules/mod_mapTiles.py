@@ -1,4 +1,3 @@
-import os.path
 #!/usr/bin/python
 #----------------------------------------------------------------------------
 # Display map tile images (+ position cursor)
@@ -18,8 +17,13 @@ import os.path
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from __future__ import with_statement # for python 2.5
 from base_module import ranaModule
 from threading import Thread
+import threading
+import Queue
+import os.path
+import traceback
 import cairo
 import os
 import sys
@@ -94,152 +98,140 @@ class mapTiles(ranaModule):
   """Display map images"""
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
-    self.images = {}
-    self.imagesQueue = [] #a chronological list of loaded images
+    self.images = [{},{}] # the first dict contains normal image data, the seccond contains special tiles
+    self.imagesLock = threading.Lock()
     self.threads = {}
-    self.maxImagesInMemmory = 100 # to avoid a memmory leak
+    self.threadlListCondition = threading.Condition(threading.Lock())
+    self.maxImagesInMemmory = 150 # to avoid a memmory leak
+    self.imagesTrimmingAmmount = 30 # how many tiles to remove once the maximum is reached
+    """so that trim does not run always run arter adding a tile"""
     self.tileSide = 256 # by default, the tiles are squares, side=256
     """ TODO: analyse memmory usage,
               set approrpiate value,
               platform dependendt value,
               user configurable
     """
-    self.specialTiles = {
-                         'tileDownloading' : 'icons/bitmap/tile_downloading.png',
-                         'tileDownloadFailed' : 'icons/bitmap/tile_download_failed.png',
-                         'tileNetworkError' : 'icons/bitmap/tile_network_error.png'
-                        }
-
-#    self.oldZ = None
-#    self.oldThreadCount = None
+    self.tileLoadRequestQueue = Queue.Queue()
+    self.downloadRequestPool = []
+    self.downloadRequestPoolLock = threading.Lock()
+    self.downloadRequestTimeout = 30 # in seconds
+    self.startTileDownloadManagementThread()
+    self.startTileLoadingThread()
+    specialTiles = [
+                    ('tileDownloading' , 'icons/bitmap/tile_downloading.png'),
+                    ('tileDownloadFailed' , 'icons/bitmap/tile_download_failed.png'),
+                    ('tileLoading' , 'icons/bitmap/tile_loading.png'),
+                    ('tileWaitingForDownloadSlot' , 'icons/bitmap/tile_waiting_for_download_slot.png'),
+                    ('tileNetworkError' , 'icons/bitmap/tile_network_error.png')
+                   ]
+    self.loadSpecialTiles(specialTiles) # load the special tiles to the special image cache
+    self.loadingTile = self.images[1]['tileLoading']
+    self.downloadingTile = self.images[1]['tileDownloading']
+    self.waitingTile = self.images[1]['tileWaitingForDownloadSlot']
+    self.lastThreadCleanupTimestamp=time.time()
+    self.lastThreadCleanupInterval=2 # clean finished threads every 2 seconds
     self.set('maplayers', maplayers) # export the maplyers definition for use by other modules
-#    setLoadimage(self.loadImage) # shortcut for the download thread
 
+  def startTileDownloadManagementThread(self):
+    """start the consumer thread for download requests"""
+    t = Thread(target=self.tileDownloadManager)
+    t.daemon = True # we need that the worker dies with the program
+    t.start()
+
+  def tileDownloadManager(self):
+    """this is a tile loading request consumer thread"""
+    while True:
+      with self.threadlListCondition:
+        try:
+          """
+          wait for notification that there might be download requests or free download slots
+          """
+          self.threadlListCondition.wait()
+          with self.downloadRequestPoolLock:
+            activeThreads = len(self.threads)
+            maxThreads = int(self.get("maxAutoDownloadThreads", 20))
+            if activeThreads < maxThreads: # can we start new threads ?
+              # ** there are free download slots **
+              availableSlots = maxThreads-activeThreads
+              #fill all available slots
+              for i in range(0, availableSlots):
+                if self.downloadRequestPool:
+                  request = self.downloadRequestPool.pop()
+                  (name,x,y,z,layer,layerPrefix,layerType, filename, folder, timestamp) = request
+                  # start a new thread
+                  self.threads[name] = self.tileDownloader(name,x,y,z,layer,layerPrefix,layerType, filename, folder, self)
+                  self.threads[name].start()
+                  # chenge the status tile to "Downloading..."
+                  with self.imagesLock:
+                    self.images[0][name] = self.downloadingTile
+            else:
+              # ** all download slots are full **
+
+              # remove old requests
+              currentTime = time.time()
+              cleanPool = []
+              def notOld(currentTime,request):
+                timestamp = request[9]
+                dt = (currentTime - timestamp)
+                return dt < self.downloadRequestTimeout
+
+              for request in self.downloadRequestPool:
+                if notOld(currentTime, request):
+                  cleanPool.append(request)
+                else:
+                  """this request timed out,
+                     remove its "Waiting..." tile from image cache,
+                     so that is can be retried"""
+                  name = request[0]
+                  self.removeImageFromMemmory(name)
+              self.downloadRequestPool = cleanPool
+        except Exception, e:
+          print "exception in tile download manager thread:\n%s" % e
+
+  def startTileLoadingThread(self):
+    """start the loading-request consumer thread"""
+    t = Thread(target=self.tileLoader)
+    t.daemon = True # we need that the worker dies with the program
+    t.start()
+
+  def tileLoader(self):
+    """this is a tile loading request consumer thread"""
+    while True:
+      request = self.tileLoadRequestQueue.get(block=True) # consume from this queue
+      (key,args) = request
+      if key == 'loadRequest':
+        (name, x, y, z, layer) = args
+        self.loadImage(name, x, y, z, layer)
 
   def firstTime(self):
     # the config folder should set the tile folder path by now
     self.tileFolder = self.get('tileFolder', 'cache/images')
 
-
-  def drawMap(self, cr):
-    """Draw map tile images"""
-    try: # this should get rid of a fair share of the infamous "black screens"
-      proj = self.m.get('projection', None)
-      if(proj == None):
-        return
-      if(not proj.isValid()):
-        return
-
-      (sx,sy,sw,sh) = self.get('viewport') # get screen parameters
-
-      scale = int(self.get('mapScale', 1)) # get the current scale
-      if scale == 1: # this will be most of the time, so it is first
-        z = int(self.get('z', 15))
-        (px1,px2,py1,py2) = (proj.px1,proj.px2,proj.py1,proj.py2) #use normal projection bbox
-        cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
-      else:
-        if scale == 2: # tiles are scaled to 512*512 and represent tiles from zl-1
-          z = int(self.get('z', 15)) - 1
-        elif scale == 4: # tiles are scaled to 1024*1024 and represent tiles from zl-2
-          z = int(self.get('z', 15)) - 2
-        else:
-          z = int(self.get('z', 15))
-
-        # we use tiles from an upper zl and strech them over lower zl
-        (px1,px2,py1,py2) = proj.findEdgesForZl(z, scale)
-        cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
-
-      if self.get("rotateMap", False) and (self.get("centred", False)):
-        # due to the rotation, the map must be larger
-        # we take the longest side and render tiles in a square
-        longestSide = max(sw,sh)
-        add = (longestSide/2)/(self.tileSide)
-        # enlarge the bounding box
-        (px1,px2,py1,py2) = (px1-add,px2+add,py1-add,py2+add)
-
-      # get the range of tiles we need
-      wTiles =  len(range(int(floor(px1)), int(ceil(px2)))) # how many tiles wide
-      hTiles =  len(range(int(floor(py1)), int(ceil(py2)))) # how many tiles high
-
-      # upper left tile
-      cx = int(px1)
-      cy = int(py1)
-      # we need the "clean" cooridnates for the folowing conversion
-      (px1,px2,py1,py2) = cleanProjectionCoords
-      (pdx, pdy) = (px2 - px1,py2 - py1)
-      # upper left tile coodinates to screen coordinates
-      cx1,cy1 = (sw*(cx-px1)/pdx,sh*(cy-py1)/pdy) #this is basically the pxpy2xy function from mod_projection inlined
-      cx1,cy1 = int(cx1),int(cy1)
-
-      layer = self.get('layer','osma')
-      # Cover the whole map view with tiles
-
-      if self.get('overlay', False): # is the overlay on ?
-        ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
-        (alpha1, alpha2) = (float(ratio[0]),float(ratio[1])) # convert it to floats
-
-        layer2 = self.get('layer2', 'mapnik') # get the background layer
-
-        # draw the composited layer
-        for ix in range(0, wTiles):
-          for iy in range(0, hTiles):
-
-            # get tile cooridnates by incrementing the upper left tile cooridnates
-            x = cx+ix
-            y = cy+iy
-
-            # get screen coordinates by incrementing upper left tile screen coordinates
-            x1 = cx1 + 256*ix*scale
-            y1 = cy1 + 256*iy*scale
-
-            # Try to load and display images
-            nameBack = self.loadImage(x,y,z,layer2)
-            nameOver = self.loadImage(x,y,z,layer)
-            if(nameBack and nameOver != None):
-              self.drawCompositeImage(cr,nameOver,nameBack,x1,y1,scale,alpha1,alpha2)
-        return
-
-
-      # draw the normal layer
-      for ix in range(0, wTiles):
-        for iy in range(0, hTiles):
-
-          # get tile cooridnates by incrementing the upper left tile cooridnates
-          x = cx+ix
-          y = cy+iy
-
-          # get screen coordinates by incrementing upper left tile screen coordinates
-          x1 = cx1 + 256*ix*scale
-          y1 = cy1 + 256*iy*scale
-
-          # Try to load and display images
-          name = self.loadImage(x,y,z,layer)
-          if(name != None):
-            self.drawImage(cr,name,x1,y1,scale)
-    except Exception, e:
-      print "mapTiles: expception while drawing the map layer:\n%s" % s
-
-
-
-
-
-
+  def loadSpecialTiles(self, specialTiles):
+    """load special tiles from files to the special tiles cache"""
+    for tile in specialTiles:
+      (name,path) = tile
+      self.loadImageFromFile(path, name, type="special", dictIndex=1)
+      
   def update(self):
     """monitor if the automatic tile downalods finished and then remove them from the dictionary
     (also automagicaly refreshes the screen once new tiles are avalabale, even when not centered)"""
 
-#    print "nr images: %d" % len(self.images)
-#    print "nr queue: %d" % len(self.imagesQueue)
+    currentTime = time.time()
+    dt = currentTime - self.lastThreadCleanupTimestamp
+    if dt > self.lastThreadCleanupInterval:
+      self.lastThreadCleanupTimestamp = currentTime
+#      with self.threadlListCondition:
+#        if len(self.threads) > 0:
+#  #        time.sleep(0.001) # without this  short (1ms ?) sleep, the threads wont get processing time to report results
+#          for index in filter(lambda x: self.threads[x].finished == 1, self.threads):
+#            self.set('needRedraw', True)
+#            if index in self.threads.keys():
+#              del self.threads[index]
 
-
-    if len(self.threads) == 0:
-      return
-
-    time.sleep(0.001) # without this  short (1ms ?) sleep, the threads wont get processing time to report results
-    for index in filter(lambda x: self.threads[x].finished == 1, self.threads):
-      self.set('needRedraw', True)
-      del self.threads[index]
-    return
+      if self.get('reportTileCachStatus', False): # TODO: set to False by default
+        print "** tile cache status report **"
+        print "threads: %d, images: %d, special tiles: %d, downloadRequestPool:%d" % (len(self.threads), len(self.images[0]),len(self.images[1]),len(self.downloadRequestPool))
 
 
     """seems that some added error handling in the download thread class can replace this,
@@ -265,69 +257,184 @@ class mapTiles(ranaModule):
 #        self.oldThreadCount = len(self.threads)
 #    self.oldThreadCount = len(self.threads)
 
-  def storeInMemmoryAndEnqueue(self, surface, name):
-    self.images[name] = surface
-    if name not in self.specialTiles:
-      self.imagesQueue.append(name)
-    # check cache size
-    # if there are too many images, delete them
-    if len(self.images) > self.maxImagesInMemmory:
-      self.trimCache()
+  def drawMap(self, cr):
+    """Draw map tile images"""
+    try: # this should get rid of a fair share of the infamous "black screens"
+      proj = self.m.get('projection', None)
+      if proj and proj.isValid():
+        loadingTile = self.loadingTile
+        (sx,sy,sw,sh) = self.get('viewport') # get screen parameters
+        scale = int(self.get('mapScale', 1)) # get the current scale
+
+        if scale == 1: # this will be most of the time, so it is first
+          z = int(self.get('z', 15))
+          (px1,px2,py1,py2) = (proj.px1,proj.px2,proj.py1,proj.py2) #use normal projection bbox
+          cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
+        else:
+          if scale == 2: # tiles are scaled to 512*512 and represent tiles from zl-1
+            z = int(self.get('z', 15)) - 1
+          elif scale == 4: # tiles are scaled to 1024*1024 and represent tiles from zl-2
+            z = int(self.get('z', 15)) - 2
+          else:
+            z = int(self.get('z', 15))
+
+          # we use tiles from an upper zl and strech them over lower zl
+          (px1,px2,py1,py2) = proj.findEdgesForZl(z, scale)
+          cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
+
+        if self.get("rotateMap", False) and (self.get("centred", False)):
+          # due to the rotation, the map must be larger
+          # we take the longest side and render tiles in a square
+          longestSide = max(sw,sh)
+          add = (longestSide/2)/(self.tileSide)
+          # enlarge the bounding box
+          (px1,px2,py1,py2) = (px1-add,px2+add,py1-add,py2+add)
+
+        # get the range of tiles we need
+        wTiles =  len(range(int(floor(px1)), int(ceil(px2)))) # how many tiles wide
+        hTiles =  len(range(int(floor(py1)), int(ceil(py2)))) # how many tiles high
+
+        # upper left tile
+        cx = int(px1)
+        cy = int(py1)
+        # we need the "clean" cooridnates for the folowing conversion
+        (px1,px2,py1,py2) = cleanProjectionCoords
+        (pdx, pdy) = (px2 - px1,py2 - py1)
+        # upper left tile coodinates to screen coordinates
+        cx1,cy1 = (sw*(cx-px1)/pdx,sh*(cy-py1)/pdy) #this is basically the pxpy2xy function from mod_projection inlined
+        cx1,cy1 = int(cx1),int(cy1)
+
+        layer = self.get('layer','osma')
+        # Cover the whole map view with tiles
+
+        if self.get('overlay', False): # is the overlay on ?
+          ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
+          (alphaOver, alphaBack) = (float(ratio[0]),float(ratio[1])) # convert it to floats
+
+          # get the background layer
+          layer2 = self.get('layer2', 'mapnik')
+
+          # draw the composited layer
+          for ix in range(0, wTiles):
+            for iy in range(0, hTiles):
+
+              # get tile cooridnates by incrementing the upper left tile cooridnates
+              x = cx+ix
+              y = cy+iy
+
+              # get screen coordinates by incrementing upper left tile screen coordinates
+              x1 = cx1 + 256*ix*scale
+              y1 = cy1 + 256*iy*scale
+
+              # Try to load and display images
+              nameBack = "%s_%d_%d_%d" % (layer2,z,x,y)
+              nameOver = "%s_%d_%d_%d" % (layer,z,x,y)
+              backImage = self.images[0].get(nameBack)
+              overImage = self.images[0].get(nameOver)
+              # check if the background tile is already cached
+              if backImage == None: # background image not yet loaded
+                if self.imagesLock.acquire(False):
+                  self.images[0][nameBack] = loadingTile # set the loading tile as placeholder
+                  self.tileLoadRequestQueue.put(('loadRequest',(nameBack, x, y, z, layer2)),block=False)
+                  self.imagesLock.release()
+                backImage = loadingTile # draw the loading tile this time
+              # check if the overlay tile is already cached
+              if overImage == None: # overlay image not yet loaded
+                if self.imagesLock.acquire(False):
+                  self.images[0][nameOver] = loadingTile # set the loading tile as placeholder
+                  self.tileLoadRequestQueue.put(('loadRequest',(nameOver, x, y, z, layer)),block=False)
+                  self.imagesLock.release()
+                overImage = loadingTile # draw the loading tile this time
+
+              """we do this inline to get rid of function calling overhead"""
+              # Move the cairo projection onto the area where we want to draw the image
+              cr.save()
+              cr.translate(x1,y1)
+              cr.scale(scale,scale) # scale te tile according to current scale settings
+
+              # Display the image
+              cr.set_source_surface(backImage[0],0,0) # draw the background
+              cr.paint_with_alpha(alphaBack)
+              cr.set_source_surface(overImage[0],0,0) # draw the overlay
+              cr.paint_with_alpha(alphaOver)
+
+              # Return the cairo projection to what it was
+              cr.restore()
+
+        else: # overlay is disabled
+          # draw the normal layer
+          for ix in range(0, wTiles):
+            for iy in range(0, hTiles):
+
+              # get tile cooridnates by incrementing the upper left tile cooridnates
+              x = cx+ix
+              y = cy+iy
+
+              # get screen coordinates by incrementing upper left tile screen coordinates
+              x1 = cx1 + 256*ix*scale
+              y1 = cy1 + 256*iy*scale
+
+              # Try to load and display images
+              """we do this inline to get rid of function calling overhead"""
+              name = "%s_%d_%d_%d" % (layer,z,x,y)
+              tileImage = self.images[0].get(name)
+              if tileImage:
+                cr.save() # save the cairo projection context
+                cr.translate(x1,y1)
+                cr.scale(scale,scale)
+                cr.set_source_surface(tileImage[0],0,0)
+                cr.paint()
+                cr.restore() # Return the cairo projection to what it was
+              else:
+                """we need this lock to store the "work in progresss" temporary tile,
+                   which assures that there is only a single loading request queued for a tile
+
+                   the lock is used quite often (trimming te image cache, storing new images),
+                   but we can't block in this thread as it would lag the user interface
+
+                   therefore if we need this lock, but it is unavailable,
+                   we just skip loading the "in progress tile" and quing the loading request
+                   and directly show a "loading..." tile instead
+                   """
+                if self.imagesLock.acquire(False):
+                  self.images[0][name] = loadingTile
+                  self.imagesLock.release()
+                  self.tileLoadRequestQueue.put(('loadRequest',(name, x, y, z, layer)),block=False)
+                cr.save() # save the cairo projection context
+                cr.translate(x1,y1)
+                cr.scale(scale,scale)
+                cr.set_source_surface(loadingTile[0],0,0)
+                cr.paint()
+                cr.restore() # Return the cairo projection to what it was
+
+    except Exception, e:
+      print "mapTiles: expception while drawing the map layer:\n%s" % e
 
 
-
-  def trimCache(self):
-    """to avoid a memmory leak, the maximum size of the image cache is fixed
-       when we reech the maximum size, we start removing images,
-       starting from the oldes ones
-       we remove one image at a time
-       """
-#    print "trimming"
-    first = self.imagesQueue[0]
-    del self.images[first]
-    del self.imagesQueue[0]
-#    print "images queue length:%d" % len(self.imagesQueue)
-#    print "memmory cache length:%d" % len(self.imagesQueue)
-
-  def removeNonexistingFromQueue(self):
-    # remove nonexistant images from queue
-    self.imagesQueue = filter(lambda x: x in self.images.keys(), self.imagesQueue)
-
-  def removeImageFromMemmory(self, name):
+  def removeImageFromMemmory(self, name, dictIndex=0):
     # remove an image from memmory
-    if name in self.images:
-      del self.images[name]
-    # make sure its removed from the queue
-    self.removeNonexistingFromQueue()
+    with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
+      if name in self.images:
+        del self.images[dictIndex][name]
   
-  def drawImage(self,cr, name, x, y, scale):
+  def drawImage(self,cr, tileImage, x, y, scale):
     """Draw a tile image"""
-    
-    # If it's not in memory, then stop here
-    if not name in self.images.keys():
-      print "Not loaded"
-      return
-    
-    # Move the cairo projection onto the area where we want to draw the image
-    cr.save()
-    cr.translate(x,y)
+    # move to the drawing coordinates
+    cr.translate(x1,y1)
     cr.scale(scale,scale) # scale te tile accorind to current scale settings
     
     # Display the image
-    cr.set_source_surface(self.images[name],0,0)
+    cr.set_source_surface(tileImage,0,0)
+    # paint the result
     cr.paint()
 
-
-    # Return the cairo projection to what it was
-    cr.restore()
-
-  def drawCompositeImage(self,cr, nameOver, nameBack, x,y, scale, alpha1=1, alpha2=1):
+  def drawCompositeImage(self,cr, nameOver, nameBack, x,y, scale, alpha1=1, alpha2=1, dictIndex1=0,dictIndex2=0):
     """Draw a composited tile image"""
 
-    # If it's not in memory, then stop here
-    if not nameOver and nameBack in self.images.keys():
-      print "Not loaded"
-      return
+#    # If it's not in memory, then stop here
+#    if not nameOver and nameBack in self.images.keys():
+#      print "Not loaded"
+#      return
 
     # Move the cairo projection onto the area where we want to draw the image
     cr.save()
@@ -335,40 +442,33 @@ class mapTiles(ranaModule):
     cr.scale(scale,scale) # scale te tile accorind to current scale settings
 
     # Display the image
-    cr.set_source_surface(self.images[nameBack],0,0) # draw the background
+    cr.set_source_surface(self.images[dictIndex1][nameBack][0],0,0) # draw the background
     cr.paint_with_alpha(alpha2)
-    cr.set_source_surface(self.images[nameOver],0,0) # draw the overlay
+    cr.set_source_surface(self.images[dictIndex2][nameOver][0],0,0) # draw the overlay
     cr.paint_with_alpha(alpha1)
-#    cr.paint()
 
     # Return the cairo projection to what it was
     cr.restore()
     
-  def loadImage(self,x,y,z, layer, ):
+  def loadImage(self,name , x, y, z, layer):
     """Check that an image is loaded, and try to load it if not"""
     
-    # First: is the image already in memory?
-    """
-    TODO: test, if a smpler name is more efficinet
-    at least we dont need to look to the layer properties dictionary like this
-    """
-#    name = self.imageName(x,y,z,layer) # make this inline
-    name = "%s_%d_%d_%d" % (layer,z,x,y)
-    if name in self.images.keys():
-      return(name)
+    """at this point, there is only a placeholder image in the memmory cache"""
 
-    # Second, is it already in the process of being downloaded?
-    if name in self.threads.keys():
-      if(not self.threads[name].finished):
-        dlTileName = 'tileDownloading'
-        dlTilePath = self.specialTiles[dlTileName]
-        self.loadImageFromFile(dlTilePath, dlTileName)
-        return(dlTileName)
+    # first, is it already in the process of being downloaded?
+    with self.threadlListCondition:
+      if name in self.threads.keys():
+        if(not self.threads[name].finished):
+          with self.imagesLock: # substitute the "loading" tile with a "downloading" tile
+            downloadingTile = self.downloadingTile
+            downloadingTile[1]['addedTimestamp'] = time.time()
+            self.images[0][name] = downloadingTile
+          return('OK')
     
-    # Third, is it in the disk cache?  (including ones recently-downloaded)
+    # seccond, is it in the disk cache?  (including ones recently-downloaded)
     layerInfo = maplayers.get(layer, None)
-    if(layerInfo == None):
-      return
+    if(layerInfo == None): # is the layer info valid
+      return('NOK')
 
     layerType = layerInfo.get('type','png')
     layerPrefix = layerInfo.get('folderPrefix','OSM')
@@ -386,29 +486,103 @@ class mapTiles(ranaModule):
             pl.write(buffer)
             pl.close()
             pixbuf = pl.get_pixbuf()
-            self.storeInMemmoryAndEnqueue(self.pixbufToCairoImageSurface(pixbuf), name)
-            return(name)
+            self.storeInMemmory(self.pixbufToCairoImageSurface(pixbuf), name)
+            return('OK')
         except Exception, e:
-          print "loding tile from sqlite failed"
+          print "loading tile from sqlite failed"
           print "exception: ", e
     else: #use the default method -> load from files
       if (os.path.exists(filename)):
         try:
           pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
-          self.storeInMemmoryAndEnqueue(self.pixbufToCairoImageSurface(pixbuf), name)
-        except:
-          print "the tile image is corrupted nad/or there are no tiles for this zoomlevel"
-        return(name)
+          self.storeInMemmory(self.pixbufToCairoImageSurface(pixbuf), name)
+        except Exception, e:
+          print "the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e
+        return('OK')
 
     # Image not found anywhere - resort to downloading it
 
     # Are we allowed to download it ? (network=='full')
     if(self.get('network','full')=='full'):
       # use threads
-      folder = self.tileFolder + self.imageFolder(x, z, layerPrefix) # target folder
-      self.threads[name] = self.tileLoader(x,y,z,layer,layerPrefix,layerType, filename, folder, self)
-      self.threads[name].start()
-      return(None)
+      """the thread list condition is used to signalize to the download manager,
+      that here is a new download request"""
+      with self.threadlListCondition:
+        folder = self.tileFolder + self.imageFolder(x, z, layerPrefix) # target folder
+        timestamp = time.time()
+        request = (name,x,y,z,layer,layerPrefix,layerType, filename, folder, timestamp)
+
+        with self.imagesLock: # display the "Waiting for download slot..." status tile
+          waitingTile = self.waitingTile
+          waitingTile[1]['addedTimestamp'] = time.time()
+          self.images[0][name] = waitingTile
+          
+        with self.downloadRequestPoolLock: # add a download request
+          self.downloadRequestPool.append(request)
+
+        self.threadlListCondition.notifyAll() # wake up the download manager
+
+  def loadImageFromFile(self,path,name, type="normal", expireTimestamp=None, dictIndex=0):
+    pixbuf = gtk.gdk.pixbuf_new_from_file(path)
+    #x = pixbuf.get_width()
+    #y = pixbuf.get_height()
+    # Google sat images are 256 by 256 px, we dont need to check the size
+    x = 256
+    y = 256
+    ''' create a new cairo surface to place the image on '''
+    surface = cairo.ImageSurface(0,x,y)
+    ''' create a context to the new surface '''
+    ct = cairo.Context(surface)
+    ''' create a GDK formatted Cairo context to the new Cairo native context '''
+    ct2 = gtk.gdk.CairoContext(ct)
+    ''' draw from the pixbuf to the new surface '''
+    ct2.set_source_pixbuf(pixbuf,0,0)
+    ct2.paint()
+    ''' surface now contains the image in a Cairo surface '''
+    self.storeInMemmory(surface, name, type, expireTimestamp, dictIndex)
+
+  def storeInMemmory(self, surface, name, type="normal", expireTimestamp=None, dictIndex=0):
+    """store a given image surface in the memmory image cache
+       dictIndex = 0 -> nromal map tiles + tile specific error tiles
+       dictIndex = 1 -> speacial tiles that exist in only once in memmory and are drawn directly
+       (like "Downloading...",Waiting for download slot..:", etc.) """
+    metadata = {}
+    metadata['addedTimestamp'] = time.time()
+    metadata['type'] = type
+    if expireTimestamp:
+      metadata['expireTimestamp'] = expireTimestamp
+    with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
+      self.images[dictIndex][name] = (surface, metadata) # store the image in memmory
+
+      """ check cache size,
+      if there are too many images, delete them """
+      if len(self.images[0]) > self.maxImagesInMemmory:
+        self.trimCache()
+
+  def trimCache(self):
+    """to avoid a memmory leak, the maximum size of the image cache is fixed
+       when we reech the maximum size, we start removing images,
+       starting from the oldes ones
+       we an amount of images specified in imagesTrimmingAmmount,
+       so that trim does not run every time an image is added to a full cache
+       -> only the normal image cache needs trimming (images[0]),
+       as the special image cache (images[1]) is just created once and not updated dynamically
+       NOTE: the storeInMemmory method already locked images, so we don't have to
+       """
+    trimmingAmmount = self.imagesTrimmingAmmount
+    imagesLength = len(self.images[0])
+    if trimmingAmmount >= imagesLength:
+      """
+      this meaens that the trimming amount was set higher,
+      than current length of the cahce
+      the rusult is basically fluhing the cache every time it fills up
+      well, I don't have an idea why would someone want to do that
+      """
+      self.images[0] = {}
+    else:
+      oldestKeys = sorted(self.images[0], key=lambda image: self.images[0][image][1]['addedTimestamp'])[0:trimmingAmmount]
+      for key in oldestKeys:
+        del self.images[0][key]
 
   def pixbufToCairoImageSurface(self, pixbuf):
       # this solution has been found on:
@@ -430,26 +604,6 @@ class mapTiles(ranaModule):
       ct2.set_source_pixbuf(pixbuf,0,0)
       ct2.paint()
       return surface
-
-  def loadImageFromFile(self,path,name):
-    pixbuf = gtk.gdk.pixbuf_new_from_file(path)
-    #x = pixbuf.get_width()
-    #y = pixbuf.get_height()
-    # Google sat images are 256 by 256 px, we dont need to check the size
-    x = 256
-    y = 256
-    ''' create a new cairo surface to place the image on '''
-    surface = cairo.ImageSurface(0,x,y)
-    ''' create a context to the new surface '''
-    ct = cairo.Context(surface)
-    ''' create a GDK formatted Cairo context to the new Cairo native context '''
-    ct2 = gtk.gdk.CairoContext(ct)
-    ''' draw from the pixbuf to the new surface '''
-    ct2.set_source_pixbuf(pixbuf,0,0)
-    ct2.paint()
-    ''' surface now contains the image in a Cairo surface '''
-    self.storeInMemmoryAndEnqueue(surface, name)
-
 
   def imageName(self,x,y,z,layer):
     """Get a unique name for a tile image 
@@ -476,9 +630,11 @@ class mapTiles(ranaModule):
     """Wrapper, that makes it possible to use this function from other modules."""
     return getTileUrl(x, y, z, layer)
 
-  class tileLoader(Thread):
+  class tileDownloader(Thread):
     """Downloads an image (in a thread)"""
-    def __init__(self, x,y,z,layer,layerName,layerType,filename, folder, callback):
+    def __init__(self,name, x,y,z,layer,layerName,layerType,filename, folder, callback):
+      Thread.__init__(self)
+      self.name = name
       self.x = x
       self.y = y
       self.z = z
@@ -489,11 +645,11 @@ class mapTiles(ranaModule):
       self.finished = 0
       self.filename = filename
       self.callback = callback
-      Thread.__init__(self)
 
     def run(self):
       try:
         self.downloadTile( \
+          self.name,
           self.x,
           self.y,
           self.z,
@@ -504,10 +660,9 @@ class mapTiles(ranaModule):
 
       # something is wrong with the server or url
       except urllib2.HTTPError, e:
-        callback = self.callback
-        name = "%s_%d_%d_%d" % (self.layer,self.z,self.x,self.y)
-        errorTilePath = callback.specialTiles['tileDownloadFailed']
-        callback.loadImageFromFile(errorTilePath,name)
+        tileDownloadFailedSurface = self.callback.images[1]['tileDownloadFailed'][0]
+        expireTimestamp = time.time() + 10
+        self.callback.storeInMemmory(tileDownloadFailedSurface,self.name,'semiPermanentError',expireTimestamp)
         """
         like this, when tile download fails due to a http error,
         the error tile is loaded instead
@@ -518,24 +673,31 @@ class mapTiles(ranaModule):
            after it is flushed with old tiles from the memmory
         """
       except urllib2.URLError, e:
-        callback = self.callback
-        name = "%s_%d_%d_%d" % (self.layer,self.z,self.x,self.y)
-        errorTilePath = callback.specialTiles['tileNetworkError']
-        callback.loadImageFromFile(errorTilePath,name)
-        time.sleep(10) # dont DOS the system, when we temorarily loose internet connection or other error occurs
-        # remove the image from memmory so it can be retried
-        callback.removeImageFromMemmory(name)
-        self.finished = 1 # finished thread can be removed from the set and retried
-
+        tileNetworkErrorSurface = self.images[1]['tileNetworkError'][0]
+        expireTimestamp = time.time() + 10
+        self.callback.storeInMemmory(tileNetworkErrorSurface,self.name, 'error', expireTimestamp) # retry after 10 seconds
+        """ as not to DOS the system when we temorarily loose internet connection or other such error occurs,
+             we load a temporary error tile with expiration timestamp instead of the tile image
+        """
 
       # something other is wrong (most probably a corrupted tile)
       except Exception, e:
         self.printErrorMessage(e)
+        # remove the status tile
+        self.callback.removeImageFromMemmory(self.name)
 
-
-
-        time.sleep(10) # dont DOS the system, when we temorarily loose internet connection or other error occurs
+      finally: # make really sure we dont get any zombie threads
         self.finished = 1 # finished thread can be removed from the set and retried
+        self.removeSelf()
+
+
+    def removeSelf(self):
+        with self.callback.threadlListCondition:
+          # try to remove its own instance from the thread list, so taht the instance could be garbage collected
+          if self.name in self.callback.threads.keys():
+            del self.callback.threads[self.name]
+            """notify the download manager that a download slot is now free"""
+            self.callback.threadlListCondition.notifyAll()
 
     def printErrorMessage(self, e):
         url = getTileUrl(self.x,self.y,self.z,self.layer)
@@ -548,9 +710,11 @@ class mapTiles(ranaModule):
                                                                             self.layer,
                                                                             self.filename,
                                                                             url)
-        print "** this exception occured: %s" % e
+        print "** this exception occured: %s\n" % e
+        print "** traceback:\n"
+        traceback.print_exc()
 
-    def downloadTile(self,x,y,z,layer,filename, folder):
+    def downloadTile(self,name,x,y,z,layer,filename, folder):
       """Downloads an image"""
 #      layerDetails = maplayers.get(layer, None)
     #  if(layerDetails == None):
@@ -566,7 +730,6 @@ class mapTiles(ranaModule):
 #      request = urllib.urlopen(url)
       content = request.read()
       request.close()
-      name = "%s_%d_%d_%d" % (layer,z,x,y)
       pl = gtk.gdk.PixbufLoader()
 
       pl.write(content)
@@ -592,17 +755,13 @@ class mapTiles(ranaModule):
       ct2.set_source_pixbuf(pl.get_pixbuf(),0,0)
       ct2.paint()
       ''' surface now contains the image in a Cairo surface '''
-      self.callback.storeInMemmoryAndEnqueue(surface, name)
+      self.callback.storeInMemmory(surface, name)
 
       # like this, currupted tiles should not get past the pixbuf loader and be stored
       m = self.callback.m.get('storeTiles', None)
       if m:
         m.automaticStoreTile(content, self.layerName, self.z, self.x, self.y, self.layerType, filename, folder, fromThread = True)
 
-
-
-
-      
 def getTileUrl(x,y,z,layer): #TODO: share this with mapData
     """Return url for given tile coorindates and layer"""
     layerDetails = maplayers.get(layer, None)
@@ -648,5 +807,3 @@ def QuadTree(tx, ty, zoom ):
 			quadKey += str(digit)
 
 		return quadKey
-
-

@@ -56,6 +56,7 @@ class options(ranaModule):
     # * the debug submenu
     self.addBoolOption("Print redraw time to terminal", "showRedrawTime", "debug", False)
     self.addBoolOption("Log modRana stdout to file", "loggingStatus", "debug", False, "log:checkLoggingStatus")
+    self.addBoolOption("Print tile cache status to terminal", "reportTileCachStatus", "debug", False)
     self.addBoolOption("Debug circles", "debugCircles", "debug", False)
     self.addBoolOption("Debug squares", "debugSquares", "debug", False)
 
@@ -125,6 +126,16 @@ class options(ranaModule):
        ("full", "Unlimited use of network")],
        "network",
        "full")
+       
+    self.addOption("Max nr. of threads for tile auto-download","maxAutoDownloadThreads",
+      [(5, "5"),
+       (10, "10"),
+       (20, "20 (default)"),
+       (30, "30"),
+       (40, "40"),
+       (50, "50")],
+       "network",
+       20)
 
     # * GPS *
     self.addBoolOption("GPS", "GPSEnabled", "GPS", True, "gpsd:checkGPSEnabled")

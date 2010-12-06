@@ -34,9 +34,9 @@
      id="base"
      showgrid="false"
      inkscape:grid-points="false"
-     inkscape:zoom="2.8284271"
-     inkscape:cx="644.90653"
-     inkscape:cy="-97.823635"
+     inkscape:zoom="0.99999999"
+     inkscape:cx="1545.3037"
+     inkscape:cy="-1163.6206"
      inkscape:window-x="0"
      inkscape:window-y="24"
      inkscape:current-layer="svg2"
@@ -15755,4 +15755,57 @@
          inkscape:label="cercles" />
     </g>
   </g>
+  <rect
+     style="fill:#0000ff;fill-opacity:0.15277776000000001;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     id="rect5050-4-4"
+     width="262"
+     height="262"
+     x="1368"
+     y="1871"
+     rx="22"
+     ry="0"
+     inkscape:export-filename="\\192.168.1.127\pub\icons\bitmap\tile_waiting_for_download_slot.png"
+     inkscape:export-xdpi="87.896996"
+     inkscape:export-ydpi="87.896996" />
+  <text
+     xml:space="preserve"
+     style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#0000ff;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+     x="1399.8594"
+     y="1996.9561"
+     id="text2831-1-0-3"
+     sodipodi:linespacing="125%"><tspan
+       sodipodi:role="line"
+       x="1399.8594"
+       y="1996.9561"
+       style="font-style:italic;fill:#0000ff"
+       id="tspan6189">Waiting for </tspan><tspan
+       sodipodi:role="line"
+       x="1399.8594"
+       y="2021.9561"
+       style="font-style:italic;fill:#0000ff"
+       id="tspan6195">     download slot...       </tspan></text>
+  <rect
+     style="fill:#ffff00;fill-opacity:0.15277776000000001;stroke:#000000;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     id="rect5050-4-47"
+     width="262"
+     height="262"
+     x="1654"
+     y="1594"
+     rx="22"
+     ry="0"
+     inkscape:export-filename="/home/melf-san/data/coding/gps/rana3/icons/bitmap/tile_loading.png"
+     inkscape:export-xdpi="87.896996"
+     inkscape:export-ydpi="87.896996" />
+  <text
+     xml:space="preserve"
+     style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffff00;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+     x="1736.8848"
+     y="1730.5176"
+     id="text2831-1-0-7"
+     sodipodi:linespacing="125%"><tspan
+       sodipodi:role="line"
+       x="1736.8848"
+       y="1730.5176"
+       id="tspan5913-4-5"
+       style="font-style:italic;fill:#ffff00">Loading...</tspan></text>
 </svg>
