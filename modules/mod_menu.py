@@ -62,7 +62,7 @@ class menus(ranaModule):
       else:
         self.lastActivity=timestamp
         """reset lastActivity if not in map screen,
-        so that the hiding counter runns from the start when we come back to the map screen
+        so that the hiding counter runs from the start when we come back to the map screen
         """
 
   def buttonsHidingOn(self):
