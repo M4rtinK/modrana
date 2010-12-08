@@ -51,10 +51,19 @@ class menus(ranaModule):
     timestamp = time.time()
     if (timestamp - self.lastHideCheckTimestamp) > 1:
       self.lastHideCheckTimestamp = timestamp
-      hideDelay = self.get('hideDelay', 'never')
-      if hideDelay != 'never': # is button hiding enabled ?
-        if (timestamp - self.lastActivity) > int(hideDelay): # have we reached the timeout ?
-          self.hideMapSreenButtons = True
+      if self.get('menu', None) == None:
+        """only check in the map view,
+        or else the user might return from menu to a screen wit no buttons,
+        which might be inconvenient"""
+        hideDelay = self.get('hideDelay', 'never')
+        if hideDelay != 'never': # is button hiding enabled ?
+          if (timestamp - self.lastActivity) > int(hideDelay): # have we reached the timeout ?
+            self.hideMapSreenButtons = True
+      else:
+        self.lastActivity=timestamp
+        """reset lastActivity if not in map screen,
+        so that the hiding counter runns from the start when we come back to the map screen
+        """
 
   def buttonsHidingOn(self):
     """report whether button hiding is enabled"""
