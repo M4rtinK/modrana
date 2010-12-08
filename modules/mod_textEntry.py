@@ -79,6 +79,9 @@ class textEntry(ranaModule):
       #create the text input field
       entry = gtk.Entry()
       entry.set_text(initialText)
+      # make sure the text is visible (TODO: respect current theme, but make sure the text will be visible ?)
+      entry.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse('black'))
+      entry.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
       #allow the user to press enter to do ok
       entry.connect("activate", self.respondToTextEntry, dialog, gtk.RESPONSE_OK, instance,key)
       dialog.connect("response", self.respondToDialog,entry, instance,key)
