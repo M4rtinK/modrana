@@ -678,6 +678,7 @@ class mapTiles(ranaModule):
         self.callback.storeInMemmory(tileNetworkErrorSurface,self.name, 'error', expireTimestamp) # retry after 10 seconds
         """ as not to DOS the system when we temorarily loose internet connection or other such error occurs,
              we load a temporary error tile with expiration timestamp instead of the tile image
+             TODO: actually remove tiles according to expiration timestamp :)
         """
 
       # something other is wrong (most probably a corrupted tile)
