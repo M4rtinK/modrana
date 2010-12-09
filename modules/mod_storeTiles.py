@@ -1,3 +1,4 @@
+import os.path
 #!/usr/bin/python
 #----------------------------------------------------------------------------
 # Store tiles in a single file.
@@ -25,6 +26,7 @@ import os
 import time
 import glob
 import Queue
+import gtk
 from threading import Thread
 
 def getModule(m,d):
@@ -247,19 +249,40 @@ class storeTiles(ranaModule):
 
   def getTile(self, folderPrefix, z, x, y, extension):
     """get a tile"""
-    accessType = "get"
-    dbFolderPath = self.initializeDb(folderPrefix, accessType)
-    if dbFolderPath!=None:
-      lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
-      result = self.getTileFromDb(lookupConn, dbFolderPath, z, x, y, extension)
-      if result: # is the result valid ?
-        resultContent = result.fetchone() # get the result content
-      else:
-        resultContent = None # the result is invalid
-      if resultContent:
-        return resultContent[0] # return the tile image data buffer
-      else:
-        return None # the tile is not stored
+    storageType = self.get('tileStorageType', 'files')
+    if storageType == 'sqlite':
+      accessType = "get"
+      dbFolderPath = self.initializeDb(folderPrefix, accessType)
+      if dbFolderPath!=None:
+        lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
+        result = self.getTileFromDb(lookupConn, dbFolderPath, z, x, y, extension)
+        if result: # is the result valid ?
+          resultContent = result.fetchone() # get the result content
+        else:
+          resultContent = None # the result is invalid
+        if resultContent:
+          # convert the buffer to pixbuf
+          try:
+            pl = gtk.gdk.PixbufLoader()
+            pl.write(resultContent[0])
+            pl.close()
+            pixbuf = pl.get_pixbuf()
+            return pixbuf # return pixbuf containing the tile image
+          except Exception, e:
+            print "loading the image buffer from sqlite to pixbuf failed:%s" % e
+        else:
+          return None # the tile is not stored
+    else: # the only other storage method is currently clasical files storage
+      mapTiles = self.m.get('mapTiles', None)
+      if mapTiles:
+        tileFolderPath = mapTiles.getTileFolderPath()
+        layerFolderAndTileFilename = mapTiles.getImagePath(x,y,z,folderPrefix, extension)
+        tilePath = tileFolderPath + layerFolderAndTileFilename
+        if os.path.exists(tilePath):
+          # load the file to pixbuf and return it
+          return mapTiles.filePath2Pixbuf(tilePath)
+        else:
+          return None # this tile is not locally stored
 
   def getTileFromDb(self, lookupConn, dbFolderPath, z, x, y, extension):
     """get a tile from the database"""

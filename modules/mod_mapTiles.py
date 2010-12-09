@@ -203,10 +203,6 @@ class mapTiles(ranaModule):
         (name, x, y, z, layer) = args
         self.loadImage(name, x, y, z, layer)
 
-  def firstTime(self):
-    # the config folder should set the tile folder path by now
-    self.tileFolder = self.get('tileFolder', 'cache/images')
-
   def loadSpecialTiles(self, specialTiles):
     """load special tiles from files to the special tiles cache"""
     for tile in specialTiles:
@@ -470,37 +466,46 @@ class mapTiles(ranaModule):
     if(layerInfo == None): # is the layer info valid
       return('NOK')
 
-    layerType = layerInfo.get('type','png')
     layerPrefix = layerInfo.get('folderPrefix','OSM')
+    layerType = layerInfo.get('type','png')
 
-    filename = self.tileFolder + (self.imagePath(x,y,z,layerPrefix, layerType))
-
-    storageType = self.get('tileStorageType', 'files')
-    if storageType == 'sqlite': # use the sqlite based storage method
-      m = self.m.get('storeTiles', None) # get the tile storage module
-      if m:
-        try:
-          buffer = m.getTile(layerPrefix, z, x, y, layerType)
-          if buffer:
-            pl = gtk.gdk.PixbufLoader()
-            pl.write(buffer)
-            pl.close()
-            pixbuf = pl.get_pixbuf()
-            self.storeInMemmory(self.pixbufToCairoImageSurface(pixbuf), name)
-            return('OK')
-        except Exception, e:
-          print "loading tile from sqlite failed"
-          print "exception: ", e
-    else: #use the default method -> load from files
-      if (os.path.exists(filename)):
-        try:
-          pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
-          self.storeInMemmory(self.pixbufToCairoImageSurface(pixbuf), name)
-        except Exception, e:
-          print "the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e
+    storeTiles = self.m.get('storeTiles', None) # get the tile storage module
+    if storeTiles:
+      pixbuf = storeTiles.getTile(layerPrefix, z, x, y, layerType)
+      """None from getTiles means the tile was not found
+         False means loading the tile from file to pixbuf failed"""
+      if pixbuf:
+        self.storeInMemmory(self.pixbufToCairoImageSurface(pixbuf), name)
         return('OK')
 
-    # Image not found anywhere - resort to downloading it
+    filename = self.getTileFolderPath() + (self.getImagePath(x,y,z,layerPrefix, layerType))
+#
+#    storageType = self.get('tileStorageType', 'files')
+#    if storageType == 'sqlite': # use the sqlite based storage method
+#      m = self.m.get('storeTiles', None) # get the tile storage module
+#      if m:
+#        try:
+#          buffer = m.getTile(layerPrefix, z, x, y, layerType)
+#          if buffer:
+#            pl = gtk.gdk.PixbufLoader()
+#            pl.write(buffer)
+#            pl.close()
+#            pixbuf = pl.get_pixbuf()
+#            self.storeInMemmory(self.pixbufToCairoImageSurface(pixbuf), name)
+#            return('OK')
+#        except Exception, e:
+#          print "loading tile from sqlite failed"
+#          print "exception: ", e
+#    else: #use the default method -> load from files
+#      if (os.path.exists(filename)):
+#        try:
+#          pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
+#          self.storeInMemmory(self.pixbufToCairoImageSurface(pixbuf), name)
+#        except Exception, e:
+#          print "the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e
+#        return('OK')
+
+    # Image not found anywhere locally - resort to downloading it
 
     # Are we allowed to download it ? (network=='full')
     if(self.get('network','full')=='full'):
@@ -508,7 +513,7 @@ class mapTiles(ranaModule):
       """the thread list condition is used to signalize to the download manager,
       that here is a new download request"""
       with self.threadlListCondition:
-        folder = self.tileFolder + self.imageFolder(x, z, layerPrefix) # target folder
+        folder = self.getTileFolderPath() + self.getImageFolder(x, z, layerPrefix) # target folder
         timestamp = time.time()
         request = (name,x,y,z,layer,layerPrefix,layerType, filename, folder, timestamp)
 
@@ -540,6 +545,16 @@ class mapTiles(ranaModule):
     ct2.paint()
     ''' surface now contains the image in a Cairo surface '''
     self.storeInMemmory(surface, name, type, expireTimestamp, dictIndex)
+
+  def filePath2Pixbuf(self, filePath):
+    """return a pixbaf for a given filePath"""
+    try:
+      pixbuf = gtk.gdk.pixbuf_new_from_file(filePath)
+      return(pixbuf)
+    except Exception, e:
+      print "the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e
+      return False
+
 
   def storeInMemmory(self, surface, name, type="normal", expireTimestamp=None, dictIndex=0):
     """store a given image surface in the memmory image cache
@@ -610,15 +625,19 @@ class mapTiles(ranaModule):
     (suitable for use as part of filenames, dictionary keys, etc)"""
     return("%s_%d_%d_%d" % (layer,z,x,y))
 
-  def imagePath(self,x,y,z,prefix, extension):
+  def getImagePath(self,x,y,z,prefix, extension):
     """Get a unique name for a tile image
     (suitable for use as part of filenames, dictionary keys, etc)"""
     return("%s/%d/%d/%d.%s" % (prefix,z,x,y,extension))
-
-  def imageFolder(self,x,z,prefix):
+  
+  def getImageFolder(self,x,z,prefix):
     """Get a unique name for a tile image
     (suitable for use as part of filenames, dictionary keys, etc)"""
     return("%s/%d/%d" % (prefix,z,x))
+
+  def getTileFolderPath(self):
+    """helper function that returns path to the tile folder"""
+    return self.get('tileFolder', 'cache/images')
 
   def imageY(z,extension):
     return (('%d.%s') % (z, extension))
@@ -629,6 +648,7 @@ class mapTiles(ranaModule):
   def getTileUrl(self, x, y, z, layer):
     """Wrapper, that makes it possible to use this function from other modules."""
     return getTileUrl(x, y, z, layer)
+
 
   class tileDownloader(Thread):
     """Downloads an image (in a thread)"""
