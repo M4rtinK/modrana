@@ -81,6 +81,11 @@ class device_n900(deviceModule):
   def getDeviceName(self):
     return "Nokia N900"
 
+  def locationType(self):
+    """modRana uses liblocation on N900"""
+    return "liblocation"
+
+
   def startAutorotation(self):
     """start the GUI autorotation feature"""
     try:

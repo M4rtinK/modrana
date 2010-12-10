@@ -139,6 +139,17 @@ class options(ranaModule):
 
     # * GPS *
     self.addBoolOption("GPS", "GPSEnabled", "GPS", True, "gpsd:checkGPSEnabled")
+    if self.dmod.locationType() == 'gpsd':
+      knots = "knots per second"
+      meters = "meters per second"
+      if self.device == 'neo':
+        knots = "knots per second (old SHR)"
+        meters = "meters per second (new SHR)"
+      self.addOption("GPSD reports speed in","gpsdSpeedUnit",
+      [('knotsPerSecond', knots),
+       ('metersPerSecond', meters)],
+       "GPS",
+       'knotsPerSecond')
 
     # * screen *
     """only add if supported on device"""

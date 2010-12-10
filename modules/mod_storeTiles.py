@@ -1,4 +1,4 @@
-import os.path
+from __future__ import with_statement # for python 2.5
 #!/usr/bin/python
 #----------------------------------------------------------------------------
 # Store tiles in a single file.
@@ -20,6 +20,7 @@ import os.path
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+
 from base_module import ranaModule
 import sqlite3
 import os
@@ -27,6 +28,7 @@ import time
 import glob
 import Queue
 import gtk
+from threading import Lock
 from threading import Thread
 
 def getModule(m,d):
@@ -52,6 +54,13 @@ class storeTiles(ranaModule):
     self.lastCommit=time.time()
     self.dirty = set() # a set of connections, that have uncommited data
     self.startLoadingThread()
+    # locks
+    """
+    TODO: this lock might not be needed for python2.6+,
+    as their sqlite version should be thread safe
+    """
+    self.lookupConnectionLock = Lock()
+
 
   def firstTime(self):
     # the config folder should set the tile folder path by now
@@ -288,19 +297,20 @@ class storeTiles(ranaModule):
     """get a tile from the database"""
     accessType = "get"
     #look in the lookup db
-    lookupCursor = lookupConn.cursor()
-    lookupResult = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension)).fetchone()
-    if lookupResult: # the tile was found in the lookup db
-      # now search in the store
-      storeFilename = lookupResult[0]
-      pathToStore = self.getStorePath(dbFolderPath, storeFilename)
-      stores = self.layers[accessType][dbFolderPath]['stores']
-      connectionToStore = self.connectToStore(stores, pathToStore, dbFolderPath, accessType)
-      storeCursor = connectionToStore.cursor()
-      result = storeCursor.execute("select tile, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension))
-      return result
-    else: # the tile was not found in the lookup table
-      return None
+    with self.lookupConnectionLock: # just to make sure the access is sequential
+      lookupCursor = lookupConn.cursor()
+      lookupResult = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension)).fetchone()
+      if lookupResult: # the tile was found in the lookup db
+        # now search in the store
+        storeFilename = lookupResult[0]
+        pathToStore = self.getStorePath(dbFolderPath, storeFilename)
+        stores = self.layers[accessType][dbFolderPath]['stores']
+        connectionToStore = self.connectToStore(stores, pathToStore, dbFolderPath, accessType)
+        storeCursor = connectionToStore.cursor()
+        result = storeCursor.execute("select tile, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension))
+        return result
+      else: # the tile was not found in the lookup table
+        return None
 
   def tileExists(self, filePath, folderPrefix, z, x, y, extension, fromThread=False):
     """test if a tile exists
@@ -309,20 +319,21 @@ class storeTiles(ranaModule):
     if storageType == 'sqlite': # we are storing to the database
       dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
       if dbFolderPath!=None: # is the database accessible ?
-        if fromThread: # is this called from a thread ?
-          # due to sqlite quirsk, connections can't be shared between threads
-          lookupDbPath = self.getLookupDbPath(dbFolderPath)
-          lookupConn = sqlite3.connect(lookupDbPath)
-        else:
-          lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
-        query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
-        lookupResult = lookupConn.execute(query,(z, x, y, extension)).fetchone()
-        if fromThread: # tidy up, just to be sure
-          lookupConn.close()
-        if lookupResult:
-          return True # the tile is in the db
-        else:
-            return False # the tile is not in the db
+        with self.lookupConnectionLock: # just to make sure the access is sequential
+          if fromThread: # is this called from a thread ?
+            # due to sqlite quirsk, connections can't be shared between threads
+            lookupDbPath = self.getLookupDbPath(dbFolderPath)
+            lookupConn = sqlite3.connect(lookupDbPath)
+          else:
+            lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
+          query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
+          lookupResult = lookupConn.execute(query,(z, x, y, extension)).fetchone()
+          if fromThread: # tidy up, just to be sure
+            lookupConn.close()
+          if lookupResult:
+            return True # the tile is in the db
+          else:
+              return False # the tile is not in the db
       else:
         return None # we cant decide if a tile is ind the db or not
     else: # we are storing to the filesystem

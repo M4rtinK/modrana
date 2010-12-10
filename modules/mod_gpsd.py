@@ -301,10 +301,13 @@ class gpsd2(ranaModule):
         speed = self.speed()
 
         if speed != None:
-          if self.device != 'neo': # FSO-GPSD in SHR on Neo FreeRunner reports directly in m/sec
+          # normal gpsd reports speed in knots per second
+          gpsdSpeed = self.get('gpsdSpeedUnit', 'knotsPerSecond')
+          if gpsdSpeed == 'knotsPerSecond':
+            # convert to meters per second
             speed = float(speed) * 0.514444444444444 # knots/sec to m/sec
           self.set('metersPerSecSpeed', speed)
-          self.set('speed', speed * 3.6)
+          self.set('speed', float(speed) * 3.6)
         else:
           self.set('metersPerSecSpeed', None)
           self.set('speed', None)

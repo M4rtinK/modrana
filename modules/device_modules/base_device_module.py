@@ -43,6 +43,10 @@ class deviceModule(ranaModule):
     -> it can be implemented and enabled in the coresponding device module"""
     return False
 
+  def locationType(self):
+    """modRana uses gpsd by default"""
+    return 'gpsd'
+  
 #  def getAutorotationSupported(self):
 #    return False
 #

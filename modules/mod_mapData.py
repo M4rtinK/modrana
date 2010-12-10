@@ -97,7 +97,7 @@ class mapData(ranaModule):
 
     for tile in tilesToDownload: # check what tiles are already stored
       (z,x,y) = (tile[2],tile[0],tile[1])
-      filePath = tileFolder + mapTiles.imagePath(x, y, z, folderPrefix, extension)
+      filePath = tileFolder + mapTiles.getImagePath(x, y, z, folderPrefix, extension)
       if not os.path.exists(filePath): # we dont have this file
         neededTiles.append(tile)
 #      if not os.path.exists(filePath): # we dont have this file
@@ -116,8 +116,8 @@ class mapData(ranaModule):
     extension = maplayers[layer]['type'] # what is the extension for the current layer ?
     folderPrefix = maplayers[layer]['folderPrefix'] # what is the extension for the current layer ?
     url = self.getTileUrl(x, y, z, layer) # generate url
-    filePath = tileFolder + mapTiles.imagePath(x, y, z, folderPrefix, extension)
-    fileFolder = tileFolder + mapTiles.imageFolder(x, z, folderPrefix)
+    filePath = tileFolder + mapTiles.getImagePath(x, y, z, folderPrefix, extension)
+    fileFolder = tileFolder + mapTiles.getImageFolder(x, z, folderPrefix)
     return (url,filePath, fileFolder, folderPrefix, extension)
 
   def addToQueue(self, neededTiles):
