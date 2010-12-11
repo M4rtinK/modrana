@@ -27,6 +27,7 @@ import gobject
 import gtk
 import sys
 import traceback
+import threading
 import global_device_id # used for communicating the device id to other modules
 import cairo
 import os
@@ -140,6 +141,7 @@ class MapWidget(gtk.Widget):
     print "Shutting-down modules"
     for m in self.m.values():
       m.shutdown()
+    print "Shuttdown complete"
   
   def update(self):
     for m in self.m.values():

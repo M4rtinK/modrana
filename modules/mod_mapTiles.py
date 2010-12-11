@@ -117,6 +117,9 @@ class mapTiles(ranaModule):
     self.downloadRequestTimeout = 30 # in seconds
     self.startTileDownloadManagementThread()
     self.startTileLoadingThread()
+
+    self.shutdownAllThreads = False # notify the threads that shutdown is in progress
+    
     specialTiles = [
                     ('tileDownloading' , 'icons/bitmap/tile_downloading.png'),
                     ('tileDownloadFailed' , 'icons/bitmap/tile_download_failed.png'),
@@ -134,8 +137,8 @@ class mapTiles(ranaModule):
 
   def startTileDownloadManagementThread(self):
     """start the consumer thread for download requests"""
-    t = Thread(target=self.tileDownloadManager)
-    t.daemon = True # we need that the worker dies with the program
+    t = Thread(target=self.tileDownloadManager, name='automatic tile download management thread')
+    t.setDaemon(True) # we need that the worker dies with the program
     t.start()
 
   def tileDownloadManager(self):
@@ -147,6 +150,9 @@ class mapTiles(ranaModule):
           wait for notification that there might be download requests or free download slots
           """
           self.threadlListCondition.wait()
+          if self.shutdownAllThreads:
+            print "\nmapTiles: automatic tile download management thread shutting down"
+            break
           with self.downloadRequestPoolLock:
             activeThreads = len(self.threads)
             maxThreads = int(self.get("maxAutoDownloadThreads", 20))
@@ -160,6 +166,7 @@ class mapTiles(ranaModule):
                   (name,x,y,z,layer,layerPrefix,layerType, filename, folder, timestamp) = request
                   # start a new thread
                   self.threads[name] = self.tileDownloader(name,x,y,z,layer,layerPrefix,layerType, filename, folder, self)
+                  self.threads[name].daemon = True
                   self.threads[name].start()
                   # chenge the status tile to "Downloading..."
                   with self.imagesLock:
@@ -190,8 +197,8 @@ class mapTiles(ranaModule):
 
   def startTileLoadingThread(self):
     """start the loading-request consumer thread"""
-    t = Thread(target=self.tileLoader)
-    t.daemon = True # we need that the worker dies with the program
+    t = Thread(target=self.tileLoader, name='tile loading thread')
+    t.setDaemon(True) # we need that the worker dies with the program
     t.start()
 
   def tileLoader(self):
@@ -202,6 +209,9 @@ class mapTiles(ranaModule):
       if key == 'loadRequest':
         (name, x, y, z, layer) = args
         self.loadImage(name, x, y, z, layer)
+      elif key == 'shutdown':
+        print "\nmapTiles: tile loading thread shutting down"
+        break
 
   def loadSpecialTiles(self, specialTiles):
     """load special tiles from files to the special tiles cache"""
@@ -648,6 +658,16 @@ class mapTiles(ranaModule):
   def getTileUrl(self, x, y, z, layer):
     """Wrapper, that makes it possible to use this function from other modules."""
     return getTileUrl(x, y, z, layer)
+
+  def shutdown(self):
+    # shutdown the worker/consumer threads
+    self.shutdownAllThreads = True
+
+    # shutdown the tile loading thread
+    self.tileLoadRequestQueue.put(('shutdown', ()),block=False)
+    # notify the automatic tile download manager thread about the shutdown
+    with self.threadlListCondition:
+      self.threadlListCondition.notifyAll()
 
 
   class tileDownloader(Thread):

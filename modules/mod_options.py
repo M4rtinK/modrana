@@ -354,12 +354,12 @@ class options(ranaModule):
             self.set(variable, default)
 
   def save(self):
-    print "saving options"
+    print "options: saving options"
     try:
       f = open(self.optionsFilename(), "w")
       marshal.dump(self.d, f)
       f.close()
-      print "success"
+      print "options: successfully saved"
     except IOError:
       print "Can't save options"
 
