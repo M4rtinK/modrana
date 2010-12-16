@@ -374,8 +374,10 @@ class options(ranaModule):
         del newData['tracklogFolder']
       for k,v in newData.items():
         self.set(k,v)
-    except IOError:
-      print "options: error while loading the saved options"
+    except Exception, e:
+      print "options: exception while loading saved options:\n%s" % e
+      #TODO: a yes/no dialog for clearing (renaming with timestamp :) the corrupted options file (options.bin)
+      self.sendMessage('ml:notification:m:Loading saved options failed;7')
 
     self.overrideOptions()
 
