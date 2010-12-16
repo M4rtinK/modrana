@@ -276,13 +276,15 @@ class route(ranaModule):
       pos = self.get('pos', None)
       if pos:
         posString = "%f,%f" % pos
-        self.startAddress = posString
+        self.startAddress = posString # set as current address
+        self.set('startAddress', posString) # also store in the persistent dictionary
 
     elif(message == 'posToDestination'):
       pos = self.get('pos', None)
       if pos:
         posString = "%f,%f" % pos
-        self.destinationAddress = posString
+        self.destinationAddress = posString # set as current address
+        self.set('destinationAddress', posString) # also store in the persistent dictionary
 
     elif(message == 'reroute'):
       if type == 'ms' and args == "fromPosToDest":
@@ -899,47 +901,44 @@ class route(ranaModule):
 
 
     if menuName == "showAdressRoute":
-      
       menus = self.m.get("menu",None)
-      if menus == None:
-        print "route: no menus module, no menus will be drawn"
-        return
+      if menus:
+        (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
+        (x1,y1) = e1
+        (x2,y2) = e2
+        (x3,y3) = e3
+        (x4,y4) = e4
+        (w1,h1,dx,dy) = alloc
+
+        # * draw "escape" button
+        menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:main")
+        # * route
+        menus.drawButton(cr, x2, y2, dx, dy, "route", "generic", "route:addressRoute|set:menu:None")
+        # * tools
+  #      menus.drawButton(cr, x3, y3, dx, dy, "tools", "generic", "set:menu:main")
+
+        menus.clearMenu('currentRouteTools', "set:menu:currentRoute")
+
+        menus.drawButton(cr, x4, y4, w1-x4, dy,  "start", "generic", "route:startInput")
+        menus.drawButton(cr, x4, y4+2*dy, w1-x4, dy, "destination", "generic", "route:destinationInput")
+        menus.drawButton(cr, x4, y4+dy, (w1-x4)/2, dy, "as start#position", "generic", "route:posToStart|set:needRedraw:True")
+        menus.drawButton(cr, x4+(w1-x4)/2, y4+dy, (w1-x4)/2, dy, "as destination#position", "generic", "route:posToDestination|set:needRedraw:True")
+
+        # try to get last used addresses
+        startText = self.get('startAddress', None)
+        destinationText = self.get('destinationAddress', None)
+
+        # if there are no last used addresses, use defaults
+        if startText == None:
+          startText = "click to input starting adres"
+
+        if destinationText == None:
+          destinationText = "click to input destination adres"
+
+        menus.showText(cr, startText, x4+w1/20, y4+dy/5, w1-x4-(w1/20)*2)
+        menus.showText(cr, destinationText, x4+w1/20, y4+2*dy+dy/5, w1-x4-(w1/20)*2)
 
 
-      (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
-      (x1,y1) = e1
-      (x2,y2) = e2
-      (x3,y3) = e3
-      (x4,y4) = e4
-      (w1,h1,dx,dy) = alloc
-
-      # * draw "escape" button
-      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:main")
-      # * route
-      menus.drawButton(cr, x2, y2, dx, dy, "route", "generic", "route:addressRoute|set:menu:None")
-      # * tools
-#      menus.drawButton(cr, x3, y3, dx, dy, "tools", "generic", "set:menu:main")
-
-      menus.clearMenu('currentRouteTools', "set:menu:currentRoute")
-      
-      menus.drawButton(cr, x4, y4, w1-x4, dy,  "start", "generic", "route:startInput")
-      menus.drawButton(cr, x4, y4+2*dy, w1-x4, dy, "destination", "generic", "route:destinationInput")
-      menus.drawButton(cr, x4, y4+dy, (w1-x4)/2, dy, "as start#position", "generic", "route:posToStart|set:needRedraw:True")
-      menus.drawButton(cr, x4+(w1-x4)/2, y4+dy, (w1-x4)/2, dy, "as destination#position", "generic", "route:posToDestination|set:needRedraw:True")
-
-      # try to get last used addresses
-      startText = self.get('startAddress', None)
-      destinationText = self.get('destinationAddress', None)
-
-      # if there are no last used addresses, use defaults
-      if startText == None:
-        startText = "click to input starting adres"
-
-      if destinationText == None:
-        destinationText = "click to input destination adres"
-
-      menus.showText(cr, startText, x4+w1/20, y4+dy/5, w1-x4-(w1/20)*2)
-      menus.showText(cr, destinationText, x4+w1/20, y4+2*dy+dy/5, w1-x4-(w1/20)*2)
 
 if(__name__ == '__main__'):
   d = {'transport':'car'}
