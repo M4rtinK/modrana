@@ -373,7 +373,16 @@ class storeTiles(ranaModule):
   def worker(self):
     """this is run by a thread that stores sqlite tiles to a db"""
     while True:
-        item = self.sqliteTileQueue.get(block=True)
+        try:
+          item = self.sqliteTileQueue.get(block=True)
+        except Exception, e:
+          """this usually occurs during interpreter shutdown
+             -> we simulate a shutdown order and try to exit cleanly
+             """
+          print "storage thread - probable shutdown"
+          print "exception: %s" % e
+          item = 'shutdown'
+
         if item=='shutdown': # we put this to the queue to announce shutdown
           print "\nshutdown imminent, commiting all uncommited tiles"
           self.commitAll()

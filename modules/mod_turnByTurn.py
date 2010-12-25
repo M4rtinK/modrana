@@ -22,7 +22,6 @@ import geo
 import math
 import pango
 import pangocairo
-import subprocess
 import time
 
 def getModule(m,d):
@@ -41,9 +40,50 @@ class turnByTurn(ranaModule):
     self.currentStepIndicator = None
     self.espeakFirstTrigger = False
     self.espeakSecondTrigger = False
-    self.espaekProcess = None
+    self.navigationUpdateInterval = 1 # update navigation info once per second
+    self.lastNavigationUpdate=time.time()
+    self.currentDistance = None
+    self.currentStep = None
 
     
+  def update(self):
+    # check if we should trigger a navigation message
+    
+    # is navigation on ?
+    if self.enabled():
+      # respect the navigation update interval
+      timestamp = time.time()
+      if timestamp - self.lastNavigationUpdate >= self.navigationUpdateInterval:
+        # get/compute/update necessary the values
+        pos = self.get('pos', None) # and current position
+        (lat1,lon1) = pos
+        currentStep = self.getCurrentStep()
+        lat2 = currentStep['Point']['coordinates'][1]
+        lon2 = currentStep['Point']['coordinates'][0]
+        currentDistance = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
+        self.currentDistance = currentDistance # update current distance
+        distance = currentStep['Distance']['meters']
+        pointReachedDistance = int(self.get('pointReachedDistance', 30))
+
+        if distance>=currentDistance:
+          """this means we reached an optimal distance for saying the message"""
+          if self.espeakFirstTrigger == False:
+            print "triggering espeak nr. 1"
+            plaintextMessage = currentStep['descriptionEspeak']
+            self.sayTurn(plaintextMessage, currentDistance)
+            self.espeakFirstTrigger = True # everything has been said :D
+        if currentDistance <= pointReachedDistance:
+          """this means we reached the point"""
+          self.switchToNextStep() # switch to next step
+          if self.espeakSecondTrigger == False:
+            print "triggering espeak nr. 2"
+            # say the message without distance
+            plaintextMessage = currentStep['descriptionEspeak']
+            self.sayTurn(plaintextMessage, 0)
+            self.markCurrentStepAsVisited() # mark this point as visited
+            self.espeakSecondTrigger = True # everything has been said, again :D
+
+
   def handleMessage(self, message, type, args):
     if message == 'start':
       self.startTBT()
@@ -61,7 +101,9 @@ class turnByTurn(ranaModule):
     elif message == 'reroute':
       # 1. say rerouting is in progress
       voiceMessage = "rerouting"
-      self.espeakSay(voiceMessage, 0, "en") # make sure rerouting said with english voice
+      voice = self.m.get('voice', None)
+      if voice:
+        voice.say(voiceMessage, "en") # make sure rerouting said with english voice
       time.sleep(2) #TODO: improve this
       # 2. get a new route from current position to destination
       self.sendMessage("ms:route:reroute:fromPosToDest")
@@ -80,44 +122,8 @@ class turnByTurn(ranaModule):
   def drawScreenOverlay(self, cr):
     if self.steps: # is there something relevant to draw ?
       proj = self.m.get('projection', None) # we also need the projection module
-      
-      currentStep = self.getCurrentStep()
-      distance = currentStep['Distance']['meters']
-      pos = self.get('pos', None) # and current position
-      (lat1,lon1) = pos
-      lat2 = currentStep['Point']['coordinates'][1]
-      lon2 = currentStep['Point']['coordinates'][0]
-      currentDistance = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
-      pointReachedDistance = int(self.get('pointReachedDistance', 30))
 
-      # TODO: maybe move the espeak messages from the display code ?
-      if distance>=currentDistance:
-        """this means we reached an optimal distance for saying the message"""
-        if self.espeakFirstTrigger == False:
-          print "triggering espeak nr. 1"
-          outputFree = True
-          if self.espaekProcess:
-            if self.espaekProcess.poll() == None:
-              outputFree = False # espeak is talking at the moment
-          if outputFree:
-            plaintextMessage = currentStep['descriptionEspeak']
-            self.espeakSay(plaintextMessage, currentDistance)
-            self.espeakFirstTrigger = True # everything has been said :D
-      if currentDistance <= pointReachedDistance:
-        """this means we reached the point"""
-        self.switchToNextStep() # switch to next step
-        if self.espeakSecondTrigger == False:
-          print "triggering espeak nr. 2"
-          outputFree = True
-          if self.espaekProcess:
-            if self.espaekProcess.poll() == None:
-              outputFree = False # espeak is talking at the moment
-          if outputFree:
-            # say the message without distance
-            plaintextMessage = currentStep['descriptionEspeak']
-            self.espeakSay(plaintextMessage, 0)
-            self.markCurrentStepAsVisited() # mark this point as visited
-            self.espeakSecondTrigger = True # everything has been said, again :D
+      currentStep = self.getClosestStep()
 
       # draw the current step indicator circle
       lat = currentStep['Point']['coordinates'][1]
@@ -149,8 +155,10 @@ class turnByTurn(ranaModule):
 
         # display current distance to the next point
         units = self.m.get('units', None)
-        if units:
-          distString = units.m2CurrentUnitString(currentDistance,2)
+        if units and self.currentDistance:
+          distString = units.m2CurrentUnitString(self.currentDistance,2)
+        else:
+          distString = ""
 
         note = "<sub> tap this box to reroute</sub>"
         message = distString + "\n" + message + "\n\n" + note
@@ -176,26 +184,24 @@ class turnByTurn(ranaModule):
           action = "turnByTurn:reroute"
           clickHandler.registerXYWH(bx, by , bw, bh, action)
 
-
-  def espeakSay(self, plaintextMessage, distanceMeters, forceLanguageCode=False):
-    """say routing messages through espeak"""
+  def sayTurn(self,message,distanceInMeters,forceLanguageCode=False):
+    voice = self.m.get('voice', None)
     units = self.m.get('units', None)
-    if units:
-      if distanceMeters == 0:
+    if voice and units:
+      if distanceInMeters == 0:
         distString = ""
       else:
-        distString = units.km2CurrentUnitString(distanceMeters/1000.0, 1, False)
+        distString = units.km2CurrentUnitString(distanceInMeters/1000.0, 1, False)
         distString = '<p xml:lang="en">in <emphasis level="strong">'+ distString + '</emphasis></p><br>'
         # TODO: language specific distance strings
-      output = distString + plaintextMessage
-      print "saying: %s" % output
+      text = distString + message
+      print "saying: %s" % text
       if forceLanguageCode:
         espeakLanguageCode = forceLanguageCode
       else:
-        # the espeak language code is the fisrt part of this whitespace delimited string
+        # the espeak language code is the first part of this whitespace delimited string
         espeakLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[0]
-      languageParam = '-v%s' % espeakLanguageCode
-      self.espaekProcess = subprocess.Popen(['espeak', languageParam ,'-s 120','-m','"%s"' % output])
+      voice.say(text,espeakLanguageCode)
 
   def getStartingStep(self, which='first'):
     if self.steps:
@@ -242,7 +248,7 @@ class turnByTurn(ranaModule):
       print "last step reached"
 
   def enabled(self):
-    """return True if enabled, flase othervise"""
+    """return True if enabled, false othervise"""
     if self.steps:
       return True
     else:

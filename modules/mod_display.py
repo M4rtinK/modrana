@@ -19,6 +19,7 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import time
+import gtk
 
 def getModule(m,d):
   return(display(m,d))
@@ -44,6 +45,10 @@ class display(ranaModule):
   def firstTime(self):
     self.checkScreenBlankingMode() # check the screen blanking mode on startup
 
+    # connect to window state signals
+    self.modrana.topWindow.connect('window-state-event', self.windowStateChangedCallback)
+    self.modrana.topWindow.connect('visibility-notify-event', self.visibilityChangedCallback)
+
   def handleMessage(self, message, type, args):
     if message=="fullscreen" and type == "ms":
       if args == "toggle":
@@ -51,16 +56,40 @@ class display(ranaModule):
     elif message=="blankingModeChanged":
       self.checkScreenBlankingMode() # check if screen blanking changed
 
+  def enableRedraw(self,reason="not given"):
+    """enable window redrawing"""
+    self.modrana.redraw=True
+    print "display: redraw ON (%s)" % reason
+    self.set('needRedraw',True) # make sure the screen is refreshed
+
+  def disableRedraw(self,reason="not given"):
+    """disable window redrawing"""
+    self.modrana.redraw=False
+    print "display: redraw OFF (%s)" % reason
+
+  def windowStateChangedCallback(self, window, event):
+    if event.new_window_state == gtk.gdk.WINDOW_STATE_ICONIFIED:
+      self.disableRedraw(reason="window minimised")
+    elif event.new_window_state == gtk.gdk.WINDOW_STATE_WITHDRAWN:
+      self.disableRedraw(reason="window is hidden")
+    else:
+      self.enableRedraw(reason="window not hidden or minimised")
+
+  def visibilityChangedCallback(self,window, event):
+    if event.state == gtk.gdk.VISIBILITY_FULLY_OBSCURED:
+      self.disableRedraw(reason="window is obscured")
+    else:
+      self.enableRedraw(reason="window is unobscured or partially obscured")
 
   def fullscreenToggle(self):
     """toggle fullscreen state"""
     if self.fullscreen == True:
-          self.mainWindow.get_toplevel().unfullscreen()
+          self.modrana.topWindow.unfullscreen()
           self.fullscreen = False
           self.menusSetFullscreen(self.fullscreen)
           print "going out of fullscreen"
     else:
-      self.mainWindow.get_toplevel().fullscreen()
+      self.modrana.topWindow.fullscreen()
       self.fullscreen = True
       self.menusSetFullscreen(self.fullscreen)
       print "going to fullscreen"
@@ -136,6 +165,8 @@ class display(ranaModule):
   def checkConditionsStop(self):
     self.checkMethod = None
     self.checkConditions = False
+
+  # * window visibility checking and redraw control *
 
   def checkFullscreenMovement(self):
     """check if we are in fullscreen and moving"""
@@ -220,10 +251,6 @@ class display(ranaModule):
         if self.checkMethod:
           self.checkMethod() # call the check method
         self.lastCheckConditions = currentTime
-
-
-
-
 
 
 if(__name__ == "__main__"):

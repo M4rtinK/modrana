@@ -34,6 +34,7 @@ import os
 #from math import sqrt
 from time import clock
 from time import time
+from time import sleep
 from gtk import gdk
 from math import radians
 
@@ -52,8 +53,6 @@ class MapWidget(gtk.Widget):
     'expose-event' : 'override',
     'size-allocate': 'override',
     'size-request': 'override',
-#    'test-signal' : (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
-#                              (gobject.TYPE_FLOAT,))
     }
   def __init__(self):
     gtk.Widget.__init__(self)
@@ -70,6 +69,8 @@ class MapWidget(gtk.Widget):
 
     self.topWindow = None
 
+    self.redraw = True
+    
 #    self.mapBuffer = None
 #    self.startX = 0
 #    self.startY = 0
@@ -79,18 +80,6 @@ class MapWidget(gtk.Widget):
 #    self.centerY = 0
 
     global_device_id.device = device
-
-#    self.connect('test-signal', self.getTextCallback)
-
-    self.loadModules('modules') # name of the folder with modules
-
-
-#  def do_test_signal(self, number):
-#          print 'number %f' % number
-#
-#  def getTextCallback(self,entry, dialog):
-#    print "text callback"
-
 
   def loadModules(self, module_path):
     """Load all modules from the specified directory"""
@@ -128,8 +117,9 @@ class MapWidget(gtk.Widget):
 
     print "Loaded all modules in %1.2f ms, initialising" % (1000 * (clock() - start))
 
-    # make sure all modules have the device module befor calling firstTime()
+    # make sure all modules have the device module and other variables before first time
     for m in self.m.values():
+      m.modrana = self # make this class accessible from modules
       m.dmod = self.dmod
 
     start = clock()
@@ -141,6 +131,7 @@ class MapWidget(gtk.Widget):
     print "Shutting-down modules"
     for m in self.m.values():
       m.shutdown()
+    sleep(2) # leave some times for threads to shut down
     print "Shuttdown complete"
   
   def update(self):
@@ -148,6 +139,7 @@ class MapWidget(gtk.Widget):
       m.update()
 
   def checkForRedraw(self):
+    # check if redrawing is enabled
     if(self.d.get("needRedraw", False)):
       self.forceRedraw()
 
@@ -173,7 +165,7 @@ class MapWidget(gtk.Widget):
       self.window.invalidate_rect((0,0,self.rect.width,self.rect.height),False)
     except AttributeError:
       pass
-    
+
   def draw(self, cr):
     start = clock()
     for m in self.m.values():
@@ -329,8 +321,6 @@ class MapWidget(gtk.Widget):
     for name in self.m:
       self.m[name].mainWindow = self.window
       self.m[name].topWindow = self.topWindow
-      self.m[name].dmod = self.dmod
-      self.m[name].modrana = self # make this class accessible from modules
 
   def do_size_request(self, allocation):
     pass
@@ -362,9 +352,10 @@ class MapWidget(gtk.Widget):
     
     self.draw(cr)
   def do_expose_event(self, event):
-    self.chain(event)
-    cr = self.window.cairo_create()
-    return self._expose_cairo(event, cr)
+    if self.redraw:
+      self.chain(event)
+      cr = self.window.cairo_create()
+      return self._expose_cairo(event, cr)
 
 class GuiBase:
   """Wrapper class for a GUI interface"""
@@ -373,7 +364,6 @@ class GuiBase:
     win = gtk.Window()
     win.set_title('modRana')
     win.connect('delete-event', gtk.main_quit)
-
 
     if(device == 'eee'): # test for use with asus eee
       win.resize(800,600)
@@ -414,6 +404,11 @@ class GuiBase:
 
     # Finalise the window
     win.show_all()
+
+    # start loading modules
+    self.mapWidget.loadModules('modules') # name of the folder with modules
+
+    # start gtk main loop
     gtk.main()
     self.mapWidget.beforeDie()
 

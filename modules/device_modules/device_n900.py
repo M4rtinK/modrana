@@ -49,13 +49,14 @@ class device_n900(deviceModule):
     self.bus = dbus.SystemBus()
     self.mceRequest = self.bus.get_object('com.nokia.mce','/com/nokia/mce/request')
     self.mceSignal = self.bus.get_object('com.nokia.mce','/com/nokia/mce/signal')
-#    self.mceSignalInterface = dbus.Interface(self.mceSignal,'com.nokia.mce.signal')
-#    self.mceSignalInterface.connect_to_signal("display_status_ind", self.screenStateCallback)
+    self.mceSignalInterface = dbus.Interface(self.mceSignal,'com.nokia.mce.signal')
+    self.mceSignalInterface.connect_to_signal("display_status_ind", self.screenStateChangedCallback)
     print "N900: dbus initialized"
 
     print "N900 device specific module initialized"
 
   def firstTime(self):
+    # load the rotation object
     rotationObject = self.startAutorotation()
     if rotationObject != False:
       print "N900: rotation object loaded"
@@ -63,6 +64,14 @@ class device_n900(deviceModule):
     else:
       print "N900: loading rotation object failed"
 
+    # setup window state callbacks
+    self.modrana.topWindow.connect('notify::is-active', self.windowIsActiveChangedCallback)
+    """
+    on the Maemo 5@N900, is-active == True signalizes that the modRana window is
+    the current active window (there is always only one active window)
+    is-active == False signalizes that the window is either minimzed on the
+    dashboard or the screen is blanked
+    """
   def update(self):
     """initialize the automatic rotation"""
     if not self.done:
@@ -85,14 +94,13 @@ class device_n900(deviceModule):
     """modRana uses liblocation on N900"""
     return "liblocation"
 
-
   def startAutorotation(self):
     """start the GUI autorotation feature"""
     try:
       from n900_maemo5_portrait import FremantleRotation
       rotationMode = self.get('rotationMode', "auto") # get last used mode
       lastModeNumber = self.getRotationModeNumber(rotationMode) # get last used mode number
-      rotationObject = FremantleRotation(self.ossoAppName, main_window=self.topWindow, mode=lastModeNumber)
+      rotationObject = FremantleRotation(self.ossoAppName, main_window=self.modrana.topWindow, mode=lastModeNumber)
       self.rotationObject = rotationObject
       print "N900 rotation object initialized"
     except Exception, e:
@@ -128,9 +136,22 @@ class device_n900(deviceModule):
   def unlockScreen(self):
     self.mceRequest.req_tklock_mode_change('unlocked')
 
-#  def screenStateCallback(self, state):
-#    print "DISPLAY STATE"
-#    print state
+  def windowIsActiveChangedCallback(self, window, event):
+    display = self.m.get('display', None)
+    if display:
+      if window.is_active():
+        display.enableRedraw(reason="N900 window is active")
+      else:
+        display.disableRedraw(reason="N900 window is not active")
+
+  def screenStateChangedCallback(self, state):
+    display = self.m.get('display', None)
+    if display:
+      if state == "on" or state == "dimm":
+        display.enableRedraw(reason="N900 display on or dimmed")
+      elif state== "off":
+        display.disableRedraw(reason="N900 display blanked")
+
 
 if(__name__ == "__main__"):
   a = n900({}, {})
