@@ -111,30 +111,28 @@ class turnByTurn(ranaModule):
       self.sendMessage("ms:turnByTurn:start:closest")
 
   def drawMapOverlay(self,cr):
-      if self.currentStepIndicator:
-        (pointX, pointY) = self.currentStepIndicator
-        cr.set_source_rgb(1, 0, 0)
-        cr.set_line_width(4)
-        cr.arc(pointX, pointY, 12, 0, 2.0 * math.pi)
-        cr.stroke()
-        cr.fill()
+      if self.steps:
+        # get current step
+        currentStep = self.getCurrentStep()
+        proj = self.m.get('projection', None)
+        # draw the current step indicator circle
+        if currentStep and proj:
+          lat = currentStep['Point']['coordinates'][1]
+          lon = currentStep['Point']['coordinates'][0]
+          (pointX, pointY) = proj.ll2xy(lat, lon)
+          print (pointX, pointY)
+          cr.set_source_rgb(1, 0, 0)
+          cr.set_line_width(4)
+          cr.arc(pointX, pointY, 12, 0, 2.0 * math.pi)
+          cr.stroke()
+          cr.fill()
 
   def drawScreenOverlay(self, cr):
     if self.steps: # is there something relevant to draw ?
       proj = self.m.get('projection', None) # we also need the projection module
 
-      currentStep = self.getClosestStep()
-
-      # draw the current step indicator circle
-      lat = currentStep['Point']['coordinates'][1]
-      lon = currentStep['Point']['coordinates'][0]
-
-      self.currentStepIndicator = proj.ll2xy(lat, lon)
-#      cr.set_source_rgb(1, 0, 0)
-#      cr.set_line_width(4)
-#      cr.arc(pointX, pointY, 12, 0, 2.0 * math.pi)
-#      cr.stroke()
-#      cr.fill()
+      # get current step
+      currentStep = self.getCurrentStep()
 
       # draw the routing message box
 
