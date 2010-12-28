@@ -145,7 +145,8 @@ class onlineServices(ranaModule):
     """a background running googledirections query
        -> verbatim start and destination will be used in route descritpion, no geocoding
        outputHandler will be provided with the results + the specified key string"""
-    self.routingThread = self.Worker(self, "onlineRoute", (start, destination), outputHandler, key)
+    routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
+    self.routingThread = self.Worker(self, "onlineRoute", (start, destination, routeRequestSentTimestamp), outputHandler, key)
     self.routingThread.daemon = True
     self.routingThread.start()
     
@@ -153,7 +154,8 @@ class onlineServices(ranaModule):
     """a background running googledirections query
     - Lat Lon pairsversion -> for geocoding the start/destination points (NOT first/last route points)
        outputHandler will be provided with the results + the specified key string"""
-    self.routingThread = self.Worker(self, "onlineRouteLL", (start, destination), outputHandler, key)
+    routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
+    self.routingThread = self.Worker(self, "onlineRouteLL", (start, destination, routeRequestSentTimestamp), outputHandler, key)
     self.routingThread.daemon = True
     self.routingThread.start()
 
@@ -292,8 +294,8 @@ class onlineServices(ranaModule):
             self.outputHandler(self.key, result)
 
       elif self.type == "onlineRoute" or self.type == "onlineRouteLL":
-        if self.args and len(self.args) == 2:
-          (start, destination) = self.args
+        if self.args and len(self.args) == 3:
+          (start, destination, routeRequestSentTimestamp) = self.args
           print "worker: routing from",start," to ",destination
           self.setStatusMessage("online routing in progress...")
           self.callback.enableOverlay()
@@ -320,7 +322,7 @@ class onlineServices(ranaModule):
           self.setStatusMessage("online routing done   ")
           # send the results to the output handler
           if self.returnResult: # check if our result is expected and should be returned to the oputpt handler
-            self.outputHandler(self.key, (directions, startAddress, destinationAddress, startLL, destinationLL))
+            self.outputHandler(self.key, (directions, startAddress, destinationAddress, startLL, destinationLL, routeRequestSentTimestamp))
             
       # cleanup
       print "onlineServices: worker finished "

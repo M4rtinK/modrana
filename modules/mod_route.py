@@ -45,6 +45,7 @@ class route(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.route = [] # maybe remove this ?
+    self.routeRequestSentTimestamp = None
     self.pxpyRoute = []
     self.directions = []
     self.start = None
@@ -70,6 +71,7 @@ class route(ranaModule):
   def handleMessage(self, message, type, args):
     if (message == "clear"):
       self.route = []
+      self.routeRequestSentTimestamp = None
       self.pxpyRoute = []
       self.directions = []
       self.start = None
@@ -178,7 +180,6 @@ class route(ranaModule):
 
       print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
 
-      # TODO: wait message (would it be needed when using internet routing ?)
       self.doRoute(fromLat, fromLon, toLat, toLon)
       self.set('needRedraw', True) # show the new route
 
@@ -320,32 +321,33 @@ class route(ranaModule):
   def handleRoute(self, key, resultsTupple):
     """handle a routing result"""
     if key == "onlineRoute":
-      if len(resultsTupple) == 5:
-        (directions, startAddress, destinationAddress, start, destination) = resultsTupple
+      if len(resultsTupple) == 6:
+        (directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp) = resultsTupple
         # remove any possible prev. route description, so new a new one for this route is created
         self.text = None
         if directions: # is there actually something in the directions ?
           polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
           route = self.decode_line(polyline) # we decode the polyline to a list of points
-          self.processAndSaveResults(route, directions, startAddress, destinationAddress, start, destination)
+          self.processAndSaveResults(route, directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp)
     elif key == "onlineRouteAdress2Adress":
-      if len(resultsTupple) == 5:
-        (directions, startAddress, destinationAddress, start, destination) = resultsTupple
+      if len(resultsTupple) == 6:
+        (directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp) = resultsTupple
         # remove any possible prev. route description, so new a new one for this route is created
         self.text = None
         if directions: # is there actually something in the directions ?
           polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
           route = self.decode_line(polyline) # we decode the polyline to a list of points
-          self.processAndSaveResults(route, directions, startAddress, destinationAddress, start, destination)
+          self.processAndSaveResults(route, directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp)
 
-    autostart = self.get('autostartNavigationDefaultOn', 'closest')
-    if autostart == 'first' or autostart == 'closest':
+    autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
+    if autostart == 'enabled':
       self.sendMessage('ms:turnByTurn:start:%s' % autostart)
     self.set('needRedraw', True)
     
-  def processAndSaveResults(self, route, directions, startAddress, destinationAddress, start, destination):
+  def processAndSaveResults(self, route, directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp):
     """process and save routing results"""
     self.route = route
+    self.routeRequestSentTimestamp = routeRequestSentTimestamp
     proj = self.m.get('projection', None)
     if proj:
       self.pxpyRoute = [proj.ll2pxpyRel(x[0],x[1]) for x in route]
@@ -483,12 +485,12 @@ class route(ranaModule):
     if destinationAddress:
       self.destinationAddress = destinationAddress
 
-    """setup the first step selection menu"""
-    menus = self.m.get('menu', None)
-    if menus:
-      menus.clearMenu('routeSelectFirstStep', "set:menu:currentRouteTools")
-      menus.addItem('routeSelectFirstStep', 'step#first', 'generic', 'ms:turnByTurn:start:first|set:menu:None')
-      menus.addItem('routeSelectFirstStep', 'step#closest', 'generic', 'ms:turnByTurn:start:closest|set:menu:None')
+#    """setup the first step selection menu"""
+#    menus = self.m.get('menu', None)
+#    if menus:
+#      menus.clearMenu('routeSelectFirstStep', "set:menu:currentRouteTools")
+#      menus.addItem('routeSelectFirstStep', 'step#first', 'generic', 'ms:turnByTurn:start:first|set:menu:None')
+#      menus.addItem('routeSelectFirstStep', 'step#closest', 'generic', 'ms:turnByTurn:start:closest|set:menu:None')
 
   def update(self):
 
@@ -666,7 +668,7 @@ class route(ranaModule):
 
   def getCurrentDirections(self):
     # return the current route
-    return self.directions
+    return (self.directions, self.routeRequestSentTimestamp)
 
   #from: http://seewah.blogspot.com/2009/11/gpolyline-decoding-in-python.html
   def decode_line(self, encoded):
@@ -899,10 +901,10 @@ class route(ranaModule):
       if tbt:
         if tbt.enabled():
           menus.addItem('currentRouteTools', 'navigation#stop', 'generic', 'turnByTurn:stop|set:menu:None')
-          menus.addItem('currentRouteTools', 'navigation#restart', 'generic', 'turnByTurn:stop|set:menu:routeSelectFirstStep')
+          menus.addItem('currentRouteTools', 'navigation#restart', 'generic', 'turnByTurn:stop|ms:turnByTurn:start:closest|set:menu:None')
           self.set('needRedraw', True) # refresh the screen to show the changed button
         else:
-          menus.addItem('currentRouteTools', 'navigation#start', 'generic', 'set:menu:routeSelectFirstStep')
+          menus.addItem('currentRouteTools', 'navigation#start', 'generic', 'ms:turnByTurn:start:enabled|set:menu:None')
 
       menus.addItem('currentRouteTools', 'clear', 'generic', 'route:clear|set:menu:None')
 
