@@ -166,6 +166,8 @@ class options(ranaModule):
          ("never", "never", "display:blankingModeChanged")],
          "Display",
          "always")
+      if display.usesDashboard():
+        self.addBoolOption("Redraw when on dashboard", "redrawOnDashboard", 'Display', False)
 
 #    self.addOption("Network", "threadedDownload",
 ##      [("off","No use of network"),
