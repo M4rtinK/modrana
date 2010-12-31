@@ -130,6 +130,10 @@ class device_n900(deviceModule):
     """it is possible to controll screen balnking on the N900"""
     return True
 
+  def usesDashboard(self):
+    """the N900 uses a dashboard type task switcher"""
+    return True
+
   def pauseScreenBlanking(self):
     self.mceRequest.req_display_blanking_pause()
 
@@ -137,14 +141,30 @@ class device_n900(deviceModule):
     self.mceRequest.req_tklock_mode_change('unlocked')
 
   def windowIsActiveChangedCallback(self, window, event):
-    display = self.m.get('display', None)
-    if display:
-      if window.is_active():
-        display.enableRedraw(reason="N900 window is active")
-      else:
-        display.disableRedraw(reason="N900 window is not active")
+    """this is called when the window gets or looses focus
+    it basically menas:
+    - has focus - it is the active window and the user is working wit it
+    - no focus -> the window is switched to dashboard or the uanother widnow is active or
+    the screen is balnked"""
+    redrawOnDashboard = self.get('redrawOnDashboard', False)
+    """
+    NOTE: this updates the snapshot in task switcher,
+    but also UPDATES WHEN MINIMISED AND NOT VISIBLE
+    so use with caution
+    balnking overrides this so when the screen is balnked it does not redraw
+    TODO: see if hildon signalizes that a the task switcher is visible or not
+    """
+
+    if not redrawOnDashboard: # we dont redraw on dashboard by default
+      display = self.m.get('display', None)
+      if display:
+        if window.is_active():
+          display.enableRedraw(reason="N900 window is active")
+        else:
+          display.disableRedraw(reason="N900 window is not active")
 
   def screenStateChangedCallback(self, state):
+    """this is called when the display is balnked or unblanked"""
     display = self.m.get('display', None)
     if display:
       if state == "on" or state == "dimm":

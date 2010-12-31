@@ -110,6 +110,13 @@ class display(ranaModule):
     """report if controling the screen blanking is supported"""
     return self.dmod.screenBlankingControlSupported()
 
+  def usesDashboard(self):
+    """this reports if the device/OS uses a dashboard
+    instead of minimizing the the window out of view
+    the user might want that the window updates on the dashboard or not"""
+    return self.dmod.usesDashboard()
+
+
   def pauseScreenBlanking(self):
     """pause screen blanking for 30 seconds"""
     if self.dmod.screenBlankingControlSupported(): # make sure the device module really supports this

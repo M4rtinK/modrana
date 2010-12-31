@@ -43,6 +43,11 @@ class deviceModule(ranaModule):
     -> it can be implemented and enabled in the coresponding device module"""
     return False
 
+  def usesDashboard(self):
+    """report if the device minimizes the windows into a dasboard instead of hiding
+    them out of view - the user might want that the window redraws on the dashboard or not"""
+    return False
+
   def locationType(self):
     """modRana uses gpsd by default"""
     return 'gpsd'
