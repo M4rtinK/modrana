@@ -1,0 +1,9 @@
+Transport icons from wikimedia commons, taken from german street signs, in the public domain
+
+Globe icon by ClémentGodbarge, LGPL from:
+http://fr.wikipedia.org/w/index.php?title=Image%3ASciences_de_la_terre.svg
+
+RSS icon is GPL or LGPL, from http://en.wikipedia.org/wiki/Image:Feed-icon.svg
+
+Crystal 128 clock is LGPL, from http://commons.wikimedia.org/wiki/Image:Crystal_128_xclock.png
+

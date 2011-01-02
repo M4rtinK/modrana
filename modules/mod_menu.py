@@ -45,6 +45,10 @@ class menus(ranaModule):
     self.hideMapSreenButtons = False
     self.lastHideCheckTimestamp = time.time()
 
+    # colors - failsafe defaults
+    self.mainTextColor = (0,0,0.3,1)
+    self.centerButtonCircleColor = (0,0,1,0.45)
+
   def update(self):
     # check if buttons should be hidden, every second by default
     # TODO: implement this by using a timer ?
@@ -150,15 +154,18 @@ class menus(ranaModule):
       (x1,y1) = buttons['fullscreen']
       self.drawButton(cr, x1, y1, dx, dy, "", icon, "ms:display:fullscreen:toggle")
 
+      # * draw the centering button
       (x1,y1) = buttons['centre']
       self.drawButton(cr, x1, y1, dx, dy, "", 'blue_border', "toggle:centred")
 
+      # the central circle
       cr.stroke()
       cr.save()
       (centreX,centreY) = (x1+dx/2.0,y1+dy/2.0)
       cr.translate(centreX,centreY)
       cr.set_line_width(6)
-      cr.set_source_rgba(0, 0, 1, 0.45)
+#      cr.set_source_rgba(0, 0, 1, 0.45)
+      cr.set_source_rgba(*self.centerButtonCircleColor)
       cr.arc(0, 0, 15, 0, 2.0 * math.pi)
       cr.stroke()
       cr.fill()
@@ -301,7 +308,8 @@ class menus(ranaModule):
           m.draw(cr,icon,x1,y1,w,h)
 
     # Draw text
-    cr.set_source_rgb(0, 0, 0.3)
+#    cr.set_source_rgb(0, 0, 0.3)
+    cr.set_source_rgba(*self.mainTextColor)
     if text != None:
       textList = text.split('#')
       if len(textList) == 1 and text != None:
@@ -1082,11 +1090,19 @@ class menus(ranaModule):
     cr.show_text(text)
     cr.fill()
 
+  def colorsChangedCallback(self,colors):
+    self.mainTextColor = colors['main_text'].getCairoColor()
+    self.centerButtonCircleColor = colors['center_button_circle'].getCairoColor()
+
   def firstTime(self):
     self.set("menu",None)
     self.userConfig = self.m.get('config', None).userConfig
     # get the notification module (to implement the master overlay)
     self.notificationModule = self.m.get('notification', None)
+
+    icons = self.m.get('icons', None)
+    if icons:
+      icons.subscribeColorInfo(self,self.colorsChangedCallback)
 
   def handleMessage(self, message, type, args):
     messageList = message.split('#')

@@ -1,0 +1,8 @@
+<gpx creator="modRana - http://nlp.fi.muni.cz/projekty/gps_navigace/" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"><metadata><time>2010-12-31T20:41:41Z</time><bounds maxlat="48.9432335" maxlon="16.378151167" minlat="48.942073333" minlon="16.376536" /></metadata><trk><trkseg><trkpt lat="48.942073333" lon="16.376536"><ele>217.100
+</ele><time>2010-12-31T20:41:41Z</time></trkpt><trkpt lat="48.942241833" lon="16.3767695"><ele>217.000
+</ele><time>2010-12-31T20:41:41Z</time></trkpt><trkpt lat="48.942410833" lon="16.377004"><ele>216.800
+</ele><time>2010-12-31T20:41:41Z</time></trkpt><trkpt lat="48.9427475" lon="16.377472667"><ele>215.900
+</ele><time>2010-12-31T20:41:41Z</time></trkpt><trkpt lat="48.942913167" lon="16.377701667"><ele>215.700
+</ele><time>2010-12-31T20:41:41Z</time></trkpt><trkpt lat="48.943073833" lon="16.377924833"><ele>214.800
+</ele><time>2010-12-31T20:41:41Z</time></trkpt><trkpt lat="48.9432335" lon="16.378151167"><ele>214.300
+</ele><time>2010-12-31T20:41:41Z</time></trkpt></trkseg></trk></gpx>

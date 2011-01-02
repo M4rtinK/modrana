@@ -121,11 +121,11 @@ class mapTiles(ranaModule):
     self.shutdownAllThreads = False # notify the threads that shutdown is in progress
     
     specialTiles = [
-                    ('tileDownloading' , 'icons/bitmap/tile_downloading.png'),
-                    ('tileDownloadFailed' , 'icons/bitmap/tile_download_failed.png'),
-                    ('tileLoading' , 'icons/bitmap/tile_loading.png'),
-                    ('tileWaitingForDownloadSlot' , 'icons/bitmap/tile_waiting_for_download_slot.png'),
-                    ('tileNetworkError' , 'icons/bitmap/tile_network_error.png')
+                    ('tileDownloading' , 'themes/default/tile_downloading.png'),
+                    ('tileDownloadFailed' , 'themes/default/tile_download_failed.png'),
+                    ('tileLoading' , 'themes/default/tile_loading.png'),
+                    ('tileWaitingForDownloadSlot' , 'themes/default/tile_waiting_for_download_slot.png'),
+                    ('tileNetworkError' , 'themes/default/tile_network_error.png')
                    ]
     self.loadSpecialTiles(specialTiles) # load the special tiles to the special image cache
     self.loadingTile = self.images[1]['tileLoading']

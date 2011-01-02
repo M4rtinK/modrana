@@ -336,6 +336,25 @@ class options(ranaModule):
        "POI",
        "dump")
 
+    # * themes *
+    icons = self.m.get('icons', None)
+    if icons:
+      defaultTheme = icons.defaultTheme
+      themeList = icons.getThemeList()
+      # check if current theme exists
+      currentTheme = self.get('currentTheme', None)
+      if currentTheme != None:
+        if currentTheme not in themeList:
+          self.set('currentTheme', defaultTheme) # theme not valid, reset to default
+
+      themeChangedMessage = "icons:themeChanged"
+      nameValueList = map(lambda x: (x,x,themeChangedMessage), themeList)
+      self.addOption("Current theme", "currentTheme",
+      nameValueList,
+       "Themes",
+       defaultTheme)
+
+
     # Add all our categories to the "options" menu
     self.menuModule = self.m.get("menu", None)
     if(self.menuModule):
