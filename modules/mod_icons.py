@@ -34,7 +34,7 @@ class icons(ranaModule):
     self.cantLoad = []
     self.themesFolderPath = 'themes/'
     self.defaultTheme = 'default'
-    self.currentTheme = self.get('currentTheme', self.defaultTheme)
+    self.currentTheme = self.defaultTheme
     self.themeList = []
 
     # structure -> color_key:color_object
@@ -97,6 +97,9 @@ class icons(ranaModule):
 
   def firstTime(self):
     self.subscribeColorInfo(self, self.colorsChangedCallback)
+    # check if there was some theme used last time
+    lastUsedTheme = self.get('currentTheme', self.defaultTheme)
+    self.switchTheme(lastUsedTheme)
 
   def updateThemeList(self):
     rawFolderContent = os.listdir(self.themesFolderPath)
@@ -199,16 +202,21 @@ class icons(ranaModule):
       return valid
 
     def setColorFromColorStringAlphaTupple(self, colorStringAlphaTupple):
-      (colorString,alpha) = colorStringAlphaTupple
-      gtkColor = gtk.gdk.color_parse(colorString)
-      gtkcolorRange = float(2**16)
-      cairoR = gtkColor.red/gtkcolorRange
-      cairoG = gtkColor.green/gtkcolorRange
-      cairoB = gtkColor.blue/gtkcolorRange
-      self.setAlpha(alpha)
-      self.setCairoColor(cairoR,cairoG,cairoB,alpha)
-      self.gtkColor = gtkColor
-      self.valid = True
+      try:
+        (colorString,alpha) = colorStringAlphaTupple
+        gtkColor = gtk.gdk.color_parse(colorString)
+        gtkcolorRange = float(2**16)
+        cairoR = gtkColor.red/gtkcolorRange
+        cairoG = gtkColor.green/gtkcolorRange
+        cairoB = gtkColor.blue/gtkcolorRange
+        self.setAlpha(alpha)
+        self.setCairoColor(cairoR,cairoG,cairoB,alpha)
+        self.gtkColor = gtkColor
+        self.valid = True
+      except Exception, e:
+        print "wrong color string: %s" % colorString
+        print e
+
       
     def setCairoColor(self,r,g,b,a):
       self.cairoColor = (r,g,b,a)

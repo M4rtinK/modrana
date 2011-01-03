@@ -37,10 +37,23 @@ class showOSD(ranaModule):
     self.nearestPoint = None
     self.nearestIndex = None
     self.distanceList = None # sorted distances from current position
+
+    # colors
+    self.widgetBackgroundColor = (0, 0, 1, 0.45) # trasparent blue
+    self.widgetTextColor = (1, 1, 1, 0.95) # slightly transparent white
 #    self.avail = set(
 #                      'speed'
 #                      )
     
+  def firstTime(self):
+    icons = self.m.get('icons', None)
+    if icons:
+      icons.subscribeColorInfo(self,self.colorsChangedCallback)
+
+  def colorsChangedCallback(self,colors):
+    self.widgetBackgroundColor = colors['widget_background'].getCairoColor()
+    self.widgetTextColor = colors['widget_text'].getCairoColor()
+
 
   def drawScreenOverlay(self, cr):
     """ draw currenty active information widgets TODO: just draw object from list"""
@@ -197,7 +210,7 @@ class showOSD(ranaModule):
 
   def drawBackground(self, cr, x, y, w, h, source=None):
     cr.set_line_width(2)
-    cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
+    cr.set_source_rgba(*self.widgetBackgroundColor) # trasparent blue
 #    (rx,ry,rw,rh) = (x, y-h*1.4, w*1.2, (h*2))
     (rx,ry,rw,rh) = (x, y, w*1.2, h*1.2)
     cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
@@ -205,13 +218,13 @@ class showOSD(ranaModule):
 
   def drawBackgroundExact(self, cr, x, y, w, h, source=None):
     cr.set_line_width(2)
-    cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
+    cr.set_source_rgba(*self.widgetBackgroundColor) # trasparent blue
     (rx,ry,rw,rh) = (x, y, w, h)
     cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
     cr.fill()
 
   def drawText(self, cr, x, y, text, source=None):
-    cr.set_source_rgba(1, 1, 1, 0.95) # slightly transparent white
+    cr.set_source_rgba(*self.widgetTextColor) # slightly transparent white
     cr.move_to(x+10,y)
     cr.show_text(text) # show the trasparent notification text
     cr.stroke()
