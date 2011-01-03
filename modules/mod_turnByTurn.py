@@ -334,6 +334,14 @@ class turnByTurn(ranaModule):
               so we switch to the next step at once"""
               print "tbt: already past closest turn, switching to next turn"
               self.setStepAsCurrent(nextStep)
+              """we play the message for the next step,
+              with current distance to this step,
+              to assure there is some voice output immediatelly after
+              getting a new route or rerouting"""
+              plaintextMessage = nextStep['descriptionEspeak']
+              self.sayTurn(plaintextMessage, pos2nextStep)
+
+
             else:
               """we have probably not yet reached the closest step,
                  so we start navigation from it"""
