@@ -32,6 +32,11 @@ class turnByTurn(ranaModule):
   
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
+
+    # initial colors
+    self.navigationBoxBackground = (0,0,1,0.3) # very transparent blue
+    self.navigationBoxText = (1,1,1,1) # non-transparent white
+
     self.goToInitialState()
 
   def goToInitialState(self):
@@ -44,7 +49,17 @@ class turnByTurn(ranaModule):
     self.lastNavigationUpdate=time.time()
     self.currentDistance = None
     self.currentStep = None
+    self.navigationBoxHidden = False
 
+
+  def firstTime(self):
+    icons = self.m.get('icons', None)
+    if icons:
+      icons.subscribeColorInfo(self,self.colorsChangedCallback)
+
+  def colorsChangedCallback(self,colors):
+    self.navigationBoxBackground = colors['navigation_box_background'].getCairoColor()
+    self.navigationBoxText = colors['navigation_box_text'].getCairoColor()
     
   def update(self):
     # check if we should trigger a navigation message
@@ -59,6 +74,10 @@ class turnByTurn(ranaModule):
 
   def doNavigationUpdate(self):
     """do a navigation update"""
+    # make sure there really are some steps
+    if not self.steps:
+      return
+
     # get/compute/update necessary the values
     pos = self.get('pos', None) # and current position
     (lat1,lon1) = pos
@@ -107,6 +126,10 @@ class turnByTurn(ranaModule):
       self.sendMessage("ms:route:reroute:fromPosToDest")
       # 3. restart routing for to this new route from the closest point
       self.sendMessage("ms:turnByTurn:start:closest")
+    elif message == "toggleBoxHiding":
+      print "turnByTurn: toggling navigation box visibility"
+      self.navigationBoxHidden = not self.navigationBoxHidden
+
 
   def drawMapOverlay(self,cr):
       if self.steps:
@@ -134,49 +157,67 @@ class turnByTurn(ranaModule):
 
       # we need to have the viewport available
       vport = self.get('viewport', None)
-      if vport:
-        # background
-        cr.set_source_rgba(0, 0, 1, 0.3)
+      menus = self.m.get('menu', None)
+      if vport and menus:
         (sx,sy,w,h) = vport
-        (bx,by,bw,bh) = (w*0.15,h*0.1,w*0.7,h*0.4)
-        cr.rectangle(bx,by,bw,bh)
-        cr.fill()
-        cr.set_source_rgba(1, 1, 1, 1)
-        pg = pangocairo.CairoContext(cr)
-        # create a layout for our drawing area
-        layout = pg.create_layout()
-        message = currentStep['descriptionHtml']
-
-        # display current distance to the next point
-        units = self.m.get('units', None)
-        if units and self.currentDistance:
-          distString = units.m2CurrentUnitString(self.currentDistance,2)
+        (bx,by,bw,bh) = (w*0.15,h*0.20,w*0.7,h*0.4)
+        buttonStripOffset = 0.25 * bh
+        if self.navigationBoxHidden:
+          # * show button
+          showButtonWidth = bw * 0.2
+          menus.drawButton(cr, bx, by, showButtonWidth, buttonStripOffset, "#turn info", 'generic', "turnByTurn:toggleBoxHiding")
         else:
-          distString = ""
+          # background
+          cr.set_source_rgba(*self.navigationBoxBackground)
+          cr.rectangle(bx,by,bw,bh)
+          cr.fill()
+          cr.set_source_rgba(*self.navigationBoxText)
+          pg = pangocairo.CairoContext(cr)
+          # create a layout for our drawing area
+          layout = pg.create_layout()
+          message = currentStep['descriptionHtml']
 
-        note = "<sub> tap this box to reroute</sub>"
-        message = distString + "\n" + message + "\n\n" + note
+          # display current distance to the next point
+          units = self.m.get('units', None)
+          if units and self.currentDistance:
+            distString = units.m2CurrentUnitString(self.currentDistance,2)
+          else:
+            distString = ""
 
-        border = min(w/30.0,h/30.0)
-        layout.set_markup(message)
-        layout.set_font_description(pango.FontDescription("Sans Serif 20"))
-        # scale to text to fit into the box
-        (lw,lh) = layout.get_size()
-        if lw == 0 or lh == 0:
-          return
-        scale = float(pango.SCALE)
-        factor = min(((bw-2*border)/(lw/scale)),((bh-2*border)/(lh/scale)))
-        factor = min(factor, 1.0)
-        cr.move_to(bx+border,by+border)
-        cr.save()
-        cr.scale(factor,factor)
-        pg.show_layout(layout)
-        cr.restore()
-        # make clickable
-        clickHandler = self.m.get('clickHandler', None)
-        if clickHandler:
-          action = "turnByTurn:reroute"
-          clickHandler.registerXYWH(bx, by , bw, bh, action)
+          note = "<sub> tap this box to reroute</sub>"
+          message = distString + "\n" + message + "\n\n" + note
+
+          border = min(w/30.0,h/30.0)
+          layout.set_markup(message)
+          layout.set_font_description(pango.FontDescription("Sans Serif 20"))
+          # scale to text to fit into the box
+          (lw,lh) = layout.get_size()
+          if lw == 0 or lh == 0:
+            return
+          scale = float(pango.SCALE)
+          factor = min(((bw-2*border)/(lw/scale)),((bh-2*border-buttonStripOffset)/(lh/scale)))
+          factor = min(factor, 1.0)
+          cr.move_to(bx+border,by+border+buttonStripOffset)
+          cr.save()
+          cr.scale(factor,factor)
+          pg.show_layout(layout)
+          cr.restore()
+          # make clickable
+          clickHandler = self.m.get('clickHandler', None)
+          if clickHandler:
+            action = "turnByTurn:reroute"
+            clickHandler.registerXYWH(bx, by+buttonStripOffset , bw, bh-buttonStripOffset, action)
+
+          # draw the button strip
+          hideButtonWidth = bw * 0.2
+          switchButtonWidth = bw * 0.4
+          # * hide button
+          menus.drawButton(cr, bx, by, hideButtonWidth, buttonStripOffset, "#   hide", 'generic', "turnByTurn:toggleBoxHiding")
+          # * previous turn button
+          menus.drawButton(cr, bx+hideButtonWidth, by, switchButtonWidth, buttonStripOffset, "#previous turn", 'generic', "turnByTurn:switchToPreviousTurn")
+          # * next turn button
+          menus.drawButton(cr, bx+hideButtonWidth+switchButtonWidth, by, switchButtonWidth, buttonStripOffset, "#next turn", 'generic', "turnByTurn:switchToNextTurn")
+
 
   def sayTurn(self,message,distanceInMeters,forceLanguageCode=False):
     """say a text-to-spech message about a turn
