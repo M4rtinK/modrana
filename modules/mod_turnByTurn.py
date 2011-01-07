@@ -165,7 +165,7 @@ class turnByTurn(ranaModule):
         if self.navigationBoxHidden:
           # * show button
           showButtonWidth = bw * 0.2
-          menus.drawButton(cr, bx, by, showButtonWidth, buttonStripOffset, "#turn info", 'generic', "turnByTurn:toggleBoxHiding")
+          menus.drawButton(cr, bx, by, showButtonWidth, buttonStripOffset, "#show", 'generic', "turnByTurn:toggleBoxHiding")
         else:
           # background
           cr.set_source_rgba(*self.navigationBoxBackground)
@@ -212,7 +212,7 @@ class turnByTurn(ranaModule):
           hideButtonWidth = bw * 0.2
           switchButtonWidth = bw * 0.4
           # * hide button
-          menus.drawButton(cr, bx, by, hideButtonWidth, buttonStripOffset, "#   hide", 'generic', "turnByTurn:toggleBoxHiding")
+          menus.drawButton(cr, bx, by, hideButtonWidth, buttonStripOffset, "#hide", 'generic', "turnByTurn:toggleBoxHiding")
           # * previous turn button
           menus.drawButton(cr, bx+hideButtonWidth, by, switchButtonWidth, buttonStripOffset, "#previous turn", 'generic', "turnByTurn:switchToPreviousTurn")
           # * next turn button

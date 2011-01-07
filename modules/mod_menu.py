@@ -288,7 +288,10 @@ class menus(ranaModule):
 
     # Draw text
     cr.set_font_size(test_fontsize / ratio)
-    cr.move_to(x, y + h)
+    # Update the text extents info
+    _s1, _s2, textwidth, textheight, _s3, _s4 = cr.text_extents(text)
+    # _s3 contans the real width of the text
+    cr.move_to(x+(w-_s3)/2.0, y + h)
     cr.show_text(text)
 
   def drawToggleButtonOld(self, cr, x1, y1, w, h, textIconAction, index):
