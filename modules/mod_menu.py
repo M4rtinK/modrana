@@ -305,10 +305,7 @@ class menus(ranaModule):
     """NOTE: # delimits the different captions: text_down#text_middle#text_up
        text_up is NOT YET IMPLEMENTED"""
     # Draw icon
-    if(icon != None):
-      m = self.m.get('icons', None)
-      if(m != None):
-          m.draw(cr,icon,x1,y1,w,h)
+    self.icons.draw(cr,icon,x1,y1,w,h)
 
     # Draw text
 #    cr.set_source_rgb(0, 0, 0.3)
@@ -1106,6 +1103,10 @@ class menus(ranaModule):
     icons = self.m.get('icons', None)
     if icons:
       icons.subscribeColorInfo(self,self.colorsChangedCallback)
+
+    """ get a local reference for the icons module
+        so we don't have to look it up for every icon"""
+    self.icons = icons
 
   def handleMessage(self, message, type, args):
     messageList = message.split('#')

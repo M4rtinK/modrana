@@ -32,6 +32,8 @@ class icons(ranaModule):
     ranaModule.__init__(self, m, d)
     self.images = {}
     self.cantLoad = []
+    self.imageOrderList = [] # for cache trimming
+    self.maxImages = 200 # default 200
     self.themesFolderPath = 'themes/'
     self.defaultTheme = 'default'
     self.currentTheme = self.defaultTheme
@@ -51,24 +53,16 @@ class icons(ranaModule):
     self.buttonOutlineColor = (0,0,0,1)
     self.buttonFillColor = (1,1,1,1)
 
-    self.load('blank')
     self.updateThemeList()
-
-#    self.load('generic')
     
-  def load(self,name,w=None,h=None):
+  def loadFromFile(self,name,w=None,h=None):
     """load icon image to cache or draw the icon with cairo
-    TODO: draw all cions through this function ?"""
-#    if name=='start':
-#      print (w, h)
-#      pixbuf = gtk.gdk.pixbuf_new_from_file_at_size('icons/bitmap/start.svg',w,h)
-#      image = cairo.ImageSurface(0,w,h)
-#      ct = cairo.Context(image)
-#      ct2 = gtk.gdk.CairoContext(ct)
-#      ct2.set_source_pixbuf(pixbuf,0,0)
-#      ct2.paint()
-#    else:
-#    filename = "icons/bitmap/%s.png" % name
+    TODO: draw all icons through this function ?"""
+
+    # we convert the width and height to int to get rid of some GTK warnings
+    w = int(w)
+    h = int(h)
+
     iconPath = None
     iconPathThemed = self.getCurrentThemePath() + '%s.png' % name
     iconPathDefault = self.themesFolderPath + '/' + self.defaultTheme + '/%s.png' % name
@@ -78,28 +72,151 @@ class icons(ranaModule):
       iconPath = iconPathDefault
     else:
       print "icons: %s not found" % name
-      return(0)
+      # we use the default button background if the tile is missing
+      return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor))
 
     image = None
     try:
-      image = cairo.ImageSurface.create_from_png(iconPath) #TODO: improve this by the pixbuff method ?
+      pixbuf = gtk.gdk.pixbuf_new_from_file(iconPath)
+
+      ''' create a new cairo surface to place the image on '''
+      image = cairo.ImageSurface(0,w,h)
+      ''' create a context to the new surface '''
+      ct = cairo.Context(image)
+      ''' create a GDK formatted Cairo context to the new Cairo native context '''
+      ct2 = gtk.gdk.CairoContext(ct)
+      ''' draw from the pixbuf to the new surface '''
+      ct2.set_source_pixbuf(pixbuf.scale_simple(w,h,gtk.gdk.INTERP_HYPER),0,0)
+      ct2.paint()
+      ''' surface now contains the image in a Cairo surface '''
     except Exception, e:
       print '** the icon "%s" is possibly corrupted' % name
-      print "** filename: %s" % filename
+      print "** filename: %s" % iconPath
       print "** exception: %s" % e
 
     if(not image):
-      return(0)
+      return(False)
     w = float(image.get_width())
     h = float(image.get_height())
-    self.images[name] = {'image':image,'w':w,'h':h}
-    return(1)
+    return (image)
 
   def firstTime(self):
     self.subscribeColorInfo(self, self.colorsChangedCallback)
     # check if there was some theme used last time
     lastUsedTheme = self.get('currentTheme', self.defaultTheme)
     self.switchTheme(lastUsedTheme)
+
+  def flushIconCache(self):
+    """flush the icon cache"""
+    self.images = {}
+    self.cantLoad = []
+    self.imageOrderList = []
+
+  def draw(self,cr,name,x,y,w,h):
+    # is the icon already cached ?
+    cacheName  = "%fx%f#%s" % (w,h,name)
+
+    if cacheName in self.images.keys():
+      self.drawIcon(cr, self.images[cacheName], x, y, w, h)
+
+    # is it in the cant load list ?
+    elif name in self.cantLoad:
+      """the cant load list stores names of icons which errored out during
+         loading from file -> like this we wont load corrupted or
+         nonexisting icons over and over again"""
+      return
+
+    # is it an icon that gets rendered at runtime ?
+    elif name.split(':')[0] == 'generic':
+      icon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
+      if icon:
+        cachedIcon = self.storeInCache(cacheName, icon, w, h)
+        self.drawIcon(cr, cachedIcon, x, y, w, h)
+      return
+
+    # try to load it from file
+    else:
+      # false means that loading the icon from file failed
+      # this can be caused by missing or corrupted image file
+      loadingResult = self.loadFromFile(name, w, h)
+      if (loadingResult == False):
+        self.cantLoad.append(name)
+      else:
+        cachedIcon = self.storeInCache(cacheName, loadingResult, w, h)
+        self.drawIcon(cr, cachedIcon, x, y, w, h)
+        
+  def drawIcon(self,cr,icon,x,y,w,h):        
+    cr.save()
+    cr.translate(x,y)
+#    cr.scale(w / icon['w'], h / icon['h'])
+    cr.set_source_surface(icon['image'],0,0)
+    cr.paint()
+    cr.restore()
+
+  def storeInCache(self, name, image, w, h):
+    """store an item in cache and return the cache representation"""
+    # check if the cache is full
+    if len(self.images) >= self.maxImages:
+      # get the oldest image + remove it ofrem the queue
+      oldestImageName = self.imageOrderList.pop(0) # TODO: this might be slow
+#      print "trimming cache, %s, %d" % (oldestImageName, len(self.images))
+      # remove it from the cache
+      del self.images[oldestImageName]
+    cacheRepresentation = {'image':image,'w':w,'h':h, 'name':name}
+    self.images[name] = cacheRepresentation
+    self.imageOrderList.append(name)
+    return cacheRepresentation
+
+  def handleMessage(self, message, type, args):
+    if message == "themeChanged":
+      """handle theme switching"""
+      currentTheme = self.get('currentTheme', self.defaultTheme)
+      self.switchTheme(currentTheme)
+      
+  # ported from
+  #http://www.cairographics.org/samples/rounded_rectangle/
+  def roundedRectangle(self, width, height, fill, outline):
+    """draw a rounded rectangle, fill and outline set the fill and outline rgba color
+       r,g,b from 0 to 255, a from 0 to 1"""
+    x = 0
+    y = 0
+    image = cairo.ImageSurface(0,width,height)
+    cr = cairo.Context(image)
+    pi = 3.1415926535897931
+    aspect        = 1.0     #/* aspect ratio */
+#    corner_radius = height / 10.0   #/* and corner curvature radius */
+    corner_radius = height / 7   #/* and corner curvature radius */
+
+    radius = corner_radius / aspect
+    degrees = pi / 180.0
+
+    # correcting for the line width
+    # we also leave a line about one pixel wide free on all sides
+
+    x         = x+5
+    y         = y+5
+    width         = width-9
+    height        = height-9
+
+    cr.new_sub_path()
+    cr.arc (x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees)
+    cr.arc (x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees)
+    cr.arc (x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees)
+    cr.arc (x + radius, y + radius, radius, 180 * degrees, 270 * degrees)
+    cr.close_path()
+
+    # inscape to cairo conversion :)
+#    (r1, g1, b1, a1) = (fill[0]/256.0,fill[1]/256.0,fill[2]/256.0,fill[3])
+#    (r2, g2, b2, a2) = (outline[0]/256.0,outline[1]/256.0,outline[2]/256.0,outline[3])
+#
+#    (r1, g1, b1, a1) = (fill[0]/256.0,fill[1]/256.0,fill[2]/256.0,fill[3])
+#    (r2, g2, b2, a2) = (outline[0]/256.0,outline[1]/256.0,outline[2]/256.0,outline[3])
+    cr.set_source_rgba(*fill)
+    cr.fill_preserve ()
+    cr.set_source_rgba(*outline)
+    cr.set_line_width(8.0)
+    cr.stroke()
+    return (image)
 
   def updateThemeList(self):
     rawFolderContent = os.listdir(self.themesFolderPath)
@@ -126,11 +243,7 @@ class icons(ranaModule):
     self.colors.update(themeColors) # then overwrite theme specific colors
     self.notifyColorSubscribers() # notify color info subscribers
     print "icons: switched theme to: %s" % newTheme
-
-  def flushIconCache(self):
-    """flush the icon cache"""
-    self.images = {}
-
+  
   def loadColorsFromFile(self,path):
     """load color definitions from file"""
     config = ConfigObj(path)
@@ -217,7 +330,7 @@ class icons(ranaModule):
         print "wrong color string: %s" % colorString
         print e
 
-      
+
     def setCairoColor(self,r,g,b,a):
       self.cairoColor = (r,g,b,a)
 
@@ -235,77 +348,3 @@ class icons(ranaModule):
 
     def getColorStringAlphaTupple(self):
       return self.colorStringAlphaTupple
-
-  def draw(self,cr,name,x,y,w,h):
-    if name == 'generic':
-      self.roundedRectangle(cr, x, y, w, h, self.buttonFillColor, self.buttonOutlineColor)
-      return
-    elif not name in self.images.keys():
-      if(name in self.cantLoad):
-        self.roundedRectangle(cr, x, y, w, h, self.buttonFillColor, self.buttonOutlineColor)
-        return
-      elif(not self.load(name,w,h)):
-        self.cantLoad.append(name)
-        self.roundedRectangle(cr, x, y, w, h, self.buttonFillColor, self.buttonOutlineColor)
-        return
-#    if not name in self.images.keys():
-#      if(name in self.cantLoad):
-#        name = 'generic'
-#      elif(not self.load(name,w,h)):
-#        self.cantLoad.append(name)
-#        name='generic'
-        
-    icon = self.images[name]
-    cr.save()
-    cr.translate(x,y)
-    cr.scale(w / icon['w'], h / icon['h'])
-    cr.set_source_surface(icon['image'],0,0)
-    cr.paint()
-    cr.restore()
-
-  def handleMessage(self, message, type, args):
-    if message == "themeChanged":
-      """handle theme switching"""
-      currentTheme = self.get('currentTheme', self.defaultTheme)
-      self.switchTheme(currentTheme)
-      
-  # ported from
-  #http://www.cairographics.org/samples/rounded_rectangle/
-  def roundedRectangle(self, cr, x, y, width, height, fill, outline):
-    """draw a rounded rectangle, fill and outline set the fill and outline rgba color
-       r,g,b from 0 to 255, a from 0 to 1"""
-    pi = 3.1415926535897931
-    aspect        = 1.0     #/* aspect ratio */
-#    corner_radius = height / 10.0   #/* and corner curvature radius */
-    corner_radius = height / 7   #/* and corner curvature radius */
-
-    radius = corner_radius / aspect
-    degrees = pi / 180.0
-
-    # correcting for the line width
-    # we also leave a line about one pixel wide free on all sides
-
-    x         = x+5
-    y         = y+5
-    width         = width-9
-    height        = height-9
-
-    cr.new_sub_path()
-    cr.arc (x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees)
-    cr.arc (x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees)
-    cr.arc (x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees)
-    cr.arc (x + radius, y + radius, radius, 180 * degrees, 270 * degrees)
-    cr.close_path()
-
-    # inscape to cairo conversion :)
-#    (r1, g1, b1, a1) = (fill[0]/256.0,fill[1]/256.0,fill[2]/256.0,fill[3])
-#    (r2, g2, b2, a2) = (outline[0]/256.0,outline[1]/256.0,outline[2]/256.0,outline[3])
-#
-#    (r1, g1, b1, a1) = (fill[0]/256.0,fill[1]/256.0,fill[2]/256.0,fill[3])
-#    (r2, g2, b2, a2) = (outline[0]/256.0,outline[1]/256.0,outline[2]/256.0,outline[3])
-    cr.set_source_rgba(*fill)
-    cr.fill_preserve ()
-    cr.set_source_rgba(*outline)
-    cr.set_line_width(8.0)
-    cr.stroke()
-  
