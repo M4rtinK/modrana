@@ -113,8 +113,6 @@ class icons(ranaModule):
     self.imageOrderList = []
 
   def draw(self,cr,name,x,y,w,h):
-    for i in self.images:
-      print i
     # is the icon already cached ?
     cacheName  = "%fx%f#%s" % (w,h,name)
 
