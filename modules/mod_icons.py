@@ -129,7 +129,6 @@ class icons(ranaModule):
     # is it an icon that gets rendered at runtime ?
     elif name.split(':')[0] == 'generic':
       icon = None
-      print name.split(':',1)
       if len(name.split(':',1)) == 1:
         # just the default cairo drawn icon
         icon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
@@ -294,7 +293,8 @@ class icons(ranaModule):
 
   def updateThemeList(self):
     rawFolderContent = os.listdir(self.themesFolderPath)
-    self.availableThemes = filter(lambda x: not os.path.isdir(x),rawFolderContent)
+    print filter(lambda x: not os.path.isdir(self.themesFolderPath + '/' +x),rawFolderContent)
+    self.availableThemes = filter(lambda x: os.path.isdir(self.themesFolderPath + '/' +x) and not x=='.svn',rawFolderContent)
 
   def getThemeList(self):
     """returna a list of currently available themes (list of folders in the themes folder)"""

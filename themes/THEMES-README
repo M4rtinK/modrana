@@ -13,3 +13,6 @@ a generic icon is used.
 Currently only png is supported, but support for other bitmap formats and SVG is planed.
 When deciding on icon resolution, look on the resolutiton of the default icons,
 icons are always scaled to fit the current iccon size.
+
+= Where are the source SVG files for the default icons ? =
+They are in data/gui_source.
