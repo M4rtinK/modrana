@@ -129,6 +129,10 @@ class turnByTurn(ranaModule):
     elif message == "toggleBoxHiding":
       print "turnByTurn: toggling navigation box visibility"
       self.navigationBoxHidden = not self.navigationBoxHidden
+    elif message == "switchToPreviousTurn":
+      self.switchToPreviousStep()
+    elif message == "switchToNextTurn":
+      self.switchToNextStep()
 
 
   def drawMapOverlay(self,cr):
@@ -165,7 +169,7 @@ class turnByTurn(ranaModule):
         if self.navigationBoxHidden:
           # * show button
           showButtonWidth = bw * 0.2
-          menus.drawButton(cr, bx, by, showButtonWidth, buttonStripOffset, "#show", 'generic', "turnByTurn:toggleBoxHiding")
+          menus.drawButton(cr, bx+(bw-showButtonWidth), by, showButtonWidth, buttonStripOffset, "#show", 'generic', "turnByTurn:toggleBoxHiding")
         else:
           # background
           cr.set_source_rgba(*self.navigationBoxBackground)
@@ -211,12 +215,12 @@ class turnByTurn(ranaModule):
           # draw the button strip
           hideButtonWidth = bw * 0.2
           switchButtonWidth = bw * 0.4
-          # * hide button
-          menus.drawButton(cr, bx, by, hideButtonWidth, buttonStripOffset, "#hide", 'generic', "turnByTurn:toggleBoxHiding")
           # * previous turn button
-          menus.drawButton(cr, bx+hideButtonWidth, by, switchButtonWidth, buttonStripOffset, "#previous turn", 'generic', "turnByTurn:switchToPreviousTurn")
+          menus.drawButton(cr, bx, by, switchButtonWidth, buttonStripOffset, "#previous turn", 'generic', "turnByTurn:switchToPreviousTurn")
           # * next turn button
-          menus.drawButton(cr, bx+hideButtonWidth+switchButtonWidth, by, switchButtonWidth, buttonStripOffset, "#next turn", 'generic', "turnByTurn:switchToNextTurn")
+          menus.drawButton(cr, bx+switchButtonWidth, by, switchButtonWidth, buttonStripOffset, "#next turn", 'generic', "turnByTurn:switchToNextTurn")
+          # * hide button
+          menus.drawButton(cr, bx+2*switchButtonWidth, by, hideButtonWidth, buttonStripOffset, "#hide", 'generic', "turnByTurn:toggleBoxHiding")
 
 
   def sayTurn(self,message,distanceInMeters,forceLanguageCode=False):
@@ -287,6 +291,17 @@ class turnByTurn(ranaModule):
   def markCurrentStepAsVisited(self):
     """mark current step as visited"""
     self.steps[self.currentStepIndex]['visited'] = True
+
+  def switchToPreviousStep(self):
+    """switch to previous step and clean up"""
+    nextIndex = self.currentStepIndex - 1
+    if nextIndex >= 0:
+      self.currentStepIndex = nextIndex
+      self.espeakFirstTrigger = False
+      self.espeakSecondTrigger = False
+      print "switching to previous step"
+    else:
+      print "previous step reached"
 
   def switchToNextStep(self):
     """switch to next step and clean up"""
