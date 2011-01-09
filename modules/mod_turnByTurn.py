@@ -223,9 +223,9 @@ class turnByTurn(ranaModule):
           switchButtonWidth = bw * 0.4
 
           # * previous turn button
-          menus.drawButton(cr, bx, by, switchButtonWidth, buttonStripOffset, "#previous turn", parametricIconName, "turnByTurn:switchToPreviousTurn")
+          menus.drawButton(cr, bx, by, switchButtonWidth, buttonStripOffset, "#previous", parametricIconName, "turnByTurn:switchToPreviousTurn")
           # * next turn button
-          menus.drawButton(cr, bx+switchButtonWidth, by, switchButtonWidth, buttonStripOffset, "#next turn", parametricIconName, "turnByTurn:switchToNextTurn")
+          menus.drawButton(cr, bx+switchButtonWidth, by, switchButtonWidth, buttonStripOffset, "#next", parametricIconName, "turnByTurn:switchToNextTurn")
           # * hide button
           menus.drawButton(cr, bx+2*switchButtonWidth, by, hideButtonWidth, buttonStripOffset, "#hide", parametricIconName, "turnByTurn:toggleBoxHiding")
 
