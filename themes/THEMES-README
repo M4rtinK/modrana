@@ -1,0 +1,15 @@
+= Intro =
+Each theme is represented with its own folder. Name of the folder is used as theme name.
+The theme folder can contain icons and the theme.conf configuration file
+for setting colors of the cairo drawn GUI components.
+See the self documented theme.conf in the default theme.
+
+= How icon loading works ? =
+Icons are first looked up in the current theme folder, if not available
+the default folder is looked up. If no icon is found in both folders,
+a generic icon is used.
+
+= What image fomats can the icons be in ? =
+Currently only png is supported, but support for other bitmap formats and SVG is planed.
+When deciding on icon resolution, look on the resolutiton of the default icons,
+icons are always scaled to fit the current iccon size.
