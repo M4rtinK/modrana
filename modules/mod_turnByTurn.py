@@ -134,7 +134,6 @@ class turnByTurn(ranaModule):
     elif message == "switchToNextTurn":
       self.switchToNextStep()
 
-
   def drawMapOverlay(self,cr):
       if self.steps:
         # get current step
@@ -166,10 +165,17 @@ class turnByTurn(ranaModule):
         (sx,sy,w,h) = vport
         (bx,by,bw,bh) = (w*0.15,h*0.20,w*0.7,h*0.4)
         buttonStripOffset = 0.25 * bh
+
+        # construct parameters for the cairo drawn buttons
+        boxAlpha = self.navigationBoxBackground[3]
+        parametricIconName="generic:;%f;;%f;7;5" % (0, boxAlpha*2)
+        
         if self.navigationBoxHidden:
           # * show button
           showButtonWidth = bw * 0.2
-          menus.drawButton(cr, bx+(bw-showButtonWidth), by, showButtonWidth, buttonStripOffset, "#show", 'generic', "turnByTurn:toggleBoxHiding")
+          # the show button uses custom parameters
+          parametricIconName="generic:;%f;;%f;;5" % (boxAlpha, boxAlpha)
+          menus.drawButton(cr, bx+(bw-showButtonWidth), by, showButtonWidth, buttonStripOffset, "#show", parametricIconName, "turnByTurn:toggleBoxHiding")
         else:
           # background
           cr.set_source_rgba(*self.navigationBoxBackground)
@@ -215,12 +221,13 @@ class turnByTurn(ranaModule):
           # draw the button strip
           hideButtonWidth = bw * 0.2
           switchButtonWidth = bw * 0.4
+
           # * previous turn button
-          menus.drawButton(cr, bx, by, switchButtonWidth, buttonStripOffset, "#previous turn", 'generic', "turnByTurn:switchToPreviousTurn")
+          menus.drawButton(cr, bx, by, switchButtonWidth, buttonStripOffset, "#previous turn", parametricIconName, "turnByTurn:switchToPreviousTurn")
           # * next turn button
-          menus.drawButton(cr, bx+switchButtonWidth, by, switchButtonWidth, buttonStripOffset, "#next turn", 'generic', "turnByTurn:switchToNextTurn")
+          menus.drawButton(cr, bx+switchButtonWidth, by, switchButtonWidth, buttonStripOffset, "#next turn", parametricIconName, "turnByTurn:switchToNextTurn")
           # * hide button
-          menus.drawButton(cr, bx+2*switchButtonWidth, by, hideButtonWidth, buttonStripOffset, "#hide", 'generic', "turnByTurn:toggleBoxHiding")
+          menus.drawButton(cr, bx+2*switchButtonWidth, by, hideButtonWidth, buttonStripOffset, "#hide", parametricIconName, "turnByTurn:toggleBoxHiding")
 
 
   def sayTurn(self,message,distanceInMeters,forceLanguageCode=False):

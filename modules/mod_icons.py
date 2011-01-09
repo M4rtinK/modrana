@@ -113,6 +113,8 @@ class icons(ranaModule):
     self.imageOrderList = []
 
   def draw(self,cr,name,x,y,w,h):
+    for i in self.images:
+      print i
     # is the icon already cached ?
     cacheName  = "%fx%f#%s" % (w,h,name)
 
@@ -128,7 +130,79 @@ class icons(ranaModule):
 
     # is it an icon that gets rendered at runtime ?
     elif name.split(':')[0] == 'generic':
-      icon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
+      icon = None
+      print name.split(':',1)
+      if len(name.split(':',1)) == 1:
+        # just the default cairo drawn icon
+        icon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
+      else:
+        # the icon name contains custom positional parameters
+        semicolonSepList = name.split(':',1)[1].split(';')
+        """
+        there are five positional parameters:
+        fill collor,fill opacity, outline color, outline opacity, 
+        outline width (default 8) and corner radius (default 22)
+        to use default value, just dont fill in the positional parameter
+        ( len(parameter) == 0
+        """
+        if len(semicolonSepList) == 6:
+          # process the positional parameters
+
+          if len(semicolonSepList[0]):
+            fillColorString = semicolonSepList[0]
+          else:
+            fillColorString = None
+
+          if len(semicolonSepList[1]):
+            fillAlpha = float(semicolonSepList[1])
+          else:
+            fillAlpha = 1.0
+
+          if len(semicolonSepList[2]):
+            outlineColorString = semicolonSepList[0]
+          else:
+            outlineColorString = None
+
+          if len(semicolonSepList[3]):
+            outlineAlpha = float(semicolonSepList[3])
+          else:
+            outlineAlpha = 1.0
+
+          if len(semicolonSepList[4]):
+            outlineWidth = int(semicolonSepList[4])
+          else:
+            outlineWidth = 8
+
+          if len(semicolonSepList[5]):
+            cornerRadius = int(semicolonSepList[5])
+          else:
+            cornerRadius = 22
+
+          # parse the colors (if defined)
+
+          if fillColorString:
+            fillColor = self.color("fill", fillColorString)
+            fillColorRGBATupple = fillColor.getCairoColor()
+          else:
+            fillColorRGBATupple = self.buttonFillColor
+
+          if outlineColorString:
+            outlineColor = self.color("outline", outlineColorString)
+            outlineColorRGBATupple = outlineColor.getCairoColor()
+          else:
+            outlineColorRGBATupple = self.buttonOutlineColor
+
+          # apply the alfa values
+
+          (r,g,b,a) = fillColorRGBATupple
+          fillColorRGBATupple = (r,g,b,fillAlpha)
+
+          (r,g,b,a) = outlineColorRGBATupple
+          outlineColorRGBATupple = (r,g,b,outlineAlpha)
+
+          # create the icon
+          icon = self.roundedRectangle(w, h, fillColorRGBATupple, outlineColorRGBATupple, outlineWidth=outlineWidth, radius=cornerRadius)
+          
       if icon:
         cachedIcon = self.storeInCache(cacheName, icon, w, h)
         self.drawIcon(cr, cachedIcon, x, y, w, h)
@@ -175,7 +249,7 @@ class icons(ranaModule):
       
   # ported from
   #http://www.cairographics.org/samples/rounded_rectangle/
-  def roundedRectangle(self, width, height, fill, outline):
+  def roundedRectangle(self, width, height, fillColor, outlineColor, outlineWidth=8, radius=22):
     """draw a rounded rectangle, fill and outline set the fill and outline rgba color
        r,g,b from 0 to 255, a from 0 to 1"""
     x = 0
@@ -183,11 +257,13 @@ class icons(ranaModule):
     image = cairo.ImageSurface(0,width,height)
     cr = cairo.Context(image)
     pi = 3.1415926535897931
-    aspect        = 1.0     #/* aspect ratio */
-#    corner_radius = height / 10.0   #/* and corner curvature radius */
-    corner_radius = height / 7   #/* and corner curvature radius */
+#    aspect        = 1.0     #/* aspect ratio */
+##    corner_radius = height / 10.0   #/* and corner curvature radius */
+#    corner_radius = height / 7   #/* and corner curvature radius */
+##    corner_radius = height / 100   #/* and corner curvature radius */
+#
+##    radius = corner_radius / aspect
 
-    radius = corner_radius / aspect
     degrees = pi / 180.0
 
     # correcting for the line width
@@ -211,10 +287,10 @@ class icons(ranaModule):
 #
 #    (r1, g1, b1, a1) = (fill[0]/256.0,fill[1]/256.0,fill[2]/256.0,fill[3])
 #    (r2, g2, b2, a2) = (outline[0]/256.0,outline[1]/256.0,outline[2]/256.0,outline[3])
-    cr.set_source_rgba(*fill)
+    cr.set_source_rgba(*fillColor)
     cr.fill_preserve ()
-    cr.set_source_rgba(*outline)
-    cr.set_line_width(8.0)
+    cr.set_source_rgba(*outlineColor)
+    cr.set_line_width(outlineWidth)
     cr.stroke()
     return (image)
 
