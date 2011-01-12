@@ -355,8 +355,12 @@ class menus(ranaModule):
 
     # Is it a list ?
     if menuName in self.lists.keys(): # TODO: optimize this
-      print "drawing list: %s" % menuName
+#      print "drawing list: %s" % menuName
       self.lists[menuName].draw(cr) # draw the list
+
+      # then draw any possibly pending notifications
+      if self.notificationModule:
+        self.notificationModule.drawMasterOverlay(cr)
       return
     
     # Find the menu
@@ -366,6 +370,10 @@ class menus(ranaModule):
         print "Menu %s doesn't exist, returning to main screen" % menuName
         self.set('menu', None)
         self.set('needRedraw', True)
+        
+        # draw any possibly pending notifications
+        if self.notificationModule:
+          self.notificationModule.drawMasterOverlay(cr)
       return
 
 
