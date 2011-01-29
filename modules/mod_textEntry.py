@@ -28,6 +28,7 @@ class textEntry(ranaModule):
   
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
+    self.entryBoxVisible = False
     
 
   def clearEntry(self):
@@ -44,21 +45,29 @@ class textEntry(ranaModule):
 
   def respondToDialog(self, dialog, response_id,entry,instance,key):
       print "responding to dialog"
+      if response_id == gtk.RESPONSE_ACCEPT:
+        print "dialog accepted"
+        self.respond(entry.get_text(), instance,key)
+      else:
+        print "dialog rejected"
+        """the dialog was rejected so we don't
+        report the input that could have been entered"""
+
+
 #      self.set('textEntry', entry.get_text())
 #      self.set('textEntryDone', True)
-      self.respond(entry.get_text(), instance,key)
       print "text entry dialog is quiting"
       dialog.destroy()
 
   def respond(self, result, instance, key):
-    menu = self.m.get('menu', None)
-    if menu:
-        fullscreen = menu.fullscreen
-        if fullscreen:
-          self.mainWindow.get_toplevel().fullscreen()
-
+#    if self.tempUnfullscreen:
+#      if display:
+#        if display.fullscreen():
+#          display.fullscreenToggle()
+#          self.tempUnfullscreen = False
+    self.dmod.textEntryDone()
     instance.handleTextEntryResult(key,result)
-
+    self.entryBoxVisible = False
 
   def entryBox(self, instance,key, label="Text entry", initialText=""):
       dialog = gtk.Dialog(
@@ -79,6 +88,7 @@ class textEntry(ranaModule):
       #create the text input field
       entry = gtk.Entry()
       entry.set_text(initialText)
+      entry.select_region(0,-1)
       # make sure the text is visible (TODO: respect current theme, but make sure the text will be visible ?)
       entry.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse('black'))
       entry.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
@@ -98,13 +108,22 @@ class textEntry(ranaModule):
       (x,y,w,h) = self.get('viewport')
       dialog.resize(w,height) # resize the dialog to the width of the window and leave height the same
       dialog.set_keep_above(True)
-      menu = self.m.get('menu', None)
-      if menu:
-        fullscreen = menu.fullscreen
-        if fullscreen:
-          self.mainWindow.get_toplevel().unfullscreen()
+#      display = self.m.get('display', None)
+#      if display:
+#        if display.getFullscreenEnabled():
+#          display.fullscreenToggle()
+#          self.tempUnfullscreen = True
+      self.dmod.textEntryIminent()
+      self.entryBoxVisible = True
       dialog.show_all()
 
+
+  def isEntryBoxvisible(self):
+    """report if the current entry box is visible
+       - so that for example the display module can distinguish
+       normal minimization events and losing focus due to the modal
+       text entry box"""
+    return self.entryBoxVisible
 
 if(__name__ == "__main__"):
   a = example({}, {})
