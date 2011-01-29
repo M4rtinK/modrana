@@ -161,10 +161,16 @@ class device_n900(deviceModule):
         if window.is_active():
           display.enableRedraw(reason="N900 window is active")
         else:
+          # check if text entry is in progress
+          textEntry = self.m.get('textEntry', None)
+          if textEntry:
+            if textEntry.isEntryBoxvisible():
+              # we redraw modRana behind text entry box
+              return
           display.disableRedraw(reason="N900 window is not active")
 
   def screenStateChangedCallback(self, state):
-    """this is called when the display is balnked or unblanked"""
+    """this is called when the display is blanked or unblanked"""
     display = self.m.get('display', None)
     if display:
       if state == "on" or state == "dimm":

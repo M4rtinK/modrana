@@ -100,7 +100,10 @@ class display(ranaModule):
     if m:
       m.fullscreen = value
 
-  def fullscreen(self):
+  def getFullscreenEnabled(self):
+    """
+    True - we are in fullscreen, False othewise
+    """
     return self.fullscreen
 
 
