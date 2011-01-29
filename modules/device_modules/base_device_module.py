@@ -51,6 +51,17 @@ class deviceModule(ranaModule):
   def locationType(self):
     """modRana uses gpsd by default"""
     return 'gpsd'
+
+  def textEntryIminent(self):
+    """text entry box will be shown after this metod finishes
+       - on some platforms, there are some steps needed to make sure
+       it is actually visible (like disabling fullscreen, etc.)"""
+    pass
+
+  def textEntryDone(self):
+    """we are done with text entry, so all the needed steps can be reversed again
+       (enbale fullscreen, etc.)"""
+    pass
   
 #  def getAutorotationSupported(self):
 #    return False
