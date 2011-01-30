@@ -528,6 +528,7 @@ class search(ranaModule):
       cr.stroke()
 
   def firstTime(self):
+    # TODO: do this once the menu is first entered, not always on startup
     m = self.m.get("menu", None)
     if(m):
       m.clearMenu("search", 'set:menu:main')
@@ -536,7 +537,7 @@ class search(ranaModule):
         m.clearMenu("search_"+category, 'set:menu:search')
         m.addItem('search', category, category.lower(), 'set:menu:search_'+category)
         for name,filter in items.items():
-          m.addItem('search_'+category, name, name.lower(), "ms:search:searchThis:"+filter)
+          m.addItem('search_'+category, name, name.lower().replace(' ','_'), "ms:search:searchThis:"+filter)
 #      m.addItem('search', 'clear', 'clear', 'search:clearSearch|set:menu:None')
       m.addItem('search', 'query#custom', 'generic', 'search:customQuery')
 
