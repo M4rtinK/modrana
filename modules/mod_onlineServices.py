@@ -209,7 +209,7 @@ class onlineServices(ranaModule):
         if not seccondTime: # guard against potential infinite loop for consequent 400 errors
           print "onlineServices:Gdirections:bad response to travel mode, trying default travel mode"
           self.set('needRedraw', True)
-          directions = self.tryToGetDirections(start, destination, dir, travelMode="", seccondTime=True)
+          directions = self.tryToGetDirections(start, destination, dir, travelMode="",otherOptions=otherOptions ,seccondTime=True)
       else:
         print "onlineServices:Gdirections:routing failed with exception googlemaps status code:%d" % e.status
     except Exception, e:
