@@ -21,6 +21,8 @@ from base_module import ranaModule
 import cairo
 import gtk
 import os
+import glob
+import fnmatch
 from configobj import ConfigObj
 
 def getModule(m,d):
@@ -63,21 +65,73 @@ class icons(ranaModule):
     w = int(w)
     h = int(h)
 
-    iconPath = None
-    iconPathThemed = self.getCurrentThemePath() + '%s.png' % name
-    iconPathDefault = self.themesFolderPath + '/' + self.defaultTheme + '/%s.png' % name
-    if(os.path.exists(iconPathThemed)):
-      iconPath = iconPathThemed
-    elif(os.path.exists(iconPathDefault)):
-      iconPath = iconPathDefault
+    iconPathThemed = self.getCurrentThemePath()
+    iconPathDefault = self.getDefaultThemePath()
+
+    (simplePaths,parameterPaths) = self.findUsableIcon(name, [iconPathThemed,iconPathDefault])
+    image = None
+    # ist there a filename with positional parameters ?
+    if parameterPaths:
+      result = None
+      if fnmatch.filter(parameterPaths, "*%s-above_text.*" % name):
+        aboveTextIconPath = fnmatch.filter(parameterPaths, "*%s-above_text.*" % name).pop()
+        pixbufInfo = gtk.gdk.pixbuf_get_file_info(aboveTextIconPath)
+        # it we get some info about the file, it means that the image is probably pixbufable
+        if pixbufInfo:
+          (iconInfo,iconW,iconH) = pixbufInfo
+          if iconH == 0:
+            iconH = 1
+          hwRatio = iconW/float(iconH)
+          border = min(w,h)*0.1
+          targetH = (h*0.55)
+          targetW = w - 2*border
+          """ try to fit the icon image above the text inside the icon outline,
+              with some space between, while respecting appect original aspect ratio"""
+          scaledW = targetW
+          scaledH = targetW/float(hwRatio)
+          if scaledH > targetH:
+            scaledH = targetH
+            scaledW = targetH * hwRatio
+          targetX = border + (targetW-scaledW)/2.0
+          targetY = border*(0.9) + ((targetH-scaledH)/2.0)
+          try:
+            # try to load the icon to pixbuf and get ist original width and height
+            pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(aboveTextIconPath,int(scaledW),int(scaledH))
+          except Exception, e:
+            print "icons: icon probably corrupted: %s" % aboveTextIconPath
+            print "%s" % e
+          # get the background icon
+          compositeIcon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
+          ct = cairo.Context(compositeIcon)
+          ct2 = gtk.gdk.CairoContext(ct)
+          ct2.set_source_pixbuf(pixbuf,targetX,targetY)
+          ct2.paint()
+          return compositeIcon
+
+      if result == None:
+        return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor))
+    # just use the classic icon
+    elif simplePaths:
+      iconPath = simplePaths.pop()
+      image = self.getImageSurface(iconPath, w, h)
+    # no icon found
     else:
       print "icons: %s not found" % name
       # we use the default button background if the tile is missing
       return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor))
 
+    if(not image): # loading the image probably failed
+      return(False)
+    w = float(image.get_width())
+    h = float(image.get_height())
+    return (image)
+
+  def getImageSurface(self,path, w, h):
+    """load a image given by path to pixbuf and paint ti to image surface,
+       then return the image surface"""
     image = None
     try:
-      pixbuf = gtk.gdk.pixbuf_new_from_file(iconPath)
+      pixbuf = gtk.gdk.pixbuf_new_from_file(path)
 
       ''' create a new cairo surface to place the image on '''
       image = cairo.ImageSurface(0,w,h)
@@ -90,15 +144,62 @@ class icons(ranaModule):
       ct2.paint()
       ''' surface now contains the image in a Cairo surface '''
     except Exception, e:
-      print '** the icon "%s" is possibly corrupted' % name
-      print "** filename: %s" % iconPath
+      print "** filename: %s" % path
       print "** exception: %s" % e
+    return image
 
-    if(not image):
-      return(False)
-    w = float(image.get_width())
-    h = float(image.get_height())
-    return (image)
+  def findUsableIcon(self, name, themePathList):
+    """due to compatibility reasons, there might be more icon
+    file versions for an icon in a them
+    -> this function select one of them based on a given set of priorities
+    priorities:
+    * SVG icons are prefered over PNG
+    * PNG is prefered over JPEG
+    * icons with centering info are prefered over "plain" icons
+    """
+    simplePaths = None
+    parameterPaths = None
+    # list the theme directory
+    for path in themePathList:
+      simplePaths = glob.glob(path+"%s.*" % name)
+      parameterPaths = glob.glob(path+"%s-*.*" % name)
+      if parameterPaths or simplePaths:
+        break
+    return (simplePaths,parameterPaths)
+
+#      possibleTargets = os.listdir(self.getCurrentThemePath())
+#      # first try to find a filename with positional parameters
+#      if fnmatch.filter(possibleTargets, "%s-*.*" % name):
+#        positionalFilenames = fnmatch.filter(possibleTargets, "%s-*.*" % name)
+#        print positionalFilenames
+#        if fnmatch.filter(positionalFilenames, "%s-above_text.*" % name):
+#          print "above text"
+#      elif fnmatch.filter(possibleTargets, "%s.*" % name):
+#        clasicIconFilename = fnmatch.filter(possibleTargets, "%s.*" % name)[0]
+#        print clasicIconFilename
+
+#    matchingExtension = None
+#    matchList = []
+#    # first, filter out only the prefered-format files
+#    for extension in extensionPriority:
+#      extensionMatchList = []
+#      extensionMatchList.extend(fnmatch.filter(possibleTargets, "*.%s" % extension))
+#      extensionMatchList.extend(fnmatch.filter(possibleTargets, "*.%s" % extension.upper()))
+#      if extensionMatchList:
+#        matchingExtension = extension
+#        break
+#
+#    # second - look if we can find any files with in the targets
+#    if matchingExtension:
+#      if ("%s-above_text." % namelower) in
+
+
+#    # second, are there any icons with in-filename position in the list ?
+#    iconsWithPosData = filter(lambda x: len(x.split('-')), matchList)
+#    if iconsWithPosData:
+#      pass
+#    else:
+#      return
 
   def firstTime(self):
     self.subscribeColorInfo(self, self.colorsChangedCallback)
@@ -246,9 +347,13 @@ class icons(ranaModule):
       
   # ported from
   #http://www.cairographics.org/samples/rounded_rectangle/
-  def roundedRectangle(self, width, height, fillColor, outlineColor, outlineWidth=8, radius=22):
+  def roundedRectangle(self, width, height, fillColor, outlineColor, outlineWidth=None, radius=22):
     """draw a rounded rectangle, fill and outline set the fill and outline rgba color
        r,g,b from 0 to 255, a from 0 to 1"""
+    # make the outline propertional to the size of the button
+    if outlineWidth == None:
+      outlineWidth = min(width,height)*0.05
+
     x = 0
     y = 0
     image = cairo.ImageSurface(0,width,height)
@@ -293,7 +398,6 @@ class icons(ranaModule):
 
   def updateThemeList(self):
     rawFolderContent = os.listdir(self.themesFolderPath)
-    print filter(lambda x: not os.path.isdir(self.themesFolderPath + '/' +x),rawFolderContent)
     self.availableThemes = filter(lambda x: os.path.isdir(self.themesFolderPath + '/' +x) and not x=='.svn',rawFolderContent)
 
   def getThemeList(self):
@@ -303,6 +407,10 @@ class icons(ranaModule):
   def getCurrentThemePath(self):
     """returns path to currently active theme"""
     return self.themesFolderPath + '/' + self.currentTheme + '/'
+
+  def getDefaultThemePath(self):
+    """returns path to currently active theme"""
+    return self.themesFolderPath + '/' + self.defaultTheme + '/'
 
   def switchTheme(self, newTheme):
     """switch the current theme to another one"""

@@ -28,7 +28,7 @@ class mapView(ranaModule):
   """Controls the view being displayed on the map"""
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
-    self.updateTime = 0
+    self.lastPos = None
     
   def handleMessage(self, message, type, args):
     z = self.get('z', 15)
@@ -61,31 +61,35 @@ class mapView(ranaModule):
         print "mapView: cant recentre cooridnates"
   
   def dragEvent(self,startX,startY,dx,dy,x,y):
-    self.set("centred",False) # turn off centering after dragging the map (like in TangoGPS)
-
-#    if(not self.get("centred",True)):
-    if(True): #
-      m = self.m.get('projection', None)
-      if(m):
-        m.nudge(dx,dy)
+    # check if centering is on
+    if self.get("centred",True):
+      fullDx = x - startX
+      fullDy = y - startY
+      distSq = fullDx * fullDx + fullDy * fullDy
+      """ check if the drag is strong enought to disable centering
+      -> like this, centering is not dsabled by pressing buttons"""
+      if distSq > 1024:
+        self.set("centred",False) # turn off centering after dragging the map (like in TangoGPS)
+    else:
+      proj = self.m.get('projection', None)
+      if proj:
+        proj.nudge(dx,dy)
         self.set('needRedraw', True)
 
-  def update(self):
-    # Run scheduledUpdate every second
+  def handleCentring(self):
+    # check if centring is on
     if(self.get("centred",True) or self.get('centreOnce', False)):
-      t = time()
-      dt = t - self.updateTime
-      #print(dt)
-      if(dt > 1): #default 2
-        self.updateTime = t
-        pos = self.get('pos', None)
-        if(pos != None):
-          if(self.setCentre(pos)):
-            self.set('centreOnce', False)
+      # get current position information
+      pos = self.get('pos', None)
+      # check if the position changed from last time
+      if pos != self.lastPos:
+        if(self.setCentre(pos)):
+          self.set('centreOnce', False)
+        self.lastPos = pos
 
-    request = self.get("centreOn", None)
-    if(request):
-      self.setCentre([float(a) for a in request.split(",")])
+#    request = self.get("centreOn", None)
+#    if(request):
+#      self.setCentre([float(a) for a in request.split(",")])
       
   def setCentre(self,pos):
     """takes care for centering the map on current position"""

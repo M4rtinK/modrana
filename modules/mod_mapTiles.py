@@ -22,21 +22,13 @@ from base_module import ranaModule
 from threading import Thread
 import threading
 import Queue
-import os.path
 import traceback
 import cairo
-import os
-import sys
-import urllib
 import urllib2
 import gtk
 import time
-import math
 from configobj import ConfigObj
 from tilenames import *
-sys.path.append("modules/pyrender")
-import renderer_default as RenderModule
-from time import clock
 
 import socket
 timeout = 30 # this sets timeout for all sockets
@@ -135,6 +127,11 @@ class mapTiles(ranaModule):
     self.lastThreadCleanupInterval=2 # clean finished threads every 2 seconds
     self.set('maplayers', maplayers) # export the maplyers definition for use by other modules
 
+    self.mapViewModule = None
+
+  def firstTime(self):
+    self.mapViewModule = self.m.get('mapView', None)
+    
   def startTileDownloadManagementThread(self):
     """start the consumer thread for download requests"""
     t = Thread(target=self.tileDownloadManager, name='automatic tile download management thread')
@@ -262,6 +259,14 @@ class mapTiles(ranaModule):
 #        self.threads = {}
 #        self.oldThreadCount = len(self.threads)
 #    self.oldThreadCount = len(self.threads)
+
+  def beforeDraw(self):
+    """we need to synchronize centering with map redraw,
+    so we first check if we need to centre the map and then redraw"""
+    mapViewModule = self.mapViewModule
+    if mapViewModule:
+      mapViewModule.handleCentring()
+
 
   def drawMap(self, cr):
     """Draw map tile images"""

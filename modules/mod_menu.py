@@ -263,37 +263,46 @@ class menus(ranaModule):
 #    cr.set_font_size(60 / ratio)
 #    pg.show_layout(layout)
 #    cr.restore()
-
+    
   def drawText(self,cr,text,x,y,w,h,border=0):
+    """This is mainly used to draw the text on icons,
+    this method uses pango, for the old show_text based one,
+    see the  drawTextOld method"""
     if(not text):
       return
+#    cr.rectangle(x,y,w,h)
     # Put a border around the area
     if(border != 0):
       x += w * border
       y += h * border
       w *= (1-2*border)
       h *= (1-2*border)
-    
-    if(0): # optional choose a font
-      self.cr.select_font_face(
-        'Verdana',
-        cairo.FONT_SLANT_NORMAL,
-        cairo.FONT_WEIGHT_BOLD)
+#    cr.rectangle(x,y,w,h)
+#    cr.stroke()
 
-    # Pick a font size to fit
-    test_fontsize = 60
-    cr.set_font_size(test_fontsize)
-    _s1, _s2, textwidth, textheight, _s3, _s4 = cr.text_extents(text)
-    ratio = max(textwidth / w, textheight / h)
-
-    # Draw text
-    cr.set_font_size(test_fontsize / ratio)
-    # Update the text extents info
-    _s1, _s2, textwidth, textheight, _s3, _s4 = cr.text_extents(text)
-    # _s3 contans the real width of the text
-    cr.move_to(x+(w-_s3)/2.0, y + h)
-    cr.show_text(text)
-
+    # get a pangocairo context
+    pg = pangocairo.CairoContext(cr)
+    layout = pg.create_layout()
+    layout.set_markup(text)
+    # set default font
+    layout.set_font_description(pango.FontDescription("Sans Serif 60"))
+    (lw,lh) = layout.get_pixel_size()
+    if lw == 0 or lh == 0:
+      return # no need to draw this + avoid a division by zero
+    # check if the text fits to given height
+    cr.save()
+    wRatio = float(w)/lw
+    hRatio = float(h)/lh
+    ratio = min(wRatio,hRatio)
+    # center the text both vertically and horizontally
+    xOffset = (w-(lw * ratio))/2.0
+    yOffset = (h-(lh * ratio))/2.0
+    # move to position and show the text
+    cr.move_to(x+xOffset,y+yOffset)
+    pg.scale(ratio,ratio)
+    pg.show_layout(layout)
+    cr.restore()
+      
   def drawToggleButtonOld(self, cr, x1, y1, w, h, textIconAction, index):
     """draw an automatic togglable icon
        textActionIcon -> a dictionary of text strings/actions/icons
@@ -313,10 +322,10 @@ class menus(ranaModule):
     if text != None:
       textList = text.split('#')
       if len(textList) == 1 and text != None:
-        self.drawText(cr, textList[0], x1, y1+0.5*h, w, 0.4*h, 0.15)
+        self.drawText(cr, textList[0], x1, y1+0.6*h, w, 0.4*h, 0.10)
       elif len(textList) >= 2:
-        self.drawText(cr, textList[0], x1, y1+0.5*h, w, 0.4*h, 0.15)
-        self.drawText(cr, textList[1], x1, y1+0.2*h, w, 0.4*h, 0.15)
+        self.drawText(cr, textList[0], x1, y1+0.6*h, w, 0.4*h, 0.08)
+        self.drawText(cr, textList[1], x1, y1+0.35*h, w, 0.4*h, 0.08)
 
     # Make clickable
     if(action != None):
@@ -375,29 +384,6 @@ class menus(ranaModule):
         if self.notificationModule:
           self.notificationModule.drawMasterOverlay(cr)
       return
-
-
-
-#    if(list != None):
-#      m = self.m.get(list, None)
-#      if(m != None):
-#        listHelper = listable_menu(cr,x1,y1,w,h, self.m.get('clickHandler', None), self.listOffset)
-#        m.drawList(cr, menuName, listHelper)
-#      return
-
-#    device = self.device
-#    if device == 'neo':
-#      cols = 3
-#      rows = 4
-#    elif device == 'n95':
-#      cols = 3
-#      rows = 4
-#    elif device == 'n900':
-#      cols = 4
-#      rows = 3
-#    elif device == 'eee':
-#      cols = 4
-#      rows = 3
 
     # Decide how to layout the menu
     if w > h:
@@ -491,8 +477,6 @@ class menus(ranaModule):
       else:
         perzist[uniqueName] = index
         self.set('persistentToggleButtons', perzist)
-
-
 
     self.menus[menu][pos] = (textIconAction, index, uniqueName, type)
 
@@ -800,11 +784,11 @@ class menus(ranaModule):
 #    self.addItem('main', 'waypoints', 'waypoints', 'set:menu:waypoints_categories')
     self.addItem('main', 'route', 'route', 'set:menu:route')
     self.addItem('main', 'POI', 'poi', 'set:menu:poi')
-    self.addItem('main', 'search', 'business', 'set:menu:searchWhere')
+    self.addItem('main', 'search', 'search', 'set:menu:searchWhere')
     #self.addItem('main', 'view', 'view', 'set:menu:view')
     self.addItem('main', 'options', 'options', 'set:menu:options')
     self.addItem('main', 'download', 'download', 'set:menu:data')
-    self.addItem('main', 'mode', 'transport', 'set:menu:transport')
+    self.addItem('main', 'mode', 'mode', 'set:menu:transport')
 #    self.addItem('main', 'centre', 'centre', 'toggle:centred|set:menu:None')
     self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManagerCathegories')
     self.addItem('main', 'log a track', 'log', 'set:menu:tracklog')

@@ -29,9 +29,30 @@ class device_neo(deviceModule):
   
   def __init__(self, m, d):
     deviceModule.__init__(self, m, d)
+    self.tempUnfullscreen = False
 
   def getDeviceName(self):
     return "OpenMoko Neo FreeRunner"
+
+  def textEntryIminent(self):
+    """in SHR on Neo, we need to temporarry disable fullscreen
+    (if we are in fullscreen),
+    or else the text entry box won't show up"""
+    display = self.m.get('display', None)
+    if display:
+      if display.getFullscreenEnabled():
+        display.fullscreenToggle()
+        self.tempUnfullscreen = True
+
+  def textEntryDone(self):
+    """restore fullscreen if needed"""
+    if self.tempUnfullscreen:
+      display = self.m.get('display', None)
+      if display:
+        if not display.getFullscreenEnabled():
+          display.fullscreenToggle()
+          self.tempUnfullscreen = False
+
     
 
 if(__name__ == "__main__"):
