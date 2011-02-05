@@ -355,6 +355,9 @@ class MapWidget(gtk.Widget):
     if self.redraw:
       self.chain(event)
       cr = self.window.cairo_create()
+      print "ASDASDASDASD"
+      print self.window
+      print cr.get_target()
       return self._expose_cairo(event, cr)
 
 class GuiBase:
