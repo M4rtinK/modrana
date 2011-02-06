@@ -87,6 +87,9 @@ class mapView(ranaModule):
           self.set('centreOnce', False)
         self.lastPos = pos
 
+
+        
+
 #    request = self.get("centreOn", None)
 #    if(request):
 #      self.setCentre([float(a) for a in request.split(",")])
@@ -94,22 +97,43 @@ class mapView(ranaModule):
   def setCentre(self,pos):
     """takes care for centering the map on current position"""
     proj = self.m.get('projection', None)
-    if(proj == None):
-      return(False)
-    if(pos == None):
-      return(False)
-    
-    (lat,lon) = pos
-    self.set('map_centre', pos)
+    if proj and pos:
+      (lat,lon) = pos
+      self.set('map_centre', pos)
 
-    z = int(self.get('z', 15))
-    x,y = latlon2xy(lat,lon,z)
+      z = int(self.get('z', 15))
+      x,y = latlon2xy(lat,lon,z)
 
-    if(not self.d.has_key('viewport')):
-      return(False)
-    (sx,sy,sw,sh) = self.get('viewport')
-    proj.setView(sx,sy,sw,sh)
-    proj.recentre(lat,lon,z)
-    proj.setZoom(z)
-    self.set("needRedraw", True)
-    return(True)
+      if(not self.d.has_key('viewport')):
+        return(False)
+      (sx,sy,sw,sh) = self.get('viewport')
+
+
+      """
+      the shift amount represents a perentage of the distance from screen center
+      to an edge:
+      ceneter+---------->|edge
+      0 -> no shift
+      1 -> directly on the edge
+      0.5 -> shifted by half of this distance, eq. in 3/4 of the screen
+      """
+      shiftAmount = self.get('posShiftAmount', None)
+      if shiftAmount:
+        intShiftAmount = int(shiftAmount)
+        shiftDirection = self.get('posShiftDirection', "down")
+        if shiftDirection == "down":
+          y = y - sh * 0.5 * intShiftAmount
+        elif shiftDirection == "up":
+          y = y + sh * 0.5 * intShiftAmount
+        elif shiftDirection == "left":
+          x = x + sw * 0.5 * intShiftAmount
+        else: # right
+          x = x + sw * 0.5 * intShiftAmount
+
+        (lat, lon) = proj.xy2ll(x, y)
+
+
+      print (sx,sy,sw,sh)
+      proj.recentre(lat,lon,z)
+      self.set("needRedraw", True)
+      return(True)
