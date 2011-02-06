@@ -231,39 +231,6 @@ class menus(ranaModule):
     else:
       cr.move_to(x,y)
       pg.show_layout(layout)
-
-## this ca be used when I can get it to behave like the old show_text based method
-#  def drawText(self,cr,text,x,y,w,h,border=0):
-#    """pango based text drawing method"""
-#    if(not text):
-#      return
-#    # Put a border around the area
-#    if(border != 0):
-#      x += w * border
-#      y += h * border
-#      w *= (1-2*border)
-#      h *= (1-2*border)
-#    pg = pangocairo.CairoContext(cr)
-#    # create a layout for your drawing area
-#    layout = pg.create_layout()
-#    layout.set_markup(text)
-#    layout.set_font_description(pango.FontDescription("Sans Serif 60"))
-#    (lw,lh) = layout.get_size()
-#    if lw == 0 or lh == 0:
-#      return # no need to draw this + avoid a division by zero
-#    scale = float(pango.SCALE)
-##    factor = min(((w)/(lw/scale)),((h)/(lh/scale)))
-#    factorW = (w)/(lw/scale)
-#    factorH = (h)/(lh/scale)
-##    factor = min(factor, 1.0)
-#    factor = min(factorW, factorH)
-#    cr.move_to(x,y)
-#    cr.save()
-#    cr.scale(factor,factor)
-#    ratio = max(lw / w, lh / h)
-#    cr.set_font_size(60 / ratio)
-#    pg.show_layout(layout)
-#    cr.restore()
     
   def drawText(self,cr,text,x,y,w,h,border=0):
     """This is mainly used to draw the text on icons,
@@ -318,7 +285,6 @@ class menus(ranaModule):
     self.icons.draw(cr,icon,x1,y1,w,h)
 
     # Draw text
-#    cr.set_source_rgb(0, 0, 0.3)
     cr.set_source_rgba(*self.mainTextColor)
     if text != None:
       textList = text.split('#')
@@ -468,34 +434,6 @@ class menus(ranaModule):
       self.notificationModule.drawMasterOverlay(cr)
     return
 
-#    for y in range(rows):
-#      for x in range(cols):
-#        item = menu.get(id, None)
-#        if(item == None):
-#          # menu drawing is done, do the master overlay hook
-#          if self.notificationModule:
-#            self.notificationModule.drawMasterOverlay(cr)
-#          return
-#
-#        # Draw it
-#        type = item[3]
-#        if type=='simple':
-#          (text, icon, action, type) = item
-#          self.drawButton(cr, x1+x*dx, y1+y*dy, dx, dy, text, icon, action)
-#        elif type=='toggle':
-#          index = item[1]
-#          toggleCount = len(item[0])
-#          nextIndex = (index + 1)%toggleCount
-#          # like this, text and corresponding actions can be written on a single line
-#          # eq: "save every 3 s", "nice icon", "set:saveInterval:3s"
-#          text = item[0][index][0]
-#          icon = item[0][nextIndex][1]
-#          action = item[0][nextIndex][2]
-#
-#          action+='|menu:toggle#%s#%s|set:needRedraw:True' % (menuName,id)
-#          self.drawButton(cr, x1+x*dx, y1+y*dy, dx, dy, text, icon, action)
-#        id += 1
-
   def register(self, menu, type, module):
     """Register a menu as being handled by some other module"""
     if(type == 'list'):
@@ -520,14 +458,6 @@ class menus(ranaModule):
     """we are counting up from zero for the item indexes"""
     self.menus[menu][itemCount] = (text, icon, action, type)
     self.menus[menu]['metadata']['itemCount'] = itemCount + 1
-
-#    while(pos == None):
-#      if(self.menus[menu].get(i, None) == None):
-#        pos = i
-#      i += 1
-#      if(i > 200):
-#        print "Menu full, can't add %s" % text
-
 
   def addToggleItem(self, menu, textIconAction, index=0, pos=None, uniqueName=None):
     """
@@ -819,7 +749,6 @@ class menus(ranaModule):
   def setupDataSubMenu(self, nextMenu='zoomDown', prevMenu='data'):
     """here we set the radius for download"""
     self.clearMenu('data2', "set:menu:%s" % prevMenu)
-#    self.addItem('data2', '5 km', 'generic', 'set:downloadSize:4|mapData:download|set:menu:editBatch')
     self.addItem('data2', '1 km', 'generic', 'set:downloadSize:1|set:menu:%s' % nextMenu)
     self.addItem('data2', '2 km', 'generic', 'set:downloadSize:2|set:menu:%s' % nextMenu)
     self.addItem('data2', '5 km', 'generic', 'set:downloadSize:4|set:menu:%s' % nextMenu)
@@ -834,7 +763,6 @@ class menus(ranaModule):
     """we can download tiles around "here" (GPS cooridnates), route or the current view"""
     self.clearMenu('data', "set:menu:%s" % prevMenu)
     self.addItem('data', 'Around here', 'generic', 'set:downloadType:data|set:downloadArea:here|set:menu:%s' % nextMenu)
-#    self.addItem('data', 'Around route', 'generic', 'set:downloadType:data|set:downloadArea:route|set:menu:%s' % nextMenu)
     self.addItem('data', 'Around route', 'generic', 'set:downloadType:data|set:downloadArea:route|set:menu:chooseRouteForDl')
     self.addItem('data', 'Around view', 'generic', 'set:downloadType:data|set:downloadArea:view|set:menu:%s' % nextMenu)
     self.setupDataSubMenu()
@@ -853,17 +781,12 @@ class menus(ranaModule):
 
   def setupGeneralMenus(self):
     self.clearMenu('main', "set:menu:None")
-    #self.addItem('main', 'map', 'generic', 'set:menu:layers')
-#    self.addItem('main', 'places', 'city', 'set:menu:placenames_categories')
-#    self.addItem('main', 'waypoints', 'waypoints', 'set:menu:waypoints_categories')
     self.addItem('main', 'route', 'route', 'set:menu:route')
     self.addItem('main', 'POI', 'poi', 'set:menu:poi')
     self.addItem('main', 'search', 'search', 'set:menu:searchWhere')
-    #self.addItem('main', 'view', 'view', 'set:menu:view')
     self.addItem('main', 'options', 'options', 'set:menu:options')
     self.addItem('main', 'download', 'download', 'set:menu:data')
     self.addItem('main', 'mode', 'mode', 'set:menu:transport')
-#    self.addItem('main', 'centre', 'centre', 'toggle:centred|set:menu:None')
     self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManagerCathegories')
     self.addItem('main', 'log a track', 'log', 'set:menu:tracklog')
     self.setupTransportMenu()
@@ -874,7 +797,6 @@ class menus(ranaModule):
     self.setupDataMenu()
     self.setupRouteMenu()
     self.clearMenu('options', "set:menu:main") # will be filled by mod_options
-#    self.clearMenu('routeProfile', "set:menu:main") # will be filled by mod_routeProfile
     self.lists['places'] = 'placenames'
 
     self.set('editBatchMenuActive', False) # at startup, the edit batch menu is inactive
@@ -1219,7 +1141,6 @@ class menus(ranaModule):
       self.set(uniqueName, newIndex)
       self.menus[menu][pos] = (textIconAction, newIndex, uniqueName, type)
 
-    
 if(__name__ == "__main__"):
   a = menus({},{'viewport':(0,0,600,800)})
   #a.drawMapOverlay(None)
