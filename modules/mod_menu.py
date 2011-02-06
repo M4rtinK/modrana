@@ -44,6 +44,7 @@ class menus(ranaModule):
     self.notificationModule = None
     self.hideMapSreenButtons = False
     self.lastHideCheckTimestamp = time.time()
+    self.itemMenuGrid = (None,[])
 
     # colors - failsafe defaults
     self.mainTextColor = (0,0,0.3,1)
@@ -345,7 +346,16 @@ class menus(ranaModule):
     if(list != None):
       self.listOffset += dy
       print "Drag in menu + %f = %f" % (dy,self.listOffset)
-    
+
+  def setItemMenuGrid(self, x1, y1, cols,rows,dx,dy):
+    """generate an icon placement grid for a given number of
+       number of columns,rows and icon sizes"""
+    grid = []
+    for y in range(rows):
+      for x in range(cols):
+        grid.append((x1+x*dx, y1+y*dy))
+    self.itemMenuGrid = ((x1, y1, cols,rows,dx,dy),grid)
+
   def drawMenu(self, cr, menuName):
     """Draw menus"""
 #    print "current menu is:%s" % menuName
@@ -353,14 +363,6 @@ class menus(ranaModule):
     if not self.d.has_key('viewport'):
       return
     (x1,y1,w,h) = self.get('viewport', None)
-
-#    list = self.lists.get(menuName, None)
-#    if(list != None):
-#      m = self.m.get(list, None)
-#      if(m != None):
-#        listHelper = listable_menu(cr,x1,y1,w,h, self.m.get('clickHandler', None), self.listOffset)
-#        m.drawList(cr, menuName, listHelper)
-#      return
 
     # Is it a list ?
     if menuName in self.lists.keys(): # TODO: optimize this
@@ -399,35 +401,100 @@ class menus(ranaModule):
     dx = w / cols
     dy = h / rows
 
+    # check if we have valid precomputed icon grid:
+    if self.itemMenuGrid[0] != (x1, y1, cols,rows,dx,dy):
+      self.setItemMenuGrid(x1, y1, cols, rows, dx, dy)
+
     # for each item in the menu
     id = 0
-    for y in range(rows):
-      for x in range(cols):
-        item = menu.get(id, None)
-        if(item == None):
-          # menu drawing is done, do the master overlay hook
-          if self.notificationModule:
-            self.notificationModule.drawMasterOverlay(cr)
-          return
+    itemSlots = cols*rows
+    itemCount = menu['metadata']['itemCount']
+    if itemCount > itemSlots:
+      pageNumber = menu['metadata']['currentPage']
+      if pageNumber == 0:
+        # just draw the "more" button
+        (x,y) = self.itemMenuGrid[1][-1]
+        self.drawButton(cr, x, y, dx, dy, "more", "more", "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber+1))
+        itemGrid = self.itemMenuGrid[1][0:-1]
+      else:
+        id = (pageNumber)*(itemSlots-2)+1
+        if (itemCount-id-2) < (itemSlots-1):
+          # this is tle last page
+          # draw only the "less" button
+          (x,y) = self.itemMenuGrid[1][0]
+          self.drawButton(cr, x, y, dx, dy, "less", "less", "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber-1))
+          itemGrid = self.itemMenuGrid[1][1:(itemCount-id-1)]
+        else:
+          # this is an intermediate page
+          # draw the "less" and "more" buttons
+          (x,y) = self.itemMenuGrid[1][0]
+          self.drawButton(cr, x, y, dx, dy, "less", "less", "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber-1))
+          (x,y) = self.itemMenuGrid[1][-1]
+          self.drawButton(cr, x, y, dx, dy, "more", "more", "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber+1))
+          itemGrid = self.itemMenuGrid[1][1:-1]
+          # the first page only has one slot less, du to having only the "more" button
 
-        # Draw it
-        type = item[3]
-        if type=='simple':
-          (text, icon, action, type) = item
-          self.drawButton(cr, x1+x*dx, y1+y*dy, dx, dy, text, icon, action)
-        elif type=='toggle':
-          index = item[1]
-          toggleCount = len(item[0])
-          nextIndex = (index + 1)%toggleCount
-          # like this, text and corresponding actions can be written on a single line
-          # eq: "save every 3 s", "nice icon", "set:saveInterval:3s"
-          text = item[0][index][0]
-          icon = item[0][nextIndex][1]
-          action = item[0][nextIndex][2]
+    else:
+      # there are less items than slots
+      itemGrid = self.itemMenuGrid[1][0:itemCount]
 
-          action+='|menu:toggle#%s#%s|set:needRedraw:True' % (menuName,id)
-          self.drawButton(cr, x1+x*dx, y1+y*dy, dx, dy, text, icon, action)
-        id += 1
+    for xy in itemGrid:
+      item = menu.get(id, None)
+      # Draw it
+
+      # get coordinates
+      (x,y) = xy
+
+      type = item[3]
+      if type=='simple':
+        (text, icon, action, type) = item
+        self.drawButton(cr, x, y, dx, dy, text, icon, action)
+      elif type=='toggle':
+        index = item[1]
+        toggleCount = len(item[0])
+        nextIndex = (index + 1)%toggleCount
+        # like this, text and corresponding actions can be written on a single line
+        # eq: "save every 3 s", "nice icon", "set:saveInterval:3s"
+        text = item[0][index][0]
+        icon = item[0][nextIndex][1]
+        action = item[0][nextIndex][2]
+
+        action+='|menu:toggle#%s#%s|set:needRedraw:True' % (menuName,id)
+        self.drawButton(cr, x, y, dx, dy, text, icon, action)
+      id += 1
+
+    # menu drawing is done, do the master overlay hook
+    if self.notificationModule:
+      self.notificationModule.drawMasterOverlay(cr)
+    return
+
+#    for y in range(rows):
+#      for x in range(cols):
+#        item = menu.get(id, None)
+#        if(item == None):
+#          # menu drawing is done, do the master overlay hook
+#          if self.notificationModule:
+#            self.notificationModule.drawMasterOverlay(cr)
+#          return
+#
+#        # Draw it
+#        type = item[3]
+#        if type=='simple':
+#          (text, icon, action, type) = item
+#          self.drawButton(cr, x1+x*dx, y1+y*dy, dx, dy, text, icon, action)
+#        elif type=='toggle':
+#          index = item[1]
+#          toggleCount = len(item[0])
+#          nextIndex = (index + 1)%toggleCount
+#          # like this, text and corresponding actions can be written on a single line
+#          # eq: "save every 3 s", "nice icon", "set:saveInterval:3s"
+#          text = item[0][index][0]
+#          icon = item[0][nextIndex][1]
+#          action = item[0][nextIndex][2]
+#
+#          action+='|menu:toggle#%s#%s|set:needRedraw:True' % (menuName,id)
+#          self.drawButton(cr, x1+x*dx, y1+y*dy, dx, dy, text, icon, action)
+#        id += 1
 
   def register(self, menu, type, module):
     """Register a menu as being handled by some other module"""
@@ -435,22 +502,31 @@ class menus(ranaModule):
       self.lists[menu] = module
     else:
       print "Can't register \"%s\" menu - unknown type" % type
+
+  def initMenu(self,menu):
+    """anitialize menu a menu dictionary instance to default parameters"""
+    self.menus[menu] = {'metadata':{'itemCount':0,'currentPage':0}}
     
   def clearMenu(self, menu, cancelButton='set:menu:main'):
-    self.menus[menu] = {}
+    self.initMenu(menu)
     if(cancelButton != None):
       self.addItem(menu,'','up', cancelButton, 0)
 
   def addItem(self, menu, text, icon=None, action=None, pos=None):
-    i = 0
-    while(pos == None):
-      if(self.menus[menu].get(i, None) == None):
-        pos = i
-      i += 1
-      if(i > 20):
-        print "Menu full, can't add %s" % text
+    if menu not in self.menus:
+      self.initMenu(menu)
+    itemCount = self.menus[menu]['metadata']['itemCount']
     type = "simple"
-    self.menus[menu][pos] = (text, icon, action, type)
+    """we are counting up from zero for the item indexes"""
+    self.menus[menu][itemCount] = (text, icon, action, type)
+    self.menus[menu]['metadata']['itemCount'] = itemCount + 1
+
+#    while(pos == None):
+#      if(self.menus[menu].get(i, None) == None):
+#        pos = i
+#      i += 1
+#      if(i > 200):
+#        print "Menu full, can't add %s" % text
 
 
   def addToggleItem(self, menu, textIconAction, index=0, pos=None, uniqueName=None):
@@ -458,13 +534,9 @@ class menus(ranaModule):
     add a togglable item to the menu
     textIconAction is a list of texts icons and actions -> (text,icon,action)
     """
-    i = 0
-    while(pos == None):
-      if(self.menus[menu].get(i, None) == None):
-        pos = i
-      i += 1
-      if(i > 20):
-        print "Menu full, can't add %s" % text
+    if menu not in self.menus:
+      self.initMenu(menu)
+    itemCount = self.menus[menu]['metadata']['itemCount']
     type = 'toggle'
     if uniqueName:
       perzist = self.get('persistentToggleButtons', None)
@@ -478,7 +550,9 @@ class menus(ranaModule):
         perzist[uniqueName] = index
         self.set('persistentToggleButtons', perzist)
 
-    self.menus[menu][pos] = (textIconAction, index, uniqueName, type)
+    """we are counting up from zero for the item indexes"""
+    self.menus[menu][itemCount] = (textIconAction, index, uniqueName, type)
+    self.menus[menu]['metadata']['itemCount'] = itemCount + 1
 
 
   def addListableMenu(self, name, items, parrentAction, descFunction=None, drawFunction=None):
@@ -1112,7 +1186,10 @@ class menus(ranaModule):
           self.lists[listMenuName].scrollUp()
         elif args[1]=="down":
           self.lists[listMenuName].scrollDown()
-
+    elif (message == "setIMPage"):
+      menuName = args[0]
+      targetPageNr = int(args[1])
+      self.menus[menuName]['metadata']['currentPage'] = targetPageNr
     elif (message == "rebootDataMenu"):
       self.setupDataMenu() # we are returning from the batch menu, data menu needs to be "rebooted"
       self.set('editBatchMenuActive', False)
