@@ -49,6 +49,9 @@ class menus(ranaModule):
     # colors - failsafe defaults
     self.mainTextColor = (0,0,0.3,1)
     self.centerButtonCircleColor = (0,0,1,0.45)
+    self.spButtonFillTup = ("#ffec8b",1.0)
+    self.spButtonOutlineTup = ("#8b814c",1.0)
+
 
   def update(self):
     # check if buttons should be hidden, every second by default
@@ -375,12 +378,17 @@ class menus(ranaModule):
     id = 0
     itemSlots = cols*rows
     itemCount = menu['metadata']['itemCount']
-    if itemCount > itemSlots:
+    if itemCount > itemSlots: # does this menu have more items than available slots
+      # get current page
       pageNumber = menu['metadata']['currentPage']
+      # get colors for the more and less buttons
+      (spbFillColor,spbFillAlpha) = self.spButtonFillTup
+      (spbOutlineColor,spbOutlineAlpha) = self.spButtonOutlineTup
+      bgIconDescription = "generic:%s;%f;%s;%f;;" % (spbFillColor, spbFillAlpha, spbOutlineColor, spbOutlineAlpha)
       if pageNumber == 0:
         # just draw the "more" button
         (x,y) = self.itemMenuGrid[1][-1]
-        self.drawButton(cr, x, y, dx, dy, "more", "more", "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber+1))
+        self.drawButton(cr, x, y, dx, dy, "more", "more>%s" % bgIconDescription, "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber+1))
         itemGrid = self.itemMenuGrid[1][0:-1]
       else:
         id = (pageNumber)*(itemSlots-2)+1
@@ -388,18 +396,17 @@ class menus(ranaModule):
           # this is tle last page
           # draw only the "less" button
           (x,y) = self.itemMenuGrid[1][0]
-          self.drawButton(cr, x, y, dx, dy, "less", "less", "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber-1))
+          self.drawButton(cr, x, y, dx, dy, "less", "less>%s" % bgIconDescription, "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber-1))
           itemGrid = self.itemMenuGrid[1][1:(itemCount-id-1)]
         else:
           # this is an intermediate page
           # draw the "less" and "more" buttons
           (x,y) = self.itemMenuGrid[1][0]
-          self.drawButton(cr, x, y, dx, dy, "less", "less", "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber-1))
+          self.drawButton(cr, x, y, dx, dy, "less", "less>%s" % bgIconDescription, "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber-1))
           (x,y) = self.itemMenuGrid[1][-1]
-          self.drawButton(cr, x, y, dx, dy, "more", "more", "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber+1))
+          self.drawButton(cr, x, y, dx, dy, "more", "more>%s" % bgIconDescription, "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber+1))
           itemGrid = self.itemMenuGrid[1][1:-1]
           # the first page only has one slot less, du to having only the "more" button
-
     else:
       # there are less items than slots
       itemGrid = self.itemMenuGrid[1][0:itemCount]
@@ -1081,6 +1088,10 @@ class menus(ranaModule):
   def colorsChangedCallback(self,colors):
     self.mainTextColor = colors['main_text'].getCairoColor()
     self.centerButtonCircleColor = colors['center_button_circle'].getCairoColor()
+    sbFill = colors['special_button__fill']
+    self.spButtonFillTup = (sbFill.getColorString(),sbFill.getAlpha())
+    sbOutline = colors['special_button__outline']
+    self.spButtonOutlineTup = (sbOutline.getColorString(),sbOutline.getAlpha())
 
   def firstTime(self):
     self.set("menu",None)

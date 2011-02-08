@@ -101,12 +101,13 @@ class icons(ranaModule):
             print "icons: icon probably corrupted: %s" % aboveTextIconPath
             print "%s" % e
           # get the background icon
-          compositeIcon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
+#          compositeIcon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
+          compositeIcon = cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h)
           ct = cairo.Context(compositeIcon)
           ct2 = gtk.gdk.CairoContext(ct)
           ct2.set_source_pixbuf(pixbuf,targetX,targetY)
           ct2.paint()
-          return compositeIcon
+          return (compositeIcon,True) # this signalizes that a background might be needed
 
       if result == None:
         return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor))
@@ -118,13 +119,13 @@ class icons(ranaModule):
     else:
       print "icons: %s not found" % name
       # we use the default button background if the tile is missing
-      return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor))
+      return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor),False)
 
     if(not image): # loading the image probably failed
       return(False)
     w = float(image.get_width())
     h = float(image.get_height())
-    return (image)
+    return (image,False)
 
   def getImageSurface(self,path, w, h):
     """load a image given by path to pixbuf and paint ti to image surface,
@@ -147,6 +148,86 @@ class icons(ranaModule):
       print "** filename: %s" % path
       print "** exception: %s" % e
     return image
+
+  def getCustomIcon(self,parameterList,w,h):
+    """
+    there are five positional parameters:
+    fill collor,fill opacity, outline color, outline opacity,
+    outline width (default 8) and corner radius (default 22)
+    to use default value, just don't fill in the positional parameter
+    ( len(parameter) == 0 )
+    """
+    # check if the list has proper length
+    if len(parameterList) != 6:
+      return None
+    semicolonSepList = parameterList
+    # process the positional parameters
+    if len(semicolonSepList[0]):
+      fillColorString = semicolonSepList[0]
+    else:
+      fillColorString = None
+
+    if len(semicolonSepList[1]):
+      fillAlpha = float(semicolonSepList[1])
+    else:
+      fillAlpha = 1.0
+
+    if len(semicolonSepList[2]):
+      outlineColorString = semicolonSepList[2]
+    else:
+      outlineColorString = None
+
+    if len(semicolonSepList[3]):
+      outlineAlpha = float(semicolonSepList[3])
+    else:
+      outlineAlpha = 1.0
+
+    if len(semicolonSepList[4]):
+      outlineWidth = int(semicolonSepList[4])
+    else:
+      outlineWidth = 8
+
+    if len(semicolonSepList[5]):
+      cornerRadius = int(semicolonSepList[5])
+    else:
+      cornerRadius = 22
+
+    # parse the colors (if defined)
+
+    if fillColorString:
+      fillColor = self.color("fill", (fillColorString,fillAlpha))
+      fillColorRGBATupple = fillColor.getCairoColor()
+    else:
+      fillColorRGBATupple = self.buttonFillColor
+
+
+    if outlineColorString:
+      outlineColor = self.color("outline", (outlineColorString,outlineAlpha))
+      outlineColorRGBATupple = outlineColor.getCairoColor()
+    else:
+      outlineColorRGBATupple = self.buttonOutlineColor
+
+    # apply the alfa values
+    try:
+      (r,g,b,a) = fillColorRGBATupple
+      fillColorRGBATupple = (r,g,b,fillAlpha)
+    except Exception, e:
+      print "** wrong fill color code or name: %s" % fillColorString
+      print "** exception: %s" % e
+      fillColorRGBATupple = self.buttonFillColor
+
+    try:
+      (r,g,b,a) = outlineColorRGBATupple
+      outlineColorRGBATupple = (r,g,b,outlineAlpha)
+    except Exception, e:
+      print "** wrong outline color code or name: %s" % fillColorString
+      print "** exception: %s" % e
+      outlineColorRGBATupple = self.buttonOutlineColor
+
+    # create the icon
+    icon = self.roundedRectangle(w, h, fillColorRGBATupple, outlineColorRGBATupple, outlineWidth=outlineWidth, radius=cornerRadius)
+    return icon
+
 
   def findUsableIcon(self, name, themePathList):
     """due to compatibility reasons, there might be more icon
@@ -221,100 +302,57 @@ class icons(ranaModule):
       self.drawIcon(cr, self.images[cacheName], x, y, w, h)
 
     # is it in the cant load list ?
-    elif name in self.cantLoad:
-      """the cant load list stores names of icons which errored out during
-         loading from file -> like this we wont load corrupted or
-         nonexisting icons over and over again"""
-      return
+#    elif name in self.cantLoad:
+#      """the cant load list stores names of icons which errored out during
+#         loading from file -> like this we wont load corrupted or
+#         nonexisting icons over and over again"""
+#      return
 
-    # is it an icon that gets rendered at runtime ?
-    elif name.split(':')[0] == 'generic':
-      icon = None
-      if len(name.split(':',1)) == 1:
-        # just the default cairo drawn icon
-        icon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
-      else:
-        # the icon name contains custom positional parameters
-        semicolonSepList = name.split(':',1)[1].split(';')
-        """
-        there are five positional parameters:
-        fill collor,fill opacity, outline color, outline opacity, 
-        outline width (default 8) and corner radius (default 22)
-        to use default value, just dont fill in the positional parameter
-        ( len(parameter) == 0
-        """
-        if len(semicolonSepList) == 6:
-          # process the positional parameters
-
-          if len(semicolonSepList[0]):
-            fillColorString = semicolonSepList[0]
-          else:
-            fillColorString = None
-
-          if len(semicolonSepList[1]):
-            fillAlpha = float(semicolonSepList[1])
-          else:
-            fillAlpha = 1.0
-
-          if len(semicolonSepList[2]):
-            outlineColorString = semicolonSepList[0]
-          else:
-            outlineColorString = None
-
-          if len(semicolonSepList[3]):
-            outlineAlpha = float(semicolonSepList[3])
-          else:
-            outlineAlpha = 1.0
-
-          if len(semicolonSepList[4]):
-            outlineWidth = int(semicolonSepList[4])
-          else:
-            outlineWidth = 8
-
-          if len(semicolonSepList[5]):
-            cornerRadius = int(semicolonSepList[5])
-          else:
-            cornerRadius = 22
-
-          # parse the colors (if defined)
-
-          if fillColorString:
-            fillColor = self.color("fill", fillColorString)
-            fillColorRGBATupple = fillColor.getCairoColor()
-          else:
-            fillColorRGBATupple = self.buttonFillColor
-
-          if outlineColorString:
-            outlineColor = self.color("outline", outlineColorString)
-            outlineColorRGBATupple = outlineColor.getCairoColor()
-          else:
-            outlineColorRGBATupple = self.buttonOutlineColor
-
-          # apply the alfa values
-
-          (r,g,b,a) = fillColorRGBATupple
-          fillColorRGBATupple = (r,g,b,fillAlpha)
-
-          (r,g,b,a) = outlineColorRGBATupple
-          outlineColorRGBATupple = (r,g,b,outlineAlpha)
-
-          # create the icon
-          icon = self.roundedRectangle(w, h, fillColorRGBATupple, outlineColorRGBATupple, outlineWidth=outlineWidth, radius=cornerRadius)
-          
-      if icon:
-        cachedIcon = self.storeInCache(cacheName, icon, w, h)
-        self.drawIcon(cr, cachedIcon, x, y, w, h)
-      return
-
-    # try to load it from file
     else:
-      # false means that loading the icon from file failed
-      # this can be caused by missing or corrupted image file
-      loadingResult = self.loadFromFile(name, w, h)
-      if (loadingResult == False):
-        self.cantLoad.append(name)
-      else:
-        cachedIcon = self.storeInCache(cacheName, loadingResult, w, h)
+      # run through possible "layers", which are separated by >
+      compositedIcon = None
+      needBackground = False
+      """icon secifications are separated by >,
+      which should be seen as a pointing arrow in this context
+      we composite from top -> down,
+      for example: "icon1>icon2"
+      icon1 will be drawn over icon2
+      """
+      for currentName in reversed(name.split('>')): # we draw top down
+        if currentName.split(':')[0] == 'generic':
+          if len(currentName.split(':',1)) == 1:
+            # just the default cairo drawn icon
+            needBackground = False
+            genericIcon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
+            compositedIcon = self.combineTwoIcons(compositedIcon, genericIcon)
+          else:
+            # the icon name contains custom positional parameters
+            semicolonSepList = currentName.split(':',1)[1].split(';')
+            """
+            there are five positional parameters:
+            fill collor,fill opacity, outline color, outline opacity,
+            outline width (default 8) and corner radius (default 22)
+            to use default value, just dont fill in the positional parameter
+            ( len(parameter) == 0
+            """
+            needBackground = False
+            parametricIcon = self.getCustomIcon(semicolonSepList,w,h)
+            compositedIcon = self.combineTwoIcons(compositedIcon, parametricIcon)
+        else: # not a generic or parametric icon, try to load from file
+          loadingResult = self.loadFromFile(currentName, w, h)
+          if (loadingResult == False):
+            self.cantLoad.append(currentName)
+          else:
+            (loadingResult,needBackground) = loadingResult
+            compositedIcon = self.combineTwoIcons(compositedIcon, loadingResult)
+
+      # cache and draw the finished icon
+      if compositedIcon:
+        if needBackground:
+          # add a generic icon as a background
+          genericIcon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
+          compositedIcon = self.combineTwoIcons(genericIcon, compositedIcon)
+        cachedIcon = self.storeInCache(cacheName, compositedIcon, w, h)
         self.drawIcon(cr, cachedIcon, x, y, w, h)
         
   def drawIcon(self,cr,icon,x,y,w,h):        
@@ -324,6 +362,21 @@ class icons(ranaModule):
     cr.set_source_surface(icon['image'],0,0)
     cr.paint()
     cr.restore()
+
+  def combineTwoIcons(self, backIcon,overIcon):
+    """ composite two same-size icons """
+    if backIcon and overIcon:
+      ct = cairo.Context(backIcon)
+      ct2 = gtk.gdk.CairoContext(ct)
+      ct2.set_source_surface(overIcon,0,0)
+      ct2.paint()
+      return backIcon
+    elif not backIcon and not overIcon:
+      return None
+    elif backIcon:
+      return backIcon
+    else:
+      return overIcon
 
   def storeInCache(self, name, image, w, h):
     """store an item in cache and return the cache representation"""
@@ -356,7 +409,7 @@ class icons(ranaModule):
 
     x = 0
     y = 0
-    image = cairo.ImageSurface(0,width,height)
+    image = cairo.ImageSurface(0,int(width),int(height))
     cr = cairo.Context(image)
     pi = 3.1415926535897931
 #    aspect        = 1.0     #/* aspect ratio */
@@ -509,8 +562,9 @@ class icons(ranaModule):
         self.gtkColor = gtkColor
         self.valid = True
       except Exception, e:
-        print "wrong color string: %s" % colorString
-        print e
+        print "** color string parsing failed **"
+        print "** input that coused this: %s" % colorStringAlphaTupple
+        print "** exception: %s" % e
 
 
     def setCairoColor(self,r,g,b,a):
@@ -520,7 +574,7 @@ class icons(ranaModule):
       self.alpha = alpha
 
     def getAlpha(self):
-      return alpha
+      return self.alpha
 
     def getGtkColor(self):
       return self.gtkColor
@@ -530,3 +584,6 @@ class icons(ranaModule):
 
     def getColorStringAlphaTupple(self):
       return self.colorStringAlphaTupple
+
+    def getColorString(self):
+      return self.gtkColor.to_string()
