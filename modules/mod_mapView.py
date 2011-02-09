@@ -97,15 +97,11 @@ class mapView(ranaModule):
     if proj and pos:
       (lat,lon) = pos
       self.set('map_centre', pos)
-
       z = int(self.get('z', 15))
-      x,y = latlon2xy(lat,lon,z)
-
+      x,y = proj.ll2xy(lat,lon)
       if(not self.d.has_key('viewport')):
         return(False)
       (sx,sy,sw,sh) = self.get('viewport')
-
-
       """
       the shift amount represents a perentage of the distance from screen center
       to an edge:
@@ -114,21 +110,6 @@ class mapView(ranaModule):
       1 -> directly on the edge
       0.5 -> shifted by half of this distance, eq. in 3/4 of the screen
       """
-      shiftAmount = self.get('posShiftAmount', None)
-      if shiftAmount:
-        intShiftAmount = int(shiftAmount)
-        shiftDirection = self.get('posShiftDirection', "down")
-        if shiftDirection == "down":
-          y = y - sh * 0.5 * intShiftAmount
-        elif shiftDirection == "up":
-          y = y + sh * 0.5 * intShiftAmount
-        elif shiftDirection == "left":
-          x = x + sw * 0.5 * intShiftAmount
-        else: # right
-          x = x + sw * 0.5 * intShiftAmount
-
-        (lat, lon) = proj.xy2ll(x, y)
-
       proj.recentre(lat,lon,z)
       self.set("needRedraw", True)
       return(True)

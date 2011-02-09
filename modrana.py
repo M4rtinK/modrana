@@ -172,52 +172,78 @@ class MapWidget(gtk.Widget):
       m.beforeDraw()
 
     menuName = self.d.get('menu', None)
-    if(menuName != None):
+    if menuName: # draw the menu
       for m in self.m.values():
         m.drawMenu(cr, menuName)
-    else:
+    else: # draw the map
       cr.set_source_rgb(0.2,0.2,0.2) # map background
       cr.rectangle(0,0,self.rect.width,self.rect.height)
       cr.fill()
+      if (self.d.get("centred", False) and self.d.get("rotateMap", False)):
+        proj = self.m['projection']
+        x=0
+        y=0
+        shiftAmount = self.d.get('posShiftAmount', 0.75)
+        (sx,sy,sw,sh) = self.d.get('viewport')
+        floatShiftAmount = float(shiftAmount)
+        shiftDirection = self.d.get('posShiftDirection', "down")
+        if shiftDirection:
+          if shiftDirection == "down":
+            y =  sh * 0.5 * floatShiftAmount
+          elif shiftDirection == "up":
+            y =  - sh * 0.5 * floatShiftAmount
+          elif shiftDirection == "left":
+            x =  - sw * 0.5 * floatShiftAmount
+          elif shiftDirection == "right":
+            x =  + sw * 0.5 * floatShiftAmount
+          # we dont need to do anything if direction is set to don't shift (None)
+        cr.translate(x,y)
+        cr.save()
+        # get the speed and angle
+        speed = self.d.get('speed', 0)
+        angle = self.d.get('bearing', 0)
 
-      cr.save()
-      if (self.d.get("centred", False)):
-        if self.d.get("rotateMap", False):
+        (lat, lon) = (proj.lat,proj.lon)
+        (x1,y1) = proj.ll2xy(lat, lon)
 
-          # get the speed and angle
-          speed = self.d.get('speed', 0)
-          angle = self.d.get('bearing', 0)
-
-          proj = self.m['projection']
-          (lat, lon) = (proj.lat,proj.lon)
-          (x1,y1) = proj.ll2xy(lat, lon)
-
-          """
-          only if current direction angle and speed are known,
-          submit a new angle
-          like this, the map does not revert back to default orientation
-          on short GPS errors
-          """
-          if angle and speed:
-            if speed > self.notMovingSpeed: # do we look like we are moving ?
-              angle = 360 - angle
-              self.mapRotationAngle = radians(angle)
-          cr.translate(x1,y1) # translate to the rotation center
-          cr.rotate(self.mapRotationAngle) # do the rotation
-          cr.translate(-x1,-y1) # translate back
+        """
+        only if current direction angle and speed are known,
+        submit a new angle
+        like this, the map does not revert back to default orientation
+        on short GPS errors
+        """
+        if angle and speed:
+          if speed > self.notMovingSpeed: # do we look like we are moving ?
+            angle = 360 - angle
+            self.mapRotationAngle = radians(angle)
+        cr.translate(x1,y1) # translate to the rotation center
+        cr.rotate(self.mapRotationAngle) # do the rotation
+        cr.translate(-x1,-y1) # translate back
 
         # Draw the base map, the map overlays, and the screen overlays
-      try:
+        try:
+          for m in self.m.values():
+            m.drawMap(cr)
+          for m in self.m.values():
+            m.drawMapOverlay(cr)
+        except Exception, e:
+          print "modRana main loop: an exception occured:\n"
+          traceback.print_exc(file=sys.stdout) # find what went wrong
+        cr.restore()
+        cr.translate(-x,-y)
         for m in self.m.values():
-          m.drawMap(cr)
+          m.drawScreenOverlay(cr)
+      else: # centering is disabled, just draw the map
+        try:
+          for m in self.m.values():
+            m.drawMap(cr)
+          for m in self.m.values():
+            m.drawMapOverlay(cr)
+        except Exception, e:
+          print "modRana main loop: an exception occured:\n"
+          traceback.print_exc(file=sys.stdout) # find what went wrong
         for m in self.m.values():
-          m.drawMapOverlay(cr)
-      except Exception, e:
-        print "modRana main loop: an exception occured:\n"
-        traceback.print_exc(file=sys.stdout) # find what went wrong
-      cr.restore()
-      for m in self.m.values():
-        m.drawScreenOverlay(cr)
+          m.drawScreenOverlay(cr)
 
     # enable redraw speed debugging
     if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:

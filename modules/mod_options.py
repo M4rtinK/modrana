@@ -354,6 +354,24 @@ class options(ranaModule):
        "Themes",
        defaultTheme)
 
+    # centering
+    self.addOption("Centering shift", "posShiftDirection",
+      [("down","shift down"),
+       ("up","shift up"),
+       ("left","shift left"),
+       ("right","shift right"),
+       (None,"don't shift")],
+       "Centering",
+       "down")
+
+    self.addOption("Centering shift amount", "posShiftAmount",
+      [(0.25,"25%"),
+       (0.5,"50%"),
+       (0.75,"75%"),
+       (1.0,"edge of the screen")],
+       "Centering",
+       0.75)
+
 
     # Add all our categories to the "options" menu
     self.menuModule = self.m.get("menu", None)
