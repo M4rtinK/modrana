@@ -32,158 +32,66 @@ class options(ranaModule):
     self.scroll = 0
     self.load()
   
-  def addBoolOption(self, title, variable, category='misc',default=None, action=None):
+
+
+  def addCategory(self,name,id,icon,actionPrefix="",actionSufix=""):
+    """this metohod shuld be run only after menu module instance
+    is vailable in self.menuModule and the options manu is clared,
+    eq. has at least the escape button"""
+    # firs we add the category button to the options
+    id = "opt_cat_%s" % id # get a standardized id
+    action="%sset:menu:%s%s" % (actionPrefix,id,actionSufix)
+    self.menuModule.addItem('options', name, icon, action)
+    # intilize menu for the new category menu
+    self.menuModule.clearMenu(id,"set:menu:options")
+    # as a convenience, return the id
+    return id
+
+  def addGroup(self,name,id,parrentId,icon,actionPrefix="",actionSufix=""):
+    """this method ads a new (empty) options group to category specified by
+    catId, as a convenience feature, the id of the new group is returned"""
+    id = "opt_group_%s_%s" % (id,parrentId) # get a standardized id
+    action="%sset:menu:%s%s" % (actionPrefix,id,actionSufix)
+    self.menuModule.addItem(parrentId, name, icon, action)
+    self.options[id] = ("set:menu:%s" % parrentId,[])
+    return id
+
+  def addBoolOption(self, title, variable, group, default=None, action=None):
+    on = '<span color="green">ON</span>'
+    off = '<span color="red">OFF</span>'
     if action:
-      self.addOption(title,variable,((False,'OFF',action),(True,'ON',action)),category,default)
+      self.addOption(title,variable,((False,off,action),(True,on,action)),group,default)
     else:
-      self.addOption(title,variable,((False,'OFF'),(True,'ON')),category,default)
+      self.addOption(title,variable,((False,off),(True,on)),group,default)
 
-  def addOption(self, title, variable, choices, category='misc', default=None):
-    newOption = (title,variable, choices,category,default)
-    if self.options.has_key(category):
-      self.options[category].append(newOption)
+  def addOption(self, title, variable, choices, group, default=None):
+    newOption = (title,variable, choices,group,default)
+    if self.options.has_key(group):
+      self.options[group][1].append(newOption)
     else:
-      self.options[category] = [newOption,]
-
+      print "options: group %s does not exist, call addGroup to create it first" % group
+#      self.options[group] = [newOption,]
+    
   def firstTime(self):
     """Create a load of options.  You can add your own options in here,
     or alternatively create them at runtime from your module's firstTime()
     function by calling addOption.  That would be best if your module is
     only occasionally used, this function is best if the option is likely
     to be needed in all installations"""
+    self.menuModule = self.m.get("menu", None)
+    self.menuModule.clearMenu("options")
 
+    # shotcuts
+    addCat = self.addCategory
+    addGroup = self.addGroup
+    addOpt = self.addOption
+    addBoolOpt = self.addBoolOption
 
-    # * the debug submenu
-    self.addBoolOption("Print redraw time to terminal", "showRedrawTime", "debug", False)
-    self.addBoolOption("Log modRana stdout to file", "loggingStatus", "debug", False, "log:checkLoggingStatus")
-    self.addBoolOption("Print tile cache status to terminal", "reportTileCachStatus", "debug", False)
-    self.addBoolOption("Debug circles", "debugCircles", "debug", False)
-    self.addBoolOption("Debug squares", "debugSquares", "debug", False)
+    # * the Map category *
+    catMap = addCat("Map", "map", "generic")
 
-#    self.addBoolOption("Debug squares", "debugSquares", "debug", False)
-    self.addBoolOption("Remove dups berofe batch dl", "checkTiles", "debug", False)
-
-    self.addBoolOption("Show N900 GPS-fix", "n900GPSDebug", "debug", False)
-
-
-
-    # * the view submenu *
-
-
-    self.addOption("Units", "unitType",
-                 [("km","use kilometers"),
-                  ("mile", "use miles")],
-                   "view",
-                   "km")
-
-    self.addOption("Hide main buttons", "hideDelay",
-                 [("never","never hide buttons"),
-                  ("5","hide buttons after 5 seconds"),
-                  ("10","hide buttons after 10 seconds"),
-                  ("15","hide buttons after 15 seconds"),
-                  ("30","hide buttons after 30 seconds"),
-                  ("60","hide buttons after 1 minute"),
-                  ("120", "hide buttons after 2 minutes")],
-                   "view",
-                   "10")
-
-    self.addOption("GUI Rotation", "rotationMode",
-                 [("auto","automatic","device:modeChanged"),
-                  ("landscape","landscape","device:modeChanged"),
-                  ("portrait","portrait","device:modeChanged")],
-                   "view",
-                   "auto")
-
-    self.addOption("Tracklogs", "showTracklog",
-    [(None, "Dont draw tracklogs"),
-     ("simple", "Draw simple tracklogs")],
-     "view",
-     None)
-
-    self.addOption("Time format", "currentTimeFormat",
-                 [("24h","24 hours"),
-                  ("12h", "12 hours")],
-                   "view",
-                   "24h")
-
-    self.addOption("Listable menu rows", "listableMenuRows",
-                 [(2,"2 rows"),
-                  (3,"3 rows"),
-                  (4,"4 rows"),
-                  (5,"5 rows"),
-                  (6,"6 rows")],
-                   "view",
-                   4)
-     
-    self.addBoolOption("Centre map", "centred", "view", True)
-
-
-
-    # * network *
-    self.addOption("Network", "network",
-#      [("off","No use of network"),
-      [("minimal", "Only for important data"),
-       ("full", "Unlimited use of network")],
-       "network",
-       "full")
-       
-    self.addOption("Max nr. of threads for tile auto-download","maxAutoDownloadThreads",
-      [(5, "5"),
-       (10, "10"),
-       (20, "20 (default)"),
-       (30, "30"),
-       (40, "40"),
-       (50, "50")],
-       "network",
-       20)
-
-    # * GPS *
-    self.addBoolOption("GPS", "GPSEnabled", "GPS", True, "gpsd:checkGPSEnabled")
-    if self.dmod.locationType() == 'gpsd':
-      knots = "knots per second"
-      meters = "meters per second"
-      if self.device == 'neo':
-        knots = "knots per second (old SHR)"
-        meters = "meters per second (new SHR)"
-      self.addOption("GPSD reports speed in","gpsdSpeedUnit",
-      [('knotsPerSecond', knots),
-       ('metersPerSecond', meters)],
-       "GPS",
-       'knotsPerSecond')
-
-    # * screen *
-    """only add if supported on device"""
-    display = self.m.get('display', None)
-    if display:
-      if display.screenBlankingControlSupported():
-        self.addOption("Keep display ON", "screenBlankingMode",
-        [("always", "always", "display:blankingModeChanged"),
-         ("centred", "while centred", "display:blankingModeChanged"),
-         ("moving", "while moving", "display:blankingModeChanged"),
-         ("movingInFullscreen", "while moving in fullscreen", "display:blankingModeChanged"),
-         ("fullscreen", "while in fullscreen", "display:blankingModeChanged"),
-         ("gpsFix", "while there is a GPS fix", "display:blankingModeChanged"), #TODO: while there is actually a GPS lock
-         ("never", "never", "display:blankingModeChanged")],
-         "Display",
-         "always")
-      if display.usesDashboard():
-        self.addBoolOption("Redraw when on dashboard", "redrawOnDashboard", 'Display', False)
-
-#    self.addOption("Network", "threadedDownload",
-##      [("off","No use of network"),
-#      [("True", "Use threads for download"),
-#       ("False", "Dont use threads for download")],
-#       "network",
-#       "on")
-
-#    self.addBoolOption("Logging", "logging", "logging", True)
-#    options = []
-#    for i in (1,2,5,10,20,40,60):
-#      options.append((i, "%d sec" % i))
-#    self.addOption("Frequency", "log_period", options, "logging", 2)
-
-#    self.addBoolOption("Vector maps", "vmap", "map", True)
-
+    # ** map layers
+    group = addGroup("Map layers", "map_layers", catMap, "generic")
     tiles = self.m.get("mapTiles", None)
     if(tiles):
       tileOptions = [("","None")]
@@ -191,77 +99,161 @@ class options(ranaModule):
       layers.sort()
       for name,layer in layers:
         tileOptions.append((name, layer.get('label',name)))
-      self.addOption("Map images", "layer", tileOptions, "map", "mapnik")
+      addOpt("Main map", "layer", tileOptions, group, "mapnik")
 
-      self.addBoolOption("Map as overlay", "overlay", "map", False)
 
-      self.addOption("Background map", "layer2", tileOptions, "map", "osma")
+      # ** Overlay
+      group = addGroup("Map overlay", "map_overlay", catMap, "generic")
+      addBoolOpt("Map as overlay", "overlay", group, False)
 
-      self.addOption("Transparency ratio:", "transpRatio",
+      addOpt("Main map", "layer", tileOptions, group, "mapnik")
+      addOpt("Background map", "layer2", tileOptions, group, "osma")
+
+      addOpt("Transparency ratio:", "transpRatio",
               [("0.25,1","overlay:25%"),
               ("0.5,1","overlay:50%"),
               ("0.75,1","overlay:75%"),
               ("1,1","overlay:100%")],
-               "map",
+               group,
                "0.5,1")
-               
-      self.addBoolOption("Rotate map in direction of travel", "rotateMap", "map", False)
 
-      self.addOption("Map scale", "mapScale",
+      # ** Rotation
+      group = addGroup("Rotation", "map_rotation", catMap, "generic")
+      addBoolOpt("Rotate map in direction of travel", "rotateMap", group, False)
+
+
+      # ** Scaling
+      group = addGroup("Scaling", "map_scaling", catMap, "generic")
+      addOpt("Map scale", "mapScale",
                    [(1,"1X"),
                     (2,"2X"),
                     (4,"4X")],
-                     "map",
+                     group,
                      1)
 
-      self.addOption("Tile storage (EXPERIMENTAL)", "tileStorageType",
+      # ** centering
+      group = addGroup("Centering", "centering", catMap, "generic")
+      addBoolOpt("Centre map", "centred", group, True)
+
+      addOpt("Centering shift", "posShiftDirection",
+        [("down","shift down"),
+         ("up","shift up"),
+         ("left","shift left"),
+         ("right","shift right"),
+         (None,"don't shift")],
+         group,
+         "down")
+
+      addOpt("Centering shift amount", "posShiftAmount",
+        [(0.25,"25%"),
+         (0.5,"50%"),
+         (0.75,"75%"),
+         (1.0,"edge of the screen")],
+         group,
+         0.75)
+
+      # ** tile storage
+      group = addGroup("Tile storage", "tile_storage", catMap, "generic")
+      addOpt("Tile storage", "tileStorageType",
                    [('files',"files (default, more space used)"),
                     ('sqlite',"sqlite (new, less space used)")],
-                     "map",
+                     group,
                      'files')
 
+    # * the view category *
+    catView = addCat("View", "view", "generic")
 
-#             [("0.5,0.5","over:50%,back:50%"),
-#              ("0.25,0.75","over:25%,back:75%"),
-#              ("0.75,0.25","over:75%,back:50%")],
-#               "map",
-#               "0.5,0.5")
+    # ** GUI
+    group = addGroup("GUI", "gui", catView, "generic")
+    addOpt("Hide main buttons", "hideDelay",
+                 [("never","never hide buttons"),
+                  ("5","hide buttons after 5 seconds"),
+                  ("10","hide buttons after 10 seconds"),
+                  ("15","hide buttons after 15 seconds"),
+                  ("30","hide buttons after 30 seconds"),
+                  ("60","hide buttons after 1 minute"),
+                  ("120", "hide buttons after 2 minutes")],
+                   group,
+                   "10")
 
-
-
-#    self.addBoolOption("Old tracklogs", "old_tracklogs", "map", False)
-#    self.addBoolOption("Latest tracklog", "tracklog", "map", True)
-
-    # * online services submenu
-    self.addOption("Google local search ordering", "GLSOrdering",
-      [("default","ordering from Google"),
-       ("distance", "order by distance")
-      ],
-       "Online services",
-       "default")
-
-    self.addOption("Google local search results", "GLSResults",
-      [("8","max 8 results"),
-       ("16", "max 16 results"),
-       ("32", "max 32 results")],
-       "Online services",
-       "8")
+    addOpt("GUI Rotation", "rotationMode",
+                 [("auto","automatic","device:modeChanged"),
+                  ("landscape","landscape","device:modeChanged"),
+                  ("portrait","portrait","device:modeChanged")],
+                   group,
+                   "auto")
 
 
-    self.addOption("Google local search captions", "drawGLSResultCaptions",
-      [("True","draw captions"),
-       ("False", "dont draw captions")],
-       "Online services",
-       "True")
+    # ** screen
+    """only add if supported on device"""
+    display = self.m.get('display', None)
+    if display:
+      if display.screenBlankingControlSupported():
+        group = addGroup("Screen", "screen", catView, "generic")
+        addOpt("Keep display ON", "screenBlankingMode",
+        [("always", "always", "display:blankingModeChanged"),
+         ("centred", "while centred", "display:blankingModeChanged"),
+         ("moving", "while moving", "display:blankingModeChanged"),
+         ("movingInFullscreen", "while moving in fullscreen", "display:blankingModeChanged"),
+         ("fullscreen", "while in fullscreen", "display:blankingModeChanged"),
+         ("gpsFix", "while there is a GPS fix", "display:blankingModeChanged"), #TODO: while there is actually a GPS lock
+         ("never", "never", "display:blankingModeChanged")],
+         group,
+         "always")
+      if display.usesDashboard():
+        addBoolOpt("Redraw when on dashboard", "redrawOnDashboard", group, False)
 
-    # * online routing submenu
-    self.addBoolOption("Avoid major highways ", "routingAvoidHighways", "Online routing", False)
+      # ** themes
+      icons = self.m.get('icons', None)
+      if icons:
+        group = addGroup("Themes", "themes", catView, "generic")
+        defaultTheme = icons.defaultTheme
+        themeList = icons.getThemeList()
+        # check if current theme exists
+        currentTheme = self.get('currentTheme', None)
+        if currentTheme != None:
+          if currentTheme not in themeList:
+            self.set('currentTheme', defaultTheme) # theme not valid, reset to default
 
-    self.addBoolOption("Avoid toll roads", "routingAvoidToll", "Online routing", False)
+        themeChangedMessage = "icons:themeChanged"
+        nameValueList = map(lambda x: (x,x,themeChangedMessage), themeList)
+        
+        addOpt("Current theme", "currentTheme",
+        nameValueList,
+         group,
+         defaultTheme)
 
 
-    # * navigation
+    # ** units
+    group = addGroup("formats#Units and", "units", catView, "generic")
+    addOpt("Units", "unitType",
+                 [("km","use kilometers"),
+                  ("mile", "use miles")],
+                   group,
+                   "km")
 
+    addOpt("Time format", "currentTimeFormat",
+                 [("24h","24 hours"),
+                  ("12h", "12 hours")],
+                   group,
+                   "24h")
+
+    # ** menus
+    group = addGroup("Menus", "menus", catView, "generic")
+    addOpt("Listable menu rows", "listableMenuRows",
+                 [(2,"2 rows"),
+                  (3,"3 rows"),
+                  (4,"4 rows"),
+                  (5,"5 rows"),
+                  (6,"6 rows")],
+                   group,
+                   4)
+
+    # * the Navigation category
+    catNavigation = addCat("Navigation", "navigation", "generic")
+
+    # * turn by turn navigation
+    group = addGroup("Turn by turn", "turn_by_turn", catNavigation, "generic")
     # in the first string: first one goes to espeak, the seccond part goes to Google
     directionsLanguages =[('ca ca', 'Catalan'),
                           ('zh-yue zh-TW', 'Chinese(Cantonese)'),
@@ -292,17 +284,17 @@ class options(ranaModule):
                           ('tr tr', 'Turkish'),
                           ('vi vi', 'Vietnamese')]
 
-    self.addOption("Language for directions", "directionsLanguage",directionsLanguages,
-       "Navigation",
+    addOpt("Language for directions", group, directionsLanguages,
+       group,
        "en en") # TODO: use locale for default language ?
 
-    self.addOption("Autostart navigation", "autostartNavigationDefaultOnAutoselectTurn",
+    addOpt("Autostart navigation", "autostartNavigationDefaultOnAutoselectTurn",
       [('disabled',"OFF"),
        ('enabled',"ON")],
-       "Navigation",
+       group,
        'enabled')
 
-    self.addOption("Point reached distance", "pointReachedDistance",
+    addOpt("Point reached distance", "pointReachedDistance",
       [(10,"10 m"),
        (20,"20 m"),
        (30,"30 m"),
@@ -311,81 +303,192 @@ class options(ranaModule):
        (200,"200 m"),
        (300,"300 m"),
        (500,"500 m")],
-       "Navigation",
+       group,
        30)
 
-    self.addOption("read Cyrillic with:", "voiceNavigationCyrillicVoice",
+    addOpt("read Cyrillic with:", "voiceNavigationCyrillicVoice",
       [('ru',"Russian voice"),
        (None,"current voice")],
-       "Navigation",
+       group,
        'ru')
 
 
-    # * POI
-    self.addOption("POI database", "POIDBFilename",
+    # ** online routing submenu
+    group = addGroup("Online routing", "online_routing", catNavigation, "generic")
+    addBoolOpt("Avoid major highways ", "routingAvoidHighways", group, False)
+
+    addBoolOpt("Avoid toll roads", "routingAvoidToll", group, False)
+
+    # * the POI category
+    catPOI = addCat("POI", "poi", "generic")
+
+    # ** POI storage
+    group = addGroup("POI storage", "poi_storage", catPOI, "generic")
+    addOpt("POI database", "POIDBFilename",
       [("poi.db","shared with Mappero (EXPERIMENTAL)","storePOI:reconnectToDb"),
        ("modrana_poi.db","modRana only (default)", "storePOI:reconnectToDb")],
-       "POI",
+       group,
        "modrana_poi.db")
 
-    """EportPOIDatabaseToCSV is just a dummy value,
+    """ExportPOIDatabaseToCSV is just a dummy value,
        we just need to send a dump message to storePOI"""
-    self.addOption("Export POI Database to CSV", "EportPOIDatabaseToCSV",
+    addOpt("Export POI Database to CSV", "EportPOIDatabaseToCSV",
       [("dump","click to export","storePOI:dumpToCSV"),
        ("dump","click to export","storePOI:dumpToCSV")],
-       "POI",
+       group,
        "dump")
 
-    # * themes *
-    icons = self.m.get('icons', None)
-    if icons:
-      defaultTheme = icons.defaultTheme
-      themeList = icons.getThemeList()
-      # check if current theme exists
-      currentTheme = self.get('currentTheme', None)
-      if currentTheme != None:
-        if currentTheme not in themeList:
-          self.set('currentTheme', defaultTheme) # theme not valid, reset to default
+    # ** online POI search
+    group = addGroup("Online search", "poi_online", catPOI, "generic")
+    addOpt("Google local search ordering", "GLSOrdering",
+      [("default","ordering from Google"),
+       ("distance", "order by distance")
+      ],
+       group,
+       "default")
 
-      themeChangedMessage = "icons:themeChanged"
-      nameValueList = map(lambda x: (x,x,themeChangedMessage), themeList)
-      self.addOption("Current theme", "currentTheme",
-      nameValueList,
-       "Themes",
-       defaultTheme)
-
-    # centering
-    self.addOption("Centering shift", "posShiftDirection",
-      [("down","shift down"),
-       ("up","shift up"),
-       ("left","shift left"),
-       ("right","shift right"),
-       (None,"don't shift")],
-       "Centering",
-       "down")
-
-    self.addOption("Centering shift amount", "posShiftAmount",
-      [(0.25,"25%"),
-       (0.5,"50%"),
-       (0.75,"75%"),
-       (1.0,"edge of the screen")],
-       "Centering",
-       0.75)
+    addOpt("Google local search results", "GLSResults",
+      [("8","max 8 results"),
+       ("16", "max 16 results"),
+       ("32", "max 32 results")],
+       group,
+       "8")
 
 
-    # Add all our categories to the "options" menu
-    self.menuModule = self.m.get("menu", None)
-    if(self.menuModule):
-      for i in self.options.keys():
-        self.menuModule.addItem(
-          'options', # which menu to add to
-          i, # title
-          "opt_"+i, # icon name
-          "set:menu:opt_%s|options:reset_scroll"%i ) # action
+    addOpt("Google local search captions", "drawGLSResultCaptions",
+      [("True","draw captions"),
+       ("False", "dont draw captions")],
+       group,
+       "True")
+
+    # * the Location category *
+    catLocation = addCat("Location", "location", "generic")
+
+    # ** GPS
+    group = addGroup("GPS", "gps", catLocation, "generic")
+    addBoolOpt("GPS", "GPSEnabled", group, True, "gpsd:checkGPSEnabled")
+    if self.dmod.locationType() == 'gpsd':
+      knots = "knots per second"
+      meters = "meters per second"
+      if self.device == 'neo':
+        knots = "knots per second (old SHR)"
+        meters = "meters per second (new SHR)"
+      addOpt("GPSD reports speed in","gpsdSpeedUnit",
+      [('knotsPerSecond', knots),
+       ('metersPerSecond', meters)],
+       group,
+       'knotsPerSecond')
+
+    # * screen *
+    """only add if supported on device"""
+    display = self.m.get('display', None)
+    if display:
+      if display.screenBlankingControlSupported():
+        addOpt("Keep display ON", "screenBlankingMode",
+        [("always", "always", "display:blankingModeChanged"),
+         ("centred", "while centred", "display:blankingModeChanged"),
+         ("moving", "while moving", "display:blankingModeChanged"),
+         ("movingInFullscreen", "while moving in fullscreen", "display:blankingModeChanged"),
+         ("fullscreen", "while in fullscreen", "display:blankingModeChanged"),
+         ("gpsFix", "while there is a GPS fix", "display:blankingModeChanged"), #TODO: while there is actually a GPS lock
+         ("never", "never", "display:blankingModeChanged")],
+         "Display",
+         "always")
+      if display.usesDashboard():
+        addBoolOpt("Redraw when on dashboard", "redrawOnDashboard", 'Display', False)
+
+    # * the Network category *
+    catNetwork = addCat("Network", "network", "generic")
+    # * network *
+    group = addGroup("Network usage", "network_usage", catNetwork, "generic")
+    addOpt("Network", "network",
+#      [("off","No use of network"),
+      [("minimal", "Only for important data"),
+       ("full", "Unlimited use of network")],
+       group,
+       "full")
+
+    addOpt("Max nr. of threads for tile auto-download","maxAutoDownloadThreads",
+      [(5, "5"),
+       (10, "10"),
+       (20, "20 (default)"),
+       (30, "30"),
+       (40, "40"),
+       (50, "50")],
+       group,
+       20)
+
+
+#    addOpt("Network", "threadedDownload",
+##      [("off","No use of network"),
+#      [("True", "Use threads for download"),
+#       ("False", "Dont use threads for download")],
+#       "network",
+#       "on")
+
+#    addBoolOpt("Logging", "logging", "logging", True)
+#    options = []
+#    for i in (1,2,5,10,20,40,60):
+#      options.append((i, "%d sec" % i))
+#    addOpt("Frequency", "log_period", options, "logging", 2)
+
+#    addBoolOpt("Vector maps", "vmap", "map", True)
+
+
+#             [("0.5,0.5","over:50%,back:50%"),
+#              ("0.25,0.75","over:25%,back:75%"),
+#              ("0.75,0.25","over:75%,back:50%")],
+#               "map",
+#               "0.5,0.5")
+
+
+
+#    addBoolOpt("Old tracklogs", "old_tracklogs", "map", False)
+#    addBoolOpt("Latest tracklog", "tracklog", "map", True)
+
+    # * the Debug category
+    catDebug = addCat("Debug", "debug", "generic")
+
+    # ** redraw
+    group = addGroup("Redrawing", "redrawing", catDebug, "generic")
+    addBoolOpt("Print redraw time to terminal", "showRedrawTime", group, False)
+    # ** logging
+    group = addGroup("Logging", "logging", catDebug, "generic")
+    addBoolOpt("Log modRana stdout to file", "loggingStatus", group, False, "log:checkLoggingStatus")
+    # ** tiles
+    group = addGroup("Tiles", "tiles", catDebug, "generic")
+    addBoolOpt("Print tile cache status to terminal", "reportTileCachStatus", group, False)
+    addBoolOpt("Remove dups berofe batch dl", "checkTiles", group, False)
+    # ** tracklog drawing
+    group = addGroup("Tracklogs", "tracklogs", catDebug, "generic")
+    addBoolOpt("Debug circles", "debugCircles", group, False)
+    addBoolOpt("Debug squares", "debugSquares", group, False)
+    # ** gps
+    group = self.addGroup("GPS", "gps", catDebug, "generic")
+    addBoolOpt("Show N900 GPS-fix", "n900GPSDebug", group, False)
+
+
+
+#    addOpt("Tracklogs", "showTracklog",
+#    [(None, "Dont draw tracklogs"),
+#     ("simple", "Draw simple tracklogs")],
+#     "view",
+#     None)
+
+
+#    # Add all our categories to the "options" menu
+#
+#    if(self.menuModule):
+#      for i in self.options.keys():
+#        self.menuModule.addItem(
+#          'options', # which menu to add to
+#          i, # title
+#          "opt_"+i, # icon name
+#          "set:menu:opt_%s|options:reset_scroll"%i ) # action
 
     # Set all undefined options to default values
     for category,options in self.options.items():
-      for option in options:
+      for option in options[1]:
         (title,variable,choices,category,default) = option
         if(default != None):
           if(not self.d.has_key(variable)):
@@ -447,22 +550,15 @@ class options(ranaModule):
     
   def drawMenu(self, cr, menuName):
     """Draw menus"""
-    if(menuName[0:4] != "opt_"):
+    if(menuName[0:5] != "opt_g"):
       return
-    menuName = menuName[4:]
     if(not self.options.has_key(menuName)):
       return
     
     # Find the screen
     if not self.d.has_key('viewport'):
       return
-#    (x1,y1,w,h) = self.get('viewport', None)
-#
-#    dx = w / 3
-#    dy = h / 4
-
-
-    
+   
     if(self.menuModule):
       
       # elements allocation
@@ -473,16 +569,16 @@ class options(ranaModule):
       (x4,y4) = e4
       (w1,h1,dx,dy) = alloc
 
+      options = self.options[menuName][1]
+      cancelButtonAction = self.options[menuName][0]
+
       # Top row:
       # * parent menu
-      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:options")
+      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", cancelButtonAction)
       # * scroll up
       self.menuModule.drawButton(cr, x2, y2, dx, dy, "", "up_list", "options:up")
       # * scroll down
       self.menuModule.drawButton(cr, x3, y3, dx, dy, "", "down_list", "options:down")
-
-      options = self.options[menuName]
-
 
       # One option per row
       for row in (0,1,2):
@@ -538,34 +634,18 @@ class options(ranaModule):
           border = 20
 
           # 1st line: option name
-          self.showText(cr, title+":", x4+border, y+border, w-2*border)
+          self.menuModule.showText(cr, title+":", x4+border, y+border, w-2*border)
 
           # 2nd line: current value
-          self.showText(cr, valueDescription, x4 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
+          self.menuModule.showText(cr, valueDescription, x4 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
 
           # in corner: row number
-          self.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y+3*border, w * 0.15 - border, 20)
-
-            
-  def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
-    if(text):
-      cr.set_font_size(fontsize)
-      stats = cr.text_extents(text)
-      (textwidth, textheight) = stats[2:4]
-
-      if(widthLimit and textwidth > widthLimit):
-        cr.set_font_size(fontsize * widthLimit / textwidth)
-        stats = cr.text_extents(text)
-        (textwidth, textheight) = stats[2:4]
-
-      cr.move_to(x, y+textheight)
-      cr.show_text(text)
+          self.menuModule.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y+3*border, w * 0.15 - border, 20)
 
   def shutdown(self):
     """save the dictionary on exit"""
     self.save()
 
-  
 if(__name__ == "__main__"):
   a = options({},{'viewport':(0,0,600,800)})
   a.firstTime()

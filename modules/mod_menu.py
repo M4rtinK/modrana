@@ -452,10 +452,9 @@ class menus(ranaModule):
     """anitialize menu a menu dictionary instance to default parameters"""
     self.menus[menu] = {'metadata':{'itemCount':0,'currentPage':0}}
     
-  def clearMenu(self, menu, cancelButton='set:menu:main'):
+  def clearMenu(self, menu, cancelButtonAction='set:menu:main'):
     self.initMenu(menu)
-    if(cancelButton != None):
-      self.addItem(menu,'','up', cancelButton, 0)
+    self.addItem(menu,'','up', cancelButtonAction, 0)
 
   def addItem(self, menu, text, icon=None, action=None, pos=None):
     if menu not in self.menus:
@@ -496,8 +495,8 @@ class menus(ranaModule):
     newListableMenu = self.listableMenu(name, self, items, parrentAction, descFunction, drawFunction,4)
     self.lists[name] = newListableMenu
     return newListableMenu
-      
 
+  
   class listableMenu:
     """a listable menu object"""
     def __init__(self, name, menus, items, parrentAction, descFunction=None, drawFunction=None, displayedItems=3):
