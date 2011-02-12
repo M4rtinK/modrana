@@ -181,10 +181,12 @@ class MapWidget(gtk.Widget):
       cr.fill()
       if (self.d.get("centred", False) and self.d.get("rotateMap", False)):
         proj = self.m['projection']
+        (lat, lon) = (proj.lat,proj.lon)
+        (x1,y1) = proj.ll2xy(lat, lon)
+        (sx,sy,sw,sh) = self.d.get('viewport')
         x=0
         y=0
         shiftAmount = self.d.get('posShiftAmount', 0.75)
-        (sx,sy,sw,sh) = self.d.get('viewport')
         floatShiftAmount = shiftAmount
         shiftDirection = self.d.get('posShiftDirection', "down")
         if shiftDirection:
@@ -202,9 +204,6 @@ class MapWidget(gtk.Widget):
         # get the speed and angle
         speed = self.d.get('speed', 0)
         angle = self.d.get('bearing', 0)
-
-        (lat, lon) = (proj.lat,proj.lon)
-        (x1,y1) = proj.ll2xy(lat, lon)
 
         """
         only if current direction angle and speed are known,
