@@ -185,7 +185,7 @@ class MapWidget(gtk.Widget):
         y=0
         shiftAmount = self.d.get('posShiftAmount', 0.75)
         (sx,sy,sw,sh) = self.d.get('viewport')
-        floatShiftAmount = float(shiftAmount)
+        floatShiftAmount = shiftAmount
         shiftDirection = self.d.get('posShiftDirection', "down")
         if shiftDirection:
           if shiftDirection == "down":
