@@ -297,7 +297,7 @@ class mapTiles(ranaModule):
           # due to the rotation, the map must be larger
           # we take the longest side and render tiles in a square
           longestSide = max(sw,sh)
-          add = (longestSide/2)/(self.tileSide)
+          add = (longestSide/2.0)/(self.tileSide)
           # enlarge the bounding box
           (px1,px2,py1,py2) = (px1-add,px2+add,py1-add,py2+add)
 
@@ -562,7 +562,7 @@ class mapTiles(ranaModule):
     self.storeInMemmory(surface, name, type, expireTimestamp, dictIndex)
 
   def filePath2Pixbuf(self, filePath):
-    """return a pixbaf for a given filePath"""
+    """return a pixbuf for a given filePath"""
     try:
       pixbuf = gtk.gdk.pixbuf_new_from_file(filePath)
       return(pixbuf)
