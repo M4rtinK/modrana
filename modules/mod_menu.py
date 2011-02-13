@@ -627,7 +627,7 @@ class menus(ranaModule):
       self.addItem(
         'transport',                       # menu
         label,                             # label
-        label.lower(),                     # icon
+        mode,                     # icon
         'set:mode:'+mode+"|set:menu:None") # action
 
   def setupSearchWhereMenu(self):
