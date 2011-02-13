@@ -172,7 +172,8 @@ class _GpxElem(point.TimedPoint):
         if self.elevation:
             location += " @ %sm" % self.elevation
         if self.time:
-            location += " on %s" % self.time.isoformat()
+            location += " on %s" % self.time # modified for modRana
+#            location += " on %s" % self.time.isoformat()
         if self.name:
             text = ["%s (%s)" % (self.name, location), ]
         else:
@@ -220,10 +221,13 @@ class _GpxElem(point.TimedPoint):
 #            element.append(elementise("time", None, self.time.isoformat()))
             """modrana:
                the previous format was using current time type sufix
-               this was chcnged just to "Z", as demanded by the spcification
+               this was changed just to "Z", as demanded by the specification
                the time should be just UTC, not local time
             """
-            element.append(elementise("time", None, time.strftime("%Y-%m-%dT%H:%M:%SZ")))
+#            element.append(elementise("time", None, time.strftime("%Y-%m-%dT%H:%M:%SZ")))
+            # add Z on the end
+            correctTime = "%sZ" % self.time
+            element.append(elementise("time", None, correctTime))
         return element
 
 
