@@ -446,7 +446,9 @@ class loadTracklogs(ranaModule):
       # try to create the directory
       try:
         os.makedirs(path)
-      except:
+      except Exception, e:
+        print "loadTracklogs: tracklog folder unusable"
+        print "exception: %s" % e
         self.sendMessage('notification:Error: tracks folder unusable#3')
         return None
     # is it a directory ?
@@ -461,7 +463,9 @@ class loadTracklogs(ranaModule):
         f = open(path+filename, 'w')
         xmlTree.write(f)
         f.close()
-      except:
+      except Exception, e:
+        print "loadTracklogs: saving tracklog failed"
+        print "exception: %s" % e
         self.sendMessage('notification:Error: saving tracklog failed#3')
         return None
 
