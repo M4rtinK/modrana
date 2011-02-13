@@ -127,8 +127,6 @@ class menus(ranaModule):
             dx = size * min(w,h)
             dy = dx
 
-
-
           for key in buttons:
             if key in item:
               (px,py,ndx,ndy) = [float(i) for i in item[key]]
@@ -139,7 +137,10 @@ class menus(ranaModule):
 
 
 
-      menuIcon = self.get('mode', 'car')
+      modeIcon = self.get('mode', 'car')
+      # use thinner outline and smaller corner radius
+      menuIcon = "%s>generic:;;;;5;10" % modeIcon
+
 
       (x1,y1) = buttons['zoom_out']
       self.drawButton(cr, x1, y1, dx, dy, '', minusIcon, "mapView:zoomOut")

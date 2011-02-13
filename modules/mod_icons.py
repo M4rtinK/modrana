@@ -156,6 +156,8 @@ class icons(ranaModule):
     outline width (default 8) and corner radius (default 22)
     to use default value, just don't fill in the positional parameter
     ( len(parameter) == 0 )
+
+    EXAMPLE: generic:green;1.0;blue;0.5;10;15
     """
     # check if the list has proper length
     if len(parameterList) != 6:
