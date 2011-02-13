@@ -88,7 +88,7 @@ class options(ranaModule):
     addBoolOpt = self.addBoolOption
 
     # * the Map category *
-    catMap = addCat("Map", "map", "generic")
+    catMap = addCat("Map", "map", "map")
 
     # ** map layers
     group = addGroup("Map layers", "map_layers", catMap, "generic")
@@ -161,7 +161,7 @@ class options(ranaModule):
                      'files')
 
     # * the view category *
-    catView = addCat("View", "view", "generic")
+    catView = addCat("View", "view", "view")
 
     # ** GUI
     group = addGroup("GUI", "gui", catView, "generic")
@@ -250,7 +250,7 @@ class options(ranaModule):
                    4)
 
     # * the Navigation category
-    catNavigation = addCat("Navigation", "navigation", "generic")
+    catNavigation = addCat("Navigation", "navigation", "navigation")
 
     # * turn by turn navigation
     group = addGroup("Turn by turn", "turn_by_turn", catNavigation, "generic")
@@ -320,7 +320,7 @@ class options(ranaModule):
     addBoolOpt("Avoid toll roads", "routingAvoidToll", group, False)
 
     # * the POI category
-    catPOI = addCat("POI", "poi", "generic")
+    catPOI = addCat("POI", "poi", "opt_poi")
 
     # ** POI storage
     group = addGroup("POI storage", "poi_storage", catPOI, "generic")
@@ -362,7 +362,7 @@ class options(ranaModule):
        "True")
 
     # * the Location category *
-    catLocation = addCat("Location", "location", "generic")
+    catLocation = addCat("Location", "location", "gps_satellite")
 
     # ** GPS
     group = addGroup("GPS", "gps", catLocation, "generic")
@@ -398,7 +398,7 @@ class options(ranaModule):
         addBoolOpt("Redraw when on dashboard", "redrawOnDashboard", 'Display', False)
 
     # * the Network category *
-    catNetwork = addCat("Network", "network", "generic")
+    catNetwork = addCat("Network", "network", "network")
     # * network *
     group = addGroup("Network usage", "network_usage", catNetwork, "generic")
     addOpt("Network", "network",
@@ -447,7 +447,7 @@ class options(ranaModule):
 #    addBoolOpt("Latest tracklog", "tracklog", "map", True)
 
     # * the Debug category
-    catDebug = addCat("Debug", "debug", "generic")
+    catDebug = addCat("Debug", "debug", "debug")
 
     # ** redraw
     group = addGroup("Redrawing", "redrawing", catDebug, "generic")
