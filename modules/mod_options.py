@@ -451,7 +451,7 @@ class options(ranaModule):
 
     # ** redraw
     group = addGroup("Redrawing", "redrawing", catDebug, "generic")
-    addBoolOpt("Print redraw time to terminal", "showRedrawTime", group, False)
+    addBoolOpt("Print redraw time to terminal", "showRedrawTime", group, False, "display:checkShowRedrawTime")
     # ** logging
     group = addGroup("Logging", "logging", catDebug, "generic")
     addBoolOpt("Log modRana stdout to file", "loggingStatus", group, False, "log:checkLoggingStatus")

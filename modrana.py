@@ -70,6 +70,8 @@ class MapWidget(gtk.Widget):
     self.topWindow = None
 
     self.redraw = True
+
+    self.showRedrawTime = False
     
 #    self.mapBuffer = None
 #    self.startX = 0
@@ -125,6 +127,9 @@ class MapWidget(gtk.Widget):
     start = clock()
     for m in self.m.values():
       m.firstTime()
+    # check if redrawing time should be printed to terminal
+    if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
+      self.showRedrawTime = True
     print "Initialization complete in %1.2f ms" % (1000 * (clock() - start))
       
   def beforeDie(self):
@@ -245,8 +250,9 @@ class MapWidget(gtk.Widget):
           m.drawScreenOverlay(cr)
 
     # enable redraw speed debugging
-    if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
+    if self.showRedrawTime:
       print "Redraw took %1.2f ms" % (1000 * (clock() - start))
+#    if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
 
 #  def draw2(self, cr1):
 #    start = clock()

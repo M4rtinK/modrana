@@ -55,6 +55,9 @@ class display(ranaModule):
         self.fullscreenToggle()
     elif message=="blankingModeChanged":
       self.checkScreenBlankingMode() # check if screen blanking changed
+    elif message=="checkShowRedrawTime":
+      state = self.get('showRedrawTime', False)
+      self.modrana.showRedrawTime = state
 
   def enableRedraw(self,reason="not given"):
     """enable window redrawing"""
