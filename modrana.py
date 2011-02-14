@@ -149,17 +149,19 @@ class MapWidget(gtk.Widget):
       self.forceRedraw()
 
   def mousedown(self,x,y):
+    """this signalizes start of a drag or a just click"""
     pass
     
   def click(self, x, y):
+    """this fires after a drag is finished or mouse button released"""
     m = self.m.get("clickHandler",None)
-    if(m != None):
+    if m:
       m.handleClick(x,y)
       self.update()
       
   def handleDrag(self,x,y,dx,dy,startX,startY):
     m = self.m.get("clickHandler",None)
-    if(m != None):
+    if m:
       m.handleDrag(startX,startY,dx,dy,x,y)
         
   def forceRedraw(self):
