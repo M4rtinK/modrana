@@ -140,7 +140,7 @@ class options(ranaModule):
          ("up","shift up"),
          ("left","shift left"),
          ("right","shift right"),
-         (None,"don't shift")],
+         (False,"don't shift")],
          group,
          "down")
 
@@ -151,6 +151,14 @@ class options(ranaModule):
          (1.0,"edge of the screen")],
          group,
          0.75)
+
+      # ** dragging
+      group = addGroup("Dragging", "dragging", catMap, "generic")
+      addOpt("Map dragging", "mapDraggingMode",
+        [("default","full redraw - <i>default</i>","mapView:dragModeChanged"),
+         ("staticMapDrag","drag visible map - <i>fastest</i>", "mapView:dragModeChanged")],
+         group,
+         "default")
 
       # ** tile storage
       group = addGroup("Tile storage", "tile_storage", catMap, "generic")
@@ -308,7 +316,7 @@ class options(ranaModule):
 
     addOpt("read Cyrillic with:", "voiceNavigationCyrillicVoice",
       [('ru',"Russian voice"),
-       (None,"current voice")],
+       (False,"current voice")],
        group,
        'ru')
 
@@ -470,10 +478,10 @@ class options(ranaModule):
 
 
 #    addOpt("Tracklogs", "showTracklog",
-#    [(None, "Dont draw tracklogs"),
+#    [(False, "Dont draw tracklogs"),
 #     ("simple", "Draw simple tracklogs")],
 #     "view",
-#     None)
+#     False)
 
 
 #    # Add all our categories to the "options" menu
@@ -487,11 +495,13 @@ class options(ranaModule):
 #          "set:menu:opt_%s|options:reset_scroll"%i ) # action
 
     # Set all undefined options to default values
+    print "ASDASDASDASDASDSD"
     for category,options in self.options.items():
       for option in options[1]:
         (title,variable,choices,category,default) = option
         if(default != None):
           if(not self.d.has_key(variable)):
+            print variable,default
             self.set(variable, default)
 
   def save(self):
@@ -574,7 +584,7 @@ class options(ranaModule):
 
       # Top row:
       # * parent menu
-      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", cancelButtonAction)
+      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", cancelButtonAction, timedAction=(1000,"set:menu:None"))
       # * scroll up
       self.menuModule.drawButton(cr, x2, y2, dx, dy, "", "up_list", "options:up")
       # * scroll down

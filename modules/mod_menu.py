@@ -281,7 +281,7 @@ class menus(ranaModule):
     """
     self.drawButton(cr, x1, y1, w, h, textIconAction[index][0], textIconAction[index][1], textIconAction[index][2])
         
-  def drawButton(self, cr, x1, y1, w, h, text='', icon='generic', action=''):
+  def drawButton(self, cr, x1, y1, w, h, text='', icon='generic', action='', timedAction=None):
     """Draw a clickable button, with icon image and text"""
     """NOTE: # delimits the different captions: text_down#text_middle#text_up
        text_up is NOT YET IMPLEMENTED"""
@@ -302,7 +302,7 @@ class menus(ranaModule):
     if(action != None):
       m = self.m.get('clickHandler', None)
       if(m != None):
-        m.registerXYWH(x1,y1,w,h, action)
+        m.registerXYWH(x1,y1,w,h, action, timedAction)
 
   def resetMenu(self, menu=None):
     print "Menu knows menu changed"
@@ -421,8 +421,10 @@ class menus(ranaModule):
 
       type = item[3]
       if type=='simple':
-        (text, icon, action, type) = item
-        self.drawButton(cr, x, y, dx, dy, text, icon, action)
+        (text, icon, action, type, timedAction) = item
+        self.drawButton(cr, x, y, dx, dy, text, icon, action, timedAction)
+#        (text, icon, action, type) = item
+#        self.drawButton(cr, x, y, dx, dy, text, icon, action)
       elif type=='toggle':
         index = item[1]
         toggleCount = len(item[0])
@@ -455,15 +457,15 @@ class menus(ranaModule):
     
   def clearMenu(self, menu, cancelButtonAction='set:menu:main'):
     self.initMenu(menu)
-    self.addItem(menu,'','up', cancelButtonAction, 0)
+    self.addItem(menu,'','up', cancelButtonAction, 0, timedAction=(1000,"set:menu:None"))
 
-  def addItem(self, menu, text, icon=None, action=None, pos=None):
+  def addItem(self, menu, text, icon=None, action=None, pos=None, timedAction=None):
     if menu not in self.menus:
       self.initMenu(menu)
     itemCount = self.menus[menu]['metadata']['itemCount']
     type = "simple"
     """we are counting up from zero for the item indexes"""
-    self.menus[menu][itemCount] = (text, icon, action, type)
+    self.menus[menu][itemCount] = (text, icon, action, type, timedAction)
     self.menus[menu]['metadata']['itemCount'] = itemCount + 1
 
   def addToggleItem(self, menu, textIconAction, index=0, pos=None, uniqueName=None):

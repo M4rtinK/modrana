@@ -29,6 +29,9 @@ class mapView(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.lastPos = None
+
+  def firstTime(self):
+    self.checkMapDraggingMode() # check the map dragging mode on startup
     
   def handleMessage(self, message, type, args):
     z = self.get('z', 15)
@@ -44,6 +47,9 @@ class mapView(ranaModule):
       if pos and proj:
         (lat,lon) = pos
         proj.recentre(lat, lon, z)
+
+    elif message=="dragModeChanged":
+      self.checkMapDraggingMode()
 
     elif(message):
       try:
@@ -61,16 +67,8 @@ class mapView(ranaModule):
         print "mapView: cant recentre cooridnates"
   
   def dragEvent(self,startX,startY,dx,dy,x,y):
-    # check if centering is on
-    if self.get("centred",True):
-      fullDx = x - startX
-      fullDy = y - startY
-      distSq = fullDx * fullDx + fullDy * fullDy
-      """ check if the drag is strong enought to disable centering
-      -> like this, centering is not dsabled by pressing buttons"""
-      if distSq > 1024:
-        self.set("centred",False) # turn off centering after dragging the map (like in TangoGPS)
-    else:
+    # only drag the map if centering is disabled
+    if not self.get("centred",False):
       proj = self.m.get('projection', None)
       if proj:
         proj.nudge(dx,dy)
@@ -113,3 +111,14 @@ class mapView(ranaModule):
       proj.recentre(lat,lon,z)
       self.set("needRedraw", True)
       return(True)
+
+    # * map draging mode control * #
+  def checkMapDraggingMode(self):
+    """check ans set current redraw mode configuration"""
+    draggingMode = self.get('mapDraggingMode', "default")
+    print "mapView: switching map drag mode to %s" % draggingMode
+    if draggingMode == 'default':
+      self.modrana.setDefaultDrag()
+    elif draggingMode == "staticMapDrag":
+      self.modrana.staticMapDragEnable()
+

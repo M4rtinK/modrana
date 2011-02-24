@@ -29,37 +29,49 @@ class clickHandler(ranaModule):
   def __init__(self, m, d):
     ranaModule.__init__(self, m, d)
     self.beforeDraw()
-    self.cycle = 0
+    self.ignoreNextClick = False
 
   def beforeDraw(self):
     self.areas = []
     self.dragareas = []
     self.dragscreen = None
+    self.timedActionInProgress = None
 
-  def register(self, rect, action):
-    self.areas.append([rect, action])
+  def register(self, rect, action, timedAction):
+    self.areas.append([rect, action, timedAction])
   
-  def registerXYWH(self, x1,y1,dx,dy, action):
+  def registerXYWH(self, x1,y1,dx,dy, action, timedAction=None):
+    if timedAction: # at least one timed action
+      self.timedActionInProgress = True
     area = rect(x1,y1,dx,dy)
-    self.register(area, action)
+    self.register(area, action, timedAction)
   
-  def registerXYXY(self, x1,y1,x2,y2, action):
+  def registerXYXY(self, x1,y1,x2,y2, action, timedAction=None):
+    if timedAction: # at least one timed action
+      self.timedActionInProgress = True
     area = rect(x1,y1,x2-x1,y2-y1)
-    self.register(area, action)
+    self.register(area, action, timedAction)
     
-  def handleClick(self, x,y):
-#    print "Clicked at %d,%d" % (x,y)
-    for area in self.areas:
-      (rect, action) = area
-      if(rect.contains(x,y)):
-        m = self.m.get("messages", None)
-        if(m != None):
-          print "Clicked, sending " + action
-#          self.set('lastClickXY', "%f,%f" % (x,y))
-          self.set('lastClickXY', (x,y))
-          m.routeMessage(action)
-        else:
-          print "No message handler to receive clicks"
+  def handleClick(self, x, y, msDuration):
+#    print "Clicked at %d,%d for %d" % (x,y,msDuration)
+    if self.ignoreNextClick:
+      self.ignoreNextClick = False
+    else:
+      for area in self.areas:
+        (rect, action, timedAction) = area
+        if(rect.contains(x,y)):
+          if timedAction: # timed action has priority
+            (givenMsDuration, tAction) = timedAction
+            if givenMsDuration <= msDuration:
+              action = tAction
+
+          m = self.m.get("messages", None)
+          if m:
+            print "Clicked, sending " + action
+            self.set('lastClickXY', (x,y))
+            m.routeMessage(action)
+          else:
+            print "No message handler to receive clicks"
           
   def registerDraggable(self, x1,y1,x2,y2, module):
     self.dragareas.append((rect(x1,y1,x2-x1,y2-y1), module))
@@ -68,7 +80,27 @@ class clickHandler(ranaModule):
     print "Entire screen is draggable for %s " % module
     self.dragscreen = module
 
-  def handleDrag(self,startX,startY,dx,dy,x,y):
+  def handleDrag(self,startX,startY,dx,dy,x,y,msDuration):
+    # react on timed actions interactivelly
+    # TODO: set finer timer for timed actions
+    if self.timedActionInProgress:
+      for area in self.areas:
+        (rect, action, timedAction) = area
+        if(rect.contains(x,y)):
+          if timedAction: # timed action has priority
+            (givenMsDuration, tAction) = timedAction
+            if givenMsDuration <= msDuration:
+              action = tAction
+              m = self.m.get("messages", None)
+              if m:
+                print "Clicked, sending " + action
+                self.set('lastClickXY', (x,y))
+                m.routeMessage(action)
+              else:
+                print "No message handler to receive clicks"
+              self.ignoreNextClick = True
+              self.set('needRedraw', True)
+
     if(self.dragscreen):
       m = self.m.get(self.dragscreen, None)
       if(m != None):
@@ -83,8 +115,9 @@ class clickHandler(ranaModule):
 	        else:
 	          print "Drag registered to nonexistant module %s" % module
 	  
-  def update(self):
-    self.cycle += 1
+#  def update(self):
+#    self.cycle += 1
+#    print self.cycle
 
 if(__name__ == "__main__"):
   print "Testing rect"

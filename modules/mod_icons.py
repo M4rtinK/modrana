@@ -102,15 +102,18 @@ class icons(ranaModule):
             print "%s" % e
           # get the background icon
 #          compositeIcon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
-          compositeIcon = cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h)
-          ct = cairo.Context(compositeIcon)
-          ct2 = gtk.gdk.CairoContext(ct)
-          ct2.set_source_pixbuf(pixbuf,targetX,targetY)
-          ct2.paint()
-          return (compositeIcon,True) # this signalizes that a background might be needed
+          if pixbuf:
+            compositeIcon = cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h)
+            ct = cairo.Context(compositeIcon)
+            ct2 = gtk.gdk.CairoContext(ct)
+            ct2.set_source_pixbuf(pixbuf,targetX,targetY)
+            ct2.paint()
+            return (compositeIcon,True) # this signalizes that a background might be needed
+          else:
+            return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor),False)
 
       if result == None:
-        return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor))
+        return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor),False)
     # just use the classic icon
     elif simplePaths:
       iconPath = simplePaths.pop()
