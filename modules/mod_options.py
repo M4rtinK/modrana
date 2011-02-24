@@ -53,7 +53,7 @@ class options(ranaModule):
     id = "opt_group_%s_%s" % (id,parrentId) # get a standardized id
     action="%sset:menu:%s%s" % (actionPrefix,id,actionSufix)
     self.menuModule.addItem(parrentId, name, icon, action)
-    self.options[id] = ("set:menu:%s" % parrentId,[])
+    self.options[id] = ["set:menu:%s" % parrentId,0,[]]
     return id
 
   def addBoolOption(self, title, variable, group, default=None, action=None):
@@ -67,7 +67,7 @@ class options(ranaModule):
   def addOption(self, title, variable, choices, group, default=None):
     newOption = (title,variable, choices,group,default)
     if self.options.has_key(group):
-      self.options[group][1].append(newOption)
+      self.options[group][2].append(newOption)
     else:
       print "options: group %s does not exist, call addGroup to create it first" % group
 #      self.options[group] = [newOption,]
@@ -495,13 +495,11 @@ class options(ranaModule):
 #          "set:menu:opt_%s|options:reset_scroll"%i ) # action
 
     # Set all undefined options to default values
-    print "ASDASDASDASDASDSD"
     for category,options in self.options.items():
-      for option in options[1]:
+      for option in options[2]:
         (title,variable,choices,category,default) = option
         if(default != None):
           if(not self.d.has_key(variable)):
-            print variable,default
             self.set(variable, default)
 
   def save(self):
@@ -545,16 +543,16 @@ class options(ranaModule):
     return("data/options.bin")
   
   def handleMessage(self, message, type, args):
-    if(message == "up"):
-      if(self.scroll > 0):
-        self.scroll -= 1
-        self.set("needRedraw", True)
-    elif(message == "down"):
-      self.scroll += 1
-      self.set("needRedraw", True)
-    elif(message == "reset_scroll"):
-      self.scroll = 0
-      self.set("needRedraw", True)
+    if type=="ml" and message=="scroll":
+      (direction,menuName) = args
+      index = self.options[menuName][1]
+      maxIndex = len(self.options[menuName][2])-1
+      if direction == "up" and index > 0:
+        newIndex = index - 1
+        self.options[menuName][1] = newIndex
+      elif direction == "down" and index < maxIndex:
+        newIndex = index + 1
+        self.options[menuName][1] = newIndex
     elif(message == "save"):
       self.save()
     
@@ -579,20 +577,19 @@ class options(ranaModule):
       (x4,y4) = e4
       (w1,h1,dx,dy) = alloc
 
-      options = self.options[menuName][1]
-      cancelButtonAction = self.options[menuName][0]
+      (cancelButtonAction, firstItemIndex, options) = self.options[menuName]
 
       # Top row:
       # * parent menu
       self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", cancelButtonAction, timedAction=(1000,"set:menu:None"))
       # * scroll up
-      self.menuModule.drawButton(cr, x2, y2, dx, dy, "", "up_list", "options:up")
+      self.menuModule.drawButton(cr, x2, y2, dx, dy, "", "up_list", "ml:options:scroll:up;%s" % menuName)
       # * scroll down
-      self.menuModule.drawButton(cr, x3, y3, dx, dy, "", "down_list", "options:down")
+      self.menuModule.drawButton(cr, x3, y3, dx, dy, "", "down_list", "ml:options:scroll:down;%s" % menuName)
 
       # One option per row
       for row in (0,1,2):
-        index = self.scroll + row
+        index = firstItemIndex + row
         numItems = len(options)
         if(0 <= index < numItems):
           (title,variable,choices,category,default) = options[index]
@@ -659,5 +656,3 @@ class options(ranaModule):
 if(__name__ == "__main__"):
   a = options({},{'viewport':(0,0,600,800)})
   a.firstTime()
-
-  
