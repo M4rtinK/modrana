@@ -52,6 +52,14 @@ class deviceModule(ranaModule):
     """modRana uses gpsd by default"""
     return 'gpsd'
 
+  def simpleMapDragging(self):
+    """should we use a fast but less fluent
+    or nice and but slow(-er) map dragging method ?
+       by default, we use the nice method
+    """
+    return False
+
+
   def textEntryIminent(self):
     """text entry box will be shown after this metod finishes
        - on some platforms, there are some steps needed to make sure
@@ -62,6 +70,7 @@ class deviceModule(ranaModule):
     """we are done with text entry, so all the needed steps can be reversed again
        (enbale fullscreen, etc.)"""
     pass
+
   
 #  def getAutorotationSupported(self):
 #    return False

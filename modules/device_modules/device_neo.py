@@ -34,6 +34,10 @@ class device_neo(deviceModule):
   def getDeviceName(self):
     return "OpenMoko Neo FreeRunner"
 
+  def simpleMapDragging(self):
+    return True
+
+
   def textEntryIminent(self):
     """in SHR on Neo, we need to temporarry disable fullscreen
     (if we are in fullscreen),
@@ -52,8 +56,6 @@ class device_neo(deviceModule):
         if not display.getFullscreenEnabled():
           display.fullscreenToggle()
           self.tempUnfullscreen = False
-
-    
 
 if(__name__ == "__main__"):
   a = device_example({}, {})

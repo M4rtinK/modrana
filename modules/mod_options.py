@@ -154,11 +154,17 @@ class options(ranaModule):
 
       # ** dragging
       group = addGroup("Dragging", "dragging", catMap, "generic")
+      # check if we are on a powerful device or not and set the default accordingly
+      if self.dmod.simpleMapDragging():
+        defaultMode = "staticMapDrag"
+      else:
+        defaultMode = "default"
+
       addOpt("Map dragging", "mapDraggingMode",
         [("default","full redraw - <i>default</i>","mapView:dragModeChanged"),
          ("staticMapDrag","drag visible map - <i>fastest</i>", "mapView:dragModeChanged")],
          group,
-         "default")
+         defaultMode)
 
       # ** tile storage
       group = addGroup("Tile storage", "tile_storage", catMap, "generic")
@@ -501,6 +507,7 @@ class options(ranaModule):
         if(default != None):
           if(not self.d.has_key(variable)):
             self.set(variable, default)
+
 
   def save(self):
     print "options: saving options"
