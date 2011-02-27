@@ -31,7 +31,7 @@ class device_q7(deviceModule):
     deviceModule.__init__(self, m, d, i)
 
   def getDeviceName(self):
-    return "Smart Devices SmartQ 7 MID "
+    return "Smart Devices SmartQ 7 MID"
 
   def simpleMapDragging(self):
     return True
