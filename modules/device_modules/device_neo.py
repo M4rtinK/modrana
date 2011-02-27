@@ -43,7 +43,6 @@ class device_neo(deviceModule):
     shows up after the screen redraws"""
     return 2
 
-
   def textEntryIminent(self):
     """in SHR on Neo, we need to temporarry disable fullscreen
     (if we are in fullscreen),

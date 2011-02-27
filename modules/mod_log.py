@@ -20,7 +20,6 @@ import os
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import sys
-import time
 
 def getModule(m,d,i):
   return(log(m,d,i))

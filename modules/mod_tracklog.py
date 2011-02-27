@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-#import re
 import gtk
 from upoints import gpx
 import time
@@ -32,10 +31,6 @@ class tracklog(ranaModule):
   """Record tracklogs"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-#    self.nodes = []
-#    self.updateTime = 0
-#    self.lastx = 0
-#    self.lasty = 0
     self.startButtonIndex = 0
     self.loggingEnabled = False
     self.loggingPaused = False
@@ -128,15 +123,6 @@ class tracklog(ranaModule):
   def handleTextEntryResult(self, key, result):
     if key == 'logNameEntry':
       self.set('logNameEntry', result)
-
-#  def saveMinimal(self, filename):
-#    try:
-#      f = open(filename, "w")
-#      for n in self.nodes:
-#        f.write("%f,%f\n"%n)
-#      f.close();
-#    except IOError:
-#      print "Error saving tracklog" # TODO: error reporting
 
   def update(self):
     if self.loggingEnabled & (not self.loggingPaused):
@@ -602,47 +588,6 @@ class tracklog(ranaModule):
 
       cr.stroke()
       cr.fill()
-
-#
-#   old method using a 2d array,
-#   that was found to be too slow
-#
-#    proj = self.m.get('projection', None)
-#    if proj:
-#      visiblePoints = self.getVisiblePoints()
-#      if visiblePoints:
-#        print "trying to draw"
-#        print len(visiblePoints)
-#        cr.set_source_rgba(0, 0, 1, 1)
-#        cr.set_line_width(10)
-#
-#        (lat,lon,prevIndex) = visiblePoints[0]
-#        (x,y) = proj.ll2xy(lat,lon)
-#        cr.move_to(x,y)
-#
-#        for point in visiblePoints[1:]:
-#          (lat,lon,index) = point
-#          (x,y) = proj.ll2xy(lat,lon)
-#          if prevIndex+1 == index:
-#            cr.line_to(x,y)
-#          else:
-#            cr.stroke()
-#            prevPoint = self.LatLonIndex[index-1]
-#            (lat,lon,index) = prevPoint
-#            (x1,y1) = proj.ll2xy(lat,lon)
-#
-#            cr.move_to(x1,y1)
-#            cr.line_to(x,y)
-#          prevIndex = index
-#
-#        pos = self.get('pos', None)
-#        if pos:
-#          (lat,lon) = pos
-#          (x,y) = proj.ll2xy(lat,lon)
-#          cr.line_to(x,y)
-#
-#        cr.stroke()
-#        cr.fill()
 
     
   def shutdown(self):

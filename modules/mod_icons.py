@@ -253,40 +253,6 @@ class icons(ranaModule):
         break
     return (simplePaths,parameterPaths)
 
-#      possibleTargets = os.listdir(self.getCurrentThemePath())
-#      # first try to find a filename with positional parameters
-#      if fnmatch.filter(possibleTargets, "%s-*.*" % name):
-#        positionalFilenames = fnmatch.filter(possibleTargets, "%s-*.*" % name)
-#        print positionalFilenames
-#        if fnmatch.filter(positionalFilenames, "%s-above_text.*" % name):
-#          print "above text"
-#      elif fnmatch.filter(possibleTargets, "%s.*" % name):
-#        clasicIconFilename = fnmatch.filter(possibleTargets, "%s.*" % name)[0]
-#        print clasicIconFilename
-
-#    matchingExtension = None
-#    matchList = []
-#    # first, filter out only the prefered-format files
-#    for extension in extensionPriority:
-#      extensionMatchList = []
-#      extensionMatchList.extend(fnmatch.filter(possibleTargets, "*.%s" % extension))
-#      extensionMatchList.extend(fnmatch.filter(possibleTargets, "*.%s" % extension.upper()))
-#      if extensionMatchList:
-#        matchingExtension = extension
-#        break
-#
-#    # second - look if we can find any files with in the targets
-#    if matchingExtension:
-#      if ("%s-above_text." % namelower) in
-
-
-#    # second, are there any icons with in-filename position in the list ?
-#    iconsWithPosData = filter(lambda x: len(x.split('-')), matchList)
-#    if iconsWithPosData:
-#      pass
-#    else:
-#      return
-
   def firstTime(self):
     self.subscribeColorInfo(self, self.colorsChangedCallback)
     # check if there was some theme used last time
@@ -305,14 +271,6 @@ class icons(ranaModule):
 
     if cacheName in self.images.keys():
       self.drawIcon(cr, self.images[cacheName], x, y, w, h)
-
-    # is it in the cant load list ?
-#    elif name in self.cantLoad:
-#      """the cant load list stores names of icons which errored out during
-#         loading from file -> like this we wont load corrupted or
-#         nonexisting icons over and over again"""
-#      return
-
     else:
       # run through possible "layers", which are separated by >
       compositedIcon = None
@@ -363,7 +321,6 @@ class icons(ranaModule):
   def drawIcon(self,cr,icon,x,y,w,h):        
     cr.save()
     cr.translate(x,y)
-#    cr.scale(w / icon['w'], h / icon['h'])
     cr.set_source_surface(icon['image'],0,0)
     cr.paint()
     cr.restore()
@@ -417,12 +374,6 @@ class icons(ranaModule):
     image = cairo.ImageSurface(0,int(width),int(height))
     cr = cairo.Context(image)
     pi = 3.1415926535897931
-#    aspect        = 1.0     #/* aspect ratio */
-##    corner_radius = height / 10.0   #/* and corner curvature radius */
-#    corner_radius = height / 7   #/* and corner curvature radius */
-##    corner_radius = height / 100   #/* and corner curvature radius */
-#
-##    radius = corner_radius / aspect
 
     degrees = pi / 180.0
 
@@ -441,12 +392,6 @@ class icons(ranaModule):
     cr.arc (x + radius, y + radius, radius, 180 * degrees, 270 * degrees)
     cr.close_path()
 
-    # inscape to cairo conversion :)
-#    (r1, g1, b1, a1) = (fill[0]/256.0,fill[1]/256.0,fill[2]/256.0,fill[3])
-#    (r2, g2, b2, a2) = (outline[0]/256.0,outline[1]/256.0,outline[2]/256.0,outline[3])
-#
-#    (r1, g1, b1, a1) = (fill[0]/256.0,fill[1]/256.0,fill[2]/256.0,fill[3])
-#    (r2, g2, b2, a2) = (outline[0]/256.0,outline[1]/256.0,outline[2]/256.0,outline[3])
     cr.set_source_rgba(*fillColor)
     cr.fill_preserve ()
     cr.set_source_rgba(*outlineColor)
@@ -570,7 +515,6 @@ class icons(ranaModule):
         print "** color string parsing failed **"
         print "** input that coused this: %s" % colorStringAlphaTupple
         print "** exception: %s" % e
-
 
     def setCairoColor(self,r,g,b,a):
       self.cairoColor = (r,g,b,a)

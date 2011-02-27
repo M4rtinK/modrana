@@ -36,9 +36,6 @@ class device_q7(deviceModule):
   def simpleMapDragging(self):
     return True
 
-
-    
-
 if(__name__ == "__main__"):
   a = device_example({}, {})
   a.update()

@@ -20,15 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_device_module import deviceModule
-import time
 import dbus.glib
 """
 why dbus.glib ?
 if you import only "dbus", it can't find its mainloop for callbacks
 
 """
-#from dbus.mainloop.glib import DBusGMainLoop
-
 
 def getModule(m,d,i):
   return(device_n900(m,d,i))

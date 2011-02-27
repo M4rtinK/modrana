@@ -265,7 +265,6 @@ class display(ranaModule):
           self.checkMethod() # call the check method
         self.lastCheckConditions = currentTime
 
-
 if(__name__ == "__main__"):
   a = example({}, {})
   a.update()

@@ -20,13 +20,10 @@
 from base_module import ranaModule
 import sys
 import math
-import gtk
-import gobject
 import re
 import csv
 import traceback
 import unicodedata
-from time import sleep
 from time import clock
 
 #if(__name__ == '__main__'):
@@ -485,23 +482,8 @@ class route(ranaModule):
     if destinationAddress:
       self.destinationAddress = destinationAddress
 
-#    """setup the first step selection menu"""
-#    menus = self.m.get('menu', None)
-#    if menus:
-#      menus.clearMenu('routeSelectFirstStep', "set:menu:currentRouteTools")
-#      menus.addItem('routeSelectFirstStep', 'step#first', 'generic', 'ms:turnByTurn:start:first|set:menu:None')
-#      menus.addItem('routeSelectFirstStep', 'step#closest', 'generic', 'ms:turnByTurn:start:closest|set:menu:None')
-
   def update(self):
-
-#    self.mainWindow.get_property("visible")
-#    print self.topWindow.get_property("visible")
-#    print self.topWindow.is_active()
-
-#    print "main", self.mainWindow.get_events()
-#    print "top", self.topWindow.get_events()
-
-    """register areas for manual point imput"""
+    """register areas for manual point input"""
 
     if self.expectStart:
       clickHandler = self.m.get('clickHandler', None)
@@ -947,8 +929,6 @@ class route(ranaModule):
 
         menus.showText(cr, startText, x4+w1/20, y4+dy/5, w1-x4-(w1/20)*2)
         menus.showText(cr, destinationText, x4+w1/20, y4+2*dy+dy/5, w1-x4-(w1/20)*2)
-
-
 
 if(__name__ == '__main__'):
   d = {'transport':'car'}
