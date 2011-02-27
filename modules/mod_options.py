@@ -33,8 +33,6 @@ class options(ranaModule):
     self.on = '<span color="green">ON</span>'
     self.off = '<span color="red">OFF</span>'
   
-
-
   def addCategory(self,name,id,icon,actionPrefix="",actionSufix=""):
     """this metohod shuld be run only after menu module instance
     is vailable in self.menuModule and the options manu is clared,
@@ -71,7 +69,6 @@ class options(ranaModule):
       self.options[group][2].append(newOption)
     else:
       print "options: group %s does not exist, call addGroup to create it first" % group
-#      self.options[group] = [newOption,]
     
   def firstTime(self):
     """Create a load of options.  You can add your own options in here,
@@ -483,16 +480,6 @@ class options(ranaModule):
 #     False)
 
 
-#    # Add all our categories to the "options" menu
-#
-#    if(self.menuModule):
-#      for i in self.options.keys():
-#        self.menuModule.addItem(
-#          'options', # which menu to add to
-#          i, # title
-#          "opt_"+i, # icon name
-#          "set:menu:opt_%s|options:reset_scroll"%i ) # action
-
     # Set all undefined options to default values
     for category,options in self.options.items():
       for option in options[2]:
@@ -625,7 +612,6 @@ class options(ranaModule):
           onClick += "|options:save"
           onClick += "|set:needRedraw:1"
 
-#          y = y1 + (row+1) * dy
           y = y4 + (row) * dy
           w = w1 - (x4-x1)
           
