@@ -44,14 +44,14 @@ else:
 
 import tiledata
 
-def getModule(m,d):
-  return(mapData(m,d))
+def getModule(m,d,i):
+  return(mapData(m,d,i))
 
 class mapData(ranaModule):
   """Handle downloading of map data"""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.stopThreading = True
     self.dlListLock = threading.Lock() # well, its actually a set
     self.currentDownloadList = [] # list of files and urls for the current download batch

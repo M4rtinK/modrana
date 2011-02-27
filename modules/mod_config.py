@@ -24,13 +24,13 @@ import os
 from time import clock
 from configobj import ConfigObj
 
-def getModule(m,d):
-  return(config(m,d))
+def getModule(m,d,i):
+  return(config(m,d,i))
 
 class config(ranaModule):
   """Handle configuration, options, and setup"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.userConfigPath = 'user_config.conf'
     self.userConfig = {}
 

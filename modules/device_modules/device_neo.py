@@ -21,14 +21,14 @@
 #---------------------------------------------------------------------------
 from base_device_module import deviceModule
 
-def getModule(m,d):
-  return(device_neo(m,d))
+def getModule(m,d,i):
+  return(device_neo(m,d,i))
 
 class device_neo(deviceModule):
   """A Neo FreeRunner modRana device-specific module"""
   
-  def __init__(self, m, d):
-    deviceModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    deviceModule.__init__(self, m, d, i)
     self.tempUnfullscreen = False
 
   def getDeviceName(self):
@@ -36,6 +36,12 @@ class device_neo(deviceModule):
 
   def simpleMapDragging(self):
     return True
+
+  def lpSkipCount(self):
+    """SHR on Neo fires two clicks after a long press, so we need to skip
+    bot of them, to avoid clicking some new button that
+    shows up after the screen redraws"""
+    return 2
 
 
   def textEntryIminent(self):

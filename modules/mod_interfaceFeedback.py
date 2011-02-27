@@ -19,14 +19,14 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 
-def getModule(m,d):
-  return(interfaceFeedback(m,d))
+def getModule(m,d,i):
+  return(interfaceFeedback(m,d,i))
 
 class interfaceFeedback(ranaModule):
   """A sample pyroute module"""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     
 
 if(__name__ == "__main__"):

@@ -19,13 +19,13 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 
-def getModule(m,d):
-  return(watchlist(m,d))
+def getModule(m,d,i):
+  return(watchlist(m,d,i))
 
 class watchlist(ranaModule):
   """Allows notification of data-changes"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
 
 
   def notify(self,name, value, oldValue=None):

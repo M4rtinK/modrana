@@ -21,13 +21,13 @@ from base_module import ranaModule
 import cairo
 from datetime import *
 
-def getModule(m,d):
-  return(infoOverlay(m,d))
+def getModule(m,d,i):
+  return(infoOverlay(m,d,i))
 
 class infoOverlay(ranaModule):
   """Overlay info on the map"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.lines = ['hello', 'world']
     self.oldlines = ['','']
     self.mode = 0

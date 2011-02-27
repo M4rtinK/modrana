@@ -25,14 +25,14 @@ import math
 import gtk
 from time import clock
 
-def getModule(m,d):
-  return(showGPX(m,d))
+def getModule(m,d,i):
+  return(showGPX(m,d,i))
 
 class showGPX(ranaModule):
   """draws a GPX track on the map"""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.linewidth = 7 #with of the line denoting GPX tracks
     self.distinctColors=[
                         'black',

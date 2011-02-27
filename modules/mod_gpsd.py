@@ -22,13 +22,13 @@ import socket
 from time import *
 import re
 
-def getModule(m,d):
-  return(gpsd2(m,d))
+def getModule(m,d,i):
+  return(gpsd2(m,d,i))
 
 class gpsd2(ranaModule):
   """Supplies position info from GPSD"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.tt = 0
     self.position_regexp = re.compile('P=(.*?)\s*$')
     self.connected = False

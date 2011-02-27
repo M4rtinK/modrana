@@ -25,13 +25,13 @@ import time
 import geo
 
 
-def getModule(m,d):
-  return(tracklog(m,d))
+def getModule(m,d,i):
+  return(tracklog(m,d,i))
 
 class tracklog(ranaModule):
   """Record tracklogs"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
 #    self.nodes = []
 #    self.updateTime = 0
 #    self.lastx = 0

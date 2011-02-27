@@ -21,8 +21,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #----------------------------------------------------------------------------
 #import dbus.glib
-from time import time
-startTimestamp = time()
+import time
+startTimestamp = time.time()
 import pygtk
 pygtk.require('2.0')
 import gobject
@@ -31,11 +31,9 @@ import sys
 import traceback
 import global_device_id # used for communicating the device id to other modules
 import os
-from time import clock
-from time import sleep
 from gtk import gdk
 from math import radians
-importsDoneTimestamp = time()
+importsDoneTimestamp = time.time()
 
 
 def update1(mapWidget):
@@ -61,9 +59,12 @@ class MapWidget(gtk.Widget):
 
     self.centeringDisableTreshold = 1024
 
+    self.msLongPress = 400
+
     """ setting this both to 100 and 1 in mapView and gpsd fixes the arow orientation bug """
     self.timer1 = gobject.timeout_add(100, update1, self) #default 100
     self.timer2 = gobject.timeout_add(10, update2, self) #default 10
+    self.timer3 = None # will be used for timing long press events
     self.d = {} # List of data
     self.m = {} # List of modules
 
@@ -90,16 +91,20 @@ class MapWidget(gtk.Widget):
     """Load all modules from the specified directory"""
     sys.path.append(module_path)
     print "importing modules:"
-    start = clock()
+    start = time.clock()
+    initInfo={
+              'modrana': self,
+              'device': global_device_id.device, # TODO: do this directly
+              'name': ""
+             }
     for f in os.listdir(module_path):
       if(f[0:4] == 'mod_' and f[-3:] == '.py'):
-        startM = clock()
+        startM = time.clock()
         name = f[4:-3]
-        filename = "%s\\%s" % ( module_path, f[0:-3]) # with directory name, but without .py extension
         a = __import__(f[0:-3])
-        self.m[name] = a.getModule(self.m,self.d)
-        self.m[name].moduleName = name
-        print " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (clock() - startM)))
+        initInfo['name'] = name
+        self.m[name] = a.getModule(self.m,self.d, initInfo)
+        print " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (time.clock() - startM)))
 
     # load device specific module
     deviceModulesPath = module_path + "/device_modules/"
@@ -108,36 +113,34 @@ class MapWidget(gtk.Widget):
     deviceModuleName = "device_" + deviceId + ".py"
     if os.path.exists(deviceModulesPath + deviceModuleName):
       print "Loading device specific module for %s" % deviceId
-      startM = clock()
-      name = "device"
-
+      startM = time.clock()
       a = __import__(deviceModuleName[0:-3])
-      self.m[name] = a.getModule(self.m,self.d)
-      self.m[name].moduleName = name
+      name = 'device'
+      initInfo['name'] = name
+      self.m[name] = a.getModule(self.m,self.d, initInfo)
       self.dmod = self.m[name]
-      print " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (clock() - startM)))
+      print " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (time.clock() - startM)))
 
-
-    print "Loaded all modules in %1.2f ms, initialising" % (1000 * (clock() - start))
+    print "Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start))
 
     # make sure all modules have the device module and other variables before first time
     for m in self.m.values():
       m.modrana = self # make this class accessible from modules
       m.dmod = self.dmod
 
-    start = clock()
+    start = time.clock()
     for m in self.m.values():
       m.firstTime()
     # check if redrawing time should be printed to terminal
     if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
       self.showRedrawTime = True
-    print "Initialization complete in %1.2f ms" % (1000 * (clock() - start))
+    print "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start))
       
   def beforeDie(self):
     print "Shutting-down modules"
     for m in self.m.values():
       m.shutdown()
-    sleep(2) # leave some times for threads to shut down
+    time.sleep(2) # leave some times for threads to shut down
     print "Shuttdown complete"
   
   def update(self):
@@ -153,7 +156,6 @@ class MapWidget(gtk.Widget):
     """this signalizes start of a drag or a just a click"""
     pass
     
-    
   def click(self, x, y, msDuration):
     """this fires after a drag is finished or mouse button released"""
     m = self.m.get("clickHandler",None)
@@ -164,6 +166,10 @@ class MapWidget(gtk.Widget):
   def released(self,event):
     """mouse button has been released or
     the tapping object has been lifted up from the touchscreen"""
+
+    #always unlock drag on release
+    self.unlockDrag()
+
     if self.altDragEnd:
       self.altDragEnd(event)
       
@@ -190,7 +196,21 @@ class MapWidget(gtk.Widget):
         m = self.m.get("clickHandler",None)
         if m:
           m.handleDrag(startX,startY,dx,dy,x,y,msDuration)
+
+  def handleLongPress(self, pressStartEpoch, msCurrentDuration, startX, startY, x, y):
+    """handle long press"""
+    m = self.m.get("clickHandler",None)
+    if m:
+      m.handleLongPress(pressStartEpoch, msCurrentDuration, startX, startY, x, y)
         
+  def lockDrag(self):
+    """start ignoring drag events"""
+    self.dragLocked = True
+    
+  def unlockDrag(self):
+    """stop ignoring drag events"""
+    self.dragLocked = False
+
   def forceRedraw(self):
     """Make the window trigger a draw event.  
     TODO: consider replacing this if porting pyroute to another platform"""
@@ -204,12 +224,12 @@ class MapWidget(gtk.Widget):
 
   def draw(self, cr, event):
     """ re/Draw the modrana GUI """
-    start = clock()
+    start = time.clock()
     # run the currently used draw method
     self.currentDrawMethod(cr,event)
     # enable redraw speed debugging
     if self.showRedrawTime:
-      print "Redraw took %1.2f ms" % (1000 * (clock() - start))
+      print "Redraw took %1.2f ms" % (1000 * (time.clock() - start))
 
   def fullDrawMethod(self, cr, event):
     """ this is the default drawing method
@@ -295,7 +315,7 @@ class MapWidget(gtk.Widget):
 #    if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
 
 #  def draw2(self, cr1):
-#    start = clock()
+#    start = time.clock()
 #
 #
 ##      cr.paint()
@@ -307,14 +327,14 @@ class MapWidget(gtk.Widget):
 #    if mapAndMapOverlayBuffer:
 #      cr1.set_source_surface(mapAndMapOverlayBuffer, float(self.centerX), float(self.centerY))
 #      cr1.paint()
-#    start1 = clock()
+#    start1 = time.clock()
 #    for m in self.m.values():
 #      m.drawScreenOverlay(cr1)
 #
 #    # enable redraw speed debugging
 #    if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
-#      print "Redraw1 took %1.2f ms" % (1000 * (clock() - start))
-#      print "Redraw2 took %1.2f ms" % (1000 * (clock() - start1))
+#      print "Redraw1 took %1.2f ms" % (1000 * (time.clock() - start))
+#      print "Redraw2 took %1.2f ms" % (1000 * (time.clock() - start1))
 #
 #  def getMapAndMapOverlayBuffer(self):
 #    if self.mapBuffer == None:
@@ -563,7 +583,11 @@ class GuiBase:
     win.set_title('modRana')
     win.connect('delete-event', gtk.main_quit)
     self.addTime("window created")
-    self.lastClickEpoch = 0
+
+    # press length timing
+    self.lastPressEpoch = 0
+    self.pressInProgress = False
+    self.pressLengthTimer = None
 
     if(device == 'eee'): # test for use with asus eee
       win.resize(800,600)
@@ -588,7 +612,6 @@ class GuiBase:
     else: # test for use with neo freerunner
       win.resize(480,640)
       win.move(gtk.gdk.screen_width() - 500, 50)
-
     
     # Events
     event_box = gtk.EventBox()
@@ -624,7 +647,7 @@ class GuiBase:
 ## STARTUP TIMING ##
 
   def addTime(self, message):
-    timestamp = time()
+    timestamp = time.time()
     self.timing.append((message,timestamp))
     return (timestamp)
 
@@ -654,7 +677,8 @@ class GuiBase:
 
 
   def pressed(self, w, event):
-    self.lastClickEpoch=event.time
+    self.lastPressEpoch=event.time
+    self.pressInProgress = True
 
     self.dragstartx = event.x
     self.dragstarty = event.y
@@ -664,6 +688,9 @@ class GuiBase:
     self.dragx = event.x
     self.dragy = event.y
     self.mapWidget.mousedown(event.x,event.y)
+
+    if not self.pressLengthTimer:
+      self.pressLengthTimer = gobject.timeout_add(50, self.checkStillPressed, event.time, time.time(), event.x,event.y)
     
   def moved(self, w, event):
     """Drag-handler"""
@@ -675,13 +702,16 @@ class GuiBase:
       event.y - self.dragy,
       self.dragstartx,
       self.dragstarty,
-      event.time - self.lastClickEpoch)
+      event.time - self.lastPressEpoch)
 
     self.dragx = event.x
     self.dragy = event.y
 
   def released(self, w, event):
-    msDuration = event.time - self.lastClickEpoch
+    self.pressInProgress = False
+    self.pressLengthTimer = None
+    msDuration = event.time - self.lastPressEpoch
+
     self.mapWidget.released(event)
     dx = event.x - self.dragstartx
     dy = event.y - self.dragstarty
@@ -690,6 +720,28 @@ class GuiBase:
     if distSq < 1024:
       self.mapWidget.click(event.x, event.y,msDuration)
 
+  def checkStillPressed(self, pressStartEpoch, pressStartTime, startX, startY):
+    """check if a press is still in progress and report:
+    pressStart epoch - to differentiate presses
+    duration
+    start coordinates
+    currentCoordinates
+    if no press is in progress or another press already started, shut down the timer
+    """
+
+    """just to be sure, time out after 60 seconds
+    - provided the released signal is always called, this timeout might not be necessary,
+    but better be safe, than eat the whole battery if the timer is not terminated"""
+    dt = (time.time() - pressStartTime)*1000
+    if dt > 60000:
+      print "long press timeout reached"
+      return False
+
+    if pressStartEpoch == self.lastPressEpoch and self.pressInProgress:
+      self.mapWidget.handleLongPress(pressStartEpoch, dt, startX, startY, self.dragx, self.dragy)     
+      return True
+    else: # the press ended or a new press is in progress -> stop the timer
+      return False
 
 if __name__ == "__main__":
   """

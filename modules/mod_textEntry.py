@@ -20,14 +20,14 @@
 from base_module import ranaModule
 import gtk
 
-def getModule(m,d):
-  return(textEntry(m,d))
+def getModule(m,d,i):
+  return(textEntry(m,d,i))
 
 class textEntry(ranaModule):
   """A module for hadnling text entry."""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.entryBoxVisible = False
     
 

@@ -18,18 +18,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import cairo
 from rect import rect
 
-def getModule(m,d):
-  return(clickHandler(m,d))
+def getModule(m,d,i):
+  return(clickHandler(m,d,i))
 
 class clickHandler(ranaModule):
   """handle mouse clicks"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.beforeDraw()
-    self.ignoreNextClick = False
+    self.ignoreNextClicks = 0
 
   def beforeDraw(self):
     self.areas = []
@@ -54,24 +53,39 @@ class clickHandler(ranaModule):
     
   def handleClick(self, x, y, msDuration):
 #    print "Clicked at %d,%d for %d" % (x,y,msDuration)
-    if self.ignoreNextClick:
-      self.ignoreNextClick = False
+    if self.ignoreNextClicks > 0:
+      self.ignoreNextClicks=self.ignoreNextClicks - 1
+#      print "ignoring click, %d remaining" % self.ignoreNextClicks
     else:
       for area in self.areas:
         (rect, action, timedAction) = area
         if(rect.contains(x,y)):
-          if timedAction: # timed action has priority
-            (givenMsDuration, tAction) = timedAction
-            if givenMsDuration <= msDuration:
-              action = tAction
-
           m = self.m.get("messages", None)
           if m:
-            print "Clicked, sending " + action
+            print "Clicked, sending %s" % action
             self.set('lastClickXY', (x,y))
             m.routeMessage(action)
           else:
             print "No message handler to receive clicks"
+
+  def handleLongPress(self, pressStartEpoch, msCurrentDuration, startX, startY, x, y):
+    """handle long press"""
+    for area in self.areas:
+      (rect, normalAction, timedAction) = area
+      if timedAction: # we are interested only in timed actions
+        if(rect.contains(x,y)):
+          (givenMsDuration, action) = timedAction
+          if givenMsDuration <= msCurrentDuration:
+            m = self.m.get("messages", None)
+            if m:
+              print "Long-clicked (%f ms), sending %s" % (givenMsDuration, action)
+              self.set('lastClickXY', (x,y))
+              self.modrana.lockDrag()
+              m.routeMessage(action)
+              self.set('needRedraw', True)
+            else:
+              print "No message handler to receive clicks"
+            self.ignoreNextClicks = self.dmod.lpSkipCount()
           
   def registerDraggable(self, x1,y1,x2,y2, module):
     self.dragareas.append((rect(x1,y1,x2-x1,y2-y1), module))
@@ -82,25 +96,6 @@ class clickHandler(ranaModule):
 
   def handleDrag(self,startX,startY,dx,dy,x,y,msDuration):
     # react on timed actions interactivelly
-    # TODO: set finer timer for timed actions
-    if self.timedActionInProgress:
-      for area in self.areas:
-        (rect, action, timedAction) = area
-        if(rect.contains(x,y)):
-          if timedAction: # timed action has priority
-            (givenMsDuration, tAction) = timedAction
-            if givenMsDuration <= msDuration:
-              action = tAction
-              m = self.m.get("messages", None)
-              if m:
-                print "Clicked, sending " + action
-                self.set('lastClickXY', (x,y))
-                m.routeMessage(action)
-              else:
-                print "No message handler to receive clicks"
-              self.ignoreNextClick = True
-              self.set('needRedraw', True)
-
     if(self.dragscreen):
       m = self.m.get(self.dragscreen, None)
       if(m != None):
@@ -114,10 +109,6 @@ class clickHandler(ranaModule):
 	          m.dragEvent(startX,startY,dx,dy,x,y)
 	        else:
 	          print "Drag registered to nonexistant module %s" % module
-	  
-#  def update(self):
-#    self.cycle += 1
-#    print self.cycle
 
 if(__name__ == "__main__"):
   print "Testing rect"

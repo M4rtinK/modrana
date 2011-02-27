@@ -22,8 +22,8 @@ from tilenames import *
 import geo
 from math import *
 
-def getModule(m,d):
-  return(Projection(m,d))
+def getModule(m,d,i):
+  return(Projection(m,d,i))
 
 class Projection(ranaModule):
   """Projection code (lat/long to screen conversions)"""
@@ -44,8 +44,8 @@ class Projection(ranaModule):
    -> shoft the trackpoints so no ll2xy would be needed
 
   """
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     
     self.xyValid = False
     self.llValid = False

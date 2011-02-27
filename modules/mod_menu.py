@@ -26,13 +26,13 @@ import time
 import math
 import geo
 
-def getModule(m,d):
-  return(menus(m,d))
+def getModule(m,d,i):
+  return(menus(m,d,i))
 
 class menus(ranaModule):
   """Handle menus"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.menus = {}
     self.lists = {}
     self.listOffset = 0
@@ -457,7 +457,8 @@ class menus(ranaModule):
     
   def clearMenu(self, menu, cancelButtonAction='set:menu:main'):
     self.initMenu(menu)
-    self.addItem(menu,'','up', cancelButtonAction, 0, timedAction=(1000,"set:menu:None"))
+    timeout = self.modrana.msLongPress
+    self.addItem(menu,'','up', cancelButtonAction, 0, timedAction=(timeout,"set:menu:None"))
 
   def addItem(self, menu, text, icon=None, action=None, pos=None, timedAction=None):
     if menu not in self.menus:

@@ -24,14 +24,14 @@ import pango
 import pangocairo
 import time
 
-def getModule(m,d):
-  return(turnByTurn(m,d))
+def getModule(m,d,i):
+  return(turnByTurn(m,d,i))
 
 class turnByTurn(ranaModule):
   """A turn by turn navigation module."""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
 
     # initial colors
     self.navigationBoxBackground = (0,0,1,0.3) # very transparent blue

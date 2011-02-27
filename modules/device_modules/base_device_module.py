@@ -25,8 +25,8 @@ from base_module import ranaModule
 class deviceModule(ranaModule):
   """A sample pyroute module"""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     
   def getDeviceName(self):
     return "unknown device"
@@ -59,6 +59,14 @@ class deviceModule(ranaModule):
     """
     return False
 
+  def lpSkipCount(self):
+    """how many clicks to skip after a long press is detected and execised
+    * this might be device specific, as for example SHR on the Neo FreeRunner
+    fires two clicks after lp, but Maemo on N900 fires just one
+    * default value -> 1
+     * should work for Maemo and normal PC Linuxes (Ubuntu)
+    """
+    return 1
 
   def textEntryIminent(self):
     """text entry box will be shown after this metod finishes

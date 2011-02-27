@@ -30,14 +30,14 @@ if you import only "dbus", it can't find its mainloop for callbacks
 #from dbus.mainloop.glib import DBusGMainLoop
 
 
-def getModule(m,d):
-  return(device_n900(m,d))
+def getModule(m,d,i):
+  return(device_n900(m,d,i))
 
 class device_n900(deviceModule):
   """A N900 modRana device-specific module"""
   
-  def __init__(self, m, d):
-    deviceModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    deviceModule.__init__(self, m, d, i)
     self.rotationObject = None
     # start the N900 specific automatic GUI rotation support
     self.done = False

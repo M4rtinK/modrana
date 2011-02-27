@@ -24,14 +24,14 @@ import pycha.line
 import cairo
 import geo
 
-def getModule(m,d):
-  return(showOSD(m,d))
+def getModule(m,d,i):
+  return(showOSD(m,d,i))
 
 class showOSD(ranaModule):
   """Draw OSD (On Screen Display)."""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.items = None
     self.routeProfileData = None
     self.nearestPoint = None

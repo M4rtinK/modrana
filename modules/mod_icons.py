@@ -25,13 +25,13 @@ import glob
 import fnmatch
 from configobj import ConfigObj
 
-def getModule(m,d):
-  return(icons(m,d))
+def getModule(m,d,i):
+  return(icons(m,d,i))
 
 class icons(ranaModule):
   """Draw icons"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.images = {}
     self.cantLoad = []
     self.imageOrderList = [] # for cache trimming

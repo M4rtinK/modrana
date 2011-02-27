@@ -20,14 +20,14 @@
 from base_module import ranaModule
 import time
 
-def getModule(m,d):
-  return(units(m,d))
+def getModule(m,d,i):
+  return(units(m,d,i))
 
 class units(ranaModule):
   """A module handling unit conversions and dispplaying correct units acording to current settings."""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.mileInMeters = 1609.344
     self.mileInKiloMeters = 1.609344
     self.yardsInMile = 1760

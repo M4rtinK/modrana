@@ -24,13 +24,13 @@ import socket
 from time import sleep
 import re
 
-def getModule(m,d):
-  return(messageModule(m,d))
+def getModule(m,d,i):
+  return(messageModule(m,d,i))
 
 class messageModule(ranaModule):
   """Handles messages"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
 
   def routeMessage(self, messages):
     for message in messages.split('|'):

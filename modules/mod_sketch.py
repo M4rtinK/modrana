@@ -21,13 +21,13 @@ from base_module import ranaModule
 import cairo
 from time import time
 
-def getModule(m,d):
-  return(sketch(m,d))
+def getModule(m,d,i):
+  return(sketch(m,d,i))
 
 class sketch(ranaModule):
   """Sketching functionality"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.points = []
 
     if(0): # to test

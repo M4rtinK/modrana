@@ -19,14 +19,14 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 
-def getModule(m,d):
-  return(askMenu(m,d))
+def getModule(m,d,i):
+  return(askMenu(m,d,i))
 
 class askMenu(ranaModule):
   """A sample pyroute module"""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.menus = None
     self.question = None
     self.yesAction = None

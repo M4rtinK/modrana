@@ -20,14 +20,14 @@
 from base_module import ranaModule
 import time
 
-def getModule(m,d):
-  return(notification(m,d))
+def getModule(m,d,i):
+  return(notification(m,d,i))
 
 class notification(ranaModule):
   """This module provides notification support."""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.notificationText = ""
     self.timeout = 5
     self.position = 'middle'

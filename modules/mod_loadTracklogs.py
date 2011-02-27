@@ -30,14 +30,14 @@ from time import clock
 from time import gmtime, strftime
 #from time import clock
 
-def getModule(m,d):
-  return(loadTracklogs(m,d))
+def getModule(m,d,i):
+  return(loadTracklogs(m,d,i))
 
 class loadTracklogs(ranaModule):
   """A sample pyroute module"""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.tracklogs = {} # dictionary of all loaded tracklogs, path is the key
     #self.set('tracklogs', self.tracklogs) # now we make the list easily acessible to other modules
     self.cachePath = 'cache/tracklogs/tracklog_cache.txt'

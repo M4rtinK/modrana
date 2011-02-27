@@ -23,14 +23,14 @@ import googlemaps
 import threading
 import time
 
-def getModule(m,d):
-  return(onlineServices(m,d))
+def getModule(m,d,i):
+  return(onlineServices(m,d,i))
 
 class onlineServices(ranaModule):
   """Module for communication with various online services."""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.routingThread = None
     self.drawOverlay = False
     self.workStartTimestamp = None # for show elapsed time since the online request has been sent

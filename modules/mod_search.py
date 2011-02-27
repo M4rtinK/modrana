@@ -22,13 +22,13 @@ from base_module import ranaModule
 import geo
 import math
 
-def getModule(m,d):
-  return(search(m,d))
+def getModule(m,d,i):
+  return(search(m,d,i))
 
 class search(ranaModule):
   """Search for POI"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.localSearchResults = None # GLS results from onlineServices
     self.scroll = 0
     self.list = None # processed results: (distancefrom pos, rusult, absolut index)

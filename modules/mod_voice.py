@@ -22,14 +22,14 @@ from base_module import ranaModule
 import subprocess
 import threading
 
-def getModule(m,d):
-  return(voice(m,d))
+def getModule(m,d,i):
+  return(voice(m,d,i))
 
 class voice(ranaModule):
   """Handle text to speach."""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.espaekProcess = None
     # this lock is used to make sure there is only one voice speking at once
     self.voiceLock = threading.Lock()

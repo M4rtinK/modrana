@@ -21,14 +21,14 @@ from base_module import ranaModule
 import time
 import gtk
 
-def getModule(m,d):
-  return(display(m,d))
+def getModule(m,d,i):
+  return(display(m,d,i))
 
 class display(ranaModule):
   """A platform independent display device control module"""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.fullscreen = False
     """according to documentation on:
     (http://wiki.maemo.org/PyMaemo/Python-osso_examples#Device_State),

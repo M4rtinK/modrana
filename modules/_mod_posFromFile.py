@@ -24,13 +24,13 @@ import socket
 from time import sleep
 import re
 
-def getModule(m,d):
-  return(posFromFile(m,d))
+def getModule(m,d,i):
+  return(posFromFile(m,d,i))
 
 class posFromFile(ranaModule):
   """Supplies position info from GPSD"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
  
   def update(self):
     filename = self.get('pos_filename', 'pos.txt')

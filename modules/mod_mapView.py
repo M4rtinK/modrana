@@ -21,14 +21,13 @@ from base_module import ranaModule
 from time import time
 from tilenames import *
 
-def getModule(m,d):
-  return(mapView(m,d))
+def getModule(m,d,i):
+  return(mapView(m,d,i))
 
 class mapView(ranaModule):
   """Controls the view being displayed on the map"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
-    self.lastPos = None
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
 
   def firstTime(self):
     self.checkMapDraggingMode() # check the map dragging mode on startup
@@ -80,14 +79,8 @@ class mapView(ranaModule):
       # get current position information
       pos = self.get('pos', None)
       # check if the position changed from last time
-      if pos != self.lastPos:
-        if(self.setCentre(pos)):
-          self.set('centreOnce', False)
-        self.lastPos = pos
-        
-#    request = self.get("centreOn", None)
-#    if(request):
-#      self.setCentre([float(a) for a in request.split(",")])
+      if(self.setCentre(pos)):
+        self.set('centreOnce', False)        
       
   def setCentre(self,pos):
     """takes care for centering the map on current position"""

@@ -21,13 +21,13 @@ from base_module import ranaModule
 import geo
 from time import *
 
-def getModule(m,d):
-  return(stats(m,d))
+def getModule(m,d,i):
+  return(stats(m,d,i))
 
 class stats(ranaModule):
   """Handles messages"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.minimalSpeed = 2 #  in kmh, we don't update the avg speed if the current speed is like this
     self.lastT = None
     self.maxSpeed = 0

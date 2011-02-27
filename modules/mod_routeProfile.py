@@ -25,14 +25,14 @@ import cairo
 import geo
 import gtk
 
-def getModule(m,d):
-  return(routeProfile(m,d))
+def getModule(m,d,i):
+  return(routeProfile(m,d,i))
 
 class routeProfile(ranaModule):
   """Creates a route profile (an elevation chart)"""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
 
   def drawMenu(self, cr, menuName):
     #print menuName

@@ -31,15 +31,15 @@ import gtk
 import threading
 from threading import Thread
 
-def getModule(m,d):
-  return(storeTiles(m,d))
+def getModule(m,d,i):
+  return(storeTiles(m,d,i))
 
 class storeTiles(ranaModule):
   """Single-file-fs tile storage"""
   #TODO: maybe run this in separate thread ?
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.layers = {}
     self.threadLayers = {}
     self.currentStorageVersion = 1

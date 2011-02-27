@@ -27,13 +27,13 @@ import vmap_load
 from math import *
 from time import time
 
-def getModule(m,d):
-  return(vmap(m,d))
+def getModule(m,d,i):
+  return(vmap(m,d,i))
 
 class vmap(ranaModule):
   """Display map vectors"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.tiles = {}
     self.style_d = 0
     self.style_c = 0

@@ -23,13 +23,13 @@ import os
 import sys
 import geo
 
-def getModule(m,d):
-  return(grid(m,d))
+def getModule(m,d,i):
+  return(grid(m,d,i))
   
 class grid(ranaModule):
   """Display map images"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
 
 #  def drawMapOverlay(self, cr):
 #    # Where is the map?

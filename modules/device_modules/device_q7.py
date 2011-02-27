@@ -21,14 +21,14 @@
 #---------------------------------------------------------------------------
 from base_device_module import deviceModule
 
-def getModule(m,d):
-  return(device_q7(m,d))
+def getModule(m,d,i):
+  return(device_q7(m,d,i))
 
 class device_q7(deviceModule):
   """A SmartQ 7 modRana device-specific module"""
   
-  def __init__(self, m, d):
-    deviceModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    deviceModule.__init__(self, m, d, i)
 
   def getDeviceName(self):
     return "Smart Devices SmartQ 7 MID "

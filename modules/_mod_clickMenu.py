@@ -22,13 +22,13 @@ import cairo
 from time import time
 from math import pi
 
-def getModule(m,d):
-  return(clickMenu(m,d))
+def getModule(m,d,i):
+  return(clickMenu(m,d,i))
 
 class clickMenu(ranaModule):
   """Overlay info on the map"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.lastWaypoint = "(none)"
     self.lastWaypointAddTime = 0
     self.messageLingerTime = 2

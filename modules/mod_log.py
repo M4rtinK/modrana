@@ -22,14 +22,14 @@ from base_module import ranaModule
 import sys
 import time
 
-def getModule(m,d):
-  return(log(m,d))
+def getModule(m,d,i):
+  return(log(m,d,i))
 
 class log(ranaModule):
   """A modRana logging module"""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.savedStdout = None
     self.fsock = None
     self.currentLogPath = ""

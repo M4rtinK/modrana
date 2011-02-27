@@ -22,8 +22,8 @@ import math
 
 class poiModule(ranaModule):
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.poi = {}
     self.needUpdate = False
     self.scroll = 0

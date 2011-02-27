@@ -22,13 +22,13 @@ from base_poi import poiModule
 from random import *
 from urllib import *
 
-def getModule(m,d):
-  return(shareServer(m,d))
+def getModule(m,d,i):
+  return(shareServer(m,d,i))
 
 class shareServer(poiModule):
   """Shares position info with groups"""
-  def __init__(self, m, d):
-    poiModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    poiModule.__init__(self, m, d, i)
  
   def update(self):
     pass

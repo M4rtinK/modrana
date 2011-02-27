@@ -22,13 +22,13 @@ import sys
 import tilenames
 import vmap_load
 
-def getModule(m,d):
-  return(nearestRoad(m,d))
+def getModule(m,d,i):
+  return(nearestRoad(m,d,i))
 
 class nearestRoad(ranaModule):
   """Handles messages"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.lastpos = [0,0]
     self.dataFilename = ''
     self.data = None

@@ -21,13 +21,13 @@ from base_module import ranaModule
 import cairo
 import marshal
 
-def getModule(m,d):
-  return(options(m,d))
+def getModule(m,d,i):
+  return(options(m,d,i))
 
 class options(ranaModule):
   """Handle options"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.options = {}
     self.scroll = 0
     self.load()
@@ -588,7 +588,8 @@ class options(ranaModule):
 
       # Top row:
       # * parent menu
-      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", cancelButtonAction, timedAction=(1000,"set:menu:None"))
+      timeout = self.modrana.msLongPress
+      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", cancelButtonAction, timedAction=(timeout,"set:menu:None"))
       # * scroll up
       self.menuModule.drawButton(cr, x2, y2, dx, dy, "", "up_list", "ml:options:scroll:up;%s" % menuName)
       # * scroll down

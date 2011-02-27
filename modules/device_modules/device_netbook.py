@@ -21,14 +21,14 @@
 #---------------------------------------------------------------------------
 from base_device_module import deviceModule
 
-def getModule(m,d):
-  return(device_netbook(m,d))
+def getModule(m,d,i):
+  return(device_netbook(m,d,i))
 
 class device_netbook(deviceModule):
   """A netbook modRana device-specific module"""
   
-  def __init__(self, m, d):
-    deviceModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    deviceModule.__init__(self, m, d, i)
 
   def getDeviceName(self):
     return "A generic netbook"

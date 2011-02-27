@@ -41,8 +41,8 @@ socket.setdefaulttimeout(timeout)
 #  print function
 #  return
 
-def getModule(m,d):
-  return(mapTiles(m,d))
+def getModule(m,d,i):
+  return(mapTiles(m,d,i))
 
 maplayers = {}
 configVariables = {
@@ -88,8 +88,8 @@ except Exception, e:
   
 class mapTiles(ranaModule):
   """Display map images"""
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.images = [{},{}] # the first dict contains normal image data, the seccond contains special tiles
     self.imagesLock = threading.Lock()
     self.threads = {}

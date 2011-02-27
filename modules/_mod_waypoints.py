@@ -22,13 +22,13 @@ import cairo
 from datetime import *
 import math
 
-def getModule(m,d):
-  return(waypoints(m,d))
+def getModule(m,d,i):
+  return(waypoints(m,d,i))
 
 class waypoints(poiModule):
   """Lookup nearest town or village"""
-  def __init__(self, m, d):
-    poiModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    poiModule.__init__(self, m, d, i)
     self.poi = {'default':[]}
     self.load("data/waypoints.txt")
     self.counter = self.nextWaypoint()

@@ -23,14 +23,14 @@ import os
 import sqlite3
 import csv
 
-def getModule(m,d):
-  return(storePOI(m,d))
+def getModule(m,d,i):
+  return(storePOI(m,d,i))
 
 class storePOI(ranaModule):
   """Store POI data."""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     self.db = None
     self.tempOnlinePOI = None # temporary slot for an uncommited POI from online search
 

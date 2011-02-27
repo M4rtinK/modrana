@@ -25,14 +25,14 @@ from math import radians
 from time import clock
 #from tilenames import *
 
-def getModule(m,d):
-  return(positionMarker(m,d))
+def getModule(m,d,i):
+  return(positionMarker(m,d,i))
 
 class positionMarker(ranaModule):
   """A sample pyroute module"""
   
-  def __init__(self, m, d):
-    ranaModule.__init__(self, m, d)
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
     
 
   def drawMapOverlay(self, cr):
