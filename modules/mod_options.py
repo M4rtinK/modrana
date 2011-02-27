@@ -404,24 +404,6 @@ class options(ranaModule):
        group,
        'knotsPerSecond')
 
-    # * screen *
-    """only add if supported on device"""
-    display = self.m.get('display', None)
-    if display:
-      if display.screenBlankingControlSupported():
-        addOpt("Keep display ON", "screenBlankingMode",
-        [("always", "always", "display:blankingModeChanged"),
-         ("centred", "while centred", "display:blankingModeChanged"),
-         ("moving", "while moving", "display:blankingModeChanged"),
-         ("movingInFullscreen", "while moving in fullscreen", "display:blankingModeChanged"),
-         ("fullscreen", "while in fullscreen", "display:blankingModeChanged"),
-         ("gpsFix", "while there is a GPS fix", "display:blankingModeChanged"), #TODO: while there is actually a GPS lock
-         ("never", "never", "display:blankingModeChanged")],
-         "Display",
-         "always")
-      if display.usesDashboard():
-        addBoolOpt("Redraw when on dashboard", "redrawOnDashboard", 'Display', False)
-
     # * the Network category *
     catNetwork = addCat("Network", "network", "network")
     # * network *
