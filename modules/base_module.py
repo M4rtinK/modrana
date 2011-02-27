@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-import global_device_id # used for communicating the device id to other modules
 class ranaModule:
   def __init__(self, modules={}, data={}, initInfo={}):
     self.m = modules
