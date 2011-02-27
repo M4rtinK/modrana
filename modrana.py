@@ -662,6 +662,11 @@ class GuiBase:
   def reportStartupTime(self):
     if self.timing:
       print "** modRana startup timing **"
+      
+      # print device identificator and name
+      if self.mapWidget.dmod:
+        deviceName = self.mapWidget.dmod.getDeviceName()
+      print "# device: %s (%s)" % (deviceName, device)
 
       tl = self.timing
       startupTime = tl[0][1] * 1000
