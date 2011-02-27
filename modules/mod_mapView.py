@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-from time import time
 from tilenames import *
 
 def getModule(m,d,i):
@@ -31,6 +30,7 @@ class mapView(ranaModule):
 
   def firstTime(self):
     self.checkMapDraggingMode() # check the map dragging mode on startup
+    self.checkCenteringDisableTreshold() # check centering disable treshold on startup
     
   def handleMessage(self, message, type, args):
     z = self.get('z', 15)
@@ -49,6 +49,9 @@ class mapView(ranaModule):
 
     elif message=="dragModeChanged":
       self.checkMapDraggingMode()
+
+    elif message=="centeringDisableTresholdChanged":
+      self.checkCenteringDisableTreshold()
 
     elif(message):
       try:
@@ -107,11 +110,17 @@ class mapView(ranaModule):
 
     # * map draging mode control * #
   def checkMapDraggingMode(self):
-    """check ans set current redraw mode configuration"""
+    """check and set current redraw mode configuration"""
     draggingMode = self.get('mapDraggingMode', "default")
     print "mapView: switching map drag mode to %s" % draggingMode
     if draggingMode == 'default':
       self.modrana.setDefaultDrag()
     elif draggingMode == "staticMapDrag":
       self.modrana.staticMapDragEnable()
+
+  def checkCenteringDisableTreshold(self):
+    """check ans set current centering disable treshold"""
+    centeringDisableTreshold = self.get('centeringDisableTreshold', 2048)
+    print "mapView: switching centering disable treshold to %s" % centeringDisableTreshold
+    self.modrana.setCDDragTreshold(int(centeringDisableTreshold))
 

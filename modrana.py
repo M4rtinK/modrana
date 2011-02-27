@@ -56,7 +56,7 @@ class MapWidget(gtk.Widget):
     self.dmod = None # device specific module
     self.currentDrawMethod = self.fullDrawMethod
 
-    self.centeringDisableTreshold = 1024
+    self.centeringDisableTreshold = 2048
 
     self.msLongPress = 400
 
@@ -177,9 +177,10 @@ class MapWidget(gtk.Widget):
       distSq = fullDx * fullDx + fullDy * fullDy
       """ check if the drag is strong enought to disable centering
       -> like this, centering is not dsabled by pressing buttons"""
-      if distSq > self.centeringDisableTreshold:
-        self.d["centred"] = False # turn off centering after dragging the map (like in TangoGPS)
-        self.d["needRedraw"] = True
+      if self.centeringDisableTreshold:
+        if distSq > self.centeringDisableTreshold:
+          self.d["centred"] = False # turn off centering after dragging the map (like in TangoGPS)
+          self.d["needRedraw"] = True
     else:
       if self.altMapDragEnabled:
         # start simple map drag if its not already in progress
@@ -206,6 +207,13 @@ class MapWidget(gtk.Widget):
   def unlockDrag(self):
     """stop ignoring drag events"""
     self.dragLocked = False
+
+  def setCDDragTreshold(self, treshold):
+    """set the treshold which needs to be reached to disable centering while dragging
+    basically, larger treshold = longer drag is needed to disable centering
+    default value = 2048
+    """
+    self.centeringDisableTreshold = treshold
 
   def forceRedraw(self):
     """Make the window trigger a draw event.  

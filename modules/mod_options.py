@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import cairo
 import marshal
 
 def getModule(m,d,i):
@@ -31,6 +30,8 @@ class options(ranaModule):
     self.options = {}
     self.scroll = 0
     self.load()
+    self.on = '<span color="green">ON</span>'
+    self.off = '<span color="red">OFF</span>'
   
 
 
@@ -57,8 +58,8 @@ class options(ranaModule):
     return id
 
   def addBoolOption(self, title, variable, group, default=None, action=None):
-    on = '<span color="green">ON</span>'
-    off = '<span color="red">OFF</span>'
+    on = self.on
+    off = self.off
     if action:
       self.addOption(title,variable,((False,off,action),(True,on,action)),group,default)
     else:
@@ -151,6 +152,16 @@ class options(ranaModule):
          (1.0,"edge of the screen")],
          group,
          0.75)
+
+      changedMsg = "mapView:centeringDisableTresholdChanged"
+      addOpt("Disable by dragging", "centeringDisableTreshold",
+        [(2048,"normal drag - <i>default</i>",changedMsg),
+         (15000,"long drag",changedMsg),
+         (40000,"realy long drag",changedMsg),
+         (80000,"extremely long drag",changedMsg),
+         (False,self.off,changedMsg)],
+         group,
+         2048)
 
       # ** dragging
       group = addGroup("Dragging", "dragging", catMap, "generic")
