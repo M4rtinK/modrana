@@ -29,7 +29,6 @@ import gobject
 import gtk
 import sys
 import traceback
-import global_device_id # used for communicating the device id to other modules
 import os
 from gtk import gdk
 from math import radians
@@ -82,10 +81,7 @@ class MapWidget(gtk.Widget):
     self.altMapDragInProgress = False
     self.shift = (0,0,0,0)
 
-    self.defaulMethodBindings() # use default map dragging method bindings
-
-    
-    global_device_id.device = device
+    self.defaulMethodBindings() # use default map dragging method binding
 
   def loadModules(self, module_path):
     """Load all modules from the specified directory"""
@@ -94,7 +90,7 @@ class MapWidget(gtk.Widget):
     start = time.clock()
     initInfo={
               'modrana': self,
-              'device': global_device_id.device, # TODO: do this directly
+              'device': device, # TODO: do this directly
               'name': ""
              }
     for f in os.listdir(module_path):
@@ -109,7 +105,7 @@ class MapWidget(gtk.Widget):
     # load device specific module
     deviceModulesPath = module_path + "/device_modules/"
     sys.path.append(deviceModulesPath)
-    deviceId = global_device_id.device
+    deviceId = device
     deviceModuleName = "device_" + deviceId + ".py"
     if os.path.exists(deviceModulesPath + deviceModuleName):
       print "Loading device specific module for %s" % deviceId
