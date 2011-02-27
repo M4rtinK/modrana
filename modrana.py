@@ -442,7 +442,7 @@ class MapWidget(gtk.Widget):
     if self.window:
       self.gc = self.window.new_gc(background=(gtk.gdk.color_parse('white')))
       self.gc.set_clip_rectangle(gtk.gdk.Rectangle(0, 0, w, h))
-      self.backingPixmap = gtk.gdk.Pixmap(self.window, w, h, depth=-1)
+      self.backingPixmap = gtk.gdk.Pixmap(self.window, int(w), int(h), depth=-1)
 
 # static map image dragging #
   def staticMapDragEnable(self):
@@ -497,7 +497,7 @@ class MapWidget(gtk.Widget):
   def staticMapPixmapDrag(self, cr, event):
     (x,y,w,h) = (self.rect.x, self.rect.y, self.rect.width, self.rect.height)
     (shiftX,shiftY,dx,dy) = self.shift
-    self.window.draw_drawable(self.gc, self.backingPixmap, 0,0,shiftX,shiftY,-1,-1)
+    self.window.draw_drawable(self.gc, self.backingPixmap, 0,0,int(shiftX),int(shiftY),-1,-1)
 
   def staticMapRevert(self):
     self.defaulMethodBindings()
