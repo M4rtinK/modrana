@@ -718,7 +718,7 @@ class mapTiles(ranaModule):
            after it is flushed with old tiles from the memmory
         """
       except urllib2.URLError, e:
-        tileNetworkErrorSurface = self.images[1]['tileNetworkError'][0]
+        tileNetworkErrorSurface = self.callback.images[1]['tileNetworkError'][0]
         expireTimestamp = time.time() + 10
         self.callback.storeInMemmory(tileNetworkErrorSurface,self.name, 'error', expireTimestamp) # retry after 10 seconds
         """ as not to DOS the system when we temorarily loose internet connection or other such error occurs,

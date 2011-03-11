@@ -624,7 +624,7 @@ class GuiBase:
     event_box.connect("button_release_event", self.released)
     event_box.connect("motion_notify_event", self.moved)
     win.add(event_box)
-    
+
     # Create the map
     self.mapWidget = MapWidget()
     self.mapWidget.topWindow=win # make the main widown accessible from modules
