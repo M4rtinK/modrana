@@ -27,6 +27,7 @@ import cairo
 import urllib2
 import gtk
 import time
+import modrana_utils
 from configobj import ConfigObj
 from tilenames import *
 
@@ -96,6 +97,7 @@ class mapTiles(ranaModule):
     self.threadlListCondition = threading.Condition(threading.Lock())
     self.maxImagesInMemmory = 150 # to avoid a memmory leak
     self.imagesTrimmingAmmount = 30 # how many tiles to remove once the maximum is reached
+    self.loadRequestCStackSize = 10 # size for the circular loading request stack
     """so that trim does not run always run arter adding a tile"""
     self.tileSide = 256 # by default, the tiles are squares, side=256
     """ TODO: analyse memmory usage,
@@ -103,7 +105,8 @@ class mapTiles(ranaModule):
               platform dependendt value,
               user configurable
     """
-    self.tileLoadRequestQueue = Queue.Queue()
+    self.loadRequestCStack = modrana_utils.SynchronizedCircularStack(self.loadRequestCStackSize)
+    self.loadingNotifyQueue = Queue.Queue(1)
     self.downloadRequestPool = []
     self.downloadRequestPoolLock = threading.Lock()
     self.downloadRequestTimeout = 30 # in seconds
@@ -159,7 +162,7 @@ class mapTiles(ranaModule):
               #fill all available slots
               for i in range(0, availableSlots):
                 if self.downloadRequestPool:
-                  request = self.downloadRequestPool.pop()
+                  request = self.downloadRequestPool.pop() # download most recent requests first
                   (name,x,y,z,layer,layerPrefix,layerType, filename, folder, timestamp) = request
                   # start a new thread
                   self.threads[name] = self.tileDownloader(name,x,y,z,layer,layerPrefix,layerType, filename, folder, self)
@@ -201,12 +204,17 @@ class mapTiles(ranaModule):
   def tileLoader(self):
     """this is a tile loading request consumer thread"""
     while True:
-      request = self.tileLoadRequestQueue.get(block=True) # consume from this queue
-      (key,args) = request
-      if key == 'loadRequest':
-        (name, x, y, z, layer) = args
-        self.loadImage(name, x, y, z, layer)
-      elif key == 'shutdown':
+      request = self.loadingNotifyQueue.get(block=True) # consume from this queue
+      if request == 'load':
+        # start processing loading requests from the stack
+        while(1):
+          (item,valid) = self.loadRequestCStack.popValid()
+          if valid:
+            (name, x, y, z, layer) = item
+            self.loadImage(name, x, y, z, layer)
+          else:
+            break # the stack is empty
+      elif request == 'shutdown':
         print "\nmapTiles: tile loading thread shutting down"
         break
 
@@ -273,7 +281,8 @@ class mapTiles(ranaModule):
     try: # this should get rid of a fair share of the infamous "black screens"
       proj = self.m.get('projection', None)
       if proj and proj.isValid():
-        loadingTile = self.loadingTile
+        loadingTileImageSurface = self.loadingTile[0]
+        requests = []
         (sx,sy,sw,sh) = self.get('viewport') # get screen parameters
         scale = int(self.get('mapScale', 1)) # get the current scale
 
@@ -373,53 +382,58 @@ class mapTiles(ranaModule):
               cr.restore()
 
         else: # overlay is disabled
-          # draw the normal layer
-          for ix in range(0, wTiles):
-            for iy in range(0, hTiles):
+          with self.imagesLock: # just one lock per frame
+            # draw the normal layer
+            for ix in range(0, wTiles):
+              for iy in range(0, hTiles):
 
-              # get tile cooridnates by incrementing the upper left tile cooridnates
-              x = cx+ix
-              y = cy+iy
+                # get tile cooridnates by incrementing the upper left tile cooridnates
+                x = cx+ix
+                y = cy+iy
 
-              # get screen coordinates by incrementing upper left tile screen coordinates
-              x1 = cx1 + 256*ix*scale
-              y1 = cy1 + 256*iy*scale
+                # get screen coordinates by incrementing upper left tile screen coordinates
+                x1 = cx1 + 256*ix*scale
+                y1 = cy1 + 256*iy*scale
 
-              # Try to load and display images
-              """we do this inline to get rid of function calling overhead"""
-              name = "%s_%d_%d_%d" % (layer,z,x,y)
-              tileImage = self.images[0].get(name)
-              if tileImage:
-                cr.save() # save the cairo projection context
-                cr.translate(x1,y1)
-                cr.scale(scale,scale)
-                cr.set_source_surface(tileImage[0],0,0)
-                cr.paint()
-                cr.restore() # Return the cairo projection to what it was
-              else:
-                """we need this lock to store the "work in progresss" temporary tile,
-                   which assures that there is only a single loading request queued for a tile
+                # Try to load and display images
+                """we do this inline to get rid of function calling overhead"""
+                name = "%s_%d_%d_%d" % (layer,z,x,y)
+                tileImage = self.images[0].get(name)
+                if tileImage:
+                  # tile found in memmory cache, draw it
+                  cr.save() # save the cairo projection context
+                  cr.translate(x1,y1)
+                  cr.scale(scale,scale)
+                  cr.set_source_surface(tileImage[0],0,0)
+                  cr.paint()
+                  cr.restore() # Return the cairo projection to what it was
+                else:       
+                  # tile not found in memmory cache, add a loading request
+                  requests.append((name, x, y, z, layer))
+                  cr.save() # save the cairo projection context
+                  cr.translate(x1,y1)
+                  cr.scale(scale,scale)
+                  cr.set_source_surface(loadingTileImageSurface,0,0)
+                  cr.paint()
+                  cr.restore() # Return the cairo projection to what it was
+        # batch send the requests to the loading thread
+        if requests:
+          self.loadRequestCStack.batchPush(requests)
+          """can the loadRequestCStack get full ?
+             NO :)
+             it takes the list, reverses it, extends its old internal
+             list with it - from this list a slice conforming to
+             its size limit is taken and set as the new internal list"""
+            # notify the loading thread using the notify Queue
+          self.loadingNotifyQueue.put("load", block=False)
 
-                   the lock is used quite often (trimming te image cache, storing new images),
-                   but we can't block in this thread as it would lag the user interface
-
-                   therefore if we need this lock, but it is unavailable,
-                   we just skip loading the "in progress tile" and quing the loading request
-                   and directly show a "loading..." tile instead
-                   """
-                if self.imagesLock.acquire(False):
-                  self.images[0][name] = loadingTile
-                  self.imagesLock.release()
-                  self.tileLoadRequestQueue.put(('loadRequest',(name, x, y, z, layer)),block=False)
-                cr.save() # save the cairo projection context
-                cr.translate(x1,y1)
-                cr.scale(scale,scale)
-                cr.set_source_surface(loadingTile[0],0,0)
-                cr.paint()
-                cr.restore() # Return the cairo projection to what it was
+    except Queue.Full:
+      """as we use the queue as a notification mechanism, we dont actually need to
+      process all the "load" notifications """
+      pass
 
     except Exception, e:
-      print "mapTiles: expception while drawing the map layer:\n%s" % e
+      print "mapTiles: expception while drawing the map layer: %s" % e
 
 
   def removeImageFromMemmory(self, name, dictIndex=0):
@@ -441,11 +455,6 @@ class mapTiles(ranaModule):
 
   def drawCompositeImage(self,cr, nameOver, nameBack, x,y, scale, alpha1=1, alpha2=1, dictIndex1=0,dictIndex2=0):
     """Draw a composited tile image"""
-
-#    # If it's not in memory, then stop here
-#    if not nameOver and nameBack in self.images.keys():
-#      print "Not loaded"
-#      return
 
     # Move the cairo projection onto the area where we want to draw the image
     cr.save()
@@ -570,7 +579,6 @@ class mapTiles(ranaModule):
       print "the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e
       return False
 
-
   def storeInMemmory(self, surface, name, type="normal", expireTimestamp=None, dictIndex=0):
     """store a given image surface in the memmory image cache
        dictIndex = 0 -> nromal map tiles + tile specific error tiles
@@ -669,11 +677,14 @@ class mapTiles(ranaModule):
     self.shutdownAllThreads = True
 
     # shutdown the tile loading thread
-    self.tileLoadRequestQueue.put(('shutdown', ()),block=False)
+    try:
+      self.loadingNotifyQueue.put(('shutdown', ()),block=False)
+    except Queue.Full:
+      """the tile loading thread is demonic, so it will be still killed in the end"""
+      pass
     # notify the automatic tile download manager thread about the shutdown
     with self.threadlListCondition:
       self.threadlListCondition.notifyAll()
-
 
   class tileDownloader(Thread):
     """Downloads an image (in a thread)"""
@@ -736,7 +747,6 @@ class mapTiles(ranaModule):
         self.finished = 1 # finished thread can be removed from the set and retried
         self.removeSelf()
 
-
     def removeSelf(self):
         with self.callback.threadlListCondition:
           # try to remove its own instance from the thread list, so taht the instance could be garbage collected
@@ -762,14 +772,6 @@ class mapTiles(ranaModule):
 
     def downloadTile(self,name,x,y,z,layer,filename, folder):
       """Downloads an image"""
-#      layerDetails = maplayers.get(layer, None)
-    #  if(layerDetails == None):
-    #    return
-    #  if(layerDetails.get('pyrender',False)):
-    #    # Generate from local data
-    #    renderer = RenderModule.RenderClass()
-    #    renderer.RenderTile(z,x,y, 'default', filename) # TODO: pyrender layers
-    #  else:
       url = getTileUrl(x,y,z,layer)
 
       request = urllib2.urlopen(url)
@@ -779,10 +781,6 @@ class mapTiles(ranaModule):
       pl = gtk.gdk.PixbufLoader()
 
       pl.write(content)
-
-#      if pl.write(content) == False:
-#        print "mapTiles:loading image failed"
-#        return
 
       pl.close() # this  blocks until the image is completely loaded
       # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
