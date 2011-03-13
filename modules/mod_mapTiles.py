@@ -335,51 +335,47 @@ class mapTiles(ranaModule):
           layer2 = self.get('layer2', 'mapnik')
 
           # draw the composited layer
-          for ix in range(0, wTiles):
-            for iy in range(0, hTiles):
+          with self.imagesLock: # just one lock per frame
+            for ix in range(0, wTiles):
+              for iy in range(0, hTiles):
 
-              # get tile cooridnates by incrementing the upper left tile cooridnates
-              x = cx+ix
-              y = cy+iy
+                # get tile cooridnates by incrementing the upper left tile cooridnates
+                x = cx+ix
+                y = cy+iy
 
-              # get screen coordinates by incrementing upper left tile screen coordinates
-              x1 = cx1 + 256*ix*scale
-              y1 = cy1 + 256*iy*scale
+                # get screen coordinates by incrementing upper left tile screen coordinates
+                x1 = cx1 + 256*ix*scale
+                y1 = cy1 + 256*iy*scale
 
-              # Try to load and display images
-              nameBack = "%s_%d_%d_%d" % (layer2,z,x,y)
-              nameOver = "%s_%d_%d_%d" % (layer,z,x,y)
-              backImage = self.images[0].get(nameBack)
-              overImage = self.images[0].get(nameOver)
-              # check if the background tile is already cached
-              if backImage == None: # background image not yet loaded
-                if self.imagesLock.acquire(False):
-                  self.images[0][nameBack] = loadingTile # set the loading tile as placeholder
-                  self.tileLoadRequestQueue.put(('loadRequest',(nameBack, x, y, z, layer2)),block=False)
-                  self.imagesLock.release()
-                backImage = loadingTile # draw the loading tile this time
-              # check if the overlay tile is already cached
-              if overImage == None: # overlay image not yet loaded
-                if self.imagesLock.acquire(False):
-                  self.images[0][nameOver] = loadingTile # set the loading tile as placeholder
-                  self.tileLoadRequestQueue.put(('loadRequest',(nameOver, x, y, z, layer)),block=False)
-                  self.imagesLock.release()
-                overImage = loadingTile # draw the loading tile this time
+                # Try to load and display images
+                nameBack = "%s_%d_%d_%d" % (layer2,z,x,y)
+                nameOver = "%s_%d_%d_%d" % (layer,z,x,y)
+                backImage = self.images[0].get(nameBack)
+                overImage = self.images[0].get(nameOver)
+                # check if the background tile is already cached
+                if backImage == None: # background image not yet loaded
+                  requests.append((nameBack, x, y, z, layer2))
+                  backImage = [loadingTileImageSurface] # draw the loading tile this time
 
-              """we do this inline to get rid of function calling overhead"""
-              # Move the cairo projection onto the area where we want to draw the image
-              cr.save()
-              cr.translate(x1,y1)
-              cr.scale(scale,scale) # scale te tile according to current scale settings
+                # check if the overlay tile is already cached
+                if overImage == None: # overlay image not yet loaded
+                  requests.append((nameOver, x, y, z, layer))
+                  overImage = [loadingTileImageSurface] # draw the loading tile this time
 
-              # Display the image
-              cr.set_source_surface(backImage[0],0,0) # draw the background
-              cr.paint_with_alpha(alphaBack)
-              cr.set_source_surface(overImage[0],0,0) # draw the overlay
-              cr.paint_with_alpha(alphaOver)
+                """we do this inline to get rid of function calling overhead"""
+                # Move the cairo projection onto the area where we want to draw the image
+                cr.save()
+                cr.translate(x1,y1)
+                cr.scale(scale,scale) # scale te tile according to current scale settings
 
-              # Return the cairo projection to what it was
-              cr.restore()
+                # Display the image
+                cr.set_source_surface(backImage[0],0,0) # draw the background
+                cr.paint_with_alpha(alphaBack)
+                cr.set_source_surface(overImage[0],0,0) # draw the overlay
+                cr.paint_with_alpha(alphaOver)
+
+                # Return the cairo projection to what it was
+                cr.restore()
 
         else: # overlay is disabled
           with self.imagesLock: # just one lock per frame
