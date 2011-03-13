@@ -78,12 +78,11 @@ class mapView(ranaModule):
 
   def handleCentring(self):
     # check if centring is on
-    if(self.get("centred",True) or self.get('centreOnce', False)):
+    if self.get("centred",True):
       # get current position information
       pos = self.get('pos', None)
       # check if the position changed from last time
-      if(self.setCentre(pos)):
-        self.set('centreOnce', False)        
+      self.setCentre(pos)     
       
   def setCentre(self,pos):
     """takes care for centering the map on current position"""
@@ -105,7 +104,6 @@ class mapView(ranaModule):
       0.5 -> shifted by half of this distance, eq. in 3/4 of the screen
       """
       proj.recentre(lat,lon,z)
-      self.set("needRedraw", True)
       return(True)
 
     # * map draging mode control * #
