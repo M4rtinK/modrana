@@ -181,6 +181,7 @@ class options(ranaModule):
                     ('sqlite',"sqlite (new, less space used)")],
                      group,
                      'files')
+      addBoolOpt("Store downloaded tiles", "storeDownloadedTiles", group, True)
 
     # * the view category *
     catView = addCat("View", "view", "view")
