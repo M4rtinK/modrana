@@ -147,6 +147,17 @@ class MapWidget(gtk.Widget):
     # check if redrawing is enabled
     if(self.d.get("needRedraw", False)):
       self.forceRedraw()
+      
+  def forceRedraw(self):
+    """Make the window trigger a draw event.
+    TODO: consider replacing this if porting pyroute to another platform"""
+    self.d['needRedraw'] = False
+    if self.redraw:
+      try:
+        self.window.invalidate_rect((0,0,self.rect.width,self.rect.height),False)
+      except Exception, e:
+        print "error in screen invalidating function"
+        print "exception: %s" % e
 
   def mousedown(self,x,y):
     """this signalizes start of a drag or a just a click"""
@@ -221,17 +232,6 @@ class MapWidget(gtk.Widget):
     default value = 2048
     """
     self.centeringDisableTreshold = treshold
-
-  def forceRedraw(self):
-    """Make the window trigger a draw event.  
-    TODO: consider replacing this if porting pyroute to another platform"""
-    self.d['needRedraw'] = False
-    if self.redraw:
-      try:
-        self.window.invalidate_rect((0,0,self.rect.width,self.rect.height),False)
-      except Exception, e:
-        print "error in screen invalidating function"
-        print "exception: %s" % e
 
   def draw(self, cr, event):
     """ re/Draw the modrana GUI """

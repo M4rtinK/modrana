@@ -425,6 +425,12 @@ class options(ranaModule):
        group,
        20)
 
+    # * the Sound category *
+    catSound = addCat("Sound", "sound", "sound")
+    # * sound output
+    group = addGroup("Sound output", "sound_output", catSound, "generic")
+
+    addBoolOpt("Application wide sound output", "soundEnabled", group, True, "device:updateAppMenu")
 
 #    addOpt("Network", "threadedDownload",
 ##      [("off","No use of network"),

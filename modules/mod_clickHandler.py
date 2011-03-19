@@ -67,6 +67,7 @@ class clickHandler(ranaModule):
             m.routeMessage(action)
           else:
             print "No message handler to receive clicks"
+    self.set('needRedraw', True)
 
   def handleLongPress(self, pressStartEpoch, msCurrentDuration, startX, startY, x, y):
     """handle long press"""

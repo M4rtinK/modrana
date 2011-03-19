@@ -206,20 +206,27 @@ class device_n900(deviceModule):
 #    openFolderButton.connect('clicked',self.startFolderChooser)
     self.rotationToggleButton = gtk.ToggleButton(label="Map rotation")
     self.rotationToggleButton.connect('toggled',self._toggle,'rotateMap')
-    self.soundToggleButton = gtk.ToggleButton(label="sound")
+    self.soundToggleButton = gtk.ToggleButton(label="Sound")
+    self.soundToggleButton.connect('toggled',self._toggle,'soundEnabled')
 
-    searchButton = gtk.Button("search")
-    routeButton = gtk.Button("route")
-    optionsButton = gtk.Button("options")
+    mapButton = gtk.Button("Map screen")
+    mapButton.connect('clicked',self._switchToMenu, None)
+    optionsButton = gtk.Button("Options")
+    optionsButton.connect('clicked',self._switchToMenu,'options')
+    searchButton = gtk.Button("Search")
+    searchButton.connect('clicked',self._switchToMenu,'search')
+    routeButton = gtk.Button("Route")
+    routeButton.connect('clicked',self._switchToMenu,'route')
 
     self._updateAppMenu() # update initial button states
 
     menu.append(self.centeringToggleButton)
     menu.append(self.rotationToggleButton)
     menu.append(self.soundToggleButton)
+    menu.append(mapButton)
+    menu.append(optionsButton)
     menu.append(searchButton)
     menu.append(routeButton)
-    menu.append(optionsButton)
 
     # Show all menu items
     menu.show_all()
@@ -231,12 +238,19 @@ class device_n900(deviceModule):
     print "N900: key %s toggled" % key
     self.set(key, toggleButton.get_active())
 
+  def _switchToMenu(self,toggleButton, menu):
+    """callback for the appMenu buttons, switch to a specified menu"""
+    self.set('menu', menu)
+    self.set('needRedraw', True)
+
 
   def _updateAppMenu(self):
     if self.centeringToggleButton:
       self.centeringToggleButton.set_active(self.get("centred",True))
-    if self.centeringToggleButton:
-      self.centeringToggleButton.set_active(self.get("centred",True))
+    if self.rotationToggleButton:
+      self.rotationToggleButton.set_active(self.get("rotateMap",True))
+    if self.soundToggleButton:
+      self.soundToggleButton.set_active(self.get("soundEnabled",True))
 
 if(__name__ == "__main__"):
   a = n900({}, {})

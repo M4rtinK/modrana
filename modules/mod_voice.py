@@ -36,37 +36,39 @@ class voice(ranaModule):
     
   def espeakSay(self, plaintextMessage, distanceMeters, forceLanguageCode=False):
       """say routing messages through espeak"""
-      units = self.m.get('units', None)
-      if units:
-        if distanceMeters == 0:
-          distString = ""
-        else:
-          distString = units.km2CurrentUnitString(distanceMeters/1000.0, 1, False)
-          distString = '<p xml:lang="en">in <emphasis level="strong">'+ distString + '</emphasis></p><br>'
-          # TODO: language specific distance strings
-        output = distString + plaintextMessage
-        print "saying: %s" % output
-        if forceLanguageCode:
-          espeakLanguageCode = forceLanguageCode
-        else:
-          # the espeak language code is the fisrt part of this whitespace delimited string
-          espeakLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[0]
-        languageParam = '-v%s' % espeakLanguageCode
-        self.espaekProcess = subprocess.Popen(['espeak', languageParam ,'-s 120','-m','"%s"' % output])
+      if self._isEnabled():
+        units = self.m.get('units', None)
+        if units:
+          if distanceMeters == 0:
+            distString = ""
+          else:
+            distString = units.km2CurrentUnitString(distanceMeters/1000.0, 1, False)
+            distString = '<p xml:lang="en">in <emphasis level="strong">'+ distString + '</emphasis></p><br>'
+            # TODO: language specific distance strings
+          output = distString + plaintextMessage
+          print "saying: %s" % output
+          if forceLanguageCode:
+            espeakLanguageCode = forceLanguageCode
+          else:
+            # the espeak language code is the fisrt part of this whitespace delimited string
+            espeakLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[0]
+          languageParam = '-v%s' % espeakLanguageCode
+          self.espaekProcess = subprocess.Popen(['espeak', languageParam ,'-s 120','-m','"%s"' % output])
 
   def say(self, text, language='en'):
     """say a given text"""
+    if self._isEnabled():
+      # check if we are laready saying something
+      with self.voiceLock:
+        if self.speaking():
+          # we are already speaking
+          collisionString= "voice: message was not pronounced due to other message in progress"
+          collisionString+= "\nlanguage code: \n%s\nmessage text:\n%s" % (language,text)
+          print collisionString
+        else:
+          languageParam = '-v%s' % language
+          self.espaekProcess = subprocess.Popen(['espeak', languageParam ,'-s 120','-m','"%s"' % text])
 
-    # check if we are laready saying something
-    with self.voiceLock:
-      if self.speaking():
-        # we are already speaking
-        collisionString= "voice: message was not pronounced due to other message in progress"
-        collisionString+= "\nlanguage code: \n%s\nmessage text:\n%s" % (language,text)
-        print collisionString
-      else:
-        languageParam = '-v%s' % language
-        self.espaekProcess = subprocess.Popen(['espeak', languageParam ,'-s 120','-m','"%s"' % text])
 
   def speaking(self):
     """return True if there is voice output in progress, False if not"""
@@ -77,6 +79,12 @@ class voice(ranaModule):
         return True # talking
     else:
       return False # no process, no talking
+
+  def _isEnabled(self):
+    if self.get('soundEnabled', True):
+      return True
+    else:
+      return False
 
 if(__name__ == "__main__"):
   a = example({}, {})
