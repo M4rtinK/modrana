@@ -85,7 +85,6 @@ class device_n900(deviceModule):
       if self.topWindow: #TODO: do this more efficiently
         self.startAutorotation()
         self.done = True
-    
 
   def handleMessage(self, message, type, args):
     if message == 'modeChanged':
@@ -186,6 +185,19 @@ class device_n900(deviceModule):
         display.enableRedraw(reason="N900 display on or dimmed")
       elif state== "off":
         display.disableRedraw(reason="N900 display blanked")
+
+  def hasNativeNotificationSupport(self):
+    return True
+
+  def notify(self, message, msTimeout=0, icon="icon_text"):
+    """the third barameter has to be a non zerolength string or
+    else the banner is not created"""
+    #TODO: find what strings to submit to actually get an icon displayed
+
+    banner = hildon.hildon_banner_show_information_with_markup(self.modrana.topWindow, icon, message)
+    if msTimeout:
+      banner.set_timeout(msTimeout)
+
 
   def _addHildonAppMenu(self):
     menu = hildon.AppMenu()

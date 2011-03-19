@@ -36,10 +36,17 @@ class mapView(ranaModule):
   def handleMessage(self, message, type, args):
     z = self.get('z', 15)
     if(message == 'zoomIn'):
-      self.set('z', z + 1)
+      newZ = z + 1
+      self.set('z', newZ)
+      proj = self.m.get('projection', None)
+      if proj:
+        proj.setZoom(newZ)
     elif(message == 'zoomOut'):
-#      self.set('z', max(z - 1, 8))
-      self.set('z', max(z - 1, 6))
+      newZ = max(z - 1, 4)
+      self.set('z', newZ)
+      proj = self.m.get('projection', None)
+      if proj:
+        proj.setZoom(newZ)
 
     elif (message=='recentreToPos'):
       pos = self.get('pos', None)

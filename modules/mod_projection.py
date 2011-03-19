@@ -145,7 +145,7 @@ class Projection(ranaModule):
   def implementNewZoom(self, zoom):
     """Change the zoom level"""
     self.zoom = int(zoom)
-    self.limitZoom()
+#    self.limitZoom()
     self.findEdges()
     self.set('needRedraw', True)
   

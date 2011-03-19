@@ -47,15 +47,20 @@ class notification(ranaModule):
     if type=='ml' and message=='m':
       """advanced message list based notification"""
       if args:
-        timeout = self.timeout
-        self.position = 'middle'
-        self.notificationText = args[0]
-        self.draw = True # enable drawing of notifications
-        if len(args) >= 2:
-          timeout=int(args[1])
-          self.expirationTimestamp = time.time() + timeout
-          
-        self.set('needRedraw', True) # make sure the notification is displayed
+        if self.dmod.hasNativeNotificationSupport(): # use platform specific method
+          timeout = self.timeout
+          notificationText = args[0]
+          self.dmod.notify(notificationText,timeout*1000)
+        else:
+          timeout = self.timeout
+          self.position = 'middle'
+          self.notificationText = args[0]
+          self.draw = True # enable drawing of notifications
+          if len(args) >= 2:
+            timeout=int(args[1])
+            self.expirationTimestamp = time.time() + timeout
+
+          self.set('needRedraw', True) # make sure the notification is displayed
     elif type=='ml' and message=='backgroundWorkNotify':
       if args:
         if args[0] == "enable":
@@ -64,18 +69,28 @@ class notification(ranaModule):
           self.backgroundWorkNotify = False
     else:
       list = message.split('#')
-      # TODO: support setting timeout and position
-      timeout = self.timeout
-      self.position = 'middle'
-      self.notificationText = list[0]
-      self.draw = True # enable drawing of notifications
-      if len(list) == 2:
-        try:
-          timeout = int(list[1]) # override the default timeout
-        except:
-          print "notification: wrong timeout, using default 5 secconds"
-      self.expirationTimestamp = time.time() + timeout
-      self.set('needRedraw', True) # make sure the notification is displayed
+      if self.dmod.hasNativeNotificationSupport():  # use platform specific method
+        timeout = self.timeout
+        if len(list) == 2:
+          try:
+            timeout = int(list[1]) # override the default timeout
+          except:
+            print "notification: wrong timeout, using default 5 secconds"
+        notificationText = list[0]
+
+        self.dmod.notify(notificationText,timeout*1000)
+      else:
+        timeout = self.timeout
+        self.position = 'middle'
+        self.notificationText = list[0]
+        self.draw = True # enable drawing of notifications
+        if len(list) == 2:
+          try:
+            timeout = int(list[1]) # override the default timeout
+          except:
+            print "notification: wrong timeout, using default 5 secconds"
+        self.expirationTimestamp = time.time() + timeout
+        self.set('needRedraw', True) # make sure the notification is displayed
 
 
   def drawMasterOverlay(self,cr):

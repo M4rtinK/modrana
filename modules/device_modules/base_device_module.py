@@ -79,6 +79,13 @@ class deviceModule(ranaModule):
        (enbale fullscreen, etc.)"""
     pass
 
+  def hasNativeNotificationSupport(self):
+    """report if the device provides its own notification method"""
+    return False
+
+  def notify(self, message, msTimeout=0, icon=""):
+    pass
+
   
 #  def getAutorotationSupported(self):
 #    return False
