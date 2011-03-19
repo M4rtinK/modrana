@@ -180,6 +180,13 @@ class MapWidget(gtk.Widget):
       if self.centeringDisableTreshold:
         if distSq > self.centeringDisableTreshold:
           self.d["centred"] = False # turn off centering after dragging the map (like in TangoGPS)
+          m = self.m.get('messages', None)
+          if m:
+            """the device module might have to update button state if it has an
+            external application menu with toggle buttons
+            eq. if centering state changes by dragging the map, it needs to update its
+            toggle button state"""
+            m.sendMessage('device:updateAppMenu')
           self.d["needRedraw"] = True
     else:
       if self.altMapDragEnabled:
@@ -583,7 +590,22 @@ class GuiBase:
     self.addTime("GUI creation")
 
     # Create the window
-    win = gtk.Window()
+
+    #TODO: do this more cleanly:
+
+    """when on N900, use a hildon StackableWindow, which
+    enables app menu and tohe features on Maemo 5"""
+    if device == 'n900':
+      try:
+        import hildon
+        win = hildon.StackableWindow()
+      except Exception, e:
+        print "creating hildon stackable window failed"
+        print e
+        win = gtk.Window()
+    else:
+      win = gtk.Window()
+
     win.set_title('modRana')
     win.connect('delete-event', gtk.main_quit)
     self.addTime("window created")

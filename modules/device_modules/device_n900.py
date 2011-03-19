@@ -21,6 +21,8 @@
 #---------------------------------------------------------------------------
 from base_device_module import deviceModule
 import dbus.glib
+import hildon
+import gtk
 """
 why dbus.glib ?
 if you import only "dbus", it can't find its mainloop for callbacks
@@ -49,6 +51,14 @@ class device_n900(deviceModule):
     self.mceSignalInterface = dbus.Interface(self.mceSignal,'com.nokia.mce.signal')
     self.mceSignalInterface.connect_to_signal("display_status_ind", self.screenStateChangedCallback)
     print "N900: dbus initialized"
+
+    # app menu and buttons
+    self.centeringToggleButton = None
+    self.rotationToggleButton = None
+    self.soundToggleButton = None
+    self._addHildonAppMenu()
+
+    print "N900: application menu added"
 
     print "N900 device specific module initialized"
 
@@ -83,7 +93,9 @@ class device_n900(deviceModule):
       if rotationMode:
         self.setRotationMode(rotationMode)
         print "rotation mode changed"
-
+    elif message == 'updateAppMenu':
+      self._updateAppMenu()
+      
   def getDeviceName(self):
     return "Nokia N900"
 
@@ -175,6 +187,44 @@ class device_n900(deviceModule):
       elif state== "off":
         display.disableRedraw(reason="N900 display blanked")
 
+  def _addHildonAppMenu(self):
+    menu = hildon.AppMenu()
+    self.centeringToggleButton = gtk.ToggleButton(label="Centering")
+    self.centeringToggleButton.connect('toggled',self._toggle, 'centred')
+#    openFolderButton.connect('clicked',self.startFolderChooser)
+    self.rotationToggleButton = gtk.ToggleButton(label="Map rotation")
+    self.rotationToggleButton.connect('toggled',self._toggle,'rotateMap')
+    self.soundToggleButton = gtk.ToggleButton(label="sound")
+
+    searchButton = gtk.Button("search")
+    routeButton = gtk.Button("route")
+    optionsButton = gtk.Button("options")
+
+    self._updateAppMenu() # update initial button states
+
+    menu.append(self.centeringToggleButton)
+    menu.append(self.rotationToggleButton)
+    menu.append(self.soundToggleButton)
+    menu.append(searchButton)
+    menu.append(routeButton)
+    menu.append(optionsButton)
+
+    # Show all menu items
+    menu.show_all()
+
+    # Add the menu to the window
+    self.modrana.topWindow.set_app_menu(menu)
+
+  def _toggle(self,toggleButton, key):
+    print "N900: key %s toggled" % key
+    self.set(key, toggleButton.get_active())
+
+
+  def _updateAppMenu(self):
+    if self.centeringToggleButton:
+      self.centeringToggleButton.set_active(self.get("centred",True))
+    if self.centeringToggleButton:
+      self.centeringToggleButton.set_active(self.get("centred",True))
 
 if(__name__ == "__main__"):
   a = n900({}, {})

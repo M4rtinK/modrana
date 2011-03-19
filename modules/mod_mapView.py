@@ -31,6 +31,7 @@ class mapView(ranaModule):
   def firstTime(self):
     self.checkMapDraggingMode() # check the map dragging mode on startup
     self.checkCenteringDisableTreshold() # check centering disable treshold on startup
+    self.lastZ = int(self.get('z', 15))
     
   def handleMessage(self, message, type, args):
     z = self.get('z', 15)
@@ -103,7 +104,11 @@ class mapView(ranaModule):
       1 -> directly on the edge
       0.5 -> shifted by half of this distance, eq. in 3/4 of the screen
       """
-      proj.recentre(lat,lon,z)
+      newZoom = None
+      if z != self.lastZ:
+        newZoom = z
+        self.lastZ = newZoom
+      proj.recentre(lat,lon,newZoom)
       return(True)
 
     # * map draging mode control * #

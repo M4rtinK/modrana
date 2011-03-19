@@ -117,7 +117,9 @@ class options(ranaModule):
 
       # ** Rotation
       group = addGroup("Rotation", "map_rotation", catMap, "generic")
-      addBoolOpt("Rotate map in direction of travel", "rotateMap", group, False)
+      addBoolOpt("Rotate map in direction of travel", "rotateMap", group, False, 'device:updateAppMenu')
+      """the device module might show a device specific app-menu, so we have to notify it
+      about a chnage in the map rotation state"""
 
 
       # ** Scaling
