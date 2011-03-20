@@ -274,6 +274,17 @@ class options(ranaModule):
                    group,
                    4)
 
+
+    if self.dmod.hasButtons():
+      # TODO: change this once there are more options for key shortcuts
+      # * the Keys category *
+      catKeys = addCat("Keys", "keys", "keys")
+      # * Device buttons
+      group = addGroup("Device buttons", "device_buttons", catKeys, "generic")
+      if self.dmod.hasVolumeKeys():
+        addBoolOpt("Use volume keys for zooming", "useVolumeKeys", group, True, "device:updateKeys")
+
+
     # * the Navigation category
     catNavigation = addCat("Navigation", "navigation", "navigation")
 

@@ -87,6 +87,17 @@ class deviceModule(ranaModule):
     """send a notification"""
     pass
 
+  def hasKeyboard(self):
+    """report if the device has a keyboard"""
+    return True
+
+  def hasButtons(self):
+    """report if the device has some usable buttons other than keyboard"""
+    if self.hasVolumeKeys():
+      return True
+    else:
+      return False
+
   def hasVolumeKeys(self):
     """report if the device has application-usable volume control keys or their
     equivalent - basically just two nearby button that can be used for zooming up/down,

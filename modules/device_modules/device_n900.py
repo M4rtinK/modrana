@@ -99,6 +99,8 @@ class device_n900(deviceModule):
         print "rotation mode changed"
     elif message == 'updateAppMenu':
       self._updateAppMenu()
+    elif message == 'updateKeys':
+      self._updateVolumeKeys()
       
   def getDeviceName(self):
     return "Nokia N900"
@@ -206,6 +208,14 @@ class device_n900(deviceModule):
     if msTimeout:
       banner.set_timeout(msTimeout)
 
+  def hasButtons(self):
+    """the N900 has the volume keys (2 buttons), the camerra trigger (2 states)
+    and the proximity sensor,
+    other than that state of the camera cover and kyboard slider can be sensed
+    AND there is the accelerometer and light sensor :)
+    """
+    return True
+
   def hasVolumeKeys(self):
     return True
 
@@ -216,9 +226,9 @@ class device_n900(deviceModule):
       self.modrana.topWindow.connect("realize", self.enable_volume_cb)
 
   def disableVolumeKeys(self):
-    self.modrana.topWindow.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"), 32, gtk.gdk.PROP_MODE_REPLACE, [0]);
+    self.modrana.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"), 32, gtk.gdk.PROP_MODE_REPLACE, [0]);
 
-  def enable_volume_cb(self):
+  def enable_volume_cb(self, window=None):
     self.modrana.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"), 32, gtk.gdk.PROP_MODE_REPLACE, [1]);
 
   def _updateVolumeKeys(self):
