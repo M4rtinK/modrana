@@ -44,8 +44,9 @@ class ranaModule:
     self.d[name] = value
 
   def notify(self, message, msTimeout=0, icon=""):
-    self.dmod.notify(message, msTimeout=0, icon="")
-    # TODO: notification module fallback
+    if self.dmod: # if some module sends a notification during init, the device module might not be loaded
+      self.dmod.notify(message, msTimeout=0, icon="")
+      # TODO: notification module fallback
 
   def getStatus(self):
     return(self.status)

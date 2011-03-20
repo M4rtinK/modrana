@@ -788,6 +788,13 @@ class menus(ranaModule):
      self.addItem('route', 'Clear', 'generic', 'route:clear|set:menu:None')
      self.addItem('route', 'route#Current', 'generic', 'set:menu:currentRoute')
 
+  def setupInfoMenu(self):
+    self.clearMenu('info')
+    self.addItem('info', 'About', 'generic', 'set:menu:infoAbout')
+
+  def setupAboutMenu(self):
+    self.clearMenu('infoAbout')
+
   def setupGeneralMenus(self):
     self.clearMenu('main', "set:menu:None")
     self.addItem('main', 'route', 'route', 'set:menu:route')
@@ -798,6 +805,7 @@ class menus(ranaModule):
     self.addItem('main', 'mode', 'mode', 'set:menu:transport')
     self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManagerCathegories')
     self.addItem('main', 'log a track', 'log', 'set:menu:tracklog')
+    self.addItem('main', 'info', 'info', 'set:menu:info')
     self.setupTransportMenu()
     self.setupSearchMenus()
     self.setupSearchWhereMenu()
@@ -805,6 +813,7 @@ class menus(ranaModule):
     self.setupPoiMenu()
     self.setupDataMenu()
     self.setupRouteMenu()
+    self.setupInfoMenu()
     self.clearMenu('options', "set:menu:main") # will be filled by mod_options
     self.lists['places'] = 'placenames'
 

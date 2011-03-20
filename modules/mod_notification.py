@@ -47,13 +47,14 @@ class notification(ranaModule):
     if type=='ml' and message=='m':
       """advanced message list based notification"""
       if args:
-        if self.dmod.hasNativeNotificationSupport(): # use platform specific method
-          timeout = self.timeout
-          if len(args) >= 2:
-            timeout=int(args[1])
-          notificationText = args[0]
-          self.dmod.notify(notificationText,timeout*1000)
-          print "timeout",timeout*1000
+        if self.dmod: # if some module sends a notification during init, the device module might not be loaded
+          if self.dmod.hasNativeNotificationSupport(): # use platform specific method
+            timeout = self.timeout
+            if len(args) >= 2:
+              timeout=int(args[1])
+            notificationText = args[0]
+            self.dmod.notify(notificationText,timeout*1000)
+            print "timeout",timeout*1000
         else:
           timeout = self.timeout
           self.position = 'middle'
@@ -72,16 +73,17 @@ class notification(ranaModule):
           self.backgroundWorkNotify = False
     else:
       list = message.split('#')
-      if self.dmod.hasNativeNotificationSupport():  # use platform specific method
-        timeout = self.timeout
-        if len(list) == 2:
-          try:
-            timeout = int(list[1]) # override the default timeout
-          except:
-            print "notification: wrong timeout, using default 5 secconds"
-        notificationText = list[0]
+      if self.dmod: # if some module sends a notification during init, the device module might not be loaded
+        if self.dmod.hasNativeNotificationSupport():  # use platform specific method
+          timeout = self.timeout
+          if len(list) == 2:
+            try:
+              timeout = int(list[1]) # override the default timeout
+            except:
+              print "notification: wrong timeout, using default 5 secconds"
+          notificationText = list[0]
 
-        self.dmod.notify(notificationText,timeout*1000)
+          self.dmod.notify(notificationText,timeout*1000)
       else:
         timeout = self.timeout
         self.position = 'middle'
