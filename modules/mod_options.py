@@ -426,15 +426,15 @@ class options(ranaModule):
        group,
        "full")
 
-    addOpt("Max nr. of threads for tile auto-download","maxAutoDownloadThreads",
+    addOpt("Max nr. of threads for tile auto-download","maxAutoDownloadThreads2",
       [(5, "5"),
-       (10, "10"),
-       (20, "20 (default)"),
+       (10, "10 (default)"),
+       (20, "20"),
        (30, "30"),
        (40, "40"),
        (50, "50")],
        group,
-       20)
+       10)
 
     # * the Sound category *
     catSound = addCat("Sound", "sound", "sound")

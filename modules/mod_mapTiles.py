@@ -155,7 +155,7 @@ class mapTiles(ranaModule):
             break
           with self.downloadRequestPoolLock:
             activeThreads = len(self.threads)
-            maxThreads = int(self.get("maxAutoDownloadThreads", 20))
+            maxThreads = int(self.get("maxAutoDownloadThreads2", 10))
             if activeThreads < maxThreads: # can we start new threads ?
               # ** there are free download slots **
               availableSlots = maxThreads-activeThreads
