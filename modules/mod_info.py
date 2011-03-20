@@ -52,7 +52,9 @@ class info(ranaModule):
         nop = "set:menu:infoAbout"
         button1 = ('', 'generic', nop)
         button2 = ('', 'generic', nop)
-        text = "modRana version:\n%s\n\n\n" % self.versionString
+        web = "www.modrana.org"
+        email = "modrana@gmail.com"
+        text = "modRana version:\n\n%s\n\n\n\nFor questions or feedback,\n\ncontact the <b>modRana</b> project:\n\n%s\n\n%s\n\n" % (self.versionString,web,email)
         box = (text ,nop)
         menus.drawThreePlusOneMenu(cr, 'infoAbout', 'set:menu:info', button1, button2, box)
 
