@@ -84,6 +84,19 @@ class deviceModule(ranaModule):
     return False
 
   def notify(self, message, msTimeout=0, icon=""):
+    """send a notification"""
+    pass
+
+  def hasVolumeKeys(self):
+    """report if the device has application-usable volume control keys or their
+    equivalent - basically just two nearby button that can be used for zooming up/down,
+    skipping to next/last and similar actions"""
+    return False
+
+  def enableVolumeKeys(self):
+    pass
+
+  def enableVolumeKeys(self):
     pass
 
   

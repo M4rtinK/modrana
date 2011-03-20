@@ -41,12 +41,18 @@ class mapView(ranaModule):
       proj = self.m.get('projection', None)
       if proj:
         proj.setZoom(newZ)
+      self.notify("zooming <b>in</b> to zl %d" % newZ)
     elif(message == 'zoomOut'):
       newZ = max(z - 1, 4)
       self.set('z', newZ)
       proj = self.m.get('projection', None)
       if proj:
         proj.setZoom(newZ)
+      if newZ != z:
+        self.notify("zooming <b>out</b> to zl %d" % newZ)
+      else:
+        self.notify("minimum zoomlevel reached")
+
 
     elif (message=='recentreToPos'):
       pos = self.get('pos', None)

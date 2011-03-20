@@ -49,8 +49,11 @@ class notification(ranaModule):
       if args:
         if self.dmod.hasNativeNotificationSupport(): # use platform specific method
           timeout = self.timeout
+          if len(args) >= 2:
+            timeout=int(args[1])
           notificationText = args[0]
           self.dmod.notify(notificationText,timeout*1000)
+          print "timeout",timeout*1000
         else:
           timeout = self.timeout
           self.position = 'middle'

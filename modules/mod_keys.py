@@ -35,7 +35,13 @@ class keys(ranaModule):
 
   def on_key_press_event(self, widget, event):
     keyName = gtk.gdk.keyval_name(event.keyval)
-    print keyName
+    if keyName == 'F8':
+      """zoom out"""
+      self.sendMessage('mapView:zoomOut')
+    elif keyName == 'F7':
+      """zoom in"""
+      self.sendMessage('mapView:zoomIn')
+    print "unassigned key pressed: %s" % keyName
     
 
 if(__name__ == "__main__"):

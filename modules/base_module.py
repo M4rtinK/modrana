@@ -42,7 +42,11 @@ class ranaModule:
     if(self.module_exists('watchlist')):
       self.m['watchlist'].notify(name, value, self.d.get(name, None))
     self.d[name] = value
-    
+
+  def notify(self, message, msTimeout=0, icon=""):
+    self.dmod.notify(message, msTimeout=0, icon="")
+    # TODO: notification module fallback
+
   def getStatus(self):
     return(self.status)
   

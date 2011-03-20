@@ -58,6 +58,11 @@ class device_n900(deviceModule):
     self.soundToggleButton = None
     self._addHildonAppMenu()
 
+    # enable volume keys usage
+    if self.get('useVolumeKeys', True):
+      self._updateVolumeKeys()
+
+
     print "N900: application menu added"
 
     print "N900 device specific module initialized"
@@ -194,9 +199,34 @@ class device_n900(deviceModule):
     else the banner is not created"""
     #TODO: find what strings to submit to actually get an icon displayed
 
+    if len(icon) == 0:
+      icon = "spam" # as mentioned above, the string has to be longer tahn zero
+
     banner = hildon.hildon_banner_show_information_with_markup(self.modrana.topWindow, icon, message)
     if msTimeout:
       banner.set_timeout(msTimeout)
+
+  def hasVolumeKeys(self):
+    return True
+
+  def enableVolumeKeys(self):
+    if self.modrana.topWindow.flags() & gtk.REALIZED:
+      self.enable_volume_cb()
+    else:
+      self.modrana.topWindow.connect("realize", self.enable_volume_cb)
+
+  def disableVolumeKeys(self):
+    self.modrana.topWindow.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"), 32, gtk.gdk.PROP_MODE_REPLACE, [0]);
+
+  def enable_volume_cb(self):
+    self.modrana.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"), 32, gtk.gdk.PROP_MODE_REPLACE, [1]);
+
+  def _updateVolumeKeys(self):
+    """check if volume keys should be used or not"""
+    if self.get('useVolumeKeys', True):
+      self.enableVolumeKeys()
+    else:
+      self.disableVolumeKeys()
 
 
   def _addHildonAppMenu(self):
@@ -242,7 +272,6 @@ class device_n900(deviceModule):
     """callback for the appMenu buttons, switch to a specified menu"""
     self.set('menu', menu)
     self.set('needRedraw', True)
-
 
   def _updateAppMenu(self):
     if self.centeringToggleButton:
