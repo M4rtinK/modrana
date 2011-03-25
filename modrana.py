@@ -66,6 +66,8 @@ class MapWidget(gtk.Widget):
     self.timer3 = None # will be used for timing long press events
     self.d = {} # List of data
     self.m = {} # List of modules
+    self.watches = {} # List of data change watches
+    self.maxWatchId = 0
 
     self.mapRotationAngle = 0 # in radians
     self.notMovingSpeed = 1 # in m/s
@@ -138,7 +140,49 @@ class MapWidget(gtk.Widget):
       m.shutdown()
     time.sleep(2) # leave some times for threads to shut down
     print "Shuttdown complete"
-  
+    
+  ## OPTIONS SETTING AND WATCHING ##
+
+  def get(self, name, default=None):
+    """Get an item of data"""
+    return(self.d.get(name, default))
+
+  def set(self, name, value, save=False):
+    """Set an item of data"""
+    self.d[name] = value
+    """options are normally saved on shutdown,
+    but for some data we want to make sure they are stored and not
+    los for example becuase of power outage/empty battery, etc."""
+    if save:
+      options = self.m.get('options')
+      if options:
+        options.save()
+    if name in self.watches.keys():
+      self._notifyWatcher(name, value)
+
+  def watch(self, key, callback, *args):
+    """add a callback on an options key"""
+    id = self.maxWatchId + 1 # TODO remove watch based on id
+    self.maxWatchId = id # TODO: recycle ids ? (alla PID)
+    if key not in self.watches:
+      self.watches[key] = [] # create the initial list
+    self.watches[key].append((id,callback,args))
+    return id
+
+  def _notifyWatcher(self, key, value):
+    """run callbacks registered on an options key"""
+    callbacks = self.watches.get(key, None)
+    if callbacks:
+      for item in callbacks:
+        (id,callback,args) = item
+        oldValue = self.get(key, None)
+        if callback:
+          callback(key,value,oldValue, *args)
+        else:
+          print "invalid watcher callback :", callback
+
+
+
   def update(self):
     for m in self.m.values():
       m.update()
@@ -182,7 +226,7 @@ class MapWidget(gtk.Widget):
       
   def handleDrag(self,x,y,dx,dy,startX,startY,msDuration):
     # check if centering is on
-    if self.d.get("centred",True):
+    if self.get("centred",True):
       fullDx = x - startX
       fullDy = y - startY
       distSq = fullDx * fullDx + fullDy * fullDy
@@ -190,14 +234,7 @@ class MapWidget(gtk.Widget):
       -> like this, centering is not dsabled by pressing buttons"""
       if self.centeringDisableTreshold:
         if distSq > self.centeringDisableTreshold:
-          self.d["centred"] = False # turn off centering after dragging the map (like in TangoGPS)
-          m = self.m.get('messages', None)
-          if m:
-            """the device module might have to update button state if it has an
-            external application menu with toggle buttons
-            eq. if centering state changes by dragging the map, it needs to update its
-            toggle button state"""
-            m.sendMessage('device:updateAppMenu')
+          self.set("centred", False) # turn off centering after dragging the map (like in TangoGPS)
           self.d["needRedraw"] = True
     else:
       if self.altMapDragEnabled:

@@ -110,6 +110,11 @@ class deviceModule(ranaModule):
   def enableVolumeKeys(self):
     pass
 
+  def hasKineticScrollingList(self):
+    """report if the device provides a native kinetic scrolling list
+    widget/dialog"""
+    return False
+
   
 #  def getAutorotationSupported(self):
 #    return False

@@ -97,8 +97,6 @@ class device_n900(deviceModule):
       if rotationMode:
         self.setRotationMode(rotationMode)
         print "rotation mode changed"
-    elif message == 'updateAppMenu':
-      self._updateAppMenu()
     elif message == 'updateKeys':
       self._updateVolumeKeys()
       
@@ -274,6 +272,13 @@ class device_n900(deviceModule):
     # Add the menu to the window
     self.modrana.topWindow.set_app_menu(menu)
 
+    # register callbacks to update upp menu toggle buttons
+    # when the controlled value changes from elsewhere
+    self.watch('rotateMap', self._updateAppMenu)
+    self.watch('soundEnabled', self._updateAppMenu)
+    self.watch('centred', self._updateAppMenu)
+
+
   def _toggle(self,toggleButton, key):
     print "N900: key %s toggled" % key
     self.set(key, toggleButton.get_active())
@@ -283,13 +288,19 @@ class device_n900(deviceModule):
     self.set('menu', menu)
     self.set('needRedraw', True)
 
-  def _updateAppMenu(self):
+  def _updateAppMenu(self, key=None, value=None, oldValue=None):
+    print "asdasdasd"
+    print self.get("centred",True)
     if self.centeringToggleButton:
       self.centeringToggleButton.set_active(self.get("centred",True))
     if self.rotationToggleButton:
       self.rotationToggleButton.set_active(self.get("rotateMap",True))
     if self.soundToggleButton:
       self.soundToggleButton.set_active(self.get("soundEnabled",True))
+
+  def hasKineticScrollingList(self):
+    return True
+
 
 if(__name__ == "__main__"):
   a = n900({}, {})

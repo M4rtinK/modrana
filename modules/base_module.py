@@ -22,7 +22,12 @@ class ranaModule:
     self.m = modules
     self.d = data
     self.status = ''
-    self.modrana = initInfo.get('modrana',None) # this is modrana
+    self.modrana = initInfo.get('modrana') # this is modrana
+    # bind the get set and watch methods to the "kernel" :D
+    self.get = self.modrana.get
+    self.set = self.modrana.set
+    self.watch = self.modrana.watch
+    
     self.moduleName = initInfo.get('name',"")
     self.device = initInfo.get('device',"")
     self.mainWindow = None # will be provided by modrana.py (a gdk.Window) -> the Widget main window
@@ -32,16 +37,6 @@ class ranaModule:
   def module_exists(self, module):
     """Test whether a named module is loaded"""
     return(self.m.get(module, None) != None)
-  
-  def get(self, name, default=None):
-    """Get an item of data"""
-    return(self.d.get(name, default))
-  
-  def set(self, name, value):
-    """Set an item of data"""
-    if(self.module_exists('watchlist')):
-      self.m['watchlist'].notify(name, value, self.d.get(name, None))
-    self.d[name] = value
 
   def notify(self, message, msTimeout=0, icon=""):
     if self.dmod: # if some module sends a notification during init, the device module might not be loaded

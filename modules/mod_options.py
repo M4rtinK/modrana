@@ -117,10 +117,7 @@ class options(ranaModule):
 
       # ** Rotation
       group = addGroup("Rotation", "map_rotation", catMap, "generic")
-      addBoolOpt("Rotate map in direction of travel", "rotateMap", group, False, 'device:updateAppMenu')
-      """the device module might show a device specific app-menu, so we have to notify it
-      about a chnage in the map rotation state"""
-
+      addBoolOpt("Rotate map in direction of travel", "rotateMap", group, False)
 
       # ** Scaling
       group = addGroup("Scaling", "map_scaling", catMap, "generic")
@@ -441,7 +438,7 @@ class options(ranaModule):
     # * sound output
     group = addGroup("Sound output", "sound_output", catSound, "generic")
 
-    addBoolOpt("Application wide sound output", "soundEnabled", group, True, "device:updateAppMenu")
+    addBoolOpt("Application wide sound output", "soundEnabled", group, True)
 
 #    addOpt("Network", "threadedDownload",
 ##      [("off","No use of network"),

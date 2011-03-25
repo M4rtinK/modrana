@@ -60,11 +60,17 @@ class Projection(ranaModule):
   def firstTime(self):
     # make absolutely sure that centering is turned on
     # otherwise we dont know what to show -> black screen => NOT GOOD :)
-    if self.get("pos", None) == None:
-      self.set("pos", (49.2, 16.616667)) # Brno
-#      self.set("pos", (49.233056, 17.666944)) # Zlin
 
-    (lat,lon) = self.get("pos", None)
+    defaultPosition = (49.2, 16.616667) # Brno
+#      (49.233056, 17.666944) # Zlin
+
+    pos = self.get("pos", None)
+    if pos:
+      (lat,lon) = pos # use position from last time
+    else: # use default position
+      self.set("pos", defaultPosition) # Brno
+      (lat,lon) = defaultPosition
+
     self.recentre(lat, lon)
 
     z = int(self.get('z', 15))
