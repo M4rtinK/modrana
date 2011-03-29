@@ -317,9 +317,10 @@ class options(ranaModule):
                           ('tr tr', 'Turkish'),
                           ('vi vi', 'Vietnamese')]
 
-    addOpt("Language for directions", group, directionsLanguages,
-       group,
-       "en en") # TODO: use locale for default language ?
+    addOpt("Language for directions", 'directionsLanguage',
+         directionsLanguages,
+         group,
+         "en en") # TODO: use locale for default language ?
 
     addOpt("Autostart navigation", "autostartNavigationDefaultOnAutoselectTurn",
       [('disabled',"OFF"),
