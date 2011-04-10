@@ -62,12 +62,14 @@ class MapWidget(gtk.Widget):
 
     """ setting this both to 100 and 1 in mapView and gpsd fixes the arow orientation bug """
     self.timer1 = gobject.timeout_add(100, update1, self) #default 100
-    self.timer2 = gobject.timeout_add(10, update2, self) #default 10
+#    self.timer2 = gobject.timeout_add(10, update2, self) #default 10
     self.timer3 = None # will be used for timing long press events
     self.d = {} # List of data
     self.m = {} # List of modules
     self.watches = {} # List of data change watches
     self.maxWatchId = 0
+    self.watch('needRedraw', self._checkForRedrawCB) # react on redraw requests
+    # TODO: add a function for directly requesting redraw
 
     self.mapRotationAngle = 0 # in radians
     self.notMovingSpeed = 1 # in m/s
@@ -181,21 +183,21 @@ class MapWidget(gtk.Widget):
         else:
           print "invalid watcher callback :", callback
 
-
-
   def update(self):
     for m in self.m.values():
       m.update()
 
-  def checkForRedraw(self):
-    # check if redrawing is enabled
-    if(self.d.get("needRedraw", False)):
+  def _checkForRedrawCB(self, key, oldValue, newValue):
+    """react to redraw requests"""
+    if newValue == True:
       self.forceRedraw()
       
   def forceRedraw(self):
     """Make the window trigger a draw event.
     TODO: consider replacing this if porting pyroute to another platform"""
     self.d['needRedraw'] = False
+    """ alter directly, no need to notificate
+    about returning the key to default state"""
     if self.redraw:
       try:
         self.window.invalidate_rect((0,0,self.rect.width,self.rect.height),False)
