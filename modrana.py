@@ -79,6 +79,9 @@ class MapWidget(gtk.Widget):
     self.redraw = True
 
     self.showRedrawTime = False
+    
+    # map center shifting variables
+    self.centerShift = (0,0)
 
     # alternative map drag variables
     self.altMapDragEnabled = False
@@ -128,14 +131,34 @@ class MapWidget(gtk.Widget):
       m.modrana = self # make this class accessible from modules
       m.dmod = self.dmod
 
+    # run what needs to be done before firstTime is called
+    self._modulesLoadedPreFirstTime()
+
     start = time.clock()
     for m in self.m.values():
       m.firstTime()
+
+    # run what needs to be done after firstTime is called
+    self._modulesLoadedPostFirstTime()
+
+    print "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start))
+
+  def _modulesLoadedPreFirstTime(self):
+    """this is run after all the modules have been loaded,
+    but before their first time is called"""
+    self._updateCenteringShiftCB()
+    # watch both centering shift related variables
+    self.watch('posShiftAmount', self._updateCenteringShiftCB)
+    self.watch('posShiftDirection', self._updateCenteringShiftCB)
+
+  def _modulesLoadedPostFirstTime(self):
+    """this is run after all the modules have been loaded,
+    after before their first time is called"""
+    
     # check if redrawing time should be printed to terminal
     if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
       self.showRedrawTime = True
-    print "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start))
-      
+
   def beforeDie(self):
     print "Shutting-down modules"
     for m in self.m.values():
@@ -271,6 +294,31 @@ class MapWidget(gtk.Widget):
     default value = 2048
     """
     self.centeringDisableTreshold = treshold
+    
+  def _updateCenteringShiftCB(self, key=None, oldValue=None, newValue=None):
+    """update shifted centering amount
+
+    this method is called if posShiftAmount or posShiftDirection
+    are set and also once at startup"""
+    (sx,sy,sw,sh) = self.d.get('viewport')
+    x=0
+    y=0
+    shiftAmount = self.d.get('posShiftAmount', 0.75)
+    """this value might show up as string, so we convert it to float, just to be sure"""
+    floatShiftAmount = float(shiftAmount)
+    shiftDirection = self.d.get('posShiftDirection', "down")
+    if shiftDirection:
+      if shiftDirection == "down":
+        y =  sh * 0.5 * floatShiftAmount
+      elif shiftDirection == "up":
+        y =  - sh * 0.5 * floatShiftAmount
+      elif shiftDirection == "left":
+        x =  - sw * 0.5 * floatShiftAmount
+      elif shiftDirection == "right":
+        x =  + sw * 0.5 * floatShiftAmount
+      """ we dont need to do anything if direction is set to don't shift (False)
+      - 0,0 will be used """
+    self.centerShift = (x,y)
 
   def draw(self, cr, event):
     """ re/Draw the modrana GUI """
@@ -300,23 +348,8 @@ class MapWidget(gtk.Widget):
         proj = self.m['projection']
         (lat, lon) = (proj.lat,proj.lon)
         (x1,y1) = proj.ll2xy(lat, lon)
-        (sx,sy,sw,sh) = self.d.get('viewport')
-        x=0
-        y=0
-        shiftAmount = self.d.get('posShiftAmount', 0.75)
-        """this value might show up as string, so we convert it to float, just to be sure"""
-        floatShiftAmount = float(shiftAmount)
-        shiftDirection = self.d.get('posShiftDirection', "down")
-        if shiftDirection:
-          if shiftDirection == "down":
-            y =  sh * 0.5 * floatShiftAmount
-          elif shiftDirection == "up":
-            y =  - sh * 0.5 * floatShiftAmount
-          elif shiftDirection == "left":
-            x =  - sw * 0.5 * floatShiftAmount
-          elif shiftDirection == "right":
-            x =  + sw * 0.5 * floatShiftAmount
-          # we dont need to do anything if direction is set to don't shift (False)
+
+        (x,y) = self.centerShift
         cr.translate(x,y)
         cr.save()
         # get the speed and angle
