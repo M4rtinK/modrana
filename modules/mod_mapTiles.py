@@ -27,7 +27,10 @@ import cairo
 import urllib2
 import gtk
 import time
+import cairo
+import traceback
 import modrana_utils
+import rectangles
 from configobj import ConfigObj
 from tilenames import *
 
@@ -279,7 +282,10 @@ class mapTiles(ranaModule):
   def drawMap(self, cr):
     """Draw map tile images"""
     try: # this should get rid of a fair share of the infamous "black screens"
+      # get all neded data and objects to local variables
       proj = self.m.get('projection', None)
+      drawImage = self.drawImage # method binding to speed up method lookup
+      layer = self.get('layer','osma')
       if proj and proj.isValid():
         loadingTileImageSurface = self.loadingTile[0]
         requests = []
@@ -302,18 +308,6 @@ class mapTiles(ranaModule):
           (px1,px2,py1,py2) = proj.findEdgesForZl(z, scale)
           cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
 
-        if self.get("rotateMap", False) and (self.get("centred", False)):
-          # due to the rotation, the map must be larger
-          # we take the longest side and render tiles in a square
-          longestSide = max(sw,sh)
-          add = (longestSide/2.0)/(self.tileSide)
-          # enlarge the bounding box
-          (px1,px2,py1,py2) = (px1-add,px2+add,py1-add,py2+add)
-
-        # get the range of tiles we need
-        wTiles =  len(range(int(floor(px1)), int(ceil(px2)))) # how many tiles wide
-        hTiles =  len(range(int(floor(py1)), int(ceil(py2)))) # how many tiles high
-
         # upper left tile
         cx = int(px1)
         cy = int(py1)
@@ -324,65 +318,102 @@ class mapTiles(ranaModule):
         cx1,cy1 = (sw*(cx-px1)/pdx,sh*(cy-py1)/pdy) #this is basically the pxpy2xy function from mod_projection inlined
         cx1,cy1 = int(cx1),int(cy1)
 
-        layer = self.get('layer','osma')
-        # Cover the whole map view with tiles
+        if self.get("rotateMap", False) and (self.get("centred", False)):
+          # due to the rotation, the map must be larger
+          # we take the longest side and render tiles in a square
 
-        if self.get('overlay', False): # is the overlay on ?
-          ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
-          (alphaOver, alphaBack) = (float(ratio[0]),float(ratio[1])) # convert it to floats
+          # get the rotation angle
+          angle = self.get('bearing', 0.0)
+          if angle == None:
+            angle = 0.0
+          radAngle = radians(angle)
 
-          # get the background layer
-          layer2 = self.get('layer2', 'mapnik')
+          # we use polygon overlap testing to only load@draw visible tiles
 
-          # draw the composited layer
-          with self.imagesLock: # just one lock per frame
+          # screen center point
+          scP = rectangles.Point(sw/2.0,sh/2.0)
+
+          """create a polygon representing the viewport and rotate around
+          current rotation center it to match the rotation and align with screen"""
+          p1 = rectangles.Point(sx,sy)
+          p2 = rectangles.Point(sx+sw,sy)
+          p3 = rectangles.Point(sx,sy+sh)
+          p4 = rectangles.Point(sx+sw,sy+sh)
+          p1 = p1.rotate_about(scP,radAngle)
+          p2 = p2.rotate_about(scP,radAngle)
+          p3 = p3.rotate_about(scP,radAngle)
+          p4 = p4.rotate_about(scP,radAngle)
+
+#          cr.set_source_rgba(0,1,0,0.5)
+#          cr.move_to(*p1.as_tuple())
+#          cr.line_to(*p2.as_tuple())
+#          cr.line_to(*p4.as_tuple())
+#          cr.line_to(*p3.as_tuple())
+#          cr.line_to(*p1.as_tuple())
+#          cr.close_path()
+#          cr.fill()
+#
+#          cr.rectangle(scP.x-10,scP.y-10,20,20)
+#          cr.fill()
+          
+          v1 = rectangles.Vector(*p1.as_tuple())
+          v2 = rectangles.Vector(*p2.as_tuple())
+          v3 = rectangles.Vector(*p3.as_tuple())
+          v4 = rectangles.Vector(*p4.as_tuple())
+          polygon = rectangles.Polygon((v1,v2,v3,v4))
+
+          v1 = rectangles.Vector(*p1.as_tuple())
+          v2 = rectangles.Vector(*p2.as_tuple())
+          v3 = rectangles.Vector(*p3.as_tuple())
+          v4 = rectangles.Vector(*p4.as_tuple())
+
+          # enlage the area of possibly visible tiles due to rotation
+          add = int(ceil(max(pdx,pdy)/2.0))
+          (px1,px2,py1,py2) = (px1-add,px2+add,py1-add,py2+add)
+          cx = int(px1)
+          cy = int(py1)
+          (pdx, pdy) = (px2 - px1,py2 - py1)
+          cx1,cy1 = (cx1-add*256,cy1-add*256)
+
+          wTiles =  len(range(int(floor(px1)), int(ceil(px2)))) # how many tiles wide
+          hTiles =  len(range(int(floor(py1)), int(ceil(py2)))) # how many tiles high
+
+          visibleCounter = 0
+          with self.imagesLock:
             for ix in range(0, wTiles):
-              for iy in range(0, hTiles):
+                for iy in range(0, hTiles):
+                  tx = cx+ix
+                  ty = cy+iy
+                  stx = cx1 + 256*ix*scale
+                  sty = cy1 + 256*iy*scale
+                  tv1 = rectangles.Vector(stx,sty)
+                  tv2 = rectangles.Vector(stx+256,sty)
+                  tv3 = rectangles.Vector(stx,sty+256)
+                  tv4 = rectangles.Vector(stx+256,sty+256)
+                  tempPolygon = rectangles.Polygon((tv1,tv2,tv3,tv4))
+                  if polygon.intersects(tempPolygon):
+                    visibleCounter+=1
+                    (x,y,x1,y1) = (tx,ty,cx1 + 256*ix*scale,cy1 + 256*iy*scale)
+                    """we do this inline to get rid of function calling overhead"""
+                    name = "%s_%d_%d_%d" % (layer,z,x,y)
+                    tileImage = self.images[0].get(name)
+                    if tileImage:
+                      # tile found in memmory cache, draw it
+                      drawImage(cr, tileImage[0], x1, y1, scale)
+                    else:
+                      # tile not found in memmory cache, add a loading request
+                      requests.append((name, x, y, z, layer))
+                      drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+            print "currently visible tiles: %d/%d" % (visibleCounter,wTiles*hTiles)
+        else:
+          # draw without rotation
+          wTiles =  len(range(int(floor(px1)), int(ceil(px2)))) # how many tiles wide
+          hTiles =  len(range(int(floor(py1)), int(ceil(py2)))) # how many tiles high
 
-                # get tile cooridnates by incrementing the upper left tile cooridnates
-                x = cx+ix
-                y = cy+iy
-
-                # get screen coordinates by incrementing upper left tile screen coordinates
-                x1 = cx1 + 256*ix*scale
-                y1 = cy1 + 256*iy*scale
-
-                # Try to load and display images
-                nameBack = "%s_%d_%d_%d" % (layer2,z,x,y)
-                nameOver = "%s_%d_%d_%d" % (layer,z,x,y)
-                backImage = self.images[0].get(nameBack)
-                overImage = self.images[0].get(nameOver)
-                # check if the background tile is already cached
-                if backImage == None: # background image not yet loaded
-                  requests.append((nameBack, x, y, z, layer2))
-                  backImage = [loadingTileImageSurface] # draw the loading tile this time
-
-                # check if the overlay tile is already cached
-                if overImage == None: # overlay image not yet loaded
-                  requests.append((nameOver, x, y, z, layer))
-                  overImage = [loadingTileImageSurface] # draw the loading tile this time
-
-                """we do this inline to get rid of function calling overhead"""
-                # Move the cairo projection onto the area where we want to draw the image
-                cr.save()
-                cr.translate(x1,y1)
-                cr.scale(scale,scale) # scale te tile according to current scale settings
-
-                # Display the image
-                cr.set_source_surface(backImage[0],0,0) # draw the background
-                cr.paint_with_alpha(alphaBack)
-                cr.set_source_surface(overImage[0],0,0) # draw the overlay
-                cr.paint_with_alpha(alphaOver)
-
-                # Return the cairo projection to what it was
-                cr.restore()
-
-        else: # overlay is disabled
           with self.imagesLock: # just one lock per frame
             # draw the normal layer
             for ix in range(0, wTiles):
               for iy in range(0, hTiles):
-
                 # get tile cooridnates by incrementing the upper left tile cooridnates
                 x = cx+ix
                 y = cy+iy
@@ -397,31 +428,21 @@ class mapTiles(ranaModule):
                 tileImage = self.images[0].get(name)
                 if tileImage:
                   # tile found in memmory cache, draw it
-                  cr.save() # save the cairo projection context
-                  cr.translate(x1,y1)
-                  cr.scale(scale,scale)
-                  cr.set_source_surface(tileImage[0],0,0)
-                  cr.paint()
-                  cr.restore() # Return the cairo projection to what it was
-                else:       
+                  drawImage(cr, tileImage[0], x1, y1, scale)
+                else:
                   # tile not found in memmory cache, add a loading request
                   requests.append((name, x, y, z, layer))
-                  cr.save() # save the cairo projection context
-                  cr.translate(x1,y1)
-                  cr.scale(scale,scale)
-                  cr.set_source_surface(loadingTileImageSurface,0,0)
-                  cr.paint()
-                  cr.restore() # Return the cairo projection to what it was
-        # batch send the requests to the loading thread
-        if requests:
-          self.loadRequestCStack.batchPush(requests)
-          """can the loadRequestCStack get full ?
-             NO :)
-             it takes the list, reverses it, extends its old internal
-             list with it - from this list a slice conforming to
-             its size limit is taken and set as the new internal list"""
-            # notify the loading thread using the notify Queue
-          self.loadingNotifyQueue.put("load", block=False)
+                  drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+
+      if requests:
+        self.loadRequestCStack.batchPush(requests)
+        """can the loadRequestCStack get full ?
+           NO :)
+           it takes the list, reverses it, extends its old internal
+           list with it - from this list a slice conforming to
+           its size limit is taken and set as the new internal list"""
+          # notify the loading thread using the notify Queue
+        self.loadingNotifyQueue.put("load", block=False)
 
     except Queue.Full:
       """as we use the queue as a notification mechanism, we dont actually need to
@@ -430,7 +451,120 @@ class mapTiles(ranaModule):
 
     except Exception, e:
       print "mapTiles: expception while drawing the map layer: %s" % e
+      traceback.print_exc()
 
+
+#              visibleTiles.append((cx+ix,cy+iy,cx1 + 256*ix*scale,cy1 + 256*iy*scale))
+
+        # get the range of tiles we need
+#        wTiles =  len(range(int(floor(px1)), int(ceil(px2)))) # how many tiles wide
+#        hTiles =  len(range(int(floor(py1)), int(ceil(py2)))) # how many tiles high
+
+#        # upper left tile
+#        cx = int(px1)
+#        cy = int(py1)
+#        # we need the "clean" cooridnates for the folowing conversion
+#        (px1,px2,py1,py2) = cleanProjectionCoords
+#        (pdx, pdy) = (px2 - px1,py2 - py1)
+#        # upper left tile coodinates to screen coordinates
+#        cx1,cy1 = (sw*(cx-px1)/pdx,sh*(cy-py1)/pdy) #this is basically the pxpy2xy function from mod_projection inlined
+#        cx1,cy1 = int(cx1),int(cy1)
+
+        # Cover the whole map view with tiles
+
+#        if self.get('overlay', False): # is the overlay on ?
+#          ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
+#          (alphaOver, alphaBack) = (float(ratio[0]),float(ratio[1])) # convert it to floats
+#
+#          # get the background layer
+#          layer2 = self.get('layer2', 'mapnik')
+#
+#          # draw the composited layer
+#          with self.imagesLock: # just one lock per frame
+#            for ix in range(0, wTiles):
+#              for iy in range(0, hTiles):
+#
+#                # get tile cooridnates by incrementing the upper left tile cooridnates
+#                x = cx+ix
+#                y = cy+iy
+#
+#                # get screen coordinates by incrementing upper left tile screen coordinates
+#                x1 = cx1 + 256*ix*scale
+#                y1 = cy1 + 256*iy*scale
+#
+#                # Try to load and display images
+#                nameBack = "%s_%d_%d_%d" % (layer2,z,x,y)
+#                nameOver = "%s_%d_%d_%d" % (layer,z,x,y)
+#                backImage = self.images[0].get(nameBack)
+#                overImage = self.images[0].get(nameOver)
+#                # check if the background tile is already cached
+#                if backImage == None: # background image not yet loaded
+#                  requests.append((nameBack, x, y, z, layer2))
+#                  backImage = [loadingTileImageSurface] # draw the loading tile this time
+#
+#                # check if the overlay tile is already cached
+#                if overImage == None: # overlay image not yet loaded
+#                  requests.append((nameOver, x, y, z, layer))
+#                  overImage = [loadingTileImageSurface] # draw the loading tile this time
+#
+#                """we do this inline to get rid of function calling overhead"""
+#                # Move the cairo projection onto the area where we want to draw the image
+#                cr.save()
+#                cr.translate(x1,y1)
+#                cr.scale(scale,scale) # scale te tile according to current scale settings
+#
+#                # Display the image
+#                cr.set_source_surface(backImage[0],0,0) # draw the background
+#                cr.paint_with_alpha(alphaBack)
+#                cr.set_source_surface(overImage[0],0,0) # draw the overlay
+#                cr.paint_with_alpha(alphaOver)
+#
+#                # Return the cairo projection to what it was
+#                cr.restore()
+#
+#            # draw the normal layer
+#            for ix in range(0, wTiles):
+#              for iy in range(0, hTiles):
+#
+#                # get tile cooridnates by incrementing the upper left tile cooridnates
+#                x = cx+ix
+#                y = cy+iy
+#
+#                # get screen coordinates by incrementing upper left tile screen coordinates
+#                x1 = cx1 + 256*ix*scale
+#                y1 = cy1 + 256*iy*scale
+#
+#                # Try to load and display images
+#                """we do this inline to get rid of function calling overhead"""
+#                name = "%s_%d_%d_%d" % (layer,z,x,y)
+#                tileImage = self.images[0].get(name)
+#                if tileImage:
+#                  # tile found in memmory cache, draw it
+#                  cr.save() # save the cairo projection context
+#                  cr.translate(x1,y1)
+#                  cr.scale(scale,scale)
+#                  cr.set_source_surface(tileImage[0],0,0)
+#                  cr.paint()
+#                  cr.restore() # Return the cairo projection to what it was
+#                else:
+#                  # tile not found in memmory cache, add a loading request
+#                  requests.append((name, x, y, z, layer))
+#                  cr.save() # save the cairo projection context
+#                  cr.translate(x1,y1)
+#                  cr.scale(scale,scale)
+#                  cr.set_source_surface(loadingTileImageSurface,0,0)
+#                  cr.paint()
+#                  cr.restore() # Return the cairo projection to what it was
+        # batch send the requests to the loading thread
+
+  def drawImage(self, cr, imageSurface, x, y, scale):
+    """draw a map tile image"""
+    cr.save() # save the cairo projection context
+    cr.translate(x,y)
+    cr.scale(scale,scale)
+    cr.set_source_surface(imageSurface,0,0)
+    cr.paint()
+    cr.restore() # Return the cairo projection to what it was
 
   def removeImageFromMemmory(self, name, dictIndex=0):
     # remove an image from memmory
@@ -438,17 +572,6 @@ class mapTiles(ranaModule):
       if name in self.images:
         del self.images[dictIndex][name]
   
-  def drawImage(self,cr, tileImage, x, y, scale):
-    """Draw a tile image"""
-    # move to the drawing coordinates
-    cr.translate(x1,y1)
-    cr.scale(scale,scale) # scale te tile accorind to current scale settings
-    
-    # Display the image
-    cr.set_source_surface(tileImage,0,0)
-    # paint the result
-    cr.paint()
-
   def drawCompositeImage(self,cr, nameOver, nameBack, x,y, scale, alpha1=1, alpha2=1, dictIndex1=0,dictIndex2=0):
     """Draw a composited tile image"""
 
