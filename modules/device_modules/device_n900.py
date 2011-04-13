@@ -289,7 +289,6 @@ class device_n900(deviceModule):
     self.set('needRedraw', True)
 
   def _updateAppMenu(self, key=None, value=None, oldValue=None):
-    print "asdasdasd"
     print self.get("centred",True)
     if self.centeringToggleButton:
       self.centeringToggleButton.set_active(self.get("centred",True))

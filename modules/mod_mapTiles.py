@@ -46,7 +46,7 @@ socket.setdefaulttimeout(timeout)
 #  return
 
 def getModule(m,d,i):
-  return(mapTiles(m,d,i))
+  return(MapTiles(m,d,i))
 
 maplayers = {}
 configVariables = {
@@ -90,7 +90,7 @@ except Exception, e:
 
 
   
-class mapTiles(ranaModule):
+class MapTiles(ranaModule):
   """Display map images"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
@@ -168,7 +168,7 @@ class mapTiles(ranaModule):
                   request = self.downloadRequestPool.pop() # download most recent requests first
                   (name,x,y,z,layer,layerPrefix,layerType, filename, folder, timestamp) = request
                   # start a new thread
-                  self.threads[name] = self.tileDownloader(name,x,y,z,layer,layerPrefix,layerType, filename, folder, self)
+                  self.threads[name] = self.TileDownloader(name,x,y,z,layer,layerPrefix,layerType, filename, folder, self)
                   self.threads[name].daemon = True
                   self.threads[name].start()
                   # chenge the status tile to "Downloading..."
@@ -290,6 +290,11 @@ class mapTiles(ranaModule):
         loadingTileImageSurface = self.loadingTile[0]
         requests = []
         (sx,sy,sw,sh) = self.get('viewport') # get screen parameters
+
+        # adjust left corner ccordinates if cewntering shift is on
+        (shiftX,shiftY) = self.modrana.centerShift
+        sx = -shiftX
+        sy = -shiftY
         scale = int(self.get('mapScale', 1)) # get the current scale
 
         if scale == 1: # this will be most of the time, so it is first
@@ -331,7 +336,9 @@ class mapTiles(ranaModule):
           # we use polygon overlap testing to only load@draw visible tiles
 
           # screen center point
-          scP = rectangles.Point(sw/2.0,sh/2.0)
+          (shiftX,shiftY) = self.modrana.centerShift
+          (centerX,centerY) = ((sw/2.0),(sh/2.0))
+          scP = rectangles.Point(centerX,centerY)
 
           """create a polygon representing the viewport and rotate around
           current rotation center it to match the rotation and align with screen"""
@@ -344,18 +351,6 @@ class mapTiles(ranaModule):
           p3 = p3.rotate_about(scP,radAngle)
           p4 = p4.rotate_about(scP,radAngle)
 
-#          cr.set_source_rgba(0,1,0,0.5)
-#          cr.move_to(*p1.as_tuple())
-#          cr.line_to(*p2.as_tuple())
-#          cr.line_to(*p4.as_tuple())
-#          cr.line_to(*p3.as_tuple())
-#          cr.line_to(*p1.as_tuple())
-#          cr.close_path()
-#          cr.fill()
-#
-#          cr.rectangle(scP.x-10,scP.y-10,20,20)
-#          cr.fill()
-          
           v1 = rectangles.Vector(*p1.as_tuple())
           v2 = rectangles.Vector(*p2.as_tuple())
           v3 = rectangles.Vector(*p3.as_tuple())
@@ -368,7 +363,7 @@ class mapTiles(ranaModule):
           v4 = rectangles.Vector(*p4.as_tuple())
 
           # enlage the area of possibly visible tiles due to rotation
-          add = int(ceil(max(pdx,pdy)/2.0))
+          add = self.modrana.expandViewportTiles
           (px1,px2,py1,py2) = (px1-add,px2+add,py1-add,py2+add)
           cx = int(px1)
           cy = int(py1)
@@ -405,6 +400,20 @@ class mapTiles(ranaModule):
                       requests.append((name, x, y, z, layer))
                       drawImage(cr, loadingTileImageSurface, x1, y1, scale)
             print "currently visible tiles: %d/%d" % (visibleCounter,wTiles*hTiles)
+
+#            cr.set_source_rgba(0,1,0,0.5)
+#            cr.move_to(*p1.as_tuple())
+#            cr.line_to(*p2.as_tuple())
+#            cr.line_to(*p4.as_tuple())
+#            cr.line_to(*p3.as_tuple())
+#            cr.line_to(*p1.as_tuple())
+#            cr.close_path()
+#            cr.fill()
+#
+#            cr.set_source_rgba(1,0,0,1)
+#            cr.rectangle(scP.x-10,scP.y-10,20,20)
+#            cr.fill()
+
         else:
           # draw without rotation
           wTiles =  len(range(int(floor(px1)), int(ceil(px2)))) # how many tiles wide
@@ -781,7 +790,7 @@ class mapTiles(ranaModule):
     """helper function that returns path to the tile folder"""
     return self.get('tileFolder', 'cache/images')
 
-  def imageY(z,extension):
+  def imageY(self, z,extension):
     return (('%d.%s') % (z, extension))
 
   def layers(self):
@@ -805,7 +814,7 @@ class mapTiles(ranaModule):
     with self.threadlListCondition:
       self.threadlListCondition.notifyAll()
 
-  class tileDownloader(Thread):
+  class TileDownloader(Thread):
     """Downloads an image (in a thread)"""
     def __init__(self,name, x,y,z,layer,layerName,layerType,filename, folder, callback):
       Thread.__init__(self)
@@ -934,7 +943,7 @@ def getTileUrl(x,y,z,layer): #TODO: share this with mapData
         layerDetails['tiles'],
         x,y,z)
     elif coords == 'quadtree': # handle Virtual Earth maps and satelite
-      quadKey = QuadTree(x, y, z)
+      quadKey = quadTree(x, y, z)
       url = '%s%s?g=452' % ( #  dont know what the g argument is, maybe revision ? but its not optional
                                 layerDetails['tiles'], # get the url
                                 quadKey # get the tile identificator
@@ -955,7 +964,7 @@ def getTileUrl(x,y,z,layer): #TODO: share this with mapData
 
   
 # modified from: http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/globalmaptiles.py (GPL)
-def QuadTree(tx, ty, zoom ):
+def quadTree(tx, ty, zoom ):
 		"Converts OSM type tile coordinates to Microsoft QuadTree"
 
 		quadKey = ""
