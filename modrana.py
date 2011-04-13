@@ -44,6 +44,11 @@ def update2(mapWidget):
   mapWidget.checkForRedraw()
   return(True)
 
+def simplePythagoreanDistance(x1, y1, x2, y2):
+    dx = x2 - x1
+    dy = y2 - y1
+    return math.sqrt(dx**2 + dy**2)
+
 class MapWidget(gtk.Widget):
   __gsignals__ = { \
     'realize': 'override',
@@ -154,6 +159,7 @@ class MapWidget(gtk.Widget):
     # watch both centering shift related variables
     self.watch('posShiftAmount', self._updateCenteringShiftCB)
     self.watch('posShiftDirection', self._updateCenteringShiftCB)
+    self.watch('viewport', self._updateCenteringShiftCB)
 
   def _modulesLoadedPostFirstTime(self):
     """this is run after all the modules have been loaded,
@@ -304,7 +310,7 @@ class MapWidget(gtk.Widget):
 
     this method is called if posShiftAmount or posShiftDirection
     are set and also once at startup"""
-    (sx,sy,sw,sh) = self.d.get('viewport')
+    (sx,sy,sw,sh) = self.get('viewport')
     x=0
     y=0
     shiftAmount = self.d.get('posShiftAmount', 0.75)
@@ -323,6 +329,15 @@ class MapWidget(gtk.Widget):
       """ we dont need to do anything if direction is set to don't shift (False)
       - 0,0 will be used """
     self.centerShift = (x,y)
+    
+    # update the viewport expansion variable
+    (centerX,centerY) = ((sw/2.0),(sh/2.0))
+    ulCenterDistance = simplePythagoreanDistance(0, 0, centerX, centerY)
+    centerLLdistance = simplePythagoreanDistance(centerX, centerY, sw, sh)
+    diagonal = max(ulCenterDistance, centerLLdistance)
+    add = int(math.ceil(diagonal/256.0))
+    self.expandViewportTiles = add
+
 
   def draw(self, cr, event):
     """ re/Draw the modrana GUI """
