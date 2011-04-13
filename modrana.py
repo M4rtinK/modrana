@@ -27,6 +27,7 @@ import pygtk
 pygtk.require('2.0')
 import gobject
 import gtk
+import math
 import sys
 import traceback
 import os
@@ -130,6 +131,9 @@ class MapWidget(gtk.Widget):
     for m in self.m.values():
       m.modrana = self # make this class accessible from modules
       m.dmod = self.dmod
+
+    # as the options module should be already loaded, we can update the viewport
+    self._updateViewport()
 
     # run what needs to be done before firstTime is called
     self._modulesLoadedPreFirstTime()
@@ -616,6 +620,9 @@ class MapWidget(gtk.Widget):
     pass
   def do_size_allocate(self, allocation):
     self.allocation = allocation
+    self.rect = self.allocation
+    self._updateViewport()
+    
     if self.flags() & gtk.REALIZED:
       self.window.move_resize(*allocation)
     newW = allocation[2]
@@ -628,10 +635,13 @@ class MapWidget(gtk.Widget):
     # notify all modules
     for m in self.m.values(): # enable resize handling by modules
         m.handleResize(newW, newH)
-#    self.forceRedraw() # redraw window contents after resize
+    self.forceRedraw() # redraw window contents after resize
+
+  def _updateViewport(self):
+    """update the current viewport in the global perzistent dictionary"""
+    self.set('viewport', (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
+
   def _expose_cairo(self, event, cr):
-    self.rect = self.allocation
-    self.d['viewport'] = (self.rect.x, self.rect.y, self.rect.width, self.rect.height)
     #self.modules['projection'].setView( \
     #  self.rect.x, 
     #  self.rect.y, 
