@@ -137,7 +137,32 @@ class MapTiles(ranaModule):
 
   def firstTime(self):
     self.mapViewModule = self.m.get('mapView', None)
+    self._updateScalingCB()
+    self.modrana.watch('mapScale', self._updateScalingCB)
+    self.modrana.watch('z', self._updateScalingCB)
+
+  def _updateScalingCB(self, key=None, oldValue=None, newValue=None):
+    """
+    as this only needs to be updated once on startup and then only
+    when scaling settings change this callback driven method is used
+    """
+
+    scale = int(self.get('mapScale', 1))
+    if scale == 1: # this will be most of the time, so it is first
+      z = int(self.get('z', 15))
+    elif scale == 2: # tiles are scaled to 512*512 and represent tiles from zl-1
+      z = int(self.get('z', 15)) - 1
+    elif scale == 4: # tiles are scaled to 1024*1024 and represent tiles from zl-2
+      z = int(self.get('z', 15)) - 2
+    else:
+      z = int(self.get('z', 15))
+      
+    tileSide = self.tileSide * scale
     
+    self.scalingInfo = (scale, z, tileSide)
+
+
+
   def startTileDownloadManagementThread(self):
     """start the consumer thread for download requests"""
     t = Thread(target=self.tileDownloadManager, name='automatic tile download management thread')
@@ -305,27 +330,18 @@ class MapTiles(ranaModule):
         loadingTileImageSurface = self.loadingTile[0]
         requests = []
         (sx,sy,sw,sh) = self.get('viewport') # get screen parameters
-        tileSide = self.tileSide
 
         # adjust left corner ccordinates if cewntering shift is on
         (shiftX,shiftY) = self.modrana.centerShift
         sx = -shiftX
         sy = -shiftY
-        scale = int(self.get('mapScale', 1)) # get the current scale
+        # get the current scale and related info
+        (scale, z, tileSide) = self.scalingInfo
 
         if scale == 1: # this will be most of the time, so it is first
-          z = int(self.get('z', 15))
           (px1,px2,py1,py2) = (proj.px1,proj.px2,proj.py1,proj.py2) #use normal projection bbox
           cleanProjectionCoords = (px1,px2,py1,py2) # we need the unmodified coords for later use
         else:
-          if scale == 2: # tiles are scaled to 512*512 and represent tiles from zl-1
-            z = int(self.get('z', 15)) - 1
-          elif scale == 4: # tiles are scaled to 1024*1024 and represent tiles from zl-2
-            z = int(self.get('z', 15)) - 2
-          else:
-            z = int(self.get('z', 15))
-          tileSide = tileSide * scale
-
           # we use tiles from an upper zl and strech them over a lower zl
           (px1,px2,py1,py2) = proj.findEdgesForZl(z, scale)
           cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
