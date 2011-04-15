@@ -95,7 +95,7 @@ class MapTiles(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.images = [{},{}] # the first dict contains normal image data, the seccond contains special tiles
-    self.imagesLock = threading.Lock()
+    self.imagesLock = threading.RLock()
     self.threads = {}
     self.threadlListCondition = threading.Condition(threading.Lock())
     self.maxImagesInMemmory = 150 # to avoid a memmory leak
@@ -285,7 +285,22 @@ class MapTiles(ranaModule):
       # get all neded data and objects to local variables
       proj = self.m.get('projection', None)
       drawImage = self.drawImage # method binding to speed up method lookup
-      layer = self.get('layer','osma')
+      overlay = self.get('overlay', False)
+      """ if overlay is enabled, we use a special naming
+          function in place of the default one"""
+
+      singleGetName = self.getTileName
+      if overlay:
+        ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
+        (alphaOver, alphaBack) = (float(ratio[0]),float(ratio[1])) # convert it to floats
+        layer1 = self.get('layer','osma')
+        layer2 = self.get('layer2', 'mapnik')
+        layerInfo = ((layer1, alphaBack),(layer2, alphaOver))
+        getName = self.getCompositeTileName
+      else:
+        layerInfo = self.get('layer','osma')
+        getName = self.getTileName
+
       if proj and proj.isValid():
         loadingTileImageSurface = self.loadingTile[0]
         requests = []
@@ -311,7 +326,7 @@ class MapTiles(ranaModule):
             z = int(self.get('z', 15))
           tileSide = tileSide * scale
 
-          # we use tiles from an upper zl and strech them over lower zl
+          # we use tiles from an upper zl and strech them over a lower zl
           (px1,px2,py1,py2) = proj.findEdgesForZl(z, scale)
           cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
 
@@ -391,15 +406,43 @@ class MapTiles(ranaModule):
                   if polygon.intersects(tempPolygon):
                     visibleCounter+=1
                     (x,y,x1,y1) = (tx,ty,cx1 + tileSide*ix,cy1 + tileSide*iy)                  
-                    name = "%s_%d_%d_%d" % (layer,z,x,y)
+                    name = getName(layerInfo,z,x,y)
                     tileImage = self.images[0].get(name)
                     if tileImage:
                       # tile found in memmory cache, draw it
                       drawImage(cr, tileImage[0], x1, y1, scale)
                     else:
-                      # tile not found in memmory cache, add a loading request
-                      requests.append((name, x, y, z, layer))
-                      drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+                      if overlay:
+                        """ check if the separate tiles are already cached
+                        and send loading request/-s if not
+                        if both tiles are in the cache, combine them, cache and disaplay the result
+                        and remove the separate tiles from cache
+                        """
+                        layerBack = layerInfo[0][0]
+                        layerOver = layerInfo[1][0]
+                        nameBack = singleGetName(layer1,z,x,y)
+                        nameOver = singleGetName(layer2,z,x,y)
+                        backImage = self.images[0].get(nameBack)
+                        overImage = self.images[0].get(nameOver)
+                        if backImage and overImage: # both images available
+                          if backImage[1]['type'] == "normal" and overImage[1]['type'] == "normal":
+                            combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
+                            # remove the separate images from cache
+                            self.removeImageFromMemmory(nameBack)
+                            self.removeImageFromMemmory(nameOver)
+                            # cache the combined image
+                            self.storeInMemmory(combinedImage, name, "composite")
+                            # draw the composite image
+                            drawImage(cr, combinedImage, x1, y1, scale)
+                          else:
+                            drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+                        else:
+                          requests.append((nameBack, x, y, z, layerBack))
+                          requests.append((nameOver, x, y, z, layerOver))
+                          drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+                      else:
+                        # tile not found in memmory cache, add a loading request
+                        requests.append((name, x, y, z, layerInfo))
             if self.modrana.showRedrawTime:
               print "currently visible tiles: %d/%d" % (visibleCounter,wTiles*hTiles)
 
@@ -434,16 +477,49 @@ class MapTiles(ranaModule):
                 y1 = cy1 + tileSide*iy
 
                 # Try to load and display images
-                """we do this inline to get rid of function calling overhead"""
-                name = "%s_%d_%d_%d" % (layer,z,x,y)
+                name = getName(layerInfo,z,x,y)
                 tileImage = self.images[0].get(name)
                 if tileImage:
                   # tile found in memmory cache, draw it
                   drawImage(cr, tileImage[0], x1, y1, scale)
                 else:
-                  # tile not found in memmory cache, add a loading request
-                  requests.append((name, x, y, z, layer))
-                  drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+                  # tile not found im memmroy cache, do something else
+                  if overlay:
+                    """ check if the separate tiles are already cached
+                    and send loading request/-s if not
+                    if both tiles are in the cache, combine them, cache and disaplay the result
+                    and remove the separate tiles from cache
+                    """
+                    layerBack = layerInfo[0][0]
+                    layerOver = layerInfo[1][0]
+                    nameBack = singleGetName(layer1,z,x,y)
+                    nameOver = singleGetName(layer2,z,x,y)
+                    backImage = self.images[0].get(nameBack)
+                    overImage = self.images[0].get(nameOver)
+                    if backImage and overImage: # both images available
+                      if backImage[1]['type'] == "normal" and overImage[1]['type'] == "normal":
+                        """
+                        we check the the metadata to filter out the "Downloading..."
+                        special tiles
+                        """
+                        combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
+                        # remove the separate images from cache
+                        self.removeImageFromMemmory(nameBack)
+                        self.removeImageFromMemmory(nameOver)
+                        # cache the combined image
+                        self.storeInMemmory(combinedImage, name, "composite")
+                        # draw the composite image
+                        drawImage(cr, combinedImage, x1, y1, scale)
+                      else: # on or more tiles not usable
+                        drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+                    else:
+                      requests.append((nameBack, x, y, z, layerBack))
+                      requests.append((nameOver, x, y, z, layerOver))
+                      drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+                  else:
+                    # tile not found in memmory cache, add a loading request
+                    requests.append((name, x, y, z, layerInfo))
+                    drawImage(cr, loadingTileImageSurface, x1, y1, scale)
 
       if requests:
         self.loadRequestCStack.batchPush(requests)
@@ -577,6 +653,21 @@ class MapTiles(ranaModule):
     cr.paint()
     cr.restore() # Return the cairo projection to what it was
 
+  def getTileName(self, layer, z, x, y):
+    return "%s_%d_%d_%d" % (layer,z,x,y)
+
+  def getCompositeTileName (self, layers , z, x, y):
+    (layer1, layer2) = layers
+    return "%s-%d+%s-%d:%d_%d_%d" % (layer1[0], layer1[1], layer2[0], layer2[1] , z, x, y)
+
+  def combine2Tiles(self, backImage, overImage, alphaOver):
+    # transparently combine two tiles
+    ct = cairo.Context(backImage)
+    ct2 = gtk.gdk.CairoContext(ct)
+    ct2.set_source_surface(overImage,0,0)
+    ct2.paint_with_alpha(alphaOver)
+    return backImage
+  
   def removeImageFromMemmory(self, name, dictIndex=0):
     # remove an image from memmory
     with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
@@ -612,6 +703,8 @@ class MapTiles(ranaModule):
           with self.imagesLock: # substitute the "loading" tile with a "downloading" tile
             downloadingTile = self.downloadingTile
             downloadingTile[1]['addedTimestamp'] = time.time()
+            downloadingTile[1]['type'] = "downloading"
+
             self.images[0][name] = downloadingTile
           return('OK')
     
