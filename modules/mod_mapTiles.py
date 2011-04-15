@@ -290,6 +290,7 @@ class MapTiles(ranaModule):
         loadingTileImageSurface = self.loadingTile[0]
         requests = []
         (sx,sy,sw,sh) = self.get('viewport') # get screen parameters
+        tileSide = self.tileSide
 
         # adjust left corner ccordinates if cewntering shift is on
         (shiftX,shiftY) = self.modrana.centerShift
@@ -300,7 +301,7 @@ class MapTiles(ranaModule):
         if scale == 1: # this will be most of the time, so it is first
           z = int(self.get('z', 15))
           (px1,px2,py1,py2) = (proj.px1,proj.px2,proj.py1,proj.py2) #use normal projection bbox
-          cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
+          cleanProjectionCoords = (px1,px2,py1,py2) # we need the unmodified coords for later use
         else:
           if scale == 2: # tiles are scaled to 512*512 and represent tiles from zl-1
             z = int(self.get('z', 15)) - 1
@@ -308,6 +309,7 @@ class MapTiles(ranaModule):
             z = int(self.get('z', 15)) - 2
           else:
             z = int(self.get('z', 15))
+          tileSide = tileSide * scale
 
           # we use tiles from an upper zl and strech them over lower zl
           (px1,px2,py1,py2) = proj.findEdgesForZl(z, scale)
@@ -368,7 +370,7 @@ class MapTiles(ranaModule):
           cx = int(px1)
           cy = int(py1)
           (pdx, pdy) = (px2 - px1,py2 - py1)
-          cx1,cy1 = (cx1-add*256,cy1-add*256)
+          cx1,cy1 = (cx1-add*tileSide,cy1-add*tileSide)
 
           wTiles =  len(range(int(floor(px1)), int(ceil(px2)))) # how many tiles wide
           hTiles =  len(range(int(floor(py1)), int(ceil(py2)))) # how many tiles high
@@ -379,17 +381,16 @@ class MapTiles(ranaModule):
                 for iy in range(0, hTiles):
                   tx = cx+ix
                   ty = cy+iy
-                  stx = cx1 + 256*ix*scale
-                  sty = cy1 + 256*iy*scale
+                  stx = cx1 + tileSide*ix
+                  sty = cy1 + tileSide*iy
                   tv1 = rectangles.Vector(stx,sty)
-                  tv2 = rectangles.Vector(stx+256,sty)
-                  tv3 = rectangles.Vector(stx,sty+256)
-                  tv4 = rectangles.Vector(stx+256,sty+256)
+                  tv2 = rectangles.Vector(stx+tileSide,sty)
+                  tv3 = rectangles.Vector(stx,sty+tileSide)
+                  tv4 = rectangles.Vector(stx+tileSide,sty+tileSide)
                   tempPolygon = rectangles.Polygon((tv1,tv2,tv3,tv4))
                   if polygon.intersects(tempPolygon):
                     visibleCounter+=1
-                    (x,y,x1,y1) = (tx,ty,cx1 + 256*ix*scale,cy1 + 256*iy*scale)
-                    """we do this inline to get rid of function calling overhead"""
+                    (x,y,x1,y1) = (tx,ty,cx1 + tileSide*ix,cy1 + tileSide*iy)                  
                     name = "%s_%d_%d_%d" % (layer,z,x,y)
                     tileImage = self.images[0].get(name)
                     if tileImage:
@@ -399,7 +400,8 @@ class MapTiles(ranaModule):
                       # tile not found in memmory cache, add a loading request
                       requests.append((name, x, y, z, layer))
                       drawImage(cr, loadingTileImageSurface, x1, y1, scale)
-            print "currently visible tiles: %d/%d" % (visibleCounter,wTiles*hTiles)
+            if self.modrana.showRedrawTime:
+              print "currently visible tiles: %d/%d" % (visibleCounter,wTiles*hTiles)
 
 #            cr.set_source_rgba(0,1,0,0.5)
 #            cr.move_to(*p1.as_tuple())
@@ -428,8 +430,8 @@ class MapTiles(ranaModule):
                 y = cy+iy
 
                 # get screen coordinates by incrementing upper left tile screen coordinates
-                x1 = cx1 + 256*ix*scale
-                y1 = cy1 + 256*iy*scale
+                x1 = cx1 + tileSide*ix
+                y1 = cy1 + tileSide*iy
 
                 # Try to load and display images
                 """we do this inline to get rid of function calling overhead"""

@@ -156,10 +156,21 @@ class MapWidget(gtk.Widget):
     """this is run after all the modules have been loaded,
     but before their first time is called"""
     self._updateCenteringShiftCB()
+
+    """to nly update values needed for map drawing when something changes
+       * window is resized
+       * user switches something rleated in options
+       * etc.
+       we use the key watching mechanism
+       once a related key is changed, we update all the values
+       """
     # watch both centering shift related variables
     self.watch('posShiftAmount', self._updateCenteringShiftCB)
     self.watch('posShiftDirection', self._updateCenteringShiftCB)
+    # also watch the viewport
     self.watch('viewport', self._updateCenteringShiftCB)
+    # and map scaling
+    self.watch('mapScale', self._updateCenteringShiftCB)
 
   def _modulesLoadedPostFirstTime(self):
     """this is run after all the modules have been loaded,
@@ -331,11 +342,17 @@ class MapWidget(gtk.Widget):
     self.centerShift = (x,y)
     
     # update the viewport expansion variable
+    scale = int(self.get('mapScale', 1))
+    tileSide = 256
+    mapTiles = self.m.get('mapTiles')
+    if mapTiles: # check the mapTiles for tile side length in pixels, if available
+      tileSide = mapTiles.tileSide
+    tileSide = tileSide * scale # apply any possible scaling
     (centerX,centerY) = ((sw/2.0),(sh/2.0))
     ulCenterDistance = simplePythagoreanDistance(0, 0, centerX, centerY)
     centerLLdistance = simplePythagoreanDistance(centerX, centerY, sw, sh)
     diagonal = max(ulCenterDistance, centerLLdistance)
-    add = int(math.ceil(diagonal/256.0))
+    add = int(math.ceil(float(diagonal)/tileSide))
     self.expandViewportTiles = add
 
 
