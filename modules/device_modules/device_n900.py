@@ -84,12 +84,6 @@ class device_n900(deviceModule):
     is-active == False signalizes that the window is either minimzed on the
     dashboard or the screen is blanked
     """
-  def update(self):
-    """initialize the automatic rotation"""
-    if not self.done:
-      if self.topWindow: #TODO: do this more efficiently
-        self.startAutorotation()
-        self.done = True
 
   def handleMessage(self, message, type, args):
     if message == 'modeChanged':
@@ -110,12 +104,12 @@ class device_n900(deviceModule):
   def startAutorotation(self):
     """start the GUI autorotation feature"""
     try:
-      from n900_maemo5_portrait import FremantleRotation
+      import n900_maemo5_portrait
       rotationMode = self.get('rotationMode', "auto") # get last used mode
       lastModeNumber = self.getRotationModeNumber(rotationMode) # get last used mode number
-      rotationObject = FremantleRotation(self.ossoAppName, main_window=self.modrana.topWindow, mode=lastModeNumber)
-      self.rotationObject = rotationObject
+      rObject = n900_maemo5_portrait.FremantleRotation(self.ossoAppName, main_window=self.modrana.topWindow, mode=lastModeNumber)
       print "N900 rotation object initialized"
+      return rObject
     except Exception, e:
       print e
       print "intializing N900 rotation object failed"
