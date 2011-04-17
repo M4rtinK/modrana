@@ -84,11 +84,23 @@ class FremantleRotation(object):
                 signal_name='sig_device_orientation_ind', \
                 dbus_interface='com.nokia.mce.signal', \
                 path='/com/nokia/mce/signal')
+
+
         system_bus.add_signal_receiver(self._on_keyboard_signal, \
                 signal_name='Condition', \
                 dbus_interface='org.freedesktop.Hal.Device', \
                 path='/org/freedesktop/Hal/devices/platform_slide')
         self.set_mode(mode)
+
+        """check for current orientation - the first signal comes after and orientation change,
+        so if the device is already in portrait when the app is launched, it won't
+        rotate to the correct orintation before being oriented to landscape and back
+        """
+        mceRequest = system_bus.get_object('com.nokia.mce','/com/nokia/mce/request')
+        dir(mceRequest)
+        orientationInfo = mceRequest.get_device_orientation()
+        # send a fake CB with current orientation info
+        self._on_orientation_signal(*orientationInfo)
 
     def get_mode(self):
         """Get the currently-set rotation mode
