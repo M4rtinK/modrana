@@ -218,10 +218,8 @@ class MapWidget(gtk.Widget):
 
   def removeWatch(self, id):
     """remove watch specified by the given watch id"""
-
     (nrId, key) = id.split('_')
 
-    print "REMOVE !!!!!"
     if key in self.watches:
       remove = lambda x:x==id
       self.watches[key][:] = [x for x in self.watches[key] if not remove(x)]
