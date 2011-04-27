@@ -69,7 +69,7 @@ class textEntry(ranaModule):
     instance.handleTextEntryResult(key,result)
     self.entryBoxVisible = False
 
-  def entryBox(self, instance,key, label="Text entry", initialText=""):
+  def entryBox(self, instance,key, label="Text entry", initialText="", description=None):
       dialog = gtk.Dialog(
         label,
         None,
@@ -96,13 +96,16 @@ class textEntry(ranaModule):
       entry.connect("activate", self.respondToTextEntry, dialog, gtk.RESPONSE_OK, instance,key)
       dialog.connect("response", self.respondToDialog,entry, instance,key)
       #create a horizontal box to pack the entry and a label
-      hbox = gtk.HBox()
-      hbox.pack_start(gtk.Label(), False, 5, 5)
-      hbox.pack_end(entry)
+      vbox = gtk.VBox()
+      if description:
+        vbox.pack_start(gtk.Label(description), False, 5, 5)
+        vbox.pack_end(entry)
+      else:
+        vbox.pack_start(entry, False, 5, 5)
       #some secondary text
 #      dialog.format_secondary_markup("This will be used for <i>identification</i> purposes")
       #add it and show it
-      dialog.vbox.pack_end(hbox, True, True, 0)
+      dialog.vbox.pack_end(vbox, True, True, 0)
       self.clearEntry()
       (width, height) = dialog.get_size() # get the current size
       (x,y,w,h) = self.get('viewport')
