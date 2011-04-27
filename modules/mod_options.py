@@ -83,16 +83,10 @@ class options(ranaModule):
   def removeOption(self, categoryId, groupId, variable):
     """remova an option given by group and variable name"""
 
-    # local function used for list comprehension
-    def remove(option):
-      """remove options with matching variable name"""
-      if option[1] == variable:
-        return True
-      else:
-        return False
     group = self._getGroupId(categoryId, groupId)
 
     if self.options.has_key(group):
+      remove = lambda x:x[1]==variable
       self.options[group][2][:] = [x for x in self.options[group][2] if not remove(x)]
     else:
       print "options: group %s does not exist, so option with variable %s can not be removed" % (group,variable)
