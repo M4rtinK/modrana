@@ -208,12 +208,25 @@ class MapWidget(gtk.Widget):
 
   def watch(self, key, callback, *args):
     """add a callback on an options key"""
-    id = self.maxWatchId + 1 # TODO remove watch based on id
-    self.maxWatchId = id # TODO: recycle ids ? (alla PID)
+    nrId = self.maxWatchId + 1
+    id = "%d_%s" % (nrId,key)
+    self.maxWatchId = nrId # TODO: recycle ids ? (alla PID)
     if key not in self.watches:
       self.watches[key] = [] # create the initial list
     self.watches[key].append((id,callback,args))
     return id
+
+  def removeWatch(self, id):
+    """remove watch specified by the given watch id"""
+
+    (nrId, key) = id.split('_')
+
+    print "REMOVE !!!!!"
+    if key in self.watches:
+      remove = lambda x:x==id
+      self.watches[key][:] = [x for x in self.watches[key] if not remove(x)]
+    else:
+      print "modRana: cant remove watch - key does not exist, watchId:", id
 
   def _notifyWatcher(self, key, value):
     """run callbacks registered on an options key"""
