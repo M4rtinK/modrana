@@ -32,27 +32,35 @@ class options(ranaModule):
     self.load()
     self.on = '<span color="green">ON</span>'
     self.off = '<span color="red">OFF</span>'
-  
-  def addCategory(self,name,id,icon,actionPrefix="",actionSufix=""):
+
+  def _getCategoryID(self, id):
+    return "opt_cat_%s" % id # get a standardized id
+
+  def addCategory(self,name,inId,icon,actionPrefix="",actionSufix=""):
     """this metohod shuld be run only after menu module instance
     is vailable in self.menuModule and the options manu is clared,
     eq. has at least the escape button"""
     # firs we add the category button to the options
-    id = "opt_cat_%s" % id # get a standardized id
+    id = self._getCategoryID(inId) # get a standardized id
     action="%sset:menu:%s%s" % (actionPrefix,id,actionSufix)
     self.menuModule.addItem('options', name, icon, action)
     # intilize menu for the new category menu
     self.menuModule.clearMenu(id,"set:menu:options")
     # as a convenience, return the id
-    return id
+    return inId
 
+  def _getGroupId(self, catId, id):
+    parrentId = self._getCategoryID(catId)
+    return "%s_opt_group_%s" % (parrentId, id)
+  
   def addGroup(self,name,id,parrentId,icon,actionPrefix="",actionSufix=""):
     """this method ads a new (empty) options group to category specified by
     catId, as a convenience feature, the id of the new group is returned"""
-    id = "opt_group_%s_%s" % (id,parrentId) # get a standardized id
+    catId = self._getCategoryID(parrentId)
+    id = self._getGroupId(parrentId, id) # get a standardized id
     action="%sset:menu:%s%s" % (actionPrefix,id,actionSufix)
-    self.menuModule.addItem(parrentId, name, icon, action)
-    self.options[id] = ["set:menu:%s" % parrentId,0,[]]
+    self.menuModule.addItem(catId, name, icon, action)
+    self.options[id] = ["set:menu:%s" % catId,0,[]]
     return id
 
   def addBoolOption(self, title, variable, group, default=None, action=None):
@@ -63,12 +71,33 @@ class options(ranaModule):
     else:
       self.addOption(title,variable,((False,off),(True,on)),group,default)
 
+  def addEditOption(self, title, variable, label="Edit variable"):
+    pass
+
   def addOption(self, title, variable, choices, group, default=None):
     newOption = (title,variable, choices,group,default)
     if self.options.has_key(group):
       self.options[group][2].append(newOption)
     else:
       print "options: group %s does not exist, call addGroup to create it first" % group
+  def removeOption(self, categoryId, groupId, variable):
+    """remova an option given by group and variable name"""
+
+    # local function used for list comprehension
+    def remove(option):
+      """remove options with matching variable name"""
+      if option[1] == variable:
+        return True
+      else:
+        return False
+    group = self._getGroupId(categoryId, groupId)
+
+    if self.options.has_key(group):
+      self.options[group][2][:] = [x for x in self.options[group][2] if not remove(x)]
+    else:
+      print "options: group %s does not exist, so option with variable %s can not be removed" % (group,variable)
+
+#  def optionExists(self, categoryId, groupId):
     
   def firstTime(self):
     """Create a load of options.  You can add your own options in here,
@@ -437,9 +466,21 @@ class options(ranaModule):
     # * the Sound category *
     catSound = addCat("Sound", "sound", "sound")
     # * sound output
-    group = addGroup("Sound output", "sound_output", catSound, "generic")
+    group = addGroup("Sound output", "sound_output", catSound, "sound")
 
     addBoolOpt("Application wide sound output", "soundEnabled", group, True)
+
+    # * espeak group
+    group = addGroup("Espeak", "espeak", catSound, "espeak")
+
+    addOpt("Espeak voice parameters","espeakParameters",
+      [("auto", "automatic","ms:options:espeakParams:auto"),
+       ("manual", "manual", "ms:options:espeakParams:manual")],
+       group,
+       "auto")
+    if self.get('espeakParameters', None) == "manual":
+      addBoolOpt("Application wide sound output", "testTest", group, True)
+       
 
 #    addOpt("Network", "threadedDownload",
 ##      [("off","No use of network"),
@@ -496,8 +537,9 @@ class options(ranaModule):
 #     ("simple", "Draw simple tracklogs")],
 #     "view",
 #     False)
+    self._setUndefinedToDefault()
 
-
+  def _setUndefinedToDefault(self):
     # Set all undefined options to default values
     for category,options in self.options.items():
       for option in options[2]:
@@ -560,10 +602,17 @@ class options(ranaModule):
         self.options[menuName][1] = newIndex
     elif(message == "save"):
       self.save()
+    elif type=="ms" and message == "espeakParams":
+      # switch between espeak parameter modes
+      if args == "manual":
+        self.removeOption("sound", "espeak", "testTest")
+      elif args == "auto":
+        groupId = self._getGroupId("sound", "espeak")
+        self.addBoolOption("Application wide sound output", "testTest", groupId, True)
     
   def drawMenu(self, cr, menuName):
     """Draw menus"""
-    if(menuName[0:5] != "opt_g"):
+    if(menuName[0:5] != "opt_c"):
       return
     if(not self.options.has_key(menuName)):
       return
@@ -597,6 +646,7 @@ class options(ranaModule):
       for row in (0,1,2):
         index = firstItemIndex + row
         numItems = len(options)
+        cAction = None
         if(0 <= index < numItems):
           (title,variable,choices,category,default) = options[index]
           # What's it set to currently?
@@ -606,21 +656,20 @@ class options(ranaModule):
           # (if any, use str(value) if it doesn't match any defined options)
           # Also lookup the _next_ choice in the list, because that's what
           # we will set the option to if it's clicked
+          
           nextChoice = choices[0]
           valueDescription = str(value)
           useNext = False
           for c in choices:
-            cAction = None
-            if len(c) == 3:
-              (cVal, cName, cAction) = c
-            else:
-              (cVal, cName) = c
+            (cVal, cName) = (c[0],c[1])
             if(useNext):
               nextChoice = c
               useNext = False
             if(str(value) == str(cVal)):
               valueDescription = cName
               useNext = True
+              if len(c) == 3:
+                cAction = c[2]
 
           # What should happen if this option is clicked -
           # set the associated option to the next value in sequence
