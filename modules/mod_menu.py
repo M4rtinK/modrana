@@ -393,11 +393,11 @@ class menus(ranaModule):
       else:
         id = (pageNumber)*(itemSlots-2)+1
         if (itemCount-id-2) < (itemSlots-1):
-          # this is tle last page
+          # this is the last page
           # draw only the "less" button
           (x,y) = self.itemMenuGrid[1][0]
           self.drawButton(cr, x, y, dx, dy, "less", "less>%s" % bgIconDescription, "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber-1))
-          itemGrid = self.itemMenuGrid[1][1:(itemCount-id-1)]
+          itemGrid = self.itemMenuGrid[1][1:(itemCount-id+1)]
         else:
           # this is an intermediate page
           # draw the "less" and "more" buttons
