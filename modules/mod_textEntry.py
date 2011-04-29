@@ -98,7 +98,9 @@ class textEntry(ranaModule):
       #create a horizontal box to pack the entry and a label
       vbox = gtk.VBox()
       if description:
-        vbox.pack_start(gtk.Label(description), False, 5, 5)
+        descLabel = gtk.Label()
+        descLabel.set_markup(description)
+        vbox.pack_start(descLabel, False, 5, 5)
         vbox.pack_end(entry)
       else:
         vbox.pack_start(entry, False, 5, 5)
