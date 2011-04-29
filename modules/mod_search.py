@@ -21,6 +21,7 @@
 from base_module import ranaModule
 import geo
 import math
+from odict import odict
 
 def getModule(m,d,i):
   return(search(m,d,i))
@@ -33,83 +34,110 @@ class search(ranaModule):
     self.scroll = 0
     self.list = None # processed results: (distancefrom pos, rusult, absolut index)
     self.where='position'
-    self.filters = {
-      'Sleep':{
-        'Hotel':'tourism=hotel',
-        'Hostel':'tourism=hostel',
-        'Motel':'tourism=motel',
-        'Camp':'amenity=camp'},
-      'Buy':{
-        'Supermarket':'amenity=supermarket',
-        'Hypermarket':'amenity=hypermarket',
-        'Shopping center':'amenity=shopping_center',
-        'Gas station':'amenity=gas_station',
-        'Outdoor':'shop=outdoor',
-        'DIY':'tourism=diy',
-        'Bank':'amenity=bank',
-        'ATM':'amenity=atm',
-        'Bookstore':'tourism=bookstore',
-        'Computer store':'tourism=computer_store '},
-      'Food':{
-        'Pub food':'amenity=pub;food=yes',
-        'Pub':'amenity=pub',
-        'Bar':'amenity=bar',
-        'Food':'amenity=food',
-        'Restaurant':'amenity=restaurant',
-        'Cafe':'amenity=cafe',
-        'Pizza':'amenity=pizza',
-        'Fast food':'amenity=fast_food'},
-      'Help':{
-#        'Police Stn':'amenity=police',
-        'Police Station':'amenity=police',
-        'Fire Stn':'amenity=fire',
-        'Information center':'amenity=information',
-        'Hospital':'amenity=hospital',
-        'Ranger':'amenity=ranger_station',
-        'Pharmacy':'amenity=pharmacy',
-        'Law':'amenity=law',
-        'Embassy':'amenity=law'},
-      'Hire':{
-        'Car hire':'amenity=car_hire',
-        'Bike hire':'amenity=bike_hire',
-        'Ski hire':'amenity=ski_hire'},
-      'Park':{
-        'Car park':'amenity=parking',
-        'Free car park':'amenity=parking;cost=free',
-        'Bike park':'amenity=cycle_parking',
-        'Lay-by':'amenity=layby'},
-      'Travel':{
-        'Airport':'amenity=airport',
-        'Heliport':'amenity=heliport',
-        'Spaceport':'amenity=spaceport',
-        'Train station':'amenity=train_station',
-        'Bus':'amenity=bus',
-        'Tram':'amenity=Tram',
-        'Subway station':'amenity=subway_station',
-        'Station':'amenity=station',
-        'Ferry':'amenity=ferry',
-        'Harbour':'amenity=harbour'},
-      'Repair':{
-        'Bike shop':'amenity=bike_shop',
-        'Garage':'amenity=garage'},
-      'Internet':{
-        'Hotspot':'amenity=hotspot',
-        'Wireless internet':'amenity=wireless_internet',
-        'Category: Internet cafe':'amenity=internet_cafe', # TODO: improve this, it finds more internet cafais but looks ugly :)
-        'Library':'amenity=library',
-        'Free wifi':'amenity=free_wifi'},
-      'Tourism':{
-        'Sightseeing':'amenity=sightseeing',
-        'Tourist information':'amenity=tourist_information',
-        'Cinema':'amenity=cinema',
-        'Theater':'amenity=theater',
-        'Gallery':'amenity=gallery',
-        'Museum':'amenity=museum',
-        'Wine celar':'amenity=wine_celar', # TODO: improve this, it finds more internet cafais but looks ugly :)
-        'National park':'amenity=national_park',
-        'WC':'amenity=wc',
-        'Swimming pool':'amenity=swimming_pool'},
-      }
+    self.menuWatchId = None
+    self.filters = {}
+  def loadFilters(self):
+    """fill the filter directory
+    the different categories are all represented by ordered dictionaries"""
+    filters = {}
+    a = odict()
+    a["hotel"] = {"name":"Hotel", "search":"hotel"}
+    a["hostel"] = {"name":"Hostel", "search":"hostel"}
+    a["motel"] = {"name":"Motel", "search":"motel"}
+    a["camp"] = {"name":"Camp", "search":"camp"}
+    filters['Sleep'] = a
+
+    a = odict()
+    a["supermarket"] = {"name":"Supermarket", "search":"supermarket"}
+    a["hypermarket"] = {"name":"Hypermarket", "search":"hypermarket"}
+    a["shopping_center"] = {"name":"Shopping center", "search":"shopping center"}
+    a["gas_station"] = {"name":"Gas station", "search":"gas station"}
+    a["outdoor"] = {"name":"Outdoor", "search":"outdoor"}
+    a["diy"] = {"name":"DIY", "search":"DIY"}
+    a["bank"] = {"name":"Bank", "search":"bank"}
+    a["atm"] = {"name":"ATM", "search":"ATM"}
+    a["bookstore"] = {"name":"Bookstore", "search":"bookstore"}
+    a["computer_store"] = {"name":"Computer store", "search":"computer store"}
+    filters['Buy'] = a
+
+    a = odict()
+    a["pub"] = {"name":"Pub", "search":"pub"}
+    a["pub_food"] = {"name":"Pub food", "search":"pub food"}
+    a["bar"] = {"name":"Bar", "search":"bar"}
+    a["food"] = {"name":"Food", "search":"food"}
+    a["restaurant"] = {"name":"Restaurant", "search":"restaurant"}
+    a["cafe"] = {"name":"Cafe", "search":"cafe"}
+    a["pizza"] = {"name":"Pizza", "search":"pizza"}
+    a["fast_food"] = {"name":"Fast food", "search":"fast food"}
+    filters['Food'] = a
+
+    a = odict()
+    a["police"] = {"name":"Police station", "search":"police"}
+    a["fire_station"] = {"name":"Fire dpt.", "search":"fire"}
+    a["information"] = {"name":"Information", "search":"information"}
+    a["hospital"] = {"name":"Hospital", "search":"hospital"}
+    a["pharmacy"] = {"name":"Pharmacy", "search":"pharmacy"}
+    a["ranger"] = {"name":"Ranger", "search":"ranger"}
+    a["law"] = {"name":"Law", "search":"law"}
+    a["embassy"] = {"name":"Embassy", "search":"embassy"}
+    filters['Help'] = a
+
+    a = odict()
+    a["car_hire"] = {"name":"Car hire", "search":"car hire"}
+    a["bike_hire"] = {"name":"Bike hire", "search":"bike hire"}
+    a["ski_hire"] = {"name":"Ski hire", "search":"Sky hire"}
+    filters['Hire'] = a
+
+
+    a = odict()
+    a["car_park"] = {"name":"Car park", "search":"car park"}
+    a["free_car_park"] = {"name":"Free car park", "search":"free car park"}
+    a["bike_park"] = {"name":"Bike park", "search":"bike park"}
+    a["lay_by"] = {"name":"Lay-by", "search":"lay by"}
+    filters['Park'] = a
+
+    a = odict()
+    a["airport"] = {"name":"Airport", "search":"airport"}
+    a["heliport"] = {"name":"Heliport", "search":"heliport"}
+    a["spaceport"] = {"name":"Spaceport", "search":"spaceport"}
+    a["train_station"] = {"name":"Train station", "search":"train station"}
+    a["bus"] = {"name":"Bus", "search":"bus"}
+    a["tram"] = {"name":"Tram", "search":"tram"}
+    a["subway"] = {"name":"Subway", "search":"subway"}
+    a["station"] = {"name":"Station", "search":"station"}
+    a["ev"] = {"name":"EV charging", "search":"EV charging station"}
+    a["gas_station"] = {"name":"Gas station", "search":"gas station"}
+    a["ferry"] = {"name":"Ferry", "search":"ferry"}
+    a["harbour"] = {"name":"Harbour", "search":"harbour"}
+    filters['Travel'] = a
+
+    a = odict()
+    a["bike_shop"] = {"name":"Bike shop", "search":"bike shop"}
+    a["garage"] = {"name":"Garage", "search":"garage"}
+    filters['Repair'] = a
+
+    a = odict()
+    a["hotspot"] = {"name":"Hotspot", "search":"hotspot"}
+    a["free_wifi"] = {"name":"Free wifi", "search":"free wifi"}
+    a["wireless_internet"] = {"name":"Wireless", "search":"wireless internet"}
+    a["internet_cafe"] = {"name":"Internet cafe", "search":"Category: Internet cafe"}
+    a["library"] = {"name":"Library", "search":"library"}
+    filters['Internet'] = a
+
+    a = odict()
+    a["sightseeing"] = {"name":"Sightseeing", "search":"sightseeing"}
+    a["tourist_information"] = {"name":"Tourist info", "search":"tourist information"}
+    a["cinema"] = {"name":"Cinema", "search":"cinema"}
+    a["theater"] = {"name":"Theater", "search":"theater"}
+    a["gallery"] = {"name":"Gallery", "search":"gallery"}
+    a["museum"] = {"name":"Museum", "search":"museum"}
+    a["wine_celar"] = {"name":"Wine celar", "search":"wine celar"}
+    a["national_park"] = {"name":"National park", "search":"national park"}
+    a["wc"] = {"name":"WC", "search":"WC"}
+    a["swimming_pool"] = {"name":"Swimming pool", "search":"swimming pool"}
+    filters['Tourism'] = a
+
+    self.filters = filters
 
   def handleMessage(self, message, type, args):
     # without this if, we would search also for the commands that move the listable menu
@@ -171,21 +199,21 @@ class search(ranaModule):
               print "search: screen center cooridnates unknown"
               return
 
-        try:
-          searchList = []
-          filters = self.filters
-          for topLevel in filters: # iterate over the filter cathegories
-            for key in filters[topLevel]: # iterate over the search keywords
-              if filters[topLevel][key] == searchTerm: # is this the search word for the current amenity ?
-                searchList.append(key) # add the matching search word to the list
-          term = searchList[0] # we have a list, because an amenity can have theoreticaly more "providers"
-
-        except:
-          print "search: key not present in the filter dictionary, using the key as search term"
-          term = searchTerm
+#        try:
+#          searchList = []
+#          filters = self.filters
+#          for topLevel in filters: # iterate over the filter cathegories
+#            for key in filters[topLevel]: # iterate over the search keywords
+#              if filters[topLevel][key] == searchTerm: # is this the search word for the current amenity ?
+#                searchList.append(key) # add the matching search word to the list
+#          term = searchList[0] # we have a list, because an amenity can have theoreticaly more "providers"
+#
+#        except:
+#          print "search: key not present in the filter dictionary, using the key as search term"
+#          term = searchTerm
 
         # initiate asynchronous search, taht is running in a separate thread
-        online.googleLocalQueryLLAsync(term, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
+        online.googleLocalQueryLLAsync(searchTerm, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
 #        if local['responseStatus'] != 200:
 #          print "search: google returned %d return code" % local['responseStatus']
 #        print ("search: local search returned %d results") % len(local['responseData']['results'])
@@ -528,17 +556,32 @@ class search(ranaModule):
       cr.stroke()
 
   def firstTime(self):
+    self.menuWatchId = self.modrana.watch('menu', self._checkMenuEnteredCB)
+
+  def _checkMenuEnteredCB(self, key, oldValue, newValue):
+    if key == "menu" and newValue == "search":
+      self.generateMenuStructure()
+
+
+  def generateMenuStructure(self):
     # TODO: do this once the menu is first entered, not always on startup
     m = self.m.get("menu", None)
     if(m):
+      self.loadFilters() # fill the search term dictionary
+
       m.clearMenu("search", 'set:menu:main')
       #m.addItem('search', 'centre', 'centre', 'set:menu:search_')
       for category, items in self.filters.items():
-        m.clearMenu("search_"+category, 'set:menu:search')
+        m.clearMenu("search_%s" % category, 'set:menu:search')
         m.addItem('search', category, category.lower(), 'set:menu:search_'+category)
-        for name,filter in items.items():
-          m.addItem('search_'+category, name, name.lower().replace(' ','_'), "ms:search:searchThis:"+filter)
-#      m.addItem('search', 'clear', 'clear', 'search:clearSearch|set:menu:None')
+        for id,data in items.items():
+          searchString = data["search"]
+          name = data["name"]
+          if "icon" in data: # check if there is icon name included
+            icon = data["icon"] # use icon name
+          else:
+            icon = id # use id as icon name
+          m.addItem('search_%s' % category, name, icon, "ms:search:searchThis:%s" % searchString)
       m.addItem('search', 'query#custom', 'generic', 'search:customQuery')
 
       # setup the searchResultTools submenu
@@ -547,6 +590,11 @@ class search(ranaModule):
       m.addItem('searchResultTools', "add to POI", "generic", "search:reset|search:storePOI")
       m.addItem('searchResultTools', "results#clear", 'generic', 'search:clearSearch|set:menu:None')
     # TODO: add "find route to"
+
+    # disconnect the watch once menu is generated
+    if self.menuWatchId != None:
+      self.modrana.removeWatch(self.menuWatchId)
+      self.menuWatchId = None
 
   def handleTextEntryResult(self, key, result):
     # handle custom query input
