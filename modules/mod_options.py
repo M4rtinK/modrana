@@ -71,15 +71,21 @@ class options(ranaModule):
     else:
       self.addOption(title,variable,((False,off),(True,on)),group,default)
 
-  def addEditOption(self, title, variable, label="Edit variable"):
-    pass
+  def addEditOption(self, title, variable, group, label="Edit variable", description=None):
+    choices = {"type":"showAndEditVariable",
+               "label": label,
+               "description": description
+              }
+    self.addOption(title, variable, choices, group, None)
 
   def addOption(self, title, variable, choices, group, default=None):
+
     newOption = (title,variable, choices,group,default)
     if self.options.has_key(group):
       self.options[group][2].append(newOption)
     else:
       print "options: group %s does not exist, call addGroup to create it first" % group
+
   def removeOption(self, categoryId, groupId, variable):
     """remova an option given by group and variable name"""
 
@@ -465,15 +471,17 @@ class options(ranaModule):
     addBoolOpt("Application wide sound output", "soundEnabled", group, True)
 
     # * espeak group
-    group = addGroup("Espeak", "espeak", catSound, "espeak")
+    group = addGroup("Voice", "voice_out", catSound, "espeak")
 
-    addOpt("Espeak voice parameters","espeakParameters",
-      [("auto", "automatic","ms:options:espeakParams:auto"),
-       ("manual", "manual", "ms:options:espeakParams:manual")],
+    addOpt("Voice parameters","voiceParameters",
+      [("auto", "<b>automatic</b>","ms:options:espeakParams:auto"),
+       ("manual", "<b>manual</b>", "ms:options:espeakParams:manual")],
        group,
        "auto")
-    if self.get('espeakParameters', None) == "manual":
-      addBoolOpt("Application wide sound output", "testTest", group, True)
+
+    if self.get('voiceParameters', None) == "manual":
+      self._updateVoiceManual('add')
+
        
 
 #    addOpt("Network", "threadedDownload",
@@ -599,11 +607,43 @@ class options(ranaModule):
     elif type=="ms" and message == "espeakParams":
       # switch between espeak parameter modes
       if args == "manual":
-        self.removeOption("sound", "espeak", "testTest")
+        self._updateVoiceManual("remove")
       elif args == "auto":
-        groupId = self._getGroupId("sound", "espeak")
-        self.addBoolOption("Application wide sound output", "testTest", groupId, True)
-    
+        self._updateVoiceManual("add")
+
+    elif type == "ml" and message == "editVariable":
+      (variable, label, description) = args
+      initialText = self.get(variable, "")
+      entry = self.m.get('textEntry', None)
+      if entry:
+        key = "editVariable_%s" % variable
+        entry.entryBox(self,key, label, initialText, description)
+
+  def _updateVoiceManual(self, action):
+    """add or remove custom voce parameters option items"""
+
+    if action == "add":
+      groupId = self._getGroupId("sound", "voice_out")
+      description="<b>Note:</b> <tt>%language</tt> will be replaced by current language code and <tt>%message</tt> will be replaced by the message"
+
+      self.addEditOption("Edit voice string", "voiceString", groupId, "Edit voice string", description=description)
+
+      message = "ms:voice:resetStringToDefault:espeak"
+      self.addOption("Reset voice string with <b>Espeak</b> default", "placeholder",
+      [("foo","<i>click to use this default</i>",message)],
+       groupId,
+       "foo")
+
+    elif action == "remove":
+      self.removeOption("sound", "voice_out", "voiceString")
+      self.removeOption("sound", "voice_out", "placeholder")
+
+  def handleTextEntryResult(self, key, result):
+    (type, variable) = key.split("_", 1)
+    if type == "editVariable":
+      print "editing variable: %s with: %s" % (variable, result)
+      self.set(variable,result)
+
   def drawMenu(self, cr, menuName):
     """Draw menus"""
     if(menuName[0:5] != "opt_c"):
@@ -650,28 +690,41 @@ class options(ranaModule):
           # (if any, use str(value) if it doesn't match any defined options)
           # Also lookup the _next_ choice in the list, because that's what
           # we will set the option to if it's clicked
-          
-          nextChoice = choices[0]
-          valueDescription = str(value)
-          useNext = False
-          for c in choices:
-            (cVal, cName) = (c[0],c[1])
-            if(useNext):
-              nextChoice = c
-              useNext = False
-            if(str(value) == str(cVal)):
-              valueDescription = cName
-              useNext = True
-              if len(c) == 3:
-                cAction = c[2]
 
-          # What should happen if this option is clicked -
-          # set the associated option to the next value in sequence
-          onClick = "set:%s:%s" % (variable, str(nextChoice[0]))
-          if cAction:
-            onClick += "|%s" % cAction
-          onClick += "|options:save"
-          onClick += "|set:needRedraw:1"
+          if type(choices) is dict:
+            optionType = choices["type"]
+            label = choices["label"]
+            description = choices["description"]
+
+            if optionType == "showAndEditVariable":
+              valueDescription = self.get(variable, "variable is not set yet")
+              valueDescription = "<tt><b>%s</b></tt>" % valueDescription
+              payload = "%s;%s;%s" % (variable, label, description)
+              onClick = "ml:options:editVariable:%s|set:needRedraw:True" % payload
+
+          else: # toggle button
+
+            nextChoice = choices[0]
+            valueDescription = str(value)
+            useNext = False
+            for c in choices:
+              (cVal, cName) = (c[0],c[1])
+              if(useNext):
+                nextChoice = c
+                useNext = False
+              if(str(value) == str(cVal)):
+                valueDescription = cName
+                useNext = True
+                if len(c) == 3:
+                  cAction = c[2]
+
+            # What should happen if this option is clicked -
+            # set the associated option to the next value in sequence
+            onClick = "set:%s:%s" % (variable, str(nextChoice[0]))
+            if cAction:
+              onClick += "|%s" % cAction
+            onClick += "|options:save"
+            onClick += "|set:needRedraw:1"
 
           y = y4 + (row) * dy
           w = w1 - (x4-x1)
