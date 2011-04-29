@@ -96,12 +96,13 @@ class textEntry(ranaModule):
       entry.connect("activate", self.respondToTextEntry, dialog, gtk.RESPONSE_OK, instance,key)
       dialog.connect("response", self.respondToDialog,entry, instance,key)
       #create a horizontal box to pack the entry and a label
-      vbox = gtk.VBox()
+      vbox = gtk.VBox(True)
       if description:
         descLabel = gtk.Label()
         descLabel.set_markup(description)
         descLabel.set_line_wrap(True)
-        vbox.pack_start(descLabel, False, 5, 5)
+        descLabel.set_max_width_chars(-1)
+        vbox.pack_start(descLabel, True, True, 5)
         vbox.pack_end(entry)
       else:
         vbox.pack_start(entry, False, 5, 5)
