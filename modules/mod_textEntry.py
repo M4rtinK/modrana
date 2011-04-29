@@ -74,9 +74,9 @@ class textEntry(ranaModule):
         label,
         None,
         gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_NO_SEPARATOR,
-#        (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
 #                      gtk.STOCK_OK, gtk.RESPONSE_ACCEPT)
         (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT)
+#        ()
         )
 #      dialog = gtk.MessageDialog(
 #        None,
@@ -100,6 +100,7 @@ class textEntry(ranaModule):
       if description:
         descLabel = gtk.Label()
         descLabel.set_markup(description)
+        descLabel.set_line_wrap(True)
         vbox.pack_start(descLabel, False, 5, 5)
         vbox.pack_end(entry)
       else:
