@@ -20,6 +20,8 @@ from __future__ import with_statement # for python 2.5
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import subprocess
+import shlex
+import re
 import threading
 
 def getModule(m,d,i):
@@ -33,6 +35,36 @@ class voice(ranaModule):
     self.espaekProcess = None
     # this lock is used to make sure there is only one voice speking at once
     self.voiceLock = threading.Lock()
+    # default espeak string for manual editing
+    self.defaultStrings = {
+                          'espeak' : 'espeak -v %language -s 120 -m %message'
+                          }
+    self.defaultProvider = "espeak"
+
+
+
+  def firstTime(self):
+    es = self.get("voiceString", None)
+    if es == None:
+      self.resetStringToDefault(self.defaultProvider)
+
+  def resetStringToDefault(self, type):
+    if type in self.defaultStrings:
+      s = self.defaultStrings[type]
+      print "voice: reseting voice string to default using string for: %s" % type
+      self.set("voiceString", s)
+    else:
+      print "voice: cant reset string to default, no string for:", type
+
+  def getDefaultString(self, type):
+    if type in self.defaultStrings:
+      return self.defaultStrings[type]
+    else:
+      return ""
+
+  def handleMessage(self, message, type, args):
+    if type == "ms" and message == "resetStringToDefault" and "args":
+      self.resetStringToDefault(args)
     
   def espeakSay(self, plaintextMessage, distanceMeters, forceLanguageCode=False):
       """say routing messages through espeak"""
@@ -52,8 +84,7 @@ class voice(ranaModule):
           else:
             # the espeak language code is the fisrt part of this whitespace delimited string
             espeakLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[0]
-          languageParam = '-v%s' % espeakLanguageCode
-          self.espaekProcess = subprocess.Popen(['espeak', languageParam ,'-s 120','-m','"%s"' % output])
+          self._speak(espeakLanguageCode, output)
 
   def say(self, text, language='en'):
     """say a given text"""
@@ -66,8 +97,27 @@ class voice(ranaModule):
           collisionString+= "\nlanguage code: \n%s\nmessage text:\n%s" % (language,text)
           print collisionString
         else:
-          languageParam = '-v%s' % language
-          self.espaekProcess = subprocess.Popen(['espeak', languageParam ,'-s 120','-m','"%s"' % text])
+          self._speak(language, text)
+
+  def _speak(self, languageCode, message):
+
+
+    mode = self.get('voiceParameters', None)
+    if mode == "manual": # user editable voice string
+      voiceString = self.get("voiceString", None)
+      if voiceString != None:
+
+        # replace langauge and message variables with appropriate values (if present)
+        voiceString = re.sub("%language", languageCode, voiceString)
+
+        message = '"%s"' % message # add quotes
+        voiceString = re.sub("%message", message, voiceString)
+        print "voice: resulting custom voice string:\n%s" % voiceString
+        self.espaekProcess = subprocess.Popen(voiceString, shell=True)
+    else:
+      languageParam = '-v%s' % languageCode
+      args = ['espeak', languageParam ,'-s 120','-m','"%s"' % message]
+      self.espaekProcess = subprocess.Popen(args)
 
 
   def speaking(self):
