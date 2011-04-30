@@ -56,8 +56,50 @@ class icons(ranaModule):
     self.buttonFillColor = (1,1,1,1)
 
     self.updateThemeList()
-    
-  def loadFromFile(self,name,w=None,h=None):
+
+  def getIconByName(self, name, returnPixbuf=False):
+    """"get icon from current theme by exact name match
+        return None if no icon is found"""
+    # first check in the current theme folder
+    iconPathThemed = self.getCurrentThemePath()
+    # and then check the default folder if the theme folder
+    # doesnt contain this icon
+    iconPathDefault = self.getDefaultThemePath()
+    simplePaths = None
+    for path in (iconPathThemed, iconPathDefault):
+      simplePaths = glob.glob(path+"%s.*" % name)
+      if simplePaths:
+        break
+    if simplePaths:
+      iconPath = simplePaths[0] # just take the first one
+      # check if it is loadable
+      if gtk.gdk.pixbuf_get_file_info(iconPath):
+        pixbuf = gtk.gdk.pixbuf_new_from_file(iconPath)
+        if returnPixbuf:
+          return pixbuf
+        else:
+          w = pixbuf.get_width()
+          h = pixbuf.get_height()
+          # paint the pixbuf on an image surface
+          icon = cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h)
+          ct = cairo.Context(icon)
+          ct2 = gtk.gdk.CairoContext(ct)
+          ct2.set_source_pixbuf(pixbuf, 0, 0)
+          ct2.paint()
+          # return the image surface
+          return icon
+      else:
+        # image is probably not loadable
+        print "icon: icon not loadable (by pixbuf loader): %s" % name
+        return None
+    else:
+      print "icons: no icon found with name: %s" % name
+      return None
+
+
+
+
+  def loadFromFile(self,name,w=None,h=None, scale=True):
     """load icon image to cache or draw the icon with cairo
     TODO: draw all icons through this function ?"""
 
@@ -100,8 +142,6 @@ class icons(ranaModule):
           except Exception, e:
             print "icons: icon probably corrupted: %s" % aboveTextIconPath
             print "%s" % e
-          # get the background icon
-#          compositeIcon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
           if pixbuf:
             compositeIcon = cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h)
             ct = cairo.Context(compositeIcon)
@@ -117,7 +157,11 @@ class icons(ranaModule):
     # just use the classic icon
     elif simplePaths:
       iconPath = simplePaths.pop()
-      image = self.getImageSurface(iconPath, w, h)
+      if scale:
+        image = self.getImageSurface(iconPath, w, h)
+      else:
+        image = self.getImageSurface(iconPath)
+
     # no icon found
     else:
       print "icons: %s not found" % name
@@ -130,12 +174,19 @@ class icons(ranaModule):
     h = float(image.get_height())
     return (image,False)
 
-  def getImageSurface(self,path, w, h):
-    """load a image given by path to pixbuf and paint ti to image surface,
+  def getImageSurface(self,path, w=None, h=None):
+    """load a image given by path to pixbuf and paint it to an image surface,
        then return the image surface"""
     image = None
+
     try:
       pixbuf = gtk.gdk.pixbuf_new_from_file(path)
+      """
+      if width or height are not set, we thek tehm from the pixbuf
+      if both are not set, we disable scaling
+      """
+
+      (w,h,scale) = self._getValidParams(w, h, pixbuf)
 
       ''' create a new cairo surface to place the image on '''
       image = cairo.ImageSurface(0,w,h)
@@ -144,13 +195,31 @@ class icons(ranaModule):
       ''' create a GDK formatted Cairo context to the new Cairo native context '''
       ct2 = gtk.gdk.CairoContext(ct)
       ''' draw from the pixbuf to the new surface '''
-      ct2.set_source_pixbuf(pixbuf.scale_simple(w,h,gtk.gdk.INTERP_HYPER),0,0)
+      if scale:
+        pixbuf = pixbuf.scale_simple(w,h,gtk.gdk.INTERP_HYPER)
+      ct2.set_source_pixbuf(pixbuf,0,0)
       ct2.paint()
       ''' surface now contains the image in a Cairo surface '''
     except Exception, e:
+      print "** loading image to pixbuf failed"
       print "** filename: %s" % path
       print "** exception: %s" % e
+      return None
     return image
+
+  def _getValidParams(self, w, h, pixbuf):
+    """return width and height
+       just return w or h if they are set,
+       if they are None, use vaules from the given pixbuf"""
+    if w == None:
+      w = pixbuf.get_width()
+    if h == None:
+      h = pixbuf.get_height()
+    if w == None and h == None:
+      scale = False
+    else:
+      scale = True
+    return (w,h, scale)
 
   def getCustomIcon(self,parameterList,w,h):
     """
@@ -301,6 +370,73 @@ class icons(ranaModule):
             needBackground = False
             parametricIcon = self.getCustomIcon(semicolonSepList,w,h)
             compositedIcon = self.combineTwoIcons(compositedIcon, parametricIcon)
+        elif currentName.split(':')[0] == 'center':
+          """ "center" means that we have an icon which we want to center inside the button
+          there re two parameters - icon name and border width
+          EXAMPLE: center:more;0.1
+          -> icon name: more
+          -> border width: 10% of shortest icon side
+          """
+          # parse the parameters
+          semicolonSepList = currentName.split(':',1)[1].split(';')
+          iconName = semicolonSepList[0]
+
+          # try to get the icon
+          icon = self.getIconByName(iconName, returnPixbuf=True)
+          if (icon == None):
+            self.cantLoad.append(iconName)
+          else:
+            w = int(w)
+            h = int(h)
+
+            needBackground = False
+            background = cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h)
+            # scale to fit and properly place inside the button size
+
+            iw = icon.get_width()
+            ih = icon.get_height()
+            # get usable width and height
+            borderWidth = float(semicolonSepList[1])
+            if borderWidth >= 1 or borderWidth <= 0:
+              border = 0
+            else:
+              border = min(w,h)*borderWidth
+            uw = float(w - border*2)
+            uh = float(h - border*2)
+            
+            # division by zero defence
+            if not(iw == 0 or iw == 0 or uw == 0 or uh == 0):
+
+              if iw >= ih: # "landscape" icon
+                newH = uh
+                newW = iw*(uh/ih)
+                if newW > uw:
+                  newW = uw
+                  newH = ih*(newW/iw)
+
+              else: # "portrait" icon
+                newW = uw
+                newH = ih*(newW/iw)
+                if newH > uh:
+                  newH = uh
+                  newW = iw*(newH/ih)
+
+              # shift to center
+              dx = border+(uw - newW)/2.0
+              dy = border+(uh - newH)/2.0
+              
+              # crete contexts
+              ct = cairo.Context(background)
+              ctBack = gtk.gdk.CairoContext(ct)
+              icon = icon.scale_simple(int(newW),int(newH),gtk.gdk.INTERP_HYPER)
+              ctBack.set_source_pixbuf(icon, dx, dy)
+
+              # paint the icon on image surface
+              ctBack.paint()
+              
+              # composite the result with other layers
+              compositedIcon = self.combineTwoIcons(compositedIcon, background)
+
         else: # not a generic or parametric icon, try to load from file
           loadingResult = self.loadFromFile(currentName, w, h)
           if (loadingResult == False):
