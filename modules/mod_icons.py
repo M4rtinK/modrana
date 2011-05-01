@@ -228,6 +228,9 @@ class icons(ranaModule):
     outline width (default 8) and corner radius (default 22)
     to use default value, just don't fill in the positional parameter
     ( len(parameter) == 0 )
+    USAGE:
+    corner radious: default=22, 0 does right angle corners
+
 
     EXAMPLE: generic:green;1.0;blue;0.5;10;15
     """
@@ -385,6 +388,10 @@ class icons(ranaModule):
           icon = self.getIconByName(iconName, returnPixbuf=True)
           if (icon == None):
             self.cantLoad.append(iconName)
+            # get a generic icon
+            genericIcon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
+            # submit it instead of the icon that failed to load
+            compositedIcon = self.combineTwoIcons(compositedIcon, genericIcon)
           else:
             w = int(w)
             h = int(h)
