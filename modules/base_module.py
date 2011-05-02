@@ -39,9 +39,9 @@ class ranaModule:
     return(self.m.get(module, None) != None)
 
   def notify(self, message, msTimeout=0, icon=""):
-    if self.dmod: # if some module sends a notification during init, the device module might not be loaded
-      self.dmod.notify(message, msTimeout=0, icon="")
-      # TODO: notification module fallback
+    notify = self.m.get('notification')
+    if notify:
+      notify.handleNotification(message, msTimeout, icon)
 
   def getStatus(self):
     return(self.status)
@@ -78,7 +78,7 @@ class ranaModule:
     """Handles notification of a window resize (also fullscreen/unfullscreen)"""
     pass
 
-  def handleTextEntryResult(self, key):
+  def handleTextEntryResult(self, key, result):
     """Handle a text returned from text input interface"""
     pass
 
