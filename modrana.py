@@ -605,6 +605,7 @@ class MapWidget(gtk.Widget):
     self.backingPixmap.draw_drawable(self.gc, self.window, 0, 0, 0,0,-1,-1)
     # initiate first drag
     self.staticMapDrag(shiftX, shiftY,dx,dy)
+    self.set('needRedraw',True)
 
   def staticMapDragEnd(self, event):
     """revert the changes neede for the drag"""
@@ -620,13 +621,13 @@ class MapWidget(gtk.Widget):
     self.setCurrentRedrawMethod()
 
     # redraw the whole screen
-    self.d['needRedraw'] = True
+    self.set('needRedraw',True)
 
   def staticMapDrag(self,shiftX,shiftY,dx,dy):
     """drag the map"""
     self.shift = (shiftX,shiftY,dx,dy)
     (x,y,w,h) = (self.rect.x, self.rect.y, self.rect.width, self.rect.height)
-    self.d['needRedraw'] = True
+    self.set('needRedraw',True)
 
   def staticMapPixmapDrag(self, cr, event):
     (x,y,w,h) = (self.rect.x, self.rect.y, self.rect.width, self.rect.height)
@@ -636,7 +637,7 @@ class MapWidget(gtk.Widget):
   def staticMapRevert(self):
     self.defaulMethodBindings()
     self.altMapDragEnabled = False
-    
+
   def do_realize(self):
     self.set_flags(self.flags() | gtk.REALIZED)
     self.window = gdk.Window( \
