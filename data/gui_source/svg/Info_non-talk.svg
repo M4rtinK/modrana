@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.0"
+   x="0.00000000"
+   y="0.00000000"
+   width="62.000000"
+   height="62.000000"
+   viewBox="0 0 62 62"
+   id="svg2">
+  <defs
+     id="defs4">
+    <linearGradient
+       x1="42.986301"
+       y1="7.0127001"
+       x2="22.014400"
+       y2="51.987099"
+       id="fieldGradient"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         style="stop-color:#b5ddfa;stop-opacity:1.0000000"
+         offset="0.00000000"
+         id="stop7" />
+      <stop
+         style="stop-color:#62a2ce;stop-opacity:1.0000000"
+         offset="1.0000000"
+         id="stop9" />
+    </linearGradient>
+    <linearGradient
+       x1="55.454102"
+       y1="42.752899"
+       x2="9.5471001"
+       y2="16.248501"
+       id="edgeGradient"
+       xlink:href="#shadowGradient"
+       gradientUnits="userSpaceOnUse"
+       spreadMethod="pad">
+      <stop
+         style="stop-color:#487fbc;stop-opacity:1.0000000"
+         offset="0.00000000"
+         id="stop12" />
+      <stop
+         style="stop-color:#749ecc;stop-opacity:1.0000000"
+         offset="1.0000000"
+         id="stop14" />
+    </linearGradient>
+    <radialGradient
+       id="shadowGradient">
+      <stop
+         style="stop-color:#c0c0c0;stop-opacity:1.0000000"
+         offset="0.00000000"
+         id="stop17" />
+      <stop
+         style="stop-color:#c0c0c0;stop-opacity:1.0000000"
+         offset="0.88000000"
+         id="stop19" />
+      <stop
+         style="stop-color:#c0c0c0;stop-opacity:0.00000000"
+         offset="1.0000000"
+         id="stop21" />
+    </radialGradient>
+    <radialGradient
+       cx="32.500000"
+       cy="29.500000"
+       r="26.500000"
+       fx="32.500000"
+       fy="29.500000"
+       id="radialGradient4170"
+       xlink:href="#shadowGradient"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       x1="42.986301"
+       y1="7.0127001"
+       x2="22.014400"
+       y2="51.987099"
+       id="linearGradient4172"
+       xlink:href="#fieldGradient"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       x1="55.454102"
+       y1="42.752899"
+       x2="9.5471001"
+       y2="16.248501"
+       id="linearGradient4174"
+       xlink:href="#edgeGradient"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     transform="translate(0.340725,0.363721)"
+     id="g4161">
+    <circle
+       cx="32.500000"
+       cy="29.500000"
+       r="26.500000"
+       transform="matrix(1.064800,0.000000,0.000000,1.064822,-2.100000,1.086400)"
+       style="fill:url(#radialGradient4170)"
+       id="circle4163" />
+    <circle
+       cx="31.000000"
+       cy="31.000000"
+       r="25.799999"
+       style="fill:url(#linearGradient4172);stroke:url(#linearGradient4174);stroke-width:2.0000000"
+       id="circle4165" />
+    <g
+       style="fill:#ffffff"
+       id="info">
+      <polygon
+         points="23.000000,25.000000 35.000000,25.000000 35.000000,44.000000 39.000000,44.000000 39.000000,48.000000 23.000000,48.000000 23.000000,44.000000 27.000000,44.000000 27.000000,28.000000 23.000000,28.000000 23.000000,25.000000 "
+         id="polygon4141" />
+      <circle
+         cx="31.000000"
+         cy="17.000000"
+         r="4.0000000"
+         id="circle4143" />
+    </g>
+  </g>
+</svg>
