@@ -134,10 +134,13 @@ class turnByTurn(ranaModule):
       self.switchToPreviousStep()
     elif message == "switchToNextTurn":
       self.switchToNextStep()
-#    elif message == "showMessageInNotification":
-#      currentStep = self.getCurrentStep()
-#      if currentStep:
-#        message = currentStep['descriptionHtml']
+    elif message == "showMessageInsideNotification":
+      currentStep = self.getCurrentStep()
+      if currentStep:
+        message = "<i>turn description:</i>\n%s" % currentStep['descriptionHtml']
+        if self.dmod.hasNativeNotificationSupport():
+          self.dmod.notify(message,7000)
+      #TODO: add support for modRana notifications once they support line wrapping
 
   def drawMapOverlay(self,cr):
       if self.steps:
@@ -250,7 +253,7 @@ class turnByTurn(ranaModule):
               cr.stroke()
               # draw the scissors icon
               cutSide = bw/10
-              menus.drawButton(cr, bx+bw, textEndY-cutSide/2.0, cutSide, cutSide, "", "center:scissors_right;0>%s" % background, "turnByTurn:nop")
+              menus.drawButton(cr, bx+bw, textEndY-cutSide/2.0, cutSide, cutSide, "", "center:scissors_right;0>%s" % background, "turnByTurn:showMessageInsideNotification")
               #TODO: show the whole message in a notifications after clicking the scossors
               # (this needs line wrapping support in modRana notifications)
 
