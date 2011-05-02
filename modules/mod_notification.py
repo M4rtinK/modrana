@@ -47,54 +47,49 @@ class notification(ranaModule):
     if type=='ml' and message=='m':
       """advanced message list based notification"""
       if args:
-        if self.dmod: # if some module sends a notification during init, the device module might not be loaded
-          if self.dmod.hasNativeNotificationSupport(): # use platform specific method
-            timeout = self.timeout
-            if len(args) >= 2:
-              timeout=int(args[1])
-            notificationText = args[0]
-            self.dmod.notify(notificationText,timeout*1000)
-            print "timeout",timeout*1000
-        else:
-          timeout = self.timeout
-          self.position = 'middle'
-          self.notificationText = args[0]
-          self.draw = True # enable drawing of notifications
-          if len(args) >= 2:
-            timeout=int(args[1])
-            self.expirationTimestamp = time.time() + timeout
+        timeout = self.timeout
+        if len(args) >= 2:
+          timeout = float(args[1])
+        messageText = args[0]
+        self.handleNotification(messageText, timeout)
 
-          self.set('needRedraw', True) # make sure the notification is displayed
     elif type=='ml' and message=='backgroundWorkNotify':
       if args:
         if args[0] == "enable":
           self.backgroundWorkNotify = True
         if args[0] == "disable":
           self.backgroundWorkNotify = False
+          
     else:
       list = message.split('#')
-      if self.dmod: # if some module sends a notification during init, the device module might not be loaded
-        if self.dmod.hasNativeNotificationSupport():  # use platform specific method
-          timeout = self.timeout
-          if len(list) == 2:
-            try:
-              timeout = int(list[1]) # override the default timeout
-            except:
-              print "notification: wrong timeout, using default 5 secconds"
-          notificationText = list[0]
-
-          self.dmod.notify(notificationText,timeout*1000)
-      else:
+      if len(list) >= 2:
+        messageText = list[0]
         timeout = self.timeout
-        self.position = 'middle'
-        self.notificationText = list[0]
-        self.draw = True # enable drawing of notifications
+        self.handleNotification(messageText, timeout)
         if len(list) == 2:
           try:
             timeout = int(list[1]) # override the default timeout
           except:
             print "notification: wrong timeout, using default 5 secconds"
+        self.handleNotification(messageText, timeout)
+      else:
+        print "notification: wrong message: %s" % message
+
+  def handleNotification(self, message, timeout=None, icon=""):
+    # TODO: icon support
+    if timeout == None:
+      timeout = self.timeout
+
+    print "notification: message: %s, timeout: %s" % (message, timeout)
+
+    if self.dmod: # if some module sends a notification during init, the device module might not be loaded
+      if self.dmod.hasNativeNotificationSupport(): # use platform specific method
+        self.dmod.notify(notificationText,timeout*1000)
+      else:
+        self.position = 'middle'
+        self.notificationText = message
         self.expirationTimestamp = time.time() + timeout
+        self.draw = True # enable drawing of notifications
         self.set('needRedraw', True) # make sure the notification is displayed
 
 
@@ -109,9 +104,7 @@ class notification(ranaModule):
 
   def drawNotification(self, cr):
     """Draw the notifications on the screen on top of everything."""
-    timestamp = time.time()
-    expirationTimestamp = self.expirationTimestamp
-    if timestamp <= expirationTimestamp:
+    if time.time() <= self.expirationTimestamp:
       proj = self.m.get('projection', None)
       (x1,y1) = proj.screenPos(0.5, 0.5) # middle fo the screen
       cr.set_font_size(30)
