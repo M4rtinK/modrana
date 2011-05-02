@@ -235,7 +235,7 @@ class menus(ranaModule):
       cr.move_to(x,y)
       pg.show_layout(layout)
     
-  def drawText(self,cr,text,x,y,w,h,border=0):
+  def drawText(self,cr,text,x,y,w,h,border=0, rgbaColor=None):
     """This is mainly used to draw the text on icons,
     this method uses pango, for the old show_text based one,
     see the  drawTextOld method"""
@@ -271,6 +271,9 @@ class menus(ranaModule):
     # move to position and show the text
     cr.move_to(x+xOffset,y+yOffset)
     pg.scale(ratio,ratio)
+    if rgbaColor != None:
+      cr.set_source_rgba(*rgbaColor)
+
     pg.show_layout(layout)
     cr.restore()
       
