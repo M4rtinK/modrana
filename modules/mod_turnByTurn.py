@@ -41,7 +41,7 @@ class turnByTurn(ranaModule):
 
   def goToInitialState(self):
     self.steps = []
-    self.currentStepIndex = None
+    self.currentStepIndex = 0
     self.currentStepIndicator = None
     self.espeakFirstTrigger = False
     self.espeakSecondTrigger = False
@@ -50,6 +50,7 @@ class turnByTurn(ranaModule):
     self.currentDistance = None
     self.currentStep = None
     self.navigationBoxHidden = False
+    self.mRouteLength = 0
 
 
   def firstTime(self):
@@ -133,6 +134,10 @@ class turnByTurn(ranaModule):
       self.switchToPreviousStep()
     elif message == "switchToNextTurn":
       self.switchToNextStep()
+#    elif message == "showMessageInNotification":
+#      currentStep = self.getCurrentStep()
+#      if currentStep:
+#        message = currentStep['descriptionHtml']
 
   def drawMapOverlay(self,cr):
       if self.steps:
@@ -166,52 +171,103 @@ class turnByTurn(ranaModule):
         (bx,by,bw,bh) = (w*0.15,h*0.20,w*0.7,h*0.4)
         buttonStripOffset = 0.25 * bh
 
-        # construct parameters for the cairo drawn buttons
-        boxAlpha = self.navigationBoxBackground[3]
-        parametricIconName="generic:;%f;;%f;7;5" % (0, boxAlpha*2)
+        # construct parametric background for the cairo drawn buttons
+        background="generic:;%f;;%f;5;0" % (0, 1.0)
         
         if self.navigationBoxHidden:
           # * show button
           showButtonWidth = bw * 0.2
           # the show button uses custom parameters
-          parametricIconName="generic:;%f;;%f;;5" % (boxAlpha, boxAlpha)
-          menus.drawButton(cr, bx+(bw-showButtonWidth), by, showButtonWidth, buttonStripOffset, "#show", parametricIconName, "turnByTurn:toggleBoxHiding")
+          parametricIconName="center:show;0.1>%s" % background
+          menus.drawButton(cr, bx+(bw-showButtonWidth), by, showButtonWidth, buttonStripOffset, "", parametricIconName, "turnByTurn:toggleBoxHiding")
+  
         else:
-          # background
+          # draw the info-box background
           cr.set_source_rgba(*self.navigationBoxBackground)
           cr.rectangle(bx,by,bw,bh)
           cr.fill()
-          cr.set_source_rgba(*self.navigationBoxText)
-          pg = pangocairo.CairoContext(cr)
+          
           # create a layout for our drawing area
+          pg = pangocairo.CairoContext(cr)
           layout = pg.create_layout()
-          message = currentStep['descriptionHtml']
 
-          # display current distance to the next point
+          # get the current turn message
+          message = currentStep['descriptionHtml']
+      
+          # display current distance to the next point & other unit conversions
           units = self.m.get('units', None)
           if units and self.currentDistance:
-            distString = units.m2CurrentUnitString(self.currentDistance,2)
+            distString = units.m2CurrentUnitString(self.currentDistance,1,True)
+            currentDistString = units.m2CurrentUnitString(currentStep['mDistanceFromStart'],1,True)
+            routeLengthString = units.m2CurrentUnitString(self.mRouteLength,1,True)
           else:
             distString = ""
+            currentDistString = ""
+            routeLengthString = ""
 
-          note = "<sub> tap this box to reroute</sub>"
-          message = distString + "\n" + message + "\n\n" + note
+          # TODO: find why there needs to be a newline at the end
+          message = "%s : %s\n" % (distString, message)
 
-          border = min(w/30.0,h/30.0)
+          border = min(bw/50.0,bh/50.0)
+          # compute how much space is actually available for the text
+          usableWidth = bw-2*border
+          usableHeight = bh-6*border-buttonStripOffset
+          layout.set_width(int(usableWidth*pango.SCALE))
+          layout.set_wrap(pango.WRAP_WORD)
           layout.set_markup(message)
-          layout.set_font_description(pango.FontDescription("Sans Serif 20"))
-          # scale to text to fit into the box
+          layout.set_font_description(pango.FontDescription("Sans Serif 24")) #TODO: custom font size ?
           (lw,lh) = layout.get_size()
           if lw == 0 or lh == 0:
+            # no need to draw a zero are layout
             return
-          scale = float(pango.SCALE)
-          factor = min(((bw-2*border)/(lw/scale)),((bh-2*border-buttonStripOffset)/(lh/scale)))
-          factor = min(factor, 1.0)
-          cr.move_to(bx+border,by+border+buttonStripOffset)
+
+          # get coordinates for the area available for text
+          ulX,ulY = (bx+border,by+border+buttonStripOffset)
+          cr.move_to(ulX,ulY)
           cr.save()
-          cr.scale(factor,factor)
+          if lh > usableHeight: # is the rendered text larger than the usable area ?
+            clipHeight = 0
+            # find last completley visible line
+            cut = False
+            for id in range(0,layout.get_line_count()-1):
+              lineHeight = layout.get_line(id).get_pixel_extents()[1][3]
+              if clipHeight + lineHeight <= usableHeight:
+                clipHeight = clipHeight + lineHeight
+              else:
+                cut = True # signalize we cut off some lines
+                break
+            
+            textEndY = by+border+clipHeight+buttonStripOffset
+
+            if cut:
+              """ notify the user that a part of the text was cut,
+              by drawing a red line and a scissors icon"""
+              # draw the red line
+              cr.set_source_rgb(1,0,0)
+              cr.set_line_width(bh*0.01)
+              cr.move_to(bx,textEndY)
+              cr.line_to(bx+bw,textEndY)
+              cr.stroke()
+              # draw the scissors icon
+              cutSide = bw/10
+              menus.drawButton(cr, bx+bw, textEndY-cutSide/2.0, cutSide, cutSide, "", "center:scissors_right;0>%s" % background, "turnByTurn:nop")
+              #TODO: show the whole message in a notifications after clicking the scossors
+              # (this needs line wrapping support in modRana notifications)
+
+
+            # clip out the overflowing part of the text
+            cr.rectangle(ulX,ulY,usableWidth,clipHeight)
+            cr.translate(ulX,ulY)
+            cr.clip()
+
+          cr.set_source_rgba(*self.navigationBoxText)
           pg.show_layout(layout)
           cr.restore()
+
+          # use the bottom of the infobox to display info
+          (bottomX,bottomY) = (bx, by+bh-6*border)
+          note = "%s/%s, %d/%d   <sub> tap this box to reroute</sub>" % (currentDistString, routeLengthString, self.currentStepIndex+1,len(self.steps))
+          menus.drawText(cr, "%s" % note, bottomX, bottomY, bw, 6*border, 0, rgbaColor=self.navigationBoxText)
           # make clickable
           clickHandler = self.m.get('clickHandler', None)
           if clickHandler:
@@ -223,11 +279,11 @@ class turnByTurn(ranaModule):
           switchButtonWidth = bw * 0.4
 
           # * previous turn button
-          menus.drawButton(cr, bx, by, switchButtonWidth, buttonStripOffset, "#previous", parametricIconName, "turnByTurn:switchToPreviousTurn")
+          menus.drawButton(cr, bx, by, switchButtonWidth, buttonStripOffset, "", "center:less;0.1>%s" % background, "turnByTurn:switchToPreviousTurn")
           # * next turn button
-          menus.drawButton(cr, bx+switchButtonWidth, by, switchButtonWidth, buttonStripOffset, "#next", parametricIconName, "turnByTurn:switchToNextTurn")
+          menus.drawButton(cr, bx+switchButtonWidth, by, switchButtonWidth, buttonStripOffset, "", "center:more;0.1>%s" % background, "turnByTurn:switchToNextTurn")
           # * hide button
-          menus.drawButton(cr, bx+2*switchButtonWidth, by, hideButtonWidth, buttonStripOffset, "#hide", parametricIconName, "turnByTurn:toggleBoxHiding")
+          menus.drawButton(cr, bx+2*switchButtonWidth, by, hideButtonWidth, buttonStripOffset, "", "center:hide;0.1>%s" % background, "turnByTurn:toggleBoxHiding")
 
 
   def sayTurn(self,message,distanceInMeters,forceLanguageCode=False):
@@ -342,9 +398,16 @@ class turnByTurn(ranaModule):
       if dirs: # is the route nonempty ?
         self.sendMessage('notification:use at own risk, watch for cliffs, etc.#2')
         route = dirs['Directions']['Routes'][0]
+        # for some reason the combined distance does not account for the last step
+        self.mRouteLength = route['Distance']['meters'] + route['Steps'][-1]["Distance"]["meters"]
         self.steps = []
+        mDistanceFromStart = route['Steps'][-1]["Distance"]["meters"]
         for step in route['Steps']:
           step['currentDistance'] = None # add the currentDistance key
+          # add and compute the distance from start
+          step['mDistanceFromStart'] = mDistanceFromStart
+          mDistanceFromLast = step["Distance"]["meters"]
+          mDistanceFromStart = mDistanceFromStart + mDistanceFromLast
           self.steps.append(step)
         self.steps = dirs['Directions']['Routes'][0]['Steps']
 #        if fromWhere == 'first':
