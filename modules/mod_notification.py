@@ -84,7 +84,7 @@ class notification(ranaModule):
 
     if self.dmod: # if some module sends a notification during init, the device module might not be loaded
       if self.dmod.hasNativeNotificationSupport(): # use platform specific method
-        self.dmod.notify(notificationText,timeout*1000)
+        self.dmod.notify(message,int(timeout)*1000)
       else:
         self.position = 'middle'
         self.notificationText = message
