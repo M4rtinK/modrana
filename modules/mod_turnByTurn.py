@@ -396,7 +396,8 @@ class turnByTurn(ranaModule):
     if m:
       (dirs,routeRequestSentTimestamp) = m.getCurrentDirections()
       if dirs: # is the route nonempty ?
-        self.sendMessage('notification:use at own risk, watch for cliffs, etc.#2')
+        # show the warning message
+        self.sendMessage('ml:notification:m:use at own risk, watch for cliffs, etc.;3')
         route = dirs['Directions']['Routes'][0]
         # for some reason the combined distance does not account for the last step
         self.mRouteLength = route['Distance']['meters'] + route['Steps'][-1]["Distance"]["meters"]
