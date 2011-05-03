@@ -570,6 +570,7 @@ class mapData(ranaModule):
         t.daemon = True
         t.start()
         threads.append(t)
+      self.callback.notificateOnce = False
       print "minipool initialized"
       print "Added %d URLS to download." % self.urlCount
       while True:
@@ -577,13 +578,19 @@ class mapData(ranaModule):
         print "Batch tile dl working...",
         print"(threads: %i)" % (threading.activeCount()-1, ),
         print"pending: %d, done: %d" % (len(self.neededTiles),self.processed)
+        # there is some downloading going on so a notification will be needed
+        self.callback.notificateOnce = True
         if self.quit == True: # we were ordered to quit
           print "***get tiles quiting"
           shutdown.set() # dismiss all workers
           self.finished = True
           break
         if not self.neededTiles: # we processed everything
-          print "***get tiles finished"
+          print "***get tiles finished"          
+          if self.callback.notificateOnce:
+            self.callback.sendMessage('ml:notification:m:Batch download complete.;7')
+            self.callback.notificateOnce = False
+
           shutdown.set()
           self.finished = True
           break
@@ -841,13 +848,9 @@ class mapData(ranaModule):
       totalTileCount = getFilesThread.urlCount
       currentTileCount = getFilesThread.processed
       text = "Downloading: %d of %d tiles complete" % (currentTileCount, totalTileCount)
-      self.notificateOnce = True
       return text
     elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
       text = "Download complete."
-      if self.notificateOnce == True:
-        self.sendMessage('notification:Download complete.#10')
-      self.notificateOnce = False
       return text
 
   def getSizeText(self, sizeThread):
