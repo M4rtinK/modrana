@@ -86,11 +86,16 @@ class notification(ranaModule):
       if self.dmod.hasNativeNotificationSupport(): # use platform specific method
         self.dmod.notify(message,int(timeout)*1000)
       else:
-        self.position = 'middle'
-        self.notificationText = message
-        self.expirationTimestamp = time.time() + timeout
-        self.draw = True # enable drawing of notifications
-        self.set('needRedraw', True) # make sure the notification is displayed
+        self._startCustomNotification(message, timeout)
+    else:
+      self._startCustomNotification(message, timeout)
+      
+  def _startCustomNotification(self, message, timeout):
+      self.position = 'middle'
+      self.notificationText = message
+      self.expirationTimestamp = time.time() + timeout
+      self.draw = True # enable drawing of notifications
+      self.set('needRedraw', True) # make sure the notification is displayed
 
 
   def drawMasterOverlay(self,cr):
