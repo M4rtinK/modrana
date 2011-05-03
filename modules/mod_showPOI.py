@@ -338,7 +338,7 @@ class showPOI(ranaModule):
       """
       self.sendMessage('ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit')
       self.set('menu', 'POICategoryChooser')
-      self.sendMessage('ml:notification:Select a category for this POI:3')
+      self.sendMessage('ml:m:notification:m:Select a category for this POI;3')
 
     # "current position as a new POI" entry chain
     elif key=='newCurrentPositionName':
@@ -350,7 +350,7 @@ class showPOI(ranaModule):
       self.sendMessage('ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit')
       self.set('menu', 'POICategoryChooser')
       print "ADASDASDASD"
-      self.sendMessage('ml:notification:Select a category for this POI:3')
+      self.sendMessage('ml:notification:m:Select a category for this POI;3')
       self.set('needRedraw', True)
       print "ADASDASDASD"
 
