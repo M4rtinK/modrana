@@ -20,7 +20,6 @@ from __future__ import with_statement # for python 2.5
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import subprocess
-import shlex
 import re
 import threading
 
@@ -37,7 +36,7 @@ class voice(ranaModule):
     self.voiceLock = threading.Lock()
     # default espeak string for manual editing
     self.defaultStrings = {
-                          'espeak' : 'espeak -v %language -s 120 -m %message'
+                          'espeak' : 'espeak -v %language% -s 120 -m %qmessage%'
                           }
     self.defaultProvider = "espeak"
 
@@ -108,10 +107,11 @@ class voice(ranaModule):
       if voiceString != None:
 
         # replace langauge and message variables with appropriate values (if present)
-        voiceString = re.sub("%language", languageCode, voiceString)
+        voiceString = re.sub("%language%", languageCode, voiceString)
 
-        message = '"%s"' % message # add quotes
-        voiceString = re.sub("%message", message, voiceString)
+        voiceString = re.sub("%message%", message, voiceString)
+
+        voiceString = re.sub("%qmessage%", '"%s"' % message, voiceString)
         print "voice: resulting custom voice string:\n%s" % voiceString
         self.espaekProcess = subprocess.Popen(voiceString, shell=True)
     else:

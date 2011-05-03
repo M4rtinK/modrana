@@ -624,7 +624,7 @@ class options(ranaModule):
 
     if action == "add":
       groupId = self._getGroupId("sound", "voice_out")
-      description="<b>Note:</b> <tt>%language</tt> will be replaced by current language code and <tt>%message</tt> will be replaced by the message"
+      description="<b>Note:</b> <tt>%language%</tt> will be replaced by current language code, <tt>%message%</tt> will be replaced by the message and <tt>%qmessage%</tt> will be replaced by the message in quotes"
 
       self.addEditOption("Edit voice string", "voiceString", groupId, "Edit voice string", description=description)
 
