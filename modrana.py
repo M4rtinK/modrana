@@ -402,7 +402,7 @@ class MapWidget(gtk.Widget):
         # get the speed and angle
         speed = self.d.get('speed', 0)
         angle = self.d.get('bearing', 0)
-
+        
         """
         only if current direction angle and speed are known,
         submit a new angle
@@ -411,10 +411,9 @@ class MapWidget(gtk.Widget):
         """
         if angle and speed:
           if speed > self.notMovingSpeed: # do we look like we are moving ?
-            angle = 360 - angle
-            self.mapRotationAngle = radians(angle)
+            self.mapRotationAngle = angle
         cr.translate(x1,y1) # translate to the rotation center
-        cr.rotate(self.mapRotationAngle) # do the rotation
+        cr.rotate(radians(360 - self.mapRotationAngle)) # do the rotation
         cr.translate(-x1,-y1) # translate back
 
         # Draw the base map, the map overlays, and the screen overlays

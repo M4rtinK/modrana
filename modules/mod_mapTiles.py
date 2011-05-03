@@ -364,7 +364,12 @@ class MapTiles(ranaModule):
           angle = self.get('bearing', 0.0)
           if angle == None:
             angle = 0.0
+
           radAngle = radians(angle)
+
+
+          # get the rotation angle from the main class (for synchronization purposses)
+          radAngle = radians(self.modrana.mapRotationAngle)
 
           # we use polygon overlap testing to only load@draw visible tiles
 
