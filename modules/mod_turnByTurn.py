@@ -175,7 +175,8 @@ class turnByTurn(ranaModule):
         buttonStripOffset = 0.25 * bh
 
         # construct parametric background for the cairo drawn buttons
-        background="generic:;%f;;%f;5;0" % (0, 1.0)
+        background="generic:;0;;1;5;0"
+#        background="generic:;;;;;"
         
         if self.navigationBoxHidden:
           # * show button
@@ -187,7 +188,7 @@ class turnByTurn(ranaModule):
         else:
           # draw the info-box background
           cr.set_source_rgba(*self.navigationBoxBackground)
-          cr.rectangle(bx,by,bw,bh)
+          cr.rectangle(bx,by+buttonStripOffset,bw,bh-buttonStripOffset)
           cr.fill()
           
           # create a layout for our drawing area
@@ -208,7 +209,7 @@ class turnByTurn(ranaModule):
             currentDistString = ""
             routeLengthString = ""
 
-          # TODO: find why there needs to be a newline at the end
+          # TODO: find why there needs to be a newline on the end
           message = "%s : %s\n" % (distString, message)
 
           border = min(bw/50.0,bh/50.0)
