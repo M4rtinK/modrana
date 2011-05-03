@@ -230,7 +230,7 @@ class icons(ranaModule):
     ( len(parameter) == 0 )
     USAGE:
     corner radious: default=22, 0 does right angle corners
-
+    
 
     EXAMPLE: generic:green;1.0;blue;0.5;10;15
     """
@@ -302,7 +302,7 @@ class icons(ranaModule):
       outlineColorRGBATupple = self.buttonOutlineColor
 
     # create the icon
-    icon = self.roundedRectangle(w, h, fillColorRGBATupple, outlineColorRGBATupple, outlineWidth=outlineWidth, radius=cornerRadius)
+    icon = self.roundedRectangle(w, h, fillColorRGBATupple, outlineColorRGBATupple, outlineWidth, cornerRadius)
     return icon
 
 
@@ -355,7 +355,7 @@ class icons(ranaModule):
       """
       for currentName in reversed(name.split('>')): # we draw top down
         if currentName.split(':')[0] == 'generic':
-          if len(currentName.split(':',1)) == 1:
+          if currentName == "generic":
             # just the default cairo drawn icon
             needBackground = False
             genericIcon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
@@ -511,10 +511,13 @@ class icons(ranaModule):
     # make the outline propertional to the size of the button
     if outlineWidth == None:
       outlineWidth = min(width,height)*0.05
+    elif outlineWidth < 1.0: # add support for proportional outlines
+      outlineWidth = min(width,height)*outlineWidth
 
     x = 0
     y = 0
-    image = cairo.ImageSurface(0,int(width),int(height))
+    
+    image = cairo.ImageSurface(cairo.FORMAT_ARGB32,int(width),int(height))
     cr = cairo.Context(image)
     pi = 3.1415926535897931
 
@@ -523,16 +526,22 @@ class icons(ranaModule):
     # correcting for the line width
     # we also leave a line about one pixel wide free on all sides
 
-    x         = x+5
-    y         = y+5
-    width         = width-9
-    height        = height-9
+    x = x+5
+    y = y+5
+    width = width-9
+    height = height-9
 
     cr.new_sub_path()
-    cr.arc (x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees)
-    cr.arc (x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees)
-    cr.arc (x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees)
-    cr.arc (x + radius, y + radius, radius, 180 * degrees, 270 * degrees)
+    if radius <= 0: # no round corners, just draw a box
+      cr.move_to(x, y)
+      cr.line_to(x+width, y)
+      cr.line_to(x+width, y+height)
+      cr.line_to(x, y+height)
+    else:
+      cr.arc (x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees)
+      cr.arc (x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees)
+      cr.arc (x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees)
+      cr.arc (x + radius, y + radius, radius, 180 * degrees, 270 * degrees)
     cr.close_path()
 
     cr.set_source_rgba(*fillColor)
