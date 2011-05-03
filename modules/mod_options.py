@@ -306,7 +306,7 @@ class options(ranaModule):
       # * the Keys category *
       catKeys = addCat("Keys", "keys", "keys")
       # * Device buttons
-      group = addGroup("Device buttons", "device_buttons", catKeys, "generic")
+      group = addGroup("Device buttons", "device_buttons", catKeys, "n900")
       if self.dmod.hasVolumeKeys():
         addBoolOpt("Use volume keys for zooming", "useVolumeKeys", group, True, "device:updateKeys")
 
