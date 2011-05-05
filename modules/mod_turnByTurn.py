@@ -305,7 +305,14 @@ class turnByTurn(ranaModule):
         distString = '<p xml:lang="en">in <emphasis level="strong">'+ distString + '</emphasis></p><br>'
         # TODO: language specific distance strings
       text = distString + message
-      print "saying: %s" % text
+
+      """ the message can contain unicode, this might cause an exception when printing it
+      in some systems (SHR-u on Neo, for eaxmaple)"""
+      try:
+        print "saying: %s" % text
+      except UnicodeEncodeError:
+        print "voice: printing the current message to stdout failed do to unicode conversion error"
+
       if forceLanguageCode:
         espeakLanguageCode = forceLanguageCode
       else:
