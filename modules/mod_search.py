@@ -465,7 +465,9 @@ class search(ranaModule):
 
     # highlight the currently selected result on the map
 
-
+    if not self.list:
+      # there is nothing to draw
+      return
     for tupple in self.list:
       (distance, point, index) = tupple
       if index == highlightNr: # the highlighted result is draw in the end
