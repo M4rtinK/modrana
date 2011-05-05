@@ -134,11 +134,19 @@ class voice(ranaModule):
         except UnicodeEncodeError:
           print "voice: printing the current message to stdout failed do to unicode conversion error"
 
-        self.espaekProcess = subprocess.Popen(voiceString, shell=True)
+        self.espaekProcess = self._startSubprocess(voiceString, shell=True)
     else:
       languageParam = '-v%s' % languageCode
       args = ['espeak', languageParam ,'-s 120','-m','"%s"' % message]
-      self.espaekProcess = subprocess.Popen(args)
+      self.espaekProcess = self._startSubprocess(args)
+
+  def _startSubprocess(self, args, shell=False):
+    """start the voice output using the subprocess module and check for exceptions"""
+    try:
+      return subprocess.Popen(args, shell=shell)
+    except TypeError:
+      print "voice: voice oduput failed - most probably due to the message containing unicode characters and your shell not properly supporting unicode"
+      return None
 
 
   def speaking(self):
