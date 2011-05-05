@@ -77,7 +77,14 @@ class voice(ranaModule):
             distString = '<p xml:lang="en">in <emphasis level="strong">'+ distString + '</emphasis></p><br>'
             # TODO: language specific distance strings
           output = distString + plaintextMessage
-          print "saying: %s" % output
+
+
+          """ the message can contain unicode, this might cause an exception when printing it
+          in some systems (SHR-u on Neo, for eaxmaple)"""
+          try:
+            print "saying: %s" % output
+          except UnicodeEncodeError:
+            print "voice: printing the current message to stdout failed do to unicode conversion error"
           if forceLanguageCode:
             espeakLanguageCode = forceLanguageCode
           else:
@@ -94,7 +101,14 @@ class voice(ranaModule):
           # we are already speaking
           collisionString= "voice: message was not pronounced due to other message in progress"
           collisionString+= "\nlanguage code: \n%s\nmessage text:\n%s" % (language,text)
-          print collisionString
+          """ the message can contain unicode, this might cause an exception when printing it
+          in some systems (SHR-u on Neo, for eaxmaple)"""
+          try:
+            print collisionString
+          except UnicodeEncodeError:
+            print "voice: printing the current message to stdout failed do to unicode conversion error"
+
+
         else:
           self._speak(language, text)
 
@@ -112,7 +126,14 @@ class voice(ranaModule):
         voiceString = re.sub("%message%", message, voiceString)
 
         voiceString = re.sub("%qmessage%", '"%s"' % message, voiceString)
-        print "voice: resulting custom voice string:\n%s" % voiceString
+        
+        """ the message can contain unicode, this might cause an exception when printing it
+        in some systems (SHR-u on Neo, for eaxmaple)"""
+        try:
+          print "voice: resulting custom voice string:\n%s" % voiceString
+        except UnicodeEncodeError:
+          print "voice: printing the current message to stdout failed do to unicode conversion error"
+
         self.espaekProcess = subprocess.Popen(voiceString, shell=True)
     else:
       languageParam = '-v%s' % languageCode
