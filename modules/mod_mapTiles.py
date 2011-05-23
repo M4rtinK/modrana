@@ -701,7 +701,6 @@ class MapTiles(ranaModule):
           sprint("tile cached in memmory in %1.2f ms" % (1000 * (time.clock() - start2)))
         return('OK')
 
-
     # Image not found anywhere locally - resort to downloading it
     filename = self.getTileFolderPath() + (self.getImagePath(x,y,z,layerPrefix, layerType))
     sprint("image not found locally - trying to download")
