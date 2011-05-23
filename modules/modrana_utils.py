@@ -22,7 +22,6 @@ class SynchronizedCircularStack:
     self.listLock = threading.Lock()
     self.maxItems = maxItems
 
-
   def push(self, item):
     """add a new item to the stack, make sure the size stays in bounds"""
     with self.listLock:
@@ -44,8 +43,6 @@ class SynchronizedCircularStack:
       itemList.reverse()
       self.list.extend(itemList)
       self.list = self.list[-self.maxItems:]
-
-
 
   def pop(self):
     """

@@ -31,6 +31,7 @@ import cairo
 import traceback
 import modrana_utils
 import rectangles
+import gobject
 from configobj import ConfigObj
 from tilenames import *
 
@@ -109,12 +110,12 @@ class MapTiles(ranaModule):
               user configurable
     """
     self.loadRequestCStack = modrana_utils.SynchronizedCircularStack(self.loadRequestCStackSize)
-    self.loadingNotifyQueue = Queue.Queue(1)
+#    self.loadingNotifyQueue = Queue.Queue(1)
     self.downloadRequestPool = []
     self.downloadRequestPoolLock = threading.Lock()
     self.downloadRequestTimeout = 30 # in seconds
     self.startTileDownloadManagementThread()
-    self.startTileLoadingThread()
+    self.idleLoaderActive = False # report the idle tile loader is running
 
     self.shutdownAllThreads = False # notify the threads that shutdown is in progress
     
@@ -160,8 +161,6 @@ class MapTiles(ranaModule):
     tileSide = self.tileSide * scale
     
     self.scalingInfo = (scale, z, tileSide)
-
-
 
   def startTileDownloadManagementThread(self):
     """start the consumer thread for download requests"""
@@ -229,22 +228,55 @@ class MapTiles(ranaModule):
     t.setDaemon(True) # we need that the worker dies with the program
     t.start()
 
-  def tileLoader(self):
-    """this is a tile loading request consumer thread"""
-    while True:
-      request = self.loadingNotifyQueue.get(block=True) # consume from this queue
-      if request == 'load':
-        # start processing loading requests from the stack
-        while(1):
-          (item,valid) = self.loadRequestCStack.popValid()
-          if valid:
-            (name, x, y, z, layer) = item
-            self.loadImage(name, x, y, z, layer)
-          else:
-            break # the stack is empty
-      elif request == 'shutdown':
-        print "\nmapTiles: tile loading thread shutting down"
-        break
+#  def tileLoader(self):
+#    """this is a tile loading request consumer thread"""
+#    while True:
+#      request = self.loadingNotifyQueue.get(block=True) # consume from this queue
+#      if request == 'load':
+#        # start processing loading requests from the stack
+#        while(1):
+#          (item,valid) = self.loadRequestCStack.popValid()
+#          if valid:
+#            (name, x, y, z, layer) = item
+#            self.loadImage(name, x, y, z, layer)
+#          else:
+#            break # the stack is empty
+#      elif request == 'shutdown':
+#        print "\nmapTiles: tile loading thread shutting down"
+#        break
+
+  def _startIdleTileLoader(self):
+    """add the tile loader as a gobject mainloop idle callback"""
+    if not self.idleLoaderActive: # one idle loader is enought
+      self.idleLoaderActive = True
+      gobject.idle_add(self._idleTileLoaderCB)
+
+  def _idleTileLoaderCB(self):
+    """get loading requests from the circual stack,
+    quit when the stack is empty"""
+    try:
+      # check for modRana shutdown
+      if self.shutdownAllThreads:
+        self.idleLoaderActive = False
+        return False
+      (item,valid) = self.loadRequestCStack.popValid()
+      if valid:
+        (name, x, y, z, layer) = item
+        self.loadImage(name, x, y, z, layer)
+#        print "loaded"
+        return True # dont stop the idle handle
+      else:
+#        print "quiting"
+        self.idleLoaderActive = False
+        return False # the stack is empty, remove this callback
+    except Exception, e:
+      """
+      on an error, we need to shut down or else idleLoaderActive might get stuck
+      and no loader will be started
+      """
+      print("mapTiles: exception in idle loader\n", e)
+      self.idleLoaderActive = False
+      return False
 
   def loadSpecialTiles(self, specialTiles):
     """load special tiles from files to the special tiles cache"""
@@ -550,12 +582,14 @@ class MapTiles(ranaModule):
            list with it - from this list a slice conforming to
            its size limit is taken and set as the new internal list"""
           # notify the loading thread using the notify Queue
-        self.loadingNotifyQueue.put("load", block=False)
+#        self.loadingNotifyQueue.put("load", block=False)
+        # try to start the idle tile loader
+        self._startIdleTileLoader()
 
-    except Queue.Full:
-      """as we use the queue as a notification mechanism, we dont actually need to
-      process all the "load" notifications """
-      pass
+#    except Queue.Full:
+#      """as we use the queue as a notification mechanism, we dont actually need to
+#      process all the "load" notifications """
+#      pass
 
     except Exception, e:
       print "mapTiles: expception while drawing the map layer: %s" % e
@@ -791,12 +825,12 @@ class MapTiles(ranaModule):
     # shutdown the worker/consumer threads
     self.shutdownAllThreads = True
 
-    # shutdown the tile loading thread
-    try:
-      self.loadingNotifyQueue.put(('shutdown', ()),block=False)
-    except Queue.Full:
-      """the tile loading thread is demonic, so it will be still killed in the end"""
-      pass
+#    # shutdown the tile loading thread
+#    try:
+#      self.loadingNotifyQueue.put(('shutdown', ()),block=False)
+#    except Queue.Full:
+#      """the tile loading thread is demonic, so it will be still killed in the end"""
+#      pass
     # notify the automatic tile download manager thread about the shutdown
     with self.threadlListCondition:
       self.threadlListCondition.notifyAll()
