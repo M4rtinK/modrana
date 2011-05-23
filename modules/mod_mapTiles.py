@@ -222,11 +222,11 @@ class MapTiles(ranaModule):
         except Exception, e:
           print "exception in tile download manager thread:\n%s" % e
 
-  def startTileLoadingThread(self):
-    """start the loading-request consumer thread"""
-    t = Thread(target=self.tileLoader, name='tile loading thread')
-    t.setDaemon(True) # we need that the worker dies with the program
-    t.start()
+#  def startTileLoadingThread(self):
+#    """start the loading-request consumer thread"""
+#    t = Thread(target=self.tileLoader, name='tile loading thread')
+#    t.setDaemon(True) # we need that the worker dies with the program
+#    t.start()
 
 #  def tileLoader(self):
 #    """this is a tile loading request consumer thread"""
@@ -641,15 +641,33 @@ class MapTiles(ranaModule):
 
     # Return the cairo projection to what it was
     cr.restore()
-    
+
+  def _fakePrint(self, text):
+    """print that does nothing"""
+    pass
+
+  def _realPrint(self,text):
+    print(text)
+
   def loadImage(self,name , x, y, z, layer):
     """Check that an image is loaded, and try to load it if not"""
     
     """at this point, there is only a placeholder image in the memmory cache"""
 
+    # check if tile loading debugging is on
+    debug = self.get('tileLoadingDebug', False)
+    if debug:
+      sprint = self._realPrint
+    else:
+      sprint = self._fakePrint
+
+    sprint("###")
+    sprint("loading tile %s" % name)
+
     # first, is it already in the process of being downloaded?
     with self.threadlListCondition:
       if name in self.threads.keys():
+        sprint("tile is being downloaded")
         if(not self.threads[name].finished):
           with self.imagesLock: # substitute the "loading" tile with a "downloading" tile
             downloadingTile = self.downloadingTile
@@ -662,6 +680,7 @@ class MapTiles(ranaModule):
     # seccond, is it in the disk cache?  (including ones recently-downloaded)
     layerInfo = maplayers.get(layer, None)
     if(layerInfo == None): # is the layer info valid
+      sprint("invalid layer")
       return('NOK')
 
     layerPrefix = layerInfo.get('folderPrefix','OSM')
@@ -669,19 +688,27 @@ class MapTiles(ranaModule):
 
     storeTiles = self.m.get('storeTiles', None) # get the tile storage module
     if storeTiles:
+      start1 = time.clock()
       pixbuf = storeTiles.getTile(layerPrefix, z, x, y, layerType)
       """None from getTiles means the tile was not found
          False means loading the tile from file to pixbuf failed"""
       if pixbuf:
+        start2 = time.clock()
         self.storeInMemmory(self.pixbufToCairoImageSurface(pixbuf), name)
+        if debug:
+          storageType = self.get('tileStorageType', 'files')
+          sprint("tile loaded from local storage (%s) in %1.2f ms" % (storageType,(1000 * (time.clock() - start1))))
+          sprint("tile cached in memmory in %1.2f ms" % (1000 * (time.clock() - start2)))
         return('OK')
 
-    filename = self.getTileFolderPath() + (self.getImagePath(x,y,z,layerPrefix, layerType))
 
     # Image not found anywhere locally - resort to downloading it
+    filename = self.getTileFolderPath() + (self.getImagePath(x,y,z,layerPrefix, layerType))
+    sprint("image not found locally - trying to download")
 
     # Are we allowed to download it ? (network=='full')
     if(self.get('network','full')=='full'):
+      sprint("automatic tile download enabled - starting download")
       # use threads
       """the thread list condition is used to signalize to the download manager,
       that here is a new download request"""
@@ -699,6 +726,8 @@ class MapTiles(ranaModule):
           self.downloadRequestPool.append(request)
 
         self.threadlListCondition.notifyAll() # wake up the download manager
+    else:
+      sprint("automatic tile download disabled - not starting download")
 
   def loadImageFromFile(self,path,name, type="normal", expireTimestamp=None, dictIndex=0):
     pixbuf = gtk.gdk.pixbuf_new_from_file(path)
@@ -745,6 +774,9 @@ class MapTiles(ranaModule):
       if there are too many images, delete them """
       if len(self.images[0]) > self.maxImagesInMemmory:
         self.trimCache()
+      # new tile available, make redraw request TODO: what overhead does this create ?
+      if self.get('tileLoadedRedraw', True):
+        self.set('needRedraw', True)
 
   def trimCache(self):
     """to avoid a memmory leak, the maximum size of the image cache is fixed

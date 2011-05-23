@@ -523,6 +523,8 @@ class options(ranaModule):
     # ** tiles
     group = addGroup("Tiles", "tiles", catDebug, "generic")
     addBoolOpt("Print tile cache status to terminal", "reportTileCachStatus", group, False)
+    addBoolOpt("Tile loading status to terminal", "tileLoadingDebug", group, False)
+    addBoolOpt("Redraw screen once a new tile is loaded", "tileLoadedRedraw", group, True)
     addBoolOpt("Remove dups berofe batch dl", "checkTiles", group, False)
     # ** tracklog drawing
     group = addGroup("Tracklogs", "tracklogs", catDebug, "generic")
