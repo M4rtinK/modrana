@@ -774,13 +774,20 @@ class MapTiles(ranaModule):
       if len(self.images[0]) > self.maxImagesInMemmory:
         self.trimCache()
       # new tile available, make redraw request TODO: what overhead does this create ?
-      if self.get('tileLoadedRedraw', True):
-        overlay = self.get('overlay', False)
-        if overlay: # only redraw when a composited tile is loaded with overlay on
-          if type == "composite":
-            self.set('needRedraw', True)
-        else: # redraw regardles of type with overlay off
+      self._tileLoadedNotify(type)
+
+  def _tileLoadedNotify(self, type):
+    """redraw the screen when a new tile is avalable in the cache
+       * redraw only when on map screen (menu == None)
+       * redraw only on composite tiles when overlay is on"""
+
+    if self.get('tileLoadedRedraw', True) and self.get('menu', None) == None:
+      overlay = self.get('overlay', False)
+      if overlay: # only redraw when a composited tile is loaded with overlay on
+        if type == "composite":
           self.set('needRedraw', True)
+      else: # redraw regardles of type with overlay off
+        self.set('needRedraw', True)
 
   def trimCache(self):
     """to avoid a memmory leak, the maximum size of the image cache is fixed
