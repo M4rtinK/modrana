@@ -1,6 +1,8 @@
 # modRana - shared utility classes and methods
 from __future__ import with_statement # for python 2.5
 import threading
+import magic
+from cStringIO import StringIO
 
 class Empty(Exception):
     "Exception raised by the Synchronized circular stack"
@@ -80,11 +82,19 @@ class SynchronizedCircularStack:
 #    """nonsynchronized version of item existence testing"""
 #    return item in self.list
 
+def isTheStringAnImage(s):
+  """test if the string contains an image
+  by reading its magic number"""
 
-
-
-
-
-
-
-
+  # create a file like object
+  f = StringIO(s)
+  mime = magic.from_buffer(f.read(1024), mime=True)
+  print mime
+  # get ists mime
+  mimeSplit = mime.split('/')
+  mime1 = mimeSplit[0]
+  # check if its an image
+  if mime1 == 'image':
+    return True
+  else:
+    return False

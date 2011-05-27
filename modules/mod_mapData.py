@@ -28,12 +28,32 @@ import geo
 from threading import Thread
 import threading
 import urllib3
+import random
+#import traceback
+import modrana_utils
+
+
 
 import socket
 timeout = 30 # this sets timeout for all sockets
 socket.setdefaulttimeout(timeout)
 
 
+
+class TileNotImageException(Exception):
+       def __init__(self):
+           self.parameter = 1
+       def __str__(self):
+
+         message = "the downloaded tile is not an image as per \
+its magic number (it is probably an error response webpage \
+returned by the server)"
+#         message = "the downloaded tile is not an image as per "
+#         message+= "its magic number (it is probably an error response webpage "
+#         message+= "returned by the server)"
+
+         return message
+         
 
 #from modules.pyrender.tilenames import xy2latlon
 import sys
@@ -532,13 +552,25 @@ class mapData(ranaModule):
       self.neededTiles = neededTiles
       self.maxThreads = maxThreads
       self.layer=layer
-      self.processed = 0
+
+
+
       self.transfered = 0
       self.urlCount = len(neededTiles)
       self.finished = False
       self.quit = False
       url = self.getAnUrl(neededTiles)
       self.connPool = self.createConnectionPool(url)
+
+      # only access following variables with the incrementLock
+      self.processed = 0
+      self.failedDownloads = []
+      
+    def getFailedDownloads(self):
+      return self.failedDownloads
+    
+    def getFailedDownloadCount(self):
+      return len(self.failedDownloads)
 
     def getAnUrl(self, neededTiles):
       """get a random url so we can init the pool"""
@@ -613,14 +645,25 @@ class mapData(ranaModule):
           continue
           
         # try to retrieve and store the tile
+        failed = False
         try:
+
+# TESTING ONLY ! - random error generator
+#          r = random.randint(1, 6)
+#          if r == 6:
+#            "BOOM"/2
+
           self.saveTileForURL(item)
         except Exception, e:
+          failed = True
           # TODO: try to redownload failed tiles
           print "exception in get tiles thread:\n%s" % e
+#          traceback.print_exc(file=sys.stdout) # find what went wrong
         # increment the counter in a thread safe way
         with incrementLock:
           self.processed+=1
+          if failed:
+            self.failedDownloads.append(item)
 
     def saveTileForURL(self, tile):
       """save a tile for url created from its coordinates"""
@@ -633,7 +676,22 @@ class mapData(ranaModule):
         if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
           request = self.connPool.get_url(url)
           content = request.data
-          m.automaticStoreTile(content, folderPrefix, z, x, y, layerType, filename, folder, fromThread = True)
+          """
+          The tileserver sometimes returns a HTML error page
+          instead of the tile, which is then saved instead of the tile an
+          users are then confused why tiles they have downloaded don't show up.
+
+          To raise a proper error on this behaviour, we check the tiles magic number
+          and if is not an image we raise the TileNotImageException.
+
+          TODO: does someone supply nonbitmap/SVG tiles ?
+          """
+          if modrana_utils.isTheStringAnImage(content):
+            #its an image, save it
+            m.automaticStoreTile(content, folderPrefix, z, x, y, layerType, filename, folder, fromThread = True)
+          else:
+            # its not ana image, raise exception
+            raise TileNotImageException()
 
   def expand(self, tileset, amount=1):
     """Given a list of tiles, expand the coverage around those tiles"""
@@ -850,7 +908,8 @@ class mapData(ranaModule):
     elif getFilesThread.isAlive() == True:
       totalTileCount = getFilesThread.urlCount
       currentTileCount = getFilesThread.processed
-      text = "Downloading: %d of %d tiles complete" % (currentTileCount, totalTileCount)
+      failedCount = getFilesThread.getFailedDownloadCount()
+      text = "Downloading: %d of %d tiles complete, %d failed" % (currentTileCount, totalTileCount, failedCount)
       return text
     elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
       text = "Download complete."
