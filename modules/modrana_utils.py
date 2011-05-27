@@ -89,7 +89,6 @@ def isTheStringAnImage(s):
   # create a file like object
   f = StringIO(s)
   mime = magic.from_buffer(f.read(1024), mime=True)
-  print mime
   # get ists mime
   mimeSplit = mime.split('/')
   mime1 = mimeSplit[0]
