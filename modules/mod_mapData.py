@@ -563,7 +563,8 @@ class mapData(ranaModule):
       self.connPool = self.createConnectionPool(url)
 
       # only access following variables with the incrementLock
-      self.processed = 0
+      self.processed = 0 # counter for processed tiles
+      self.downloaded = 0 # counter for downloaded tiles
       self.failedDownloads = []
       
     def getFailedDownloads(self):
@@ -571,6 +572,9 @@ class mapData(ranaModule):
     
     def getFailedDownloadCount(self):
       return len(self.failedDownloads)
+
+    def getDownloadCount(self):
+      return self.downloaded
 
     def getAnUrl(self, neededTiles):
       """get a random url so we can init the pool"""
@@ -584,8 +588,7 @@ class mapData(ranaModule):
       else:
         url = ""
       return url
-
-
+    
     def createConnectionPool(self, url):
       """create the connection pool -> to facilitate socket reuse"""
       timeout = self.callback.onlineRequestTimeout
@@ -646,6 +649,7 @@ class mapData(ranaModule):
           
         # try to retrieve and store the tile
         failed = False
+        dl = False
         try:
 
 # TESTING ONLY ! - random error generator
@@ -653,7 +657,7 @@ class mapData(ranaModule):
 #          if r == 6:
 #            "BOOM"/2
 
-          self.saveTileForURL(item)
+          dl = self.saveTileForURL(item)
         except Exception, e:
           failed = True
           # TODO: try to redownload failed tiles
@@ -664,6 +668,8 @@ class mapData(ranaModule):
           self.processed+=1
           if failed:
             self.failedDownloads.append(item)
+          elif dl:
+            self.downloaded+=1
 
     def saveTileForURL(self, tile):
       """save a tile for url created from its coordinates"""
@@ -692,6 +698,9 @@ class mapData(ranaModule):
           else:
             # its not ana image, raise exception
             raise TileNotImageException()
+          return True # something was actually downloaded saved
+        else:
+          return False # nothing was downloaded
 
   def expand(self, tileset, amount=1):
     """Given a list of tiles, expand the coverage around those tiles"""
@@ -900,20 +909,27 @@ class mapData(ranaModule):
 
   def getFilesText(self, getFilesThread):
     """return a string describing status of the download threads"""
+    text = ""
     tileCount = len(self.currentDownloadList)
-    if tileCount == 0:
-      return "All tiles for this area are available."
-    elif getFilesThread == None:
-      return ( "Press Start to download ~ %d tiles." % tileCount)
-    elif getFilesThread.isAlive() == True:
-      totalTileCount = getFilesThread.urlCount
-      currentTileCount = getFilesThread.processed
-      failedCount = getFilesThread.getFailedDownloadCount()
-      text = "Downloading: %d of %d tiles complete, %d failed" % (currentTileCount, totalTileCount, failedCount)
-      return text
-    elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
-      text = "Download complete."
-      return text
+    if getFilesThread == None:
+      if tileCount:
+        text = "Press Start to download ~ %d tiles." % tileCount
+      else:
+        text = "Download queue empty."
+    else:
+      if getFilesThread.isAlive() == True:
+        totalTileCount = getFilesThread.urlCount
+        currentTileCount = getFilesThread.processed
+        failedCount = getFilesThread.getFailedDownloadCount()
+        text = "Downloading: %d of %d tiles complete, %d failed" % (currentTileCount, totalTileCount, failedCount)
+      elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
+        if getFilesThread.getDownloadCount():
+          # some downloads occured
+          text = "Download complete."
+        else:
+          # no downloads occured
+          text = "All tiles were locally available."
+    return text
 
   def getSizeText(self, sizeThread):
     """return a string describing status of the size counting threads"""
