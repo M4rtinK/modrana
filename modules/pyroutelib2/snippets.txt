@@ -1,0 +1,43 @@
+"""snippets of routing or vector maps related code"""
+
+  def tilesetSvgSnippet(self, f, tileset, colour):
+    for tile in tileset:
+      (x,y) = [int(a) for a in tile.split(",")]
+      f.write("<rect width=\"1\" height=\"1\" x=\"%d\" y=\"%d\" style=\"fill:%s;stroke:#000000;stroke-width:0.05;\" id=\"rect2160\" />\n" % (x,y, colour))
+
+  def routeSvgSnippet(self, f, route):
+    path = None
+    for pos in route:
+      (lat,lon) = pos
+      (x,y) = latlon2xy(lat, lon, 15)
+      if(path == None):
+        path = "M %f,%f" % (x,y)
+      else:
+        path += " L %f,%f" % (x,y)
+
+    f.write("<path       style=\"fill:none; stroke:white; stroke-width:0.12px;\" d=\"%s\"        id=\"inner\" />\n" % path)
+
+    f.write("<path       style=\"fill:none; stroke:yellow; stroke-width:0.06px;\" d=\"%s\"        id=\"outer\" />\n" % path)
+
+
+  def tilesetToSvg(self, tilesets, route, filename):
+    f = open(filename, "w")
+    f.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n")
+    f.write("<svg\n   xmlns:svg=\"http://www.w3.org/2000/svg\"\n   xmlns=\"http://www.w3.org/2000/svg\"\n   version=\"1.0\"\n   width=\"1000\"\n   height=\"1000\"   id=\"svg2\">\n")
+
+    print "Creating SVG"
+    f.write("  <g id=\"layer1\">\n")
+    colours = ['red','#FF8000','yellow','green','blue','#808080','black']
+    for tileset in tilesets:
+      colour = colours.pop(0)
+      print " - tileset %s"% colour
+      self.tilesetSvgSnippet(f,tileset, colour)
+    f.write("</g>\n")
+
+    if(route):
+      f.write("  <g id=\"route\">\n")
+      print " - route"
+      self.routeSvgSnippet(f, route)
+      f.write("</g>\n")
+
+    f.write("</svg>\n")
