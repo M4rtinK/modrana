@@ -553,8 +553,6 @@ class mapData(ranaModule):
       self.maxThreads = maxThreads
       self.layer=layer
 
-
-
       self.transfered = 0
       self.urlCount = len(neededTiles)
       self.finished = False
@@ -564,6 +562,7 @@ class mapData(ranaModule):
 
       # only access following variables with the incrementLock
       self.processed = 0 # counter for processed tiles
+      self.found = 0 # number of tiles found locally
       self.downloaded = 0 # counter for downloaded tiles
       self.failedDownloads = []
       
@@ -575,6 +574,9 @@ class mapData(ranaModule):
 
     def getDownloadCount(self):
       return self.downloaded
+
+    def isFinished(self):
+      return self.finished
 
     def getAnUrl(self, neededTiles):
       """get a random url so we can init the pool"""
@@ -839,7 +841,10 @@ class mapData(ranaModule):
       menus.drawButton(cr, (x1+w)-2*dx, y1, dx, dy, "edit", "tools", "menu:setupEditBatchMenu|set:menu:editBatch")
       # * draw "start" button
       if self.getFilesThread:
-        menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "stop", "stop", "mapData:stopDownloadThreads")
+        if self.getFilesThread.isFinished():
+          menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "retry", "start", "mapData:download")
+        else:
+          menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "stop", "stop", "mapData:stopDownloadThreads")
       else:
         menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "start", "start", "mapData:download")
       # * draw the combined info area and size button (aka "box")
@@ -863,7 +868,7 @@ class mapData(ranaModule):
       sizeTextY = boxY + boxH*2/4
       self.showText(cr, sizeText, sizeTextX, sizeTextY, w-dx/4, 40)
 
-      # * display information about free space available (for the filesystem with the tilefolder)
+      # * display information about free space available (for the filesystem with tilefolder)
       freeSpaceText = self.getFreeSpaceText()
       freeSpaceTextX = boxX + dx/8
       freeSpaceTextY = boxY + boxH * 3/4
@@ -917,18 +922,23 @@ class mapData(ranaModule):
       else:
         text = "Download queue empty."
     else:
+      failedCount = getFilesThread.getFailedDownloadCount()
       if getFilesThread.isAlive() == True:
         totalTileCount = getFilesThread.urlCount
         currentTileCount = getFilesThread.processed
-        failedCount = getFilesThread.getFailedDownloadCount()
-        text = "Downloading: %d of %d tiles complete, %d failed" % (currentTileCount, totalTileCount, failedCount)
+        text = "Downloading: %d of %d tiles done, %d failed" % (currentTileCount, totalTileCount, failedCount)
       elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
         if getFilesThread.getDownloadCount():
           # some downloads occured
           text = "Download complete."
         else:
           # no downloads occured
-          text = "All tiles were locally available."
+          if failedCount:
+            # no downloads + failed downloads
+            text = "Download of all tiles failed."
+          else:
+            # no downalods and no failed downloads
+            text = "All tiles were locally available."
     return text
 
   def getSizeText(self, sizeThread):
