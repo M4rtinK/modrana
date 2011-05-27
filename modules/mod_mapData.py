@@ -63,6 +63,9 @@ class mapData(ranaModule):
     self.notificateOnce = True
     self.scroll = 0
     self.onlineRequestTimeout = 30
+    """ how often should be the download info
+    updated during batch, in seconds"""
+    self.batchInfoUpdateInterval = 0.5
 
 
   def listTiles(self, route):
@@ -446,7 +449,7 @@ class mapData(ranaModule):
         threads.append(t)
       print "Added %d URLS to check for size." % self.urlCount
       while True:
-        time.sleep(0.5) # this governs how often we check status of the worker threads
+        time.sleep(self.callback.batchInfoUpdateInterval) # this governs how often we check status of the worker threads
         print "Batch size working...",
         print "(threads: %i)," % (threading.activeCount()-1, ),
         print"pending: %d, done: %d" % (len(self.neededTiles),self.processed)
@@ -574,7 +577,7 @@ class mapData(ranaModule):
       print "minipool initialized"
       print "Added %d URLS to download." % self.urlCount
       while True:
-        time.sleep(0.5)
+        time.sleep(self.callback.batchInfoUpdateInterval)
         print "Batch tile dl working...",
         print"(threads: %i)" % (threading.activeCount()-1, ),
         print"pending: %d, done: %d" % (len(self.neededTiles),self.processed)
