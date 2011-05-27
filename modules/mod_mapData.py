@@ -965,49 +965,6 @@ class mapData(ranaModule):
     else:
       print "mapData: No message handler, cant send message."
 
-  def tilesetSvgSnippet(self, f, tileset, colour):
-    for tile in tileset:
-      (x,y) = [int(a) for a in tile.split(",")]
-      f.write("<rect width=\"1\" height=\"1\" x=\"%d\" y=\"%d\" style=\"fill:%s;stroke:#000000;stroke-width:0.05;\" id=\"rect2160\" />\n" % (x,y, colour))
-  
-  def routeSvgSnippet(self, f, route):
-    path = None
-    for pos in route:
-      (lat,lon) = pos
-      (x,y) = latlon2xy(lat, lon, 15)
-      if(path == None):
-        path = "M %f,%f" % (x,y)
-      else:
-        path += " L %f,%f" % (x,y)
-
-    f.write("<path       style=\"fill:none; stroke:white; stroke-width:0.12px;\" d=\"%s\"        id=\"inner\" />\n" % path)
-
-    f.write("<path       style=\"fill:none; stroke:yellow; stroke-width:0.06px;\" d=\"%s\"        id=\"outer\" />\n" % path)
-      
-
-  def tilesetToSvg(self, tilesets, route, filename):
-    f = open(filename, "w")
-    f.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n")
-    f.write("<svg\n   xmlns:svg=\"http://www.w3.org/2000/svg\"\n   xmlns=\"http://www.w3.org/2000/svg\"\n   version=\"1.0\"\n   width=\"1000\"\n   height=\"1000\"   id=\"svg2\">\n")
-
-    print "Creating SVG"
-    f.write("  <g id=\"layer1\">\n")
-    colours = ['red','#FF8000','yellow','green','blue','#808080','black']
-    for tileset in tilesets:
-      colour = colours.pop(0)
-      print " - tileset %s"% colour
-      self.tilesetSvgSnippet(f,tileset, colour)
-    f.write("</g>\n")
-    
-    if(route):
-      f.write("  <g id=\"route\">\n")
-      print " - route"
-      self.routeSvgSnippet(f, route)
-      f.write("</g>\n")
-     
-    f.write("</svg>\n")
-
-
   def stopSizeThreads(self):
     if self.sizeThread:
       try:
@@ -1031,56 +988,3 @@ class mapData(ranaModule):
   def shutdown(self):
     self.stopSizeThreads()
     self.stopBatchDownloadThreads()
-
-
-
-
-if(__name__ == "__main__"):
-  from sample_route import *
-  route = getSampleRoute()
-  a = mapData({}, {})
-
-  if(0): # spirals
-    for d in range(1,10):
-      # Create a spiral of tiles, radius d
-      tileset = a.spiral(100,100,0, d)
-      print "Spiral of width %d = %d locations" %(d,len(tileset))
-
-      # Convert array to dictionary
-      keys = {}
-      count = 0
-      for tile in tileset:
-        (x,y,z) = tile
-        key = "%d,%d" % (x,y)
-        keys[key] = " " * (5-len(str(count))) + str(count)
-        count += 1
-
-      # Print grid of values to a textfile
-      f = open("tiles_%d.txt" % d, "w")
-      for y in range(100 - d - 2, 100 + d + 2):
-        for x in range(100 - d - 2, 100 + d + 2):
-          key = "%d,%d" % (x,y)
-          val = keys.get(key, " ")
-          f.write("%s\t" % val)
-        f.write("\n")
-      f.close()
-          
-  # Load a sample route, and try expanding it
-  if(1):
-    tileset = a.listTiles(route)
-    from time import time
-    print "Route covers %d tiles" % len(tileset)
-
-
-    a.tilesetToSvg([tileset], route, "route.svg")
-       
-    if(1):
-      tilesets = []
-      for i in range(0,14,2):
-        start = time()
-        result = a.expand(tileset,i)
-        dt = time() - start
-        print " expand by %d to get %d tiles (took %1.3f sec)" % (i,len(result), dt)
-        tilesets.insert(0,result)
-
-      a.tilesetToSvg(tilesets, route, "expand.svg" )
