@@ -479,10 +479,10 @@ class mapData(ranaModule):
           self.finished = True
           break
         if not self.neededTiles: # we processed everything
-          print "***get size finished"
-          shutdown.set()
-          self.finished = True
-          break
+              print "***get size finished"
+              shutdown.set()
+              self.finished = True
+              break
 
     def getSizeWorker(self, shutdown, incrementLock,localDlListLock):
       """a worker thread method for estimating tile size"""
@@ -553,6 +553,10 @@ class mapData(ranaModule):
       self.maxThreads = maxThreads
       self.layer=layer
 
+      self.retryCount = 2
+
+      self.retryInProgress = 0
+
       self.transfered = 0
       self.urlCount = len(neededTiles)
       self.finished = False
@@ -565,7 +569,15 @@ class mapData(ranaModule):
       self.found = 0 # number of tiles found locally
       self.downloaded = 0 # counter for downloaded tiles
       self.failedDownloads = []
-      
+
+    def _resetCounts(self):
+      self.processed = 0
+      self.urlCount = len(self.neededTiles)
+      self.failedDownloads = []
+
+    def getProgress(self):
+      return (self.processed, self.urlCount)
+
     def getFailedDownloads(self):
       return self.failedDownloads
     
@@ -574,6 +586,11 @@ class mapData(ranaModule):
 
     def getDownloadCount(self):
       return self.downloaded
+
+    def getRetryInProgress(self):
+      """return 0 if normal download is in progress
+      or 1-n for 1 - n-th retry"""
+      return self.retryInProgress
 
     def isFinished(self):
       return self.finished
@@ -602,6 +619,7 @@ class mapData(ranaModule):
       maxThreads = self.maxThreads
       shutdown = threading.Event()
       incrementLock = threading.Lock()
+      workFinished = False
 
       threads = []
       for i in range(0,maxThreads): # start threads
@@ -626,14 +644,29 @@ class mapData(ranaModule):
           self.finished = True
           break
         if not self.neededTiles: # we processed everything
-          print "***get tiles finished"          
+          if self.failedDownloads: # retry failed downloads
+            if self.retryCount > 0:
+              # retry failed tiles
+              self.retryCount-=1
+              self.retryInProgress+=1
+              self.neededTiles = list(self.failedDownloads) # make a copy
+              self._resetCounts()
+            else: # retries exhausted, quit
+              workFinished = True
+
+          else: # no failed downloads, just quit
+            workFinished = True
+
+        if workFinished: # check if we are done
+          print "***get tiles finished"
           if self.callback.notificateOnce:
             self.callback.sendMessage('ml:notification:m:Batch download complete.;7')
             self.callback.notificateOnce = False
-
           shutdown.set()
           self.finished = True
           break
+
+
 
     def getTilesWorker(self, shutdown, incrementLock):
       while 1:
@@ -654,7 +687,7 @@ class mapData(ranaModule):
         dl = False
         try:
 
-# TESTING ONLY ! - random error generator
+ #TESTING ONLY ! - random error generator
 #          r = random.randint(1, 6)
 #          if r == 6:
 #            "BOOM"/2
@@ -926,7 +959,14 @@ class mapData(ranaModule):
       if getFilesThread.isAlive() == True:
         totalTileCount = getFilesThread.urlCount
         currentTileCount = getFilesThread.processed
-        text = "Downloading: %d of %d tiles done, %d failed" % (currentTileCount, totalTileCount, failedCount)
+        retryNumber = getFilesThread.getRetryInProgress()
+        print retryNumber
+        if retryNumber:
+          action = "Retry nr. %d" % retryNumber
+        else:
+          action = "Downloading"
+
+        text = "%s: %d of %d tiles done, %d failed" % (action, currentTileCount, totalTileCount, failedCount)
       elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
         if getFilesThread.getDownloadCount():
           # some downloads occured
