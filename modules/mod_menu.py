@@ -761,6 +761,9 @@ class menus(ranaModule):
   def setupDataSubMenu(self, nextMenu='zoomDown', prevMenu='data'):
     """here we set the radius for download"""
     self.clearMenu('data2', "set:menu:%s" % prevMenu)
+
+    # TODO: compute the download size with more precision
+
     self.addItem('data2', '1 km', 'generic', 'set:downloadSize:1|set:menu:%s' % nextMenu)
     self.addItem('data2', '2 km', 'generic', 'set:downloadSize:2|set:menu:%s' % nextMenu)
     self.addItem('data2', '5 km', 'generic', 'set:downloadSize:4|set:menu:%s' % nextMenu)

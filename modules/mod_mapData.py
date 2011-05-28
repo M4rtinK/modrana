@@ -960,7 +960,6 @@ class mapData(ranaModule):
         totalTileCount = getFilesThread.urlCount
         currentTileCount = getFilesThread.processed
         retryNumber = getFilesThread.getRetryInProgress()
-        print retryNumber
         if retryNumber:
           action = "Retry nr. %d" % retryNumber
         else:
