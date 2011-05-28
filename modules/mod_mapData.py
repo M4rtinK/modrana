@@ -557,7 +557,6 @@ class mapData(ranaModule):
 
       self.retryInProgress = 0
 
-      self.transfered = 0
       self.urlCount = len(neededTiles)
       self.finished = False
       self.quit = False
@@ -569,6 +568,7 @@ class mapData(ranaModule):
       self.found = 0 # number of tiles found locally
       self.downloaded = 0 # counter for downloaded tiles
       self.failedDownloads = []
+      self.transfered = 0
 
     def _resetCounts(self):
       self.processed = 0
@@ -576,7 +576,7 @@ class mapData(ranaModule):
       self.failedDownloads = []
 
     def getProgress(self):
-      return (self.processed, self.urlCount)
+      return (self.processed, self.urlCount, self.transfered, self.getFailedDownloadCount())
 
     def getFailedDownloads(self):
       return self.failedDownloads
@@ -692,7 +692,7 @@ class mapData(ranaModule):
 #          if r == 6:
 #            "BOOM"/2
 
-          dl = self.saveTileForURL(item)
+          dlSize = self.saveTileForURL(item)
         except Exception, e:
           failed = True
           # TODO: try to redownload failed tiles
@@ -703,8 +703,9 @@ class mapData(ranaModule):
           self.processed+=1
           if failed:
             self.failedDownloads.append(item)
-          elif dl:
+          elif dlSize!=False:
             self.downloaded+=1
+            self.transfered+=dlSize
 
     def saveTileForURL(self, tile):
       """save a tile for url created from its coordinates"""
@@ -716,6 +717,7 @@ class mapData(ranaModule):
         # TODO: maybe make something like tile objects so we dont have to pass so many parameters ?
         if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
           request = self.connPool.get_url(url)
+          size = int(request.getheaders()['content-length'])
           content = request.data
           """
           The tileserver sometimes returns a HTML error page
@@ -733,7 +735,7 @@ class mapData(ranaModule):
           else:
             # its not ana image, raise exception
             raise TileNotImageException()
-          return True # something was actually downloaded saved
+          return size # something was actually downloaded and saved
         else:
           return False # nothing was downloaded
 
@@ -891,21 +893,21 @@ class mapData(ranaModule):
         menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "generic", "mapData:getSize")
       # * display information about download status
       getFilesText = self.getFilesText(getFilesThread)
-      getFilesTextX = boxX + dx/8
-      getFilesTextY = boxY + boxH*1/4
-      self.showText(cr, getFilesText, getFilesTextX, getFilesTextY, w-dx/4, 40)
-
-      # * display information about size of the tiles
       sizeText = self.getSizeText(sizeThread)
-      sizeTextX = boxX + dx/8
-      sizeTextY = boxY + boxH*2/4
-      self.showText(cr, sizeText, sizeTextX, sizeTextY, w-dx/4, 40)
+      getFilesTextX = boxX + dx/8
+      getFilesTextY = boxY + boxH*1/10
+      menus.showText(cr, "%s\n\n%s" % (getFilesText, sizeText), getFilesTextX, getFilesTextY, w-dx/4, 40)
+
+#      # * display information about size of the tiles
+#      sizeTextX = boxX + dx/8
+#      sizeTextY = boxY + boxH*2/4
+#      menus.showText(cr, sizeText, sizeTextX, sizeTextY, w-dx/4, 40)
 
       # * display information about free space available (for the filesystem with tilefolder)
       freeSpaceText = self.getFreeSpaceText()
       freeSpaceTextX = boxX + dx/8
       freeSpaceTextY = boxY + boxH * 3/4
-      self.showText(cr, freeSpaceText, freeSpaceTextX, freeSpaceTextY, w-dx/4, 40)
+      menus.showText(cr, freeSpaceText, freeSpaceTextX, freeSpaceTextY, w-dx/4, 40)
 
     if menuName == 'chooseRouteForDl':
 
@@ -951,12 +953,13 @@ class mapData(ranaModule):
     tileCount = len(self.currentDownloadList)
     if getFilesThread == None:
       if tileCount:
-        text = "Press Start to download ~ %d tiles." % tileCount
+        text = "Press <b>Start</b> to download ~ <b>%d</b> tiles." % tileCount
       else:
         text = "Download queue empty."
     else:
-      failedCount = getFilesThread.getFailedDownloadCount()
+      (currentTileCount, totalTileCount, BTotalTransfered, failedCount) = getFilesThread.getProgress()
       if getFilesThread.isAlive() == True:
+        MBTotalTransfered = BTotalTransfered/float(1048576)
         totalTileCount = getFilesThread.urlCount
         currentTileCount = getFilesThread.processed
         retryNumber = getFilesThread.getRetryInProgress()
@@ -964,20 +967,20 @@ class mapData(ranaModule):
           action = "Retry nr. %d" % retryNumber
         else:
           action = "Downloading"
-
-        text = "%s: %d of %d tiles done, %d failed" % (action, currentTileCount, totalTileCount, failedCount)
+          
+        text = "<b>%s</b>: <b>%d</b> of <b>%d</b> tiles done\n\n<b>%1.2f MB</b> transfered, %d downloads failed" % (action, currentTileCount, totalTileCount, MBTotalTransfered, failedCount)
       elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
         if getFilesThread.getDownloadCount():
           # some downloads occured
-          text = "Download complete."
+          text = "<b>Download complete.</b>"
         else:
           # no downloads occured
           if failedCount:
             # no downloads + failed downloads
-            text = "Download of all tiles failed."
+            text = "<b>Download of all tiles failed.</b>"
           else:
             # no downalods and no failed downloads
-            text = "All tiles were locally available."
+            text = "<b>All tiles were locally available.</b>"
     return text
 
   def getSizeText(self, sizeThread):
@@ -986,12 +989,12 @@ class mapData(ranaModule):
     if tileCount == 0:
       return ""
     if sizeThread == None:
-      return ("Total size of tiles is unknown (click to compute).")
+      return ("Total size of tiles is unknown (<i>click to compute</i>).")
     elif sizeThread.isAlive() == True:
       totalTileCount = sizeThread.urlCount
       currentTileCount = sizeThread.processed
       currentSize = sizeThread.totalSize/(1048576) # = 1024.0*1024.0
-      text = "Checking: %d of %d tiles complete(%1.0f MB)" % (currentTileCount, totalTileCount, currentSize)
+      text = "Checking: %d of %d tiles complete(<b>%1.0f MB</b>)" % (currentTileCount, totalTileCount, currentSize)
       return text
     elif sizeThread.isAlive() == False:
       sizeInMB = sizeThread.totalSize/(1024.0*1024.0)
@@ -1006,29 +1009,6 @@ class mapData(ranaModule):
     freeSpaceInMB = freeSpaceInBytes/(1024.0*1024.0)
     text = "Free space available: %1.1f MB" % freeSpaceInMB
     return text
-
-
-  def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
-    if(text):
-      cr.set_font_size(fontsize)
-      stats = cr.text_extents(text)
-      (textwidth, textheight) = stats[2:4]
-
-      if(widthLimit and textwidth > widthLimit):
-        cr.set_font_size(fontsize * widthLimit / textwidth)
-        stats = cr.text_extents(text)
-        (textwidth, textheight) = stats[2:4]
-
-      cr.move_to(x, y+textheight)
-      cr.show_text(text)
-
-  def sendMessage(self,message):
-    m = self.m.get("messages", None)
-    if(m != None):
-      print "mapData: Sending message: " + message
-      m.routeMessage(message)
-    else:
-      print "mapData: No message handler, cant send message."
 
   def stopSizeThreads(self):
     if self.sizeThread:
