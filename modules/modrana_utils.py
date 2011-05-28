@@ -3,6 +3,7 @@ from __future__ import with_statement # for python 2.5
 import threading
 import magic
 from cStringIO import StringIO
+#import time
 
 class Empty(Exception):
     "Exception raised by the Synchronized circular stack"
@@ -85,14 +86,18 @@ class SynchronizedCircularStack:
 def isTheStringAnImage(s):
   """test if the string contains an image
   by reading its magic number"""
+#  start = time.clock()
 
   # create a file like object
   f = StringIO(s)
-  mime = magic.from_buffer(f.read(1024), mime=True)
+  mime = str(magic.from_buffer(f.read(1024), mime=True))
+  f.close() # clenup
   # get ists mime
   mimeSplit = mime.split('/')
   mime1 = mimeSplit[0]
   # check if its an image
+
+#  print("mime checked in %1.2f ms" % (1000 * (time.clock() - start)))
   if mime1 == 'image':
     return True
   else:
