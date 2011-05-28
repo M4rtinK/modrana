@@ -553,7 +553,7 @@ class mapData(ranaModule):
       self.maxThreads = maxThreads
       self.layer=layer
 
-      self.retryCount = 2
+      self.retryCount = 3
 
       self.retryInProgress = 0
 
