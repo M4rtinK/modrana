@@ -1,7 +1,16 @@
 # modRana - shared utility classes and methods
 from __future__ import with_statement # for python 2.5
 import threading
-import magic
+try:
+  import magic
+  magicAvailable = True
+except ImportError:
+  magicAvailable = False
+  print("WARNING : libmagic is not installed : WARNING")
+  print("this means that batch-downloaded tiles will not be checked,")
+  print("to remove HTML error pages from real tiles")
+  print("-> this can result in tiles not showing up after batch-download")
+  print("WARNING : : WARNING")
 from cStringIO import StringIO
 #import time
 
@@ -87,18 +96,24 @@ def isTheStringAnImage(s):
   """test if the string contains an image
   by reading its magic number"""
 #  start = time.clock()
+  if magicAvailable:
+    # create a file like object
+    f = StringIO(s)
+    mime = str(magic.from_buffer(f.read(1024), mime=True))
+    f.close() # clenup
+    # get ists mime
+    mimeSplit = mime.split('/')
+    mime1 = mimeSplit[0]
+    # check if its an image
 
-  # create a file like object
-  f = StringIO(s)
-  mime = str(magic.from_buffer(f.read(1024), mime=True))
-  f.close() # clenup
-  # get ists mime
-  mimeSplit = mime.split('/')
-  mime1 = mimeSplit[0]
-  # check if its an image
-
-#  print("mime checked in %1.2f ms" % (1000 * (time.clock() - start)))
-  if mime1 == 'image':
-    return True
+  #  print("mime checked in %1.2f ms" % (1000 * (time.clock() - start)))
+    if mime1 == 'image':
+      return True
+    else:
+      return False
   else:
-    return False
+    # mime checking not available
+    # lets hope it really is a tile
+    return True
+
+
