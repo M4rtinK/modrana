@@ -292,7 +292,9 @@ class showPOI(ranaModule):
         self.activePOI.routeFrom('currentPosition')
         self.sendMessage('mapView:recentreToPos')
         self.makePOIVisible(self.activePOI)
+        self.drawPOI()
         self.set('menu', None)
+        self.set('needRedraw', True)
         
       elif message == 'drawActivePOI':
         if self.activePOI: # only add valid poi
