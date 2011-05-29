@@ -32,6 +32,7 @@ class showPOI(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.activePOI = None
+    self.visiblePOI = []
     self.listMenusDirty = False
     self.drawActivePOI = False
     self.expectPoint = False
@@ -58,64 +59,65 @@ class showPOI(ranaModule):
   def drawMapOverlay(self, cr):
     if self.drawActivePOI:
       proj = self.m.get('projection', None)
-      if proj and self.activePOI:
-        lat = self.activePOI.getLat()
-        lon = self.activePOI.getLon()
-        name = self.activePOI.getName()
-        distanceString = ""
-        pos = self.get('pos', None)
-        units = self.m.get('units', None)
-        if pos and units:
-          (lat1,lon1) = pos # current position coordinates
-          kiloMetricDistance = geo.distance(lat,lon,lat1,lon1)
-          unitString = units.km2CurrentUnitString(kiloMetricDistance, 0, True)
-          distanceString = " (%s)" % unitString
+      if proj and self.visiblePOI:
+        for POI in self.visiblePOI:
+          id = POI.getId()
+          lat = POI.getLat()
+          lon = POI.getLon()
+          name = POI.getName()
+          distanceString = ""
+          pos = self.get('pos', None)
+          units = self.m.get('units', None)
+          if pos and units:
+            (lat1,lon1) = pos # current position coordinates
+            kiloMetricDistance = geo.distance(lat,lon,lat1,lon1)
+            unitString = units.km2CurrentUnitString(kiloMetricDistance, 0, True)
+            distanceString = " (%s)" % unitString
 
+          text = "" + name + distanceString
 
-        text = "" + name + distanceString
-        
-        (x,y) = proj.ll2xy(lat, lon)
-        # draw the highlighting circle
-        cr.set_line_width(8)
-        cr.set_source_rgba(0.1, 0.6, 0.1, 0.55) # highlight circle color
-        cr.arc(x, y, 15, 0, 2.0 * math.pi)
-        cr.stroke()
-        cr.fill()
+          (x,y) = proj.ll2xy(lat, lon)
+          # draw the highlighting circle
+          cr.set_line_width(8)
+          cr.set_source_rgba(0.1, 0.6, 0.1, 0.55) # highlight circle color
+          cr.arc(x, y, 15, 0, 2.0 * math.pi)
+          cr.stroke()
+          cr.fill()
 
-        # draw the point
-        cr.set_source_rgb(0.0, 0.0, 0.0)
-        cr.set_line_width(10)
-        cr.arc(x, y, 3, 0, 2.0 * math.pi)
-        cr.stroke()
-        cr.set_source_rgb(0.0, 0.0, 1.0)
-        cr.set_line_width(8)
-        cr.arc(x, y, 2, 0, 2.0 * math.pi)
-        cr.stroke()
+          # draw the point
+          cr.set_source_rgb(0.0, 0.0, 0.0)
+          cr.set_line_width(10)
+          cr.arc(x, y, 3, 0, 2.0 * math.pi)
+          cr.stroke()
+          cr.set_source_rgb(0.0, 0.0, 1.0)
+          cr.set_line_width(8)
+          cr.arc(x, y, 2, 0, 2.0 * math.pi)
+          cr.stroke()
 
-        # draw a caption with transparent background
-        cr.set_font_size(25)
-        extents = cr.text_extents(text) # get the text extents
-        (w,h) = (extents[2], extents[3])
-        border = 2
-        cr.set_line_width(2)
-        cr.set_source_rgba(0.1, 0.6, 0.1, 0.45) # trasparent blue
-        (rx,ry,rw,rh) = (x - border+12, y + border+h*0.2 + 6, w + 4*border, -(h*1.4))
-        cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
-        cr.fill()
+          # draw a caption with transparent background
+          cr.set_font_size(25)
+          extents = cr.text_extents(text) # get the text extents
+          (w,h) = (extents[2], extents[3])
+          border = 2
+          cr.set_line_width(2)
+          cr.set_source_rgba(0.1, 0.6, 0.1, 0.45) # trasparent blue
+          (rx,ry,rw,rh) = (x - border+12, y + border+h*0.2 + 6, w + 4*border, -(h*1.4))
+          cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
+          cr.fill()
 
-        # register clickable area
-        click = self.m.get('clickHandler', None)
-        if click:
-          """ make the POI caption clickable"""
-          click.registerXYWH(rx,ry-(-rh),rw,-rh, "set:menu:POIDetail")
-        cr.fill()
+          # register clickable area
+          click = self.m.get('clickHandler', None)
+          if click:
+            """ make the POI caption clickable"""
+            click.registerXYWH(rx,ry-(-rh),rw,-rh, "ms:showPOI:setActivePOI:%d|set:menu:POIDetail" % id)
+          cr.fill()
 
-        # draw the actual text
-#        cr.set_source_rgba(1, 1, 0, 0.95) # slightly trasparent white
-        cr.set_source_rgba(1, 1, 1, 0.95) # slightly trasparent white
-        cr.move_to(x+15,y+7)
-        cr.show_text(text) # show the trasparent result caption
-        cr.stroke()
+          # draw the actual text
+  #        cr.set_source_rgba(1, 1, 0, 0.95) # slightly trasparent white
+          cr.set_source_rgba(1, 1, 1, 0.95) # slightly trasparent white
+          cr.move_to(x+15,y+7)
+          cr.show_text(text) # show the trasparent result caption
+          cr.stroke()
 
   def handleMessage(self, message, type, args):
     # messages that need the store and/or menus go here
@@ -289,21 +291,41 @@ class showPOI(ranaModule):
            and may need a regen"""
         self.activePOI.routeFrom('currentPosition')
         self.sendMessage('mapView:recentreToPos')
-        self.drawActivePOIEnable()
+        self.makePOIVisible(self.activePOI)
         self.set('menu', None)
         
-
       elif message == 'drawActivePOI':
-        self.drawActivePOIEnable()
+        if self.activePOI: # only add valid poi
+          self.makePOIVisible(self.activePOI)
+          # enable drawing
+          self.drawPOI()
 
       elif message == 'dontDrawActivePOI':
-        self.drawActivePOIDisable()
+        self.removePOIFromVisible(self.activePOI)
 
-  def drawActivePOIEnable(self):
+      elif message == 'clearVisiblePOI':
+        self.clearVisiblePOI()
+
+  def makePOIVisible(self, POI):
+    """add a POI to the list of visible POI"""
+    # check if the POI is already present
+    if POI not in self.visiblePOI:
+      self.visiblePOI.append(POI)
+
+  def clearVisiblePOI(self):
+    """discard visible POI"""
+    self.dontDrawPOI()
+    self.visiblePOI = []
+
+  def removePOIFromVisible(self,POI):
+    if POI in self.visiblePOI:
+      self.visiblePOI.remove(POI)
+
+  def drawPOI(self):
     """enable drawing of the active POI"""
     self.drawActivePOI = True
 
-  def drawActivePOIDisable(self):
+  def dontDrawPOI(self):
     """disable drawing of the active POI"""
     self.drawActivePOI = False
 

@@ -161,6 +161,13 @@ class storePOI(ranaModule):
       self.description= u'%s' % description
       self.categoryId=catId
 
+    def __str__(self):
+      s = "POI named: %s, lat,lon: %f,%f with id: %d" % (self.getName(),self.getLat(),self.getLon(), self.getId())
+      return s
+
+    def __eq__(self, other):
+      return self.getId() == other.getId()
+
     def getMenus(self):
       """convenience function for getting the menus object"""
       return self.callback.m.get('menu', None)

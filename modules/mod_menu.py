@@ -677,6 +677,8 @@ class menus(ranaModule):
     POISelectedAction2 = "showPOI:routeToActivePOI"
     self.addItem('poi', 'POI#route to', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:POICategories" % POISelectedAction2)
     self.addItem('poi', 'search#online', 'generic', "set:menu:searchWhere")
+    self.addItem('poi', 'visible#clear', 'generic', "showPOI:clearVisiblePOI|set:menu:None")
+
 
     self.addPOIPOIAddFromWhereMenu() # chain the "add from where menu"
 
