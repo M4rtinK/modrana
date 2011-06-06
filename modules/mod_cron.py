@@ -77,7 +77,7 @@ class Cron(ranaModule):
     """remove timeout with a given id"""
     with self.dataLock:
       if id in self.cronTab['timeout'].keys():
-         (callback, args, timeout, caller, description, realId) = self.cronTab['timeout'][id]
+        (callback, args, timeout, caller, description, realId) = self.cronTab['timeout'][id]
         del self.cronTab['timeout'][id]
         gobject.source_remove(realId)
       else:
@@ -103,8 +103,8 @@ class Cron(ranaModule):
     """
 
     if callback(*args) == False:
-      # the callback returned False, which means it wants
-      # to quit the timeout
+      # the callback returned False,
+      # that means it wants to quit the timeout
 
       # stop tracking
       self.removeTimeout(id)
