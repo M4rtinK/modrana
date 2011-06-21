@@ -224,7 +224,7 @@ class storePOI(ranaModule):
         menus.addItem('POIDetailTools', 'latitude#edit', 'generic', 'ms:showPOI:editActivePOI:lat')
         menus.addItem('POIDetailTools', 'longitude#edit', 'generic', 'ms:showPOI:editActivePOI:lon')
         menus.addItem('POIDetailTools', 'category#change', 'generic', 'ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit|set:menu:POICategoryChooser')
-        menus.addItem('POIDetailTools', 'position#set as', 'generic', 'showPOI:centerOnActivePOI|ml:gpsd:setPosLatLon:%f;%f' % (self.lat,self.lon))
+        menus.addItem('POIDetailTools', 'position#set as', 'generic', 'showPOI:centerOnActivePOI|ml:location:setPosLatLon:%f;%f' % (self.lat,self.lon))
         """just after the point is stored and and its detail menu shows up for the first time,
         it cant be deleted from the database, beucause we dont know which index it got :D
         TODO: find a free index and then store the point on it

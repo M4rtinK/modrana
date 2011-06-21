@@ -429,7 +429,7 @@ class options(ranaModule):
 
     # ** GPS
     group = addGroup("GPS", "gps", catLocation, "generic")
-    addBoolOpt("GPS", "GPSEnabled", group, True, "gpsd:checkGPSEnabled")
+    addBoolOpt("GPS", "GPSEnabled", group, True, "location:checkGPSEnabled")
     if self.dmod.locationType() == 'gpsd':
       knots = "knots per second"
       meters = "meters per second"
