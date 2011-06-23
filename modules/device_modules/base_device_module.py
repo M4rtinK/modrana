@@ -115,6 +115,18 @@ class deviceModule(ranaModule):
     widget/dialog"""
     return False
 
+  def handlesLocation(self):
+    """report wheter the device module handles position updates by itself"""
+    return False
+
+  def startLocation(self):
+    """start handling location - check handlesLocation if this is supported"""
+    pass
+
+  def stopLocation(self):
+    """stop handling location - check handlesLocation if this is supported"""
+    pass
+
   
 #  def getAutorotationSupported(self):
 #    return False

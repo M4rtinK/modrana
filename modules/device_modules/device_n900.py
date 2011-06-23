@@ -21,8 +21,10 @@
 #---------------------------------------------------------------------------
 from base_device_module import deviceModule
 import dbus.glib
-import hildon
 import gtk
+#N900 specific:
+import hildon
+import location
 """
 why dbus.glib ?
 if you import only "dbus", it can't find its mainloop for callbacks
@@ -57,13 +59,17 @@ class device_n900(deviceModule):
     self.rotationToggleButton = None
     self.soundToggleButton = None
     self._addHildonAppMenu()
+    print "N900: application menu added"
 
     # enable volume keys usage
     if self.get('useVolumeKeys', True):
       self._updateVolumeKeys()
 
-
-    print "N900: application menu added"
+    # liblocation
+    self.lControl = None
+    self.lDevice = None
+    """location starting is handled by mod_location
+    in its firstTime call"""
 
     print "N900 device specific module initialized"
 
@@ -293,6 +299,151 @@ class device_n900(deviceModule):
 
   def hasKineticScrollingList(self):
     return True
+
+  def handlesLocation(self):
+      """on N900 location is handled through liblocation"""
+      return True
+
+  def startLocation(self):
+    """this will called by mod_location automatically"""
+    self._libLocationStart()
+
+  def stopLocation(self):
+    """this will called by mod_location automatically"""
+    self._libLocationStop()
+
+  def _libLocationStart(self):
+    """start the liblocation based location update method"""
+    try:
+      try:
+        self.lControl = location.GPSDControl.get_default()
+        self.lDevice = location.GPSDevice()
+      except Exception, e:
+        print "n900 - location: - cant create location objects: %s" % e
+
+      try:
+        self.lControl.set_properties(preferred_method=location.METHOD_USER_SELECTED)
+      except Exception, e:
+        print "n900 - location: - cant set prefered location method: %s" % e
+
+      try:
+        self.lControl.set_properties(preferred_interval=location.INTERVAL_1S)
+      except Exception, e:
+        print "n900 - location: - cant set prefered location interval: %s" % e
+      try:
+        self.lControl.start()
+        print "** n900 - location: - GPS successfully activated **"
+        self.connected = True
+      except Exception, e:
+        print "n900 - location: - opening the GPS device failed: %s" % e
+        self.status = "No GPSD running"
+        
+      # connect callbacks
+      self.lControl.connect("error-verbose", self._liblocationErrorCB)
+      self.lDevice.connect("changed", self._libLocationUpdateCB)
+      print "n900 - location: activated"
+    except:
+      self.status = "No GPSD running"
+      print "n900 - location: - importing location module failed, please install the python-location package"
+      self.sendMessage('notification:install python-location package to enable GPS#7')
+
+
+  def _libLocationStop(self):
+    """stop the liblocation based location update method"""
+
+    print('n900 - location: stopping')
+    if self.lControl:
+      self.lControl.stop()
+      # cleanup
+      self.lControl = None
+      self.lDevice = None
+      self.location = None
+
+
+  def _liblocationErrorCB(self, control, error):
+    if error == location.ERROR_USER_REJECTED_DIALOG:
+        print("User didn't enable requested methods")
+    elif error == location.ERROR_USER_REJECTED_SETTINGS:
+        print("User changed settings, which disabled location")
+    elif error == location.ERROR_BT_GPS_NOT_AVAILABLE:
+        print("Problems with BT GPS")
+    elif error == location.ERROR_METHOD_NOT_ALLOWED_IN_OFFLINE_MODE:
+        print("Requested method is not allowed in offline mode")
+    elif error == location.ERROR_SYSTEM:
+        print("System error")
+
+
+  def _libLocationUpdateCB(self, device):
+    """
+    from:  http://wiki.maemo.org/PyMaemo/Using_Location_API
+    result tupple in order:
+    * mode: The mode of the fix
+    * fields: A bitfield representing which items of this tuple contain valid data
+    * time: The timestamp of the update (location.GPS_DEVICE_TIME_SET)
+    * ept: Time accuracy
+    * latitude: Fix latitude (location.GPS_DEVICE_LATLONG_SET)
+    * longitude: Fix longitude (location.GPS_DEVICE_LATLONG_SET)
+    * eph: Horizontal position accuracy
+    * altitude: Fix altitude in meters (location.GPS_DEVICE_ALTITUDE_SET)
+    * double epv: Vertical position accuracy
+    * track: Direction of motion in degrees (location.GPS_DEVICE_TRACK_SET)
+    * epd: Track accuracy
+    * speed: Current speed in km/h (location.GPS_DEVICE_SPEED_SET)
+    * eps: Speed accuracy
+    * climb: Current rate of climb in m/s (location.GPS_DEVICE_CLIMB_SET)
+    * epc: Climb accuracy
+
+      """
+    try:
+      if device.fix:
+        fix = device.fix
+
+        self.set('fix', fix[0])
+        """from liblocation reference:
+        0 =	The device has not seen a satellite yet.
+        1 =	The device has no fix.
+        2 =	The device has latitude and longitude fix.
+        3 =	The device has latitude, longitude, and altitude.
+        """
+
+        if fix[1] & location.GPS_DEVICE_LATLONG_SET:
+          (lat,lon) = fix[4:6]
+          self.set('pos', (lat,lon))
+
+        if fix[1] & location.GPS_DEVICE_TRACK_SET:
+          bearing = fix[9]
+          self.set('bearing', bearing)
+
+        if fix[1] & location.GPS_DEVICE_SPEED_SET:
+          self.set('speed', fix[11]) # km/h
+          metersPerSecSpeed = fix[11]/3.6 # km/h -> metres per second
+          self.set('metersPerSecSpeed', metersPerSecSpeed) # m/s
+
+        if fix[1] & location.GPS_DEVICE_ALTITUDE_SET:
+          elev = fix[7]
+          self.set('elevation', elev)
+
+        # TODO: remove when not needed
+        if self.get('n900GPSDebug', False):
+          print "## N900 GPS debugging info ##"
+          print "fix tupple from the Location API:"
+          print fix
+          print "position,bearing,speed (in descending order):"
+          print self.get('pos', None)
+          print self.get('bearing', None)
+          print self.get('speed', None)
+          print "#############################"
+
+
+        print "updating location"
+        self.set('needRedraw', True)
+
+      else:
+        self.status = "Unknown"
+        print "n900 - location: getting fix failed (on a regular update)"
+    except Exception, e:
+      self.status = "Unknown"
+      print "n900 - location:getting fix failed (on a regular update + exception: %s)" % e
 
 
 if(__name__ == "__main__"):

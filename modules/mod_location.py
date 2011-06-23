@@ -16,8 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import sys
-import os
 import socket
 from time import *
 import re
@@ -36,66 +34,46 @@ class gpsd2(ranaModule):
     self.set('metersPerSecSpeed', None)
     self.set('bearing', None)
     self.set('elevation', None)
-    self.lControl = None
-    self.lDevice = None
-    self.location = None
     self.status = "Unknown"
+    self.locationUpdate = self.nop
 
+  def nop(self):
+    """navigation update function placeholder"""
+    pass
 
   def firstTime(self):
-    if self.device == 'n900':
-      # start libLocation on the N900
-      if self.get('GPSEnabled', True): # is GPS enabled ?
-        self.libLocationStart()
+    # start screen update 1 per second screen update
+    # TODO: event based redrawing
+    cron = self.m.get('cron', None)
+    if cron:
+      cron.addTimeout(self.screenUpdateCB, 1000, self, "screen and GPSD update")
 
-    else:
+    # start location if persistantly enabled
+    if self.get('GPSEnabled', True): # is GPS enabled ?
+      self.startLocation()
 
-      try:
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect(("127.0.0.1", 2947)) #TODO: set this from options
-        self.connected = True
-      except socket.error:
-        self.status = "No GPSD running"
+  def screenUpdateCB(self):
+    """update the screen and also GPSD location if enabled
+    TODO: more efficient screen updates"""
+#    print "updating screen"
+    self.locationUpdate()
+    self.set('needRedraw', True)
 
-  def libLocationStart(self):
-      try:
-        import location
-        self.location = location
-        try:
-          self.lControl = location.GPSDControl.get_default()
-          self.lDevice = location.GPSDevice()
-        except Exception, e:
-          print "gpsd:N900 - cant create location objects: %s" % e
 
-        try:
-          self.lControl.set_properties(preferred_method=location.METHOD_USER_SELECTED)
-        except Exception, e:
-          print "gpsd:N900 - cant set prefered location method: %s" % e
+  def startGPSD(self):
+    """start the GPSD based location update method"""
+    try:
+      self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      self.s.connect(("127.0.0.1", 2947)) #TODO: set this from options
+      self.connected = True
+      self.locationUpdate = self.updateGPSD
+    except socket.error:
+      self.status = "No GPSD running"
 
-        try:
-          self.lControl.set_properties(preferred_interval=location.INTERVAL_1S)
-        except Exception, e:
-          print "gpsd:N900 - cant set prefered location interval: %s" % e
-        try:
-          self.lControl.start()
-          print "** gpsd:N900 - GPS successfully activated **"
-          self.connected = True
-        except Exception, e:
-          print "gpsd:N900 - opening the GPS device failed: %s" % e
-          self.status = "No GPSD running"
-      except:
-        self.status = "No GPSD running"
-        print "gpsd:N900 - importing location module failed, please install the python-location package"
-        self.sendMessage('notification:install python-location package to enable GPS#7')
-
-  def libLocationStop(self):
-    # stop the libLocation on N900
-    if self.lControl:
-      self.lControl.stop()
-      # cleanup
-      self.lControl = None
-      self.lDevice = None
-      self.location = None
+  def stopGPSD(self):
+    """stop the GPSD based location update method"""
+    self.locationUpdate = self.nop
+    self.status = "No GPSD running"
 
   def handleMessage(self, message, type, args):
     if message == "setPosLatLon" and type == "ml":
@@ -107,23 +85,25 @@ class gpsd2(ranaModule):
     elif message == "checkGPSEnabled":
         state = self.get('GPSEnabled', True)
         if state == True:
-          print "gps: enabling GPS"
-          if self.device == 'n900':
-            self.libLocationStart()
+          self.startLocation()
         elif state == False:
-          print "gps: disabling GPS"
-          if self.device == 'n900':
-            self.set('fixType', 0) # a disabled GPS device can't see any satellites
-            self.libLocationStop()
+          self.stopLocation()
 
-  def sendMessage(self,message):
-    m = self.m.get("messages", None)
-    if(m != None):
-      print "mapData: Sending message: " + message
-      m.routeMessage(message)
+  def startLocation(self):
+    """start location - device based or gpsd"""
+    print "location: enabling location"
+    if self.dmod.handlesLocation():
+      self.dmod.startLocation()
     else:
-      print "mapData: No message handler, cant send message."
+      self.startGPSD()
 
+  def stopLocation(self):
+    """stop location - device based or gpsd"""
+    print "location: disabling location"
+    if self.dmod.handlesLocation():
+      self.dmod.stopLocation()
+    else:
+      self.stopGPSD()
  
   def socket_cmd(self, cmd):
     try:
@@ -199,12 +179,7 @@ class gpsd2(ranaModule):
       (dx,dy,dd) = [float(a) for a in (dx,dy,dd)]
       print "%d sats, quality %f, %f, %f" % (count,dd,dx,dy)
 
-  def update(self):
-    dt = time() - self.tt
-    #print(dt)
-    if(dt < 1): #default 2
-      return
-    self.tt = time()
+  def updateGPSD(self):
     if self.get('GPSEnabled', True) == False:
       # just make sure the screen updates atleast once per seccond
       self.set('needRedraw', True)
@@ -212,76 +187,6 @@ class gpsd2(ranaModule):
 
     if(not self.connected):
       self.status = "Not connected"
-      #print("not connected")
-    elif self.device == 'n900':
-      """
-    from:  http://wiki.maemo.org/PyMaemo/Using_Location_API
-    result tupple in order:
-    * mode: The mode of the fix
-    * fields: A bitfield representing which items of this tuple contain valid data
-    * time: The timestamp of the update (location.GPS_DEVICE_TIME_SET)
-    * ept: Time accuracy
-    * latitude: Fix latitude (location.GPS_DEVICE_LATLONG_SET)
-    * longitude: Fix longitude (location.GPS_DEVICE_LATLONG_SET)
-    * eph: Horizontal position accuracy
-    * altitude: Fix altitude in meters (location.GPS_DEVICE_ALTITUDE_SET)
-    * double epv: Vertical position accuracy
-    * track: Direction of motion in degrees (location.GPS_DEVICE_TRACK_SET)
-    * epd: Track accuracy
-    * speed: Current speed in km/h (location.GPS_DEVICE_SPEED_SET)
-    * eps: Speed accuracy
-    * climb: Current rate of climb in m/s (location.GPS_DEVICE_CLIMB_SET)
-    * epc: Climb accuracy
-
-      """
-      location = self.location
-      try:
-        if self.lDevice.fix:
-          fix = self.lDevice.fix
-
-          self.set('fix', fix[0])
-          """from liblocation reference:
-          0 =	The device has not seen a satellite yet.
-          1 =	The device has no fix.
-          2 =	The device has latitude and longitude fix.
-          3 =	The device has latitude, longitude, and altitude. 
-          """
-
-          if fix[1] & location.GPS_DEVICE_LATLONG_SET:
-            (lat,lon) = fix[4:6]
-            self.set('pos', (lat,lon))
-
-          if fix[1] & location.GPS_DEVICE_TRACK_SET:
-            bearing = fix[9]
-            self.set('bearing', bearing)
-
-          if fix[1] & location.GPS_DEVICE_SPEED_SET:
-            self.set('speed', fix[11]) # km/h
-            metersPerSecSpeed = fix[11]/3.6 # km/h -> metres per second
-            self.set('metersPerSecSpeed', metersPerSecSpeed) # m/s
-
-          if fix[1] & location.GPS_DEVICE_ALTITUDE_SET:
-            elev = fix[7]
-            self.set('elevation', elev)
-
-          # TODO: remove when not needed
-          if self.get('n900GPSDebug', False):
-            print "## N900 GPS debugging info ##"
-            print "fix tupple from the Location API:"
-            print fix
-            print "position,bearing,speed (in descending order):"
-            print self.get('pos', None)
-            print self.get('bearing', None)
-            print self.get('speed', None)
-            print "#############################"
-
-        else:
-          self.status = "Unknown"
-          print "gpsd:N900 - getting fix failed (on a regular update)"
-      except Exception, e:
-        self.status = "Unknown"
-        print "gpsd:N900 - getting fix failed (on a regular update + exception: %s)" % e
-
     else:
       result = self.socket_cmd("p")
       if(not result):
@@ -310,9 +215,7 @@ class gpsd2(ranaModule):
           self.set('speed', float(speed) * 3.6)
         else:
           self.set('metersPerSecSpeed', None)
-          self.set('speed', None)
-             
-#        self.satellites()
+          self.set('speed', None)            
 
         elevation = self.elevation()
         if elevation:
@@ -330,30 +233,14 @@ class gpsd2(ranaModule):
     #  * reuse the alredy drawn area ?
     #  * dont overdraw the whole screen for a simple nudge ?
     #  * draw the new area with a delay/after the drag ended ?
-    self.set('needRedraw', True)
-        #print(self.get('pos', None))
-        #print(time())
+#    self.set('needRedraw', True)
+#        #print(self.get('pos', None))
+#        #print(time())
 
   def shutdown(self):
     if self.device == 'n900':
       try:
-        self.libLocationStop()
-        print "gpsd:N900 - GPS device successfully stopped"
+        self.stopLocation()
       except:
-        print "gpsd:N900 - closing the GPS device failed"
-
-
-
-if __name__ == "__main__":
-  d = {}
-  a = gpsd2({},d)
-  print a.gpsStatus()
-  #print a.quality()
-  print a.satellites()
-
-  if(0):
-    for i in range(2):
-      a.update()
-      print "%s: %s" %(a.status, d.get('pos', None))
-      sleep(2)
+        print "location: stopping location failed"
 
