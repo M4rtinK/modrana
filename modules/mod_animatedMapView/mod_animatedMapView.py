@@ -18,8 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import sys
-#print sys.path
 import tile
 
 def getModule(m,d,i):
@@ -30,7 +28,6 @@ class AnimatedMapView(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    print tile
     
 
 if(__name__ == "__main__"):
