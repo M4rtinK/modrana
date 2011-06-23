@@ -56,15 +56,18 @@ class MapWidget(gtk.Widget):
     'size-allocate': 'override',
     'size-request': 'override',
     }
-  def __init__(self):
+  def __init__(self,device):
     gtk.Widget.__init__(self)
     self.draw_gc = None
+    self.device = device
     self.dmod = None # device specific module
     self.currentDrawMethod = self.fullDrawMethod
 
     self.centeringDisableTreshold = 2048
 
     self.msLongPress = 400
+
+    self.modulesFolder = 'modules'
 
     """ setting this both to 100 and 1 in mapView and gpsd fixes the arow orientation bug """
     self.timer1 = gobject.timeout_add(100, update1, self) #default 100
@@ -96,39 +99,38 @@ class MapWidget(gtk.Widget):
 
     self.defaulMethodBindings() # use default map dragging method binding
 
-  def loadModules(self, module_path):
+  def loadModules(self):
     """Load all modules from the specified directory"""
-    sys.path.append(module_path)
+
+    modulesFolder = self.modulesFolder
+    device = self.device
+    sys.path.append(modulesFolder)
     print "importing modules:"
     start = time.clock()
-    initInfo={
+    self.initInfo={
               'modrana': self,
               'device': device, # TODO: do this directly
               'name': ""
              }
-    for f in os.listdir(module_path):
-      if(f[0:4] == 'mod_' and f[-3:] == '.py'):
-        startM = time.clock()
-        name = f[4:-3]
-        a = __import__(f[0:-3])
-        initInfo['name'] = name
-        self.m[name] = a.getModule(self.m,self.d, initInfo)
-        print " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (time.clock() - startM)))
 
-    # load device specific module
-    deviceModulesPath = module_path + "/device_modules/"
+    # get possible module names
+    moduleNames = self._getModuleNamesFromFolder(modulesFolder)
+    loadModule = self._loadModule
+    # load if possible
+    for moduleName in moduleNames:
+        # filter out .py
+        moduleName = moduleName.split('.')[0]
+        loadModule(moduleName, moduleName[4:])
+
+    # load the device specific module
+    deviceModulesPath = os.path.join(modulesFolder, "device_modules")
     sys.path.append(deviceModulesPath)
-    deviceId = device
-    deviceModuleName = "device_" + deviceId + ".py"
-    if os.path.exists(deviceModulesPath + deviceModuleName):
-      print "Loading device specific module for %s" % deviceId
-      startM = time.clock()
-      a = __import__(deviceModuleName[0:-3])
-      name = 'device'
-      initInfo['name'] = name
-      self.m[name] = a.getModule(self.m,self.d, initInfo)
-      self.dmod = self.m[name]
-      print " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (time.clock() - startM)))
+    dmod = loadModule("device_%s" % device, "device")
+    if dmod == None:
+      print("modRana: loading Neo device module as failsafe")
+      device = "neo"
+      dmod = loadModule("device_%s" % device, "device")
+    self.dmod = dmod
 
     print "Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start))
 
@@ -151,6 +153,28 @@ class MapWidget(gtk.Widget):
     self._modulesLoadedPostFirstTime()
 
     print "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start))
+
+  def _getModuleNamesFromFolder(self,folder):
+    """list a given folder and find all possible module names"""
+
+    return filter(lambda x: x[0:4]=="mod_" and x[-4:]!=".pyc",os.listdir(folder))
+
+  def _loadModule(self, importName, modRanaName):
+    """load a single module by name from path"""
+    startM = time.clock()
+    try:
+      a = __import__(importName)
+      initInfo = self.initInfo
+      name = modRanaName
+      initInfo['name'] = name
+      module = a.getModule(self.m, self.d, initInfo)
+      self.m[name] = module
+      print " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (time.clock() - startM)))
+      return module
+    except Exception, e:
+      print "modRana: module: %s/%s failed to load" % (importName, modRanaName)
+      traceback.print_exc(file=sys.stdout) # find what went wrong
+      return None
 
   def _modulesLoadedPreFirstTime(self):
     """this is run after all the modules have been loaded,
@@ -773,7 +797,7 @@ class GuiBase:
     win.add(event_box)
 
     # Create the map
-    self.mapWidget = MapWidget()
+    self.mapWidget = MapWidget(device)
     self.mapWidget.topWindow=win # make the main widown accessible from modules
     event_box.add(self.mapWidget)
     self.addTime("map widget created")
@@ -783,7 +807,7 @@ class GuiBase:
     self.addTime("window finalized")
 
     # start loading modules
-    self.mapWidget.loadModules('modules') # name of the folder with modules
+    self.mapWidget.loadModules() # name of the folder with modules
 
     # add last timing checkpoint
     self.addTime("all modules loaded")
@@ -813,7 +837,7 @@ class GuiBase:
       # print device identificator and name
       if self.mapWidget.dmod:
         deviceName = self.mapWidget.dmod.getDeviceName()
-      print "# device: %s (%s)" % (deviceName, device)
+        print "# device: %s (%s)" % (deviceName, device)
 
       tl = self.timing
       startupTime = tl[0][1] * 1000

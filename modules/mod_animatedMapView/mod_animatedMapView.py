@@ -18,19 +18,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
+import sys
+#print sys.path
+import tile
 
 def getModule(m,d,i):
-  return(Example(m,d,i))
+  return(AnimatedMapView(m,d,i))
 
-class Example(ranaModule):
+class AnimatedMapView(ranaModule):
   """A sample pyroute module"""
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+    print tile
     
 
 if(__name__ == "__main__"):
-  a = Example({}, {})
+  a = example({}, {})
   a.update()
   a.update()
   a.update()
