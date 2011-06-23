@@ -68,7 +68,7 @@ class Cron(ranaModule):
     and other events"""
     id = self._getID()
     # TODO: other backends
-    realId = gobject.timeout_add(self._doTimeout, timeout, id, callback, args)
+    realId = gobject.timeout_add(timeout, self._doTimeout, id, callback, args)
     timeoutTupple = (callback, args, timeout, caller, description, realId)
     with self.dataLock:
       self.cronTab['timeout'][id] = timeoutTupple
