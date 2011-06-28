@@ -88,6 +88,60 @@ class turnByTurn(ranaModule):
     currentDistance = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
     self.currentDistance = currentDistance # update current distance
     distance = currentStep['Distance']['meters']
+    # GHK: make distance speed-sensitive
+    #
+    # I came up with this formula after a lot of exerimentation with
+    # gnuplot.  The idea is to give the user some simple parameters to
+    # adjust yet let him have a lot of control.  There are five
+    # parameters in the equation:
+    #
+    # lowSpeed	Speed below which the pre-announcement time is constant.
+    # lowTime	Announcement time at and below lowSpeed.
+    # highSpeed	Speed above which the announcement time is constant.
+    # highTime	Announcement time at and above highSpeed.
+    # power	Exponential power used in the formula; good values are 0.5-5
+    #
+    # The speeds are in m/s.  Obviously highXXX must be greater than lowXXX.
+    # If power is 1.0, announcement times increase linearly above lowSpeed.
+    # If power < 1.0, times rise rapidly just above lowSpeed and more
+    # gradually approaching highSpeed.  If power > 1.0, times rise
+    # gradually at first and rapidly near highSpeed.  I like power > 1.0.
+    #
+    # The reasoning is that at high speeds you are probably on a
+    # motorway/freeway and will need extra time to get into the proper
+    # lane to take your exit.  That reasoning is pretty harmless on a
+    # high-speed two-lane road, but it breaks down if you are stuck in
+    # heavy traffic on a four-lane freeway (like in Los Angeles
+    # where I live) because you might need quite a while to work your
+    # way across the traffic even though you're creeping along.  But I
+    # don't know a good way to detect whether you're on a multi-lane road,
+    # I chose speed as an acceptable proxy.
+    #
+    # Regardless of speed, we always warn a certain distance ahead (see
+    # "distance" above).  That distance comes from the value in the current
+    # step of the directions.
+    #
+    # BTW, if you want to use gnuplot to play with the curves, try:
+    # max(a,b) = a > b ? a : b
+    # min(a,b) = a < b ? a : b
+    # warn(x,t1,s1,t2,s2,p) = min(t2,(max(s1,x)-s1)**p*(t2-t1)/(s2-s1)**p+t1)
+    # plot [0:160][0:] warn(x,10,50,60,100,2.0)
+    #
+    metersPerSecSpeed = self.get('metersPerSecSpeed', None)
+    if metersPerSecSpeed:
+        lowSpeed = float(self.get('minAnnounceSpeed', 13.89))
+        highSpeed = float(self.get('maxAnnounceSpeed', 27.78))
+        highSpeed = max(highSpeed, lowSpeed + 0.1)
+        lowTime = int(self.get('minAnnounceTime', 10))
+        highTime = int(self.get('maxAnnounceTime', 60))
+        highTime = max(highTime, lowTime)
+        power = float(self.get('announcePower', 2.0))
+        warnTime = (max(lowSpeed, metersPerSecSpeed) - lowSpeed)**power \
+          * (highTime - lowTime) / (highSpeed - lowSpeed)**power \
+          + lowTime
+        warnTime = min(highTime, warnTime)
+        distance = max(distance, warnTime * metersPerSecSpeed)
+        
     pointReachedDistance = int(self.get('pointReachedDistance', 30))
 
     if distance>=currentDistance:
