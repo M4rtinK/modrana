@@ -99,6 +99,9 @@ class MapWidget(gtk.Widget):
 
     self.defaulMethodBindings() # use default map dragging method binding
 
+    self.lastFullRedraw = time.time()
+    self.lastFullRedrawRequest = time.time()
+
   def loadModules(self):
     """Load all modules from the specified directory"""
 
@@ -277,6 +280,10 @@ class MapWidget(gtk.Widget):
     self.d['needRedraw'] = False
     """ alter directly, no need to notificate
     about returning the key to default state"""
+
+    # record timestamp
+    self.lastFullRedrawRequest = time.time()
+
     if self.redraw:
       try:
         self.window.invalidate_rect((0,0,self.rect.width,self.rect.height),False)
@@ -399,6 +406,13 @@ class MapWidget(gtk.Widget):
     # enable redraw speed debugging
     if self.showRedrawTime:
       print "Redraw took %1.2f ms" % (1000 * (time.clock() - start))
+    self.lastFullRedraw = time.time()
+
+  def getLastFullRedraw(self):
+    return self.lastFullRedraw
+
+  def getLastFullRedrawRequest(self):
+    return self.lastFullRedrawRequest
 
   def fullDrawMethod(self, cr, event):
     """ this is the default drawing method
