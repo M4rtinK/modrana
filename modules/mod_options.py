@@ -316,40 +316,6 @@ class options(ranaModule):
 
     # * turn by turn navigation
     group = addGroup("Turn by turn", "turn_by_turn", catNavigation, "generic")
-    # in the first string: first one goes to espeak, the seccond part goes to Google
-    directionsLanguages =[('ca ca', 'Catalan'),
-                          ('zh-yue zh-TW', 'Chinese(Cantonese)'),
-                          ('zh zh-CN', 'Chinese(Mandarin)'),
-                          ('hr hr', 'Croatian'),
-                          ('cs cs', 'Czech'),
-                          ('nl nl', 'Dutch'),
-                          ('en en', 'English'),
-                          ('fi fi', 'Finnish'),
-                          ('fr fr', 'French'),
-                          ('de de', 'German'),
-                          ('el el', 'Greek'),
-                          ('hi hi', 'Hindi'),
-                          ('hu hu', 'Hungarian'),
-                          ('id id', 'Indonesian'),
-                          ('it it', 'Italian'),
-                          ('lv lv', 'Latvian'),
-                          ('no no', 'Norwegian'),
-                          ('pl pl', 'Polish'),
-                          ('pt pt-BR', 'Portuguese(Brazil)'),
-                          ('pt-pt pt-PT', 'Portuguese(European)'),
-                          ('ro ro', 'Romanian'),
-                          ('ru ru', 'Russian'),
-                          ('sr sr', 'Serbian'),
-                          ('sk sk', 'Slovak'),
-                          ('es es', 'Spanish'),
-                          ('ta ta', 'Tamil'),
-                          ('tr tr', 'Turkish'),
-                          ('vi vi', 'Vietnamese')]
-
-    addOpt("Language for directions", 'directionsLanguage',
-         directionsLanguages,
-         group,
-         "en en") # TODO: use locale for default language ?
 
     addOpt("Autostart navigation", "autostartNavigationDefaultOnAutoselectTurn",
       [('disabled',"OFF"),
@@ -436,7 +402,46 @@ class options(ranaModule):
        group,
        "2.0")
 
-    addOpt("read Cyrillic with:", "voiceNavigationCyrillicVoice",
+
+    # * navigation language
+    group = addGroup("Language", "tbt_language", catNavigation, "generic")
+
+    # in the first string: first one goes to espeak, the seccond part goes to Google
+    directionsLanguages =[('ca ca', 'Catalan'),
+                          ('zh-yue zh-TW', 'Chinese(Cantonese)'),
+                          ('zh zh-CN', 'Chinese(Mandarin)'),
+                          ('hr hr', 'Croatian'),
+                          ('cs cs', 'Czech'),
+                          ('nl nl', 'Dutch'),
+                          ('en en', 'English'),
+                          ('fi fi', 'Finnish'),
+                          ('fr fr', 'French'),
+                          ('de de', 'German'),
+                          ('el el', 'Greek'),
+                          ('hi hi', 'Hindi'),
+                          ('hu hu', 'Hungarian'),
+                          ('id id', 'Indonesian'),
+                          ('it it', 'Italian'),
+                          ('lv lv', 'Latvian'),
+                          ('no no', 'Norwegian'),
+                          ('pl pl', 'Polish'),
+                          ('pt pt-BR', 'Portuguese(Brazil)'),
+                          ('pt-pt pt-PT', 'Portuguese(European)'),
+                          ('ro ro', 'Romanian'),
+                          ('ru ru', 'Russian'),
+                          ('sr sr', 'Serbian'),
+                          ('sk sk', 'Slovak'),
+                          ('es es', 'Spanish'),
+                          ('ta ta', 'Tamil'),
+                          ('tr tr', 'Turkish'),
+                          ('vi vi', 'Vietnamese')]
+
+    addOpt("Language for directions", 'directionsLanguage',
+         directionsLanguages,
+         group,
+         "en en") # TODO: use locale for default language ?
+
+    addOpt("read Cyrillic with", "voiceNavigationCyrillicVoice",
       [('ru',"Russian voice"),
        (False,"current voice")],
        group,
