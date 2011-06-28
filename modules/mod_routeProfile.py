@@ -19,6 +19,7 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import pycha.line
+import pycha.color
 import cairo
 import geo
 
@@ -52,6 +53,11 @@ class routeProfile(ranaModule):
 
     dx = min(w,h) / 5.0
     dy = dx
+
+    # draw a solid color background    
+    cr.rectangle(x1,y1,w,h)
+    cr.set_source_rgb(*pycha.color.hex2rgb("#eeeeff"))
+    cr.fill()
 
     menus = self.m.get("menu",None)
     loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
