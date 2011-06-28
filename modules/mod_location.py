@@ -239,11 +239,11 @@ class GPSDConsumer(threading.Thread):
         print "breaking"
         break
       r = self.session.next()
+      if self.verbose:
+        print r
       if r["class"] == "TPV":
         with self.lock:
           self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
-          if self.verbose:
-            self.fix
     print("GPSDConsumer: stoped")
 
   def shutdown(self):
