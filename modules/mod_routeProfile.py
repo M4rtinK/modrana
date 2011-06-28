@@ -19,11 +19,8 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import pycha.line
-#from lines import lines
-import sys
 import cairo
 import geo
-import gtk
 
 def getModule(m,d,i):
   return(routeProfile(m,d,i))
