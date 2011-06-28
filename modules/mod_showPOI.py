@@ -109,7 +109,10 @@ class showPOI(ranaModule):
           click = self.m.get('clickHandler', None)
           if click:
             """ make the POI caption clickable"""
-            click.registerXYWH(rx,ry-(-rh),rw,-rh, "ms:showPOI:setActivePOI:%d|set:menu:POIDetail" % id)
+            if id != None: # new POI have id == None
+              click.registerXYWH(rx,ry-(-rh),rw,-rh, "ms:showPOI:setActivePOI:%d|set:menu:POIDetail" % id)
+            else: # the last added POI is still set, no need to set the id
+              click.registerXYWH(rx,ry-(-rh),rw,-rh, "set:menu:POIDetail")
           cr.fill()
 
           # draw the actual text
