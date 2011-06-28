@@ -244,7 +244,11 @@ class GPSDConsumer(threading.Thread):
         print r
       if r["class"] == "TPV":
         with self.lock:
-          self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
+          try:
+            self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
+          except Exception, e:
+            print("GPSDConsumer: eror reading data", e)
+
     print("GPSDConsumer: stoped")
 
   def shutdown(self):
