@@ -435,7 +435,7 @@ class device_n900(deviceModule):
           print "#############################"
 
 
-        print "updating location"
+#        print "updating location"
         self.set('needRedraw', True)
 
       else:
