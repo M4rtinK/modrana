@@ -60,7 +60,18 @@ class gpsd2(ranaModule):
     TODO: more efficient screen updates"""
 #    print "updating screen"
     self.locationUpdate()
-    self.set('needRedraw', True)
+
+    """
+    the location update method which might run asynchornously in the
+    device module also sends redraw requests
+    -> no need to send a new one if there is already one pending
+    --> there would not be a change position anyway until next the fix
+    -> surpuls redraw requests are actually harmfull with map rotation enabled
+    """
+    sFromLastRequest = time() - self.modrana.getLastFullRedrawRequest()
+    if sFromLastRequest > 0.85:
+      self.set('needRedraw', True)
+
 
   def startGPSD(self):
     """start the GPSD based location update method"""
@@ -203,6 +214,8 @@ class gpsd2(ranaModule):
         self.set('elevation', elevation)
       else:
         self.set('elevation', None)
+
+      self.set('needRedraw', True)
 
     # make the screen refresh after the update
     # even when centering is turned off
