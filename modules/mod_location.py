@@ -177,31 +177,32 @@ class gpsd2(ranaModule):
 
   def updateGPSD(self):    
     fix = self.GPSDConsumer.getFix()
-    (lat,lon,elevation,bearing,speed,timestamp) = fix
+    if fix:
+      (lat,lon,elevation,bearing,speed,timestamp) = fix
 
-    # position
-    self.set('pos', (lat,lon))
-    self.set('pos_source', 'GPSD')
-    self.status = "OK"
-    # bearing
-    self.set('bearing', float(bearing))
-    # speed
-    if speed != None:
-      # normal gpsd reports speed in knots per second
-      gpsdSpeed = self.get('gpsdSpeedUnit', 'knotsPerSecond')
-      if gpsdSpeed == 'knotsPerSecond':
-        # convert to meters per second
-        speed = float(speed) * 0.514444444444444 # knots/sec to m/sec
-      self.set('metersPerSecSpeed', speed)
-      self.set('speed', float(speed) * 3.6)
-    else:
-      self.set('metersPerSecSpeed', None)
-      self.set('speed', None)
-    # elevation
-    if elevation:
-      self.set('elevation', elevation)
-    else:
-      self.set('elevation', None)
+      # position
+      self.set('pos', (lat,lon))
+      self.set('pos_source', 'GPSD')
+      self.status = "OK"
+      # bearing
+      self.set('bearing', float(bearing))
+      # speed
+      if speed != None:
+        # normal gpsd reports speed in knots per second
+        gpsdSpeed = self.get('gpsdSpeedUnit', 'knotsPerSecond')
+        if gpsdSpeed == 'knotsPerSecond':
+          # convert to meters per second
+          speed = float(speed) * 0.514444444444444 # knots/sec to m/sec
+        self.set('metersPerSecSpeed', speed)
+        self.set('speed', float(speed) * 3.6)
+      else:
+        self.set('metersPerSecSpeed', None)
+        self.set('speed', None)
+      # elevation
+      if elevation:
+        self.set('elevation', elevation)
+      else:
+        self.set('elevation', None)
 
     # make the screen refresh after the update
     # even when centering is turned off
