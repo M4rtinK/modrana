@@ -122,7 +122,7 @@ class routeProfile(ranaModule):
     if units == None:
       xTicks = [dict(v=r, label=list[r][0]) for r in range(0,length,labelTick)]
     else:
-      xTicks = [dict(v=r, label=units.km2CurrentUnitString(list[r][0])) for r in range(0,length,labelTick)]
+      xTicks = [dict(v=r, label=units.km2CurrentUnitString(round(list[r][0], 1))) for r in range(0,length,labelTick)]
 
 #    list = tracklog.trackpointsList[0]
 #    lines = tuple(map(lambda x: ("", float(x.elevation)), list))
