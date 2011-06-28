@@ -357,7 +357,7 @@ class options(ranaModule):
        group,
        'enabled')
 
-    addOpt("Point reached distance", "pointReachedDistance",
+    addOpt("Make final turn announcement at", "pointReachedDistance",
       [(10,"10 m"),
        (20,"20 m"),
        (30,"30 m"),
@@ -368,6 +368,73 @@ class options(ranaModule):
        (500,"500 m")],
        group,
        30)
+
+    addOpt("Announce turns at least this far ahead", "minAnnounceDistance",
+      [(10,"10 m"),
+       (20,"20 m"),
+       (30,"30 m"),
+       (60,"60 m"),
+       (100,"100 m"),
+       (200,"200 m"),
+       (300,"300 m"),
+       (500,"500 m")],
+       group,
+       100)
+
+    addOpt("Announce turns at least this long ahead", "minAnnounceTime",
+      [(5,"5 s"),
+       (10,"10 s"),
+       (20,"20 s"),
+       (30,"30 s"),
+       (45,"45 s"),
+       (60,"60 s"),
+       (90,"90 s")],
+       group,
+       10)
+
+    # Note: actual values are in m/s, accurate to 2 decimal places.  We
+    # store them as strings so lookup will work reliably.
+    addOpt("Increase turn announcement time above", "minAnnounceSpeed",
+      [("5.56","20 km/h (12 mph)"),
+       ("8.33","30 km/h (20 mph)"),
+       ("11.11","40 km/h (25 mph)"),
+       ("13.89","50 km/h (30 mph)"),
+       ("22.22","80 km/h (50 mph)"),
+       ("27.78","100 km/h (60 mph)")],
+       group,
+       "13.89")
+
+    # Note: actual values are in m/s, accurate to 2 decimal places.  We
+    # store them as strings so lookup will work reliably.
+    addOpt("Constant turn announcement time above", "maxAnnounceSpeed",
+      [("13.89","50 km/h (30 mph)"),
+       ("22.22","80 km/h (50 mph)"),
+       ("27.78","100 km/h (60 mph)"),
+       ("33.33","120 km/h (75 mph)"),
+       ("44.44","160 km/h (100 mph)")],
+       group,
+       "27.78")
+
+    addOpt("Maximum turn announcement time", "maxAnnounceTime",
+      [(20,"20 s"),
+       (30,"30 s"),
+       (45,"45 s"),
+       (60,"60 s"),
+       (90,"90 s"),
+       (120,"120 s")],
+       group,
+       60)
+
+    # Note: these are exponents, stored as strings so lookup will work reliably.
+    addOpt("Announcment time increase type", "announcePower",
+      [("1.0","Linear with speed"),
+       ("0.5","Very quickly, then linear"),
+       ("0.75","Quickly, then linear"),
+       ("1.5","Slowly, then linear"),
+       ("2.0","Quite slowly, then linear"),
+       ("4.0","Very slowly, then quite fast")],
+       group,
+       "2.0")
 
     addOpt("read Cyrillic with:", "voiceNavigationCyrillicVoice",
       [('ru',"Russian voice"),

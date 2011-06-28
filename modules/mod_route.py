@@ -375,7 +375,7 @@ class route(ranaModule):
       (lat,lon) = self.route[-1]
       # NOTE: steps have reversed coordinates
       destStep[u'Point'] = {'coordinates':[lon,lat,0]}
-      destStep[u'Distance'] = {u'meters' : 100}
+      destStep[u'Distance'] = {u'meters' : int(self.get('minAnnounceDistance',100))}
       rawDirections['Directions']['Routes'][0]['Steps'].append(destStep) # add it to the end of the list
 
       # make the direction messages pango compatible
