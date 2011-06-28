@@ -15,9 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from __future__ import with_statement # for python 2.5
 from base_module import ranaModule
-import socket
+import threading
 from time import *
+import gps_module as gps
 
 def getModule(m,d,i):
   return(gpsd2(m,d,i))
@@ -34,6 +36,9 @@ class gpsd2(ranaModule):
     self.set('elevation', None)
     self.status = "Unknown"
     self.locationUpdate = self.nop
+
+    # GPSD support
+    self.GPSDConsumer = None
 
   def nop(self):
     """navigation update function placeholder"""
@@ -57,19 +62,20 @@ class gpsd2(ranaModule):
     self.locationUpdate()
     self.set('needRedraw', True)
 
-
   def startGPSD(self):
     """start the GPSD based location update method"""
     try:
-      self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      self.s.connect(("127.0.0.1", 2947)) #TODO: set this from options
+      self.GPSDConsumer = GPSDConsumer()
+      self.GPSDConsumer.start()
       self.connected = True
       self.locationUpdate = self.updateGPSD
-    except socket.error:
+    except Exception, e:
+      print("location: connecting to GPSD failed", e)
       self.status = "No GPSD running"
 
   def stopGPSD(self):
     """stop the GPSD based location update method"""
+    self.GPSDConsumer.shutdown()
     self.locationUpdate = self.nop
     self.status = "No GPSD running"
 
@@ -128,16 +134,9 @@ class gpsd2(ranaModule):
   def gpsStatus(self):
     return(self.socket_cmd("M"))
 
-# it seems that at least with gpsfake, wee get only Empty as response
-#  def DOP(self):
-#    """return (three) estimated position errors in meters (DOP)"""
-#    dop = self.socket_cmd("e")
-#    print dop
-
   def bearing(self):
     """return bearing as reported by gpsd"""
     return self.socket_cmd("t")
-
     
   def elevation(self):
     """return elevation as reported by gpsd
@@ -155,7 +154,6 @@ class gpsd2(ranaModule):
     timeFromGPS = self.socket_cmd("d")
     return timeFromGPS
 
-  
   def satellites(self):
     list = self.socket_cmd('y')
     if(not list):
@@ -177,49 +175,33 @@ class gpsd2(ranaModule):
       (dx,dy,dd) = [float(a) for a in (dx,dy,dd)]
       print "%d sats, quality %f, %f, %f" % (count,dd,dx,dy)
 
-  def updateGPSD(self):
-    if self.get('GPSEnabled', True) == False:
-      # just make sure the screen updates atleast once per seccond
-      self.set('needRedraw', True)
-      return
+  def updateGPSD(self):    
+    fix = self.GPSDConsumer.getFix()
+    (lat,lon,elevation,bearing,speed,timestamp) = fix
 
-    if(not self.connected):
-      self.status = "Not connected"
+    # position
+    self.set('pos', (lat,lon))
+    self.set('pos_source', 'GPSD')
+    self.status = "OK"
+    # bearing
+    self.set('bearing', float(bearing))
+    # speed
+    if speed != None:
+      # normal gpsd reports speed in knots per second
+      gpsdSpeed = self.get('gpsdSpeedUnit', 'knotsPerSecond')
+      if gpsdSpeed == 'knotsPerSecond':
+        # convert to meters per second
+        speed = float(speed) * 0.514444444444444 # knots/sec to m/sec
+      self.set('metersPerSecSpeed', speed)
+      self.set('speed', float(speed) * 3.6)
     else:
-      result = self.socket_cmd("p")
-      if(not result):
-        self.status = "Unknown"
-        #print("unknown")
-      else:
-        lat,lon = [float(ll) for ll in result.split(' ')]
-        self.set('pos', (lat,lon))
-        self.set('pos_source', 'GPSD')
-#        self.set('needRedraw', True)
-        self.status = "OK"
-
-        bearing = self.bearing()
-        if bearing != None:
-          self.set('bearing', float(bearing))
-
-        speed = self.speed()
-
-        if speed != None:
-          # normal gpsd reports speed in knots per second
-          gpsdSpeed = self.get('gpsdSpeedUnit', 'knotsPerSecond')
-          if gpsdSpeed == 'knotsPerSecond':
-            # convert to meters per second
-            speed = float(speed) * 0.514444444444444 # knots/sec to m/sec
-          self.set('metersPerSecSpeed', speed)
-          self.set('speed', float(speed) * 3.6)
-        else:
-          self.set('metersPerSecSpeed', None)
-          self.set('speed', None)            
-
-        elevation = self.elevation()
-        if elevation:
-          self.set('elevation', elevation)
-        else:
-          self.set('elevation', None)
+      self.set('metersPerSecSpeed', None)
+      self.set('speed', None)
+    # elevation
+    if elevation:
+      self.set('elevation', elevation)
+    else:
+      self.set('elevation', None)
 
     # make the screen refresh after the update
     # even when centering is turned off
@@ -231,14 +213,47 @@ class gpsd2(ranaModule):
     #  * reuse the alredy drawn area ?
     #  * dont overdraw the whole screen for a simple nudge ?
     #  * draw the new area with a delay/after the drag ended ?
-#    self.set('needRedraw', True)
-#        #print(self.get('pos', None))
-#        #print(time())
 
   def shutdown(self):
-    if self.device == 'n900':
-      try:
-        self.stopLocation()
-      except:
-        print "location: stopping location failed"
+    try:
+      self.stopLocation()
+    except Exception, e:
+      print "location: stopping location failed", e
 
+class GPSDConsumer(threading.Thread):
+  """consume data as they come in from the GPSD and store last known fix"""
+  def __init__(self):
+    threading.Thread.__init__(self)
+    self.lock = threading.RLock()
+    self.stop = False
+    self.session = gps.gps(host="localhost", port="2947")
+    self.session.stream(flags=gps.client.WATCH_JSON)
+    self.verbose = False
+    # vars
+    self.fix = None
+
+  def run(self):
+    print("GPSDConsumer: starting")
+    while True:
+      if self.stop == True:
+        print "breaking"
+        break
+      r = self.session.next()
+      if r["class"] == "TPV":
+        with self.lock:
+          self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
+          if self.verbose:
+            self.fix
+    print("GPSDConsumer: stoped")
+
+  def shutdown(self):
+    print("GPSDConsumer: stopping")
+    self.stop = True
+
+  def getFix(self):
+    with self.lock:
+      return self.fix
+
+  def setVerbose(self, value):
+    with self.lock:
+      self.verbose = value
