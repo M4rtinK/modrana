@@ -18,7 +18,6 @@
 from base_module import ranaModule
 import socket
 from time import *
-import re
 
 def getModule(m,d,i):
   return(gpsd2(m,d,i))
@@ -28,7 +27,6 @@ class gpsd2(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.tt = 0
-    self.position_regexp = re.compile('P=(.*?)\s*$')
     self.connected = False
     self.set('speed', None)
     self.set('metersPerSecSpeed', None)
