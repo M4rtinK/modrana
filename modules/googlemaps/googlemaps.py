@@ -42,8 +42,8 @@ try:
     import simplejson as json       # pylint: disable-msg=F0401
 except:
   import sys
-  sys.path.append("modules/googlemaps/local_simplejson")
-  print "googlemaps: using integrated non-binary simplejson, instal proper simplejson package for better speed"
+  sys.path.append("modules/local_simplejson")
+  print "googlemaps: using integrated non-binary simplejson, install proper simplejson package for better speed"
   import simplejson as json
 
 

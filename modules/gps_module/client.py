@@ -3,10 +3,22 @@
 #
 import time, socket, sys, select
 
-if sys.hexversion >= 0x2060000:
-    import json			# For Python 2.6
-else:
-    import simplejson as json	# For Python 2.4 and 2.5
+#if sys.hexversion >= 0x2060000:
+#    import json			# For Python 2.6
+#else:
+#    import simplejson as json	# For Python 2.4 and 2.5
+
+try:
+  try:
+    import json
+  except ImportError:
+    import simplejson as json
+except:
+  import sys
+  sys.path.append("modules/local_simplejson")
+  print "gpsd: using integrated non-binary simplejson, install proper simplejson package for better speed"
+  import simplejson as json
+
 
 GPSD_PORT="2947"
 

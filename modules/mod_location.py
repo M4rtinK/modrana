@@ -19,7 +19,6 @@ from __future__ import with_statement # for python 2.5
 from base_module import ranaModule
 import threading
 from time import *
-import gps_module as gps
 
 def getModule(m,d,i):
   return(gpsd2(m,d,i))
@@ -240,6 +239,7 @@ class GPSDConsumer(threading.Thread):
     threading.Thread.__init__(self)
     self.lock = threading.RLock()
     self.stop = False
+    import gps_module as gps
     self.session = gps.gps(host="localhost", port="2947")
     self.session.stream(flags=gps.client.WATCH_JSON)
     self.verbose = False
