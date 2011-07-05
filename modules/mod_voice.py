@@ -93,9 +93,9 @@ class voice(ranaModule):
           self._speak(espeakLanguageCode, output)
 
   def say(self, text, language='en'):
-    """say a given text"""
+    """say a given text.  Return false if failed due to collision"""
     if self._isEnabled():
-      # check if we are laready saying something
+      # check if we are already saying something
       with self.voiceLock:
         if self.speaking():
           # we are already speaking
@@ -107,10 +107,12 @@ class voice(ranaModule):
             print collisionString
           except UnicodeEncodeError:
             print "voice: printing the current message to stdout failed do to unicode conversion error"
+          return False
 
 
         else:
           self._speak(language, text)
+          return True
 
   def _speak(self, languageCode, message):
 
