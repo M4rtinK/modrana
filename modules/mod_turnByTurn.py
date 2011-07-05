@@ -358,6 +358,9 @@ class turnByTurn(ranaModule):
        """
     voice = self.m.get('voice', None)
     units = self.m.get('units', None)
+
+    distanceInMeters = 10*round(distanceInMeters*0.1,0) # add simple rounding
+
     if voice and units:
       if distanceInMeters == 0:
         distString = ""
