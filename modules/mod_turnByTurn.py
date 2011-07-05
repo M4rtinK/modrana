@@ -129,38 +129,45 @@ class turnByTurn(ranaModule):
     #
     metersPerSecSpeed = self.get('metersPerSecSpeed', None)
     if metersPerSecSpeed:
-        lowSpeed = float(self.get('minAnnounceSpeed', 13.89))
-        highSpeed = float(self.get('maxAnnounceSpeed', 27.78))
-        highSpeed = max(highSpeed, lowSpeed + 0.1)
-        lowTime = int(self.get('minAnnounceTime', 10))
-        highTime = int(self.get('maxAnnounceTime', 60))
-        highTime = max(highTime, lowTime)
-        power = float(self.get('announcePower', 2.0))
-        warnTime = (max(lowSpeed, metersPerSecSpeed) - lowSpeed)**power \
-          * (highTime - lowTime) / (highSpeed - lowSpeed)**power \
-          + lowTime
-        warnTime = min(highTime, warnTime)
-        distance = max(distance, warnTime * metersPerSecSpeed)
+      lowSpeed = float(self.get('minAnnounceSpeed', 13.89))
+      highSpeed = float(self.get('maxAnnounceSpeed', 27.78))
+      highSpeed = max(highSpeed, lowSpeed + 0.1)
+      lowTime = int(self.get('minAnnounceTime', 10))
+      highTime = int(self.get('maxAnnounceTime', 60))
+      highTime = max(highTime, lowTime)
+      power = float(self.get('announcePower', 2.0))
+      warnTime = (max(lowSpeed, metersPerSecSpeed) - lowSpeed)**power \
+        * (highTime - lowTime) / (highSpeed - lowSpeed)**power \
+        + lowTime
+      warnTime = min(highTime, warnTime)
+      distance = max(distance, warnTime * metersPerSecSpeed)
         
     pointReachedDistance = int(self.get('pointReachedDistance', 30))
 
-    if distance>=currentDistance:
-      """this means we reached an optimal distance for saying the message"""
-      if self.espeakFirstTrigger == False:
-        print "triggering espeak nr. 1"
-        plaintextMessage = currentStep['descriptionEspeak']
-        self.sayTurn(plaintextMessage, currentDistance)
-        self.espeakFirstTrigger = True # everything has been said :D
+#    print "#####"
+#    print distance, currentStep['Distance']['meters']
+#    print currentDistance, currentDistance <= distance
+#    print self.espeakFirstTrigger, self.espeakSecondTrigger
+
     if currentDistance <= pointReachedDistance:
       """this means we reached the point"""
-      self.switchToNextStep() # switch to next step
       if self.espeakSecondTrigger == False:
         print "triggering espeak nr. 2"
         # say the message without distance
         plaintextMessage = currentStep['descriptionEspeak']
+        # consider turn said even if it was skipped (ignore errors)
         self.sayTurn(plaintextMessage, 0)
         self.markCurrentStepAsVisited() # mark this point as visited
+        self.espeakFirstTrigger = True # everything has been said, again :D
         self.espeakSecondTrigger = True # everything has been said, again :D
+      self.switchToNextStep() # switch to next step
+    elif currentDistance <= distance:
+      """this means we reached an optimal distance for saying the message"""
+      if self.espeakFirstTrigger == False:
+        print "triggering espeak nr. 1"
+        plaintextMessage = currentStep['descriptionEspeak']
+        if self.sayTurn(plaintextMessage, currentDistance):
+          self.espeakFirstTrigger = True # everything has been said :D
 
 
   def handleMessage(self, message, type, args):
@@ -372,7 +379,7 @@ class turnByTurn(ranaModule):
       else:
         # the espeak language code is the first part of this whitespace delimited string
         espeakLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[0]
-      voice.say(text,espeakLanguageCode)
+      return voice.say(text,espeakLanguageCode)
 
   def getStartingStep(self, which='first'):
     if self.steps:
