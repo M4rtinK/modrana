@@ -87,7 +87,10 @@ class turnByTurn(ranaModule):
     lon2 = currentStep['Point']['coordinates'][0]
     currentDistance = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
     self.currentDistance = currentDistance # update current distance
-    distance = currentStep['Distance']['meters']
+
+    # use some sane minimum distance
+    distance = int(self.get('minAnnounceDistance',100))
+
     # GHK: make distance speed-sensitive
     #
     # I came up with this formula after a lot of exerimentation with
