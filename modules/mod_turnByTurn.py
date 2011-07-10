@@ -43,6 +43,7 @@ class turnByTurn(ranaModule):
     self.steps = []
     self.currentStepIndex = 0
     self.currentStepIndicator = None
+    self.espeakFirstAndHalfTrigger = False
     self.espeakFirstTrigger = False
     self.espeakSecondTrigger = False
     self.navigationUpdateInterval = 1 # update navigation info once per second
@@ -132,7 +133,14 @@ class turnByTurn(ranaModule):
     #
     metersPerSecSpeed = self.get('metersPerSecSpeed', None)
     pointReachedDistance = int(self.get('pointReachedDistance', 30))
+
     if metersPerSecSpeed:
+      # check if we can miss the point by going too fast -> mps speed > point reached distance
+      if metersPerSecSpeed > pointReachedDistance*0.75:
+        pointReachedDistance = metersPerSecSpeed*2
+        print "tbt: enlarging point reached distance to: %1.2f m due to large speed (%1.2f m/s)" % (pointReachedDistance, metersPerSecSpeed)
+
+      # speed & time based triggering
       lowSpeed = float(self.get('minAnnounceSpeed', 13.89))
       highSpeed = float(self.get('maxAnnounceSpeed', 27.78))
       highSpeed = max(highSpeed, lowSpeed + 0.1)
@@ -153,28 +161,38 @@ class turnByTurn(ranaModule):
         print "current distance: %1.2f m" % currentDistance
         print "current speed: %1.2f m/s (%1.2f km/h)" % (metersPerSecSpeed, metersPerSecSpeed*3.6)
         print "point reached distance: %f m" % pointReachedDistance
-        print "1. announcement triggered: %r, 2. announcement triggered: %r" % (self.espeakFirstTrigger, self.espeakSecondTrigger)
+        print "1. triggered=%r, 1.5. triggered=%r, 2. triggered=%r" % (self.espeakFirstTrigger, self.espeakFirstAndHalfTrigger, self.espeakSecondTrigger)
+        if warnTime > 20:
+          print "optional (20 s) trigger distance: %1.2f" % (20.0*metersPerSecSpeed)
 
-
-    if currentDistance <= pointReachedDistance:
-      """this means we reached the point"""
-      if self.espeakSecondTrigger == False:
-        print "triggering espeak nr. 2"
-        # say the message without distance
-        plaintextMessage = currentStep['descriptionEspeak']
-        # consider turn said even if it was skipped (ignore errors)
-        self.sayTurn(plaintextMessage, 0)
-        self.markCurrentStepAsVisited() # mark this point as visited
-        self.espeakFirstTrigger = True # everything has been said, again :D
-        self.espeakSecondTrigger = True # everything has been said, again :D
-      self.switchToNextStep() # switch to next step
-    elif currentDistance <= distance:
-      """this means we reached an optimal distance for saying the message"""
-      if self.espeakFirstTrigger == False:
-        print "triggering espeak nr. 1"
-        plaintextMessage = currentStep['descriptionEspeak']
-        if self.sayTurn(plaintextMessage, currentDistance):
-          self.espeakFirstTrigger = True # everything has been said :D
+      if currentDistance <= pointReachedDistance:
+        """this means we reached the point"""
+        if self.espeakSecondTrigger == False:
+          print "triggering espeak nr. 2"
+          # say the message without distance
+          plaintextMessage = currentStep['descriptionEspeak']
+          # consider turn said even if it was skipped (ignore errors)
+          self.sayTurn(plaintextMessage, 0)
+          self.markCurrentStepAsVisited() # mark this point as visited
+          self.espeakFirstTrigger = True # everything has been said, again :D
+          self.espeakSecondTrigger = True # everything has been said, again :D
+        self.switchToNextStep() # switch to next step
+      else:
+        if currentDistance <= distance:
+          """this means we reached an optimal distance for saying the message"""
+          if self.espeakFirstTrigger == False:
+            print "triggering espeak nr. 1"
+            plaintextMessage = currentStep['descriptionEspeak']
+            if self.sayTurn(plaintextMessage, currentDistance):
+              self.espeakFirstTrigger = True # first message done
+        if self.espeakFirstAndHalfTrigger == False and warnTime > 20:
+          if currentDistance <= (20.0*metersPerSecSpeed):
+            """in case that the warning time gets too big, add an intemediate warning at 20 secconds
+            NOTE: this means it is said after the first trigger
+            """
+            plaintextMessage = currentStep['descriptionEspeak']
+            if self.sayTurn(plaintextMessage, currentDistance):
+              self.espeakFirstAndHalfTrigger = True # intermediate message done
 
 
   def handleMessage(self, message, type, args):
@@ -454,6 +472,7 @@ class turnByTurn(ranaModule):
     nextIndex = self.currentStepIndex + 1
     if nextIndex <= maxIndex:
       self.currentStepIndex = nextIndex
+      self.espeakFirstAndHalfTrigger = False
       self.espeakFirstTrigger = False
       self.espeakSecondTrigger = False
       print "switching to next step"
