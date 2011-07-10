@@ -131,6 +131,7 @@ class turnByTurn(ranaModule):
     # plot [0:160][0:] warn(x,10,50,60,100,2.0)
     #
     metersPerSecSpeed = self.get('metersPerSecSpeed', None)
+    pointReachedDistance = int(self.get('pointReachedDistance', 30))
     if metersPerSecSpeed:
       lowSpeed = float(self.get('minAnnounceSpeed', 13.89))
       highSpeed = float(self.get('maxAnnounceSpeed', 27.78))
@@ -145,12 +146,15 @@ class turnByTurn(ranaModule):
       warnTime = min(highTime, warnTime)
       distance = max(distance, warnTime * metersPerSecSpeed)
         
-    pointReachedDistance = int(self.get('pointReachedDistance', 30))
+      if self.get('debugTbT', False):
+        print "#####"
+        print "min/max announce time: %d/%d s" % (lowTime, highTime)
+        print "trigger distance: %1.2f m (%1.2f s warning)" % (distance, distance/float(metersPerSecSpeed))
+        print "current distance: %1.2f m" % currentDistance
+        print "current speed: %1.2f m/s (%1.2f km/h)" % (metersPerSecSpeed, metersPerSecSpeed*3.6)
+        print "point reached distance: %f m" % pointReachedDistance
+        print "1. announcement triggered: %r, 2. announcement triggered: %r" % (self.espeakFirstTrigger, self.espeakSecondTrigger)
 
-#    print "#####"
-#    print distance, currentStep['Distance']['meters']
-#    print currentDistance, currentDistance <= distance
-#    print self.espeakFirstTrigger, self.espeakSecondTrigger
 
     if currentDistance <= pointReachedDistance:
       """this means we reached the point"""

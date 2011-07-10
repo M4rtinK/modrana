@@ -602,6 +602,9 @@ class options(ranaModule):
     group = addGroup("Tracklogs", "tracklogs", catDebug, "generic")
     addBoolOpt("Debug circles", "debugCircles", group, False)
     addBoolOpt("Debug squares", "debugSquares", group, False)
+    # ** navigation
+    group = self.addGroup("Navigation", "navigation", catDebug, "generic")
+    addBoolOpt("Print Turn-By-Turn triggers", "debugTbT", group, False)
     # ** gps
     group = self.addGroup("GPS", "gps", catDebug, "generic")
     addBoolOpt("Show N900 GPS-fix", "n900GPSDebug", group, False)
