@@ -27,6 +27,7 @@ class ranaModule:
     self.get = self.modrana.get
     self.set = self.modrana.set
     self.watch = self.modrana.watch
+    self.removeWatch = self.modrana.removeWatch
     
     self.moduleName = initInfo.get('name',"")
     self.device = initInfo.get('device',"")
