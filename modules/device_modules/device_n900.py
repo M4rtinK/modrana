@@ -25,6 +25,7 @@ import gtk
 #N900 specific:
 import hildon
 import location
+import time
 """
 why dbus.glib ?
 if you import only "dbus", it can't find its mainloop for callbacks
@@ -435,6 +436,9 @@ class device_n900(deviceModule):
           print "#############################"
 
 
+        """always set this key to current epoch once the location is updated
+        so that modules can watch it and react"""
+        self.set('locationUpdated', time.time())
 #        print "updating location"
         self.set('needRedraw', True)
 
