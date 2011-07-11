@@ -214,6 +214,10 @@ class gpsd2(ranaModule):
       else:
         self.set('elevation', None)
 
+      """always set this key to current epoch once the location is updated
+      so that modules can watch it and react"""
+      self.set('locationUpdated', time())
+
       self.set('needRedraw', True)
 
     # make the screen refresh after the update
