@@ -234,7 +234,11 @@ class MapWidget(gtk.Widget):
       self._notifyWatcher(name, value)
 
   def watch(self, key, callback, *args):
-    """add a callback on an options key"""
+    """add a callback on an options key
+    callbakc will get:
+    key, newValue, oldValue, *args
+
+    """
     nrId = self.maxWatchId + 1
     id = "%d_%s" % (nrId,key)
     self.maxWatchId = nrId # TODO: recycle ids ? (alla PID)
@@ -253,7 +257,7 @@ class MapWidget(gtk.Widget):
     else:
       print "modRana: cant remove watch - key does not exist, watchId:", id
 
-  def _notifyWatcher(self, key, value):
+  def _notifyWatcher(self, key, newValue):
     """run callbacks registered on an options key"""
     callbacks = self.watches.get(key, None)
     if callbacks:
@@ -261,7 +265,7 @@ class MapWidget(gtk.Widget):
         (id,callback,args) = item
         oldValue = self.get(key, None)
         if callback:
-          callback(key,value,oldValue, *args)
+          callback(key,newValue,oldValue, *args)
         else:
           print "invalid watcher callback :", callback
 
