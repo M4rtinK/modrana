@@ -238,6 +238,7 @@ class MapWidget(gtk.Widget):
     callbakc will get:
     key, newValue, oldValue, *args
 
+    NOTE: watch ids should be >0, so that they evaluate as True
     """
     nrId = self.maxWatchId + 1
     id = "%d_%s" % (nrId,key)
