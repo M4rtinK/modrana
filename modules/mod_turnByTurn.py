@@ -46,12 +46,11 @@ class turnByTurn(ranaModule):
     self.espeakFirstAndHalfTrigger = False
     self.espeakFirstTrigger = False
     self.espeakSecondTrigger = False
-    self.navigationUpdateInterval = 1 # update navigation info once per second
-    self.lastNavigationUpdate=time.time()
     self.currentDistance = None
     self.currentStep = None
     self.navigationBoxHidden = False
     self.mRouteLength = 0
+    self.locationWatchID = None
 
 
   def firstTime(self):
@@ -63,138 +62,6 @@ class turnByTurn(ranaModule):
     self.navigationBoxBackground = colors['navigation_box_background'].getCairoColor()
     self.navigationBoxText = colors['navigation_box_text'].getCairoColor()
     
-  def update(self):
-    # check if we should trigger a navigation message
-    
-    # is navigation on ?
-    if self.steps:
-      # respect the navigation update interval
-      timestamp = time.time()
-      if timestamp - self.lastNavigationUpdate >= self.navigationUpdateInterval:
-        self.lastNavigationUpdate = timestamp
-        self.doNavigationUpdate()
-
-  def doNavigationUpdate(self):
-    """do a navigation update"""
-    # make sure there really are some steps
-    if not self.steps:
-      return
-
-    # get/compute/update necessary the values
-    pos = self.get('pos', None) # and current position
-    (lat1,lon1) = pos
-    currentStep = self.getCurrentStep()
-    lat2 = currentStep['Point']['coordinates'][1]
-    lon2 = currentStep['Point']['coordinates'][0]
-    currentDistance = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
-    self.currentDistance = currentDistance # update current distance
-
-    # use some sane minimum distance
-    distance = int(self.get('minAnnounceDistance',100))
-
-    # GHK: make distance speed-sensitive
-    #
-    # I came up with this formula after a lot of exerimentation with
-    # gnuplot.  The idea is to give the user some simple parameters to
-    # adjust yet let him have a lot of control.  There are five
-    # parameters in the equation:
-    #
-    # lowSpeed	Speed below which the pre-announcement time is constant.
-    # lowTime	Announcement time at and below lowSpeed.
-    # highSpeed	Speed above which the announcement time is constant.
-    # highTime	Announcement time at and above highSpeed.
-    # power	Exponential power used in the formula; good values are 0.5-5
-    #
-    # The speeds are in m/s.  Obviously highXXX must be greater than lowXXX.
-    # If power is 1.0, announcement times increase linearly above lowSpeed.
-    # If power < 1.0, times rise rapidly just above lowSpeed and more
-    # gradually approaching highSpeed.  If power > 1.0, times rise
-    # gradually at first and rapidly near highSpeed.  I like power > 1.0.
-    #
-    # The reasoning is that at high speeds you are probably on a
-    # motorway/freeway and will need extra time to get into the proper
-    # lane to take your exit.  That reasoning is pretty harmless on a
-    # high-speed two-lane road, but it breaks down if you are stuck in
-    # heavy traffic on a four-lane freeway (like in Los Angeles
-    # where I live) because you might need quite a while to work your
-    # way across the traffic even though you're creeping along.  But I
-    # don't know a good way to detect whether you're on a multi-lane road,
-    # I chose speed as an acceptable proxy.
-    #
-    # Regardless of speed, we always warn a certain distance ahead (see
-    # "distance" above).  That distance comes from the value in the current
-    # step of the directions.
-    #
-    # BTW, if you want to use gnuplot to play with the curves, try:
-    # max(a,b) = a > b ? a : b
-    # min(a,b) = a < b ? a : b
-    # warn(x,t1,s1,t2,s2,p) = min(t2,(max(s1,x)-s1)**p*(t2-t1)/(s2-s1)**p+t1)
-    # plot [0:160][0:] warn(x,10,50,60,100,2.0)
-    #
-    metersPerSecSpeed = self.get('metersPerSecSpeed', None)
-    pointReachedDistance = int(self.get('pointReachedDistance', 30))
-
-    if metersPerSecSpeed:
-      # check if we can miss the point by going too fast -> mps speed > point reached distance
-      if metersPerSecSpeed > pointReachedDistance*0.75:
-        pointReachedDistance = metersPerSecSpeed*2
-        print "tbt: enlarging point reached distance to: %1.2f m due to large speed (%1.2f m/s)" % (pointReachedDistance, metersPerSecSpeed)
-
-      # speed & time based triggering
-      lowSpeed = float(self.get('minAnnounceSpeed', 13.89))
-      highSpeed = float(self.get('maxAnnounceSpeed', 27.78))
-      highSpeed = max(highSpeed, lowSpeed + 0.1)
-      lowTime = int(self.get('minAnnounceTime', 10))
-      highTime = int(self.get('maxAnnounceTime', 60))
-      highTime = max(highTime, lowTime)
-      power = float(self.get('announcePower', 2.0))
-      warnTime = (max(lowSpeed, metersPerSecSpeed) - lowSpeed)**power \
-        * (highTime - lowTime) / (highSpeed - lowSpeed)**power \
-        + lowTime
-      warnTime = min(highTime, warnTime)
-      distance = max(distance, warnTime * metersPerSecSpeed)
-        
-      if self.get('debugTbT', False):
-        print "#####"
-        print "min/max announce time: %d/%d s" % (lowTime, highTime)
-        print "trigger distance: %1.2f m (%1.2f s warning)" % (distance, distance/float(metersPerSecSpeed))
-        print "current distance: %1.2f m" % currentDistance
-        print "current speed: %1.2f m/s (%1.2f km/h)" % (metersPerSecSpeed, metersPerSecSpeed*3.6)
-        print "point reached distance: %f m" % pointReachedDistance
-        print "1. triggered=%r, 1.5. triggered=%r, 2. triggered=%r" % (self.espeakFirstTrigger, self.espeakFirstAndHalfTrigger, self.espeakSecondTrigger)
-        if warnTime > 20:
-          print "optional (20 s) trigger distance: %1.2f" % (20.0*metersPerSecSpeed)
-
-      if currentDistance <= pointReachedDistance:
-        """this means we reached the point"""
-        if self.espeakSecondTrigger == False:
-          print "triggering espeak nr. 2"
-          # say the message without distance
-          plaintextMessage = currentStep['descriptionEspeak']
-          # consider turn said even if it was skipped (ignore errors)
-          self.sayTurn(plaintextMessage, 0)
-          self.markCurrentStepAsVisited() # mark this point as visited
-          self.espeakFirstTrigger = True # everything has been said, again :D
-          self.espeakSecondTrigger = True # everything has been said, again :D
-        self.switchToNextStep() # switch to next step
-      else:
-        if currentDistance <= distance:
-          """this means we reached an optimal distance for saying the message"""
-          if self.espeakFirstTrigger == False:
-            print "triggering espeak nr. 1"
-            plaintextMessage = currentStep['descriptionEspeak']
-            if self.sayTurn(plaintextMessage, currentDistance):
-              self.espeakFirstTrigger = True # first message done
-        if self.espeakFirstAndHalfTrigger == False and warnTime > 20:
-          if currentDistance <= (20.0*metersPerSecSpeed):
-            """in case that the warning time gets too big, add an intemediate warning at 20 secconds
-            NOTE: this means it is said after the first trigger
-            """
-            plaintextMessage = currentStep['descriptionEspeak']
-            if self.sayTurn(plaintextMessage, currentDistance):
-              self.espeakFirstAndHalfTrigger = True # intermediate message done
-
-
   def handleMessage(self, message, type, args):
     if message == 'start':
       if type == 'ms':
@@ -512,12 +379,6 @@ class turnByTurn(ranaModule):
           mDistanceFromStart = mDistanceFromStart + mDistanceFromLast
           self.steps.append(step)
         self.steps = dirs['Directions']['Routes'][0]['Steps']
-#        if fromWhere == 'first':
-#          self.currentStepIndex = 0
-#        elif fromWhere == 'closest':
-#          cs = self.getClosestStep()
-#          id = cs['id']
-#          self.currentStepIndex = id
         # some statistics
         metersPerSecSpeed = self.get('metersPerSecSpeed', None)
         dt = time.time() - routeRequestSentTimestamp
@@ -590,12 +451,151 @@ class turnByTurn(ranaModule):
           -> we just start from the closest step"""
           """tbt: not enough data to decide, using closest turn"""
           self.setStepAsCurrent(cs)
-    self.doNavigationUpdate() # run a navigation update
-
+    self.doNavigationUpdate() # run a first time navigation update
+    self.locationWatchID = self.watch('locationUpdated', self.locationUpdateCB)
+    print("tbt: started")
+      
   def stopTBT(self):
     """stop Turn-by-turn navigation"""
+    # remove location watch
+    if self.locationWatchID:
+      self.removeWatch(self.locationWatchID)
+    
     self.goToInitialState()
+    print("tbt: stopped")
 
+  def locationUpdateCB(self, key, newValue, oldValue):
+    """position chnaged, do a tbt navigation update"""
+    if key == "locationUpdated": # just to be sure
+      self.doNavigationUpdate()
+    else:
+      print "tbt: invalid key: %r" % key
+
+  def doNavigationUpdate(self):
+    """do a navigation update"""
+    # make sure there really are some steps
+    if not self.steps:
+      print "tbt: error no navigation steps"
+      return
+    pos = self.get('pos', None)
+    if pos == None:
+      print "tbt: skipping update, invalid position"
+      return
+
+    # get/compute/update necessary the values
+    (lat1,lon1) = pos
+    currentStep = self.getCurrentStep()
+    lat2 = currentStep['Point']['coordinates'][1]
+    lon2 = currentStep['Point']['coordinates'][0]
+    currentDistance = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
+    self.currentDistance = currentDistance # update current distance
+
+    # use some sane minimum distance
+    distance = int(self.get('minAnnounceDistance',100))
+
+    # GHK: make distance speed-sensitive
+    #
+    # I came up with this formula after a lot of exerimentation with
+    # gnuplot.  The idea is to give the user some simple parameters to
+    # adjust yet let him have a lot of control.  There are five
+    # parameters in the equation:
+    #
+    # lowSpeed	Speed below which the pre-announcement time is constant.
+    # lowTime	Announcement time at and below lowSpeed.
+    # highSpeed	Speed above which the announcement time is constant.
+    # highTime	Announcement time at and above highSpeed.
+    # power	Exponential power used in the formula; good values are 0.5-5
+    #
+    # The speeds are in m/s.  Obviously highXXX must be greater than lowXXX.
+    # If power is 1.0, announcement times increase linearly above lowSpeed.
+    # If power < 1.0, times rise rapidly just above lowSpeed and more
+    # gradually approaching highSpeed.  If power > 1.0, times rise
+    # gradually at first and rapidly near highSpeed.  I like power > 1.0.
+    #
+    # The reasoning is that at high speeds you are probably on a
+    # motorway/freeway and will need extra time to get into the proper
+    # lane to take your exit.  That reasoning is pretty harmless on a
+    # high-speed two-lane road, but it breaks down if you are stuck in
+    # heavy traffic on a four-lane freeway (like in Los Angeles
+    # where I live) because you might need quite a while to work your
+    # way across the traffic even though you're creeping along.  But I
+    # don't know a good way to detect whether you're on a multi-lane road,
+    # I chose speed as an acceptable proxy.
+    #
+    # Regardless of speed, we always warn a certain distance ahead (see
+    # "distance" above).  That distance comes from the value in the current
+    # step of the directions.
+    #
+    # BTW, if you want to use gnuplot to play with the curves, try:
+    # max(a,b) = a > b ? a : b
+    # min(a,b) = a < b ? a : b
+    # warn(x,t1,s1,t2,s2,p) = min(t2,(max(s1,x)-s1)**p*(t2-t1)/(s2-s1)**p+t1)
+    # plot [0:160][0:] warn(x,10,50,60,100,2.0)
+    #
+    metersPerSecSpeed = self.get('metersPerSecSpeed', None)
+    pointReachedDistance = int(self.get('pointReachedDistance', 30))
+
+    if metersPerSecSpeed:
+      # check if we can miss the point by going too fast -> mps speed > point reached distance
+      if metersPerSecSpeed > pointReachedDistance*0.75:
+        pointReachedDistance = metersPerSecSpeed*2
+        print "tbt: enlarging point reached distance to: %1.2f m due to large speed (%1.2f m/s)" % (pointReachedDistance, metersPerSecSpeed)
+
+      # speed & time based triggering
+      lowSpeed = float(self.get('minAnnounceSpeed', 13.89))
+      highSpeed = float(self.get('maxAnnounceSpeed', 27.78))
+      highSpeed = max(highSpeed, lowSpeed + 0.1)
+      lowTime = int(self.get('minAnnounceTime', 10))
+      highTime = int(self.get('maxAnnounceTime', 60))
+      highTime = max(highTime, lowTime)
+      power = float(self.get('announcePower', 2.0))
+      warnTime = (max(lowSpeed, metersPerSecSpeed) - lowSpeed)**power \
+        * (highTime - lowTime) / (highSpeed - lowSpeed)**power \
+        + lowTime
+      warnTime = min(highTime, warnTime)
+      distance = max(distance, warnTime * metersPerSecSpeed)
+
+      if self.get('debugTbT', False):
+        print "#####"
+        print "min/max announce time: %d/%d s" % (lowTime, highTime)
+        print "trigger distance: %1.2f m (%1.2f s warning)" % (distance, distance/float(metersPerSecSpeed))
+        print "current distance: %1.2f m" % currentDistance
+        print "current speed: %1.2f m/s (%1.2f km/h)" % (metersPerSecSpeed, metersPerSecSpeed*3.6)
+        print "point reached distance: %f m" % pointReachedDistance
+        print "1. triggered=%r, 1.5. triggered=%r, 2. triggered=%r" % (self.espeakFirstTrigger, self.espeakFirstAndHalfTrigger, self.espeakSecondTrigger)
+        if warnTime > 20:
+          print "optional (20 s) trigger distance: %1.2f" % (20.0*metersPerSecSpeed)
+
+      if currentDistance <= pointReachedDistance:
+        """this means we reached the point"""
+        if self.espeakSecondTrigger == False:
+          print "triggering espeak nr. 2"
+          # say the message without distance
+          plaintextMessage = currentStep['descriptionEspeak']
+          # consider turn said even if it was skipped (ignore errors)
+          self.sayTurn(plaintextMessage, 0)
+          self.markCurrentStepAsVisited() # mark this point as visited
+          self.espeakFirstTrigger = True # everything has been said, again :D
+          self.espeakSecondTrigger = True # everything has been said, again :D
+        self.switchToNextStep() # switch to next step
+      else:
+        if currentDistance <= distance:
+          """this means we reached an optimal distance for saying the message"""
+          if self.espeakFirstTrigger == False:
+            print "triggering espeak nr. 1"
+            plaintextMessage = currentStep['descriptionEspeak']
+            if self.sayTurn(plaintextMessage, currentDistance):
+              self.espeakFirstTrigger = True # first message done
+        if self.espeakFirstAndHalfTrigger == False and warnTime > 20:
+          if currentDistance <= (20.0*metersPerSecSpeed):
+            """in case that the warning time gets too big, add an intemediate warning at 20 secconds
+            NOTE: this means it is said after the first trigger
+            """
+            plaintextMessage = currentStep['descriptionEspeak']
+            if self.sayTurn(plaintextMessage, currentDistance):
+              self.espeakFirstAndHalfTrigger = True # intermediate message done
+
+              
 if(__name__ == "__main__"):
   a = example({}, {})
   a.update()
