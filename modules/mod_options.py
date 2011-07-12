@@ -19,6 +19,7 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import marshal
+import os
 
 def getModule(m,d,i):
   return(options(m,d,i))
@@ -28,10 +29,26 @@ class options(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.options = {}
-    self.scroll = 0
+
+    # profile folder
+    modRanaProfileFolderName = '.modrana'
+    userHomePath = os.getenv("HOME")
+    self.profileFolderPath = os.path.join(userHomePath, modRanaProfileFolderName)
+    # check the profile path and create the folders if necessary
+    self.checkProfilePath()
+
+    # load persistant options
     self.load()
     self.on = '<span color="green">ON</span>'
     self.off = '<span color="red">OFF</span>'
+
+  def getProfilePath(self):
+    """return path to the profile folder"""
+    return self.profileFolderPath
+
+  def getOptionsFilename(self):
+    """return path to the options store filename"""
+    return os.path.join(self.getProfilePath(),"options.bin")
 
   def _getCategoryID(self, id):
     return "opt_cat_%s" % id # get a standardized id
@@ -631,7 +648,7 @@ class options(ranaModule):
   def save(self):
     print "options: saving options"
     try:
-      f = open(self.optionsFilename(), "w")
+      f = open(self.getOptionsFilename(), "w")
       marshal.dump(self.d, f)
       f.close()
       print "options: successfully saved"
@@ -640,7 +657,7 @@ class options(ranaModule):
 
   def load(self):
     try:
-      f = open(self.optionsFilename(), "r")
+      f = open(self.getOptionsFilename(), "r")
       newData = marshal.load(f)
       f.close()
       if 'tileFolder' in newData: #TODO: do this more elegantly
@@ -664,9 +681,6 @@ class options(ranaModule):
     self.set('centred', True) # set centering to True at start to get setView to run
     self.set('editBatchMenuActive', False)
 
-      
-  def optionsFilename(self):
-    return("data/options.bin")
   
   def handleMessage(self, message, type, args):
     if type=="ml" and message=="scroll":
@@ -826,6 +840,19 @@ class options(ranaModule):
 
           # in corner: row number
           self.menuModule.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y+3*border, w * 0.15 - border, 20)
+
+  def checkProfilePath(self):
+    """check if the profile folder exists, try to create it if not"""
+    if os.path.exists(self.getProfilePath()):
+      return True
+    else:
+      try:
+        os.makedirs(self.profileFolderPath)
+        print "creating profile folder in: %s" % self.profileFolderPath
+        return True
+      except Exception, e:
+        print "options:Creating profile folder in path: %s failed:\n%s" % (self.profileFolderPath, e)
+        return False
 
   def shutdown(self):
     """save the dictionary on exit"""

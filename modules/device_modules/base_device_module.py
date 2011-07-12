@@ -27,7 +27,7 @@ class deviceModule(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    
+        
   def getDeviceName(self):
     return "unknown device"
 
