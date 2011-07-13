@@ -20,6 +20,7 @@
 from base_module import ranaModule
 import marshal
 import os
+import modrana_utils
 
 def getModule(m,d,i):
   return(options(m,d,i))
@@ -35,7 +36,7 @@ class options(ranaModule):
     userHomePath = os.getenv("HOME")
     self.profileFolderPath = os.path.join(userHomePath, modRanaProfileFolderName)
     # check the profile path and create the folders if necessary
-    self.checkProfilePath()
+    modrana_utils.createFolderPath(self.profileFolderPath)
 
     # load persistant options
     self.load()
@@ -844,18 +845,18 @@ class options(ranaModule):
           # in corner: row number
           self.menuModule.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y+3*border, w * 0.15 - border, 20)
 
-  def checkProfilePath(self):
-    """check if the profile folder exists, try to create it if not"""
-    if os.path.exists(self.getProfilePath()):
-      return True
-    else:
-      try:
-        os.makedirs(self.profileFolderPath)
-        print "creating profile folder in: %s" % self.profileFolderPath
-        return True
-      except Exception, e:
-        print "options:Creating profile folder in path: %s failed:\n%s" % (self.profileFolderPath, e)
-        return False
+#  def checkProfilePath(self):
+#    """check if the profile folder exists, try to create it if not"""
+#    if os.path.exists(self.getProfilePath()):
+#      return True
+#    else:
+#      try:
+#        os.makedirs(self.profileFolderPath)
+#        print "creating profile folder in: %s" % self.profileFolderPath
+#        return True
+#      except Exception, e:
+#        print "options:Creating profile folder in path: %s failed:\n%s" % (self.profileFolderPath, e)
+#        return False
 
   def shutdown(self):
     """save the dictionary on exit"""
