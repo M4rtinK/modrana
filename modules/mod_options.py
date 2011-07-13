@@ -46,9 +46,12 @@ class options(ranaModule):
     """return path to the profile folder"""
     return self.profileFolderPath
 
-  def getOptionsFilename(self):
+  def getOptionsFilePath(self):
     """return path to the options store filename"""
     return os.path.join(self.getProfilePath(),"options.bin")
+
+  def getCacheFolderPath(self):
+    return os.join(self.getProfilePath(), "cache")
 
   def _getCategoryID(self, id):
     return "opt_cat_%s" % id # get a standardized id
@@ -648,7 +651,7 @@ class options(ranaModule):
   def save(self):
     print "options: saving options"
     try:
-      f = open(self.getOptionsFilename(), "w")
+      f = open(self.getOptionsFilePath(), "w")
       marshal.dump(self.d, f)
       f.close()
       print "options: successfully saved"
@@ -657,7 +660,7 @@ class options(ranaModule):
 
   def load(self):
     try:
-      f = open(self.getOptionsFilename(), "r")
+      f = open(self.getOptionsFilePath(), "r")
       newData = marshal.load(f)
       f.close()
       if 'tileFolder' in newData: #TODO: do this more elegantly
