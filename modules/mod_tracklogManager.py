@@ -38,8 +38,6 @@ class tracklogManager(ranaModule):
     # but we dont need that to setup the cathegories menu
     self.setupCathegoriesMenu()
 
-
-
   def handleMessage(self, message, type, args):
     if message in ["up","down","reset"]:
       currentCat = self.get('currentTracCat', '')
@@ -80,10 +78,6 @@ class tracklogManager(ranaModule):
 
     elif message == 'loadTrackProfile':
       # get the data needed for drawing the dynamic route profile in the osd
-#      filename = self.get('currentTrack', None)
-#      loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
-#      loadedTracklogs = loadTl.tracklogs
-#      track = filter(lambda x: x.filename == filename, loadedTracklogs).pop()
       track = self.LTModule.getActiveTracklog()
       self.m.get('showOSD', None).routeProfileData = track.perElevList
 
@@ -209,7 +203,6 @@ class tracklogManager(ranaModule):
 
           (text1,text2,onClick) = self.describeTracklog(list[index], cat)
 
-#          y = y1 + (row+1) * dy
           y = y4 + (row) * dy
           w = w1 - (x4-x1)
 
@@ -299,7 +292,6 @@ class tracklogManager(ranaModule):
     isVisible = (currentPath in visibleTracklogs)
 
     menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")
-#    menus.addItem('tracklogTools', 'rename', 'generic', 'loadTracklogs:renameActiveTracklog|set:menu:tracklogInfo')
     menus.addItem('tracklogTools', 'elevation#get', 'generic', 'tracklogManager:getElevation|set:menu:tracklogInfo')
     menus.addItem('tracklogTools', 'active#set', 'generic', 'set:currentTrack:%s|tracklogManager:loadTrackProfile|set:menu:None' % track.filename)
     menus.addItem('tracklogTools', 'inactive#set', 'generic', 'set:currentTrack:None|tracklogManager:unLoadTrackProfile|set:menu:None')
@@ -313,10 +305,6 @@ class tracklogManager(ranaModule):
     if isVisible:
       colorName = visibleTracklogs[currentPath]['colorName']
       menus.addItem('tracklogTools', 'change color#%s' % colorName, 'generic', 'tracklogManager:setupColorMenu|set:menu:chooseDistColor')
-
-#    menus.addItem('tracklogTools', 'cathegory#set', 'generic', 'set:menu:tracklogSetCathegory')
-#    menus.addItem('tracklogTools', 'tracklog#delete', 'generic', 'tracklogManager:askDeleteActiveTracklog')
-
 
 
   def describeTracklog(self, item, category):
@@ -344,11 +332,6 @@ class tracklogManager(ranaModule):
 
       cr.move_to(x, y+textheight)
       cr.show_text(text)
-
-
-
-
-
 
 
 if(__name__ == "__main__"):

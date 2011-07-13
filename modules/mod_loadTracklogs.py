@@ -25,10 +25,8 @@ import geo
 import os
 import glob
 import cPickle
-#import marshal
 from time import clock
 from time import gmtime, strftime
-#from time import clock
 
 def getModule(m,d,i):
   return(loadTracklogs(m,d,i))
@@ -61,8 +59,6 @@ class loadTracklogs(ranaModule):
         self.tracklogFolder = (folder+'/')
     else:
       self.tracklogFolder = 'tracklogs/'
-
-#    self.load()
 
   def handleMessage(self, message, type, args):
     if message == 'loadActive':
@@ -619,12 +615,6 @@ class GPXTracklog(tracklog):
       ci = CacheItem(self.clusters, self.routeInfo, self.perElevList)
       cache[filename] = ci
       
-
-#    self.checkElevation()
-#
-#    if self.elevation == True:
-#      self.getPerElev()
-
 
   def modified(self):
     """the tracklog has been modified, recount all the statistics and clusters"""
