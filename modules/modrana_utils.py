@@ -116,4 +116,21 @@ def isTheStringAnImage(s):
     # lets hope it really is a tile
     return True
 
-
+def createFolderPath(newPath):
+  """
+  Creat a path for a directory and all needed parent forlders
+  -> parent directoryies will be created
+  -> if directory already exists, then do nothing
+  -> if there is another filsystem object (like a file) with the same name, raise an exception
+  """
+  if os.path.isdir(newPath):
+    pass
+  elif os.path.isfile(newPath):
+    raise OSError("cannot create directory, file already exists: '%s'" % newPath)
+  else:
+    print("creating path: %s" % newPath)
+    head, tail = os.path.split(newPath)
+    if head and not os.path.isdir(head):
+        mkdirs(head)
+    if tail:
+        os.mkdir(newPath)
