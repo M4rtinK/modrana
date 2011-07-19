@@ -30,7 +30,7 @@ class units(ranaModule):
     ranaModule.__init__(self, m, d, i)
     self.mileInMeters = 1609.344
     self.mileInKiloMeters = 1.609344
-    self.yardsInMile = 1760
+    self.feetInMile = 5280
     """
     # we consider 2km/h as as stationary 
     (to filter out the standart GPS drift while not moving)
@@ -44,14 +44,14 @@ class units(ranaModule):
     return (km * 1000) # km to m
 
   def km2Miles(self, km):
-    return (km * 0.621371192)  # km to miles
+    return km / self.mileInKiloMeters  # km to miles
   
   def km2CurrentUnit(self, km):
     unitType = self.get("unitType", "km")
     if unitType == 'km':
       return km
     else:
-      return (km * 0.621371192)  # km to miles
+      return self.km2Miles(km)
 
   def m2CurrentUnitString(self, m,dp=None, short=False):
     km = self.m2km(m)
@@ -63,21 +63,21 @@ class units(ranaModule):
     small = False
     if unitType == 'km':
       if km <= 1: # we now count in meters
-        dp = 0 # no need to count the odd centimeter with current GPS accuracy
+        dp = -1 # no need to count the odd meter with current GPS accuracy
         distance = km*1000
         small = True
       else:
         distance = km
     else: # just miles for now
-      if km<self.mileInKiloMeters:
-        miles = km *  0.621371192
-        distance = miles*self.yardsInMile
+      if km<self.mileInKiloMeters / 10:
+        distance = self.km2Miles(km) * self.feetInMile
+        dp = -1 # no need to count the odd foot with current GPS accuracy
         small = True
       else:
-        distance = km *  0.621371192
+        distance = self.km2Miles(km)
 
     # rounding
-    if dp==None:
+    if dp is None:
       numberString = "%f" % distance
     elif dp==0:
       n = int(round(distance, 0))
@@ -89,8 +89,8 @@ class units(ranaModule):
     # strip trailing zeroes
 
     #is it a string float representation ?
-    if len(numberString.split('.')) > 1: # strip possible trailing zeroes
-      numberString = numberString.rstrip('.0')
+    if '.' in numberString: # strip possible trailing zeroes
+      numberString = numberString.rstrip('0').rstrip('.')
       
     # short/lon unit name
     if unitType == 'km':
@@ -108,11 +108,11 @@ class units(ranaModule):
       
     else: # miles
       if short:
-        unitString = "miles"
-        smallUnitString = "yards"
+        unitString = "mi"
+        smallUnitString = "ft"
       else:
         unitString = "miles"
-        smallUnitString = "yards"
+        smallUnitString = "feet"
 
       if small:
         return "%s %s" % (numberString, smallUnitString)
@@ -128,7 +128,7 @@ class units(ranaModule):
       else:
         return "%000.0f meters" % (km * 1000.0)
     else:
-      return "%1.2f miles" % (km * 0.621371192)  # km to miles
+      return "%1.2f miles" % self.km2Miles(km)
     
   def km2CurrentUnitPerHourString(self, km, dp=None, short=True):
     """return a string with the speed rouded to the current unit
@@ -142,10 +142,10 @@ class units(ranaModule):
     if unitType == 'km':
       speed = km
     else: # miles
-      speed = km * 0.621371192
+      speed = self.km2Miles(km)
 
     # rounding
-    if dp == None:
+    if dp is None:
       numberString = "%1.0f" % speed
     elif dp == 0:
       n = int(round(speed, 0))
@@ -179,7 +179,7 @@ class units(ranaModule):
     if unitType == 'km':
       return "%1.0f kmh" % km
     else:
-      return "%1.0f mph" % (km * 0.621371192) #  km to miles
+      return "%1.0f mph" % self.km2Miles(km)
 
   def currentUnitPerHourString(self):
     unitType = self.get("unitType", "km")
@@ -194,7 +194,7 @@ class units(ranaModule):
     if unitType == 'km':
       return "km"
     else:
-      return "miles"
+      return "mi"
 
   def currentUnitStringFullName(self):
     unitType = self.get("unitType", "km")
@@ -234,7 +234,7 @@ class units(ranaModule):
        """
 
     currentspeedKMH = self.get('speed', None)
-    if currentspeedKMH !=None:
+    if currentspeedKMH is not None:
       return (currentspeedKMH>self.notMovingspeed)
     else:
       # signalise that we cant decite this
