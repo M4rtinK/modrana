@@ -45,14 +45,19 @@ class options(ranaModule):
 
   def getProfilePath(self):
     """return path to the profile folder"""
+    # check if it exists and create it if not
+    modrana_utils.createFolderPath(self.profileFolderPath)
     return self.profileFolderPath
 
   def getOptionsFilePath(self):
     """return path to the options store filename"""
+    # check if it exists and create it if not
     return os.path.join(self.getProfilePath(),"options.bin")
 
   def getCacheFolderPath(self):
-    return os.join(self.getProfilePath(), "cache")
+    cacheFolderPath = os.path.join(self.getProfilePath(), "cache")
+    modrana_utils.createFolderPath(cacheFolderPath)
+    return cacheFolderPath
 
   def _getCategoryID(self, id):
     return "opt_cat_%s" % id # get a standardized id

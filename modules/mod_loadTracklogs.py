@@ -1,4 +1,3 @@
-import os.path
 #!/usr/bin/python
 #----------------------------------------------------------------------------
 # Sample of a Rana module.
@@ -23,6 +22,7 @@ from base_module import ranaModule
 from upoints import gpx
 import geo
 import os
+import modrana_utils
 import glob
 import cPickle
 from time import clock
@@ -101,8 +101,9 @@ class loadTracklogs(ranaModule):
     print "loading cache"
     start = clock()
     try:
-      f = open(self.cachePath, 'r')
+      f = open(self.getTracklogCachePath(), 'r')
       self.cache = cPickle.load(f)
+      f.close()
     except:
       print "loadTracklogs: loading cache from file failed"
       self.cache = {}
@@ -194,7 +195,13 @@ class loadTracklogs(ranaModule):
     path = self.get('activeTracklogPath', None)
     return path
 
-
+  def getTracklogCachePath(self):
+    options = self.m.get('options', None)
+    if options:
+      return os.path.join(options.getCacheFolderPath(), 'tracklog_cache.txt')
+    else:
+      print("loadTracklogs: options module missing")
+      return None
 
   def listAvailableTracklogs(self):
     print "** making a list of available tracklogs"
@@ -212,7 +219,7 @@ class loadTracklogs(ranaModule):
     availableFiles = []
     pathList = []
     for folder in currentFolders:
-      #TODO: suport other tracklogs
+      #TODO: support other tracklogs
       folderFiles = glob.glob(tf+folder+'/*.gpx')
       folderFiles.extend(glob.glob(tf+folder+'/*.GPX'))
       # remove possible folders
@@ -222,7 +229,7 @@ class loadTracklogs(ranaModule):
         filename = os.path.split(file)[1]
         lastModifiedEpochSecs = os.path.getmtime(path)
         lastModified = strftime("%d.%m.%Y %H:%M:%S",gmtime(lastModifiedEpochSecs))
-        size = self.convertBytes(os.path.getsize(path))
+        size = modrana_utils.bytes2PrettyUnitString(os.path.getsize(path))
         extension = os.path.splitext(path)[1]
         cat = folder
         item={'path':path,
@@ -278,25 +285,6 @@ class loadTracklogs(ranaModule):
 #    # update the current in memmory list
 #    self.tracklogList[index]['cat'] = cathegory
 
-  # from:
-  # http://www.5dollarwhitebox.org/drupal/node/84
-  def convertBytes(self, bytes):
-      bytes = float(bytes)
-      if bytes >= 1099511627776:
-          terabytes = bytes / 1099511627776
-          size = '%.2fTB' % terabytes
-      elif bytes >= 1073741824:
-          gigabytes = bytes / 1073741824
-          size = '%.2fGB' % gigabytes
-      elif bytes >= 1048576:
-          megabytes = bytes / 1048576
-          size = '%.2fMB' % megabytes
-      elif bytes >= 1024:
-          kilobytes = bytes / 1024
-          size = '%.2fKB' % kilobytes
-      else:
-          size = '%.2fb' % bytes
-      return size
 
 #  def load(self):
 #    start = clock()
@@ -332,11 +320,13 @@ class loadTracklogs(ranaModule):
 
   def save(self):
     try:
-      f = open(self.cachePath, 'w')
+      print self.getTracklogCachePath()
+      f = open(self.getTracklogCachePath(), 'w')
       cPickle.dump(self.cache, f)
       f.close()
-    except:
-      print "loadTracklogs: cant store tracklog data to cache, tracklogs wil be loaded from files next time"
+    except Exception, e:
+      print "loadTracklogs: can't store tracklog data to cache, tracklogs will be loaded from files next time"
+      print("exception: %r" % e)
 
 #  def saveClusters(self, clusters):
 
