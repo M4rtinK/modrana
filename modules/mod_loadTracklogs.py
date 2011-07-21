@@ -38,7 +38,6 @@ class loadTracklogs(ranaModule):
     ranaModule.__init__(self, m, d, i)
     self.tracklogs = {} # dictionary of all loaded tracklogs, path is the key
     #self.set('tracklogs', self.tracklogs) # now we make the list easily acessible to other modules
-    self.cachePath = 'cache/tracklogs/tracklog_cache.txt'
     self.cache = {}
     self.tracklogFolder = 'tracklogs/'
     self.tracklogList = []
