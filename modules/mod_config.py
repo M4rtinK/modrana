@@ -21,7 +21,6 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import os
-from time import clock
 from configobj import ConfigObj
 
 def getModule(m,d,i):
