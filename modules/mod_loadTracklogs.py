@@ -25,6 +25,7 @@ import os
 import modrana_utils
 import glob
 import cPickle
+import modrana_utils
 from time import clock
 from time import gmtime, strftime
 
@@ -39,25 +40,12 @@ class loadTracklogs(ranaModule):
     self.tracklogs = {} # dictionary of all loaded tracklogs, path is the key
     #self.set('tracklogs', self.tracklogs) # now we make the list easily acessible to other modules
     self.cache = {}
-    self.tracklogFolder = 'tracklogs/'
     self.tracklogList = []
     self.tracklogPathList = []
     self.categoryList = []
 
-
   def firstTime(self):
-    folder = self.get('tracklogFolder', 'tracklogs/')
-
-    if folder != None:
-      
-      # make sure there is a slash on the end
-      # TODO: check if this is too platform specific
-      if folder[-1] == '/':
-        self.tracklogFolder = folder
-      else:
-        self.tracklogFolder = (folder+'/')
-    else:
-      self.tracklogFolder = 'tracklogs/'
+    self._createBasicFolderStructure()
 
   def handleMessage(self, message, type, args):
     if message == 'loadActive':
@@ -93,7 +81,34 @@ class loadTracklogs(ranaModule):
 #        # get current tracklog filename, sans extension
 #        # start an entry box
 
+  def _getTFP(self):
+    options = self.m.get('options', None)
+    if options:
+      tracklogFolder = options.getTracklogsFolderPath()
+      # check if the folder exists and create it if it doesn't
+      modrana_utils.createFolderPath(tracklogFolder)
+      return tracklogFolder
+    else:
+      print("loadTracklogs:no options module, can't get tracklog folder path")
+      return None
 
+  def _getTFSubPath(self, subPath):
+    """return a tracklog folder sub path,
+    assure the patch exists before returning it"""
+    tracklogFolderPath = self._getTFP()
+    if tracklogFolderPath == None:
+      print("loadTracklogs: can't get tracklog sub path - tracklog folder path is unknown")
+      return None # tracklog folder path is unknown
+    else:
+      TFSubPath = os.path.join(tracklogFolderPath, subPath)
+      modrana_utils.createFolderPath(TFSubPath)
+      return TFSubPath
+
+  def _createBasicFolderStructure(self):
+    """trigger creation of the logs, misc and online folders"""
+    self._getTFSubPath("logs")
+    self._getTFSubPath("online")
+    self._getTFSubPath("misc")
 
   def loadCache(self):
     # unpickle the cache from file
@@ -205,9 +220,9 @@ class loadTracklogs(ranaModule):
   def listAvailableTracklogs(self):
     print "** making a list of available tracklogs"
 
-    tf = self.tracklogFolder
+    tf = self._getTFP()
     # does the tracklog folder exist ?
-    if not os.path.exists(tf):
+    if tf == None or not os.path.exists(tf):
       return # no tracklog folder, nothing to list
     # get the available directories,
     # each directory represents a category
@@ -244,9 +259,9 @@ class loadTracklogs(ranaModule):
     self.categoryList = currentFolders
 
     print "*  using this tracklog folder:"
-    print self.tracklogFolder
+    print self._getTFP()
     print "*  does it exist ?"
-    print os.path.exists(self.tracklogFolder)
+    print os.path.exists(self._getTFP())
     print "*  there are %d tracklogs available" % len(availableFiles)
     self.tracklogPathList = pathList
     self.tracklogList = availableFiles
@@ -424,21 +439,14 @@ class loadTracklogs(ranaModule):
 
   def storeTracklog(self,tracklog,filename,cat,type,refresh="True"):
     """store tracklog and return the resulting path"""
-    folder = self.tracklogFolder
-    path = folder + cat +'/'
-    # does the directory exist ?
-    if not os.path.exists(path):
-      # try to create the directory
-      try:
-        os.makedirs(path)
-      except Exception, e:
-        print "loadTracklogs: tracklog folder unusable"
-        print "exception: %s" % e
-        self.sendMessage('notification:Error: tracks folder unusable#3')
-        return None
+    folder = self._getTFP()
+    if folder == None:
+      print("loadTracklogs: can't store tracklog - path to tracklog folder is unknown or unusable")
+      return None
+    path = os.path.join(folder, cat)
     # is it a directory ?
     if not os.path.isdir(path):
-      self.sendMessage('Error: tracks folder unusable#3')
+      self.sendMessage("loadTracklogs: can't store tracklog - tracklgo folder is not a directory")
       return None
 
     if type=="GPX":
