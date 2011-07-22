@@ -124,10 +124,14 @@ def createFolderPath(newPath):
   -> if directory already exists, then do nothing
   -> if there is another filsystem object (like a file) with the same name, raise an exception
   """
+  if not newPath:
+    print("cannot create folder, wrong path: ", newPath)
+    return False
   if os.path.isdir(newPath):
-    pass
+    return True
   elif os.path.isfile(newPath):
-    raise OSError("cannot create directory, file already exists: '%s'" % newPath)
+    print("cannot create directory, file already exists: '%s'" % newPath)
+    return False
   else:
     print("creating path: %s" % newPath)
     head, tail = os.path.split(newPath)
@@ -135,6 +139,7 @@ def createFolderPath(newPath):
         mkdirs(head)
     if tail:
         os.mkdir(newPath)
+    return True
 
 # from:
 # http://www.5dollarwhitebox.org/drupal/node/84
