@@ -26,6 +26,7 @@ import gtk
 import hildon
 import location
 import time
+import modrana_utils
 """
 why dbus.glib ?
 if you import only "dbus", it can't find its mainloop for callbacks
@@ -300,6 +301,20 @@ class device_n900(deviceModule):
 
   def hasKineticScrollingList(self):
     return True
+  
+  def hasCustomTracklogsFolderPath(self):
+    """tracklogs are now in /home/user/MyDocs/tracklogs by default on Maemo 5"""
+    return True
+
+  def getCustomTracklogsFolderPath(self):
+    customTracklogsFolderPath = "/home/user/MyDocs/tracklogs"
+    # check if the folder exists and create it if it doesn't
+    modrana_utils.createFolderPath(customTracklogsFolderPath)
+    return customTracklogsFolderPath
+
+
+
+  # ** LOCATION **
 
   def handlesLocation(self):
       """on N900 location is handled through liblocation"""
