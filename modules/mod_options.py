@@ -59,6 +59,15 @@ class options(ranaModule):
     modrana_utils.createFolderPath(cacheFolderPath)
     return cacheFolderPath
 
+  def getTracklogsFolderPath(self):
+    if self.dmod:
+      if self.dmod.hasCustomTracklogsFolderPath():
+        return self.dmod.getCustomTracklogsFolderPath()
+      else:
+        return os.path.join(self.getProfilePath(),"tracklogs")
+    else:
+      return os.path.join(self.getProfilePath(),"tracklogs")
+
   def _getCategoryID(self, id):
     return "opt_cat_%s" % id # get a standardized id
 
