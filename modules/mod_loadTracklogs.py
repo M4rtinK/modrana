@@ -228,7 +228,7 @@ class loadTracklogs(ranaModule):
     # each directory represents a category
     currentFolders = os.listdir(tf)
     # leave just nonhidden folders
-    currentFolders = filter(lambda x: os.path.isdir(tf+x) and x[0]!='.', currentFolders)
+    currentFolders = filter(lambda x: os.path.isdir(tf) and x[0]!='.', currentFolders)
     # add files from all available folders
     availableFiles = []
     pathList = []
