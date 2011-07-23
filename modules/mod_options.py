@@ -55,11 +55,13 @@ class options(ranaModule):
     return os.path.join(self.getProfilePath(),"options.bin")
 
   def getCacheFolderPath(self):
+    """return path to a folder used for various cache data"""
     cacheFolderPath = os.path.join(self.getProfilePath(), "cache")
     modrana_utils.createFolderPath(cacheFolderPath)
     return cacheFolderPath
 
   def getTracklogsFolderPath(self):
+    """return path to a folder for storing tracklogs"""
     if self.dmod:
       if self.dmod.hasCustomTracklogFolderPath():
         return self.dmod.getCustomTracklogFolderPath()
@@ -67,6 +69,17 @@ class options(ranaModule):
         return os.path.join(self.getProfilePath(),"tracklogs")
     else:
       return os.path.join(self.getProfilePath(),"tracklogs")
+
+  def getMapFolderPath(self):
+    """return a path to folder for storing map data"""
+    if self.dmod:
+      if self.dmod.hasCustomMapFolderPath():
+        return self.dmod.getCustomMapFolderPath()
+      else:
+        return os.path.join(self.getProfilePath(),"maps")
+    else:
+      return os.path.join(self.getProfilePath(),"maps")
+
 
   def _getCategoryID(self, id):
     return "opt_cat_%s" % id # get a standardized id
