@@ -61,8 +61,8 @@ class options(ranaModule):
 
   def getTracklogsFolderPath(self):
     if self.dmod:
-      if self.dmod.hasCustomTracklogsFolderPath():
-        return self.dmod.getCustomTracklogsFolderPath()
+      if self.dmod.hasCustomTracklogFolderPath():
+        return self.dmod.getCustomTracklogFolderPath()
       else:
         return os.path.join(self.getProfilePath(),"tracklogs")
     else:

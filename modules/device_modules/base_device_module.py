@@ -127,14 +127,23 @@ class deviceModule(ranaModule):
     """stop handling location - check handlesLocation if this is supported"""
     pass
 
-  def hasCustomTracklogsFolderPath(self):
+  def hasCustomTracklogFolderPath(self):
     """inform weather this device has a custom tracklogs folder path
     NOTE: the getCustomTracklogsFolderPath should be only called when
     this method returns True"""
     return False
 
-  def getCustomTracklogsFolderPath(self):
-    pass
+  def getCustomTracklogFolderPath(self):
+    return None
+
+  def hasCustomMapFolderPath(self):
+    """inform weather this device has a custom map folder path
+    NOTE: the getCustomMapFolderPath should be only called when
+    this method returns True"""
+    return False
+
+  def getCustomMapFolderPath(self):
+    return None
   
 #  def getAutorotationSupported(self):
 #    return False

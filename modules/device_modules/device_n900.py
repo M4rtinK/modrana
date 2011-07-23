@@ -301,18 +301,24 @@ class device_n900(deviceModule):
 
   def hasKineticScrollingList(self):
     return True
-  
-  def hasCustomTracklogsFolderPath(self):
+
+  # ** PATHS **
+
+  def hasCustomTracklogFolderPath(self):
     """tracklogs are now in /home/user/MyDocs/tracklogs by default on Maemo 5"""
     return True
 
-  def getCustomTracklogsFolderPath(self):
+  def getCustomTracklogFolderPath(self):
     customTracklogsFolderPath = "/home/user/MyDocs/tracklogs"
     # check if the folder exists and create it if it doesn't
     modrana_utils.createFolderPath(customTracklogsFolderPath)
     return customTracklogsFolderPath
 
+  def hasCustomMapFolderPath(self):
+    return True
 
+  def getCustomMapFolderPath(self):
+    return "/home/user/MyDocs/.maps/"
 
   # ** LOCATION **
 
