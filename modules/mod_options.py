@@ -45,18 +45,18 @@ class options(ranaModule):
 
   def getProfilePath(self):
     """return path to the profile folder"""
-    # check if it exists and create it if not
+    # check if the path exists and create it if not
     modrana_utils.createFolderPath(self.profileFolderPath)
     return self.profileFolderPath
 
   def getOptionsFilePath(self):
     """return path to the options store filename"""
-    # check if it exists and create it if not
     return os.path.join(self.getProfilePath(),"options.bin")
 
   def getCacheFolderPath(self):
     """return path to a folder used for various cache data"""
     cacheFolderPath = os.path.join(self.getProfilePath(), "cache")
+    # check if the path exists and create it if not
     modrana_utils.createFolderPath(cacheFolderPath)
     return cacheFolderPath
 
@@ -64,22 +64,39 @@ class options(ranaModule):
     """return path to a folder for storing tracklogs"""
     if self.dmod:
       if self.dmod.hasCustomTracklogFolderPath():
-        return self.dmod.getCustomTracklogFolderPath()
+        customTFPath = self.dmod.getCustomTracklogFolderPath()
+        # check if the path exists and create it if not
+        modrana_utils.createFolderPath(customTFPath)
+        return customTFPath
       else:
-        return os.path.join(self.getProfilePath(),"tracklogs")
+        defaultPath = os.path.join(self.getProfilePath(),"tracklogs")
+        # check if the path exists and create it if not
+        modrana_utils.createFolderPath(defaultPath)
+        return defaultPath
     else:
-      return os.path.join(self.getProfilePath(),"tracklogs")
+      defaultPath = os.path.join(self.getProfilePath(),"tracklogs")
+      # check if the path exists and create it if not
+      modrana_utils.createFolderPath(defaultPath)
+      return defaultPath
 
   def getMapFolderPath(self):
     """return a path to folder for storing map data"""
     if self.dmod:
       if self.dmod.hasCustomMapFolderPath():
-        return self.dmod.getCustomMapFolderPath()
+        customMFPath = self.dmod.getCustomMapFolderPath()
+        # check if the path exists and create it if not
+        modrana_utils.createFolderPath(customMFPath)
+        return customMFPath
       else:
-        return os.path.join(self.getProfilePath(),"maps")
+        defaultPath = os.path.join(self.getProfilePath(),"maps")
+        # check if the path exists and create it if not
+        modrana_utils.createFolderPath(defaultPath)
+        return defaultPath
     else:
-      return os.path.join(self.getProfilePath(),"maps")
-
+      defaultPath = os.path.join(self.getProfilePath(),"maps")
+      # check if the path exists and create it if not
+      modrana_utils.createFolderPath(defaultPath)
+      return defaultPath
 
   def _getCategoryID(self, id):
     return "opt_cat_%s" % id # get a standardized id
