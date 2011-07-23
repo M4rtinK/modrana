@@ -23,21 +23,17 @@ from tilenames import *
 from time import clock
 import time
 import os
-import sys
 import geo
 from threading import Thread
 import threading
 import urllib3
-import random
 #import traceback
 import modrana_utils
 
-
-
+# socket timeout
 import socket
 timeout = 30 # this sets timeout for all sockets
 socket.setdefaulttimeout(timeout)
-
 
 
 class TileNotImageException(Exception):
@@ -48,22 +44,9 @@ class TileNotImageException(Exception):
          message = "the downloaded tile is not an image as per \
 its magic number (it is probably an error response webpage \
 returned by the server)"
-#         message = "the downloaded tile is not an image as per "
-#         message+= "its magic number (it is probably an error response webpage "
-#         message+= "returned by the server)"
 
          return message
          
-
-#from modules.pyrender.tilenames import xy2latlon
-import sys
-if(__name__ == '__main__'):
-  sys.path.append('pyroutelib2')
-else:
-  sys.path.append('modules/pyroutelib2')
-
-import tiledata
-
 def getModule(m,d,i):
   return(mapData(m,d,i))
 
@@ -86,7 +69,17 @@ class mapData(ranaModule):
     """ how often should be the download info
     updated during batch, in seconds"""
     self.batchInfoUpdateInterval = 0.5
+    self.mapFolderPath = None
 
+  def firstTime(self):
+    # cache the map folder path
+    options = self.m.get('options', None)
+    if options:
+      self.mapFolderPath = options.getMapFolderPath()
+
+  def _getTileFolderPath(self):
+    """return path to the map folder"""
+    return self.mapFolderPath
 
   def listTiles(self, route):
     """List all tiles touched by a polyline"""
@@ -106,13 +99,14 @@ class mapData(ranaModule):
     """
     print "Checking if there are duplicated tiles"
     start = clock()
-#    self.currentTilesToGet = tilesToDownload # this is for displaying the tiles for debugging reasons
-    tileFolder = self.get('tileFolder', None) # where should we store the downloaded tiles
+    tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
+    if tileFolder == None:
+      print "mapData: tile folder path unknown or unusable"
+      return []
     layer = self.get('layer', None) # TODO: manual layer setting
     maplayers = self.get('maplayers', None) # a distionary describing supported maplayers
     extension = maplayers[layer]['type'] # what is the extension for the current layer ?
     folderPrefix = maplayers[layer]['folderPrefix'] # what is the extension for the current layer ?
-#    alreadyDownloadedTiles = set(os.listdir(tileFolderPath)) # already dowloaded tiles
 
     mapTiles = self.m.get('mapTiles', None)
 
@@ -123,9 +117,6 @@ class mapData(ranaModule):
       filePath = tileFolder + mapTiles.getImagePath(x, y, z, folderPrefix, extension)
       if not os.path.exists(filePath): # we dont have this file
         neededTiles.append(tile)
-#      if not os.path.exists(filePath): # we dont have this file
-#        url = self.getTileUrl(x, y, z, layer) # generate url
-#        urlsAndFilenames.append((url,filePath)) # store url and path
 
     print "Downloading %d new tiles." % len(neededTiles)
     print "Removing already available tiles from dl took %1.2f ms" % (1000 * (clock() - start))
@@ -134,7 +125,7 @@ class mapData(ranaModule):
 
   def getTileUrlAndPath(self,x,y,z,layer):
     mapTiles = self.m.get('mapTiles', None)
-    tileFolder = self.get('tileFolder', None) # where should we store the downloaded tiles
+    tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
     maplayers = self.get('maplayers', None) # a distionary describing supported maplayers
     extension = maplayers[layer]['type'] # what is the extension for the current layer ?
     folderPrefix = maplayers[layer]['folderPrefix'] # what is the extension for the current layer ?
@@ -148,7 +139,7 @@ class mapData(ranaModule):
        optionaly check for duplicates
     """
 
-    tileFolder = self.get('tileFolder', None) # where should we store the downloaded tiles
+    tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
     print "tiles for the batch will be downloaded to: %s" % tileFolder
 
     check = self.get('checkTiles', False)
@@ -687,11 +678,6 @@ class mapData(ranaModule):
         dl = False
         try:
 
- #TESTING ONLY ! - random error generator
-#          r = random.randint(1, 6)
-#          if r == 6:
-#            "BOOM"/2
-
           dlSize = self.saveTileForURL(item)
         except Exception, e:
           failed = True
@@ -1003,7 +989,7 @@ class mapData(ranaModule):
 
   def getFreeSpaceText(self):
     """return a string describing the space available on the filesystem where the tilefolder is"""
-    path = self.get('tileFolder', None)
+    path = self._getTileFolderPath()
     f = os.statvfs(path)
     freeSpaceInBytes = (f.f_bsize * f.f_bavail)
     freeSpaceInMB = freeSpaceInBytes/(1024.0*1024.0)

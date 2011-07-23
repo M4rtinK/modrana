@@ -296,9 +296,9 @@ class storeTiles(ranaModule):
     else: # the only other storage method is currently clasical files storage
       mapTiles = self.m.get('mapTiles', None)
       if mapTiles:
-        tileFolderPath = mapTiles.getTileFolderPath()
+        tileFolderPath = mapTiles._getTileFolderPath()
         layerFolderAndTileFilename = mapTiles.getImagePath(x,y,z,folderPrefix, extension)
-        tilePath = tileFolderPath + layerFolderAndTileFilename
+        tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
         if os.path.exists(tilePath):
           # load the file to pixbuf and return it
           return mapTiles.filePath2Pixbuf(tilePath)
@@ -410,7 +410,7 @@ class storeTiles(ranaModule):
             print "sqlite storage worker : exception during mass db commit:\n%s" % e
 
 
-  def automaticStoreTile(self, tile, folderPrefix, z, x, y, extension, filename, folder, fromThread = False):
+  def automaticStoreTile(self, tile, folderPrefix, z, x, y, extension, filename, fromThread = False):
     """store a tile to a file or db, depending on the current setting"""
 
     storageType = self.get('tileStorageType', 'files')
@@ -418,12 +418,15 @@ class storeTiles(ranaModule):
       # put the tile to the storage queue, so that then worker can store it
       self.sqliteTileQueue.put((tile, folderPrefix, z, x, y, extension, filename, folder), block=True, timeout=20)
     else: # we are storing to the filesystem
-      if not os.path.exists(folder): # does it exist ?
+      # get the folder path
+      (folderPath, tail) = os.path.split(filename)
+      if not os.path.exists(folderPath): # does it exist ?
         try:
-          os.makedirs(folder) # create the folder
+          os.makedirs(folderPath) # create the folder
         except:
-          print "mapTiles: cant crate folder %s for %s" % (folder,filename)
-      f = open(filename, 'w') # write the tile to file
+          print "mapTiles: cant create folder %s for %s" % (folderPath,filename)
+
+      f = open(filename, 'w') # write the tile to a file
       f.write(tile)
       f.close()
 

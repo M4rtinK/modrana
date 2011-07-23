@@ -21,7 +21,7 @@ from __future__ import with_statement # for python 2.5
 from base_module import ranaModule
 from threading import Thread
 import threading
-import Queue
+import os
 import traceback
 import cairo
 import urllib2
@@ -136,11 +136,18 @@ class MapTiles(ranaModule):
 
     self.mapViewModule = None
 
+    self.mapFolderPath = None
+
   def firstTime(self):
     self.mapViewModule = self.m.get('mapView', None)
     self._updateScalingCB()
     self.modrana.watch('mapScale', self._updateScalingCB)
     self.modrana.watch('z', self._updateScalingCB)
+
+    # cache the map folder path
+    options = self.m.get('options', None)
+    if options:
+      self.mapFolderPath = options.getMapFolderPath()
 
   def _updateScalingCB(self, key=None, oldValue=None, newValue=None):
     """
@@ -190,9 +197,9 @@ class MapTiles(ranaModule):
               for i in range(0, availableSlots):
                 if self.downloadRequestPool:
                   request = self.downloadRequestPool.pop() # download most recent requests first
-                  (name,x,y,z,layer,layerPrefix,layerType, filename, folder, timestamp) = request
+                  (name,x,y,z,layer,layerPrefix,layerType, filename, timestamp) = request
                   # start a new thread
-                  self.threads[name] = self.TileDownloader(name,x,y,z,layer,layerPrefix,layerType, filename, folder, self)
+                  self.threads[name] = self.TileDownloader(name,x,y,z,layer,layerPrefix,layerType, filename, self)
                   self.threads[name].daemon = True
                   self.threads[name].start()
                   # chenge the status tile to "Downloading..."
@@ -276,6 +283,7 @@ class MapTiles(ranaModule):
       """
       print("mapTiles: exception in idle loader\n", e)
       self.idleLoaderActive = False
+      traceback.print_exc()
       return False
 
   def loadSpecialTiles(self, specialTiles):
@@ -702,7 +710,7 @@ class MapTiles(ranaModule):
         return('OK')
 
     # Image not found anywhere locally - resort to downloading it
-    filename = self.getTileFolderPath() + (self.getImagePath(x,y,z,layerPrefix, layerType))
+    filename = os.path.join(self._getTileFolderPath(), (self.getImagePath(x,y,z,layerPrefix, layerType)))
     sprint("image not found locally - trying to download")
 
     # Are we allowed to download it ? (network=='full')
@@ -712,9 +720,8 @@ class MapTiles(ranaModule):
       """the thread list condition is used to signalize to the download manager,
       that here is a new download request"""
       with self.threadlListCondition:
-        folder = self.getTileFolderPath() + self.getImageFolder(x, z, layerPrefix) # target folder
         timestamp = time.time()
-        request = (name,x,y,z,layer,layerPrefix,layerType, filename, folder, timestamp)
+        request = (name,x,y,z,layer,layerPrefix,layerType, filename, timestamp)
 
         with self.imagesLock: # display the "Waiting for download slot..." status tile
           waitingTile = self.waitingTile
@@ -843,16 +850,17 @@ class MapTiles(ranaModule):
   def getImagePath(self,x,y,z,prefix, extension):
     """Get a unique name for a tile image
     (suitable for use as part of filenames, dictionary keys, etc)"""
-    return("%s/%d/%d/%d.%s" % (prefix,z,x,y,extension))
+#    return("%s/%d/%d/%d.%s" % (prefix,z,x,y,extension))
+    return os.path.join(prefix, str(z), str(x), "%d.%s" % (y,extension) )
   
   def getImageFolder(self,x,z,prefix):
     """Get a unique name for a tile image
     (suitable for use as part of filenames, dictionary keys, etc)"""
     return("%s/%d/%d" % (prefix,z,x))
 
-  def getTileFolderPath(self):
+  def _getTileFolderPath(self):
     """helper function that returns path to the tile folder"""
-    return self.get('tileFolder', 'cache/images')
+    return self.mapFolderPath
 
   def imageY(self, z,extension):
     return (('%d.%s') % (z, extension))
@@ -880,7 +888,7 @@ class MapTiles(ranaModule):
 
   class TileDownloader(Thread):
     """Downloads an image (in a thread)"""
-    def __init__(self,name, x,y,z,layer,layerName,layerType,filename, folder, callback):
+    def __init__(self,name, x,y,z,layer,layerName,layerType,filename, callback):
       Thread.__init__(self)
       self.name = name
       self.x = x
@@ -889,7 +897,6 @@ class MapTiles(ranaModule):
       self.layer = layer
       self.layerName = layerName
       self.layerType = layerType
-      self.folder = folder
       self.finished = 0
       self.filename = filename
       self.callback = callback
@@ -902,8 +909,7 @@ class MapTiles(ranaModule):
           self.y,
           self.z,
           self.layer,
-          self.filename,
-          self.folder)
+          self.filename)
         self.finished = 1
 
       # something is wrong with the server or url
@@ -962,7 +968,7 @@ class MapTiles(ranaModule):
         print "** traceback:\n"
         traceback.print_exc()
 
-    def downloadTile(self,name,x,y,z,layer,filename, folder):
+    def downloadTile(self,name,x,y,z,layer,filename):
       """Downloads an image"""
       url = getTileUrl(x,y,z,layer)
 
@@ -996,7 +1002,7 @@ class MapTiles(ranaModule):
       # like this, currupted tiles should not get past the pixbuf loader and be stored
       m = self.callback.m.get('storeTiles', None)
       if m:
-        m.automaticStoreTile(content, self.layerName, self.z, self.x, self.y, self.layerType, filename, folder, fromThread = True)
+        m.automaticStoreTile(content, self.layerName, self.z, self.x, self.y, self.layerType, filename, fromThread = True)
 
 def getTileUrl(x,y,z,layer): #TODO: share this with mapData
     """Return url for given tile coorindates and layer"""
