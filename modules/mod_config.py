@@ -124,28 +124,28 @@ class config(ranaModule):
       print "config: and if the config file is present in the main directory"
       print "config: this happended:\n%s\nconfig: thats all" % e
 
-    self.setTileFolder(tilePath)
+#    self.setTileFolder(tilePath)
     print "** using tracklog folder: %s **" % tracklogFolder
     self.set('tracklogFolder', tracklogFolder)
 
-  def setTileFolder(self, path):
-    createDir = False
-    try:
-      os.listdir(path)
-      self.set('tileFolder', path)
-      print "** using tile folder: %s **" % path
-    except:
-      createDir = True
-
-    if createDir:
-      try:
-        os.makedirs(path)
-        print "config: creating tile folder: %s" % path
-        self.set('tileFolder', path)
-      except:
-        print "config: this folder cannot be used/created: %s" % path
-        print "config: using default path: cache/images"
-        self.set('tileFolder', 'cache/images')
+#  def setTileFolder(self, path):
+#    createDir = False
+#    try:
+#      os.listdir(path)
+#      self.set('tileFolder', path)
+#      print "** using tile folder: %s **" % path
+#    except:
+#      createDir = True
+#
+#    if createDir:
+#      try:
+#        os.makedirs(path)
+#        print "config: creating tile folder: %s" % path
+#        self.set('tileFolder', path)
+#      except:
+#        print "config: this folder cannot be used/created: %s" % path
+#        print "config: using default path: cache/images"
+#        self.set('tileFolder', 'cache/images')
 
 
 
