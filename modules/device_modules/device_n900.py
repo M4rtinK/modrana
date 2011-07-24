@@ -26,7 +26,6 @@ import gtk
 import hildon
 import location
 import time
-import modrana_utils
 """
 why dbus.glib ?
 if you import only "dbus", it can't find its mainloop for callbacks
@@ -133,9 +132,6 @@ class device_n900(deviceModule):
       return 1
     elif rotationMode == "portrait":
       return 2
-
-  def getLogFolderPath(self):
-    return "/home/user/MyDocs/modrana_debug_log/" #N900 specific log folder
 
   def screenBlankingControlSupported(self):
     """it is possible to controll screen balnking on the N900"""
@@ -300,30 +296,17 @@ class device_n900(deviceModule):
 
   # ** PATHS **
 
-  def hasCustomTracklogFolderPath(self):
-    """tracklogs are now in /home/user/MyDocs/tracklogs by default on Maemo 5"""
-    return True
+  def getTracklogFolderPath(self):
+    return "/home/user/MyDocs/tracklogs"
 
-  def getCustomTracklogFolderPath(self):
-    customTracklogsFolderPath = "/home/user/MyDocs/tracklogs"
-    # check if the folder exists and create it if it doesn't
-    modrana_utils.createFolderPath(customTracklogsFolderPath)
-    return customTracklogsFolderPath
-
-  def hasCustomMapFolderPath(self):
-    return True
-
-  def getCustomMapFolderPath(self):
+  def getMapFolderPath(self):
     return "/home/user/MyDocs/.maps/"
 
-  def hasCustomPOIFolderPath(self):
-    """inform weather this device has a custom map folder path
-    NOTE: the getCustomMapFolderPath should be only called when
-    this method returns True"""
-    return True
-
-  def getCustomPOIFolderPath(self):
+  def getPOIFolderPath(self):
     return "/home/user/MyDocs/.maps"
+
+  def getLogFolderPath(self):
+    return "/home/user/MyDocs/modrana_debug_log/" #N900 specific log folder
 
   # ** LOCATION **
 

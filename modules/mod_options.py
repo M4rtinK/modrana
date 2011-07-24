@@ -60,28 +60,31 @@ class options(ranaModule):
   def getTracklogsFolderPath(self):
     """return path to a folder for storing tracklogs"""
     if self.dmod:
-      if self.dmod.hasCustomTracklogFolderPath():
-        return self._assurePath(self.dmod.getCustomTracklogFolderPath())
+      path = self.dmod.getTracklogFolderPath()
+      if path != None: # None means there is no device dependent path
+        return self._assurePath(path)
       else:
-        return self._assurePathFolder(self.getProfilePath(),"tracklogs")
+        return self._assurePathFolder(self.getProfilePath(), "POI")
     else:
       return self._assurePathFolder(self.getProfilePath(),"tracklogs")
 
   def getMapFolderPath(self):
-    """return a path to folder for storing map data"""
+    """return a path to folder for map data storage"""
     if self.dmod:
-      if self.dmod.hasCustomMapFolderPath():
-        return self._assurePath(self.dmod.getCustomMapFolderPath())
+      path = self.dmod.getMapFolderPath()
+      if path != None: # None means there is no device dependent path
+        return self._assurePath(path)
       else:
-        return self._assurePathFolder(self.getProfilePath(),"maps")
+        return self._assurePathFolder(self.getProfilePath(), "POI")
     else:
       return self._assurePathFolder(self.getProfilePath(),"maps")
 
   def getPOIFolderPath(self):
     """return path to the POI folder"""
     if self.dmod:
-      if self.dmod.hasCustomPOIFolderPath():
-        return self._assurePath(self.dmod.getCustomPOIFolderPath())
+      path = self._assurePath(self.dmod.getPOIFolderPath())
+      if path != None: # None means there is no device dependent path
+        return self._assurePath(path)
       else:
         return self._assurePathFolder(self.getProfilePath(), "POI")
     else:

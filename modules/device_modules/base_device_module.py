@@ -124,31 +124,16 @@ class deviceModule(ranaModule):
     """stop handling location - check handlesLocation if this is supported"""
     pass
 
-  def hasCustomTracklogFolderPath(self):
-    """inform weather this device has a custom tracklogs folder path
-    NOTE: the getCustomTracklogsFolderPath should be only called when
-    this method returns True"""
-    return False
-
-  def getCustomTracklogFolderPath(self):
+  def getTracklogFolderPath(self):
+    """return device specific tracklog folder or None if default should be used"""
     return None
 
-  def hasCustomMapFolderPath(self):
-    """inform weather this device has a custom map folder path
-    NOTE: the getCustomMapFolderPath should be only called when
-    this method returns True"""
-    return False
-
-  def getCustomMapFolderPath(self):
+  def getMapFolderPath(self):
+    """return device specific map folder or None if default should be used"""
     return None
 
-  def hasCustomPOIFolderPath(self):
-    """inform weather this device has a custom map folder path
-    NOTE: the getCustomMapFolderPath should be only called when
-    this method returns True"""
-    return False
-
-  def getCustomPOIFolderPath(self):
+  def getPOIFolderPath(self):
+    """return device specific POI folder or None if default should be used"""
     return None
   
 #  def getAutorotationSupported(self):
