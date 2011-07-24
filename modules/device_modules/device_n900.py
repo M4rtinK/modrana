@@ -320,6 +320,15 @@ class device_n900(deviceModule):
   def getCustomMapFolderPath(self):
     return "/home/user/MyDocs/.maps/"
 
+  def hasCustomPOIFolderPath(self):
+    """inform weather this device has a custom map folder path
+    NOTE: the getCustomMapFolderPath should be only called when
+    this method returns True"""
+    return True
+
+  def getCustomPOIFolderPath(self):
+    return "/home/user/MyDocs/.maps"
+
   # ** LOCATION **
 
   def handlesLocation(self):
