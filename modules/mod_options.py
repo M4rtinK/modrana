@@ -64,7 +64,7 @@ class options(ranaModule):
       if path != None: # None means there is no device dependent path
         return self._assurePath(path)
       else:
-        return self._assurePathFolder(self.getProfilePath(), "POI")
+        return self._assurePathFolder(self.getProfilePath(), "tracklogs")
     else:
       return self._assurePathFolder(self.getProfilePath(),"tracklogs")
 
@@ -75,7 +75,7 @@ class options(ranaModule):
       if path != None: # None means there is no device dependent path
         return self._assurePath(path)
       else:
-        return self._assurePathFolder(self.getProfilePath(), "POI")
+        return self._assurePathFolder(self.getProfilePath(), "maps")
     else:
       return self._assurePathFolder(self.getProfilePath(),"maps")
 
@@ -86,9 +86,9 @@ class options(ranaModule):
       if path != None: # None means there is no device dependent path
         return self._assurePath(path)
       else:
-        return self._assurePathFolder(self.getProfilePath(), "POI")
+        return self._assurePathFolder(self.getProfilePath(), "poi")
     else:
-      return self._assurePathFolder(self.getProfilePath(), "POI")
+      return self._assurePathFolder(self.getProfilePath(), "poi")
 
   def getPOIDatabasePath(self):
     """return path to the POI database file"""
