@@ -32,10 +32,7 @@ class deviceModule(ranaModule):
     return "unknown device"
 
   def getLogFolderPath(self):
-    return "data/log/" # default log folder
-
-  def getPOIFolderPath(self):
-    return "data/poi/" # default log folder
+    return "/tmp" # default log folder
 
   def screenBlankingControlSupported(self):
     """ there is no universal way to control screen blanking,

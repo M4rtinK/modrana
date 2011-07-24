@@ -137,10 +137,6 @@ class device_n900(deviceModule):
   def getLogFolderPath(self):
     return "/home/user/MyDocs/modrana_debug_log/" #N900 specific log folder
 
-  def getPOIFolderPath(self):
-    """get the N900 specific POI folder path"""
-    return "/home/user/MyDocs/.maps/"
-
   def screenBlankingControlSupported(self):
     """it is possible to controll screen balnking on the N900"""
     return True
