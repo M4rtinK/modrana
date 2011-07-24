@@ -144,6 +144,15 @@ class deviceModule(ranaModule):
 
   def getCustomMapFolderPath(self):
     return None
+
+  def hasCustomPOIFolderPath(self):
+    """inform weather this device has a custom map folder path
+    NOTE: the getCustomMapFolderPath should be only called when
+    this method returns True"""
+    return False
+
+  def getCustomPOIFolderPath(self):
+    return None
   
 #  def getAutorotationSupported(self):
 #    return False
