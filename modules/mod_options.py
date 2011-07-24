@@ -55,48 +55,55 @@ class options(ranaModule):
 
   def getCacheFolderPath(self):
     """return path to a folder used for various cache data"""
-    cacheFolderPath = os.path.join(self.getProfilePath(), "cache")
-    # check if the path exists and create it if not
-    modrana_utils.createFolderPath(cacheFolderPath)
-    return cacheFolderPath
+    return self._assurePathFolder(self.getProfilePath(), "cache")
 
   def getTracklogsFolderPath(self):
     """return path to a folder for storing tracklogs"""
     if self.dmod:
       if self.dmod.hasCustomTracklogFolderPath():
-        customTFPath = self.dmod.getCustomTracklogFolderPath()
-        # check if the path exists and create it if not
-        modrana_utils.createFolderPath(customTFPath)
-        return customTFPath
+        return self._assurePath(self.dmod.getCustomTracklogFolderPath())
       else:
-        defaultPath = os.path.join(self.getProfilePath(),"tracklogs")
-        # check if the path exists and create it if not
-        modrana_utils.createFolderPath(defaultPath)
-        return defaultPath
+        return self._assurePathFolder(self.getProfilePath(),"tracklogs")
     else:
-      defaultPath = os.path.join(self.getProfilePath(),"tracklogs")
-      # check if the path exists and create it if not
-      modrana_utils.createFolderPath(defaultPath)
-      return defaultPath
+      return self._assurePathFolder(self.getProfilePath(),"tracklogs")
 
   def getMapFolderPath(self):
     """return a path to folder for storing map data"""
     if self.dmod:
       if self.dmod.hasCustomMapFolderPath():
-        customMFPath = self.dmod.getCustomMapFolderPath()
-        # check if the path exists and create it if not
-        modrana_utils.createFolderPath(customMFPath)
-        return customMFPath
+        return self._assurePath(self.dmod.getCustomMapFolderPath())
       else:
-        defaultPath = os.path.join(self.getProfilePath(),"maps")
-        # check if the path exists and create it if not
-        modrana_utils.createFolderPath(defaultPath)
-        return defaultPath
+        return self._assurePathFolder(self.getProfilePath(),"maps")
     else:
-      defaultPath = os.path.join(self.getProfilePath(),"maps")
-      # check if the path exists and create it if not
-      modrana_utils.createFolderPath(defaultPath)
-      return defaultPath
+      return self._assurePathFolder(self.getProfilePath(),"maps")
+
+  def getPOIFolderPath(self):
+    """return path to the POI folder"""
+    if self.dmod:
+      if self.dmod.hasCustomPOIFolderPath():
+        return self._assurePath(self.dmod.getCustomPOIFolderPath())
+      else:
+        return self._assurePathFolder(self.getProfilePath(), "POI")
+    else:
+      return self._assurePathFolder(self.getProfilePath(), "POI")
+
+  def getPOIDatabasePath(self):
+    """return path to the POI database file"""
+    POIDBFilename = self.get('POIDBFilename', 'modrana_poi.db')
+    POIFolderPath = self.getPOIFolderPath()
+    return os.path.join(POIFolderPath,POIDBFilename)
+
+  def _assurePathFolder(self, path, folder):
+    """combine the given path and folder and make sure the path exists,
+    return the resulting path"""
+    path = os.path.join(path, folder)
+    return self._assurePath(path)
+
+  def _assurePath(self, path):
+    """assure path exists and return it back"""
+    # check if the path exists and create it if not
+    modrana_utils.createFolderPath(path)
+    return path
 
   def _getCategoryID(self, id):
     return "opt_cat_%s" % id # get a standardized id

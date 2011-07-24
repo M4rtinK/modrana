@@ -40,25 +40,31 @@ class storePOI(ranaModule):
 
   def connectToDb(self):
     """connect to the database"""
-    POIFolderPath = self.dmod.getPOIFolderPath()
-    POIDBFilename = self.get('POIDBFilename', 'modrana_poi.db')
-    DBPath = "" + POIFolderPath + "/" + POIDBFilename
-
-    if os.path.exists(DBPath): # connect to db
-      try:
-        self.db = sqlite3.connect(DBPath)
-        print "connection to POI db in %s estabilshed" % DBPath
-      except Exception, e:
-        print "connecting to POI database failed:\n%s" % e
-    else: # create new db
-      try:
-        self.db = self.createDatabase(DBPath)
-      except Exception, e:
-        print "creating POI database failed:\n%s" % e
+    options = self.m.get('options', None)
+    if options:
+      DBPath = options.getPOIDatabasePath()
+      if os.path.exists(DBPath): # connect to db
+        try:
+          self.db = sqlite3.connect(DBPath)
+          print "storePOI: connection to POI db in %s estabilshed" % DBPath
+        except Exception, e:
+          print "storePOI: connecting to POI database failed:\n%s" % e
+      else: # create new db
+        try:
+          self.db = self.createDatabase(DBPath)
+        except Exception, e:
+          print "storePOI: creating POI database failed:\n%s" % e
+    else:
+      print "storePOI: options module not available, can't connect to DB"
+      """
+      without the options module providing path to the database,
+      we can't connect to it
+      """
 
   def disconnectFromDb(self):
     print "storePOI: disconnecting from db"
-    self.db.close()
+    if self.db:
+      self.db.close()
         
   def createDatabase(self, path):
     """create a new database, including tables and initial data
