@@ -19,7 +19,6 @@
 #---------------------------------------------------------------------------
 #from dbus.service import Object
 from base_module import ranaModule
-from upoints import gpx
 import geo
 import os
 import modrana_utils
@@ -80,6 +79,11 @@ class loadTracklogs(ranaModule):
 #        pass
 #        # get current tracklog filename, sans extension
 #        # start an entry box
+
+  def _checkImports(self):
+    """only import the GPX module when neaded as
+    its loading takes some time and we want fast startup"""
+    from upoints import gpx
 
   def _getTFP(self):
     options = self.m.get('options', None)
@@ -228,14 +232,14 @@ class loadTracklogs(ranaModule):
     # each directory represents a category
     currentFolders = os.listdir(tf)
     # leave just nonhidden folders
-    currentFolders = filter(lambda x: os.path.isdir(tf) and x[0]!='.', currentFolders)
+    currentFolders = filter(lambda x: os.path.isdir(tf), currentFolders)
     # add files from all available folders
     availableFiles = []
     pathList = []
     for folder in currentFolders:
       #TODO: support other tracklogs
-      folderFiles = glob.glob(tf+folder+'/*.gpx')
-      folderFiles.extend(glob.glob(tf+folder+'/*.GPX'))
+      folderFiles = glob.glob(os.path.join(tf, folder, '*.gpx'))
+      folderFiles.extend(glob.glob(os.path.join(tf, folder, '*.GPX')))
       # remove possible folders
       folderFiles = filter(lambda x: os.path.isfile(x), folderFiles)
       for file in folderFiles:
@@ -390,6 +394,8 @@ class loadTracklogs(ranaModule):
       self.sendMessage('notification:loading %s#1' % path)
 
     if(file): # TODO: add handling of other than GPX files
+      # import the GPX module only when really needed
+      self._checkImports()
       track = gpx.Trackpoints() # create new Trackpoints object
 #      print track
       # lets assume we have only GPX 1.1 files TODO: 1.1 and 1.0
@@ -424,6 +430,8 @@ class loadTracklogs(ranaModule):
        then load this file to tracklogs list,
        return resulting path
        or None when storing fails"""
+    # import the GPX module only when really needed
+    self._checkImports()
     newTracklog = gpx.Trackpoints()
     trackpoints = map(lambda x: gpx.Trackpoint(x[0],x[1]), route)
     newTracklog.append(trackpoints)
