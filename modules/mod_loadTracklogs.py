@@ -462,7 +462,6 @@ class loadTracklogs(ranaModule):
       try:
         xmlTree = tracklog.export_gpx_file()
         f = open(os.path.join(path,filename), 'w')
-
         xmlTree.write(f)
         f.close()
       except Exception, e:
