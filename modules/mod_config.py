@@ -37,61 +37,29 @@ class config(ranaModule):
 
   def firstTime(self):
 
+    # *** Various hardcoded peristant variables ***
 
-    # load the user config file
-
-#    self.parseUserConfig(self.userConfigPath)
-
-    # Option: load a GPX replay
-#    m = self.m.get('replayGpx', None)
-#    if(m != None):
-#      m.load('track.gpx')
-
-    # Option: set your start position
-#    self.set("pos", (49.2, 16.616667)) # Brno
-    #self.set("centred", False)  # don't keep the map centred on the start position
-    #  self.set("pos_source", "default")
-
-    # Option: set the initial view
-    # WARNING: this locks to these coordinates, unless set to false
-    # self.set("centreOn", False)
-    
-    # Option: set the map tiles
-    # osma, mapnik, etc - see mod_mapTiles for list
-    # currently: gmap,gsat,mapnik,osma,cycle,pyrender,localhost
-    # NOTE: cycle map seems to be missing some z14 tiles
-
-#    self.set('layer',"osma")
-
-
-    # Option: whether to centre on your position
-    #self.set('centred', False)
-
-
-      #m.load('Znaim-Wien.gpx')
-      #m.load('znojmo-brno.gpx')
-
-    # Option: True => draw circles for debuging of the track drawing mechanism optimalization
-    #self.set('debugCircles', False)
     # Option: Number of threads for batch-downloading tiles
     self.set('maxBatchThreads', 5)
-    # Option: Folder for storing downloaded tile images (there should be a slash at the end)
-#    self.set('tileFolder', '/tmp/images')
-#    self.set('tileFolder', 'cache/images')
-    # Option: Folder for storing POI file representations (there should be a slash at the end)
-    self.set('POIFolder', 'data/poi/')
+
+    # Option: Bath tile download threads
     # this sets the number of threads for bach tile download
     # even values of 10 can lead to 3000+ open sockets on a fast internet connection
     # handle with care :)
+    # UPDATE: modRana now reuses open sockets so it might not be that bad any more
     self.set('maxDlThreads', 5)
+    # Option: Batch size estimation threads
     # this sets the number of threads used for determining the size of the batch (from http headers)
     # NOTE: even though we are downloading only the headers,
-    # for a few tousand tiles this can be an unrivila amount of data
+    # for a few tousand tiles this can be an untrival amount of data
     # (so use this with caution on metered connections)
     self.set('maxSizeThreads', 20)
 
-    # Google API key
+    # Google API key for modRana
     self.set('googleAPIKey', 'ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw')
+
+    # Option: set your start position
+    #self.set("pos", (49.2, 16.616667)) # Brno
 
 
 
@@ -127,25 +95,6 @@ class config(ranaModule):
 #    self.setTileFolder(tilePath)
     print "** using tracklog folder: %s **" % tracklogFolder
     self.set('tracklogFolder', tracklogFolder)
-
-#  def setTileFolder(self, path):
-#    createDir = False
-#    try:
-#      os.listdir(path)
-#      self.set('tileFolder', path)
-#      print "** using tile folder: %s **" % path
-#    except:
-#      createDir = True
-#
-#    if createDir:
-#      try:
-#        os.makedirs(path)
-#        print "config: creating tile folder: %s" % path
-#        self.set('tileFolder', path)
-#      except:
-#        print "config: this folder cannot be used/created: %s" % path
-#        print "config: using default path: cache/images"
-#        self.set('tileFolder', 'cache/images')
 
 
 
