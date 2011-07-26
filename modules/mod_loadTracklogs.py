@@ -346,8 +346,6 @@ class loadTracklogs(ranaModule):
       print "loadTracklogs: can't store tracklog data to cache, tracklogs will be loaded from files next time"
       print("exception: %r" % e)
 
-#  def saveClusters(self, clusters):
-
   def setPathAsActiveTracklog(self, path):
     self.set('activeTracklogPath', path)
 
@@ -397,7 +395,6 @@ class loadTracklogs(ranaModule):
       # import the GPX module only when really needed
       self._checkImports()
       track = gpx.Trackpoints() # create new Trackpoints object
-#      print track
       # lets assume we have only GPX 1.1 files TODO: 1.1 and 1.0
       try:
         track.import_locations(file, "1.1") # load a gpx file into it
@@ -406,8 +403,6 @@ class loadTracklogs(ranaModule):
         if notify:
           self.sendMessage('notification:loading tracklog failed#2')
         return
-#      print file
-#      print track
       file.close()
 
       type="GPX" #TODO: more formats support
@@ -484,11 +479,6 @@ class loadTracklogs(ranaModule):
       dx = x2 - x1
       dy = y2 - y1
       return math.sqrt(dx**2 + dy**2)
-
-#  def adjustAproximateCircle(self, points, radius):
-#    """test wheter all points are inside the preliminary circle,
-#    if not, adjust the radius acordingly"""
-##    for point in points:
 
   # found on:
   # http://www.quanative.com/2010/01/01/server-side-marker-clustering-for-google-maps-with-python/
@@ -676,13 +666,6 @@ class GPXTracklog(tracklog):
 
   def getPerElev(self):
     self.perElevList = geo.perElevList(self.trackpointsList)
-
-#  def getLength(self):
-#    """return length of the tracklog if known, None else - GPX version"""
-#    if self.perElevList:
-#      print self.perElevList
-#    else:
-#      return None
 
 class CacheItem():
   """class representing a cache item"""
