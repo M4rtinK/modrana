@@ -20,7 +20,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import os
 from configobj import ConfigObj
 
 def getModule(m,d,i):
@@ -95,6 +94,3 @@ class config(ranaModule):
 #    self.setTileFolder(tilePath)
     print "** using tracklog folder: %s **" % tracklogFolder
     self.set('tracklogFolder', tracklogFolder)
-
-
-
