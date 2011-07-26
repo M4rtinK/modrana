@@ -60,30 +60,30 @@ class config(ranaModule):
     # Option: set your start position
     #self.set("pos", (49.2, 16.616667)) # Brno
 
+  def getMapFolderPath(self):
+    """return the prefered map folder path from the user
+    configuration file an None if no such path is specified"""
+    if 'map_folder' in self.userConfig:
+      return self.userConfig['map_folder']
+    else:
+      return None
 
+  def getTracklogFolderPath(self):
+    """return the prefered tracklog folder path from the user
+    configuration file an None if no such path is specified"""
+    if 'tracklog_folder' in self.userConfig:
+      return self.userConfig['tracklog_folder']
+    else:
+      return None
 
   def parseUserConfig(self, path):
     """Par user created configuration file."""
-
-    tilePath = 'cache/images'
-
-    tracklogFolder = 'tracklogs/'
 
     try:
       config = ConfigObj(path)
       if 'enabled' in config:
         if config['enabled'] == 'True':
-          self.userConfig = config
-          
-          if 'tile_folder' in config:
-            tilePath = "%s/" % config['tile_folder'] # make sure the path ends with /
-          if 'tracklog_folder' in config:
-            tracklogFolder = "%s/" % config['tracklog_folder'] # make sure the path ends with /
-          device = self.device
-          if device in config: #TODO: modules for specific devices
-            devSpecific = config[device] 
-            if 'tile_folder' in devSpecific:
-              tilePath = devSpecific['tile_folder']
+          self.userConfig = config        
 
     except Exception, e:
       print "config: loading user_config.conf failed"
