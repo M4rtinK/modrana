@@ -32,7 +32,6 @@ import traceback
 import modrana_utils
 import rectangles
 import gobject
-from configobj import ConfigObj
 from tilenames import *
 
 import socket
@@ -48,48 +47,6 @@ socket.setdefaulttimeout(timeout)
 
 def getModule(m,d,i):
   return(MapTiles(m,d,i))
-
-maplayers = {}
-configVariables = {
-    'label':'label',
-    'url':'tiles',
-    'max_zoom':'maxZoom',
-    'min_zoom':'minZoom',
-    'type':'type',
-    'folder_prefix':'folderPrefix',
-    'coordinates':'coordinates',
-                  }
-mapConfigPath = 'map_config.conf'
-
-
-def allNeededIn(needed, dict):
-  for key in needed:
-    if key in dict:
-      continue
-    else:
-      return False
-  return True  
-
-try:
-  config = ConfigObj(mapConfigPath)
-  for layer in config:
-    if allNeededIn(configVariables.keys(), config[layer].keys()): # check if all neded keys are available
-      tempDict = {}
-      for var in configVariables:
-        tempDict[configVariables[var]] = config[layer][var]
-      tempDict['minZoom'] = int(tempDict['minZoom']) # convert strings to integers
-      tempDict['maxZoom'] = int(tempDict['maxZoom'])
-    else:
-      print "mapTiles: layer is badly defined/formated: %s" % layer
-
-
-    maplayers[layer] = tempDict
-
-except Exception, e:
-  print "mapTiles: loading map_config.conf failed: %s" % e
-
-
-
   
 class MapTiles(ranaModule):
   """Display map images"""
@@ -132,7 +89,11 @@ class MapTiles(ranaModule):
     self.waitingTile = self.images[1]['tileWaitingForDownloadSlot']
     self.lastThreadCleanupTimestamp=time.time()
     self.lastThreadCleanupInterval=2 # clean finished threads every 2 seconds
-    self.set('maplayers', maplayers) # export the maplyers definition for use by other modules
+
+    # local copy of the mapLayers dictionary
+    # TODO: don't forget to update this after implementing
+    #       map layer re/configuration at runtime
+    self.mapLayers = self.modrana.getMapLayers()
 
     self.mapViewModule = None
 
@@ -686,7 +647,7 @@ class MapTiles(ranaModule):
           return('OK')
     
     # seccond, is it in the disk cache?  (including ones recently-downloaded)
-    layerInfo = maplayers.get(layer, None)
+    layerInfo = self.mapLayers.get(layer, None)
     if(layerInfo == None): # is the layer info valid
       sprint("invalid layer")
       return('NOK')
@@ -865,12 +826,35 @@ class MapTiles(ranaModule):
   def imageY(self, z,extension):
     return (('%d.%s') % (z, extension))
 
-  def layers(self):
-    return(maplayers)
-
   def getTileUrl(self, x, y, z, layer):
-    """Wrapper, that makes it possible to use this function from other modules."""
-    return getTileUrl(x, y, z, layer)
+    """Return url for given tile coorindates and layer"""
+    layerDetails = self.mapLayers.get(layer, {})
+    if layerDetails == {}:
+      return None
+    coords = layerDetails['coordinates']
+    if coords == 'google':
+      url = '%s&x=%d&y=%d&z=%d' % (
+        layerDetails['tiles'],
+        x,y,z)
+    elif coords == 'quadtree': # handle Virtual Earth maps and satelite
+      quadKey = quadTree(x, y, z)
+      url = '%s%s?g=452' % ( #  dont know what the g argument is, maybe revision ? but its not optional
+                                layerDetails['tiles'], # get the url
+                                quadKey # get the tile identificator
+                                #layerDetails['type'] # get the correct extension (also works with png for
+                                )                    #  both maps and sat, but the original url is specific)
+    elif coords == 'yahoo': # handle Yaho maps, sat, overlay
+      y = ((2**(z-1) - 1) - y)
+      z = z + 1
+      url = '%s&x=%d&y=%d&z=%d&r=1' % ( # I have no idea what the r parameter is, r=0 or no r => grey square
+                                layerDetails['tiles'],
+                                x,y,z)
+    else: # OSM, Open Cycle, T@H -> equivalent to coords == osm
+      url = '%s%d/%d/%d.%s' % (
+        layerDetails['tiles'],
+        z,x,y,
+        layerDetails.get('type','png'))
+    return url
 
   def shutdown(self):
     # shutdown the worker/consumer threads
@@ -954,7 +938,7 @@ class MapTiles(ranaModule):
             self.callback.threadlListCondition.notifyAll()
 
     def printErrorMessage(self, e):
-        url = getTileUrl(self.x,self.y,self.z,self.layer)
+        url = self.callback.getTileUrl(self.x,self.y,self.z,self.layer)
         print "mapTiles: download thread reports error"
         print "** we were doing this, when an exception occured:"
         print "** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s, url: %s" % ( \
@@ -970,7 +954,7 @@ class MapTiles(ranaModule):
 
     def downloadTile(self,name,x,y,z,layer,filename):
       """Downloads an image"""
-      url = getTileUrl(x,y,z,layer)
+      url = self.callback.getTileUrl(x,y,z,layer)
 
       request = urllib2.urlopen(url)
 #      request = urllib.urlopen(url)
@@ -1003,35 +987,6 @@ class MapTiles(ranaModule):
       m = self.callback.m.get('storeTiles', None)
       if m:
         m.automaticStoreTile(content, self.layerName, self.z, self.x, self.y, self.layerType, filename, fromThread = True)
-
-def getTileUrl(x,y,z,layer): #TODO: share this with mapData
-    """Return url for given tile coorindates and layer"""
-    layerDetails = maplayers.get(layer, None)
-    coords = layerDetails['coordinates']
-    if coords == 'google':
-      url = '%s&x=%d&y=%d&z=%d' % (
-        layerDetails['tiles'],
-        x,y,z)
-    elif coords == 'quadtree': # handle Virtual Earth maps and satelite
-      quadKey = quadTree(x, y, z)
-      url = '%s%s?g=452' % ( #  dont know what the g argument is, maybe revision ? but its not optional
-                                layerDetails['tiles'], # get the url
-                                quadKey # get the tile identificator
-                                #layerDetails['type'] # get the correct extension (also works with png for
-                                )                    #  both maps and sat, but the original url is specific)
-    elif coords == 'yahoo': # handle Yaho maps, sat, overlay
-      y = ((2**(z-1) - 1) - y)
-      z = z + 1
-      url = '%s&x=%d&y=%d&z=%d&r=1' % ( # I have no idea what the r parameter is, r=0 or no r => grey square
-                                layerDetails['tiles'],
-                                x,y,z)
-    else: # OSM, Open Cycle, T@H -> equivalent to coords == osm
-      url = '%s%d/%d/%d.%s' % (
-        layerDetails['tiles'],
-        z,x,y,
-        layerDetails.get('type','png'))
-    return url
-
   
 # modified from: http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/globalmaptiles.py (GPL)
 def quadTree(tx, ty, zoom ):

@@ -1,3 +1,4 @@
+import os.path
 #!/usr/bin/python
 #----------------------------------------------------------------------------
 # Rana main GUI.  Displays maps, for use on a mobile device
@@ -21,6 +22,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #----------------------------------------------------------------------------
 #import dbus.glib
+modulesFolder = 'modules'
+import sys
+sys.path.append(modulesFolder)
 import time
 startTimestamp = time.time()
 import pygtk
@@ -28,13 +32,37 @@ pygtk.require('2.0')
 import gobject
 import gtk
 import math
-import sys
 import traceback
 import os
 from gtk import gdk
 from math import radians
+from configobj import ConfigObj
 importsDoneTimestamp = time.time()
 
+
+def createFolderPath(newPath):
+  """
+  Creat a path for a directory and all needed parent forlders
+  -> parent directoryies will be created
+  -> if directory already exists, then do nothing
+  -> if there is another filsystem object (like a file) with the same name, raise an exception
+  """
+  if not newPath:
+    print("cannot create folder, wrong path: ", newPath)
+    return False
+  if os.path.isdir(newPath):
+    return True
+  elif os.path.isfile(newPath):
+    print("cannot create directory, file already exists: '%s'" % newPath)
+    return False
+  else:
+    print("creating path: %s" % newPath)
+    head, tail = os.path.split(newPath)
+    if head and not os.path.isdir(head):
+        mkdirs(head)
+    if tail:
+        os.mkdir(newPath)
+    return True
 
 def update1(mapWidget):
   mapWidget.update()
@@ -67,7 +95,6 @@ class MapWidget(gtk.Widget):
 
     self.msLongPress = 400
 
-    self.modulesFolder = 'modules'
 
     """ setting this both to 100 and 1 in mapView and gpsd fixes the arow orientation bug """
     self.timer1 = gobject.timeout_add(100, update1, self) #default 100
@@ -102,12 +129,13 @@ class MapWidget(gtk.Widget):
     self.lastFullRedraw = time.time()
     self.lastFullRedrawRequest = time.time()
 
+    # map layers
+    self.mapLayers = {}
+
   def loadModules(self):
     """Load all modules from the specified directory"""
 
-    modulesFolder = self.modulesFolder
     device = self.device
-    sys.path.append(modulesFolder)
     print "importing modules:"
     start = time.clock()
     self.initInfo={
@@ -748,6 +776,81 @@ class MapWidget(gtk.Widget):
     cr = self.window.cairo_create()
     return self._expose_cairo(event, cr)
 
+  # * PROFILE PATH *
+  def getProfilePath(self):
+    """return the profile folder (create it if it does not exist)
+    NOTE: this function is provided here in the main class as some
+    ordinary modRana modules need to know the profile folder path before the
+    option module that normally handles it is fully initialized
+    (for example the config module might need to copy default
+    configuration files to the profile folder in its init)
+    """
+    # get the path
+    modRanaProfileFolderName = '.modrana'
+    userHomePath = os.getenv("HOME")
+    profileFolderPath = os.path.join(userHomePath, modRanaProfileFolderName)
+    # make sure it exists
+    createFolderPath(profileFolderPath)
+    # return it
+    return profileFolderPath
+
+  # * MAP LAYERS *
+  """map lyer information is important and needed by many modules during their initialization,
+  so it is handled here"""
+  def getMapLayers(self):
+    return self.mapLayers
+
+  def loadMapLayerInfo(self):
+    maplayers = {}
+    configVariables = {
+        'label':'label',
+        'url':'tiles',
+        'max_zoom':'maxZoom',
+        'min_zoom':'minZoom',
+        'type':'type',
+        'folder_prefix':'folderPrefix',
+        'coordinates':'coordinates',
+                      }
+    mapConfigPath = os.path.join(self.getProfilePath(),'map_config.conf')
+    # check if the configuration files are there already
+    if not os.path.exists(mapConfigPath):
+      # nthing in prfile folder -> try to use the default configs
+      print("modRana: no config in profile folder, using default map layer configuration file")
+      mapConfigPath = os.path.join("data/default_configuration_files",'map_config.conf')
+      if not os.path.exists(mapConfigPath):
+        # no map layer config available
+        print("modRana: map layer configuration file not available")
+        return
+
+    def allNeededIn(needed, dict):
+      for key in needed:
+        if key in dict:
+          continue
+        else:
+          return False
+      return True  
+
+    try:
+      config = ConfigObj(mapConfigPath)
+      for layer in config:
+        if allNeededIn(configVariables.keys(), config[layer].keys()): # check if all neded keys are available
+          tempDict = {}
+          for var in configVariables:
+            tempDict[configVariables[var]] = config[layer][var]
+          tempDict['minZoom'] = int(tempDict['minZoom']) # convert strings to integers
+          tempDict['maxZoom'] = int(tempDict['maxZoom'])
+        else:
+          print "mapTiles: layer is badly defined/formated: %s" % layer
+
+
+        maplayers[layer] = tempDict
+
+    except Exception, e:
+      print "mapTiles: loading map_config.conf failed: %s" % e
+
+    self.mapLayers = maplayers
+
+
 class GuiBase:
   """Wrapper class for a GUI interface"""
   def __init__(self, device):
@@ -824,6 +927,9 @@ class GuiBase:
     # Finalise the window
     win.show_all()
     self.addTime("window finalized")
+
+    # load map layer info
+    self.mapWidget.loadMapLayerInfo()
 
     # start loading modules
     self.mapWidget.loadModules() # name of the folder with modules
@@ -941,6 +1047,8 @@ class GuiBase:
       return True
     else: # the press ended or a new press is in progress -> stop the timer
       return False
+
+
 
 if __name__ == "__main__":
   """

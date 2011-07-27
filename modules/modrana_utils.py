@@ -141,24 +141,6 @@ def createFolderPath(newPath):
         os.mkdir(newPath)
     return True
 
-def getProfilePath():
-  """return the profile folder (create it if it does not exist)
-  NOTE: this function is provided here in a simple importable module as some
-  ordinary modRana modules need to know the profile folder path before the
-  option module that normally handles it is fully initialized
-  (for example the config module might need to copy default
-  configuration files to the profile folder in its init)
-
-  """
-  # get the path
-  modRanaProfileFolderName = '.modrana'
-  userHomePath = os.getenv("HOME")
-  profileFolderPath = os.path.join(userHomePath, modRanaProfileFolderName)
-  # make sure it exists
-  createFolderPath(profileFolderPath)
-  # return it
-  return profileFolderPath
-
 # from:
 # http://www.5dollarwhitebox.org/drupal/node/84
 def bytes2PrettyUnitString(bytes):

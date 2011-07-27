@@ -23,7 +23,6 @@ from base_module import ranaModule
 from configobj import ConfigObj
 import os
 import shutil
-import modrana_utils
 
 def getModule(m,d,i):
   return(config(m,d,i))
@@ -69,7 +68,7 @@ class config(ranaModule):
 
   def checkConfigs(self):
     """assure that configuration files are available in the profile folder"""
-    profilePath = modrana_utils.getProfilePath()
+    profilePath = self.modrana.getProfilePath()
     configs = ["map_config.conf", "user_config.conf"]
     for config in configs:
       configPath = os.path.join(profilePath, config)

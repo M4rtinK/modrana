@@ -603,15 +603,13 @@ class menus(ranaModule):
 
   def setupMaplayerMenus(self):
     self.clearMenu('layers')
-    m = self.m.get('mapTiles', None)
-    if(m):
-      layers = m.layers()
-      for (name, layer) in layers.items():
-        self.addItem(
-          'layers',
-          layer.get('label',name),
-          name,
-          'set:layer:'+name+'|set:menu:None')
+    layers = self.modrana.getMapLayers()
+    for (name, layer) in layers.items():
+      self.addItem(
+        'layers',
+        layer.get('label',name),
+        name,
+        'set:layer:'+name+'|set:menu:None')
     
   def setupTransportMenu(self):
     """Create menus for routing modes"""
@@ -708,9 +706,9 @@ class menus(ranaModule):
     maxZ = z + zoomDown
 
     layer = self.get('layer', None)
-    maplayers = self.get('maplayers', None)
+    maplayers = self.modRana.getMapLayers()
     print maplayers[layer]['maxZoom']
-    if maplayers == None:
+    if maplayers == {}:
       maxZoomLimit == 17
     else:
       maxZoomLimit = maplayers[layer]['maxZoom']

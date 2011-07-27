@@ -104,7 +104,7 @@ class mapData(ranaModule):
       print "mapData: tile folder path unknown or unusable"
       return []
     layer = self.get('layer', None) # TODO: manual layer setting
-    maplayers = self.get('maplayers', None) # a distionary describing supported maplayers
+    maplayers = self.modRana.getMapLayers() # a dictionary describing supported maplayers
     extension = maplayers[layer]['type'] # what is the extension for the current layer ?
     folderPrefix = maplayers[layer]['folderPrefix'] # what is the extension for the current layer ?
 
@@ -126,7 +126,7 @@ class mapData(ranaModule):
   def getTileUrlAndPath(self,x,y,z,layer):
     mapTiles = self.m.get('mapTiles', None)
     tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-    maplayers = self.get('maplayers', None) # a distionary describing supported maplayers
+    maplayers = self.modRana.getMapLayers() # a distionary describing supported maplayers
     extension = maplayers[layer]['type'] # what is the extension for the current layer ?
     folderPrefix = maplayers[layer]['folderPrefix'] # what is the extension for the current layer ?
     url = self.getTileUrl(x, y, z, layer) # generate url
@@ -151,8 +151,11 @@ class mapData(ranaModule):
   def getTileUrl(self,x,y,z,layer):
       """Return url for given tile coorindates and layer"""
       mapTiles = self.m.get('mapTiles', None)
-      url = mapTiles.getTileUrl(x,y,z,layer)
-      return url
+      if mapTiles:
+        url = mapTiles.getTileUrl(x,y,z,layer)
+        return url
+      else:
+        return None
 
   def handleMessage(self, message, type, args):
     if(message == "refreshTilecount"):
@@ -181,8 +184,8 @@ class mapData(ranaModule):
       maxZ = z + int(self.get('zoomDownSize', 0)) # how many zoomlevels down (from current zoomlevel) should we download ?
 
       layer = self.get('layer', None)
-      maplayers = self.get('maplayers', None)
-      if maplayers == None:
+      maplayers = self.modRana.getMapLayers()
+      if maplayers == {}:
         maxZoomLimit == 17
       else:
         maxZoomLimit = maplayers[layer]['maxZoom']

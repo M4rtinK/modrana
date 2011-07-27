@@ -32,7 +32,7 @@ class options(ranaModule):
     self.options = {}
 
     # profile folder
-    self.profileFolderPath = modrana_utils.getProfilePath()
+    self.profileFolderPath = self.modrana.getProfilePath()
     # check the profile path and create the folders if necessary
     modrana_utils.createFolderPath(self.profileFolderPath)
 
@@ -209,7 +209,7 @@ class options(ranaModule):
     tiles = self.m.get("mapTiles", None)
     if(tiles):
       tileOptions = [("","None")]
-      layers = tiles.layers().items()
+      layers = self.modrana.getMapLayers().items()
       layers.sort()
       for name,layer in layers:
         tileOptions.append((name, layer.get('label',name)))
@@ -714,12 +714,24 @@ class options(ranaModule):
           if(not self.d.has_key(variable)):
             self.set(variable, default)
 
+  def _removeNonPersistent(self, inputDict):
+    """keys that begin with # are not saved
+    (as they mostly contain data that is either time sensitive or is
+    reloaded on startup)
+    ASSUMPTION: keys are strings of length>=1"""
+    try:
+      return dict((k, v) for k, v in inputDict.iteritems() if k[0] != '#')
+    except Exception, e:
+      print('options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n', e)
+      return self.d
 
   def save(self):
     print "options: saving options"
     try:
       f = open(self.getOptionsFilePath(), "w")
-      marshal.dump(self.d, f)
+      # remove keys marked as nonpersistent
+      d = self._removeNonPersistent(self.d)
+      marshal.dump(d, f)
       f.close()
       print "options: successfully saved"
     except IOError:
