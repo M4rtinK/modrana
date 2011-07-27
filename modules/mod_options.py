@@ -32,9 +32,7 @@ class options(ranaModule):
     self.options = {}
 
     # profile folder
-    modRanaProfileFolderName = '.modrana'
-    userHomePath = os.getenv("HOME")
-    self.profileFolderPath = os.path.join(userHomePath, modRanaProfileFolderName)
+    self.profileFolderPath = modrana_utils.getProfilePath()
     # check the profile path and create the folders if necessary
     modrana_utils.createFolderPath(self.profileFolderPath)
 
