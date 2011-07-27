@@ -21,6 +21,7 @@ from base_module import ranaModule
 import gtk
 from upoints import gpx
 import time
+import os
 import geo
 
 
@@ -51,7 +52,7 @@ class tracklog(ranaModule):
     self.avgSpeed = None
     self.distance = None
     self.toolsMenuDone = False
-    self.category='log'
+    self.category='logs'
     self.traceColor = 'blue'
     self.traceIndex = 0
     self.pxpyIndex = []
@@ -189,7 +190,7 @@ class tracklog(ranaModule):
 
       filename = name + ".gpx"
       self.currentLogFileName = filename
-      self.currentLogPath = tracklogFolder + self.category + '/' + filename
+      self.currentLogPath = os.path.join(tracklogFolder, self.category, filename)
       self.saveGPXLog(self.currentLogGPX, self.currentLogFileName)
 
     self.lastTimestamp = self.lastSavedTimestamp = int(time.time())
