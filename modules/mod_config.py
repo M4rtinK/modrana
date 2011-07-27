@@ -21,6 +21,9 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 from configobj import ConfigObj
+import os
+import shutil
+import modrana_utils
 
 def getModule(m,d,i):
   return(config(m,d,i))
@@ -32,6 +35,10 @@ class config(ranaModule):
     self.userConfigPath = 'user_config.conf'
     self.userConfig = {}
 
+    """ make sure the config files are present
+    in the profile folder"""
+    self.checkConfigs()
+    """parse the configration files"""
     self.parseUserConfig(self.userConfigPath)
 
   def firstTime(self):
@@ -45,7 +52,7 @@ class config(ranaModule):
     # this sets the number of threads for bach tile download
     # even values of 10 can lead to 3000+ open sockets on a fast internet connection
     # handle with care :)
-    # UPDATE: modRana now reuses open sockets so it might not be that bad any more
+    # UPDATE: modRana now reuses open sockets so it might not be that bad any more
     self.set('maxDlThreads', 5)
     # Option: Batch size estimation threads
     # this sets the number of threads used for determining the size of the batch (from http headers)
@@ -59,6 +66,23 @@ class config(ranaModule):
 
     # Option: set your start position
     #self.set("pos", (49.2, 16.616667)) # Brno
+
+  def checkConfigs(self):
+    """assure that configuration files are available in the profile folder"""
+    profilePath = modrana_utils.getProfilePath()
+    configs = ["map_config.conf", "user_config.conf"]
+    for config in configs:
+      configPath = os.path.join(profilePath, config)
+      if not os.path.exists(configPath):
+        try:
+          source = os.path.join("data/default_configuration_files", config)
+          print(" ** config:copying default configuration file to profile folder")
+          print(" ** from: %s" % source)
+          print(" ** to: %s" % configPath)
+          shutil.copy(source, configPath)
+          print(" ** DONE")
+        except Exception, e:
+          print("config: copying default configuration file to profile folder failed", e)
 
   def getMapFolderPath(self):
     """return the prefered map folder path from the user
@@ -90,7 +114,3 @@ class config(ranaModule):
       print "config: check the syntax"
       print "config: and if the config file is present in the main directory"
       print "config: this happended:\n%s\nconfig: thats all" % e
-
-#    self.setTileFolder(tilePath)
-    print "** using tracklog folder: %s **" % tracklogFolder
-    self.set('tracklogFolder', tracklogFolder)
