@@ -57,25 +57,39 @@ class options(ranaModule):
 
   def getTracklogsFolderPath(self):
     """return path to a folder for storing tracklogs"""
-    if self.dmod:
-      path = self.dmod.getTracklogFolderPath()
-      if path != None: # None means there is no device dependent path
-        return self._assurePath(path)
-      else:
-        return self._assurePathFolder(self.getProfilePath(), "tracklogs")
+    path = None
+    # first check if the user overrode the tracklog folder path
+    config = self.m.get('config', None)
+    if config:
+      path = config.getTracklogFolderPath()
+    if path == None:
+    # try to get the path from device module
+      if self.dmod:
+        path = self.dmod.getTracklogFolderPath()
+
+    if path == None: # this means there is no config or device path
+      # use default path & assure it exists
+      return self._assurePathFolder(self.getProfilePath(), "tracklogs")
     else:
-      return self._assurePathFolder(self.getProfilePath(),"tracklogs")
+      return self._assurePath(path)
 
   def getMapFolderPath(self):
     """return a path to folder for map data storage"""
-    if self.dmod:
-      path = self.dmod.getMapFolderPath()
-      if path != None: # None means there is no device dependent path
-        return self._assurePath(path)
-      else:
-        return self._assurePathFolder(self.getProfilePath(), "maps")
+    path = None
+    # first check if the user overrode the map folder path
+    config = self.m.get('config', None)
+    if config:
+      path = config.getMapFolderPath()
+    if path == None:
+    # try to get the path from device module
+      if self.dmod:
+        path = self.dmod.getMapFolderPath()
+
+    if path == None: # this means there is no config or device path
+      # use default path & assure it exists
+      return self._assurePathFolder(self.getProfilePath(), "maps")
     else:
-      return self._assurePathFolder(self.getProfilePath(),"maps")
+      return self._assurePath(path)
 
   def getPOIFolderPath(self):
     """return path to the POI folder"""
@@ -93,7 +107,7 @@ class options(ranaModule):
     POIDBFilename = self.get('POIDBFilename', 'modrana_poi.db')
     POIFolderPath = self.getPOIFolderPath()
     return os.path.join(POIFolderPath,POIDBFilename)
-
+  
   def _assurePathFolder(self, path, folder):
     """combine the given path and folder and make sure the path exists,
     return the resulting path"""
