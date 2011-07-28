@@ -19,7 +19,6 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import urllib
-import googlemaps
 import threading
 import time
 
@@ -106,6 +105,8 @@ class onlineServices(ranaModule):
     if key == None:
       print "onlineServices: a google API key is needed for using the google maps services"
       return None
+    # only import when actually needed
+    import googlemaps
     gmap = googlemaps.GoogleMaps(key)
     return gmap
 
@@ -196,6 +197,8 @@ class onlineServices(ranaModule):
     parameters = travelMode + otherOptions
     dir['dirflg'] = parameters
     directions = ""
+    # only import when actually needed
+    import googlemaps
     try:
       directions = gmap.directions(start, destination, dir)
     except googlemaps.googlemaps.GoogleMapsError, e:
