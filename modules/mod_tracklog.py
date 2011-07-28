@@ -19,7 +19,6 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import gtk
-from upoints import gpx
 import time
 import os
 import geo
@@ -180,6 +179,9 @@ class tracklog(ranaModule):
     self.currentLogName = name
 
     if type=='gpx':
+      """ importing the GPX module can be time consuming so import it
+      when it is really needed"""
+      from upoints import gpx
       self.currentLogGPX = gpx.Trackpoints()
       # set tracklog metadata
       self.currentLogGPX.name = name
@@ -217,7 +219,9 @@ class tracklog(ranaModule):
 
     """
 
-
+    """ importing the GPX module can be time consuming so import it
+    when it is really needed"""
+    from upoints import gpx
     newTrackpoints = map(lambda x: gpx.Trackpoint(x[0],x[1],None,None,x[2],x[3]), self.currentTempLog)
 
     if len(self.currentLogGPX)==0:
@@ -314,6 +318,9 @@ class tracklog(ranaModule):
 #    self.nodes = []
 #    file = open(filename, 'r')
 #    if(file):
+#      """ importing the GPX module can be time consuming so import it
+#      when it is really needed"""
+#      from upoints import gpx
 #      track = gpx.Trackpoints() # create new Trackpoints object
 #      track.import_locations(file) # load a gpx file into it
 #      for point in track[0]: #iterate over the points, track[0] is list of all points in file
