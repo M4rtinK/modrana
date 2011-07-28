@@ -80,11 +80,6 @@ class loadTracklogs(ranaModule):
 #        # get current tracklog filename, sans extension
 #        # start an entry box
 
-  def _checkImports(self):
-    """only import the GPX module when neaded as
-    its loading takes some time and we want fast startup"""
-    from upoints import gpx
-
   def _getTFP(self):
     options = self.m.get('options', None)
     if options:
@@ -393,7 +388,7 @@ class loadTracklogs(ranaModule):
 
     if(file): # TODO: add handling of other than GPX files
       # import the GPX module only when really needed
-      self._checkImports()
+      from upoints import gpx
       track = gpx.Trackpoints() # create new Trackpoints object
       # lets assume we have only GPX 1.1 files TODO: 1.1 and 1.0
       try:
@@ -426,7 +421,7 @@ class loadTracklogs(ranaModule):
        return resulting path
        or None when storing fails"""
     # import the GPX module only when really needed
-    self._checkImports()
+    from upoints import gpx
     newTracklog = gpx.Trackpoints()
     trackpoints = map(lambda x: gpx.Trackpoint(x[0],x[1]), route)
     newTracklog.append(trackpoints)
