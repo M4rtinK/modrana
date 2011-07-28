@@ -24,6 +24,7 @@ import os
 import modrana_utils
 import glob
 import cPickle
+import shutil
 import modrana_utils
 from time import clock
 from time import gmtime, strftime
@@ -104,10 +105,28 @@ class loadTracklogs(ranaModule):
       return TFSubPath
 
   def _createBasicFolderStructure(self):
-    """trigger creation of the logs, misc and online folders"""
+    """trigger creation of the logs, misc and online folders
+    also copy example tracklogs, if necessary"""
     self._getTFSubPath("logs")
     self._getTFSubPath("online")
     self._getTFSubPath("misc")
+    """if there is no examplef folder, create it
+    and copy example tracklogs into it"""
+    examplesDestinationPath = os.path.join(self._getTFP(),'examples')
+    if not os.path.exists(examplesDestinationPath):
+      modrana_utils.createFolderPath(examplesDestinationPath)
+      print(' ** loadTracklogs: copying example tracklogs')
+      examplesSourcePath = 'data/tracklog_examples'
+       # copy all files from this folder
+      for item in os.listdir(examplesSourcePath):
+        path = os.path.join(examplesSourcePath,item)
+        if os.path.isfile(path):
+          print(' ** copying: %r' % item)
+          shutil.copy(path,os.path.join(examplesDestinationPath,item))
+      print(' ** DONE')
+
+
+
 
   def loadCache(self):
     # unpickle the cache from file
