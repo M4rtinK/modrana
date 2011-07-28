@@ -306,7 +306,7 @@ class device_n900(deviceModule):
     return "/home/user/MyDocs/.maps"
 
   def getLogFolderPath(self):
-    return "/home/user/MyDocs/modrana_debug_log/" #N900 specific log folder
+    return "/home/user/MyDocs/modrana_debug_logs/" #N900 specific log folder
 
   # ** LOCATION **
 

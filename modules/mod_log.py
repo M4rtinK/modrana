@@ -20,6 +20,7 @@ import os
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import sys
+import os
 
 def getModule(m,d,i):
   return(log(m,d,i))
@@ -48,18 +49,21 @@ class log(ranaModule):
         print "**log: flushing the log file failed"
 
   def getLogFilePath(self):
-    logFolderPath = self.dmod.getLogFolderPath()
-    # check if folder exists, if not, try to create it
-    if not os.path.exists(logFolderPath):
-      try:
-        os.makedirs(logFolderPath)
-      except:
-        print "debug log: creating log folder failed"
-    units = self.m.get('units', None)
-    if units:
-      timeHashString = units.getTimeHashString()
-      fileName = 'modrana_stdout_%s.log.txt' % timeHashString
-      return("" + logFolderPath + "/" + fileName)
+    options = self.m.get('options', None)
+    if options:
+      logFolderPath = options.getLogFolderPath()
+      """ the options module should make sure that the folder exists"""
+      units = self.m.get('units', None)
+      if units:
+        timeHashString = units.getTimeHashString()
+        fileName = 'modrana_stdout_%s.log.txt' % timeHashString
+        return(os.path.join(logFolderPath, fileName))
+      else:
+        print("log: units module missing")
+        return None
+    else:
+      print("log: options module missing")
+      return None
 
   def checkLoggingStatus(self):
     loggingStatus = self.get('loggingStatus', False)
@@ -97,9 +101,6 @@ class log(ranaModule):
         self.fsock.close()
       except:
         print "**log: closing log file failed"
-
-
-    
 
 if(__name__ == "__main__"):
   a = example({}, {})

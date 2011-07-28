@@ -94,7 +94,7 @@ class options(ranaModule):
   def getPOIFolderPath(self):
     """return path to the POI folder"""
     if self.dmod:
-      path = self._assurePath(self.dmod.getPOIFolderPath())
+      path = self.dmod.getPOIFolderPath()
       if path != None: # None means there is no device dependent path
         return self._assurePath(path)
       else:
@@ -107,6 +107,17 @@ class options(ranaModule):
     POIDBFilename = self.get('POIDBFilename', 'modrana_poi.db')
     POIFolderPath = self.getPOIFolderPath()
     return os.path.join(POIFolderPath,POIDBFilename)
+
+  def getLogFolderPath(self):
+    """return path to the POI folder"""
+    if self.dmod:
+      path = self.dmod.getLogFolderPath()
+      if path != None: # None means there is no device dependent path
+        return self._assurePath(path)
+      else:
+        return self._assurePathFolder(self.getProfilePath(), "debug_logs")
+    else:
+      return self._assurePathFolder(self.getProfilePath(), "debug_logs")
   
   def _assurePathFolder(self, path, folder):
     """combine the given path and folder and make sure the path exists,

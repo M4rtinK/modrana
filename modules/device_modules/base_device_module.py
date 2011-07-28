@@ -31,9 +31,6 @@ class deviceModule(ranaModule):
   def getDeviceName(self):
     return "unknown device"
 
-  def getLogFolderPath(self):
-    return "/tmp" # default log folder
-
   def screenBlankingControlSupported(self):
     """ there is no universal way to control screen blanking,
     so its off by default
@@ -135,6 +132,10 @@ class deviceModule(ranaModule):
   def getPOIFolderPath(self):
     """return device specific POI folder or None if default should be used"""
     return None
+
+  def getLogFolderPath(self):
+    """default path is handled through the options module"""
+    None
   
 #  def getAutorotationSupported(self):
 #    return False
