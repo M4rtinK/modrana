@@ -136,7 +136,7 @@ def createFolderPath(newPath):
     print("creating path: %s" % newPath)
     head, tail = os.path.split(newPath)
     if head and not os.path.isdir(head):
-        mkdirs(head)
+        createFolderPath(head) # NOTE: recursion
     if tail:
         os.mkdir(newPath)
     return True

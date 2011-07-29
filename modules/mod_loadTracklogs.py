@@ -276,11 +276,11 @@ class loadTracklogs(ranaModule):
 
     self.categoryList = currentFolders
 
-    print "*  using this tracklog folder:"
-    print self._getTFP()
-    print "*  does it exist ?"
-    print os.path.exists(self._getTFP())
-    print "*  there are %d tracklogs available" % len(availableFiles)
+    print("*  using this tracklog folder:")
+    print(self._getTFP())
+    print("*  does it exist ?")
+    print(os.path.exists(self._getTFP()))
+    print("*  there are %d tracklogs available" % len(availableFiles))
     self.tracklogPathList = pathList
     self.tracklogList = availableFiles
 

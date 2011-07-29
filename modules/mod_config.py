@@ -37,8 +37,9 @@ class config(ranaModule):
     """ make sure the config files are present
     in the profile folder"""
     self.checkConfigs()
-    """parse the configration files"""
-    self.parseUserConfig(self.userConfigPath)
+    """parse the main configration file"""
+    userConfPath = os.path.join(self.modrana.getProfilePath(), 'user_config.conf')
+    self.parseUserConfig(userConfPath)
 
   def firstTime(self):
 
