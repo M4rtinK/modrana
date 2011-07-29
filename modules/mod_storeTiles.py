@@ -395,7 +395,7 @@ class storeTiles(ranaModule):
            would wait forewer for the queue to empty
         """
         try:
-          (tile, folderPrefix, z, x, y, extension, filename, folder) = item # unpack the tupple
+          (tile, folderPrefix, z, x, y, extension, filename) = item # unpack the tupple
           self.storeTile(tile, folderPrefix, z, x, y, extension) # store the tile
           self.sqliteTileQueue.task_done()
         except Exception, e:
@@ -416,7 +416,7 @@ class storeTiles(ranaModule):
     storageType = self.get('tileStorageType', 'files')
     if storageType == 'sqlite': # we are storing to the database
       # put the tile to the storage queue, so that then worker can store it
-      self.sqliteTileQueue.put((tile, folderPrefix, z, x, y, extension, filename, folder), block=True, timeout=20)
+      self.sqliteTileQueue.put((tile, folderPrefix, z, x, y, extension, filename), block=True, timeout=20)
     else: # we are storing to the filesystem
       # get the folder path
       (folderPath, tail) = os.path.split(filename)

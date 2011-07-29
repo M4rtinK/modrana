@@ -109,6 +109,7 @@ class MapTiles(ranaModule):
     options = self.m.get('options', None)
     if options:
       self.mapFolderPath = options.getMapFolderPath()
+      print "mapTiles: map folder path: %s" % self.mapFolderPath
 
   def _updateScalingCB(self, key=None, oldValue=None, newValue=None):
     """
