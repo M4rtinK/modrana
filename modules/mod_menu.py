@@ -706,7 +706,7 @@ class menus(ranaModule):
     maxZ = z + zoomDown
 
     layer = self.get('layer', None)
-    maplayers = self.modRana.getMapLayers()
+    maplayers = self.modrana.getMapLayers()
     print maplayers[layer]['maxZoom']
     if maplayers == {}:
       maxZoomLimit == 17

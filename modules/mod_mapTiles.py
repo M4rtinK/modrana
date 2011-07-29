@@ -987,7 +987,7 @@ class MapTiles(ranaModule):
       # like this, currupted tiles should not get past the pixbuf loader and be stored
       m = self.callback.m.get('storeTiles', None)
       if m:
-        m.automaticStoreTile(content, self.layerName, self.z, self.x, self.y, self.layerType, filename, fromThread = True)
+        m.automaticStoreTile(content, self.layerName, self.z, self.x, self.y, self.layerType, filename)
   
 # modified from: http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/globalmaptiles.py (GPL)
 def quadTree(tx, ty, zoom ):

@@ -410,7 +410,7 @@ class storeTiles(ranaModule):
             print "sqlite storage worker : exception during mass db commit:\n%s" % e
 
 
-  def automaticStoreTile(self, tile, folderPrefix, z, x, y, extension, filename, fromThread = False):
+  def automaticStoreTile(self, tile, folderPrefix, z, x, y, extension, filename):
     """store a tile to a file or db, depending on the current setting"""
 
     storageType = self.get('tileStorageType', 'files')

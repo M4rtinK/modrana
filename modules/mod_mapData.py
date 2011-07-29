@@ -27,7 +27,6 @@ import geo
 from threading import Thread
 import threading
 import urllib3
-#import traceback
 import modrana_utils
 
 # socket timeout
@@ -104,7 +103,7 @@ class mapData(ranaModule):
       print "mapData: tile folder path unknown or unusable"
       return []
     layer = self.get('layer', None) # TODO: manual layer setting
-    maplayers = self.modRana.getMapLayers() # a dictionary describing supported maplayers
+    maplayers = self.modrana.getMapLayers() # a dictionary describing supported maplayers
     extension = maplayers[layer]['type'] # what is the extension for the current layer ?
     folderPrefix = maplayers[layer]['folderPrefix'] # what is the extension for the current layer ?
 
@@ -126,7 +125,7 @@ class mapData(ranaModule):
   def getTileUrlAndPath(self,x,y,z,layer):
     mapTiles = self.m.get('mapTiles', None)
     tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-    maplayers = self.modRana.getMapLayers() # a distionary describing supported maplayers
+    maplayers = self.modrana.getMapLayers() # a distionary describing supported maplayers
     extension = maplayers[layer]['type'] # what is the extension for the current layer ?
     folderPrefix = maplayers[layer]['folderPrefix'] # what is the extension for the current layer ?
     url = self.getTileUrl(x, y, z, layer) # generate url
@@ -184,7 +183,7 @@ class mapData(ranaModule):
       maxZ = z + int(self.get('zoomDownSize', 0)) # how many zoomlevels down (from current zoomlevel) should we download ?
 
       layer = self.get('layer', None)
-      maplayers = self.modRana.getMapLayers()
+      maplayers = self.modrana.getMapLayers()
       if maplayers == {}:
         maxZoomLimit == 17
       else:
@@ -686,6 +685,7 @@ class mapData(ranaModule):
           failed = True
           # TODO: try to redownload failed tiles
           print "exception in get tiles thread:\n%s" % e
+#          import traceback, sys
 #          traceback.print_exc(file=sys.stdout) # find what went wrong
         # increment the counter in a thread safe way
         with incrementLock:
@@ -720,7 +720,8 @@ class mapData(ranaModule):
           """
           if modrana_utils.isTheStringAnImage(content):
             #its an image, save it
-            m.automaticStoreTile(content, folderPrefix, z, x, y, layerType, filename, folder, fromThread = True)
+            fromThread=True
+            m.automaticStoreTile(content, folderPrefix, z, x, y, layerType, filename)
           else:
             # its not ana image, raise exception
             raise TileNotImageException()
