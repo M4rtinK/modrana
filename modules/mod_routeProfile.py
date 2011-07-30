@@ -104,17 +104,17 @@ class routeProfile(ranaModule):
 
     title = tracklog.tracklogName
 
-    list = tracklog.perElevList
+    elevList = tracklog.perElevList
 
-    minimum = min(map(lambda x: x[1], list))
-    maximum = max(map(lambda x: x[1], list))
+    minimum = min(map(lambda x: x[1], elevList))
+    maximum = max(map(lambda x: x[1], elevList))
 #
-#    list = map(lambda x: (x[0],(x[1]-minimum)), list)
+#    elevList = map(lambda x: (x[0],(x[1]-minimum)), elevList)
 
-    lines = tuple(map(lambda x: (x[0], x[1]), list))
+    lines = tuple(map(lambda x: (x[0], x[1]), elevList))
 
     units = self.m.get('units', None)
-    length = int(len(list))
+    length = int(len(elevList))
 
     if w <= 610:
       yTick = 7
@@ -126,12 +126,12 @@ class routeProfile(ranaModule):
       fontSize = 15
 
     if units == None:
-      xTicks = [dict(v=r, label=list[r][0]) for r in range(0,length,labelTick)]
+      xTicks = [dict(v=r, label=elevList[r][0]) for r in range(0,length,labelTick)]
     else:
-      xTicks = [dict(v=r, label=units.km2CurrentUnitString(round(list[r][0], 1))) for r in range(0,length,labelTick)]
+      xTicks = [dict(v=r, label=units.km2CurrentUnitString(elevList[r][0], 1)) for r in range(0,length,labelTick)]
 
-#    list = tracklog.trackpointsList[0]
-#    lines = tuple(map(lambda x: ("", float(x.elevation)), list))
+#    elevList = tracklog.trackpointsList[0]
+#    lines = tuple(map(lambda x: ("", float(x.elevation)), elevList))
 
     dataSet = (
         ('lines', [(i, l[1]) for i, l in enumerate(lines)]),
