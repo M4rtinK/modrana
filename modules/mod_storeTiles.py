@@ -63,16 +63,17 @@ class storeTiles(ranaModule):
 
   def firstTime(self):
     # the config folder should set the tile folder path by now
-    self.tileFolder = self.get('tileFolder', 'cache/images')
-
+    options = self.m.get('options', None)
+    if options:
+      self.tileFolder = options.getMapFolderPath()
     # testing:
     #self.test()
 
   def getLayerDbFolderPath(self, folderPrefix):
-    return (self.tileFolder + "/" + folderPrefix)
+    return os.path.join(self.tileFolder, folderPrefix)
 
   def getLookupDbPath(self, dbFolderPath):
-    return "" + dbFolderPath + "/" + "lookup.sqlite" # get the path to the lookup db
+    return os.path.join(dbFolderPath, "lookup.sqlite") # get the path to the lookup db
 
   def initializeDb(self, folderPrefix, accessType):
     """there are two access types, "store" and "get"
@@ -220,8 +221,8 @@ class storeTiles(ranaModule):
 
 
   def listStores(self, folder):
-    """search for available store database files"""
-    return glob.glob("" + folder + "/" + "store.sqlite.*")
+    """search a folder for available store database files"""
+    return glob.glob(os.path.join(folder,"store.sqlite.*"))
 
 
   def willItFitIn(self, path, sizeBytes):
@@ -266,7 +267,7 @@ class storeTiles(ranaModule):
 
   def getStorePath(self, folder, storeName):
     """get a standardized store path from folder path and filename"""
-    return folder + "/" + storeName
+    return os.path.join(folder, storeName)
 
   def getTile(self, folderPrefix, z, x, y, extension):
     """get a tile"""
