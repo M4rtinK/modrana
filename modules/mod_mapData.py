@@ -608,7 +608,7 @@ class mapData(ranaModule):
       return connPool
 
     def run(self):
-      print "**!! bath tile download is starting !!**"
+      print "**!! batch tile download is starting !!**"
       maxThreads = self.maxThreads
       shutdown = threading.Event()
       incrementLock = threading.Lock()
