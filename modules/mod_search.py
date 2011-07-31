@@ -461,7 +461,9 @@ class search(ranaModule):
     proj = self.m.get('projection', None)
     captions = self.get('drawGLSResultCaptions', True)
 
-    highlightNr = int(self.get('searchResultsItemNr', None))
+    menus = self.m.get("menu",None)
+
+    highlightNr = int(self.get('searchResultsItemNr', -1))
 
     # highlight the currently selected result on the map
 
@@ -471,6 +473,7 @@ class search(ranaModule):
     for tupple in self.list:
       (distance, point, index) = tupple
       if index == highlightNr: # the highlighted result is draw in the end
+        # skip it this time
         continue
       (lat,lon) = (float(point['lat']), float(point['lng']))
       (x,y) = proj.ll2xy(lat, lon)
@@ -488,6 +491,8 @@ class search(ranaModule):
       # draw caption with transparent background
       text = "%s" % point['titleNoFormatting'] # result caption
 
+      print point['titleNoFormatting']
+
       cr.set_font_size(20)
       extents = cr.text_extents(text) # get the text extents
       (w,h) = (extents[2], extents[3])
@@ -504,12 +509,13 @@ class search(ranaModule):
       cr.fill()
       # draw the actual text
       cr.set_source_rgba(1, 1, 1, 0.95) # slightly trasparent white
-      cr.move_to(x+10,y)
-      cr.show_text(text) # show the trasparent result caption
+#      cr.move_to(x+10,y)
+      menus.drawText(cr, text, x+10, y, rw, rh, 2)
+#      cr.show_text(text) # show the trasparent result caption
       cr.stroke()
       cr.fill()
 
-    if highlightNr != None: # is there some search result to highlight ?
+    if highlightNr != -1: # is there some search result to highlight ?
       tupple = filter(lambda x: x[2] == int(highlightNr), self.list).pop()
       result = tupple[1]
       lat = float(result['lat'])
