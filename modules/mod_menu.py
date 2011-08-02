@@ -721,7 +721,7 @@ class menus(ranaModule):
     # add the buttons for the varius settings
     self.addItem('editBatch', 'where#now: %s' % location, 'generic', 'set:menu:data')
     self.addItem('editBatch', 'radius#now: %dkm' % radius, 'generic', 'set:menu:data2')
-    self.addItem('editBatch', 'Zoom down#now: %d - %d = %d' % (z,zoomDown,maxZ), 'generic', 'set:menu:zoomDown')
+    self.addItem('editBatch', 'Zoom down#now: %d + %d = %d' % (z,zoomDown,maxZ), 'generic', 'set:menu:zoomDown')
     self.addItem('editBatch', 'Zoom up#now: %d - %d = %d' % (z,zoomUp,minZ), 'generic', 'set:menu:zoomUp')
 
     # on exit from submenu, we need to refresh the editBacht menu, so we also send setupEditBatchMenu
