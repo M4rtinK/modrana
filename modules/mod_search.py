@@ -33,6 +33,7 @@ class search(ranaModule):
     self.localSearchResults = None # GLS results from onlineServices
     self.scroll = 0
     self.list = None # processed results: (distancefrom pos, rusult, absolut index)
+    self.maxIndex = 0 # based on the number of items in the list
     self.where='position'
     self.menuWatchId = None
     self.filters = {}
@@ -147,7 +148,7 @@ class search(ranaModule):
       if(self.scroll > 0):
         self.scroll -= 1
         self.set("needRedraw", True)
-    elif(message == "down"):
+    elif(message == "down") and self.scroll < self.maxIndex:
       print "down"
       self.scroll += 1
       self.set("needRedraw", True)
@@ -257,10 +258,13 @@ class search(ranaModule):
       # * scroll down
       menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % self.moduleName)
       
-      list = self.updateDistance()
+      resultList = self.updateDistance()
+      # update maxIndex, needed for proper listing
+      self.maxIndex=len(resultList)-1
+
 
       if self.get('GLSOrdering', 'default') == 'distance': # if ordering by distance is turned on, sort the list
-        list.sort()
+        resultList.sort()
 
       category = ""
 
@@ -269,10 +273,10 @@ class search(ranaModule):
       # One option per row
       for row in (0,1,2): # TODO: dynamic adjustment (how to guess the screensize vs dpi ?)
         index = self.scroll + row
-        numItems = len(list)
+        numItems = len(resultList)
         if(0 <= index < numItems):
 
-          (text1,text2,onClick) = self.describeItem(index, category, list)
+          (text1,text2,onClick) = self.describeItem(index, category, resultList)
 
           y = y4 + (row) * dy
           w = w1 - (x4-x1)
@@ -299,10 +303,10 @@ class search(ranaModule):
 
     elif menuName == 'searchResultsItem':
       """draw the menu describing a single GLS result"""
-      list = self.updateDistance()
+      resultList = self.updateDistance()
 
       if self.get('GLSOrdering', 'default') == 'distance': # if ordering by distance is turned on, sort the list
-        list.sort()
+        resultList.sort()
 
       resultNumber = int(self.get('searchResultsItemNr', 0))
 
@@ -311,7 +315,7 @@ class search(ranaModule):
          which is created from the initial ordering
          without this,(with distance sort) we would get different results for a key, if we moved fast enoght :)
       """
-      result = self.getResult(resultNumber, list)
+      result = self.getResult(resultNumber, resultList)
       self.drawGLSResultMenu(cr, result)
 
     elif menuName == 'searchCustomQuery':
