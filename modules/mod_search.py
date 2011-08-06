@@ -264,6 +264,8 @@ class search(ranaModule):
 
       category = ""
 
+      # TODO: replace with universal list from mod_menu
+
       # One option per row
       for row in (0,1,2): # TODO: dynamic adjustment (how to guess the screensize vs dpi ?)
         index = self.scroll + row
@@ -274,6 +276,7 @@ class search(ranaModule):
 
           y = y4 + (row) * dy
           w = w1 - (x4-x1)
+          h = h1 / 3.0
 
           # Draw background and make clickable
           menus.drawButton(cr,
@@ -285,15 +288,14 @@ class search(ranaModule):
             "generic", # background for a 3x1 icon
             onClick)
 
-          border = 20
+          # result text
+          menus.drawText(cr, text1, x4+dx*0.10, y+dy*0.1, w-dx*0.20, h*0.5)
 
-          self.showText(cr, text1, x4+border, y+border, w-2*border)
-
-          # 2nd line: current value
-          self.showText(cr, text2, x4 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
+          # 2nd line: distance to result
+          menus.drawText(cr, text2, x4+dx*0.15, y + 0.7 * dy, w * 0.3, 0.2 * dy, 0.05)
 
           # in corner: row number
-          self.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y + 0.42 * dy, w * 0.15 - border, 20)
+          menus.drawText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y + 0.7 * dy, w * 0.15, 0.2 * dy, 0.05)
 
     elif menuName == 'searchResultsItem':
       """draw the menu describing a single GLS result"""
@@ -411,7 +413,11 @@ class search(ranaModule):
     lat = float(result['lat'])
     lon = float(result['lng'])
     units = self.m.get('units', None)
-    distanceString = units.km2CurrentUnitString(float(distance))
+    if units:
+      distanceString = units.km2CurrentUnitString(float(distance), dp=2)
+    else:
+      print "search: warning, the units module uis missing"
+      distanceString = "%1.2f km" % float(distance)
     # * draw "escape" button
     menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:searchResults")
     # * draw "show" button
@@ -495,7 +501,8 @@ class search(ranaModule):
 
       cr.set_font_size(20)
       extents = cr.text_extents(text) # get the text extents
-      (w,h) = (extents[2], extents[3])
+      (w,h) = (extents[2]*1.5, extents[3]*1.5)
+#      (w,h) = (extents[2], extents[3])
 
       border = 2
       cr.set_line_width(2)
@@ -509,11 +516,9 @@ class search(ranaModule):
       cr.fill()
       # draw the actual text
       cr.set_source_rgba(1, 1, 1, 0.95) # slightly trasparent white
-#      cr.move_to(x+10,y)
-      menus.drawText(cr, text, x+10, y, rw, rh, 2)
+      menus.drawText(cr, text, rx,ry-(-rh),rw,-rh, 0.05)
 #      cr.show_text(text) # show the trasparent result caption
       cr.stroke()
-      cr.fill()
 
     if highlightNr != -1: # is there some search result to highlight ?
       tupple = filter(lambda x: x[2] == int(highlightNr), self.list).pop()
@@ -559,9 +564,9 @@ class search(ranaModule):
       
       # draw the actual text
       cr.set_source_rgba(1, 1, 0, 0.95) # slightly trasparent white
-      cr.move_to(x+15,y+7)
-      cr.show_text(text) # show the trasparent result caption
+      menus.drawText(cr, text, rx,ry-(-rh),rw,-rh, 0.05)
       cr.stroke()
+
 
   def firstTime(self):
     self.menuWatchId = self.modrana.watch('menu', self._checkMenuEnteredCB)
