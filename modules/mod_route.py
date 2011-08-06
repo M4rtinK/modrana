@@ -63,8 +63,6 @@ class route(ranaModule):
     self.set('startPos', None)
     self.set('endPos', None)
 
-    self.cancelButtonEnabled = False
-
     file = open(self.directionsFilterCSV, 'rb')
     CSVreader = csv.reader(file, delimiter=';', quotechar='|') #use an iterator
     self.directionsFilterRules = []
@@ -304,13 +302,6 @@ class route(ranaModule):
           (dLat, dLon) = (self.destination[0], self.destination[1])
           self.doRoute(pLat, pLon, dLat, dLon)
 
-    elif(message == 'cancelButton'): #enable/dsiable the background activity cancel button
-      if type == 'ms':
-       if args == "enable":
-         self.cancelButtonEnabled = True
-       elif args == "disable":
-         self.cancelButtonEnabled = False
-
   def doRoute(self, fromLat, fromLon, toLat, toLon):
     """Route from one point to another, and set that as the active route"""
     online = self.m.get('onlineServices', None)
@@ -508,8 +499,6 @@ class route(ranaModule):
       if menus.buttonsHidingOn() == False: # check if the buttons should not be hidden
         if self.route: # current route info button
           self.drawCurrentRouteInfoButton(cr)
-        elif self.cancelButtonEnabled:
-          self.drawCancelButton(cr) # draw the background activity cancel button
 
         if self.selectTwoPoints == True: # point selection menu
           self.drawTwoPointsMenu(cr)
@@ -723,27 +712,6 @@ class route(ranaModule):
       x1 = x1-dx
       y1 = y1-dy
     menus.drawButton(cr, x1, y1, dx, dy, 'info#route', "generic_alpha", 'set:menu:currentRouteBackToMap')
-    if self.cancelButtonEnabled:
-      self.drawCancelButton(cr, (x1-dx,y1+dy,dx,dy)) # draw the cancel button botom left from the info button
-
-  def drawCancelButton(self,cr,coords=None):
-    """draw the cancel button
-    TODO: this and the other context buttons should be moved to a seprate module,
-    named contextMenuor something in the same style"""
-    menus = self.m.get('menu', None)
-    if menus:
-      if coords: #use the provided coords
-        (x1,y1,dx,dy) = coords
-      else: # use the bottom left corner
-        (x,y,w,h) = self.get('viewport')
-        dx = min(w,h) / 5.0
-        dy = dx
-        x1 = (x+w)-dx
-        y1 = (y-dy)+h
-        if self.selectTwoPoints: #check for the point selection menu
-          x1 = x1 - 2*dx
-      # the cancel button sends a cancel message to onlineServicesand disables itself
-      menus.drawButton(cr, x1, y1, dx, dy, 'search#cancel', "generic_alpha", 'onlineServices:cancelOperation')
 
   def drawTwoPointsMenu(self, cr):
     (x,y,w,h) = self.get('viewport')
