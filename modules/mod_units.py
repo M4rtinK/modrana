@@ -26,11 +26,13 @@ def getModule(m,d,i):
 class units(ranaModule):
   """A module handling unit conversions and dispplaying correct units acording to current settings."""
   
+  mileInMeters = 1609.344
+  mileInKiloMeters = mileInMeters / 1000
+  mileInFeet = 5280
+  footInMeters = 0.3048
+
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    self.mileInMeters = 1609.344
-    self.mileInKiloMeters = 1.609344
-    self.feetInMile = 5280
     """
     # we consider 2km/h as as stationary 
     (to filter out the standart GPS drift while not moving)
@@ -70,7 +72,7 @@ class units(ranaModule):
         distance = km
     else: # just miles for now
       if km<self.mileInKiloMeters / 10:
-        distance = self.km2Miles(km) * self.feetInMile
+        distance = self.km2Miles(km) * self.mileInFeet
         dp = -1 # no need to count the odd foot with current GPS accuracy
         small = True
       else:
@@ -240,6 +242,81 @@ class units(ranaModule):
       # signalise that we cant decite this
       return None
 
+  #
+  # Descriptions of units.  Each tuple gives the short (abbreviated)
+  # name of the unit, the long name in singular and plural forms, and
+  # the conversion factor for turning meters into that unit (by
+  # multiplication).
+  #
+  meters = ('m', 'meter', 'meters', 1)
+  kilometers = ('km', 'kilometer', 'kilometers', 1.0 / 1000)
+  feet = ('ft', 'foot', 'feet', 1.0 / footInMeters)
+  miles = ('mi', 'mile', 'miles', 1.0 / mileInMeters)
+  #
+  # Table of how to round.  There is one dictionary entry for each
+  # unit type.  Each entry contains a sorted list of tuples
+  # (see below).  The first element of the tuple is a distance in
+  # METERS (even for units of mi).  The table is searched in order;
+  # the first entry where tuple[0] is greater than the distance will
+  # be the one used.  If tuple[0] is None, then that entry applies to
+  # all distances not already handled.
+  #
+  # Each tuple has 4 elements.  Tuple[0] is the trigger distance, as
+  # given above.  Tuple[1] is itself a tuple, one of the unit
+  # descriptions from just above.  Tuple[2] and tuple[3] are used in
+  # rounding, as explained below.
+  #
+  # Rounding is done by dividing the final distance (in the output
+  # units) by tuple[2], rounding to the number of digits given in
+  # tuple[3] (negative values are accepted, as in the round()
+  # function), and multiplying by tuple[2] again.  However, if
+  # tuple[2] is zero, the output is forced to exactly zero instead of
+  # being rounded.
+  #
+  # All of this should become clearer from the table entries themselves.
+  #
+  humanRoundTable = {'km': [
+      (10,     meters,      0,   0), # Short distances become 0
+      (100,    meters,      5,   0), # 10-100 round to nearest 5
+      (300,    meters,     50,   0), # 100-300 round to 50
+      (1000,   meters,      1,  -2), # Under 1 km round to 100 m
+      (10000,  kilometers,  1,   1), # Under 10 km round to 0.1 km
+      (100000, kilometers,  1,   0), # 10-100 km round to 1 km
+      (None,   kilometers,  1,  -1)  # Over 100 km round to 10 km
+    ],
+      'mile': [
+      (30  * footInMeters, feet,   0,  0), # Short distances become 0
+      (0.1 * mileInMeters, feet,  20,  0), # 30 feet to 0.1 mile round to 20 ft
+      (10  * mileInMeters, miles,  1,  1), # Under 1 mile round to 0.1 mi
+      (100 * mileInMeters, miles,  1,  0), # 10-100 miles round to 1 mi
+      (None,               miles,  1, -1)  # Over 100 mi round to 10 mi
+    ]}
+
+  def humanRound(self, distance):
+    """round a distance (given in meters) to a human-friendly form.
+       returns a triple (rounded, shortUnits, longUnits) giving the rounded
+       result and the short and long unit names.
+    """
+    unitType = self.get('unitType', 'km')
+    if unitType not in self.humanRoundTable:
+      unitType = 'km'
+    for tuple in self.humanRoundTable[unitType]:
+      if tuple[0] is None  or  tuple[0] > distance:
+        break
+    unitDescription = tuple[1]
+    if tuple[2] == 0:
+      distance = 0
+    else:
+      distance *= float(unitDescription[3])
+      distance = round(distance / tuple[2], tuple[3]) * tuple[2]
+    distanceString = str(distance)
+    if '.' in distanceString:
+      distanceString = distanceString.rstrip('0').rstrip('.')
+    if distanceString == '1':
+      long = unitDescription[1]
+    else:
+      long = unitDescription[2]
+    return (distanceString, unitDescription[0], long)
 
 if(__name__ == "__main__"):
   a = example({}, {})

@@ -65,6 +65,15 @@ class route(ranaModule):
 
     self.cancelButtonEnabled = False
 
+    file = open(self.directionsFilterCSV, 'rb')
+    CSVreader = csv.reader(file, delimiter=';', quotechar='|') #use an iterator
+    self.directionsFilterRules = []
+    for row in CSVreader:
+      if row[0] != '#' and len(row) >= 2:
+        regex = re.compile(unicode(row[0]))
+        self.directionsFilterRules.append((regex, unicode(row[1])))
+    file.close()
+
   def handleMessage(self, message, type, args):
     if (message == "clear"):
       self.route = []
@@ -459,15 +468,11 @@ class route(ranaModule):
     return outputString
 
   def applyRulesFromCSVFile(self,rawDirections):
-      filename = self.directionsFilterCSV
-
       for step in rawDirections['Directions']['Routes'][0]['Steps']:
         message = step['descriptionEspeak']
-        CSVreader = csv.reader(open(filename, 'rb'), delimiter=';', quotechar='|') #use an iterator
-        for row in CSVreader:
-          if len(row)>=2:
-            # replace strings according to the csv file
-            message = re.sub(unicode(row[0]), unicode(row[1]), message, re.UNICODE)
+        for (regex, replacement) in self.directionsFilterRules:
+          # replace strings according to the csv file
+          message = regex.sub(replacement, message, re.UNICODE)
         step['descriptionEspeak'] = message
       return rawDirections
 
@@ -922,10 +927,10 @@ class route(ranaModule):
 
         # if there are no last used addresses, use defaults
         if startText == None:
-          startText = "click to input starting adres"
+          startText = "click to input starting address"
 
         if destinationText == None:
-          destinationText = "click to input destination adres"
+          destinationText = "click to input destination address"
 
         menus.showText(cr, startText, x4+w1/20, y4+dy/5, w1-x4-(w1/20)*2)
         menus.showText(cr, destinationText, x4+w1/20, y4+2*dy+dy/5, w1-x4-(w1/20)*2)

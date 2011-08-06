@@ -251,15 +251,13 @@ class turnByTurn(ranaModule):
     voice = self.m.get('voice', None)
     units = self.m.get('units', None)
 
-    distanceInMeters = self.roundDistance(distanceInMeters) # do rounding
-    # TODO: rounding suitable for imperial units ?
-
     if voice and units:
-      if distanceInMeters == 0:
+      (distString, short, long) = units.humanRound(distanceInMeters)
+
+      if distString == "0":
         distString = ""
       else:
-        distString = units.km2CurrentUnitString(distanceInMeters/1000.0, 1, False)
-        distString = '<p xml:lang="en">in <emphasis level="strong">'+ distString + '</emphasis></p><br>'
+        distString = '<p xml:lang="en">in <emphasis level="strong">'+ distString + ' ' + long + '</emphasis></p><br>'
         # TODO: language specific distance strings
       text = distString + message
 
@@ -276,48 +274,6 @@ class turnByTurn(ranaModule):
         # the espeak language code is the first part of this whitespace delimited string
         espeakLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[0]
       return voice.say(text,espeakLanguageCode)
-
-  def roundDistance(self, mDistance):
-    """round a distance in a manner to be suitably short to say but
-    still informative enoght"""
-
-    # just skip < 10m distances
-    if mDistance < 10:
-      return 0
-
-    #round short distance to next whole 5 m
-    elif mDistance < 100:
-      intMDistance = int(mDistance)
-      tensCount = intMDistance/10
-      fiveCount = (intMDistance%10)/5
-      if (intMDistance%10):
-        return (tensCount * 10 + ((fiveCount + 1) * 5))
-      else:
-        return (tensCount * 10 + fiveCount * 5)
-
-    #round to next 50 m
-    elif (mDistance >= 100) and (mDistance < 300):
-      intMDistance = int(10*round(mDistance*0.1,0))
-      hundredsCount = intMDistance/100
-      fiftyCount = ((intMDistance)%100)/50
-
-      if (intMDistance%100):
-        return (100*hundredsCount + (50 * (fiftyCount+1)))
-      else:
-        return (100*hundredsCount + 50 * fiftyCount)
-
-    # round to next 100 m
-    elif (mDistance >= 300 ) and (mDistance < 1000):
-      intMDistance = int(10*round(mDistance*0.1,0))
-      hundredsCount = intMDistance/100
-      if intMDistance % 100:
-        return ((hundredsCount + 1) * 100)
-      else:
-        return (hundredsCount * 100)
-    # round to 10 m for 1km+
-    # as the units module does the 1.5 km etc. rounding there
-    else:
-      return int(10*round(mDistance*0.1,0))
 
   def getStartingStep(self, which='first'):
     if self.steps:
@@ -606,7 +562,7 @@ class turnByTurn(ranaModule):
         print "current speed: %1.2f m/s (%1.2f km/h)" % (metersPerSecSpeed, metersPerSecSpeed*3.6)
         print "point reached distance: %f m" % pointReachedDistance
         print "1. triggered=%r, 1.5. triggered=%r, 2. triggered=%r" % (self.espeakFirstTrigger, self.espeakFirstAndHalfTrigger, self.espeakSecondTrigger)
-        if warnTime > 20:
+        if warnTime > 30:
           print "optional (20 s) trigger distance: %1.2f" % (20.0*metersPerSecSpeed)
 
       if currentDistance <= pointReachedDistance:
@@ -629,7 +585,7 @@ class turnByTurn(ranaModule):
             plaintextMessage = currentStep['descriptionEspeak']
             if self.sayTurn(plaintextMessage, currentDistance):
               self.espeakFirstTrigger = True # first message done
-        if self.espeakFirstAndHalfTrigger == False and warnTime > 20:
+        if self.espeakFirstAndHalfTrigger == False and warnTime > 30:
           if currentDistance <= (20.0*metersPerSecSpeed):
             """in case that the warning time gets too big, add an intemediate warning at 20 secconds
             NOTE: this means it is said after the first trigger
