@@ -292,7 +292,7 @@ class search(ranaModule):
           menus.drawText(cr, text1, x4+dx*0.10, y+dy*0.1, w-dx*0.20, h*0.5)
 
           # 2nd line: distance to result
-          menus.drawText(cr, text2, x4+dx*0.15, y + 0.7 * dy, w * 0.3, 0.2 * dy, 0.05)
+          menus.drawText(cr, text2, x4+dx*0.15, y + 0.6 * dy, w * 0.3, 0.3 * dy, 0.05)
 
           # in corner: row number
           menus.drawText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y + 0.7 * dy, w * 0.15, 0.2 * dy, 0.05)
