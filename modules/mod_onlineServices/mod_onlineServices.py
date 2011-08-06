@@ -30,9 +30,13 @@ class onlineServices(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    self.routingThread = None
+    self.workerThread = None
     self.drawOverlay = False
     self.workStartTimestamp = None # for show elapsed time since the online request has been sent
+
+#  # testing
+#  def firstTime(self):
+#    self.enableOverlay()
 
   def handleMessage(self, message, type, args):
     if message == "cancelOperation":
@@ -126,9 +130,9 @@ class onlineServices(ranaModule):
     """asynchronous Google Local Search query for """
     print "onlineServices: GLS search"
     # TODO: we use a single thread for both routing and search for now, maybe have separate ones ?
-    self.routingThread = self.Worker(self, "localSearchGoogle", ((query)), outputHandler, key)
-    self.routingThread.daemon = True
-    self.routingThread.start()
+    self.workerThread = self.Worker(self, "localSearchGoogle", ((query)), outputHandler, key)
+    self.workerThread.daemon = True
+    self.workerThread.start()
 
 
   def googleLocalQueryLLAsync(self, term, lat, lon,outputHandler, key):
@@ -147,18 +151,18 @@ class onlineServices(ranaModule):
        -> verbatim start and destination will be used in route descritpion, no geocoding
        outputHandler will be provided with the results + the specified key string"""
     routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
-    self.routingThread = self.Worker(self, "onlineRoute", (start, destination, routeRequestSentTimestamp), outputHandler, key)
-    self.routingThread.daemon = True
-    self.routingThread.start()
+    self.workerThread = self.Worker(self, "onlineRoute", (start, destination, routeRequestSentTimestamp), outputHandler, key)
+    self.workerThread.daemon = True
+    self.workerThread.start()
     
   def googleDirectionsLLAsync(self, start, destination, outputHandler, key):
     """a background running googledirections query
     - Lat Lon pairsversion -> for geocoding the start/destination points (NOT first/last route points)
        outputHandler will be provided with the results + the specified key string"""
     routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
-    self.routingThread = self.Worker(self, "onlineRouteLL", (start, destination, routeRequestSentTimestamp), outputHandler, key)
-    self.routingThread.daemon = True
-    self.routingThread.start()
+    self.workerThread = self.Worker(self, "onlineRouteLL", (start, destination, routeRequestSentTimestamp), outputHandler, key)
+    self.workerThread.daemon = True
+    self.workerThread.start()
 
   def googleDirections(self ,start, destination):
     '''
@@ -235,21 +239,26 @@ class onlineServices(ranaModule):
 
   def enableOverlay(self):
     """enable the "working" overlay + set timestamp"""
-    self.sendMessage('ml:notification:backgroundWorkNotify:enable|ms:route:cancelButton:enable')
+    self.sendMessage('ml:notification:backgroundWorkNotify:enable')
     self.workStartTimestamp = time.time()
 
   def disableOverlay(self):
     """disable the "working" overlay + disable the timestamp"""
-    self.sendMessage('ml:notification:backgroundWorkNotify:disable|ms:route:cancelButton:disable')
+    self.sendMessage('ml:notification:backgroundWorkNotify:disable')
     self.workStartTimestamp = None
 
   def stop(self):
     """called either after the worker thread finishes or after pressing the cacnel button"""
     self.disableOverlay()
-    self.routingThread.dontReturnResult()
+    if self.workerThread:
+      self.workerThread.dontReturnResult()
 
   def drawOpInProgressOverlay(self,cr):
-      message = self.routingThread.getStatusMessage()
+      if self.workerThread:
+        message = self.workerThread.getStatusMessage()
+      else:
+        message = "no work in progress, press cancel"
+
       if self.workStartTimestamp:
         elapsedSeconds = int(time.time() - self.workStartTimestamp)
         if elapsedSeconds: # 0s doesnt look very good :)
@@ -257,7 +266,7 @@ class onlineServices(ranaModule):
       proj = self.m.get('projection', None) # we also need the projection module
       vport = self.get('viewport', None)
       if proj and vport:
-        # we need to have the viewport and projection module available
+        # we need to have both the viewport and projection modules available
 
         # background
         cr.set_source_rgba(0.5, 0.5, 1, 0.5)
@@ -265,10 +274,41 @@ class onlineServices(ranaModule):
         (bx,by,bw,bh) = (0,0,w,h*0.2)
         cr.rectangle(bx,by,bw,bh)
         cr.fill()
+        
+        # cancel button coordinates
+        cbdx = min(w,h) / 5.0
+        cbdy = cbdx
+        cbx1 = (sx+w)-cbdx
+        cby1 = sy
 
+        # cancel button
+        self.drawCancelButton(cr,(cbx1,cby1,cbdx,cbdy))
+
+        # draw the text
         menus = self.m.get('menu', None)
-        border = min(w/20.0,h/20.0)
-        menus.showText(cr, message, bx+border, by+border, bw-2*border,30, "white")
+        if menus:
+          border = min(w/20.0,h/20.0)
+          menus.showText(cr, message, bx+border, by+border, bw-2*border-cbdx,30, "white")
+
+  def drawCancelButton(self,cr,coords=None):
+    """draw the cancel button
+    TODO: this and the other context buttons should be moved to a seprate module,
+    named contextMenuor something in the same style"""
+    menus = self.m.get('menu', None)
+    if menus:
+      if coords: #use the provided coords
+        (x1,y1,dx,dy) = coords
+      else: # use the bottom right corner
+        (x,y,w,h) = self.get('viewport')
+        dx = min(w,h) / 5.0
+        dy = dx
+        x1 = (x+w)-dx
+        y1 = y
+      """ the cancel button sends a cancel message to onlineServices
+      to disable currently running operation"""
+      menus.drawButton(cr, x1, y1, dx, dy, '#<span foreground="red">cancel</span>', "generic_alpha", 'onlineServices:cancelOperation')
+
+
 
   class Worker(threading.Thread):
     """a worker thread for asynchronous online services access"""
