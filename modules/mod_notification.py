@@ -59,6 +59,7 @@ class notification(ranaModule):
           self.backgroundWorkNotify = True
         if args[0] == "disable":
           self.backgroundWorkNotify = False
+        self.set('needRedraw', True)
           
     else:
       list = message.split('#')

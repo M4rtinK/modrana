@@ -628,7 +628,7 @@ class search(ranaModule):
     if key == "customQuery":
       message = "ms:search:searchThis:%s" % result
       self.sendMessage(message)
-      self.set('menu', 'searchResults')
+#      self.set('menu', 'searchResults')
     elif key == "address":
       online = self.m.get('onlineServices')
       textInput = result
