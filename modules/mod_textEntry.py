@@ -35,19 +35,19 @@ class textEntry(ranaModule):
     self.set('textEntry', None)
     self.set('textEntryDone', False)
 
-  def respondToTextEntry(self, entry, dialog, response,instance,key):
+  def respondToTextEntry(self, entry, dialog, response,instance,key, persistentKey):
       print "responding to text entry"
 #      self.set('textEntry', entry.get_text())
 #      self.set('textEntryDone', True)
-      self.respond(entry.get_text(), instance,key)
+      self.respond(entry.get_text(), instance,key, persistentKey)
       print "text entry dialog is quiting"
       dialog.destroy()
 
-  def respondToDialog(self, dialog, response_id,entry,instance,key):
+  def respondToDialog(self, dialog, response_id,entry,instance,key, persistentKey): 
       print "responding to dialog"
       if response_id == gtk.RESPONSE_ACCEPT:
         print "dialog accepted"
-        self.respond(entry.get_text(), instance,key)
+        self.respond(entry.get_text(), instance,key, persistentKey)
       else:
         print "dialog rejected"
         """the dialog was rejected so we don't
@@ -59,17 +59,20 @@ class textEntry(ranaModule):
       print "text entry dialog is quiting"
       dialog.destroy()
 
-  def respond(self, result, instance, key):
+  def respond(self, result, instance, key, persistentKey=None):
 #    if self.tempUnfullscreen:
 #      if display:
 #        if display.fullscreen():
 #          display.fullscreenToggle()
 #          self.tempUnfullscreen = False
+    # save
+    if persistentKey != None:
+      self.set(persistentKey, result)
     self.dmod.textEntryDone()
     instance.handleTextEntryResult(key,result)
     self.entryBoxVisible = False
 
-  def entryBox(self, instance,key, label="Text entry", initialText="", description=None):
+  def entryBox(self, instance,key, label="Text entry", initialText="", description=None, persistentKey=None):
       dialog = gtk.Dialog(
         label,
         None,
@@ -87,14 +90,18 @@ class textEntry(ranaModule):
 #      dialog.set_markup('Please enter your <b>name</b>:')
       #create the text input field
       entry = gtk.Entry()
+      # relod last used input, if available
+      if persistentKey != None:
+        initialText = self.get(persistentKey, initialText)
+
       entry.set_text(initialText)
       entry.select_region(0,-1)
       # make sure the text is visible (TODO: respect current theme, but make sure the text will be visible ?)
       entry.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse('black'))
       entry.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse('white'))
       #allow the user to press enter to do ok
-      entry.connect("activate", self.respondToTextEntry, dialog, gtk.RESPONSE_OK, instance,key)
-      dialog.connect("response", self.respondToDialog,entry, instance,key)
+      entry.connect("activate", self.respondToTextEntry, dialog, gtk.RESPONSE_OK, instance,key, persistentKey)
+      dialog.connect("response", self.respondToDialog,entry, instance,key, persistentKey)
       #create a horizontal box to pack the entry and a label
       vbox = gtk.VBox(True)
       if description:

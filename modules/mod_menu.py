@@ -647,6 +647,11 @@ class menus(ranaModule):
     * near POI (when POI rework is finished)
     """
 
+  def setupSearchWhatMenu(self):
+    self.clearMenu('searchWhat')
+    self.addItem('searchWhat', 'online#address', 'generic', 'search:searchAddress')
+    self.addItem('searchWhat', 'online#presets', 'generic', 'set:menu:searchWhere')
+
   def setupSearchMenus(self):
     """Create a load of menus that are just filters for OSM tags"""
     f = open("data/search_menu.txt", "r")
@@ -805,7 +810,7 @@ class menus(ranaModule):
     self.clearMenu('main', "set:menu:None")
     self.addItem('main', 'route', 'route', 'set:menu:route')
     self.addItem('main', 'POI', 'poi', 'set:menu:poi')
-    self.addItem('main', 'search', 'search', 'set:menu:searchWhere')
+    self.addItem('main', 'search', 'search', 'set:menu:searchWhat')
     self.addItem('main', 'options', 'options', 'set:menu:options')
     self.addItem('main', 'download', 'download', 'set:menu:data')
     self.addItem('main', 'mode', 'mode', 'set:menu:transport')
@@ -814,6 +819,7 @@ class menus(ranaModule):
     self.addItem('main', 'info', 'info', 'set:menu:info')
     self.setupTransportMenu()
     self.setupSearchMenus()
+    self.setupSearchWhatMenu()
     self.setupSearchWhereMenu()
     self.setupMaplayerMenus()
     self.setupPoiMenu()

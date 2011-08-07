@@ -37,6 +37,10 @@ class search(ranaModule):
     self.where='position'
     self.menuWatchId = None
     self.filters = {}
+
+  def firstTime(self):
+    self.menuWatchId = self.modrana.watch('menu', self._checkMenuEnteredCB)
+
   def loadFilters(self):
     """fill the filter directory
     the different categories are all represented by ordered dictionaries"""
@@ -221,11 +225,17 @@ class search(ranaModule):
 #        self.localSearchResults = local
 
     elif message == "customQuery":
-      # start input for custom query
+      # start text input for custom query
       entry = self.m.get('textEntry', None)
       if entry:
         entryText = ""
         entry.entryBox(self, 'customQuery','Enter your search query',entryText)
+
+    elif message == "searchAddress":
+      # start text input for an address
+      entry = self.m.get('textEntry', None)
+      if entry:
+        entry.entryBox(self, 'address',description='Enter and address or location description', persistentKey="lastAddressSearchInput")
 
     elif message == "routeToActiveResult":
       """get a route from current position to active search result
@@ -260,7 +270,8 @@ class search(ranaModule):
       
       resultList = self.updateDistance()
       # update maxIndex, needed for proper listing
-      self.maxIndex=len(resultList)-1
+      if resultList:
+        self.maxIndex=len(resultList)-1
 
 
       if self.get('GLSOrdering', 'default') == 'distance': # if ordering by distance is turned on, sort the list
@@ -273,7 +284,10 @@ class search(ranaModule):
       # One option per row
       for row in (0,1,2): # TODO: dynamic adjustment (how to guess the screensize vs dpi ?)
         index = self.scroll + row
-        numItems = len(resultList)
+        if resultList:
+          numItems = len(resultList)
+        else:
+          numItems=0
         if(0 <= index < numItems):
 
           (text1,text2,onClick) = self.describeItem(index, category, resultList)
@@ -571,10 +585,6 @@ class search(ranaModule):
       menus.drawText(cr, text, rx,ry-(-rh),rw,-rh, 0.05)
       cr.stroke()
 
-
-  def firstTime(self):
-    self.menuWatchId = self.modrana.watch('menu', self._checkMenuEnteredCB)
-
   def _checkMenuEnteredCB(self, key, oldValue, newValue):
     if key == "menu" and newValue == "search":
       self.generateMenuStructure()
@@ -619,9 +629,28 @@ class search(ranaModule):
       message = "ms:search:searchThis:%s" % result
       self.sendMessage(message)
       self.set('menu', 'searchResults')
+    elif key == "address":
+      online = self.m.get('onlineServices')
+      textInput = result
+      if online:
+        # geocode the text input
+        results = online.geocode(textInput)
+        print "geocoding done"
+        if results:
+          for r in results:
+            print(r)
+          place, (lat, lon) = results[0]
+          z = self.get('z', 15)
+          self.sendMessage('mapView:recentre %f %f %d|set:menu:None' % (lat, lon, z))
+        else:
+          print("nothing found")
+      else:
+        print("search: online services module missing")
 
   def handleSearchResult(self, key, results):
     if key == "localSearchResultGoogle":
       print "search: GLS result recieved"
       self.localSearchResults = results
-      self.set('menu', 'searchResults')       
+      self.set('menu', 'searchResults')
+    elif key == "address2LL":
+      print  "search address2LL received"

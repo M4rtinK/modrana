@@ -21,6 +21,7 @@ from base_module import ranaModule
 import urllib
 import threading
 import time
+import geocoding
 
 def getModule(m,d,i):
   return(onlineServices(m,d,i))
@@ -246,6 +247,9 @@ class onlineServices(ranaModule):
     """disable the "working" overlay + disable the timestamp"""
     self.sendMessage('ml:notification:backgroundWorkNotify:disable')
     self.workStartTimestamp = None
+
+  def geocode(self, address):
+    return geocoding.geocode(address)
 
   def stop(self):
     """called either after the worker thread finishes or after pressing the cacnel button"""
