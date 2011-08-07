@@ -1,3 +1,20 @@
+N ;North ;
+S ;South ;
+E ;East ;
+W ;West ;
+N<;North<;
+S<;South<;
+E<;East<;
+W<;West<;
+NW ; Northwest ;
+NE ; Northeast ;
+SW ; Southwest ;
+SE ; Southeast ;
+NW<; Northwest<;
+NE<; Northeast<;
+SW<; Southwest<;
+SE<; Southeast<;
+St. ;Saint ;
 St.<;Street<
 St<;Street<
 Dr.<;Drive<
