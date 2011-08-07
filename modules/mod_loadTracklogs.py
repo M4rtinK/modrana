@@ -85,8 +85,6 @@ class loadTracklogs(ranaModule):
     options = self.m.get('options', None)
     if options:
       tracklogFolder = options.getTracklogsFolderPath()
-      # check if the folder exists and create it if it doesn't
-      modrana_utils.createFolderPath(tracklogFolder)
       return tracklogFolder
     else:
       print("loadTracklogs:no options module, can't get tracklog folder path")
