@@ -41,7 +41,10 @@ class notification(ranaModule):
     """the first part is the message, that will be displayed,
        there can also by some parameters, delimited by #
        NEW: you can also use a message list for the notification
-            fitst goes the message, then the timeout in seconds
+            fitst goes 'm', the message and then the timeout in seconds
+
+
+       EXAMPLE: ml:notification:m:Hello world!;5
        """
 
     if type=='ml' and message=='m':

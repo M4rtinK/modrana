@@ -635,15 +635,17 @@ class search(ranaModule):
       if online:
         # geocode the text input
         results = online.geocode(textInput)
-        print "geocoding done"
+        print("geocoding done - something found")
         if results:
           for r in results:
             print(r)
           place, (lat, lon) = results[0]
           z = self.get('z', 15)
-          self.sendMessage('mapView:recentre %f %f %d|set:menu:None' % (lat, lon, z))
+          self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
         else:
-          print("nothing found")
+          print("geocoding done - nothing found")
+          self.sendMessage('ml:notification:m:No results found for this address.;5')
+
       else:
         print("search: online services module missing")
 
