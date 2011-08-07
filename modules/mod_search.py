@@ -229,7 +229,7 @@ class search(ranaModule):
       entry = self.m.get('textEntry', None)
       if entry:
         entryText = ""
-        entry.entryBox(self, 'customQuery','Enter your search query',entryText)
+        entry.entryBox(self, 'customQuery','Enter your search query',entryText, persistentKey="lastCustomLocalSearchQuery")
 
     elif message == "searchAddress":
       # start text input for an address
