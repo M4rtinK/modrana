@@ -171,33 +171,39 @@ class tracklog(ranaModule):
     self.currentTempLog = []
     self.distance = 0
     self.pxpyIndex = []
-    tracklogFolder = self.get('tracklogFolder', None)
+    options = self.m.get('options', None)
+    if options:
+      tracklogFolder = options.getTracklogsFolderPath()
 
-    if name==None:
-      name = self.generateLogName()
+      if name==None:
+        name = self.generateLogName()
 
-    self.currentLogName = name
+      self.currentLogName = name
 
-    if type=='gpx':
-      """ importing the GPX module can be time consuming so import it
-      when it is really needed"""
-      from upoints import gpx
-      self.currentLogGPX = gpx.Trackpoints()
-      # set tracklog metadata
-      self.currentLogGPX.name = name
-      self.currentLogGPX.time = time.gmtime()
+      if type=='gpx':
+        """ importing the GPX module can be time consuming so import it
+        when it is really needed"""
+        from upoints import gpx
+        self.currentLogGPX = gpx.Trackpoints()
+        # set tracklog metadata
+        self.currentLogGPX.name = name
+        self.currentLogGPX.time = time.gmtime()
 
-#      self.currentLogGPX.author = "modRana - a flexible GPS navigation system"
-#      self.currentLogGPX.link = "http://nlp.fi.muni.cz/trac/gps_navigace"
+  #      self.currentLogGPX.author = "modRana - a flexible GPS navigation system"
+  #      self.currentLogGPX.link = "http://nlp.fi.muni.cz/trac/gps_navigace"
 
-      filename = name + ".gpx"
-      self.currentLogFileName = filename
-      self.currentLogPath = os.path.join(tracklogFolder, self.category, filename)
-      self.saveGPXLog(self.currentLogGPX, self.currentLogFileName)
+        filename = name + ".gpx"
+        self.currentLogFileName = filename
+        self.currentLogPath = os.path.join(tracklogFolder, self.category, filename)
+        self.saveGPXLog(self.currentLogGPX, self.currentLogFileName)
 
-    self.lastTimestamp = self.lastSavedTimestamp = int(time.time())
-    self.lastCoords = self.get('pos', None)
-    print "log file initialized"
+      self.lastTimestamp = self.lastSavedTimestamp = int(time.time())
+      self.lastCoords = self.get('pos', None)
+      print "log file initialized"
+    else:
+      print ('tracklogs: options module missing')
+      print ('log file not initialized')
+
 
   def saveGPXLog(self, GPXTracklog, filename):
 #      f = open(self.currentLogPath,'w')
@@ -450,7 +456,7 @@ class tracklog(ranaModule):
 #                  ('ON #time', '', 'set:tracklogLogTime:True')
 #                  ]
 #      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsTime')
-      menus.addItem('tracklogTools', 'folder#go to', 'generic', 'set:currentTracCat:log|set:menu:tracklogManager')
+      menus.addItem('tracklogTools', 'folder#go to', 'generic', 'set:currentTracCat:logs|set:menu:tracklogManager')
       menus.addItem('tracklogTools', 'trace#clear', 'generic', 'tracklog:clearTrace|set:menu:None')
       menus.addItem('tracklogTools', 'color#change', 'generic', 'tracklog:setupColorMenu|set:menu:chooseDistColor')
 
@@ -499,10 +505,12 @@ class tracklog(ranaModule):
       else:
         text+= '<span foreground="red">logging is OFF</span>'
 
+      text+="\n\n"
+
       if not self.loggingEnabled:
-        text+= "\n\n%s" % self.generateLogName()
+        text+= "%s" % self.generateLogName()
       else:
-        text+= "\n\n%s" % self.currentLogName
+        text+= "%s" % self.currentLogName
 
       text+= "\n\nlogging interval %d s, saving every %d s" % (self.logInterval, self.saveInterval)
       if self.loggingStartTimestamp:
@@ -515,9 +523,9 @@ class tracklog(ranaModule):
           currentSpeedString = units.km2CurrentUnitPerHourString(currentSpeed)
         else:
           currentSpeedString = "%f kmh" % currentSpeed
-        text+="\n\ncurrent speed: %s" % currentSpeedString
+        text+="\n\ncurrent speed: <span foreground='yellow'>%s</span>" % currentSpeedString
       else:
-        text+='\ncurrent speed <span foreground="red">unknown</span>'
+        text+='\n\ncurrent speed <span foreground="red">unknown</span>'
 
       if self.maxSpeed:
         if units:
@@ -533,7 +541,7 @@ class tracklog(ranaModule):
           distanceString = units.km2CurrentUnitString(self.distance, 2)
         else:
           distanceString = "%f km" % self.distance
-        text+= "\n\ndistance traveled %s" % distanceString
+        text+= "\ndistance traveled <span foreground='white'>%s</span>\n" % distanceString
 
       box = (text , "set:menu:tracklog")
       menus.drawSixPlusOneMenu(cr, menuName, parent, fiveButtons, box)
