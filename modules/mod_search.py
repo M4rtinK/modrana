@@ -515,7 +515,7 @@ class search(ranaModule):
       # draw caption with transparent background
       text = "%s" % point['titleNoFormatting'] # result caption
 
-      print point['titleNoFormatting']
+#      print point['titleNoFormatting']
 
       cr.set_font_size(20)
       extents = cr.text_extents(text) # get the text extents
@@ -566,11 +566,11 @@ class search(ranaModule):
       text = "%s" % result['titleNoFormatting'] # result caption
       cr.set_font_size(20)
       extents = cr.text_extents(text) # get the text extents
-      (w,h) = (extents[2], extents[3])
+      (w,h) = (extents[2]*1.5, extents[3]*1.5)
       border = 2
       cr.set_line_width(2)
       cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
-      (rx,ry,rw,rh) = (x - border+12, y + border+h*0.2 + 6, w + 4*border, -(h*1.4))
+      (rx,ry,rw,rh) = (x - border+10, y + border+h*0.2, w + 4*border, -(h*1.4))
       cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
       cr.fill()
 
