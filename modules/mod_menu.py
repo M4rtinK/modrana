@@ -650,6 +650,7 @@ class menus(ranaModule):
   def setupSearchWhatMenu(self):
     self.clearMenu('searchWhat')
     self.addItem('searchWhat', 'online#address', 'generic', 'search:searchAddress')
+    self.addItem('searchWhat', 'online#wikipedia', 'generic', 'search:searchWikipedia')
     self.addItem('searchWhat', 'online#presets', 'generic', 'set:menu:searchWhere')
 
   def setupSearchMenus(self):

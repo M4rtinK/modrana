@@ -251,6 +251,9 @@ class onlineServices(ranaModule):
   def geocode(self, address):
     return geocoding.geocode(address)
 
+  def wikipediaSearch(self, query):
+    return geocoding.wikipediaSearch(query)
+
   def stop(self):
     """called either after the worker thread finishes or after pressing the cacnel button"""
     self.disableOverlay()

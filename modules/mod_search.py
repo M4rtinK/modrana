@@ -237,6 +237,12 @@ class search(ranaModule):
       if entry:
         entry.entryBox(self, 'address',description='Enter and address or location description', persistentKey="lastAddressSearchInput")
 
+    elif message == "searchWikipedia":
+      # start text input for an address
+      entry = self.m.get('textEntry', None)
+      if entry:
+        entry.entryBox(self, 'wikipedia',description='Enter and address or location description', persistentKey="lastWikipediaSearchInput")
+
     elif message == "routeToActiveResult":
       """get a route from current position to active search result
          * center on the current position
@@ -645,6 +651,22 @@ class search(ranaModule):
         else:
           print("geocoding done - nothing found")
           self.sendMessage('ml:notification:m:No results found for this address.;5')
+    elif key == "wikipedia":
+      online = self.m.get('onlineServices')
+      textInput = result
+      if online:
+        # geocode the text input
+        results = online.geocode(textInput)
+        print("wikipedia search done - something found")
+        if results:
+          for r in results:
+            print(r)
+          place, (lat, lon) = results[0]
+          z = self.get('z', 15)
+          self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
+        else:
+          print("wikipedia search done - nothing found")
+          self.sendMessage('ml:notification:m:No results found for this query.;5')
 
       else:
         print("search: online services module missing")
