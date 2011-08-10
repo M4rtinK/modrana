@@ -643,9 +643,10 @@ class search(ranaModule):
         results = online.geocode(textInput)
         print("geocoding done - something found")
         if results:
-          for r in results:
-            print(r)
-          place, (lat, lon) = results[0]
+          for p in results:
+            print(p)
+          p1 = results[0]
+          place, (lat, lon) = p1.getMessage(), p1.getLL()
           z = self.get('z', 15)
           self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
         else:
@@ -659,9 +660,10 @@ class search(ranaModule):
         results = online.geocode(textInput)
         print("wikipedia search done - something found")
         if results:
-          for r in results:
-            print(r)
-          place, (lat, lon) = results[0]
+          for p in results:
+            print(p)
+          p1 = results[0]
+          place, (lat, lon) = p1.getMessage(), p1.getLL()
           z = self.get('z', 15)
           self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
         else:
