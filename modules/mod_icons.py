@@ -224,12 +224,12 @@ class icons(ranaModule):
   def getCustomIcon(self,parameterList,w,h):
     """
     there are five positional parameters:
-    fill collor,fill opacity, outline color, outline opacity,
+    fill color,fill opacity, outline color, outline opacity,
     outline width (default 8) and corner radius (default 22)
     to use default value, just don't fill in the positional parameter
     ( len(parameter) == 0 )
     USAGE:
-    corner radious: default=22, 0 does right angle corners
+    corner radius: default=22, 0 does right angle corners
     
 
     EXAMPLE: generic:green;1.0;blue;0.5;10;15
@@ -347,9 +347,9 @@ class icons(ranaModule):
       # run through possible "layers", which are separated by >
       compositedIcon = None
       needBackground = False
-      """icon secifications are separated by >,
+      """icon specifications are separated by >,
       which should be seen as a pointing arrow in this context
-      we composite from top -> down,
+      we composite top -> down,
       for example: "icon1>icon2"
       icon1 will be drawn over icon2
       """
