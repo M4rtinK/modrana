@@ -34,7 +34,9 @@ class notification(ranaModule):
     self.expirationTimestamp = time.time()
     self.draw = False
     self.redrawn = None
-    self.backgroundWorkNotify = False
+    self.workInProgressOverlay = 0
+    self.workStartTimestamp = None
+    self.workInProgressOverlayText = ""
     """this indicates if the notification about background processing should be shown"""
 
   def handleMessage(self, message, type, args):
@@ -56,13 +58,12 @@ class notification(ranaModule):
         messageText = args[0]
         self.handleNotification(messageText, timeout)
 
-    elif type=='ml' and message=='backgroundWorkNotify':
+    elif type=='ml' and message=='workInProgressOverlay':
       if args:
         if args[0] == "enable":
-          self.backgroundWorkNotify = True
+          self.startWorkInProgressOverlay()
         if args[0] == "disable":
-          self.backgroundWorkNotify = False
-        self.set('needRedraw', True)
+          self.stopWorkInProgressOverlay()
           
     else:
       list = message.split('#')
@@ -78,6 +79,76 @@ class notification(ranaModule):
         self.handleNotification(messageText, timeout)
       else:
         print "notification: wrong message: %s" % message
+
+  def startWorkInProgressOverlay(self):
+    """start background work notification and redraw the screen"""
+    self.workInProgressOverlay = True
+    self.workStartTimestamp = time.time()
+    self.set('needRedraw', True)
+
+  def stopWorkInProgressOverlay(self):
+    """stop background work notification and redraw the screen"""
+    self.workInProgressOverlay = False
+    self.set('needRedraw', True)
+    
+  def setWorkInProgressOverlayText(self, text):
+    self.workInProgressOverlayText = text
+
+  def getWorkInProgressOverlayText(self):
+    elapsedSeconds = int(time.time() - self.workStartTimestamp)
+    if elapsedSeconds: # 0s doesnt look very good :)
+      return "%s %d s" % (self.workInProgressOverlayText, elapsedSeconds)
+    else:
+      return self.workInProgressOverlayText
+
+  def drawWorkInProgressOverlay(self,cr):
+      if self.workInProgressOverlay:
+        proj = self.m.get('projection', None) # we also need the projection module
+        vport = self.get('viewport', None)
+        menus = self.m.get('menu', None)
+        if proj and vport and menus:
+          # we need to have both the viewport and projection modules available
+          # also the menu module for the text
+          message = self.getWorkInProgressOverlayText()
+          # background
+          cr.set_source_rgba(0.5, 0.5, 1, 0.5)
+          (sx,sy,w,h) = vport
+          (bx,by,bw,bh) = (0,0,w,h*0.2)
+          cr.rectangle(bx,by,bw,bh)
+          cr.fill()
+
+          # cancel button coordinates
+          cbdx = min(w,h) / 5.0
+          cbdy = cbdx
+          cbx1 = (sx+w)-cbdx
+          cby1 = sy
+
+          # cancel button
+          self.drawCancelButton(cr,(cbx1,cby1,cbdx,cbdy))
+
+          # draw the text
+          border = min(w/20.0,h/20.0)
+          menus.showText(cr, message, bx+border, by+border, bw-2*border-cbdx,30, "white")
+        
+
+  def drawCancelButton(self,cr,coords=None):
+    """draw the cancel button
+    TODO: this and the other context buttons should be moved to a seprate module,
+    named contextMenuor something in the same style"""
+    menus = self.m.get('menu', None)
+    if menus:
+      if coords: #use the provided coords
+        (x1,y1,dx,dy) = coords
+      else: # use the bottom right corner
+        (x,y,w,h) = self.get('viewport')
+        dx = min(w,h) / 5.0
+        dy = dx
+        x1 = (x+w)-dx
+        y1 = y
+      """ the cancel button sends a cancel message to onlineServices
+      to disable currently running operation"""
+      menus.drawButton(cr, x1, y1, dx, dy, '#<span foreground="red">cancel</span>', "generic_alpha", 'onlineServices:cancelOperation')
+
 
   def handleNotification(self, message, timeout=None, icon=""):
     # TODO: icon support
@@ -106,10 +177,8 @@ class notification(ranaModule):
     """this function is called by the menu module, both in map mode and menu mode
     -> its bit of a hack, but we can """
     self.drawNotification(cr)
-    if self.backgroundWorkNotify:
-      online = self.m.get('onlineServices', None)
-      if online:
-        online.drawOpInProgressOverlay(cr)
+    if self.workInProgressOverlay:
+      self.drawWorkInProgressOverlay(cr)
 
   def drawNotification(self, cr):
     """Draw the notifications on the screen on top of everything."""
