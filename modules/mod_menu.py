@@ -40,7 +40,6 @@ class menus(ranaModule):
     self.fullscreen = False
     self.mainScreenCoords = {}
     self.userConfig = {}
-    self.notificationModule = None
     self.hideMapSreenButtons = False
     self.lastHideCheckTimestamp = time.time()
     self.itemMenuGrid = (None,[])
@@ -203,10 +202,6 @@ class menus(ranaModule):
       (x1,y1) = buttons['scalebar']
       self.drawScalebar(cr, proj,x1,y1,w)
 
-    # master overlay hook - should be visible even when the mapscreen buttons are hidden
-    if self.notificationModule:
-      self.notificationModule.drawMasterOverlay(cr)
-
   def needRedraw(self):
     """conveninece function for asking for redraw"""
     self.set('needRedraw', True)
@@ -340,11 +335,6 @@ class menus(ranaModule):
     if menuName in self.lists.keys(): # TODO: optimize this
 #      print "drawing list: %s" % menuName
       self.lists[menuName].draw(cr) # draw the list
-
-      # then draw any possibly pending notifications
-      if self.notificationModule:
-        self.notificationModule.drawMasterOverlay(cr)
-      return
     
     # Find the menu
     menu = self.menus.get(menuName, None)
@@ -354,9 +344,6 @@ class menus(ranaModule):
         self.set('menu', None)
         self.set('needRedraw', True)
         
-        # draw any possibly pending notifications
-        if self.notificationModule:
-          self.notificationModule.drawMasterOverlay(cr)
       return
 
     # Decide how to layout the menu
@@ -441,9 +428,6 @@ class menus(ranaModule):
         self.drawButton(cr, x, y, dx, dy, text, icon, action)
       id += 1
 
-    # menu drawing is done, do the master overlay hook
-    if self.notificationModule:
-      self.notificationModule.drawMasterOverlay(cr)
     return
 
   def register(self, menu, type, module):
@@ -1121,7 +1105,6 @@ class menus(ranaModule):
     self.set("menu",None)
     self.userConfig = self.m.get('config', None).userConfig
     # get the notification module (to implement the master overlay)
-    self.notificationModule = self.m.get('notification', None)
 
     icons = self.m.get('icons', None)
     if icons:
