@@ -131,6 +131,7 @@ class MapWidget(gtk.Widget):
 
     # map layers
     self.mapLayers = {}
+    self.notificationModule = None
 
   def loadModules(self):
     """Load all modules from the specified directory"""
@@ -182,6 +183,9 @@ class MapWidget(gtk.Widget):
 
     # run what needs to be done after firstTime is called
     self._modulesLoadedPostFirstTime()
+
+    # get the notication module
+    self.notificationModule = self.m.get('notification', None)
 
     print "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start))
 
@@ -458,6 +462,7 @@ class MapWidget(gtk.Widget):
     if menuName: # draw the menu
       for m in self.m.values():
         m.drawMenu(cr, menuName)
+      self.drawMasterOverlay(cr)
     else: # draw the map
       cr.set_source_rgb(0.2,0.2,0.2) # map background
       cr.rectangle(0,0,self.rect.width,self.rect.height)
@@ -500,6 +505,7 @@ class MapWidget(gtk.Widget):
         cr.translate(-x,-y)
         for m in self.m.values():
           m.drawScreenOverlay(cr)
+        self.drawMasterOverlay(cr)
       else: # centering is disabled, just draw the map
         try:
           for m in self.m.values():
@@ -511,6 +517,7 @@ class MapWidget(gtk.Widget):
           traceback.print_exc(file=sys.stdout) # find what went wrong
         for m in self.m.values():
           m.drawScreenOverlay(cr)
+        self.drawMasterOverlay(cr)
 
 #    if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
 
@@ -775,6 +782,11 @@ class MapWidget(gtk.Widget):
     self.chain(event)
     cr = self.window.cairo_create()
     return self._expose_cairo(event, cr)
+
+  # * MASTER OVERLAY *
+  def drawMasterOverlay(self, cr):
+    if self.notificationModule:
+      self.notificationModule.drawMasterOverlay(cr)
 
   # * PROFILE PATH *
   def getProfilePath(self):

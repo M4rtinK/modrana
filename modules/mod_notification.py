@@ -93,6 +93,10 @@ class notification(ranaModule):
     
   def setWorkInProgressOverlayText(self, text):
     self.workInProgressOverlayText = text
+    """ if the overlay is enabled, 
+    trigger screen redraw if the text changes"""
+    if self.workInProgressOverlay:
+      self.set('needRedraw', True)
 
   def getWorkInProgressOverlayText(self):
     elapsedSeconds = int(time.time() - self.workStartTimestamp)
@@ -102,33 +106,32 @@ class notification(ranaModule):
       return self.workInProgressOverlayText
 
   def drawWorkInProgressOverlay(self,cr):
-      if self.workInProgressOverlay:
-        proj = self.m.get('projection', None) # we also need the projection module
-        vport = self.get('viewport', None)
-        menus = self.m.get('menu', None)
-        if proj and vport and menus:
-          # we need to have both the viewport and projection modules available
-          # also the menu module for the text
-          message = self.getWorkInProgressOverlayText()
-          # background
-          cr.set_source_rgba(0.5, 0.5, 1, 0.5)
-          (sx,sy,w,h) = vport
-          (bx,by,bw,bh) = (0,0,w,h*0.2)
-          cr.rectangle(bx,by,bw,bh)
-          cr.fill()
+    proj = self.m.get('projection', None) # we also need the projection module
+    vport = self.get('viewport', None)
+    menus = self.m.get('menu', None)
+    if proj and vport and menus:
+      # we need to have both the viewport and projection modules available
+      # also the menu module for the text
+      message = self.getWorkInProgressOverlayText()
+      # background
+      cr.set_source_rgba(0.5, 0.5, 1, 0.5)
+      (sx,sy,w,h) = vport
+      (bx,by,bw,bh) = (0,0,w,h*0.2)
+      cr.rectangle(bx,by,bw,bh)
+      cr.fill()
 
-          # cancel button coordinates
-          cbdx = min(w,h) / 5.0
-          cbdy = cbdx
-          cbx1 = (sx+w)-cbdx
-          cby1 = sy
+      # cancel button coordinates
+      cbdx = min(w,h) / 5.0
+      cbdy = cbdx
+      cbx1 = (sx+w)-cbdx
+      cby1 = sy
 
-          # cancel button
-          self.drawCancelButton(cr,(cbx1,cby1,cbdx,cbdy))
+      # cancel button
+      self.drawCancelButton(cr,(cbx1,cby1,cbdx,cbdy))
 
-          # draw the text
-          border = min(w/20.0,h/20.0)
-          menus.showText(cr, message, bx+border, by+border, bw-2*border-cbdx,30, "white")
+      # draw the text
+      border = min(w/20.0,h/20.0)
+      menus.showText(cr, message, bx+border, by+border, bw-2*border-cbdx,30, "white")
         
 
   def drawCancelButton(self,cr,coords=None):
