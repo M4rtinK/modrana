@@ -1,12 +1,15 @@
 from urllib import urlencode
 from urllib2 import urlopen
 try:
+  try:
     import json
-except ImportError:
-    try:
-        import simplejson as json
-    except ImportError:
-        from django.utils import simplejson as json
+  except ImportError:
+    import simplejson as json       # pylint: disable-msg=F0401
+except:
+  import sys
+  sys.path.append("modules/local_simplejson")
+  print("onlineServices: using integrated non-binary simplejson, install proper simplejson package for better speed")
+  import simplejson as json
 
 import xml
 from xml.parsers.expat import ExpatError
