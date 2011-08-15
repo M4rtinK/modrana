@@ -639,37 +639,15 @@ class search(ranaModule):
       online = self.m.get('onlineServices')
       textInput = result
       if online:
-        # geocode the text input
-        results = online.geocode(textInput)
-        print("geocoding done - something found")
-        if results:
-          for p in results:
-            print(p)
-          p1 = results[0]
-          place, (lat, lon) = p1.getMessage(), p1.getLL()
-          z = self.get('z', 15)
-          self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
-        else:
-          print("geocoding done - nothing found")
-          self.sendMessage('ml:notification:m:No results found for this address.;5')
+        # geocode the text input asynchronously
+        online.geocodeAsync(textInput, self.handleSearchResult, "address2LL")
+
     elif key == "wikipedia":
       online = self.m.get('onlineServices')
       textInput = result
       if online:
-        # geocode the text input
-        results = online.geocode(textInput)
-        print("wikipedia search done - something found")
-        if results:
-          for p in results:
-            print(p)
-          p1 = results[0]
-          place, (lat, lon) = p1.getMessage(), p1.getLL()
-          z = self.get('z', 15)
-          self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
-        else:
-          print("wikipedia search done - nothing found")
-          self.sendMessage('ml:notification:m:No results found for this query.;5')
-
+        # search wikipedia asynchronously
+        online.wikipediaSearchAsync(textInput, self.handleSearchResult, "wikipedia")
       else:
         print("search: online services module missing")
 
@@ -679,4 +657,26 @@ class search(ranaModule):
       self.localSearchResults = results
       self.set('menu', 'searchResults')
     elif key == "address2LL":
-      print  "search address2LL received"
+      if results:
+        print("geocoding done - something found")
+        for p in results:
+          print(p)
+        p1 = results[0]
+        place, (lat, lon) = p1.getMessage(), p1.getLL()
+        z = self.get('z', 15)
+        self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
+      else:
+        print("geocoding done - nothing found")
+        self.sendMessage('ml:notification:m:No results found for this address.;5')
+    elif key == "wikipedia":
+      if results:
+        print("wikipedia search done - something found")
+        for p in results:
+          print(p)
+        p1 = results[0]
+        place, (lat, lon) = p1.getMessage(), p1.getLL()
+        z = self.get('z', 15)
+        self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
+      else:
+        print("wikipedia search done - nothing found")
+        self.sendMessage('ml:notification:m:No results found for this query.;5')

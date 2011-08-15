@@ -22,6 +22,7 @@ import urllib
 import threading
 import time
 import geocoding
+import geonames
 
 def getModule(m,d,i):
   return(onlineServices(m,d,i))
@@ -31,7 +32,7 @@ class onlineServices(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    self.workerThread = None
+    self.workerThreads = []
     self.drawOverlay = False
 
 #  # testing
@@ -102,7 +103,6 @@ class onlineServices(ranaModule):
 
     return latLonElevList
 
-
   def getGmapsInstance(self):
     """get a google maps wrapper instance"""
     key = self.get('googleAPIKey', None)
@@ -126,20 +126,6 @@ class onlineServices(ranaModule):
     local = self.googleLocalQuery(query)
     return local
 
-  def googleLocalQueryAsync(self,query,outputHandler, key):
-    """asynchronous Google Local Search query for """
-    print "onlineServices: GLS search"
-    # TODO: we use a single thread for both routing and search for now, maybe have separate ones ?
-    self.workerThread = self.Worker(self, self._localGoogleSearch, [query], outputHandler, key)
-    self.workerThread.daemon = True
-    self.workerThread.start()
-
-
-  def googleLocalQueryLLAsync(self, term, lat, lon,outputHandler, key):
-    """asynchronous Google Local Search query for explicit lat, lon coordiantes"""
-    query = self.constructGoogleQueryLL(term, lat, lon)
-    self.googleLocalQueryAsync(query, outputHandler, key)
-
   def constructGoogleQueryLL(self, term, lat, lon):
     """get a correctly formated GLS query"""
     sufix = " loc:%f,%f" % (lat,lon)
@@ -151,18 +137,14 @@ class onlineServices(ranaModule):
        -> verbatim start and destination will be used in route descritpion, no geocoding
        outputHandler will be provided with the results + the specified key string"""
     routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
-    self.workerThread = self.Worker(self, self._onlineRouteLookup, [(start, destination, routeRequestSentTimestamp), "normal"], outputHandler, key)
-    self.workerThread.daemon = True
-    self.workerThread.start()
+    self._addWorkerThread(self._onlineRouteLookup, [(start, destination, routeRequestSentTimestamp), "normal"], outputHandler, key)
     
   def googleDirectionsLLAsync(self, start, destination, outputHandler, key):
     """a background running googledirections query
     - Lat Lon pairsversion -> for geocoding the start/destination points (NOT first/last route points)
        outputHandler will be provided with the results + the specified key string"""
     routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
-    self.workerThread = self.Worker(self, self._onlineRouteLookup, [(start, destination, routeRequestSentTimestamp), "LL"], outputHandler, key)
-    self.workerThread.daemon = True
-    self.workerThread.start()
+    self._addWorkerThread(self._onlineRouteLookup, [(start, destination, routeRequestSentTimestamp), "LL"], outputHandler, key)
 
   def googleDirections(self ,start, destination):
     '''
@@ -229,9 +211,6 @@ class onlineServices(ranaModule):
     destination = (lat2, lon2)
     return self.googleDirections(start, destination)
 
-  def googleGeocode(self, adress):
-    pass
-
   def googleReverseGeocode(self, lat, lon):
     gmap = self.getGmapsInstance()
     address = gmap.latlng_to_address(lat,lon)
@@ -247,11 +226,16 @@ class onlineServices(ranaModule):
     self.sendMessage('ml:notification:workInProgressOverlay:disable')
     self.workStartTimestamp = None
 
-  def geocode(self, address):
-    return geocoding.geocode(address)
-
-  def wikipediaSearch(self, query):
-    return geocoding.wikipediaSearch(query)
+  def googleLocalQueryLLAsync(self, term, lat, lon,outputHandler, key):
+    """asynchronous Google Local Search query for explicit lat, lon coordiantes"""
+    query = self.constructGoogleQueryLL(term, lat, lon)
+    self.googleLocalQueryAsync(query, outputHandler, key)
+    
+  def googleLocalQueryAsync(self,query,outputHandler, key):
+    """asynchronous Google Local Search query for """
+    print "onlineServices: GLS search"
+    # TODO: we use a single thread for both routing and search for now, maybe have separate ones ?
+    self._addWorkerThread(self._localGoogleSearch, [query], outputHandler, key)
 
   def _localGoogleSearch(self, query):
     """this method performs Google Local online-search and is called by the worker thread"""
@@ -290,16 +274,63 @@ class onlineServices(ranaModule):
     # return result to the thread to handle
     return (directions, startAddress, destinationAddress, startLL, destinationLL, routeRequestSentTimestamp)
 
-  def stop(self):
-    """called either after the worker thread finishes or after pressing the cacnel button"""
-    self._disableOverlay()
-    if self.workerThread:
-      self.workerThread.dontReturnResult()
+  def geocode(self, address):
+    return geocoding.geocode(address)
+
+  def geocodeAsync(self, address, outputHandler, key):
+    self._addWorkerThread(self._onlineGocoding, [address], outputHandler, key)
+
+  def _onlineGocoding(self, address):
+    self._setWorkStatusText("online geocoding in progress...")
+    result = self.geocode(address)
+    self._setWorkStatusText("online geocoding done   ")
+    return result
+
+  def wikipediaSearch(self, query):
+    return geonames.wikipediaSearch(query)
+
+  def wikipediaSearchAsync(self, query, outputHandler, key):
+    self._addWorkerThread(self._onlineWikipediaSearch, [query], outputHandler, key)
+    
+  def _onlineWikipediaSearch(self, query):
+    self._setWorkStatusText("online Wikipedia search in progress...")
+    result = self.wikipediaSearch(query)
+    self._setWorkStatusText("online Wikipedia search done   ")
+    return result
+
 
   def _setWorkStatusText(self, text):
     notification = self.m.get('notification', None)
     if notification:
       notification.setWorkInProgressOverlayText(text)
+
+  def _addWorkerThread(self, *args):
+    """start the worker thread and provide it the specified arguments"""
+    w = self.Worker(self,*args)
+    w.daemon = True
+    w.start()
+    self.workerThreads.append(w)
+
+  def _done(self, thread):
+    """a thread reporting it is done"""
+    # unregister the thread
+    self._unregisterWorkerThread(thread)
+    # if no other thredas are working, disable the overlay
+    if not self.workerThreads:
+      self._disableOverlay()
+
+  def stop(self):
+    """called after pressing the cancel button"""
+    # disable the overlay
+    self._disableOverlay()
+    # tell all threads not to return results TODO: per thread cancelling
+    if self.workerThreads:
+      for thread in self.workerThreads:
+        thread.dontReturnResult()
+
+  def _unregisterWorkerThread(self, thread):
+    if thread in self.workerThreads:
+      self.workerThreads.remove(thread)
 
   class Worker(threading.Thread):
     """a worker thread for asynchronous online services access"""
@@ -323,7 +354,7 @@ class onlineServices(ranaModule):
             
       # cleanup
       print("onlineServices: worker finished")
-      self.callback.stop()
+      self.callback._done(self)
 
     def dontReturnResult(self):
       self.returnResult = False

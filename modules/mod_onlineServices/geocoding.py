@@ -19,16 +19,19 @@ def geocode(address):
     print("geocoding exception:\n", e)
     return []
   
-def wikipediaSearch(query):
-  from geopy import geocoders
-  wiki = geocoders.MediaWiki("http://wikipedia.org/wiki/%s", exactly_one=False)
-#  wiki = geocoders.MediaWiki("http://en.wikipedia.org/wiki/%s", exactly_one=False)
-#  wiki = geocoders.MediaWiki("http://en.wikipedia.org/wiki/Special:Search/%s", exactly_one=False)
-  try:
-    places = list(wiki.geocode(query))
-    return _places2points(places)
-  except Exception, e:
-    print("wiki search exception:\n", e)
-    return []
+#def wikipediaSearch(query):
+#  from geopy import geocoders
+##  wiki = geocoders.MediaWiki("http://wikipedia.org/wiki/%s")
+##  wiki = geocoders.MediaWiki("http://en.wikipedia.org/wiki/%s")
+##  wiki = geocoders.MediaWiki("http://en.wikipedia.org/wiki/Special:Search/%s")
+#  wiki = geocoders.MediaWiki("http://wiki.case.edu/%s")
+#  places = list(wiki.geocode(query))
+#  return _places2points(places)
+##  try:
+##    places = list(wiki.geocode(query))
+##    return _places2points(places)
+##  except Exception, e:
+##    print("wiki search exception:\n", e)
+##    return []
 
 
