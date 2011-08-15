@@ -57,6 +57,20 @@ class onlineServices(ranaModule):
       return 0
     return query.read()
 
+  def elevFromGeonamesBatchAsync(self, latLonList, outputHandler, key, tracklog=None):
+    self._addWorkerThread(self._elevFromGeonamesBatch, [latLonList, tracklog], outputHandler, key)
+
+  def _elevFromGeonamesBatch(self, latLonList, tracklog):
+    try:
+      self._setWorkStatusText("online elevation lookup starting...")
+      results = self.elevFromGeonamesBatch(latLonList)
+      self._setWorkStatusText("online elevation lookup done   ")
+      return (results, tracklog) 
+    except Exception, e:
+      print('onlineServices: exception suring elevation lookup:\n',e)
+      return (None,tracklog)
+
+
   def elevFromGeonamesBatch(self, latLonList):
     """
     get elevation in meters for the specified latitude and longitude from geonames
@@ -65,9 +79,9 @@ class onlineServices(ranaModule):
     maxCoordinates = 20 #geonames only allows 20 coordinates per query
     latLonElevList = []
     tempList = []
-#    mainLength = len(latLonList)
+    mL = len(latLonList)
     while len(latLonList) > 0:
-
+      self._setWorkStatusText("%d of %d done" % (mL-len(latLonList),mL) )
       tempList = latLonList[0:maxCoordinates]
       latLonList = latLonList[maxCoordinates:len(latLonList)]
 

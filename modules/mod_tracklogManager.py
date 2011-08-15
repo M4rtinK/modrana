@@ -62,19 +62,15 @@ class tracklogManager(ranaModule):
       self.scrollDict[currentCat] = scroll
 
     elif message == 'getElevation':
-      print "getting elevation info"
-      online = self.m.get("onlineServices",None)
+      print("tracklogManage: getting elevation info for active tracklog")
       activeTracklog = self.LTModule.getActiveTracklog()
       # generate a list of (lat,lon) tupples
       latLonList = map(lambda x: (x.latitude,x.longitude), activeTracklog.trackpointsList[0])
-      # this method returns (lat,lon, elev) tupples, where the elev comes from an online service
-      onlineElevList = online.elevFromGeonamesBatch(latLonList)
-      index = 0
-      for onlinePoint in onlineElevList: # add the new elevation data to the tracklog
-        activeTracklog.trackpointsList[0][index].elevation = onlinePoint[2]
-        index = index + 1
-      activeTracklog.modified() # make the tracklog update
-      activeTracklog.replaceFile() # replace the old tracklog file
+      # look-up elevation data using Geonames asynchronously
+      online = self.m.get("onlineServices",None)
+      if online:
+        online.elevFromGeonamesBatchAsync(latLonList, self._handleElevationLookupResults, 'geonamesBatchResults', activeTracklog)
+
 
     elif message == 'loadTrackProfile':
       # get the data needed for drawing the dynamic route profile in the osd
@@ -332,6 +328,17 @@ class tracklogManager(ranaModule):
 
       cr.move_to(x, y+textheight)
       cr.show_text(text)
+
+  def _handleElevationLookupResults(self, key, results):
+    onlineElevList, originalTracklog = results
+    if onlineElevList:
+      index = 0
+      for onlinePoint in onlineElevList: # add the new elevation data to the tracklog
+        originalTracklog.trackpointsList[0][index].elevation = onlinePoint[2]
+        index = index + 1
+      originalTracklog.modified() # make the tracklog update
+      originalTracklog.replaceFile() # replace the old tracklog file
+
 
 
 if(__name__ == "__main__"):
