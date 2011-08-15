@@ -36,27 +36,26 @@ class textEntry(ranaModule):
     self.set('textEntryDone', False)
 
   def respondToTextEntry(self, entry, dialog, response,instance,key, persistentKey):
-      print "responding to text entry"
+#      print "responding to text entry"
 #      self.set('textEntry', entry.get_text())
 #      self.set('textEntryDone', True)
       self.respond(entry.get_text(), instance,key, persistentKey)
-      print "text entry dialog is quiting"
+#      print "text entry dialog is quiting"
       dialog.destroy()
 
   def respondToDialog(self, dialog, response_id,entry,instance,key, persistentKey): 
       print "responding to dialog"
       if response_id == gtk.RESPONSE_ACCEPT:
-        print "dialog accepted"
+        print("** dialog accepted **")
         self.respond(entry.get_text(), instance,key, persistentKey)
       else:
-        print "dialog rejected"
+        print("** dialog rejected **")
         """the dialog was rejected so we don't
         report the input that could have been entered"""
 
 
 #      self.set('textEntry', entry.get_text())
 #      self.set('textEntryDone', True)
-      print "text entry dialog is quiting"
       dialog.destroy()
 
   def respond(self, result, instance, key, persistentKey=None):
@@ -130,7 +129,6 @@ class textEntry(ranaModule):
       self.dmod.textEntryIminent()
       self.entryBoxVisible = True
       dialog.show_all()
-
 
   def isEntryBoxvisible(self):
     """report if the current entry box is visible
