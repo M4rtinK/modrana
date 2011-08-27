@@ -462,7 +462,6 @@ class MapWidget(gtk.Widget):
     if menuName: # draw the menu
       for m in self.m.values():
         m.drawMenu(cr, menuName)
-      self.drawMasterOverlay(cr)
     else: # draw the map
       cr.set_source_rgb(0.2,0.2,0.2) # map background
       cr.rectangle(0,0,self.rect.width,self.rect.height)
@@ -505,7 +504,6 @@ class MapWidget(gtk.Widget):
         cr.translate(-x,-y)
         for m in self.m.values():
           m.drawScreenOverlay(cr)
-        self.drawMasterOverlay(cr)
       else: # centering is disabled, just draw the map
         try:
           for m in self.m.values():
@@ -517,7 +515,9 @@ class MapWidget(gtk.Widget):
           traceback.print_exc(file=sys.stdout) # find what went wrong
         for m in self.m.values():
           m.drawScreenOverlay(cr)
-        self.drawMasterOverlay(cr)
+
+    # do the master overlay over everything
+    self.drawMasterOverlay(cr)
 
 #    if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
 
