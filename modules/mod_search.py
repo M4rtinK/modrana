@@ -665,6 +665,9 @@ class search(ranaModule):
         place, (lat, lon) = p1.getMessage(), p1.getLL()
         z = self.get('z', 15)
         self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
+        markers = self.m.get('markers', None)
+        if markers:
+          markers.addGroup('addressResults', results)
       else:
         print("geocoding done - nothing found")
         self.sendMessage('ml:notification:m:No results found for this address.;5')
@@ -677,6 +680,9 @@ class search(ranaModule):
         place, (lat, lon) = p1.getMessage(), p1.getLL()
         z = self.get('z', 15)
         self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
+        markers = self.m.get('markers', None)
+        if markers:
+          markers.addGroup('wikipediaResults', results)
       else:
         print("wikipedia search done - nothing found")
         self.sendMessage('ml:notification:m:No results found for this query.;5')
