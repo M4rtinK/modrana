@@ -49,7 +49,7 @@ class showPOI(ranaModule):
     if clickHandler:
       clickHandler.registerXYWH(x, y, x+w, y+h, 'showPOI:stopExpecting|ms:showPOI:storePOI:fromMapDone')
 
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     """make the POI Object draw the menu :D"""
     if menuName=='POIDetail':
       self.activePOI.drawMenu(cr)

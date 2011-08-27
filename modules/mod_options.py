@@ -828,7 +828,7 @@ class options(ranaModule):
       print "editing variable: %s with: %s" % (variable, result)
       self.set(variable,result)
 
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     """Draw menus"""
     if(menuName[0:5] != "opt_c"):
       return

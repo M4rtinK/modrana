@@ -791,7 +791,7 @@ class route(ranaModule):
     self.set('needRedraw', True)
 
 
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     if menuName == 'currentRoute' or menuName == 'currentRouteBackToMap':
       menus = self.m.get("menu",None)
       if menus == None:

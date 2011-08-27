@@ -32,7 +32,7 @@ class routeProfile(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
 
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     #print menuName
     # is this menu the correct menu ?
     if menuName != 'routeProfile':

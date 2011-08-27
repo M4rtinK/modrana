@@ -138,7 +138,7 @@ class poiModule(ranaModule):
       cr.move_to(x, y+textheight)
       cr.show_text(text)
       
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     l = len(self.moduleName)
     if(menuName[0:l] != self.moduleName):
       return

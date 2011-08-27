@@ -831,7 +831,7 @@ class mapData(ranaModule):
     localAddPointsToLine(lat1, lon1, lat2, lon2, maxDistance) # call the local function
     return pointsBetween
 
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     # is this menu the correct menu ?
     if menuName == 'batchTileDl':
       """in order for the threeds to work normally, it is needed to pause the main loop for a while

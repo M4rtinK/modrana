@@ -255,7 +255,7 @@ class search(ranaModule):
 
     self.set("needRedraw", True)
 
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     if menuName == 'searchResults':
       menus = self.m.get("menu",None)
 

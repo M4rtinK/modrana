@@ -44,7 +44,7 @@ class info(ranaModule):
         print e
 
 
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     if menuName == 'infoAbout':
       menus = self.m.get('menu', None)
       if menus:

@@ -460,7 +460,7 @@ class tracklog(ranaModule):
       menus.addItem('tracklogTools', 'trace#clear', 'generic', 'tracklog:clearTrace|set:menu:None')
       menus.addItem('tracklogTools', 'color#change', 'generic', 'tracklog:setupColorMenu|set:menu:chooseDistColor')
 
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     if menuName == 'tracklog':
       # is the submenu initialized ?
       if self.toolsMenuDone == False:

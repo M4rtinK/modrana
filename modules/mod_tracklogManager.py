@@ -157,7 +157,7 @@ class tracklogManager(ranaModule):
       icon = "generic"
       menus.addItem(menu, text, icon, "set:currentTracCat:%s" % catId + nextAction)
 
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     # is this menu the correct menu ?
     if menuName == 'tracklogManager' or menuName == 'tracklogInfo' or menuName == 'tracklogManagerCathegories':
       # setup the viewport

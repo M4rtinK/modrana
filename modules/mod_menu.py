@@ -323,7 +323,7 @@ class menus(ranaModule):
         grid.append((x1+x*dx, y1+y*dy))
     self.itemMenuGrid = ((x1, y1, cols,rows,dx,dy),grid)
 
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     """Draw menus"""
 #    print "current menu is:%s" % menuName
     # Find the screen

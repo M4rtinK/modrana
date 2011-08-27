@@ -36,7 +36,7 @@ class askMenu(ranaModule):
     self.menus = self.m.get('menu', None)
 
 
-  def drawMenu(self, cr, menuName):
+  def drawMenu(self, cr, menuName, args=None):
     if menuName == 'askYesNo':
       self.drawAskYesNo(cr, self.question, self.yesAction, self.noAction)
 
