@@ -156,9 +156,9 @@ class options(ranaModule):
     catId, as a convenience feature, the id of the new group is returned"""
     catId = self._getCategoryID(parrentId)
     id = self._getGroupId(parrentId, id) # get a standardized id
-    action="%sset:menu:%s%s" % (actionPrefix,id,actionSufix)
+    action="%sset:menu:options#%s%s" % (actionPrefix,id,actionSufix)
     self.menuModule.addItem(catId, name, icon, action)
-    self.options[id] = ["set:menu:%s" % catId,0,[]]
+    self.options[id] = ["set:menu:options#%s" % catId,0,[]]
     return id
 
   def addBoolOption(self, title, variable, group, default=None, action=None):
@@ -829,10 +829,14 @@ class options(ranaModule):
       self.set(variable,result)
 
   def drawMenu(self, cr, menuName, args=None):
+    print menuName
     """Draw menus"""
     if(menuName[0:5] != "opt_c"):
+      print 1
       return
     if(not self.options.has_key(menuName)):
+      print 2
+      print self.options.keys()
       return
     
     # Find the screen

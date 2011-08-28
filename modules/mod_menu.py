@@ -325,17 +325,47 @@ class menus(ranaModule):
 
   def drawMenu(self, cr, menuName, args=None):
     """Draw menus"""
-#    print "current menu is:%s" % menuName
+
+    """
+    == Meaning of the menu persistant variable ==
+    "foo" - the default menu module has to do something with foo
+    "markers#" - the markers module has to draw the menu and gets "" as menu name
+    "markers#point" - the markers module has to draw the module
+                      and gets "point" as menu name
+    "markers#point#1 - the markers module has to draw the module
+                       and gets "point" as menu name and "1" (a string!) as args
+    """
+    split = menuName.split('#',2)
+    if len(split) == 1: # no module name found
+      self._drawOwnMenu(cr, menuName)
+    elif len(split) == 2:
+      (moduleName, menuName) = split
+      module = self.m.get(moduleName, None)
+      if module:
+        module.drawMenu(cr,menuName)
+      else:
+        print('menu: module %s that should handle menu drawing is missing' % moduleName)
+    elif len(split) == 3:
+      (moduleName, menuName, args) = split
+      module = self.m.get(moduleName, None)
+      if module:
+        module.drawMenu(cr,menuName, args)
+      else:
+        print('menu: module %s that should handle menu drawing is missing' % moduleName)
+
+  def _drawOwnMenu(self,cr, menuName):
     # Find the screen
-    if not self.d.has_key('viewport'):
+    vp = self.get('viewport', None)
+    if not vp:
       return
-    (x1,y1,w,h) = self.get('viewport', None)
+    else:
+      (x1,y1,w,h) = self.get('viewport', None)
 
     # Is it a list ?
     if menuName in self.lists.keys(): # TODO: optimize this
 #      print "drawing list: %s" % menuName
       self.lists[menuName].draw(cr) # draw the list
-    
+
     # Find the menu
     menu = self.menus.get(menuName, None)
     if(menu == None):
@@ -343,9 +373,7 @@ class menus(ranaModule):
         print "Menu %s doesn't exist, returning to main screen" % menuName
         self.set('menu', None)
         self.set('needRedraw', True)
-        
       return
-
     # Decide how to layout the menu
     if w > h:
       cols = 4
@@ -356,7 +384,6 @@ class menus(ranaModule):
     elif w == h:
       cols = 4
       rows = 4
-    
     dx = w / cols
     dy = h / rows
 
@@ -427,8 +454,6 @@ class menus(ranaModule):
         action+='|menu:toggle#%s#%s|set:needRedraw:True' % (menuName,id)
         self.drawButton(cr, x, y, dx, dy, text, icon, action)
       id += 1
-
-    return
 
   def register(self, menu, type, module):
     """Register a menu as being handled by some other module"""
@@ -680,7 +705,7 @@ class menus(ranaModule):
 
   def setupEditBatchMenu(self):
     """this is a menu for editing settings of a batch before running the said batch"""
-    self.clearMenu('editBatch', "mapData:refreshTilecount|set:menu:batchTileDl")
+    self.clearMenu('editBatch', "mapData:refreshTilecount|set:menu:mapData#batchTileDl")
     # on exit from the editation menu refresh the tilecount
 
     # we show the values of the settings
@@ -720,10 +745,10 @@ class menus(ranaModule):
     self.setupZoomDownMenu('editBatch|menu:setupEditBatchMenu', 'editBatch')
     self.setupZoomUpMenu('editBatch|menu:setupEditBatchMenu', 'editBatch')
 
-  def setupZoomUpMenu(self, nextMenu='batchTileDl', prevMenu='data'):
+  def setupZoomUpMenu(self, nextMenu='mapData#batchTileDl', prevMenu='data'):
     """in this menu, we set the maximal zoom level UP from the current zoomlevel (eq less detail)"""
     self.clearMenu('zoomUp', "set:menu:%s" % prevMenu)
-    if nextMenu == 'batchTileDl':
+    if nextMenu == 'mapData#batchTileDl':
       """if the next menu is the batch tile download menu (eq we are not called from the edit menu)
       we also send a message to refresh the tilecount after pressing the button
       (the edit menu sends the refresh message on exit so it would be redundant)"""
@@ -772,7 +797,7 @@ class menus(ranaModule):
     self.addItem('data', 'Around view', 'generic', 'set:downloadType:data|set:downloadArea:view|set:menu:%s' % nextMenu)
     self.setupDataSubMenu()
     if self.get("batchMenuEntered", None) == True:
-      self.addItem('data', 'back to dl', 'generic', 'set:menu:batchTileDl')
+      self.addItem('data', 'back to dl', 'generic', 'set:menu:mapData#batchTileDl')
 
   def setupRouteMenu(self):
      self.clearMenu('route')
@@ -780,13 +805,13 @@ class menus(ranaModule):
      self.addItem('route', 'Here to Point#Point to Here', 'generic', 'set:menu:None|route:selectOnePoint')
      POISelectedAction2 = "showPOI:routeToActivePOI"
      self.addItem('route', 'Here to POI', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:POICategories" % POISelectedAction2)
-     self.addItem('route', 'to Address#Address', 'generic', 'set:menu:showAdressRoute')
+     self.addItem('route', 'to Address#Address', 'generic', 'set:menu:route#showAdressRoute')
      self.addItem('route', 'Clear', 'generic', 'route:clear|set:menu:None')
      self.addItem('route', 'route#Current', 'generic', 'set:menu:currentRoute')
 
   def setupInfoMenu(self):
     self.clearMenu('info')
-    self.addItem('info', 'About', 'generic', 'set:menu:infoAbout')
+    self.addItem('info', 'About', 'generic', 'set:menu:info#infoAbout')
 
   def setupAboutMenu(self):
     self.clearMenu('infoAbout')
@@ -800,7 +825,7 @@ class menus(ranaModule):
     self.addItem('main', 'download', 'download', 'set:menu:data')
     self.addItem('main', 'mode', 'mode', 'set:menu:transport')
     self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManagerCathegories')
-    self.addItem('main', 'log a track', 'log', 'set:menu:tracklog')
+    self.addItem('main', 'log a track', 'log', 'set:menu:tracklog#tracklog')
     self.addItem('main', 'info', 'info', 'set:menu:info')
     self.setupTransportMenu()
     self.setupSearchMenus()

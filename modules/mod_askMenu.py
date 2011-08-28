@@ -40,19 +40,17 @@ class askMenu(ranaModule):
     if menuName == 'askYesNo':
       self.drawAskYesNo(cr, self.question, self.yesAction, self.noAction)
 
-
-  def setupAskYesNo(self,question,yesAction,noAction):
-    self.question = question
-    self.yesAction = yesAction
-    self.noAction = noAction
-    self.set('menu', 'askYesNo')
-
-
   def drawAskYesNo(self,cr,question,yesAction,noAction):
     first = (question,'generic','')
     second = ('YES','yeslong',yesAction)
     third = ('NO','nolong',noAction)
     self.menus.drawThreeItemHorizontalMenu(cr, first, second, third)
+
+  def setupAskYesNo(self,question,yesAction,noAction):
+    self.question = question
+    self.yesAction = yesAction
+    self.noAction = noAction
+    self.set('menu', 'askMenu#askYesNo')
 
 
 

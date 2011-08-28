@@ -413,7 +413,7 @@ class tracklog(ranaModule):
       # add the buttons
 
       # * escape button
-      menus.clearMenu('tracklogTools', "set:menu:tracklog")
+      menus.clearMenu('tracklogTools', "set:menu:tracklog#tracklog")
 
       # * logging interval button
 
@@ -456,7 +456,7 @@ class tracklog(ranaModule):
 #                  ('ON #time', '', 'set:tracklogLogTime:True')
 #                  ]
 #      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsTime')
-      menus.addItem('tracklogTools', 'folder#go to', 'generic', 'set:currentTracCat:logs|set:menu:tracklogManager')
+      menus.addItem('tracklogTools', 'folder#go to', 'generic', 'set:currentTracCat:logs|set:menu:tracklogManager#tracklogManager')
       menus.addItem('tracklogTools', 'trace#clear', 'generic', 'tracklog:clearTrace|set:menu:None')
       menus.addItem('tracklogTools', 'color#change', 'generic', 'tracklog:setupColorMenu|set:menu:chooseDistColor')
 
@@ -542,7 +542,7 @@ class tracklog(ranaModule):
           distanceString = "%f km" % self.distance
         text+= "\ndistance traveled <span foreground='white'>%s</span>\n" % distanceString
 
-      box = (text , "set:menu:tracklog")
+      box = (text , "set:menu:tracklog#tracklog")
       menus.drawSixPlusOneMenu(cr, menuName, parent, fiveButtons, box)
 
     else:

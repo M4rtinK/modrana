@@ -84,8 +84,8 @@ class tracklogManager(ranaModule):
       ask = self.m.get('askMenu', None)
       path = self.LTModule.getActiveTracklogPath()
       question = "do you really want to delete:|%s|?" % path
-      yesAction = "tracklogManager:deleteActiveTracklog|set:menu:tracklogManager"
-      noAction = "set:menu:tracklogInfo"
+      yesAction = "tracklogManager:deleteActiveTracklog|set:menu:tracklogManager#tracklogManager"
+      noAction = "set:menu:tracklogManager#tracklogInfo"
       ask.setupAskYesNo(question, yesAction, noAction)
 
     elif message == 'deleteActiveTracklog':
@@ -137,7 +137,7 @@ class tracklogManager(ranaModule):
 
     # setup the cathegory dashboard
     menu = 'tracklogManagerCathegories'
-    nextAction = '|set:menu:tracklogManager'
+    nextAction = '|set:menu:tracklogManager#tracklogManager'
     menus.clearMenu(menu, "set:menu:main")
     
     categories = self.LTModule.getCatList()
@@ -149,8 +149,8 @@ class tracklogManager(ranaModule):
 
     # setup the set cathegory menu
     menu = 'tracklogSetCathegory'
-    nextAction = '|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogInfo'
-    menus.clearMenu(menu, "|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogInfo")
+    nextAction = '|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogManager#tracklogInfo'
+    menus.clearMenu(menu, "|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogManager#tracklogInfo")
     for category in categories:
       catId = category
       text = category
@@ -226,7 +226,7 @@ class tracklogManager(ranaModule):
     elif menuName == 'tracklogInfo':
       menus = self.m.get("menu",None)
       # * draw "escape" button
-      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:tracklogManager")
+      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:tracklogManager#tracklogManager")
       track = self.LTModule.getActiveTracklog()
       # is there an active tracklog ?
       if track == None:
@@ -250,15 +250,15 @@ class tracklogManager(ranaModule):
         action3 = "mapView:recentre %f %f|set:showTrackFilename:%s|showGPX:makeVisible|set:menu:None" % (lat, lon, track.filename)
         menus.drawButton(cr, x3, y3, dx, dy, "show on map", "generic", action3)
       else:
-        menus.drawButton(cr, x3, y3, dx, dy, "can't show on map#no points", "generic", 'set:menu:tracklogInfo')
+        menus.drawButton(cr, x3, y3, dx, dy, "can't show on map#no points", "generic", 'set:menu:tracklogManager#tracklogInfo')
       # * draw "route profile"
-      menus.drawButton(cr, x4, y4, w, dy, "", "generic", "set:menu:routeProfile")
+      menus.drawButton(cr, x4, y4, w, dy, "", "generic", "set:menu:routeProfile#routeProfile")
 
       if track.elevation == True:
         profile.lineChart(cr, track, x4, y4, w, dy)
 
       # * draw an info box
-      menus.drawButton(cr, x4, y4+dy, w, h1-(y4+dy), "", "generic", "set:menu:tracklogInfo")
+      menus.drawButton(cr, x4, y4+dy, w, h1-(y4+dy), "", "generic", "set:menu:tracklogManager#tracklogInfo")
 
       pointcount = 0
       if track.trackpointsList:
@@ -287,16 +287,16 @@ class tracklogManager(ranaModule):
     currentPath = self.LTModule.getActiveTracklogPath()
     isVisible = (currentPath in visibleTracklogs)
 
-    menus.clearMenu('tracklogTools', "set:menu:tracklogInfo")
-    menus.addItem('tracklogTools', 'elevation#get', 'generic', 'tracklogManager:getElevation|set:menu:tracklogInfo')
+    menus.clearMenu('tracklogTools', "set:menu:tracklogManager#tracklogInfo")
+    menus.addItem('tracklogTools', 'elevation#get', 'generic', 'tracklogManager:getElevation|set:menu:tracklogManager#tracklogInfo')
     menus.addItem('tracklogTools', 'active#set', 'generic', 'set:currentTrack:%s|tracklogManager:loadTrackProfile|set:menu:None' % track.filename)
     menus.addItem('tracklogTools', 'inactive#set', 'generic', 'set:currentTrack:None|tracklogManager:unLoadTrackProfile|set:menu:None')
     if isVisible:
       menus.addItem('tracklogTools', 'toggle#visible', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|tracklogManager:setupToolsSubmenu' % track.filename)
     else:
       menus.addItem('tracklogTools', 'toggle#invisible', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|tracklogManager:setupToolsSubmenu' % track.filename)
-    menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogInfo')
-    menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogInfo')
+    menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogManager#tracklogInfo')
+    menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogManager#tracklogInfo')
 
     if isVisible:
       colorName = visibleTracklogs[currentPath]['colorName']
@@ -306,7 +306,7 @@ class tracklogManager(ranaModule):
   def describeTracklog(self, item, category):
     # describe a tracklog item
     action = ""
-    action += "set:activeTracklogPath:%s|loadTracklogs:loadActive|set:menu:tracklogInfo" % item['path']
+    action += "set:activeTracklogPath:%s|loadTracklogs:loadActive|set:menu:tracklogManager#tracklogInfo" % item['path']
     name = item['filename']
     description = 'type: ' + item['type'] + '   size:' + item['size'] + '   last modified:' + item['lastModified']
 

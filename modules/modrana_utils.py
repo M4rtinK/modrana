@@ -3,7 +3,7 @@ from __future__ import with_statement # for python 2.5
 import threading
 import os
 try:
-  import magic
+  import white_magic as magic
   magicAvailable = True
 except ImportError:
   magicAvailable = False

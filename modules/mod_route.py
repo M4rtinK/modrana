@@ -711,7 +711,7 @@ class route(ranaModule):
       """move to avoid colision with the point selection menu"""
       x1 = x1-dx
       y1 = y1-dy
-    menus.drawButton(cr, x1, y1, dx, dy, 'info#route', "generic_alpha", 'set:menu:currentRouteBackToMap')
+    menus.drawButton(cr, x1, y1, dx, dy, 'info#route', "generic_alpha", 'set:menu:route#currentRouteBackToMap')
 
   def drawTwoPointsMenu(self, cr):
     (x,y,w,h) = self.get('viewport')
@@ -846,10 +846,10 @@ class route(ranaModule):
       if self.once:
         self.once = False
 
-      box = (text , "set:menu:currentRoute")
+      box = (text , "set:menu:route#currentRoute")
       menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
-      menus.clearMenu('currentRouteTools', "set:menu:currentRoute")
-      menus.addItem('currentRouteTools', 'tracklog#save as', 'generic', 'route:storeRoute|set:currentTracCat:online|set:menu:tracklogInfo')
+      menus.clearMenu('currentRouteTools', "set:menu:route#currentRoute")
+      menus.addItem('currentRouteTools', 'tracklog#save as', 'generic', 'route:storeRoute|set:currentTracCat:online|set:menu:tracklogManager#tracklogInfo')
 
       # add turn-by-turn navigation buttons
       tbt = self.m.get('turnByTurn', None)
@@ -882,7 +882,7 @@ class route(ranaModule):
         # * tools
   #      menus.drawButton(cr, x3, y3, dx, dy, "tools", "generic", "set:menu:main")
 
-        menus.clearMenu('currentRouteTools', "set:menu:currentRoute")
+        menus.clearMenu('currentRouteTools', "set:menu:route#currentRoute")
 
         menus.drawButton(cr, x4, y4, w1-x4, dy,  "start", "generic", "route:startInput")
         menus.drawButton(cr, x4, y4+2*dy, w1-x4, dy, "destination", "generic", "route:destinationInput")

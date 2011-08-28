@@ -957,8 +957,13 @@ class mapData(ranaModule):
           action = "Retry nr. %d" % retryNumber
         else:
           action = "Downloading"
-          
-        text = "<b>%s</b>: <b>%d</b> of <b>%d</b> tiles done\n\n<b>%1.2f MB</b> transfered, %d downloads failed" % (action, currentTileCount, totalTileCount, MBTotalTransfered, failedCount)
+
+        # hanldle singular versus plural
+        if failedCount == 1:
+          failedCountString = "1 download failed"
+        else:
+          failedCountString = "%d downloads failed" % failedCount
+        text = "<b>%s</b>: <b>%d</b> of <b>%d</b> tiles done\n\n<b>%1.2f MB</b> transfered, %s" % (action, currentTileCount, totalTileCount, MBTotalTransfered, failedCountString)
       elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
         if getFilesThread.getDownloadCount():
           # some downloads occured

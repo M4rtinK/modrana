@@ -211,7 +211,7 @@ class storePOI(ranaModule):
       menus = self.getMenus()
       if menus:
         button1 = ('map#show on', 'generic', 'mapView:recentre %f %f|showPOI:drawActivePOI|set:menu:None' % (self.lat,self.lon))
-        button2 = ('tools', 'tools', 'set:menu:POIDetailTools')
+        button2 = ('tools', 'tools', 'showPOI:updateToolsMenu|set:menu:POIDetailTools')
         if self.label!=None and self.lat!=None and self.lon!=None and self.description!=None:
           text = "%s\nlat:%f lon:%f\n%s" % (self.label,self.lat,self.lon,self.description)
         else:
@@ -219,11 +219,11 @@ class storePOI(ranaModule):
         box = (text ,'')
         menus.drawThreePlusOneMenu(cr, 'POIDetail', 'showPOI:checkMenus|set:menu:POIList', button1, button2, box)
     
-    def drawToolsMenu(self,cr):
+    def updateToolsMenu(self):
       # setup the tools submenu
       menus = self.getMenus()
       if menus:
-        menus.clearMenu('POIDetailTools', "set:menu:POIDetail")
+        menus.clearMenu('POIDetailTools', "set:menu:showPOI#POIDetail")
         menus.addItem('POIDetailTools', 'here#route', 'generic', 'showPOI:routeToActivePOI')
         menus.addItem('POIDetailTools', 'name#edit', 'generic', 'ms:showPOI:editActivePOI:name')
         menus.addItem('POIDetailTools', 'description#edit', 'generic', 'ms:showPOI:editActivePOI:description')

@@ -48,7 +48,7 @@ class info(ranaModule):
     if menuName == 'infoAbout':
       menus = self.m.get('menu', None)
       if menus:
-        nop = "set:menu:infoAbout"
+        nop = "set:menu:info#infoAbout"
         button1 = ('', 'generic', nop)
         button2 = ('', 'generic', nop)
         web = "www.modrana.org"

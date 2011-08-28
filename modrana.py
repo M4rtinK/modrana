@@ -100,8 +100,8 @@ class MapWidget(gtk.Widget):
     self.timer1 = gobject.timeout_add(100, update1, self) #default 100
 #    self.timer2 = gobject.timeout_add(10, update2, self) #default 10
     self.timer3 = None # will be used for timing long press events
-    self.d = {} # List of data
-    self.m = {} # List of modules
+    self.d = {} # persistant dictionary of data
+    self.m = {} # dictionary of loaded modules
     self.watches = {} # List of data change watches
     self.maxWatchId = 0
     self.watch('needRedraw', self._checkForRedrawCB) # react on redraw requests
@@ -460,8 +460,11 @@ class MapWidget(gtk.Widget):
 
     menuName = self.d.get('menu', None)
     if menuName: # draw the menu
-      for m in self.m.values():
-        m.drawMenu(cr, menuName)
+      menus = self.m.get('menu', None)
+      if menus:
+        menus.drawMenu(cr, menuName)
+      else:
+        print("modrana: error, menu module missing")
     else: # draw the map
       cr.set_source_rgb(0.2,0.2,0.2) # map background
       cr.rectangle(0,0,self.rect.width,self.rect.height)

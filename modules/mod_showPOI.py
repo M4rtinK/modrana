@@ -53,8 +53,6 @@ class showPOI(ranaModule):
     """make the POI Object draw the menu :D"""
     if menuName=='POIDetail':
       self.activePOI.drawMenu(cr)
-    elif menuName=='POIDetailTools':
-      self.activePOI.drawToolsMenu(cr)
 
   def drawMapOverlay(self, cr):
     if self.drawActivePOI:
@@ -110,9 +108,9 @@ class showPOI(ranaModule):
           if click:
             """ make the POI caption clickable"""
             if id != None: # new POI have id == None
-              click.registerXYWH(rx,ry-(-rh),rw,-rh, "ms:showPOI:setActivePOI:%d|set:menu:POIDetail" % id)
+              click.registerXYWH(rx,ry-(-rh),rw,-rh, "ms:showPOI:setActivePOI:%d|set:menu:showPOI#POIDetail" % id)
             else: # the last added POI is still set, no need to set the id
-              click.registerXYWH(rx,ry-(-rh),rw,-rh, "set:menu:POIDetail")
+              click.registerXYWH(rx,ry-(-rh),rw,-rh, "set:menu:showPOI#POIDetail")
           cr.fill()
 
           # draw the actual text
@@ -148,7 +146,7 @@ class showPOI(ranaModule):
         if args:
           if type=='ms':
             catId = int(args)
-            action = 'set:menu:POIDetail' # use the default action
+            action = 'set:menu:showPOI#POIDetail' # use the default action
           elif type=='ml':
             """if the message is a message list, execute a custom action instead of the default POI detail menu
                TODO: use this even for selecting the POIDetail menu ?"""
@@ -255,7 +253,7 @@ class showPOI(ranaModule):
           # mark list menus for regeneration
           self.listMenusDirty = True
           # go to the new POI menu
-          self.set('menu', 'POIDetail')
+          self.set('menu', 'showPOI#POIDetail')
 
       elif message=='checkMenus':
         """check if the POI menus are "dirty" and need to be regenerated"""
@@ -265,6 +263,9 @@ class showPOI(ranaModule):
             catId = self.activePOI.getCatId()
             self.sendMessage('ms:showPOI:setupPOIList:%d' % catId)
           self.listMenusDirty = False
+
+      elif message=="updateToolsMenu":
+        self.activePOI.updateToolsMenu()
 
       elif message == 'listMenusDirty':
         """something regarding the POI changed
@@ -278,8 +279,8 @@ class showPOI(ranaModule):
           id = self.activePOI.getId()
           name = self.activePOI.getName()
           question = "Do you really want to delete:\n%s\nfrom the POI database ?" % name
-          yesAction = "ms:storePOI:deletePOI:%d|set:menu:poi" % id
-          noAction = "set:menu:POIDetailTools"
+          yesAction = "ms:storePOI:deletePOI:%d|set:menu:POICategories" % id
+          noAction = "showPOI:updateToolsMenu|set:menu:POIDetailTools"
           ask.setupAskYesNo(question, yesAction, noAction)
 
       elif message == 'centerOnActivePOI':

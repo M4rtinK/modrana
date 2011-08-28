@@ -354,7 +354,7 @@ class search(ranaModule):
 #    longName = name = item.getTracklogName()
 #    print filter(lambda x: x.getTracklogName() == longName, loadedTracklogs)
 #    print loadedTracklogs.index(item)
-    action = "set:menu:searchResultsItem"
+    action = "set:menu:search#searchResultsItem"
     action += "|set:searchResultsItemNr:%d" % list[index][2] # here we use the ABSOLUTE index, not the relative one
 #    action += "|set:menu:"
 #    name = item.getTracklogName().split('/').pop()
@@ -443,12 +443,12 @@ class search(ranaModule):
       print "search: warning, the units module uis missing"
       distanceString = "%1.2f km" % float(distance)
     # * draw "escape" button
-    menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:searchResults")
+    menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:search#searchResults")
     # * draw "show" button
     action2 = "search:reset|set:menu:None|set:searchResultsItemNr:%d|mapView:recentre %f %f" % (index, lat, lon)
     menus.drawButton(cr, x2, y2, dx, dy, "on map#show", "generic", action2)
 #    # * draw "add POI" button
-#    menus.drawButton(cr, x3, y3, dx, dy, "add to POI", "generic", "search:reset|search:storePOI|set:menu:searchResults")
+#    menus.drawButton(cr, x3, y3, dx, dy, "add to POI", "generic", "search:reset|search:storePOI|set:menu:search#searchResults")
     # * draw "tools" button
     menus.drawButton(cr, x3, y3, dx, dy, "tools", "tools", "set:menu:searchResultTools")
     # * draw info box
@@ -536,7 +536,7 @@ class search(ranaModule):
       m = self.m.get('clickHandler', None)
       # register clickable area
       if(m != None):
-        m.registerXYWH(rx,ry-(-rh),rw,-rh, "search:reset|set:searchResultsItemNr:%d|set:menu:searchResultsItem" % index)
+        m.registerXYWH(rx,ry-(-rh),rw,-rh, "search:reset|set:searchResultsItemNr:%d|set:menu:search#searchResultsItem" % index)
       cr.fill()
       # draw the actual text
       cr.set_source_rgba(1, 1, 1, 0.95) # slightly trasparent white
@@ -583,7 +583,7 @@ class search(ranaModule):
       # register clickable area
       m = self.m.get('clickHandler', None)
       if(m != None):
-        m.registerXYWH(rx,ry-(-rh),rw,-rh, "search:reset|set:searchResultsItemNr:%d|set:menu:searchResultsItem" % highlightNr)
+        m.registerXYWH(rx,ry-(-rh),rw,-rh, "search:reset|set:searchResultsItemNr:%d|set:menu:search#searchResultsItem" % highlightNr)
       cr.fill()
       
       # draw the actual text
@@ -603,7 +603,6 @@ class search(ranaModule):
       self.loadFilters() # fill the search term dictionary
 
       m.clearMenu("search", 'set:menu:main')
-      #m.addItem('search', 'centre', 'centre', 'set:menu:search_')
       for category, items in self.filters.items():
         m.clearMenu("search_%s" % category, 'set:menu:search')
         m.addItem('search', category, category.lower(), 'set:menu:search_'+category)
@@ -618,7 +617,7 @@ class search(ranaModule):
       m.addItem('search', 'query#custom', 'generic', 'search:customQuery')
 
       # setup the searchResultTools submenu
-      m.clearMenu('searchResultTools', 'set:menu:searchResultsItem')
+      m.clearMenu('searchResultTools', 'set:menu:search#searchResultsItem')
       m.addItem('searchResultTools', "here#route", "generic", "search:routeToActiveResult")
       m.addItem('searchResultTools', "add to POI", "generic", "search:reset|search:storePOI")
       m.addItem('searchResultTools', "results#clear", 'generic', 'search:clearSearch|set:menu:None')
@@ -655,7 +654,7 @@ class search(ranaModule):
     if key == "localSearchResultGoogle":
       print "search: GLS result recieved"
       self.localSearchResults = results
-      self.set('menu', 'searchResults')
+      self.set('menu', 'search#searchResults')
     elif key == "address2LL":
       if results:
         print("geocoding done - something found")

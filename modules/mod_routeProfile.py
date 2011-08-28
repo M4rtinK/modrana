@@ -66,7 +66,7 @@ class routeProfile(ranaModule):
       self.lineChart(cr, tracklog, 0, 0, w, h)
       
     # * draw "escape" button
-    menus.drawButton(cr, x1, y1, dx, dy, "", "up_transp_gama", "set:menu:tracklogInfo")
+    menus.drawButton(cr, x1, y1, dx, dy, "", "up_transp_gama", "set:menu:tracklogManager#tracklogInfo")
 
 
     if tracklog.trackpointsList == []:
