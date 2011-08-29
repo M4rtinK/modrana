@@ -217,7 +217,7 @@ class storePOI(ranaModule):
         else:
           text = "POI is being initialized"
         box = (text ,'')
-        menus.drawThreePlusOneMenu(cr, 'POIDetail', 'showPOI:checkMenus|set:menu:POIList', button1, button2, box)
+        menus.drawThreePlusOneMenu(cr, 'POIDetail', 'showPOI:checkMenus|set:menu:menu#list#POIList', button1, button2, box)
     
     def updateToolsMenu(self):
       # setup the tools submenu

@@ -462,7 +462,7 @@ class MapWidget(gtk.Widget):
     if menuName: # draw the menu
       menus = self.m.get('menu', None)
       if menus:
-        menus.drawMenu(cr, menuName)
+        menus.mainDrawMenu(cr, menuName)
       else:
         print("modrana: error, menu module missing")
     else: # draw the map

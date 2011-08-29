@@ -323,7 +323,7 @@ class menus(ranaModule):
         grid.append((x1+x*dx, y1+y*dy))
     self.itemMenuGrid = ((x1, y1, cols,rows,dx,dy),grid)
 
-  def drawMenu(self, cr, menuName, args=None):
+  def mainDrawMenu(self, cr, menuName, args=None):
     """Draw menus"""
 
     """
@@ -353,6 +353,13 @@ class menus(ranaModule):
       else:
         print('menu: module %s that should handle menu drawing is missing' % moduleName)
 
+  def drawMenu(self, cr, menuName, args=None):
+    if menuName == 'list':
+      listName = args
+      if listName in self.lists.keys():
+#        print "drawing list: %s" % menuName
+        self.lists[listName].draw(cr) # draw the list
+
   def _drawOwnMenu(self,cr, menuName):
     # Find the screen
     vp = self.get('viewport', None)
@@ -360,11 +367,6 @@ class menus(ranaModule):
       return
     else:
       (x1,y1,w,h) = self.get('viewport', None)
-
-    # Is it a list ?
-    if menuName in self.lists.keys(): # TODO: optimize this
-#      print "drawing list: %s" % menuName
-      self.lists[menuName].draw(cr) # draw the list
 
     # Find the menu
     menu = self.menus.get(menuName, None)
@@ -683,12 +685,12 @@ class menus(ranaModule):
     
   def setupPoiMenu(self):
     self.clearMenu('poi', "set:menu:main")
-    self.addItem('poi', 'POI#list', 'generic', "showPOI:setupCategoryList|set:menu:POICategories")
+    self.addItem('poi', 'POI#list', 'generic', "showPOI:setupCategoryList|set:menu:menu#list#POICategories")
     self.addItem('poi', 'POI#add new', 'generic', "set:menu:POIAddFromWhere")
     POISelectedAction1 = "showPOI:centerOnActivePOI"
-    self.addItem('poi', 'POI#go to', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:POICategories" % POISelectedAction1)
+    self.addItem('poi', 'POI#go to', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:menu#list#POICategories" % POISelectedAction1)
     POISelectedAction2 = "showPOI:routeToActivePOI"
-    self.addItem('poi', 'POI#route to', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:POICategories" % POISelectedAction2)
+    self.addItem('poi', 'POI#route to', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:menu#list#POICategories" % POISelectedAction2)
     self.addItem('poi', 'search#online', 'generic', "set:menu:searchWhere")
     self.addItem('poi', 'visible#clear', 'generic', "showPOI:clearVisiblePOI|set:menu:None")
 
@@ -804,7 +806,7 @@ class menus(ranaModule):
      self.addItem('route', 'Point to Point', 'generic', 'set:menu:None|route:selectTwoPoints')
      self.addItem('route', 'Here to Point#Point to Here', 'generic', 'set:menu:None|route:selectOnePoint')
      POISelectedAction2 = "showPOI:routeToActivePOI"
-     self.addItem('route', 'Here to POI', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:POICategories" % POISelectedAction2)
+     self.addItem('route', 'Here to POI', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:menu#list#POICategories" % POISelectedAction2)
      self.addItem('route', 'to Address#Address', 'generic', 'set:menu:route#showAdressRoute')
      self.addItem('route', 'Clear', 'generic', 'route:clear|set:menu:None')
      self.addItem('route', 'route#Current', 'generic', 'set:menu:currentRoute')

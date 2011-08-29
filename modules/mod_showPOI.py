@@ -130,9 +130,9 @@ class showPOI(ranaModule):
           """this is used for executing something special instead of going to the POIDetail menu
              after a POI is selected"""
           POISelectedAction = args[0]
-          action = "ml:showPOI:setupPOIList:%s;%s|set:menu:POIList" % ("%d",POISelectedAction)
+          action = "ml:showPOI:setupPOIList:%s;%s|set:menu:menu#list#POIList" % ("%d",POISelectedAction)
         else:
-          action = "ms:showPOI:setupPOIList:%d|set:menu:POIList"
+          action = "ms:showPOI:setupPOIList:%d|set:menu:menu#list#POIList"
         usedCategories = store.getUsedCategories()
         # convert cat_id to actions
         i = 0
@@ -162,7 +162,7 @@ class showPOI(ranaModule):
             buttonAction = "ms:showPOI:setActivePOI:%d|%s" % (poi_id,action)
             poiFromCategory[i] = (label,subText,buttonAction)
             i = i + 1
-          menus.addListableMenu("POIList",poiFromCategory, 'set:menu:POICategories')
+          menus.addListableMenu("POIList",poiFromCategory, 'set:menu:menu#list#POICategories')
       elif type=='ms' and message=='setActivePOI':
         if args:
           POIId = int(args)
@@ -279,7 +279,7 @@ class showPOI(ranaModule):
           id = self.activePOI.getId()
           name = self.activePOI.getName()
           question = "Do you really want to delete:\n%s\nfrom the POI database ?" % name
-          yesAction = "ms:storePOI:deletePOI:%d|set:menu:POICategories" % id
+          yesAction = "ms:storePOI:deletePOI:%d|set:menu:menu#list#POICategories" % id
           noAction = "showPOI:updateToolsMenu|set:menu:POIDetailTools"
           ask.setupAskYesNo(question, yesAction, noAction)
 
