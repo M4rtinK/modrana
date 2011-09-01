@@ -286,9 +286,7 @@ class MapWidget(gtk.Widget):
 
     if key in self.watches:
       remove = lambda x:x[0]==id
-      print self.watches[key][:]
       self.watches[key][:] = [x for x in self.watches[key] if not remove(x)]
-      print self.watches[key][:]
     else:
       print("modRana: can't remove watch - key does not exist, watchId:", id)
 
