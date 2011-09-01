@@ -32,11 +32,17 @@ class Markers(ranaModule):
     ranaModule.__init__(self, m, d, i)
     self.groups = {} # marker groups
 
-  def addGroup(self, name, points):
+  def addGroup(self, name, points, menu=False):
     """the name must be unique,
     if it isnt the previous similarly named group is overwritten
     points is a list of point objects"""
     g = PointGroup(points)
+    if menu:
+      g.setMenuEnabled(menu)
+      menus = self.m.get('menu', None)
+      if menus:
+        menu = menus.addPointListMenu(name, "set:menu:None", points, goto="map")
+        g.setMenuInstance(menu)
     self.groups[name] = g
     return g
 
@@ -69,21 +75,26 @@ class Markers(ranaModule):
       units = self.m.get('units', None)
       proj = self.m.get('projection', None)
       crPosUnitsProj = (cr, pos, units, proj)
-      for key in self.groups.keys():
+      for key in self.groups.keys(): # draw all groups
         group = self.groups[key]
+        menu = group.getMenuEnabled()
         colors = group.getColors()
 
         index = 0
-        for point, highlight in group.getPoints():
-          pointer = "%s#%d" % (key, index)
-          if highlight:
-            self._drawPoint(crPosUnitsProj, point, colors, pointer, highlight=True)
+        for point, highlight in group.getPoints(): # draw all points in group
+          if menu:
+            """key contains the point group name, it should be the same
+            as the corresponding listable menu name"""
+            action="set:menu:menu#listDetail#%s#%d" % (key, index)
           else:
-            self._drawPoint(crPosUnitsProj, point, colors, pointer)
+            action=""
+          if highlight:
+            self._drawPoint(crPosUnitsProj, point, colors, action=action, highlight=True)
+          else:
+            self._drawPoint(crPosUnitsProj, point, colors, action=action)
           index+=1
 
-
-  def _drawPoint(self, crPosUnitsProj, point, colors, pointer, distance=True, highlight=False):
+  def _drawPoint(self, crPosUnitsProj, point, colors, distance=True, action="", highlight=False):
     (cr, pos, units, proj) = crPosUnitsProj
     (lat,lon) = point.getLL() #TODO use getLLE for 3D distance
     (lat1,lon1) = pos # current position coordinates
@@ -134,10 +145,7 @@ class Markers(ranaModule):
     click = self.m.get('clickHandler', None)
     if click:
       """ make the POI caption clickable"""
-      if id != None: # new POI have id == None
-        click.registerXYWH(rx,ry-(-rh),rw,-rh, "ms:showPOI:setActivePOI:%d|set:menu:POIDetail")
-      else: # the last added POI is still set, no need to set the id
-        click.registerXYWH(rx,ry-(-rh),rw,-rh, "set:menu:POIDetail")
+      click.registerXYWH(rx,ry-(-rh),rw,-rh, action)
     cr.fill()
 
     # draw the actual text
@@ -154,6 +162,8 @@ class PointGroup():
       self.points.append((point,False))
     self.bgColor = bgColor
     self.textColor = textColor
+    self.menu=False
+    self.menuInstance = None
 
   def getBBox(self):
     "report a bounding box for all points"
@@ -176,3 +186,29 @@ class PointGroup():
   def unhighlightAll(self):
     for tupple in self.points:
       tupple[1] = False
+
+  def setMenuEnabled(self, value):
+    self.menu = value
+
+  def getMenuEnabled(self):
+    """is menu for this point group enabled or disabled"""
+    return self.menu
+
+  def setMenuInstance(self, menu):
+    self.menuInstance = menu
+
+  def getMenuInstance(self):
+    return self.menuInstance
+
+  def setInitialBackAction(self, action):
+        """this action will be used if the corresponding marker group menu is
+    entered for the first time without selecting any items,
+    once an item is selected, the back action reverts to "set:menu:None",
+    eq. returning to the map screen
+    USE CASE: quick returning from search results back to the serch menu
+              to start another search
+    """
+
+
+
+

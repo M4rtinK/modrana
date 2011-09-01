@@ -658,30 +658,48 @@ class search(ranaModule):
     elif key == "address2LL":
       if results:
         print("geocoding done - something found")
-        for p in results:
-          print(p)
-        p1 = results[0]
-        place, (lat, lon) = p1.getMessage(), p1.getLL()
-        z = self.get('z', 15)
-        self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
         markers = self.m.get('markers', None)
+        name = 'addressResults'
         if markers:
-          markers.addGroup('addressResults', results)
+          g = markers.addGroup(name, results, menu=True)
+          menu = g.getMenuInstance()
+          if len(results) == 1: # if only one result is found, center on it righ away
+            point = results[0]
+            self._jumpToPoint(point)
+          else:
+            self.sendMessage('set:menu:menu#list#%s' % name)
+          menu.setOnceBackAction('set:menu:searchWhat')
+        else: # just jump to the first result
+          point = results[0]
+          self._jumpToPoint(point)
       else:
         print("geocoding done - nothing found")
         self.sendMessage('ml:notification:m:No results found for this address.;5')
     elif key == "wikipedia":
       if results:
         print("wikipedia search done - something found")
-        for p in results:
-          print(p)
-        p1 = results[0]
-        place, (lat, lon) = p1.getMessage(), p1.getLL()
-        z = self.get('z', 15)
-        self.sendMessage('mapView:recentre %f %f %d|set:menu:None|ml:notification:m:%s;5' % (lat, lon, z, place))
+        name = 'wikipediaResults'
         markers = self.m.get('markers', None)
+        menu = None
         if markers:
-          markers.addGroup('wikipediaResults', results)
+          g = markers.addGroup(name, results, menu=True)
+          menu = g.getMenuInstance()
+          if len(results) == 1: # if only one result is found, center on it righ away
+            point = results[0]
+            self._jumpToPoint(point)
+          else:
+            self.sendMessage('set:menu:menu#list#%s' % name)
+          menu.setOnceBackAction('set:menu:searchWhat')
+        else: # just jump to the first result
+          point = results[0]
+          self._jumpToPoint(point)
       else:
         print("wikipedia search done - nothing found")
         self.sendMessage('ml:notification:m:No results found for this query.;5')
+
+  def _jumpToPoint(self, point):
+    mw = self.m.get('mapView', None)
+    if mw:
+      mw.jump2point(point)
+
+

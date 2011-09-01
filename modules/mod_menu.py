@@ -24,6 +24,7 @@ import gtk
 import time
 import math
 import geo
+import modrana_utils
 
 def getModule(m,d,i):
   return(menus(m,d,i))
@@ -355,10 +356,21 @@ class menus(ranaModule):
 
   def drawMenu(self, cr, menuName, args=None):
     if menuName == 'list':
-      listName = args
+      try:
+        listName,index = args.split('#',1)
+        index = int(index)
+      except ValueError: # index not specified
+        listName = args
+        index = None
+
       if listName in self.lists.keys():
 #        print "drawing list: %s" % menuName
-        self.lists[listName].draw(cr) # draw the list
+        self.lists[listName].draw(cr, index) # draw the list
+    elif menuName == 'listDetail':
+      listName,index = args.split('#',1)
+      index = int(index) # strin to int
+      if listName in self.lists.keys():
+        self.lists[listName].drawItemMenu(cr, index) # draw detailed menu
 
   def _drawOwnMenu(self,cr, menuName):
     # Find the screen
@@ -507,58 +519,132 @@ class menus(ranaModule):
     self.menus[menu][itemCount] = (textIconAction, index, uniqueName, type)
     self.menus[menu]['metadata']['itemCount'] = itemCount + 1
 
+  def drawPointDetailMenu(self, cr, point, backAction):
+    """draw a detailed menu for a Point object"""
+    lat, lon = point.getLL()
+    z = self.get('z', 15)
+    button1 = ('on map#show', 'generic', 'mapView:recentre %f %f %d|set:menu:None' % (lat, lon, z))
+    button2 = ('Tools', 'tools', 'set:menu:None')
+    box = ('<b>%s</b>\n%s' % (point.getName(),point.getDescription()), '')
 
-  def addListableMenu(self, name, items, parrentAction, descFunction=None, drawFunction=None):
-    newListableMenu = self.listableMenu(name, self, items, parrentAction, descFunction, drawFunction,4)
+    self.drawThreePlusOneMenu(cr, 'pointDetail', backAction, button1, button2, box)
+
+  def addPointListMenu(self, name, parrentAction, points=None, goto='detail'):
+    if points:
+      c = modrana_utils.SimpleListContainer(points)
+    else:
+      c = modrana_utils.SimpleListContainer()
+
+    def describePointGo2Map(point, index, name):
+      mainText = point.getName()
+      secText, (lat, lon) = point.getAbstract(), point.getLL()
+      z = self.get('z', 15)
+      action = 'mapView:recentre %f %f %d|set:menu:None' % (lat, lon, z)
+      return(mainText,secText,action)
+
+    def describePointGo2Detail(point, index, listName):
+      mainText = point.getName()
+      secText = getDescription()
+      action = 'set:menu:menu#listDetail#%s#%d' % (name, index)
+      return(mainText,secText,action)
+
+    if goto == 'detail':
+      descFunction = describePointGo2Detail
+    else:
+      descFunction = describePointGo2Map
+
+    newListableMenu = self.ListableMenu(name, self, c, parrentAction, descFunction=descFunction, displayedItems=4)
+    newListableMenu.setDrawItemMenuMethod(self.drawPointDetailMenu)
     self.lists[name] = newListableMenu
     return newListableMenu
 
+  def addListMenu(self, name, parrentAction, items=None, descFunction=None, drawFunction=None):
+    if items:
+      c = modrana_utils.SimpleListContainer(items)
+    else:
+      c = modrana_utils.SimpleListContainer()
+    newListableMenu = self.ListableMenu(name, self, c, parrentAction, descFunction, drawFunction,4)
+
+    self.lists[name] = newListableMenu
+    return newListableMenu
   
-  class listableMenu:
+  class ListableMenu:
     """a listable menu object"""
-    def __init__(self, name, menus, items, parrentAction, descFunction=None, drawFunction=None, displayedItems=3):
+    def __init__(self, name, menus, container, parrentAction, descFunction=None, drawFunction=None, displayedItems=3):
       """use custom item and description drawing functions, or use the default ones"""
-      self.descFunction = descFunction
+      # TODO: is this possible in the header ?
       if descFunction==None:
         self.descFunction = self.describeListItem
-      self.drawFunction = drawFunction
+      else:
+        self.descFunction = descFunction
       if drawFunction==None:
         self.drawFunction=self.drawListItem
+      else:
+        self.drawFunction = drawFunction
       self.index=0 #index of the first item in the current list view
       self.displayedItems = displayedItems
-      self.items = items
+      self.container = container
       self.parrentAction = parrentAction
       self.menus = menus
       self.name = name
+      self.drawItemMenuFunction = self.nop
 
-    def describeListItem(self, item, index, maxIndex):
+    def nop(self, cr=None, item=None, backAction=None):
+      "a function that does nothing and acts as a callable placeholder"
+      pass
+
+    def setDrawItemMenuMethod(self, method):
+      """select a method for drawing a detail menu for an item"""
+      self.drawItemMenuFunction = method
+
+    def setDrawMethod(self, method):
+      self.drawFunction = method
+
+    def setDescMethod(self, method):
+      self.descFunction = method
+
+    def setParrentAction(self, action):
+      self.parrentAction = action
+
+    def describeListItem(self, item, index=None, name=None):
       """default item description function
          -> get the needed strings for the default item drawing function"""
       (mainText, secText, action) = item
-      indexString = "%d/%d" % (index+1,maxIndex)
-      return(mainText, secText, indexString, action)
+      return(mainText, secText, action)
+
+    def drawItemMenu(self, cr, index):
+      item = self.container.getItem(index)
+      self.drawItemMenuFunction(cr, item, self._getBackToListAction(index))
+
+    def _getBackToListAction(self, index):
+      return "set:menu:menu#list#%s#%d" % (self.name, index)
 
     def drawListItem(self, cr, item, x, y, w, h, index, descFunction=None):
       """default list item drawing function"""
       if descFunction==None:
-        descFunction=self.describeListItem
+        descFunction=self.descFunction
 
       # * get the data for this button
-      (mainText, secText, indexString, action) = descFunction(item, index, len(self.items))
+      indexString = "%d/%d" % (index+1, self.container.getLength())
+
+      (mainText, secText, action) = descFunction(item, index, self.name)
       # * draw the background
       self.menus.drawButton(cr,x,y,w,h,'','generic', action)
 
       # * draw the text
-      border = 20
-
+      
       # 1st line: option name
-      self.menus.drawText(cr, mainText, x+border, y+border, w-2*border,20)
-      # 2nd line: current value
-      self.menus.drawText(cr, secText, x + 0.15 * w, y + 0.6 * h, w * 0.85 - border, 20)
-      # in corner: row number
-      self.menus.drawText(cr, indexString, x+0.85*w, y+3*border, w * 0.15 - border, 20)
+#      mainText = "AAAA"
+#      secText = "BBBB"
+#      indexString = "1/2"
 
-    def draw(self, cr):
+      self.menus.drawText(cr, mainText, x+w*0.10, y+h*0.1, w*0.80, h*0.5)
+      # 2nd line: current value
+      self.menus.drawText(cr, secText, x+w*0.10, y + 0.6 * h, w * 0.72, 0.4 * h)
+      # in corner: row number
+      self.menus.drawText(cr, indexString, x+0.85*w, y + 0.6 * h, w * 0.15, 0.2 * h)
+
+    def draw(self, cr, index=None):
       """draw the listable menu"""
       (e1,e2,e3,e4,alloc) = self.menus.threePlusOneMenuCoords()
       (x1,y1) = e1
@@ -575,7 +661,8 @@ class menus(ranaModule):
       # * scroll down
       self.menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "ml:menu:listMenu:%s;down" % self.name)
 
-      id = self.index
+      if index == None:
+        index = self.index
 
       # get the number of rows
       globalCount = self.menus.get('listableMenuRows', None) # try to get the global one
@@ -583,31 +670,45 @@ class menus(ranaModule):
         nrItems = self.displayedItems # use the default value
       else:
         nrItems = int(globalCount) # use the global one
-      visibleItems = self.items[id:(id+nrItems)]
+      visibleItems = self.container.getItemsInRange(index,(index+nrItems))
       if len(visibleItems): # there must be a nonzero amount of items to avoid a division by zero
         # compute item sizes
         itemBoxW = w-x4
         itemBoxH = h-y4
         itemW = itemBoxW
-#        itemH = itemBoxH/len(visibleItems)
         itemH = itemBoxH/nrItems
         for item in visibleItems:
-          self.drawFunction(cr,item,x4,y4,itemW,itemH,id) #draw the item
+          self.drawFunction(cr,item,x4,y4,itemW,itemH,index) #draw the item
           y4 = y4 + itemH # move the drawing window
-          id = id + 1 # increment the current index
+          index = index + 1 # increment the current index
 
     def scrollUp(self):
       if self.index>=1:
         self.index = self.index -1
         self.menus.needRedraw()
+
     def scrollDown(self):
-      if (self.index + 1) < len(self.items):
+      # TODO: handle containers with unknown length
+      if (self.index + 1) < self.container.getLength():
         self.index = self.index + 1
         self.menus.needRedraw()
+
     def reset(self):
       self.index = 0
 
+    def setOnceBackAction(self, action):
+      """replace the back button action with a given action for a single listable menu entry"""
+      oldAction = self.parrentAction # save the previous back action
+      self.parrentAction = action # replace with the given one
+      # restore by callback once the menu is left
+      self.menus.watch('menu', self._menuLeftCB, oldAction)
 
+    def _menuLeftCB(self,key,old,new, oldAction):
+      # restore the original back action
+      self.parrentAction = oldAction
+      # remove the watch by returning False
+      return False
+      
   def setupProfile(self):
     self.clearMenu('data2', "set:menu:main")
     self.setupDataSubMenu()
@@ -724,7 +825,6 @@ class menus(ranaModule):
 
     layer = self.get('layer', None)
     maplayers = self.modrana.getMapLayers()
-    print maplayers[layer]['maxZoom']
     if maplayers == {}:
       maxZoomLimit == 17
     else:

@@ -141,7 +141,7 @@ class showPOI(ranaModule):
           buttonAction = action % cat_id
           usedCategories[i] = (label,desc,buttonAction)
           i = i + 1
-        menus.addListableMenu('POICategories', usedCategories,"set:menu:poi")
+        menus.addListMenu('POICategories', "set:menu:poi", usedCategories)
       elif message=='setupPOIList':
         if args:
           if type=='ms':
@@ -162,7 +162,7 @@ class showPOI(ranaModule):
             buttonAction = "ms:showPOI:setActivePOI:%d|%s" % (poi_id,action)
             poiFromCategory[i] = (label,subText,buttonAction)
             i = i + 1
-          menus.addListableMenu("POIList",poiFromCategory, 'set:menu:menu#list#POICategories')
+          menus.addListMenu("POIList", 'set:menu:menu#list#POICategories', poiFromCategory)
       elif type=='ms' and message=='setActivePOI':
         if args:
           POIId = int(args)
