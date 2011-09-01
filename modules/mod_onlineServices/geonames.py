@@ -17,18 +17,32 @@ except:
 
 from point import Point
 
+
+class GeonamesWikipediaPoint(Point):
+  """
+  * a Point subclass suitable for representing the search result from
+  a Geonames wkipedia search
+  """
+  def __init__(self, gnWikipediaResult):
+    lat = gnWikipediaResult['lat']
+    lon = gnWikipediaResult['lng']
+    Point.__init__(self, lat, lon, gnWikipediaResult['elevation'], gnWikipediaResult['title'])
+    self.abstract="%s..." % gnWikipediaResult['summary'][0:50] # chop a part of the summary
+#    splitSumm = gnWikipediaResult['summary'].split(',')
+#    self.description = gnWikipediaResult['summary']
+    self.description = "%s..." % gnWikipediaResult['summary'][0:50]
+
+  def getDescription(self):
+    return self.description
+
+  def getAbstract(self):
+    return self.abstract
+
 def _wikipediaResults2points(results):
   """convert wikipedia search results from Geonames to modRana points"""
   points = []
-  for r in results:
-    lat = r['lat']
-    lon = r['lng']
-    if 'elevation' in r:
-      elev = r['elevation']
-    else:
-      elev = None
-    text = r['title']
-    points.append(Point(lat,lon, elevation=elev, message=text))
+  for result in results:
+    points.append(GeonamesWikipediaPoint(result))
   return points
 
 # from the googlemaps module
