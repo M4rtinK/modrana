@@ -93,6 +93,52 @@ class SynchronizedCircularStack:
 #    """nonsynchronized version of item existence testing"""
 #    return item in self.list
 
+class ListContainer:
+  """a WIP efficient list container, that does not need to actually store the
+  whole list in memmory"""
+  def __init__(self):
+    pass
+  
+  def getItem(self, index):
+    """return item with a given index"""
+    pass
+
+  def getItemsInRange(self, startIndex, stopIndex):
+    """return all items in range"""
+    pass
+
+  def getLength(self):
+    """-1 indicates unknown item count"""
+    pass
+
+class SimpleListContainer(ListContainer):
+  def __init__(self, items=[]):
+    ListContainer.__init__(self)
+    self.items = items
+    
+  def getItem(self, index):
+    return self.items[index]
+
+  def getItemsInRange(self, startIndex, stopIndex):
+    return self.items[startIndex:stopIndex]
+
+  def getLength(self):
+    return len(self.items)
+
+class PointListContainer(ListContainer):
+  def __init__(self, points=[]):
+    ListContainer.__init__(self)
+    self.points=points
+
+  def getItem(self, index):
+    return self.points[index]
+
+  def getItemsInRange(self, startIndex, stopIndex):
+    return self.points[startIndex:stopIndex]
+
+  def getLength(self):
+    return len(self.points)
+
 def isTheStringAnImage(s):
   """test if the string contains an image
   by reading its magic number"""
