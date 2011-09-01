@@ -51,3 +51,8 @@ class Point:
 
   def getDescription(self):
     return self.message
+
+  def getAbstract(self):
+    """a short single line point description"""
+    if self.message:
+      return self.message.split('\n',1)[0]
