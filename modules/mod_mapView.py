@@ -140,3 +140,9 @@ class mapView(ranaModule):
     print "mapView: switching centering disable treshold to %s" % centeringDisableTreshold
     self.modrana.setCDDragTreshold(int(centeringDisableTreshold))
 
+  def jump2point(self, point):
+    """recentre on a given point"""
+    z = self.get('z', 15)
+    lat, lon = point.getLL()
+    self.sendMessage('mapView:recentre %f %f %d|set:menu:None|set:needRedraw:True' % (lat, lon, z))
+
