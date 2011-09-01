@@ -34,8 +34,11 @@ class messageModule(ranaModule):
 
   def routeMessage(self, messages):
     for message in messages.split('|'):
-      (module, text) = message.split(":", 1)
-      
+      try:
+        (module, text) = message.split(":", 1)
+      except ValueError: # no modulename or keyword found
+        return
+
       if(module == 'set'):
         (key,value) = text.split(":", 1)
         for i in(None, True, False):
@@ -45,7 +48,8 @@ class messageModule(ranaModule):
         
       elif(module == 'toggle'):
         self.set(text, not self.get(text,0))
-      elif(module == "*"):
+
+      elif(module == "*"): # send to all modules
         for m in self.m.items():
           m.handleMessage(text)
 
