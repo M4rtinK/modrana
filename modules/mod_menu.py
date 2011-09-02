@@ -971,7 +971,7 @@ class menus(ranaModule):
       lineSpace = (h-2*spacing)/lineCount
       i = 0
       for line in lines:
-        self.showText(cr, line, x+border, y+i*lineSpace+1*spacing, w-2*border, wrap=wrap)
+        self.showText(cr, line, x+border, y+i*lineSpace+1*spacing, w-2*border)
         i = i + 1
 
   def drawThreeItemHorizontalMenu(self, cr, first, second, third):
