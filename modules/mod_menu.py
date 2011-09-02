@@ -230,7 +230,18 @@ class menus(ranaModule):
     else:
       cr.move_to(x,y)
       pg.show_layout(layout)
-    
+
+  def showWrappedText(self,cr,text,x,y,widthLimit,fontsize=20):
+    pg = pangocairo.CairoContext(cr)
+    # create a layout for your drawing area
+    layout = pg.create_layout()
+    layout.set_width(int(widthLimit*pango.SCALE))
+    layout.set_wrap(pango.WRAP_WORD)
+    layout.set_font_description(pango.FontDescription("Sans Serif %d" % fontsize))
+    layout.set_markup(text)
+    cr.move_to(x,y)
+    pg.show_layout(layout)
+
   def drawText(self,cr,text,x,y,w,h,border=0, rgbaColor=None):
     """This is mainly used to draw the text on icons,
     this method uses pango, for the old show_text based one,
@@ -527,7 +538,7 @@ class menus(ranaModule):
     button2 = ('Tools', 'tools', 'set:menu:None')
     box = ('<b>%s</b>\n%s' % (point.getName(),point.getDescription()), '')
 
-    self.drawThreePlusOneMenu(cr, 'pointDetail', backAction, button1, button2, box)
+    self.drawThreePlusOneMenu(cr, 'pointDetail', backAction, button1, button2, box, wrap=True)
 
   def addPointListMenu(self, name, parrentAction, points=None, goto='detail'):
     if points:
@@ -944,20 +955,24 @@ class menus(ranaModule):
     self.set('editBatchMenuActive', False) # at startup, the edit batch menu is inactive
 
 
-  def drawTextToSquare(self, cr, x, y, w, h, text):
+  def drawTextToSquare(self, cr, x, y, w, h, text, wrap=False):
     """draw lines of text to a square text box, \n is used as a delimiter"""
 #    (x1,y1,w1,h1) = self.get('viewport', None)
 #    dx = w / 3
 #    dy = h / 4
-    border = 30
+    border = int(min(w/30.0,h/30.0))
+    print border
     spacing = 20
-    lines = text.split('\n')
-    lineCount = len(lines)
-    lineSpace = (h-2*spacing)/lineCount
-    i = 0
-    for line in lines:
-      self.showText(cr, line, x+border, y+i*lineSpace+1*spacing, w-2*border)
-      i = i + 1
+    if wrap:
+      self.showWrappedText(cr, text, x+border, y+border, w-2*border)
+    else:
+      lines = text.split('\n')
+      lineCount = len(lines)
+      lineSpace = (h-2*spacing)/lineCount
+      i = 0
+      for line in lines:
+        self.showText(cr, line, x+border, y+i*lineSpace+1*spacing, w-2*border, wrap=wrap)
+        i = i + 1
 
   def drawThreeItemHorizontalMenu(self, cr, first, second, third):
     """draw a menu, that consists from three horizontal buttons
@@ -1082,7 +1097,7 @@ class menus(ranaModule):
         # in corner: row number
         self.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y + 0.42 * dy, w * 0.15 - border, 20)
 
-  def drawThreePlusOneMenu(self, cr, menuName, parentAction, button1, button2, box):
+  def drawThreePlusOneMenu(self, cr, menuName, parentAction, button1, button2, box, wrap=False):
     """draw a three plus on menu"""
     (e1,e2,e3,e4,alloc) = self.threePlusOneMenuCoords()
     (x1,y1) = e1
@@ -1107,7 +1122,7 @@ class menus(ranaModule):
     self.drawButton(cr, x4, y4, w4, h4, "", "generic", boxAction)
     # * draw text to the box
     text = boxTextLines
-    self.drawTextToSquare(cr, x4, y4, w4, h4, text) # display the text in the box
+    self.drawTextToSquare(cr, x4, y4, w4, h4, text, wrap) # display the text in the box
 
   def drawSixPlusOneMenu(self, cr, menuName, parent, fiveButtons, box):
     """draw a three plus on menu

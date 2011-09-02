@@ -26,11 +26,11 @@ class GeonamesWikipediaPoint(Point):
   def __init__(self, gnWikipediaResult):
     lat = gnWikipediaResult['lat']
     lon = gnWikipediaResult['lng']
-    Point.__init__(self, lat, lon, gnWikipediaResult['elevation'], gnWikipediaResult['title'])
+    # for storage, we remember both name and summary in the message variable
+    message = "%s\n%s" % (gnWikipediaResult['title'],gnWikipediaResult['summary'])
+    Point.__init__(self, lat, lon, gnWikipediaResult['elevation'], message)
     self.abstract="%s..." % gnWikipediaResult['summary'][0:50] # chop a part of the summary
-#    splitSumm = gnWikipediaResult['summary'].split(',')
-#    self.description = gnWikipediaResult['summary']
-    self.description = "%s..." % gnWikipediaResult['summary'][0:50]
+    self.description = gnWikipediaResult['summary']
 
   def getDescription(self):
     return self.description
