@@ -30,10 +30,13 @@ class GeonamesWikipediaPoint(Point):
     message = "%s\n%s" % (gnWikipediaResult['title'],gnWikipediaResult['summary'])
     Point.__init__(self, lat, lon, gnWikipediaResult['elevation'], message)
     self.abstract="%s..." % gnWikipediaResult['summary'][0:50] # chop a part of the summary
-    self.description = gnWikipediaResult['summary']
+    self.result = gnWikipediaResult
+
+  def getName(self):
+    return self.result['title']
 
   def getDescription(self):
-    return self.description
+    return self.result['summary']
 
   def getAbstract(self):
     return self.abstract

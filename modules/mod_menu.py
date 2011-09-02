@@ -961,7 +961,6 @@ class menus(ranaModule):
 #    dx = w / 3
 #    dy = h / 4
     border = int(min(w/30.0,h/30.0))
-    print border
     spacing = 20
     if wrap:
       self.showWrappedText(cr, text, x+border, y+border, w-2*border)
