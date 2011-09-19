@@ -138,7 +138,7 @@ class options(ranaModule):
     """this metohod shuld be run only after menu module instance
     is vailable in self.menuModule and the options manu is clared,
     eq. has at least the escape button"""
-    # firs we add the category button to the options
+    # first we add the category button to the options
     id = self._getCategoryID(inId) # get a standardized id
     action="%sset:menu:%s%s" % (actionPrefix,id,actionSufix)
     self.menuModule.addItem('options', name, icon, action)
@@ -158,7 +158,7 @@ class options(ranaModule):
     id = self._getGroupId(parrentId, id) # get a standardized id
     action="%sset:menu:options#%s%s" % (actionPrefix,id,actionSufix)
     self.menuModule.addItem(catId, name, icon, action)
-    self.options[id] = ["set:menu:options#%s" % catId,0,[]]
+    self.options[id] = ["set:menu:%s" % catId,0,[]]
     return id
 
   def addBoolOption(self, title, variable, group, default=None, action=None):
@@ -828,17 +828,7 @@ class options(ranaModule):
       print "editing variable: %s with: %s" % (variable, result)
       self.set(variable,result)
 
-  def drawMenu(self, cr, menuName, args=None):
-    print menuName
-    """Draw menus"""
-    if(menuName[0:5] != "opt_c"):
-      print 1
-      return
-    if(not self.options.has_key(menuName)):
-      print 2
-      print self.options.keys()
-      return
-    
+  def drawMenu(self, cr, menuName, args=None):    
     # Find the screen
     if not self.d.has_key('viewport'):
       return
