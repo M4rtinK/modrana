@@ -106,15 +106,13 @@ class routeProfile(ranaModule):
 
     elevList = tracklog.perElevList
 
-    minimum = min(map(lambda x: x[1], elevList))
-    maximum = max(map(lambda x: x[1], elevList))
-#
-#    elevList = map(lambda x: (x[0],(x[1]-minimum)), elevList)
-
-    lines = tuple(map(lambda x: (x[0], x[1]), elevList))
-
     units = self.m.get('units', None)
+    if units == None:
+      print("routeProfile, lineChart: Units module missing")
+      return
+
     length = int(len(elevList))
+    lines = tuple(map(lambda x: (x[0], x[1]), elevList))
 
     if w <= 610:
       yTick = 7
@@ -125,13 +123,41 @@ class routeProfile(ranaModule):
       labelTick = 20
       fontSize = 15
 
-    if units == None:
-      xTicks = [dict(v=r, label=elevList[r][0]) for r in range(0,length,labelTick)]
-    else:
-      xTicks = [dict(v=r, label=units.km2CurrentUnitString(elevList[r][0], 1)) for r in range(0,length,labelTick)]
+    xTicks = [dict(v=r, label=units.km2CurrentUnitString(elevList[r][0], 1)) for r in range(0,length,labelTick)]
+    minimum = min(map(lambda x: x[1], elevList))
+    maximum = max(map(lambda x: x[1], elevList))
 
-#    elevList = tracklog.trackpointsList[0]
-#    lines = tuple(map(lambda x: ("", float(x.elevation)), elevList))
+#    elevList = map(lambda x: (x[0],(x[1]-minimum)), elevList)
+
+
+    unitType = self.get('unitType', 'km')
+    if unitType == 'km':
+      yAxis = {
+#                  'interval' : 200,
+                   'range' : (minimum-15,maximum+30),
+                  'tickCount': yTick, #number of data points on the Y axis
+                   'label' : "elevation (m)",
+
+              }
+    else: # non metric
+      cuMinimum = units.m2CurrentUnitString(minimum, 3, short=True)
+      cuMaximum = units.m2CurrentUnitString(maximum, 3, short=True)
+      middle = minimum + (maximum - minimum)/2.0
+      print minimum
+      print middle
+      print maximum
+      cuMiddle = units.m2CurrentUnitString(middle, 3, short=True)
+      yTicks = [{'label': cuMinimum, 'v': minimum-15},
+                {'label': cuMiddle, 'v': middle+15/2.0},
+                {'label': cuMaximum, 'v': maximum+30}]
+      yAxis = {
+#                  'interval' : 200,
+                  'range' : (minimum-15,maximum+30),
+                  'ticks':yTicks,
+#                  'tickCount': yTick, #number of data points on the Y axis
+#                   'label' : "elevation (%s)" % units.currentSmallUnitString(short=True),
+                   'label' : "elevation",
+              }
 
     dataSet = (
         ('lines', [(i, l[1]) for i, l in enumerate(lines)]),
@@ -147,15 +173,8 @@ class routeProfile(ranaModule):
                   'ticks': xTicks,
                   'label' : "distance",
 #                  'tickCount': 10, #number of data points on the X axis
-#                 'ticks':[dict(v=i, label=l[1]) for i, l in enumerate(lines)],
             },
-            'y': {
-#                'interval' : 200,
-                'range' : (minimum-15,maximum+30),
-                'tickCount': yTick, #number of data points on the Y axis
-#                'rotate' : 35,
-                'label' : "elevation",
-            }
+            'y': yAxis
         },
         'background': {
             'color': '#eeeeff',

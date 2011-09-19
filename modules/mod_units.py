@@ -47,7 +47,14 @@ class units(ranaModule):
 
   def km2Miles(self, km):
     return km / self.mileInKiloMeters  # km to miles
-  
+
+  def miles2Feet(self, miles):
+    return miles*self.mileInFeet
+
+
+  def m2CurrentUnit(self, m):
+    return self.km2CurrentUnit(m*1000)
+
   def km2CurrentUnit(self, km):
     unitType = self.get("unitType", "km")
     if unitType == 'km':
@@ -204,6 +211,19 @@ class units(ranaModule):
       return "kilometers"
     else:
       return "miles"
+
+  def currentSmallUnitString(self, short=False):
+    unitType = self.get("unitType", "km")
+    if unitType == 'km':
+      if short:
+        return "m"
+      else:
+        return "meters"
+    else:
+      if short:
+        return "ft"
+      else:
+        return "feet"
 
   def currentSpeedUnitToMS(self, currentSpeedUnit):
     "convert current speed unit to meters per second"

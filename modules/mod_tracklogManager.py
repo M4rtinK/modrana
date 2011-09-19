@@ -268,9 +268,14 @@ class tracklogManager(ranaModule):
 
       text = "number of points: %d\n" % pointcount
       if track.elevation == True:
-        text += "\nmaximum elevation: %d meters\nminimum elevation: %d meters" % (track.routeInfo['maxElevation'], track.routeInfo['minElevation'])
-        text += "\nelevation of the first point: %d meters" % track.routeInfo['firstElevation']
-        text += "\nelevation of the last point: %d meters" % track.routeInfo['lastElevation']
+        units = self.m.get('units', None)
+        if units:
+          print track.routeInfo['firstElevation']
+          maxString = units.m2CurrentUnitString(track.routeInfo['maxElevation'], 2, False)
+          minString = units.m2CurrentUnitString(track.routeInfo['minElevation'], 2, False)
+          text += "\nmaximum elevation: %s\nminimum elevation: %s" % (maxString, minString)
+          text += "\nelevation of the first point: %s" % units.m2CurrentUnitString(track.routeInfo['firstElevation'], 2, False)
+          text += "\nelevation of the last point: %s" % units.m2CurrentUnitString(track.routeInfo['lastElevation'], 2, False)
 
       menus.drawTextToSquare(cr, x4, y4+dy, w, h1-(y4+dy), text)
 
