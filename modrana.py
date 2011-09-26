@@ -1,4 +1,3 @@
-import os.path
 #!/usr/bin/python
 #----------------------------------------------------------------------------
 # Rana main GUI.  Displays maps, for use on a mobile device
@@ -133,6 +132,11 @@ class MapWidget(gtk.Widget):
     self.mapLayers = {}
     self.notificationModule = None
 
+    # per mode options
+    # NOTE: this variable is automatically saved by the
+    # options module
+    self.keyModifiers = {}
+
   def loadModules(self):
     """Load all modules from the specified directory"""
 
@@ -230,6 +234,8 @@ class MapWidget(gtk.Widget):
     self.watch('viewport', self._updateCenteringShiftCB)
     # and map scaling
     self.watch('mapScale', self._updateCenteringShiftCB)
+    # cache key modifiers
+    self.keyModifiers = self.d.get('keyModifiers', {})
 
   def _modulesLoadedPostFirstTime(self):
     """this is run after all the modules have been loaded,
@@ -250,11 +256,29 @@ class MapWidget(gtk.Widget):
 
   def get(self, name, default=None):
     """Get an item of data"""
-    return(self.d.get(name, default))
+
+    # check if the value depends on current mode
+    if name in self.keyModifiers.keys():
+      # get the current mode
+      mode = self.d.get('mode', None)
+      # get the dictionary with per mode values
+      multiDict = self.d.get(name.join('#multi'), default)
+      # retrun the value for current mode
+      return multiDict.get(mode,default)
+
+    else: # just return the normal value
+      return(self.d.get(name, default))
 
   def set(self, name, value, save=False):
     """Set an item of data"""
-    self.d[name] = value
+    if name in self.keyModifiers.keys():
+      # get the current mode
+      mode = self.d.get('mode', None)
+      # save it to the name + #multi key under the mode key
+      self.d[name.join('#multi')][mode] = value
+
+    else: # just save to the key as usuall
+      self.d[name] = value
     """options are normally saved on shutdown,
     but for some data we want to make sure they are stored and not
     los for example becuase of power outage/empty battery, etc."""
@@ -303,6 +327,21 @@ class MapWidget(gtk.Widget):
             self.removeWatch(id)       
         else:
           print "invalid watcher callback :", callback
+
+  def addKeyModifier(self, key, modifier=None):
+    """add a key modifier
+    NOTE: currently only used to make value of some keys
+    dependent on the current mode"""
+    self.keyModifiers[key] = modifier
+
+  def removeKeyModifier(self, key):
+    """remove key modifier
+    NOTE: currently this just makes the key independent
+    on the current mode"""
+    if key in self.keyModifiers.keys():
+      del self.keyModifiers[key]
+    else:
+      print("modRana: key %s has no modifier and thus cannot be removed")
 
   def update(self):
     for m in self.m.values():

@@ -741,6 +741,7 @@ class options(ranaModule):
     try:
       f = open(self.getOptionsFilePath(), "w")
       # remove keys marked as nonpersistent
+      self.d['keyModifiers'] = self.modrana.keyModifiers
       d = self._removeNonPersistent(self.d)
       marshal.dump(d, f)
       f.close()
@@ -802,6 +803,15 @@ class options(ranaModule):
       if entry:
         key = "editVariable_%s" % variable
         entry.entryBox(self,key, label, initialText, description)
+
+    #messages to toggles a key to be mode un/specific
+    #Mode specific keys:
+    #this means that the options key can have a different value
+    #depending on the current mode, thus enabling better cutomization"""
+    elif type == "ms" and message == "makeKeyModeSpecific":
+      self.modrana.addKeyModifier(args)
+    elif type == "ms" and message == "makeKeyModeUnSpecific":
+      self.modrana.removeKeyModifier(args)
 
   def _updateVoiceManual(self, action):
     """add or remove custom voce parameters option items"""
