@@ -384,21 +384,23 @@ class menus(ranaModule):
         self.lists[listName].drawItemMenu(cr, index) # draw detailed menu
 
   def _drawOwnMenu(self,cr, menuName):
-    # Find the screen
+    # Find the menu
+    menu = self.menus.get(menuName, None)
+    if(menu == None):
+      print "Menu %s doesn't exist, returning to main screen" % menuName
+      self.set('menu', None)
+      self.set('needRedraw', True)
+      return
+    else:
+      self.drawItemMenu(cr, menu)
+
+  def drawItemMenu(self, cr, menu):
+    """draw the item menu"""
     vp = self.get('viewport', None)
     if not vp:
       return
     else:
       (x1,y1,w,h) = self.get('viewport', None)
-
-    # Find the menu
-    menu = self.menus.get(menuName, None)
-    if(menu == None):
-      if(0):
-        print "Menu %s doesn't exist, returning to main screen" % menuName
-        self.set('menu', None)
-        self.set('needRedraw', True)
-      return
     # Decide how to layout the menu
     if w > h:
       cols = 4
