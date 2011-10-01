@@ -504,8 +504,11 @@ class menus(ranaModule):
     itemCount = self.menus[menu]['metadata']['itemCount']
     type = "simple"
     """we are counting up from zero for the item indexes"""
-    self.menus[menu][itemCount] = (text, icon, action, type, timedAction)
+    self.menus[menu][itemCount] = self.getItem(text, icon, action, type, timedAction)
     self.menus[menu]['metadata']['itemCount'] = itemCount + 1
+
+  def getItem(self, text, icon, action, type, timedAction):
+    return (text, icon, action, type, timedAction)
 
   def addToggleItem(self, menu, textIconAction, index=0, pos=None, uniqueName=None):
     """
@@ -531,6 +534,9 @@ class menus(ranaModule):
     """we are counting up from zero for the item indexes"""
     self.menus[menu][itemCount] = (textIconAction, index, uniqueName, type)
     self.menus[menu]['metadata']['itemCount'] = itemCount + 1
+
+#  def getToggleItem():
+# TODO: implement later
 
   def drawPointDetailMenu(self, cr, point, backAction):
     """draw a detailed menu for a Point object"""
