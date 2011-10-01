@@ -491,7 +491,10 @@ class menus(ranaModule):
 
   def initMenu(self,menu):
     """anitialize menu a menu dictionary instance to default parameters"""
-    self.menus[menu] = {'metadata':{'itemCount':0,'currentPage':0}}
+    self.menus[menu] = self.getInitializedMenu()
+
+  def getInitializedMenu(self):
+    return {'metadata':{'itemCount':0,'currentPage':0}}
     
   def clearMenu(self, menu, cancelButtonAction='set:menu:main'):
     self.initMenu(menu)
@@ -504,10 +507,10 @@ class menus(ranaModule):
     itemCount = self.menus[menu]['metadata']['itemCount']
     type = "simple"
     """we are counting up from zero for the item indexes"""
-    self.menus[menu][itemCount] = self.getItem(text, icon, action, type, timedAction)
+    self.menus[menu][itemCount] = self.generateItem(text, icon, action, type, timedAction)
     self.menus[menu]['metadata']['itemCount'] = itemCount + 1
 
-  def getItem(self, text, icon, action, type, timedAction):
+  def generateItem(self, text, icon, action, type, timedAction):
     return (text, icon, action, type, timedAction)
 
   def addToggleItem(self, menu, textIconAction, index=0, pos=None, uniqueName=None):
