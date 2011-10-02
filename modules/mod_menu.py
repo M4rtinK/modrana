@@ -45,6 +45,9 @@ class menus(ranaModule):
     self.lastHideCheckTimestamp = time.time()
     self.itemMenuGrid = (None,[])
 
+    # tools menu
+    self.itemToolsMenuCache = (None, None)
+
     # colors - failsafe defaults
     self.mainTextColor = (0,0,0.3,1)
     self.centerButtonCircleColor = (0,0,1,0.45)
@@ -335,6 +338,8 @@ class menus(ranaModule):
         grid.append((x1+x*dx, y1+y*dy))
     self.itemMenuGrid = ((x1, y1, cols,rows,dx,dy),grid)
 
+# menu drawing logic#
+
   def mainDrawMenu(self, cr, menuName, args=None):
     """Draw menus"""
 
@@ -366,6 +371,7 @@ class menus(ranaModule):
         print('menu: module %s that should handle menu drawing is missing' % moduleName)
 
   def drawMenu(self, cr, menuName, args=None):
+    """handles list menus"""
     if menuName == 'list':
       try:
         listName,index = args.split('#',1)
@@ -382,8 +388,13 @@ class menus(ranaModule):
       index = int(index) # strin to int
       if listName in self.lists.keys():
         self.lists[listName].drawItemMenu(cr, index) # draw detailed menu
+    elif menuName == 'listDetailTools':
+      listName,index = args.split('#',1)
+      index = int(index)
+      self.lists[listName].drawItemToolsMenu(cr, index)
 
   def _drawOwnMenu(self,cr, menuName):
+    """currently handles itemized menus"""
     # Find the menu
     menu = self.menus.get(menuName, None)
     if(menu == None):
@@ -392,15 +403,16 @@ class menus(ranaModule):
       self.set('needRedraw', True)
       return
     else:
-      self.drawItemMenu(cr, menu)
+      self.drawItemizedMenu(cr, menu, menuName)
 
-  def drawItemMenu(self, cr, menu):
+  def drawItemizedMenu(self, cr, menu, menuName):
     """draw the item menu"""
     vp = self.get('viewport', None)
     if not vp:
+      print('menu:ERROR, no viewport found')
       return
     else:
-      (x1,y1,w,h) = self.get('viewport', None)
+      (x1,y1,w,h) = vp
     # Decide how to layout the menu
     if w > h:
       cols = 4
@@ -494,23 +506,50 @@ class menus(ranaModule):
     self.menus[menu] = self.getInitializedMenu()
 
   def getInitializedMenu(self):
+    """initialize the itemized menu datastructure
+    TODO: make this object oriented"""
     return {'metadata':{'itemCount':0,'currentPage':0}}
     
-  def clearMenu(self, menu, cancelButtonAction='set:menu:main'):
-    self.initMenu(menu)
+  def clearMenu(self, menuName, cancelButtonAction='set:menu:main'):
+    """claer a local itemized menu instance and add the ecape button"""
+    self.initMenu(menuName)
     timeout = self.modrana.msLongPress
-    self.addItem(menu,'','up', cancelButtonAction, 0, timedAction=(timeout,"set:menu:None"))
+    item = self.generateItem('', 'up', cancelButtonAction, 'simple', timedAction=(timeout,"set:menu:None"))
+    self.addItems(menuName, [item])
 
-  def addItem(self, menu, text, icon=None, action=None, pos=None, timedAction=None):
-    if menu not in self.menus:
-      self.initMenu(menu)
-    itemCount = self.menus[menu]['metadata']['itemCount']
+  def getClearedMenu(self, cancelButtonAction='set:menu:main'):
+    """clear a given itemized menu instance, add the ecape button and return it"""
+    menu = self.getInitializedMenu()
+    timedAction=(self.modrana.msLongPress,"set:menu:None")
+    item = self.generateItem("", "up", cancelButtonAction, "simple", timedAction)
+    return self.addItemsToThisMenu(menu, [item])
+
+  def addItemsToThisMenu(self, menu, items=[]):
+    """add items to a given itemized menu datastructure and return it"""
+    if not menu:
+      menu = getInitializedMenu()
+    itemCount = menu['metadata']['itemCount']
     type = "simple"
-    """we are counting up from zero for the item indexes"""
-    self.menus[menu][itemCount] = self.generateItem(text, icon, action, type, timedAction)
-    self.menus[menu]['metadata']['itemCount'] = itemCount + 1
+    # add all items to the menu
+    for item in items:
+      (text, icon, action, type, timedAction) = item
+      """we are counting up from zero for the item indexes"""
+      menu[itemCount] = self.generateItem(text, icon, action, type, timedAction)
+      itemCount = itemCount + 1
+    menu['metadata']['itemCount'] = itemCount
+    return menu
 
-  def generateItem(self, text, icon, action, type, timedAction):
+  def addItem(self, menuName, text, icon=None, action=None, pos=None, timedAction=None):
+    """add item to the local menu structure"""
+    item = self.generateItem(text, icon, action, "simple", timedAction)
+    self.menus[menuName] = self.addItemsToThisMenu(self.menus.get(menuName, None), [item,])
+    
+  def addItems(self, menuName, items):
+    """add multiple items to the local menu structure"""
+    self.menus[menuName] = self.addItemsToThisMenu(self.menus.get(menuName, None), items)
+
+  def generateItem(self, text, icon, action, type='simple', timedAction=None):
+    """generate an itemized menu item"""
     return (text, icon, action, type, timedAction)
 
   def addToggleItem(self, menu, textIconAction, index=0, pos=None, uniqueName=None):
@@ -541,15 +580,41 @@ class menus(ranaModule):
 #  def getToggleItem():
 # TODO: implement later
 
-  def drawPointDetailMenu(self, cr, point, backAction):
+# Point menus #
+
+  def drawPointDetailMenu(self, cr, point, backAction, menuName, index):
     """draw a detailed menu for a Point object"""
     lat, lon = point.getLL()
     z = self.get('z', 15)
     button1 = ('on map#show', 'generic', 'mapView:recentre %f %f %d|set:menu:None' % (lat, lon, z))
-    button2 = ('Tools', 'tools', 'set:menu:None')
+    button2 = ('Tools', 'tools', 'set:menu:menu#listDetailTools#%s#%d' % (menuName, index))
     box = ('<b>%s</b>\n%s' % (point.getName(),point.getDescription()), '')
 
     self.drawThreePlusOneMenu(cr, 'pointDetail', backAction, button1, button2, box, wrap=True)
+
+  def drawPointToolsMenu(self, cr, point, backAction):
+    """draw a detailed menu for a Point object"""
+
+    # check if the for this point is cached
+    if self.itemToolsMenuCache[0] == point:
+      # draw from cache
+      menu = self.itemToolsMenuCache[1]
+    else:
+      # generate menu structure and then cache & draw it
+      lat, lon = point.getLL()
+      menu = self.getClearedMenu(backAction)
+      gi = self.generateItem # for better readability
+      routing = 'md:route:route:type=pos2ll;toLat=%f;toLon=%f;show=start' % (lat,lon)
+      items = [
+      gi('here#route', 'generic', routing),
+      gi('to POI#add', 'generic', 'set:menu:None'), # TODO implement this
+      gi('clear all#results', 'generic', 'set:menu:None') # TODO implement this
+      ]
+      # add the items to a menu
+      menu = self.addItemsToThisMenu(menu, items)
+      self.itemToolsMenuCache = (point, menu)
+
+    self.drawItemizedMenu(cr, menu, "fooName")
 
   def addPointListMenu(self, name, parrentAction, points=None, goto='detail'):
     if points:
@@ -577,6 +642,7 @@ class menus(ranaModule):
 
     newListableMenu = self.ListableMenu(name, self, c, parrentAction, descFunction=descFunction, displayedItems=4)
     newListableMenu.setDrawItemMenuMethod(self.drawPointDetailMenu)
+    newListableMenu.setDrawItemToolsMenuMethod(self.drawPointToolsMenu)
     self.lists[name] = newListableMenu
     return newListableMenu
 
@@ -610,14 +676,23 @@ class menus(ranaModule):
       self.menus = menus
       self.name = name
       self.drawItemMenuFunction = self.nop
+      self.drawItemToolsMenuFunction = self.nop
 
-    def nop(self, cr=None, item=None, backAction=None):
+    def getName(self):
+      """this name is also used as a key for this list by the menu module"""
+      return self.name
+
+    def nop(self, cr=None, item=None, backAction=None, index=None, menuName=None):
       "a function that does nothing and acts as a callable placeholder"
       pass
 
     def setDrawItemMenuMethod(self, method):
       """select a method for drawing a detail menu for an item"""
       self.drawItemMenuFunction = method
+
+    def setDrawItemToolsMenuMethod(self, method):
+      """select a method for drawing a tools menu for an item"""
+      self.drawItemToolsMenuFunction = method
 
     def setDrawMethod(self, method):
       self.drawFunction = method
@@ -636,10 +711,17 @@ class menus(ranaModule):
 
     def drawItemMenu(self, cr, index):
       item = self.container.getItem(index)
-      self.drawItemMenuFunction(cr, item, self._getBackToListAction(index))
+      self.drawItemMenuFunction(cr, item, self._getBackToListAction(index), self.getName(), index)
+
+    def drawItemToolsMenu(self, cr, index):
+      item = self.container.getItem(index)
+      self.drawItemToolsMenuFunction(cr, item, self._getBackToListDetailAction(index))
 
     def _getBackToListAction(self, index):
       return "set:menu:menu#list#%s#%d" % (self.name, index)
+
+    def _getBackToListDetailAction(self, index):
+      return "set:menu:menu#listDetail#%s#%d" % (self.name, index)
 
     def drawListItem(self, cr, item, x, y, w, h, index, descFunction=None):
       """default list item drawing function"""
