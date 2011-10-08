@@ -857,7 +857,7 @@ class MapWidget(gtk.Widget):
     return self.mapLayers
 
   def loadMapLayerInfo(self):
-    maplayers = {}
+    mapLayers = {}
     configVariables = {
         'label':'label',
         'url':'tiles',
@@ -899,13 +899,12 @@ class MapWidget(gtk.Widget):
           print "mapTiles: layer is badly defined/formated: %s" % layer
 
 
-        maplayers[layer] = tempDict
+        mapLayers[layer] = tempDict
 
     except Exception, e:
       print "mapTiles: loading map_config.conf failed: %s" % e
 
-    self.mapLayers = maplayers
-
+    self.mapLayers = mapLayers
 
 class GuiBase:
   """Wrapper class for a GUI interface"""

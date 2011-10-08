@@ -527,7 +527,7 @@ class menus(ranaModule):
   def addItemsToThisMenu(self, menu, items=[]):
     """add items to a given itemized menu datastructure and return it"""
     if not menu:
-      menu = getInitializedMenu()
+      menu = self.getInitializedMenu()
     itemCount = menu['metadata']['itemCount']
     type = "simple"
     # add all items to the menu
@@ -547,6 +547,11 @@ class menus(ranaModule):
   def addItems(self, menuName, items):
     """add multiple items to the local menu structure"""
     self.menus[menuName] = self.addItemsToThisMenu(self.menus.get(menuName, None), items)
+
+  def addItemMenu(self, menuName, menu):
+    """store a given item menu
+    NOTE: if there already is a menu with the given key, it will be replaced"""
+    self.menus[menuName] = menu
 
   def generateItem(self, text, icon, action, type='simple', timedAction=None):
     """generate an itemized menu item"""

@@ -41,6 +41,9 @@ class options(ranaModule):
     self.on = '<span color="green">ON</span>'
     self.off = '<span color="red">OFF</span>'
 
+    # items menu cache
+    self.itemMenus = {}
+
   def getProfilePath(self):
     """return path to the profile folder"""
     # check if the path exists and create it if not
@@ -176,6 +179,32 @@ class options(ranaModule):
               }
     self.addOption(title, variable, choices, group, None)
 
+  def addItemsOption(self, title, variable, items, group, default=None):
+    # create and add the menu
+    menu = self.menuModule.clearMenu(variable, "")
+    # the back action returns back to the group
+    backAction = "set:menu:options#%s" % group
+    menuItems = []
+    for item in items:
+      name, key = item
+      item = self.menuModule.generateItem(name, "generic", "set:%s:%s|%s" % (variable, key, backAction))
+      menuItems.append(item)
+    # load all items to the menu
+    menu = self.menuModule.addItemsToThisMenu(menu, menuItems)
+    # store the menu locally
+    """NOTE: for the returning back to the group to work correctly,
+    the menu is stored under a key combined from the variable and group names"""
+    storageKey = "options1Item*%s*%s" % (group, variable)
+    self.menuModule.addItemMenu(storageKey, menu)
+
+    # also store in the local options structure
+    choices = {"type":"selectOneItem",
+              'label':"",
+              'description':"",
+              "items":items}
+    self.addOption(title, variable, choices, group, default)
+
+
   def addOption(self, title, variable, choices, group, default=None):
 
     newOption = (title,variable, choices,group,default)
@@ -211,103 +240,103 @@ class options(ranaModule):
     addGroup = self.addGroup
     addOpt = self.addOption
     addBoolOpt = self.addBoolOption
+    addItems = self.addItemsOption
 
     # * the Map category *
     catMap = addCat("Map", "map", "map")
 
     # ** map layers
     group = addGroup("Map layers", "map_layers", catMap, "generic")
-    tiles = self.m.get("mapTiles", None)
-    if(tiles):
-      tileOptions = [("","None")]
-      layers = self.modrana.getMapLayers().items()
-      layers.sort()
-      for name,layer in layers:
-        tileOptions.append((name, layer.get('label',name)))
-      addOpt("Main map", "layer", tileOptions, group, "mapnik")
+    layers = self.modrana.getMapLayers()
+    layerNameKey = [("None", "")]
+    for key in layers.keys():
+      name = layers[key]['label']
+      layerNameKey.append( (name, key) )
+    layerNameKey.sort()
 
+    addItems("Main map", "layer", layerNameKey, group, "mapnik")
 
-      # ** Overlay
-      group = addGroup("Map overlay", "map_overlay", catMap, "generic")
-      addBoolOpt("Map as overlay", "overlay", group, False)
+    # ** Overlay
+    group = addGroup("Map overlay", "map_overlay", catMap, "generic")
+    addBoolOpt("Map as overlay", "overlay", group, False)
 
-      addOpt("Main map", "layer", tileOptions, group, "mapnik")
-      addOpt("Background map", "layer2", tileOptions, group, "osma")
+    addItems("Main map", "layer", layerNameKey, group, "mapnik")
+    addItems("Background map", "layer2", layerNameKey, group, "osma")
 
-      addOpt("Transparency ratio:", "transpRatio",
-              [("0.25,1","overlay:25%"),
-              ("0.5,1","overlay:50%"),
-              ("0.75,1","overlay:75%"),
-              ("1,1","overlay:100%")],
-               group,
-               "0.5,1")
+    addOpt("Transparency ratio:", "transpRatio",
+            [("0.25,1","overlay:25%"),
+            ("0.5,1","overlay:50%"),
+            ("0.75,1","overlay:75%"),
+            ("1,1","overlay:100%")],
+             group,
+             "0.5,1")
 
-      # ** Rotation
-      group = addGroup("Rotation", "map_rotation", catMap, "generic")
-      addBoolOpt("Rotate map in direction of travel", "rotateMap", group, False)
+    # ** Rotation
+    group = addGroup("Rotation", "map_rotation", catMap, "generic")
+    addBoolOpt("Rotate map in direction of travel", "rotateMap", group, False)
 
-      # ** Scaling
-      group = addGroup("Scaling", "map_scaling", catMap, "generic")
-      addOpt("Map scale", "mapScale",
-                   [(1,"1X"),
-                    (2,"2X"),
-                    (4,"4X")],
-                     group,
-                     1)
+    # ** Scaling
+    group = addGroup("Scaling", "map_scaling", catMap, "generic")
+    addOpt("Map scale", "mapScale",
+                 [(1,"1X"),
+                  (2,"2X"),
+                  (4,"4X")],
+                   group,
+                   1)
 
-      # ** centering
-      group = addGroup("Centering", "centering", catMap, "generic")
-      addBoolOpt("Centre map", "centred", group, True)
+    # ** centering
+    group = addGroup("Centering", "centering", catMap, "generic")
+    addBoolOpt("Centre map", "centred", group, True)
 
-      addOpt("Centering shift", "posShiftDirection",
-        [("down","shift down"),
-         ("up","shift up"),
-         ("left","shift left"),
-         ("right","shift right"),
-         (False,"don't shift")],
-         group,
-         "down")
+    addOpt("Centering shift", "posShiftDirection",
+      [("down","shift down"),
+       ("up","shift up"),
+       ("left","shift left"),
+       ("right","shift right"),
+       (False,"don't shift")],
+       group,
+       "down")
 
-      addOpt("Centering shift amount", "posShiftAmount",
-        [(0.25,"25%"),
-         (0.5,"50%"),
-         (0.75,"75%"),
-         (1.0,"edge of the screen")],
-         group,
-         0.75)
+    addOpt("Centering shift amount", "posShiftAmount",
+      [(0.25,"25%"),
+       (0.5,"50%"),
+       (0.75,"75%"),
+       (1.0,"edge of the screen")],
+       group,
+       0.75)
 
-      changedMsg = "mapView:centeringDisableTresholdChanged"
-      addOpt("Disable by dragging", "centeringDisableTreshold",
-        [(2048,"normal drag - <i>default</i>",changedMsg),
-         (15000,"long drag",changedMsg),
-         (40000,"realy long drag",changedMsg),
-         (80000,"extremely long drag",changedMsg),
-         (False,self.off,changedMsg)],
-         group,
-         2048)
+    changedMsg = "mapView:centeringDisableTresholdChanged"
+    addOpt("Disable by dragging", "centeringDisableTreshold",
+      [(2048,"normal drag - <i>default</i>",changedMsg),
+       (15000,"long drag",changedMsg),
+       (40000,"realy long drag",changedMsg),
+       (80000,"extremely long drag",changedMsg),
+       (False,self.off,changedMsg)],
+       group,
+       2048)
 
-      # ** dragging
-      group = addGroup("Dragging", "dragging", catMap, "generic")
-      # check if we are on a powerful device or not and set the default accordingly
-      if self.dmod.simpleMapDragging():
-        defaultMode = "staticMapDrag"
-      else:
-        defaultMode = "default"
+    # ** dragging
+    group = addGroup("Dragging", "dragging", catMap, "generic")
+    # check if we are on a powerful device or not and set the default accordingly
+    if self.dmod.simpleMapDragging():
+      defaultMode = "staticMapDrag"
+    else:
+      defaultMode = "default"
 
-      addOpt("Map dragging", "mapDraggingMode",
-        [("default","full redraw - <i>default</i>","mapView:dragModeChanged"),
-         ("staticMapDrag","drag visible map - <i>fastest</i>", "mapView:dragModeChanged")],
-         group,
-         defaultMode)
+    addOpt("Map dragging", "mapDraggingMode",
+      [("default","full redraw - <i>default</i>","mapView:dragModeChanged"),
+       ("staticMapDrag","drag visible map - <i>fastest</i>", "mapView:dragModeChanged")],
+       group,
+       defaultMode)
 
-      # ** tile storage
-      group = addGroup("Tile storage", "tile_storage", catMap, "generic")
-      addOpt("Tile storage", "tileStorageType",
-                   [('files',"files (default, more space used)"),
-                    ('sqlite',"sqlite (new, less space used)")],
-                     group,
-                     'files')
-      addBoolOpt("Store downloaded tiles", "storeDownloadedTiles", group, True)
+    # ** tile storage
+    group = addGroup("Tile storage", "tile_storage", catMap, "generic")
+    addOpt("Tile storage", "tileStorageType",
+                 [('files',"files (default, more space used)"),
+                  ('sqlite',"sqlite (new, less space used)")],
+                   group,
+                   'files')
+    addBoolOpt("Store downloaded tiles", "storeDownloadedTiles", group, True)
 
     # * the view category *
     catView = addCat("View", "view", "view")
@@ -843,8 +872,7 @@ class options(ranaModule):
     if not self.d.has_key('viewport'):
       return
    
-    if(self.menuModule):
-      
+    if(self.menuModule):        
       # elements allocation
       (e1,e2,e3,e4,alloc) = self.menuModule.threePlusOneMenuCoords()
       (x1,y1) = e1
@@ -870,7 +898,7 @@ class options(ranaModule):
         numItems = len(options)
         cAction = None
         if(0 <= index < numItems):
-          (title,variable,choices,category,default) = options[index]
+          (title,variable,choices,group,default) = options[index]
           # What's it set to currently?
           value = self.get(variable, None)
 
@@ -885,10 +913,18 @@ class options(ranaModule):
             description = choices["description"]
 
             if optionType == "showAndEditVariable":
+              # show and edit the exact value of a variable manually
               valueDescription = self.get(variable, "variable is not set yet")
               valueDescription = "<tt><b>%s</b></tt>" % valueDescription
               payload = "%s;%s;%s" % (variable, label, description)
               onClick = "ml:options:editVariable:%s|set:needRedraw:True" % payload
+
+            if optionType == "selectOneItem":
+              #show multiple items and make it possible to select one of them
+              valueDescription = self.get(variable, 'mapnik')
+              valueDescription = "<tt><b>%s</b></tt>" % valueDescription
+#              payload = "%s;%s;%s" % (variable, label, description)
+              onClick = "set:menu:options1Item*%s*%s" % (group, variable)
 
           else: # toggle button
 
@@ -916,7 +952,7 @@ class options(ranaModule):
 
           y = y4 + (row) * dy
           w = w1 - (x4-x1)
-          
+
           # Draw background and make clickable
           self.menuModule.drawButton(cr,
             x4,
