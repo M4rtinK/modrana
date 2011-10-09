@@ -180,28 +180,32 @@ class options(ranaModule):
     self.addOption(title, variable, choices, group, None)
 
   def addItemsOption(self, title, variable, items, group, default=None):
-    # create and add the menu
-    menu = self.menuModule.clearMenu(variable, "")
     # the back action returns back to the group
     backAction = "set:menu:options#%s" % group
-    menuItems = []
+    # create and add the menu
+    menu = self.menuModule.getClearedMenu(backAction)
+    menuItems = [] # an ordered list of all the menu items
+    itemDict = {} # for easilly asigning keys to labels
     for item in items:
       name, key = item
-      item = self.menuModule.generateItem(name, "generic", "set:%s:%s|%s" % (variable, key, backAction))
+      item = self.menuModule.generateItem("#%s" % name, "generic", "set:%s:%s|%s" % (variable, key, backAction))
       menuItems.append(item)
+      itemDict[key] = name
     # load all items to the menu
     menu = self.menuModule.addItemsToThisMenu(menu, menuItems)
-    # store the menu locally
+    # store the menu in the menu module
     """NOTE: for the returning back to the group to work correctly,
     the menu is stored under a key combined from the variable and group names"""
     storageKey = "options1Item*%s*%s" % (group, variable)
-    self.menuModule.addItemMenu(storageKey, menu)
+    self.menuModule.addItemMenu(storageKey, menu, wideButtons=True)
 
     # also store in the local options structure
     choices = {"type":"selectOneItem",
               'label':"",
               'description':"",
-              "items":items}
+              'default':default,
+              'items':items,
+              'itemDict' : itemDict}
     self.addOption(title, variable, choices, group, default)
 
 
@@ -224,8 +228,6 @@ class options(ranaModule):
     else:
       print "options: group %s does not exist, so option with variable %s can not be removed" % (group,variable)
 
-#  def optionExists(self, categoryId, groupId):
-    
   def firstTime(self):
     """Create a load of options.  You can add your own options in here,
     or alternatively create them at runtime from your module's firstTime()
@@ -248,11 +250,12 @@ class options(ranaModule):
     # ** map layers
     group = addGroup("Map layers", "map_layers", catMap, "generic")
     layers = self.modrana.getMapLayers()
-    layerNameKey = [("None", "")]
+    layerNameKey = []
     for key in layers.keys():
       name = layers[key]['label']
       layerNameKey.append( (name, key) )
     layerNameKey.sort()
+    layerNameKey.append(("None", ""))
 
     addItems("Main map", "layer", layerNameKey, group, "mapnik")
 
@@ -921,7 +924,13 @@ class options(ranaModule):
 
             if optionType == "selectOneItem":
               #show multiple items and make it possible to select one of them
-              valueDescription = self.get(variable, 'mapnik')
+
+              # get current value
+              default = choices['default']
+              value = self.get(variable, default)
+              # show label for the given value
+              valueDescription = choices['itemDict'].get(value, value)
+              """if no description is found, just display the value"""
               valueDescription = "<tt><b>%s</b></tt>" % valueDescription
 #              payload = "%s;%s;%s" % (variable, label, description)
               onClick = "set:menu:options1Item*%s*%s" % (group, variable)

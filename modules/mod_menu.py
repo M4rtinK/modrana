@@ -413,16 +413,34 @@ class menus(ranaModule):
       return
     else:
       (x1,y1,w,h) = vp
+      
+    # check if wide icons are to be used
+    wideButtons = menu['metadata'].get('wideButtons', False)
+
     # Decide how to layout the menu
-    if w > h:
-      cols = 4
-      rows = 3
-    elif w < h:
-      cols = 3
-      rows = 4
-    elif w == h:
-      cols = 4
-      rows = 4
+
+    # use wide buttons #
+    if wideButtons:
+      if w > h: # landscape
+        cols = 3
+        rows = 5
+      elif w < h: # portrait
+        cols = 2
+        rows = 7
+      elif w == h: # square
+        cols = 2
+        rows = 4
+    # use roughly square buttons #
+    else:
+      if w > h: # landscape
+        cols = 4
+        rows = 3
+      elif w < h: # portrait
+        cols = 3
+        rows = 4
+      elif w == h: # square
+        cols = 4
+        rows = 4
     dx = w / cols
     dy = h / rows
 
@@ -548,9 +566,10 @@ class menus(ranaModule):
     """add multiple items to the local menu structure"""
     self.menus[menuName] = self.addItemsToThisMenu(self.menus.get(menuName, None), items)
 
-  def addItemMenu(self, menuName, menu):
+  def addItemMenu(self, menuName, menu, wideButtons=False):
     """store a given item menu
     NOTE: if there already is a menu with the given key, it will be replaced"""
+    menu['metadata']['wideButtons'] = wideButtons
     self.menus[menuName] = menu
 
   def generateItem(self, text, icon, action, type='simple', timedAction=None):
