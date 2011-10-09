@@ -186,17 +186,20 @@ class options(ranaModule):
     menu = self.menuModule.getClearedMenu(backAction)
     menuItems = [] # an ordered list of all the menu items
     itemDict = {} # for easilly asigning keys to labels
+    id = 1 # id 0 us the escape button
     for item in items:
       name, key = item
       item = self.menuModule.generateItem("#%s" % name, "generic", "set:%s:%s|%s" % (variable, key, backAction))
       menuItems.append(item)
-      itemDict[key] = name
+      itemDict[key] = (name,id)
+      id = id + 1
     # load all items to the menu
     menu = self.menuModule.addItemsToThisMenu(menu, menuItems)
     # store the menu in the menu module
     """NOTE: for the returning back to the group to work correctly,
     the menu is stored under a key combined from the variable and group names"""
     storageKey = "options1Item*%s*%s" % (group, variable)
+
     self.menuModule.addItemMenu(storageKey, menu, wideButtons=True)
 
     # also store in the local options structure
@@ -205,9 +208,17 @@ class options(ranaModule):
               'description':"",
               'default':default,
               'items':items,
-              'itemDict' : itemDict}
+              'itemDict' : itemDict,
+              'storageKey' : storageKey}
     self.addOption(title, variable, choices, group, default)
 
+  def _highlightActiveItem(self, menu, variable):
+    """highlight currently active item in the item selection menu"""
+    # test if the key was initialized
+    if self.optionsKeyExists(variable):
+      text, icon, action, type, timedAction
+    else: # not initialized, no need to highlight anything
+      return menu
 
   def addOption(self, title, variable, choices, group, default=None):
 
@@ -929,11 +940,20 @@ class options(ranaModule):
               default = choices['default']
               value = self.get(variable, default)
               # show label for the given value
-              valueDescription = choices['itemDict'].get(value, value)
+              valueDescription, highlightId = choices['itemDict'].get(value, (value,None))
               """if no description is found, just display the value"""
               valueDescription = "<tt><b>%s</b></tt>" % valueDescription
-#              payload = "%s;%s;%s" % (variable, label, description)
-              onClick = "set:menu:options1Item*%s*%s" % (group, variable)
+              
+              #assure highlighting
+              if highlightId != None:
+                """ run an action before switching to the next menu that
+                assures that items in the next menu are properly highlighted
+                according to the state of the corresponding variable"""
+                pre = "ml:menu:highlightItem:%s;%d|" % (choices['storageKey'], highlightId)
+              else:
+                pre = "" # no id that needs highlighting found
+
+              onClick = "%sset:menu:options1Item*%s*%s" % (pre, group, variable)
 
           else: # toggle button
 

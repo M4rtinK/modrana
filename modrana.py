@@ -289,6 +289,10 @@ class MapWidget(gtk.Widget):
     if name in self.watches.keys():
       self._notifyWatcher(name, value)
 
+  def optionsKeyExists(self, key):
+    """Report if a given key exists"""
+    return key in self.d.keys()
+
   def watch(self, key, callback, *args):
     """add a callback on an options key
     callbakc will get:

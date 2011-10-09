@@ -53,6 +53,8 @@ class menus(ranaModule):
     self.centerButtonCircleColor = (0,0,1,0.45)
     self.spButtonFillTup = ("#ffec8b",1.0)
     self.spButtonOutlineTup = ("#8b814c",1.0)
+    self.spButtonHiFillTup = ("#ffec8b",1.0)
+    self.spButtonHiOutlineTup = ("yellow",1.0)
 
 
   def update(self):
@@ -417,6 +419,14 @@ class menus(ranaModule):
     # check if wide icons are to be used
     wideButtons = menu['metadata'].get('wideButtons', False)
 
+    # check if an item should be highlighted
+    highlightId = menu['metadata'].get('highlightId', None)
+    if highlightId != None:
+      # get highlight colors
+      (spbHiFillColor,spbHiFillAlpha) = self.spButtonHiFillTup
+      (spbHiOutlineColor,spbHiOutlineAlpha) = self.spButtonHiOutlineTup
+      highlighIconDescription = "generic:%s;%f;%s;%f;;" % (spbHiFillColor, spbHiFillAlpha, spbHiOutlineColor, spbHiOutlineAlpha)
+
     # Decide how to layout the menu
 
     # use wide buttons #
@@ -495,6 +505,9 @@ class menus(ranaModule):
       type = item[3]
       if type=='simple':
         (text, icon, action, type, timedAction) = item
+        if id == highlightId:
+          # make the button highlighted
+          icon = "%s>>%s" % (highlighIconDescription, icon)
         self.drawButton(cr, x, y, dx, dy, text, icon, action, timedAction)
 #        (text, icon, action, type) = item
 #        self.drawButton(cr, x, y, dx, dy, text, icon, action)
@@ -506,6 +519,9 @@ class menus(ranaModule):
         # eq: "save every 3 s", "nice icon", "set:saveInterval:3s"
         text = item[0][index][0]
         icon = item[0][nextIndex][1]
+        if id == highlightId:
+          # make the button highlighted
+          icon = "%s>>%s" % (highlighIconDescription, icon)
         action = item[0][nextIndex][2]
 
         action+='|menu:toggle#%s#%s|set:needRedraw:True' % (menuName,id)
@@ -561,7 +577,19 @@ class menus(ranaModule):
     """add item to the local menu structure"""
     item = self.generateItem(text, icon, action, "simple", timedAction)
     self.menus[menuName] = self.addItemsToThisMenu(self.menus.get(menuName, None), [item,])
-    
+
+  def getItem(self,menuName,id,):
+    """get a given ittemized menu item"""
+    return self.menus[menuName][id]
+
+  def setItem(self,menuName,id, item):
+    """set a given ittemized menu item to a given value"""
+    self.menus[menuName][id] = item
+
+  def highlightItem(self,menuName,id):
+    """highlight an item in a given itemmized menu, replacing the previous highlighted"""
+    self.menus[menuName]['metadata']['highlightId'] = id
+
   def addItems(self, menuName, items):
     """add multiple items to the local menu structure"""
     self.menus[menuName] = self.addItemsToThisMenu(self.menus.get(menuName, None), items)
@@ -571,6 +599,7 @@ class menus(ranaModule):
     NOTE: if there already is a menu with the given key, it will be replaced"""
     menu['metadata']['wideButtons'] = wideButtons
     self.menus[menuName] = menu
+
 
   def generateItem(self, text, icon, action, type='simple', timedAction=None):
     """generate an itemized menu item"""
@@ -1354,10 +1383,16 @@ class menus(ranaModule):
   def colorsChangedCallback(self,colors):
     self.mainTextColor = colors['main_text'].getCairoColor()
     self.centerButtonCircleColor = colors['center_button_circle'].getCairoColor()
-    sbFill = colors['special_button__fill']
+    # normal
+    sbFill = colors['special_button_fill']
     self.spButtonFillTup = (sbFill.getColorString(),sbFill.getAlpha())
-    sbOutline = colors['special_button__outline']
+    sbOutline = colors['special_button_outline']
     self.spButtonOutlineTup = (sbOutline.getColorString(),sbOutline.getAlpha())
+    # highlight
+    sbFill = colors['main_highlight_fill']
+    self.spButtonHiFillTup = (sbFill.getColorString(),sbFill.getAlpha())
+    sbOutline = colors['main_highlight_outline']
+    self.spButtonHiOutlineTup = (sbOutline.getColorString(),sbOutline.getAlpha())
 
   def firstTime(self):
     self.set("menu",None)
@@ -1398,6 +1433,11 @@ class menus(ranaModule):
       self.lastActivity = int(time.time())
       self.hideMapSreenButtons = False # show the buttons at once
       self.set('needRedraw', True)
+    elif(type=='ml' and message=='highlightItem'):
+      print args
+      menuName, id = args
+      id = int(id)
+      self.highlightItem(menuName, id)
     elif(message == 'toggle' and len(messageList) >= 3):
       # toggle a button
       menu = messageList[1]

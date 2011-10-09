@@ -26,6 +26,7 @@ class ranaModule:
     # bind the get set and watch methods to the "kernel" :D
     self.get = self.modrana.get
     self.set = self.modrana.set
+    self.optionsKeyExists = self.modrana.optionsKeyExists
     self.watch = self.modrana.watch
     self.removeWatch = self.modrana.removeWatch
     
