@@ -20,7 +20,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #----------------------------------------------------------------------------
-#import dbus.glib
 modulesFolder = 'modules'
 import sys
 sys.path.append(modulesFolder)
@@ -97,7 +96,6 @@ class MapWidget(gtk.Widget):
 
     """ setting this both to 100 and 1 in mapView and gpsd fixes the arow orientation bug """
     self.timer1 = gobject.timeout_add(100, update1, self) #default 100
-#    self.timer2 = gobject.timeout_add(10, update2, self) #default 10
     self.timer3 = None # will be used for timing long press events
     self.d = {} # persistant dictionary of data
     self.m = {} # dictionary of loaded modules
@@ -810,20 +808,14 @@ class MapWidget(gtk.Widget):
     """update the current viewport in the global perzistent dictionary"""
     self.set('viewport', (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
 
-  def _expose_cairo(self, event, cr):
-    #self.modules['projection'].setView( \
-    #  self.rect.x, 
-    #  self.rect.y, 
-    #  self.rect.width, 
-    #  self.rect.height)
-    
-    if(1): # optional set clipping in cairo
-      cr.rectangle(
-        self.rect.x,
-        self.rect.y,
-        self.rect.width,
-        self.rect.height)
-      cr.clip()
+  def _expose_cairo(self, event, cr):    
+    # set clipping in cairo
+    cr.rectangle(
+      self.rect.x,
+      self.rect.y,
+      self.rect.width,
+      self.rect.height)
+    cr.clip()
     
     self.draw(cr,event)
   def do_expose_event(self, event):
@@ -1133,5 +1125,3 @@ if __name__ == "__main__":
     print " no device string in first parameter, using: %s" % device
 
   program = GuiBase(device)
-
-
