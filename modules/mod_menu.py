@@ -282,7 +282,8 @@ class menus(ranaModule):
     yOffset = (h-(lh * ratio))/2.0
     # move to position and show the text
     cr.move_to(x+xOffset,y+yOffset)
-    pg.scale(ratio,ratio)
+    if ratio: # handle ratio == 0.0
+      pg.scale(ratio,ratio)
     if rgbaColor != None:
       cr.set_source_rgba(*rgbaColor)
 
