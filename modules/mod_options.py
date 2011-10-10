@@ -277,7 +277,7 @@ class options(ranaModule):
     addItems("Main map", "layer", layerNameKey, group, "mapnik")
     addItems("Background map", "layer2", layerNameKey, group, "osma")
 
-    addOpt("Transparency ratio:", "transpRatio",
+    addOpt("Transparency ratio", "transpRatio",
             [("0.25,1","overlay:25%"),
             ("0.5,1","overlay:50%"),
             ("0.75,1","overlay:75%"),
@@ -882,11 +882,9 @@ class options(ranaModule):
       self.set(variable,result)
 
   def drawMenu(self, cr, menuName, args=None):    
-    # Find the screen
-    if not self.d.has_key('viewport'):
-      return
+    clickHandler = self.m.get('clickHandler', None)
    
-    if(self.menuModule):        
+    if self.menuModule and clickHandler:
       # elements allocation
       (e1,e2,e3,e4,alloc) = self.menuModule.threePlusOneMenuCoords()
       (x1,y1) = e1
@@ -980,9 +978,12 @@ class options(ranaModule):
             onClick += "|set:needRedraw:1"
 
           y = y4 + (row) * dy
-          w = w1 - (x4-x1)
+          dx = (x4-x1)
+          w = w1 - dx
+          smallButtonW = dx/2.0
+          smallButtonH = dy/2.0
 
-          # Draw background and make clickable
+          # Draw the option button and make it clickable
           self.menuModule.drawButton(cr,
             x4,
             y,
@@ -990,18 +991,42 @@ class options(ranaModule):
             dy,
             None,
             "generic", # background for a 3x1 icon
-            onClick)
+            "")
+          # due to the button on the righ, register a slightly smaller area
+          clickHandler.registerXYWH(x4, y, w-smallButtonW, dy, onClick)
+
+          # draw mode specific toggle
+          self.menuModule.drawButton(cr,
+            x4+w-smallButtonW,
+            y,
+            smallButtonW,
+            smallButtonH,
+            "OFF#per Mode",
+            "generic", # background for a 3x1 icon
+            "")
+
+          # draw tools button
+          self.menuModule.drawButton(cr,
+            x4+w-smallButtonW,
+            y+smallButtonH,
+            smallButtonW,
+            smallButtonH,
+            None,
+            "tools", # background for a 3x1 icon
+            "")
+
 
           border = 20
 
           # 1st line: option name
-          self.menuModule.showText(cr, title+":", x4+border, y+border, w-2*border)
+          self.menuModule.showText(cr, title+":", x4+border, y+border, w*0.95 - smallButtonW - border)
 
           # 2nd line: current value
-          self.menuModule.showText(cr, valueDescription, x4 + 0.15 * w, y + 0.6 * dy, w * 0.85 - border)
+          self.menuModule.showText(cr, valueDescription, x4 + 0.15 * w, y + 0.6 * dy, w*0.85 - smallButtonW - border)
 
           # in corner: row number
-          self.menuModule.showText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y+3*border, w * 0.15 - border, 20)
+          indexX = x4+w*0.90-smallButtonW
+          self.menuModule.showText(cr, "%d/%d" % (index+1, numItems), indexX, y+dy*0.07, w * 0.10 - border, 20)
 
 #  def checkProfilePath(self):
 #    """check if the profile folder exists, try to create it if not"""
