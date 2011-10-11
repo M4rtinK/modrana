@@ -42,7 +42,7 @@ class deviceModule(ranaModule):
     them out of view - the user might want that the window redraws on the dashboard or not"""
     return False
 
-  def locationType(self):
+  def getLocationType(self):
     """modRana uses gpsd by default"""
     return 'gpsd'
 

@@ -643,7 +643,7 @@ class options(ranaModule):
     # ** GPS
     group = addGroup("GPS", "gps", catLocation, "generic")
     addBoolOpt("GPS", "GPSEnabled", group, True, "location:checkGPSEnabled")
-    if self.dmod.locationType() == 'gpsd':
+    if self.dmod.getLocationType() == 'gpsd':
       knots = "knots per second"
       meters = "meters per second"
       if self.device == 'neo':
@@ -748,7 +748,12 @@ class options(ranaModule):
     addBoolOpt("Print Turn-By-Turn triggers", "debugTbT", group, False)
     # ** gps
     group = self.addGroup("GPS", "gps", catDebug, "generic")
-    addBoolOpt("Show N900 GPS-fix", "n900GPSDebug", group, False)
+    # only show relevant
+    locationType = self.dmod.getLocationType()
+    if locationType == 'liblocation':
+      addBoolOpt("Show N900 GPS-fix", "n900GPSDebug", group, False)
+    if locationType == 'gpsd':
+      addBoolOpt("Show gpsd debug output", "gpsdDebugVerbose", group, False, "location:gpsdCheckVerboseDebugEnabled")
 
 
 

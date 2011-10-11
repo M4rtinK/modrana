@@ -71,11 +71,11 @@ class gpsd2(ranaModule):
     if sFromLastRequest > 0.85:
       self.set('needRedraw', True)
 
-
   def startGPSD(self):
     """start the GPSD based location update method"""
     try:
       self.GPSDConsumer = GPSDConsumer()
+      self._checkVerbose() # check if verbose debugging is enabled
       self.GPSDConsumer.start()
       self.connected = True
       self.locationUpdate = self.updateGPSD
@@ -102,6 +102,8 @@ class gpsd2(ranaModule):
           self.startLocation()
         elif state == False:
           self.stopLocation()
+    elif message == "gpsdCheckVerboseDebugEnabled":
+      self._checkVerbose()
 
   def startLocation(self):
     """start location - device based or gpsd"""
@@ -237,6 +239,18 @@ class gpsd2(ranaModule):
     except Exception, e:
       print "location: stopping location failed", e
 
+  def _checkVerbose(self):
+    verbose = self.get('gpsdDebugVerbose', False)
+    if self.GPSDConsumer:
+      if verbose:
+        self.GPSDConsumer.setVerbose(True)
+        print "location: gpsd debugging output turned ON"
+      else:
+        self.GPSDConsumer.setVerbose(False)
+        print "location: gpsd debugging output turned OFF"
+    else:
+      print("location: gpsd not used, so there is no debug output to enable")
+
 class GPSDConsumer(threading.Thread):
   """consume data as they come in from the GPSD and store last known fix"""
   def __init__(self):
@@ -251,22 +265,31 @@ class GPSDConsumer(threading.Thread):
     self.fix = None
 
   def run(self):
+    import gps_module as gps
     print("GPSDConsumer: starting")
     while True:
       if self.stop == True:
         print "breaking"
         break
-      r = self.session.next()
-      if self.verbose:
-        print r
-      if r["class"] == "TPV":
+      self.session.next() # this function blocks until a new fix is available
+      sf = self.session.fix
+      if sf.mode != gps.MODE_NO_FIX:
         with self.lock:
-          try:
-            self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
-          except Exception, e:
-            print("GPSDConsumer: eror reading data", e)
+          self.fix = (sf.latitude,sf.longitude,sf.altitude,sf.track,sf.speed, time())
+          if self.verbose:
+            print self.fix
+      else:
+        if self.verbose:
+          print "NO FIX, will retry in 1 s"
+        sleep(1)
+    print("GPSDConsumer: stopped")
 
-    print("GPSDConsumer: stoped")
+#      if r["class"] == "TPV":
+#        with self.lock:
+#          try:
+#            self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
+#          except Exception, e:
+#            print("GPSDConsumer: eror reading data", e)
 
   def shutdown(self):
     print("GPSDConsumer: stopping")
