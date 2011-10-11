@@ -83,7 +83,7 @@ def isotime(s):
         date = int(s)
         msec = s - date
         date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
-        return date + "." + `msec`[2:]
+        return date + "." + `msec`[3:]
     elif type(s) == type(""):
         if s[-1] == "Z":
             s = s[:-1]

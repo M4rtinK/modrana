@@ -3,22 +3,10 @@
 #
 import time, socket, sys, select
 
-#if sys.hexversion >= 0x2060000:
-#    import json			# For Python 2.6
-#else:
-#    import simplejson as json	# For Python 2.4 and 2.5
-
-try:
-  try:
-    import json
-  except ImportError:
-    import simplejson as json
-except:
-  import sys
-  sys.path.append("modules/local_simplejson")
-  print "gpsd: using integrated non-binary simplejson, install proper simplejson package for better speed"
-  import simplejson as json
-
+if sys.hexversion >= 0x2060000:
+    import json			# For Python 2.6
+else:
+    import simplejson as json	# For Python 2.4 and 2.5
 
 GPSD_PORT="2947"
 
@@ -140,14 +128,13 @@ WATCH_RAW	= 0x000080	# output of raw packets
 WATCH_SCALED	= 0x000100	# scale output to floats 
 WATCH_TIMING	= 0x000200	# timing information
 WATCH_DEVICE	= 0x000800	# watch specific device
-POLL_NONBLOCK	= 0x001000	# set non-blocking poll
 
 class gpsjson(gpscommon):
     "Basic JSON decoding."
     def __iter__(self):
         return self
 
-    def json_unpack(self, buf):
+    def unpack(self, buf):
         try:
             self.data = dictwrapper(json.loads(buf.strip(), encoding="ascii"))
         except ValueError, e:
@@ -157,7 +144,7 @@ class gpsjson(gpscommon):
         if hasattr(self.data, "satellites"):
             self.data.satellites = map(lambda x: dictwrapper(x), self.data.satellites)
 
-    def stream(self, flags=0, outfile=None):
+    def stream(self, flags=0, devpath=None):
         "Control streaming reports from the daemon,"
         if flags & WATCH_DISABLE:
             arg = '?WATCH={"enable":false'
@@ -188,7 +175,7 @@ class gpsjson(gpscommon):
             if flags & WATCH_TIMING:
                 arg += ',"scaled":true'
             if flags & WATCH_DEVICE:
-                arg += ',"device":"%s"' % outfile
+                arg += ',"device":"%s"' % devpath
         return self.send(arg + "}")
 
 class dictwrapper:

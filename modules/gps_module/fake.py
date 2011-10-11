@@ -64,7 +64,7 @@ To allow for adding and removing clients while the test is running,
 run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
-import sys, os, time, signal, pty, termios # fcntl, array, struct
+import os, time, signal, pty, termios # fcntl, array, struct
 import exceptions, threading, socket
 import gps
 import packet as sniffer
@@ -115,8 +115,8 @@ class TestLoad:
         #gps.packet.register_report(reporter)
         type_latch = None
         while True:
-            (len, ptype, packet, counter) = getter.get(logfp.fileno())
-            if len <= 0:
+            (plen, ptype, packet, counter) = getter.get(logfp.fileno())
+            if plen <= 0:
                 break
             elif ptype == sniffer.COMMENT_PACKET:
                 # Some comments are magic
@@ -144,9 +144,6 @@ class TestLoad:
                     self.serial = (baud, databits, parity, stopbits)
                 elif "UDP" in packet:
                     self.sourcetype = "UDP"
-                elif "%" in packet:
-                    # Pass through for later interpretation 
-                    self.sentences.append(packet)
             else:
                 if type_latch is None:
                     type_latch = ptype
@@ -175,6 +172,10 @@ class FakeGPS:
         self.readers = 0
         self.index = 0
         self.progress("gpsfake: %s provides %d sentences\n" % (self.testload.name, len(self.testload.sentences)))
+
+    def write(self, line):
+        "Throw an error if this superclass is ever instantiated."
+        raise ValueError, line
 
     def feed(self):
         "Feed a line from the contents of the GPS log to the daemon."
@@ -432,7 +433,7 @@ class TestSession:
         self.threadlock = None
     def spawn(self):
         for sig in (signal.SIGQUIT, signal.SIGINT, signal.SIGTERM):
-            signal.signal(sig, lambda signal, frame: self.cleanup())
+            signal.signal(sig, lambda unused, dummy: self.cleanup())
         self.daemon.spawn(background=True, prefix=self.prefix, port=self.port, options=self.options)
         self.daemon.wait_pid()
     def set_predicate(self, pred):

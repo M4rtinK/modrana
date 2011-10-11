@@ -282,7 +282,7 @@ class gps(gpsdata, gpsjson):
             self.fix.epc =       default("epc",   NaN, CLIMBERR_SET)
             self.fix.mode =      default("mode",  0,   MODE_SET)
         elif self.data.get("class") == "SKY":
-            for attrp in "xyvhpg":
+            for attrp in ("x", "y", "v", "h", "p", "g"):
                 setattr(self, attrp+"dop", default(attrp+"dop", NaN, DOP_SET))
             if "satellites" in self.data.keys():
                 self.satellites = [] 
@@ -304,7 +304,7 @@ class gps(gpsdata, gpsjson):
         if status <= 0:
             return status
         if self.response.startswith("{") and self.response.endswith("}\r\n"):
-            self.json_unpack(self.response)
+            self.unpack(self.response)
             self.__oldstyle_shim()
             self.newstyle = True
             self.valid |= PACKET_SET
@@ -321,30 +321,26 @@ class gps(gpsdata, gpsjson):
         else:
             return self.response
 
-    def stream(self, flags=0, outfile=None):
+    def stream(self, flags=0, devpath=None):
         "Ask gpsd to stream reports at your client."
         if (flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW)) == 0:
-            # If we're looking at a daemon that speaks JSON, this
-            # should have been set when we saw the initial VERSION
-            # response.  Note, however, that this requires at
-            # least one read() before stream() is called
-            if self.newstyle or flags & WATCH_NEWSTYLE:
-                flags |= WATCH_JSON
-            else:
-                flags |= WATCH_OLDSTYLE
-        if flags & WATCH_OLDSTYLE:
-            if flags & WATCH_DISABLE:
+            flags |= WATCH_JSON
+        if flags & WATCH_DISABLE:
+            if flags & WATCH_OLDSTYLE:
                 arg = "w-"
                 if flags & WATCH_NMEA:
                     arg += 'r-'
                     return self.send(arg)
-            else: # flags & WATCH_ENABLE:
+            else:
+                gpsjson.stream(self, ~flags, devpath)
+        else: # flags & WATCH_ENABLE:
+            if flags & WATCH_OLDSTYLE:
                 arg = 'w+'
                 if (flags & WATCH_NMEA):
                     arg += 'r+'
                     return self.send(arg)
-        else: # flags & WATCH_NEWSTYLE:
-            gpsjson.stream(self, flags)
+            else:
+                gpsjson.stream(self, flags, devpath)
 
 if __name__ == '__main__':
     import readline, getopt, sys
@@ -365,8 +361,12 @@ if __name__ == '__main__':
         opts["port"] = arguments[1]
 
     session = gps(**opts)
-    session.stream(WATCH_ENABLE|WATCH_NEWSTYLE)
-    for report in session:
-        print report
+    session.stream(WATCH_ENABLE)
+    try:
+        for report in session:
+            print report
+    except KeyboardInterrupt:
+        # Avoid garble on ^C
+        print ""
 
 # gps.py ends here
