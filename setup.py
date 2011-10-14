@@ -5,11 +5,12 @@ import os.path
 versionFilePath = 'version.txt'
 if os.path.exists(versionFilePath):
   try:
-    f = open(self.versionFilePath, 'r')
+    f = open(versionFilePath, 'r')
     versionNumber = f.read()
     f.close()
     # is it really string ?
-    versionNumber = str(versionString)
+    versionNumber = str(versionNumber)
+    versionNumber = versionNumber[1:]
   except Exception, e:
     print("loading version info failed")
     print(e)
@@ -30,7 +31,7 @@ setup (
   author = 'Martin Kolman',
   author_email = 'modrana@gmail.com',
 
-  summary = 'A flexible GPS navigation system for mobile Linux devices.',
+  description = 'A flexible GPS navigation system for mobile Linux devices.',
   url = 'http://www.modrana.org',
   license = 'GNU GPLv3',
   long_description= 'Modrana is a flexible GPS navigation system for mobile Linux devices.',
