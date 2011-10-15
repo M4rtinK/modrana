@@ -1,5 +1,6 @@
 from setuptools import setup,find_packages
 import os.path
+import os
 
 # try to  read the version file
 versionFilePath = 'version.txt'
@@ -18,12 +19,17 @@ else:
   print("version file not found, using default")
   versionNumber = "0.1"
 
+# generate data files tree
+data_files = []
+for pathTuple in os.walk('.'):
+  data_files.append('',pathTuple[0])
+  
 setup (
   name = 'modRana',
   version = versionNumber,
 
   # just package everything in this folder
-  data_files = [('',''),('.','.')],
+  data_files = data_files,
 
   # list the main modRana script
   scripts = ['modrana'],
