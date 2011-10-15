@@ -23,10 +23,10 @@ setup (
   version = versionNumber,
 
   # just package everything in this folder
-  data_files = [('','')],
+  data_files = [('',''),('.','.')],
 
   # list the main modRana script
-  scripts = ['modrana.py'],
+  scripts = ['modrana'],
 
   author = 'Martin Kolman',
   author_email = 'modrana@gmail.com',
