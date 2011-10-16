@@ -983,8 +983,13 @@ class options(ranaModule):
             onClick += "|set:needRedraw:1"
 
           y = y4 + (row) * dy
-          dx = (x4-x1)
-          w = w1 - dx
+          if w1 > h1: # landscape
+            dx = (x4-x1)
+            w = w1 - dx
+          else: # portrait
+            dx = (x2)
+            w = w1
+
           smallButtonW = dx/2.0
           smallButtonH = dy/2.0
 
