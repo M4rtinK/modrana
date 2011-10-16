@@ -22,6 +22,7 @@ import cPickle
 import os
 import sqlite3
 import csv
+from point import Point
 
 def getModule(m,d,i):
   return(storePOI(m,d,i))
@@ -33,6 +34,9 @@ class storePOI(ranaModule):
     ranaModule.__init__(self, m, d, i)
     self.db = None
     self.tempOnlinePOI = None # temporary slot for an uncommited POI from online search
+    # to which menu to return after the POI is stored
+    # NOTE: False => unset, None => map screen
+    self.menuNameAfterStorageComplete = False
 
   def firstTime(self):
     self.connectToDb()
@@ -359,7 +363,14 @@ class storePOI(ranaModule):
       catInfo = self.getCategoryForId(catId)
       catName = catInfo[1]
       POIName = self.tempOnlinePOI.getName()
-      self.set('menu', 'search#searchResultsItem')
+      """
+      NOTE: False means the the variable is unset, as None mens the map screen
+      """
+      if self.menuNameAfterStorageComplete == False:
+        self.set('menu', 'search#searchResultsItem')
+      else:
+        self.set('menu', self.menuNameAfterStorageComplete)
+
       self.sendMessage('ml:notification:m:%s has been saved to %s;5' % (POIName, catName))
 
     elif message == "reconnectToDb":
@@ -418,6 +429,29 @@ class storePOI(ranaModule):
   def shutdown(self):
     """disconnect from the database on shutdown"""
     self.disconnectFromDb()
+
+  def storePoint(self, point, returnToMenu=False):
+    """store a givne point to the POI database"""
+    # TODO: automatic saving without asking
+    # * skip name entry
+    # * and/or skip category entry
+
+    newPOI = self.getEmptyPOI()
+    newPOI.setName(point.getName(), commit=False)
+    (lat, lon) = point.getLL()
+    newPOI.setLat(lat, commit=False)
+    newPOI.setLon(lon, commit=False)
+    newPOI.setDescription(point.getDescription())
+
+    """ temporarily store the new POI to make it
+    avalable during filling its name, description, etc."""
+    self.tempOnlinePOI = newPOI
+    self.menuNameAfterStorageComplete = returnToMenu
+
+     # start the name and description entry chain
+    entry = self.m.get('textEntry', None)
+    if entry:
+      entry.entryBox(self,'onlineResultName','POI Name', initialText=point.getName())
 
   def storeGLSResult(self, result):
     """store a Google Local Search result to file"""

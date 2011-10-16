@@ -661,7 +661,7 @@ class menus(ranaModule):
       routing = 'md:route:route:type=pos2ll;toLat=%f;toLon=%f;show=start' % (lat,lon)
       items = [
       gi('here#route', 'generic', routing),
-      gi('to POI#add', 'generic', 'set:menu:None'), # TODO implement this
+      gi('to POI#add', 'generic', 'ms:menu:handleToolsMenuPoint:store'), # TODO implement this
       gi('clear all#results', 'generic', 'set:menu:None') # TODO implement this
       ]
       # add the items to a menu
@@ -866,7 +866,17 @@ class menus(ranaModule):
       self.parrentAction = oldAction
       # remove the watch by returning False
       return False
-      
+
+    def getItem(self, index):
+      return self.container.getItem(index)
+
+  def getList(self, listName):
+    """get a list by name, return None if no list is found"""
+
+  def getListItem(self, listName, index):
+    """get an item object for a given list"""
+    return self.getList(listName).getItem(index)
+
   def setupProfile(self):
     self.clearMenu('data2', "set:menu:main")
     self.setupDataSubMenu()
@@ -961,8 +971,6 @@ class menus(ranaModule):
     self.addItem('POIAddFromWhere', 'entry#manual', 'generic', "ms:showPOI:storePOI:manualEntry")
     self.addItem('POIAddFromWhere', 'map#from', 'generic', "ms:showPOI:storePOI:fromMap")
     self.addItem('POIAddFromWhere', 'position#current', 'generic', "ms:showPOI:storePOI:currentPosition")
-
-
 
   def setupEditBatchMenu(self):
     """this is a menu for editing settings of a batch before running the said batch"""
@@ -1435,10 +1443,19 @@ class menus(ranaModule):
       self.hideMapSreenButtons = False # show the buttons at once
       self.set('needRedraw', True)
     elif(type=='ml' and message=='highlightItem'):
-      print args
       menuName, id = args
       id = int(id)
       self.highlightItem(menuName, id)
+    elif (type == 'ms' and message == 'handleToolsMenuPoint'):
+      # store the currently selected point to the POI database
+      if args == 'store':
+        point = self.itemToolsMenuCache[0]
+        store = self.m.get('storePOI', None)
+        if point and store:
+          store.storePoint(point, returnToMenu=None)
+        else:
+          print("menu: can't store point, point or storePOI module missing")
+          
     elif(message == 'toggle' and len(messageList) >= 3):
       # toggle a button
       menu = messageList[1]
