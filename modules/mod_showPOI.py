@@ -233,15 +233,8 @@ class showPOI(ranaModule):
         """setup a category chooser menu"""
         if args:
           (menu,key) = args
-          cats = store.getCategories()
-          i = 0
-          for cat in cats:
-            (label,desc,cat_id) = cat
-            action = "ms:%s:%s:%d" % (menu,key,cat_id)
-            cats[i] = (label,desc,action)
-            i = i + 1
-          menus.addListableMenu('POICategoryChooser', cats,"set:menu:poi")
-
+          self._setupPOICategoryChooser(menu, key)
+        
       elif type=='ms' and message=='setCatAndCommit':
         """selecting the category is the final stage of adding a POI"""
         if args:
@@ -312,6 +305,22 @@ class showPOI(ranaModule):
       elif message == 'clearVisiblePOI':
         self.clearVisiblePOI()
 
+  def _setupPOICategoryChooser(self, menu, key):
+    menus = self.m.get('menu', None)
+    store = self.m.get('storePOI', None)
+    cats = store.getCategories()
+    print cats
+    i = 0
+    for cat in cats:
+      (label,desc,cat_id) = cat
+      action = "ms:%s:%s:%d" % (menu,key,cat_id)
+      cats[i] = (label, desc, action)
+      i = i + 1
+
+    print cats
+
+    menus.addListMenu('POICategoryChooser',"set:menu:poi", cats)
+
   def makePOIVisible(self, POI):
     """add a POI to the list of visible POI"""
     # check if the POI is already present
@@ -364,9 +373,9 @@ class showPOI(ranaModule):
       setup the category chooser menu,
       and make sure the POI is commited after a cetegory is chosen
       """
-      self.sendMessage('ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit')
-      self.set('menu', 'POICategoryChooser')
-      self.sendMessage('ml:m:notification:m:Select a category for this POI;3')
+      self._setupPOICategoryChooser('showPOI', 'setCatAndCommit')
+      self.set('menu', 'menu#list#POICategoryChooser')
+      self.sendMessage('ml:notification:m:Select a category for this POI;3')
 
     # "current position as a new POI" entry chain
     elif key=='newCurrentPositionName':
@@ -375,12 +384,12 @@ class showPOI(ranaModule):
     elif key=='newCurrentPositionDescription':
       self.activePOI.setDescription(result,commit=False)
       # setting the category is the last step
-      self.sendMessage('ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit')
-      self.set('menu', 'POICategoryChooser')
-      print "ADASDASDASD"
+
+      # setup the category chooser
+      self._setupPOICategoryChooser('showPOI', 'setCatAndCommit')
+      self.set('menu', 'menu#list#POICategoryChooser')
       self.sendMessage('ml:notification:m:Select a category for this POI;3')
       self.set('needRedraw', True)
-      print "ADASDASDASD"
 
 if(__name__ == "__main__"):
   a = example({}, {})

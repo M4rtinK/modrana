@@ -229,7 +229,7 @@ class storePOI(ranaModule):
         menus.addItem('POIDetailTools', 'description#edit', 'generic', 'ms:showPOI:editActivePOI:description')
         menus.addItem('POIDetailTools', 'latitude#edit', 'generic', 'ms:showPOI:editActivePOI:lat')
         menus.addItem('POIDetailTools', 'longitude#edit', 'generic', 'ms:showPOI:editActivePOI:lon')
-        menus.addItem('POIDetailTools', 'category#change', 'generic', 'ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit|set:menu:POICategoryChooser')
+        menus.addItem('POIDetailTools', 'category#change', 'generic', 'ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit|set:menu:menu#list#POICategoryChooser')
         menus.addItem('POIDetailTools', 'position#set as', 'generic', 'showPOI:centerOnActivePOI|ml:location:setPosLatLon:%f;%f' % (self.lat,self.lon))
         """just after the point is stored and and its detail menu shows up for the first time,
         it cant be deleted from the database, beucause we dont know which index it got :D
@@ -359,7 +359,7 @@ class storePOI(ranaModule):
       catInfo = self.getCategoryForId(catId)
       catName = catInfo[1]
       POIName = self.tempOnlinePOI.getName()
-      self.set('menu', 'searchResultsItem')
+      self.set('menu', 'search#searchResultsItem')
       self.sendMessage('ml:notification:m:%s has been saved to %s;5' % (POIName, catName))
 
     elif message == "reconnectToDb":
@@ -381,7 +381,7 @@ class storePOI(ranaModule):
       self.tempOnlinePOI.setName(result, commit=False)
       self.sendMessage('ml:notification:m:Select a category for the new POI;3')
       self.sendMessage('ml:showPOI:setupPOICategoryChooser:storePOI;setCatAndCommit')
-      self.set('menu', 'POICategoryChooser')
+      self.set('menu', 'menu#list#POICategoryChooser')
 
   def dumpToCSV(self):
     """dump the db content as a CSV file"""
