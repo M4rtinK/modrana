@@ -235,13 +235,13 @@ class search(ranaModule):
       # start text input for an address
       entry = self.m.get('textEntry', None)
       if entry:
-        entry.entryBox(self, 'address',description='Enter and address or location description', persistentKey="lastAddressSearchInput")
+        entry.entryBox(self, 'address',description='Enter an address or location description', persistentKey="lastAddressSearchInput")
 
     elif message == "searchWikipedia":
       # start text input for an address
       entry = self.m.get('textEntry', None)
       if entry:
-        entry.entryBox(self, 'wikipedia',description='Enter and address or location description', persistentKey="lastWikipediaSearchInput")
+        entry.entryBox(self, 'wikipedia',description='Wikipedia search query', persistentKey="lastWikipediaSearchInput")
 
     elif message == "routeToActiveResult":
       """get a route from current position to active search result
