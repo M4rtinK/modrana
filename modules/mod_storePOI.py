@@ -217,11 +217,11 @@ class storePOI(ranaModule):
         button1 = ('map#show on', 'generic', 'mapView:recentre %f %f|showPOI:drawActivePOI|set:menu:None' % (self.lat,self.lon))
         button2 = ('tools', 'tools', 'showPOI:updateToolsMenu|set:menu:POIDetailTools')
         if self.label!=None and self.lat!=None and self.lon!=None and self.description!=None:
-          text = "%s\nlat:%f lon:%f\n%s" % (self.label,self.lat,self.lon,self.description)
+          text = "<big><b>%s</b></big>\n\n%s\n\nlat: <b>%f</b> lon: <b>%f</b>" % (self.label, self.description, self.lat, self.lon)
         else:
           text = "POI is being initialized"
         box = (text ,'')
-        menus.drawThreePlusOneMenu(cr, 'POIDetail', 'showPOI:checkMenus|set:menu:menu#list#POIList', button1, button2, box)
+        menus.drawThreePlusOneMenu(cr, 'POIDetail', 'showPOI:checkMenus|set:menu:menu#list#POIList', button1, button2, box, wrap=True)
     
     def updateToolsMenu(self):
       # setup the tools submenu
