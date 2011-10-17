@@ -52,7 +52,7 @@ class clickHandler(ranaModule):
     self.register(area, action, timedAction)
     
   def handleClick(self, x, y, msDuration):
-#    print "Clicked at %d,%d for %d" % (x,y,msDuration)
+    print "Clicked at %d,%d for %d" % (x,y,msDuration)
     if self.ignoreNextClicks > 0:
       self.ignoreNextClicks=self.ignoreNextClicks - 1
 #      print "ignoring click, %d remaining" % self.ignoreNextClicks
@@ -71,22 +71,25 @@ class clickHandler(ranaModule):
 
   def handleLongPress(self, pressStartEpoch, msCurrentDuration, startX, startY, x, y):
     """handle long press"""
-    for area in self.areas:
-      (rect, normalAction, timedAction) = area
-      if timedAction: # we are interested only in timed actions
-        if(rect.contains(x,y)):
-          (givenMsDuration, action) = timedAction
-          if givenMsDuration <= msCurrentDuration:
-            m = self.m.get("messages", None)
-            if m:
-              print "Long-clicked (%f ms), sending %s" % (givenMsDuration, action)
-              self.set('lastClickXY', (x,y))
-              self.modrana.lockDrag()
-              m.routeMessage(action)
-              self.set('needRedraw', True)
-            else:
-              print "No message handler to receive clicks"
-            self.ignoreNextClicks = self.dmod.lpSkipCount()
+
+    """ make sure subsegvent long presses are ignored until release """
+    if self.ignoreNextClicks == 0:
+      for area in self.areas:
+        (rect, normalAction, timedAction) = area
+        if timedAction: # we are interested only in timed actions
+          if(rect.contains(x,y)):
+            (givenMsDuration, action) = timedAction
+            if givenMsDuration <= msCurrentDuration:
+              m = self.m.get("messages", None)
+              if m:
+                print "Long-clicked (%f ms), sending %s" % (givenMsDuration, action)
+                self.set('lastClickXY', (x,y))
+                self.modrana.lockDrag()
+                m.routeMessage(action)
+                self.set('needRedraw', True)
+              else:
+                print "No message handler to receive clicks"
+              self.ignoreNextClicks = self.dmod.lpSkipCount()
           
   def registerDraggable(self, x1,y1,x2,y2, module):
     self.dragareas.append((rect(x1,y1,x2-x1,y2-y1), module))

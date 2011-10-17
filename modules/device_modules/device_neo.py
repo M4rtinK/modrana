@@ -39,7 +39,7 @@ class device_neo(deviceModule):
 
   def lpSkipCount(self):
     """SHR on Neo fires two clicks after a long press, so we need to skip
-    bot of them, to avoid clicking some new button that
+    both of them, to avoid clicking some new button that
     shows up after the screen redraws"""
     return 2
 

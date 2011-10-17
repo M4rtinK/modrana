@@ -139,8 +139,6 @@ class menus(ranaModule):
 
       # main buttons
 
-
-
       modeIcon = self.get('mode', 'car')
       # use thinner outline and smaller corner radius
       menuIcon = "%s>generic:;;;;5;10" % modeIcon
@@ -148,8 +146,15 @@ class menus(ranaModule):
 
       (x1,y1) = buttons['zoom_out']
       self.drawButton(cr, x1, y1, dx, dy, '', minusIcon, "mapView:zoomOut")
+
       (x1,y1) = buttons['menu']
-      self.drawButton(cr, x1, y1, dx, dy, 'menu', menuIcon, "set:menu:main")
+      self.drawButton(cr, x1, y1, dx, dy,
+      'menu',
+      menuIcon,
+      "set:menu:main",
+      timedAction=(self.modrana.msLongPress,"set:menu:modes"))
+
+
       (x1,y1) = buttons['zoom_in']
       self.drawButton(cr, x1, y1, dx, dy, '', plusIcon, "mapView:zoomIn")
 
@@ -891,9 +896,9 @@ class menus(ranaModule):
         name,
         'set:layer:'+name+'|set:menu:None')
     
-  def setupTransportMenu(self):
+  def setupModesMenu(self):
     """Create menus for routing modes"""
-    self.clearMenu('transport')
+    self.clearMenu('modes')
     for(label, mode) in { \
       'Bike':'cycle',
       'Walk':'foot',
@@ -908,7 +913,7 @@ class menus(ranaModule):
 #      'HGV':'hgv'
       }.items():
       self.addItem(
-        'transport',                       # menu
+        'modes',                       # menu
         label,                             # label
         mode,                     # icon
         'set:mode:'+mode+"|set:menu:None") # action
@@ -1091,11 +1096,11 @@ class menus(ranaModule):
     self.addItem('main', 'search', 'search', 'set:menu:searchWhat')
     self.addItem('main', 'options', 'options', 'set:menu:options')
     self.addItem('main', 'download', 'download', 'set:menu:data')
-    self.addItem('main', 'mode', 'mode', 'set:menu:transport')
+    self.addItem('main', 'mode', 'mode', 'set:menu:modes')
     self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManagerCathegories')
     self.addItem('main', 'log a track', 'log', 'set:menu:tracklog#tracklog')
     self.addItem('main', 'info', 'info', 'set:menu:info')
-    self.setupTransportMenu()
+    self.setupModesMenu()
     self.setupSearchMenus()
     self.setupSearchWhatMenu()
     self.setupSearchWhereMenu()
