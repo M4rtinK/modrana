@@ -476,7 +476,7 @@ class tracklog(ranaModule):
       (x4,y4) = e4
       (w1,h1,dx,dy) = alloc
 
-      parent = 'main'
+      parentAction = 'set:menu:main'
 
       """this is a alist of button parameters, all buttons can be togglable
       it is in this form:
@@ -543,7 +543,7 @@ class tracklog(ranaModule):
         text+= "\ndistance traveled <span foreground='white'>%s</span>\n" % distanceString
 
       box = (text , "set:menu:tracklog#tracklog")
-      menus.drawSixPlusOneMenu(cr, menuName, parent, fiveButtons, box)
+      menus.drawSixPlusOneMenu(cr, menuName, parentAction, fiveButtons, box)
 
     else:
       return # we arent the active menu so we dont do anything

@@ -557,6 +557,11 @@ class menus(ranaModule):
     item = self.generateItem('', 'up', cancelButtonAction, 'simple', timedAction=(timeout,"set:menu:None"))
     self.addItems(menuName, [item])
 
+  def drawClearButton(self, cr, x, y, w, h, parentAction, icon='up'):
+    """draw a correct up button, including the timed jump-to-map action"""
+    timedAction=(self.modrana.msLongPress,"set:menu:None")
+    self.drawButton(cr, x, y, w, h, '', icon, parentAction, timedAction)
+
   def getClearedMenu(self, cancelButtonAction='set:menu:main'):
     """clear a given itemized menu instance, add the ecape button and return it"""
     menu = self.getInitializedMenu()
@@ -1270,7 +1275,7 @@ class menus(ranaModule):
     (boxTextLines, boxAction) = box
 
     # * draw "escape" button
-    self.drawButton(cr, x1, y1, dx, dy, "", "up", "%s:reset|%s" % (menuName, parentAction))
+    self.drawClearButton(cr, x1, y1, dx, dy, "%s:reset|%s" % (menuName, parentAction))
     # * draw the first button
     self.drawButton(cr, x2, y2, dx, dy, text1, icon1, action1)
     # * draw the second button
@@ -1283,7 +1288,7 @@ class menus(ranaModule):
     text = boxTextLines
     self.drawTextToSquare(cr, x4, y4, w4, h4, text, wrap) # display the text in the box
 
-  def drawSixPlusOneMenu(self, cr, menuName, parent, fiveButtons, box):
+  def drawSixPlusOneMenu(self, cr, menuName, parentAction, fiveButtons, box):
     """draw a three plus on menu
     + support for toggle buttons"""
     (e1,e2,e3,e4,alloc) = self.threePlusOneMenuCoords()
@@ -1300,7 +1305,7 @@ class menus(ranaModule):
     (boxTextLines, boxAction) = box
 
     # * draw "escape" button
-    self.drawButton(cr, x1, y1, dx, dy, "", "up", "%s:reset|set:menu:%s" % (menuName, parent))
+    self.drawClearButton(cr, x1, y1, dx, dy, "%s:reset|%s" % (menuName, parentAction))
     # * draw the first button
     self.drawToggleButtonOld(cr, x2, y2, dx, dy, fiveButtons[0][0],fiveButtons[0][1])
     # * draw the second button
