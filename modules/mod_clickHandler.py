@@ -52,7 +52,7 @@ class clickHandler(ranaModule):
     self.register(area, action, timedAction)
     
   def handleClick(self, x, y, msDuration):
-    print "Clicked at %d,%d for %d" % (x,y,msDuration)
+#    print "Clicked at %d,%d for %d" % (x,y,msDuration)
     if self.ignoreNextClicks > 0:
       self.ignoreNextClicks=self.ignoreNextClicks - 1
 #      print "ignoring click, %d remaining" % self.ignoreNextClicks
