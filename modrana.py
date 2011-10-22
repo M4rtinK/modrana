@@ -260,7 +260,7 @@ class MapWidget(gtk.Widget):
       # get the current mode
       mode = self.d.get('mode', None)
       # get the dictionary with per mode values
-      multiDict = self.d.get(name.join('#multi'), default)
+      multiDict = self.d.get('%s#multi' % name , {})
       # retrun the value for current mode
       return multiDict.get(mode,default)
 
@@ -273,7 +273,10 @@ class MapWidget(gtk.Widget):
       # get the current mode
       mode = self.d.get('mode', None)
       # save it to the name + #multi key under the mode key
-      self.d[name.join('#multi')][mode] = value
+      try:
+        self.d['%s#multi' % name][mode] = value
+      except KeyError: # key not yet created
+        self.d["%s%s" % (name,'#multi')] = {mode : value}
 
     else: # just save to the key as usuall
       self.d[name] = value
@@ -330,11 +333,20 @@ class MapWidget(gtk.Widget):
         else:
           print "invalid watcher callback :", callback
 
-  def addKeyModifier(self, key, modifier=None):
+  def addKeyModifier(self, key, modifier=None, copyInitialValue=True):
     """add a key modifier
     NOTE: currently only used to make value of some keys
     dependent on the current mode"""
     self.keyModifiers[key] = modifier
+    """if the modifier is set for the first time,
+    do we copy the value from the normal key or not ?"""
+    if copyInitialValue:
+      # check if the key is unset for this mode
+      mode = self.d.get('mode', None)
+      multiDict = self.d.get('%s#multi' % key , {})
+      if mode not in multiDict:
+        # set for first time, copy value
+        self.set(key, self.d.get(key, None))
 
   def removeKeyModifier(self, key):
     """remove key modifier
@@ -344,6 +356,10 @@ class MapWidget(gtk.Widget):
       del self.keyModifiers[key]
     else:
       print("modRana: key %s has no modifier and thus cannot be removed")
+
+  def hasKeyModifier(self, key):
+    """return if a key has a key modifier"""
+    return key in self.keyModifiers.keys()
 
   def update(self):
     for m in self.m.values():

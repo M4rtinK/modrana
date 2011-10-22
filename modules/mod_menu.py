@@ -905,7 +905,7 @@ class menus(ranaModule):
     """Create menus for routing modes"""
     self.clearMenu('modes')
     for(label, mode) in { \
-      'Bike':'cycle',
+      'Cycle':'cycle',
       'Walk':'foot',
 #      'MTB':'cycle',
       'Car':'car',

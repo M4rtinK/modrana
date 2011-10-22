@@ -837,6 +837,14 @@ class options(ranaModule):
         self.options[menuName][1] = newIndex
     elif(message == "save"):
       self.save()
+      
+    elif type == 'ms' and message == 'addKeyModifier':
+      """make the value of a key mode specific"""
+      self.modrana.addKeyModifier(args)
+    elif type == 'ms' and message == 'removeKeyModifier':
+      """make the value of a key mode unspecific"""
+      self.modrana.removeKeyModifier(args)
+
     elif type=="ms" and message == "espeakParams":
       # switch between espeak parameter modes
       if args == "manual":
@@ -1006,14 +1014,23 @@ class options(ranaModule):
           clickHandler.registerXYWH(x4, y, w-smallButtonW, dy, onClick)
 
           # draw mode specific toggle
+
+          if self.modrana.hasKeyModifier(variable):
+            mode = self.get('mode', 'ON')
+            toggleText = '<span color="green">%s</span>#per Mode' % mode
+            modeSpecToggleAction = "ms:options:removeKeyModifier:%s" % variable
+          else:
+            toggleText = "OFF#per Mode"
+            modeSpecToggleAction = "ms:options:addKeyModifier:%s" % variable
+
           self.menuModule.drawButton(cr,
             x4+w-smallButtonW,
             y,
             smallButtonW,
             smallButtonH,
-            "OFF#per Mode",
-            "generic", # background for a 3x1 icon
-            "")
+            toggleText,
+            "generic",
+            modeSpecToggleAction)
 
           # draw tools button
           self.menuModule.drawButton(cr,
@@ -1022,7 +1039,7 @@ class options(ranaModule):
             smallButtonW,
             smallButtonH,
             None,
-            "tools", # background for a 3x1 icon
+            "tools", # tools icon
             "")
 
 
