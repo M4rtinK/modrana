@@ -46,6 +46,7 @@ class options(ranaModule):
 
     # item tools special menu name
     self.itemToolsMenuName = None
+    self.itemToolsMenuCurrentKey = None
 
   def getProfilePath(self):
     """return path to the profile folder"""
@@ -172,10 +173,6 @@ class options(ranaModule):
   def setGroupParent(self, groupID, parentID):
     """set the parent id of a given group id"""
     if groupID in self.options:
-      print "ASDASDASDas"
-#      print groupID
-#      print parentID
-#      print self.options
       self.options[groupID][0] = "set:menu:options#%s" % parentID
     else:
       print('options - set group parrent: group not found: %s' % groupID)
@@ -731,7 +728,11 @@ class options(ranaModule):
     self.itemToolsMenuName = group
     
     # mockup
-    addBoolOpt("Application wide sound output", "soundEnabled", group, True)
+    addOpt("Voice parameters","voiceParameters",
+      [("auto", "<b>automatic</b>","ms:options:espeakParams:auto"),
+       ("manual", "<b>manual</b>", "ms:options:espeakParams:manual")],
+       group,
+       "auto")
 
 #    addOpt("Network", "threadedDownload",
 ##      [("off","No use of network"),
@@ -874,9 +875,12 @@ class options(ranaModule):
     elif(message == "save"):
       self.save()
 
-    elif type == 'ms' and message == "go2ItemToolsMenu":
+    elif type == 'ml' and message == "go2ItemToolsMenu":
+      (parent, key) = args
       # reset the parent id for the tools menu
-      self.setGroupParent(self.itemToolsMenuName, args)
+      self.setGroupParent(self.itemToolsMenuName, parent)
+      # update the current key for the tools menu
+      self.itemToolsMenuCurrentKey = key
       # go to the menu
       self.set('menu', 'options#%s' % self.itemToolsMenuName)
       
@@ -1083,7 +1087,7 @@ class options(ranaModule):
             smallButtonH,
             None,
             "tools", # tools icon
-            "ms:options:go2ItemToolsMenu:%s" % parentMenu)
+            "ml:options:go2ItemToolsMenu:%s;%s" % (parentMenu, variable))
 
 
           border = 20
