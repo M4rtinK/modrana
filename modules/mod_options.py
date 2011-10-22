@@ -46,7 +46,6 @@ class options(ranaModule):
 
     # item tools special menu name
     self.itemToolsMenuName = None
-    self.itemToolsParentGroup = ""
 
   def getProfilePath(self):
     """return path to the profile folder"""
