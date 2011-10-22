@@ -44,6 +44,10 @@ class options(ranaModule):
     # items menu cache
     self.itemMenus = {}
 
+    # item tools special menu name
+    self.itemToolsMenuName = None
+    self.itemToolsParentGroup = ""
+
   def getProfilePath(self):
     """return path to the profile folder"""
     # check if the path exists and create it if not
@@ -154,23 +158,46 @@ class options(ranaModule):
     parrentId = self._getCategoryID(catId)
     return "%s_opt_group_%s" % (parrentId, id)
   
-  def addGroup(self,name,id,parrentId,icon,actionPrefix="",actionSufix=""):
+  def addGroup(self,name,id,parrentId,icon,actionPrefix="",
+               actionSufix="", registerToMenu=True):
     """this method ads a new (empty) options group to category specified by
     catId, as a convenience feature, the id of the new group is returned"""
     catId = self._getCategoryID(parrentId)
     id = self._getGroupId(parrentId, id) # get a standardized id
     action="%sset:menu:options#%s%s" % (actionPrefix,id,actionSufix)
-    self.menuModule.addItem(catId, name, icon, action)
+    if registerToMenu: # add to options menu structure ?
+      self.menuModule.addItem(catId, name, icon, action)
     self.options[id] = ["set:menu:%s" % catId,0,[]]
     return id
+
+  def setGroupParent(self, groupID, parentID):
+    """set the parent id of a given group id"""
+    if groupID in self.options:
+      print "ASDASDASDas"
+#      print groupID
+#      print parentID
+#      print self.options
+      self.options[groupID][0] = "set:menu:options#%s" % parentID
+    else:
+      print('options - set group parrent: group not found: %s' % groupID)
 
   def addBoolOption(self, title, variable, group, default=None, action=None):
     on = self.on
     off = self.off
+
     if action:
-      self.addOption(title,variable,((False,off,action),(True,on,action)),group,default)
+      states = ((False,off,action),(True,on,action))
     else:
-      self.addOption(title,variable,((False,off),(True,on)),group,default)
+      states = ((False,off),(True,on))
+    data = {"type":"toggle",
+               "states": states }
+    self.addOption(title,variable,data,group,default)
+
+  def addToggleOption(self, title, variable, choices, group, default=None):
+    data = {"type":"toggle",
+               "states": choices }
+    self.addOption(title,variable,data,group,default)
+
 
   def addEditOption(self, title, variable, group, label="Edit variable", description=None):
     choices = {"type":"showAndEditVariable",
@@ -221,6 +248,11 @@ class options(ranaModule):
       return menu
 
   def addOption(self, title, variable, choices, group, default=None):
+    """add an option item"""
+  
+    """ add group name to choices,
+    this is needed for the item tools menu to know where to return"""
+    choices['groupName'] = group
 
     newOption = (title,variable, choices,group,default)
     if self.options.has_key(group):
@@ -251,7 +283,7 @@ class options(ranaModule):
     # shotcuts
     addCat = self.addCategory
     addGroup = self.addGroup
-    addOpt = self.addOption
+    addOpt = self.addToggleOption
     addBoolOpt = self.addBoolOption
     addItems = self.addItemsOption
 
@@ -695,7 +727,12 @@ class options(ranaModule):
     if self.get('voiceParameters', None) == "manual":
       self._updateVoiceManual('add')
 
-       
+    # *** special group for item tools ***
+    group = addGroup("specialTools", "noParrent", 'invisibleCat', "")
+    self.itemToolsMenuName = group
+    
+    # mockup
+    addBoolOpt("Application wide sound output", "soundEnabled", group, True)
 
 #    addOpt("Network", "threadedDownload",
 ##      [("off","No use of network"),
@@ -837,6 +874,12 @@ class options(ranaModule):
         self.options[menuName][1] = newIndex
     elif(message == "save"):
       self.save()
+
+    elif type == 'ms' and message == "go2ItemToolsMenu":
+      # reset the parent id for the tools menu
+      self.setGroupParent(self.itemToolsMenuName, args)
+      # go to the menu
+      self.set('menu', 'options#%s' % self.itemToolsMenuName)
       
     elif type == 'ms' and message == 'addKeyModifier':
       """make the value of a key mode specific"""
@@ -879,7 +922,7 @@ class options(ranaModule):
       self.addEditOption("Edit voice string", "voiceString", groupId, "Edit voice string", description=description)
 
       message = "ms:voice:resetStringToDefault:espeak"
-      self.addOption("Reset voice string with <b>Espeak</b> default", "placeholder",
+      self.addToggleOption("Reset voice string with <b>Espeak</b> default", "placeholder",
       [("foo","<i>click to use this default</i>",message)],
        groupId,
        "foo")
@@ -894,9 +937,9 @@ class options(ranaModule):
       print "editing variable: %s with: %s" % (variable, result)
       self.set(variable,result)
 
-  def drawMenu(self, cr, menuName, args=None):    
+  def drawMenu(self, cr, menuName, args=None):
+    # custom options list drawing
     clickHandler = self.m.get('clickHandler', None)
-   
     if self.menuModule and clickHandler:
       # elements allocation
       (e1,e2,e3,e4,alloc) = self.menuModule.threePlusOneMenuCoords()
@@ -932,46 +975,45 @@ class options(ranaModule):
           # Also lookup the _next_ choice in the list, because that's what
           # we will set the option to if it's clicked
 
-          if type(choices) is dict:
-            optionType = choices["type"]
+          optionType = choices["type"]
+
+          if optionType == "showAndEditVariable":
             label = choices["label"]
             description = choices["description"]
+            # show and edit the exact value of a variable manually
+            valueDescription = self.get(variable, "variable is not set yet")
+            valueDescription = "<tt><b>%s</b></tt>" % valueDescription
+            payload = "%s;%s;%s" % (variable, label, description)
+            onClick = "ml:options:editVariable:%s|set:needRedraw:True" % payload
 
-            if optionType == "showAndEditVariable":
-              # show and edit the exact value of a variable manually
-              valueDescription = self.get(variable, "variable is not set yet")
-              valueDescription = "<tt><b>%s</b></tt>" % valueDescription
-              payload = "%s;%s;%s" % (variable, label, description)
-              onClick = "ml:options:editVariable:%s|set:needRedraw:True" % payload
+          elif optionType == "selectOneItem":
+            #show multiple items and make it possible to select one of them
 
-            if optionType == "selectOneItem":
-              #show multiple items and make it possible to select one of them
+            # get current value
+            default = choices['default']
+            value = self.get(variable, default)
+            # show label for the given value
+            valueDescription, highlightId = choices['itemDict'].get(value, (value,None))
+            """if no description is found, just display the value"""
+            valueDescription = "<tt><b>%s</b></tt>" % valueDescription
 
-              # get current value
-              default = choices['default']
-              value = self.get(variable, default)
-              # show label for the given value
-              valueDescription, highlightId = choices['itemDict'].get(value, (value,None))
-              """if no description is found, just display the value"""
-              valueDescription = "<tt><b>%s</b></tt>" % valueDescription
-              
-              #assure highlighting
-              if highlightId != None:
-                """ run an action before switching to the next menu that
-                assures that items in the next menu are properly highlighted
-                according to the state of the corresponding variable"""
-                pre = "ml:menu:highlightItem:%s;%d|" % (choices['storageKey'], highlightId)
-              else:
-                pre = "" # no id that needs highlighting found
+            #assure highlighting
+            if highlightId != None:
+              """ run an action before switching to the next menu that
+              assures that items in the next menu are properly highlighted
+              according to the state of the corresponding variable"""
+              pre = "ml:menu:highlightItem:%s;%d|" % (choices['storageKey'], highlightId)
+            else:
+              pre = "" # no id that needs highlighting found
 
-              onClick = "%sset:menu:options1Item*%s*%s" % (pre, group, variable)
+            onClick = "%sset:menu:options1Item*%s*%s" % (pre, group, variable)
 
-          else: # toggle button
-
-            nextChoice = choices[0]
+          elif optionType == 'toggle':
+            states = choices['states']
+            nextChoice = states[0]
             valueDescription = str(value)
             useNext = False
-            for c in choices:
+            for c in states:
               (cVal, cName) = (c[0],c[1])
               if(useNext):
                 nextChoice = c
@@ -989,6 +1031,7 @@ class options(ranaModule):
               onClick += "|%s" % cAction
             onClick += "|options:save"
             onClick += "|set:needRedraw:1"
+
 
           y = y4 + (row) * dy
           if w1 > h1: # landscape
@@ -1032,6 +1075,7 @@ class options(ranaModule):
             "generic",
             modeSpecToggleAction)
 
+          parentMenu = choices['groupName']
           # draw tools button
           self.menuModule.drawButton(cr,
             x4+w-smallButtonW,
@@ -1040,7 +1084,7 @@ class options(ranaModule):
             smallButtonH,
             None,
             "tools", # tools icon
-            "")
+            "ms:options:go2ItemToolsMenu:%s" % parentMenu)
 
 
           border = 20
