@@ -30,6 +30,8 @@ class options(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.options = {}
+    """for fast searching defaults for corresponding keys"""
+    self.keyDefault = {}
 
     # profile folder
     self.profileFolderPath = self.modrana.getProfilePath()
@@ -177,6 +179,13 @@ class options(ranaModule):
     else:
       print('options - set group parrent: group not found: %s' % groupID)
 
+  def getGroupParent(self, groupID):
+    """set the parent id of a given group id"""
+    if groupID in self.options:
+      return self.options[groupID][0]
+    else:
+      print('options - get group parrent: group not found: %s' % groupID)
+
   def addBoolOption(self, title, variable, group, default=None, action=None):
     on = self.on
     off = self.off
@@ -253,6 +262,7 @@ class options(ranaModule):
     newOption = (title,variable, choices,group,default)
     if self.options.has_key(group):
       self.options[group][2].append(newOption)
+      self.keyDefault[variable] = default
     else:
       print "options: group %s does not exist, call addGroup to create it first" % group
 
@@ -264,8 +274,14 @@ class options(ranaModule):
     if self.options.has_key(group):
       remove = lambda x:x[1]==variable
       self.options[group][2][:] = [x for x in self.options[group][2] if not remove(x)]
+      if variable in self.keyDefault:
+        del self.keyDefault[variable]
     else:
       print "options: group %s does not exist, so option with variable %s can not be removed" % (group,variable)
+
+  def getKeyDefault(self, key, default=None):
+    """get default value for a given key"""
+    return self.keyDefault.get(key, default)
 
   def firstTime(self):
     """Create a load of options.  You can add your own options in here,
@@ -728,8 +744,8 @@ class options(ranaModule):
     self.itemToolsMenuName = group
     
     # mockup
-    addOpt("Voice parameters","voiceParameters",
-      [("auto", "<b>automatic</b>","ms:options:espeakParams:auto"),
+    addOpt("Reset to default","voiceParameters",
+      [("", "","ms:options:itemTools:resetToDefault"),
        ("manual", "<b>manual</b>", "ms:options:espeakParams:manual")],
        group,
        "auto")
@@ -877,12 +893,31 @@ class options(ranaModule):
 
     elif type == 'ml' and message == "go2ItemToolsMenu":
       (parent, key) = args
+      # reload the tools menu
+      menus = self.m.get('menu', None)
+      if menus:
+        menuName = 'optionsItemTools'
+        reset='ms:options:resetKey:%s' % key
+        notify = "ml:notification:m:Item has been reset to default;3"
+        resetAction = "%s|%s|set:menu:options#%s" % (reset, notify, parent)
+        menus.clearMenu(menuName, 'options#%s' % parent)
+        menus.addItem(menuName, 'state list#per mode', 'generic',  '')
+        menus.addItem(menuName, 'default#reset to', 'generic', resetAction)
+        self.set('menu', menuName)
+    elif type == 'ml' and message == "go2ItemStateListMenu":
       # reset the parent id for the tools menu
       self.setGroupParent(self.itemToolsMenuName, parent)
       # update the current key for the tools menu
       self.itemToolsMenuCurrentKey = key
       # go to the menu
       self.set('menu', 'options#%s' % self.itemToolsMenuName)
+
+    elif type == 'ms' and message == 'resetKey':
+      """ reset a given options item to default, including any key modifiers"""
+      key = args
+      self.modrana.removeKeyModifier(key, purge=True)
+      default = self.getKeyDefault(key)
+      self.set(key, default)
       
     elif type == 'ms' and message == 'addKeyModifier':
       """make the value of a key mode specific"""

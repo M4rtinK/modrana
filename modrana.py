@@ -348,14 +348,22 @@ class MapWidget(gtk.Widget):
         # set for first time, copy value
         self.set(key, self.d.get(key, None))
 
-  def removeKeyModifier(self, key):
+  def removeKeyModifier(self, key, purge=False):
     """remove key modifier
     NOTE: currently this just makes the key independent
     on the current mode"""
     if key in self.keyModifiers.keys():
       del self.keyModifiers[key]
+      """remove also the possibly present
+      alternative states for different modes"""
+      if purge:
+        multiKey = "%s%s" % (key,'#multi')
+        if multiKey in self.d:
+          del self.d[multiKey]
+      return True
     else:
       print("modRana: key %s has no modifier and thus cannot be removed")
+      return False
 
   def hasKeyModifier(self, key):
     """return if a key has a key modifier"""
