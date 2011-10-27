@@ -887,6 +887,7 @@ class Options(ranaModule):
     for (modeLabel, mode) in modes:
       optionD = list(optionData) # make a copy
       optionD[0] = "%s <small><sup>[%s]</sup></small>" % (optionD[0], modeLabel)
+      optionD[2]['noToolsIcon'] = True # choices dictionary
       optionD[3] = self.keyStateListGroupID # set the group to the state list
       self.addRawOption(optionD)
 
@@ -1177,15 +1178,16 @@ class Options(ranaModule):
             modeSpecToggleAction)
 
           groupName = choices['groupName']
-          # draw tools button
-          self.menuModule.drawButton(cr,
-            x4+w-smallButtonW,
-            y+smallButtonH,
-            smallButtonW,
-            smallButtonH,
-            None,
-            "tools", # tools icon
-            "ml:options:go2ItemToolsMenu:%s;%d;%s" % (groupName, index, variable))
+          if 'noToolsIcon' not in choices:
+            # draw tools button
+            self.menuModule.drawButton(cr,
+              x4+w-smallButtonW,
+              y+smallButtonH,
+              smallButtonW,
+              smallButtonH,
+              None,
+              "tools", # tools icon
+              "ml:options:go2ItemToolsMenu:%s;%d;%s" % (groupName, index, variable))
 
 
           border = 20
