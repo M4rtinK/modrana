@@ -1071,7 +1071,11 @@ class Options(ranaModule):
         if(0 <= index < numItems):
           (title,variable,choices,group,default) = options[index]
           # What's it set to currently?
-          value = self.get(variable, None)
+          if 'mode' in choices:
+            mode = choices['mode']
+          else:
+            mode = self.get('mode', 'car')
+          value = self.get(variable, None, mode=mode)
 
           # Lookup the description of the currently-selected choice.
           # (if any, use str(value) if it doesn't match any defined options)
@@ -1129,7 +1133,7 @@ class Options(ranaModule):
 
             # What should happen if this option is clicked -
             # set the associated option to the next value in sequence
-            onClick = "set:%s:%s" % (variable, str(nextChoice[0]))
+            onClick = "setWithMode:%s:%s:%s" % (mode, variable, str(nextChoice[0]))
             if cAction:
               onClick += "|%s" % cAction
             onClick += "|options:save"
@@ -1158,11 +1162,6 @@ class Options(ranaModule):
             "")
           # due to the button on the righ, register a slightly smaller area
           clickHandler.registerXYWH(x4, y, w-smallButtonW, dy, onClick)
-
-          if 'mode' in choices:
-            mode = choices['mode']
-          else:
-            mode = self.get('mode', 'car')
             
           # draw mode specific toggle
 

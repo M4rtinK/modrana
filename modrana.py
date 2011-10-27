@@ -252,13 +252,14 @@ class MapWidget(gtk.Widget):
     
   ## OPTIONS SETTING AND WATCHING ##
 
-  def get(self, name, default=None):
+  def get(self, name, default=None, mode=""):
     """Get an item of data"""
 
     # check if the value depends on current mode
     if name in self.keyModifiers.keys():
       # get the current mode
-      mode = self.d.get('mode', None)
+      if not mode:
+        mode = self.d.get('mode', None)
       # get the dictionary with per mode values
       multiDict = self.d.get('%s#multi' % name , {})
       # retrun the value for current mode
@@ -267,11 +268,12 @@ class MapWidget(gtk.Widget):
     else: # just return the normal value
       return(self.d.get(name, default))
 
-  def set(self, name, value, save=False):
+  def set(self, name, value, save=False, mode=""):
     """Set an item of data"""
     if name in self.keyModifiers.keys():
       # get the current mode
-      mode = self.d.get('mode', None)
+      if not mode:
+        mode = self.d.get('mode', None)
       # save it to the name + #multi key under the mode key
       try:
         self.d['%s#multi' % name][mode] = value

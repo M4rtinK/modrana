@@ -90,6 +90,13 @@ class messageModule(ranaModule):
         else:
           print "Message addressed to %s which isn't loaded" % module
 
+      elif(module == "setWithMode"):
+        (mode, key, value) = text.split(":", 2)
+        for i in(None, True, False):
+          if(value == str(i)):
+            value = i
+        self.set(key, value, mode=mode)
+
       else:
         m = self.m.get(module, None)
         if(m != None):
