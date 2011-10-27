@@ -888,8 +888,12 @@ class Options(ranaModule):
       optionD = list(optionData) # make a copy
       optionD[0] = "%s <small><sup>[%s]</sup></small>" % (optionD[0], modeLabel)
       # modify the choices dictionary
-      optionD[2]['noToolsIcon'] = True # disable the tools icon
-      optionD[2]['mode'] = mode # force a mode
+      # NOTE: somehow, it is needed to do a copy not just to modify it in the option
+      # or else the mode value is for all options added the same
+      d = dict(optionD[2])
+      d['noToolsIcon'] = True # disable the tools icon
+      d['mode'] = mode # force a mode
+      optionD[2] = d
       optionD[3] = self.keyStateListGroupID # set the group to the state list
       self.addRawOption(optionD)
 
