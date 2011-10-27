@@ -23,9 +23,9 @@ import os
 import modrana_utils
 
 def getModule(m,d,i):
-  return(options(m,d,i))
+  return(Options(m,d,i))
 
-class options(ranaModule):
+class Options(ranaModule):
   """Handle options"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
@@ -47,8 +47,7 @@ class options(ranaModule):
     self.itemMenus = {}
 
     # item tools special menu name
-    self.itemToolsMenuName = None
-    self.itemToolsMenuCurrentKey = None
+    self.keyStateListGroupID = None
 
   def getProfilePath(self):
     """return path to the profile folder"""
@@ -157,19 +156,30 @@ class options(ranaModule):
     return inId
 
   def _getGroupId(self, catId, id):
-    parrentId = self._getCategoryID(catId)
-    return "%s_opt_group_%s" % (parrentId, id)
+    parentId = self._getCategoryID(catId)
+    return "%s_opt_group_%s" % (parentId, id)
   
-  def addGroup(self,name,id,parrentId,icon,actionPrefix="",
-               actionSufix="", registerToMenu=True):
+  def addGroup(self,name,id,parentId,icon,actionPrefix="",
+               actionSufix="", registerToMenu=True, backButtonAction=None):
     """this method ads a new (empty) options group to category specified by
     catId, as a convenience feature, the id of the new group is returned"""
-    catId = self._getCategoryID(parrentId)
-    id = self._getGroupId(parrentId, id) # get a standardized id
-    action="%sset:menu:options#%s%s" % (actionPrefix,id,actionSufix)
+    catId = self._getCategoryID(parentId)
+    id = self._getGroupId(parentId, id) # get a standardized id
+    """
+    handle mepty parent ids - such ids can be valid because the menu switching is handled
+    handled entirelly by the pre and post actions
+    """
+    if not parentId:
+      action="%s%s" % (actionPrefix,actionSufix)
+    else:
+      action="%sset:menu:options#%s%s" % (actionPrefix,id,actionSufix)
+      
     if registerToMenu: # add to options menu structure ?
       self.menuModule.addItem(catId, name, icon, action)
-    self.options[id] = ["set:menu:%s" % catId,0,[]]
+    if backButtonAction != None:
+      self.options[id] = [backButtonAction ,0,[]]
+    else:
+      self.options[id] = ["set:menu:%s" % catId,0,[]]
     return id
 
   def setGroupParent(self, groupID, parentID):
@@ -177,14 +187,21 @@ class options(ranaModule):
     if groupID in self.options:
       self.options[groupID][0] = "set:menu:options#%s" % parentID
     else:
-      print('options - set group parrent: group not found: %s' % groupID)
+      print('options - set group parent: group not found: %s' % groupID)
 
   def getGroupParent(self, groupID):
     """set the parent id of a given group id"""
     if groupID in self.options:
       return self.options[groupID][0]
     else:
-      print('options - get group parrent: group not found: %s' % groupID)
+      print('options - get group parent: group not found: %s' % groupID)
+
+  def clearGroup(self, groupID):
+    """clear a given group from any options,
+    preserving its parent setting"""
+    self.options[groupID][1] = 0
+    self.options[groupID][2] = []
+
 
   def addBoolOption(self, title, variable, group, default=None, action=None):
     on = self.on
@@ -259,12 +276,22 @@ class options(ranaModule):
     this is needed for the item tools menu to know where to return"""
     choices['groupName'] = group
 
-    newOption = (title,variable, choices,group,default)
+    newOption = [title,variable, choices,group,default]
     if self.options.has_key(group):
       self.options[group][2].append(newOption)
       self.keyDefault[variable] = default
     else:
       print "options: group %s does not exist, call addGroup to create it first" % group
+
+  def addRawOption(self, optionData):
+    """add a raw option to options
+    NOTE: the options contains its group ID"""
+    (title,variable, choices,group,default) = optionData
+    if self.options.has_key(group):
+      self.options[group][2].append(optionData)
+      self.keyDefault[variable] = default
+    else:
+      print "options: group %s does not exist, can't add a raw option to it" % group
 
   def removeOption(self, categoryId, groupId, variable):
     """remova an option given by group and variable name"""
@@ -278,6 +305,19 @@ class options(ranaModule):
         del self.keyDefault[variable]
     else:
       print "options: group %s does not exist, so option with variable %s can not be removed" % (group,variable)
+
+  def getOption(self, groupID, index):
+    """get a options item from a given group by its index"""
+    if self.options.has_key(groupID):
+      try:
+        return self.options[groupID][2][index]
+      except IndexError:
+        print "options: group %s has no index %d, so this option can not be returned" % (groupID, index)
+        return False
+
+    else:
+      print "options: group %s does not exist, so option with index %d can not be returned" % (groupID, index)
+      return False
 
   def getKeyDefault(self, key, default=None):
     """get default value for a given key"""
@@ -739,16 +779,9 @@ class options(ranaModule):
     if self.get('voiceParameters', None) == "manual":
       self._updateVoiceManual('add')
 
-    # *** special group for item tools ***
-    group = addGroup("specialTools", "noParrent", 'invisibleCat', "")
-    self.itemToolsMenuName = group
-    
-    # mockup
-    addOpt("Reset to default","voiceParameters",
-      [("", "","ms:options:itemTools:resetToDefault"),
-       ("manual", "<b>manual</b>", "ms:options:espeakParams:manual")],
-       group,
-       "auto")
+    # *** special group for a list per mode item states ***
+    self.keyStateListGroupID = addGroup("specialTools", 'specialGroup', 'specialParent',
+    "generic", registerToMenu=False, backButtonAction="set:menu:optionsItemTools")    
 
 #    addOpt("Network", "threadedDownload",
 ##      [("off","No use of network"),
@@ -837,6 +870,26 @@ class options(ranaModule):
       print('options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n', e)
       return self.d
 
+  def _reloadKeyStateList(self, groupID, index, key):
+    """reload the key state list to represent currently selected option"""
+
+    # clear the group
+    self.clearGroup(self.keyStateListGroupID)
+    """ for each mode show the current key state"""
+    modes = self.modrana.getModes().items()
+    modes.sort()
+
+    # get data for the given option
+    optionData = self.getOption(groupID, index)
+
+
+    # modify the title
+    for (modeLabel, mode) in modes:
+      optionD = list(optionData) # make a copy
+      optionD[0] = "%s <small><sup>[%s]</sup></small>" % (optionD[0], modeLabel)
+      optionD[3] = self.keyStateListGroupID # set the group to the state list
+      self.addRawOption(optionD)
+
   def save(self):
     print "options: saving options"
     try:
@@ -892,25 +945,28 @@ class options(ranaModule):
       self.save()
 
     elif type == 'ml' and message == "go2ItemToolsMenu":
-      (parent, key) = args
+      (groupID, index, key) = args
+      index = int(index)
       # reload the tools menu
       menus = self.m.get('menu', None)
       if menus:
         menuName = 'optionsItemTools'
         reset='ms:options:resetKey:%s' % key
         notify = "ml:notification:m:Item has been reset to default;3"
-        resetAction = "%s|%s|set:menu:options#%s" % (reset, notify, parent)
-        menus.clearMenu(menuName, 'options#%s' % parent)
-        menus.addItem(menuName, 'state list#per mode', 'generic',  '')
+        resetAction = "%s|%s|set:menu:options#%s" % (reset, notify, groupID)
+        menus.clearMenu(menuName, 'set:menu:options#%s' % groupID)
+        menus.addItem(menuName, 'state list#per mode', 'generic',
+                      'ml:options:go2ItemStateListMenu:%s;%d;%s' % (groupID, index, key)
+                      )
         menus.addItem(menuName, 'default#reset to', 'generic', resetAction)
         self.set('menu', menuName)
     elif type == 'ml' and message == "go2ItemStateListMenu":
-      # reset the parent id for the tools menu
-      self.setGroupParent(self.itemToolsMenuName, parent)
-      # update the current key for the tools menu
-      self.itemToolsMenuCurrentKey = key
+      (groupID, index, key) = args
+      index = int(index)
+      """reload the option key state list for the given key"""
+      self._reloadKeyStateList(groupID, index, key)
       # go to the menu
-      self.set('menu', 'options#%s' % self.itemToolsMenuName)
+      self.set('menu', 'options#%s' % self.keyStateListGroupID)
 
     elif type == 'ms' and message == 'resetKey':
       """ reset a given options item to default, including any key modifiers"""
@@ -919,10 +975,12 @@ class options(ranaModule):
       default = self.getKeyDefault(key)
       self.set(key, default)
       
-    elif type == 'ms' and message == 'addKeyModifier':
+    elif type == 'ml' and message == 'addKeyModifier':
       """make the value of a key mode specific"""
+      (key, mode) = args
       self.modrana.addKeyModifier(args)
-    elif type == 'ms' and message == 'removeKeyModifier':
+    elif type == 'ml' and message == 'removeKeyModifier':
+      (key, mode) = args
       """make the value of a key mode unspecific"""
       self.modrana.removeKeyModifier(args)
 
@@ -1094,15 +1152,20 @@ class options(ranaModule):
           # due to the button on the righ, register a slightly smaller area
           clickHandler.registerXYWH(x4, y, w-smallButtonW, dy, onClick)
 
+          if 'mode' in choices:
+            mode = choices['mode']
+          else:
+            mode = self.get('mode', 'car')
+            
           # draw mode specific toggle
 
           if self.modrana.hasKeyModifier(variable):
-            mode = self.get('mode', 'ON')
+            # check for mode override
             toggleText = '<span color="green">%s</span>#per Mode' % mode
-            modeSpecToggleAction = "ms:options:removeKeyModifier:%s" % variable
+            modeSpecToggleAction = "ml:options:removeKeyModifier:%s;%s" % (variable, mode)
           else:
             toggleText = "OFF#per Mode"
-            modeSpecToggleAction = "ms:options:addKeyModifier:%s" % variable
+            modeSpecToggleAction = "ml:options:addKeyModifier:%s;%s" % (variable, mode)
 
           self.menuModule.drawButton(cr,
             x4+w-smallButtonW,
@@ -1113,7 +1176,7 @@ class options(ranaModule):
             "generic",
             modeSpecToggleAction)
 
-          parentMenu = choices['groupName']
+          groupName = choices['groupName']
           # draw tools button
           self.menuModule.drawButton(cr,
             x4+w-smallButtonW,
@@ -1122,7 +1185,7 @@ class options(ranaModule):
             smallButtonH,
             None,
             "tools", # tools icon
-            "ml:options:go2ItemToolsMenu:%s;%s" % (parentMenu, variable))
+            "ml:options:go2ItemToolsMenu:%s;%d;%s" % (groupName, index, variable))
 
 
           border = 20

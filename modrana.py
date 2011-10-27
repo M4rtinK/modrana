@@ -333,7 +333,7 @@ class MapWidget(gtk.Widget):
         else:
           print "invalid watcher callback :", callback
 
-  def addKeyModifier(self, key, modifier=None, copyInitialValue=True):
+  def addKeyModifier(self, key, modifier=None, mode=None, copyInitialValue=True):
     """add a key modifier
     NOTE: currently only used to make value of some keys
     dependent on the current mode"""
@@ -342,18 +342,33 @@ class MapWidget(gtk.Widget):
     do we copy the value from the normal key or not ?"""
     if copyInitialValue:
       # check if the key is unset for this mode
-      mode = self.d.get('mode', None)
+      if mode == None:
+        mode = self.d.get('mode', None)
       multiDict = self.d.get('%s#multi' % key , {})
       if mode not in multiDict:
         # set for first time, copy value
         self.set(key, self.d.get(key, None))
 
-  def removeKeyModifier(self, key, purge=False):
+  def removeKeyModifier(self, key, mode=None, purge=False):
     """remove key modifier
     NOTE: currently this just makes the key independent
     on the current mode"""
+    # if no mode is provided, use the current one
+    if mode == None:
+        mode = self.d.get('mode', None)
+
     if key in self.keyModifiers.keys():
-      del self.keyModifiers[key]
+      # get the per mode states
+      multiDict = self.d.get('%s#multi' % key , {})
+      if mode in multiDict:
+        del multiDict[mode]
+      else:
+        print("modrana: can't remove modifier that is not present")
+        print("key: %s, mode: %s" % (key, mode))
+      if len(multiDict) == 0:
+        # no more modes registered -> remove key modifier indicator
+        del self.keyModifiers[key]
+
       """remove also the possibly present
       alternative states for different modes"""
       if purge:
@@ -368,6 +383,16 @@ class MapWidget(gtk.Widget):
   def hasKeyModifier(self, key):
     """return if a key has a key modifier"""
     return key in self.keyModifiers.keys()
+
+  def getModes(self):
+    modes = {
+      'Cycle':'cycle',
+      'Walk':'foot',
+      'Car':'car',
+      'Train':'train',
+      'Bus':'bus',
+    }
+    return modes
 
   def update(self):
     for m in self.m.values():

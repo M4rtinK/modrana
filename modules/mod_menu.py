@@ -904,24 +904,15 @@ class menus(ranaModule):
   def setupModesMenu(self):
     """Create menus for routing modes"""
     self.clearMenu('modes')
-    for(label, mode) in { \
-      'Cycle':'cycle',
-      'Walk':'foot',
-#      'MTB':'cycle',
-      'Car':'car',
-#      'Hike':'foot',
-#      'FastBike':'cycle',
-      'Train':'train',
-      'Bus':'bus',
-
-#      'Train':'train',
-#      'HGV':'hgv'
-      }.items():
+    modes = self.modrana.getModes().items()
+    modes.sort()
+    for(label, mode) in modes:
       self.addItem(
-        'modes',                       # menu
-        label,                             # label
-        mode,                     # icon
-        'set:mode:'+mode+"|set:menu:None") # action
+        'modes',  # menu
+        label,    # label
+        mode,     # icon
+        'set:mode:%s|set:menu:None' % mode, # action
+        )
 
   def setupSearchWhereMenu(self):
     self.clearMenu('searchWhere')
