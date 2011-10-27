@@ -887,7 +887,9 @@ class Options(ranaModule):
     for (modeLabel, mode) in modes:
       optionD = list(optionData) # make a copy
       optionD[0] = "%s <small><sup>[%s]</sup></small>" % (optionD[0], modeLabel)
-      optionD[2]['noToolsIcon'] = True # choices dictionary
+      # modify the choices dictionary
+      optionD[2]['noToolsIcon'] = True # disable the tools icon
+      optionD[2]['mode'] = mode # force a mode
       optionD[3] = self.keyStateListGroupID # set the group to the state list
       self.addRawOption(optionD)
 
@@ -979,11 +981,11 @@ class Options(ranaModule):
     elif type == 'ml' and message == 'addKeyModifier':
       """make the value of a key mode specific"""
       (key, mode) = args
-      self.modrana.addKeyModifier(args)
+      self.modrana.addKeyModifier(key, mode=mode)
     elif type == 'ml' and message == 'removeKeyModifier':
       (key, mode) = args
       """make the value of a key mode unspecific"""
-      self.modrana.removeKeyModifier(args)
+      self.modrana.removeKeyModifier(key, mode=mode)
 
     elif type=="ms" and message == "espeakParams":
       # switch between espeak parameter modes

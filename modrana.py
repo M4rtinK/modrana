@@ -377,7 +377,7 @@ class MapWidget(gtk.Widget):
           del self.d[multiKey]
       return True
     else:
-      print("modRana: key %s has no modifier and thus cannot be removed")
+      print("modRana: key %s has no modifier and thus cannot be removed" % key)
       return False
 
   def hasKeyModifier(self, key):
