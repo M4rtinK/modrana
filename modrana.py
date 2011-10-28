@@ -266,7 +266,7 @@ class MapWidget(gtk.Widget):
         # retrun the value for current mode
         return multiDict.get(mode,default)
       else:
-        return default
+        return(self.d.get(name, default))
 
     else: # just return the normal value
       return(self.d.get(name, default))

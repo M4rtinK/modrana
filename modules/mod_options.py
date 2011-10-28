@@ -1072,9 +1072,11 @@ class Options(ranaModule):
           (title,variable,choices,group,default) = options[index]
           # What's it set to currently?
           if 'mode' in choices:
+            fakeMode = self.get('mode', 'car') != choices['mode']
             mode = choices['mode']
           else:
             mode = self.get('mode', 'car')
+            fakeMode = False
           value = self.get(variable, None, mode=mode)
 
           # Lookup the description of the currently-selected choice.
@@ -1098,7 +1100,7 @@ class Options(ranaModule):
 
             # get current value
             default = choices['default']
-            value = self.get(variable, default)
+            value = self.get(variable, default, mode=mode)
             # show label for the given value
             valueDescription, highlightId = choices['itemDict'].get(value, (value,None))
             """if no description is found, just display the value"""
@@ -1167,7 +1169,12 @@ class Options(ranaModule):
 
           if self.modrana.hasKeyModifierInMode(variable, mode):
             # check for mode override
-            toggleText = '<span color="green">%s</span>#per Mode' % mode
+            # green - current mode
+            # not green - other mode
+            if fakeMode:
+              toggleText = '<span color="green">%s</span>#per Mode' % mode
+            else:
+              toggleText = '<span color="green"><b>%s</b></span>#per Mode' % mode
             modeSpecToggleAction = "ml:options:removeKeyModifier:%s;%s" % (variable, mode)
           else:
             toggleText = "OFF#per Mode"
