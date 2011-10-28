@@ -260,28 +260,35 @@ class MapWidget(gtk.Widget):
       # get the current mode
       if not mode:
         mode = self.d.get('mode', None)
-      # get the dictionary with per mode values
-      multiDict = self.d.get('%s#multi' % name , {})
-      # retrun the value for current mode
-      return multiDict.get(mode,default)
+      if mode in self.keyModifiers[name]['modes']:
+        # get the dictionary with per mode values
+        multiDict = self.d.get('%s#multi' % name , {})
+        # retrun the value for current mode
+        return multiDict.get(mode,default)
+      else:
+        return default
 
     else: # just return the normal value
       return(self.d.get(name, default))
 
-  def set(self, name, value, save=False, mode=""):
+  def set(self, name, value, save=False, mode=None):
     """Set an item of data"""
     if name in self.keyModifiers.keys():
       # get the current mode
-      if not mode:
+      if mode == None:
         mode = self.d.get('mode', None)
-      # save it to the name + #multi key under the mode key
-      try:
-        self.d['%s#multi' % name][mode] = value
-      except KeyError: # key not yet created
-        self.d["%s%s" % (name,'#multi')] = {mode : value}
-
+      # check if there is a modifier for the current mode
+      if mode in self.keyModifiers[name]['modes'].keys():
+        # save it to the name + #multi key under the mode key
+        try:
+          self.d['%s#multi' % name][mode] = value
+        except KeyError: # key not yet created
+          self.d['%s#multi' % name] = {mode : value}
+      else: # just save to the key as usuall
+        self.d[name] = value
     else: # just save to the key as usuall
       self.d[name] = value
+
     """options are normally saved on shutdown,
     but for some data we want to make sure they are stored and not
     los for example becuase of power outage/empty battery, etc."""
@@ -289,6 +296,8 @@ class MapWidget(gtk.Widget):
       options = self.m.get('options')
       if options:
         options.save()
+    """ if there is a watch set for this key,
+    notify the watcher that its value has changed"""
     if name in self.watches.keys():
       self._notifyWatcher(name, value)
 
@@ -339,17 +348,30 @@ class MapWidget(gtk.Widget):
     """add a key modifier
     NOTE: currently only used to make value of some keys
     dependent on the current mode"""
-    self.keyModifiers[key] = modifier
+    if mode == None:
+      mode = self.d.get('mode', None)
+    if key not in self.keyModifiers.keys(): # initialize
+      self.keyModifiers[key] = {'modes':{mode:modifier}}
+    else:
+      self.keyModifiers[key]['modes'][mode] = modifier
+
+    # make sure the multi mode dictionary exists
+    multiKey = '%s#multi' % key
+    multiDict = self.d.get(multiKey , {})
+    self.d[multiKey] = multiDict
+
     """if the modifier is set for the first time,
     do we copy the value from the normal key or not ?"""
     if copyInitialValue:
       # check if the key is unset for this mode
-      if mode == None:
-        mode = self.d.get('mode', None)
-      multiDict = self.d.get('%s#multi' % key , {})
       if mode not in multiDict:
         # set for first time, copy value
-        self.set(key, self.d.get(key, None))
+        options = self.m.get('options', None)
+        if options:
+          defaultValue = options.getKeyDefault(key, None)
+        else:
+          defaultValue = None
+        self.set(key, self.d.get(key, defaultValue), mode=mode)
 
   def removeKeyModifier(self, key, mode=None, purge=False):
     """remove key modifier
@@ -358,22 +380,25 @@ class MapWidget(gtk.Widget):
     # if no mode is provided, use the current one
     if mode == None:
         mode = self.d.get('mode', None)
-
     if key in self.keyModifiers.keys():
       # get the per mode states
-      multiDict = self.d.get('%s#multi' % key , {})
-      if mode in multiDict:
-        del multiDict[mode]
+      if mode in self.keyModifiers[key]['modes'].keys():
+        del self.keyModifiers[key]['modes'][mode]
+        # was this the last key ?
+        if len(self.keyModifiers[key]['modes']) == 0:
+          # no modes registered - unregister from modifiers
+          # TODO: handle non-mode modifiers in the future
+          del self.keyModifiers[key]
+        return True
       else:
         print("modrana: can't remove modifier that is not present")
         print("key: %s, mode: %s" % (key, mode))
-      if len(multiDict) == 0:
-        # no more modes registered -> remove key modifier indicator
-        del self.keyModifiers[key]
+        return False
 
       """remove also the possibly present
       alternative states for different modes"""
       if purge:
+        del self.keyModifiers[key]
         multiKey = "%s%s" % (key,'#multi')
         if multiKey in self.d:
           del self.d[multiKey]
@@ -385,6 +410,15 @@ class MapWidget(gtk.Widget):
   def hasKeyModifier(self, key):
     """return if a key has a key modifier"""
     return key in self.keyModifiers.keys()
+
+  def hasKeyModifierInMode(self, key, mode=None):
+    """return if a key has a key modifier"""
+    if mode == None:
+      mode = self.d.get('mode', None)
+    if key in self.keyModifiers.keys():
+      return mode in self.keyModifiers[key]['modes'].keys()
+    else:
+      return False
 
   def getModes(self):
     modes = {

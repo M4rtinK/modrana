@@ -1165,7 +1165,7 @@ class Options(ranaModule):
             
           # draw mode specific toggle
 
-          if self.modrana.hasKeyModifier(variable):
+          if self.modrana.hasKeyModifierInMode(variable, mode):
             # check for mode override
             toggleText = '<span color="green">%s</span>#per Mode' % mode
             modeSpecToggleAction = "ml:options:removeKeyModifier:%s;%s" % (variable, mode)
