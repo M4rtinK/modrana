@@ -977,7 +977,7 @@ class Options(ranaModule):
     elif type == 'ms' and message == 'resetKey':
       """ reset a given options item to default, including any key modifiers"""
       key = args
-      self.modrana.removeKeyModifier(key, purge=True)
+      self.modrana.purgeKey(key)
       default = self.getKeyDefault(key)
       self.set(key, default)
       

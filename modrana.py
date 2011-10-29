@@ -305,6 +305,24 @@ class MapWidget(gtk.Widget):
     """Report if a given key exists"""
     return key in self.d.keys()
 
+  def purgeKey(self, key):
+    """remove a key from the presistant dictionary,
+    including possible key modifiers and alternate values"""
+    if key in self.d:
+      del self.d[key]
+      # purge any key modifiers
+      if key in self.keyModifiers.keys():
+        del self.keyModifiers[key]
+        """also remove the possibly present
+        alternative states for different modes"""
+        multiKey = "%s#multi" % key
+        if multiKey in self.d:
+          del self.d[multiKey]
+      self._notifyWatcher(key, None)
+      return True
+    else:
+      print("modrana: can't purge a not present key: %s" % key)
+
   def watch(self, key, callback, *args):
     """add a callback on an options key
     callbakc will get:
@@ -373,15 +391,16 @@ class MapWidget(gtk.Widget):
           defaultValue = None
         self.set(key, self.d.get(key, defaultValue), mode=mode)
 
-  def removeKeyModifier(self, key, mode=None, purge=False):
+  def removeKeyModifier(self, key, mode=None):
     """remove key modifier
     NOTE: currently this just makes the key independent
     on the current mode"""
+
     # if no mode is provided, use the current one
     if mode == None:
         mode = self.d.get('mode', None)
     if key in self.keyModifiers.keys():
-      # get the per mode states
+      # just remove the key modifier preserving the alternative values
       if mode in self.keyModifiers[key]['modes'].keys():
         del self.keyModifiers[key]['modes'][mode]
         # was this the last key ?
@@ -394,18 +413,10 @@ class MapWidget(gtk.Widget):
         print("modrana: can't remove modifier that is not present")
         print("key: %s, mode: %s" % (key, mode))
         return False
-
-      """remove also the possibly present
-      alternative states for different modes"""
-      if purge:
-        del self.keyModifiers[key]
-        multiKey = "%s%s" % (key,'#multi')
-        if multiKey in self.d:
-          del self.d[multiKey]
-      return True
     else:
       print("modRana: key %s has no modifier and thus cannot be removed" % key)
       return False
+
 
   def hasKeyModifier(self, key):
     """return if a key has a key modifier"""
