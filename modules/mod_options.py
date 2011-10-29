@@ -886,7 +886,7 @@ class Options(ranaModule):
     # modify the title
     for (modeLabel, mode) in modes:
       optionD = list(optionData) # make a copy
-      optionD[0] = "%s <small><sup>[%s]</sup></small>" % (optionD[0], modeLabel)
+      optionD[0] = "%s <small><sup><b>[%s]</b></sup></small>" % (optionD[0], modeLabel)
       # modify the choices dictionary
       # NOTE: somehow, it is needed to do a copy not just to modify it in the option
       # or else the mode value is for all options added the same
