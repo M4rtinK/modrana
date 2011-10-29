@@ -906,7 +906,7 @@ class menus(ranaModule):
     self.clearMenu('modes')
     modes = self.modrana.getModes().items()
     modes.sort()
-    for(label, mode) in modes:
+    for(mode, label) in modes:
       self.addItem(
         'modes',  # menu
         label,    # label

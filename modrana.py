@@ -422,13 +422,21 @@ class MapWidget(gtk.Widget):
 
   def getModes(self):
     modes = {
-      'Cycle':'cycle',
-      'Walk':'foot',
-      'Car':'car',
-      'Train':'train',
-      'Bus':'bus',
+      'cycle':'Cycle',
+      'walk':'Foot',
+      'car':'Car',
+      'train':'Train',
+      'bus':'Bus',
     }
     return modes
+
+  def getModeLabel(self, modeName):
+    "get a label for a given mode"
+    try:
+      return self.getModes()[modeName]
+    except KeyError:
+      print('modrana: mode %s does not exist and thus has no label' % modeName)
+      return None
 
   def update(self):
     for m in self.m.values():

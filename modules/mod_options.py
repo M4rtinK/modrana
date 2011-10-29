@@ -876,7 +876,7 @@ class Options(ranaModule):
     # clear the group
     self.clearGroup(self.keyStateListGroupID)
     """ for each mode show the current key state"""
-    modes = self.modrana.getModes().items()
+    modes = self.modrana.getModes().keys()
     modes.sort()
 
     # get data for the given option
@@ -884,9 +884,8 @@ class Options(ranaModule):
 
 
     # modify the title
-    for (modeLabel, mode) in modes:
+    for (mode) in modes:
       optionD = list(optionData) # make a copy
-      optionD[0] = "%s <small><sup><b>[%s]</b></sup></small>" % (optionD[0], modeLabel)
       # modify the choices dictionary
       # NOTE: somehow, it is needed to do a copy not just to modify it in the option
       # or else the mode value is for all options added the same
@@ -1072,12 +1071,31 @@ class Options(ranaModule):
           (title,variable,choices,group,default) = options[index]
           # What's it set to currently?
           if 'mode' in choices:
-            fakeMode = self.get('mode', 'car') != choices['mode']
             mode = choices['mode']
           else:
             mode = self.get('mode', 'car')
-            fakeMode = False
           value = self.get(variable, None, mode=mode)
+
+          """ if the key has a modifier in this mode,
+          append the mode label to the title"""
+
+          if 'mode' in choices:
+            # this currently means we are in the option state list
+            if self.get('mode', 'car') == choices['mode']:
+              # current mode
+              title = "%s: <small><sup><b>[%s]</b></sup></small>" % (
+              title, self.modrana.getModeLabel(mode))
+            else:
+              title = "%s: <small><sup>[%s]</sup></small>" % (
+              title, self.modrana.getModeLabel(mode))
+
+          else:
+            # nromal option display
+            if self.modrana.hasKeyModifierInMode(variable, mode):
+              title = "%s: <small><sup><b>[%s]</b></sup></small>" % (
+              title, self.modrana.getModeLabel(mode))
+            else:
+              title = "%s:" % title
 
           # Lookup the description of the currently-selected choice.
           # (if any, use str(value) if it doesn't match any defined options)
@@ -1165,16 +1183,9 @@ class Options(ranaModule):
           # due to the button on the righ, register a slightly smaller area
           clickHandler.registerXYWH(x4, y, w-smallButtonW, dy, onClick)
             
-          # draw mode specific toggle
-
+          # draw mode specific combined toggle & indicator
           if self.modrana.hasKeyModifierInMode(variable, mode):
-            # check for mode override
-            # green - current mode
-            # not green - other mode
-            if fakeMode:
-              toggleText = '<span color="green">%s</span>#per Mode' % mode
-            else:
-              toggleText = '<span color="green"><b>%s</b></span>#per Mode' % mode
+            toggleText = '<span color="green">ON</span>#per Mode'
             modeSpecToggleAction = "ml:options:removeKeyModifier:%s;%s" % (variable, mode)
           else:
             toggleText = "OFF#per Mode"
@@ -1205,7 +1216,7 @@ class Options(ranaModule):
           border = 20
 
           # 1st line: option name
-          self.menuModule.showText(cr, title+":", x4+border, y+border, w*0.95 - smallButtonW - border)
+          self.menuModule.showText(cr, title, x4+border, y+border, w*0.95 - smallButtonW - border)
 
           # 2nd line: current value
           self.menuModule.showText(cr, valueDescription, x4 + 0.15 * w, y + 0.6 * dy, w*0.85 - smallButtonW - border)
