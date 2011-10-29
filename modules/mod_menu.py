@@ -590,11 +590,11 @@ class menus(ranaModule):
     self.menus[menuName] = self.addItemsToThisMenu(self.menus.get(menuName, None), [item,])
 
   def getItem(self,menuName,id,):
-    """get a given ittemized menu item"""
+    """get a given itemized menu item"""
     return self.menus[menuName][id]
 
   def setItem(self,menuName,id, item):
-    """set a given ittemized menu item to a given value"""
+    """set a given itemized menu item to a given value"""
     self.menus[menuName][id] = item
 
   def highlightItem(self,menuName,id):

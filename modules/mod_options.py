@@ -228,17 +228,24 @@ class Options(ranaModule):
               }
     self.addOption(title, variable, choices, group, None)
 
-  def addItemsOption(self, title, variable, items, group, default=None):
+  def addItemsOption(self, title, variable, items, group, default=None, fakeMode=None):
     # the back action returns back to the group
     backAction = "set:menu:options#%s" % group
     # create and add the menu
     menu = self.menuModule.getClearedMenu(backAction)
     menuItems = [] # an ordered list of all the menu items
     itemDict = {} # for easilly asigning keys to labels
+    if fakeMode != None:
+      mode = fakeMode
+    else:
+      mode = self.get('mode', 'car')
+
     id = 1 # id 0 us the escape button
     for item in items:
       name, key = item
-      item = self.menuModule.generateItem("#%s" % name, "generic", "set:%s:%s|%s" % (variable, key, backAction))
+      item = self.menuModule.generateItem("#%s" % name, "generic",
+      "setWithMode:%s:%s:%s|%s" % (mode, variable, key, backAction))
+
       menuItems.append(item)
       itemDict[key] = (name,id)
       id = id + 1
@@ -247,7 +254,7 @@ class Options(ranaModule):
     # store the menu in the menu module
     """NOTE: for the returning back to the group to work correctly,
     the menu is stored under a key combined from the variable and group names"""
-    storageKey = "options1Item*%s*%s" % (group, variable)
+    storageKey = self._getItemsOptionStorageKey(group, variable, mode)
 
     self.menuModule.addItemMenu(storageKey, menu, wideButtons=True)
 
@@ -259,7 +266,15 @@ class Options(ranaModule):
               'items':items,
               'itemDict' : itemDict,
               'storageKey' : storageKey}
+    if fakeMode != None:
+      choices['mode'] = fakeMode
+      print fakeMode
     self.addOption(title, variable, choices, group, default)
+
+  def _getItemsOptionStorageKey(self, group, variable, mode):
+    """return menu name for the special item selection itemized menu
+    """
+    return "options1Item*%s*%s*%s" % (group, variable, mode)
 
   def _highlightActiveItem(self, menu, variable):
     """highlight currently active item in the item selection menu"""
@@ -287,11 +302,23 @@ class Options(ranaModule):
     """add a raw option to options
     NOTE: the options contains its group ID"""
     (title,variable, choices,group,default) = optionData
-    if self.options.has_key(group):
-      self.options[group][2].append(optionData)
-      self.keyDefault[variable] = default
-    else:
-      print "options: group %s does not exist, can't add a raw option to it" % group
+    """ as some options have have side effects when they are created,
+    we need to check option the type and replicate those effect as needed"""
+    type = choices['type']
+    choices = dict(choices)
+    if type == 'selectOneItem':
+      if 'mode' in choices:
+        fakeMode = choices['mode']
+      else:
+        fakeMode = None
+      items = choices['items']
+      self.addItemsOption(title, variable, items, group, default, fakeMode = fakeMode)
+    else: # no side effects, just add the raw option
+      if self.options.has_key(group):
+        self.options[group][2].append(optionData)
+        self.keyDefault[variable] = default
+      else:
+        print "options: group %s does not exist, can't add a raw option to it" % group
 
   def removeOption(self, categoryId, groupId, variable):
     """remova an option given by group and variable name"""
@@ -1133,7 +1160,7 @@ class Options(ranaModule):
             else:
               pre = "" # no id that needs highlighting found
 
-            onClick = "%sset:menu:options1Item*%s*%s" % (pre, group, variable)
+            onClick = "%sset:menu:options1Item*%s*%s*%s" % (pre, group, variable, mode)
 
           elif optionType == 'toggle':
             states = choices['states']
