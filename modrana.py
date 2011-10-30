@@ -252,15 +252,15 @@ class MapWidget(gtk.Widget):
     
   ## OPTIONS SETTING AND WATCHING ##
 
-  def get(self, name, default=None, mode=""):
+  def get(self, name, default=None, mode=None):
     """Get an item of data"""
 
     # check if the value depends on current mode
     if name in self.keyModifiers.keys():
       # get the current mode
-      if not mode:
-        mode = self.d.get('mode', None)
-      if mode in self.keyModifiers[name]['modes']:
+      if mode == None:
+        mode = self.d.get('mode', 'car')
+      if mode in self.keyModifiers[name]['modes'].keys():
         # get the dictionary with per mode values
         multiDict = self.d.get('%s#multi' % name , {})
         # retrun the value for current mode
@@ -272,21 +272,26 @@ class MapWidget(gtk.Widget):
       return(self.d.get(name, default))
 
   def set(self, name, value, save=False, mode=None):
-    """Set an item of data"""
+    """Set an item of data,
+    if there is a watch set for this key,
+    notify the watcher that its value has changed"""
     if name in self.keyModifiers.keys():
       # get the current mode
       if mode == None:
-        mode = self.d.get('mode', None)
+        mode = self.d.get('mode', 'car')
       # check if there is a modifier for the current mode
       if mode in self.keyModifiers[name]['modes'].keys():
         # save it to the name + #multi key under the mode key
         try:
+          self._notifyWatcher(name, value)
           self.d['%s#multi' % name][mode] = value
         except KeyError: # key not yet created
           self.d['%s#multi' % name] = {mode : value}
       else: # just save to the key as usuall
+        self._notifyWatcher(name, value)
         self.d[name] = value
     else: # just save to the key as usuall
+      self._notifyWatcher(name, value)
       self.d[name] = value
 
     """options are normally saved on shutdown,
@@ -296,10 +301,6 @@ class MapWidget(gtk.Widget):
       options = self.m.get('options')
       if options:
         options.save()
-    """ if there is a watch set for this key,
-    notify the watcher that its value has changed"""
-    if name in self.watches.keys():
-      self._notifyWatcher(name, value)
 
   def optionsKeyExists(self, key):
     """Report if a given key exists"""
@@ -349,7 +350,12 @@ class MapWidget(gtk.Widget):
       print("modRana: can't remove watch - key does not exist, watchId:", id)
 
   def _notifyWatcher(self, key, newValue):
-    """run callbacks registered on an options key"""
+    """run callbacks registered on an options key
+    HOW IT WORKS
+    * the watcher is notified before the key is written to the persistant
+    dictionary, so that it can react before the change is visible
+    * the watcher gets the key and both the new and old values
+    """
     callbacks = self.watches.get(key, None)
     if callbacks:
       for item in callbacks:
@@ -358,16 +364,17 @@ class MapWidget(gtk.Widget):
         if callback:
           if callback(key,newValue,oldValue, *args) == False:
             # remove watches that return False
-            self.removeWatch(id)       
+            self.removeWatch(id)
         else:
           print "invalid watcher callback :", callback
+
 
   def addKeyModifier(self, key, modifier=None, mode=None, copyInitialValue=True):
     """add a key modifier
     NOTE: currently only used to make value of some keys
     dependent on the current mode"""
     if mode == None:
-      mode = self.d.get('mode', None)
+      mode = self.d.get('mode', 'car')
     if key not in self.keyModifiers.keys(): # initialize
       self.keyModifiers[key] = {'modes':{mode:modifier}}
     else:
@@ -391,6 +398,12 @@ class MapWidget(gtk.Widget):
           defaultValue = None
         self.set(key, self.d.get(key, defaultValue), mode=mode)
 
+#    # notify watchers
+#    fallback = self.get(key, None)
+#    realMode = self.get('mode', 'car')
+#    newValue = multiDict.get(realMode, fallback)
+#    self._notifyWatcher(key, newValue)
+
   def removeKeyModifier(self, key, mode=None):
     """remove key modifier
     NOTE: currently this just makes the key independent
@@ -398,7 +411,7 @@ class MapWidget(gtk.Widget):
 
     # if no mode is provided, use the current one
     if mode == None:
-        mode = self.d.get('mode', None)
+        mode = self.d.get('mode', 'car')
     if key in self.keyModifiers.keys():
       # just remove the key modifier preserving the alternative values
       if mode in self.keyModifiers[key]['modes'].keys():
@@ -425,7 +438,7 @@ class MapWidget(gtk.Widget):
   def hasKeyModifierInMode(self, key, mode=None):
     """return if a key has a key modifier"""
     if mode == None:
-      mode = self.d.get('mode', None)
+      mode = self.d.get('mode', 'car')
     if key in self.keyModifiers.keys():
       return mode in self.keyModifiers[key]['modes'].keys()
     else:
