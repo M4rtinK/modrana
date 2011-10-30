@@ -241,8 +241,7 @@ class Options(ranaModule):
       mode = self.get('mode', 'car')
 
     id = 1 # id 0 us the escape button
-    for item in items:
-      name, key = item
+    for key, name in items:
       item = self.menuModule.generateItem("#%s" % name, "generic",
       "setWithMode:%s:%s:%s|%s" % (mode, variable, key, backAction))
 
@@ -375,10 +374,9 @@ class Options(ranaModule):
     layerNameKey = []
     for key in layers.keys():
       name = layers[key]['label']
-      layerNameKey.append( (name, key) )
+      layerNameKey.append( (key, name) )
     layerNameKey.sort()
-    layerNameKey.append(("None", ""))
-
+    layerNameKey.append((None, "Empty layer"))
     addItems("Main map", "layer", layerNameKey, group, "mapnik")
 
     # ** Overlay
@@ -688,7 +686,7 @@ class Options(ranaModule):
                           ('tr tr', 'Turkish'),
                           ('vi vi', 'Vietnamese')]
 
-    addOpt("Language for directions", 'directionsLanguage',
+    addItems("Language for directions", 'directionsLanguage',
          directionsLanguages,
          group,
          "en en") # TODO: use locale for default language ?
