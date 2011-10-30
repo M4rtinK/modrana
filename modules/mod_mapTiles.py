@@ -101,7 +101,8 @@ class MapTiles(ranaModule):
 
   def firstTime(self):
     self.mapViewModule = self.m.get('mapView', None)
-    self._updateScalingCB()
+    scale = self.get('mapScale', 1)
+    self._updateScalingCB('mapScale', scale, scale)
     self.modrana.watch('mapScale', self._updateScalingCB)
     self.modrana.watch('z', self._updateScalingCB)
 
@@ -111,13 +112,12 @@ class MapTiles(ranaModule):
       self.mapFolderPath = options.getMapFolderPath()
       print "mapTiles: map folder path: %s" % self.mapFolderPath
 
-  def _updateScalingCB(self, key=None, oldValue=None, newValue=None):
+  def _updateScalingCB(self, key='mapScale', oldValue=1, newValue=1):
     """
     as this only needs to be updated once on startup and then only
     when scaling settings change this callback driven method is used
     """
-
-    scale = int(self.get('mapScale', 1))
+    scale = int(newValue)
     if scale == 1: # this will be most of the time, so it is first
       z = int(self.get('z', 15))
     elif scale == 2: # tiles are scaled to 512*512 and represent tiles from zl-1

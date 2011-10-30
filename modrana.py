@@ -362,7 +362,7 @@ class MapWidget(gtk.Widget):
         (id,callback,args) = item
         oldValue = self.get(key, None)
         if callback:
-          if callback(key,newValue,oldValue, *args) == False:
+          if callback(key,oldValue, newValue, *args) == False:
             # remove watches that return False
             self.removeWatch(id)
         else:
@@ -560,13 +560,37 @@ class MapWidget(gtk.Widget):
 
     this method is called if posShiftAmount or posShiftDirection
     are set and also once at startup"""
-    (sx,sy,sw,sh) = self.get('viewport')
+    # get the needed values
+    # NOTE: some of them might have been updated just now
+    if key == 'viewport':
+      (sx,sy,sw,sh) = newValue
+    else:
+      (sx,sy,sw,sh) = self.get('viewport')
+
+    if key == 'posShiftAmount':
+      shiftAmount = newValue
+    else:
+      shiftAmount = self.d.get('posShiftAmount', 0.75)
+
+    if key == 'posShiftDirection':
+      shiftDirection = newValue
+    else:
+      shiftDirection = self.d.get('posShiftDirection', "down")
+
+    if key == 'mapScale':
+      print 1
+      scale = int(newValue)
+    else:
+      print 2
+      scale = int(self.get('mapScale', 1))
+      
+    print scale
+
     x=0
     y=0
-    shiftAmount = self.d.get('posShiftAmount', 0.75)
-    """this value might show up as string, so we convert it to float, just to be sure"""
     floatShiftAmount = float(shiftAmount)
-    shiftDirection = self.d.get('posShiftDirection', "down")
+    """this value might show up as string, so we convert it to float, just to be sure"""
+
     if shiftDirection:
       if shiftDirection == "down":
         y =  sh * 0.5 * floatShiftAmount
@@ -580,8 +604,7 @@ class MapWidget(gtk.Widget):
       - 0,0 will be used """
     self.centerShift = (x,y)
     
-    # update the viewport expansion variable
-    scale = int(self.get('mapScale', 1))
+    # update the viewport expansion variable    
     tileSide = 256
     mapTiles = self.m.get('mapTiles')
     if mapTiles: # check the mapTiles for tile side length in pixels, if available
