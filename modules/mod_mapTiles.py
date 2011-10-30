@@ -129,10 +129,6 @@ class MapTiles(ranaModule):
       z = int(self.get('z', 15)) - 2
     else:
       z = int(self.get('z', 15))
-
-    print "update scale"
-    print z
-    print scale
       
     tileSide = self.tileSide * scale
     
