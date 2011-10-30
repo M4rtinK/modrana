@@ -232,6 +232,8 @@ class MapWidget(gtk.Widget):
     self.watch('viewport', self._updateCenteringShiftCB)
     # and map scaling
     self.watch('mapScale', self._updateCenteringShiftCB)
+    # and mode change
+    self.watch('mode', self._modeChangedCB)
     # cache key modifiers
     self.keyModifiers = self.d.get('keyModifiers', {})
 
@@ -276,7 +278,7 @@ class MapWidget(gtk.Widget):
     if there is a watch set for this key,
     notify the watcher that its value has changed"""
 
-    oldValue = self.get('name', value)
+    oldValue = self.get(name, value)
 
     if name in self.keyModifiers.keys():
       # get the current mode
@@ -628,6 +630,13 @@ class MapWidget(gtk.Widget):
     add = int(math.ceil(float(diagonal)/tileSide))
     self.expandViewportTiles = add
 
+  def _modeChangedCB(self, key=None, oldMode=None, newMode=None):
+    """handle mode change in regards to key modifiers and option key watchers"""
+    print "mode changed"
+
+    print oldMode, newMode
+    # get keys that have both a key modifier and a watcher
+    keys = filter(lambda x: x in self.keyModifiers.keys(), self.watches.keys())
 
   def draw(self, cr, event):
     """ re/Draw the modrana GUI """
