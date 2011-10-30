@@ -632,11 +632,26 @@ class MapWidget(gtk.Widget):
 
   def _modeChangedCB(self, key=None, oldMode=None, newMode=None):
     """handle mode change in regards to key modifiers and option key watchers"""
-    print "mode changed"
-
-    print oldMode, newMode
     # get keys that have both a key modifier and a watcher
     keys = filter(lambda x: x in self.keyModifiers.keys(), self.watches.keys())
+    """ filter out only those keys that have a modifier for the new mode or
+    had a modifier in the previous mode
+    otherwise their value would not change and thus triggering a watch is not necessary """
+    keys = filter(
+                  lambda x: newMode in self.keyModifiers[x]['modes'].keys() or oldMode in self.keyModifiers[x]['modes'].keys(),
+                  keys )
+    for key in keys:
+      # try to get some value if the old value is not available
+      options = self.m.get('options', None)
+      # remeber the old value, if not se use default from options
+      # if available
+      if options:
+        defaultValue = options.getKeyDefault(key, None)
+      else:
+        defaultValue = None
+      oldValue = self.get(key, defaultValue)
+      # notify watchers
+      self._notifyWatcher(key, oldValue)
 
   def draw(self, cr, event):
     """ re/Draw the modrana GUI """
