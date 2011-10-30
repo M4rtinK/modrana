@@ -117,7 +117,10 @@ class MapTiles(ranaModule):
     as this only needs to be updated once on startup and then only
     when scaling settings change this callback driven method is used
     """
-    scale = int(newValue)
+    if key == 'mapScale':
+      scale = int(newValue)
+    else:
+      scale = int(self.get('mapScale', 1))
     if scale == 1: # this will be most of the time, so it is first
       z = int(self.get('z', 15))
     elif scale == 2: # tiles are scaled to 512*512 and represent tiles from zl-1
@@ -126,6 +129,10 @@ class MapTiles(ranaModule):
       z = int(self.get('z', 15)) - 2
     else:
       z = int(self.get('z', 15))
+
+    print "update scale"
+    print z
+    print scale
       
     tileSide = self.tileSide * scale
     

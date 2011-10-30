@@ -330,7 +330,7 @@ class MapWidget(gtk.Widget):
 
   def watch(self, key, callback, *args):
     """add a callback on an options key
-    callbakc will get:
+    callback will get:
     key, newValue, oldValue, *args
 
     NOTE: watch ids should be >0, so that they evaluate as True
@@ -579,25 +579,30 @@ class MapWidget(gtk.Widget):
     are set and also once at startup"""
     # get the needed values
     # NOTE: some of them might have been updated just now
-    if key == 'viewport':
-      (sx,sy,sw,sh) = newValue
-    else:
-      (sx,sy,sw,sh) = self.get('viewport')
+    (sx,sy,sw,sh) = self.get('viewport')
+    shiftAmount = self.d.get('posShiftAmount', 0.75)
+    shiftDirection = self.d.get('posShiftDirection', "down")
+    scale = int(self.get('mapScale', 1))
 
-    if key == 'posShiftAmount':
-      shiftAmount = newValue
-    else:
-      shiftAmount = self.d.get('posShiftAmount', 0.75)
-
-    if key == 'posShiftDirection':
-      shiftDirection = newValue
-    else:
-      shiftDirection = self.d.get('posShiftDirection', "down")
-
-    if key == 'mapScale':
-      scale = int(newValue)
-    else:
-      scale = int(self.get('mapScale', 1))
+#    if key == 'viewport':
+#      (sx,sy,sw,sh) = newValue
+#    else:
+#      (sx,sy,sw,sh) = self.get('viewport')
+#
+#    if key == 'posShiftAmount':
+#      shiftAmount = newValue
+#    else:
+#      shiftAmount = self.d.get('posShiftAmount', 0.75)
+#
+#    if key == 'posShiftDirection':
+#      shiftDirection = newValue
+#    else:
+#      shiftDirection = self.d.get('posShiftDirection', "down")
+#
+#    if key == 'mapScale':
+#      scale = int(newValue)
+#    else:
+#      scale = int(self.get('mapScale', 1))
 
     x=0
     y=0
