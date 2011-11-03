@@ -265,9 +265,10 @@ class Options(ranaModule):
               'items':items,
               'itemDict' : itemDict,
               'storageKey' : storageKey}
+    # this means we are probably showing the option in the per mode state list
     if fakeMode != None:
       choices['mode'] = fakeMode
-      print fakeMode
+      choices['noToolsIcon'] = True # disable the tools in the per mode state list
     self.addOption(title, variable, choices, group, default)
 
   def _getItemsOptionStorageKey(self, group, variable, mode):
@@ -908,8 +909,8 @@ class Options(ranaModule):
     optionData = self.getOption(groupID, index)
 
 
-    # modify the title
-    for (mode) in modes:
+    # modify the option
+    for mode in modes:
       optionD = list(optionData) # make a copy
       # modify the choices dictionary
       # NOTE: somehow, it is needed to do a copy not just to modify it in the option
