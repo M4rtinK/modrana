@@ -22,7 +22,7 @@ else:
 # generate data files tree
 data_files = []
 for pathTuple in os.walk('.'):
-  data_files.append( ('', pathTuple[0]) )
+  data_files.append( ('modrana', os.path.join(pathTuple[0],pathTuple[2])) )
   
 setup (
   name = 'modRana',
