@@ -21,7 +21,7 @@ else:
 
 # generate data files tree
 data_files = []
-for pathTuple in os.walk('.'):
+for pathTuple in os.walk(''):
   for filename in pathTuple[2]:
     data_files.append( ('modrana', os.path.join(pathTuple[0], filename)) )
   
