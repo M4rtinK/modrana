@@ -1,4 +1,4 @@
-from setuptools import setup,find_packages
+from setuptools import setup
 import os.path
 import os
 
@@ -22,9 +22,10 @@ else:
 # generate data files tree
 data_files = []
 for pathTuple in os.walk('.'):
-  data_files.append( ('modrana', os.path.join(pathTuple[0],pathTuple[2])) )
+  for filename in pathTuple[2]:
+    data_files.append( ('modrana', os.path.join(pathTuple[0], filename)) )
   
-setup (
+dist = setup (
   name = 'modRana',
   version = versionNumber,
 
@@ -44,3 +45,14 @@ setup (
 
   # could also include long_description, download_url, classifiers, etc.
 )
+
+installCmd = dist.get_command_obj(command="install_data")
+installdir = installCmd.install_dir
+installroot = installCmd.root
+
+if not installroot:
+    installroot = ""
+
+if installdir:
+    installdir = os.path.join(os.path.sep,
+        installdir.replace(installroot, ""))
