@@ -236,6 +236,11 @@ class MapWidget(gtk.Widget):
     self.watch('mode', self._modeChangedCB)
     # cache key modifiers
     self.keyModifiers = self.d.get('keyModifiers', {})
+    # check if own Quit button is needed
+    if self.dmod.needsQuitButton():
+      menus = self.m.get('menu', None)
+      if menus:
+        menus.addItem('main', 'Quit', 'quit', 'menu:askQuit')
 
   def _modulesLoadedPostFirstTime(self):
     """this is run after all the modules have been loaded,
@@ -245,12 +250,18 @@ class MapWidget(gtk.Widget):
     if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
       self.showRedrawTime = True
 
+  def shutdown(self):
+    """terminate GTK main loop, which should
+    trigger the modRana standart shutdown sequence,
+    then terminate the GTK main loop"""
+    gtk.main_quit()
+
   def beforeDie(self):
-    print "Shutting-down modules"
-    for m in self.m.values():
-      m.shutdown()
-    time.sleep(2) # leave some times for threads to shut down
-    print "Shuttdown complete"
+      print "Shutting-down modules"
+      for m in self.m.values():
+        m.shutdown()
+      time.sleep(2) # leave some times for threads to shut down
+      print "Shuttdown complete"
     
   ## OPTIONS SETTING AND WATCHING ##
 
@@ -1136,6 +1147,10 @@ class GuiBase:
       win.move(gtk.gdk.screen_width() - 500, 50)
     elif(device == 'ipaq'): #  for some 240*320 displays (like most old Ipaqs/PocketPCs)
       win.resize(240,320)
+      win.move(gtk.gdk.screen_width() - 500, 50)
+    elif(device == 'android_chroot'): #  for some 240*320 displays (like most old Ipaqs/PocketPCs)
+      # use same settings as for Neo for the time being
+      win.resize(480,640)
       win.move(gtk.gdk.screen_width() - 500, 50)
     else: # test for use with neo freerunner
       win.resize(480,640)

@@ -1457,6 +1457,24 @@ class menus(ranaModule):
         else:
           print("menu: can't store point, point or storePOI module missing")
           
+    elif message == 'askQuit':
+      ask = self.m.get('askMenu', None)
+      if ask:
+        question = "Do you really want to quit modRana ?"
+        yesAction = "menu:shutdownModRana"
+        noAction = "set:menu:main"
+        ask.setupAskYesNo(question, yesAction, noAction)
+
+    elif message == 'shutdownModRana':
+#      self.set('menu',None)
+      self.sendMessage("ml:notification:m:Shutting down;10")
+#      self.set('needRefresh', True)
+      cron = self.m.get('cron', None)
+      if cron:
+        cron.addIdle(self.modrana.shutdown,[])
+
+      #self.modrana.shutdown()
+
     elif(message == 'toggle' and len(messageList) >= 3):
       # toggle a button
       menu = messageList[1]

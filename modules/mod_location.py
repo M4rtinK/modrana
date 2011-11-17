@@ -76,6 +76,7 @@ class gpsd2(ranaModule):
     try:
       self.GPSDConsumer = GPSDConsumer()
       self._checkVerbose() # check if verbose debugging is enabled
+      self.GPSDConsumer.daemon = True
       self.GPSDConsumer.start()
       self.connected = True
       self.locationUpdate = self.updateGPSD
@@ -269,7 +270,7 @@ class GPSDConsumer(threading.Thread):
     print("GPSDConsumer: starting")
     while True:
       if self.stop == True:
-        print "breaking"
+        print "GPSDConsumer: breaking"
         break
       self.session.next() # this function blocks until a new fix is available
       sf = self.session.fix

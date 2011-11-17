@@ -136,6 +136,11 @@ class deviceModule(ranaModule):
   def getLogFolderPath(self):
     """default path is handled through the options module"""
     None
+
+  def needsQuitButton(self):
+    """On some platforms (Android chroot) aplications
+    need to provide their own shutdown buttons"""
+    return False
   
 #  def getAutorotationSupported(self):
 #    return False
