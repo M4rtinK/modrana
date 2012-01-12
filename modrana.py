@@ -976,6 +976,7 @@ class MapWidget(gtk.Widget):
 
   def do_size_request(self, allocation):
     pass
+
   def do_size_allocate(self, allocation):
     self.allocation = allocation
     self.rect = self.allocation

@@ -23,7 +23,7 @@
 from base_module import ranaModule
 
 class deviceModule(ranaModule):
-  """A sample pyroute module"""
+  """A modRana device module"""
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
