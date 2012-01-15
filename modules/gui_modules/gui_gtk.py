@@ -27,7 +27,7 @@ import gobject
 import gtk
 from gtk import gdk
 
-from gui import GUIModule
+from base_gui import adGUIModule
 
 class GTKGUI(GUIModule):
   def __init__(self, mieru):

@@ -29,13 +29,17 @@ from PySide.QtGui import *
 from PySide.QtDeclarative import *
 #from PySide import QtOpenGL
 
-import gui
+from base_gui import GUIModule
 
 def newlines2brs(text):
   """ QML uses <br> instead of \n for linebreak """
   return re.sub('\n', '<br>', text)
 
-class QMLGUI(gui.GUI):
+
+def getModule(m,d,i):
+    return(QMLGUI(m,d,i))
+
+class QMLGUI(GUIModule):
   def __init__(self, mieru, type, size=(854,480)):
     self.mieru = mieru
 

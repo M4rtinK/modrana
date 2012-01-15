@@ -21,11 +21,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 
-class GUIModule:
-  def __init__(self, mieru):
-    self.mieru = mieru
+from base_module import ranaModule
 
-  def resize(self, w, h):
+class GUIModule:
+  def __init__(self, m, d, i):
+    ranaModule.__init__(self, m, d, i)
+
+  def resize(self, mrw, h):
     """resize the GUI to given width and height"""
     pass
 
