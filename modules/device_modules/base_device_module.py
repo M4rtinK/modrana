@@ -27,18 +27,21 @@ class deviceModule(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-        
+
+  def getDeviceIDString(self):
+    return None
+
   def getDeviceName(self):
     return "unknown device"
 
   def screenBlankingControlSupported(self):
     """ there is no universal way to control screen blanking,
     so its off by default
-    -> it can be implemented and enabled in the coresponding device module"""
+    -> it can be implemented and enabled in the corresponding device module"""
     return False
 
   def usesDashboard(self):
-    """report if the device minimizes the windows into a dasboard instead of hiding
+    """report if the device minimizes the windows into a dashboard instead of hiding
     them out of view - the user might want that the window redraws on the dashboard or not"""
     return False
 

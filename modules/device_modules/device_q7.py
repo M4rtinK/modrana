@@ -30,6 +30,9 @@ class device_q7(deviceModule):
   def __init__(self, m, d, i):
     deviceModule.__init__(self, m, d, i)
 
+  def getDeviceIDString(self):
+    return "q7"
+
   def getDeviceName(self):
     return "Smart Devices SmartQ 7 MID"
 

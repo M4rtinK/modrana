@@ -100,7 +100,10 @@ class device_n900(deviceModule):
         print "rotation mode changed"
     elif message == 'updateKeys':
       self._updateVolumeKeys()
-      
+
+  def getDeviceIDString(self):
+    return "n900"
+
   def getDeviceName(self):
     return "Nokia N900"
 

@@ -31,6 +31,9 @@ class device_neo(deviceModule):
     deviceModule.__init__(self, m, d, i)
     self.tempUnfullscreen = False
 
+  def getDeviceIDString(self):
+    return "neo"
+
   def getDeviceName(self):
     return "OpenMoko Neo FreeRunner"
 

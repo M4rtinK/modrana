@@ -22,14 +22,17 @@
 from base_device_module import deviceModule
 
 def getModule(m,d,i):
-  return(device_neo(m,d,i))
+  return(AndroidChrot(m,d,i))
 
-class device_neo(deviceModule):
+class AndroidChroot(deviceModule):
   """A Neo FreeRunner modRana device-specific module"""
   
   def __init__(self, m, d, i):
     deviceModule.__init__(self, m, d, i)
     self.tempUnfullscreen = False
+
+  def getDeviceIDString(self):
+    return "android_chroot"
 
   def getDeviceName(self):
     return "Android chroot"

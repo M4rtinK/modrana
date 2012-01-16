@@ -30,6 +30,9 @@ class device_netbook(deviceModule):
   def __init__(self, m, d, i):
     deviceModule.__init__(self, m, d, i)
 
+  def getDeviceIDString(self):
+    return "netbook"
+
   def getDeviceName(self):
     return "A generic netbook"
     
