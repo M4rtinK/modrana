@@ -45,7 +45,6 @@ class deviceModule(ranaModule):
     # we'll use VGA as a default value
     return((640,480))
 
-
   def screenBlankingControlSupported(self):
     """ there is no universal way to control screen blanking,
     so its off by default
