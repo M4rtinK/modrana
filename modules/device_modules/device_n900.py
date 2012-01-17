@@ -107,6 +107,9 @@ class device_n900(deviceModule):
   def getDeviceName(self):
     return "Nokia N900"
 
+  def getWinWH(self):
+    return((800,480))
+
   def getLocationType(self):
     """modRana uses liblocation on N900"""
     return "liblocation"

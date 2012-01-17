@@ -36,6 +36,9 @@ class device_q7(deviceModule):
   def getDeviceName(self):
     return "Smart Devices SmartQ 7 MID"
 
+  def getWinWH(self):
+    return((800,480))
+
   def simpleMapDragging(self):
     return True
 

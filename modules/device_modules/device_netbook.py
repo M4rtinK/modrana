@@ -35,6 +35,9 @@ class device_netbook(deviceModule):
 
   def getDeviceName(self):
     return "A generic netbook"
+
+  def getWinWH(self):
+    return((1024,600))
     
 
 if(__name__ == "__main__"):

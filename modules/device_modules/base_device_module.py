@@ -29,10 +29,22 @@ class deviceModule(ranaModule):
     ranaModule.__init__(self, m, d, i)
 
   def getDeviceIDString(self):
+    """
+    return an unique string identifying the device module
+    """
     return None
 
   def getDeviceName(self):
+    """return a "human" name of the device"""
     return "unknown device"
+
+  def getWinWH(self):
+    """
+    return the preferred application window size in pixels
+    """
+    # we'll use VGA as a default value
+    return((640,480))
+
 
   def screenBlankingControlSupported(self):
     """ there is no universal way to control screen blanking,

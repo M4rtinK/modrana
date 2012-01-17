@@ -37,6 +37,9 @@ class AndroidChroot(deviceModule):
   def getDeviceName(self):
     return "Android chroot"
 
+  def getWinWH(self):
+    return((480,600))
+
   def simpleMapDragging(self):
     return True
 

@@ -37,6 +37,9 @@ class device_neo(deviceModule):
   def getDeviceName(self):
     return "OpenMoko Neo FreeRunner"
 
+  def getWinWH(self):
+    return((480,600))
+
   def simpleMapDragging(self):
     return True
 
