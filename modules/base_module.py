@@ -22,7 +22,7 @@ class ranaModule:
     self.m = modules
     self.d = data
     self.status = ''
-    self.modrana = initInfo.get('modrana') # this is modrana
+    self.modrana = initInfo.get('modrana') # this is modRana
     # bind the get set and watch methods to the "kernel" :D
     self.get = self.modrana.get
     self.set = self.modrana.set
