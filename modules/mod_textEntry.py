@@ -24,7 +24,7 @@ def getModule(m,d,i):
   return(textEntry(m,d,i))
 
 class textEntry(ranaModule):
-  """A module for hadnling text entry."""
+  """A module for handling text entry."""
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
@@ -89,7 +89,7 @@ class textEntry(ranaModule):
 #      dialog.set_markup('Please enter your <b>name</b>:')
       #create the text input field
       entry = gtk.Entry()
-      # relod last used input, if available
+      # reload last used input, if available
       if persistentKey != None:
         initialText = self.get(persistentKey, initialText)
 
