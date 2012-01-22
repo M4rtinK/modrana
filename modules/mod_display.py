@@ -94,17 +94,17 @@ class display(ranaModule):
     if event.state == gtk.gdk.VISIBILITY_FULLY_OBSCURED:
       self.disableRedraw(reason="window is obscured")
     else:
-      self.enableRedraw(reason="window is unobscured or partially obscured")
+      self.enableRedraw(reason="window is un-obscured or partially obscured")
 
   def fullscreenToggle(self):
     """toggle fullscreen state"""
     if self.fullscreen:
-          self.modrana.gui.setFullscreen(True)
+          self.modrana.gui.setFullscreen(False)
           self.fullscreen = False
           self.menusSetFullscreen(self.fullscreen)
           print "going out of fullscreen"
     else:
-      self.modrana.gui.setFullscreen(False)
+      self.modrana.gui.setFullscreen(True)
       self.fullscreen = True
       self.menusSetFullscreen(self.fullscreen)
       print "going to fullscreen"
@@ -120,7 +120,6 @@ class display(ranaModule):
     True - we are in fullscreen, False othewise
     """
     return self.fullscreen
-
 
   # * screen blanking control *
 
