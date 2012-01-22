@@ -29,7 +29,7 @@ from PySide.QtGui import *
 from PySide.QtDeclarative import *
 #from PySide import QtOpenGL
 
-from base_gui import GUIModule
+from base_gui_module import GUIModule
 
 def newlines2brs(text):
   """ QML uses <br> instead of \n for linebreak """
@@ -42,6 +42,8 @@ def getModule(m,d,i):
 class QMLGUI(GUIModule):
   def __init__(self, mieru, type, size=(854,480)):
     self.mieru = mieru
+
+    self.centeringDisableThreshold = 2048
 
     self.activePage = None
 
@@ -123,14 +125,22 @@ class QMLGUI(GUIModule):
 #  def setWindowTitle(self, title):
 #    self.window.set_title(title)
 #
-  def getToolkit(self):
-    return "QML"
+  def getIDString(self):
+    return "GTK"
 
   def toggleFullscreen(self):
     if self.window.isFullScreen():
       self.window.showNormal()
     else:
       self.window.showFullScreen()
+
+
+  def setCDDragThreshold(self, threshold):
+    """set the threshold which needs to be reached to disable centering while dragging
+    basically, larger threshold = longer drag is needed to disable centering
+    default value = 2048
+    """
+    self.centeringDisableThreshold = threshold
 
   def startMainLoop(self):
     """start the main loop or its equivalent"""
