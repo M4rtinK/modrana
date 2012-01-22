@@ -23,9 +23,16 @@
 
 from base_module import ranaModule
 
-class GUIModule:
+class GUIModule(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+    self.msLongPress = 400
+
+  def getIDString(self):
+    """
+    get a unique string identifier for a GUI module
+    """
+    return None
 
   def resize(self, mrw, h):
     """resize the GUI to given width and height"""
@@ -52,6 +59,62 @@ class GUIModule:
     pass
 
   def toggleFullscreen(self):
+    """
+    toggle fullscreen state
+    """
+    pass
+
+  def setFullscreen(self, value):
+    """
+    set fullscreen state
+    * True - go to fullscreen
+    * False - unfullscreen
+    """
+    pass
+
+
+  def enableDefaultDrag(self):
+    """
+    use the default map dragging implementation
+    """
+  pass
+
+  def enableStaticMapDrag(self):
+    """
+    enable static map dragging
+    eq. while dragging the map, only the area that is visible is dragged
+    and the rest is not updated until the drag is finished
+    (can lead to better dragging performance on slower devices at the cost of
+    some eyecandy)
+    """
+    pass
+
+  def setCDDragThreshold(self, threshold):
+    """set the threshold which needs to be reached to disable centering while dragging
+    basically, larger threshold = longer drag is needed to disable centering
+    default value = 2048
+    """
+    pass
+
+  def lockDrag(self):
+    """
+    lock map dragging
+    """
+    pass
+
+  def unlockDrag(self):
+    """
+    unlock map dragging
+    """
+    pass
+
+  def setRedraw(self, value):
+    """
+    set redrawing mode
+    * True - redraw as usual
+    * False - don't redraw application window
+    * "minimized" - the application window is now minimized
+    """
     pass
 
   def startMainLoop(self):
