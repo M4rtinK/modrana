@@ -28,10 +28,20 @@ class keys(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    # connect the key press handler
-    # TODO: do this more elegantly, eq make modRana/mapWidget catch keypress events
-    self.modrana.topWindow.connect('key-press-event', self.on_key_press_event)
 
+  def firstTime(self):
+    # connect the key press handler
+    # TODO: make this toolkit independent
+    gui = self.modrana.gui
+    if gui:
+      if gui.getIDString() == "GTK":
+        gui.topWindow.connect('key-press-event', self.on_key_press_event)
+      elif gui.getIdString() == "QML":
+        pass
+      else:
+        print("keys: WARNING, unhandled GUI toolkit, most key shortcuts would not work")
+    else:
+      print("keys: GUI module not available")
 
   def on_key_press_event(self, widget, event):
     keyName = gtk.gdk.keyval_name(event.keyval)

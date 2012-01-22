@@ -30,7 +30,7 @@ class mapView(ranaModule):
 
   def firstTime(self):
     self.checkMapDraggingMode() # check the map dragging mode on startup
-    self.checkCenteringDisableTreshold() # check centering disable treshold on startup
+    self.checkCenteringDisableThreshold() # check centering disable treshold on startup
     self.lastZ = int(self.get('z', 15))
     
   def handleMessage(self, message, type, args):
@@ -64,8 +64,8 @@ class mapView(ranaModule):
     elif message=="dragModeChanged":
       self.checkMapDraggingMode()
 
-    elif message=="centeringDisableTresholdChanged":
-      self.checkCenteringDisableTreshold()
+    elif message=="centeringDisableThresholdChanged":
+      self.checkCenteringDisableThreshold()
 
     elif(message):
       try:
@@ -124,21 +124,21 @@ class mapView(ranaModule):
       proj.recentre(lat,lon,newZoom)
       return(True)
 
-    # * map draging mode control * #
+    # * map dragging mode control * #
   def checkMapDraggingMode(self):
     """check and set current redraw mode configuration"""
     draggingMode = self.get('mapDraggingMode', "default")
     print "mapView: switching map drag mode to %s" % draggingMode
     if draggingMode == 'default':
-      self.modrana.setDefaultDrag()
+      self.modrana.gui.enableDefaultDrag()
     elif draggingMode == "staticMapDrag":
-      self.modrana.staticMapDragEnable()
+      self.modrana.gui.enableStaticMapDrag()
 
-  def checkCenteringDisableTreshold(self):
+  def checkCenteringDisableThreshold(self):
     """check ans set current centering disable treshold"""
-    centeringDisableTreshold = self.get('centeringDisableTreshold', 2048)
-    print "mapView: switching centering disable treshold to %s" % centeringDisableTreshold
-    self.modrana.setCDDragTreshold(int(centeringDisableTreshold))
+    centeringDisableThreshold = self.get('centeringDisableThreshold', 2048)
+    print "mapView: switching centering disable threshold to %s" % centeringDisableThreshold
+    self.modrana.gui.setCDDragThreshold(int(centeringDisableThreshold))
 
   def jump2point(self, point):
     """recentre on a given point"""

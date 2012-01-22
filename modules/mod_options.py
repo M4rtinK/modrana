@@ -429,8 +429,8 @@ class Options(ranaModule):
        group,
        0.75)
 
-    changedMsg = "mapView:centeringDisableTresholdChanged"
-    addOpt("Disable by dragging", "centeringDisableTreshold",
+    changedMsg = "mapView:centeringDisableThresholdChanged"
+    addOpt("Disable by dragging", "centeringDisableThreshold",
       [(2048,"normal drag - <i>default</i>",changedMsg),
        (15000,"long drag",changedMsg),
        (40000,"realy long drag",changedMsg),
@@ -1081,7 +1081,7 @@ class Options(ranaModule):
 
       # Top row:
       # * parent menu
-      timeout = self.modrana.msLongPress
+      timeout = self.modrana.gui.msLongPress
       self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", cancelButtonAction, timedAction=(timeout,"set:menu:None"))
       # * scroll up
       self.menuModule.drawButton(cr, x2, y2, dx, dy, "", "up_list", "ml:options:scroll:up;%s" % menuName)

@@ -152,7 +152,7 @@ class menus(ranaModule):
       'menu',
       menuIcon,
       "set:menu:main",
-      timedAction=(self.modrana.msLongPress,"set:menu:modes"))
+      timedAction=(self.modrana.gui.msLongPress,"set:menu:modes"))
 
 
       (x1,y1) = buttons['zoom_in']
@@ -551,21 +551,28 @@ class menus(ranaModule):
     return {'metadata':{'itemCount':0,'currentPage':0}}
     
   def clearMenu(self, menuName, cancelButtonAction='set:menu:main'):
-    """claer a local itemized menu instance and add the ecape button"""
+    """clear a local itemized menu instance and add the escape button"""
     self.initMenu(menuName)
-    timeout = self.modrana.msLongPress
+    if self.modrana.gui:
+      if self.modrana.gui.getIDString() == "GTK":
+        timeout = self.modrana.gui.msLongPress
+      else:
+        # fallback value
+        timeout = 400
+    else:
+      timeout = 400
     item = self.generateItem('', 'up', cancelButtonAction, 'simple', timedAction=(timeout,"set:menu:None"))
     self.addItems(menuName, [item])
 
   def drawClearButton(self, cr, x, y, w, h, parentAction, icon='up'):
     """draw a correct up button, including the timed jump-to-map action"""
-    timedAction=(self.modrana.msLongPress,"set:menu:None")
+    timedAction=(self.modrana.gui.msLongPress,"set:menu:None")
     self.drawButton(cr, x, y, w, h, '', icon, parentAction, timedAction)
 
   def getClearedMenu(self, cancelButtonAction='set:menu:main'):
     """clear a given itemized menu instance, add the ecape button and return it"""
     menu = self.getInitializedMenu()
-    timedAction=(self.modrana.msLongPress,"set:menu:None")
+    timedAction=(self.modrana.gui.msLongPress,"set:menu:None")
     item = self.generateItem("", "up", cancelButtonAction, "simple", timedAction)
     return self.addItemsToThisMenu(menu, [item])
 

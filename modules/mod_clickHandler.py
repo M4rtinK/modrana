@@ -84,7 +84,7 @@ class clickHandler(ranaModule):
               if m:
                 print "Long-clicked (%f ms), sending %s" % (givenMsDuration, action)
                 self.set('lastClickXY', (x,y))
-                self.modrana.lockDrag()
+                self.modrana.gui.lockDrag()
                 m.routeMessage(action)
                 self.set('needRedraw', True)
               else:
@@ -99,7 +99,7 @@ class clickHandler(ranaModule):
     self.dragscreen = module
 
   def handleDrag(self,startX,startY,dx,dy,x,y,msDuration):
-    # react on timed actions interactivelly
+    # react on timed actions interactively
     if(self.dragscreen):
       m = self.m.get(self.dragscreen, None)
       if(m != None):

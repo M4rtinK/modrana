@@ -60,16 +60,21 @@ class gpsd2(ranaModule):
 #    print "updating screen"
     self.locationUpdate()
 
-    """
-    the location update method which might run asynchornously in the
-    device module also sends redraw requests
-    -> no need to send a new one if there is already one pending
-    --> there would not be a change position anyway until next the fix
-    -> surpuls redraw requests are actually harmfull with map rotation enabled
-    """
-    sFromLastRequest = time() - self.modrana.getLastFullRedrawRequest()
-    if sFromLastRequest > 0.85:
-      self.set('needRedraw', True)
+    gui = self.modrana.gui
+    if gui and gui.getIDString() == "GTK":
+      """
+      the location update method which might run asynchronously in the
+      device module also sends redraw requests
+      -> no need to send a new one if there is already one pending
+      --> there would not be a change position anyway until next the fix
+      -> surplus redraw requests are actually harmful with map rotation enabled
+      NOTE: this currently applies only to the GTK GUI
+      """
+      sFromLastRequest = time() - gui.getLastFullRedrawRequest()
+      if sFromLastRequest > 0.85:
+        self.set('needRedraw', True)
+    else:
+      print("location: GUI module not available")
 
   def startGPSD(self):
     """start the GPSD based location update method"""

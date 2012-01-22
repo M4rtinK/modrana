@@ -469,8 +469,10 @@ class MapTiles(ranaModule):
                       else:
                         # tile not found in memmory cache, add a loading request
                         requests.append((name, x, y, z, layerInfo))
-            if self.modrana.showRedrawTime:
-              print "currently visible tiles: %d/%d" % (visibleCounter,wTiles*hTiles)
+            gui = self.modrana.gui
+            if gui and gui.getIDString() == "GTK":
+              if gui.getShowRedrawTime():
+                print "currently visible tiles: %d/%d" % (visibleCounter,wTiles*hTiles)
 
 #            cr.set_source_rgba(0,1,0,0.5)
 #            cr.move_to(*p1.as_tuple())

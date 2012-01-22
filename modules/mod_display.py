@@ -45,9 +45,19 @@ class display(ranaModule):
   def firstTime(self):
     self.checkScreenBlankingMode() # check the screen blanking mode on startup
 
-    # connect to window state signals
-    self.modrana.topWindow.connect('window-state-event', self.windowStateChangedCallback)
-    self.modrana.topWindow.connect('visibility-notify-event', self.visibilityChangedCallback)
+    gui = self.modrana.gui
+    if gui:
+      if gui.getIDString() == "GTK":
+        # connect to window state signals
+        gui.topWindow.connect('window-state-event', self.windowStateChangedCallback)
+        gui.topWindow.connect('visibility-notify-event', self.visibilityChangedCallback)
+      elif gui.getIdString() == "QML":
+        # QML handles redrawing by itself
+        pass
+      else:
+        print("display: WARNING, unhandled GUI toolkit, redraw disable if not visible might not work")
+    else:
+      print("display: GUI module not available")
 
   def handleMessage(self, message, type, args):
     if message=="fullscreen" and type == "ms":
@@ -57,17 +67,19 @@ class display(ranaModule):
       self.checkScreenBlankingMode() # check if screen blanking changed
     elif message=="checkShowRedrawTime":
       state = self.get('showRedrawTime', False)
-      self.modrana.showRedrawTime = state
+      gui = self.modrana.gui
+      if gui and gui.getIDString() == "GTK":
+        self.modrana.gui.setShowRedrawTime(state)
 
   def enableRedraw(self,reason="not given"):
     """enable window redrawing"""
-    self.modrana.redraw=True
+    self.modrana.gui.setRedraw(True)
     print "display: redraw ON (%s)" % reason
     self.set('needRedraw',True) # make sure the screen is refreshed
 
   def disableRedraw(self,reason="not given"):
     """disable window redrawing"""
-    self.modrana.redraw=False
+    self.modrana.gui.setRedraw(False)
     print "display: redraw OFF (%s)" % reason
 
   def windowStateChangedCallback(self, window, event):
@@ -86,13 +98,13 @@ class display(ranaModule):
 
   def fullscreenToggle(self):
     """toggle fullscreen state"""
-    if self.fullscreen == True:
-          self.modrana.topWindow.unfullscreen()
+    if self.fullscreen:
+          self.modrana.gui.setFullscreen(True)
           self.fullscreen = False
           self.menusSetFullscreen(self.fullscreen)
           print "going out of fullscreen"
     else:
-      self.modrana.topWindow.fullscreen()
+      self.modrana.gui.setFullscreen(False)
       self.fullscreen = True
       self.menusSetFullscreen(self.fullscreen)
       print "going to fullscreen"
