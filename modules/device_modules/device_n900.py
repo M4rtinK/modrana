@@ -62,10 +62,6 @@ class device_n900(deviceModule):
     self._addHildonAppMenu()
     print "N900: application menu added"
 
-    # enable volume keys usage
-    if self.get('useVolumeKeys', True):
-      self._updateVolumeKeys()
-
     # liblocation
     self.lControl = None
     self.lDevice = None
@@ -83,14 +79,28 @@ class device_n900(deviceModule):
     else:
       print "N900: loading rotation object failed"
 
+    # toolkit usage
+    self.GTK = True
+
     # setup window state callbacks
-    self.modrana.topWindow.connect('notify::is-active', self.windowIsActiveChangedCallback)
-    """
-    on the Maemo 5@N900, is-active == True signalizes that the modRana window is
-    the current active window (there is always only one active window)
-    is-active == False signalizes that the window is either minimzed on the
-    dashboard or the screen is blanked
-    """
+    gui = self.modrana.gui
+    if gui and gui.getIDString() == "GTK":
+      self.GTK = True
+      self.topWindow = gui.getGTKTopWindow()
+      self.topWindow.connect('notify::is-active', self.windowIsActiveChangedCallback)
+      """
+      on the Maemo 5@N900, is-active == True signalizes that the modRana window is
+      the current active window (there is always only one active window)
+      is-active == False signalizes that the window is either minimized on the
+      dashboard or the screen is blanked
+      """
+      # enable volume keys usage
+      if self.get('useVolumeKeys', True):
+        self._updateVolumeKeys()
+
+    else:
+        self.GTK = False
+
 
   def handleMessage(self, message, type, args):
     if message == 'modeChanged':
@@ -120,12 +130,12 @@ class device_n900(deviceModule):
       import n900_maemo5_portrait
       rotationMode = self.get('rotationMode', "auto") # get last used mode
       lastModeNumber = self.getRotationModeNumber(rotationMode) # get last used mode number
-      rObject = n900_maemo5_portrait.FremantleRotation(self.ossoAppName, main_window=self.modrana.topWindow, mode=lastModeNumber)
+      rObject = n900_maemo5_portrait.FremantleRotation(self.ossoAppName, main_window=self.topWindow, mode=lastModeNumber)
       print "N900 rotation object initialized"
       return rObject
     except Exception, e:
       print e
-      print "intializing N900 rotation object failed"
+      print "initializing N900 rotation object failed"
 
   def setRotationMode(self, rotationMode):
     rotationModeNumber = self.getRotationModeNumber(rotationMode)
@@ -140,7 +150,7 @@ class device_n900(deviceModule):
       return 2
 
   def screenBlankingControlSupported(self):
-    """it is possible to controll screen balnking on the N900"""
+    """it is possible to control screen blanking on the N900"""
     return True
 
   def usesDashboard(self):
@@ -155,20 +165,20 @@ class device_n900(deviceModule):
 
   def windowIsActiveChangedCallback(self, window, event):
     """this is called when the window gets or looses focus
-    it basically menas:
+    it basically means:
     - has focus - it is the active window and the user is working wit it
-    - no focus -> the window is switched to dashboard or the uanother widnow is active or
-    the screen is balnked"""
+    - no focus -> the window is switched to dashboard or the another window is active or
+    the screen is blanked"""
     redrawOnDashboard = self.get('redrawOnDashboard', False)
     """
     NOTE: this updates the snapshot in task switcher,
     but also UPDATES WHEN MINIMISED AND NOT VISIBLE
     so use with caution
-    balnking overrides this so when the screen is balnked it does not redraw
+    blanking overrides this so when the screen is blanked it does not redraw
     TODO: see if hildon signalizes that a the task switcher is visible or not
     """
 
-    if not redrawOnDashboard: # we dont redraw on dashboard by default
+    if not redrawOnDashboard: # we don't redraw on dashboard by default
       display = self.m.get('display', None)
       if display:
         if window.is_active():
@@ -183,7 +193,7 @@ class device_n900(deviceModule):
           display.disableRedraw(reason="N900 window is not active")
 
   def screenStateChangedCallback(self, state):
-    """this is called when the display is blanked or unblanked"""
+    """this is called when the display is blanked or un-blanked"""
     display = self.m.get('display', None)
     if display:
       if state == "on" or state == "dimm":
@@ -195,7 +205,7 @@ class device_n900(deviceModule):
     return True
 
   def notify(self, message, msTimeout=0, icon="icon_text"):
-    """the third barameter has to be a non zerolength string or
+    """the third parameter has to be a non zero-length string or
     else the banner is not created"""
     #TODO: find what strings to submit to actually get an icon displayed
 
@@ -207,9 +217,9 @@ class device_n900(deviceModule):
       banner.set_timeout(msTimeout)
 
   def hasButtons(self):
-    """the N900 has the volume keys (2 buttons), the camerra trigger (2 states)
+    """the N900 has the volume keys (2 buttons), the camera trigger (2 states)
     and the proximity sensor,
-    other than that state of the camera cover and kyboard slider can be sensed
+    other than that state of the camera cover and keyboard slider can be sensed
     AND there is the accelerometer and light sensor :)
     """
     return True
@@ -218,16 +228,16 @@ class device_n900(deviceModule):
     return True
 
   def enableVolumeKeys(self):
-    if self.modrana.topWindow.flags() & gtk.REALIZED:
+    if self.topWindow.flags() & gtk.REALIZED:
       self.enable_volume_cb()
     else:
-      self.modrana.topWindow.connect("realize", self.enable_volume_cb)
+      self.topWindow.connect("realize", self.enable_volume_cb)
 
   def disableVolumeKeys(self):
-    self.modrana.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"), 32, gtk.gdk.PROP_MODE_REPLACE, [0]);
+    self.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"), 32, gtk.gdk.PROP_MODE_REPLACE, [0]);
 
   def enable_volume_cb(self, window=None):
-    self.modrana.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"), 32, gtk.gdk.PROP_MODE_REPLACE, [1]);
+    self.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"), 32, gtk.gdk.PROP_MODE_REPLACE, [1]);
 
   def _updateVolumeKeys(self):
     """check if volume keys should be used or not"""
@@ -270,7 +280,7 @@ class device_n900(deviceModule):
     menu.show_all()
 
     # Add the menu to the window
-    self.modrana.topWindow.set_app_menu(menu)
+    self.topWindow.set_app_menu(menu)
 
     # register callbacks to update upp menu toggle buttons
     # when the controlled value changes from elsewhere
@@ -340,12 +350,12 @@ class device_n900(deviceModule):
       try:
         self.lControl.set_properties(preferred_method=location.METHOD_USER_SELECTED)
       except Exception, e:
-        print "n900 - location: - cant set prefered location method: %s" % e
+        print "n900 - location: - cant set preferred location method: %s" % e
 
       try:
         self.lControl.set_properties(preferred_interval=location.INTERVAL_1S)
       except Exception, e:
-        print "n900 - location: - cant set prefered location interval: %s" % e
+        print "n900 - location: - cant set preferred location interval: %s" % e
       try:
         self.lControl.start()
         print "** n900 - location: - GPS successfully activated **"
