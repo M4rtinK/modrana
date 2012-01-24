@@ -143,14 +143,14 @@ class Options(ranaModule):
     return "opt_cat_%s" % id # get a standardized id
 
   def addCategory(self,name,inId,icon,actionPrefix="",actionSufix=""):
-    """this metohod shuld be run only after menu module instance
-    is vailable in self.menuModule and the options manu is clared,
+    """this method should be run only after menu module instance
+    is available in self.menuModule and the options menu is cleared,
     eq. has at least the escape button"""
     # first we add the category button to the options
     id = self._getCategoryID(inId) # get a standardized id
     action="%sset:menu:%s%s" % (actionPrefix,id,actionSufix)
     self.menuModule.addItem('options', name, icon, action)
-    # intilize menu for the new category menu
+    # initialize menu for the new category menu
     self.menuModule.clearMenu(id,"set:menu:options")
     # as a convenience, return the id
     return inId
@@ -166,8 +166,8 @@ class Options(ranaModule):
     catId = self._getCategoryID(parentId)
     id = self._getGroupId(parentId, id) # get a standardized id
     """
-    handle mepty parent ids - such ids can be valid because the menu switching is handled
-    handled entirelly by the pre and post actions
+    handle empty parent ids - such ids can be valid because the menu switching is handled
+    handled entirely by the pre and post actions
     """
     if not parentId:
       action="%s%s" % (actionPrefix,actionSufix)
@@ -234,7 +234,7 @@ class Options(ranaModule):
     # create and add the menu
     menu = self.menuModule.getClearedMenu(backAction)
     menuItems = [] # an ordered list of all the menu items
-    itemDict = {} # for easilly asigning keys to labels
+    itemDict = {} # for easily assigning keys to labels
     if fakeMode != None:
       mode = fakeMode
     else:
@@ -359,7 +359,7 @@ class Options(ranaModule):
     self.menuModule = self.m.get("menu", None)
     self.menuModule.clearMenu("options")
 
-    # shotcuts
+    # shortcuts
     addCat = self.addCategory
     addGroup = self.addGroup
     addOpt = self.addToggleOption
@@ -433,7 +433,7 @@ class Options(ranaModule):
     addOpt("Disable by dragging", "centeringDisableThreshold",
       [(2048,"normal drag - <i>default</i>",changedMsg),
        (15000,"long drag",changedMsg),
-       (40000,"realy long drag",changedMsg),
+       (40000,"really long drag",changedMsg),
        (80000,"extremely long drag",changedMsg),
        (False,self.off,changedMsg)],
        group,
@@ -643,7 +643,7 @@ class Options(ranaModule):
        60)
 
     # Note: these are exponents, stored as strings so lookup will work reliably.
-    addOpt("Announcment time increase type", "announcePower",
+    addOpt("Announcement time increase type", "announcePower",
       [("1.0","Linear with speed"),
        ("0.5","Very quickly, then linear"),
        ("0.75","Quickly, then linear"),
@@ -657,7 +657,7 @@ class Options(ranaModule):
     # * navigation language
     group = addGroup("Language", "tbt_language", catNavigation, "generic")
 
-    # in the first string: first one goes to espeak, the seccond part goes to Google
+    # in the first string: first one goes to espeak, the second part goes to Google
     directionsLanguages =[('ca ca', 'Catalan'),
                           ('zh-yue zh-TW', 'Chinese(Cantonese)'),
                           ('zh zh-CN', 'Chinese(Mandarin)'),
@@ -812,7 +812,7 @@ class Options(ranaModule):
 #    addOpt("Network", "threadedDownload",
 ##      [("off","No use of network"),
 #      [("True", "Use threads for download"),
-#       ("False", "Dont use threads for download")],
+#       ("False", "Don't use threads for download")],
 #       "network",
 #       "on")
 
@@ -850,7 +850,7 @@ class Options(ranaModule):
     addBoolOpt("Print tile cache status to terminal", "reportTileCachStatus", group, False)
     addBoolOpt("Tile loading status to terminal", "tileLoadingDebug", group, False)
     addBoolOpt("Redraw screen once a new tile is loaded", "tileLoadedRedraw", group, True)
-    addBoolOpt("Remove dups berofe batch dl", "checkTiles", group, False)
+    addBoolOpt("Remove dups before batch dl", "checkTiles", group, False)
     # ** tracklog drawing
     group = addGroup("Tracklogs", "tracklogs", catDebug, "generic")
     addBoolOpt("Debug circles", "debugCircles", group, False)
@@ -955,8 +955,8 @@ class Options(ranaModule):
 
   def overrideOptions(self):
     """
-    without this, there would not be any projcetion values at start,
-    becuase modRana does not know, what part of the map to show
+    without this, there would not be any projection values at start,
+    because modRana does not know, what part of the map to show
     """
     self.set('centred', True) # set centering to True at start to get setView to run
     self.set('editBatchMenuActive', False)
@@ -1034,7 +1034,7 @@ class Options(ranaModule):
     #messages to toggles a key to be mode un/specific
     #Mode specific keys:
     #this means that the options key can have a different value
-    #depending on the current mode, thus enabling better cutomization"""
+    #depending on the current mode, thus enabling better customization"""
     elif type == "ms" and message == "makeKeyModeSpecific":
       self.modrana.addKeyModifier(args)
     elif type == "ms" and message == "makeKeyModeUnSpecific":
