@@ -50,7 +50,7 @@ class voice(ranaModule):
   def resetStringToDefault(self, type):
     if type in self.defaultStrings:
       s = self.defaultStrings[type]
-      print "voice: reseting voice string to default using string for: %s" % type
+      print "voice: resetting voice string to default using string for: %s" % type
       self.set("voiceString", s)
     else:
       print "voice: cant reset string to default, no string for:", type
@@ -64,7 +64,13 @@ class voice(ranaModule):
   def handleMessage(self, message, type, args):
     if type == "ms" and message == "resetStringToDefault" and "args":
       self.resetStringToDefault(args)
-    
+    elif message == "voiceTest":
+      if self.get('soundEnabled', True):
+        self.notify("Voice output test in progress", 3000)
+        self.say("test. test. Can you hear me now ? Good.","en")
+      else:
+        self.notify("Sound output disabled, can't test", 2000)
+
   def espeakSay(self, plaintextMessage, distanceMeters, forceLanguageCode=False):
       """say routing messages through espeak"""
       if self._isEnabled():

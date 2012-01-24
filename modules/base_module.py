@@ -43,12 +43,14 @@ class ranaModule:
   def notify(self, message, msTimeout=0, icon=""):
     notify = self.m.get('notification')
     if notify:
-      notify.handleNotification(message, msTimeout, icon)
+      # the notification module counts timeout in seconds
+      sTimeout = msTimeout/1000.0
+      notify.handleNotification(message, sTimeout, icon)
 
   def getStatus(self):
     return(self.status)
   
-  # Overridable
+  # Following can be overridden
   def firstTime(self):
     """Runs on application start (after all other modules are loaded)"""
     pass

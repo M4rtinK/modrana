@@ -84,7 +84,7 @@ class deviceModule(ranaModule):
 
   def textEntryDone(self):
     """we are done with text entry, so all the needed steps can be reversed again
-       (enbale fullscreen, etc.)"""
+       (enable fullscreen, etc.)"""
     pass
 
   def hasNativeNotificationSupport(self):

@@ -796,11 +796,19 @@ class Options(ranaModule):
     # * espeak group
     group = addGroup("Voice", "voice_out", catSound, "espeak")
 
+    addOpt("Test voice output","voiceTest",
+      [("test", "<b>press to start test</b>","voice:voiceTest"),
+       ("test", "<b>press to start test</b>", "voice:voiceTest")],
+       group,
+       "test")
+
     addOpt("Voice parameters","voiceParameters",
       [("auto", "<b>automatic</b>","ms:options:espeakParams:auto"),
        ("manual", "<b>manual</b>", "ms:options:espeakParams:manual")],
        group,
        "auto")
+
+
 
     if self.get('voiceParameters', None) == "manual":
       self._updateVoiceManual('add')
