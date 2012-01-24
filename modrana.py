@@ -96,7 +96,6 @@ class ModRana:
 
     # map layers
     self.mapLayers = {}
-    self.notificationModule = None
 
     # per mode options
     # NOTE: this variable is automatically saved by the
@@ -188,9 +187,6 @@ class ModRana:
 
       # run what needs to be done after firstTime is called
     self._modulesLoadedPostFirstTime()
-
-    # get the notfication module
-    self.notificationModule = self.m.get('notification', None)
 
     print "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start))
 

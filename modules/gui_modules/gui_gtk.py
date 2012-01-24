@@ -302,6 +302,10 @@ class MainWidget(gtk.Widget):
     """called at the same time as the modules firstTime"""
     self.proj = self.modrana.getModule('projection', None)
 
+    # get the notification module
+    self.notificationModule = self.modrana.m.get('notification', None)
+
+
   def shutdown(self):
     """terminate GTK main loop, which should
     trigger the modRana standard shutdown sequence,
