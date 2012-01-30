@@ -51,7 +51,7 @@ class display(ranaModule):
         # connect to window state signals
         gui.topWindow.connect('window-state-event', self.windowStateChangedCallback)
         gui.topWindow.connect('visibility-notify-event', self.visibilityChangedCallback)
-      elif gui.getIdString() == "QML":
+      elif gui.getIDString() == "QML":
         # QML handles redrawing by itself
         pass
       else:
