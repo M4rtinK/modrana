@@ -55,13 +55,6 @@ class device_n900(deviceModule):
     self.mceSignalInterface.connect_to_signal("display_status_ind", self.screenStateChangedCallback)
     print "N900: dbus initialized"
 
-    # app menu and buttons
-    self.centeringToggleButton = None
-    self.rotationToggleButton = None
-    self.soundToggleButton = None
-    self._addHildonAppMenu()
-    print "N900: application menu added"
-
     # liblocation
     self.lControl = None
     self.lDevice = None
@@ -87,6 +80,15 @@ class device_n900(deviceModule):
     if gui and gui.getIDString() == "GTK":
       self.GTK = True
       self.topWindow = gui.getGTKTopWindow()
+
+      # app menu and buttons
+      self.centeringToggleButton = None
+      self.rotationToggleButton = None
+      self.soundToggleButton = None
+      self._addHildonAppMenu()
+      print "N900: application menu added"
+
+      # window-active detection
       self.topWindow.connect('notify::is-active', self.windowIsActiveChangedCallback)
       """
       on the Maemo 5@N900, is-active == True signalizes that the modRana window is
@@ -210,11 +212,14 @@ class device_n900(deviceModule):
     #TODO: find what strings to submit to actually get an icon displayed
 
     if len(icon) == 0:
-      icon = "spam" # as mentioned above, the string has to be longer tahn zero
-
-    banner = hildon.hildon_banner_show_information_with_markup(self.modrana.topWindow, icon, message)
-    if msTimeout:
-      banner.set_timeout(msTimeout)
+      icon = "spam" # as mentioned above, the string has to be longer than zero
+    if self.GTK:
+      topWindow = self.modrana.gui.getWindow()
+      banner = hildon.hildon_banner_show_information_with_markup(topWindow, icon, message)
+      if msTimeout:
+        banner.set_timeout(msTimeout)
+    else:
+      print "n900: the N900 device module currently handles only Hildon based notifications"
 
   def hasButtons(self):
     """the N900 has the volume keys (2 buttons), the camera trigger (2 states)
