@@ -31,7 +31,7 @@ class Startup:
       '-d', metavar="--device", type=str,
       nargs='+', help="specify device type",
       default=None, action="store",
-      choices=["neo","pc", "n900", "N9", "q7"]
+      choices=["neo","pc", "n900", "n9", "q7"]
     )
     parser.add_argument(
       '-u', metavar="--gui", type=str,
