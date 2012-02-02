@@ -37,6 +37,8 @@ def getModule(m,d,i):
   return(GTKGUI(m,d,i))
 
 class GTKGUI(GUIModule):
+  """A GTK GUI module"""
+
   def __init__(self, m, d, i):
     GUIModule.__init__(self, m, d, i)
 
@@ -65,9 +67,7 @@ class GTKGUI(GUIModule):
         print(e)
         win = gtk.Window()
     else:
-      pass
-    pass
-    win = gtk.Window()
+      win = gtk.Window()
     self.win = win
     win.connect("destroy", self._destroyCB)
 
