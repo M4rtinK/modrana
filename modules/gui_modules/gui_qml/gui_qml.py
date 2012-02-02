@@ -40,12 +40,18 @@ def getModule(m,d,i):
     return(QMLGUI(m,d,i))
 
 class QMLGUI(GUIModule):
-  def __init__(self, mieru, type, size=(854,480)):
-    self.mieru = mieru
+  """A Qt + QML GUI module"""
 
+  def __init__(self, m, d, i):
+    GUIModule.__init__(self, m, d, i)
+
+    # some constants
+    self.msLongPress = 400
     self.centeringDisableThreshold = 2048
+    size = (800,480) # initial window size
 
-    self.activePage = None
+    # window state
+    self.fullscreen = False
 
     # Create Qt application and the QDeclarative view
     class ModifiedQDeclarativeView(QDeclarativeView):
@@ -69,33 +75,33 @@ class QMLGUI(GUIModule):
 #    self.view.setResizeMode(QDeclarativeView.SizeViewToRootObject)
 
     # add image providers
-    self.pageProvider = MangaPageImageProvider(self)
-    self.iconProvider = IconImageProvider()
-    self.view.engine().addImageProvider("page",self.pageProvider)
-    self.view.engine().addImageProvider("icons",self.iconProvider)
+    #self.pageProvider = MangaPageImageProvider(self)
+    #self.iconProvider = IconImageProvider()
+    #self.view.engine().addImageProvider("page",self.pageProvider)
+    #self.view.engine().addImageProvider("icons",self.iconProvider)
     rc = self.view.rootContext()
-    # make the reading state accesible from QML
-    readingState = ReadingState(self)
-    rc.setContextProperty("readingState", readingState)
+    # make the reading state accessible from QML
+    #readingState = ReadingState(self)
+    #rc.setContextProperty("readingState", readingState)
     # make stats accessible from QML
-    stats = Stats(self.mieru.stats)
-    rc.setContextProperty("stats", stats)
+    #stats = Stats(self.mieru.stats)
+    #rc.setContextProperty("stats", stats)
     # make options accessible from QML
-    options = Options(self.mieru)
-    rc.setContextProperty("options", options)
+    #options = Options(self.mieru)
+    #rc.setContextProperty("options", options)
 
 
     # ** history list handling **
     # get the objects and wrap them
-    historyListController = HistoryListController(self.mieru)
-    self.historyList = []
-    self.historyListModel = HistoryListModel(self.mieru, self.historyList)
+    #historyListController = HistoryListController(self.mieru)
+    #self.historyList = []
+    #self.historyListModel = HistoryListModel(self.mieru, self.historyList)
     # make available from QML
-    rc.setContextProperty('historyListController', historyListController)
-    rc.setContextProperty('historyListModel', self.historyListModel)
+    #rc.setContextProperty('historyListController', historyListController)
+    #rc.setContextProperty('historyListModel', self.historyListModel)
 
     # Create an URL to the QML file
-    url = QUrl('gui/qml/main.qml')
+    url = QUrl('modules/gui_modules/gui_qml/qml/main.qml')
     # Set the QML file and show
     self.view.setSource(url)
     self.window.closeEvent = self._qtWindowClosed
@@ -110,11 +116,7 @@ class QMLGUI(GUIModule):
 #    self.nextButton.clicked.connect(self._nextCB)
 #    self.pageFlickable.clicked.connect(self._prevCB)
 #    self.prevButton.clicked.connect(self._prevCB)
-    self.toggleFullscreen()
-
-    # check if first start dialog has to be shown
-    if self.mieru.get("QMLShowFirstStartDialog", True):
-      self.rootObject.openFirstStartDialog()
+    #self.toggleFullscreen()
 
 #  def resize(self, w, h):
 #    self.window.resize(w,h)
@@ -126,7 +128,7 @@ class QMLGUI(GUIModule):
 #    self.window.set_title(title)
 #
   def getIDString(self):
-    return "GTK"
+    return "QML"
 
   def toggleFullscreen(self):
     if self.window.isFullScreen():
@@ -144,10 +146,6 @@ class QMLGUI(GUIModule):
 
   def startMainLoop(self):
     """start the main loop or its equivalent"""
-
-    # restore page centering
-    mv = self.rootObject.findChild(QObject, "mainView")
-    mv.restoreContentShift()
 
     # start main loop
     self.app.exec_()
