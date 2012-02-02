@@ -188,7 +188,7 @@ class ModRana:
       # run what needs to be done after firstTime is called
     self._modulesLoadedPostFirstTime()
 
-    print "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start))
+    print( "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start)) )
 
     # add last timing checkpoint
     self.addTime("all modules initilaized")
@@ -207,10 +207,10 @@ class ModRana:
       initInfo['name'] = name
       module = a.getModule(self.m, self.d, initInfo)
       self.m[name] = module
-      print " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (time.clock() - startM)))
+      print( " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (time.clock() - startM))) )
       return module
     except Exception, e:
-      print "modRana: module: %s/%s failed to load" % (importName, modRanaName)
+      print( "modRana: module: %s/%s failed to load" % (importName, modRanaName) )
       traceback.print_exc(file=sys.stdout) # find what went wrong
       return None
 
@@ -288,11 +288,11 @@ class ModRana:
     self.beforeDie()
 
   def beforeDie(self):
-      print "Shutting-down modules"
+      print("Shutting-down modules")
       for m in self.m.values():
         m.shutdown()
       time.sleep(2) # leave some times for threads to shut down
-      print "Shuttdown complete"
+      print("Shuttdown complete")
     
   ## OPTIONS SETTING AND WATCHING ##
 
@@ -413,7 +413,7 @@ class ModRana:
             # remove watches that return False
             self.removeWatch(id)
         else:
-          print "invalid watcher callback :", callback
+          print("invalid watcher callback :", callback)
 
   def addKeyModifier(self, key, modifier=None, mode=None, copyInitialValue=True):
     """add a key modifier
@@ -651,13 +651,13 @@ class ModRana:
           tempDict['minZoom'] = int(tempDict['minZoom']) # convert strings to integers
           tempDict['maxZoom'] = int(tempDict['maxZoom'])
         else:
-          print "mapTiles: layer is badly defined/formated: %s" % layer
+          print("mapTiles: layer is badly defined/formated: %s" % layer)
 
 
         mapLayers[layer] = tempDict
 
     except Exception, e:
-      print "mapTiles: loading map_config.conf failed: %s" % e
+      print("mapTiles: loading map_config.conf failed: %s" % e)
 
     self.mapLayers = mapLayers
 
@@ -670,19 +670,18 @@ class ModRana:
     return (timestamp)
 
   def addCustomTime(self, message, timestamp):
-    print(message, timestamp)
     self.timing.append((message,timestamp))
     return (timestamp)
 
   def reportStartupTime(self):
     if self.timing:
-      print "** modRana startup timing **"
+      print("** modRana startup timing **")
 
       # print device identificator and name
       if self.dmod:
         deviceName = self.dmod.getDeviceName()
         deviceString = self.dmod.getDeviceIDString()
-        print "# device: %s (%s)" % (deviceName, deviceString)
+        print("# device: %s (%s)" % (deviceName, deviceString))
 
       tl = self.timing
       startupTime = tl[0][1] * 1000
@@ -693,14 +692,14 @@ class ModRana:
         t = 1000 * t # convert to ms
         timeSpent = t - lastTime
         timeSinceStart = t - startupTime
-        print "* %s (%1.0f ms), %1.0f/%1.0f ms" % (message, timeSpent, timeSinceStart, totalTime)
+        print( "* %s (%1.0f ms), %1.0f/%1.0f ms" % (message, timeSpent, timeSinceStart, totalTime))
         lastTime = t
-      print "** whole startup: %1.0f ms **" % totalTime
+      print("** whole startup: %1.0f ms **" % totalTime)
     else:
-      print "* timing list empty *"
+      print("* timing list empty *")
 
 if __name__ == "__main__":
 
-  print " == modRana Starting == "
+  print(" == modRana Starting == ")
 
   program = ModRana()
