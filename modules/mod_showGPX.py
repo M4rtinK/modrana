@@ -50,8 +50,8 @@ class showGPX(ranaModule):
   def setupChooseDistColorMenu(self, parent, additionalActions=""):
     """setup a menu for choosing from the distinct colors
     when a color is chosen, the 'colorRegister'
-    perzistent variable is set to the color name
-    also, (the same) aditional actions can be appended to the buttons"""
+    persistent variable is set to the color name
+    also, (the same) additional actions can be appended to the buttons"""
     menus = self.m.get("menu",None)
     # * draw "escape" button
     menus.clearMenu('chooseDistColor', "set:menu:%s" % parent)
@@ -75,7 +75,7 @@ class showGPX(ranaModule):
     if self.distinctColors:
       return self.distinctColors
     else:
-      return ['navy'] # one navy ought be enoght for anybody
+      return ['navy'] # one navy ought be enough for anybody
 
   def drawMapOverlay(self, cr):
     """get a file, load it and display it on the map"""
@@ -110,7 +110,7 @@ class showGPX(ranaModule):
 #    print proj.zoom
 
 #    testRadius = 5 # 5 km
-#    """ Znojmo cooridnates """
+#    """ Znojmo coordinates """
 #    testLat = 48.855556
 #    testLon = 16.048889
 #    (px1,py1,px2,py2) = (proj.radiusEdges(testLat, testLon, testRadius))
@@ -127,7 +127,7 @@ class showGPX(ranaModule):
     # find what tracklogs are not loaded and load them
     notLoaded = filter(lambda x: x not in loadedTracklogsPathList, visibleTracklogs)
     if notLoaded:
-      # remove possible nonexitant tracks from the not loaded tracks
+      # remove possible nonexistent tracks from the not loaded tracks
       notLoaded = self.removeNonexistentTracks(notLoaded)
       # load the existing not loaded tracks
       loadTl.loadPathList(notLoaded)
@@ -149,14 +149,14 @@ class showGPX(ranaModule):
         self.drawDebugSquares(cr, GPXTracklog)
 
   def removeNonexistentTracks(self, tracks):
-    """remove tracks that dont exist,
+    """remove tracks that don't exist,
        both from "tracks" and the persistent list,
        then return the tracks that do exist """
     loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
     if loadTl:
       availiblePaths = loadTl.getTracklogPathList()
 
-      # look which files exist and which dont
+      # look which files exist and which don't
       nonexistent = filter(lambda x: x not in availiblePaths, tracks)
       # remove nonexistent tracks:
       
@@ -195,7 +195,7 @@ class showGPX(ranaModule):
 
   def makeTrackInvisible(self,path):
     """
-    make a tracklog invisible = dont draw it
+    make a tracklog invisible = don't draw it
     """
     visibleTracklogs = self.get('visibleTracklogsDict', {})
     if path in visibleTracklogs:
@@ -235,7 +235,7 @@ class showGPX(ranaModule):
 
     #are the projection and screen usable ?
     if proj == None or GPXTracklog == None:
-      # we dont have WHAT to draw or HOW or BOTH :D
+      # we don't have WHAT to draw or HOW or BOTH :D
       print "draw track: skipping one track (tracklog or projection == None)"
       return
 
@@ -252,7 +252,7 @@ class showGPX(ranaModule):
       clusterRadius = cluster.radius
       screenToClusterDistance = geo.distance(screenCentreX, screenCentreY, clusterCentreX, clusterCentreY)
       if (screenToClusterDistance - (screenRadius + clusterRadius)) >= 0:
-        continue # we dont see this cluster se we skip it
+        continue # we don't see this cluster se we skip it
       clusterNr = GPXTracklog.clusters.index(cluster)
       #print "Cluster nr %d" % clusterNr
       """now we need to draw lines to connect neighboring clusters"""
@@ -298,7 +298,7 @@ class showGPX(ranaModule):
 
   def drawColoredTracklog(self, cr, GPXTracklog):
     # show color depending on height
-    if GPXTracklog.elevation == False: # we cant draw clored tracklog withou elevation data
+    if GPXTracklog.elevation == False: # we cant draw colored tracklog without elevation data
       self.drawSimpleTrack(cr, GPXTracklog)
       return
     proj = self.m.get('projection', None)
@@ -338,8 +338,8 @@ class showGPX(ranaModule):
         cr.set_line_width(self.linewidth)
         current_elevation = float(point.elevation)
         """the maximum height is solid red, that is 1,0,0 in RGB,
-        the mid-heght is 0,0,1 and the minimum height is 0,1,0
-        we use the folowing functions to get apropriate numbers for coloring"""
+        the mid-height is 0,0,1 and the minimum height is 0,1,0
+        we use the following functions to get appropriate numbers for coloring"""
         # max color goes from 1 at max to 0 at the middle and after
         max_color = self.getNat(((current_elevation - difference)/(min_elev/2)) - 1)
         # is 1 in the middle, goes to 0 both to max and min
