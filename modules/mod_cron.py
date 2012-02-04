@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #----------------------------------------------------------------------------
-# A timing and sheduling module for modRana.
+# A timing and scheduling module for modRana.
 #----------------------------------------------------------------------------
 # Copyright 2007, Oliver White
 #
@@ -26,18 +26,18 @@ def getModule(m,d,i):
   return(Cron(m,d,i))
 
 class Cron(ranaModule):
-  """A timing and sheduling module for modRana."""
+  """A timing and scheduling module for modRana."""
 
-  """Why is there a specuial module for timing ?
+  """Why is there a special module for timing ?
      The reason is twofold:
      Toolkit independence and power saving/monitoring.
 
-     If all timing calls go throgh this module,
-     the undelying engine (currently glibs gobject)
+     If all timing calls go through this module,
+     the underlying engine (currently glibs gobject)
      can be more easily changed thant rewriting code everywhere.
 
      Also, modRana targets mobile devices with limited power budget.
-     If all timing goes throught this module, rogue modules many frequent
+     If all timing goes through this module, rogue modules many frequent
      timers can be easily identified.
      It might be also possible to stop or pause some/all of the timers
      after a period of inactivity, or some such.
@@ -97,9 +97,9 @@ class Cron(ranaModule):
         print("cron: can't modify timeout, wrong id: ", id)
 
   def _doTimeout(self, id, callback, args):
-    """wraper about the timeout function, which makes it possible to check
+    """wrapper about the timeout function, which makes it possible to check
     if a timeout is still in progress from the "outside"
-    - like this, the underlying timer should also be easily replacable
+    - like this, the underlying timer should also be easily replaceable
     """
 
     if callback(*args) == False:
