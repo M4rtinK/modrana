@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # supplies position info from the GPS daemon
 #---------------------------------------------------------------------------
 # Copyright 2007-2008, Oliver White

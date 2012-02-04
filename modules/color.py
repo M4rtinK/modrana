@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 class Color:
   """an object representing a color
      provides:

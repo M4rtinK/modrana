@@ -1,5 +1,6 @@
 from __future__ import with_statement # for python 2.5
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Store tiles in a single file.
 # This is done to avoid the fs cluster issues.

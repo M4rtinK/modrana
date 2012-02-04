@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------
 # routeAsCSV - routes with OSM data, and generates a
 # CSV file containing the result

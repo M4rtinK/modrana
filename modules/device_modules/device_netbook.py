@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # An a generic netbook device module.
 # It is a basic modRana module, that has some special features

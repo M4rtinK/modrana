@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # modRana - shared utility classes and methods
 from __future__ import with_statement # for python 2.5
 import threading

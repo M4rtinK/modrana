@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Download OSM data covering the area of a slippy-map tile 
 #

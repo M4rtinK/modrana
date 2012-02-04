@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # A module handling unit conversions and dispplaying correct units acording to current settings.
 #----------------------------------------------------------------------------

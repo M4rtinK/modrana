@@ -21,29 +21,3 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-
-import argparse
-
-class Startup:
-  def __init__(self, modrana):
-    self.modrana = modrana
-    parser = argparse.ArgumentParser(description="A flexible GPS navigation system.")
-    parser.add_argument(
-      '-d', metavar="--device", type=str,
-      nargs='+', help="specify device type",
-      default=None, action="store",
-      choices=["neo","pc", "n900", "n9", "q7"]
-    )
-    parser.add_argument(
-      '-u', metavar="--gui", type=str,
-      nargs='+', help="specify user interface type",
-      default="pc",
-      action="store",
-      choices=["GTK", "QML"]
-    )
-    self.args = parser.parse_args()
-
-  def getArgs(self):
-    """return parsed CLI arguments"""
-    return self.args
-

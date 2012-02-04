@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Base class for Rana device-specific modules
 # * it inherits everything in the base module

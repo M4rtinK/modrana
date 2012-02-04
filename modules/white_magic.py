@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 magic is a wrapper around the libmagic file identification library.
 

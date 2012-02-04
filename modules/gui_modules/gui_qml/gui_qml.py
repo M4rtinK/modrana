@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # A modRana QML GUI module
 # * it inherits everything in the base GUI module

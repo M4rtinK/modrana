@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Display map tile images (+ position cursor)
 #----------------------------------------------------------------------------
@@ -50,10 +51,11 @@ class MapTiles(ranaModule):
     ranaModule.__init__(self, m, d, i)
 
     gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-      import gtk
-      import gobject
-      import cairo
+    if gui:
+      if gui.getIDString() == "GTK":
+        import gtk
+        import gobject
+        import cairo
 
     self.images = [{},{}] # the first dict contains normal image data, the seccond contains special tiles
     self.imagesLock = threading.RLock()

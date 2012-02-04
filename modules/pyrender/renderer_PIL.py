@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Basic test of the PIL rendering engine, using OSM tags to control
 # width and colour of the lines

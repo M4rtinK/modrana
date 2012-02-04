@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Allows areas of screen to be registered as clickable, sending a message
 #----------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Rana main GUI.  Displays maps, for use on a mobile device
 #
@@ -129,16 +130,10 @@ class ModRana:
               'name': ""
              }
 
-    # get possible module names
-    moduleNames = self._getModuleNamesFromFolder(modulesFolder)
-    loadModule = self._loadModule
-    # load if possible
-    for moduleName in moduleNames:
-        # filter out .py
-        moduleName = moduleName.split('.')[0]
-        loadModule(moduleName, moduleName[4:])
 
     # load the device specific module
+    # NOTE: other modules need the device and GUI modules
+    # during init
     deviceModulesPath = os.path.join(modulesFolder, "device_modules")
     sys.path.append(deviceModulesPath)
     dmod = loadModule("device_%s" % device, "device")
@@ -157,6 +152,16 @@ class ModRana:
     else:
       # GTK GUI fallback
       GUIString = "GTK"
+
+
+    # get possible module names
+    moduleNames = self._getModuleNamesFromFolder(modulesFolder)
+    loadModule = self._loadModule
+    # load if possible
+    for moduleName in moduleNames:
+        # filter out .py
+        moduleName = moduleName.split('.')[0]
+        loadModule(moduleName, moduleName[4:])
 
     # add the GUI module folder to path
     GUIModulesPath = os.path.join(modulesFolder, "gui_modules")

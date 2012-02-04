@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------
 # routeAsOsm - routes with OSM data, and generates a
 # GPX file containing the result

@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Sample of a modRana device-specific module.
 # It is a basic modRana module, that has some special features

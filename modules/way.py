@@ -1,4 +1,5 @@
 """a modRana class representing an unified tracklog or route"""
+# -*- coding: utf-8 -*-
 from point import Point
 
 class Segment:
