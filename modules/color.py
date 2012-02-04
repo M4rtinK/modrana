@@ -1,5 +1,3 @@
-import gtk
-
 class Color:
   """an object representing a color
      provides:
@@ -7,6 +5,10 @@ class Color:
      * cairo compatible rgba tupple
      * a gtk.gdkColor object
      """
+
+  #TODO: use colormath ?
+
+
   def __init__(self,name,colorStringAlphaTupple=None,cairoColor=None):
     self.name = name
     self.valid = False
@@ -30,6 +32,7 @@ class Color:
 
   def setColorFromColorStringAlphaTupple(self, colorStringAlphaTupple):
     try:
+      import gtk
       (colorString,alpha) = colorStringAlphaTupple
       gtkColor = gtk.gdk.color_parse(colorString)
       gtkcolorRange = float(2**16)
@@ -41,9 +44,11 @@ class Color:
       self.gtkColor = gtkColor
       self.valid = True
     except Exception, e:
-      print "** color string parsing failed **"
-      print "** input that coused this: %s" % colorStringAlphaTupple
-      print "** exception: %s" % e
+      print("** color string parsing failed **")
+      print("** input that caused this:", colorStringAlphaTupple)
+      print("** exception: %s" % e)
+      # fallback
+      self.gtkColor = "ff0000"
 
   def setCairoColor(self,r,g,b,a):
     self.cairoColor = (r,g,b,a)
@@ -64,4 +69,5 @@ class Color:
     return self.colorStringAlphaTupple
 
   def getColorString(self):
-    return self.gtkColor.to_string()
+#    return self.gtkColor.to_string()
+    return str(self.gtkColor)

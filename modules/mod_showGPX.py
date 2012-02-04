@@ -22,7 +22,6 @@ from base_module import ranaModule
 #import random
 import geo
 import math
-import gtk
 from time import clock
 
 def getModule(m,d,i):
@@ -33,6 +32,12 @@ class showGPX(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+
+    # only import GKT libs if GTK GUI is used
+    gui = self.modrana.gui
+    if gui and gui.getIDString() == "GTK":
+      import gtk
+
     self.linewidth = 7 #with of the line denoting GPX tracks
     self.distinctColors=[
                         'black',

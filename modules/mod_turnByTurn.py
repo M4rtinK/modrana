@@ -20,8 +20,6 @@
 from base_module import ranaModule
 import geo
 import math
-import pango
-import pangocairo
 import time
 
 def getModule(m,d,i):
@@ -32,6 +30,10 @@ class turnByTurn(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+    gui = self.modrana.gui
+    if gui and gui.getIDString() == "GTK":
+      import pango
+      import pangocairo
 
     # initial colors
     self.navigationBoxBackground = (0,0,1,0.3) # very transparent blue

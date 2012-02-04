@@ -30,6 +30,7 @@ from PySide.QtDeclarative import *
 #from PySide import QtOpenGL
 
 from base_gui_module import GUIModule
+import modrana
 
 def newlines2brs(text):
   """ QML uses <br> instead of \n for linebreak """
@@ -55,16 +56,16 @@ class QMLGUI(GUIModule):
 
     # Create Qt application and the QDeclarative view
     class ModifiedQDeclarativeView(QDeclarativeView):
-      def __init__(self, gui):
+      def __init__(self, modrana):
         QDeclarativeView.__init__(self)
-        self.gui = gui
-        
+        self.modrana = modrana
+
       def closeEvent(self, event):
         print "shutting down"
-        self.gui.mieru.destroy()
+        self.modrana.shutdown()
 
     self.app = QApplication(sys.argv)
-    self.view = ModifiedQDeclarativeView(self)
+    self.view = ModifiedQDeclarativeView(self.modrana)
 #    # try OpenGl acceleration
 #    glw = QtOpenGL.QGLWidget()
 #    self.view.setViewport(glw)
@@ -79,7 +80,7 @@ class QMLGUI(GUIModule):
     #self.iconProvider = IconImageProvider()
     #self.view.engine().addImageProvider("page",self.pageProvider)
     #self.view.engine().addImageProvider("icons",self.iconProvider)
-    rc = self.view.rootContext()
+    #rc = self.view.rootContext()
     # make the reading state accessible from QML
     #readingState = ReadingState(self)
     #rc.setContextProperty("readingState", readingState)
@@ -112,11 +113,10 @@ class QMLGUI(GUIModule):
 #    self.prevButton = self.rootObject.findChild(QObject, "prevButton")
 #    self.pageFlickable = self.rootObject.findChild(QObject, "pageFlickable")
 
-    self.lastTimeRequestedOtherManga = None
 #    self.nextButton.clicked.connect(self._nextCB)
 #    self.pageFlickable.clicked.connect(self._prevCB)
 #    self.prevButton.clicked.connect(self._prevCB)
-    #self.toggleFullscreen()
+#    self.toggleFullscreen()
 
 #  def resize(self, w, h):
 #    self.window.resize(w,h)
@@ -147,12 +147,15 @@ class QMLGUI(GUIModule):
   def startMainLoop(self):
     """start the main loop or its equivalent"""
 
+    print "QML start main loop"
+
     # start main loop
     self.app.exec_()
+    print "QML main loop started"
 
   def _qtWindowClosed(self, event):
     print('qt window closing down')
-    self.mieru.destroy()
+    self.modrana.shutdown()
 
   def stopMainLoop(self):
     """stop the main loop or its equivalent"""
@@ -160,78 +163,10 @@ class QMLGUI(GUIModule):
     """NOTE: due to calling Python properties
     from onDestruction handlers causing
     segfault, we need this"""
-    self.rootObject.shutdown()
+    #self.rootObject.shutdown()
 
     # quit the application
     self.app.exit()
-
-  def getPage(self, fileObject, mieru, fitOnStart=False):
-    return qml_page.QMLPage(fileObject, self)
-
-  def showPage(self, page, mangaInstance, id):
-    """show a page on the stage"""
-
-    """first get the file object containing
-    the page image to a local variable so it can be loaded to a
-    QML Image using QDeclarativeImageProvider"""
-
-    path = mangaInstance.getPath()                              
-    self.rootObject.showPage(path, id)
-
-  def newActiveManga(self, manga):
-    """update max page number in the QML GUI"""
-#    print "* new manga loaded *"
-    maxPageNumber = manga.getMaxPageNumber()
-    pageNumber = manga.getActivePageNumber()
-    # assure sane slider behaviour
-
-    if maxPageNumber == None:
-      maxPageNumber = 2
-
-    self.rootObject.setPageNumber(pageNumber)
-    self.rootObject.setMaxPageNumber(maxPageNumber)
-
-
-  def getScale(self):
-    """get scale from the page flickable"""
-    mv = self.rootObject.findChild(QObject, "mainView")
-    return mv.getScale()
-
-  def getUpperLeftShift(self):
-    #return (pf.contX(), pf.contY())
-    mv = self.rootObject.findChild(QObject, "mainView")
-    return (mv.getXShift(), mv.getYShift())
-    
-  def _nextCB(self):
-    print "turning page forward"
-    self.mieru.activeManga.next()
-
-  def _prevCB(self):
-    print "turning page forward"
-    self.mieru.activeManga.previous()
-
-  def _getPageByPathId(self, mangaPath, id):
-#    print "PAGE BY ID", mangaPath, id
-    """as QML automatically caches images by URL,
-    using a url consisting from a filesystem path to the container and page id,
-    we basically create a hash with very unlikely colisions (eq. same hash resulting in different images
-    and thus can avoid doing caching on our side
-
-    NOTE: some images might get cached twice
-    example: lets have a 10 page manga, in /tmp/manga.zip
-    URLs "/tmp/manga.zip|9" and "/tmp/manga.zip|-1" are the same image
-    but the URLs are the same and QML would probably cache the image twice
-    """
-    if self.mieru.activeManga and self.mieru.activeManga.getPath() == mangaPath:
-      return self.mieru.activeManga.getPageById(id)
-    elif self.lastTimeRequestedOtherManga and self.lastTimeRequestedOtherManga.getPath() == mangaPath:
-      return self.lastTimeRequestedOtherManga.getPageById(id)
-    else:
-      manga = self.mieru.openManga(mangaPath, None, replaceCurrent=False, loadNotify=False)
-      """for the cached manga instance, we don't wan't any pages to be set as active,
-         we don't want loafing notifications and we don't want it to replace the current manga"""
-      self.lastTimeRequestedOtherManga = manga
-      return manga.getPageById(id)
 
   def _notify(self, text, icon=""):
     """trigger a notification using the Qt Quick Components

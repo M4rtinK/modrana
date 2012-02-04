@@ -19,7 +19,6 @@
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
 from base_module import ranaModule
-import gobject
 import threading
 
 def getModule(m,d,i):
@@ -34,7 +33,7 @@ class Cron(ranaModule):
 
      If all timing calls go through this module,
      the underlying engine (currently glibs gobject)
-     can be more easily changed thant rewriting code everywhere.
+     can be more easily changed than rewriting code everywhere.
 
      Also, modRana targets mobile devices with limited power budget.
      If all timing goes through this module, rogue modules many frequent
@@ -45,6 +44,16 @@ class Cron(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+    gui = self.modrana.gui
+    self.ready = False
+    if gui:
+      if gui.getIDString() == "GTK":
+        import gobject
+        self.ready = True
+      else:
+        pass
+        # add Qt support
+
     self.nextId = 0
     # cronTab and activeIds should be in sync
     self.cronTab = {"idle":{}, "timeout":{}}
@@ -66,6 +75,8 @@ class Cron(ranaModule):
   def addTimeout(self, callback, timeout, caller, description, args=[]):
     """the callback will be called timeout + time needed to execute the callback
     and other events"""
+    if not self.ready:
+      return
     id = self._getID()
     # TODO: other backends
     realId = gobject.timeout_add(timeout, self._doTimeout, id, callback, args)
@@ -75,6 +86,8 @@ class Cron(ranaModule):
 
   def removeTimeout(self, id):
     """remove timeout with a given id"""
+    if not self.ready:
+      return
     with self.dataLock:
       if id in self.cronTab['timeout'].keys():
         (callback, args, timeout, caller, description, realId) = self.cronTab['timeout'][id]
@@ -85,6 +98,8 @@ class Cron(ranaModule):
 
   def modifyTimeout(self,id, newTimeout):
     """modify the duration of a timeout in progress"""
+    if not self.ready:
+      return
     with self.dataLock:
       if id in self.cronTab['timeout'].keys():
         # load the timeout description
@@ -133,10 +148,3 @@ class Cron(ranaModule):
 #          return None
 #      else:
 #        return None
-
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

@@ -18,8 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #----------------------------------------------------------------------------
 from base_module import ranaModule
-import cairo
-import gtk
 import os
 import glob
 import fnmatch
@@ -33,6 +31,14 @@ class icons(ranaModule):
   """Draw icons"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+
+    # only import GKT libs if GTK GUI is used
+    gui = self.modrana.gui
+    if gui and gui.getIDString() == "GTK":
+        import cairo
+        import gtk
+        from color import Color
+
     self.images = {}
     self.cantLoad = []
     self.imageOrderList = [] # for cache trimming

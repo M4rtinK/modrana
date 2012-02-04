@@ -179,7 +179,7 @@ class ModRana:
       m.dmod = self.dmod
 
       # run what needs to be done before firstTime is called
-    self._modulesLoadedPreFirstTime()
+#    self._modulesLoadedPreFirstTime()
 
     start = time.clock()
     for m in self.m.values():
@@ -278,7 +278,9 @@ class ModRana:
     self.reportStartupTime()
 
     # start the mainloop or equivalent
+    print "starting main loop"
     self.gui.startMainLoop()
+    print "main loop started"
 
   def shutdown(self):
     """

@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import cairo
 from time import time
 
 def getModule(m,d,i):
@@ -28,6 +27,10 @@ class sketch(ranaModule):
   """Sketching functionality"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+    gui = self.modrana.gui
+    if gui and gui.getIDString() == "GTK":
+      import cairo
+
     self.points = []
 
     if(0): # to test

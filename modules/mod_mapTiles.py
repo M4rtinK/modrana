@@ -23,15 +23,11 @@ from threading import Thread
 import threading
 import os
 import traceback
-import cairo
 import urllib2
-import gtk
 import time
-import cairo
-import traceback
 import modrana_utils
 import rectangles
-import gobject
+
 from tilenames import *
 
 import socket
@@ -52,6 +48,13 @@ class MapTiles(ranaModule):
   """Display map images"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+
+    gui = self.modrana.gui
+    if gui and gui.getIDString() == "GTK":
+      import gtk
+      import gobject
+      import cairo
+
     self.images = [{},{}] # the first dict contains normal image data, the seccond contains special tiles
     self.imagesLock = threading.RLock()
     self.threads = {}
@@ -83,12 +86,15 @@ class MapTiles(ranaModule):
                     ('tileWaitingForDownloadSlot' , 'themes/default/tile_waiting_for_download_slot.png'),
                     ('tileNetworkError' , 'themes/default/tile_network_error.png')
                    ]
-    self.loadSpecialTiles(specialTiles) # load the special tiles to the special image cache
-    self.loadingTile = self.images[1]['tileLoading']
-    self.downloadingTile = self.images[1]['tileDownloading']
-    self.waitingTile = self.images[1]['tileWaitingForDownloadSlot']
-    self.lastThreadCleanupTimestamp=time.time()
-    self.lastThreadCleanupInterval=2 # clean finished threads every 2 seconds
+
+    gui = self.modrana.gui
+    if gui and gui.getIDString() == "GTK":
+      self.loadSpecialTiles(specialTiles) # load the special tiles to the special image cache
+      self.loadingTile = self.images[1]['tileLoading']
+      self.downloadingTile = self.images[1]['tileDownloading']
+      self.waitingTile = self.images[1]['tileWaitingForDownloadSlot']
+      self.lastThreadCleanupTimestamp=time.time()
+      self.lastThreadCleanupInterval=2 # clean finished threads every 2 seconds
 
     # local copy of the mapLayers dictionary
     # TODO: don't forget to update this after implementing

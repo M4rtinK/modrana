@@ -68,8 +68,8 @@ class route(ranaModule):
     self.directionsFilterRules = []
     for row in CSVreader:
       if row[0] != '#' and len(row) >= 2:
-        regex = re.compile(unicode(row[0]))
-        self.directionsFilterRules.append((regex, unicode(row[1])))
+        regex = re.compile(unicode(row[0].decode("utf-8")))
+        self.directionsFilterRules.append((regex, row[1].decode("utf-8")))
     file.close()
 
   def handleMessage(self, message, type, args):
@@ -126,7 +126,7 @@ class route(ranaModule):
         lastClick = self.get('lastClickXY', None)
         (x, y) = lastClick
         """
-        x and y must be floats, otherwise strang rounding errors occur, whan converting to lat lon coridnates
+        x and y must be floats, otherwise strange rounding errors occur, when converting to lat lon coordinates
         """
         (lat, lon) = proj.xy2ll(x, y)
         self.set('endPos', (lat,lon))

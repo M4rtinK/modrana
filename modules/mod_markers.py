@@ -34,7 +34,7 @@ class Markers(ranaModule):
 
   def addGroup(self, name, points, menu=False):
     """the name must be unique,
-    if it isnt the previous similarly named group is overwritten
+    if it isn't the previous similarly named group is overwritten
     points is a list of point objects"""
     g = PointGroup(points)
     if menu:
@@ -149,11 +149,10 @@ class Markers(ranaModule):
     cr.fill()
 
     # draw the actual text
-    cr.set_source_rgba(*textColor.getCairoColor()) # slightly trasparent white
+    cr.set_source_rgba(*textColor.getCairoColor()) # slightly transparent white
     cr.move_to(x+15,y+7)
-    cr.show_text(text) # show the trasparent result caption
+    cr.show_text(text) # show the transparent result caption
     cr.stroke()
-
 
 class PointGroup():
   def __init__(self, points=[], bgColor=Color("bg",("blue",0.45)),textColor=Color("bg",("white",0.95))):

@@ -27,7 +27,6 @@ import os
 import time
 import glob
 import Queue
-import gtk
 import threading
 from threading import Thread
 
@@ -40,6 +39,9 @@ class storeTiles(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+    gui = self.modrana.gui
+    if gui and gui.getIDString() == "GTK":
+      import gtk
     self.layers = {}
     self.threadLayers = {}
     self.currentStorageVersion = 1

@@ -18,8 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import cairo
-import gtk
 import math
 from math import radians
 from time import clock
@@ -33,6 +31,10 @@ class positionMarker(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+    gui = self.modrana.gui
+    if gui and gui.getIDString() == "GTK":
+      import gtk
+      import cairo
     
 
   def drawMapOverlay(self, cr):

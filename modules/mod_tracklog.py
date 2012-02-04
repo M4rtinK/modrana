@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import gtk
 import time
 import os
 import geo
@@ -31,6 +30,9 @@ class tracklog(ranaModule):
   """Record tracklogs"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+    gui = self.modrana.gui
+    if gui and gui.getIDString() == "GTK":
+      import gtk
     self.startButtonIndex = 0
     self.loggingEnabled = False
     self.loggingPaused = False
