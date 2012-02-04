@@ -37,7 +37,6 @@ class icons(ranaModule):
     if gui and gui.getIDString() == "GTK":
         import cairo
         import gtk
-        from color import Color
 
     self.images = {}
     self.cantLoad = []
