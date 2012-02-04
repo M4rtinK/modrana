@@ -109,6 +109,8 @@ class ModRana:
     # startup done, print some statistics
     self._startupDone()
 
+  ##  MODULE HANDLING ##
+
   def loadModules(self):
     """Load all modules from the specified directory"""
 
@@ -275,6 +277,8 @@ class ModRana:
     # in favor of event based and explicit update timers
     for m in self.m.values():
       m.update()
+
+  ## STARTUP AND SHUTDOWN ##
 
   def _startupDone(self):
     """called when startup has been finished"""
@@ -594,7 +598,8 @@ class ModRana:
       # notify watchers
       self._notifyWatcher(key, oldValue)
 
-  # * PROFILE PATH *
+  ## PROFILE PATH ##
+
   def getProfilePath(self):
     """return the profile folder (create it if it does not exist)
     NOTE: this function is provided here in the main class as some
@@ -612,7 +617,7 @@ class ModRana:
     # return it
     return profileFolderPath
 
-  # * MAP LAYERS *
+  ## MAP LAYERS ##
   """map lyer information is important and needed by many modules during their initialization,
   so it is handled here"""
   def getMapLayers(self):
