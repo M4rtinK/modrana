@@ -41,6 +41,9 @@ class AndroidChroot(deviceModule):
   def getWinWH(self):
     return((480,600))
 
+  def startInFullscreen(self):
+    return False
+
   def simpleMapDragging(self):
     return True
 

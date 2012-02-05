@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
-# A SmartQ 7 modRana device-specific module.
-# It is a basic modRana module, that has some special features
-# and is loaded only on the correpsponding device.
+# A PC modRana device-specific module.
+# This is currently used mainly to make modRana
+# development & debugging on the PC easier.
 #----------------------------------------------------------------------------
 # Copyright 2010, Martin Kolman
 #
@@ -23,28 +23,29 @@
 from base_device_module import deviceModule
 
 def getModule(m,d,i):
-  return(device_q7(m,d,i))
+  return(Device_PC(m,d,i))
 
-class device_q7(deviceModule):
+class Device_PC(deviceModule):
   """A SmartQ 7 modRana device-specific module"""
   
   def __init__(self, m, d, i):
     deviceModule.__init__(self, m, d, i)
 
   def getDeviceIDString(self):
-    return "q7"
+    return "pc"
 
   def getDeviceName(self):
-    return "Smart Devices SmartQ 7 MID"
+    return "A generic Personal Computer"
 
   def getWinWH(self):
     return((800,480))
 
   def simpleMapDragging(self):
-    return True
+    return False
 
   def startInFullscreen(self):
-    return True
+    return False
+
 
 if(__name__ == "__main__"):
   a = device_example({}, {})

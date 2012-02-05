@@ -46,6 +46,12 @@ class deviceModule(ranaModule):
     # we'll use VGA as a default value
     return((640,480))
 
+  def startInFullscreen(self):
+    """weather or not to start modRana in fullscreen
+    NOTE: this is a default value and can be overridden by a
+    user-set options key, etc."""
+    return False
+
   def screenBlankingControlSupported(self):
     """ there is no universal way to control screen blanking,
     so its off by default

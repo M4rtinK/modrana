@@ -41,6 +41,9 @@ class device_neo(deviceModule):
   def getWinWH(self):
     return((480,600))
 
+  def startInFullscreen(self):
+    return True
+
   def simpleMapDragging(self):
     return True
 

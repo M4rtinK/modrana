@@ -39,6 +39,9 @@ class device_netbook(deviceModule):
 
   def getWinWH(self):
     return((1024,600))
+
+  def startInFullscreen(self):
+    return False
     
 
 if(__name__ == "__main__"):
