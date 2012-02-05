@@ -21,6 +21,13 @@
 from base_module import ranaModule
 import time
 
+# only import GKT libs if GTK GUI is used
+from core import gs
+if gs.GUIString == "GTK":
+  import cairo
+  import gtk
+  import pycha.line
+
 def getModule(m,d,i):
   return(display(m,d,i))
 
@@ -30,10 +37,7 @@ class display(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-      import cairo
-      import gtk
-      import pycha.line
+
     self.fullscreen = False
     """according to documentation on:
     (http://wiki.maemo.org/PyMaemo/Python-osso_examples#Device_State),

@@ -25,6 +25,12 @@ import fnmatch
 from color import Color
 from configobj import ConfigObj
 
+# only import GKT libs if GTK GUI is used
+from core import gs
+if gs.GUIString == "GTK":
+  import gtk
+  import cairo
+
 def getModule(m,d,i):
   return(icons(m,d,i))
 
@@ -33,13 +39,8 @@ class icons(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
 
-    # only import GKT libs if GTK GUI is used
-    gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-        import cairo
-        import gtk
-
     self.images = {}
+
     self.cantLoad = []
     self.imageOrderList = [] # for cache trimming
     self.maxImages = 200 # default 200

@@ -66,9 +66,7 @@ class storeTiles(ranaModule):
 
   def firstTime(self):
     # the config folder should set the tile folder path by now
-    options = self.m.get('options', None)
-    if options:
-      self.tileFolder = options.getMapFolderPath()
+    self.tileFolder = self.modrana.paths.getMapFolderPath()
     # testing:
     #self.test()
 

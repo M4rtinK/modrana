@@ -168,6 +168,7 @@ class QMLGUI(GUIModule):
 
     # quit the application
     self.app.exit()
+    self.modrana.shutdown()
 
   def _notify(self, text, icon=""):
     """trigger a notification using the Qt Quick Components

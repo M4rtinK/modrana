@@ -20,6 +20,11 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 
+# only import GKT libs if GTK GUI is used
+from core import gs
+if gs.GUIString == "GTK":
+  import gtk
+
 def getModule(m,d,i):
   return(textEntry(m,d,i))
 
@@ -28,9 +33,6 @@ class textEntry(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-      import gtk
     self.entryBoxVisible = False
     
 

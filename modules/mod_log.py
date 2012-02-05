@@ -50,20 +50,15 @@ class log(ranaModule):
         print "**log: flushing the log file failed"
 
   def getLogFilePath(self):
-    options = self.m.get('options', None)
-    if options:
-      logFolderPath = options.getLogFolderPath()
-      """ the options module should make sure that the folder exists"""
-      units = self.m.get('units', None)
-      if units:
-        timeHashString = units.getTimeHashString()
-        fileName = 'modrana_stdout_%s.log.txt' % timeHashString
-        return(os.path.join(logFolderPath, fileName))
-      else:
-        print("log: units module missing")
-        return None
+    logFolderPath = self.modrana.paths.getLogFolderPath()
+    """modRana should make sure that the folder exists"""
+    units = self.m.get('units', None)
+    if units:
+      timeHashString = units.getTimeHashString()
+      fileName = 'modrana_stdout_%s.log.txt' % timeHashString
+      return(os.path.join(logFolderPath, fileName))
     else:
-      print("log: options module missing")
+      print("log: units module missing")
       return None
 
   def checkLoggingStatus(self):
@@ -79,7 +74,7 @@ class log(ranaModule):
       if not self.fsock:
         print "**log: opening stdout log file"
         self.fsock = open(self.getLogFilePath(), 'w')
-      print "**log: redirectiong stdout to log file:\%s" % self.currentLogPath
+      print "**log: redirecting stdout to log file:\%s" % self.currentLogPath
       sys.stdout = self.fsock
       print "**log: stdout redirected to (this :) log file"
     except Exception, e:
@@ -89,7 +84,7 @@ class log(ranaModule):
     """disable logging"""
     #do whe have a usable saved stdout ?
     if self.savedStdout:
-      print "**log: redirectiong stdout back"
+      print "**log: redirecting stdout back"
       sys.stdout = self.savedStdout
 
   def shutdown(self):

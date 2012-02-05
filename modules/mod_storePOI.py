@@ -47,7 +47,7 @@ class storePOI(ranaModule):
     """connect to the database"""
     options = self.m.get('options', None)
     if options:
-      DBPath = options.getPOIDatabasePath()
+      DBPath = self.modrana.paths.getPOIDatabasePath()
       if os.path.exists(DBPath): # connect to db
         try:
           self.db = sqlite3.connect(DBPath)

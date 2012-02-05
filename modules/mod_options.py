@@ -20,7 +20,6 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 import marshal
-import os
 import modrana_utils
 
 def getModule(m,d,i):
@@ -39,8 +38,8 @@ class Options(ranaModule):
     # check the profile path and create the folders if necessary
     modrana_utils.createFolderPath(self.profileFolderPath)
 
-    # load persistant options
-    self.load()
+    # load persistent options
+#    self.load()
     self.on = '<span color="green">ON</span>'
     self.off = '<span color="red">OFF</span>'
 
@@ -49,96 +48,6 @@ class Options(ranaModule):
 
     # item tools special menu name
     self.keyStateListGroupID = None
-
-  def getProfilePath(self):
-    """return path to the profile folder"""
-    # check if the path exists and create it if not
-    modrana_utils.createFolderPath(self.profileFolderPath)
-    return self.profileFolderPath
-
-  def getOptionsFilePath(self):
-    """return path to the options store filename"""
-    return os.path.join(self.getProfilePath(),"options.bin")
-
-  def getCacheFolderPath(self):
-    """return path to a folder used for various cache data"""
-    return self._assurePathFolder(self.getProfilePath(), "cache")
-
-  def getTracklogsFolderPath(self):
-    """return path to a folder for storing tracklogs"""
-    path = None
-    # first check if the user overrode the tracklog folder path
-    config = self.m.get('config', None)
-    if config:
-      path = config.getTracklogFolderPath()
-    if path == None:
-    # try to get the path from device module
-      if self.dmod:
-        path = self.dmod.getTracklogFolderPath()
-
-    if path == None: # this means there is no config or device path
-      # use default path & assure it exists
-      return self._assurePathFolder(self.getProfilePath(), "tracklogs")
-    else:
-      return self._assurePath(path)
-
-  def getMapFolderPath(self):
-    """return a path to folder for map data storage"""
-    path = None
-    # first check if the user overrode the map folder path
-    config = self.m.get('config', None)
-    if config:
-      path = config.getMapFolderPath()
-    if path == None:
-    # try to get the path from device module
-      if self.dmod:
-        path = self.dmod.getMapFolderPath()
-
-    if path == None: # this means there is no config or device path
-      # use default path & assure it exists
-      return self._assurePathFolder(self.getProfilePath(), "maps")
-    else:
-      return self._assurePath(path)
-
-  def getPOIFolderPath(self):
-    """return path to the POI folder"""
-    if self.dmod:
-      path = self.dmod.getPOIFolderPath()
-      if path != None: # None means there is no device dependent path
-        return self._assurePath(path)
-      else:
-        return self._assurePathFolder(self.getProfilePath(), "poi")
-    else:
-      return self._assurePathFolder(self.getProfilePath(), "poi")
-
-  def getPOIDatabasePath(self):
-    """return path to the POI database file"""
-    POIDBFilename = self.get('POIDBFilename', 'modrana_poi.db')
-    POIFolderPath = self.getPOIFolderPath()
-    return os.path.join(POIFolderPath,POIDBFilename)
-
-  def getLogFolderPath(self):
-    """return path to the POI folder"""
-    if self.dmod:
-      path = self.dmod.getLogFolderPath()
-      if path != None: # None means there is no device dependent path
-        return self._assurePath(path)
-      else:
-        return self._assurePathFolder(self.getProfilePath(), "debug_logs")
-    else:
-      return self._assurePathFolder(self.getProfilePath(), "debug_logs")
-  
-  def _assurePathFolder(self, path, folder):
-    """combine the given path and folder and make sure the path exists,
-    return the resulting path"""
-    path = os.path.join(path, folder)
-    return self._assurePath(path)
-
-  def _assurePath(self, path):
-    """assure path exists and return it back"""
-    # check if the path exists and create it if not
-    modrana_utils.createFolderPath(path)
-    return path
 
   def _getCategoryID(self, id):
     return "opt_cat_%s" % id # get a standardized id
@@ -931,46 +840,6 @@ class Options(ranaModule):
       optionD[3] = self.keyStateListGroupID # set the group to the state list
       self.addRawOption(optionD)
 
-  def save(self):
-    print "options: saving options"
-    try:
-      f = open(self.getOptionsFilePath(), "w")
-      # remove keys marked as nonpersistent
-      self.d['keyModifiers'] = self.modrana.keyModifiers
-      d = self._removeNonPersistent(self.d)
-      marshal.dump(d, f)
-      f.close()
-      print "options: successfully saved"
-    except IOError:
-      print "Can't save options"
-
-  def load(self):
-    try:
-      f = open(self.getOptionsFilePath(), "r")
-      newData = marshal.load(f)
-      f.close()
-      if 'tileFolder' in newData: #TODO: do this more elegantly
-        del newData['tileFolder']
-      if 'tracklogFolder' in newData: #TODO: do this more elegantly
-        del newData['tracklogFolder']
-      for k,v in newData.items():
-        self.set(k,v)
-    except Exception, e:
-      print "options: exception while loading saved options:\n%s" % e
-      #TODO: a yes/no dialog for clearing (renaming with timestamp :) the corrupted options file (options.bin)
-      self.sendMessage('ml:notification:m:Loading saved options failed;7')
-
-    self.overrideOptions()
-
-  def overrideOptions(self):
-    """
-    without this, there would not be any projection values at start,
-    because modRana does not know, what part of the map to show
-    """
-    self.set('centred', True) # set centering to True at start to get setView to run
-    self.set('editBatchMenuActive', False)
-
-  
   def handleMessage(self, message, type, args):
     if type=="ml" and message=="scroll":
       (direction,menuName) = args
@@ -983,7 +852,7 @@ class Options(ranaModule):
         newIndex = index + 1
         self.options[menuName][1] = newIndex
     elif(message == "save"):
-      self.save()
+      self.modrana._saveOptions()
 
     elif type == 'ml' and message == "go2ItemToolsMenu":
       (groupID, index, key) = args
@@ -1259,23 +1128,6 @@ class Options(ranaModule):
           # in corner: row number
           indexX = x4+w*0.90-smallButtonW
           self.menuModule.showText(cr, "%d/%d" % (index+1, numItems), indexX, y+dy*0.07, w * 0.10 - border, 20)
-
-#  def checkProfilePath(self):
-#    """check if the profile folder exists, try to create it if not"""
-#    if os.path.exists(self.getProfilePath()):
-#      return True
-#    else:
-#      try:
-#        os.makedirs(self.profileFolderPath)
-#        print "creating profile folder in: %s" % self.profileFolderPath
-#        return True
-#      except Exception, e:
-#        print "options:Creating profile folder in path: %s failed:\n%s" % (self.profileFolderPath, e)
-#        return False
-
-  def shutdown(self):
-    """save the dictionary on exit"""
-    self.save()
 
 if(__name__ == "__main__"):
   a = options({},{'viewport':(0,0,600,800)})

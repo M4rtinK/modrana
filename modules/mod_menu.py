@@ -24,6 +24,13 @@ import math
 import geo
 import modrana_utils
 
+# only import GKT libs if GTK GUI is used
+from core import gs
+if gs.GUIString == "GTK":
+  import gtk
+  import pango
+  import pangocairo
+
 def getModule(m,d,i):
   return(menus(m,d,i))
 
@@ -31,14 +38,6 @@ class menus(ranaModule):
   """Handle menus"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-
-    # only import GKT libs if GTK GUI is used
-    gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-      import pango
-      import pangocairo
-      import gtk
-
     self.menus = {}
     self.lists = {}
     self.listOffset = 0

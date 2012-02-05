@@ -30,13 +30,17 @@ sys.path.append(modulesFolder)
 import time
 startTimestamp = time.time()
 import math
-import traceback
 import os
+import marshal
+import traceback
 from math import radians
 from configobj import ConfigObj
 # import core modules/classes
-from core import startup as startup
+from core import startup
+from core import paths
+from core import gs
 
+# record that imports-done timestamp
 importsDoneTimestamp = time.time()
 
 def createFolderPath(newPath):
@@ -64,17 +68,21 @@ def createFolderPath(newPath):
     return True
 
 def simplePythagoreanDistance(x1, y1, x2, y2):
-    dx = x2 - x1
-    dy = y2 - y1
-    return math.sqrt(dx**2 + dy**2)
+  """convenience PyThagorean distance :)"""
+  dx = x2 - x1
+  dy = y2 - y1
+  return math.sqrt(dx**2 + dy**2)
 
 class ModRana:
   """
-  This is the main modRana class.
+  This is THE main modRana class.
   """
   def __init__(self):
-    start = startup.Startup(self)
-    self.args = start.getArgs()
+    self.timing = []
+    self.addCustomTime("modRana start",startTimestamp)
+    self.addCustomTime("imports done", importsDoneTimestamp)
+
+    # constants & variable initilization
     self.dmod = None # device specific module
     self.gui = None
 
@@ -82,12 +90,6 @@ class ModRana:
     self.m = {} # dictionary of loaded modules
     self.watches = {} # List of data change watches
     self.maxWatchId = 0
-
-    # start timing the launch
-    self.timing = []
-    self.addCustomTime("modRana start",startTimestamp)
-    self.addCustomTime("imports done", importsDoneTimestamp)
-    self.addTime("GUI creation")
 
     self.mapRotationAngle = 0 # in radians
     self.notMovingSpeed = 1 # in m/s
@@ -102,6 +104,20 @@ class ModRana:
     # NOTE: this variable is automatically saved by the
     # options module
     self.keyModifiers = {}
+
+    # start timing modRana launch
+    self.addTime("GUI creation")
+
+    # add the startup handling core module
+    start = startup.Startup(self)
+    self.args = start.getArgs()
+
+    # add the paths handling core module
+    self.paths = paths.Paths(self)
+
+    # load persistant options
+    self.optLoadingOK= self._loadOptions()
+
     # load map layer info
     self.loadMapLayerInfo()
     # start loading modules
@@ -132,8 +148,11 @@ class ModRana:
               'name': ""
              }
 
+    # make shortcut for the loadModule function
+    loadModule = self._loadModule
 
-    # load the device specific module
+    ## load the device specific module
+
     # NOTE: other modules need the device and GUI modules
     # during init
     deviceModulesPath = os.path.join(modulesFolder, "device_modules")
@@ -154,17 +173,7 @@ class ModRana:
     else:
       # GTK GUI fallback
       GUIString = "GTK"
-
-
-    # get possible module names
-    moduleNames = self._getModuleNamesFromFolder(modulesFolder)
-    loadModule = self._loadModule
-    # load if possible
-    for moduleName in moduleNames:
-        # filter out .py
-        moduleName = moduleName.split('.')[0]
-        loadModule(moduleName, moduleName[4:])
-
+    gs.GUIString = GUIString
     # add the GUI module folder to path
     GUIModulesPath = os.path.join(modulesFolder, "gui_modules")
     sys.path.append(GUIModulesPath)
@@ -172,10 +181,19 @@ class ModRana:
       gui = loadModule("gui_gtk", "gui")
     elif GUIString == "QML":
       gui = loadModule("gui_qml", "gui")
-    # make device module available to the GUI module
+      # make device module available to the GUI module
     if gui:
       gui.dmod = dmod
     self.gui = gui
+
+
+    # get possible module names
+    moduleNames = self._getModuleNamesFromFolder(modulesFolder)
+    # load if possible
+    for moduleName in moduleNames:
+        # filter out .py
+        moduleName = moduleName.split('.')[0]
+        loadModule(moduleName, moduleName[4:])
 
     print "Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start))
     self.addTime("all modules loaded")
@@ -286,10 +304,12 @@ class ModRana:
     # report startup time
     self.reportStartupTime()
 
+    # check if loading options failed
+    if self.optLoadingOK:
+      self.gui.notify("Loading saved options failed", 7000)
+
     # start the mainloop or equivalent
-    print "starting main loop"
     self.gui.startMainLoop()
-    print "main loop started"
 
   def shutdown(self):
     """
@@ -597,6 +617,65 @@ class ModRana:
       oldValue = self.get(key, defaultValue)
       # notify watchers
       self._notifyWatcher(key, oldValue)
+
+
+  def _removeNonPersistentOptions(self, inputDict):
+    """keys that begin with # are not saved
+    (as they mostly contain data that is either time sensitive or is
+    reloaded on startup)
+    ASSUMPTION: keys are strings of length>=1"""
+    try:
+      return dict((k, v) for k, v in inputDict.iteritems() if k[0] != '#')
+    except Exception, e:
+      print('options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n', e)
+      return self.d
+
+  def _saveOptions(self):
+    print("modRana: saving options")
+    try:
+      f = open(self.paths.getOptionsFilePath(), "w")
+      # remove keys marked as nonpersistent
+      self.d['keyModifiers'] = self.keyModifiers
+      d = self._removeNonPersistentOptions(self.d)
+      marshal.dump(d, f)
+      f.close()
+      print("modRana: options successfully saved")
+    except IOError:
+      print("modRana: Can't save options")
+    except Exception, e:
+      print("modRana: saving options failed:", e)
+
+  def _loadOptions(self):
+    print("modRana: loading options")
+    succcess = False
+    try:
+      f = open(self.paths.getOptionsFilePath(), "r")
+      newData = marshal.load(f)
+      print newData
+      f.close()
+      # TODO: check out if this is needed anymore
+      if 'tileFolder' in newData: #TODO: do this more elegantly
+        del newData['tileFolder']
+      if 'tracklogFolder' in newData: #TODO: do this more elegantly
+        del newData['tracklogFolder']
+      for k,v in newData.items():
+        self.set(k,v)
+      succcess = True
+    except Exception, e:
+      print("modRana: exception while loading saved options:\n%s" % e)
+      #TODO: a yes/no dialog for clearing (renaming with timestamp :) the corrupted options file (options.bin)
+      succcess = False
+
+    self.overrideOptions()
+    return succcess
+
+  def overrideOptions(self):
+    """
+    without this, there would not be any projection values at start,
+    because modRana does not know, what part of the map to show
+    """
+    self.set('centred', True) # set centering to True at start to get setView to run
+    self.set('editBatchMenuActive', False)
 
   ## PROFILE PATH ##
 

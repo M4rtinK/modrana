@@ -20,6 +20,10 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 from time import time
+# only import GKT libs if GTK GUI is used
+from core import gs
+if gs.GUIString == "GTK":
+  import cairo
 
 def getModule(m,d,i):
   return(sketch(m,d,i))
@@ -28,10 +32,6 @@ class sketch(ranaModule):
   """Sketching functionality"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-      import cairo
-
     self.points = []
 
     if(0): # to test

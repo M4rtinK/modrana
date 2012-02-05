@@ -21,6 +21,12 @@
 from base_module import ranaModule
 import time
 import geo
+# only import GKT libs if GTK GUI is used
+from core import gs
+if gs.GUIString == "GTK":
+  import cairo
+  import gtk
+  import pycha.line
 
 def getModule(m,d,i):
   return(showOSD(m,d,i))
@@ -30,12 +36,6 @@ class showOSD(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-      import cairo
-      import gtk
-      import pycha.line
-
     self.items = None
     self.routeProfileData = None
     self.nearestPoint = None

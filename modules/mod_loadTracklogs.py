@@ -82,19 +82,10 @@ class loadTracklogs(ranaModule):
 #        # get current tracklog filename, sans extension
 #        # start an entry box
 
-  def _getTFP(self):
-    options = self.m.get('options', None)
-    if options:
-      tracklogFolder = options.getTracklogsFolderPath()
-      return tracklogFolder
-    else:
-      print("loadTracklogs:no options module, can't get tracklog folder path")
-      return None
-
   def _getTFSubPath(self, subPath):
     """return a tracklog folder sub path,
     assure the patch exists before returning it"""
-    tracklogFolderPath = self._getTFP()
+    tracklogFolderPath = self.modrana.paths.getTracklogsFolderPath()
     if tracklogFolderPath == None:
       print("loadTracklogs: can't get tracklog sub path - tracklog folder path is unknown")
       return None # tracklog folder path is unknown
@@ -109,9 +100,10 @@ class loadTracklogs(ranaModule):
     self._getTFSubPath("logs")
     self._getTFSubPath("online")
     self._getTFSubPath("misc")
-    """if there is no examplef folder, create it
+    """if there is no example folder, create it
     and copy example tracklogs into it"""
-    examplesDestinationPath = os.path.join(self._getTFP(),'examples')
+    tfp = self.modrana.paths.getTracklogsFolderPath()
+    examplesDestinationPath = os.path.join(tfp,'examples')
     if not os.path.exists(examplesDestinationPath):
       modrana_utils.createFolderPath(examplesDestinationPath)
       print(' ** loadTracklogs: copying example tracklogs')
@@ -237,7 +229,7 @@ class loadTracklogs(ranaModule):
   def listAvailableTracklogs(self):
     print "** making a list of available tracklogs"
 
-    tf = self._getTFP()
+    tf = self.modrana.paths.getTracklogsFolderPath()
     # does the tracklog folder exist ?
     if tf == None or not os.path.exists(tf):
       return # no tracklog folder, nothing to list
@@ -276,9 +268,9 @@ class loadTracklogs(ranaModule):
     self.categoryList = currentFolders
 
     print("*  using this tracklog folder:")
-    print(self._getTFP())
+    print(self.modrana.paths.getTracklogsFolderPath())
     print("*  does it exist ?")
-    print(os.path.exists(self._getTFP()))
+    print(os.path.exists(self.modrana.paths.getTracklogsFolderPath()))
     print("*  there are %d tracklogs available" % len(availableFiles))
     self.tracklogPathList = pathList
     self.tracklogList = availableFiles
@@ -455,7 +447,7 @@ class loadTracklogs(ranaModule):
 
   def storeTracklog(self,tracklog,filename,cat,type,refresh="True"):
     """store tracklog and return the resulting path"""
-    folder = self._getTFP()
+    folder = self.modrana.paths.getTracklogsFolderPath()
     if folder == None:
       print("loadTracklogs: can't store tracklog - path to tracklog folder is unknown or unusable")
       return None

@@ -20,6 +20,12 @@
 #---------------------------------------------------------------------------
 from base_module import ranaModule
 
+# only import GKT libs if GTK GUI is used
+from core import gs
+if gs.GUIString == "GTK":
+  import gtk
+
+
 def getModule(m,d,i):
   return(keys(m,d,i))
 
@@ -28,9 +34,6 @@ class keys(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-      import gtk
 
   def firstTime(self):
     # connect the key press handler

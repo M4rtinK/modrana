@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+# only import GKT libs if GTK GUI is used
+from core import gs
+if gs.GUIString == "GTK":
+  import gtk
+
 class Color:
   """an object representing a color
      provides:
@@ -8,7 +13,7 @@ class Color:
      * a gtk.gdkColor object
      """
 
-  #TODO: use colormath ?
+  #TODO: use palette ?
 
 
   def __init__(self,name,colorStringAlphaTupple=None,cairoColor=None):

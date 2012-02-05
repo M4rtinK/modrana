@@ -73,9 +73,7 @@ class mapData(ranaModule):
 
   def firstTime(self):
     # cache the map folder path
-    options = self.m.get('options', None)
-    if options:
-      self.mapFolderPath = options.getMapFolderPath()
+    self.mapFolderPath = self.modrana.paths.getMapFolderPath()
 
   def _getTileFolderPath(self):
     """return path to the map folder"""

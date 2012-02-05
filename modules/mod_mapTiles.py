@@ -35,6 +35,12 @@ import socket
 timeout = 30 # this sets timeout for all sockets
 socket.setdefaulttimeout(timeout)
 
+# only import GKT libs if GTK GUI is used
+from core import gs
+if gs.GUIString == "GTK":
+  import gtk
+  import gobject
+  import cairo
 
 #loadImage = None
 #def setLoadimage(function):
@@ -44,31 +50,23 @@ socket.setdefaulttimeout(timeout)
 
 def getModule(m,d,i):
   return(MapTiles(m,d,i))
-  
+
 class MapTiles(ranaModule):
   """Display map images"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-
-    gui = self.modrana.gui
-    if gui:
-      if gui.getIDString() == "GTK":
-        import gtk
-        import gobject
-        import cairo
-
-    self.images = [{},{}] # the first dict contains normal image data, the seccond contains special tiles
+    self.images = [{},{}] # the first dict contains normal image data, the second contains special tiles
     self.imagesLock = threading.RLock()
     self.threads = {}
     self.threadlListCondition = threading.Condition(threading.Lock())
     self.maxImagesInMemmory = 150 # to avoid a memmory leak
     self.imagesTrimmingAmmount = 30 # how many tiles to remove once the maximum is reached
     self.loadRequestCStackSize = 10 # size for the circular loading request stack
-    """so that trim does not run always run arter adding a tile"""
+    """so that trim does not run always run after adding a tile"""
     self.tileSide = 256 # by default, the tiles are squares, side=256
-    """ TODO: analyse memmory usage,
-              set approrpiate value,
-              platform dependendt value,
+    """ TODO: analyse memory usage,
+              set appropriate value,
+              platform dependent value,
               user configurable
     """
     self.loadRequestCStack = modrana_utils.SynchronizedCircularStack(self.loadRequestCStackSize)
@@ -80,7 +78,7 @@ class MapTiles(ranaModule):
     self.idleLoaderActive = False # report the idle tile loader is running
 
     self.shutdownAllThreads = False # notify the threads that shutdown is in progress
-    
+
     specialTiles = [
                     ('tileDownloading' , 'themes/default/tile_downloading.png'),
                     ('tileDownloadFailed' , 'themes/default/tile_download_failed.png'),
@@ -90,7 +88,7 @@ class MapTiles(ranaModule):
                    ]
 
     gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
+    if gui.getIDString() == "GTK":
       self.loadSpecialTiles(specialTiles) # load the special tiles to the special image cache
       self.loadingTile = self.images[1]['tileLoading']
       self.downloadingTile = self.images[1]['tileDownloading']
@@ -105,7 +103,9 @@ class MapTiles(ranaModule):
 
     self.mapViewModule = None
 
-    self.mapFolderPath = None
+    # cache the map folder path
+    self.mapFolderPath = self.modrana.paths.getMapFolderPath()
+    print "mapTiles: map folder path: %s" % self.mapFolderPath
 
   def firstTime(self):
     self.mapViewModule = self.m.get('mapView', None)
@@ -113,12 +113,6 @@ class MapTiles(ranaModule):
     self._updateScalingCB('mapScale', scale, scale)
     self.modrana.watch('mapScale', self._updateScalingCB)
     self.modrana.watch('z', self._updateScalingCB)
-
-    # cache the map folder path
-    options = self.m.get('options', None)
-    if options:
-      self.mapFolderPath = options.getMapFolderPath()
-      print "mapTiles: map folder path: %s" % self.mapFolderPath
 
   def _updateScalingCB(self, key='mapScale', oldValue=1, newValue=1):
     """
