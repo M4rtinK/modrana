@@ -651,7 +651,6 @@ class ModRana:
     try:
       f = open(self.paths.getOptionsFilePath(), "r")
       newData = marshal.load(f)
-      print newData
       f.close()
       # TODO: check out if this is needed anymore
       if 'tileFolder' in newData: #TODO: do this more elegantly
