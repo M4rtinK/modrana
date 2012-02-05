@@ -31,6 +31,11 @@ import Queue
 import threading
 from threading import Thread
 
+# only import GKT libs if GTK GUI is used
+from core import gs
+if gs.GUIString == "GTK":
+  import gtk
+
 def getModule(m,d,i):
   return(storeTiles(m,d,i))
 
@@ -40,9 +45,6 @@ class storeTiles(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-      import gtk
     self.layers = {}
     self.threadLayers = {}
     self.currentStorageVersion = 1
