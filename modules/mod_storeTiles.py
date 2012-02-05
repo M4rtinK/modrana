@@ -50,12 +50,12 @@ class storeTiles(ranaModule):
     self.maxTilesInQueue = 50
     self.sqliteTileQueue = Queue.Queue(self.maxTilesInQueue)
     """if there are more tiles in the buffer than maxTilesInBuffer,
-       the whole buffer will be processed at once (flushed) to avoid a potencial memmory leak
+       the whole buffer will be processed at once (flushed) to avoid a potential memory leak
     """
     self.processPerUpdate = 1 #how many tiles will be processed per update (updates should happen every 100ms)
-    self.commmitInterval=5 # how often we commit to the database (aonly happens when there is something in the queue)
+    self.commmitInterval=5 # how often we commit to the database (only happens when there is something in the queue)
     self.lastCommit=time.time()
-    self.dirty = set() # a set of connections, that have uncommited data
+    self.dirty = set() # a set of connections, that have uncommitted data
     self.startLoadingThread()
     # locks
     """
@@ -83,21 +83,21 @@ class storeTiles(ranaModule):
        we basically have two connection tables, store and get ones
        the store connections are used only by the worker to store all the tiles it gets to its queue
        the get connections are used by the main thread
-       when other threads query the database, they create a new connection and disconect it when done
+       when other threads query the database, they create a new connection and disconnect it when done
 
        we still get "database locked" from time to time,
        * it may bee needed to use a mutex to control db access to fix this
        * or disconnect all database connections ?
     """
     dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
-    if accessType in self.layers: # do we have an entry fro this acces type ?
+    if accessType in self.layers: # do we have an entry fro this access type ?
       if dbFolderPath in self.layers[accessType]:
         return dbFolderPath # return the lookup connection
       else:
         self.initializeLookupDb(folderPrefix,accessType) # initialize the lookup db
         return dbFolderPath
     else:
-      self.layers[accessType]={} # create a new accestype entry
+      self.layers[accessType]={} # create a new access type entry
       self.initializeLookupDb(folderPrefix,accessType) # initialize the lookup db
       return dbFolderPath
 
@@ -137,7 +137,7 @@ class storeTiles(ranaModule):
       with self.lookupConnectionLock:
         """ just to make sure the access is sequential
         (due to sqlite in python 2.5 probably not liking concurrent access,
-        resulting in te database becomming unavailable)"""
+        resulting in te database becoming unavailable)"""
         result = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension))
         if not result.fetchone():
           # store the tile as its not already in the database
@@ -175,15 +175,15 @@ class storeTiles(ranaModule):
 
 
   def commitAll(self):
-    """commit all uncommited"""
+    """commit all uncommitted"""
     with self.lookupConnectionLock:
       """ just to make sure the access is sequential
       (due to sqlite in python 2.5 probably not liking concurrent access,
-      resulting in te database becomming unavailable)"""
+      resulting in te database becoming unavailable)"""
       while self.dirty:
         conn = self.dirty.pop()
         conn.commit()
-      print "storeTiles: sqlite committ OK"
+      print "storeTiles: sqlite commit OK"
 
 
 
@@ -196,7 +196,7 @@ class storeTiles(ranaModule):
       with self.lookupConnectionLock:
         """ just to make sure the access is sequential
         (due to sqlite in python 2.5 probably not liking concurrent access,
-        resulting in te database becomming unavailable)"""
+        resulting in te database becoming unavailable)"""
         storeConn = sqlite3.connect(pathToStore) #TODO: add some error handling
         self.layers[accessType][dbFolderPath]['stores'][pathToStore] = storeConn # cache the connection
         return storeConn
@@ -208,7 +208,7 @@ class storeTiles(ranaModule):
     if storeList: # there are already some stores
       availableStores = []
       for storePath in storeList: # iterate over the available stores
-        cleanPath =  storePath.rstrip('-journal') # dont add sqlite journal files
+        cleanPath =  storePath.rstrip('-journal') # don't add sqlite journal files
         if self.willItFitIn(cleanPath, size):# add all stores that can be used to store the current object
           availableStores.append(cleanPath)
 
@@ -238,7 +238,7 @@ class storeTiles(ranaModule):
     maximumSizeBytes = self.maxDbFileSizeGibiBytes*gibiByte
     pathSizeBytes = os.path.getsize(path)
     if (pathSizeBytes+sizeBytes)<=maximumSizeBytes:
-      return True # the database will (probably) still smaler than the limit
+      return True # the database will (probably) still smaller than the limit
     else:
       return False # the database will be larger
 
@@ -316,7 +316,7 @@ class storeTiles(ranaModule):
     with self.lookupConnectionLock:
       """ just to make sure the access is sequential
       (due to sqlite in python 2.5 probably not liking concurrent access,
-      resulting in te database becomming unavailable)"""
+      resulting in te database becoming unavailable)"""
       lookupCursor = lookupConn.cursor()
       lookupResult = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension)).fetchone()
       if lookupResult: # the tile was found in the lookup db
@@ -341,9 +341,9 @@ class storeTiles(ranaModule):
         with self.lookupConnectionLock:
           """ just to make sure the access is sequential
           (due to sqlite in python 2.5 probably not liking concurrent access,
-          resulting in te database becomming unavailable)"""
+          resulting in te database becoming unavailable)"""
           if fromThread: # is this called from a thread ?
-            # due to sqlite quirsk, connections can't be shared between threads
+            # due to sqlite quirks, connections can't be shared between threads
             lookupDbPath = self.getLookupDbPath(dbFolderPath)
             lookupConn = sqlite3.connect(lookupDbPath)
           else:
@@ -365,9 +365,9 @@ class storeTiles(ranaModule):
     """start the sqlite loading thread"""
     t = Thread(target=self.worker, name='sqlite tile storage thread')
     """we need that the worker tidies up,
-       (commits all "dirty" conections)
+       (commits all "dirty" connections)
        so it should be not daemonic
-       -> but we also cant affort that modrana wont
+       -> but we also cant afford that modRana wont
        terminate completely
        """
     t.setDaemon(True)
@@ -388,18 +388,18 @@ class storeTiles(ranaModule):
           item = 'shutdown'
 
         if item=='shutdown': # we put this to the queue to announce shutdown
-          print "\nshutdown imminent, commiting all uncommited tiles"
+          print "\nshutdown imminent, committing all uncommitted tiles"
           self.commitAll()
-          print "\nall tiles commited, breaking, goodbye :)"
+          print "\nall tiles committed, breaking, goodbye :)"
           break
         """
         the thread should not die due to an exception
         or the queue fills up without anybody removing and processing the tiles
         -> this would mean that all threads that need to store tiles
-           would wait forewer for the queue to empty
+           would wait forever for the queue to empty
         """
         try:
-          (tile, folderPrefix, z, x, y, extension, filename) = item # unpack the tupple
+          (tile, folderPrefix, z, x, y, extension, filename) = item # unpack the tuple
           self.storeTile(tile, folderPrefix, z, x, y, extension) # store the tile
           self.sqliteTileQueue.task_done()
         except Exception, e:
