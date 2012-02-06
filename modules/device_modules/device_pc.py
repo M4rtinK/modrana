@@ -26,7 +26,7 @@ def getModule(m,d,i):
   return(Device_PC(m,d,i))
 
 class Device_PC(deviceModule):
-  """A SmartQ 7 modRana device-specific module"""
+  """A modRana device-specific module for PC"""
   
   def __init__(self, m, d, i):
     deviceModule.__init__(self, m, d, i)
