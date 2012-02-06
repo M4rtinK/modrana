@@ -319,9 +319,9 @@ class icons(ranaModule):
     file versions for an icon in a them
     -> this function select one of them based on a given set of priorities
     priorities:
-    * SVG icons are prefered over PNG
-    * PNG is prefered over JPEG
-    * icons with centering info are prefered over "plain" icons
+    * SVG icons are preferred over PNG
+    * PNG is preferred over JPEG
+    * icons with centering info are preferred over "plain" icons
     """
     simplePaths = None
     parameterPaths = None
@@ -495,7 +495,7 @@ class icons(ranaModule):
     """store an item in cache and return the cache representation"""
     # check if the cache is full
     if len(self.images) >= self.maxImages:
-      # get the oldest image + remove it ofrem the queue
+      # get the oldest image + remove it from the queue
       oldestImageName = self.imageOrderList.pop(0) # TODO: this might be slow
 #      print "trimming cache, %s, %d" % (oldestImageName, len(self.images))
       # remove it from the cache
@@ -516,7 +516,7 @@ class icons(ranaModule):
   def roundedRectangle(self, width, height, fillColor, outlineColor, outlineWidth=None, radius=22):
     """draw a rounded rectangle, fill and outline set the fill and outline rgba color
        r,g,b from 0 to 255, a from 0 to 1"""
-    # make the outline propertional to the size of the button
+    # make the outline proportional to the size of the button
     if outlineWidth == None:
       outlineWidth = min(width,height)*0.05
     elif outlineWidth < 1.0: # add support for proportional outlines
@@ -564,7 +564,7 @@ class icons(ranaModule):
     self.availableThemes = filter(lambda x: os.path.isdir(self.themesFolderPath + '/' +x) and not x=='.svn',rawFolderContent)
 
   def getThemeList(self):
-    """returna a list of currently available themes (list of folders in the themes folder)"""
+    """return a a list of currently available themes (list of folders in the themes folder)"""
     return self.availableThemes
 
   def getCurrentThemePath(self):
@@ -612,13 +612,13 @@ class icons(ranaModule):
     return self.colors
   
   def subscribeColorInfo(self,module,callback,firstCall=True):
-    """subscribe to notifictaions about color map changes"""
+    """subscribe to notifications about color map changes"""
     self.colorInfoSubscribers[module] = callback
     if firstCall: # should we call tha callback function right after subscribing ?
       callback(self.getColors())
 
   def unSubscribeColorInfo(self,module):
-    """unsubscribe from notifications about colormap changes"""
+    """un-subscribe from notifications about colormap changes"""
     del self.colorInfoSubscribers[module]
 
   def notifyColorSubscribers(self):
