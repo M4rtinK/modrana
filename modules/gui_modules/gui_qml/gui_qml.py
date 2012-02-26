@@ -30,13 +30,25 @@ from PySide.QtGui import *
 from PySide.QtDeclarative import *
 #from PySide import QtOpenGL
 
+# modRana imports
 from base_gui_module import GUIModule
-import modrana
+from datetime import datetime
 
 def newlines2brs(text):
   """ QML uses <br> instead of \n for linebreak """
   return re.sub('\n', '<br>', text)
 
+
+class Logger:
+  def __init__(self, log=True):
+    pass
+    self.log=log
+
+  def debug(self, message):
+    if self.log:
+      print message
+
+logger = Logger(log=True)
 
 def getModule(m,d,i):
     return(QMLGUI(m,d,i))
@@ -77,11 +89,9 @@ class QMLGUI(GUIModule):
 #    self.view.setResizeMode(QDeclarativeView.SizeViewToRootObject)
 
     # add image providers
-    #self.pageProvider = MangaPageImageProvider(self)
-    #self.iconProvider = IconImageProvider()
-    #self.view.engine().addImageProvider("page",self.pageProvider)
-    #self.view.engine().addImageProvider("icons",self.iconProvider)
-    #rc = self.view.rootContext()
+    self.iconProvider = IconImageProvider()
+    self.view.engine().addImageProvider("icons",self.iconProvider)
+    rc = self.view.rootContext()
     # make the reading state accessible from QML
     #readingState = ReadingState(self)
     #rc.setContextProperty("readingState", readingState)
@@ -89,8 +99,12 @@ class QMLGUI(GUIModule):
     #stats = Stats(self.mieru.stats)
     #rc.setContextProperty("stats", stats)
     # make options accessible from QML
-    #options = Options(self.mieru)
-    #rc.setContextProperty("options", options)
+    options = Options(self.modrana)
+    rc.setContextProperty("options", options)
+    # make GPS accessible from QML
+    gps = GPSDataWrapper(self.modrana)
+    rc.setContextProperty("gps", gps)
+
 
 
     # ** history list handling **
@@ -117,7 +131,9 @@ class QMLGUI(GUIModule):
 #    self.nextButton.clicked.connect(self._nextCB)
 #    self.pageFlickable.clicked.connect(self._prevCB)
 #    self.prevButton.clicked.connect(self._prevCB)
-#    self.toggleFullscreen()
+    if self.modrana.dmod.startInFullscreen():
+      self.toggleFullscreen()
+
 
 #  def resize(self, w, h):
 #    self.window.resize(w,h)
@@ -179,239 +195,226 @@ class QMLGUI(GUIModule):
     text = newlines2brs(text)
     self.rootObject.notify(text)
 
-#  def idleAdd(self, callback, *args):
-#    gobject.idle_add(callback, *args)
-#
-#  def _destroyCB(self, window):
-#    self.mieru.destroy()
-
-class MangaPageImageProvider(QDeclarativeImageProvider):
-  """the MangaPageImageProvider class provides manga pages to the QML layer"""
-  def __init__(self, gui):
-      QDeclarativeImageProvider.__init__(self, QDeclarativeImageProvider.ImageType.Image)
-      self.gui = gui
-
-  def requestImage(self, pathId, size, requestedSize):
-#    print "IMAGE REQUESTED"
-#    print size
-#    print requestedSize
-
-
-    (path,id) = pathId.split('|',1)
-    id = int(id) # string -> integer
-#    print  "** IR:", path, id
-    (page, id) = self.gui._getPageByPathId(path, id)
-    imageFileObject = page.popImage()
-    img=QImage()
-    img.loadFromData(imageFileObject.read())
-#    if size:
-#      print "size"
-#      size.setWidth(img.width())
-#      size.setHeight(img.height())
-#    if requestedSize:
-#      print "requestedSize"
-#      return img.scaled(requestedSize)
-#    else:
-#      return img
-#    print img.size()
-    return img
-
 class IconImageProvider(QDeclarativeImageProvider):
   """the IconImageProvider class provides icon images to the QML layer as
   QML does not seem to handle .. in the url very well"""
   def __init__(self):
-      QDeclarativeImageProvider.__init__(self, QDeclarativeImageProvider.ImageType.Image)
+    QDeclarativeImageProvider.__init__(self, QDeclarativeImageProvider.ImageType.Image)
 
-  def requestImage(self, iconFilename, size, requestedSize):
+  def requestImage(self, iconPath, size, requestedSize):
     try:
-      f = open('icons/%s' % iconFilename,'r')
+      #TODO: theme name caching ?
+      f = open('themes/%s' % (iconPath),'r')
       img=QImage()
       img.loadFromData(f.read())
       f.close()
       return img
       #return img.scaled(requestedSize)
     except Exception, e:
-      print("loading icon failed", e)
+      print("QML GUI: icon image provider: loading icon failed", e)
 
-class ReadingState(QObject):
-    def __init__(self, gui):
-      QObject.__init__(self)
-      self.gui = gui
-      self.mieru = gui.mieru
+# from AGTL
+class Fix():
+  BEARING_HOLD_EPD = 90 # arbitrary, yet non-random value
+  last_bearing = 0
+  # tracking the minimum difference between a received fix time and
+  # our current internal time.
+  min_timediff = datetime.utcnow() - datetime.utcfromtimestamp(0)
 
-    @QtCore.Slot(result=str)
-    def next(self):
-      activeManga = self.gui.mieru.getActiveManga()
-      if activeManga:
-        path = activeManga.getPath()
-        idValid, id = activeManga.next()
-        if idValid:
-          return "image://page/%s|%d" % (path, id)
-        else:
-          return "ERROR do something else"
-      else:
-        return "ERROR no active manga"
+  def __init__(self,
+               position = None,
+               altitude = None,
+               bearing = None,
+               speed = None,
+               sats = 0,
+               sats_known = 0,
+               dgps = False,
+               quality = 0,
+               error = 0,
+               error_bearing = 0,
+               timestamp = None):
+    self.position = position
+    self.altitude = altitude
+    self.bearing = bearing
+    self.speed = speed
+    self.sats = sats
+    self.sats_known = sats_known
+    self.dgps = dgps
+    self.quality = quality
+    self.error = error
+    self.error_bearing = error_bearing
+    if timestamp == None:
+      self.timestamp = datetime.utcnow()
+    else:
+      self.timestamp = timestamp
 
-    @QtCore.Slot(result=str)
-    def previous(self):
-      activeManga = self.gui.mieru.getActiveManga()
-      if activeManga:
-        path = activeManga.getPath()
-        idValid, id = activeManga.previous()
-        if idValid:
-          return "image://page/%s|%d" % (path, id)
-        else:
-          return "ERROR do something else"
-      else:
-        return "ERROR no active manga"
+class FixWrapper(QtCore.QObject):
 
-    @QtCore.Slot(int)
-    def goToPage(self, pageNumber):
-      activeManga = self.gui.mieru.getActiveManga()
-      if activeManga:
-        id = activeManga.PageNumber2ID(pageNumber)
-        activeManga.gotoPageId(id)
+  def __init__(self, fix):
+    QtCore.QObject.__init__(self)
+    self.data = fix
 
-    @QtCore.Slot(int, str)
-    def setPageID(self, pageID, mangaPath):
-      activeManga = self.gui.mieru.getActiveManga()
-      if activeManga:
-        # filter out false alarms
-        if activeManga.getPath() == mangaPath:
-          activeManga.setActivePageId(pageID)
+  changed = QtCore.Signal()
 
-    @QtCore.Slot(result=str)
-    def getPrettyName(self):
-      activeManga = self.gui.mieru.getActiveManga()
-      if activeManga:
-        return activeManga.getPrettyName()
-      else:
-        return "Name unknown"
+  def update(self, fix):
+    self.data = fix
+    logger.debug("Fix updated with data from %r" % fix)
+    self.changed.emit()
 
-    @QtCore.Slot(result=str)
-    def getAboutText(self):
-      return newlines2brs(info.getAboutText())
+  def _lat(self):
+    if self.data.position != None:
+      return self.data.position[0]
+    else:
+      return -1
 
-    @QtCore.Slot(result=str)
-    def getVersionString(self):
-      return newlines2brs(info.getVersionString())
+  def _lon(self):
+    if self.data.position != None:
+      print self.data
+      return self.data.position[1]
+    else:
+      return -1
 
-    @QtCore.Slot(result=str)
-    def toggleFullscreen(self):
-      self.gui.toggleFullscreen()
+  def _altitude(self):
+    return self.data.altitude if self.data.altitude != None else 0
 
-    @QtCore.Slot(str)
-    def openManga(self, path):
-      print "Open manga"
-      # remove the "file:// part of the path"
-      path = re.sub('file://', '', path, 1)
-      folder = os.path.dirname(path)
-      self.mieru.set('lastChooserFolder', folder)
-      self.mieru.openManga(path)
+  def _speed(self):
+    return self.data.speed if self.data.speed != None else 0
 
-    @QtCore.Slot(result=str)
-    def getSavedFileSelectorPath(self):
-      defaultPath = self.mieru.platform.getDefaultFileSelectorPath()
-      lastFolder = self.mieru.get('lastChooserFolder', defaultPath)
-      return lastFolder
+  def _error(self):
+    return float(self.data.error)
 
-    @QtCore.Slot()
-    def updateHistoryListModel(self):
-      print "updating history list model"
-      """the history list model needs to be updated only before the list
-      is actually shown, no need to update it dynamically every time a manga is added
-      to history"""
-      mangaStateObjects = [MangaStateWrapper(state) for state in self.gui.mieru.getSortedHistory()]      
-      self.gui.historyListModel.setThings(mangaStateObjects)
-      self.gui.historyListModel.reset()
+  def _valid(self):
+    return (self.data.position != None)
 
-    @QtCore.Slot()
-    def eraseHistory(self):
-      print "erasing history"
-      """the history list model needs to be updated only before the list
-      is actually shown, no need to update it dynamically every time a manga is added
-      to history"""
-      self.gui.mieru.clearHistory()
+  def _altitude_valid(self):
+    return self.data.altitude != None
 
-    @QtCore.Slot(result=float)
-    def getActiveMangaScale(self):
-      """return the saved scale of the currently active manga"""
-      activeManga = self.mieru.getActiveManga()
-      if activeManga:
-        return activeManga.getScale()
-      else:
-        return 1.0
+  def _speed_valid(self):
+    return self.data.speed != None
 
-    @QtCore.Slot(result=float)
-    def getActiveMangaShiftX(self):
-      """return the saved X shift of the currently active manga"""
-      activeManga = self.mieru.getActiveManga()
-      print self.mieru.getActiveManga()
-      if activeManga:
-        return activeManga.getShiftX()
-      else:
-        return 0.0
-
-    @QtCore.Slot(result=float)
-    def getActiveMangaShiftY(self):
-      """return the saved Y shift of the currently active manga"""
-      activeManga = self.mieru.getActiveManga()
-      if activeManga:
-        return activeManga.getShiftY()
-      else:
-        return 0.0
+  lat = QtCore.Property(float, _lat, notify=changed)
+  lon = QtCore.Property(float, _lon, notify=changed)
+  altitude = QtCore.Property(float, _altitude, notify=changed)
+  speed = QtCore.Property(float, _speed, notify=changed)
+  error = QtCore.Property(float, _error, notify=changed)
+  valid = QtCore.Property(bool, _valid, notify=changed)
+  speedValid = QtCore.Property(bool, _speed_valid, notify=changed)
+  altitudeValid = QtCore.Property(bool, _altitude_valid, notify=changed)
 
 
-class Stats(QtCore.QObject):
-    """make stats available to QML and integrable as a property"""
-    def __init__(self, stats):
-        QtCore.QObject.__init__(self)
-        self.stats = stats
+class GPSDataWrapper(QtCore.QObject):
 
-    @QtCore.Slot(bool)
-    def setOn(self, ON):
-      self.mieru.stats.setOn(ON)
+  changed = QtCore.Signal()
+  changed_target = QtCore.Signal()
+  changed_distance_bearing = QtCore.Signal()
 
-    @QtCore.Slot()
-    def reset(self):
-      self.stats.resetStats()
+  def __init__(self, modrana):
+    QtCore.QObject.__init__(self)
+    self.modrana = modrana
+#    self.modrana.connect('good-fix', self._on_good_fix)
+#    self.modrana.connect('no-fix', self._on_no_fix)
+#    self.modrana.connect('target-changed', self._on_target_changed)
+    self.modrana.watch('locationUpdated',self._posChangedCB)
 
-    @QtCore.Slot(result=str)
-    def getStatsText(self):
-        print ""
+    pos = self.modrana.get('pos', None)
+    speed = self.modrana.get('speed', 0)
+    bearing = self.modrana.get('bearing', 0)
+    elevation = self.modrana.get('elevation', 0)
+    fix = Fix(pos, elevation, bearing, speed)
+    self.gps_data = FixWrapper(fix)
+    self.gps_last_good_fix = FixWrapper(fix)
+    self.gps_has_fix = False
+    self.gps_status = ''
+    #self.astral = Astral()
 
-    def _get_statsText(self):
-      text = newlines2brs(re.sub('\n', '<br>', self.stats.getStatsText(headline=False)))
-      return text
+  def _posChangedCB(self, key, oldValue, newValue):
+    """position changed callback"""
+    print "POS CHANGED CALLBACK"
+    pos = self.modrana.get('pos', None)
+    if pos:
+      speed = self.modrana.get('speed', 0)
+      bearing = self.modrana.get('bearing', 0)
+      elevation = self.modrana.get('elevation', 0)
+      self._on_good_fix(Fix(pos, elevation, bearing, speed))
+    else:
+      self._on_no_fix()
 
-    def _set_statsText(self, statsText):
-      """if this method is called, it should trigger the
-      usual propety changed notification
-      NOTE: as the Info page is loaded from file each time
-      it is opened, the stats text is updated on startup and
-      thus this method doesn't need to be called"""
-      self.on_statsText.emit()
+  def _on_good_fix(self, fix):
+    logger.debug("Received good fix")
+    self.gps_data.update(fix)
+    self.gps_last_good_fix.update(fix)
+    self.gps_has_fix = True
+    self.changed_distance_bearing.emit()
+    self.changed.emit()
 
-    def _get_enabled(self):
-      return self.stats.isOn()
+  def _on_no_fix(self):
+    self.gps_data.update(gps_data)
+    self.gps_has_fix = False
+    self.gps_status = "unknown"
+    self.changed_distance_bearing.emit()
+    self.changed.emit()
 
-    def _set_enabled(self, value):
-      self.stats.setOn(value)
-      self.on_enabled.emit()
+  def _on_target_changed(self, target, distance, bearing):
+    self._target_valid = (target != None)
+    self._target = CoordinateWrapper(target) if target != None else CoordinateWrapper(geo.Coordinate(0, 0))
+    self.gps_target_distance = distance
+    self.gps_target_bearing = bearing
+    self.changed_distance_bearing.emit()
+    self.changed_target.emit()
+    logger.debug("Target is now set to %r" % target)
 
-    on_statsText = QtCore.Signal()
-    on_enabled = QtCore.Signal()
+  #    def _sun_angle_valid(self):
+  #        return self.astral.get_sun_azimuth_from_fix(self.gps_last_good_fix) != None
+  #
 
-    statsText = QtCore.Property(str, _get_statsText, _set_statsText,
-            notify=on_statsText)
-    enabled = QtCore.Property(bool, _get_enabled, _set_enabled,
-            notify=on_enabled)
+  def _target(self):
+    return self._target
+
+  def _target_valid(self):
+    return self._target_valid
+
+  def _gps_data(self):
+    return self.gps_data
+
+  def _gps_last_good_fix(self):
+    print "GPS LAST GOOD FIX"
+    return self.gps_last_good_fix
+
+  def _gps_has_fix(self):
+    return self.gps_has_fix
+
+  def _gps_target_distance_valid(self):
+    return self.gps_target_distance != None
+
+  def _gps_target_distance(self):
+    logger.debug("Target distance is %r" % self.gps_target_distance)
+    return float(self.gps_target_distance) if self._gps_target_distance_valid()  else 0
+
+  def _gps_target_bearing(self):
+    try:
+      return float(self.gps_target_bearing)
+    except TypeError:
+      return 0
+
+  def _gps_status(self):
+    return self.gps_status
+
+
+  data = QtCore.Property(QtCore.QObject, _gps_data, notify=changed)
+  lastGoodFix = QtCore.Property(QtCore.QObject, _gps_last_good_fix, notify=changed)
+  hasFix = QtCore.Property(bool, _gps_has_fix, notify=changed)
+#  targetValid = QtCore.Property(bool, _target_valid, notify=changed_target)
+#  target = QtCore.Property(QtCore.QObject, _target, notify=changed_target)
+#  targetDistanceValid = QtCore.Property(bool, _gps_target_distance_valid, notify=changed_distance_bearing)
+#  targetDistance = QtCore.Property(float, _gps_target_distance, notify=changed_distance_bearing)
+#  targetBearing = QtCore.Property(float, _gps_target_bearing, notify=changed_distance_bearing)
+  status = QtCore.Property(str, _gps_status, notify=changed)
 
 class Options(QtCore.QObject):
     """make options available to QML and integrable as a property"""
-    def __init__(self, mieru):
+    def __init__(self, modrana):
         QtCore.QObject.__init__(self)
-        self.mieru = mieru
+        self.modrana = modrana
 
     """ like this, the function can accept
     and return different types to and from QML
@@ -426,8 +429,8 @@ class Options(QtCore.QObject):
     def get(self, key, default):
       """get a value from Mierus persistant options dictionary"""
       print "GET"
-      print key, default, self.mieru.get(key, default)
-      return self.mieru.get(key, default)
+      print key, default, self.modrana.get(key, default)
+      return self.modrana.get(key, default)
 
     @QtCore.Slot(str, bool)
     @QtCore.Slot(str, int)
@@ -437,8 +440,7 @@ class Options(QtCore.QObject):
       """set a keys value in Mierus persistant options dictionary"""
       print "SET"
       print key, value
-      return self.mieru.set(key, value)
-
+      return self.modrana.set(key, value)
 
 # ** history list wrappers **
 

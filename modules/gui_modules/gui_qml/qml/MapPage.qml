@@ -6,9 +6,10 @@ import "functions.js" as F
 Page {
     id: tabMap
     property int buttonSize: 72
-    property alias geocacheModel: pinchmap.model // for access by the list page
+    /*property alias geocacheModel: pinchmap.model // for access by the list page
+    */
 
-    orientationLock: PageOrientation.LockPortrait
+    //orientationLock: PageOrientation.LockPortrait
 
     function showOnMap(lat, lon) {
         pinchmap.setCenterLatLon(lat, lon);
@@ -17,13 +18,14 @@ Page {
 
     PinchMap {
         id: pinchmap
-        width: listPage.width
-        height: listPage.height
+        width: parent.width
+        height: parent.height
         zoomLevel: 11
 
         Connections {
             target: gps
             onLastGoodFixChanged: {
+                console.log("fix changed")
                 if (tabMap.status == PageStatus.Active) {
                     if (followPositionButton.checked && ! updateTimer.running) {
                         console.debug("Update from GPS position")
@@ -35,19 +37,6 @@ Page {
                 }
             }
         }
-        Connections {
-            target: settings
-            onSettingsChanged: {
-                pinchmap.setCenterLatLon(settings.mapPositionLat, settings.mapPositionLon); console.debug("Lat/Lon restored from settings: " + settings.mapPositionLat + " / " + settings.mapPositionLon);
-                pinchmap.setZoomLevel(settings.mapZoom); console.debug("Zoom restored from settings: " + settings.mapZoom);
-            }
-        }
-        Connections {
-            target: controller
-            onMarksChanged: {
-                pinchmap.updateGeocaches();
-            }
-        }
 
         Timer {
             id: updateTimer
@@ -55,6 +44,7 @@ Page {
             repeat: false
         }
 
+        /*
         onLatitudeChanged: {
             settings.mapPositionLat = latitude;
         }
@@ -64,7 +54,7 @@ Page {
         onZoomLevelChanged: {
             settings.mapZoom = pinchmap.zoomLevel;
         }
-
+        */
 
         showTargetIndicator: gps.targetValid;
         showTargetAtLat: gps.target.lat || 0
@@ -75,19 +65,22 @@ Page {
         currentPositionValid: gps.hasFix
         currentPositionLat: gps.lastGoodFix.lat
         currentPositionLon: gps.lastGoodFix.lon
-        currentPositionAzimuth: compass.azimuth
+        //currentPositionAzimuth: compass.azimuth
         currentPositionError: gps.lastGoodFix.error
 
     }
 
     Image {
         id: compassImage
-        source: "../data/windrose-simple.svg"
+        /* TODO: investigate how to replace this by an image loader
+         what about rendered size ?
+         */
+        source: "../../../../themes/"+ rWin.theme +"/windrose-simple.svg"
         transform: [Rotation {
                 id: azCompass
                 origin.x: compassImage.width/2
                 origin.y: compassImage.height/2
-                angle: -compass.azimuth
+                //angle: -compass.azimuth
             }]
         anchors.left: tabMap.left
         anchors.leftMargin: 16
@@ -103,7 +96,10 @@ Page {
             property int outerMargin: 0
             id: arrowImage
             visible: (gps.targetValid && gps.lastGoodFix.valid)
-            source: "../data/arrow_target.svg"
+            /* TODO: investigate how to replace this by an image loader
+             what about rendered size ?
+             */
+            source: "../../../../themes/"+ rWin.theme +"/arrow_target.svg"
             width: (compassImage.paintedWidth / compassImage.sourceSize.width)*sourceSize.width
             fillMode: Image.PreserveAspectFit
             x: compassImage.width/2 - width/2
@@ -117,7 +113,7 @@ Page {
         }
     }
 
-
+    /*
     Text {
         text: F.formatDistance(gps.targetDistance || 0, settings)
         anchors.horizontalCenter: compassImage.horizontalCenter
@@ -128,6 +124,7 @@ Page {
         font.pixelSize: 32
         visible: (gps.targetValid && gps.data.valid && gps.targetDistanceValid)
     }
+    */
 
     Row {
         id: buttonsRight
@@ -195,40 +192,6 @@ Page {
                 PauseAnimation { duration: 750; }
                 PropertyAction { target: zoomBar; property: "visible"; value: false }
             }
-        }
-    }
-
-    Label {
-        id: tooManyPoints
-        text: "Zoom in to see geocaches"
-        anchors.bottom: zoomBar.top
-        anchors.bottomMargin: 8
-        anchors.horizontalCenter: pinchmap.horizontalCenter
-        visible: pinchmap.tooManyPoints
-        color: "black"
-    }
-    
-    
-    function openMenu() {
-        menu.open();
-    }
-    
-    Menu {
-        id: menu
-        visualParent: parent
-
-        MenuLayout {
-            MenuItem { text: "Use Center as Target"; onClicked: {
-                    var c = pinchmap.getCenter();
-                    controller.setTarget(c[0], c[1]);
-                }}
-            MenuItem { text: "Go to Target"; visible: gps.targetValid; onClicked: {
-                    followPositionButton.checked = false;
-                    pinchmap.setCenterLatLon(gps.target.lat, gps.target.lon);
-                }}
-            MenuItem { text: "Fetch Details for all in view"; onClicked: { pinchmap.requestUpdateDetails() } }
-            MenuItem { text: "Reload Map"; onClicked: { pinchmap.populate(); } }
-            MenuItem { text: "Settings"; onClicked: { showSettings(); } }
         }
     }
 }

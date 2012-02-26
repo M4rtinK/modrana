@@ -131,7 +131,7 @@ class device_n900(deviceModule):
     return "liblocation"
 
   def startAutorotation(self):
-    """start the GUI autorotation feature"""
+    """start the GUI automatic rotation feature"""
     try:
       import n900_maemo5_portrait
       rotationMode = self.get('rotationMode', "auto") # get last used mode
@@ -411,7 +411,7 @@ class device_n900(deviceModule):
   def _libLocationUpdateCB(self, device):
     """
     from:  http://wiki.maemo.org/PyMaemo/Using_Location_API
-    result tupple in order:
+    result tuple in order:
     * mode: The mode of the fix
     * fields: A bitfield representing which items of this tuple contain valid data
     * time: The timestamp of the update (location.GPS_DEVICE_TIME_SET)
@@ -461,7 +461,7 @@ class device_n900(deviceModule):
         # TODO: remove when not needed
         if self.get('n900GPSDebug', False):
           print "## N900 GPS debugging info ##"
-          print "fix tupple from the Location API:"
+          print "fix tuple from the Location API:"
           print fix
           print "position,bearing,speed (in descending order):"
           print self.get('pos', None)

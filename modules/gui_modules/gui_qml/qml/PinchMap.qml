@@ -36,13 +36,14 @@ Rectangle {
     
     property alias angle: rot.angle
 
-    property string url: settings.currentMapType.url
+    //property string url: settings.currentMapType.url
+    property string url: "http://a.tile.openstreetmap.org/%(zoom)d/%(x)d/%(y)d.png"
 
     property int earthRadius: 6371000
 
     property bool tooManyPoints: true
 
-    property alias model: geocacheDisplay.model
+    //property alias model: geocacheDisplay.model
 
     transform: Rotation {
         angle: 0
@@ -122,7 +123,6 @@ Rectangle {
         var l = getCenter()
         longitude = l[1]
         latitude = l[0]
-        updateGeocaches();
     }
 
     function requestUpdate() {
@@ -226,7 +226,7 @@ Rectangle {
 
     function tileUrl(tx, ty) {
         if (ty < 0 || ty > maxTileNo) {
-            return "../data/noimage.png"
+            return "image://icons/"+ rWin.theme +"/noimage.png"
         } else {
             var x = F.getMapTile(url, tx, ty, zoomLevel);
             return x
@@ -318,7 +318,7 @@ Rectangle {
     
     Image {
         id: targetIndicator
-        source: "../data/target-indicator-cross.png"
+        source: "image://icons/"+ rWin.theme +"/target-indicator-cross.png"
         property variant t: getMappointFromCoord(showTargetAtLat, showTargetAtLon)
         x: map.x + t[0] - width/2
         y: map.y + t[1] - height/2
@@ -344,7 +344,8 @@ Rectangle {
 
     Rectangle {
         id: positionErrorIndicator
-        visible: showCurrentPosition && settings.optionsShowPositionError
+        //visible: showCurrentPosition && settings.optionsShowPositionError
+        visible: true
         width: currentPositionError * (1/getMetersPerPixel(currentPositionLat)) * 2
         height: width
         color: "#300000ff"
@@ -357,7 +358,10 @@ Rectangle {
 
     Image {
         id: positionIndicator
-        source: currentPositionValid ? "../data/position-indicator.png" : "../data/position-indicator-red.png"
+
+        source: currentPositionValid ?
+                "image://icons/"+ rWin.theme +"/position-indicator.png" :
+                "image://icons/"+ rWin.theme +"/position-indicator-red.png"
         property variant t: getMappointFromCoord(currentPositionLat, currentPositionLon)
         x: map.x + t[0] - width/2
         y: map.y + t[1] - height + positionIndicator.width/2
@@ -386,7 +390,8 @@ Rectangle {
     }
 
     Text {
-        text: F.formatDistance(scaleBarLength[1], settings)
+        //text: F.formatDistance(scaleBarLength[1], settings)
+        //text: F.formatDistance(scaleBarLength[1], settings)
         anchors.horizontalCenter: scaleBar.horizontalCenter
         anchors.top: scaleBar.bottom
         anchors.topMargin: 8
@@ -403,18 +408,6 @@ Rectangle {
     onCornerTileXChanged: {
         updateGeocaches();
     }*/
-
-    function updateGeocaches () {
-        console.debug("Update geocaches called")
-        if (zoomLevel < minZoomLevelShowGeocaches) {
-            tooManyPoints = true
-            //geocacheDisplay.model = emptyList
-        } else {
-            var from = getCoordFromScreenpoint(0,0)
-            var to = getCoordFromScreenpoint(pinchmap.width,pinchmap.height)
-            tooManyPoints = controller.getGeocaches(geocacheDisplay, from[0], from[1], to[0], to[1]);
-        }
-    }
 
     PinchArea {
         id: pincharea;
