@@ -28,14 +28,26 @@ if gs.GUIString == "GTK":
   import gobject
   ready = True
 else:
+  from PySide import QtCore
   ready = False
 # TODO: add Qt support
 
 def getModule(m,d,i):
-  return(Cron(m,d,i))
+  """
+  return module version corresponding to the currently used toolkit
+  (eq. one that uses the timers provided by the toolkit
+  - gobject.timeout_add, QTimer, etc.
+  """
+  if gs.GUIString == 'QML':
+    return(CronQt(m,d,i))
+  else: # GTK for now
+    return(Cron(m,d,i))
 
 class Cron(ranaModule):
-  """A timing and scheduling module for modRana."""
+  """A timing and scheduling module for modRana
+  -> this class is an specifies and interface for
+  concrete implementations
+  """
 
   """Why is there a special module for timing ?
      The reason is twofold:
@@ -51,9 +63,52 @@ class Cron(ranaModule):
      It might be also possible to stop or pause some/all of the timers
      after a period of inactivity, or some such.
   """
-  
+
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+
+  def addIdle(self, callback, args):
+    """add a callback that is called once the main loop becomes idle"""
+    pass
+
+  def addTimeout(self, callback, timeout, caller, description, args=[]):
+    """the callback will be called timeout + time needed to execute the callback
+    and other events"""
+    pass
+
+  def _doTimeout(self, id, callback, args):
+    """wrapper about the timeout function, which makes it possible to check
+    if a timeout is still in progress from the "outside"
+    - like this, the underlying timer should also be easily replaceable
+    """
+
+    if callback(*args) == False:
+      # the callback returned False,
+      # that means it wants to quit the timeout
+
+      # stop tracking
+      self.removeTimeout(id)
+      # propagate the quit signal
+      return False
+    else:
+      return True # just run the loop
+
+  def removeTimeout(self, id):
+    """remove timeout with a given id"""
+    pass
+
+  def modifyTimeout(self,id, newTimeout):
+    """modify the duration of a timeout in progress"""
+    pass
+
+class CronGTK(Cron):
+  """A timing and scheduling module for modRana
+  -> this is an implementation that uses GObject & the GTK main loop
+  to do the timing
+  """
+  
+  def __init__(self, m, d, i):
+    Cron.__init__(self, m, d, i)
     gui = self.modrana.gui
 
     self.nextId = 0
@@ -82,7 +137,6 @@ class Cron(ranaModule):
     if not ready:
       return
     id = self._getID()
-    # TODO: other backends
     realId = gobject.timeout_add(timeout, self._doTimeout, id, callback, args)
     timeoutTuple = (callback, args, timeout, caller, description, realId)
     with self.dataLock:
@@ -115,24 +169,76 @@ class Cron(ranaModule):
       else:
         print("cron: can't modify timeout, wrong id: ", id)
 
-  def _doTimeout(self, id, callback, args):
-    """wrapper about the timeout function, which makes it possible to check
-    if a timeout is still in progress from the "outside"
-    - like this, the underlying timer should also be easily replaceable
+class CronQt(Cron):
+  """A timing and scheduling module for modRana
+  -> this class is an specifies and interface for
+  concrete implementations
+  """
+
+  def __init__(self, m, d, i):
+    Cron.__init__(self, m, d, i)
+    self.nextId = 0
+    # cronTab and activeIds should be in sync
+    self.cronTab = {"idle":{}, "timeout":{}}
+    #    self.info = {}
+    self.dataLock = threading.RLock()
+
+  def _getID(self):
+    """get an unique id for timing related request that can be
+    returned to the callers and used as a handle
+    TODO: can int overflow in Python ?
+    TODO: id recycling ?"""
+    with self.dataLock:
+      id = self.nextId
+      self.nextId+=1
+      return id
+
+  def addIdle(self, callback, args):
+    """add a callback that is called once the main loop becomes idle"""
+    pass
+
+  def addTimeout(self, callback, timeout, caller, description, args=[]):
+    """the callback will be called timeout + time needed to execute the callback
+    and other events
     """
+    # create and configure the timer
+    timer = QtCore.QTimer()
+#    timer.setInterval(timeout)
+    id = self._getID()
+    """create a new function that calls the callback processing function
+     with thh provided arguments"""
+    handleThisTimeout = lambda: self._doTimeout(id, callback, args)
+    # connect this function to the timeout
+    timer.timeout.connect(handleThisTimeout)
+    # store timer data
+    timeoutTuple = (callback, args, timeout, caller, description, id, timer)
+    with self.dataLock:
+      self.cronTab['timeout'][id] = timeoutTuple
+    # start the timer
+    timer.start(timeout)
 
-    if callback(*args) == False:
-      # the callback returned False,
-      # that means it wants to quit the timeout
+  def removeTimeout(self, id):
+    """remove timeout with a given id"""
+    with self.dataLock:
+      if id in self.cronTab['timeout'].keys():
+        (callback, args, timeout, caller, description, id, timer) = self.cronTab['timeout'][id]
+        timer.stop()
+        del self.cronTab['timeout'][id]
+      else:
+        print("cron: can't remove timeout, wrong id: ", id)
 
-      # stop tracking
-      self.removeTimeout(id)
-      # propagate the quit signal
-      return False
-    else:
-      return True # just run the loop
-
-
+  def modifyTimeout(self, id, newTimeout):
+    """modify the duration of a timeout in progress"""
+    with self.dataLock:
+      if id in self.cronTab['timeout'].keys():
+        # load the timeout data
+        (callback, args, timeout, caller, description, id, timer) = self.cronTab['timeout'][id]
+        # reset the timeout duration
+        timer.setInterval(newTimeout)
+        # update the timeout data
+        self.cronTab['timeout'][id] = (callback, args, newTimeout, caller, description, id, timer)
+      else:
+        print("cron: can't modify timeout, wrong id: ", id)
 
 #  def _addInfo(self, id, info):
 #    """add a message for a timeout handler to read"""
