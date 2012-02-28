@@ -66,6 +66,8 @@ Page {
         currentPositionLat: gps.lastGoodFix.lat
         currentPositionLon: gps.lastGoodFix.lon
         //currentPositionAzimuth: compass.azimuth
+        //TODO: switching between GPS bearing & compass azimuth
+        currentPositionAzimuth: gps.lastGoodFix.bearing
         currentPositionError: gps.lastGoodFix.error
 
     }

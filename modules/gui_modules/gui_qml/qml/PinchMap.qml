@@ -212,10 +212,11 @@ Rectangle {
     function getCenter() {
         return getCoordFromScreenpoint(pinchmap.width/2, pinchmap.height/2);
     }
-    function sinh(aValue)
-    {
+
+    function sinh(aValue) {
         return (Math.pow(Math.E, aValue)-Math.pow(Math.E, -aValue))/2;
     }
+
     function num2deg(xtile, ytile) {
         var n = Math.pow(2, zoomLevel);
         var lon_deg = xtile / n * 360.0 - 180;

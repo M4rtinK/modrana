@@ -58,7 +58,6 @@ class gpsd2(ranaModule):
   def screenUpdateCB(self):
     """update the screen and also GPSD location if enabled
     TODO: more efficient screen updates"""
-#    print "updating screen"
     self.locationUpdate()
 
     gui = self.modrana.gui
@@ -74,8 +73,6 @@ class gpsd2(ranaModule):
       sFromLastRequest = time() - gui.getLastFullRedrawRequest()
       if sFromLastRequest > 0.85:
         self.set('needRedraw', True)
-    else:
-      print("location: GUI module not available")
 
   def startGPSD(self):
     """start the GPSD based location update method"""

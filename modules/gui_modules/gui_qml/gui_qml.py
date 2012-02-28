@@ -280,6 +280,10 @@ class FixWrapper(QtCore.QObject):
   def _speed(self):
     return self.data.speed if self.data.speed != None else 0
 
+  def _bearing(self):
+    print "BEARING"
+    return self.data.bearing if self.data.bearing != None else 0
+
   def _error(self):
     return float(self.data.error)
 
@@ -296,10 +300,12 @@ class FixWrapper(QtCore.QObject):
   lon = QtCore.Property(float, _lon, notify=changed)
   altitude = QtCore.Property(float, _altitude, notify=changed)
   speed = QtCore.Property(float, _speed, notify=changed)
+  bearing = QtCore.Property(float, _bearing, notify=changed)
   error = QtCore.Property(float, _error, notify=changed)
   valid = QtCore.Property(bool, _valid, notify=changed)
   speedValid = QtCore.Property(bool, _speed_valid, notify=changed)
   altitudeValid = QtCore.Property(bool, _altitude_valid, notify=changed)
+
 
 
 class GPSDataWrapper(QtCore.QObject):
