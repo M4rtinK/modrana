@@ -25,10 +25,10 @@ Page {
         Connections {
             target: gps
             onLastGoodFixChanged: {
-                console.log("fix changed")
+                //console.log("fix changed")
                 if (tabMap.status == PageStatus.Active) {
                     if (followPositionButton.checked && ! updateTimer.running) {
-                        console.debug("Update from GPS position")
+                        //console.debug("Update from GPS position")
                         pinchmap.setCenterLatLon(gps.lastGoodFix.lat, gps.lastGoodFix.lon);
                         updateTimer.start();
                     } else if (followPositionButton.checked) {

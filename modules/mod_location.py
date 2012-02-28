@@ -293,7 +293,7 @@ class GPSDConsumer(threading.Thread):
 #          try:
 #            self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
 #          except Exception, e:
-#            print("GPSDConsumer: eror reading data", e)
+#            print("GPSDConsumer: error reading data", e)
 
   def shutdown(self):
     print("GPSDConsumer: stopping")

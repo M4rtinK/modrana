@@ -48,7 +48,7 @@ class Logger:
     if self.log:
       print message
 
-logger = Logger(log=True)
+logger = Logger(log=False)
 
 def getModule(m,d,i):
     return(QMLGUI(m,d,i))
@@ -164,11 +164,11 @@ class QMLGUI(GUIModule):
   def startMainLoop(self):
     """start the main loop or its equivalent"""
 
-    print "QML start main loop"
+#    print "QML start main loop"
 
     # start main loop
     self.app.exec_()
-    print "QML main loop started"
+#    print "QML main loop started"
 
   def _qtWindowClosed(self, event):
     print('qt window closing down')
@@ -269,7 +269,6 @@ class FixWrapper(QtCore.QObject):
 
   def _lon(self):
     if self.data.position != None:
-      print self.data
       return self.data.position[1]
     else:
       return -1
@@ -281,7 +280,6 @@ class FixWrapper(QtCore.QObject):
     return self.data.speed if self.data.speed != None else 0
 
   def _bearing(self):
-    print "BEARING"
     return self.data.bearing if self.data.bearing != None else 0
 
   def _error(self):
@@ -335,7 +333,6 @@ class GPSDataWrapper(QtCore.QObject):
 
   def _posChangedCB(self, key, oldValue, newValue):
     """position changed callback"""
-    print "POS CHANGED CALLBACK"
     pos = self.modrana.get('pos', None)
     if pos:
       speed = self.modrana.get('speed', 0)
@@ -383,7 +380,6 @@ class GPSDataWrapper(QtCore.QObject):
     return self.gps_data
 
   def _gps_last_good_fix(self):
-    print "GPS LAST GOOD FIX"
     return self.gps_last_good_fix
 
   def _gps_has_fix(self):
@@ -517,7 +513,6 @@ class HistoryListModel(QtCore.QAbstractListModel):
       #count = len(self.checked())
       for state in checked:
         paths.append(state.path)
-      print paths
       self.mieru.removeMangasFromHistory(paths)
       # quick and dirty remove
       for state in checked:
