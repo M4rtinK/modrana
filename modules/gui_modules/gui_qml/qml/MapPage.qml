@@ -169,11 +169,11 @@ Page {
         }
         Button {
             id: refreshGeocachesButton
-            iconSource: "image://theme/icon-s-transfer-download" + (theme.inverted ? "-inverse" : "")
+            iconSource: "image://theme/icon-m-content-application" + (theme.inverted ? "-inverse" : "")
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             onClicked: {
-                pinchmap.requestUpdate()
+                rWin.pageStack.push(mainMenu)
             }
         }
     }

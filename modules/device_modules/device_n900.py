@@ -104,6 +104,8 @@ class device_n900(deviceModule):
     else:
         self.GTK = False
 
+  def startInFullscreen(self):
+    return True
 
   def handleMessage(self, message, type, args):
     if message == 'modeChanged':

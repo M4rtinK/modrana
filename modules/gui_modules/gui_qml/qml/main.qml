@@ -10,6 +10,10 @@ PageStackWindow {
             id: mapPage
         }
 
+    MenuPage {
+        id : mainMenu
+    }
+
     /** global notification handling **/
     InfoBanner {
         id: notification
