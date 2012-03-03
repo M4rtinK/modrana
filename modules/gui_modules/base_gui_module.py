@@ -59,6 +59,10 @@ class GUIModule(ranaModule):
     """report if current GUI supports acceleration"""
     pass
 
+  def isFullscreen(self):
+    """report if the application is in fullscreen mode"""
+    pass
+
   def toggleFullscreen(self):
     """
     toggle fullscreen state
@@ -72,7 +76,6 @@ class GUIModule(ranaModule):
     * False - unfullscreen
     """
     pass
-
 
   def enableDefaultDrag(self):
     """

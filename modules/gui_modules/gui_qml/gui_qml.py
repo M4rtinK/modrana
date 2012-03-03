@@ -92,20 +92,15 @@ class QMLGUI(GUIModule):
     self.iconProvider = IconImageProvider()
     self.view.engine().addImageProvider("icons",self.iconProvider)
     rc = self.view.rootContext()
-    # make the reading state accessible from QML
-    #readingState = ReadingState(self)
-    #rc.setContextProperty("readingState", readingState)
-    # make stats accessible from QML
-    #stats = Stats(self.mieru.stats)
-    #rc.setContextProperty("stats", stats)
     # make options accessible from QML
     options = Options(self.modrana)
     rc.setContextProperty("options", options)
     # make GPS accessible from QML
     gps = GPSDataWrapper(self.modrana)
     rc.setContextProperty("gps", gps)
-
-
+    # make the platform accessible from QML
+    platform = Platform(self.modrana)
+    rc.setContextProperty("platform", platform)
 
     # ** history list handling **
     # get the objects and wrap them
@@ -147,12 +142,20 @@ class QMLGUI(GUIModule):
   def getIDString(self):
     return "QML"
 
+  def isFullscreen(self):
+    return self.window.isFullScreen()
+
   def toggleFullscreen(self):
     if self.window.isFullScreen():
       self.window.showNormal()
     else:
       self.window.showFullScreen()
 
+  def setFullscreen(self, value):
+    if value == True:
+      self.window.showFullScreen()
+    else:
+      self.window.showNormal()
 
   def setCDDragThreshold(self, threshold):
     """set the threshold which needs to be reached to disable centering while dragging
@@ -194,6 +197,55 @@ class QMLGUI(GUIModule):
 
     text = newlines2brs(text)
     self.rootObject.notify(text)
+
+class Platform(QtCore.QObject):
+  """make stats available to QML and integrable as a property"""
+  def __init__(self, modrana):
+    QtCore.QObject.__init__(self)
+    self.modrana = modrana
+
+  @QtCore.Slot(result=bool)
+  def isFullscreen(self):
+    return self.modrana.gui.isFullscreen()
+
+  @QtCore.Slot()
+  def toggleFullscreen(self):
+    self.modrana.gui.toggleFullscreen()
+
+  @QtCore.Slot(bool)
+  def setFullscreen(self, value):
+    self.modrana.gui.setFullscreen(value)
+
+  #  @QtCore.Slot()
+  #  def minimise(self):
+  #    return self.mieru.platform.minimise()
+
+  #  @QtCore.Slot(result=bool)
+  #  def showMinimiseButton(self):
+  #    """
+  #    Harmattan handles this by the Swype UI and
+  #    on PC this should be handled by window decorator
+  #    """
+  #    return self.mieru.platform.showMinimiseButton()
+
+  @QtCore.Slot(result=bool)
+  def showQuitButton(self):
+    """
+    Harmattan handles this by the Swype UI and
+    on PC it is a custom to have the quit action in the main menu
+    """
+    return self.modrana.dmod.needsQuitButton()
+
+  @QtCore.Slot(result=bool)
+  def incompleteTheme(self):
+    """
+    The "base" theme is incomplete at the moment (March 2012),
+    use fail-safe or local icons.
+    Hopefully, this can be removed once the themes are in better shape.
+    """
+    # the Fremantle theme is incomplete
+    return self.modrana.dmod.getDeviceIDString() == "n900"
+
 
 class IconImageProvider(QDeclarativeImageProvider):
   """the IconImageProvider class provides icon images to the QML layer as

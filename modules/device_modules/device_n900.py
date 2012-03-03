@@ -126,7 +126,7 @@ class device_n900(deviceModule):
     return((800,480))
 
   def startInFullscreen(self):
-    True
+    return True
 
   def getLocationType(self):
     """modRana uses liblocation on N900"""

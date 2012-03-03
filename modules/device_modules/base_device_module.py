@@ -131,7 +131,7 @@ class deviceModule(ranaModule):
     return False
 
   def handlesLocation(self):
-    """report wheter the device module handles position updates by itself"""
+    """report whether the device module handles position updates by itself"""
     return False
 
   def startLocation(self):
