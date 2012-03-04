@@ -156,6 +156,14 @@ Page {
         anchors.leftMargin: 16
         spacing: 16
         Button {
+            iconSource: "image://theme/icon-m-image-edit-resize"
+            onClicked: {
+                platform.toggleFullscreen()
+            }
+            width: parent.parent.buttonSize
+            height: parent.parent.buttonSize
+        }
+        Button {
             id: followPositionButton
             iconSource: "image://theme/icon-m-common-location" + (theme.inverted ? "-inverse" : "")
             width: parent.parent.buttonSize

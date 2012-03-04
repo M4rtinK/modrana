@@ -470,7 +470,7 @@ Rectangle {
             __wasClick = true;
         }
 
-        onReleased: {
+        /* onReleased: {
             __isPanning = false;
             if (! __wasClick) {
                 panEnd();
@@ -483,7 +483,7 @@ Rectangle {
                 }
             }
 
-        }
+        } */
 
         onPositionChanged: {
             if (__isPanning) {

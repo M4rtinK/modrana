@@ -72,68 +72,8 @@ Page {
                 } else {
                     pageList.openMenu()
                 }
-
             }
 
         }
     }
-
-    DetailsDefaultPage {
-        id: pageDetailsDefault
-    }
-
-    ListPage {
-        id: pageList
-    }
-    
-    Loader {
-        id: pageSettings
-    }
-
-
-    ToolBarLayout {
-        id: commonTools
-        visible: true
-        ToolIcon {
-            iconId: "toolbar-back" + ((! tabGroup.currentTab.depth || tabGroup.currentTab.depth < 2) ? "-dimmed" : "")// + (theme.inverted ? "-white" : "")
-            onClicked: {
-                if (tabGroup.currentTab.depth && tabGroup.currentTab.depth > 1) tabGroup.currentTab.pop();
-            }
-
-        }
-
-        ButtonRow {
-            style: TabButtonStyle { }
-            TabButton {
-                //text: "Compass"
-                iconSource: "../data/icon-m-toolbar-compass" + (theme.inverted ? "-night" : "") + ".png"
-                tab: tabCompass
-            }
-            TabButton {
-                //text: "Map"
-                iconSource: "../data/icon-m-toolbar-map" + (theme.inverted ? "-night" : "") + ".png"
-                tab: tabMap
-            }
-            TabButton {
-                //text: "Details"
-                tab: tabDetailsPageStack
-                iconSource: "image://theme/icon-m-toolbar-new-message" + (theme.inverted ? "-white" : "")
-            }
-            TabButton {
-                //text: "Details"
-                tab: tabListPageStack
-                iconSource: "image://theme/icon-m-toolbar-search" + (theme.inverted ? "-white" : "")
-            }
-        }
-
-
-        ToolIcon {
-            iconId: "toolbar-view-menu"
-            onClicked: {
-                tabGroup.currentTab.openMenu();
-            }
-
-        }
-    }
-    
 }
