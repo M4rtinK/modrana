@@ -264,6 +264,8 @@ class IconImageProvider(QDeclarativeImageProvider):
       #return img.scaled(requestedSize)
     except Exception, e:
       print("QML GUI: icon image provider: loading icon failed", e)
+      print iconPath
+      print 'themes/%s' % (iconPath)
 
 # from AGTL
 class Fix():
