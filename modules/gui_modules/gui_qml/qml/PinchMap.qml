@@ -325,7 +325,7 @@ Rectangle {
         y: map.y + t[1] - height/2
 
         visible: showTargetIndicator
-        trcd rana   ansform: Rotation {
+        transform: Rotation {
             id: rotationTarget
             origin.x: targetIndicator.width/2
             origin.y: targetIndicator.height/2
