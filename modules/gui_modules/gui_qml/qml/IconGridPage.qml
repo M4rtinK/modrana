@@ -4,15 +4,23 @@ import com.nokia.meego 1.0
 Page {
     id : iconGP
     property double iconMargin : width/20.0
-    property double iconSize : (width-2)/5.0
+    property int hIcons : rWin.inPortrait ? 2 : 4
+    property double iconSize : (width-2)/hIcons
     // search, routes, POI, mode, options, info
+
+    // page background
+    Rectangle {
+        anchors.fill : parent
+        color : "black"
+    }
+
 
     ListModel {
         id : testModel
 
         ListElement {
-            caption : ""
-            icon : ""
+            caption : "back"
+            icon : "left_arrow_black.png"
             menu : ""
         }
 
@@ -51,63 +59,41 @@ Page {
     // main flickable with icon grid
     GridView {
         anchors.fill : parent
-        anchors.topMargin : iconGP.iconMargin/2.0
+        anchors.topMargin : iconGP.iconMargin/4.0
         //anchors.margins : iconGP.iconMargin
         cellHeight : iconGP.iconSize
         cellWidth : iconGP.iconSize
 
         model : testModel
-        delegate : Item {
-            width : iconGP.iconSize
-            height : iconGP.iconSize
-            // background
-            Rectangle {
-                anchors.horizontalCenter : parent.horizontalCenter
-                anchors.margins : iconGP.iconMargin/2.0
-                width : iconGP.iconSize-iconGP.iconMargin/2.0
-                height : iconGP.iconSize-iconGP.iconMargin/2.0
-                // handle place-holders
-                visible : icon != ""
-                // TODO: get color from theme
-                color : "#92aaf3"
-                radius : 10
-                smooth : true
-
-                // icon
-                TIcon {
-                    anchors.horizontalCenter : parent.horizontalCenter
-                    iconName : icon
-                    anchors.margins : iconGP.iconMargin
-                    width : parent.width-iconGP.iconMargin
-                    height : parent.height-iconGP.iconMargin
-                }
-            }
-            // caption
-            Label {
-                text : caption
-                anchors.horizontalCenter : parent.horizontalCenter
-                anchors.bottom : parent.bottom
-                anchors.bottomMargin : iconGP.iconMargin/1.5
-            }
-            /*
-            Rectangle {
-                width : iconGP.iconSize
-                height : iconGP.iconSize
-                //anchors.fill : parent
-                color : "blue"
-            }*/
+        delegate : IconGridButton {
+            //anchors.fill : parent
+            // handle place-holders
+            visible : icon != ""
+            iconName : icon
+            text : caption
+            iconSize : iconGP.iconSize
+            margin : iconGP.iconMargin
         }
+        Component.onCompleted: console.log("AASDASDASDASDASDASD")
+        //Component.onCompleted: console.log("icon grid " + model)
+
+
     }
 
     // main "escape" button
-    Button {
+
+    IconGridButton {
+        iconSize : iconGP.iconSize
+        margin : iconGP.iconMargin
         anchors.top : parent.top
         anchors.left : parent.left
-        anchors.leftMargin : iconGP.iconMargin/2.0
-        anchors.topMargin : iconGP.iconMargin/2.0
-        width : iconGP.iconSize-iconGP.iconMargin/2.0
-        height : iconGP.iconSize-iconGP.iconMargin/2.0
-        iconSource: "image://theme/icon-m-common-previous"
+        //anchors.leftMargin : iconGP.iconMargin/12.0
+        anchors.topMargin : iconGP.iconMargin/4.0
+        //width : iconGP.iconSize-iconGP.iconMargin/2.0
+        //height : iconGP.iconSize-iconGP.iconMargin/2.0
+        iconName : "left_arrow_black.png"
+        text : "back"
+        color : "blue"
         opacity : 0.55
         onClicked : {
             rWin.pageStack.pop()
