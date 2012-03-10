@@ -2,6 +2,8 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 
 Page {
+    property alias model : gridView.model
+
     id : iconGP
     property double iconMargin : width/20.0
     property int hIcons : rWin.inPortrait ? 2 : 4
@@ -14,57 +16,20 @@ Page {
         color : "black"
     }
 
-
-    ListModel {
-        id : testModel
-
-        ListElement {
-            caption : "back"
-            icon : "left_arrow_black.png"
-            menu : ""
-        }
-
-        ListElement {
-            caption : "search"
-            icon : "search.png"
-            menu : ""
-        }
-        ListElement {
-            caption : "routes"
-            icon : "route.png"
-            menu : ""
-        }
-        ListElement {
-            caption : "POI"
-            icon : "poi.png"
-            menu : ""
-        }
-        ListElement {
-            caption : "info"
-            icon : "info.png"
-            menu : ""
-        }
-        ListElement {
-            caption : "mode"
-            icon : "mode.png"
-            menu : ""
-        }
-        ListElement {
-            caption : "options"
-            icon : "options.png"
-            menu : ""
-        }
-    }
-
     // main flickable with icon grid
     GridView {
+        id : gridView
         anchors.fill : parent
         anchors.topMargin : iconGP.iconMargin/4.0
         //anchors.margins : iconGP.iconMargin
         cellHeight : iconGP.iconSize
         cellWidth : iconGP.iconSize
 
-        model : testModel
+        // default empty list model
+        model : ListModel {
+        }
+
+
         delegate : IconGridButton {
             //anchors.fill : parent
             // handle place-holders
@@ -73,9 +38,17 @@ Page {
             text : caption
             iconSize : iconGP.iconSize
             margin : iconGP.iconMargin
+            onClicked : {
+                console.log("clicked")
+                console.log(caption)
+                rWin.pageStack.push(rWin.getPage(menu))
+            }
         }
-        Component.onCompleted: console.log("AASDASDASDASDASDASD")
-        //Component.onCompleted: console.log("icon grid " + model)
+        //insert the back arrow
+        Component.onCompleted: {
+            console.log("INSERTING BACK ARROW")
+            model.insert(0, {"caption": "back", "icon":"left_arrow_black.png", "menu":""})
+        }
 
 
     }

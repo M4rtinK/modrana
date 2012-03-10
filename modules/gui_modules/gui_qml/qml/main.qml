@@ -13,6 +13,27 @@ PageStackWindow {
     MenuPage {
         id : mainMenu
     }
+    OptionsMenuPage {
+        id : optionsMenu
+    }
+
+    /* looks like object ids can't be stored in ListElements,
+     so we need this function to return corresponding menu pages
+     for names given by a string
+    */
+
+    property variant pages : {
+        "mainMenu" : mainMenu,
+        "optionsMenu" : optionsMenu
+    }
+
+    function getPage(name) {
+        return pages[name]
+    /* TODO: some pages are not so often visited pages so they could
+    be loaded dynamically from their QML files ?
+    -> also, a loader pool might be used as a rudimentary page cache,
+    but this might not be needed if the speed is found to be adequate */
+    }
 
     /** global notification handling **/
     InfoBanner {

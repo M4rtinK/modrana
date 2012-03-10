@@ -7,8 +7,12 @@ Item {
     property real iconSize : 100
     property alias iconName : themedIcon.iconName
     property alias color : background.color
+    property alias sensitive : mouseArea.enabled
     property string text : ""
     signal clicked
+
+    scale : mouseArea.pressed ? 0.9 : 1.0
+    //transform: Scale { origin.x: 25; origin.y: 25; xScale: 3}
 
     width : iconSize
     height : iconSize
@@ -20,7 +24,7 @@ Item {
         width : icgb.iconSize-icgb.margin/2.0
         height : icgb.iconSize-icgb.margin/2.0
         // TODO: get color from theme
-        //color : icgb.clicked ? "black" : "#92aaf3"
+        //color : mouseArea.pressed ? "black" : "#92aaf3"
         color : "#92aaf3"
         radius : 10
         smooth : true
@@ -29,18 +33,24 @@ Item {
         TIcon {
             id: themedIcon
             anchors.horizontalCenter : parent.horizontalCenter
+            anchors.top : parent.top
+            anchors.bottom : iconLabel.top
+            anchors.right : parent.right
+            anchors.left : parent.left
             iconName : icon
             anchors.margins : icgb.margin
             width : parent.width-icgb.margin
             height : parent.height-icgb.margin
         }
-    }
-    // caption
-    Label {
-        text : icgb.text
-        anchors.horizontalCenter : parent.horizontalCenter
-        anchors.bottom : parent.bottom
-        anchors.bottomMargin : icgb.margin/1.5
+        // caption
+        Label {
+            id : iconLabel
+            text : icgb.text
+            font.pixelSize : rWin.inPortrait ? 42 : 36
+            anchors.horizontalCenter : parent.horizontalCenter
+            anchors.bottom : parent.bottom
+            anchors.bottomMargin : icgb.margin/1.5
+        }
     }
     MouseArea {
         id: mouseArea

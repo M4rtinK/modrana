@@ -176,7 +176,7 @@ Page {
             }
         }
         Button {
-            id: refreshGeocachesButton
+            id: mainMenuButton
             iconSource: "image://theme/icon-m-content-application" + (theme.inverted ? "-inverse" : "")
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
