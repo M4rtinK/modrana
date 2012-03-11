@@ -44,7 +44,6 @@ Page {
         }
         //insert the back arrow
         Component.onCompleted: {
-            //model.insert(0, {"caption": "back", "icon":"left_arrow_black.png", "menu":""})
             model.insert(0, {"caption": "", "icon":"", "menu":""})
         }
 
@@ -64,7 +63,8 @@ Page {
         //height : iconGP.iconSize-iconGP.iconMargin/2.0
         iconName : "left_arrow_black.png"
         text : "back"
-        color : "blue"
+        normalColor : "blue"
+        toggledColor: "#92aaf3"
         opacity : gridView.atYBeginning ? 1.0 : 0.55
         onClicked : {
             rWin.pageStack.pop()
