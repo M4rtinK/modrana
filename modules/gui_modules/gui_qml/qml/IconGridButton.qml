@@ -24,7 +24,7 @@ Item {
         width : icgb.iconSize-icgb.margin/2.0
         height : icgb.iconSize-icgb.margin/2.0
         // TODO: get color from theme
-        //color : mouseArea.pressed ? "black" : "#92aaf3"
+        // TODO: slightly darker (themable ?) pressed color ?
         color : "#92aaf3"
         radius : 10
         smooth : true
@@ -35,12 +35,11 @@ Item {
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.top : parent.top
             anchors.bottom : iconLabel.top
-            anchors.right : parent.right
-            anchors.left : parent.left
             iconName : icon
-            anchors.margins : icgb.margin
-            width : parent.width-icgb.margin
-            height : parent.height-icgb.margin
+            anchors.topMargin : icgb.margin
+            anchors.bottomMargin : icgb.margin/2.0
+            width : parent.width-icgb.margin*1.5
+            height : parent.height-icgb.margin*1.5
         }
         // caption
         Label {
@@ -49,7 +48,7 @@ Item {
             font.pixelSize : rWin.inPortrait ? 42 : 36
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.bottom : parent.bottom
-            anchors.bottomMargin : icgb.margin/1.5
+            anchors.bottomMargin : icgb.margin/2
         }
     }
     MouseArea {
