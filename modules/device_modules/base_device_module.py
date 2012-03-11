@@ -4,7 +4,7 @@
 # Base class for Rana device-specific modules
 # * it inherits everything in the base module
 # * ads some default functions and handling,
-#   that can be overriden for specific devices
+#   that can be overridden for a specific devices
 #----------------------------------------------------------------------------
 # Copyright 2007, Oliver White
 #
@@ -75,7 +75,7 @@ class deviceModule(ranaModule):
     return False
 
   def lpSkipCount(self):
-    """how many clicks to skip after a long press is detected and execised
+    """how many clicks to skip after a long press is detected and exercised
     * this might be device specific, as for example SHR on the Neo FreeRunner
     fires two clicks after lp, but Maemo on N900 fires just one
     * default value -> 1
@@ -84,7 +84,7 @@ class deviceModule(ranaModule):
     return 1
 
   def textEntryIminent(self):
-    """text entry box will be shown after this metod finishes
+    """text entry box will be shown after this method finishes
        - on some platforms, there are some steps needed to make sure
        it is actually visible (like disabling fullscreen, etc.)"""
     pass
@@ -159,7 +159,7 @@ class deviceModule(ranaModule):
     None
 
   def needsQuitButton(self):
-    """On some platforms (Android chroot) aplications
+    """On some platforms (Android chroot) applications
     need to provide their own shutdown buttons"""
     return False
   
