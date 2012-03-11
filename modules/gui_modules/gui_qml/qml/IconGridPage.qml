@@ -47,7 +47,8 @@ Page {
         //insert the back arrow
         Component.onCompleted: {
             console.log("INSERTING BACK ARROW")
-            model.insert(0, {"caption": "back", "icon":"left_arrow_black.png", "menu":""})
+            //model.insert(0, {"caption": "back", "icon":"left_arrow_black.png", "menu":""})
+            model.insert(0, {"caption": "", "icon":"", "menu":""})
         }
 
 
@@ -67,7 +68,7 @@ Page {
         iconName : "left_arrow_black.png"
         text : "back"
         color : "blue"
-        opacity : 0.55
+        opacity : gridView.atYBeginning ? 1.0 : 0.55
         onClicked : {
             rWin.pageStack.pop()
         }
