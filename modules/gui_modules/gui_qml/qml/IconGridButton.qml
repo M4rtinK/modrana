@@ -24,11 +24,10 @@ Item {
         height : icgb.iconSize-icgb.margin/2.0
         // TODO: get color from theme
         // TODO: slightly darker (themable ?) pressed color ?
-        //color : mouseArea.pressed ? Qt.darker("#92aaf3") : "#92aaf3"
-        color : "#92aaf3"
+        property real darking : mouseArea.pressed ? 1.5 : 1.0
+        color : Qt.darker("#92aaf3", darking)
         radius : 10
         smooth : true
-
         // icon
         TIcon {
             id: themedIcon
@@ -42,10 +41,12 @@ Item {
             height : parent.height-icgb.margin*1.5
         }
         // caption
-        Label {
+        Text {
+            smooth : true
             id : iconLabel
             text : icgb.text
             font.pixelSize : rWin.inPortrait ? 42 : 36
+            font.bold : mouseArea.pressed
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.bottom : parent.bottom
             anchors.bottomMargin : icgb.margin/2
@@ -55,11 +56,5 @@ Item {
         id: mouseArea
         anchors.fill: parent
         onClicked: icgb.clicked()
-    }
-    Rectangle {
-        anchors.fill : parent
-        visible : mouseArea.pressed
-        color : "black"
-        opacity : 0.35
     }
 }
