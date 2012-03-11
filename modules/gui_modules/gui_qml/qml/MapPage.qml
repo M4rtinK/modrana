@@ -56,9 +56,9 @@ Page {
         }
         */
 
-        showTargetIndicator: gps.targetValid;
-        showTargetAtLat: gps.target.lat || 0
-        showTargetAtLon: gps.target.lon || 0
+        //showTargetIndicator: gps.targetValid;
+        //showTargetAtLat: gps.target.lat || 0
+        //showTargetAtLon: gps.target.lon || 0
         // Rotating the map for fun and profit.
         // angle: -compass.azimuth
         showCurrentPosition: true
@@ -97,7 +97,7 @@ Page {
             property int angle: gps.targetBearing || 0
             property int outerMargin: 0
             id: arrowImage
-            visible: (gps.targetValid && gps.lastGoodFix.valid)
+            //visible: (gps.targetValid && gps.lastGoodFix.valid)
             /* TODO: investigate how to replace this by an image loader
              what about rendered size ?
              */
@@ -156,7 +156,10 @@ Page {
         anchors.leftMargin: 16
         spacing: 16
         Button {
-            iconSource: "image://theme/icon-m-image-edit-resize"
+            //iconSource: "image://theme/icon-m-image-edit-resize"
+            iconSource: "image://theme/icon-m-toolbar-tab-next"
+            rotation : 270
+            checkable : true
             onClicked: {
                 platform.toggleFullscreen()
             }
