@@ -39,14 +39,11 @@ Page {
             iconSize : iconGP.iconSize
             margin : iconGP.iconMargin
             onClicked : {
-                console.log("clicked")
-                console.log(caption)
                 rWin.pageStack.push(rWin.getPage(menu))
             }
         }
         //insert the back arrow
         Component.onCompleted: {
-            console.log("INSERTING BACK ARROW")
             //model.insert(0, {"caption": "back", "icon":"left_arrow_black.png", "menu":""})
             model.insert(0, {"caption": "", "icon":"", "menu":""})
         }
