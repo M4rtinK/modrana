@@ -12,7 +12,6 @@ Item {
     signal clicked
 
     scale : mouseArea.pressed ? 0.9 : 1.0
-    //transform: Scale { origin.x: 25; origin.y: 25; xScale: 3}
 
     width : iconSize
     height : iconSize
@@ -25,6 +24,7 @@ Item {
         height : icgb.iconSize-icgb.margin/2.0
         // TODO: get color from theme
         // TODO: slightly darker (themable ?) pressed color ?
+        //color : mouseArea.pressed ? Qt.darker("#92aaf3") : "#92aaf3"
         color : "#92aaf3"
         radius : 10
         smooth : true
@@ -55,5 +55,11 @@ Item {
         id: mouseArea
         anchors.fill: parent
         onClicked: icgb.clicked()
+    }
+    Rectangle {
+        anchors.fill : parent
+        visible : mouseArea.pressed
+        color : "black"
+        opacity : 0.35
     }
 }
