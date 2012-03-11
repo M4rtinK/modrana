@@ -8,7 +8,7 @@ IconGridPage {
     model : ListModel {
         id : testModel
         ListElement {
-            caption : "map"
+            caption : "Map"
             icon : "map.png"
             menu : ""
         }
@@ -23,17 +23,17 @@ IconGridPage {
             menu : ""
         }
         ListElement {
-            caption : "navigation"
+            caption : "Navigation"
             icon : "gps_satellite.png"
             menu : ""
         }
         ListElement {
-            caption : "network"
+            caption : "Network"
             icon : "network.png"
             menu : ""
         }
         ListElement {
-            caption : "debug"
+            caption : "Debug"
             icon : "debug.png"
             menu : ""
         }

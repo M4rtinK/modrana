@@ -5,12 +5,12 @@ IconGridPage {
     model : ListModel {
         id : testModel
         ListElement {
-            caption : "search"
+            caption : "Search"
             icon : "search.png"
             menu : ""
         }
         ListElement {
-            caption : "routes"
+            caption : "Routes"
             icon : "route.png"
             menu : ""
         }
@@ -20,17 +20,17 @@ IconGridPage {
             menu : ""
         }
         ListElement {
-            caption : "info"
+            caption : "Info"
             icon : "info.png"
             menu : ""
         }
         ListElement {
-            caption : "mode"
+            caption : "Mode"
             icon : "mode.png"
             menu : ""
         }
         ListElement {
-            caption : "options"
+            caption : "Options"
             icon : "options.png"
             menu : "optionsMenu"
         }
