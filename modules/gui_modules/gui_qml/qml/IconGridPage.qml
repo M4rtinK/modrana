@@ -5,8 +5,8 @@ Page {
     property alias model : gridView.model
 
     id : iconGP
-    property double iconMargin : width/20.0
     property int hIcons : rWin.inPortrait ? 2 : 4
+    property double iconMargin : width/(hIcons*10)
     property double iconSize : (width-2)/hIcons
     // search, routes, POI, mode, options, info
 
