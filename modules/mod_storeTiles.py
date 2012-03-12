@@ -4,7 +4,7 @@ from __future__ import with_statement # for python 2.5
 #----------------------------------------------------------------------------
 # Store tiles in a single file.
 # This is done to avoid the fs cluster issues.
-# Initialy, sqlite will be used for storage.
+# Initially, sqlite will be used for storage.
 #----------------------------------------------------------------------------
 # Copyright 2007, Oliver White
 #
