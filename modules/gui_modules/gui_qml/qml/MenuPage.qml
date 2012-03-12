@@ -7,27 +7,27 @@ IconGridPage {
         ListElement {
             caption : "Search"
             icon : "search.png"
-            menu : ""
+            menu : "searchMenu"
         }
         ListElement {
             caption : "Routes"
             icon : "route.png"
-            menu : ""
+            menu : "routesMenu"
         }
         ListElement {
             caption : "POI"
             icon : "poi.png"
-            menu : ""
+            menu : "poiMenu"
         }
         ListElement {
             caption : "Info"
             icon : "info.png"
-            menu : ""
+            menu : "infoMenu"
         }
         ListElement {
             caption : "Mode"
             icon : "mode.png"
-            menu : ""
+            menu : "modeMenu"
         }
         ListElement {
             caption : "Options"
