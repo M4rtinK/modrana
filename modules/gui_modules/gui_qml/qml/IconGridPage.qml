@@ -63,8 +63,8 @@ Page {
         //height : iconGP.iconSize-iconGP.iconMargin/2.0
         iconName : "left_arrow_black.png"
         text : "back"
-        normalColor : "blue"
-        toggledColor: "#92aaf3"
+        //normalColor : "blue"
+        //toggledColor: "#92aaf3"
         opacity : gridView.atYBeginning ? 1.0 : 0.55
         onClicked : {
             rWin.pageStack.pop()

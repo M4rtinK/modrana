@@ -25,6 +25,11 @@ IconGridPage {
             menu : "infoMenu"
         }
         ListElement {
+            caption : "Map"
+            icon : "map.png"
+            menu : "mapMenu"
+        }
+        ListElement {
             caption : "Mode"
             icon : "mode.png"
             menu : "modeMenu"

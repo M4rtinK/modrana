@@ -21,6 +21,10 @@ PageStackWindow {
         id : infoMenu
     }
 
+    MapMenuPage {
+        id : mapMenu
+    }
+
     /* looks like object ids can't be stored in ListElements,
      so we need this function to return corresponding menu pages
      for names given by a string
@@ -29,7 +33,8 @@ PageStackWindow {
     property variant pages : {
         "mainMenu" : mainMenu,
         "optionsMenu" : optionsMenu,
-        "infoMenu" : infoMenu
+        "infoMenu" : infoMenu,
+        "mapMenu" : mapMenu
     }
 
     function getPage(name) {
