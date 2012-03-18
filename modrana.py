@@ -38,6 +38,7 @@ from configobj import ConfigObj
 # import core modules/classes
 from core import startup
 from core import paths
+from core import configs
 from core import gs
 
 # record that imports-done timestamp
@@ -114,16 +115,37 @@ class ModRana:
 
     # add the paths handling core module
     self.paths = paths.Paths(self)
+    # add the configs handling core module
+    self.configs = configs.Configs(self)
 
     # load persistant options
     self.optLoadingOK= self._loadOptions()
 
-    # load map layer info
-    self.loadMapLayerInfo()
+    # check if upgrade took place
+
+    if self.optLoadingOK:
+      savedVersionString = self.get('modRanaVersionString', "")
+      versionStringFromFile = self.paths.getVersionString()
+      if savedVersionString != versionStringFromFile:
+        print "modRana: possible upgrade detected"
+        self._postUpgradeCheck()
+
+    # save current version string
+    self.set('modRanaVersionString', self.paths.getVersionString())
+
+    # load all configuration files
+    self.configs.loadAll()
+
     # start loading modules
     self.loadModules()
     # startup done, print some statistics
     self._startupDone()
+
+  def _postUpgradeCheck(self):
+    """
+    perform post upgrade checks
+    """
+    self.configs.upgradeConfigFiles()
 
   ##  MODULE HANDLING ##
 
@@ -316,14 +338,12 @@ class ModRana:
     start shutdown cleanup and stop GUI main loop
     when finished
     """
-    self.beforeDie()
-
-  def beforeDie(self):
-      print("Shutting-down modules")
-      for m in self.m.values():
-        m.shutdown()
-      time.sleep(2) # leave some times for threads to shut down
-      print("Shuttdown complete")
+    print("Shutting-down modules")
+    for m in self.m.values():
+      m.shutdown()
+    self._saveOptions()
+    time.sleep(2) # leave some times for threads to shut down
+    print("Shuttdown complete")
     
   ## OPTIONS SETTING AND WATCHING ##
 
@@ -696,61 +716,11 @@ class ModRana:
     return profileFolderPath
 
   ## MAP LAYERS ##
-  """map lyer information is important and needed by many modules during their initialization,
+  """map layer information is important and needed by many modules during their initialization,
   so it is handled here"""
   def getMapLayers(self):
-    return self.mapLayers
-
-  def loadMapLayerInfo(self):
-    mapLayers = {}
-    configVariables = {
-        'label':'label',
-        'url':'tiles',
-        'max_zoom':'maxZoom',
-        'min_zoom':'minZoom',
-        'type':'type',
-        'folder_prefix':'folderPrefix',
-        'coordinates':'coordinates',
-                      }
-    mapConfigPath = os.path.join(self.getProfilePath(),'map_config.conf')
-    # check if the configuration files are there already
-    if not os.path.exists(mapConfigPath):
-      # nthing in prfile folder -> try to use the default configs
-      print("modRana: no config in profile folder, using default map layer configuration file")
-      mapConfigPath = os.path.join("data/default_configuration_files",'map_config.conf')
-      if not os.path.exists(mapConfigPath):
-        # no map layer config available
-        print("modRana: map layer configuration file not available")
-        return
-
-    def allNeededIn(needed, dict):
-      for key in needed:
-        if key in dict:
-          continue
-        else:
-          return False
-      return True  
-
-    try:
-      config = ConfigObj(mapConfigPath)
-      for layer in config:
-        if allNeededIn(configVariables.keys(), config[layer].keys()): # check if all neded keys are available
-          tempDict = {}
-          for var in configVariables:
-            tempDict[configVariables[var]] = config[layer][var]
-          tempDict['minZoom'] = int(tempDict['minZoom']) # convert strings to integers
-          tempDict['maxZoom'] = int(tempDict['maxZoom'])
-        else:
-          print("mapTiles: layer is badly defined/formated: %s" % layer)
-
-
-        mapLayers[layer] = tempDict
-
-    except Exception, e:
-      print("mapTiles: loading map_config.conf failed: %s" % e)
-
-    self.mapLayers = mapLayers
-
+    print "GET MAP LAYERS"
+    return self.configs.getMapLayers()
 
   ## STARTUP TIMING ##
 

@@ -43,6 +43,10 @@ class Paths:
     # check the profile path and create the folders if necessary
     modrana_utils.createFolderPath(self.profileFolderPath)
 
+    # load version string
+    self.versionString = None
+    self._loadVersionString()
+
 
   ## Important modRana folders ##
 
@@ -64,9 +68,9 @@ class Paths:
     """return path to a folder for storing tracklogs"""
     path = None
     # first check if the user overrode the tracklog folder path
-    config = self.modrana.m.get('config', None)
+    config = self.modrana.configs.getUserConfig()
     if config:
-      path = config.getTracklogFolderPath()
+      path = config.get("tracklog_folder", None)
     if path == None:
     # try to get the path from device module
       if self.modrana.dmod:
@@ -82,9 +86,9 @@ class Paths:
     """return a path to folder for map data storage"""
     path = None
     # first check if the user overrode the map folder path
-    config = self.modrana.m.get('config', None)
+    config = self.modrana.configs.getUserConfig()
     if config:
-      path = config.getMapFolderPath()
+      path = config.get("map_folder", None)
     if path == None:
     # try to get the path from device module
       if self.modrana.dmod:
@@ -123,6 +127,31 @@ class Paths:
         return self._assurePathFolder(self.getProfilePath(), "debug_logs")
     else:
       return self._assurePathFolder(self.getProfilePath(), "debug_logs")
+
+  def getVersionString(self):
+    """
+    return current version string or None if not available
+    """
+    return self.versionString
+
+  def _loadVersionString(self):
+    """
+    load version string from file
+    """
+    self.versionString = None
+    versionFilePath = 'version.txt'
+    # try read the version file
+    if os.path.exists(versionFilePath):
+      try:
+        f = open(self.versionFilePath, 'r')
+        versionString = f.read()
+        f.close()
+        # is it really string ?
+        versionString = str(versionString)
+        self.versionString = versionString
+      except Exception, e:
+        print "modRana config: loading version info failed"
+        print e
 
   def _assurePathFolder(self, path, folder):
     """combine the given path and folder and make sure the path exists,

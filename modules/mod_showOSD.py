@@ -62,7 +62,7 @@ class showOSD(ranaModule):
   def drawScreenOverlay(self, cr):
     """ draw currenty active information widgets TODO: just draw object from list"""
     if self.m.get('config', {}):
-      config = self.m.get('config', None).userConfig
+      config = self.modrana.configs.getUserConfig()
 
       mode = self.get('mode', None)
       if mode == None:

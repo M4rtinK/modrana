@@ -30,20 +30,10 @@ class info(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.versionString = "unknown version"
-    self.versionFilePath = 'version.txt'
-    # try read the version file
-    if os.path.exists(self.versionFilePath):
-      try:
-        f = open(self.versionFilePath, 'r')
-        versionString = f.read()
-        f.close()
-        # is it really string ?
-        versionString = str(versionString)
-        self.versionString = versionString
-      except Exception, e:
-        print "loading version info failed"
-        print e
-
+    currentVersionString = self.modrana.paths.getVersionString()
+    if currentVersionString != None:
+      # check version string validity
+      self.versionString = currentVersionString
 
   def drawMenu(self, cr, menuName, args=None):
     if menuName == 'infoAbout':

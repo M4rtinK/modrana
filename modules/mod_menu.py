@@ -45,7 +45,7 @@ class menus(ranaModule):
     self.lastActivity = int(time.time())
     self.fullscreen = False
     self.mainScreenCoords = {}
-    self.userConfig = {}
+    self.userConfig = self.modrana.configs.getUserConfig()
     self.hideMapSreenButtons = False
     self.lastHideCheckTimestamp = time.time()
     self.itemMenuGrid = (None,[])
@@ -1418,8 +1418,6 @@ class menus(ranaModule):
 
   def firstTime(self):
     self.set("menu",None)
-    self.userConfig = self.m.get('config', None).userConfig
-    # get the notification module (to implement the master overlay)
 
     icons = self.m.get('icons', None)
     if icons:
