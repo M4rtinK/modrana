@@ -63,6 +63,10 @@ class deviceModule(ranaModule):
     them out of view - the user might want that the window redraws on the dashboard or not"""
     return False
 
+  def handlesLocation(self):
+    """report whether the device module handles position updates by itself"""
+    return False
+
   def getLocationType(self):
     """modRana uses gpsd by default"""
     return 'gpsd'
@@ -128,10 +132,6 @@ class deviceModule(ranaModule):
   def hasKineticScrollingList(self):
     """report if the device provides a native kinetic scrolling list
     widget/dialog"""
-    return False
-
-  def handlesLocation(self):
-    """report whether the device module handles position updates by itself"""
     return False
 
   def startLocation(self):
