@@ -129,6 +129,14 @@ class GUIModule(ranaModule):
     """stop the main loop or its equivalent"""
     pass
 
+  def hasNotificationSupport(self):
+    """handles notifications"""
+    return False
+
+  def notify(self, message, msTimeout, icon=""):
+    """handle a notification"""
+    pass
+
 
 #  def getPage(self, flObject, name="", fitOnStart=True):
 #    """create a page from a file like object"""

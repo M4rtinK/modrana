@@ -1,6 +1,9 @@
 import QtQuick 1.1
 import com.nokia.meego 1.0
 import com.nokia.extras 1.0
+//import QtMobility.sensors 1.1
+//import QtMobility.location 1.1
+//import QtMobility.systeminfo 1.1
 
 PageStackWindow {
     property string theme : options.get("currentTheme", "default")
@@ -46,6 +49,13 @@ PageStackWindow {
     }
 
     /** global notification handling **/
+    function notify(text, msTimeout) {
+        notification.text = text
+        notification.timerShowTime = msTimeout
+        notification.show()
+    }
+
+
     InfoBanner {
         id: notification
         timerShowTime : 5000
@@ -53,5 +63,32 @@ PageStackWindow {
         // prevent overlapping with status bar
         y : rWin.showStatusBar ? rWin.statusBarHeight + 8 : 8
 
+    }
+
+    /*
+    // compass
+    Compass {
+        id: compass
+        onReadingChanged: {azimuth = compass.reading.azimuth; calibration = compass.reading.calibrationLevel; }
+        property real azimuth: 0
+        property real calibration: 0
+        active: true
+        dataRate: 10
+    }
+
+
+    // temporary position source
+    PositionSource {
+        id: gpsSource
+        active: true
+        updateInterval: 1000
+        onPositionChanged: {
+            console.log("lat: " + position.coordinate.latitude + "lon: " + position.coordinate.longitude )
+            controller.positionChanged(position.latitudeValid, position.coordinate.latitude, position.coordinate.longitude, position.altitudeValid, position.coordinate.altitude, position.speedValid, position.speed, position.horizontalAccuracy, position.timestamp);
+        }
+    }
+    */
+
+    Component.onCompleted : {
     }
 }

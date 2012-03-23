@@ -28,7 +28,6 @@ from PySide import QtCore
 from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtDeclarative import *
-#from PySide import QtOpenGL
 
 # modRana imports
 from base_gui_module import GUIModule
@@ -79,9 +78,6 @@ class QMLGUI(GUIModule):
 
     self.app = QApplication(sys.argv)
     self.view = ModifiedQDeclarativeView(self.modrana)
-#    # try OpenGl acceleration
-#    glw = QtOpenGL.QGLWidget()
-#    self.view.setViewport(glw)
     self.window = QMainWindow()
     self.window.resize(*size)
     self.window.setCentralWidget(self.view)
@@ -96,20 +92,11 @@ class QMLGUI(GUIModule):
     options = Options(self.modrana)
     rc.setContextProperty("options", options)
     # make GPS accessible from QML
-    gps = GPSDataWrapper(self.modrana)
+    gps = GPSDataWrapper(self.modrana, self)
     rc.setContextProperty("gps", gps)
     # make the platform accessible from QML
     platform = Platform(self.modrana)
     rc.setContextProperty("platform", platform)
-
-    # ** history list handling **
-    # get the objects and wrap them
-    #historyListController = HistoryListController(self.mieru)
-    #self.historyList = []
-    #self.historyListModel = HistoryListModel(self.mieru, self.historyList)
-    # make available from QML
-    #rc.setContextProperty('historyListController', historyListController)
-    #rc.setContextProperty('historyListModel', self.historyListModel)
 
     # Create an URL to the QML file
     url = QUrl('modules/gui_modules/gui_qml/qml/main.qml')
@@ -119,26 +106,14 @@ class QMLGUI(GUIModule):
     self.window.show()
 
     self.rootObject = self.view.rootObject()
-#    self.nextButton = self.rootObject.findChild(QObject, "nextButton")
-#    self.prevButton = self.rootObject.findChild(QObject, "prevButton")
-#    self.pageFlickable = self.rootObject.findChild(QObject, "pageFlickable")
-
-#    self.nextButton.clicked.connect(self._nextCB)
-#    self.pageFlickable.clicked.connect(self._prevCB)
-#    self.prevButton.clicked.connect(self._prevCB)
     if self.modrana.dmod.startInFullscreen():
       self.toggleFullscreen()
 
+    self._location = None # location module
 
-#  def resize(self, w, h):
-#    self.window.resize(w,h)
-#
-#  def getWindow(self):
-#    return self.window
-#
-#  def setWindowTitle(self, title):
-#    self.window.set_title(title)
-#
+  def firstTime(self):
+    self._location = self.m.get('location', None)
+
   def getIDString(self):
     return "QML"
 
@@ -189,14 +164,17 @@ class QMLGUI(GUIModule):
     self.app.exit()
     self.modrana.shutdown()
 
-  def _notify(self, text, icon=""):
+  def hasNotificationSupport(self):
+    return True
+
+  def notify(self, text, msTimeout=5000, icon=""):
     """trigger a notification using the Qt Quick Components
     InfoBanner notification"""
 
     # QML uses <br> instead of \n for linebreak
-
     text = newlines2brs(text)
-    self.rootObject.notify(text)
+    print("QML GUI notify:\n message: %s, timeout: %d" % (text, msTimeout))
+    self.rootObject.notify(text,msTimeout)
 
 class Platform(QtCore.QObject):
   """make stats available to QML and integrable as a property"""
@@ -366,9 +344,10 @@ class GPSDataWrapper(QtCore.QObject):
   changed_target = QtCore.Signal()
   changed_distance_bearing = QtCore.Signal()
 
-  def __init__(self, modrana):
+  def __init__(self, modrana, gui):
     QtCore.QObject.__init__(self)
     self.modrana = modrana
+    self.gui = gui
 #    self.modrana.connect('good-fix', self._on_good_fix)
 #    self.modrana.connect('no-fix', self._on_no_fix)
 #    self.modrana.connect('target-changed', self._on_target_changed)
@@ -385,14 +364,20 @@ class GPSDataWrapper(QtCore.QObject):
     self.gps_status = ''
     #self.astral = Astral()
 
+  @QtCore.Slot(bool, float, float, bool, float, bool, float, float, QtCore.QObject)
+  def positionChanged(self, valid, lat, lon, altvalid, alt, speedvalid, speed, error, timestamp):
+    if valid:
+      pos = (lat,lon)
+      self._on_good_fix(Fix(pos, alt, bearing, speed))
+
   def _posChangedCB(self, key, oldValue, newValue):
     """position changed callback"""
+
+    # check validity
     pos = self.modrana.get('pos', None)
     if pos:
-      speed = self.modrana.get('speed', 0)
-      bearing = self.modrana.get('bearing', 0)
-      elevation = self.modrana.get('elevation', 0)
-      self._on_good_fix(Fix(pos, elevation, bearing, speed))
+      if self.gui._location:
+        self._on_good_fix(self.gui._location.getFix())
     else:
       self._on_no_fix()
 
@@ -497,90 +482,3 @@ class Options(QtCore.QObject):
       print "SET"
       print key, value
       return self.modrana.set(key, value)
-
-# ** history list wrappers **
-
-class MangaStateWrapper(QtCore.QObject):
-  def __init__(self, state):
-    QtCore.QObject.__init__(self)
-    # unwrap the history storage wrapper
-    state = state['state']
-    self.path = state['path']
-    self.mangaName = manga_module.path2prettyName(self.path)
-    self.pageNumber = state['pageNumber'] + 1
-    self.pageCount = state['pageCount']
-    self.state = state
-    self._checked = False
-
-  def __str__(self):
-      return '%s %d/%d' % (self.mangaName, self.pageNumber, self.pageCount)
-
-  def _name(self):
-      return str(self)
-
-  def is_checked(self):
-    return self._checked
-
-  def toggle_checked(self):
-    self._checked = not self._checked
-    self.changed.emit()
-
-  # signals
-  changed = QtCore.Signal()
-
-  # setup the Qt properties
-  name = QtCore.Property(unicode, _name, notify=changed)
-  checked = QtCore.Property(bool, is_checked, notify=changed)
-
-class HistoryListModel(QtCore.QAbstractListModel):
-    COLUMNS = ('thing',)
-
-    def __init__(self, mieru, things):
-      QtCore.QAbstractListModel.__init__(self)
-      self.mieru = mieru
-      self._things = things
-      self.setRoleNames(dict(enumerate(HistoryListModel.COLUMNS)))
-
-    def setThings(self, things):
-      #print "SET THINGS"
-      self._things = things
-      
-    def rowCount(self, parent=QtCore.QModelIndex()):
-      #print "ROW"
-      #print self._things
-      return len(self._things)
-
-    def checked(self):
-      return [x for x in self._things if x.checked]
-
-    def data(self, index, role):
-      #print "DATA"
-      #print self._things
-      if index.isValid() and role == HistoryListModel.COLUMNS.index('thing'):
-        return self._things[index.row()]
-      return None
-
-    @QtCore.Slot()
-    def removeChecked(self):
-      paths = []
-      checked = self.checked()
-      #count = len(self.checked())
-      for state in checked:
-        paths.append(state.path)
-      self.mieru.removeMangasFromHistory(paths)
-      # quick and dirty remove
-      for state in checked:
-        self._things.remove(state)
-
-class HistoryListController(QtCore.QObject):
-  def __init__(self, mieru):
-    QtCore.QObject.__init__(self)
-    self.mieru = mieru
-        
-  @QtCore.Slot(QtCore.QObject)
-  def thingSelected(self, wrapper):
-    self.mieru.openMangaFromState(wrapper.state)
-
-  @QtCore.Slot(QtCore.QObject, QtCore.QObject)
-  def toggled(self, model, wrapper):
-    wrapper.toggle_checked()

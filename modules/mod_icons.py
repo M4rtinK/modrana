@@ -23,7 +23,14 @@ import os
 import glob
 import fnmatch
 from color import Color
-from configobj import ConfigObj
+"""for some reason one import method works
+on Fremantle and other everywhere (?) else"""
+try:
+  from configobj.configobj import ConfigObj # everywhere
+except:
+  print("icons: trying alternative configobj import method")
+  from configobj import ConfigObj # Fremantle
+
 
 # only import GKT libs if GTK GUI is used
 from core import gs

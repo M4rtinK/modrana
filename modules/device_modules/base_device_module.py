@@ -98,7 +98,7 @@ class deviceModule(ranaModule):
        (enable fullscreen, etc.)"""
     pass
 
-  def hasNativeNotificationSupport(self):
+  def hasNotificationSupport(self):
     """report if the device provides its own notification method"""
     return False
 

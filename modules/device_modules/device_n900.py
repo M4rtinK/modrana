@@ -21,17 +21,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_device_module import deviceModule
-import dbus.glib
-import gtk
 #N900 specific:
-import hildon
-import location
-import time
-"""
-why dbus.glib ?
-if you import only "dbus", it can't find its mainloop for callbacks
+import dbus.glib
+from core import gs
+# only import GTK, Hildon & Liblocation when using GTK GUI
+if gs.GUIString == "GTK":
+  import hildon
+  import location
+#  import dbus.glib
+  import gtk
+  """
+  why dbus.glib ?
+  if you import only "dbus", it can't find its mainloop for callbacks
+  """
+else:
+  from QtMobility.SystemInfo import QSystemScreenSaver
+  """ ^^ back-light control"""
 
-"""
+import time
 
 def getModule(m,d,i):
   return(device_n900(m,d,i))
@@ -56,30 +63,30 @@ class device_n900(deviceModule):
     self.mceSignalInterface.connect_to_signal("display_status_ind", self.screenStateChangedCallback)
     print "N900: dbus initialized"
 
-    # liblocation
-    self.lControl = None
-    self.lDevice = None
-    """location starting is handled by mod_location
-    in its firstTime call"""
+    if gs.GUIString == "GTK":
+      # liblocation
+      self.lControl = None
+      self.lDevice = None
+      """location starting is handled by mod_location
+      in its firstTime call"""
+    else:
+      print("N900 Qt screen saver controller created")
+      self.qScreenSaver = QSystemScreenSaver()
 
     print "N900 device specific module initialized"
 
   def firstTime(self):
-    # load the rotation object
-    rotationObject = self.startAutorotation()
-    if rotationObject != False:
-      print "N900: rotation object loaded"
-      self.rotationObject = rotationObject
-    else:
-      print "N900: loading rotation object failed"
-
-    # toolkit usage
-    self.GTK = True
-
     # setup window state callbacks
     gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-      self.GTK = True
+    if gs.GUIString == "GTK":
+      # load the rotation object
+      rotationObject = self.startAutorotation()
+      if rotationObject != False:
+        print "N900: rotation object loaded"
+        self.rotationObject = rotationObject
+      else:
+        print "N900: loading rotation object failed"
+
       self.topWindow = gui.getGTKTopWindow()
 
       # app menu and buttons
@@ -100,9 +107,6 @@ class device_n900(deviceModule):
       # enable volume keys usage
       if self.get('useVolumeKeys', True):
         self._updateVolumeKeys()
-
-    else:
-        self.GTK = False
 
   def startInFullscreen(self):
     return True
@@ -127,10 +131,6 @@ class device_n900(deviceModule):
 
   def startInFullscreen(self):
     return True
-
-  def getLocationType(self):
-    """modRana uses liblocation on N900"""
-    return "liblocation"
 
   def startAutorotation(self):
     """start the GUI automatic rotation feature"""
@@ -166,7 +166,10 @@ class device_n900(deviceModule):
     return True
 
   def pauseScreenBlanking(self):
-    self.mceRequest.req_display_blanking_pause()
+    if gs.GUIString == "GTK":
+      self.mceRequest.req_display_blanking_pause()
+    else:
+      QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
 
   def unlockScreen(self):
     self.mceRequest.req_tklock_mode_change('unlocked')
@@ -209,8 +212,11 @@ class device_n900(deviceModule):
       elif state== "off":
         display.disableRedraw(reason="N900 display blanked")
 
-  def hasNativeNotificationSupport(self):
-    return True
+  def hasNotificationSupport(self):
+    if gs.GUIString == "GTK":
+      return True
+    else:
+      return False
 
   def notify(self, message, msTimeout=0, icon="icon_text"):
     """the third parameter has to be a non zero-length string or
@@ -219,7 +225,7 @@ class device_n900(deviceModule):
 
     if len(icon) == 0:
       icon = "spam" # as mentioned above, the string has to be longer than zero
-    if self.GTK:
+    if gs.GUIString == "GTK":
       topWindow = self.modrana.gui.getWindow()
       banner = hildon.hildon_banner_show_information_with_markup(topWindow, icon, message)
       if msTimeout:
@@ -262,7 +268,6 @@ class device_n900(deviceModule):
     menu = hildon.AppMenu()
     self.centeringToggleButton = gtk.ToggleButton(label="Centering")
     self.centeringToggleButton.connect('toggled',self._toggle, 'centred')
-#    openFolderButton.connect('clicked',self.startFolderChooser)
     self.rotationToggleButton = gtk.ToggleButton(label="Map rotation")
     self.rotationToggleButton.connect('toggled',self._toggle,'rotateMap')
     self.soundToggleButton = gtk.ToggleButton(label="Sound")
@@ -339,7 +344,20 @@ class device_n900(deviceModule):
 
   def handlesLocation(self):
       """on N900 location is handled through liblocation"""
-      return True
+      if gs.GUIString == "GTK":
+        # use liblocation
+        return True
+      else:
+        return False
+
+  def getLocationType(self):
+    """modRana uses liblocation on N900"""
+    if gs.GUIString == "GTK":
+      # use liblocation for GTK
+      return "liblocation"
+    else:
+      # use Qt Mobility for Qt
+      return "qt_mobility"
 
   def startLocation(self):
     """this will called by mod_location automatically"""
@@ -376,7 +394,7 @@ class device_n900(deviceModule):
         self.status = "No GPSD running"
         
       # connect callbacks
-      self.lControl.connect("error-verbose", self._liblocationErrorCB)
+      #self.lControl.connect("error-verbose", self._liblocationErrorCB)
       self.lDevice.connect("changed", self._libLocationUpdateCB)
       print "n900 - location: activated"
     except:
@@ -408,7 +426,6 @@ class device_n900(deviceModule):
         print("Requested method is not allowed in offline mode")
     elif error == location.ERROR_SYSTEM:
         print("System error")
-
 
   def _libLocationUpdateCB(self, device):
     """

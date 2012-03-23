@@ -34,7 +34,6 @@ import os
 import marshal
 import traceback
 from math import radians
-from configobj import ConfigObj
 # import core modules/classes
 from core import startup
 from core import paths
@@ -719,7 +718,6 @@ class ModRana:
   """map layer information is important and needed by many modules during their initialization,
   so it is handled here"""
   def getMapLayers(self):
-    print "GET MAP LAYERS"
     return self.configs.getMapLayers()
 
   ## STARTUP TIMING ##

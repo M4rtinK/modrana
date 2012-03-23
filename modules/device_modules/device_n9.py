@@ -66,7 +66,7 @@ class device_example(deviceModule):
 
   def handlesLocation(self):
     """using Qt Mobility"""
-    return True
+    return False
 
   def startLocation(self):
     pass
