@@ -1,38 +1,12 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-#----------------------------------------------------------------------------
-# Rana main GUI.  Displays maps, for use on a mobile device
-#
-# Controls:
-#   * click on the overlay text to change fields displayed
-#----------------------------------------------------------------------------
-# Copyright 2007-2008, Oliver White
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#----------------------------------------------------------------------------
 
-# module folder name
 modulesFolder = 'modules'
 import sys
 # add module folder to path
 sys.path.append(modulesFolder)
+import math
 import time
 startTimestamp = time.time()
-import math
-import os
-import marshal
-import traceback
 from math import radians
 # import core modules/classes
 from core import startup
@@ -40,6 +14,10 @@ from core import paths
 from core import configs
 from core import gs
 
+import os
+#tady umazu marshala
+import traceback
+#tady neco pridame a uvidime
 # record that imports-done timestamp
 importsDoneTimestamp = time.time()
 
