@@ -8,7 +8,7 @@ Rectangle {
     //property double centerLongitude: 0;
     property int zoomLevel: 10;
     property int oldZoomLevel: 99
-    property int maxZoomLevel: 17;
+    property int maxZoomLevel: 18;
     property int minZoomLevel: 2;
     property int minZoomLevelShowGeocaches: 9;
     property int tileSize: 256;
