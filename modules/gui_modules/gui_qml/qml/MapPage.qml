@@ -136,16 +136,18 @@ Page {
         anchors.rightMargin: 16
         spacing: 16
         Button {
-            iconSource: theme.inverted ? "image://theme/icon-m-input-add" : "image://theme/icon-m-common-add"
+            iconSource: "image://theme/icon-m-input-add"
             onClicked: {pinchmap.zoomIn() }
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
+            enabled : pinchmap.zoomLevel != pinchmap.maxZoomLevel
         }
         Button {
-            iconSource: theme.inverted ? "image://theme/icon-m-input-remove" : "image://theme/icon-m-common-remove"
+            iconSource: "image://theme/icon-m-input-remove"
             onClicked: {pinchmap.zoomOut() }
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
+            enabled : pinchmap.zoomLevel != pinchmap.minZoomLevel
         }
     }
     Column {
@@ -157,8 +159,9 @@ Page {
         spacing: 16
         Button {
             //iconSource: "image://theme/icon-m-image-edit-resize"
-            iconSource: "image://theme/icon-m-toolbar-tab-next"
-            rotation : 270
+            //iconSource: "image://theme/icon-m-toolbar-tab-next"
+            iconSource: "image://theme/icon-m-transfer-download"
+            rotation : 180
             checkable : true
             onClicked: {
                 platform.toggleFullscreen()
@@ -168,7 +171,7 @@ Page {
         }
         Button {
             id: followPositionButton
-            iconSource: "image://theme/icon-m-common-location" + (theme.inverted ? "-inverse" : "")
+            iconSource: "image://theme/icon-m-common-location"
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             checkable: true
@@ -180,7 +183,7 @@ Page {
         }
         Button {
             id: mainMenuButton
-            iconSource: "image://theme/icon-m-content-application" + (theme.inverted ? "-inverse" : "")
+            iconSource: "image://theme/icon-m-content-application"
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             onClicked: {
@@ -190,7 +193,7 @@ Page {
     }
     ProgressBar {
         id: zoomBar
-        anchors.bottom: pinchmap.bottom;
+        anchors.top: pinchmap.top;
         //anchors.bottomMargin: 16
         anchors.left: pinchmap.left;
         anchors.right: pinchmap.right;
