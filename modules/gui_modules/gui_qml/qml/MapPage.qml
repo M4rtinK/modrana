@@ -194,7 +194,7 @@ Page {
     ProgressBar {
         id: zoomBar
         anchors.top: pinchmap.top;
-        //anchors.bottomMargin: 16
+        anchors.topMargin: 1
         anchors.left: pinchmap.left;
         anchors.right: pinchmap.right;
         maximumValue: pinchmap.maxZoomLevel;
