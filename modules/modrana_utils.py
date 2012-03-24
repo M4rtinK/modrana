@@ -22,7 +22,7 @@ class Empty(Exception):
 
 class SynchronizedCircularStack:
   """
-  this should be a synchronized circular stact implementation
+  this should be a synchronized circular stack implementation
   * LIFO
   * once the size limit is reached, items re discarded,
     starting by the oldest ones
@@ -42,7 +42,7 @@ class SynchronizedCircularStack:
       self.list.append(item)
       # check list size
       if self.maxItems:
-          # discard olderst items to get back to the limit
+          # discard oldest items to get back to the limit
           while len(self.list) > self.maxItems:
             del self.list[0]
 
@@ -50,7 +50,7 @@ class SynchronizedCircularStack:
     """batch push items in a smart way"""
     with self.listLock:
       """
-      reverse the imput list to simulate stack pushes
+      reverse the input list to simulate stack pushes
       then combine the old list and the new one
       and finally slice it to fit to the size limit
       """
@@ -91,12 +91,12 @@ class SynchronizedCircularStack:
       return item in self.list
 
 #  def isInNonSync(self, item):
-#    """nonsynchronized version of item existence testing"""
+#    """non-synchronized version of item existence testing"""
 #    return item in self.list
 
 class ListContainer:
   """a WIP efficient list container, that does not need to actually store the
-  whole list in memmory"""
+  whole list in memory"""
   def __init__(self):
     pass
   
@@ -148,8 +148,8 @@ def isTheStringAnImage(s):
     # create a file like object
     f = StringIO(s)
     mime = str(magic.from_buffer(f.read(1024), mime=True))
-    f.close() # clenup
-    # get ists mime
+    f.close() # cleanup
+    # get lists mime
     mimeSplit = mime.split('/')
     mime1 = mimeSplit[0]
     # check if its an image
@@ -166,10 +166,10 @@ def isTheStringAnImage(s):
 
 def createFolderPath(newPath):
   """
-  Creat a path for a directory and all needed parent forlders
-  -> parent directoryies will be created
+  Create a path for a directory and all needed parent folders
+  -> parent directories will be created
   -> if directory already exists, then do nothing
-  -> if there is another filsystem object (like a file) with the same name, raise an exception
+  -> if there is another filesystem object (like a file) with the same name, raise an exception
   """
   if not newPath:
     print("cannot create folder, wrong path: ", newPath)
