@@ -114,6 +114,15 @@ class MapTiles(ranaModule):
     self.modrana.watch('mapScale', self._updateScalingCB)
     self.modrana.watch('z', self._updateScalingCB)
 
+  def getTile(self, layerID, z, x, y):
+    """
+    return a tile specified by layerID, z, x & y
+    * first look if such a tile is available from storage
+    * if not, download it
+    """
+
+    pass
+
   def _updateScalingCB(self, key='mapScale', oldValue=1, newValue=1):
     """
     as this only needs to be updated once on startup and then only
@@ -597,7 +606,7 @@ class MapTiles(ranaModule):
     return backImage
   
   def removeImageFromMemmory(self, name, dictIndex=0):
-    # remove an image from memmory
+    # remove an image from memory
     with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
       if name in self.images:
         del self.images[dictIndex][name]
@@ -608,7 +617,7 @@ class MapTiles(ranaModule):
     # Move the cairo projection onto the area where we want to draw the image
     cr.save()
     cr.translate(x,y)
-    cr.scale(scale,scale) # scale te tile accorind to current scale settings
+    cr.scale(scale,scale) # scale te tile according to current scale settings
 
     # Display the image
     cr.set_source_surface(self.images[dictIndex1][nameBack][0],0,0) # draw the background
@@ -825,17 +834,17 @@ class MapTiles(ranaModule):
   def getImageFolder(self,x,z,prefix):
     """Get a unique name for a tile image
     (suitable for use as part of filenames, dictionary keys, etc)"""
-    return("%s/%d/%d" % (prefix,z,x))
+    return "%s/%d/%d" % (prefix,z,x)
 
   def _getTileFolderPath(self):
     """helper function that returns path to the tile folder"""
     return self.mapFolderPath
 
   def imageY(self, z,extension):
-    return (('%d.%s') % (z, extension))
+    return ('%d.%s') % (z, extension)
 
   def getTileUrl(self, x, y, z, layer):
-    """Return url for given tile coorindates and layer"""
+    """Return url for given tile coordinates and layer"""
     layerDetails = self.mapLayers.get(layer, {})
     if layerDetails == {}:
       return None
@@ -844,16 +853,16 @@ class MapTiles(ranaModule):
       url = '%s&x=%d&y=%d&z=%d' % (
         layerDetails['tiles'],
         x,y,z)
-    elif coords == 'quadtree': # handle Virtual Earth maps and satelite
+    elif coords == 'quadtree': # handle Virtual Earth maps and satellite
       quadKey = quadTree(x, y, z)
-      url = '%s%s?g=452' % ( #  dont know what the g argument is, maybe revision ? but its not optional
+      url = '%s%s?g=452' % ( #  don't know what the g argument is, maybe revision ? but its not optional
                                 layerDetails['tiles'], # get the url
                                 quadKey # get the tile identificator
                                 #layerDetails['type'] # get the correct extension (also works with png for
                                 )                    #  both maps and sat, but the original url is specific)
-    elif coords == 'yahoo': # handle Yaho maps, sat, overlay
+    elif coords == 'yahoo': # handle Yahoo maps, sat, overlay
       y = ((2**(z-1) - 1) - y)
-      z = z + 1
+      z += 1
       url = '%s&x=%d&y=%d&z=%d&r=1' % ( # I have no idea what the r parameter is, r=0 or no r => grey square
                                 layerDetails['tiles'],
                                 x,y,z)
@@ -914,15 +923,15 @@ class MapTiles(ranaModule):
         the error tile is loaded instead
         like this:
          - modRana does not immediately try to download a tile that errors out
-         - the error tile is shown without modifieng the pipeline too much
+         - the error tile is shown without modifying the pipeline too much
          - modRana will eventually try to download the tile again,
-           after it is flushed with old tiles from the memmory
+           after it is flushed with old tiles from the memory
         """
       except urllib2.URLError, e:
         tileNetworkErrorSurface = self.callback.images[1]['tileNetworkError'][0]
         expireTimestamp = time.time() + 10
         self.callback.storeInMemmory(tileNetworkErrorSurface,self.name, 'error', expireTimestamp) # retry after 10 seconds
-        """ as not to DOS the system when we temorarily loose internet connection or other such error occurs,
+        """ as not to DOS the system when we temporarily loose internet connection or other such error occurs,
              we load a temporary error tile with expiration timestamp instead of the tile image
              TODO: actually remove tiles according to expiration timestamp :)
         """
@@ -939,7 +948,7 @@ class MapTiles(ranaModule):
 
     def removeSelf(self):
         with self.callback.threadlListCondition:
-          # try to remove its own instance from the thread list, so taht the instance could be garbage collected
+          # try to remove its own instance from the thread list, so that the instance could be garbage collected
           if self.name in self.callback.threads.keys():
             del self.callback.threads[self.name]
             """notify the download manager that a download slot is now free"""
@@ -948,7 +957,7 @@ class MapTiles(ranaModule):
     def printErrorMessage(self, e):
         url = self.callback.getTileUrl(self.x,self.y,self.z,self.layer)
         print "mapTiles: download thread reports error"
-        print "** we were doing this, when an exception occured:"
+        print "** we were doing this, when an exception occurred:"
         print "** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s, url: %s" % ( \
                                                                             self.x,
                                                                             self.y,
@@ -956,7 +965,7 @@ class MapTiles(ranaModule):
                                                                             self.layer,
                                                                             self.filename,
                                                                             url)
-        print "** this exception occured: %s\n" % e
+        print "** this exception occurred: %s\n" % e
         print "** traceback:\n"
         traceback.print_exc()
 
@@ -976,7 +985,7 @@ class MapTiles(ranaModule):
       # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
       #x = pixbuf.get_width()
       #y = pixbuf.get_height()
-      # Google sat images are 256 by 256 px, we dont need to check the size
+      # Google sat images are 256 by 256 px, we don't need to check the size
       x = 256
       y = 256
       ''' create a new cairo surface to place the image on '''
@@ -991,7 +1000,7 @@ class MapTiles(ranaModule):
       ''' surface now contains the image in a Cairo surface '''
       self.callback.storeInMemmory(surface, name)
 
-      # like this, currupted tiles should not get past the pixbuf loader and be stored
+      # like this, corrupted tiles should not get past the pixbuf loader and be stored
       m = self.callback.m.get('storeTiles', None)
       if m:
         m.automaticStoreTile(content, self.layerName, self.z, self.x, self.y, self.layerType, filename)
