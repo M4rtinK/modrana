@@ -230,12 +230,12 @@ class MapTiles(ranaModule):
 
   def _startIdleTileLoader(self):
     """add the tile loader as a gobject mainloop idle callback"""
-    if not self.idleLoaderActive: # one idle loader is enought
+    if not self.idleLoaderActive: # one idle loader is enough
       self.idleLoaderActive = True
       gobject.idle_add(self._idleTileLoaderCB)
 
   def _idleTileLoaderCB(self):
-    """get loading requests from the circual stack,
+    """get loading requests from the circular stack,
     quit when the stack is empty"""
     try:
       # check for modRana shutdown
@@ -247,7 +247,7 @@ class MapTiles(ranaModule):
         (name, x, y, z, layer) = item
         self.loadImage(name, x, y, z, layer)
 #        print "loaded"
-        return True # dont stop the idle handle
+        return True # don't stop the idle handle
       else:
 #        print "quiting"
         self.idleLoaderActive = False
@@ -270,7 +270,7 @@ class MapTiles(ranaModule):
       
   def update(self):
     """monitor if the automatic tile downloads finished and then remove them from the dictionary
-    (also automagicaly refreshes the screen once new tiles are available, even when not centered)"""
+    (also automagically refreshes the screen once new tiles are available, even when not centered)"""
 
     currentTime = time.time()
     dt = currentTime - self.lastThreadCleanupTimestamp
@@ -323,7 +323,7 @@ class MapTiles(ranaModule):
   def drawMap(self, cr):
     """Draw map tile images"""
     try: # this should get rid of a fair share of the infamous "black screens"
-      # get all neded data and objects to local variables
+      # get all needed data and objects to local variables
       proj = self.m.get('projection', None)
       drawImage = self.drawImage # method binding to speed up method lookup
       overlay = self.get('overlay', False)
@@ -347,7 +347,7 @@ class MapTiles(ranaModule):
         requests = []
         (sx,sy,sw,sh) = self.get('viewport') # get screen parameters
 
-        # adjust left corner cordinates if centering shift is on
+        # adjust left corner coordinates if centering shift is on
         (shiftX,shiftY) = self.modrana.centerShift
         sx = -shiftX
         sy = -shiftY
@@ -358,7 +358,7 @@ class MapTiles(ranaModule):
           (px1,px2,py1,py2) = (proj.px1,proj.px2,proj.py1,proj.py2) #use normal projection bbox
           cleanProjectionCoords = (px1,px2,py1,py2) # we need the unmodified coords for later use
         else:
-          # we use tiles from an upper zl and strech them over a lower zl
+          # we use tiles from an upper zl and stretch them over a lower zl
           (px1,px2,py1,py2) = proj.findEdgesForZl(z, scale)
           cleanProjectionCoords = (px1,px2,py1,py2) # wee need the unmodified coords for later use
 
@@ -416,7 +416,7 @@ class MapTiles(ranaModule):
           v3 = rectangles.Vector(*p3.as_tuple())
           v4 = rectangles.Vector(*p4.as_tuple())
 
-          # enlage the area of possibly visible tiles due to rotation
+          # enlarge the area of possibly visible tiles due to rotation
           add = self.modrana.expandViewportTiles
           (px1,px2,py1,py2) = (px1-add,px2+add,py1-add,py2+add)
           cx = int(px1)
@@ -806,7 +806,7 @@ class MapTiles(ranaModule):
       """Using pixbufs in place of surface_from_png seems to be MUCH faster for jpegs and pngs alike.
          Therefore we use it as default."""
 
-      # Tile images are mostly 256 by 256 px, we dont need to check the size
+      # Tile images are mostly 256 by 256 px, we don't need to check the size
       x = 256
       y = 256
       ''' create a new cairo surface to place the image on '''
