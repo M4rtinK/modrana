@@ -59,7 +59,7 @@ class MapTiles(ranaModule):
     self.imagesLock = threading.RLock()
     self.threads = {}
     self.threadlListCondition = threading.Condition(threading.Lock())
-    self.maxImagesInMemmory = 150 # to avoid a memmory leak
+    self.maxImagesInMemmory = 150 # to avoid a memory leak
     self.imagesTrimmingAmmount = 30 # how many tiles to remove once the maximum is reached
     self.loadRequestCStackSize = 10 # size for the circular loading request stack
     """so that trim does not run always run after adding a tile"""
@@ -178,7 +178,7 @@ class MapTiles(ranaModule):
                   self.threads[name] = self.TileDownloader(name,x,y,z,layer,layerPrefix,layerType, filename, self)
                   self.threads[name].daemon = True
                   self.threads[name].start()
-                  # chenge the status tile to "Downloading..."
+                  # change the status tile to "Downloading..."
                   with self.imagesLock:
                     self.images[0][name] = self.downloadingTile
             else:
@@ -269,8 +269,8 @@ class MapTiles(ranaModule):
       self.loadImageFromFile(path, name, type="special", dictIndex=1)
       
   def update(self):
-    """monitor if the automatic tile downalods finished and then remove them from the dictionary
-    (also automagicaly refreshes the screen once new tiles are avalabale, even when not centered)"""
+    """monitor if the automatic tile downloads finished and then remove them from the dictionary
+    (also automagicaly refreshes the screen once new tiles are available, even when not centered)"""
 
     currentTime = time.time()
     dt = currentTime - self.lastThreadCleanupTimestamp
@@ -347,7 +347,7 @@ class MapTiles(ranaModule):
         requests = []
         (sx,sy,sw,sh) = self.get('viewport') # get screen parameters
 
-        # adjust left corner ccordinates if cewntering shift is on
+        # adjust left corner cordinates if centering shift is on
         (shiftX,shiftY) = self.modrana.centerShift
         sx = -shiftX
         sy = -shiftY
@@ -365,10 +365,10 @@ class MapTiles(ranaModule):
         # upper left tile
         cx = int(px1)
         cy = int(py1)
-        # we need the "clean" cooridnates for the folowing conversion
+        # we need the "clean" coordinates for the following conversion
         (px1,px2,py1,py2) = cleanProjectionCoords
         (pdx, pdy) = (px2 - px1,py2 - py1)
-        # upper left tile coodinates to screen coordinates
+        # upper left tile coordinates to screen coordinates
         cx1,cy1 = (sw*(cx-px1)/pdx,sh*(cy-py1)/pdy) #this is basically the pxpy2xy function from mod_projection inlined
         cx1,cy1 = int(cx1),int(cy1)
 
@@ -384,7 +384,7 @@ class MapTiles(ranaModule):
           radAngle = radians(angle)
 
 
-          # get the rotation angle from the main class (for synchronization purposses)
+          # get the rotation angle from the main class (for synchronization purposes)
           radAngle = radians(self.modrana.mapRotationAngle)
 
           # we use polygon overlap testing to only load@draw visible tiles
@@ -446,13 +446,13 @@ class MapTiles(ranaModule):
                     name = getName(layerInfo,z,x,y)
                     tileImage = self.images[0].get(name)
                     if tileImage:
-                      # tile found in memmory cache, draw it
+                      # tile found in memory cache, draw it
                       drawImage(cr, tileImage[0], x1, y1, scale)
                     else:
                       if overlay:
                         """ check if the separate tiles are already cached
                         and send loading request/-s if not
-                        if both tiles are in the cache, combine them, cache and disaplay the result
+                        if both tiles are in the cache, combine them, cache and display the result
                         and remove the separate tiles from cache
                         """
                         layerBack = layerInfo[0][0]
@@ -478,7 +478,7 @@ class MapTiles(ranaModule):
                           requests.append((nameOver, x, y, z, layerOver))
                           drawImage(cr, loadingTileImageSurface, x1, y1, scale)
                       else:
-                        # tile not found in memmory cache, add a loading request
+                        # tile not found in memory cache, add a loading request
                         requests.append((name, x, y, z, layerInfo))
             gui = self.modrana.gui
             if gui and gui.getIDString() == "GTK":
@@ -507,7 +507,7 @@ class MapTiles(ranaModule):
             # draw the normal layer
             for ix in range(0, wTiles):
               for iy in range(0, hTiles):
-                # get tile cooridnates by incrementing the upper left tile cooridnates
+                # get tile coordinates by incrementing the upper left tile coordinates
                 x = cx+ix
                 y = cy+iy
 
@@ -519,14 +519,14 @@ class MapTiles(ranaModule):
                 name = getName(layerInfo,z,x,y)
                 tileImage = self.images[0].get(name)
                 if tileImage:
-                  # tile found in memmory cache, draw it
+                  # tile found in memory cache, draw it
                   drawImage(cr, tileImage[0], x1, y1, scale)
                 else:
-                  # tile not found im memmroy cache, do something else
+                  # tile not found im memory cache, do something else
                   if overlay:
                     """ check if the separate tiles are already cached
                     and send loading request/-s if not
-                    if both tiles are in the cache, combine them, cache and disaplay the result
+                    if both tiles are in the cache, combine them, cache and display the result
                     and remove the separate tiles from cache
                     """
                     layerBack = layerInfo[0][0]
@@ -556,7 +556,7 @@ class MapTiles(ranaModule):
                       requests.append((nameOver, x, y, z, layerOver))
                       drawImage(cr, loadingTileImageSurface, x1, y1, scale)
                   else:
-                    # tile not found in memmory cache, add a loading request
+                    # tile not found in memory cache, add a loading request
                     requests.append((name, x, y, z, layerInfo))
                     drawImage(cr, loadingTileImageSurface, x1, y1, scale)
 
@@ -573,12 +573,12 @@ class MapTiles(ranaModule):
         self._startIdleTileLoader()
 
 #    except Queue.Full:
-#      """as we use the queue as a notification mechanism, we dont actually need to
+#      """as we use the queue as a notification mechanism, we don't actually need to
 #      process all the "load" notifications """
 #      pass
 
     except Exception, e:
-      print "mapTiles: expception while drawing the map layer: %s" % e
+      print "mapTiles: exception while drawing the map layer: %s" % e
       traceback.print_exc()
 
   def drawImage(self, cr, imageSurface, x, y, scale):
@@ -684,7 +684,7 @@ class MapTiles(ranaModule):
         if debug:
           storageType = self.get('tileStorageType', 'files')
           sprint("tile loaded from local storage (%s) in %1.2f ms" % (storageType,(1000 * (time.clock() - start1))))
-          sprint("tile cached in memmory in %1.2f ms" % (1000 * (time.clock() - start2)))
+          sprint("tile cached in memory in %1.2f ms" % (1000 * (time.clock() - start2)))
         return('OK')
 
     # Image not found anywhere locally - resort to downloading it
@@ -717,7 +717,7 @@ class MapTiles(ranaModule):
     pixbuf = gtk.gdk.pixbuf_new_from_file(path)
     #x = pixbuf.get_width()
     #y = pixbuf.get_height()
-    # Google sat images are 256 by 256 px, we dont need to check the size
+    # Google sat images are 256 by 256 px, we don't need to check the size
     x = 256
     y = 256
     ''' create a new cairo surface to place the image on '''
@@ -742,9 +742,9 @@ class MapTiles(ranaModule):
       return False
 
   def storeInMemmory(self, surface, name, type="normal", expireTimestamp=None, dictIndex=0):
-    """store a given image surface in the memmory image cache
-       dictIndex = 0 -> nromal map tiles + tile specific error tiles
-       dictIndex = 1 -> speacial tiles that exist in only once in memmory and are drawn directly
+    """store a given image surface in the memory image cache
+       dictIndex = 0 -> normal map tiles + tile specific error tiles
+       dictIndex = 1 -> special tiles that exist in only once in memory and are drawn directly
        (like "Downloading...",Waiting for download slot..:", etc.) """
     metadata = {}
     metadata['addedTimestamp'] = time.time()
@@ -752,7 +752,7 @@ class MapTiles(ranaModule):
     if expireTimestamp:
       metadata['expireTimestamp'] = expireTimestamp
     with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
-      self.images[dictIndex][name] = (surface, metadata) # store the image in memmory
+      self.images[dictIndex][name] = (surface, metadata) # store the image in memory
 
       """ check cache size,
       if there are too many images, delete them """
@@ -775,9 +775,9 @@ class MapTiles(ranaModule):
         self.set('needRedraw', True)
 
   def trimCache(self):
-    """to avoid a memmory leak, the maximum size of the image cache is fixed
-       when we reech the maximum size, we start removing images,
-       starting from the oldes ones
+    """to avoid a memory leak, the maximum size of the image cache is fixed
+       when we reach the maximum size, we start removing images,
+       starting from the oldest ones
        we an amount of images specified in imagesTrimmingAmmount,
        so that trim does not run every time an image is added to a full cache
        -> only the normal image cache needs trimming (images[0]),
@@ -788,9 +788,9 @@ class MapTiles(ranaModule):
     imagesLength = len(self.images[0])
     if trimmingAmmount >= imagesLength:
       """
-      this meaens that the trimming amount was set higher,
-      than current length of the cahce
-      the rusult is basically fluhing the cache every time it fills up
+      this means that the trimming amount was set higher,
+      than current length of the cache
+      the result is basically flushing the cache every time it fills up
       well, I don't have an idea why would someone want to do that
       """
       self.images[0] = {}
@@ -942,7 +942,7 @@ class MapTiles(ranaModule):
         # remove the status tile
         self.callback.removeImageFromMemmory(self.name)
 
-      finally: # make really sure we dont get any zombie threads
+      finally: # make really sure we don't get any zombie threads
         self.finished = 1 # finished thread can be removed from the set and retried
         self.removeSelf()
 
