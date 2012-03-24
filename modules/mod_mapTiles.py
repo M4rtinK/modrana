@@ -284,15 +284,15 @@ class MapTiles(ranaModule):
        but it left here for testing purposses"""
 #    z = self.get('z', 15)
 #    """when we change zoomlevel and the number of threads does not change,
-#       we clear the threads set, this is usefull, because:
-#       * failed downloads dont acumulate and will be tried again when we visit this zoomlevel again
-#       * tile downloads that dont actualy exist (eq tiles from max+1 zoomlevel) dont acumulate
+#       we clear the threads set, this is useful, because:
+#       * failed downloads don't accumulate and will be tried again when we visit this zoomlevel again
+#       * tile downloads that don't actually exist (eq tiles from max+1 zoomlevel) don't accumulate
 #       it is important to have the "self.threads" set empty when we are not downloading anything,
-#       because othervise we are wasting time on the "refresh on finished tile download" logic and also
-#       the set could theoreticaly cause a memmory leak if not periodicaly cleared from wrong items
+#       because otherwise we are wasting time on the "refresh on finished tile download" logic and also
+#       the set could theoretically cause a memory leak if not periodically cleared from wrong items
 #
 #       this method was chosen instead of a timeout, because it would be hard to set a timeout,
-#       that would work on gprs and a fast connection
+#       that would work on GPRS and a fast connection
 #    """
 #    if self.oldZ != z:
 ##      print "resetting z"
@@ -629,7 +629,7 @@ class MapTiles(ranaModule):
   def loadImage(self,name , x, y, z, layer):
     """Check that an image is loaded, and try to load it if not"""
     
-    """at this point, there is only a placeholder image in the memmory cache"""
+    """at this point, there is only a placeholder image in the memory cache"""
 
     # check if tile loading debugging is on
     debug = self.get('tileLoadingDebug', False)
@@ -654,7 +654,7 @@ class MapTiles(ranaModule):
             self.images[0][name] = downloadingTile
           return('OK')
     
-    # seccond, is it in the disk cache?  (including ones recently-downloaded)
+    # second, is it in the disk cache?  (including ones recently-downloaded)
     layerInfo = self.mapLayers.get(layer, None)
     if(layerInfo == None): # is the layer info valid
       sprint("invalid layer")
@@ -753,7 +753,7 @@ class MapTiles(ranaModule):
       self._tileLoadedNotify(type)
 
   def _tileLoadedNotify(self, type):
-    """redraw the screen when a new tile is avalable in the cache
+    """redraw the screen when a new tile is available in the cache
        * redraw only when on map screen (menu == None)
        * redraw only on composite tiles when overlay is on"""
 
@@ -762,7 +762,7 @@ class MapTiles(ranaModule):
       if overlay: # only redraw when a composited tile is loaded with overlay on
         if type == "composite":
           self.set('needRedraw', True)
-      else: # redraw regardles of type with overlay off
+      else: # redraw regardless of type with overlay off
         self.set('needRedraw', True)
 
   def trimCache(self):

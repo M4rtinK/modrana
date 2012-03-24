@@ -1,3 +1,4 @@
+from ScrolledText import example
 from __future__ import with_statement # for python 2.5
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
@@ -152,7 +153,7 @@ class storeTiles(ranaModule):
           # store the tile
           integerTimestamp = int(time.time())
           try:
-            ## 1. write in the lookup db (its easier to remove pointers to nonexisting stuff than to remove orphaned store items)
+            ## 1. write in the lookup db (its easier to remove pointers to nonexistent stuff than to remove orphaned store items)
             storeFilename = os.path.basename(pathToStore)
             lookupQuery="insert into tiles (z, x, y, store_filename, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
             lookupCursor = lookupConn.cursor()
@@ -297,7 +298,7 @@ class storeTiles(ranaModule):
             print "loading the image buffer from sqlite to pixbuf failed:%s" % e
         else:
           return None # the tile is not stored
-    else: # the only other storage method is currently clasical files storage
+    else: # the only other storage method is currently classical files storage
       mapTiles = self.m.get('mapTiles', None)
       if mapTiles:
         tileFolderPath = mapTiles._getTileFolderPath()
@@ -467,7 +468,7 @@ class storeTiles(ranaModule):
 #    print "connection reuse %f ms" % (1000 * (time.clock() - start))
 
 
-    self.sqliteTileQueue.put('shutdown',True) # try to commit possible uncommited tiles
+    self.sqliteTileQueue.put('shutdown',True) # try to commit possible uncommitted tiles
 
 if(__name__ == "__main__"):
   a = example({}, {})
