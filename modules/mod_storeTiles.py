@@ -1,4 +1,3 @@
-from ScrolledText import example
 from __future__ import with_statement # for python 2.5
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
@@ -67,11 +66,14 @@ class storeTiles(ranaModule):
     """
     self.lookupConnectionLock = threading.RLock()
 
+    self._mapTiles = None
+
   def firstTime(self):
     # the config folder should set the tile folder path by now
     self.tileFolder = self.modrana.paths.getMapFolderPath()
     # testing:
     #self.test()
+    self._mapTiles = self.m.get('mapTiles', None)
 
   def getLayerDbFolderPath(self, folderPrefix):
     return os.path.join(self.tileFolder, folderPrefix)
@@ -273,8 +275,32 @@ class storeTiles(ranaModule):
     """get a standardized store path from folder path and filename"""
     return os.path.join(folder, storeName)
 
+
   def getTile(self, folderPrefix, z, x, y, extension):
-    """get a tile"""
+    """
+    return a Pixbuf for the corresponding tile
+    """
+    tileData = self.getTileData(folderPrefix, z, x, y, extension)
+    if tileData:
+      try:
+        pl = gtk.gdk.PixbufLoader()
+        pl.write(tileData)
+        pl.close()
+        pixbuf = pl.get_pixbuf()
+        return pixbuf # return pixbuf containing the tile image
+      except Exception, e:
+        print("storeTiles: loading tile image to pixbuf failed")
+        print(e)
+        return None
+    else:
+      # tile not found
+      return None
+
+
+  def getTileData(self, folderPrefix, z, x, y, extension):
+    """
+    return data for the given tile
+    """
     storageType = self.get('tileStorageType', 'files')
     if storageType == 'sqlite':
       accessType = "get"
@@ -283,38 +309,38 @@ class storeTiles(ranaModule):
         lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
         result = self.getTileFromDb(lookupConn, dbFolderPath, z, x, y, extension)
         if result: # is the result valid ?
-          resultContent = result.fetchone() # get the result content
+          resultData = result.fetchone() # get the result content
         else:
-          resultContent = None # the result is invalid
-        if resultContent:
-          # convert the buffer to pixbuf
-          try:
-            pl = gtk.gdk.PixbufLoader()
-            pl.write(resultContent[0])
-            pl.close()
-            pixbuf = pl.get_pixbuf()
-            return pixbuf # return pixbuf containing the tile image
-          except Exception, e:
-            print "loading the image buffer from sqlite to pixbuf failed:%s" % e
+          resultData = None # the result is invalid
+        if resultData:
+          # return tile data
+          return resultData[0]
         else:
           return None # the tile is not stored
     else: # the only other storage method is currently classical files storage
-      mapTiles = self.m.get('mapTiles', None)
-      if mapTiles:
-        tileFolderPath = mapTiles._getTileFolderPath()
-        layerFolderAndTileFilename = mapTiles.getImagePath(x,y,z,folderPrefix, extension)
-        tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
-        if os.path.exists(tilePath):
-          # load the file to pixbuf and return it
-          return mapTiles.filePath2Pixbuf(tilePath)
-        else:
-          return None # this tile is not locally stored
+      tileFolderPath = self._mapTiles._getTileFolderPath()
+      layerFolderAndTileFilename = self._mapTiles.getImagePath(x,y,z,folderPrefix, extension)
+      tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
+      if os.path.exists(tilePath):
+        # load the file to pixbuf and return it
+        try:
+          f = open(tilePath, "r")
+          data = f.read()
+          f.close()
+          return data
+        except Exception, e:
+          print("storeTiles: loading tile from file failed")
+          print(e)
+          return None
+      else:
+        return None # this tile is not locally stored
 
   def getTileFromDb(self, lookupConn, dbFolderPath, z, x, y, extension):
     """get a tile from the database"""
     accessType = "get"
     #look in the lookup db
-    with self.lookupConnectionLock:
+    #with self.lookupConnectionLock:
+    if 1:
       """ just to make sure the access is sequential
       (due to sqlite in python 2.5 probably not liking concurrent access,
       resulting in te database becoming unavailable)"""
@@ -399,6 +425,7 @@ class storeTiles(ranaModule):
         -> this would mean that all threads that need to store tiles
            would wait forever for the queue to empty
         """
+        #TODO: defensive programming - check if thread is alive when storing ?
         try:
           (tile, folderPrefix, z, x, y, extension, filename) = item # unpack the tuple
           self.storeTile(tile, folderPrefix, z, x, y, extension) # store the tile
@@ -436,6 +463,11 @@ class storeTiles(ranaModule):
       f.close()
 
   def shutdown(self):
+    # try to commit possibly uncommitted tiles
+    self.sqliteTileQueue.put('shutdown',True)
+
+
+## TESTING CODE
 #    accessType = "get"
 #    folderPrefix = 'OpenStreetMap I'
 #    dbFolderPath = self.initializeDb(folderPrefix, accessType)
@@ -466,9 +498,6 @@ class storeTiles(ranaModule):
 #    lookupCursor.close()
 #    lookupConn.close()
 #    print "connection reuse %f ms" % (1000 * (time.clock() - start))
-
-
-    self.sqliteTileQueue.put('shutdown',True) # try to commit possible uncommitted tiles
 
 if(__name__ == "__main__"):
   a = example({}, {})

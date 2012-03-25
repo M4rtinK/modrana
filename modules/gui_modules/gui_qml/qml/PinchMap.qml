@@ -36,8 +36,10 @@ Rectangle {
     
     property alias angle: rot.angle
 
+    property string layer: "mapnik"
     //property string url: settings.currentMapType.url
-    property string url: "http://a.tile.openstreetmap.org/%(zoom)d/%(x)d/%(y)d.png"
+    //property string url: "http://a.tile.openstreetmap.org/%(zoom)d/%(x)d/%(y)d.png"
+    //property string url: "http://a.tile.openstreetmap.org/%(zoom)d/%(x)d/%(y)d.png"
 
     property int earthRadius: 6371000
 
@@ -200,14 +202,13 @@ Rectangle {
         var y = realY + map.rootY + map.offsetY
         return [x, y]
     }
+
     function getMappointFromCoord(lat, lon) {
         var tile = deg2num(lat, lon)
         var realX = (tile[0] - cornerTileX) * tileSize
         var realY = (tile[1] - cornerTileY) * tileSize
         return [realX, realY]
-        
     }
-
 
     function getCenter() {
         return getCoordFromScreenpoint(pinchmap.width/2, pinchmap.height/2);
@@ -229,8 +230,8 @@ Rectangle {
         if (ty < 0 || ty > maxTileNo) {
             return "image://icons/"+ rWin.theme +"/noimage.png"
         } else {
-            var x = F.getMapTile(url, tx, ty, zoomLevel);
-            return x
+            //var x = F.getMapTile(url, tx, ty, zoomLevel);
+            return "image://tiles/"+layer+"/"+zoomLevel+"/"+tx+"/"+ty
         }
     }
 
@@ -289,7 +290,9 @@ Rectangle {
                     id: img;
                     anchors.fill: parent;
                     onProgressChanged: { progressBar.p = progress }
+                    asynchronous: true
                     source: tileUrl(tileX, tileY);
+
                 }
 
 

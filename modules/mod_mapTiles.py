@@ -19,12 +19,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
+import urllib
 from base_module import ranaModule
 from threading import Thread
 import threading
 import os
 import traceback
 import urllib2
+import urllib3
+#import urllib3_old_fixed as urllib3
 import time
 import modrana_utils
 import rectangles
@@ -32,8 +35,8 @@ import rectangles
 from tilenames import *
 
 import socket
-timeout = 30 # this sets timeout for all sockets
-socket.setdefaulttimeout(timeout)
+#timeout = 30 # this sets timeout for all sockets
+#socket.setdefaulttimeout(timeout)
 
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -107,21 +110,62 @@ class MapTiles(ranaModule):
     self.mapFolderPath = self.modrana.paths.getMapFolderPath()
     print "mapTiles: map folder path: %s" % self.mapFolderPath
 
+    self._storeTiles = None
+
+    url = "http://c.tile.openstreetmap.org/"
+    #self.httpPool = urllib3.PoolManager()
+    self.httpPool = urllib3.connection_from_url(url = url, maxsize=4, timeout=3, block=False)
+
+
   def firstTime(self):
     self.mapViewModule = self.m.get('mapView', None)
     scale = self.get('mapScale', 1)
     self._updateScalingCB('mapScale', scale, scale)
     self.modrana.watch('mapScale', self._updateScalingCB)
     self.modrana.watch('z', self._updateScalingCB)
+    self._storeTiles = self.m.get('storeTiles', None) # get the tile storage module
 
-  def getTile(self, layerID, z, x, y):
+  def getTile(self, layer, z, x, y):
     """
     return a tile specified by layerID, z, x & y
     * first look if such a tile is available from storage
     * if not, download it
     """
+    layerInfo = self.mapLayers.get(layer, None)
+    if(layerInfo == None): # is the layer info valid ?
+      print("mapTiles: invalid layer")
+      return None
+    layerPrefix = layerInfo.get('folderPrefix','OpenStreetMap II')
+    layerType = layerInfo.get('type','png')
 
-    pass
+    tileData = self._storeTiles.getTileData(layerPrefix, z, x, y, layerType)
+    if tileData:
+      print "loaded FROM CACHE"
+      # tile was available from storage
+      return tileData
+
+    # tile not available from storage, we need to download it
+    url = self.getTileUrl(x,y,z,layer)
+    print "DOWNLOAD"
+    print url
+    #request = urllib.urlopen(url)
+    request = self.httpPool.get_url(url)
+#    request = self.httpPool.urlopen("GET", "%d/%d/%d.png" % (z, x, y))
+    tileData = request.data
+    #request.close()
+    print "DOWNLOAD DONE"
+    # check if the data is an image or an error page
+    if modrana_utils.isTheStringAnImage(tileData):
+      # store
+      tileFolder = self.modrana.paths.getMapFolderPath()
+      filePath = tileFolder + self.getImagePath(x, y, z, layerPrefix, layerType)
+      self._storeTiles.automaticStoreTile(tileData, layerPrefix, z, x, y, layerType, filePath)
+      print "STORED"
+      # return
+      return tileData
+    else:
+      print("mapTiles: downloaded tile is not an image (error page?)")
+      return None
 
   def _updateScalingCB(self, key='mapScale', oldValue=1, newValue=1):
     """
@@ -334,12 +378,12 @@ class MapTiles(ranaModule):
       if overlay:
         ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
         (alphaOver, alphaBack) = (float(ratio[0]),float(ratio[1])) # convert it to floats
-        layer1 = self.get('layer','osma')
-        layer2 = self.get('layer2', 'mapnik')
+        layer1 = self.get('layer','mapnik')
+        layer2 = self.get('layer2', 'cycle')
         layerInfo = ((layer1, alphaBack),(layer2, alphaOver))
         getName = self.getCompositeTileName
       else:
-        layerInfo = self.get('layer','osma')
+        layerInfo = self.get('layer','mapnik')
         getName = self.getTileName
 
       if proj and proj.isValid():
@@ -666,26 +710,23 @@ class MapTiles(ranaModule):
     # second, is it in the disk cache?  (including ones recently-downloaded)
     layerInfo = self.mapLayers.get(layer, None)
     if(layerInfo == None): # is the layer info valid
-      sprint("invalid layer")
       return('NOK')
 
     layerPrefix = layerInfo.get('folderPrefix','OSM')
     layerType = layerInfo.get('type','png')
 
-    storeTiles = self.m.get('storeTiles', None) # get the tile storage module
-    if storeTiles:
-      start1 = time.clock()
-      pixbuf = storeTiles.getTile(layerPrefix, z, x, y, layerType)
-      """None from getTiles means the tile was not found
-         False means loading the tile from file to pixbuf failed"""
-      if pixbuf:
-        start2 = time.clock()
-        self.storeInMemmory(self.pixbufToCairoImageSurface(pixbuf), name)
-        if debug:
-          storageType = self.get('tileStorageType', 'files')
-          sprint("tile loaded from local storage (%s) in %1.2f ms" % (storageType,(1000 * (time.clock() - start1))))
-          sprint("tile cached in memory in %1.2f ms" % (1000 * (time.clock() - start2)))
-        return('OK')
+    start1 = time.clock()
+    pixbuf = self._storeTiles.getTile(layerPrefix, z, x, y, layerType)
+    """None from getTiles means the tile was not found
+       False means loading the tile from file to pixbuf failed"""
+    if pixbuf:
+      start2 = time.clock()
+      self.storeInMemmory(self.pixbufToCairoImageSurface(pixbuf), name)
+      if debug:
+        storageType = self.get('tileStorageType', 'files')
+        sprint("tile loaded from local storage (%s) in %1.2f ms" % (storageType,(1000 * (time.clock() - start1))))
+        sprint("tile cached in memory in %1.2f ms" % (1000 * (time.clock() - start2)))
+      return('OK')
 
     # Image not found anywhere locally - resort to downloading it
     filename = os.path.join(self._getTileFolderPath(), (self.getImagePath(x,y,z,layerPrefix, layerType)))

@@ -24,6 +24,10 @@
 import sys
 import re
 import os
+import traceback
+import cStringIO
+
+# PySide
 from PySide import QtCore
 from PySide.QtCore import *
 from PySide.QtGui import *
@@ -87,6 +91,10 @@ class QMLGUI(GUIModule):
     # add image providers
     self.iconProvider = IconImageProvider()
     self.view.engine().addImageProvider("icons",self.iconProvider)
+    # add tiles provider
+    self.tilesProvider = TileImageProvider(self)
+    self.view.engine().addImageProvider("tiles",self.tilesProvider)
+
     rc = self.view.rootContext()
     # make options accessible from QML
     options = Options(self.modrana)
@@ -98,21 +106,19 @@ class QMLGUI(GUIModule):
     platform = Platform(self.modrana)
     rc.setContextProperty("platform", platform)
 
-    # Create an URL to the QML file
-    url = QUrl('modules/gui_modules/gui_qml/qml/main.qml')
-    # Set the QML file and show
-    self.view.setSource(url)
     self.window.closeEvent = self._qtWindowClosed
-    self.window.show()
+    #self.window.show()
 
-    self.rootObject = self.view.rootObject()
-    if self.modrana.dmod.startInFullscreen():
-      self.toggleFullscreen()
+    self.rootObject = None
 
     self._location = None # location module
+    self._mapTiles = None # map tiles module
+
+    self._notificationQueue = []
 
   def firstTime(self):
     self._location = self.m.get('location', None)
+    self._mapTiles = self.m.get('mapTiles', None)
 
   def getIDString(self):
     return "QML"
@@ -144,12 +150,30 @@ class QMLGUI(GUIModule):
 
 #    print "QML start main loop"
 
+    if self.modrana.dmod.startInFullscreen():
+      self.toggleFullscreen()
+
+    # Create an URL to the QML file
+    url = QUrl('modules/gui_modules/gui_qml/qml/main.qml')
+    # Set the QML file and show
+    self.view.setSource(url)
+    # get the root object
+    self.rootObject = self.view.rootObject()
+
     # start main loop
+    self.window.show()
+
+    # handle any notifications that might have come before firstTime
+    # (the GUI is not available before firstTime)
+    if self._notificationQueue:
+      for item in self._notificationQueue:
+        self.notify(*item)
+
     self.app.exec_()
 #    print "QML main loop started"
 
   def _qtWindowClosed(self, event):
-    print('qt window closing down')
+    print('Qt window closing down')
     self.modrana.shutdown()
 
   def stopMainLoop(self):
@@ -174,7 +198,10 @@ class QMLGUI(GUIModule):
     # QML uses <br> instead of \n for linebreak
     text = newlines2brs(text)
     print("QML GUI notify:\n message: %s, timeout: %d" % (text, msTimeout))
-    self.rootObject.notify(text,msTimeout)
+    if self.rootObject:
+      self.rootObject.notify(text,msTimeout)
+    else:
+      self._notificationQueue.append((text, msTimeout, icon))
 
 class Platform(QtCore.QObject):
   """make stats available to QML and integrable as a property"""
@@ -244,6 +271,46 @@ class IconImageProvider(QDeclarativeImageProvider):
       print("QML GUI: icon image provider: loading icon failed", e)
       print iconPath
       print 'themes/%s' % (iconPath)
+
+class TileImageProvider(QDeclarativeImageProvider):
+  """
+  the TileImageProvider class provides images images to the QML map element
+  """
+  def __init__(self, gui):
+    QDeclarativeImageProvider.__init__(self, QDeclarativeImageProvider.ImageType.Image)
+    self.gui = gui
+
+  def requestImage(self, tileInfo, size, requestedSize):
+    """
+    the tile info should look like this:
+    layerID/zl/x/y
+    """
+    try:
+      # split tileInfo
+      (layer,z,x,y) = tileInfo.split("/")
+      print "LAYER"
+      print layer
+      z = int(z)
+      x = int(x)
+      y = int(y)
+      tileData = self.gui._mapTiles.getTile(layer, z, x, y)
+      # create a file-like object
+      f = cStringIO.StringIO(tileData)
+      # create image object
+      img=QImage()
+      # lod the image from in memory buffer
+      img.loadFromData(f.read())
+      # cleanup
+      f.close()
+
+      return img
+      #return img.scaled(requestedSize)
+    except Exception, e:
+      print("QML GUI: icon image provider: loading tile failed", e)
+      print tileInfo
+      traceback.print_exc(file=sys.stdout)
+
+
 
 # from AGTL
 class Fix():
