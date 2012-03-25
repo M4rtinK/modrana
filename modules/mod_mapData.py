@@ -263,7 +263,7 @@ class mapData(ranaModule):
 
       self.totalSize = 0
       maxThreads = self.get('maxSizeThreads', 5)
-      sizeThread = self.GetSize(self, neededTiles, layer, maxThreads) # the seccond parameter is the max number of threads TODO: tweak this
+      sizeThread = self.GetSize(self, neededTiles, layer, maxThreads) # the second parameter is the max number of threads TODO: tweak this
       print  "getSize received, starting sizeThread"
       sizeThread.start()
       self.sizeThread = sizeThread
@@ -682,7 +682,7 @@ class mapData(ranaModule):
           dlSize = self.saveTileForURL(item)
         except Exception, e:
           failed = True
-          # TODO: try to redownload failed tiles
+          # TODO: try to re-download failed tiles
           print "exception in get tiles thread:\n%s" % e
 #          import traceback, sys
 #          traceback.print_exc(file=sys.stdout) # find what went wrong
@@ -702,7 +702,7 @@ class mapData(ranaModule):
       m = self.callback.m.get('storeTiles', None) # get the tile storage module
       if m:
         # does the the file exist ?
-        # TODO: maybe make something like tile objects so we dont have to pass so many parameters ?
+        # TODO: maybe make something like tile objects so we don't have to pass so many parameters ?
         if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
           request = self.connPool.get_url(url)
           size = int(request.getheaders()['content-length'])
@@ -770,7 +770,7 @@ class mapData(ranaModule):
     return(s.tiles)
 
   def getTilesForRoute(self, route, radius, z):
-    """get tilenamames for tiles around the route for given radius and zoom"""
+    """get tilenames for tiles around the route for given radius and zoom"""
     """ now we look whats the distance between each two trackpoints,
     if it is larger than the tracklog radius, we add additional interpolated points,
     so we get continuous coverage for the tracklog """
@@ -957,7 +957,7 @@ class mapData(ranaModule):
         else:
           action = "Downloading"
 
-        # hanldle singular versus plural
+        # handle singular versus plural
         if failedCount == 1:
           failedCountString = "1 download failed"
         else:
