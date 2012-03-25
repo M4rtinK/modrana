@@ -535,7 +535,7 @@ class Options(QtCore.QObject):
     @QtCore.Slot(str, str, result=str)
     @QtCore.Slot(str, float, result=float)
     def get(self, key, default):
-      """get a value from Mierus persistant options dictionary"""
+      """get a value from the modRanas persistent options dictionary"""
       print "GET"
       print key, default, self.modrana.get(key, default)
       return self.modrana.get(key, default)
@@ -545,7 +545,7 @@ class Options(QtCore.QObject):
     @QtCore.Slot(str, str)
     @QtCore.Slot(str, float)
     def set(self, key, value):
-      """set a keys value in Mierus persistant options dictionary"""
+      """set a keys value in modRanas persistent options dictionary"""
       print "SET"
       print key, value
       return self.modrana.set(key, value)
