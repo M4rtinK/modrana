@@ -3,16 +3,6 @@
 from __future__ import with_statement # for python 2.5
 import threading
 import os
-try:
-  import white_magic as magic
-  magicAvailable = True
-except ImportError:
-  magicAvailable = False
-  print("WARNING : libmagic is not installed : WARNING")
-  print("this means that batch-downloaded tiles will not be checked,")
-  print("to remove HTML error pages from real tiles")
-  print("-> this can result in tiles not showing up after batch-download")
-  print("WARNING : : WARNING")
 from cStringIO import StringIO
 #import time
 
@@ -143,26 +133,27 @@ class PointListContainer(ListContainer):
 def isTheStringAnImage(s):
   """test if the string contains an image
   by reading its magic number"""
-#  start = time.clock()
-  if magicAvailable:
-    # create a file like object
-    f = StringIO(s)
-    mime = str(magic.from_buffer(f.read(1024), mime=True))
-    f.close() # cleanup
-    # get lists mime
-    mimeSplit = mime.split('/')
-    mime1 = mimeSplit[0]
-    # check if its an image
 
-  #  print("mime checked in %1.2f ms" % (1000 * (time.clock() - start)))
-    if mime1 == 'image':
-      return True
-    else:
-      return False
-  else:
-    # mime checking not available
-    # lets hope it really is a tile
+  # create a file-like object
+  f = StringIO(s)
+  # read the header from it
+  h = f.read(32)
+  # cleanup
+  f.close()
+
+  # NOTE: magic numbers taken from imghdr source code
+
+  # as most tiles are PNGs, check for PNG first
+  if h[:8] == "\211PNG\r\n\032\n":
     return True
+  elif h[6:10] in ('JFIF','Exif'): # JPEG in JFIF or Exif format
+    return True
+  elif h[:6] in ('GIF87a', 'GIF89a'): # GIF ('87 and '89 variants)
+    return True
+  elif h[:2] in ('MM', 'II', 'BM'): # tiff or BMP
+    return True
+  else: # probably not an image file
+    return False
 
 def createFolderPath(newPath):
   """
