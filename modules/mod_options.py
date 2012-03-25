@@ -295,7 +295,7 @@ class Options(ranaModule):
     addBoolOpt("Map as overlay", "overlay", group, False)
 
     addItems("Main map", "layer", layerNameKey, group, "mapnik")
-    addItems("Background map", "layer2", layerNameKey, group, "osma")
+    addItems("Background map", "layer2", layerNameKey, group, "cycle")
 
     addOpt("Transparency ratio", "transpRatio",
             [("0.25,1","overlay:25%"),
