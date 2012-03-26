@@ -226,12 +226,21 @@ Rectangle {
         return [lat_deg % 90.0, lon_deg % 180.0];
     }
 
-    function tileUrl(tx, ty) {
+    function tileUrl(layerID, tx, ty, retryCount) {
+        //console.log("tileURL")
+        //console.log(retryCount)
         if (ty < 0 || ty > maxTileNo) {
             return "image://icons/"+ rWin.theme +"/noimage.png"
         } else {
             //var x = F.getMapTile(url, tx, ty, zoomLevel);
-            return "image://tiles/"+layer+"/"+zoomLevel+"/"+tx+"/"+ty
+            var suffix = ""
+            if (retryCount == 0) {
+                suffix = ""
+            } else {
+                suffix = "/" + retryCount
+            }
+            console.log("image://tiles/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty+suffix)
+            return "image://tiles/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty+suffix
         }
     }
 
@@ -250,15 +259,13 @@ Rectangle {
 
         Repeater {
             id: tiles
-
-
             model: (pinchmap.numTilesX * pinchmap.numTilesY);
             Rectangle {
                 id: tile
                 property alias source: img.source;
                 property int tileX: cornerTileX + (index % numTilesX)
                 property int tileY: cornerTileY + Math.floor(index / numTilesX)
-                Rectangle {
+                /*Rectangle {
                     id: progressBar;
                     property real p: 0;
                     height: 16;
@@ -275,26 +282,74 @@ Rectangle {
                         width: (parent.width - 4) * progressBar.p;
                         color: "#000000";
                     }
-                }
+                }*/
                 Label {
                     anchors.left: parent.left
                     anchors.leftMargin: 16
                     y: parent.height/2 - 32
-                    text: (img.status == Image.Ready ? "Ready" :
+                    text: (img.status == Image.Ready ? "Loading... "+(img.retryCount+1)+" s" :
                            img.status == Image.Null ? "Not Set" :
                            img.status == Image.Error ? "Error" :
-                           "Loading...")
+                           "")
                 }
-
+                /* triggers tile reload to check
+                if the tile is ready to be loaded */
+                Timer {
+                    id : retryTile
+                    interval : 1000
+                    running : false
+                    onTriggered : {
+                        console.log("timer fires")
+                        console.log(img.cache)
+                        if (img.retryCount < 256) {
+                            img.retryCount = img.retryCount+1;
+                        } else {
+                            img.retryCount = 1
+                        }
+                    }
+                }
                 Image {
+                    property int retryCount: 0
                     id: img;
                     anchors.fill: parent;
-                    onProgressChanged: { progressBar.p = progress }
+                    //onProgressChanged: { progressBar.p = progress }
                     asynchronous: true
-                    source: tileUrl(tileX, tileY);
-
+                    source: tileUrl(pinchmap.layer, tileX, tileY, retryCount);
+                    cache: false
+                    //cache : sourceSize.width == 256 // only cache real tiles
+                    //console.log("IMAGE");
+                    //console.log(index);
+                    onStatusChanged : {
+                        console.log("status changed")
+                        //console.log(sourceSize.width)
+                        //console.log(status)
+                        // image signaling works only once
+                        // the image has been loaded
+                        if (status == Image.Ready) {
+                            if (sourceSize.width == 256) {
+                                // real tile loaded
+                                console.log("real tile loaded")
+                                //cache = true
+                                //retryTile.stop()
+                            } else if (sourceSize.width == 2) {
+                                // tile downloaded & ready
+                                console.log("ready")
+                                retryCount = 0
+                                //cache = true
+                            } else if (sourceSize.width == 1 || sourceSize.width == 0) {
+                                /* tile is being loaded from network,
+                                retry in a while
+                                */
+                                console.log("retry")
+                                cache = false
+                                retryTile.start()
+                            } else if (sourceSize.width == 3) {
+                                // semi permanent error, give up for now
+                                retryTile.stop()
+                            }
+                        }
+                    }
                 }
-
 
                 width: tileSize;
                 height: tileSize;

@@ -115,7 +115,7 @@ class MapTiles(ranaModule):
     url = "http://c.tile.openstreetmap.org/"
     #self.httpPool = urllib3.PoolManager()
     self.httpPool = urllib3.connection_from_url(url = url, maxsize=4, timeout=3, block=False)
-
+    self.cacheImageSurfaces = gs.GUIString == "GTK"
 
   def firstTime(self):
     self.mapViewModule = self.m.get('mapView', None)
@@ -131,41 +131,111 @@ class MapTiles(ranaModule):
     * first look if such a tile is available from storage
     * if not, download it
     """
+    # check if the tile is in the recently-downloaded cache
+    name = self.getTileName(layer, z, x, y)
+    cacheItem = self.images[0].get(name, None)
+    if cacheItem:
+      print "loaded FROM memory CACHE"
+      return cacheItem[0]
+
+    # get layer info
     layerInfo = self.mapLayers.get(layer, None)
     if(layerInfo == None): # is the layer info valid ?
       print("mapTiles: invalid layer")
-      return None
+      return
     layerPrefix = layerInfo.get('folderPrefix','OpenStreetMap II')
     layerType = layerInfo.get('type','png')
-
     tileData = self._storeTiles.getTileData(layerPrefix, z, x, y, layerType)
     if tileData:
-      print "loaded FROM CACHE"
+      print "loaded FROM disk CACHE"
       # tile was available from storage
       return tileData
 
     # tile not available from storage, we need to download it
     url = self.getTileUrl(x,y,z,layer)
-    print "DOWNLOAD"
-    print url
-    #request = urllib.urlopen(url)
-    request = self.httpPool.get_url(url)
-#    request = self.httpPool.urlopen("GET", "%d/%d/%d.png" % (z, x, y))
-    tileData = request.data
-    #request.close()
-    print "DOWNLOAD DONE"
-    # check if the data is an image or an error page
-    if modrana_utils.isTheStringAnImage(tileData):
-      # store
-      tileFolder = self.modrana.paths.getMapFolderPath()
-      filePath = tileFolder + self.getImagePath(x, y, z, layerPrefix, layerType)
-      self._storeTiles.automaticStoreTile(tileData, layerPrefix, z, x, y, layerType, filePath)
-      print "STORED"
-      # return
-      return tileData
+    if name in self.threads:
+      return None # download already in progress
     else:
-      print("mapTiles: downloaded tile is not an image (error page?)")
+      print "queuing DOWNLOAD"
+      self.addTileDownloadRequest(layer,z,x,y)
       return None
+#    #request = urllib.urlopen(url)
+#    request = self.httpPool.get_url(url)
+##    request = self.httpPool.urlopen("GET", "%d/%d/%d.png" % (z, x, y))
+#    tileData = request.data
+#    #request.close()
+#    print "DOWNLOAD DONE"
+#    # check if the data is an image or an error page
+#    if modrana_utils.isTheStringAnImage(tileData):
+#      # store
+#      tileFolder = self.modrana.paths.getMapFolderPath()
+#      filePath = tileFolder + self.getImagePath(x, y, z, layerPrefix, layerType)
+#      self._storeTiles.automaticStoreTile(tileData, layerPrefix, z, x, y, layerType, filePath)
+#      print "STORED"
+#      # return
+#      return tileData
+#    else:
+#      print("mapTiles: downloaded tile is not an image (error page?)")
+#      return None
+
+  def addTileDownloadRequest(self, layer, z, x, y):
+    """add a download request to the download manager queue
+    the download manager will use its download thread pool to process the request
+    NOTE: no checking if tile exists in local storage is done past this point,
+    you have to do this beforehand or you might download an already available tile :)
+    """
+
+    print "DOWNLOAD queued"
+    name = self.getTileName(layer, z, x, y)
+    # check if the tile is being downloaded
+    if name in self.threads or name in self.images[0]:
+      return
+    """ as we check both in thread list and image cache (where download threads deposit tiles) we don't
+    use the corresponding image cache and thread list locks
+    - the window for collision is ver small
+    - possible collisions:
+    -> falsely discarding a request for a thread that actually just errored out
+    -> adding a request for a thread that actually just started (dl manager will kill such requests, np)
+    - so basically nothing serious, also even when ve falsely discard a loading request,
+    it will probably be soon repeated (this is by design to flush the no longer relevant tiles from the
+    download queue)
+    """
+
+    layerInfo = self.mapLayers.get(layer, None)
+    if(layerInfo == None): # is the layer info valid ?
+      print("mapTiles: invalid layer")
+      return
+    layerPrefix = layerInfo.get('folderPrefix','OpenStreetMap II')
+    layerType = layerInfo.get('type','png')
+    # Are we allowed to download it ? (network=='full')
+    # -> no need to submit a download request if network access is disabled
+    if(self.get('network','full')=='full'):
+      filename = os.path.join(self._getTileFolderPath(), (self.getImagePath(x,y,z,layerPrefix, layerType)))
+      # add tile download request
+      with self.threadlListCondition:
+        timestamp = time.time()
+        request = (name, x, y, z,layer, layerPrefix, layerType, filename, timestamp)
+
+        with self.downloadRequestPoolLock: # add a download request
+          self.downloadRequestPool.append(request)
+
+        self.threadlListCondition.notifyAll() # wake up the download manager
+
+  def tileInProgress(self, layer, z, x, y):
+    name = self.getTileName(layer, z, x, y)
+    return name in self.threads
+
+  def tileInMemory(self, layer, z, x, y):
+    name = self.getTileName(layer, z, x, y)
+    return name in self.images[0]
+
+#  def tileInStorage(self, layer, z, x, y):
+#    pass
+#    layerInfo = self.mapLayers.get(layer, None)
+#    layerPrefix = layerInfo.get('folderPrefix','OpenStreetMap II')
+#    layerType = layerInfo.get('type','png')
+#    self._storeTiles.tileExists(layerPrefix, z, x, y, layerType)
+
 
   def _updateScalingCB(self, key='mapScale', oldValue=1, newValue=1):
     """
@@ -218,13 +288,18 @@ class MapTiles(ranaModule):
                 if self.downloadRequestPool:
                   request = self.downloadRequestPool.pop() # download most recent requests first
                   (name,x,y,z,layer,layerPrefix,layerType, filename, timestamp) = request
+                  if name in self.threads.keys():
+                    print "DISCARDED"
+                    continue
                   # start a new thread
                   self.threads[name] = self.TileDownloader(name,x,y,z,layer,layerPrefix,layerType, filename, self)
                   self.threads[name].daemon = True
                   self.threads[name].start()
-                  # change the status tile to "Downloading..."
-                  with self.imagesLock:
-                    self.images[0][name] = self.downloadingTile
+                  if self.cacheImageSurfaces:
+                    # change the status tile to "Downloading..."
+                    if self.cacheImageSurfaces:
+                      with self.imagesLock:
+                        self.images[0][name] = self.downloadingTile
             else:
               # ** all download slots are full **
 
@@ -232,10 +307,9 @@ class MapTiles(ranaModule):
               currentTime = time.time()
               cleanPool = []
               def notOld(currentTime,request):
-                timestamp = request[9]
+                timestamp = request[8]
                 dt = (currentTime - timestamp)
                 return dt < self.downloadRequestTimeout
-
               for request in self.downloadRequestPool:
                 if notOld(currentTime, request):
                   cleanPool.append(request)
@@ -248,6 +322,7 @@ class MapTiles(ranaModule):
               self.downloadRequestPool = cleanPool
         except Exception, e:
           print "exception in tile download manager thread:\n%s" % e
+#          traceback.print_exc()
 
 #  def startTileLoadingThread(self):
 #    """start the loading-request consumer thread"""
@@ -651,9 +726,10 @@ class MapTiles(ranaModule):
   
   def removeImageFromMemmory(self, name, dictIndex=0):
     # remove an image from memory
-    with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
-      if name in self.images:
-        del self.images[dictIndex][name]
+    if self.cacheImageSurfaces:
+      with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
+        if name in self.images:
+          del self.images[dictIndex][name]
   
   def drawCompositeImage(self,cr, nameOver, nameBack, x,y, scale, alpha1=1, alpha2=1, dictIndex1=0,dictIndex2=0):
     """Draw a composited tile image"""
@@ -942,6 +1018,7 @@ class MapTiles(ranaModule):
       self.finished = 0
       self.filename = filename
       self.callback = callback
+      self.useImageSurface = callback.cacheImageSurfaces
 
     def run(self):
       try:
@@ -956,26 +1033,28 @@ class MapTiles(ranaModule):
 
       # something is wrong with the server or url
       except urllib2.HTTPError, e:
-        tileDownloadFailedSurface = self.callback.images[1]['tileDownloadFailed'][0]
-        expireTimestamp = time.time() + 10
-        self.callback.storeInMemmory(tileDownloadFailedSurface,self.name,'semiPermanentError',expireTimestamp)
-        """
-        like this, when tile download fails due to a http error,
-        the error tile is loaded instead
-        like this:
-         - modRana does not immediately try to download a tile that errors out
-         - the error tile is shown without modifying the pipeline too much
-         - modRana will eventually try to download the tile again,
-           after it is flushed with old tiles from the memory
-        """
+        if self.useImageSurface:
+          self.callback.storeInMemmory(tileDownloadFailedSurface,self.name,'semiPermanentError',expireTimestamp)
+          tileDownloadFailedSurface = self.callback.images[1]['tileDownloadFailed'][0]
+          expireTimestamp = time.time() + 10
+          """
+          like this, when tile download fails due to a http error,
+          the error tile is loaded instead
+          like this:
+           - modRana does not immediately try to download a tile that errors out
+           - the error tile is shown without modifying the pipeline too much
+           - modRana will eventually try to download the tile again,
+             after it is flushed with old tiles from the memory
+          """
       except urllib2.URLError, e:
-        tileNetworkErrorSurface = self.callback.images[1]['tileNetworkError'][0]
-        expireTimestamp = time.time() + 10
-        self.callback.storeInMemmory(tileNetworkErrorSurface,self.name, 'error', expireTimestamp) # retry after 10 seconds
-        """ as not to DOS the system when we temporarily loose internet connection or other such error occurs,
-             we load a temporary error tile with expiration timestamp instead of the tile image
-             TODO: actually remove tiles according to expiration timestamp :)
-        """
+        if self.useImageSurface:
+          tileNetworkErrorSurface = self.callback.images[1]['tileNetworkError'][0]
+          expireTimestamp = time.time() + 10
+          self.callback.storeInMemmory(tileNetworkErrorSurface,self.name, 'error', expireTimestamp) # retry after 10 seconds
+          """ as not to DOS the system when we temporarily loose internet connection or other such error occurs,
+               we load a temporary error tile with expiration timestamp instead of the tile image
+               TODO: actually remove tiles according to expiration timestamp :)
+          """
 
       # something other is wrong (most probably a corrupted tile)
       except Exception, e:
@@ -1018,31 +1097,36 @@ class MapTiles(ranaModule):
 #      request = urllib.urlopen(url)
       content = request.read()
       request.close()
-      pl = gtk.gdk.PixbufLoader()
 
-      pl.write(content)
+      if self.useImageSurface:
+        pl = gtk.gdk.PixbufLoader()
 
-      pl.close() # this  blocks until the image is completely loaded
-      # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
-      #x = pixbuf.get_width()
-      #y = pixbuf.get_height()
-      # Google sat images are 256 by 256 px, we don't need to check the size
-      x = 256
-      y = 256
-      ''' create a new cairo surface to place the image on '''
-      surface = cairo.ImageSurface(0,x,y)
-      ''' create a context to the new surface '''
-      ct = cairo.Context(surface)
-      ''' create a GDK formatted Cairo context to the new Cairo native context '''
-      ct2 = gtk.gdk.CairoContext(ct)
-      ''' draw from the pixbuf to the new surface '''
-      ct2.set_source_pixbuf(pl.get_pixbuf(),0,0)
-      ct2.paint()
-      ''' surface now contains the image in a Cairo surface '''
-      self.callback.storeInMemmory(surface, name)
+        pl.write(content)
 
-      # like this, corrupted tiles should not get past the pixbuf loader and be stored
-      m = self.callback.m.get('storeTiles', None)
+        pl.close() # this  blocks until the image is completely loaded
+        # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
+        #x = pixbuf.get_width()
+        #y = pixbuf.get_height()
+        # Google sat images are 256 by 256 px, we don't need to check the size
+        x = 256
+        y = 256
+        ''' create a new cairo surface to place the image on '''
+        surface = cairo.ImageSurface(0,x,y)
+        ''' create a context to the new surface '''
+        ct = cairo.Context(surface)
+        ''' create a GDK formatted Cairo context to the new Cairo native context '''
+        ct2 = gtk.gdk.CairoContext(ct)
+        ''' draw from the pixbuf to the new surface '''
+        ct2.set_source_pixbuf(pl.get_pixbuf(),0,0)
+        ct2.paint()
+        ''' surface now contains the image in a Cairo surface '''
+        self.callback.storeInMemmory(surface, name)
+        # like this, corrupted tiles should not get past the pixbuf loader and be stored
+      else:
+        # cache the raw data
+        self.callback.storeInMemmory(content, name)
+
+      m = self.callback._storeTiles
       if m:
         m.automaticStoreTile(content, self.layerName, self.z, self.x, self.y, self.layerType, filename)
   

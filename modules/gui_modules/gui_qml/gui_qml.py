@@ -26,6 +26,8 @@ import re
 import os
 import traceback
 import cStringIO
+import urllib
+import urllib2
 
 # PySide
 from PySide import QtCore
@@ -36,6 +38,7 @@ from PySide.QtDeclarative import *
 # modRana imports
 from base_gui_module import GUIModule
 from datetime import datetime
+import time
 
 def newlines2brs(text):
   """ QML uses <br> instead of \n for linebreak """
@@ -194,6 +197,7 @@ class QMLGUI(GUIModule):
   def notify(self, text, msTimeout=5000, icon=""):
     """trigger a notification using the Qt Quick Components
     InfoBanner notification"""
+    return
 
     # QML uses <br> instead of \n for linebreak
     text = newlines2brs(text)
@@ -279,6 +283,10 @@ class TileImageProvider(QDeclarativeImageProvider):
   def __init__(self, gui):
     QDeclarativeImageProvider.__init__(self, QDeclarativeImageProvider.ImageType.Image)
     self.gui = gui
+    self.loading = QImage(1,1, QImage.Format_RGB32)
+    self.ready = QImage(2,1, QImage.Format_RGB32)
+    self.error = QImage(3,1, QImage.Format_RGB32)
+
 
   def requestImage(self, tileInfo, size, requestedSize):
     """
@@ -286,14 +294,37 @@ class TileImageProvider(QDeclarativeImageProvider):
     layerID/zl/x/y
     """
     try:
-      # split tileInfo
-      (layer,z,x,y) = tileInfo.split("/")
-      print "LAYER"
-      print layer
-      z = int(z)
-      x = int(x)
-      y = int(y)
+      # split the string provided by QML
+      split = tileInfo.split("/")
+      layer = split[0]
+      z = int(split[1])
+      x = int(split[2])
+      y = int(split[3])
+
+      if len(split) > 4:
+        retry = int(split[4])
+        # just an inquiry about tile availability
+        if self.gui._mapTiles.tileInMemory(layer, z, x, y):
+          # tile is ready to be loaded
+          return self.ready
+        else:
+          # every second inquiry, refresh the loading request
+          if retry%2 == 0:
+            self.gui._mapTiles.addTileDownloadRequest(layer, z, x, y)
+          # * tile download requests are stored in a circular queue
+          # and the original request might have been discarded in the meantime
+          # * also, download requests are processed starting by the
+          # newest ones - so like this, we are basically increasing
+          # the probability that the currently visible tiles
+          # will be downloaded
+
+          return self.loading
+
+      # get the tile from the tile module
       tileData = self.gui._mapTiles.getTile(layer, z, x, y)
+      if not tileData:
+        # download request queued, return loading status image
+        return self.loading
       # create a file-like object
       f = cStringIO.StringIO(tileData)
       # create image object
@@ -302,15 +333,12 @@ class TileImageProvider(QDeclarativeImageProvider):
       img.loadFromData(f.read())
       # cleanup
       f.close()
-
       return img
-      #return img.scaled(requestedSize)
+
     except Exception, e:
       print("QML GUI: icon image provider: loading tile failed", e)
       print tileInfo
       traceback.print_exc(file=sys.stdout)
-
-
 
 # from AGTL
 class Fix():
