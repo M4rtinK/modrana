@@ -19,7 +19,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 #from dbus.service import Object
-from ScrolledText import example
 from base_module import ranaModule
 import geo
 import os
