@@ -54,7 +54,7 @@ class device_neo(deviceModule):
     return 2
 
   def textEntryIminent(self):
-    """in SHR on Neo, we need to temporarry disable fullscreen
+    """in SHR on Neo, we need to temporarily disable fullscreen
     (if we are in fullscreen),
     or else the text entry box won't show up"""
     display = self.m.get('display', None)

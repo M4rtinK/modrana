@@ -205,7 +205,7 @@ class PointGroup():
     entered for the first time without selecting any items,
     once an item is selected, the back action reverts to "set:menu:None",
     eq. returning to the map screen
-    USE CASE: quick returning from search results back to the serch menu
+    USE CASE: quick returning from search results back to the search menu
               to start another search
     """
 

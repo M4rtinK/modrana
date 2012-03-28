@@ -423,7 +423,7 @@ class showGPX(ranaModule):
       visibleTracklogs = self.get('visibleTracklogsDict', {})
 
       for path in availableTracklogs:
-        # dont override already set colors
+        # don't override already set colors
         if path not in visibleTracklogs.keys():
           visibleTracklogs[path] = {'colorName' : self.getDistinctColorName()}
 

@@ -96,5 +96,8 @@ class ranaModule:
       print "No message handler, cant send message."
 
   def shutdown(self):
-    """Program is about to shutdown (don't rely solely on this for anything important like saving someone's tracklog!)"""
+    """
+    Program is about to shutdown
+    (don't rely solely on this for anything important like saving someone's tracklog!)
+    """
     pass

@@ -75,7 +75,7 @@ class positionMarker(ranaModule):
 
     cr.save()
 
-    # rotate the marker acording to our bearing
+    # rotate the marker according to our bearing
     cr.translate(x1,y1) # we move the coordinates center to where we want the center of the marker
     cr.rotate(radians(angle))
 
@@ -126,7 +126,7 @@ class positionMarker(ranaModule):
 
     cr.save()
 
-    # rotate the marker acording to our bearing
+    # rotate the marker according to our bearing
     cr.translate(x1,y1) # we move the coordinates center to where we want the center of the marker
 
     # circle

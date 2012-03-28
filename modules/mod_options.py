@@ -231,7 +231,7 @@ class Options(ranaModule):
         print "options: group %s does not exist, can't add a raw option to it" % group
 
   def removeOption(self, categoryId, groupId, variable):
-    """remova an option given by group and variable name"""
+    """remove an option given by group and variable name"""
 
     group = self._getGroupId(categoryId, groupId)
 
@@ -788,7 +788,7 @@ class Options(ranaModule):
 
 
 #    addOpt("Tracklogs", "showTracklog",
-#    [(False, "Dont draw tracklogs"),
+#    [(False, "Don't draw tracklogs"),
 #     ("simple", "Draw simple tracklogs")],
 #     "view",
 #     False)
@@ -919,7 +919,7 @@ class Options(ranaModule):
       self.modrana.removeKeyModifier(args)
 
   def _updateVoiceManual(self, action):
-    """add or remove custom voce parameters option items"""
+    """add or remove custom voice parameters option items"""
 
     if action == "add":
       groupId = self._getGroupId("sound", "voice_out")
@@ -994,7 +994,7 @@ class Options(ranaModule):
               title, self.modrana.getModeLabel(mode))
 
           else:
-            # nromal option display
+            # normal option display
             if self.modrana.hasKeyModifierInMode(variable, mode):
               title = "%s: <small><sup><b>[%s]</b></sup></small>" % (
               title, self.modrana.getModeLabel(mode))

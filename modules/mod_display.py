@@ -41,8 +41,8 @@ class display(ranaModule):
     self.fullscreen = False
     """according to documentation on:
     (http://wiki.maemo.org/PyMaemo/Python-osso_examples#Device_State),
-    every display_blanking_pause() call pauses screenblank for 60 secconds,
-    to make sure, we request every 30 secconds"""
+    every display_blanking_pause() call pauses screenblank for 60 seconds,
+    to make sure, we request every 30 seconds"""
     self.pauseScreenBlankingEnabled = False
     self.screenBlankPauseInterval = 30
     self.lastScreenblankPauseRequest = time.time()
@@ -126,14 +126,14 @@ class display(ranaModule):
 
   def getFullscreenEnabled(self):
     """
-    True - we are in fullscreen, False othewise
+    True - we are in fullscreen, False otherwise
     """
     return self.fullscreen
 
   # * screen blanking control *
 
   def screenBlankingControlSupported(self):
-    """report if controling the screen blanking is supported"""
+    """report if controlling the screen blanking is supported"""
     return self.dmod.screenBlankingControlSupported()
 
   def usesDashboard(self):
@@ -276,7 +276,7 @@ class display(ranaModule):
     if self.pauseScreenBlankingEnabled: # pause screen blanking for 60s
       currentTime = time.time()
       if (currentTime - self.lastScreenblankPauseRequest)>self.screenBlankPauseInterval:
-        # reaguest to pause screen blanking for 60 secconds every 30 secconds
+        # request to pause screen blanking for 60 seconds every 30 seconds
         self.pauseScreenBlanking()
     if self.checkConditions: # run a check for screen un/blanking conditions
       currentTime = time.time()

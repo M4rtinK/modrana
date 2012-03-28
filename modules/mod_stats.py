@@ -55,7 +55,7 @@ class stats(ranaModule):
 
     speed = self.get('speed', None)
     if speed == None or speed<=self.minimalSpeed:
-      """we have no data, or the speed is below the treshold (we are not moving)"""
+      """we have no data, or the speed is below the threshold (we are not moving)"""
       return
 
     average = 0

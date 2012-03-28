@@ -39,10 +39,10 @@ class Projection(ranaModule):
 
   TODO:
   - why is find edges called twice for position tracking ?
-  - dont redraw the whole map for a small nudge
+  - don't redraw the whole map for a small nudge
    -> currently even for a 1 pixel nudge, the whol screen is redrawn
   - use a mechanism similar to nudging for faster tracklog drawing
-   -> shoft the trackpoints so no ll2xy would be needed
+   -> show the trackpoints so no ll2xy would be needed
 
   """
   def __init__(self, m, d, i):
@@ -60,7 +60,7 @@ class Projection(ranaModule):
 
   def firstTime(self):
     # make absolutely sure that centering is turned on
-    # otherwise we dont know what to show -> black screen => NOT GOOD :)
+    # otherwise we don't know what to show -> black screen => NOT GOOD :)
 
     defaultPosition = (49.2, 16.616667) # Brno
 #      (49.233056, 17.666944) # Zlin
@@ -121,7 +121,7 @@ class Projection(ranaModule):
       self.findEdges()
     
   def recentre(self,lat,lon,zoom = None):
-#    print "recentring to: %f,%f" % (lat,lon)
+#    print "recentering to: %f,%f" % (lat,lon)
     """Move the projection to a particular geographic location
     (with optional zoom level)"""
     self.lat = lat

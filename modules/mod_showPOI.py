@@ -99,7 +99,7 @@ class showPOI(ranaModule):
           (w,h) = (extents[2], extents[3])
           border = 2
           cr.set_line_width(2)
-          cr.set_source_rgba(0.1, 0.6, 0.1, 0.45) # trasparent blue
+          cr.set_source_rgba(0.1, 0.6, 0.1, 0.45) # transparent blue
           (rx,ry,rw,rh) = (x - border+12, y + border+h*0.2 + 6, w + 4*border, -(h*1.4))
           cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
           cr.fill()
@@ -115,10 +115,10 @@ class showPOI(ranaModule):
           cr.fill()
 
           # draw the actual text
-  #        cr.set_source_rgba(1, 1, 0, 0.95) # slightly trasparent white
-          cr.set_source_rgba(1, 1, 1, 0.95) # slightly trasparent white
+  #        cr.set_source_rgba(1, 1, 0, 0.95) # slightly transparent white
+          cr.set_source_rgba(1, 1, 1, 0.95) # slightly transparent white
           cr.move_to(x+15,y+7)
-          cr.show_text(text) # show the trasparent result caption
+          cr.show_text(text) # show the transparent result caption
           cr.stroke()
 
   def handleMessage(self, message, type, args):
@@ -155,7 +155,7 @@ class showPOI(ranaModule):
             catId=int(args[0])
             action = args[1]
           poiFromCategory = store.getAllPOIFromCategory(catId)
-          # convert the output to a listable menu comaptible state
+          # convert the output to a listable menu compatible state
           i = 0
           for item in poiFromCategory:
             (label,lat,lon,poi_id) = item
@@ -357,8 +357,8 @@ class showPOI(ranaModule):
     elif key=='lon':
       self.activePOI.setLon(float(result))
 
-    # new  poi will be coomited at once, so we disable the autocommit
-    # also, the events are chained, so one netry box follows the other
+    # new  poi will be committed at once, so we disable the autocommit
+    # also, the events are chained, so one entry box follows the other
     elif key=='newName':
       self.activePOI.setName(result,commit=False)
       entry.entryBox(self,'newDescription','POI Description',"")
@@ -372,7 +372,7 @@ class showPOI(ranaModule):
       self.activePOI.setLon(result,commit=False)
       """final step:
       setup the category chooser menu,
-      and make sure the POI is commited after a cetegory is chosen
+      and make sure the POI is committed after acategory is chosen
       """
       self._setupPOICategoryChooser('showPOI', 'setCatAndCommit')
       self.set('menu', 'menu#list#POICategoryChooser')

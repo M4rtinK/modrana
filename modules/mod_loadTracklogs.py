@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 #from dbus.service import Object
+from ScrolledText import example
 from base_module import ranaModule
 import geo
 import os
@@ -55,7 +56,7 @@ class loadTracklogs(ranaModule):
       if path != None and self.tracklogList:
         print "loading tracklog: %s" % path
 
-        # Zeroeth, is the tracklog already loaded ?
+        # Zeroth, is the tracklog already loaded ?
         if path not in self.tracklogs.keys():
           # First, is the cache loaded ?
           if self.cache == {}:
@@ -177,7 +178,7 @@ class loadTracklogs(ranaModule):
       return self.tracklogs[path]
 
   def getTracklogForPath(self, path):
-    # return a tracklog coresponding to the path specified
+    # return a tracklog corresponding to the path specified
     if path in self.tracklogs.keys():
       return self.tracklogs[path]
     else:
@@ -391,7 +392,7 @@ class loadTracklogs(ranaModule):
     try:
       file = open(path, 'r')
     except:
-      print "loading tracklo failed: %s" % path
+      print "loading tracklog failed: %s" % path
 
     if notify:
       self.sendMessage('notification:loading %s#1' % path)
@@ -569,7 +570,7 @@ class GPXTracklog(tracklog):
     tracklog.__init__(self, trackpointsList, filename, type)
     tracklog.type = 'GPX'
     self.routeInfo = None # a dictionary for storing route information
-    # TODO: set this automaticaly
+    # TODO: set this automatically
 
     filename = self.filename
 
@@ -582,7 +583,7 @@ class GPXTracklog(tracklog):
 
     self.perElevList = None
 
-    # dowe have any points to process ?
+    # do we have any points to process ?
     if self.trackpointsList == []:
       # no points, we are done :)
       return
@@ -628,7 +629,7 @@ class GPXTracklog(tracklog):
     if pointsWithElevation: # do we have some points with known elevation ?
       self.elevation = True
       self.routeInfo = {}
-      # there we have the poinsts, that contain the highest, lowest, first and last point
+      # there we have the points, that contain the highest, lowest, first and last point
       firstPoint = pointsWithElevation[0]
       lastPoint = pointsWithElevation[len(pointsWithElevation)-1]
       # now we use some lambdas, to find the lowest and highest point
@@ -658,8 +659,8 @@ class GPXTracklog(tracklog):
   def replaceFile(self):
     """
     we output the tree structure of the gpx xml back to the file
-    this can also meen, that some info that we didnt load to the tree will be lost
-    also atributes that were changed after the initial load will be written in the current (changed) state
+    this can also mean, that some info that we didn't load to the tree will be lost
+    also attributes that were changed after the initial load will be written in the current (changed) state
     """
     f = open(self.filename, "w") # open the old file
     xmlTree = self.trackpointsList.export_gpx_file() # get the element tree
@@ -683,7 +684,7 @@ class clusterOfPoints():
   """A basic class representing a cluster of nearby points."""
   def __init__(self, pointsList, centreX, centreY, radius):
     self.pointsList = pointsList # points in the cluster
-    """coordinates of the circle encompasing all points"""
+    """coordinates of the circle encompassing all points"""
     self.centreX = centreX
     self.centreY = centreY
     self.radius = radius #radius of the circle

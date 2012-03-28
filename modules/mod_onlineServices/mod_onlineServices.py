@@ -54,7 +54,7 @@ class onlineServices(ranaModule):
     try:
       query = urllib.urlopen(url)
     except:
-      "onlineServices: getting elevation from geonames retuned an error"
+      "onlineServices: getting elevation from geonames returned an error"
       return 0
     return query.read()
 
@@ -98,7 +98,7 @@ class onlineServices(ranaModule):
       try:
         query = urllib.urlopen(url)
       except:
-        "onlineServices: getting elevation from geonames retuned an error"
+        "onlineServices: getting elevation from geonames returned an error"
         results = "0"
         for i in range(1, len(tempList)):
           results = results + " 0"
@@ -148,8 +148,8 @@ class onlineServices(ranaModule):
     return query
 
   def googleDirectionsAsync(self, start, destination, outputHandler, key):
-    """a background running googledirections query
-       -> verbatim start and destination will be used in route descritpion, no geocoding
+    """a background running google directions query
+       -> verbatim start and destination will be used in route description, no geocoding
        outputHandler will be provided with the results + the specified key string"""
     routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
     self._addWorkerThread(self._onlineRouteLookup, [(start, destination, routeRequestSentTimestamp), "normal"], outputHandler, key)
@@ -217,7 +217,7 @@ class onlineServices(ranaModule):
       else:
         print "onlineServices:Gdirections:routing failed with exception googlemaps status code:%d" % e.status
     except Exception, e:
-      print "onlineServices:Gdirections:routing failed with nongooglemaps exception:\n%s" % e
+      print "onlineServices:Gdirections:routing failed with non-googlemaps exception:\n%s" % e
     self.set('needRedraw', True)
     return directions
 
@@ -276,11 +276,11 @@ class onlineServices(ranaModule):
       startAddress = self.googleReverseGeocode(fromLat,fromLon)
       self._setWorkStatusText("geocoding destination...")
       destinationAddress = self.googleReverseGeocode(toLat,toLon)
-      # return the original start/dest cooridnates
+      # return the original start/dest coordinates
       startLL = start
       destinationLL = destination
     else:
-      # signalize that the original start/dest cooridnates are unknown
+      # signalize that the original start/dest coordinates are unknown
       startAddress = start
       destinationAddress = destination
       startLL = None
@@ -328,9 +328,9 @@ class onlineServices(ranaModule):
 
   def _done(self, thread):
     """a thread reporting it is done"""
-    # unregister the thread
+    # un-register the thread
     self._unregisterWorkerThread(thread)
-    # if no other thredas are working, disable the overlay
+    # if no other threads are working, disable the overlay
     if not self.workerThreads:
       self._disableOverlay()
 

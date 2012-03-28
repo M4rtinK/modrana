@@ -197,7 +197,7 @@ class icons(ranaModule):
     try:
       pixbuf = gtk.gdk.pixbuf_new_from_file(path)
       """
-      if width or height are not set, we thek tehm from the pixbuf
+      if width or height are not set, we take them from the pixbuf
       if both are not set, we disable scaling
       """
 
@@ -225,7 +225,7 @@ class icons(ranaModule):
   def _getValidParams(self, w, h, pixbuf):
     """return width and height
        just return w or h if they are set,
-       if they are None, use vaules from the given pixbuf"""
+       if they are None, use values from the given pixbuf"""
     if w == None:
       w = pixbuf.get_width()
     if h == None:

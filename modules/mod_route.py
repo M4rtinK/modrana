@@ -166,10 +166,10 @@ class route(ranaModule):
       startPos = self.get('startPos', None)
       endPos = self.get('endPos', None)
       pos = self.get('pos', None)
-      if pos == None: # well, we dont know where we are, so we dont know here to go :)
+      if pos == None: # well, we don't know where we are, so we don't know here to go :)
         return
 
-      if startPos == None and endPos == None: # we know where we are, but we dont know where we should go :)
+      if startPos == None and endPos == None: # we know where we are, but we don't know where we should go :)
         return
 
       if startPos != None: # we want a route from somewhere to our current position
@@ -189,7 +189,7 @@ class route(ranaModule):
       self.set('needRedraw', True) # show the new route
 
     elif(message == "route"): # find a route
-      if (type=='md'): # mesage-list based routing
+      if (type=='md'): # message-list based routing
         if args:
           type = args['type']
           go = False
@@ -276,7 +276,7 @@ class route(ranaModule):
         print "address routing"
         self.doAddressRoute(self.startAddress,self.destinationAddress)
       else:
-        print "cant route, start or destionation (or both) not set"
+        print "cant route, start or destination (or both) not set"
 
     elif(message == 'posToStart'):
       pos = self.get('pos', None)
@@ -356,7 +356,7 @@ class route(ranaModule):
 
     self.startAddress = startAddress
     self.destinationAddress = destinationAddress
-    """use cooridnates for start dest or use first/last point from the route
+    """use coordinates for start dest or use first/last point from the route
        if start/dest coordinates are unknown (None)"""
     if start !=None and destination != None:
       self.start = start
@@ -435,7 +435,7 @@ class route(ranaModule):
         except:
           """just skip this as the character is  most probably unknown"""
           pass
-      if cyrillicCharFound: # the substring contains at least one cyrillics character
+      if cyrillicCharFound: # the substring contains at least one cyrillic character
         if cyrillicStringTemp: # append to the already "open" cyrillic string
           cyrillicStringTemp += ' ' + substring
         else: # create a new cyrillic string
@@ -516,13 +516,13 @@ class route(ranaModule):
       if(not proj.isValid()):
         return
 
-      # as you can see, for some reason, the cooridnates in direction steps are reversed, (lon,lat,0)
+      # as you can see, for some reason, the coordinates in direction steps are reversed, (lon,lat,0)
       steps = map(lambda x: (x['Point']['coordinates'][1],x['Point']['coordinates'][0]), self.directions['Directions']['Routes'][0]['Steps'])
 
       # draw the destination as a step point
       steps.append(self.route[-1])
 
-      # now we convert geographic cooridnates to screen coordinates, so we dont need to do it twice
+      # now we convert geographic coordinates to screen coordinates, so we dont need to do it twice
       steps = map(lambda x: (proj.ll2xy(x[0],x[1])), steps)
 
       start = proj.ll2xy(self.start[0], self.start[1])
@@ -584,10 +584,10 @@ class route(ranaModule):
       z = proj.zoom
 
 
-      # these setting seem to werk the best for routing results:
-      # (they have a different structure than loging traces,
+      # these setting seem to work the best for routing results:
+      # (they have a different structure than logging traces,
       # eq. long segments delimited by only two points, etc)
-      # basicly, routing results heva only the really nedded points -> less points than traces
+      # basically, routing results have only the really needed points -> less points than traces
       if z < 16 and z > 10:
         modulo = 2**(14-z)
       elif (z <= 10):

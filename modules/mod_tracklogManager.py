@@ -35,8 +35,8 @@ class tracklogManager(ranaModule):
 
   def firstTime(self):
     self.LTModule = self.m.get('loadTracklogs', None)
-    # we dont know what tracklogs are awailable yet
-    # but we dont need that to setup the cathegories menu
+    # we don't know what tracklogs are available yet
+    # but we don't need that to setup the categories menu
     self.setupCathegoriesMenu()
 
   def handleMessage(self, message, type, args):
@@ -65,7 +65,7 @@ class tracklogManager(ranaModule):
     elif message == 'getElevation':
       print("tracklogManage: getting elevation info for active tracklog")
       activeTracklog = self.LTModule.getActiveTracklog()
-      # generate a list of (lat,lon) tupples
+      # generate a list of (lat,lon) tuples
       latLonList = map(lambda x: (x.latitude,x.longitude), activeTracklog.trackpointsList[0])
       # look-up elevation data using Geonames asynchronously
       online = self.m.get("onlineServices",None)
@@ -132,7 +132,7 @@ class tracklogManager(ranaModule):
     self.LTModule.listAvailableTracklogs()
 
   def setupCathegoriesMenu(self):
-    # setup the cathegories menu
+    # setup the categories menu
 
     menus = self.m.get("menu",None)
 
@@ -148,7 +148,7 @@ class tracklogManager(ranaModule):
       icon = "generic"
       menus.addItem(menu, text, icon, "set:currentTracCat:%s" % catId + nextAction)
 
-    # setup the set cathegory menu
+    # setup the set category menu
     menu = 'tracklogSetCathegory'
     nextAction = '|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogManager#tracklogInfo'
     menus.clearMenu(menu, "|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogManager#tracklogInfo")
@@ -170,7 +170,7 @@ class tracklogManager(ranaModule):
       (x4,y4) = e4
       (w1,h1,dx,dy) = alloc
     else:
-      return # we arent the active menu so we dont do anything
+      return # we aren't the active menu so we don't do anything
 
     if menuName == 'tracklogManagerCathegories':
       self.setupCathegoriesMenu()
@@ -232,8 +232,8 @@ class tracklogManager(ranaModule):
       # is there an active tracklog ?
       if track == None:
         """ there is no active tracklog,
-           so we dont draw the rest of the menu
-           we also dont setup the tools sub menu
+           so we don't draw the rest of the menu
+           we also don't setup the tools sub menu
            """
         return
       profile = self.m.get('routeProfile', None)

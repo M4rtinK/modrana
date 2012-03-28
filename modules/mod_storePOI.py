@@ -162,7 +162,7 @@ class storePOI(ranaModule):
       return None
 
   class POI:
-    """this class reperesents a POI"""
+    """this class represents a POI"""
     def __init__(self,callaback,label,description,lat,lon,catId,id=None):
       self.callback = callaback
       self.id=id
@@ -330,7 +330,7 @@ class storePOI(ranaModule):
       f.close()
       return points
     except Exception, e:
-      print "storePOI: loding POI from file failed:\n%s" % e
+      print "storePOI: loading POI from file failed:\n%s" % e
       return None
 
 #  def saveOld(self):
@@ -432,7 +432,7 @@ class storePOI(ranaModule):
     self.disconnectFromDb()
 
   def storePoint(self, point, returnToMenu=False):
-    """store a givne point to the POI database"""
+    """store a given point to the POI database"""
     # TODO: automatic saving without asking
     # * skip name entry
     # * and/or skip category entry
@@ -493,7 +493,7 @@ class storePOI(ranaModule):
 class POI():
   """A basic class representing a POI.
      DEPRECIATED, use the new version in the main class
-     this is there only becuase it is needed for import of old POI"""
+     this is there only because it is needed for import of old POI"""
   def __init__(self, name, category, lat, lon):
     self.name = name
     self.category = category

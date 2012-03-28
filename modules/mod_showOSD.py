@@ -43,7 +43,7 @@ class showOSD(ranaModule):
     self.distanceList = None # sorted distances from current position
 
     # colors
-    self.widgetBackgroundColor = (0, 0, 1, 0.45) # trasparent blue
+    self.widgetBackgroundColor = (0, 0, 1, 0.45) # transparent blue
     self.widgetTextColor = (1, 1, 1, 0.95) # slightly transparent white
 #    self.avail = set(
 #                      'speed'
@@ -72,8 +72,8 @@ class showOSD(ranaModule):
         return
       if 'OSD' in config[mode]:
         items = config[mode]['OSD']
-        # we dont know the nearest poin when refreshing the screen
-        # TODO: dont search for nearest point on every refresh ?
+        # we don't know the nearest point when refreshing the screen
+        # TODO: don't search for nearest point on every refresh ?
         self.nearestPoint = None
         self.nearestIndex = None
         self.distanceList = None
@@ -135,7 +135,7 @@ class showOSD(ranaModule):
         self.drawMultilineTextWidget(cr, item, text)
         return
       else:
-        if self.distanceList == None: # was the neerest point already determined ?
+        if self.distanceList == None: # was the nearest point already determined ?
           if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
             return
       avgSpeed = self.get('avgSpeed', 0)
@@ -155,7 +155,7 @@ class showOSD(ranaModule):
         self.drawMultilineTextWidget(cr, item, text)
         return
       else:
-        if self.distanceList == None: # was the neerest point already determined ?
+        if self.distanceList == None: # was the nearest point already determined ?
           if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
             return
         currentLength = self.routeProfileData[self.nearestIndex][0]
@@ -214,7 +214,7 @@ class showOSD(ranaModule):
 
   def drawBackground(self, cr, x, y, w, h, source=None):
     cr.set_line_width(2)
-    cr.set_source_rgba(*self.widgetBackgroundColor) # trasparent blue
+    cr.set_source_rgba(*self.widgetBackgroundColor) # transparent blue
 #    (rx,ry,rw,rh) = (x, y-h*1.4, w*1.2, (h*2))
     (rx,ry,rw,rh) = (x, y, w*1.2, h*1.2)
     cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
@@ -222,7 +222,7 @@ class showOSD(ranaModule):
 
   def drawBackgroundExact(self, cr, x, y, w, h, source=None):
     cr.set_line_width(2)
-    cr.set_source_rgba(*self.widgetBackgroundColor) # trasparent blue
+    cr.set_source_rgba(*self.widgetBackgroundColor) # transparent blue
     (rx,ry,rw,rh) = (x, y, w, h)
     cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
     cr.fill()
@@ -230,7 +230,7 @@ class showOSD(ranaModule):
   def drawText(self, cr, x, y, text, source=None):
     cr.set_source_rgba(*self.widgetTextColor) # slightly transparent white
     cr.move_to(x+10,y)
-    cr.show_text(text) # show the trasparent notification text
+    cr.show_text(text) # show the transparent notification text
     cr.stroke()
     cr.fill()
 
@@ -286,7 +286,7 @@ class showOSD(ranaModule):
     if 'segment_length' in item:
       segmentLength = float(item['segment_length'])
 
-    if self.distanceList == None: # was the neerest point already determined ?
+    if self.distanceList == None: # was the nearest point already determined ?
       if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
         return
 

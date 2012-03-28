@@ -9,7 +9,7 @@ class Color:
   """an object representing a color
      provides:
      * hex color string
-     * cairo compatible rgba tupple
+     * cairo compatible rgba tuple
      * a gtk.gdkColor object
      """
 

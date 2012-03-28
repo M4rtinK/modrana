@@ -73,7 +73,7 @@ class clickHandler(ranaModule):
   def handleLongPress(self, pressStartEpoch, msCurrentDuration, startX, startY, x, y):
     """handle long press"""
 
-    """ make sure subsegvent long presses are ignored until release """
+    """ make sure subsequent long presses are ignored until release """
     if self.ignoreNextClicks == 0:
       for area in self.areas:
         (rect, normalAction, timedAction) = area
@@ -113,7 +113,7 @@ class clickHandler(ranaModule):
 	        if(m != None):
 	          m.dragEvent(startX,startY,dx,dy,x,y)
 	        else:
-	          print "Drag registered to nonexistant module %s" % module
+	          print "Drag registered to nonexistent module %s" % module
 
 if(__name__ == "__main__"):
   print "Testing rect"

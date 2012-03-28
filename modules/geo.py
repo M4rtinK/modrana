@@ -124,9 +124,9 @@ def old_clusterTrackpoints(trackpointsList , cluster_distance):
   return clusters
 
 def circleAroundPointCluster(cluster):
-  """Find a cricle around a given point cluster and return its centre and radius"""
+  """Find a circle around a given point cluster and return its centre and radius"""
 
-  """we get the most nort,west,south,east points as a heristics for the preliminary circle"""
+  """we get the most north, west, south, east points as a heuristics for the preliminary circle"""
   maxLat = max(cluster, key=lambda x: x['latitude'])
   minLat = min(cluster, key=lambda x: x['latitude'])
   maxLon = max(cluster, key=lambda x: x['longitude'])
@@ -135,7 +135,7 @@ def circleAroundPointCluster(cluster):
   """now we find the nort-south and west-east distances using the points above"""
   latDist = distance(maxLat['latitude'],maxLat['longitude'],minLat['latitude'],minLat['longitude'])
   lonDist = distance(maxLon['latitude'],maxLon['longitude'],minLon['latitude'],minLon['longitude'])
-  if latDist >= lonDist: #the horizonatal distance is the longest
+  if latDist >= lonDist: #the horizontal distance is the longest
     centreX = (maxLat['latitude'] + minLat['latitude'])/2.0
     centreY = (maxLat['longitude'] + minLat['longitude'])/2.0
     pointX = maxLat['latitude']
@@ -159,7 +159,7 @@ def circleAroundPointCluster(cluster):
 
 
 def perElevList(trackpointsList, numPoints=200):
-  """determine elevation in regual interval, numPoints gives the number of intervals"""
+  """determine elevation in regular interval, numPoints gives the number of intervals"""
   points = [{'lat': point.latitude,'lon': point.longitude, 'elev': point.elevation} for point in trackpointsList[0]]
 
   # create a list, where we have (cumulative distance from starting point, elevation)
@@ -246,7 +246,7 @@ def perElevList(trackpointsList, numPoints=200):
         dElev = adjecentPart / tan(alpha)
         newElev = prevElev + dElev
 
-      # add cooridnates to periodic points
+      # add coordinates to periodic points
       (lat1,lon1) = prevPoint[2:4]
       (lat2,lon2) = nextPoint[2:4]
 #      (lat,lon) = point[2:4]

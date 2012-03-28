@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from ScrolledText import example
 from base_module import ranaModule
 import geo
 import math
@@ -188,7 +189,7 @@ class turnByTurn(ranaModule):
           cr.save()
           if lh > usableHeight: # is the rendered text larger than the usable area ?
             clipHeight = 0
-            # find last completley visible line
+            # find last completely visible line
             cut = False
             for id in range(0,layout.get_line_count()-1):
               lineHeight = layout.get_line(id).get_pixel_extents()[1][3]
@@ -212,7 +213,7 @@ class turnByTurn(ranaModule):
               # draw the scissors icon
               cutSide = bw/10
               menus.drawButton(cr, bx+bw, textEndY-cutSide/2.0, cutSide, cutSide, "", "center:scissors_right;0>%s" % background, "turnByTurn:showMessageInsideNotification")
-              #TODO: show the whole message in a notifications after clicking the scossors
+              #TODO: show the whole message in a notifications after clicking the scissors
               # (this needs line wrapping support in modRana notifications)
 
 
@@ -248,7 +249,7 @@ class turnByTurn(ranaModule):
 
 
   def sayTurn(self,message,distanceInMeters,forceLanguageCode=False):
-    """say a text-to-spech message about a turn
+    """say a text-to-speach message about a turn
        this basically wraps the simple say method from voice and adds some more information,
        like current distance to the turn
        """
@@ -266,7 +267,7 @@ class turnByTurn(ranaModule):
       text = distString + message
 
       """ the message can contain unicode, this might cause an exception when printing it
-      in some systems (SHR-u on Neo, for eaxmaple)"""
+      in some systems (SHR-u on Neo, for example)"""
       try:
         print "saying: %s" % text
       except UnicodeEncodeError:
@@ -350,7 +351,7 @@ class turnByTurn(ranaModule):
       print "last step reached"
 
   def enabled(self):
-    """return True if enabled, false othervise"""
+    """return True if enabled, false otherwise"""
     if self.steps:
       return True
     else:
@@ -362,7 +363,7 @@ class turnByTurn(ranaModule):
     # clean up any possible previous navigation data
     self.goToInitialState()
 
-    """NOTE: turn and step are used interchangably in the documentation"""
+    """NOTE: turn and step are used interchangeably in the documentation"""
     m = self.m.get('route', None)
     if m:
       (dirs,routeRequestSentTimestamp) = m.getCurrentDirections()
@@ -422,13 +423,13 @@ class turnByTurn(ranaModule):
 
             """what is more distant, the closest or the next step ?"""
             if pos2nextStep < currentStep2nextStep:
-              """we are mosty probably already past the closest step,
+              """we are mostly probably already past the closest step,
               so we switch to the next step at once"""
               print "tbt: already past closest turn, switching to next turn"
               self.setStepAsCurrent(nextStep)
               """we play the message for the next step,
               with current distance to this step,
-              to assure there is some voice output immediatelly after
+              to assure there is some voice output immediately after
               getting a new route or rerouting"""
               plaintextMessage = nextStep['descriptionEspeak']
               self.sayTurn(plaintextMessage, pos2nextStep)
@@ -468,7 +469,7 @@ class turnByTurn(ranaModule):
     print("tbt: stopped")
 
   def locationUpdateCB(self, key, newValue, oldValue):
-    """position chnaged, do a tbt navigation update"""
+    """position changed, do a tbt navigation update"""
     if key == "locationUpdated": # just to be sure
       self.doNavigationUpdate()
     else:
@@ -498,7 +499,7 @@ class turnByTurn(ranaModule):
 
     # GHK: make distance speed-sensitive
     #
-    # I came up with this formula after a lot of exerimentation with
+    # I came up with this formula after a lot of experimentation with
     # gnuplot.  The idea is to give the user some simple parameters to
     # adjust yet let him have a lot of control.  There are five
     # parameters in the equation:
@@ -591,7 +592,7 @@ class turnByTurn(ranaModule):
               self.espeakFirstTrigger = True # first message done
         if self.espeakFirstAndHalfTrigger == False and warnTime > 30:
           if currentDistance <= (20.0*metersPerSecSpeed):
-            """in case that the warning time gets too big, add an intemediate warning at 20 secconds
+            """in case that the warning time gets too big, add an intermediate warning at 20 seconds
             NOTE: this means it is said after the first trigger
             """
             plaintextMessage = currentStep['descriptionEspeak']

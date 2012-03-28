@@ -334,7 +334,7 @@ class search(ranaModule):
       """
          because the results can be ordered in different manners, we use the absolute index,
          which is created from the initial ordering
-         without this,(with distance sort) we would get different results for a key, if we moved fast enoght :)
+         without this,(with distance sort) we would get different results for a key, if we moved fast enough :)
       """
       result = self.getResult(resultNumber, resultList)
       self.drawGLSResultMenu(cr, result)
@@ -531,7 +531,7 @@ class search(ranaModule):
 
       border = 2
       cr.set_line_width(2)
-      cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
+      cr.set_source_rgba(0, 0, 1, 0.45) # transparent blue
       (rx,ry,rw,rh) = (x - border+10, y + border+h*0.2, w + 4*border, -(h*1.4))
       cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
       m = self.m.get('clickHandler', None)
@@ -540,9 +540,9 @@ class search(ranaModule):
         m.registerXYWH(rx,ry-(-rh),rw,-rh, "search:reset|set:searchResultsItemNr:%d|set:menu:search#searchResultsItem" % index)
       cr.fill()
       # draw the actual text
-      cr.set_source_rgba(1, 1, 1, 0.95) # slightly trasparent white
+      cr.set_source_rgba(1, 1, 1, 0.95) # slightly transparent white
       menus.drawText(cr, text, rx,ry-(-rh),rw,-rh, 0.05)
-#      cr.show_text(text) # show the trasparent result caption
+#      cr.show_text(text) # show the transparent result caption
       cr.stroke()
 
     if highlightNr != -1: # is there some search result to highlight ?
@@ -576,7 +576,7 @@ class search(ranaModule):
       (w,h) = (extents[2]*1.5, extents[3]*1.5)
       border = 2
       cr.set_line_width(2)
-      cr.set_source_rgba(0, 0, 1, 0.45) # trasparent blue
+      cr.set_source_rgba(0, 0, 1, 0.45) # transparent blue
       (rx,ry,rw,rh) = (x - border+10, y + border+h*0.2, w + 4*border, -(h*1.4))
       cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
       cr.fill()
@@ -588,7 +588,7 @@ class search(ranaModule):
       cr.fill()
       
       # draw the actual text
-      cr.set_source_rgba(1, 1, 0, 0.95) # slightly trasparent white
+      cr.set_source_rgba(1, 1, 0, 0.95) # slightly transparent white
       menus.drawText(cr, text, rx,ry-(-rh),rw,-rh, 0.05)
       cr.stroke()
 
@@ -646,7 +646,7 @@ class search(ranaModule):
       online = self.m.get('onlineServices')
       textInput = result
       if online:
-        # search wikipedia asynchronously
+        # search Wikipedia asynchronously
         online.wikipediaSearchAsync(textInput, self.handleSearchResult, "wikipedia")
       else:
         print("search: online services module missing")

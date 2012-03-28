@@ -38,8 +38,8 @@ class tracklog(ranaModule):
     self.loggingEnabled = False
     self.loggingPaused = False
     self.loggingStartTimestamp = None
-    self.logInterval = 1 #loggin interval in secconds
-    self.saveInterval = 10 #saving interval in secconds
+    self.logInterval = 1 #loggin interval in seconds
+    self.saveInterval = 10 #saving interval in seconds
     self.lastTimestamp = None
     self.lastSavedTimestamp = None
     self.lastCoords = None
@@ -70,7 +70,7 @@ class tracklog(ranaModule):
       # start a new log
       if not self.loggingEnabled:
         self.loggingEnabled = True
-        print "initilizing the log file"
+        print "initializing the log file"
         self.initLog()
       # or resume an existing one
       elif self.loggingEnabled == True & self.loggingPaused == True:
@@ -165,7 +165,7 @@ class tracklog(ranaModule):
         self.set('needRedraw', True)
 
   def initLog(self,type='gpx',name=None):
-    """start a new log, zero the apropriate variables, etc."""
+    """start a new log, zero the appropriate variables, etc."""
     self.loggingStartTimestamp = int(time.time())
     self.maxSpeed = 0
     self.avg1 = 0
@@ -266,7 +266,7 @@ class tracklog(ranaModule):
 
 
   def clean(self):
-    """zero unneaded datastructures after logging is stoped"""
+    """zero unneeded datastructures after logging is stopped"""
     self.currentLogGPX = None
     self.currentTempLog = None
     self.loggingStartTimestamp = None
@@ -481,7 +481,7 @@ class tracklog(ranaModule):
 
       parentAction = 'set:menu:main'
 
-      """this is a alist of button parameters, all buttons can be togglable
+      """this is a a list of button parameters, all buttons can be toggleable
       it is in this form:
       [list of string-lists for toggling, index of string-list to show]
       """

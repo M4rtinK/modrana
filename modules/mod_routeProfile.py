@@ -40,7 +40,7 @@ class routeProfile(ranaModule):
     #print menuName
     # is this menu the correct menu ?
     if menuName != 'routeProfile':
-      return # we arent the active menu so we dont do anything
+      return # we aren't the active menu so we don't do anything
     (x1,y1,w,h) = self.get('viewport', None)
 #    if w > h:
 #      cols = 4

@@ -219,7 +219,7 @@ class menus(ranaModule):
       self.drawScalebar(cr, proj,x1,y1,w)
 
   def needRedraw(self):
-    """conveninece function for asking for redraw"""
+    """convenience function for asking for redraw"""
     self.set('needRedraw', True)
 
   def showText(self,cr,text,x,y,widthLimit=None,fontsize=40,colorString=None):
@@ -357,7 +357,7 @@ class menus(ranaModule):
     """Draw menus"""
 
     """
-    == Meaning of the menu persistant variable ==
+    == Meaning of the menu persistent variable ==
     "foo" - the default menu module has to do something with foo
     "markers#" - the markers module has to draw the menu and gets "" as menu name
     "markers#point" - the markers module has to draw the module
@@ -547,7 +547,7 @@ class menus(ranaModule):
       print "Can't register \"%s\" menu - unknown type" % type
 
   def initMenu(self,menu):
-    """anitialize menu a menu dictionary instance to default parameters"""
+    """initialize menu a menu dictionary instance to default parameters"""
     self.menus[menu] = self.getInitializedMenu()
 
   def getInitializedMenu(self):
@@ -1330,7 +1330,7 @@ class menus(ranaModule):
 
 
   def showTextOld(self,cr,text,x,y,widthLimit=None,fontsize=40):
-    """DEPRECIATED shof text funtion"""
+    """DEPRECIATED show text function"""
     if(text):
       cr.set_font_size(fontsize)
       stats = cr.text_extents(text)

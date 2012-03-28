@@ -4,11 +4,11 @@ import re
 
 class GeoPyPoint(Point):
   """
-  * the GeoPy geocoding results return composite place names contaning
+  * the GeoPy geocoding results return composite place names containing
   the address components delimited by ','
   * this point Point subclass just splits the part before the first ','
   and returns it when the getName method is called
-  * also, it outpust a description text where all ',' are replaced by newlines
+  * also, it outputs a description text where all ',' are replaced by newlines
   """
   def __init__(self, lat, lon, placeText):
     Point.__init__(self, lat, lon, message=placeText)
@@ -22,7 +22,7 @@ class GeoPyPoint(Point):
     return self.description
 
 def _places2points(places):
-  """convert place tupples to modRana points"""
+  """convert place tuples to modRana points"""
   points = []
   for place in places:
     text, (lat,lon) = place

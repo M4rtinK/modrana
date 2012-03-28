@@ -33,7 +33,7 @@ class voice(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.espaekProcess = None
-    # this lock is used to make sure there is only one voice speking at once
+    # this lock is used to make sure there is only one voice speaking at once
     self.voiceLock = threading.Lock()
     # default espeak string for manual editing
     self.defaultStrings = {
@@ -87,7 +87,7 @@ class voice(ranaModule):
 
 
           """ the message can contain unicode, this might cause an exception when printing it
-          in some systems (SHR-u on Neo, for eaxmaple)"""
+          in some systems (SHR-u on Neo, for example)"""
           try:
             print "saying: %s" % output
           except UnicodeEncodeError:
@@ -95,7 +95,7 @@ class voice(ranaModule):
           if forceLanguageCode:
             espeakLanguageCode = forceLanguageCode
           else:
-            # the espeak language code is the fisrt part of this whitespace delimited string
+            # the espeak language code is the first part of this whitespace delimited string
             espeakLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[0]
           self._speak(espeakLanguageCode, output)
 
@@ -109,7 +109,7 @@ class voice(ranaModule):
           collisionString= "voice: message was not pronounced due to other message in progress"
           collisionString+= "\nlanguage code: \n%s\nmessage text:\n%s" % (language,text)
           """ the message can contain unicode, this might cause an exception when printing it
-          in some systems (SHR-u on Neo, for eaxmaple)"""
+          in some systems (SHR-u on Neo, for example)"""
           try:
             print collisionString
           except UnicodeEncodeError:
@@ -129,7 +129,7 @@ class voice(ranaModule):
       voiceString = self.get("voiceString", None)
       if voiceString != None:
 
-        # replace langauge and message variables with appropriate values (if present)
+        # replace language and message variables with appropriate values (if present)
         voiceString = re.sub("%language%", languageCode, voiceString)
 
         voiceString = re.sub("%message%", message, voiceString)
@@ -137,7 +137,7 @@ class voice(ranaModule):
         voiceString = re.sub("%qmessage%", '"%s"' % message, voiceString)
         
         """ the message can contain unicode, this might cause an exception when printing it
-        in some systems (SHR-u on Neo, for eaxmaple)"""
+        in some systems (SHR-u on Neo, for example)"""
         try:
           print "voice: resulting custom voice string:\n%s" % voiceString
         except UnicodeEncodeError:
@@ -154,14 +154,14 @@ class voice(ranaModule):
     try:
       return subprocess.Popen(args, shell=shell)
     except TypeError:
-      print "voice: voice oduput failed - most probably due to the message containing unicode characters and your shell not properly supporting unicode"
+      print "voice: voice output failed - most probably due to the message containing unicode characters and your shell not properly supporting unicode"
       return None
 
 
   def speaking(self):
     """return True if there is voice output in progress, False if not"""
     if self.espaekProcess: # is there a espeak process
-      if self.espaekProcess.poll() != None: # none meens the process is still running
+      if self.espaekProcess.poll() != None: # none means the process is still running
         return False # not talking
       else:
         return True # talking

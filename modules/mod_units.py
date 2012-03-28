@@ -25,7 +25,10 @@ def getModule(m,d,i):
   return(units(m,d,i))
 
 class units(ranaModule):
-  """A module handling unit conversions and dispplaying correct units acording to current settings."""
+  """
+  A module handling unit conversions and displaying correct units
+  according to current settings.
+  """
   
   mileInMeters = 1609.344
   mileInKiloMeters = mileInMeters / 1000
@@ -252,7 +255,7 @@ class units(ranaModule):
   def moving(self):
     """return
        True if the current speed is above the not moving threshodl,
-       False if below the treshodl
+       False if below the thresholds
        None if the current speed is unknown
        """
 
@@ -260,7 +263,7 @@ class units(ranaModule):
     if currentspeedKMH is not None:
       return (currentspeedKMH>self.notMovingspeed)
     else:
-      # signalise that we cant decite this
+      # signalise that we can't decide this
       return None
 
   #
