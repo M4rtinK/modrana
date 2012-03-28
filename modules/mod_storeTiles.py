@@ -358,6 +358,44 @@ class storeTiles(ranaModule):
       else: # the tile was not found in the lookup table
         return None
 
+  def tileExists2(self, layer, z, x, y, fromThread=False):
+    """test if a tile exists
+       if fromThread=False, a new connection is created and disconnected again
+       NEW CLEANED UP VERSION"""
+    layerInfo = self._mapTiles.mapLayers.get(layer, None)
+    if(layerInfo == None): # is the layer info valid ?
+      print("storeTiles: invalid layer")
+      return None
+    storageType = self.get('tileStorageType', 'files')
+    folderPrefix = layerInfo.get('folderPrefix','OpenStreetMap II')
+    extension = layerInfo.get('type','png')
+    if storageType == 'sqlite': # we are storing to the database
+      dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
+      if dbFolderPath!=None: # is the database accessible ?
+        with self.lookupConnectionLock:
+          """ just to make sure the access is sequential
+          (due to sqlite in python 2.5 probably not liking concurrent access,
+          resulting in te database becoming unavailable)"""
+          if fromThread: # is this called from a thread ?
+            # due to sqlite quirks, connections can't be shared between threads
+            lookupDbPath = self.getLookupDbPath(dbFolderPath)
+            lookupConn = sqlite3.connect(lookupDbPath)
+          else:
+            lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
+          query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
+          lookupResult = lookupConn.execute(query,(z, x, y, extension)).fetchone()
+          if fromThread: # tidy up, just to be sure
+            lookupConn.close()
+          if lookupResult:
+            return True # the tile is in the db
+          else:
+            return False # the tile is not in the db
+      else:
+        return None # we cant decide if a tile is ind the db or not
+    else: # we are storing to the filesystem
+      filePath = os.path.join(self.tileFolder, self._mapTiles.getImagePath(x, y, z, folderPrefix, extension))
+      return os.path.exists(filePath)
+
   def tileExists(self, filePath, folderPrefix, z, x, y, extension, fromThread=False):
     """test if a tile exists
        if fromThread=False, a new connection is created and disconnected again"""

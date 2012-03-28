@@ -20,10 +20,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-
+import SocketServer
+import random
+import callback_proxy
 import sys
 import re
 import os
+from threading import Thread
 import traceback
 import cStringIO
 import urllib
@@ -34,11 +37,17 @@ from PySide import QtCore
 from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtDeclarative import *
+from PySide.QtNetwork import *
 
 # modRana imports
 from base_gui_module import GUIModule
 from datetime import datetime
 import time
+
+import BaseHTTPServer
+import SimpleHTTPServer
+
+global globe
 
 def newlines2brs(text):
   """ QML uses <br> instead of \n for linebreak """
@@ -64,6 +73,8 @@ class QMLGUI(GUIModule):
 
   def __init__(self, m, d, i):
     GUIModule.__init__(self, m, d, i)
+
+    callback_proxy.cb = self
 
     # some constants
     self.msLongPress = 400
@@ -108,6 +119,10 @@ class QMLGUI(GUIModule):
     # make the platform accessible from QML
     platform = Platform(self.modrana)
     rc.setContextProperty("platform", platform)
+    # make tile loading accessible from QML
+    tiles = MapTiles(self)
+    rc.setContextProperty("mapTiles", tiles)
+
 
     self.window.closeEvent = self._qtWindowClosed
     #self.window.show()
@@ -118,6 +133,72 @@ class QMLGUI(GUIModule):
     self._mapTiles = None # map tiles module
 
     self._notificationQueue = []
+
+
+    t = Thread(target=self.server)
+    t.daemon=True
+    t.start()
+
+  def server(self):
+    print "BBBBBBBBBBBB"
+    print "starting server"
+
+
+#    self.tileserverPort = 8888
+    self.tileserverPort = random.randint(8000,9000)
+
+
+#    Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+
+    class MyServer(SocketServer.TCPServer):
+#      def __init__(self, tuple, callback):
+#        SocketServer.TCPServer.init(tuple, "")
+#        self.callback = callback
+
+      class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
+        def __init__(self, request, client_address):
+          try:
+            SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
+          except:
+            SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
+        def do_GET(self):
+          split = self.path.split("/")
+          layer = split[1]
+          z = int(split[2])
+          x = int(split[3])
+          y = int(split[4].split(".")[0])
+          print self.path
+          try:
+            tileData = callback_proxy.cb._mapTiles.getTile(layer, z, x, y)
+            if tileData:
+
+              self.send_response(200)
+              self.send_header("Content-type", "image/png")
+              #self.send_header("Content-type", "application/octet-stream")
+              self.send_header("Content-Length", len(tileData))
+              self.end_headers()
+
+              print "GET returning file"
+              return True
+  #            self.wfile.write(cStringIO.StringIO(tileData).read())
+              self.wfile.write(cStringIO.StringIO(tileData).read())
+            else:
+              print "GET tile not found"
+              return False
+          except urllib2.HTTPError, e:
+            # forward the error code
+            self.send_response(e.code)
+
+        #        self.copyfile(urllib.urlopen(self.path), self.wfile)
+        #        self.copyfile(urllib.urlopen(self.path), self.wfile)
+
+      def finish_request(self, request, client_address):
+        self.Proxy(request, client_address)
+
+    self.httpd = MyServer(("", self.tileserverPort), self)
+
+    print "serving at port", self.tileserverPort
+    self.httpd.serve_forever()
 
   def firstTime(self):
     self._location = self.m.get('location', None)
@@ -186,6 +267,8 @@ class QMLGUI(GUIModule):
     from onDestruction handlers causing
     segfault, we need this"""
     #self.rootObject.shutdown()
+
+    self.httpd.shutdown()
 
     # quit the application
     self.app.exit()
@@ -286,13 +369,15 @@ class TileImageProvider(QDeclarativeImageProvider):
     self.loading = QImage(1,1, QImage.Format_RGB32)
     self.ready = QImage(2,1, QImage.Format_RGB32)
     self.error = QImage(3,1, QImage.Format_RGB32)
-
+    self.manager = QNetworkAccessManager()
 
   def requestImage(self, tileInfo, size, requestedSize):
     """
     the tile info should look like this:
     layerID/zl/x/y
     """
+    print "IMAGE REQUESTED"
+    print tileInfo
     try:
       # split the string provided by QML
       split = tileInfo.split("/")
@@ -300,31 +385,29 @@ class TileImageProvider(QDeclarativeImageProvider):
       z = int(split[1])
       x = int(split[2])
       y = int(split[3])
+#      print "REALLY AVAILABLE ?"
+#      print self.gui._mapTiles.tileInMemory(layer, z, x, y)
+#      print self.gui._mapTiles.tileInStorage(layer, z, x, y)
 
-      if len(split) > 4:
-        retry = int(split[4])
-        # just an inquiry about tile availability
-        if self.gui._mapTiles.tileInMemory(layer, z, x, y):
-          # tile is ready to be loaded
-          return self.ready
-        else:
-          # every second inquiry, refresh the loading request
-          if retry%2 == 0:
-            self.gui._mapTiles.addTileDownloadRequest(layer, z, x, y)
-          # * tile download requests are stored in a circular queue
-          # and the original request might have been discarded in the meantime
-          # * also, download requests are processed starting by the
-          # newest ones - so like this, we are basically increasing
-          # the probability that the currently visible tiles
-          # will be downloaded
-
-          return self.loading
 
       # get the tile from the tile module
       tileData = self.gui._mapTiles.getTile(layer, z, x, y)
       if not tileData:
+        print "DOWNLOADING"
         # download request queued, return loading status image
-        return self.loading
+#        print "NOK"
+#        return self.loading
+        url = self.gui._mapTiles.getTileUrl(layer, z, x, y)
+        request = QNetworkRequest()
+        request.setUrl(QUrl(url))
+        reply = self.manager.get(request)
+        data = reply.readAll()
+        data1 = QByteArray(data)
+        img=QImage()
+        img.loadFromData(data1)
+
+        return img
+
       # create a file-like object
       f = cStringIO.StringIO(tileData)
       # create image object
@@ -333,12 +416,44 @@ class TileImageProvider(QDeclarativeImageProvider):
       img.loadFromData(f.read())
       # cleanup
       f.close()
+      print "OK"
       return img
 
     except Exception, e:
       print("QML GUI: icon image provider: loading tile failed", e)
       print tileInfo
       traceback.print_exc(file=sys.stdout)
+
+
+class MapTiles(QtCore.QObject):
+
+  def __init__(self, gui):
+    QtCore.QObject.__init__(self)
+    self.gui = gui
+
+  @QtCore.Slot(result=int)
+  def serverPort(self):
+    return self.gui.tileserverPort
+
+  @QtCore.Slot(str, int, int, int, result=bool)
+  def loadTile(self, layer, z, x, y):
+    """
+    load a given tile from storage and/or from the network
+    True - tile already in storage or in memory
+    False - tile download in progress, retry in a while
+    """
+    print layer, z, x, y
+    if self.gui._mapTiles.tileInMemory(layer, z, x, y):
+      print "available in memory"
+      return True
+    elif self.gui._mapTiles.tileInStorage(layer, z, x, y):
+      print "available in storage"
+      return True
+    else: # not in memory or storage
+      # add a tile download request
+      self.gui._mapTiles.addTileDownloadRequest(layer, z, x, y)
+      print "dling try later"
+      return False
 
 # from AGTL
 class Fix():

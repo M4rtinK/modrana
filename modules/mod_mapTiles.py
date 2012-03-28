@@ -135,7 +135,7 @@ class MapTiles(ranaModule):
     name = self.getTileName(layer, z, x, y)
     cacheItem = self.images[0].get(name, None)
     if cacheItem:
-      print "loaded FROM memory CACHE"
+      print "got tile FROM memory CACHE"
       return cacheItem[0]
 
     # get layer info
@@ -147,18 +147,28 @@ class MapTiles(ranaModule):
     layerType = layerInfo.get('type','png')
     tileData = self._storeTiles.getTileData(layerPrefix, z, x, y, layerType)
     if tileData:
-      print "loaded FROM disk CACHE"
+      print "got tile FROM disk CACHE"
       # tile was available from storage
       return tileData
 
     # tile not available from storage, we need to download it
+#    url = self.getTileUrl(x,y,z,layer)
+#    if name in self.threads:
+#      return None # download already in progress
+#    else:
+#      print "queuing DOWNLOAD"
+#      self.addTileDownloadRequest(layer,z,x,y)
+#      return None
+
+    print "download"
     url = self.getTileUrl(x,y,z,layer)
-    if name in self.threads:
-      return None # download already in progress
-    else:
-      print "queuing DOWNLOAD"
-      self.addTileDownloadRequest(layer,z,x,y)
-      return None
+    request = urllib2.urlopen(url)
+    return(request.read())
+
+
+
+
+
 #    #request = urllib.urlopen(url)
 #    request = self.httpPool.get_url(url)
 ##    request = self.httpPool.urlopen("GET", "%d/%d/%d.png" % (z, x, y))
@@ -222,19 +232,24 @@ class MapTiles(ranaModule):
         self.threadlListCondition.notifyAll() # wake up the download manager
 
   def tileInProgress(self, layer, z, x, y):
+    """
+    report if tile is being downloaded
+    """
     name = self.getTileName(layer, z, x, y)
     return name in self.threads
 
   def tileInMemory(self, layer, z, x, y):
+    """
+    report if tile is stored in memory cache
+    """
     name = self.getTileName(layer, z, x, y)
     return name in self.images[0]
 
-#  def tileInStorage(self, layer, z, x, y):
-#    pass
-#    layerInfo = self.mapLayers.get(layer, None)
-#    layerPrefix = layerInfo.get('folderPrefix','OpenStreetMap II')
-#    layerType = layerInfo.get('type','png')
-#    self._storeTiles.tileExists(layerPrefix, z, x, y, layerType)
+  def tileInStorage(self, layer, z, x, y):
+    """
+    report if tile is available from storage
+    """
+    return self._storeTiles.tileExists2(layer, z, x, y)
 
 
   def _updateScalingCB(self, key='mapScale', oldValue=1, newValue=1):
@@ -409,7 +424,7 @@ class MapTiles(ranaModule):
 
 
     """seems that some added error handling in the download thread class can replace this,
-       but it left here for testing purposses"""
+       but it left here for testing purposes"""
 #    z = self.get('z', 15)
 #    """when we change zoomlevel and the number of threads does not change,
 #       we clear the threads set, this is useful, because:
