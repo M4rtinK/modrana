@@ -81,7 +81,7 @@ class mapView(ranaModule):
         self.set("centred",False) # turn off centering before moving screen to the coordinates
         proj.recentre(lat, lon, zoom)
       except:
-        print "mapView: cant recentre cooridnates"
+        print "mapView: cant recenter coordinates"
   
   def dragEvent(self,startX,startY,dx,dy,x,y):
     # only drag the map if centering is disabled
@@ -111,9 +111,9 @@ class mapView(ranaModule):
         return(False)
       (sx,sy,sw,sh) = self.get('viewport')
       """
-      the shift amount represents a perentage of the distance from screen center
+      the shift amount represents a percentage of the distance from screen center
       to an edge:
-      ceneter+---------->|edge
+      center+---------->|edge
       0 -> no shift
       1 -> directly on the edge
       0.5 -> shifted by half of this distance, eq. in 3/4 of the screen
@@ -136,13 +136,13 @@ class mapView(ranaModule):
       self.modrana.gui.enableStaticMapDrag()
 
   def checkCenteringDisableThreshold(self):
-    """check ans set current centering disable treshold"""
+    """check ans set current centering disable threshold"""
     centeringDisableThreshold = self.get('centeringDisableThreshold', 2048)
     print "mapView: switching centering disable threshold to %s" % centeringDisableThreshold
     self.modrana.gui.setCDDragThreshold(int(centeringDisableThreshold))
 
   def jump2point(self, point):
-    """recentre on a given point"""
+    """recenter on a given point"""
     z = self.get('z', 15)
     lat, lon = point.getLL()
     self.sendMessage('mapView:recentre %f %f %d|set:menu:None|set:needRedraw:True' % (lat, lon, z))
