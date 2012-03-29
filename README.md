@@ -25,12 +25,14 @@ Confirmed to run on:
 
 ### QML GUI ###
 * PySide & Qt 4.7.4+
-* Qt Componnents
+* Qt Components
 * python-mobility
 
 ## Ancestry ##
 
-ModRana begin as a fork of the [Rana project](http://wiki.openstreetmap.org/wiki/Rana), but currently uses code from many open source projects:
+ModRana begin as a fork of the [Rana project](http://wiki.openstreetmap.org/wiki/Rana),
+but currently uses code from many open source projects:
+
 * Upoints - GPX handling
 * Odict - ordered dictionaries
 * GPSD Python bindings
@@ -41,6 +43,7 @@ ModRana begin as a fork of the [Rana project](http://wiki.openstreetmap.org/wiki
 * PyCha - route profile graphs
 * urllib3 - tile download connection reuse
 * argparse standalone - startup argument handling
+* gprof2dot - profiling
 
 ## Licence ##
 
