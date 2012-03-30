@@ -114,13 +114,13 @@ class storeTiles(ranaModule):
     lookupDbPath = self.getLookupDbPath(dbFolderPath) # get the path
 
     if dbFolderPath not in self.layers.keys():
-      print "sqlite tiles: initializing db for layer: %s" % folderPrefix
+      print("sqlite tiles: initializing db for layer: %s" % folderPrefix)
       if os.path.exists(lookupDbPath): #does the lookup db exist ?
         connection = sqlite3.connect(lookupDbPath) # connect to the lookup db
       else: #create new lookup db
         connection = sqlite3.connect(lookupDbPath)
         cursor = connection.cursor()
-        print "sqlite tiles: creating lookup table"
+        print("sqlite tiles: creating lookup table")
         cursor.execute("create table tiles (z integer, x integer, y integer, store_filename string, extension varchar(10), unix_epoch_timestamp integer, primary key (z, x, y, extension))")
         cursor.execute("create table version (v integer)")
         cursor.execute("insert into version values (?)", (self.currentStorageVersion,))
@@ -167,8 +167,8 @@ class storeTiles(ranaModule):
             storeCursor.execute(storeQuery,[z,x,y,sqlite3.Binary(tile), extension, integerTimestamp])
             self.commitConnections([storeConn,lookupConn])
           except Exception, e:
-            print "tile already present"
-            print e
+            print("tile already present")
+            print(e)
             pass #tile is already present, skip insert
 
   def commitConnections(self,connections):
@@ -186,7 +186,7 @@ class storeTiles(ranaModule):
       while self.dirty:
         conn = self.dirty.pop()
         conn.commit()
-      print "storeTiles: sqlite commit OK"
+      print("storeTiles: sqlite commit OK")
 
 
 
@@ -469,7 +469,7 @@ class storeTiles(ranaModule):
           self.storeTile(tile, folderPrefix, z, x, y, extension) # store the tile
           self.sqliteTileQueue.task_done()
         except Exception, e:
-          print "sqlite storage worker : exception during tile storage:\n%s" % e
+          print("sqlite storage worker : exception during tile storage:\n%s" % e)
 
         dt = time.time() - self.lastCommit # check when the last commit was
         if dt>self.commmitInterval:
@@ -477,7 +477,7 @@ class storeTiles(ranaModule):
             self.commitAll() # commit all "dirty" connections
             self.lastCommit = time.time() # update the last commit timestamp
           except Exception, e:
-            print "sqlite storage worker : exception during mass db commit:\n%s" % e
+            print("sqlite storage worker : exception during mass db commit:\n%s" % e)
 
 
   def automaticStoreTile(self, tile, folderPrefix, z, x, y, extension, filename):
@@ -494,7 +494,7 @@ class storeTiles(ranaModule):
         try:
           os.makedirs(folderPath) # create the folder
         except:
-          print "mapTiles: cant create folder %s for %s" % (folderPath,filename)
+          print("mapTiles: can't create folder %s for %s" % (folderPath,filename))
 
       f = open(filename, 'w') # write the tile to a file
       f.write(tile)
