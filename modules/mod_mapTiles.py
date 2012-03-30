@@ -26,7 +26,7 @@ import threading
 import os
 import traceback
 import urllib2
-import urllib3
+#import urllib3
 #import urllib3_old_fixed as urllib3
 import time
 import modrana_utils
@@ -112,9 +112,9 @@ class MapTiles(ranaModule):
 
     self._storeTiles = None
 
-    url = "http://c.tile.openstreetmap.org/"
+#    url = "http://c.tile.openstreetmap.org/"
     #self.httpPool = urllib3.PoolManager()
-    self.httpPool = urllib3.connection_from_url(url = url, maxsize=4, timeout=3, block=False)
+#    self.httpPool = urllib3.connection_from_url(url = url, maxsize=4, timeout=3, block=False)
     self.cacheImageSurfaces = gs.GUIString == "GTK"
 
   def firstTime(self):
