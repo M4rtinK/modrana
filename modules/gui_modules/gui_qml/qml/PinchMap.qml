@@ -36,7 +36,8 @@ Rectangle {
     
     property alias angle: rot.angle
 
-    property string layer: "mapnik"
+    //property string layer: "mapnik"
+    property string layer: rWin.layer
     //property string url: settings.currentMapType.url
     //property string url: "http://a.tile.openstreetmap.org/%(zoom)d/%(x)d/%(y)d.png"
     //property string url: "http://a.tile.openstreetmap.org/%(zoom)d/%(x)d/%(y)d.png"

@@ -48,6 +48,12 @@ PageStackWindow {
     but this might not be needed if the speed is found to be adequate */
     }
 
+    property string layer: "mapnik"
+
+    function setLayer(name) {
+        layer = name
+    }
+
     /** global notification handling **/
     function notify(text, msTimeout) {
         notification.text = text

@@ -16,6 +16,10 @@ Page {
         color : "black"
     }
 
+    function getPage(menu) {
+        return rWin.getPage(menu)
+    }
+
     // main flickable with icon grid
     GridView {
         id : gridView
@@ -39,7 +43,8 @@ Page {
             iconSize : iconGP.iconSize
             margin : iconGP.iconMargin
             onClicked : {
-                rWin.pageStack.push(rWin.getPage(menu))
+                //rWin.pageStack.push(rWin.getPage(menu))
+                rWin.pageStack.push(iconGP.getPage(menu))
             }
         }
         //insert the back arrow
