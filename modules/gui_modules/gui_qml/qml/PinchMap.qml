@@ -56,7 +56,6 @@ Rectangle {
         id: rot
     }
 
-
     onWidthChanged: {
         pinchmap.setCenterLatLon(pinchmap.latitude, pinchmap.longitude);
     }
@@ -64,7 +63,6 @@ Rectangle {
     onHeightChanged: {
         pinchmap.setCenterLatLon(pinchmap.latitude, pinchmap.longitude);
     }
-
 
     function setZoomLevel(z) {
         setZoomLevelPoint(z, pinchmap.width/2, pinchmap.height/2);
@@ -168,6 +166,7 @@ Rectangle {
         var ytile = (1.0 - Math.log(Math.tan(rad) + (1.0 / Math.cos(rad))) / Math.PI) / 2.0 * n;
         return [xtile, ytile];
     }
+
     function setLatLon(lat, lon, x, y) {
         var oldCornerTileX = cornerTileX
         var oldCornerTileY = cornerTileY
@@ -180,15 +179,19 @@ Rectangle {
         map.offsetY = -(cornerTileFloatY - Math.floor(cornerTileFloatY)) * tileSize;
         updateCenter();
     }
+
     function setCoord(c, x, y) {
         setLatLon(c[0], c[1], x, y);
     }
+
     function setCenterLatLon(lat, lon) {
         setLatLon(lat, lon, pinchmap.width/2, pinchmap.height/2);
     }
+
     function setCenterCoord(c) {
         setCenterLatLon(c[0], c[1]);
     }
+
     function getCoordFromScreenpoint(x, y) {
         var realX = - map.rootX - map.offsetX + x;
         var realY = - map.rootY - map.offsetY + y;
@@ -196,6 +199,7 @@ Rectangle {
         var realTileY = cornerTileY + realY / tileSize;
         return num2deg(realTileX, realTileY);
     }
+
     function getScreenpointFromCoord(lat, lon) {
         var tile = deg2num(lat, lon)
         var realX = (tile[0] - cornerTileX) * tileSize
@@ -239,17 +243,18 @@ Rectangle {
             return 2 // downloading, retry in a while
         }
         return 0
-
-
     }
 
-    function tileUrl(layerID, tx, ty, suffix) {
+    function tileUrl(layerID, tx, ty) {
         if (ty < 0 || ty > maxTileNo) {
             return "image://icons/"+ rWin.theme +"/noimage.png"
         } else {
+            if (tileserverPort != 0) {
+                return "http://127.0.0.1:"+tileserverPort+"/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty+".png"
+            } else {
+                return "image://tiles/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty
+            }
             //var x = F.getMapTile(url, tx, ty, zoomLevel);
-            //return "image://tiles/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty
-            return "http://localhost:"+tileserverPort+"/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty+".png"
         }
     }
 
@@ -349,6 +354,7 @@ Rectangle {
                     property bool now: false
                     source : tileUrl(pinchmap.layer, tileX, tileY, suffix)
                     signal update2(int code2)
+                    asynchronous : true
                     /*
                     onSourceSizeChanged : {
                         if (sourceSize.width == 1) {

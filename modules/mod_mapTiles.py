@@ -151,23 +151,21 @@ class MapTiles(ranaModule):
       # tile was available from storage
       return tileData
 
-    # tile not available from storage, we need to download it
-#    url = self.getTileUrl(x,y,z,layer)
-#    if name in self.threads:
-#      return None # download already in progress
-#    else:
-#      print "queuing DOWNLOAD"
-#      self.addTileDownloadRequest(layer,z,x,y)
-#      return None
-
     print "download"
     url = self.getTileUrl(x,y,z,layer)
+    print(url)
+    #request = urllib2.urlopen(url)
+#    request = self.httpPool.get_url(url)
     request = urllib2.urlopen(url)
-    return(request.read())
-
-
-
-
+    tileData = request.read()
+    if tileData:
+      tileFolder = self.modrana.paths.getMapFolderPath()
+      filePath = os.path.join(tileFolder, self.getImagePath(x, y, z, layerPrefix, layerType))
+      self._storeTiles.automaticStoreTile(tileData, layerPrefix, z, x, y, layerType, filePath)
+      print "STORED"
+      return(tileData)
+    else:
+      return None
 
 #    #request = urllib.urlopen(url)
 #    request = self.httpPool.get_url(url)

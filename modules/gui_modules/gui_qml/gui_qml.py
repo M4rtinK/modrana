@@ -140,12 +140,11 @@ class QMLGUI(GUIModule):
     t.start()
 
   def server(self):
-    print "BBBBBBBBBBBB"
-    print "starting server"
+    print "tile server: starting localhost tileserver"
 
 
-#    self.tileserverPort = 8888
-    self.tileserverPort = random.randint(8000,9000)
+    self.tileserverPort = 9009
+#    self.tileserverPort = random.randint(8000,9000)
 
 
 #    Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
@@ -176,12 +175,16 @@ class QMLGUI(GUIModule):
               self.send_header("Content-type", "image/png")
               #self.send_header("Content-type", "application/octet-stream")
               self.send_header("Content-Length", len(tileData))
+#              self.send_header('Server', self.version_string())
+#              self.send_header('Date', self.date_time_string())
               self.end_headers()
 
               print "GET returning file"
-              return True
+
   #            self.wfile.write(cStringIO.StringIO(tileData).read())
               self.wfile.write(cStringIO.StringIO(tileData).read())
+#              send(cStringIO.StringIO(tileData).read())
+              return True
             else:
               print "GET tile not found"
               return False
@@ -194,10 +197,16 @@ class QMLGUI(GUIModule):
 
       def finish_request(self, request, client_address):
         self.Proxy(request, client_address)
+    try:
+      self.httpd = MyServer(("", self.tileserverPort), self)
+    except Exception, e:
+      print("tile server: starting server on port %d failed" % self.tileserverPort)
+      self.tileserverPort = random.randint(9000,10000)
+      print("tile server: generating random port")
+      print("tile server: starting on port %d" % self.tileserverPort)
+      self.httpd = MyServer(("", self.tileserverPort), self)
 
-    self.httpd = MyServer(("", self.tileserverPort), self)
-
-    print "serving at port", self.tileserverPort
+    print("tile server: serving at port: %d" % self.tileserverPort)
     self.httpd.serve_forever()
 
   def firstTime(self):
@@ -393,20 +402,21 @@ class TileImageProvider(QDeclarativeImageProvider):
       # get the tile from the tile module
       tileData = self.gui._mapTiles.getTile(layer, z, x, y)
       if not tileData:
-        print "DOWNLOADING"
-        # download request queued, return loading status image
-#        print "NOK"
-#        return self.loading
-        url = self.gui._mapTiles.getTileUrl(layer, z, x, y)
-        request = QNetworkRequest()
-        request.setUrl(QUrl(url))
-        reply = self.manager.get(request)
-        data = reply.readAll()
-        data1 = QByteArray(data)
-        img=QImage()
-        img.loadFromData(data1)
-
-        return img
+        return None
+#        print "DOWNLOADING"
+#        # download request queued, return loading status image
+##        print "NOK"
+##        return self.loading
+#        url = self.gui._mapTiles.getTileUrl(layer, z, x, y)
+#        request = QNetworkRequest()
+#        request.setUrl(QUrl(url))
+#        reply = self.manager.get(request)
+#        data = reply.readAll()
+#        data1 = QByteArray(data)
+#        img=QImage()
+#        img.loadFromData(data1)
+#
+#        return img
 
       # create a file-like object
       f = cStringIO.StringIO(tileData)
