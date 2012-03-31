@@ -26,8 +26,6 @@ import threading
 import os
 import traceback
 import urllib2
-#import urllib3
-#import urllib3_old_fixed as urllib3
 import time
 import modrana_utils
 from modules import urllib3
@@ -153,6 +151,7 @@ class MapTiles(ranaModule):
 
     print "download"
     url = self.getTileUrl(x,y,z,layer)
+    print url
 #    request = urllib2.urlopen(url)
 #    tileData = request.read()
     response = self._getConnPool(layer, url).get_url(url)
@@ -177,8 +176,10 @@ class MapTiles(ranaModule):
     if pool:
       return pool
     else: # create pool
+
+      headers = { 'User-Agent' : "'Mozilla/5.0 (compatible; MSIE 5.5; Linux)'" }
       url = self.mapLayers.get(layer)["tiles"]
-      newPool = urllib3.connection_from_url(url = url, maxsize=10, timeout=10, block=False)
+      newPool = urllib3.connection_from_url(url = url, headers=headers, maxsize=10, timeout=10, block=False)
       self.connPools[layer] = newPool
       return newPool
 
