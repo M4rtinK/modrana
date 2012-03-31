@@ -40,6 +40,7 @@ Page {
 
         onDrag : {
             // disable map centering once drag is detected
+            console.log("DRAGGGGG")
             tabMap.center = false
         }
 
@@ -180,7 +181,11 @@ Page {
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             checked : tabMap.center
-            checkable: true
+            /*
+            checked is bound to tabMap.center, no need to toggle
+            it's value when the button is pressed
+            */
+            checkable: false
             onClicked: {
                 // toggle map centering
                 if (tabMap.center) {
