@@ -16,6 +16,8 @@ Page {
         tabGroup.currentTab = tabMap
     }
 
+    property bool center : true
+
     PinchMap {
         id: pinchmap
         width: parent.width
@@ -26,16 +28,19 @@ Page {
             target: gps
             onLastGoodFixChanged: {
                 //console.log("fix changed")
-                if (tabMap.status == PageStatus.Active) {
-                    if (followPositionButton.checked && ! updateTimer.running) {
-                        //console.debug("Update from GPS position")
-                        pinchmap.setCenterLatLon(gps.lastGoodFix.lat, gps.lastGoodFix.lon);
-                        updateTimer.start();
-                    } else if (followPositionButton.checked) {
-                        console.debug("Update timer preventing another update.");
-                    }
+                if (tabMap.center && ! updateTimer.running) {
+                    //console.debug("Update from GPS position")
+                    pinchmap.setCenterLatLon(gps.lastGoodFix.lat, gps.lastGoodFix.lon);
+                    updateTimer.start();
+                } else if (tabMap.center) {
+                    console.debug("Update timer preventing another update.");
                 }
             }
+        }
+
+        onDrag : {
+            // disable map centering once drag is detected
+            tabMap.center = false
         }
 
         Timer {
@@ -174,10 +179,17 @@ Page {
             iconSource: "image://theme/icon-m-common-location"
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
+            checked : tabMap.center
             checkable: true
             onClicked: {
-                if (checked && gps.lastGoodFix) {
-                    pinchmap.setCenterLatLon(gps.lastGoodFix.lat, gps.lastGoodFix.lon);
+                // toggle map centering
+                if (tabMap.center) {
+                    tabMap.center = false // disable
+                } else {
+                    tabMap.center = true // enable
+                    if (gps.lastGoodFix) { // recenter at once
+                        pinchmap.setCenterLatLon(gps.lastGoodFix.lat, gps.lastGoodFix.lon);
+                    }
                 }
             }
         }

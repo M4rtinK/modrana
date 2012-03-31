@@ -50,6 +50,8 @@ Rectangle {
 
     property int tileserverPort : mapTiles.serverPort()
 
+    signal drag // signals that map-drag has been detected
+
     transform: Rotation {
         angle: 0
         origin.x: pinchmap.width/2
@@ -554,6 +556,7 @@ Rectangle {
         anchors.fill : parent;
 
         onPressed: {
+            console.log("PRESSED")
             __isPanning = true;
             __lastX = mouse.x;
             __lastY = mouse.y;
@@ -562,20 +565,20 @@ Rectangle {
             __wasClick = true;
         }
 
-        /* onReleased: {
+        onReleased: {
             __isPanning = false;
             if (! __wasClick) {
                 panEnd();
-            } else {
+            } /*else {
                 var n = mousearea.mapToItem(geocacheDisplayContainer, mouse.x, mouse.y)
                 var g = geocacheDisplayContainer.childAt(n.x, n.y)
                 if (g != null) {
                     showAndResetDetailsPage()
                     controller.geocacheSelected(g.cache)
                 }
-            }
+            }*/
 
-        } */
+        }
 
         onPositionChanged: {
             if (__isPanning) {
@@ -584,8 +587,16 @@ Rectangle {
                 pan(-dx, -dy);
                 __lastX = mouse.x;
                 __lastY = mouse.y;
-                if (Math.pow(mouse.x - __firstX, 2) + Math.pow(mouse.y - __firstY, 2) > maxClickDistance) {
+                /*
+                once the pan threshold is reached,
+                additional checking is unnecessary
+                for the press duration as nothing sets
+                __wasClick back to true
+                */
+                if (__wasClick && Math.pow(mouse.x - __firstX, 2) + Math.pow(mouse.y - __firstY, 2) > maxClickDistance) {
                     __wasClick = false;
+                    pinchmap.drag() // send the drag-detected signal
+
                 }
             }
         }
