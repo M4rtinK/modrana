@@ -556,7 +556,6 @@ Rectangle {
         anchors.fill : parent;
 
         onPressed: {
-            console.log("PRESSED")
             __isPanning = true;
             __lastX = mouse.x;
             __lastY = mouse.y;

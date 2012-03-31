@@ -40,7 +40,6 @@ Page {
 
         onDrag : {
             // disable map centering once drag is detected
-            console.log("DRAGGGGG")
             tabMap.center = false
         }
 
