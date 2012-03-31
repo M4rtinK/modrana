@@ -6,10 +6,6 @@ import "functions.js" as F
 Page {
     id: tabMap
     property int buttonSize: 72
-    /*property alias geocacheModel: pinchmap.model // for access by the list page
-    */
-
-    //orientationLock: PageOrientation.LockPortrait
 
     function showOnMap(lat, lon) {
         pinchmap.setCenterLatLon(lat, lon);
@@ -65,9 +61,6 @@ Page {
         }
         */
 
-        //showTargetIndicator: gps.targetValid;
-        //showTargetAtLat: gps.target.lat || 0
-        //showTargetAtLon: gps.target.lon || 0
         // Rotating the map for fun and profit.
         // angle: -compass.azimuth
         showCurrentPosition: true

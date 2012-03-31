@@ -36,11 +36,7 @@ Rectangle {
     
     property alias angle: rot.angle
 
-    //property string layer: "mapnik"
     property string layer: rWin.layer
-    //property string url: settings.currentMapType.url
-    //property string url: "http://a.tile.openstreetmap.org/%(zoom)d/%(x)d/%(y)d.png"
-    //property string url: "http://a.tile.openstreetmap.org/%(zoom)d/%(x)d/%(y)d.png"
 
     property int earthRadius: 6371000
 
@@ -260,7 +256,6 @@ Rectangle {
         x: rootX + offsetX;
         y: rootY + offsetY;
 
-
         Repeater {
             id: tiles
             model: (pinchmap.numTilesX * pinchmap.numTilesY);
@@ -269,16 +264,6 @@ Rectangle {
                 property alias source: img.source;
                 property int tileX: cornerTileX + (index % numTilesX)
                 property int tileY: cornerTileY + Math.floor(index / numTilesX)
-                /*
-                onTileXChanged : {
-                    img.update2(tileStatus(tileX, tileY))
-                }
-                onTileYChanged : {
-                    img.update2(tileStatus(tileX, tileY))
-                }*/
-
-
-
 
                 Rectangle {
                     id: progressBar;
@@ -307,84 +292,12 @@ Rectangle {
                            img.status == Image.Error ? "Error" :
                            "Loading...")
                 }
-                /* triggers tile reload to check
-                if the tile is ready to be loaded */
-                /*
-                Timer {
-                    id : retryTile
-                    interval : 1000
-                    running : false
-                    repeat : true
-
-
-                    onTriggered : {
-                        console.log("timer fires")
-                        console.log(img.retryCount)
-                        if (img.retryCount < 256) {
-                            img.retryCount = img.retryCount+1;
-                        } else {
-                            img.retryCount = 1
-                        }
-                        img.update2(tileStatus(tileX, tileY))
-                    }
-                }
-                */
                 Image {
                     property int retryCount : 1
-                    /* tile states:
-                    0 - initialized
-                    1 - needs to be loaded
-                    2 - downloading
-                    3 - loaded
-                    4 - error
-                    */
                     id: img
-                    property bool suffix: true
                     anchors.fill: parent;
-                    property bool now: false
-                    source : tileUrl(pinchmap.layer, tileX, tileY, suffix)
-                    signal update2(int code2)
+                    source : tileUrl(pinchmap.layer, tileX, tileY)
                     asynchronous : true
-                    /*
-                    onSourceSizeChanged : {
-                        if (sourceSize.width == 1) {
-                            update2(2)
-                        }
-                    }
-
-                    onUpdate2 : {
-                        console.log("update2 changed")
-                        console.log(code2)
-
-                        if (code2 == 1) {
-                            // tile needed
-                            console.log("loading complete")
-                            //retryTile.stop()
-                        } else if (code2 == 2) {
-                            // tile download in progress
-                            console.log("retry")
-                            //cache: false
-                            //source = "image://icons/"+ rWin.theme +"/noimage.png"
-                            retryTile.restart()
-                            //console.log("triggered timer")
-                        } else if (code2 == 3) {
-                            // tile downloaded & ready
-                            console.log("loaded")
-                            //source = tileUrl(pinchmap.layer, tileX, tileY)
-                            //cache:true
-                            suffix= !suffix
-                            retryCount = 1
-                            retryTile.stop()
-                        } else if (code2 == 4) {
-                            // semi permanent error
-                            console.log("error")
-                        }
-
-                    }
-                    onRetryCountChanged : {
-                        console.log("retryCountChanged")
-                    }
-                    */
                 }
 
                 width: tileSize;
@@ -424,7 +337,7 @@ Rectangle {
             origin.x: targetIndicator.width/2
             origin.y: targetIndicator.height/2
         }
-        /*
+
         NumberAnimation {
             running: true
             target: rotationTarget;
@@ -433,14 +346,14 @@ Rectangle {
             to: 359;
             duration: 2000
             loops: Animation.Infinite
-        }*/
+        }
 
     }
 
     Rectangle {
         id: positionErrorIndicator
         //visible: showCurrentPosition && settings.optionsShowPositionError
-        visible: true
+        visible: false
         width: currentPositionError * (1/getMetersPerPixel(currentPositionLat)) * 2
         height: width
         color: "#300000ff"
@@ -568,14 +481,7 @@ Rectangle {
             __isPanning = false;
             if (! __wasClick) {
                 panEnd();
-            } /*else {
-                var n = mousearea.mapToItem(geocacheDisplayContainer, mouse.x, mouse.y)
-                var g = geocacheDisplayContainer.childAt(n.x, n.y)
-                if (g != null) {
-                    showAndResetDetailsPage()
-                    controller.geocacheSelected(g.cache)
-                }
-            }*/
+            }
 
         }
 
