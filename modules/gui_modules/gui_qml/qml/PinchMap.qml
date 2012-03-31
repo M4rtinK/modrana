@@ -233,19 +233,6 @@ Rectangle {
         return [lat_deg % 90.0, lon_deg % 180.0];
     }
 
-    function tileStatus(tx, ty) {
-        console.log("tile status")
-        console.log(tiles.serverPort())
-        if (mapTiles.loadTile(pinchmap.layer, zoomLevel, tx, ty)) {
-            console.log("status ready")
-            return 3 // loaded and ready
-        } else {
-            console.log("status retry")
-            return 2 // downloading, retry in a while
-        }
-        return 0
-    }
-
     function tileUrl(layerID, tx, ty) {
         if (ty < 0 || ty > maxTileNo) {
             return "image://icons/"+ rWin.theme +"/noimage.png"
