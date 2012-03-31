@@ -18,6 +18,10 @@ Page {
 
     property bool center : true
 
+    Component.onCompleted : {
+        pinchmap.setCenterLatLon(gps.lastGoodFix.lat, gps.lastGoodFix.lon);
+    }
+
     PinchMap {
         id: pinchmap
         width: parent.width
