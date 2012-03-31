@@ -928,7 +928,7 @@ class MapTiles(ranaModule):
       # this solution has been found on:
       # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
 
-      """Using pixbufs in place of surface_from_png seems to be MUCH faster for jpegs and pngs alike.
+      """Using pixbufs in place of surface_from_png seems to be MUCH faster for JPEGSs and PNGs alike.
          Therefore we use it as default."""
 
       # Tile images are mostly 256 by 256 px, we don't need to check the size
