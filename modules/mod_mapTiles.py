@@ -30,6 +30,7 @@ import urllib2
 #import urllib3_old_fixed as urllib3
 import time
 import modrana_utils
+from modules import urllib3
 import rectangles
 
 from tilenames import *
@@ -112,9 +113,8 @@ class MapTiles(ranaModule):
 
     self._storeTiles = None
 
-#    url = "http://c.tile.openstreetmap.org/"
-    #self.httpPool = urllib3.PoolManager()
-#    self.httpPool = urllib3.connection_from_url(url = url, maxsize=4, timeout=3, block=False)
+    self.connPools={} # connection pool dictionary
+
     self.cacheImageSurfaces = gs.GUIString == "GTK"
 
   def firstTime(self):
@@ -153,11 +153,12 @@ class MapTiles(ranaModule):
 
     print "download"
     url = self.getTileUrl(x,y,z,layer)
-    print(url)
-    #request = urllib2.urlopen(url)
-#    request = self.httpPool.get_url(url)
-    request = urllib2.urlopen(url)
-    tileData = request.read()
+#    request = urllib2.urlopen(url)
+#    tileData = request.read()
+    response = self._getConnPool(layer, url).get_url(url)
+    print "RESPONSE"
+    tileData = response.data
+    
     if tileData:
       tileFolder = self.modrana.paths.getMapFolderPath()
       filePath = os.path.join(tileFolder, self.getImagePath(x, y, z, layerPrefix, layerType))
@@ -167,24 +168,19 @@ class MapTiles(ranaModule):
     else:
       return None
 
-#    #request = urllib.urlopen(url)
-#    request = self.httpPool.get_url(url)
-##    request = self.httpPool.urlopen("GET", "%d/%d/%d.png" % (z, x, y))
-#    tileData = request.data
-#    #request.close()
-#    print "DOWNLOAD DONE"
-#    # check if the data is an image or an error page
-#    if modrana_utils.isTheStringAnImage(tileData):
-#      # store
-#      tileFolder = self.modrana.paths.getMapFolderPath()
-#      filePath = tileFolder + self.getImagePath(x, y, z, layerPrefix, layerType)
-#      self._storeTiles.automaticStoreTile(tileData, layerPrefix, z, x, y, layerType, filePath)
-#      print "STORED"
-#      # return
-#      return tileData
-#    else:
-#      print("mapTiles: downloaded tile is not an image (error page?)")
-#      return None
+  def _getConnPool(self, layer, url):
+    """
+    get a connection pool for the given layer
+    NOTE: connection pools reuse open connections
+    """
+    pool = self.connPools.get(layer, None)
+    if pool:
+      return pool
+    else: # create pool
+      url = self.mapLayers.get(layer)["tiles"]
+      newPool = urllib3.connection_from_url(url = url, maxsize=10, timeout=10, block=False)
+      self.connPools[layer] = newPool
+      return newPool
 
   def addTileDownloadRequest(self, layer, z, x, y):
     """add a download request to the download manager queue
@@ -193,7 +189,7 @@ class MapTiles(ranaModule):
     you have to do this beforehand or you might download an already available tile :)
     """
 
-    print "DOWNLOAD queued"
+#    print("mapTiles: DOWNLOAD queued")
     name = self.getTileName(layer, z, x, y)
     # check if the tile is being downloaded
     if name in self.threads or name in self.images[0]:
@@ -248,7 +244,6 @@ class MapTiles(ranaModule):
     report if tile is available from storage
     """
     return self._storeTiles.tileExists2(layer, z, x, y)
-
 
   def _updateScalingCB(self, key='mapScale', oldValue=1, newValue=1):
     """
