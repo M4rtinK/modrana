@@ -140,7 +140,7 @@ class MapTiles(ranaModule):
 
     # get layer info
     layerInfo = self.mapLayers.get(layer, None)
-    if(layerInfo == None): # is the layer info valid ?
+    if layerInfo == None: # is the layer info valid ?
       print("mapTiles: invalid layer")
       return
     layerPrefix = layerInfo.get('folderPrefix','OpenStreetMap II')
@@ -297,7 +297,7 @@ class MapTiles(ranaModule):
                   request = self.downloadRequestPool.pop() # download most recent requests first
                   (name,x,y,z,layer,layerPrefix,layerType, filename, timestamp) = request
                   if name in self.threads.keys():
-                    print "DISCARDED"
+#                    print "DISCARDED"
                     continue
                   # start a new thread
                   self.threads[name] = self.TileDownloader(name,x,y,z,layer,layerPrefix,layerType, filename, self)
@@ -817,7 +817,7 @@ class MapTiles(ranaModule):
     sprint("image not found locally - trying to download")
 
     # Are we allowed to download it ? (network=='full')
-    if(self.get('network','full')=='full'):
+    if self.get('network','full')=='full':
       sprint("automatic tile download enabled - starting download")
       # use threads
       """the thread list condition is used to signalize to the download manager,
@@ -1054,7 +1054,7 @@ class MapTiles(ranaModule):
            - modRana will eventually try to download the tile again,
              after it is flushed with old tiles from the memory
           """
-      except urllib2.URLError, e:
+      except urllib2.URLError:
         if self.useImageSurface:
           tileNetworkErrorSurface = self.callback.images[1]['tileNetworkError'][0]
           expireTimestamp = time.time() + 10
