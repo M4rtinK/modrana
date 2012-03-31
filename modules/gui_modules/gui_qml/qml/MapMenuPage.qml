@@ -46,6 +46,8 @@ IconGridPage {
            ListElement { name: "gover" }
            ListElement { name: "vmap" }
            ListElement { name: "vsat" }
+           ListElement { name: "ymap" }
+           ListElement { name: "ysat" }
            ListElement { name: "yover" }
            ListElement { name: "cycle" }
            ListElement { name: "cz_mtb" }
