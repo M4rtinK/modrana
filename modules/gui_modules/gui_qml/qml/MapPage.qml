@@ -138,14 +138,16 @@ Page {
         anchors.rightMargin: 16
         spacing: 16
         Button {
-            iconSource: "image://theme/icon-m-input-add"
+            //iconSource: "image://theme/icon-m-input-add"
+            iconSource: "image://theme/icon-m-common-add"
             onClicked: {pinchmap.zoomIn() }
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             enabled : pinchmap.zoomLevel != pinchmap.maxZoomLevel
         }
         Button {
-            iconSource: "image://theme/icon-m-input-remove"
+            //iconSource: "image://theme/icon-m-input-remove"
+            iconSource: "image://theme/icon-m-common-remove"
             onClicked: {pinchmap.zoomOut() }
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
