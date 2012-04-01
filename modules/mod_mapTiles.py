@@ -176,7 +176,8 @@ class MapTiles(ranaModule):
     if pool:
       return pool
     else: # create pool
-      headers = { 'User-Agent' : "Mozilla/5.0 (compatible; MSIE 5.5; Linux)" }
+      #headers = { 'User-Agent' : "Mozilla/5.0 (compatible; MSIE 5.5; Linux)" }
+      headers = { 'User-Agent' : "modRana flexible GPS navigation system (compatible; Linux)" }
       url = self.mapLayers.get(layer)["tiles"]
       newPool = urllib3.connection_from_url(url = url, headers=headers, maxsize=10, timeout=10, block=False)
       self.connPools[layer] = newPool

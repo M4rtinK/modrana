@@ -430,7 +430,8 @@ class mapData(ranaModule):
     def createConnectionPool(self, url):
       """create the connection pool -> to facilitate socket reuse"""
       timeout = self.callback.onlineRequestTimeout
-      headers = { 'User-Agent' : "Mozilla/5.0 (compatible; MSIE 5.5; Linux)" }
+      #headers = { 'User-Agent' : "Mozilla/5.0 (compatible; MSIE 5.5; Linux)" }
+      headers = { 'User-Agent' : "modRana flexible GPS navigation system (compatible; Linux)" }
       connPool = urllib3.connection_from_url(url, headers=headers, timeout=timeout, maxsize=self.maxThreads, block=False)
       return connPool
 
