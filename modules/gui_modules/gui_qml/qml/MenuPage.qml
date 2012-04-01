@@ -36,7 +36,7 @@ IconGridPage {
         }
         ListElement {
             caption : "Options"
-            icon : "options.png"
+            icon : "3gears.png"
             menu : "optionsMenu"
         }
     }

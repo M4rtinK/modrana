@@ -66,7 +66,7 @@ Page {
         anchors.topMargin : iconGP.iconMargin/4.0
         //width : iconGP.iconSize-iconGP.iconMargin/2.0
         //height : iconGP.iconSize-iconGP.iconMargin/2.0
-        iconName : "left_arrow_black.png"
+        iconName : "left_thin.png"
         text : "back"
         //normalColor : "#4973f3"
         //normalColor : "#3d6af3"

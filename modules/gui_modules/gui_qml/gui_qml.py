@@ -337,6 +337,12 @@ class Platform(QtCore.QObject):
     """
     return self.modrana.dmod.needsQuitButton()
 
+  def fullscreenOnly(self):
+    """
+    Harmattan doesn't need a minimize button
+    """
+    return self.modrana.dmod.fullscreenOnly()
+
   @QtCore.Slot(result=bool)
   def incompleteTheme(self):
     """
@@ -362,7 +368,6 @@ class IconImageProvider(QDeclarativeImageProvider):
       img.loadFromData(f.read())
       f.close()
       return img
-      #return img.scaled(requestedSize)
     except Exception, e:
       print("QML GUI: icon image provider: loading icon failed", e)
       print iconPath
@@ -371,6 +376,8 @@ class IconImageProvider(QDeclarativeImageProvider):
 class TileImageProvider(QDeclarativeImageProvider):
   """
   the TileImageProvider class provides images images to the QML map element
+  NOTE: this image provider is currently only used as fallback in case
+  the localhost tileserver won't start
   """
   def __init__(self, gui):
     QDeclarativeImageProvider.__init__(self, QDeclarativeImageProvider.ImageType.Image)
@@ -385,8 +392,8 @@ class TileImageProvider(QDeclarativeImageProvider):
     the tile info should look like this:
     layerID/zl/x/y
     """
-    print "IMAGE REQUESTED"
-    print tileInfo
+#    print "IMAGE REQUESTED"
+#    print tileInfo
     try:
       # split the string provided by QML
       split = tileInfo.split("/")
@@ -394,29 +401,11 @@ class TileImageProvider(QDeclarativeImageProvider):
       z = int(split[1])
       x = int(split[2])
       y = int(split[3])
-#      print "REALLY AVAILABLE ?"
-#      print self.gui._mapTiles.tileInMemory(layer, z, x, y)
-#      print self.gui._mapTiles.tileInStorage(layer, z, x, y)
-
 
       # get the tile from the tile module
       tileData = self.gui._mapTiles.getTile(layer, z, x, y)
       if not tileData:
         return None
-#        print "DOWNLOADING"
-#        # download request queued, return loading status image
-##        print "NOK"
-##        return self.loading
-#        url = self.gui._mapTiles.getTileUrl(layer, z, x, y)
-#        request = QNetworkRequest()
-#        request.setUrl(QUrl(url))
-#        reply = self.manager.get(request)
-#        data = reply.readAll()
-#        data1 = QByteArray(data)
-#        img=QImage()
-#        img.loadFromData(data1)
-#
-#        return img
 
       # create a file-like object
       f = cStringIO.StringIO(tileData)
@@ -555,8 +544,6 @@ class FixWrapper(QtCore.QObject):
   valid = QtCore.Property(bool, _valid, notify=changed)
   speedValid = QtCore.Property(bool, _speed_valid, notify=changed)
   altitudeValid = QtCore.Property(bool, _altitude_valid, notify=changed)
-
-
 
 class GPSDataWrapper(QtCore.QObject):
 

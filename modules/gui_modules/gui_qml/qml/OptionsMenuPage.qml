@@ -24,7 +24,7 @@ IconGridPage {
         }
         ListElement {
             caption : "Navigation"
-            icon : "gps_satellite.png"
+            icon : "navigation.png"
             menu : ""
         }
         ListElement {

@@ -16,7 +16,7 @@ IconGridPage {
         id : testModel
         ListElement {
             caption : "Layer"
-            icon : "map.png"
+            icon : "map_layers.png"
             menu : "mapDialog"
         }
         ListElement {

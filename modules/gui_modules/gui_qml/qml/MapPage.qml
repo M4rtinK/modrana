@@ -167,6 +167,7 @@ Page {
             iconSource: "image://theme/icon-m-transfer-download"
             rotation : 180
             checkable : true
+            visible: !platform.fullscreenOnly()
             onClicked: {
                 platform.toggleFullscreen()
             }
