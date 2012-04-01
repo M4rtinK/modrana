@@ -111,6 +111,9 @@ class device_n900(deviceModule):
   def startInFullscreen(self):
     return True
 
+  def fullscreenOnly(self):
+    return False
+
   def handleMessage(self, message, type, args):
     if message == 'modeChanged':
       rotationMode = self.get('rotationMode', None)

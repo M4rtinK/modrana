@@ -52,6 +52,13 @@ class deviceModule(ranaModule):
     user-set options key, etc."""
     return False
 
+  def fullscreenOnly(self):
+    """
+    some platforms are basically fullscreen-only (Harmattan),
+    as applications only switch between fullscreen and a task switcher
+    """
+    return False
+
   def screenBlankingControlSupported(self):
     """ there is no universal way to control screen blanking,
     so its off by default

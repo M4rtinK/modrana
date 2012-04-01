@@ -45,8 +45,14 @@ class device_example(deviceModule):
 
   def startInFullscreen(self):
     """
-    no need to start out of Fullscreen due to toggleable
-    status bar
+    non-fullscreen mode just draw some weird toolbar & status-bar
+    on Harmattan
+    """
+    return True
+
+  def fullscreenOnly(self):
+    """
+    basically no need to
     """
     return True
 
