@@ -337,6 +337,7 @@ class Platform(QtCore.QObject):
     """
     return self.modrana.dmod.needsQuitButton()
 
+  @QtCore.Slot(result=bool)
   def fullscreenOnly(self):
     """
     Harmattan doesn't need a minimize button
