@@ -44,6 +44,7 @@ IconGridPage {
            ListElement { name: "gmap" }
            ListElement { name: "gsat" }
            ListElement { name: "gover" }
+           ListElement { name: "g8bit" }
            ListElement { name: "vmap" }
            ListElement { name: "vsat" }
            ListElement { name: "ymap" }
