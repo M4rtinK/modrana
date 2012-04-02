@@ -157,13 +157,20 @@ class MapTiles(ranaModule):
     response = self._getConnPool(layer, url).get_url(url)
     print "RESPONSE"
     tileData = response.data
-    
+
     if tileData:
-      tileFolder = self.modrana.paths.getMapFolderPath()
-      filePath = os.path.join(tileFolder, self.getImagePath(x, y, z, layerPrefix, layerType))
-      self._storeTiles.automaticStoreTile(tileData, layerPrefix, z, x, y, layerType, filePath)
-      print "STORED"
-      return(tileData)
+      # check if the data is actually an image, and not an error page
+      if modrana_utils.isTheStringAnImage(tileData):
+        tileFolder = self.modrana.paths.getMapFolderPath()
+        filePath = os.path.join(tileFolder, self.getImagePath(x, y, z, layerPrefix, layerType))
+        self._storeTiles.automaticStoreTile(tileData, layerPrefix, z, x, y, layerType, filePath)
+        print "STORED"
+        return(tileData)
+      else:
+        print("mapTiles: tile data returned by remote tileserver was not an image")
+        print("NOTE: this probably means that the tileserver returned an"
+              "error page in place of the tile, because it doesn't like you")
+        return None
     else:
       return None
 
