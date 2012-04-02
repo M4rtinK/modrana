@@ -35,7 +35,7 @@ IconGridPage {
        onSelectedIndexChanged : {
            rWin.setLayer(model.get(selectedIndex).name)
            //rWin.pageStack.pop()
-           rWin.pageStack.pop()
+           rWin.pageStack.pop(null)
            accept()
            }
 

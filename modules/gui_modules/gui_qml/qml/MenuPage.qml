@@ -20,11 +20,6 @@ IconGridPage {
             menu : "poiMenu"
         }
         ListElement {
-            caption : "Info"
-            icon : "info.png"
-            menu : "infoMenu"
-        }
-        ListElement {
             caption : "Map"
             icon : "map.png"
             menu : "mapMenu"
@@ -33,6 +28,11 @@ IconGridPage {
             caption : "Mode"
             icon : "mode.png"
             menu : "modeMenu"
+        }
+        ListElement {
+            caption : "Info"
+            icon : "info.png"
+            menu : "infoMenu"
         }
         ListElement {
             caption : "Options"
