@@ -30,7 +30,13 @@ sys.path.append(modulesFolder)
 import time
 startTimestamp = time.time()
 import math
+# set current directory to the directory
+# of this file
+# like this, modRana can be run from an absolute path
+# eq.: ./opt/modrana/modrana.py -u QML -d n9
 import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 import marshal
 import traceback
 from math import radians
