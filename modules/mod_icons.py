@@ -126,12 +126,20 @@ class icons(ranaModule):
     iconPathDefault = self.getDefaultThemePath()
 
     (simplePaths,parameterPaths) = self.findUsableIcon(name, [iconPathThemed,iconPathDefault])
+
+    parameterPaths.extend(simplePaths)
+
     image = None
-    # ist there a filename with positional parameters ?
+    # is there a filename with positional parameters ?
     if parameterPaths:
       result = None
-      if fnmatch.filter(parameterPaths, "*%s-above_text.*" % name):
-        aboveTextIconPath = fnmatch.filter(parameterPaths, "*%s-above_text.*" % name).pop()
+#      if fnmatch.filter(parameterPaths, "*%s-above_text.*" % name):
+      if True:
+#        aboveTextIconPath = fnmatch.filter(parameterPaths, "*%s-above_text.*" % name).pop()
+        print parameterPaths
+        print name
+
+        aboveTextIconPath = fnmatch.filter(parameterPaths, "*%s.*" % name).pop()
         pixbufInfo = gtk.gdk.pixbuf_get_file_info(aboveTextIconPath)
         # it we get some info about the file, it means that the image is probably pixbufable
         if pixbufInfo:
@@ -171,6 +179,7 @@ class icons(ranaModule):
         return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor),False)
     # just use the classic icon
     elif simplePaths:
+      print "SIMPLE PATHS"
       iconPath = simplePaths.pop()
       if scale:
         image = self.getImageSurface(iconPath, w, h)
@@ -187,6 +196,7 @@ class icons(ranaModule):
       return(False)
     w = float(image.get_width())
     h = float(image.get_height())
+    print "RETURNING IMAGE"
     return (image,False)
 
   def getImageSurface(self,path, w=None, h=None):

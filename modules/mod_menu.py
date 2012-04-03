@@ -566,11 +566,11 @@ class menus(ranaModule):
         timeout = 400
     else:
       timeout = 400
-    item = self.generateItem('', 'up', cancelButtonAction, 'simple', timedAction=(timeout,"set:menu:None"))
+    item = self.generateItem('', 'back', cancelButtonAction, 'simple', timedAction=(timeout,"set:menu:None"))
     self.addItems(menuName, [item])
 
-  def drawClearButton(self, cr, x, y, w, h, parentAction, icon='up'):
-    """draw a correct up button, including the timed jump-to-map action"""
+  def drawClearButton(self, cr, x, y, w, h, parentAction, icon='back'):
+    """draw a correct back button, including the timed jump-to-map action"""
     timedAction=(self.modrana.gui.msLongPress,"set:menu:None")
     self.drawButton(cr, x, y, w, h, '', icon, parentAction, timedAction)
 
@@ -578,7 +578,7 @@ class menus(ranaModule):
     """clear a given itemized menu instance, add the ecape button and return it"""
     menu = self.getInitializedMenu()
     timedAction=(self.modrana.gui.msLongPress,"set:menu:None")
-    item = self.generateItem("", "up", cancelButtonAction, "simple", timedAction)
+    item = self.generateItem("", "back", cancelButtonAction, "simple", timedAction)
     return self.addItemsToThisMenu(menu, [item])
 
   def addItemsToThisMenu(self, menu, items=[]):
@@ -835,7 +835,7 @@ class menus(ranaModule):
 
       # controls
       # * parent menu
-      self.menus.drawButton(cr, x1, y1, dx, dy, "", "up", self.parrentAction)
+      self.menus.drawButton(cr, x1, y1, dx, dy, "", "back", self.parrentAction)
       # * scroll up
       self.menus.drawButton(cr, x2, y2, dx, dy, "", "up_list", "ml:menu:listMenu:%s;up" % self.name)
       # * scroll down
@@ -1217,7 +1217,7 @@ class menus(ranaModule):
 #    (x4,y4) = e4
     (w1,h1,dx,dy) = alloc
     # * draw "escape" button
-    self.drawButton(cr, x1, y1, dx, dy, "", "up", "%s:reset|set:menu:%s" % (parent,parent))
+    self.drawButton(cr, x1, y1, dx, dy, "", "back", "%s:reset|set:menu:%s" % (parent,parent))
     # * scroll up
     self.drawButton(cr, x2, y2, dx, dy, "", "up_list", "%s:up" % scrollMenu)
     # * scroll down

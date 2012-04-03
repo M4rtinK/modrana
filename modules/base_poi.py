@@ -30,7 +30,7 @@ class poiModule(ranaModule):
     self.scroll = 0
 
   def handleMessage(self, message, type, args):
-    if(message == "up"):
+    if(message == "back"):
       if(self.scroll > 0):
         self.scroll -= 1
         self.set("needRedraw", True)
@@ -86,9 +86,9 @@ class poiModule(ranaModule):
     if(menus):
       # Top row:
 #      # * parent menu
-#      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:%s_categories" % self.moduleName)
+#      menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:%s_categories" % self.moduleName)
       # * main menu for now
-      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:main")
+      menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:main")
       # * scroll up
       menus.drawButton(cr, x1+dx, y1, dx, dy, "", "up_list", "%s:up" % self.moduleName)
       # * scroll down

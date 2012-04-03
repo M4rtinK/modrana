@@ -877,7 +877,7 @@ class route(ranaModule):
         (w1,h1,dx,dy) = alloc
 
         # * draw "escape" button
-        menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:main")
+        menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:main")
         # * route
         menus.drawButton(cr, x2, y2, dx, dy, "route", "generic", "route:addressRoute|set:menu:None")
         # * tools

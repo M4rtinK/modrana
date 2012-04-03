@@ -862,7 +862,7 @@ class mapData(ranaModule):
       dx = w / cols
       dy = h / rows
       # * draw "escape" button
-      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "menu:rebootDataMenu|set:menu:main")
+      menus.drawButton(cr, x1, y1, dx, dy, "", "back", "menu:rebootDataMenu|set:menu:main")
       # * draw "edit" button
       menus.drawButton(cr, (x1+w)-2*dx, y1, dx, dy, "edit", "tools", "menu:setupEditBatchMenu|set:menu:editBatch")
       # * draw "start" button

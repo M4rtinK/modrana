@@ -181,7 +181,7 @@ class tracklogManager(ranaModule):
       menus = self.m.get("menu",None)
 
       # * draw "escape" button
-      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:tracklogManagerCathegories")
+      menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:tracklogManagerCathegories")
       # * scroll up
       menus.drawButton(cr, x2, y2, dx, dy, "", "up_list", "%s:up" % self.moduleName)
       # * scroll down
@@ -227,7 +227,7 @@ class tracklogManager(ranaModule):
     elif menuName == 'tracklogInfo':
       menus = self.m.get("menu",None)
       # * draw "escape" button
-      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "set:menu:tracklogManager#tracklogManager")
+      menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:tracklogManager#tracklogManager")
       track = self.LTModule.getActiveTracklog()
       # is there an active tracklog ?
       if track == None:

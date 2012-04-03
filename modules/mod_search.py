@@ -269,7 +269,7 @@ class search(ranaModule):
       (w1,h1,dx,dy) = alloc
 
       # * draw "escape" button
-      menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:search")
+      menus.drawButton(cr, x1, y1, dx, dy, "", "back", "search:reset|set:menu:search")
       # * scroll up
       menus.drawButton(cr, x2, y2, dx, dy, "", "up_list", "%s:up" % self.moduleName)
       # * scroll down
@@ -444,7 +444,7 @@ class search(ranaModule):
       print "search: warning, the units module uis missing"
       distanceString = "%1.2f km" % float(distance)
     # * draw "escape" button
-    menus.drawButton(cr, x1, y1, dx, dy, "", "up", "search:reset|set:menu:search#searchResults")
+    menus.drawButton(cr, x1, y1, dx, dy, "", "back", "search:reset|set:menu:search#searchResults")
     # * draw "show" button
     action2 = "search:reset|set:menu:None|set:searchResultsItemNr:%d|mapView:recentre %f %f" % (index, lat, lon)
     menus.drawButton(cr, x2, y2, dx, dy, "on map#show", "generic", action2)

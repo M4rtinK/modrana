@@ -460,7 +460,7 @@ class MapTiles(ranaModule):
     try: # this should get rid of a fair share of the infamous "black screens"
       # get all needed data and objects to local variables
       proj = self.m.get('projection', None)
-      drawImage = self.drawImage # method binding to speed up method lookup
+      drawImage = self.drawImage # method binding to speed back method lookup
       overlay = self.get('overlay', False)
       """ if overlay is enabled, we use a special naming
           function in place of the default one"""
@@ -842,7 +842,7 @@ class MapTiles(ranaModule):
         with self.downloadRequestPoolLock: # add a download request
           self.downloadRequestPool.append(request)
 
-        self.threadlListCondition.notifyAll() # wake up the download manager
+        self.threadlListCondition.notifyAll() # wake back the download manager
     else:
       sprint("automatic tile download disabled - not starting download")
 
@@ -923,7 +923,7 @@ class MapTiles(ranaModule):
       """
       this means that the trimming amount was set higher,
       than current length of the cache
-      the result is basically flushing the cache every time it fills up
+      the result is basically flushing the cache every time it fills back
       well, I don't have an idea why would someone want to do that
       """
       self.images[0] = {}

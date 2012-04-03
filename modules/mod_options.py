@@ -616,7 +616,7 @@ class Options(ranaModule):
     addBoolOpt("Avoid toll roads", "routingAvoidToll", group, False)
 
     # * the POI category
-    catPOI = addCat("POI", "poi", "opt_poi")
+    catPOI = addCat("POI", "poi", "poi")
 
     # ** POI storage
     group = addGroup("POI storage", "poi_storage", catPOI, "generic")
@@ -960,7 +960,7 @@ class Options(ranaModule):
       # Top row:
       # * parent menu
       timeout = self.modrana.gui.msLongPress
-      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "up", cancelButtonAction, timedAction=(timeout,"set:menu:None"))
+      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "back", cancelButtonAction, timedAction=(timeout,"set:menu:None"))
       # * scroll up
       self.menuModule.drawButton(cr, x2, y2, dx, dy, "", "up_list", "ml:options:scroll:up;%s" % menuName)
       # * scroll down
