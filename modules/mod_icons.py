@@ -136,8 +136,6 @@ class icons(ranaModule):
 #      if fnmatch.filter(parameterPaths, "*%s-above_text.*" % name):
       if True:
 #        aboveTextIconPath = fnmatch.filter(parameterPaths, "*%s-above_text.*" % name).pop()
-        print parameterPaths
-        print name
 
         aboveTextIconPath = fnmatch.filter(parameterPaths, "*%s.*" % name).pop()
         pixbufInfo = gtk.gdk.pixbuf_get_file_info(aboveTextIconPath)
@@ -179,7 +177,6 @@ class icons(ranaModule):
         return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor),False)
     # just use the classic icon
     elif simplePaths:
-      print "SIMPLE PATHS"
       iconPath = simplePaths.pop()
       if scale:
         image = self.getImageSurface(iconPath, w, h)
@@ -196,7 +193,6 @@ class icons(ranaModule):
       return(False)
     w = float(image.get_width())
     h = float(image.get_height())
-    print "RETURNING IMAGE"
     return (image,False)
 
   def getImageSurface(self,path, w=None, h=None):
