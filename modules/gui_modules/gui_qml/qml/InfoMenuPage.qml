@@ -5,6 +5,7 @@ import com.nokia.meego 1.0
 
 
 IconGridPage {
+    isMockup: true
     model : ListModel {
         id : testModel
         ListElement {

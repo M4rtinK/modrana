@@ -8,6 +8,7 @@ Page {
     property int hIcons : rWin.inPortrait ? 2 : 4
     property double iconMargin : width/(hIcons*10)
     property double iconSize : (width-2)/hIcons
+    property alias isMockup : mockup.visible
     // search, routes, POI, mode, options, info
 
     // page background
@@ -75,6 +76,22 @@ Page {
         opacity : gridView.atYBeginning ? 1.0 : 0.55
         onClicked : {
             rWin.pageStack.pop()
+        }
+    }
+
+    Rectangle {
+        anchors.verticalCenter : parent.verticalCenter
+        anchors.horizontalCenter : parent.horizontalCenter
+        id : mockup
+        visible : false
+        opacity : 0.7
+        color: "grey"
+        Label {
+            anchors.verticalCenter : parent.verticalCenter
+            anchors.horizontalCenter : parent.horizontalCenter
+            font.pixelSize : 64
+            text : "MOCKUP"
+            color:"white"
         }
     }
 }
