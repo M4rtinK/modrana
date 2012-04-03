@@ -119,16 +119,16 @@ class menus(ranaModule):
       buttons['fullscreen'] = (x, y+h-dy) # fullscreen button coordinates
       buttons['centre'] = (x+w-dx, y) # centre button coordinates
       buttons['scalebar'] = proj.screenPos(0.15, 0.97) # scalebar coordinates
-      plusIcon = 'zoom_in'
-      minusIcon = 'zoom_out'
+      plusIcon = 'center:zoom_in;0.05'
+      minusIcon = 'center:zoom_out;0.05'
 
       # possible main button coordinates override
       mode = self.get('mode', None)
       if mode in self.userConfig:
         if 'override_main_buttons' in self.userConfig[mode]:
           # we dont know the orientation, so we use generic icons
-          plusIcon = 'plus'
-          minusIcon = 'minus'
+          plusIcon = 'center:plus;0.05'
+          minusIcon = 'center:minus;0.05'
           item = self.userConfig[mode]['override_main_buttons']
 
           if 'icon_size' in item:
@@ -166,16 +166,16 @@ class menus(ranaModule):
 
       # draw the maximize icon
       if self.fullscreen:
-        icon = 'minimize'
+        icon = 'center:minimize;0.05'
       else:
-        icon = 'maximize'
+        icon = 'center:maximize;0.05'
 
       (x1,y1) = buttons['fullscreen']
       self.drawButton(cr, x1, y1, dx, dy, "", icon, "ms:display:fullscreen:toggle")
 
       # * draw the centering button
       (x1,y1) = buttons['centre']
-      self.drawButton(cr, x1, y1, dx, dy, "", 'blue_border', "toggle:centred")
+      self.drawButton(cr, x1, y1, dx, dy, "", '', "toggle:centred")
 
       # the central circle
       cr.stroke()
