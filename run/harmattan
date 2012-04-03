@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /opt/modrana
+invoker --single-instance --type=e /opt/modrana/modrana.py -u QML -d n9
