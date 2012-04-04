@@ -251,12 +251,16 @@ class Platform(QtCore.QObject):
   def setFullscreen(self, value):
     self.modrana.gui.setFullscreen(value)
 
-  @QtCore.Slot(results=str)
+  @QtCore.Slot(result=str)
   def modRanaVersion(self):
     """
     report current modRana version or None if version info is not available
     """
-    self.modrana.paths.getVersionString()
+    version = self.modrana.paths.getVersionString()
+    if version == None:
+      return "unknown"
+    else:
+      return version
 
   #  @QtCore.Slot()
   #  def minimise(self):
