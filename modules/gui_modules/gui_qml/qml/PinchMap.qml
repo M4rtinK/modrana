@@ -44,7 +44,7 @@ Rectangle {
 
     //property alias model: geocacheDisplay.model
 
-    property int tileserverPort : mapTiles.serverPort()
+    property int tileserverPort : mapTiles.tileserverPort()
 
     signal drag // signals that map-drag has been detected
 

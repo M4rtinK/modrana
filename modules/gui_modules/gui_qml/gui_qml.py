@@ -22,7 +22,6 @@
 #---------------------------------------------------------------------------
 import SocketServer
 import random
-import callback_proxy
 import sys
 import re
 import os
@@ -73,8 +72,6 @@ class QMLGUI(GUIModule):
 
   def __init__(self, m, d, i):
     GUIModule.__init__(self, m, d, i)
-
-    callback_proxy.cb = self
 
     # some constants
     self.msLongPress = 400
@@ -134,87 +131,19 @@ class QMLGUI(GUIModule):
 
     self._notificationQueue = []
 
-
-    t = Thread(target=self.server)
-    t.daemon=True
-    t.start()
-
-  def server(self):
-    print "tile server: starting localhost tileserver"
-
-
-    self.tileserverPort = 9009
-#    self.tileserverPort = random.randint(8000,9000)
-
-
-#    Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-
-    class MyServer(SocketServer.TCPServer):
-#      def __init__(self, tuple, callback):
-#        SocketServer.TCPServer.init(tuple, "")
-#        self.callback = callback
-
-      class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
-        def __init__(self, request, client_address):
-          try:
-            SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
-          except:
-            SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
-        def do_GET(self):
-          split = self.path.split("/")
-          layer = split[1]
-          z = int(split[2])
-          x = int(split[3])
-          y = int(split[4].split(".")[0])
-          print self.path
-          try:
-            tileData = callback_proxy.cb._mapTiles.getTile(layer, z, x, y)
-            if tileData:
-
-              self.send_response(200)
-              self.send_header("Content-type", "image/png")
-              #self.send_header("Content-type", "application/octet-stream")
-              self.send_header("Content-Length", len(tileData))
-#              self.send_header('Server', self.version_string())
-#              self.send_header('Date', self.date_time_string())
-              self.end_headers()
-
-              print "GET returning file"
-
-  #            self.wfile.write(cStringIO.StringIO(tileData).read())
-              self.wfile.write(cStringIO.StringIO(tileData).read())
-#              send(cStringIO.StringIO(tileData).read())
-              return True
-            else:
-              print "GET tile not found"
-              return False
-          except urllib2.HTTPError, e:
-            # forward the error code
-            self.send_response(e.code)
-
-        #        self.copyfile(urllib.urlopen(self.path), self.wfile)
-        #        self.copyfile(urllib.urlopen(self.path), self.wfile)
-
-      def finish_request(self, request, client_address):
-        self.Proxy(request, client_address)
-    try:
-      self.httpd = MyServer(("", self.tileserverPort), self)
-    except Exception, e:
-      print("tile server: starting server on port %d failed" % self.tileserverPort)
-      self.tileserverPort = random.randint(9000,10000)
-      print("tile server: generating random port")
-      print("tile server: starting on port %d" % self.tileserverPort)
-      self.httpd = MyServer(("", self.tileserverPort), self)
-
-    print("tile server: serving at port: %d" % self.tileserverPort)
-    self.httpd.serve_forever()
-
   def firstTime(self):
     self._location = self.m.get('location', None)
     self._mapTiles = self.m.get('mapTiles', None)
 
   def getIDString(self):
     return "QML"
+
+  def needsLocalhostTileserver(self):
+    """
+    the QML GUI needs the localhost tileserver
+    for efficient and responsive tile loading
+    """
+    return True
 
   def isFullscreen(self):
     return self.window.isFullScreen()
@@ -277,8 +206,6 @@ class QMLGUI(GUIModule):
     segfault, we need this"""
     #self.rootObject.shutdown()
 
-    self.httpd.shutdown()
-
     # quit the application
     self.app.exit()
     self.modrana.shutdown()
@@ -299,8 +226,15 @@ class QMLGUI(GUIModule):
     else:
       self._notificationQueue.append((text, msTimeout, icon))
 
+  def _getTileserverPort(self):
+    m = self.m.get("tileserver", None)
+    if m:
+      return m.getServerPort()
+    else:
+      return None
+
 class Platform(QtCore.QObject):
-  """make stats available to QML and integrable as a property"""
+  """make current platform available to QML and integrable as a property"""
   def __init__(self, modrana):
     QtCore.QObject.__init__(self)
     self.modrana = modrana
@@ -316,6 +250,13 @@ class Platform(QtCore.QObject):
   @QtCore.Slot(bool)
   def setFullscreen(self, value):
     self.modrana.gui.setFullscreen(value)
+
+  @QtCore.Slot(results=str)
+  def modRanaVersion(self):
+    """
+    report current modRana version or None if version info is not available
+    """
+    self.modrana.paths.getVersionString()
 
   #  @QtCore.Slot()
   #  def minimise(self):
@@ -432,8 +373,12 @@ class MapTiles(QtCore.QObject):
     self.gui = gui
 
   @QtCore.Slot(result=int)
-  def serverPort(self):
-    return self.gui.tileserverPort
+  def tileserverPort(self):
+    port = self.gui._getTileserverPort()
+    if port:
+      return port
+    else: # None,0 == 0 in QML
+      return 0
 
   @QtCore.Slot(str, int, int, int, result=bool)
   def loadTile(self, layer, z, x, y):

@@ -156,6 +156,13 @@ class GUIModule(ranaModule):
     """report current status of the gui"""
     return "It works!"
 
+  def needsLocalhostTileserver(self):
+    """
+    report if the GUI module requires the localhost
+    tileserver to run
+    """
+    return False
+
 #  def _destroyed(self):
 #    self.mieru.destroy()
 #
