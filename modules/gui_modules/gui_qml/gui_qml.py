@@ -143,7 +143,7 @@ class QMLGUI(GUIModule):
     the QML GUI needs the localhost tileserver
     for efficient and responsive tile loading
     """
-    return True
+    return False
 
   def isFullscreen(self):
     return self.window.isFullScreen()
