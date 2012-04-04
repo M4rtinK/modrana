@@ -265,6 +265,7 @@ Rectangle {
                 property int tileX: cornerTileX + (index % numTilesX)
                 property int tileY: cornerTileY + Math.floor(index / numTilesX)
 
+                /*
                 Rectangle {
                     id: progressBar;
                     property real p: 0;
@@ -283,7 +284,11 @@ Rectangle {
                         color: "#000000";
                     }
                 }
+                */
+
                 Label {
+                    visible : true
+                    opacity: 0.3
                     anchors.left: parent.left
                     anchors.leftMargin: 16
                     y: parent.height/2 - 32
