@@ -143,7 +143,7 @@ class Paths:
     # try read the version file
     if os.path.exists(versionFilePath):
       try:
-        f = open(self.versionFilePath, 'r')
+        f = open(versionFilePath, 'r')
         versionString = f.read()
         f.close()
         # is it really string ?
