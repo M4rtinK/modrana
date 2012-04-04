@@ -7,7 +7,7 @@ import com.nokia.meego 1.0
 
 IconGridPage {
     function getPage(menu){
-        if (menu = "mapDialog") {
+        if (menu == "mapDialog") {
             singleSelectionDialog.open()
         }
     }
