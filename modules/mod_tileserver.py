@@ -89,8 +89,9 @@ class Tileserver(ranaModule):
     """
     stop the tileserver
     """
-    self.server.socket.close()
-    self.serverThread = None
+    if self.server:
+      self.server.socket.close()
+      self.serverThread = None
 
   def getServerPort(self):
     """
