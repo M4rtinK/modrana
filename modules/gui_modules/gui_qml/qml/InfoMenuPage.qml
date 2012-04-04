@@ -5,18 +5,38 @@ import com.nokia.meego 1.0
 
 
 IconGridPage {
-    isMockup: true
+
+    InfoPage {
+        id : infoPage
+    }
+
+    function getPage(menu){
+        if (menu == "infoPage") {
+            return infoPage
+        }
+    }
+
+    isMockup: false
     model : ListModel {
         id : testModel
+        /*
         ListElement {
             caption : "Compass"
             icon : "windrose-simple.svg"
             menu : ""
         }
+        */
         ListElement {
             caption : "About"
             icon : "info.png"
-            menu : ""
+            menu : "infoPage"
         }
     }
+
+
+    Loader {
+        id: infoPage1
+        source: "InfoPage.qml"
+    }
+
 }
