@@ -10,7 +10,7 @@ IconGridPage {
         id : testModel
         ListElement {
             caption : "Foot"
-            icon : "foot.png"
+            icon : "walk.png"
             menu : ""
         }
         ListElement {
