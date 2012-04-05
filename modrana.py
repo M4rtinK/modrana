@@ -178,6 +178,14 @@ class ModRana:
     # make shortcut for the loadModule function
     loadModule = self._loadModule
 
+    # make sure there are some arguments
+    if self.args.u:
+      GUIString = self.args.u[0]
+    else:
+      # GTK GUI fallback
+      GUIString = "GTK"
+    gs.GUIString = GUIString
+
     ## load the device specific module
 
     # NOTE: other modules need the device and GUI modules
@@ -194,13 +202,6 @@ class ModRana:
 
     ## load the GUI module
 
-    # make sure there are some arguments
-    if self.args.u:
-      GUIString = self.args.u[0]
-    else:
-      # GTK GUI fallback
-      GUIString = "GTK"
-    gs.GUIString = GUIString
     # add the GUI module folder to path
     GUIModulesPath = os.path.join(modulesFolder, "gui_modules")
     sys.path.append(GUIModulesPath)
