@@ -6,20 +6,21 @@ Page {
     Label {
         anchors.verticalCenter : parent.verticalCenter
         anchors.horizontalCenter : parent.horizontalCenter
-        font.pixelSize : 64
+        font.pixelSize : 32
         text : "modRana version:<br>" + platform.modRanaVersion()
-        color:"white"
+        color:"black"
     }
 
-    IconGridButton {
-        iconSize : iconGP.iconSize
-        margin : iconGP.iconMargin
+
+    Button {
+        width : 150
+        height : 150
         anchors.top : parent.top
         anchors.left : parent.left
-        anchors.topMargin : iconGP.iconMargin/4.0
-        iconName : "left_thin.png"
-        text : "back"
-        opacity : gridView.atYBeginning ? 1.0 : 0.55
+        anchors.topMargin : 16
+        anchors.leftMargin : 16
+        iconSource : "image://icons/"+ rWin.theme +"/left_thin.png"
+        //text : "back"
         onClicked : {
             rWin.pageStack.pop()
         }
