@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # only import GKT libs if GTK GUI is used
+import sys
 from core import gs
+import traceback
 if gs.GUIString == "GTK":
   import gtk
 
@@ -38,24 +40,25 @@ class Color:
     return valid
 
   def setColorFromColorStringAlphaTupple(self, colorStringAlphaTupple):
-    try:
-      import gtk
-      (colorString,alpha) = colorStringAlphaTupple
-      gtkColor = gtk.gdk.color_parse(colorString)
-      gtkcolorRange = float(2**16)
-      cairoR = gtkColor.red/gtkcolorRange
-      cairoG = gtkColor.green/gtkcolorRange
-      cairoB = gtkColor.blue/gtkcolorRange
-      self.setAlpha(alpha)
-      self.setCairoColor(cairoR,cairoG,cairoB,alpha)
-      self.gtkColor = gtkColor
-      self.valid = True
-    except Exception, e:
-      print("** color string parsing failed **")
-      print("** input that caused this:", colorStringAlphaTupple)
-      print("** exception: %s" % e)
-      # fallback
-      self.gtkColor = "ff0000"
+    if gs.GUIString == "GTK":
+      try:
+        import gtk
+        (colorString,alpha) = colorStringAlphaTupple
+        gtkColor = gtk.gdk.color_parse(colorString)
+        gtkcolorRange = float(2**16)
+        cairoR = gtkColor.red/gtkcolorRange
+        cairoG = gtkColor.green/gtkcolorRange
+        cairoB = gtkColor.blue/gtkcolorRange
+        self.setAlpha(alpha)
+        self.setCairoColor(cairoR,cairoG,cairoB,alpha)
+        self.gtkColor = gtkColor
+        self.valid = True
+      except Exception, e:
+        print("** color string parsing failed **")
+        print("** input that caused this:", colorStringAlphaTupple)
+        print("** exception: %s" % e)
+        # fallback
+        self.gtkColor = "ff0000"
 
   def setCairoColor(self,r,g,b,a):
     self.cairoColor = (r,g,b,a)

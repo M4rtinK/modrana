@@ -22,7 +22,6 @@ from base_module import ranaModule
 import os
 import glob
 import fnmatch
-from color import Color
 """for some reason one import method works
 on Fremantle and other everywhere (?) else"""
 try:
@@ -37,6 +36,7 @@ from core import gs
 if gs.GUIString == "GTK":
   import gtk
   import cairo
+  from color import Color
 
 def getModule(m,d,i):
   return(icons(m,d,i))
@@ -46,31 +46,43 @@ class icons(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
 
-    self.images = {}
-
+    self.defaultTheme = 'default'
+    self.themesFolderPath = 'themes/'
     self.cantLoad = []
     self.imageOrderList = [] # for cache trimming
     self.maxImages = 200 # default 200
-    self.themesFolderPath = 'themes/'
-    self.defaultTheme = 'default'
+    self.images = {}
+
     self.currentTheme = self.defaultTheme
     self.themeList = []
 
     # structure -> color_key:color_object
     self.defaultColors = {} # default color set
     self.colors = {} # main combined color set
-    defaultThemeConfig = self.themesFolderPath + '/' + self.defaultTheme + '/theme.conf'
-    # load the default set of colors
-    defaultColors = self.loadColorsFromFile(defaultThemeConfig)
-    self.defaultColors = defaultColors
-    self.colors = defaultColors.copy()
-    self.colorInfoSubscribers = {}
-
-    #color shortcuts
-    self.buttonOutlineColor = (0,0,0,1)
-    self.buttonFillColor = (1,1,1,1)
-
+    defaultThemeConfig = os.path.join(self.themesFolderPath, self.defaultTheme, 'theme.conf')
     self.updateThemeList()
+    # TODO: make themes GUI toolkit independent
+    if gs.GUIString == "GTK":
+      # load the default set of colors
+      defaultColors = self.loadColorsFromFile(defaultThemeConfig)
+      self.defaultColors = defaultColors
+      self.colors = defaultColors.copy()
+      self.colorInfoSubscribers = {}
+
+      #color shortcuts
+      self.buttonOutlineColor = (0,0,0,1)
+      self.buttonFillColor = (1,1,1,1)
+
+
+
+
+  def firstTime(self):
+    # TODO: make themes GUI toolkit independent
+    if gs.GUIString == "GTK":
+      self.subscribeColorInfo(self, self.colorsChangedCallback)
+      # check if there was some theme used last time
+      lastUsedTheme = self.get('currentTheme', self.defaultTheme)
+      self.switchTheme(lastUsedTheme)
 
   def getIconByName(self, name, returnPixbuf=False):
     """"get icon from current theme by exact name match
@@ -346,12 +358,6 @@ class icons(ranaModule):
         break
     return (simplePaths,parameterPaths)
 
-  def firstTime(self):
-    self.subscribeColorInfo(self, self.colorsChangedCallback)
-    # check if there was some theme used last time
-    lastUsedTheme = self.get('currentTheme', self.defaultTheme)
-    self.switchTheme(lastUsedTheme)
-
   def flushIconCache(self):
     """flush the icon cache"""
     self.images = {}
@@ -574,7 +580,7 @@ class icons(ranaModule):
 
   def updateThemeList(self):
     rawFolderContent = os.listdir(self.themesFolderPath)
-    self.availableThemes = filter(lambda x: os.path.isdir(self.themesFolderPath + '/' +x) and not x=='.svn',rawFolderContent)
+    self.availableThemes = filter(lambda x: os.path.isdir(os.path.join(self.themesFolderPath, x)) and not x=='.svn',rawFolderContent)
 
   def getThemeList(self):
     """return a a list of currently available themes (list of folders in the themes folder)"""
@@ -597,7 +603,7 @@ class icons(ranaModule):
 
     # handle colors
     self.colors = self.defaultColors.copy() # revert to default colors first
-    themeColors = self.loadColorsFromFile(self.getCurrentThemePath()+'theme.conf')
+    themeColors = self.loadColorsFromFile(os.path.join(self.getCurrentThemePath(),'theme.conf') )
     self.colors.update(themeColors) # then overwrite theme specific colors
     self.notifyColorSubscribers() # notify color info subscribers
     print "icons: switched theme to: %s" % newTheme
@@ -626,9 +632,11 @@ class icons(ranaModule):
   
   def subscribeColorInfo(self,module,callback,firstCall=True):
     """subscribe to notifications about color map changes"""
-    self.colorInfoSubscribers[module] = callback
-    if firstCall: # should we call tha callback function right after subscribing ?
-      callback(self.getColors())
+    # TODO: make themes GUI toolkit independent
+    if gs.GUIString == "GTK":
+      self.colorInfoSubscribers[module] = callback
+      if firstCall: # should we call tha callback function right after subscribing ?
+        callback(self.getColors())
 
   def unSubscribeColorInfo(self,module):
     """un-subscribe from notifications about colormap changes"""
