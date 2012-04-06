@@ -219,12 +219,7 @@ class loadTracklogs(ranaModule):
     return path
 
   def getTracklogCachePath(self):
-    options = self.m.get('options', None)
-    if options:
-      return os.path.join(options.getCacheFolderPath(), 'tracklog_cache.txt')
-    else:
-      print("loadTracklogs: options module missing")
-      return None
+    return os.path.join(self.modrana.paths.getCacheFolderPath(), 'tracklog_cache.txt')
 
   def listAvailableTracklogs(self):
     print "** making a list of available tracklogs"
