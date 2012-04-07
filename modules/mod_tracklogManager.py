@@ -245,7 +245,7 @@ class tracklogManager(ranaModule):
 
       # * draw "show button" button
 
-      if track.trackpointsList:
+      if track.trackpointsList and track.trackpointsList[0]:
         firstPoint = track.trackpointsList[0][0]
         (lat,lon) = (firstPoint.latitude, firstPoint.longitude)
         action3 = "mapView:recentre %f %f|set:showTrackFilename:%s|showGPX:makeVisible|set:menu:None" % (lat, lon, track.filename)
