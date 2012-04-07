@@ -22,6 +22,9 @@ from base_module import ranaModule
 import time
 import os
 import geo
+from core import gs
+if gs.GUIString == "GTK":
+  import gtk
 
 
 def getModule(m,d,i):
@@ -31,9 +34,6 @@ class tracklog(ranaModule):
   """Record tracklogs"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-      import gtk
     self.startButtonIndex = 0
     self.loggingEnabled = False
     self.loggingPaused = False

@@ -61,6 +61,7 @@ class GPSD(PositionSource):
 
   def _checkVerbose(self):
     verbose = self.location.get('gpsdDebugVerbose', False)
+#    verbose = True
     if self.GPSDConsumer:
       if verbose:
         self.GPSDConsumer.setVerbose(True)
