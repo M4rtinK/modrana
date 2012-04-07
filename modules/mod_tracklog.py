@@ -175,37 +175,33 @@ class tracklog(ranaModule):
     self.distance = 0
     self.pxpyIndex = []
     options = self.m.get('options', None)
-    if options:
-      tracklogFolder = options.getTracklogsFolderPath()
+    tracklogFolder = self.modrana.paths.getTracklogsFolderPath()
 
-      if name==None:
-        name = self.generateLogName()
+    if name==None:
+      name = self.generateLogName()
 
-      self.currentLogName = name
+    self.currentLogName = name
 
-      if type=='gpx':
-        """ importing the GPX module can be time consuming so import it
-        when it is really needed"""
-        from upoints import gpx
-        self.currentLogGPX = gpx.Trackpoints()
-        # set tracklog metadata
-        self.currentLogGPX.name = name
-        self.currentLogGPX.time = time.gmtime()
+    if type=='gpx':
+      """ importing the GPX module can be time consuming so import it
+      when it is really needed"""
+      from upoints import gpx
+      self.currentLogGPX = gpx.Trackpoints()
+      # set tracklog metadata
+      self.currentLogGPX.name = name
+      self.currentLogGPX.time = time.gmtime()
 
-  #      self.currentLogGPX.author = "modRana - a flexible GPS navigation system"
-  #      self.currentLogGPX.link = "http://nlp.fi.muni.cz/trac/gps_navigace"
+#      self.currentLogGPX.author = "modRana - a flexible GPS navigation system"
+#      self.currentLogGPX.link = "http://nlp.fi.muni.cz/trac/gps_navigace"
 
-        filename = name + ".gpx"
-        self.currentLogFileName = filename
-        self.currentLogPath = os.path.join(tracklogFolder, self.category, filename)
-        self.saveGPXLog(self.currentLogGPX, self.currentLogFileName)
+      filename = name + ".gpx"
+      self.currentLogFileName = filename
+      self.currentLogPath = os.path.join(tracklogFolder, self.category, filename)
+      self.saveGPXLog(self.currentLogGPX, self.currentLogFileName)
 
-      self.lastTimestamp = self.lastSavedTimestamp = int(time.time())
-      self.lastCoords = self.get('pos', None)
-      print "log file initialized"
-    else:
-      print ('tracklogs: options module missing')
-      print ('log file not initialized')
+    self.lastTimestamp = self.lastSavedTimestamp = int(time.time())
+    self.lastCoords = self.get('pos', None)
+    print "log file initialized"
 
 
   def saveGPXLog(self, GPXTracklog, filename):
