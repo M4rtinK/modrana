@@ -49,32 +49,33 @@ class storePOI(ranaModule):
     if options:
       DBPath = self.modrana.paths.getPOIDatabasePath()
       if os.path.exists(DBPath): # connect to db
+        print("storePOI: POI database path:\n %s" % DBPath)
         try:
           self.db = sqlite3.connect(DBPath)
-          print "storePOI: connection to POI db in %s estabilshed" % DBPath
+          print("storePOI: connection to POI db established")
         except Exception, e:
-          print "storePOI: connecting to POI database failed:\n%s" % e
+          print("storePOI: connecting to POI database failed:\n%s" % e)
       else: # create new db
         try:
           self.db = self.createDatabase(DBPath)
         except Exception, e:
-          print "storePOI: creating POI database failed:\n%s" % e
+          print("storePOI: creating POI database failed:\n%s" % e)
     else:
-      print "storePOI: options module not available, can't connect to DB"
+      print("storePOI: options module not available, can't connect to DB"
       """
       without the options module providing path to the database,
       we can't connect to it
-      """
+      """)
 
   def disconnectFromDb(self):
-    print "storePOI: disconnecting from db"
+    print("storePOI: disconnecting from db")
     if self.db:
       self.db.close()
         
   def createDatabase(self, path):
     """create a new database, including tables and initial data
     return the connection object"""
-    print "storePOI: creating new database file in:\n%s" % path
+    print("storePOI: creating new database file in:\n%s" % path)
     conn = sqlite3.connect(path)
 
     # create the category table
@@ -98,7 +99,7 @@ class storePOI(ranaModule):
       conn.execute('insert into category values(?,?,?,?)', cat)
     # commit the chnages
     conn.commit()
-    print "storePoi: new database file has been created"
+    print("storePoi: new database file has been created")
     return conn
 
   def storePOI(self,POI):
@@ -301,7 +302,7 @@ class storePOI(ranaModule):
     if os.path.exists(oldPOIPath):
       try:
         renamedOldPOIPath = "data/poi/imported_old_poi.txt"
-        print "storePOI:importing old POI from: %s" % oldPOIPath
+        print("storePOI:importing old POI from: %s" % oldPOIPath)
         points = self.loadOld(oldPOIPath)
         if points:
           for point in points:
@@ -313,12 +314,12 @@ class storePOI(ranaModule):
             catId = 11
             newPOI = self.POI(self,label,description,lat,lon,catId)
             newPOI.storeToDb()
-          print "storePOI: imported %d old POI" % len(points)
+          print("storePOI: imported %d old POI" % len(points))
           os.rename(oldPOIPath,renamedOldPOIPath)
-          print "storePOI: old POI file moved to: %s" % renamedOldPOIPath
+          print("storePOI: old POI file moved to: %s" % renamedOldPOIPath)
           self.sendMessage('ml:notification:m:%d old POI imported to category "Other";10' % len(points))
       except Exception, e:
-        print "storePOI: import of old POI failed:\n%s" % e
+        print("storePOI: import of old POI failed:\n%s" % e)
 
 
     
@@ -330,7 +331,7 @@ class storePOI(ranaModule):
       f.close()
       return points
     except Exception, e:
-      print "storePOI: loading POI from file failed:\n%s" % e
+      print("storePOI: loading POI from file failed:\n%s" % e)
       return None
 
 #  def saveOld(self):

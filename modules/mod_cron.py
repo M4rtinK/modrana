@@ -44,9 +44,11 @@ def getModule(m,d,i):
     return(Cron(m,d,i))
 
 class Cron(ranaModule):
-  """A timing and scheduling module for modRana
-  -> this class is an specifies and interface for
-  concrete implementations
+  """A timing and scheduling module for modRana"""
+
+  """
+  -> this is an abstract class
+  that specifies and interface for concrete implementations
   """
 
   """Why is there a special module for timing ?

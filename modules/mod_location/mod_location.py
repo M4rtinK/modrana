@@ -40,11 +40,11 @@ class Location(ranaModule):
     if not self.modrana.dmod.handlesLocation():
       method = self.modrana.dmod.getLocationType()
       if method == "qt_mobility":
-        print("location: using Qt Mobility")
+        print(" @ location: using Qt Mobility")
         import qt_mobility
         self.provider = qt_mobility.QtMobility(self)
       else: # GPSD
-        print("location: using GPSD")
+        print(" @ location: using GPSD")
         import gps_daemon
         self.provider = gps_daemon.GPSD(self)
 

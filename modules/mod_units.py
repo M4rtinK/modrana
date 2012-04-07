@@ -25,10 +25,7 @@ def getModule(m,d,i):
   return(units(m,d,i))
 
 class units(ranaModule):
-  """
-  A module handling unit conversions and displaying correct units
-  according to current settings.
-  """
+  """a unit handling module """
   
   mileInMeters = 1609.344
   mileInKiloMeters = mileInMeters / 1000

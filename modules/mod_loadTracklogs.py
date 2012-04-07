@@ -222,7 +222,7 @@ class loadTracklogs(ranaModule):
     return os.path.join(self.modrana.paths.getCacheFolderPath(), 'tracklog_cache.txt')
 
   def listAvailableTracklogs(self):
-    print "** making a list of available tracklogs"
+    print("** making a list of available tracklogs")
 
     tf = self.modrana.paths.getTracklogsFolderPath()
     # does the tracklog folder exist ?
@@ -263,10 +263,9 @@ class loadTracklogs(ranaModule):
     self.categoryList = currentFolders
 
     print("*  using this tracklog folder:")
-    print(self.modrana.paths.getTracklogsFolderPath())
-    print("*  does it exist ?")
-    print(os.path.exists(self.modrana.paths.getTracklogsFolderPath()))
+    print("* %s" % self.modrana.paths.getTracklogsFolderPath())
     print("*  there are %d tracklogs available" % len(availableFiles))
+    print("**")
     self.tracklogPathList = pathList
     self.tracklogList = availableFiles
 

@@ -29,7 +29,7 @@ def getModule(m,d,i):
   return(onlineServices(m,d,i))
 
 class onlineServices(ranaModule):
-  """Module for communication with various online services."""
+  """A module for talking to various online services"""
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)

@@ -107,7 +107,7 @@ class MapTiles(ranaModule):
 
     # cache the map folder path
     self.mapFolderPath = self.modrana.paths.getMapFolderPath()
-    print "mapTiles: map folder path: %s" % self.mapFolderPath
+    print(" @ mapTiles: map folder path: %s" % self.mapFolderPath)
 
     self._storeTiles = None
 
