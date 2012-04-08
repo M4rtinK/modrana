@@ -101,10 +101,7 @@ class Cron(ranaModule):
     pass
 
 class CronGTK(Cron):
-  """A timing and scheduling module for modRana
-  -> this is an implementation that uses GObject & the GTK main loop
-  to do the timing
-  """
+  """A GTK timing and scheduling module for modRana"""
   
   def __init__(self, m, d, i):
     Cron.__init__(self, m, d, i)
@@ -161,10 +158,7 @@ class CronGTK(Cron):
         print("cron: can't modify timeout, wrong id: ", id)
 
 class CronQt(Cron):
-  """A timing and scheduling module for modRana
-  -> this class is an specifies and interface for
-  concrete implementations
-  """
+  """A Qt timing and scheduling module for modRana"""
 
   def __init__(self, m, d, i):
     Cron.__init__(self, m, d, i)
