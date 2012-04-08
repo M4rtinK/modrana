@@ -30,7 +30,6 @@ if gs.GUIString == "GTK":
 else:
   from PySide import QtCore
   ready = False
-# TODO: add Qt support
 
 def getModule(m,d,i):
   """
