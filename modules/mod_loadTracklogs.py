@@ -53,7 +53,7 @@ class loadTracklogs(ranaModule):
       # load the active tracklog
       path = self.get('activeTracklogPath', None)
       if path != None and self.tracklogList:
-        print "loading tracklog: %s" % path
+        print("* loading tracklog:\n%s" % path)
 
         # Zeroth, is the tracklog already loaded ?
         if path not in self.tracklogs.keys():
@@ -61,20 +61,22 @@ class loadTracklogs(ranaModule):
           if self.cache == {}:
             self.loadCache()
           else:
-            print "not loading cache (already loaded)"
+            print("not loading tracklog cache (already loaded)")
           # Second, try to load the tracklog (if its not loaded)
 
           try:
             self.loadTracklog(path)
-            print "tracklog successfully loaded"
-          except:
-            print "loading tracklog failed: %s" % path
+            print("tracklog successfully loaded")
+          except Exception, e:
+            print("loading tracklog failed")
+            print("path: %s" % path)
+            print(e)
 
           # Third, assure consistency of the cache
-          print "assuring cache consistency"
+          print("** Assuring tracklog cache consistency")
           self.save()
           self.cleanCache()
-          print "cache consistency assured"
+          print "** Tracklog cache consistency assured"
 #    elif message == 'renameActiveTracklog':
 #      activeTracklog = self.getActiveTracklog()
 #      if activeTracklog:
@@ -121,7 +123,7 @@ class loadTracklogs(ranaModule):
 
   def loadCache(self):
     # unpickle the cache from file
-    print "loading cache"
+    print "** Loading tracklog cache"
     start = clock()
     try:
       f = open(self.getTracklogCachePath(), 'r')
@@ -130,7 +132,7 @@ class loadTracklogs(ranaModule):
     except:
       print "loadTracklogs: loading cache from file failed"
       self.cache = {}
-    print "Loading cache took %1.2f ms" % (1000 * (clock() - start))
+    print "** Loading tracklog cache took %1.2f ms" % (1000 * (clock() - start))
 
   def cleanCache(self):
     """remove files that are not present from the cache"""
@@ -349,7 +351,7 @@ class loadTracklogs(ranaModule):
     self.set('activeTracklogPath', path)
 
   def loadPathList(self, pathList):
-    print "loading path list"
+    print("** Loading tracklogs list")
     start = clock()
     count = len(pathList)
     index = 1
@@ -360,7 +362,7 @@ class loadTracklogs(ranaModule):
       index = index + 1
 
     elapsed = (1000 * (clock() - start))
-    print "Loading tracklogs took %1.2f ms" % elapsed
+    print("** Loading tracklogs took %1.2f ms" % elapsed)
     self.save()
     self.cleanCache()
     self.sendMessage('notification:%d tracks loaded in %1.2f ms#1' % (count, elapsed) )
@@ -384,8 +386,9 @@ class loadTracklogs(ranaModule):
 
     try:
       file = open(path, 'r')
-    except:
-      print "loading tracklog failed: %s" % path
+    except Exception ,e:
+      print("loading tracklog failed: %s" % path)
+      print(e)
 
     if notify:
       self.sendMessage('notification:loading %s#1' % path)
@@ -398,7 +401,7 @@ class loadTracklogs(ranaModule):
       try:
         track.import_locations(file, "1.1") # load a gpx file into it
       except Exception, e:
-        print "loading tracklog failed: %s" % e
+        print("loading tracklog failed:\n%s" % e)
         if notify:
           self.sendMessage('notification:loading tracklog failed#2')
         return
@@ -408,11 +411,11 @@ class loadTracklogs(ranaModule):
 
       self.tracklogs[path] = GPXTracklog(track, path, type, self.cache, self.save)
 
-      print "Loading %s took %1.2f ms" % (path,(1000 * (clock() - start)))
+      print("Loading tracklog \n%s\ntook %1.2f ms" % (path,(1000 * (clock() - start))))
       if notify:
         self.sendMessage('notification:loaded in %1.2f ms' % (1000 * (clock() - start)))
     else:
-      print "No file"
+      print("No tracklog file")
 
 
   def storeRouteAndSetActive(self, route, name='', cat='misc'):
@@ -434,7 +437,7 @@ class loadTracklogs(ranaModule):
     # gdr = Google Directions Result, TODO: alternate prefixes when we have more routing providers
 
     name = name.encode('ascii', 'ignore')
-    filename = "gdr_" + name + timeString + ".gpx"
+    filename = "gdr_%s%s.gpx" % (name, timeString)
     # TODO: store to more formats ?
     return self.storeTracklog(newTracklog, filename, cat, "GPX")
 
@@ -459,8 +462,8 @@ class loadTracklogs(ranaModule):
         xmlTree.write(f)
         f.close()
       except Exception, e:
-        print "loadTracklogs: saving tracklog failed"
-        print "exception: %s" % e
+        print("loadTracklogs: saving tracklog failed")
+        print("exception: %s" % e)
         self.sendMessage('notification:Error: saving tracklog failed#3')
         return None
 
@@ -469,9 +472,9 @@ class loadTracklogs(ranaModule):
     if refresh:
       self.listAvailableTracklogs()
     # TODO: incremental addition of new tracklogs without relisting
-    print "%s" % filename
-    print "saved successfully"
-    return (path+filename)
+    print("tracklog: %s" % filename)
+    print("tracklog saved successfully")
+    return (os.path.join(path,filename))
 
 
   def simplePythagoreanDistance(self, x1,y1,x2,y2):
@@ -582,7 +585,7 @@ class GPXTracklog(tracklog):
       return
 
     if filename in cache:
-      print "loading from cache"
+      print("** loading tracklog from cache")
       self.clusters = cache[filename].clusters
       self.routeInfo = cache[filename].routeInfo
       if self.routeInfo != None:
@@ -590,7 +593,7 @@ class GPXTracklog(tracklog):
       self.perElevList = cache[filename].perElevList
       
     else:
-      print "creating clusters,routeInfo and perElevList: %s" % filename
+      print("* creating clusters,routeInfo and perElevList: %s" % filename)
       clusterDistance = 5 # cluster points to clusters about 5 kilometers in diameter
       self.clusters = []
 
