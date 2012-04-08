@@ -26,10 +26,8 @@ import threading
 from core import gs
 if gs.GUIString == "GTK":
   import gobject
-  ready = True
 else:
   from PySide import QtCore
-  ready = False
 
 def getModule(m,d,i):
   """
@@ -40,7 +38,7 @@ def getModule(m,d,i):
   if gs.GUIString == 'QML':
     return(CronQt(m,d,i))
   else: # GTK for now
-    return(Cron(m,d,i))
+    return(CronGTK(m,d,i))
 
 class Cron(ranaModule):
   """A timing and scheduling module for modRana"""
@@ -128,15 +126,11 @@ class CronGTK(Cron):
 
   def addIdle(self, callback, args):
     """add a callback that is called once the main loop becomes idle"""
-    if not ready:
-      return
     gobject.idle_add(callback, *args)
 
   def addTimeout(self, callback, timeout, caller, description, args=[]):
     """the callback will be called timeout + time needed to execute the callback
     and other events"""
-    if not ready:
-      return
     id = self._getID()
     realId = gobject.timeout_add(timeout, self._doTimeout, id, callback, args)
     timeoutTuple = (callback, args, timeout, caller, description, realId)
@@ -145,8 +139,6 @@ class CronGTK(Cron):
 
   def removeTimeout(self, id):
     """remove timeout with a given id"""
-    if not ready:
-      return
     with self.dataLock:
       if id in self.cronTab['timeout'].keys():
         (callback, args, timeout, caller, description, realId) = self.cronTab['timeout'][id]
@@ -157,8 +149,6 @@ class CronGTK(Cron):
 
   def modifyTimeout(self,id, newTimeout):
     """modify the duration of a timeout in progress"""
-    if not ready:
-      return
     with self.dataLock:
       if id in self.cronTab['timeout'].keys():
         # load the timeout description
