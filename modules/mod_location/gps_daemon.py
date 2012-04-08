@@ -42,22 +42,25 @@ class GPSD(PositionSource):
   def stop(self):
     """stop the GPSD based location update method"""
     self.GPSDConsumer.shutdown()
+    self.connected = False
     self.status = "No GPSD running"
 
   def _updateGPSD(self):
-    fix = self.GPSDConsumer.getFix()
-    if fix:
-      """
-      as the GPSD consumer updates its values very often, it probably better to use a simple
-      tuple instead of a Fix object and only convert to the Fix object once the position data
-      is actually requested
-      """
-      (lat,lon,elevation,bearing,speed,timestamp) = fix
-      fix = Fix( (lat,lon),
-                 elevation,
-                 bearing,
-                 speed )
-      self.fix = fix
+    # only update if connected to GPSD
+    if self.connected:
+      fix = self.GPSDConsumer.getFix()
+      if fix:
+        """
+        as the GPSD consumer updates its values very often, it probably better to use a simple
+        tuple instead of a Fix object and only convert to the Fix object once the position data
+        is actually requested
+        """
+        (lat,lon,elevation,bearing,speed,timestamp) = fix
+        fix = Fix( (lat,lon),
+                   elevation,
+                   bearing,
+                   speed )
+        self.fix = fix
 
   def _checkVerbose(self):
     verbose = self.location.get('gpsdDebugVerbose', False)

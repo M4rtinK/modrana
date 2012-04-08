@@ -18,8 +18,8 @@
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
 from base_module import ranaModule
-import threading
 from time import *
+from core import gs
 
 def getModule(m,d,i):
   return(Location(m,d,i))
@@ -35,6 +35,7 @@ class Location(ranaModule):
     self.set('bearing', None)
     self.set('elevation', None)
     self.status = "Unknown"
+    self.enabled = False
 
     # check if the device handles location by itself
     if not self.modrana.dmod.handlesLocation():
@@ -66,19 +67,20 @@ class Location(ranaModule):
     """update the screen and also GPSD location if enabled
     TODO: more efficient screen updates"""
 #    print("location: screen update")
-    self.provider._updateGPSD()
-    fix = self.provider.getFix()
-    if fix:
-      self.updatePosition(fix)
-    else:
-      print("location: fix not valid")
-      print(fix)
 
-    gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
+    # only try to update position info if
+    # location is enabled
+    if self.enabled:
+      self.provider._updateGPSD()
+
       fix = self.provider.getFix()
-      self.updatePosition(fix)
+      if fix:
+        self.updatePosition(fix)
+      else:
+        print("location: fix not valid")
+        print(fix)
 
+      # forced screen update is only needed by the GTK GUI
       """
       the location update method which might run asynchronously in the
       device module also sends redraw requests
@@ -87,7 +89,9 @@ class Location(ranaModule):
       -> surplus redraw requests are actually harmful with map rotation enabled
       NOTE: this currently applies only to the GTK GUI
       """
-      sFromLastRequest = time() - gui.getLastFullRedrawRequest()
+    if gs.GUIString == "GTK":
+      # make sure the screen is updated at least once per second
+      sFromLastRequest = time() - self.modrana.gui.getLastFullRedrawRequest()
       if sFromLastRequest > 0.85:
         self.set('needRedraw', True)
 
@@ -154,6 +158,7 @@ class Location(ranaModule):
       self.modrana.dmod.startLocation()
     else:
       self.provider.start()
+    self.enabled = True
 
   def stopLocation(self):
     """stop location - device based or gpsd"""
@@ -162,6 +167,7 @@ class Location(ranaModule):
       self.modrana.dmod.stopLocation()
     else:
       self.provider.stop()
+    self.enabled = False
 
   def shutdown(self):
     try:
