@@ -94,6 +94,7 @@ class QMLGUI(GUIModule):
     self.app = QApplication(sys.argv)
     self.view = ModifiedQDeclarativeView(self.modrana)
     self.window = QMainWindow()
+    self.window.setWindowTitle("modRana")
     self.window.resize(*size)
     self.window.setCentralWidget(self.view)
     self.view.setResizeMode(QDeclarativeView.SizeRootObjectToView)

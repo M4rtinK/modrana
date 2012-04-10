@@ -8,7 +8,7 @@ import com.nokia.meego 1.0
 IconGridPage {
     function getPage(menu){
         if (menu == "mapDialog") {
-            singleSelectionDialog.open()
+            layerSelectD.open()
         }
     }
 
@@ -28,30 +28,57 @@ IconGridPage {
 
 
     SelectionDialog {
-       id: singleSelectionDialog
-       titleText: "Dialog Header #1"
-       //selectedIndex: 1
+        id: layerSelectD
+        titleText: "Select map layer"
+        //selectedIndex: 1
 
-       onSelectedIndexChanged : {
-           rWin.setLayer(model.get(selectedIndex).name)
-           //rWin.pageStack.pop()
-           rWin.pageStack.pop(null)
-           accept()
-           }
+        /*delegate: Rectangle {
+            //width: parent.width
+            height: 80
+            color: index%2?"#eee":"#ddd"
+            Label {
+                id: title
+                elide: Text.ElideRight
+                //text: model.get(index).caption
+                text: "TEST"
+                color: "white"
+                font.bold: true
+                anchors.leftMargin: 10
+                anchors.fill: parent
+                verticalAlignment: Text.AlignVCenter
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    //rWin.setLayer(model.get(index).name)
+                    rWin.setLayer(model.get(selectedIndex).name)
+                    rWin.pageStack.pop(null)
+                    accept()
+                }
+            }
 
-       model: ListModel {
-           ListElement { name: "mapnik" }
-           ListElement { name: "gmap" }
-           ListElement { name: "gsat" }
-           ListElement { name: "gover" }
-           ListElement { name: "g8bit" }
-           ListElement { name: "vmap" }
-           ListElement { name: "vsat" }
-           ListElement { name: "ymap" }
-           ListElement { name: "ysat" }
-           ListElement { name: "yover" }
-           ListElement { name: "cycle" }
-           ListElement { name: "cz_mtb" }
-           }
+        }*/
+
+        onSelectedIndexChanged : {
+            rWin.setLayer(model.get(selectedIndex).layerID)
+            //rWin.pageStack.pop()
+            rWin.pageStack.pop(null)
+            accept()
+            }
+
+        model: ListModel {
+            ListElement { name: "OSM Mapnik"; layerID: "mapnik" }
+            ListElement { name: "OSM Cycle map"; layerID: "cycle" }
+            ListElement { name: "Google map"; layerID: "gmap" }
+            ListElement { name: "Google satellite"; layerID: "gsat" }
+            ListElement { name: "Google overlay"; layerID: "gover" }
+            ListElement { name: "Google 8-bit"; layerID: "g8bit" }
+            ListElement { name: "Virtual Earth map"; layerID: "vmap" }
+            ListElement { name: "Virtual Earth satellite"; layerID: "vsat" }
+            ListElement { name: "Yahoo map"; layerID: "ymap" }
+            ListElement { name: "Yahoo satellite"; layerID: "ysat" }
+            ListElement { name: "Yahoo overlay"; layerID: "yover" }
+            ListElement { name: "Czech mountain-bike map"; layerID: "cz_mtb" }
+        }
     }
 }
