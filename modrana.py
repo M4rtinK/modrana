@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
-# Rana main GUI.  Displays maps, for use on a mobile device
+# modRana main GUI.  Displays maps & much more, for use on a mobile device.
 #
 # Controls:
-#   * click on the overlay text to change fields displayed
+# Start by clicking on the main menu icon.
 #----------------------------------------------------------------------------
 # Copyright 2007-2008, Oliver White
 #
@@ -51,10 +51,10 @@ importsDoneTimestamp = time.time()
 
 def createFolderPath(newPath):
   """
-  Creat a path for a directory and all needed parent forlders
-  -> parent directoryies will be created
+  Create a path for a directory and all needed parent forlders
+  -> parent directories will be created
   -> if directory already exists, then do nothing
-  -> if there is another filsystem object (like a file) with the same name, raise an exception
+  -> if there is another filesystem object (like a file) with the same name, raise an exception
   """
   if not newPath:
     print("cannot create folder, wrong path: ", newPath)
@@ -88,11 +88,11 @@ class ModRana:
     self.addCustomTime("modRana start",startTimestamp)
     self.addCustomTime("imports done", importsDoneTimestamp)
 
-    # constants & variable initilization
+    # constants & variable initialization
     self.dmod = None # device specific module
     self.gui = None
 
-    self.d = {} # persistant dictionary of data
+    self.d = {} # persistent dictionary of data
     self.m = {} # dictionary of loaded modules
     self.watches = {} # List of data change watches
     self.maxWatchId = 0
@@ -123,7 +123,7 @@ class ModRana:
     # add the configs handling core module
     self.configs = configs.Configs(self)
 
-    # load persistant options
+    # load persistent options
     self.optLoadingOK= self._loadOptions()
 
     # check if upgrade took place
@@ -157,7 +157,7 @@ class ModRana:
   def loadModules(self):
     """Load all modules from the specified directory"""
 
-    # get the devicme module string
+    # get the device module string
     # (a unique device module string identificator)
     # make sure there is some argument provided
     if self.args:
@@ -244,7 +244,7 @@ class ModRana:
     print( "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start)) )
 
     # add last timing checkpoint
-    self.addTime("all modules initilaized")
+    self.addTime("all modules initialized")
 
   def _getModuleNamesFromFolder(self,folder):
     """list a given folder and find all possible module names"""
@@ -274,7 +274,7 @@ class ModRana:
 
     """to only update values needed for map drawing when something changes
        * window is resized
-       * user switches something releated in options
+       * user switches something related in options
        * etc.
        we use the key watching mechanism
        once a related key is changed, we update all the values
@@ -349,7 +349,7 @@ class ModRana:
       m.shutdown()
     self._saveOptions()
     time.sleep(2) # leave some times for threads to shut down
-    print("Shuttdown complete")
+    print("Shutdown complete")
     
   ## OPTIONS SETTING AND WATCHING ##
 
@@ -364,7 +364,7 @@ class ModRana:
       if mode in self.keyModifiers[name]['modes'].keys():
         # get the dictionary with per mode values
         multiDict = self.d.get('%s#multi' % name , {})
-        # retrun the value for current mode
+        # return the value for current mode
         return multiDict.get(mode,default)
       else:
         return(self.d.get(name, default))
@@ -390,15 +390,15 @@ class ModRana:
           self.d['%s#multi' % name][mode] = value
         except KeyError: # key not yet created
           self.d['%s#multi' % name] = {mode : value}
-      else: # just save to the key as usuall
+      else: # just save to the key as usual
         self.d[name] = value
-    else: # just save to the key as usuall
+    else: # just save to the key as usual
       self.d[name] = value
 
     self._notifyWatcher(name, oldValue)
     """options are normally saved on shutdown,
     but for some data we want to make sure they are stored and not
-    los for example becuase of power outage/empty battery, etc."""
+    los for example because of power outage/empty battery, etc."""
     if save:
       options = self.m.get('options')
       if options:
@@ -409,7 +409,7 @@ class ModRana:
     return key in self.d.keys()
 
   def purgeKey(self, key):
-    """remove a key from the presistant dictionary,
+    """remove a key from the persistent dictionary,
     including possible key modifiers and alternate values"""
     if key in self.d:
       oldValue = self.get(key, None)
@@ -425,7 +425,7 @@ class ModRana:
       self._notifyWatcher(key, oldValue)
       return True
     else:
-      print("modrana: can't purge a not present key: %s" % key)
+      print("modrana: can't purge a not-present key: %s" % key)
 
   def watch(self, key, callback, *args):
     """add a callback on an options key
@@ -455,7 +455,7 @@ class ModRana:
   def _notifyWatcher(self, key, oldValue):
     """run callbacks registered on an options key
     HOW IT WORKS
-    * the watcher is notified before the key is written to the persistant
+    * the watcher is notified before the key is written to the persistent
     dictionary, so that it can react before the change is visible
     * the watcher gets the key and both the new and old values
     """
@@ -477,7 +477,7 @@ class ModRana:
     NOTE: currently only used to make value of some keys
     dependent on the current mode"""
     options = self.m.get('options', None)
-    # remeber the old value, if not se use default from options
+    # remember the old value, if not se use default from options
     # if available
     if options:
       defaultValue = options.getKeyDefault(key, None)
@@ -522,7 +522,7 @@ class ModRana:
       if mode in self.keyModifiers[key]['modes'].keys():
         # get the previous value
         options = self.m.get('options', None)
-        # remeber the old value, if not se use default from options
+        # remember the old value, if not se use default from options
         # if available
         if options:
           defaultValue = options.getKeyDefault(key, None)
@@ -604,7 +604,7 @@ class ModRana:
         x =  - sw * 0.5 * floatShiftAmount
       elif shiftDirection == "right":
         x =  + sw * 0.5 * floatShiftAmount
-      """ we dont need to do anything if direction is set to don't shift (False)
+      """ we don't need to do anything if direction is set to don't shift (False)
       - 0,0 will be used """
     self.centerShift = (x,y)
     
@@ -616,8 +616,8 @@ class ModRana:
     tileSide = tileSide * scale # apply any possible scaling
     (centerX,centerY) = ((sw/2.0),(sh/2.0))
     ulCenterDistance = simplePythagoreanDistance(0, 0, centerX, centerY)
-    centerLLdistance = simplePythagoreanDistance(centerX, centerY, sw, sh)
-    diagonal = max(ulCenterDistance, centerLLdistance)
+    centerLLDistance = simplePythagoreanDistance(centerX, centerY, sw, sh)
+    diagonal = max(ulCenterDistance, centerLLDistance)
     add = int(math.ceil(float(diagonal)/tileSide))
     self.expandViewportTiles = add
 
@@ -634,7 +634,7 @@ class ModRana:
     for key in keys:
       # try to get some value if the old value is not available
       options = self.m.get('options', None)
-      # remeber the old value, if not se use default from options
+      # remember the old value, if not se use default from options
       # if available
       if options:
         defaultValue = options.getKeyDefault(key, None)
@@ -673,7 +673,7 @@ class ModRana:
 
   def _loadOptions(self):
     print("modRana: loading options")
-    succcess = False
+    success = False
     try:
       f = open(self.paths.getOptionsFilePath(), "r")
       newData = marshal.load(f)
@@ -685,14 +685,14 @@ class ModRana:
         del newData['tracklogFolder']
       for k,v in newData.items():
         self.set(k,v)
-      succcess = True
+      success = True
     except Exception, e:
       print("modRana: exception while loading saved options:\n%s" % e)
       #TODO: a yes/no dialog for clearing (renaming with timestamp :) the corrupted options file (options.bin)
-      succcess = False
+      success = False
 
     self.overrideOptions()
-    return succcess
+    return success
 
   def overrideOptions(self):
     """
