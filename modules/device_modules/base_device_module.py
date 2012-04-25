@@ -65,6 +65,17 @@ class deviceModule(ranaModule):
     -> it can be implemented and enabled in the corresponding device module"""
     return False
 
+  def pauseScreenBlanking(self):
+    """
+    calling this method should pause screen blanking
+    * on mobile devices, screen balking needs to be paused every n seconds
+    * on desktop, one call might be enough, still, several calls should
+    be handled without issues
+    * also what about restoring the screen blanking on Desktop
+    once modRana exits ?
+    """
+    pass
+
   def usesDashboard(self):
     """report if the device minimizes the windows into a dashboard instead of hiding
     them out of view - the user might want that the window redraws on the dashboard or not"""

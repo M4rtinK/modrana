@@ -22,6 +22,9 @@
 #---------------------------------------------------------------------------
 from base_device_module import deviceModule
 
+from QtMobility.SystemInfo import QSystemScreenSaver
+""" ^^ back-light control"""
+
 # NOTE: use the device_ prefix when naming the module
 
 def getModule(m,d,i):
@@ -32,6 +35,8 @@ class device_example(deviceModule):
   
   def __init__(self, m, d, i):
     deviceModule.__init__(self, m, d, i)
+    # create the screen-saver controller
+    self.qScreenSaver = QSystemScreenSaver()
 
   def getDeviceIDString(self):
     return "n9"
@@ -57,8 +62,17 @@ class device_example(deviceModule):
     return True
 
   def screenBlankingControlSupported(self):
-    # TODO: screen blanking support
-    return False
+    """
+    Screen blanking support is handled through Qt Mobility
+    """
+    return True
+
+  def pauseScreenBlanking(self):
+    """
+    inhibit screen blanking
+    """
+    QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
+
 
   def getLocationType(self):
     return "qt_mobility"
