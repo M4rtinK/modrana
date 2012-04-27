@@ -23,6 +23,8 @@
 #----------------------------------------------------------------------------
 
 # module folder name
+import subprocess
+
 modulesFolder = 'modules'
 import sys
 # add module folder to path
@@ -765,6 +767,21 @@ class ModRana:
 
 if __name__ == "__main__":
 
-  print(" == modRana Starting == ")
+  # check if reload has been requested
 
-  program = ModRana()
+  reloadArg = "--reload"
+  if len(sys.argv)>=3 and sys.argv[1] == reloadArg:
+    # following argument is path to the modRana main class we want to reload to,
+    # optionally followed by any argument for the main class
+    print(" == modRana Reloading == ")
+    reloadPath = sys.argv[2]
+    callArgs = [reloadPath]
+    callArgs.extend(sys.argv[3:])
+    subprocess.call(callArgs)
+
+  else:
+    print(" == modRana Starting == ")
+
+    program = ModRana()
+
+
