@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # modRana main GUI.  Displays maps & much more, for use on a mobile device.
@@ -369,10 +369,10 @@ class ModRana:
         # return the value for current mode
         return multiDict.get(mode,default)
       else:
-        return(self.d.get(name, default))
+        return self.d.get(name, default)
 
     else: # just return the normal value
-      return(self.d.get(name, default))
+      return self.d.get(name, default)
 
   def set(self, name, value, save=False, mode=None):
     """Set an item of data,
@@ -383,7 +383,7 @@ class ModRana:
 
     if name in self.keyModifiers.keys():
       # get the current mode
-      if mode == None:
+      if mode is None:
         mode = self.d.get('mode', 'car')
       # check if there is a modifier for the current mode
       if mode in self.keyModifiers[name]['modes'].keys():
@@ -486,7 +486,7 @@ class ModRana:
     else:
       defaultValue = None
     oldValue = self.get(key,defaultValue)
-    if mode == None:
+    if mode is None:
       mode = self.d.get('mode', 'car')
     if key not in self.keyModifiers.keys(): # initialize
       self.keyModifiers[key] = {'modes':{mode:modifier}}
@@ -516,7 +516,7 @@ class ModRana:
 
 
     # if no mode is provided, use the current one
-    if mode == None:
+    if mode is None:
         mode = self.d.get('mode', 'car')
     if key in self.keyModifiers.keys():
       
@@ -555,7 +555,7 @@ class ModRana:
 
   def hasKeyModifierInMode(self, key, mode=None):
     """return if a key has a key modifier"""
-    if mode == None:
+    if mode is None:
       mode = self.d.get('mode', 'car')
     if key in self.keyModifiers.keys():
       return mode in self.keyModifiers[key]['modes'].keys()
@@ -734,11 +734,11 @@ class ModRana:
   def addTime(self, message):
     timestamp = time.time()
     self.timing.append((message,timestamp))
-    return (timestamp)
+    return timestamp
 
   def addCustomTime(self, message, timestamp):
     self.timing.append((message,timestamp))
-    return (timestamp)
+    return timestamp
 
   def reportStartupTime(self):
     if self.timing:
