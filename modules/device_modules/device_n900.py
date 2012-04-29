@@ -20,6 +20,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+import os
+import subprocess
 from base_device_module import deviceModule
 #N900 specific:
 import dbus.glib
@@ -266,6 +268,21 @@ class device_n900(deviceModule):
     else:
       self.disableVolumeKeys()
 
+
+  # ** Hildon App menu **
+
+  def handlesUrlOpening(self):
+    """
+    PyGTK version on Maemo 5 is too old and does not have the gtk.open_uri() function,
+    -> a platform specific implementation is needed
+    """
+    return True
+
+  def openUrl(self, url):
+    """
+    open a URL using the Maemo specific browser command
+    """
+    subprocess.Popen(['browser', '--url=%s' %url])
 
   def _addHildonAppMenu(self):
     menu = hildon.AppMenu()

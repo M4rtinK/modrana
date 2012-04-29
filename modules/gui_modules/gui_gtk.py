@@ -332,6 +332,21 @@ class MainWidget(gtk.Widget):
     """
     self.modrana.set(key, value)
 
+
+  def openUrl(self, url):
+    # check if the device module handles URL opening
+    if self.modrana.dmod.handlesUrlOpening():
+      self.modrana.dmod.openUrl(url)
+    else:
+      try:
+        gtk.show_uri(None, url, gtk.gdk.CURRENT_TIME)
+      except Exception, e:
+        print("GTK GUI: calling gtk.show_uri() failed, probably due to old GTK version")
+        print(e)
+        print("using the webbrowser module as fallback")
+        import webbrowser
+        webbrowser.open(url)
+
   def _checkForRedrawCB(self, key, oldValue, newValue):
     """react to redraw requests"""
     if newValue == True:

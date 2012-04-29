@@ -163,6 +163,14 @@ class GUIModule(ranaModule):
     """
     return False
 
+  def openUrl(self, url):
+    """
+    open a given URL asynchronously
+    """
+    # the webbrowser module should be a good default
+    import webbrowser
+    webbrowser.open(url)
+
 #  def _destroyed(self):
 #    self.mieru.destroy()
 #

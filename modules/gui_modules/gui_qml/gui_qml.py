@@ -227,6 +227,9 @@ class QMLGUI(GUIModule):
     else:
       self._notificationQueue.append((text, msTimeout, icon))
 
+  def openUrl(self, url):
+    QDesktopServices.openUrl(url)
+
   def _getTileserverPort(self):
     m = self.m.get("tileserver", None)
     if m:

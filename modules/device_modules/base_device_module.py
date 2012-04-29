@@ -180,7 +180,21 @@ class deviceModule(ranaModule):
     """On some platforms (Android chroot) applications
     need to provide their own shutdown buttons"""
     return False
-  
+
+  def handlesUrlOpening(self):
+    """
+    report if opening of URI is handled by the device module
+    * for example, on the N900 a special DBUS command not available
+    elsewhere needs to be used
+    """
+    return False
+
+  def openUrl(self, url):
+    """
+    open a URL
+    """
+    pass
+
 #  def getAutorotationSupported(self):
 #    return False
 #
