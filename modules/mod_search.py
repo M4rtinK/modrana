@@ -26,7 +26,7 @@ import math
 from odict import odict
 
 def getModule(m,d,i):
-  return(search(m,d,i))
+  return search(m,d,i)
 
 class search(ranaModule):
   """Search for POI"""
@@ -138,7 +138,7 @@ class search(ranaModule):
     a["theater"] = {"name":"Theater", "search":"theater"}
     a["gallery"] = {"name":"Gallery", "search":"gallery"}
     a["museum"] = {"name":"Museum", "search":"museum"}
-    a["wine_celar"] = {"name":"Wine celar", "search":"wine celar"}
+    a["wine_cellar"] = {"name":"Wine cellar", "search":"wine cellar"}
     a["national_park"] = {"name":"National park", "search":"national park"}
     a["wc"] = {"name":"WC", "search":"WC"}
     a["swimming_pool"] = {"name":"Swimming pool", "search":"swimming pool"}
