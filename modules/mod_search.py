@@ -584,7 +584,7 @@ class search(ranaModule):
 
       # register clickable area
       m = self.m.get('clickHandler', None)
-      if(m != None):
+      if m is not None:
         m.registerXYWH(rx,ry-(-rh),rw,-rh, "search:reset|set:searchResultsItemNr:%d|set:menu:search#searchResultsItem" % highlightNr)
       cr.fill()
       
@@ -626,7 +626,7 @@ class search(ranaModule):
     # TODO: add "find route to"
 
     # disconnect the watch once menu is generated
-    if self.menuWatchId != None:
+    if self.menuWatchId is not None:
       self.modrana.removeWatch(self.menuWatchId)
       self.menuWatchId = None
 
