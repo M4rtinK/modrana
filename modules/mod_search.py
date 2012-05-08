@@ -149,47 +149,47 @@ class search(ranaModule):
     # without this if, we would search also for the commands that move the listable menu
     # lets hope no one needs to search for reset, up or down :)
     
-    if(message == "up"):
-      if(self.scroll > 0):
+    if message == "up":
+      if self.scroll > 0:
         self.scroll -= 1
         self.set("needRedraw", True)
-    elif(message == "down") and self.scroll < self.maxIndex:
+    elif (message == "down") and self.scroll < self.maxIndex:
       print "down"
       self.scroll += 1
       self.set("needRedraw", True)
-    elif(message == "reset"):
+    elif message == "reset":
       self.scroll = 0
       self.set("needRedraw", True)
-    elif (message == 'clearSearch'):
+    elif message == 'clearSearch':
       self.localSearchResults = None
       self.list = None
-    elif (message == 'storePOI'):
+    elif message == 'storePOI':
       store = self.m.get('storePOI', None)
-      if store == None:
+      if store is None:
         return
       resultNr = self.get('searchResultsItemNr', None)
-      if resultNr == None:
+      if resultNr is None:
         return
       tupple = filter(lambda x: x[2] == int(resultNr), self.list).pop()
       result = tupple[1]
       store.storeGLSResult(result)
 
-    elif (message=='setWhere'): # set the search region
+    elif message=='setWhere': # set the search region
       if type=='ms' and args:
         self.where = args
 
-    elif (message=='searchThis'): # search for a term in the message string
+    elif message=='searchThis': # search for a term in the message string
       if type=='ms' and args:
         searchTerm = args
         online = self.m.get('onlineServices', None)
-        if online == None:
+        if online is None:
           print "search: online services module not pressent"
           return
 
         if self.where=='position':
           print "search:near position"
           pos = self.get('pos', None)
-          if pos == None:
+          if pos is None:
             print "search: our position is not known"
             return
           else:
@@ -263,7 +263,7 @@ class search(ranaModule):
     return self.getResult(resultNumber)
 
   def getResult(self, resultNumber, list=None):
-    if list == None:
+    if list is None:
       list = self.updateDistance()
     return filter(lambda x: x[2] == resultNumber, list).pop() # get the result for the ABSOLUTE key
 
@@ -293,7 +293,7 @@ class search(ranaModule):
       action)
 
   def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
-    if(text):
+    if text:
       cr.set_font_size(fontsize)
       stats = cr.text_extents(text)
       (textwidth, textheight) = stats[2:4]
@@ -461,11 +461,11 @@ class search(ranaModule):
     # * draw details from the search result
     text = "\n%s (%s)" % (result['titleNoFormatting'],distanceString)
 
-    try: # the adress can be unknown
+    try: # the address can be unknown
       for addressLine in result['addressLines']:
         text += "\n%s" % addressLine
     except:
-      text += "\n%s" % "no adress found"
+      text += "\n%s" % "no address found"
 
     try: # it seems, that this entry is no guarantied
       for phoneNumber in result['phoneNumbers']:
