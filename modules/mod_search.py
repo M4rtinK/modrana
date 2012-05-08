@@ -256,91 +256,7 @@ class search(ranaModule):
 
     self.set("needRedraw", True)
 
-  def drawMenu(self, cr, menuName, args=None):
-    if menuName == 'searchResults':
-      menus = self.m.get("menu",None)
 
-      # get coordinate allocation for the menu elements
-      (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
-      (x1,y1) = e1
-      (x2,y2) = e2
-      (x3,y3) = e3
-      (x4,y4) = e4
-      (w1,h1,dx,dy) = alloc
-
-      # * draw "escape" button
-      menus.drawButton(cr, x1, y1, dx, dy, "", "back", "search:reset|set:menu:search")
-      # * scroll up
-      menus.drawButton(cr, x2, y2, dx, dy, "", "up_list", "%s:up" % self.moduleName)
-      # * scroll down
-      menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % self.moduleName)
-      
-      resultList = self.updateDistance()
-      # update maxIndex, needed for proper listing
-      if resultList:
-        self.maxIndex=len(resultList)-1
-
-
-      if self.get('GLSOrdering', 'default') == 'distance': # if ordering by distance is turned on, sort the list
-        resultList.sort()
-
-      category = ""
-
-      # TODO: replace with universal list from mod_menu
-
-      # One option per row
-      for row in (0,1,2): # TODO: dynamic adjustment (how to guess the screensize vs dpi ?)
-        index = self.scroll + row
-        if resultList:
-          numItems = len(resultList)
-        else:
-          numItems=0
-        if(0 <= index < numItems):
-
-          (text1,text2,onClick) = self.describeItem(index, category, resultList)
-
-          y = y4 + (row) * dy
-          w = w1 - (x4-x1)
-          h = h1 / 3.0
-
-          # Draw background and make clickable
-          menus.drawButton(cr,
-            x4,
-            y,
-            w,
-            dy,
-            "",
-            "generic", # background for a 3x1 icon
-            onClick)
-
-          # result text
-          menus.drawText(cr, text1, x4+dx*0.10, y+dy*0.1, w-dx*0.20, h*0.5)
-
-          # 2nd line: distance to result
-          menus.drawText(cr, text2, x4+dx*0.15, y + 0.6 * dy, w * 0.3, 0.3 * dy, 0.05)
-
-          # in corner: row number
-          menus.drawText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y + 0.7 * dy, w * 0.15, 0.2 * dy, 0.05)
-
-    elif menuName == 'searchResultsItem':
-      """draw the menu describing a single GLS result"""
-      resultList = self.updateDistance()
-
-      if self.get('GLSOrdering', 'default') == 'distance': # if ordering by distance is turned on, sort the list
-        resultList.sort()
-
-      resultNumber = int(self.get('searchResultsItemNr', 0))
-
-      """
-         because the results can be ordered in different manners, we use the absolute index,
-         which is created from the initial ordering
-         without this,(with distance sort) we would get different results for a key, if we moved fast enough :)
-      """
-      result = self.getResult(resultNumber, resultList)
-      self.drawGLSResultMenu(cr, result)
-
-    elif menuName == 'searchCustomQuery':
-      self.drawSearchCustomQueryMenu(cr)
 
   def getActiveResultTupple(self):
     resultNumber = int(self.get('searchResultsItemNr', 0))
@@ -421,6 +337,91 @@ class search(ranaModule):
         distance = 0 # in this case, we dont know our position, so we say the distance is 0
       return distance
 
+  def drawMenu(self, cr, menuName, args=None):
+    if menuName == 'searchResults':
+      menus = self.m.get("menu",None)
+
+      # get coordinate allocation for the menu elements
+      (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
+      (x1,y1) = e1
+      (x2,y2) = e2
+      (x3,y3) = e3
+      (x4,y4) = e4
+      (w1,h1,dx,dy) = alloc
+
+      # * draw "escape" button
+      menus.drawButton(cr, x1, y1, dx, dy, "", "back", "search:reset|set:menu:search")
+      # * scroll up
+      menus.drawButton(cr, x2, y2, dx, dy, "", "up_list", "%s:up" % self.moduleName)
+      # * scroll down
+      menus.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % self.moduleName)
+
+      resultList = self.updateDistance()
+      # update maxIndex, needed for proper listing
+      if resultList:
+        self.maxIndex=len(resultList)-1
+
+
+      if self.get('GLSOrdering', 'default') == 'distance': # if ordering by distance is turned on, sort the list
+        resultList.sort()
+
+      category = ""
+
+      # TODO: replace with universal list from mod_menu
+
+      # One option per row
+      for row in (0,1,2): # TODO: dynamic adjustment (how to guess the screensize vs dpi ?)
+        index = self.scroll + row
+        if resultList:
+          numItems = len(resultList)
+        else:
+          numItems=0
+        if(0 <= index < numItems):
+
+          (text1,text2,onClick) = self.describeItem(index, category, resultList)
+
+          y = y4 + (row) * dy
+          w = w1 - (x4-x1)
+          h = h1 / 3.0
+
+          # Draw background and make clickable
+          menus.drawButton(cr,
+            x4,
+            y,
+            w,
+            dy,
+            "",
+            "generic", # background for a 3x1 icon
+            onClick)
+
+          # result text
+          menus.drawText(cr, text1, x4+dx*0.10, y+dy*0.1, w-dx*0.20, h*0.5)
+
+          # 2nd line: distance to result
+          menus.drawText(cr, text2, x4+dx*0.15, y + 0.6 * dy, w * 0.3, 0.3 * dy, 0.05)
+
+          # in corner: row number
+          menus.drawText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y + 0.7 * dy, w * 0.15, 0.2 * dy, 0.05)
+
+    elif menuName == 'searchResultsItem':
+      """draw the menu describing a single GLS result"""
+      resultList = self.updateDistance()
+
+      if self.get('GLSOrdering', 'default') == 'distance': # if ordering by distance is turned on, sort the list
+        resultList.sort()
+
+      resultNumber = int(self.get('searchResultsItemNr', 0))
+
+      """
+         because the results can be ordered in different manners, we use the absolute index,
+         which is created from the initial ordering
+         without this,(with distance sort) we would get different results for a key, if we moved fast enough :)
+      """
+      result = self.getResult(resultNumber, resultList)
+      self.drawGLSResultMenu(cr, result)
+
+    elif menuName == 'searchCustomQuery':
+      self.drawSearchCustomQueryMenu(cr)
 
   def drawGLSResultMenu(self, cr, resultTupple):
     """draw an info screen for a Google local search result"""
