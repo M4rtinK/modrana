@@ -19,6 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from xapian import item
 from base_module import ranaModule
 import geo
 import math
@@ -33,7 +34,7 @@ class search(ranaModule):
     ranaModule.__init__(self, m, d, i)
     self.localSearchResults = None # GLS results from onlineServices
     self.scroll = 0
-    self.list = None # processed results: (distancefrom pos, rusult, absolut index)
+    self.list = None # processed results: (distance from pos, result, absolute index)
     self.maxIndex = 0 # based on the number of items in the list
     self.where='position'
     self.menuWatchId = None
@@ -183,7 +184,7 @@ class search(ranaModule):
         searchTerm = args
         online = self.m.get('onlineServices', None)
         if online is None:
-          print "search: online services module not pressent"
+          print "search: online services module not present"
           return
 
         if self.where=='position':
@@ -312,7 +313,7 @@ class search(ranaModule):
         list = []
         index = 0
         for item in self.localSearchResults['responseData']['results']: # we iterate over the local search results
-          if position != None:
+          if position is not None:
             (lat1,lon1) = position
             (lat2,lon2) = (float(item['lat']), float(item['lng']))
             distance = geo.distance(lat1,lon1,lat2,lon2)
@@ -321,7 +322,7 @@ class search(ranaModule):
           else:
             tupple = (0, item, index) # in this case, we dont know our position, so we say the distance is 0
             list.append(tupple)
-          index = index + 1
+          index += 1
         self.list = list
         return list
       else:
@@ -329,12 +330,12 @@ class search(ranaModule):
 
   def updateItemDistance(self):
       position = self.get("pos", None) # our lat lon coordinates
-      if position != None:
+      if position is not None:
         (lat1,lon1) = position
         (lat2,lon2) = (float(item['lat']), float(item['lng']))
         distance = geo.distance(lat1,lon1,lat2,lon2)
       else:
-        distance = 0 # in this case, we dont know our position, so we say the distance is 0
+        distance = 0 # in this case, we don't know our position, so we say the distance is 0
       return distance
 
   def drawMenu(self, cr, menuName, args=None):
@@ -488,7 +489,7 @@ class search(ranaModule):
   def drawMapOverlay(self, cr):
     """Draw overlay that's part of the map"""
     # draw the GLS results on the map
-    if self.localSearchResults == None:
+    if self.localSearchResults is None:
       return
     proj = self.m.get('projection', None)
     captions = self.get('drawGLSResultCaptions', True)
@@ -654,7 +655,7 @@ class search(ranaModule):
 
   def handleSearchResult(self, key, results):
     if key == "localSearchResultGoogle":
-      print "search: GLS result recieved"
+      print "search: GLS result received"
       self.localSearchResults = results
       self.set('menu', 'search#searchResults')
     elif key == "address2LL":
