@@ -56,3 +56,7 @@ class Point:
     """a short single line point description"""
     if self.message:
       return self.message.split('\n',1)[0]
+
+  def getUrls(self):
+    """get a list of (Url, Url description) tuples corresponding to the point"""
+    return []
