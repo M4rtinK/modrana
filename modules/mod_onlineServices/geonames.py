@@ -21,7 +21,7 @@ from point import Point
 class GeonamesWikipediaPoint(Point):
   """
   * a Point subclass suitable for representing the search result from
-  a Geonames wkipedia search
+  a Geonames wikipedia search
   """
   def __init__(self, gnWikipediaResult):
     lat = gnWikipediaResult['lat']
