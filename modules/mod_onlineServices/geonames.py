@@ -41,6 +41,10 @@ class GeonamesWikipediaPoint(Point):
   def getAbstract(self):
     return self.abstract
 
+  def getUrls(self):
+    fullUrl = "http://%s" % self.result['wikipediaUrl']
+    return [(fullUrl, "full article")]
+
 def _wikipediaResults2points(results):
   """convert wikipedia search results from Geonames to modRana points"""
   points = []
