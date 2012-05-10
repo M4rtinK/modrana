@@ -666,7 +666,7 @@ class menus(ranaModule):
     if urls:
       #TODO: support more Urls
       url = urls[0]
-      suffix = "\n\n<u>click to open %s</u>" % url[1]
+      suffix = "\n\n <u>click to open %s</u> " % url[1]
       boxAction = "ms:menu:openUrl:%s" % url[0]
     else:
       suffix = ""
