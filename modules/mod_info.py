@@ -35,17 +35,23 @@ class info(ranaModule):
       # check version string validity
       self.versionString = currentVersionString
 
+  def getPayPalUrl(self):
+    return "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=martin%2ekolman%40gmail%2ecom&lc=CZ&item_name=The%20modRana%20project&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted"
+
+  def getDiscussionUrls(self):
+    return [("http://talk.maemo.org/showthread.php?t=58861","Discussion@TMO")]
+
   def drawMenu(self, cr, menuName, args=None):
     if menuName == 'infoAbout':
       menus = self.m.get('menu', None)
       if menus:
         nop = "set:menu:info#infoAbout"
-        button1 = ('', 'generic', nop)
-        button2 = ('', 'generic', nop)
-        web = "www.modrana.org"
-        email = "modrana@gmail.com"
+        button1 = ('Discussion', 'generic', "ms:menu:openUrl:%s" % self.getDiscussionUrls()[0][0])
+        button2 = ('Donate', 'generic', "ms:menu:openUrl:%s" % self.getPayPalUrl())
+        web = " <u>www.modrana.org</u> "
+        email = " modrana@gmail.com "
         text = "modRana version:\n\n%s\n\n\n\nFor questions or feedback,\n\ncontact the <b>modRana</b> project:\n\n%s\n\n%s\n\n" % (self.versionString,web,email)
-        box = (text ,nop)
+        box = (text ,"ms:menu:openUrl:http://www.modrana.org")
         menus.drawThreePlusOneMenu(cr, 'infoAbout', 'set:menu:info', button1, button2, box)
 
     
