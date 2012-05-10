@@ -1452,25 +1452,25 @@ class menus(ranaModule):
       url = args
       self.modrana.gui.openUrl(url)
 
-    elif (message == "setIMPage"):
+    elif message == "setIMPage":
       menuName = args[0]
       targetPageNr = int(args[1])
       self.menus[menuName]['metadata']['currentPage'] = targetPageNr
-    elif (message == "rebootDataMenu"):
+    elif message == "rebootDataMenu":
       self.setupDataMenu() # we are returning from the batch menu, data menu needs to be "rebooted"
       self.set('editBatchMenuActive', False)
-    elif(message == "setupEditBatchMenu"):
+    elif message == "setupEditBatchMenu":
       self.setupEditBatchMenu()
       self.set('editBatchMenuActive', True)
-    elif(message == 'screenClicked'):
+    elif message == 'screenClicked':
       self.lastActivity = int(time.time())
       self.hideMapSreenButtons = False # show the buttons at once
       self.set('needRedraw', True)
-    elif(type=='ml' and message=='highlightItem'):
+    elif type =='ml' and message=='highlightItem':
       menuName, id = args
       id = int(id)
       self.highlightItem(menuName, id)
-    elif (type == 'ms' and message == 'handleToolsMenuPoint'):
+    elif type == 'ms' and message == 'handleToolsMenuPoint':
       # store the currently selected point to the POI database
       if args == 'store':
         point = self.itemToolsMenuCache[0]
@@ -1498,7 +1498,7 @@ class menus(ranaModule):
 
       #self.modrana.shutdown()
 
-    elif(message == 'toggle' and len(messageList) >= 3):
+    elif message == 'toggle' and len(messageList) >= 3:
       # toggle a button
       menu = messageList[1]
       pos = int(messageList[2])
@@ -1509,10 +1509,10 @@ class menus(ranaModule):
       # TODO: maybe use a list instead of a tupple ?
 
       if uniqueName:
-        perzist = self.get('persistentToggleButtons', None)
-        if perzist and uniqueName in perzist:
-          perzist[uniqueName] = newIndex
-          self.set('persistentToggleButtons', perzist)
+        persist = self.get('persistentToggleButtons', None)
+        if persist and uniqueName in persist:
+          persist[uniqueName] = newIndex
+          self.set('persistentToggleButtons', persist)
 
       self.set(uniqueName, newIndex)
       self.menus[menu][pos] = (textIconAction, newIndex, uniqueName, type)
