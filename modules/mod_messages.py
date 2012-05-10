@@ -37,44 +37,44 @@ class messageModule(ranaModule):
     for message in messages.split('|'):
       try:
         (module, text) = message.split(":", 1)
-      except ValueError: # no modulename or keyword found
+      except ValueError: # no module name or keyword found
         return
 
-      if(module == 'set'):
+      if module == 'set':
         (key,value) = text.split(":", 1)
         for i in(None, True, False):
-          if(value == str(i)):
+          if value == str(i):
             value = i
         self.set(key, value)
         
-      elif(module == 'toggle'):
+      elif module == 'toggle':
         self.set(text, not self.get(text,0))
 
-      elif(module == "*"): # send to all modules
+      elif module == "*": # send to all modules
         for m in self.m.items():
           m.handleMessage(text)
 
-      elif(module == 'ms'): # short for message + single simple string
-        (module, key, string) = text.split(':', 3)
+      elif module == 'ms': # short for message + single simple string
+        (module, key, string) = text.split(':', 2)
         m = self.m.get(module, None)
-        if(m != None):
+        if m is not None:
           m.handleMessage(key,'ms',string)
         else:
           print "Message addressed to %s which isn't loaded" % module
 
-      elif(module == 'ml'): # short for message + list of strings
+      elif module == 'ml': # short for message + list of strings
         tokens = text.split(':', 2)
         module = tokens[0]
         key = tokens[1]
         semicolonSepList = tokens[2]
         list = semicolonSepList.split(';')
         m = self.m.get(module, None)
-        if(m != None):
+        if m is not None:
           m.handleMessage(key,'ml',list)
         else:
           print "Message addressed to %s which isn't loaded" % module
 
-      elif(module == 'md'): # short for message + dictionary of string:string key:value pairs
+      elif module == 'md': # short for message + dictionary of string:string key:value pairs
         tokens = text.split(':', 3)
         module = tokens[0]
         mainKey = tokens[1]
@@ -86,21 +86,21 @@ class messageModule(ranaModule):
             (key,value) = (kvList[0],kvList[1])
             d[key] = value
         m = self.m.get(module, None)
-        if(m != None):
+        if m is not None:
           m.handleMessage(mainKey,'md',d)
         else:
           print "Message addressed to %s which isn't loaded" % module
 
-      elif(module == "setWithMode"):
+      elif module == "setWithMode":
         (mode, key, value) = text.split(":", 2)
         for i in(None, True, False):
-          if(value == str(i)):
+          if value == str(i):
             value = i
         self.set(key, value, mode=mode)
 
       else:
         m = self.m.get(module, None)
-        if(m != None):
+        if m is not None:
           m.handleMessage(text, None, None)
         else:
           print "Message addressed to %s which isn't loaded" % module
