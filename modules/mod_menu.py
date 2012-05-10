@@ -662,9 +662,18 @@ class menus(ranaModule):
     """draw a detailed menu for a Point object"""
     lat, lon = point.getLL()
     z = self.get('z', 15)
+    urls = point.getUrls()
+    if urls:
+      #TODO: support more Urls
+      url = urls[0]
+      suffix = "\n\n<u>click to open %s</u>" % url[1]
+      boxAction = "ms:menu:openUrl:%s" % url[0]
+    else:
+      suffix = ""
+      boxAction = ""
     button1 = ('on map#show', 'generic', 'mapView:recentre %f %f %d|set:menu:None' % (lat, lon, z))
     button2 = ('Tools', 'tools', 'set:menu:menu#listDetailTools#%s#%d' % (menuName, index))
-    box = ('<b>%s</b>\n%s' % (point.getName(),point.getDescription()), '')
+    box = ('<b>%s</b>\n%s%s' % (point.getName(),point.getDescription(), suffix), boxAction)
 
     self.drawThreePlusOneMenu(cr, 'pointDetail', backAction, button1, button2, box, wrap=True)
 
@@ -703,13 +712,13 @@ class menus(ranaModule):
       secText, (lat, lon) = point.getAbstract(), point.getLL()
       z = self.get('z', 15)
       action = 'mapView:recentre %f %f %d|set:menu:None' % (lat, lon, z)
-      return(mainText,secText,action)
+      return mainText,secText,action
 
     def describePointGo2Detail(point, index, listName):
       mainText = point.getName()
       secText = getDescription()
       action = 'set:menu:menu#listDetail#%s#%d' % (name, index)
-      return(mainText,secText,action)
+      return mainText,secText,action
 
     if goto == 'detail':
       descFunction = describePointGo2Detail
@@ -783,7 +792,7 @@ class menus(ranaModule):
       """default item description function
          -> get the needed strings for the default item drawing function"""
       (mainText, secText, action) = item
-      return(mainText, secText, action)
+      return mainText, secText, action
 
     def drawItemMenu(self, cr, index):
       item = self.container.getItem(index)
@@ -801,7 +810,7 @@ class menus(ranaModule):
 
     def drawListItem(self, cr, item, x, y, w, h, index, descFunction=None):
       """default list item drawing function"""
-      if descFunction==None:
+      if descFunction is None:
         descFunction=self.descFunction
 
       # * get the data for this button
@@ -1439,6 +1448,10 @@ class menus(ranaModule):
           self.lists[listMenuName].scrollUp()
         elif args[1]=="down":
           self.lists[listMenuName].scrollDown()
+    elif type == "ms" and message == "openUrl":
+      url = args
+      self.modrana.gui.openUrl(url)
+
     elif (message == "setIMPage"):
       menuName = args[0]
       targetPageNr = int(args[1])
