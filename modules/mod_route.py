@@ -471,7 +471,7 @@ class route(ranaModule):
     if destinationAddress:
       self.destinationAddress = destinationAddress
 
-  def update(self):
+  def beforeDraw(self):
     """register areas for manual point input"""
 
     if self.expectStart:
@@ -489,11 +489,11 @@ class route(ranaModule):
   def drawScreenOverlay(self, cr):
     menus = self.m.get('menu', None)
     if menus:
-      if menus.buttonsHidingOn() == False: # check if the buttons should not be hidden
+      if not menus.buttonsHidingOn(): # check if the buttons should not be hidden
         if self.route: # current route info button
           self.drawCurrentRouteInfoButton(cr)
 
-        if self.selectTwoPoints == True: # point selection menu
+        if self.selectTwoPoints: # point selection menu
           self.drawTwoPointsMenu(cr)
 
   def drawMapOverlay(self, cr):
