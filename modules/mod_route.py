@@ -27,14 +27,6 @@ import traceback
 import unicodedata
 from time import clock
 
-#if(__name__ == '__main__'):
-#  sys.path.append('pyroutelib2')
-#else:
-#  sys.path.append('modules/pyroutelib2')
-
-#from loadOsm import *
-#from route import Router
-
 def getModule(m,d,i):
   return(route(m,d,i))
 
