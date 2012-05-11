@@ -392,9 +392,9 @@ class icons(ranaModule):
             semicolonSepList = currentName.split(':',1)[1].split(';')
             """
             there are five positional parameters:
-            fill collor,fill opacity, outline color, outline opacity,
+            fill color,fill opacity, outline color, outline opacity,
             outline width (default 8) and corner radius (default 22)
-            to use default value, just dont fill in the positional parameter
+            to use default value, just don't fill in the positional parameter
             ( len(parameter) == 0
             """
             needBackground = False
