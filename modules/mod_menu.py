@@ -316,7 +316,7 @@ class menus(ranaModule):
     cr.set_source_rgba(*self.mainTextColor)
     if text is not None:
       textList = text.split('#')
-      if len(textList) == 1 and text != None:
+      if len(textList) == 1 and text is not None:
         self.drawText(cr, textList[0], x1, y1+0.6*h, w, 0.4*h, 0.10)
       elif len(textList) >= 2:
         self.drawText(cr, textList[0], x1, y1+0.6*h, w, 0.4*h, 0.08)
@@ -397,7 +397,7 @@ class menus(ranaModule):
         self.lists[listName].draw(cr, index) # draw the list
     elif menuName == 'listDetail':
       listName,index = args.split('#',1)
-      index = int(index) # strin to int
+      index = int(index) # string to int
       if listName in self.lists.keys():
         self.lists[listName].drawItemMenu(cr, index) # draw detailed menu
     elif menuName == 'listDetailTools':
