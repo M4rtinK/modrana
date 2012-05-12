@@ -714,20 +714,20 @@ class route(ranaModule):
     x1 = (x+w)-dx
     y1 = (y-dy)+h
 
-    startIcon = "generic_alpha"
-    endIcon = "generic_alpha"
+    startIcon = "generic:;0.5;;0.5;;"
+    endIcon = "generic:;0.5;;0.5;;"
     if self.expectStart:
-      startIcon = "generic_alpha_red"
+      startIcon = "generic:red;0.5;red;0.5;;"
     if self.expectEnd:
-      endIcon = "generic_alpha_green"
+      endIcon = "generic:green;0.5;green;0.5;;"
 
     routingAction = 'route:p2pRoute'
-    if self.selectOnePoint == True:
+    if self.selectOnePoint:
       routingAction = 'route:p2posRoute'
 
     menus.drawButton(cr, x1-dx, y1, dx, dy, 'start', startIcon, "route:expectStart")
     menus.drawButton(cr, x1, y1-dy, dx, dy, 'end', endIcon, "route:expectEnd")
-    menus.drawButton(cr, x1, y1, dx, dy, 'route', "generic_alpha", routingAction)
+    menus.drawButton(cr, x1, y1, dx, dy, 'route', "generic:;0.5;;0.5;;", routingAction)
 
     # "flush" cairo operations
     cr.stroke()
