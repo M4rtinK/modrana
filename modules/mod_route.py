@@ -701,10 +701,10 @@ class route(ranaModule):
     x1 = (x+w)-dx
     y1 = (y-dy)+h
     if self.selectTwoPoints:
-      """move to avoid colision with the point selection menu"""
-      x1 = x1-dx
-      y1 = y1-dy
-    menus.drawButton(cr, x1, y1, dx, dy, 'info#route', "generic_alpha", 'set:menu:route#currentRouteBackToMap')
+      """move to avoid collision with the point selection menu"""
+      x1 -= dx
+      y1 -= dy
+    menus.drawButton(cr, x1, y1, dx, dy, 'info#route', "generic:;0.5;;0.5;;", 'set:menu:route#currentRouteBackToMap')
 
   def drawTwoPointsMenu(self, cr):
     (x,y,w,h) = self.get('viewport')
