@@ -1080,7 +1080,7 @@ class menus(ranaModule):
     self.setupZoomDownMenu()
     
   def setupDataMenu(self, nextMenu='data2', prevMenu='main'):
-    """we can download tiles around "here" (GPS cooridnates), route or the current view"""
+    """we can download tiles around "here" (GPS coordinates), route or the current view"""
     self.clearMenu('data', "set:menu:%s" % prevMenu)
     self.addItem('data', 'Around here', 'generic', 'set:downloadType:data|set:downloadArea:here|set:menu:%s' % nextMenu)
     self.addItem('data', 'Around route', 'generic', 'set:downloadType:data|set:downloadArea:route|set:menu:mapData#chooseRouteForDl')
@@ -1243,7 +1243,7 @@ class menus(ranaModule):
 
         (text1,text2,onClick) = describeItem(index, category, list)
 
-        y = y4 + (row) * dy
+        y = y4 + row * dy
         w = w1 - (x4-x1)
 
         # Draw background and make clickable
@@ -1338,7 +1338,7 @@ class menus(ranaModule):
       stats = cr.text_extents(text)
       (textwidth, textheight) = stats[2:4]
 
-      if(widthLimit and textwidth > widthLimit):
+      if widthLimit and (textwidth > widthLimit):
         cr.set_font_size(fontsize * widthLimit / textwidth)
         stats = cr.text_extents(text)
         (textwidth, textheight) = stats[2:4]
@@ -1384,15 +1384,15 @@ class menus(ranaModule):
     (w,h) = (extents[2], extents[3])
 
     x1 = x
-    if(align in (9,6,3)):
+    if align in (9,6,3):
       x1 -= w
-    elif(align in (8,5,2)):
+    elif align in (8,5,2):
       x1 -= 0.5 * w
 
     y1 = y
-    if(align in (7,8,9)):
+    if align in (7,8,9):
       y1 += h
-    elif(align in (4,5,6)):
+    elif align in (4,5,6):
       y1 += 0.5 * h
 
     cr.set_source_rgb(bg[0],bg[1],bg[2])
@@ -1497,9 +1497,9 @@ class menus(ranaModule):
       pos = int(messageList[2])
       (textIconAction, currentIndex, uniqueName, type) = self.menus[menu][pos]
       maxIndex = len(textIconAction) # maxIndex => number of toggle values
-      newIndex = (currentIndex + 1)%maxIndex # make the index ovelap
+      newIndex = (currentIndex + 1)%maxIndex # make the index overlap
       # create a new tuple with updated index
-      # TODO: maybe use a list instead of a tupple ?
+      # TODO: maybe use a list instead of a tuple ?
 
       if uniqueName:
         persist = self.get('persistentToggleButtons', None)
