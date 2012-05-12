@@ -126,7 +126,7 @@ class menus(ranaModule):
       mode = self.get('mode', None)
       if mode in self.userConfig:
         if 'override_main_buttons' in self.userConfig[mode]:
-          # we dont know the orientation, so we use generic icons
+          # we don't know the orientation, so we use generic icons
           plusIcon = 'center:plus;0.05'
           minusIcon = 'center:minus;0.05'
           item = self.userConfig[mode]['override_main_buttons']
@@ -183,7 +183,6 @@ class menus(ranaModule):
       (centreX,centreY) = (x1+dx/2.0,y1+dy/2.0)
       cr.translate(centreX,centreY)
       cr.set_line_width(6)
-#      cr.set_source_rgba(0, 0, 1, 0.45)
       cr.set_source_rgba(*self.centerButtonCircleColor)
       cr.arc(0, 0, 15, 0, 2.0 * math.pi)
       cr.stroke()
@@ -233,7 +232,7 @@ class menus(ranaModule):
       return # no need to draw this + avoid a division by zero
     if colorString: #optinaly set text color
       cr.set_source_color(gtk.gdk.color_parse(colorString))
-    if(widthLimit and lw > widthLimit):
+    if widthLimit and lw > widthLimit:
       scale = float(pango.SCALE)
       factor = ((widthLimit/(lw/scale)))
       factor = min(factor, 1.0)
@@ -265,7 +264,7 @@ class menus(ranaModule):
       return
 #    cr.rectangle(x,y,w,h)
     # Put a border around the area
-    if(border != 0):
+    if border != 0:
       x += w * border
       y += h * border
       w *= (1-2*border)
@@ -301,7 +300,7 @@ class menus(ranaModule):
     cr.restore()
       
   def drawToggleButtonOld(self, cr, x1, y1, w, h, textIconAction, index):
-    """draw an automatic togglable icon
+    """draw an automatic toggleable icon
        textActionIcon -> a dictionary of text strings/actions/icons
     """
     self.drawButton(cr, x1, y1, w, h, textIconAction[index][0], textIconAction[index][1], textIconAction[index][2])
@@ -351,7 +350,7 @@ class menus(ranaModule):
         grid.append((x1+x*dx, y1+y*dy))
     self.itemMenuGrid = ((x1, y1, cols,rows,dx,dy),grid)
 
-# menu drawing logic#
+  # menu drawing logic#
 
   def mainDrawMenu(self, cr, menuName, args=None):
     """Draw menus"""
@@ -610,7 +609,7 @@ class menus(ranaModule):
     self.menus[menuName][id] = item
 
   def highlightItem(self,menuName,id):
-    """highlight an item in a given itemmized menu, replacing the previous highlighted"""
+    """highlight an item in a given itemized menu, replacing the previous highlighted"""
     self.menus[menuName]['metadata']['highlightId'] = id
 
   def addItems(self, menuName, items):
