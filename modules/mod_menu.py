@@ -1148,12 +1148,12 @@ class menus(ranaModule):
       i = 0
       for line in lines:
         self.showText(cr, line, x+border, y+i*lineSpace+1*spacing, w-2*border)
-        i = i + 1
+        i += 1
 
   def drawThreeItemHorizontalMenu(self, cr, first, second, third):
     """draw a menu, that consists from three horizontal buttons
        this is mostly intended for asking YES/NO questions
-       the three parameters are tupples, like this:
+       the three parameters are tuples, like this:
        (text,icon,action)"""
     (x1,y1,w,h) = self.get('viewport', None)
 #    dx = w1
@@ -1175,7 +1175,7 @@ class menus(ranaModule):
     """
     get element coordinates for a menu,
     that combines three normal and one big button/area
-    * becuse we want the big button/area to be cca square,
+    * because we want the big button/area to be cca square,
       we move the buttons to the upper part of the screen in portrait mode
       and to the left in landscape
 
@@ -1213,7 +1213,7 @@ class menus(ranaModule):
     return(elem1,elem2,elem3,elem4,alloc)
 
   def listableMenuCoords(self):
-    """listable menu is basicly the same as the three plus one menu,
+    """listable menu is basically the same as the three plus one menu,
     eq the listable entries are in the place of the square element"""
     return self.threePlusOneMenuCoords()
 
@@ -1246,7 +1246,7 @@ class menus(ranaModule):
     for row in (0,1,2): # TODO: dynamic adjustment (how to guess the screensize vs dpi ?)
       index = scroll + row
       numItems = len(list)
-      if(0 <= index < numItems):
+      if 0 <= index < numItems:
 
         (text1,text2,onClick) = describeItem(index, category, list)
 
@@ -1295,7 +1295,7 @@ class menus(ranaModule):
     # * draw info box
     w4 = w - x4
     h4 = h - y4
-    self.drawButton(cr, x4, y4, w4, h4, "", "generic", boxAction)
+    self.drawButton(cr, x4, y4, w4, h4, "", "generic:;;;;8;", boxAction)
     # * draw text to the box
     text = boxTextLines
     self.drawTextToSquare(cr, x4, y4, w4, h4, text, wrap) # display the text in the box
@@ -1332,7 +1332,7 @@ class menus(ranaModule):
     # * draw info box
     w4 = w - x4
     h4 = h - (y4+dy)
-    self.drawButton(cr, x4, y4+dy, w4, h4, "", "generic", boxAction)
+    self.drawButton(cr, x4, y4+dy, w4, h4, "", "generic:;;;;8;", boxAction)
     # * draw text to the box
     text = boxTextLines
     self.drawTextToSquare(cr, x4, y4+dy, w4, h4, text) # display the text in the box
