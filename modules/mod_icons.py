@@ -295,7 +295,7 @@ class icons(ranaModule):
     if len(semicolonSepList[4]):
       outlineWidth = int(semicolonSepList[4])
     else:
-      outlineWidth = 8
+      outlineWidth = 4
 
     if len(semicolonSepList[5]):
       cornerRadius = int(semicolonSepList[5])
