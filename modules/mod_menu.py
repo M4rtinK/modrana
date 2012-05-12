@@ -730,19 +730,19 @@ class menus(ranaModule):
     self.lists[name] = newListableMenu
     return newListableMenu
 
-  def addListMenu(self, name, parrentAction, items=None, descFunction=None, drawFunction=None):
+  def addListMenu(self, name, parentAction, items=None, descFunction=None, drawFunction=None):
     if items:
       c = modrana_utils.SimpleListContainer(items)
     else:
       c = modrana_utils.SimpleListContainer()
-    newListableMenu = self.ListableMenu(name, self, c, parrentAction, descFunction, drawFunction,4)
+    newListableMenu = self.ListableMenu(name, self, c, parentAction, descFunction, drawFunction,4)
 
     self.lists[name] = newListableMenu
     return newListableMenu
   
   class ListableMenu:
     """a listable menu object"""
-    def __init__(self, name, menus, container, parrentAction, descFunction=None, drawFunction=None, displayedItems=3):
+    def __init__(self, name, menus, container, parentAction, descFunction=None, drawFunction=None, displayedItems=3):
       """use custom item and description drawing functions, or use the default ones"""
       # TODO: is this possible in the header ?
       if descFunction is None:
@@ -756,7 +756,7 @@ class menus(ranaModule):
       self.index=0 #index of the first item in the current list view
       self.displayedItems = displayedItems
       self.container = container
-      self.parrentAction = parrentAction
+      self.parentAction = parentAction
       self.menus = menus
       self.name = name
       self.drawItemMenuFunction = self.nop
@@ -784,8 +784,8 @@ class menus(ranaModule):
     def setDescMethod(self, method):
       self.descFunction = method
 
-    def setParrentAction(self, action):
-      self.parrentAction = action
+    def setParentAction(self, action):
+      self.parentAction = action
 
     def describeListItem(self, item, index=None, name=None):
       """default item description function
@@ -843,7 +843,7 @@ class menus(ranaModule):
 
       # controls
       # * parent menu
-      self.menus.drawButton(cr, x1, y1, dx, dy, "", "back", self.parrentAction)
+      self.menus.drawButton(cr, x1, y1, dx, dy, "", "back", self.parentAction)
       # * scroll up
       self.menus.drawButton(cr, x2, y2, dx, dy, "", "up_list", "ml:menu:listMenu:%s;up" % self.name)
       # * scroll down
@@ -886,14 +886,14 @@ class menus(ranaModule):
 
     def setOnceBackAction(self, action):
       """replace the back button action with a given action for a single listable menu entry"""
-      oldAction = self.parrentAction # save the previous back action
-      self.parrentAction = action # replace with the given one
+      oldAction = self.parentAction # save the previous back action
+      self.parentAction = action # replace with the given one
       # restore by callback once the menu is left
       self.menus.watch('menu', self._menuLeftCB, oldAction)
 
     def _menuLeftCB(self,key,old,new, oldAction):
       # restore the original back action
-      self.parrentAction = oldAction
+      self.parentAction = oldAction
       # remove the watch by returning False
       return False
 
@@ -1420,7 +1420,6 @@ class menus(ranaModule):
 
   def firstTime(self):
     self.set("menu",None)
-
     icons = self.m.get('icons', None)
     if icons:
       icons.subscribeColorInfo(self,self.colorsChangedCallback)
