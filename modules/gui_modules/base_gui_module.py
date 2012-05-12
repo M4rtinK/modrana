@@ -137,21 +137,6 @@ class GUIModule(ranaModule):
     """handle a notification"""
     pass
 
-
-#  def getPage(self, flObject, name="", fitOnStart=True):
-#    """create a page from a file like object"""
-#    pass
-#
-#  def showPage(self, page, mangaInstance=None, id=None):
-#    """show a page on the stage"""
-#    pass
-
-#  def getCurrentPage(self):
-#    """return the page that is currently shown
-#    if there is no page, return None"""
-#    pass
-
-
   def statusReport(self):
     """report current status of the gui"""
     return "It works!"
