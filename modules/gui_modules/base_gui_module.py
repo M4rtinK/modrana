@@ -171,23 +171,6 @@ class GUIModule(ranaModule):
     import webbrowser
     webbrowser.open(url)
 
-#  def _destroyed(self):
-#    self.mieru.destroy()
-#
-#  def _keyPressed(self, keyName):
-#    self.mieru.keyPressed(keyName)
-
-
-#def getGui(mieru, type="gtk",accel=True, size=(800,480)):
-#  """return a GUI object"""
-#  if type=="gtk" and accel:
-#    import cluttergtk
-#    import clutter_gui
-#    return clutter_gui.ClutterGTKGUI(mieru, type, size)
-#  elif type=="QML" and accel:
-#    import qml_gui
-#    return qml_gui.QMLGUI(mieru, type, size)
-
 
 
 
