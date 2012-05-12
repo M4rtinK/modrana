@@ -637,16 +637,16 @@ class menus(ranaModule):
     itemCount = self.menus[menu]['metadata']['itemCount']
     type = 'toggle'
     if uniqueName:
-      perzist = self.get('persistentToggleButtons', None)
-      if perzist is None:
+      persist = self.get('persistentToggleButtons', None)
+      if persist is None:
         self.set('persistentToggleButtons', {})
-        perzist = {}
+        persist = {}
 
-      if uniqueName in perzist:
-        index = perzist[uniqueName]
+      if uniqueName in persist:
+        index = persist[uniqueName]
       else:
-        perzist[uniqueName] = index
-        self.set('persistentToggleButtons', perzist)
+        persist[uniqueName] = index
+        self.set('persistentToggleButtons', persist)
 
     """we are counting up from zero for the item indexes"""
     self.menus[menu][itemCount] = (textIconAction, index, uniqueName, type)
