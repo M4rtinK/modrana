@@ -75,8 +75,9 @@ class notification(ranaModule):
         if len(list) == 2:
           try:
             timeout = int(list[1]) # override the default timeout
-          except:
-            print "notification: wrong timeout, using default 5 secconds"
+          except Exception ,e:
+            print("notification: wrong timeout, using default 5 seconds")
+            print(e)
         self.handleNotification(messageText, timeout)
       else:
         print "notification: wrong message: %s" % message
@@ -155,7 +156,7 @@ class notification(ranaModule):
 
   def handleNotification(self, message, timeout=None, icon=""):
     # TODO: icon support
-    if timeout == None:
+    if timeout is None:
       timeout = self.timeout
 
     print("notification: message: %s, timeout: %s" % (message, timeout))
