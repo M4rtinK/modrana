@@ -1,3 +1,4 @@
+from ScrolledText import example
 import os
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
@@ -32,7 +33,7 @@ class log(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.savedStdout = None
-    self.fsock = None
+    self.fSock = None
     self.currentLogPath = ""
 
   def firstTime(self):
@@ -43,11 +44,12 @@ class log(ranaModule):
       self.checkLoggingStatus()
 
   def update(self):
-    if self.fsock:
+    if self.fSock:
       try:
-        self.fsock.flush()
-      except:
-        print "**log: flushing the log file failed"
+        self.fSock.flush()
+      except Exception, e:
+        print("**log: flushing the log file failed")
+        print(e)
 
   def getLogFilePath(self):
     logFolderPath = self.modrana.paths.getLogFolderPath()
@@ -56,7 +58,7 @@ class log(ranaModule):
     if units:
       timeHashString = units.getTimeHashString()
       fileName = 'modrana_stdout_%s.log.txt' % timeHashString
-      return(os.path.join(logFolderPath, fileName))
+      return os.path.join(logFolderPath, fileName)
     else:
       print("log: units module missing")
       return None
@@ -71,11 +73,11 @@ class log(ranaModule):
   def enableLogging(self):
     try:
       self.savedStdout = sys.stdout
-      if not self.fsock:
+      if not self.fSock:
         print "**log: opening stdout log file"
-        self.fsock = open(self.getLogFilePath(), 'w')
+        self.fSock = open(self.getLogFilePath(), 'w')
       print "**log: redirecting stdout to log file:\%s" % self.currentLogPath
-      sys.stdout = self.fsock
+      sys.stdout = self.fSock
       print "**log: stdout redirected to (this :) log file"
     except Exception, e:
       print "debug log: redirecting stdout to file failed:\n%s" % e
@@ -92,11 +94,13 @@ class log(ranaModule):
     self.disableLogging()
     """try to close the log file"""
     # is there actually something to close ?
-    if self.fsock:
+    if self.fSock:
       try:
-        self.fsock.close()
-      except:
-        print "**log: closing log file failed"
+        self.fSock.close()
+      except Exception ,e:
+        print("**log: closing log file failed")
+        print(e)
+
 
 if(__name__ == "__main__"):
   a = example({}, {})
