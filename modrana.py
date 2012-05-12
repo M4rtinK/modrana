@@ -361,7 +361,7 @@ class ModRana:
     # check if the value depends on current mode
     if name in self.keyModifiers.keys():
       # get the current mode
-      if mode == None:
+      if mode is None:
         mode = self.d.get('mode', 'car')
       if mode in self.keyModifiers[name]['modes'].keys():
         # get the dictionary with per mode values
