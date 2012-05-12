@@ -960,7 +960,7 @@ class mapData(ranaModule):
           failedCountString = "1 download failed"
         else:
           failedCountString = "%d downloads failed" % failedCount
-        text = "<b>%s</b>: <b>%d</b> of <b>%d</b> tiles done\n\n<b>%1.2f MB</b> transferred, %s" % (action, currentTileCount, totalTileCount, MBTotalTransfered, failedCountString)
+        text = "<b>%s</b>: <b>%d</b> of <b>%d</b> tiles done\n<b>%1.2f MB</b> transferred, %s" % (action, currentTileCount, totalTileCount, MBTotalTransfered, failedCountString)
       elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
         if getFilesThread.getDownloadCount():
           # some downloads occurred
@@ -982,10 +982,10 @@ class mapData(ranaModule):
       return ""
     if sizeThread is None:
       return "Total size of tiles is unknown (<i>click to compute</i>)."
-    elif sizeThread.isAlive() == True:
+    elif sizeThread.isAlive():
       totalTileCount = sizeThread.urlCount
       currentTileCount = sizeThread.processed
-      currentSize = sizeThread.totalSize/(1048576) # = 1024.0*1024.0
+      currentSize = sizeThread.totalSize/1048576 # = 1024.0*1024.0
       text = "Checking: %d of %d tiles complete(<b>%1.0f MB</b>)" % (currentTileCount, totalTileCount, currentSize)
       return text
     elif sizeThread.isAlive() == False:
@@ -994,7 +994,7 @@ class mapData(ranaModule):
       return text
 
   def getFreeSpaceText(self):
-    """return a string describing the space available on the filesystem where the tilefolder is"""
+    """return a string describing the space available on the filesystem where the tile-folder is"""
     path = self._getTileFolderPath()
     f = os.statvfs(path)
     freeSpaceInBytes = (f.f_bsize * f.f_bavail)
