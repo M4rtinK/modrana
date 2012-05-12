@@ -354,7 +354,7 @@ class MainWidget(gtk.Widget):
 
   def forceRedraw(self):
     """Make the window trigger a draw event.
-TODO: consider replacing this if porting pyroute to another platform"""
+       TODO: consider replacing this if porting pyroute to another platform"""
     self.set('needRedraw', False)
     """ alter directly, no need to notificate
     about returning the key to default state"""
