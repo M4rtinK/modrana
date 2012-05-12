@@ -151,7 +151,7 @@ class notification(ranaModule):
         y1 = y
       """ the cancel button sends a cancel message to onlineServices
       to disable currently running operation"""
-      menus.drawButton(cr, x1, y1, dx, dy, '#<span foreground="red">cancel</span>', "generic_alpha", 'onlineServices:cancelOperation')
+      menus.drawButton(cr, x1, y1, dx, dy, '#<span foreground="red">cancel</span>', "generic:;0.5;;0.5;;", 'onlineServices:cancelOperation')
 
   def handleNotification(self, message, timeout=None, icon=""):
     # TODO: icon support
