@@ -934,8 +934,6 @@ class mapData(ranaModule):
       menus.drawListableMenuControls(cr, menuName, parent, scrollMenu)
       menus.drawListableMenuItems(cr, tracks, self.scroll, describeTracklog)
 
-
-
   def getFilesText(self, getFilesThread):
     """return a string describing status of the download threads"""
     text = ""
@@ -983,7 +981,7 @@ class mapData(ranaModule):
     if tileCount == 0:
       return ""
     if sizeThread is None:
-      return ("Total size of tiles is unknown (<i>click to compute</i>).")
+      return "Total size of tiles is unknown (<i>click to compute</i>)."
     elif sizeThread.isAlive() == True:
       totalTileCount = sizeThread.urlCount
       currentTileCount = sizeThread.processed
