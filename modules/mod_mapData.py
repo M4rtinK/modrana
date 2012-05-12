@@ -737,7 +737,7 @@ class mapData(ranaModule):
       for dx in range(-amount, amount+1):
         for dy in range(-amount, amount+1):
           tiles["%d,%d" % (x+dx,y+dy)] = True
-    return(tiles.keys())
+    return tiles.keys()
 
   def spiral(self, x, y, z, distance):
     (x,y) = (int(round(x)),int(round(y)))
