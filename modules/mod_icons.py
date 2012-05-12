@@ -244,19 +244,19 @@ class icons(ranaModule):
     """return width and height
        just return w or h if they are set,
        if they are None, use values from the given pixbuf"""
-    if w == None:
+    if w is None:
       w = pixbuf.get_width()
-    if h == None:
+    if h is None:
       h = pixbuf.get_height()
-    if w == None and h == None:
+    if w is None and h is None:
       scale = False
     else:
       scale = True
-    return (w,h, scale)
+    return w,h, scale
 
   def getCustomIcon(self,parameterList,w,h):
     """
-    there are five positional parameters:
+    there are six positional parameters:
     fill color,fill opacity, outline color, outline opacity,
     outline width (default 8) and corner radius (default 22)
     to use default value, just don't fill in the positional parameter
