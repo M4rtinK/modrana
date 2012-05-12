@@ -562,7 +562,7 @@ class route(ranaModule):
       cr.move_to(x,y)
 
       # well, this SHOULD be faster and this is a performance critical section after all...
-  #    map(lambda x: cr.line_to(x[0],x[1]), route[1:]) # lambda drawing :)
+      #    map(lambda x: cr.line_to(x[0],x[1]), route[1:]) # lambda drawing :)
       # according to numerous sources, list comprehensions should be faster than for loops and map+lambda
       # if its faster in this case too has not been determined
 
@@ -666,14 +666,14 @@ class route(ranaModule):
 
         while True:
             b = ord(encoded[index]) - 63
-            index = index + 1
+            index += 1
             result |= (b & 0x1f) << shift
             shift += 5
             if b < 0x20:
                 break
 
-        dlat = ~(result >> 1) if result & 1 else result >> 1
-        lat += dlat
+        dLat = ~(result >> 1) if result & 1 else result >> 1
+        lat += dLat
 
         shift = 0
         result = 0
@@ -686,8 +686,8 @@ class route(ranaModule):
             if b < 0x20:
                 break
 
-        dlng = ~(result >> 1) if result & 1 else result >> 1
-        lng += dlng
+        dLng = ~(result >> 1) if result & 1 else result >> 1
+        lng += dLng
 
         array.append((lat * 1e-5, lng * 1e-5))
 
