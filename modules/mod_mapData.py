@@ -715,7 +715,7 @@ class mapData(ranaModule):
           To raise a proper error on this behaviour, we check the tiles magic number
           and if is not an image we raise the TileNotImageException.
 
-          TODO: does someone supply nonbitmap/SVG tiles ?
+          TODO: does someone supply non-bitmap/SVG tiles ?
           """
           if modrana_utils.isTheStringAnImage(content):
             #its an image, save it
@@ -922,7 +922,7 @@ class mapData(ranaModule):
 #          length = track.perElevList[-1][0]
 #          units = self.m.get('units', None)
 #          desc+=", %s" % units.km2CurrentUnitString(length)
-        return (name,desc,action)
+        return name,desc,action
 
 
       status = self.get('editBatchMenuActive', False)
@@ -944,9 +944,9 @@ class mapData(ranaModule):
       else:
         text = "Download queue empty."
     else:
-      (currentTileCount, totalTileCount, BTotalTransfered, failedCount) = getFilesThread.getProgress()
+      (currentTileCount, totalTileCount, BTotalTransferred, failedCount) = getFilesThread.getProgress()
       if getFilesThread.isAlive() == True:
-        MBTotalTransfered = BTotalTransfered/float(1048576)
+        MBTotalTransferred = BTotalTransferred/float(1048576)
         totalTileCount = getFilesThread.urlCount
         currentTileCount = getFilesThread.processed
         retryNumber = getFilesThread.getRetryInProgress()
@@ -960,7 +960,7 @@ class mapData(ranaModule):
           failedCountString = "1 download failed"
         else:
           failedCountString = "%d downloads failed" % failedCount
-        text = "<b>%s</b>: <b>%d</b> of <b>%d</b> tiles done\n<b>%1.2f MB</b> transferred, %s" % (action, currentTileCount, totalTileCount, MBTotalTransfered, failedCountString)
+        text = "<b>%s</b>: <b>%d</b> of <b>%d</b> tiles done\n<b>%1.2f MB</b> transferred, %s" % (action, currentTileCount, totalTileCount, MBTotalTransferred, failedCountString)
       elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
         if getFilesThread.getDownloadCount():
           # some downloads occurred
