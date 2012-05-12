@@ -821,10 +821,6 @@ class menus(ranaModule):
       # * draw the text
       
       # 1st line: option name
-#      mainText = "AAAA"
-#      secText = "BBBB"
-#      indexString = "1/2"
-
       self.menus.drawText(cr, mainText, x+w*0.10, y+h*0.1, w*0.80, h*0.5)
       # 2nd line: current value
       self.menus.drawText(cr, secText, x+w*0.10, y + 0.6 * h, w * 0.72, 0.4 * h)
