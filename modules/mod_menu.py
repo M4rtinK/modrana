@@ -485,7 +485,7 @@ class menus(ranaModule):
         self.drawButton(cr, x, y, dx, dy, "more", "more>%s" % bgIconDescription, "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber+1))
         itemGrid = self.itemMenuGrid[1][0:-1]
       else:
-        id = (pageNumber)*(itemSlots-2)+1
+        id = pageNumber *(itemSlots-2)+1
         if (itemCount-id-2) < (itemSlots-1):
           # this is the last page
           # draw only the "less" button
@@ -513,7 +513,7 @@ class menus(ranaModule):
       (x,y) = xy
 
       type = item[3]
-      if type=='simple':
+      if type == 'simple':
         (text, icon, action, type, timedAction) = item
         if id == highlightId:
           # make the button highlighted
@@ -521,7 +521,7 @@ class menus(ranaModule):
         self.drawButton(cr, x, y, dx, dy, text, icon, action, timedAction)
 #        (text, icon, action, type) = item
 #        self.drawButton(cr, x, y, dx, dy, text, icon, action)
-      elif type=='toggle':
+      elif type == 'toggle':
         index = item[1]
         toggleCount = len(item[0])
         nextIndex = (index + 1)%toggleCount
@@ -621,7 +621,6 @@ class menus(ranaModule):
     NOTE: if there already is a menu with the given key, it will be replaced"""
     menu['metadata']['wideButtons'] = wideButtons
     self.menus[menuName] = menu
-
 
   def generateItem(self, text, icon, action, type='simple', timedAction=None):
     """generate an itemized menu item"""
@@ -767,7 +766,7 @@ class menus(ranaModule):
       return self.name
 
     def nop(self, cr=None, item=None, backAction=None, index=None, menuName=None):
-      "a function that does nothing and acts as a callable placeholder"
+      """a function that does nothing and acts as a callable placeholder"""
       pass
 
     def setDrawItemMenuMethod(self, method):
