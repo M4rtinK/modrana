@@ -1,5 +1,3 @@
-from ScrolledText import example
-import os
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
@@ -100,10 +98,3 @@ class log(ranaModule):
       except Exception ,e:
         print("**log: closing log file failed")
         print(e)
-
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()
