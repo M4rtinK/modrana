@@ -801,7 +801,7 @@ class menus(ranaModule):
       self.drawItemToolsMenuFunction(cr, item, self._getBackToListDetailAction(index))
 
     def _getBackToListAction(self, index):
-      return "set:menu:menu#list#%s#%d" % (self.name, index)
+      return "ml:menu:setListIndex:%s;%d|set:menu:menu#list#%s" % (self.name, index, self.name)
 
     def _getBackToListDetailAction(self, index):
       return "set:menu:menu#listDetail#%s#%d" % (self.name, index)
@@ -878,6 +878,12 @@ class menus(ranaModule):
 
     def reset(self):
       self.index = 0
+
+    def setIndex(self, index):
+      if 0 <= index < self.container.getLength():
+        self.index = index
+      else:
+        print("listable menu %s: invalid index: %d" % (self.getName(), index))
 
     def setOnceBackAction(self, action):
       """replace the back button action with a given action for a single listable menu entry"""
@@ -1435,6 +1441,20 @@ class menus(ranaModule):
           self.lists[listMenuName].scrollUp()
         elif args[1]=="down":
           self.lists[listMenuName].scrollDown()
+
+    elif type == "ml" and message == "setListIndex":
+      # set listable menu index
+      try:
+        listName = args[0]
+        l = self.lists.get(listName)
+        if l:
+          l.setIndex(int(args[1]))
+        else:
+          print("menu: no list %s available, can't set index" % listName)
+      except Exception, e:
+        print("menu: setting list index failed")
+        print e
+
     elif type == "ms" and message == "openUrl":
       url = args
       self.modrana.gui.openUrl(url)
