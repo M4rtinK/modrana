@@ -86,9 +86,9 @@ class mapData(ranaModule):
       (lat,lon) = pos
       (tx,ty) = tileXY(lat, lon, 15)
       tile = "%d,%d" % (tx,ty)
-      if(not tiles.has_key(tile)):
+      if not tiles.has_key(tile):
         tiles[tile] = True
-    return(tiles.keys())
+    return tiles.keys()
 
   def checkTiles(self, tilesToDownload):
     """
@@ -130,7 +130,7 @@ class mapData(ranaModule):
     url = self.getTileUrl(x, y, z, layer) # generate url
     filePath = tileFolder + mapTiles.getImagePath(x, y, z, folderPrefix, extension)
     fileFolder = tileFolder + mapTiles.getImageFolder(x, z, folderPrefix)
-    return (url,filePath, fileFolder, folderPrefix, extension)
+    return url,filePath, fileFolder, folderPrefix, extension
 
   def addToQueue(self, neededTiles):
     """load urls and filenames to download queue,
@@ -156,7 +156,7 @@ class mapData(ranaModule):
         return None
 
   def handleMessage(self, message, type, args):
-    if(message == "refreshTilecount"):
+    if message == "refreshTilecount":
       size = int(self.get("downloadSize", 4))
       type = self.get("downloadType")
       if(type != "data"):
@@ -207,10 +207,10 @@ class mapData(ranaModule):
         midZ = 15
       print "max: %d, min: %d, diff: %d, middle:%d" % (maxZ, minZ, diffZ, midZ)
 
-      if(location == "here"):  
+      if location == "here":
         # Find which tile we're on
         pos = self.get("pos",None)
-        if(pos != None):
+        if pos is not None:
           (lat,lon) = pos
           # be advised: the xy in this case are not screen coordinates but tile coordinates
           (x,y) = latlon2xy(lat,lon,midZ)
@@ -221,7 +221,7 @@ class mapData(ranaModule):
           self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
 
 
-      if(location == "route"):
+      if location == "route":
         loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
         GPXTracklog = loadTl.getActiveTracklog()
         """because we don't need all the information in the original list and
@@ -235,7 +235,7 @@ class mapData(ranaModule):
         self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
         
 
-      if(location == "view"):
+      if location == "view":
         proj = self.m.get('projection', None)
         (screenCenterX,screenCenterY) = proj.screenPos(0.5, 0.5) # get pixel coordinates for the screen center
         (lat,lon) = proj.xy2ll(screenCenterX,screenCenterY) # convert to geographic coordinates
@@ -246,7 +246,7 @@ class mapData(ranaModule):
 
         self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
 
-    if(message == "getSize"):
+    if message == "getSize":
       """will now ask the server and find the combined size if tiles in the batch"""
       self.set("sizeStatus", 'unknown') # first we set the size as unknown
       neededTiles = self.currentDownloadList
@@ -256,7 +256,7 @@ class mapData(ranaModule):
         print "cant get combined size, the list is empty"
         return
 
-      if self.sizeThread != None:
+      if self.sizeThread is not None:
         if self.sizeThread.finished == False:
           print "size check already in progress"
           return
@@ -268,7 +268,7 @@ class mapData(ranaModule):
       sizeThread.start()
       self.sizeThread = sizeThread
 
-    if(message == "download"):
+    if message == "download":
       """get tilelist and download the tiles using threads"""
       neededTiles = self.currentDownloadList
       layer = self.get('layer', None)
@@ -277,7 +277,7 @@ class mapData(ranaModule):
         print "cant download an empty list"
         return
 
-      if self.getFilesThread != None:
+      if self.getFilesThread is not None:
         if self.getFilesThread.finished == False:
           print "download already in progress"
           return
@@ -309,21 +309,21 @@ class mapData(ranaModule):
       getFilesThread.start()
       self.getFilesThread = getFilesThread
 
-    if(message == "stopDownloadThreads"):
+    if message == "stopDownloadThreads":
       self.stopBatchDownloadThreads()
 
-    if(message == 'stopSizeThreads'):
+    if message == 'stopSizeThreads':
       self.stopSizeThreads()
 
-    if(message == "up"):
+    if message == "up":
       if(self.scroll > 0):
         self.scroll -= 1
         self.set('needRedraw', True)
-    if(message == "down"):
+    if message == "down":
       print "down"
       self.scroll += 1
       self.set('needRedraw', True)
-    if(message == "reset"):
+    if message == "reset":
       self.scroll = 0
       self.set("needRedraw", True)
 
@@ -347,14 +347,12 @@ class mapData(ranaModule):
     start = clock()
     extendedTiles = tiles.copy()
 
-
-
     """start of the tile splitting code"""
     previousZoomlevelTiles = None # we will split the tiles from the previous zoomlevel
     print "splitting down"
     for z in range(tilesZ, maxZ): # to max zoom (fo each z we split one zoomlevel down)
       newTilesFromSplit = set() # tiles from the splitting go there
-      if previousZoomlevelTiles == None: # this is the first iteration
+      if previousZoomlevelTiles is None: # this is the first iteration
         previousZoomlevelTiles = tiles.copy()
       for tile in previousZoomlevelTiles:
         x = tile[0]
@@ -385,7 +383,7 @@ class mapData(ranaModule):
     r.reverse()
     for z in r:
       newTilesFromRounding = set() # tiles from the rounding go there
-      if previousZoomlevelTiles == None: # this is the first iteration
+      if previousZoomlevelTiles is None: # this is the first iteration
         previousZoomlevelTiles = tiles.copy()
       for tile in previousZoomlevelTiles:
         x = tile[0]
@@ -499,7 +497,7 @@ class mapData(ranaModule):
           print "exception in a get size worker thread:\n%s" % e
 
         # increment the counter or remove an available tile in a thread safe way
-        if size == None: #this signalizes that the tile is available
+        if size is None: #this signalizes that the tile is available
           with self.callback.dlListLock:
             self.callbackSet.discard(item)
           size = 0 # tiles we don't have don't need to be downloaded, therefore 0
@@ -570,7 +568,7 @@ class mapData(ranaModule):
       self.failedDownloads = []
 
     def getProgress(self):
-      return (self.processed, self.urlCount, self.transfered, self.getFailedDownloadCount())
+      return self.processed, self.urlCount, self.transfered, self.getFailedDownloadCount()
 
     def getFailedDownloads(self):
       return self.failedDownloads
@@ -769,7 +767,7 @@ class mapData(ranaModule):
       s.moveX(d*2, -1)   # d*2 left
       s.moveY(d*2, 1)    # d*2 down
       s.moveX(d*2, 1)    # d*2 right
-    return(s.tiles)
+    return s.tiles
 
   def getTilesForRoute(self, route, radius, z):
     """get tilenames for tiles around the route for given radius and zoom"""
@@ -792,7 +790,7 @@ class mapData(ranaModule):
         points that are too far apart"""
         interpolatedPoints.extend(self.addPointsToLine(lastLat, lastLon, thisLat, thisLon, radius))
       (lastLat, lastLon) = (thisLat, thisLon)
-    """because we dont care about what order are the points in this case,
+    """because we don't care about what order are the points in this case,
     we just add the interpolated points to the end"""
     route.extend(interpolatedPoints)
     start = clock()
@@ -942,7 +940,7 @@ class mapData(ranaModule):
     """return a string describing status of the download threads"""
     text = ""
     tileCount = len(self.currentDownloadList)
-    if getFilesThread == None:
+    if getFilesThread is None:
       if tileCount:
         text = "Press <b>Start</b> to download ~ <b>%d</b> tiles." % tileCount
       else:
@@ -984,7 +982,7 @@ class mapData(ranaModule):
     tileCount = len(self.currentDownloadList)
     if tileCount == 0:
       return ""
-    if sizeThread == None:
+    if sizeThread is None:
       return ("Total size of tiles is unknown (<i>click to compute</i>).")
     elif sizeThread.isAlive() == True:
       totalTileCount = sizeThread.urlCount
@@ -1010,8 +1008,9 @@ class mapData(ranaModule):
     if self.sizeThread:
       try:
         self.sizeThread.quit=True
-      except:
-        print "error while shutting down size thread"
+      except Exception, e:
+        print("error while shutting down size thread")
+        print(e)
 
     time.sleep(0.1) # make place for the tread to handle whats needed
     self.sizeThread = None
@@ -1020,8 +1019,9 @@ class mapData(ranaModule):
     if self.getFilesThread:
       try:
         self.getFilesThread.quit=True
-      except:
-        print "error while shutting down files thread"
+      except Exception, e:
+        print("error while shutting down files thread")
+        print(e)
 
     time.sleep(0.1) # make place for the tread to handle whats needed
     self.getFilesThread = None
