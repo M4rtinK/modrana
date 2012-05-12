@@ -195,7 +195,7 @@ class ModRana:
     deviceModulesPath = os.path.join(modulesFolder, "device_modules")
     sys.path.append(deviceModulesPath)
     dmod = loadModule("device_%s" % device, "device")
-    if dmod == None:
+    if dmod is None:
       print("modRana: no device module name provided"
             "loading the Neo device module as failsafe")
       device = "neo"
@@ -615,7 +615,7 @@ class ModRana:
     mapTiles = self.m.get('mapTiles')
     if mapTiles: # check the mapTiles for tile side length in pixels, if available
       tileSide = mapTiles.tileSide
-    tileSide = tileSide * scale # apply any possible scaling
+    tileSide *= scale# apply any possible scaling
     (centerX,centerY) = ((sw/2.0),(sh/2.0))
     ulCenterDistance = simplePythagoreanDistance(0, 0, centerX, centerY)
     centerLLDistance = simplePythagoreanDistance(centerX, centerY, sw, sh)
@@ -756,7 +756,7 @@ class ModRana:
       totalTime = (tl[-1][1] * 1000) - startupTime
       for i in tl:
         (message, t) = i
-        t = 1000 * t # convert to ms
+        t *= 1000# convert to ms
         timeSpent = t - lastTime
         timeSinceStart = t - startupTime
         print( "* %s (%1.0f ms), %1.0f/%1.0f ms" % (message, timeSpent, timeSinceStart, totalTime))
