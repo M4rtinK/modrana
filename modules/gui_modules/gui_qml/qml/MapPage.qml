@@ -1,6 +1,5 @@
 import QtQuick 1.1
 import com.nokia.meego 1.0
-import "uiconstants.js" as UI
 import "functions.js" as F
 
 Page {

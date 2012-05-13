@@ -23,7 +23,7 @@ BasePage {
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.topMargin : 10
             anchors.top : aboutTitle.bottom
-            source : "image://icons/mieru.svg"
+            source : "image://icons/"+ rWin.theme +"/mieru.svg"
         }
         Label {
             id : aboutContactInfo
