@@ -116,19 +116,6 @@ Page {
         }
     }
 
-    /*
-    Text {
-        text: F.formatDistance(gps.targetDistance || 0, settings)
-        anchors.horizontalCenter: compassImage.horizontalCenter
-        anchors.top: compassImage.bottom
-        anchors.topMargin: 8
-        style: Text.Outline
-        styleColor: "white"
-        font.pixelSize: 32
-        visible: (gps.targetValid && gps.data.valid && gps.targetDistanceValid)
-    }
-    */
-
     Row {
         id: buttonsRight
         anchors.bottom: pinchmap.bottom
