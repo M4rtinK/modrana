@@ -29,8 +29,7 @@ Page {
             anchors.left : parent.left
             anchors.topMargin : 8
             anchors.leftMargin : 16
-            iconSource : "image://icons/"+ rWin.theme +"/left_thin.png"
-            //text : "back"
+            iconSource : "image://icons/"+ rWin.theme +"/back_small.png"
             onClicked : {
                 rWin.pageStack.pop()
             }
