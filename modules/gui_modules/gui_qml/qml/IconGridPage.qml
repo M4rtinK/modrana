@@ -36,7 +36,6 @@ Page {
 
 
         delegate : IconGridButton {
-            //anchors.fill : parent
             // handle place-holders
             visible : icon != ""
             iconName : icon
@@ -63,16 +62,9 @@ Page {
         margin : iconGP.iconMargin
         anchors.top : parent.top
         anchors.left : parent.left
-        //anchors.leftMargin : iconGP.iconMargin/12.0
         anchors.topMargin : iconGP.iconMargin/4.0
-        //width : iconGP.iconSize-iconGP.iconMargin/2.0
-        //height : iconGP.iconSize-iconGP.iconMargin/2.0
         iconName : "left_thin.png"
         text : "back"
-        //normalColor : "#4973f3"
-        //normalColor : "#3d6af3"
-        //normalColor : "#3161f3"
-        //toggledColor: "#92aaf3"
         opacity : gridView.atYBeginning ? 1.0 : 0.55
         onClicked : {
             rWin.pageStack.pop()
