@@ -13,7 +13,7 @@ import com.nokia.meego 1.0
 Page {
     property alias content: contentField.children
     property alias headerText: headerLabel.text
-    property int headerHeight : rWin.inPortrait ? height/7.0 : height/6.0
+    property int headerHeight : rWin.inPortrait ? height/7.0 : height/5.5
     Rectangle {
         id : header
         color : "darkgrey"
