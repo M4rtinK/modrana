@@ -10,12 +10,13 @@ BasePage {
     anchors.leftMargin : 30
     anchors.rightMargin : 30
     */
+    headerText : "modRana"
     content {
         Label {
             id : aboutTitle
             anchors.horizontalCenter : parent.horizontalCenter
-            text: "<b>modRana</b>" + " " + platform.modRanaVersion()
-            //font.pointSize: 24
+            text: "version: " + platform.modRanaVersion()
+            font.pointSize: 24
         }
         Image {
             id : aboutRephoIcon
