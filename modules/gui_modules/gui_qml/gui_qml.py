@@ -60,7 +60,7 @@ class Logger:
 
   def debug(self, message):
     if self.log:
-      print message
+      print(message)
 
 logger = Logger(log=False)
 
@@ -88,7 +88,7 @@ class QMLGUI(GUIModule):
         self.modrana = modrana
 
       def closeEvent(self, event):
-        print "shutting down"
+        print("shutting down")
         self.modrana.shutdown()
 
     self.app = QApplication(sys.argv)
@@ -365,7 +365,7 @@ class TileImageProvider(QDeclarativeImageProvider):
       img.loadFromData(f.read())
       # cleanup
       f.close()
-      print "OK"
+      #print "OK"
       return img
 
     except Exception, e:
@@ -395,17 +395,17 @@ class MapTiles(QtCore.QObject):
     True - tile already in storage or in memory
     False - tile download in progress, retry in a while
     """
-    print layer, z, x, y
+#    print layer, z, x, y
     if self.gui._mapTiles.tileInMemory(layer, z, x, y):
-      print "available in memory"
+#      print "available in memory"
       return True
     elif self.gui._mapTiles.tileInStorage(layer, z, x, y):
-      print "available in storage"
+#      print "available in storage"
       return True
     else: # not in memory or storage
       # add a tile download request
       self.gui._mapTiles.addTileDownloadRequest(layer, z, x, y)
-      print "dling try later"
+#      print "dling try later"
       return False
 
 # from AGTL
@@ -630,8 +630,8 @@ class Options(QtCore.QObject):
     @QtCore.Slot(str, float, result=float)
     def get(self, key, default):
       """get a value from the modRanas persistent options dictionary"""
-      print "GET"
-      print key, default, self.modrana.get(key, default)
+      print("GET")
+      print(key, default, self.modrana.get(key, default))
       return self.modrana.get(key, default)
 
     @QtCore.Slot(str, bool)
@@ -640,6 +640,6 @@ class Options(QtCore.QObject):
     @QtCore.Slot(str, float)
     def set(self, key, value):
       """set a keys value in modRanas persistent options dictionary"""
-      print "SET"
-      print key, value
+      print("SET")
+      print(key, value)
       return self.modrana.set(key, value)

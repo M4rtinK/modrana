@@ -133,7 +133,7 @@ class MapTiles(ranaModule):
     name = self.getTileName(layer, z, x, y)
     cacheItem = self.images[0].get(name, None)
     if cacheItem:
-      print "got tile FROM memory CACHE"
+#      print "got tile FROM memory CACHE"
       return cacheItem[0]
 
     # get layer info
@@ -145,7 +145,7 @@ class MapTiles(ranaModule):
     layerType = layerInfo.get('type','png')
     tileData = self._storeTiles.getTileData(layerPrefix, z, x, y, layerType)
     if tileData:
-      print "got tile FROM disk CACHE"
+#      print "got tile FROM disk CACHE"
       # tile was available from storage
       return tileData
 
