@@ -266,6 +266,15 @@ class Platform(QtCore.QObject):
     else:
       return version
 
+  @QtCore.Slot(result=str)
+  def getPayPalUrl(self):
+    m = self.modrana.getModule("info")
+    if m:
+      return m.getPayPalUrl()
+    else:
+      # fallback to hardwired link
+      return "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=martin%2ekolman%40gmail%2ecom&lc=CZ&item_name=The%20modRana%20project&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted"
+
   #  @QtCore.Slot()
   #  def minimise(self):
   #    return self.mieru.platform.minimise()
