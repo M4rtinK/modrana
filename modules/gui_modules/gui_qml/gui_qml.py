@@ -313,7 +313,11 @@ class IconImageProvider(QDeclarativeImageProvider):
   def requestImage(self, iconPath, size, requestedSize):
     try:
       #TODO: theme name caching ?
-      f = open('themes/%s' % (iconPath),'r')
+      f = open('themes/%s' % iconPath,'r')
+#      print "ICON"
+#      print iconPath
+#      print size
+#      print requestedSize
       img=QImage()
       img.loadFromData(f.read())
       f.close()
