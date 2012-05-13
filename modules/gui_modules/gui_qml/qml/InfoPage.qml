@@ -46,7 +46,7 @@ BasePage {
             anchors.top : aboutContactInfo.bottom
             onClicked : {
                 console.log('donation button clicked')
-                Qt.openUrlExternally(platform.getPayPalUrl())
+                Qt.openUrlExternally(modules.getS("info", "getPayPalUrl"))
             }
         }
     }

@@ -117,6 +117,9 @@ class QMLGUI(GUIModule):
     # make the platform accessible from QML
     platform = Platform(self.modrana)
     rc.setContextProperty("platform", platform)
+    # make the modules accessible from QML
+    modules = Modules(self.modrana)
+    rc.setContextProperty("modules", modules)
     # make tile loading accessible from QML
     tiles = MapTiles(self)
     rc.setContextProperty("mapTiles", tiles)
@@ -261,19 +264,10 @@ class Platform(QtCore.QObject):
     report current modRana version or None if version info is not available
     """
     version = self.modrana.paths.getVersionString()
-    if version == None:
+    if version is None:
       return "unknown"
     else:
       return version
-
-  @QtCore.Slot(result=str)
-  def getPayPalUrl(self):
-    m = self.modrana.getModule("info")
-    if m:
-      return m.getPayPalUrl()
-    else:
-      # fallback to hardwired link
-      return "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=martin%2ekolman%40gmail%2ecom&lc=CZ&item_name=The%20modRana%20project&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted"
 
   #  @QtCore.Slot()
   #  def minimise(self):
@@ -312,6 +306,47 @@ class Platform(QtCore.QObject):
     # the Fremantle theme is incomplete
     return self.modrana.dmod.getDeviceIDString() == "n900"
 
+class Modules(QtCore.QObject):
+  """
+  modRana module access from QML
+  """
+  def __init__(self, modrana):
+    QtCore.QObject.__init__(self)
+    self.modrana = modrana
+
+  @QtCore.Slot(str, str, result=str)
+  def getS(self, moduleName, functionName):
+    return self._mCall(moduleName, functionName)
+
+  @QtCore.Slot(str, str, result=bool)
+  def getB(self, moduleName, functionName):
+    return self._mCall(moduleName, functionName)
+
+  @QtCore.Slot(str, str, result=int)
+  def getI(self, moduleName, functionName):
+    return self._mCall(moduleName, functionName)
+
+  @QtCore.Slot(str, str, result=float)
+  def getF(self, moduleName, functionName):
+    return self._mCall(moduleName, functionName)
+
+  def _mCall(self, moduleName, functionName):
+    """
+    call the getter function for a given module
+    """
+    m = self.modrana.getModule(moduleName, None)
+    if m:
+      try:
+        function = getattr(m, functionName)
+        result = function()
+        return result
+      except Exception, e:
+        print("QML GUI: calling function %s on module %s failed" % (functionName, moduleName))
+        print(e)
+        return None
+    else:
+      print("QML GUI: module %s not loaded" % moduleName)
+      return None
 
 class IconImageProvider(QDeclarativeImageProvider):
   """the IconImageProvider class provides icon images to the QML layer as
