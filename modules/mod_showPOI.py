@@ -43,10 +43,6 @@ class showPOI(ranaModule):
     # restore the IDs of visible POI
     self.restoreVisibleIDs()
 
-  def beforeDraw(self):
-    if self.expectPoint:
-      self.makeMapClickable()
-
   def makeMapClickable(self):
     """make the whole map/screen clickable and send a specific message when clicked"""
     clickHandler = self.m.get('clickHandler', None)
@@ -60,6 +56,8 @@ class showPOI(ranaModule):
       self.activePOI.drawMenu(cr)
 
   def drawMapOverlay(self, cr):
+    if self.expectPoint:
+      self.makeMapClickable()
     if self.drawActivePOI:
       proj = self.m.get('projection', None)
       if proj and self.visiblePOI:
