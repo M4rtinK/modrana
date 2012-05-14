@@ -39,7 +39,11 @@ class showPOI(ranaModule):
     self.expectPoint = False
     self.expectLock = threading.Lock()
 
-  def update(self):
+  def firstTime(self):
+    # restore the IDs of visible POI
+    self.restoreVisibleIDs()
+
+  def beforeDraw(self):
     if self.expectPoint:
       self.makeMapClickable()
 
@@ -309,7 +313,11 @@ class showPOI(ranaModule):
 
       elif message == 'clearVisiblePOI':
         count = self.clearVisiblePOI()
-        self.notify("%d visible POI cleared" % count, 2000)
+        if count > 0:
+          self.notify("%d visible POI cleared" % count, 2000)
+        else:
+          self.notify("Nothing to clear", 2000)
+
 
   def _setupPOICategoryChooser(self, menu, key):
     menus = self.m.get('menu', None)
@@ -325,9 +333,14 @@ class showPOI(ranaModule):
     menus.addListMenu('POICategoryChooser',"set:menu:poi", cats)
 
   def makePOIVisible(self, POI):
-    """add a POI to the list of visible POI"""
+    """add a POI to the list of visible POI & save ID"""
+    self._makePOIVisible(POI)
+    self.saveVisibleIDs()
+
+  def _makePOIVisible(self, POI):
+    """add a POI to the list of visible POI & don't save ID"""
     # check if the POI is already present
-    if POI not in self.visiblePOI:
+    if POI and POI not in self.visiblePOI:
       self.visiblePOI.append(POI)
 
   def makeAllStoredPOIVisible(self):
@@ -335,15 +348,15 @@ class showPOI(ranaModule):
     store = self.m.get('storePOI', None)
     cats = store.getCategories()
     count = 0
+    _makePOIVisible = self._makePOIVisible
     for cat in cats:
       (label,desc,cat_id) = cat
       catPOI=store.getAllPOIFromCategory(cat_id)
       count+=len(catPOI)
       for item in catPOI:
         (label,lat,lon,poi_id) = item
-        POI = store.getPOI(poi_id)
-        if POI not in self.visiblePOI:
-          self.visiblePOI.append(POI)
+        _makePOIVisible(store.getPOI(poi_id))
+    self.saveVisibleIDs()
     self.drawPOI()
     return count
 
@@ -352,11 +365,35 @@ class showPOI(ranaModule):
     count = len(self.visiblePOI)
     self.dontDrawPOI()
     self.visiblePOI = []
+    self.saveVisibleIDs()
     return count
 
   def removePOIFromVisible(self,POI):
     if POI in self.visiblePOI:
       self.visiblePOI.remove(POI)
+      self.saveVisibleIDs()
+
+  def saveVisibleIDs(self):
+    visibleIDs = []
+    for POI in self.visiblePOI:
+      visibleIDs.append(POI.getId())
+    self.set("visiblePOIIDs", visibleIDs)
+
+  def restoreVisibleIDs(self):
+    print "RESTORE"
+    visibleIDs = self.get("visiblePOIIDs", [])
+    print visibleIDs
+    if visibleIDs:
+      store = self.m.get('storePOI', None)
+      if store:
+        for id in visibleIDs:
+          print store.getPOI(id)
+          self._makePOIVisible(store.getPOI(id))
+        if self.visiblePOI: # enable POI drawing only if some POI vere restored
+          self.drawPOI()
+        print("showPOI: %d visible POI restored" % len(self.visiblePOI))
+      else:
+        print("showPOI: can't restore visible, storePOI not loaded")
 
   def drawPOI(self):
     """enable drawing of the active POI"""
