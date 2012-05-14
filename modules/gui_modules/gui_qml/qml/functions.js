@@ -5,7 +5,6 @@ function formatDistance(d) {
         return "0"
     }
 
-
     //TODO: imperial unit handling
     if (1) {
         if (d >= 1000) {

@@ -325,8 +325,6 @@ Rectangle {
             }
         }
         */
-
-
     }
     
     Image {
