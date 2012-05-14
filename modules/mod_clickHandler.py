@@ -55,12 +55,12 @@ class clickHandler(ranaModule):
   def handleClick(self, x, y, msDuration):
 #    print "Clicked at %d,%d for %d" % (x,y,msDuration)
     if self.ignoreNextClicks > 0:
-      self.ignoreNextClicks=self.ignoreNextClicks - 1
+      self.ignoreNextClicks -= 1
 #      print "ignoring click, %d remaining" % self.ignoreNextClicks
     else:
       for area in self.areas:
         (rect, action, timedAction) = area
-        if(rect.contains(x,y)):
+        if rect.contains(x,y):
           m = self.m.get("messages", None)
           if m:
             print "Clicked, sending %s" % action
@@ -78,7 +78,7 @@ class clickHandler(ranaModule):
       for area in self.areas:
         (rect, normalAction, timedAction) = area
         if timedAction: # we are interested only in timed actions
-          if(rect.contains(x,y)):
+          if rect.contains(x,y):
             (givenMsDuration, action) = timedAction
             if givenMsDuration <= msCurrentDuration:
               m = self.m.get("messages", None)
@@ -101,16 +101,16 @@ class clickHandler(ranaModule):
 
   def handleDrag(self,startX,startY,dx,dy,x,y,msDuration):
     # react on timed actions interactively
-    if(self.dragscreen):
+    if self.dragscreen:
       m = self.m.get(self.dragscreen, None)
-      if(m != None):
+      if m is not None:
         m.dragEvent(startX,startY,dx,dy,x,y)
     else:
 	    for area in self.dragareas:
 	      (rect, module) = area
-	      if(rect.contains(startX,startY)):
+	      if rect.contains(startX,startY):
 	        m = self.m.get(module, None)
-	        if(m != None):
+	        if m is not None:
 	          m.dragEvent(startX,startY,dx,dy,x,y)
 	        else:
 	          print "Drag registered to nonexistent module %s" % module
