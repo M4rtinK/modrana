@@ -468,7 +468,7 @@ class storePOI(ranaModule):
 
     text = "%s" % (result['titleNoFormatting'])
 
-    try: # the adress can be unknown
+    try: # the address can be unknown
       for addressLine in result['addressLines']:
         text += "\n%s" % addressLine
     except:
@@ -492,9 +492,13 @@ class storePOI(ranaModule):
       entry.entryBox(self,'onlineResultName','POI Name',name)
 
 class POI():
-  """A basic class representing a POI.
+  """
+  !! DEPRECIATED
+  A basic class representing a POI.
      DEPRECIATED, use the new version in the main class
-     this is there only because it is needed for import of old POI"""
+     this is there only because it is needed for import of old POI
+  !! DEPRECIATED
+  """
   def __init__(self, name, category, lat, lon):
     self.name = name
     self.category = category
