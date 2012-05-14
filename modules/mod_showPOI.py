@@ -52,7 +52,7 @@ class showPOI(ranaModule):
 
   def drawMenu(self, cr, menuName, args=None):
     """make the POI Object draw the menu :D"""
-    if menuName=='POIDetail':
+    if menuName == 'POIDetail':
       self.activePOI.drawMenu(cr)
 
   def drawMapOverlay(self, cr):
@@ -145,10 +145,10 @@ class showPOI(ranaModule):
         menus.addListMenu('POICategories', "set:menu:poi", usedCategories)
       elif message=='setupPOIList':
         if args:
-          if type=='ms':
+          if type == 'ms':
             catId = int(args)
             action = 'set:menu:showPOI#POIDetail' # use the default action
-          elif type=='ml':
+          elif type == 'ml':
             """if the message is a message list, execute a custom action instead of the default POI detail menu
                TODO: use this even for selecting the POIDetail menu ?"""
             print args
@@ -164,11 +164,11 @@ class showPOI(ranaModule):
             poiFromCategory[i] = (label,subText,buttonAction)
             i += 1
           menus.addListMenu("POIList", 'set:menu:menu#list#POICategories', poiFromCategory)
-      elif type=='ms' and message=='setActivePOI':
+      elif type == 'ms' and message=='setActivePOI':
         if args:
           POIId = int(args)
           self.activePOI = store.getPOI(POIId)
-      elif type=='ms' and message=='storePOI':
+      elif type == 'ms' and message=='storePOI':
         if args == "manualEntry":
           """add all POI info manually"""
           entry = self.m.get('textEntry', None)
@@ -212,30 +212,30 @@ class showPOI(ranaModule):
                 """we misuse the current position chain"""
                 entry.entryBox(self,'newCurrentPositionName','POI name',"")
 
-      elif type=='ms' and message=='editActivePOI':
+      elif type == 'ms' and message == 'editActivePOI':
         entry = self.m.get('textEntry', None)
         if args:
           if entry:
-            if args=='name':
+            if args == 'name':
               name = self.activePOI.getName()
               entry.entryBox(self,'name','POI name',name)
-            if args=='description':
+            if args == 'description':
               description = self.activePOI.getDescription()
               entry.entryBox(self,'description','POI Description',description)
-            if args=='lat':
+            if args == 'lat':
               lat = str(self.activePOI.getLat())
               entry.entryBox(self,'lat','POI Latitude',lat)
-            if args=='lon':
+            if args == 'lon':
               lon = str(self.activePOI.getLon())
               entry.entryBox(self,'lon','POI Longitude',lon)
 
-      elif type=='ml' and message=='setupPOICategoryChooser':
+      elif type == 'ml' and message == 'setupPOICategoryChooser':
         """setup a category chooser menu"""
         if args:
           (menu,key) = args
           self._setupPOICategoryChooser(menu, key)
         
-      elif type=='ms' and message=='setCatAndCommit':
+      elif type == 'ms' and message == 'setCatAndCommit':
         """selecting the category is the final stage of adding a POI"""
         if args:
           # set the category
@@ -248,7 +248,7 @@ class showPOI(ranaModule):
           # go to the new POI menu
           self.set('menu', 'showPOI#POIDetail')
 
-      elif message=='checkMenus':
+      elif message == 'checkMenus':
         """check if the POI menus are "dirty" and need to be regenerated"""
         if self.listMenusDirty:
           self.sendMessage('showPOI:setupCategoryList')
@@ -257,7 +257,7 @@ class showPOI(ranaModule):
             self.sendMessage('ms:showPOI:setupPOIList:%d' % catId)
           self.listMenusDirty = False
 
-      elif message=="updateToolsMenu":
+      elif message == "updateToolsMenu":
         self.activePOI.updateToolsMenu()
 
       elif message == 'listMenusDirty':
@@ -347,27 +347,27 @@ class showPOI(ranaModule):
   def handleTextEntryResult(self, key, result):
     # TODO: add input checking
     entry = self.m.get('textEntry', None)
-    if key=='name':
+    if key == 'name':
       self.activePOI.setName(result)
-    elif key=='description':
+    elif key == 'description':
       self.activePOI.setDescription(result)
-    elif key=='lat':
+    elif key == 'lat':
       self.activePOI.setLat(float(result))
-    elif key=='lon':
+    elif key == 'lon':
       self.activePOI.setLon(float(result))
 
     # new  poi will be committed at once, so we disable the autocommit
     # also, the events are chained, so one entry box follows the other
-    elif key=='newName':
+    elif key == 'newName':
       self.activePOI.setName(result,commit=False)
       entry.entryBox(self,'newDescription','POI Description',"")
-    elif key=='newDescription':
+    elif key == 'newDescription':
       self.activePOI.setDescription(result,commit=False)
       entry.entryBox(self,'newLat','POI Latitude',"")
-    elif key=='newLat':
+    elif key == 'newLat':
       self.activePOI.setLat(result,commit=False)
       entry.entryBox(self,'newLon','POI Longitude',"")
-    elif key=='newLon':
+    elif key == 'newLon':
       self.activePOI.setLon(result,commit=False)
       """final step:
       setup the category chooser menu,
@@ -378,10 +378,10 @@ class showPOI(ranaModule):
       self.sendMessage('ml:notification:m:Select a category for this POI;3')
 
     # "current position as a new POI" entry chain
-    elif key=='newCurrentPositionName':
+    elif key == 'newCurrentPositionName':
       self.activePOI.setName(result,commit=False)
       entry.entryBox(self,'newCurrentPositionDescription','POI Description',"")
-    elif key=='newCurrentPositionDescription':
+    elif key == 'newCurrentPositionDescription':
       self.activePOI.setDescription(result,commit=False)
       # setting the category is the last step
 
