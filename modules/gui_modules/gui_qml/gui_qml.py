@@ -52,7 +52,6 @@ def newlines2brs(text):
   """ QML uses <br> instead of \n for linebreak """
   return re.sub('\n', '<br>', text)
 
-
 class Logger:
   def __init__(self, log=True):
     pass
@@ -315,8 +314,13 @@ class Modules(QtCore.QObject):
     self.modrana = modrana
 
   @QtCore.Slot(str, str, result=str)
-  def getS(self, moduleName, functionName):
-    return self._mCall(moduleName, functionName)
+  @QtCore.Slot(str, str, bool, result=str)
+  def getS(self, moduleName, functionName, replaceNewlines=True):
+    result = self._mCall(moduleName, functionName)
+    # QML uses <br> in place of newlines
+    if replaceNewlines:
+      result = newlines2brs(result)
+    return result
 
   @QtCore.Slot(str, str, result=bool)
   def getB(self, moduleName, functionName):
