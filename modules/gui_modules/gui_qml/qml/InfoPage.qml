@@ -34,7 +34,7 @@ BasePage {
             anchors.top : donateLabel.bottom
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.topMargin : 32
-            color : "gold"
+            color : ppMA.pressed ? "yellow" : "gold"
             radius : 30
             width : 210
             height : 60
@@ -44,6 +44,7 @@ BasePage {
                 text : "<h2>PayPal</h2>"
             }
             MouseArea {
+                id : ppMA
                 anchors.fill : parent
                 onClicked : {
                     console.log('PayPal button clicked')
@@ -57,7 +58,7 @@ BasePage {
             anchors.top : ppButton.bottom
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.topMargin : 32
-            color : "green"
+            color : flattrMA.pressed ? "limegreen" : "green"
             radius : 5
             width : 210
             height : 45
@@ -68,6 +69,7 @@ BasePage {
                 color : "white"
             }
             MouseArea {
+                id : flattrMA
                 anchors.fill : parent
                 onClicked : {
                     console.log('Flattr button clicked')
