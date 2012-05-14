@@ -38,6 +38,9 @@ class info(ranaModule):
   def getPayPalUrl(self):
     return "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=martin%2ekolman%40gmail%2ecom&lc=CZ&item_name=The%20modRana%20project&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted"
 
+  def getFlattrUrl(self):
+    return "https://flattr.com/thing/678708/modRana-flexible-GPS-navigation-system"
+
   def getDiscussionUrls(self):
     """
     return a list of modRana-relevant discussions, with the most relevant discussion on top
