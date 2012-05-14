@@ -114,6 +114,20 @@ class GTKGUI(GUIModule):
   def getIDString(self):
     return "GTK"
 
+  def openUrl(self, url):
+    # check if the device module handles URL opening
+    if self.modrana.dmod.handlesUrlOpening():
+      self.modrana.dmod.openUrl(url)
+    else:
+      try:
+        gtk.show_uri(None, url, gtk.gdk.CURRENT_TIME)
+      except Exception, e:
+        print("GTK GUI: calling gtk.show_uri() failed, probably due to old GTK version")
+        print(e)
+        print("using the webbrowser module as fallback")
+        import webbrowser
+        webbrowser.open(url)
+
   def resize(self, w, h):
     """resize the GUI to given width and height"""
     self.win.resize(w,h)
@@ -331,21 +345,6 @@ class MainWidget(gtk.Widget):
     local alias for the modRana persistent dictionary set function
     """
     self.modrana.set(key, value)
-
-
-  def openUrl(self, url):
-    # check if the device module handles URL opening
-    if self.modrana.dmod.handlesUrlOpening():
-      self.modrana.dmod.openUrl(url)
-    else:
-      try:
-        gtk.show_uri(None, url, gtk.gdk.CURRENT_TIME)
-      except Exception, e:
-        print("GTK GUI: calling gtk.show_uri() failed, probably due to old GTK version")
-        print(e)
-        print("using the webbrowser module as fallback")
-        import webbrowser
-        webbrowser.open(url)
 
   def _checkForRedrawCB(self, key, oldValue, newValue):
     """react to redraw requests"""
