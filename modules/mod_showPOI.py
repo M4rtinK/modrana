@@ -302,8 +302,14 @@ class showPOI(ranaModule):
       elif message == 'dontDrawActivePOI':
         self.removePOIFromVisible(self.activePOI)
 
+      elif message == 'makeAllStoredPOIVisible':
+        count = self.makeAllStoredPOIVisible()
+        self.set("menu", None)
+        self.notify("All %d stored POI are now visible" % count, 2000)
+
       elif message == 'clearVisiblePOI':
-        self.clearVisiblePOI()
+        count = self.clearVisiblePOI()
+        self.notify("%d visible POI cleared" % count, 2000)
 
   def _setupPOICategoryChooser(self, menu, key):
     menus = self.m.get('menu', None)
@@ -324,10 +330,29 @@ class showPOI(ranaModule):
     if POI not in self.visiblePOI:
       self.visiblePOI.append(POI)
 
+  def makeAllStoredPOIVisible(self):
+    """make all stored POI visible"""
+    store = self.m.get('storePOI', None)
+    cats = store.getCategories()
+    count = 0
+    for cat in cats:
+      (label,desc,cat_id) = cat
+      catPOI=store.getAllPOIFromCategory(cat_id)
+      count+=len(catPOI)
+      for item in catPOI:
+        (label,lat,lon,poi_id) = item
+        POI = store.getPOI(poi_id)
+        if POI not in self.visiblePOI:
+          self.visiblePOI.append(POI)
+    self.drawPOI()
+    return count
+
   def clearVisiblePOI(self):
     """discard visible POI"""
+    count = len(self.visiblePOI)
     self.dontDrawPOI()
     self.visiblePOI = []
+    return count
 
   def removePOIFromVisible(self,POI):
     if POI in self.visiblePOI:
