@@ -108,7 +108,7 @@ class showPOI(ranaModule):
           click = self.m.get('clickHandler', None)
           if click:
             """ make the POI caption clickable"""
-            if id != None: # new POI have id == None
+            if id is not None: # new POI have id == None
               click.registerXYWH(rx,ry-(-rh),rw,-rh, "ms:showPOI:setActivePOI:%d|set:menu:showPOI#POIDetail" % id)
             else: # the last added POI is still set, no need to set the id
               click.registerXYWH(rx,ry-(-rh),rw,-rh, "set:menu:showPOI#POIDetail")
