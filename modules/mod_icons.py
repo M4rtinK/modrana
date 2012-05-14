@@ -185,7 +185,7 @@ class icons(ranaModule):
           else:
             return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor),False)
 
-      if result == None:
+      if result is None:
         return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor),False)
     # just use the classic icon
     elif simplePaths:
@@ -201,11 +201,11 @@ class icons(ranaModule):
       # we use the default button background if the tile is missing
       return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor),False)
 
-    if(not image): # loading the image probably failed
-      return(False)
+    if not image: # loading the image probably failed
+      return False
     w = float(image.get_width())
     h = float(image.get_height())
-    return (image,False)
+    return image,False
 
   def getImageSurface(self,path, w=None, h=None):
     """load a image given by path to pixbuf and paint it to an image surface,
@@ -413,7 +413,7 @@ class icons(ranaModule):
 
           # try to get the icon
           icon = self.getIconByName(iconName, returnPixbuf=True)
-          if (icon == None):
+          if icon is None:
             self.cantLoad.append(iconName)
             # get a generic icon
             genericIcon = self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor)
@@ -473,7 +473,7 @@ class icons(ranaModule):
 
         else: # not a generic or parametric icon, try to load from file
           loadingResult = self.loadFromFile(currentName, w, h)
-          if (loadingResult == False):
+          if loadingResult == False:
             self.cantLoad.append(currentName)
           else:
             (loadingResult,needBackground) = loadingResult
@@ -536,7 +536,7 @@ class icons(ranaModule):
     """draw a rounded rectangle, fill and outline set the fill and outline rgba color
        r,g,b from 0 to 255, a from 0 to 1"""
     # make the outline proportional to the size of the button
-    if outlineWidth == None:
+    if outlineWidth is None:
       outlineWidth = min(width,height)*0.05
     elif outlineWidth < 1.0: # add support for proportional outlines
       outlineWidth = min(width,height)*outlineWidth
@@ -553,10 +553,10 @@ class icons(ranaModule):
     # correcting for the line width
     # we also leave a line about one pixel wide free on all sides
 
-    x = x+5
-    y = y+5
-    width = width-9
-    height = height-9
+    x += 5
+    y += 5
+    width -= 9
+    height -= 9
 
     cr.new_sub_path()
     if radius <= 0: # no round corners, just draw a box
