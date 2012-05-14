@@ -65,6 +65,16 @@ class route(ranaModule):
         self.directionsFilterRules.append((regex, row[1].decode("utf-8")))
     file.close()
 
+  def firstTime(self):
+    """Load stored addresses at startup.
+           TODO: toggle for this, privacy reasons perhaps ?"""
+    startAddress = self.get('startAddress', None)
+    if startAddress:
+      self.startAddress = startAddress
+    destinationAddress = self.get('destinationAddress', None)
+    if destinationAddress:
+      self.destinationAddress = destinationAddress
+
   def handleMessage(self, message, type, args):
     if message == "clear":
       self.route = []
@@ -461,15 +471,6 @@ class route(ranaModule):
       return rawDirections
 
 
-  def firstTime(self):
-    """Load stored addresses at startup.
-      TODO: toggle for this, privacy reasons perhaps ?"""
-    startAddress = self.get('startAddress', None)
-    if startAddress:
-      self.startAddress = startAddress
-    destinationAddress = self.get('destinationAddress', None)
-    if destinationAddress:
-      self.destinationAddress = destinationAddress
 
   def beforeDraw(self):
     """register areas for manual point input"""
