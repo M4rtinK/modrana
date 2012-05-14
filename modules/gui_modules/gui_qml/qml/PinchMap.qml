@@ -403,8 +403,7 @@ Rectangle {
     }
 
     Text {
-        //text: F.formatDistance(scaleBarLength[1], settings)
-        //text: F.formatDistance(scaleBarLength[1], settings)
+        text: F.formatDistance(scaleBarLength[1])
         anchors.horizontalCenter: scaleBar.horizontalCenter
         anchors.top: scaleBar.bottom
         anchors.topMargin: 8

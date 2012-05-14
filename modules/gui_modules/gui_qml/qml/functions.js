@@ -1,11 +1,13 @@
 //.pragma library
 
-function formatDistance(d, settings) {
+function formatDistance(d) {
     if (! d) {
         return "0"
     }
 
-    if (settings.distanceUnit == 'm') {
+
+    //TODO: imperial unit handling
+    if (1) {
         if (d >= 1000) {
             return Math.round(d / 1000.0) + " km"
         } else if (d >= 100) {
