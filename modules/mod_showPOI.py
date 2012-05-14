@@ -126,7 +126,7 @@ class showPOI(ranaModule):
     store = self.m.get('storePOI', None)
     menus = self.m.get('menu', None)
     if store and menus:
-      if(message == "setupCategoryList"):
+      if message == "setupCategoryList":
         if type=='ml':
           """this is used for executing something special instead of going to the POIDetail menu
              after a POI is selected"""
@@ -141,7 +141,7 @@ class showPOI(ranaModule):
           (label,desc,cat_id) = item
           buttonAction = action % cat_id
           usedCategories[i] = (label,desc,buttonAction)
-          i = i + 1
+          i += 1
         menus.addListMenu('POICategories', "set:menu:poi", usedCategories)
       elif message=='setupPOIList':
         if args:
@@ -162,7 +162,7 @@ class showPOI(ranaModule):
             subText = "lat: %f, lon: %f" % (lat,lon)
             buttonAction = "ms:showPOI:setActivePOI:%d|%s" % (poi_id,action)
             poiFromCategory[i] = (label,subText,buttonAction)
-            i = i + 1
+            i += 1
           menus.addListMenu("POIList", 'set:menu:menu#list#POICategories', poiFromCategory)
       elif type=='ms' and message=='setActivePOI':
         if args:
@@ -194,7 +194,6 @@ class showPOI(ranaModule):
           self.set('menu', None)
           self.sendMessage('ml:notification:m:Tap on the map to add POI;3')
           self.set('needRedraw', True)
-#          self.makeMapClickable() # make the map clickable right away
         elif args == "fromMapDone": # this is after the point has been clicked
           with self.expectLock:
             if self.expectPoint == True:
@@ -242,7 +241,7 @@ class showPOI(ranaModule):
           # set the category
           catId = int(args)
           self.activePOI.setCategory(catId, commit=False)
-          # comit the new POI to db
+          # commit the new POI to db
           self.activePOI.storeToDb()
           # mark list menus for regeneration
           self.listMenusDirty = True
@@ -316,7 +315,7 @@ class showPOI(ranaModule):
       (label,desc,cat_id) = cat
       action = "ms:%s:%s:%d" % (menu,key,cat_id)
       cats[i] = (label, desc, action)
-      i = i + 1
+      i += 1
 
     print cats
 
@@ -372,7 +371,7 @@ class showPOI(ranaModule):
       self.activePOI.setLon(result,commit=False)
       """final step:
       setup the category chooser menu,
-      and make sure the POI is committed after acategory is chosen
+      and make sure the POI is committed after a category is chosen
       """
       self._setupPOICategoryChooser('showPOI', 'setCatAndCommit')
       self.set('menu', 'menu#list#POICategoryChooser')
