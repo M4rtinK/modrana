@@ -316,9 +316,6 @@ class showPOI(ranaModule):
       action = "ms:%s:%s:%d" % (menu,key,cat_id)
       cats[i] = (label, desc, action)
       i += 1
-
-    print cats
-
     menus.addListMenu('POICategoryChooser',"set:menu:poi", cats)
 
   def makePOIVisible(self, POI):
