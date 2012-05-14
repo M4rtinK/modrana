@@ -471,22 +471,6 @@ class route(ranaModule):
       return rawDirections
 
 
-
-  def beforeDraw(self):
-    """register areas for manual point input"""
-
-    if self.expectStart:
-      clickHandler = self.m.get('clickHandler', None)
-      (x,y,w,h) = self.get('viewport')
-      if clickHandler is not None:
-        clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setStart')
-
-    if self.expectEnd:
-      clickHandler = self.m.get('clickHandler', None)
-      (x,y,w,h) = self.get('viewport')
-      if clickHandler is not None:
-        clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setEnd')
-
   def drawScreenOverlay(self, cr):
     menus = self.m.get('menu', None)
     if menus:
@@ -496,6 +480,18 @@ class route(ranaModule):
 
         if self.selectTwoPoints: # point selection menu
           self.drawTwoPointsMenu(cr)
+
+    #register clickable areas for manual point input
+    if self.expectStart:
+      clickHandler = self.m.get('clickHandler', None)
+      (x,y,w,h) = self.get('viewport')
+      if clickHandler is not None:
+        clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setStart')
+    if self.expectEnd:
+      clickHandler = self.m.get('clickHandler', None)
+      (x,y,w,h) = self.get('viewport')
+      if clickHandler is not None:
+        clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setEnd')
 
   def drawMapOverlay(self, cr):
     """Draw a route"""
