@@ -34,38 +34,31 @@ class storePOI(ranaModule):
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.db = None
-    self.tempOnlinePOI = None # temporary slot for an uncommited POI from online search
+    self.tempOnlinePOI = None # temporary slot for an uncommitted POI from online search
     # to which menu to return after the POI is stored
     # NOTE: False => unset, None => map screen
     self.menuNameAfterStorageComplete = False
+    # connect to the POI database
+    self.connectToDb()
 
   def firstTime(self):
-    self.connectToDb()
     self.checkImport() # check if there ary any old POI to import
 
   def connectToDb(self):
     """connect to the database"""
-    options = self.m.get('options', None)
-    if options:
-      DBPath = self.modrana.paths.getPOIDatabasePath()
-      if os.path.exists(DBPath): # connect to db
-        print("storePOI: POI database path:\n %s" % DBPath)
-        try:
-          self.db = sqlite3.connect(DBPath)
-          print("storePOI: connection to POI db established")
-        except Exception, e:
-          print("storePOI: connecting to POI database failed:\n%s" % e)
-      else: # create new db
-        try:
-          self.db = self.createDatabase(DBPath)
-        except Exception, e:
-          print("storePOI: creating POI database failed:\n%s" % e)
-    else:
-      print("storePOI: options module not available, can't connect to DB"
-      """
-      without the options module providing path to the database,
-      we can't connect to it
-      """)
+    DBPath = self.modrana.paths.getPOIDatabasePath()
+    if os.path.exists(DBPath): # connect to db
+      print("storePOI: POI database path:\n %s" % DBPath)
+      try:
+        self.db = sqlite3.connect(DBPath)
+        print("storePOI: connection to POI db established")
+      except Exception, e:
+        print("storePOI: connecting to POI database failed:\n%s" % e)
+    else: # create new db
+      try:
+        self.db = self.createDatabase(DBPath)
+      except Exception, e:
+        print("storePOI: creating POI database failed:\n%s" % e)
 
   def disconnectFromDb(self):
     print("storePOI: disconnecting from db")
@@ -97,7 +90,7 @@ class storePOI(ranaModule):
                    (11, u'Other', u'Miscellaneous category for everything else.', 1)]
     for cat in defaultCats:
       conn.execute('insert into category values(?,?,?,?)', cat)
-    # commit the chnages
+    # commit the changes
     conn.commit()
     print("storePoi: new database file has been created")
     return conn
@@ -136,7 +129,7 @@ class storePOI(ranaModule):
       return None
 
   def getCategoryForId(self, catId):
-    """return cat_id,label, desc, enabled froa agiven cat_id"""
+    """return cat_id,label, desc, enabled from a given cat_id"""
     result = self.db.execute('select cat_id,label,desc,enabled from category where cat_id=?', [catId]).fetchone()
     return result
 
@@ -218,7 +211,7 @@ class storePOI(ranaModule):
       if menus:
         button1 = ('map#show on', 'generic', 'mapView:recentre %f %f|showPOI:drawActivePOI|set:menu:None' % (self.lat,self.lon))
         button2 = ('tools', 'tools', 'showPOI:updateToolsMenu|set:menu:POIDetailTools')
-        if self.label!=None and self.lat!=None and self.lon!=None and self.description!=None:
+        if self.label is not None and self.lat is not None and self.lon is not None and self.description is not None:
           text = "<big><b>%s</b></big>\n\n%s\n\nlat: <b>%f</b> lon: <b>%f</b>" % (self.label, self.description, self.lat, self.lon)
         else:
           text = "POI is being initialized"
@@ -238,15 +231,15 @@ class storePOI(ranaModule):
         menus.addItem('POIDetailTools', 'category#change', 'generic', 'ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit|set:menu:menu#list#POICategoryChooser')
         menus.addItem('POIDetailTools', 'position#set as', 'generic', 'showPOI:centerOnActivePOI|ml:location:setPosLatLon:%f;%f' % (self.lat,self.lon))
         """just after the point is stored and and its detail menu shows up for the first time,
-        it cant be deleted from the database, beucause we dont know which index it got :D
+        it cant be deleted from the database, because we don't know which index it got :D
         TODO: find a free index and then store the point on it
-        (make sure noone writes to the database between getting the free index and writing the poi to it)
+        (make sure no one writes to the database between getting the free index and writing the poi to it)
         then we would be able to delete even newly created points"""
         if self.getId():
           menus.addItem('POIDetailTools', 'POI#delete', 'generic', 'showPOI:askDeleteActivePOI')
 
     def getValues(self):
-      return([self.id,self.lat,self.lon,self.label,self.description,self.categoryId])
+      return [self.id,self.lat,self.lon,self.label,self.description,self.categoryId]
 
     def setName(self, newLabel, commit=True):
       self.label = u'%s' % newLabel
@@ -345,14 +338,14 @@ class storePOI(ranaModule):
 
 
   def handleMessage(self, message, type, args):
-    if type=='ms' and message=='deletePOI':
+    if type == 'ms' and message == 'deletePOI':
       """remove a poi with given id from database"""
       if args:
         id = int(args)
         self.deletePOI(id) # remove the poi from database
         # notify the showPOI module, that it might need to rebuild its menus
         self.sendMessage('showPOI:listMenusDirty')
-    elif type=='ms' and message=='setCatAndCommit':
+    elif type == 'ms' and message == 'setCatAndCommit':
       """set category and as this is the last needed input,
          commit the new POI to db"""
       catId = int(args)
@@ -366,7 +359,7 @@ class storePOI(ranaModule):
       catName = catInfo[1]
       POIName = self.tempOnlinePOI.getName()
       """
-      NOTE: False means the the variable is unset, as None mens the map screen
+      NOTE: False means the the variable is unset, as None means the map screen
       """
       if self.menuNameAfterStorageComplete == False:
         self.set('menu', 'search#searchResultsItem')
@@ -388,7 +381,7 @@ class storePOI(ranaModule):
       self.dumpToCSV()
 
   def handleTextEntryResult(self, key, result):
-    if key=='onlineResultName':
+    if key == 'onlineResultName':
       """like this, the user can edit the name of the
          result before saving it to POI"""
       self.tempOnlinePOI.setName(result, commit=False)
@@ -405,7 +398,7 @@ class storePOI(ranaModule):
       try:
         filenameHash = units.getTimeHashString()
 
-        def CSVdump(path, rows):
+        def CSVDump(path, rows):
           """dump given list of rows to file"""
           f = open(path, 'wb')
           writer = csv.writer(f)
@@ -415,13 +408,15 @@ class storePOI(ranaModule):
 
         # dump the categories
         rows = self.db.execute('select * from category').fetchall()
-        path = "" + POIFolderPath + "/" + filenameHash + "_category_dump.csv"
-        CSVdump(path, rows)
+        filename = filenameHash + "_category_dump.csv"
+        path = os.path.join(POIFolderPath, filename)
+        CSVDump(path, rows)
 
         # dump the POI
         rows = self.db.execute('select * from poi').fetchall()
-        path = "" + POIFolderPath + "/" + filenameHash + "_poi_dump.csv"
-        CSVdump(path, rows)
+        filename = filenameHash + "_poi_dump.csv"
+        path = os.path.join(POIFolderPath, filename)
+        CSVDump(path, rows)
 
         self.sendMessage('ml:notification:m:POI exported to: %s;5' % POIFolderPath)
       except Exception, e:
@@ -446,7 +441,7 @@ class storePOI(ranaModule):
     newPOI.setDescription(point.getDescription())
 
     """ temporarily store the new POI to make it
-    avalable during filling its name, description, etc."""
+    available during filling its name, description, etc."""
     self.tempOnlinePOI = newPOI
     self.menuNameAfterStorageComplete = returnToMenu
 
