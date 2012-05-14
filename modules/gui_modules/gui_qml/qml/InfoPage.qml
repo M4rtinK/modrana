@@ -3,14 +3,8 @@ import com.nokia.meego 1.0
 
 BasePage {
     id: aboutPage
-    /*
-    anchors.fill : parent
-    anchors.topMargin : 20
-    anchors.bottomMargin : 30
-    anchors.leftMargin : 30
-    anchors.rightMargin : 30
-    */
     headerText : "modRana"
+    bottomPadding : 32
     content {
         Label {
             anchors.top : parent.top
@@ -26,28 +20,32 @@ BasePage {
             anchors.top : aboutTitle.bottom
             source : "image://icons/"+ rWin.theme +"/modrana.svg"
         }
-        Label {
-            id : aboutContactInfo
-            anchors.horizontalCenter : parent.horizontalCenter
-            //anchors.topMargin : 10
-            anchors.top : aboutModRanaIcon.bottom
-            //text: "<style type='text/css'>p { margin-bottom:15px; margin-top:0px; }</style>" + repho.getAboutText()
-
-            onLinkActivated : {
-                console.log('about text link clicked: ' + link)
-                mainView.notify("Opening:<br><b>"+link+"</b>")
-                Qt.openUrlExternally(link)
-            }
-        }
         Button {
+            id : donateButton
             text : "Donate ?"
             anchors.horizontalCenter : parent.horizontalCenter
-            anchors.topMargin : 25
-            anchors.top : aboutContactInfo.bottom
+            anchors.topMargin : 32
+            anchors.top : aboutModRanaIcon.bottom
             onClicked : {
                 console.log('donation button clicked')
                 Qt.openUrlExternally(modules.getS("info", "getPayPalUrl"))
             }
         }
+        Label {
+            id : contactInfo
+            anchors.top : donateButton.bottom
+            anchors.topMargin : 16
+            height : paintedHeight + 31
+            anchors.horizontalCenter : parent.horizontalCenter
+            text: "<style type='text/css'>p { margin-bottom:15px; margin-top:0px; }</style>" + modules.getS("info", "getAboutText")
+            wrapMode : Text.WordWrap
+            onLinkActivated : {
+                console.log('about text link clicked: ' + link)
+                rWin.notify("Opening:<br><b>"+link+"</b>", 5000)
+                Qt.openUrlExternally(link)
+            }
+        }
+
+
     }
 }
