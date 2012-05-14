@@ -57,9 +57,9 @@ class route(ranaModule):
     self.set('endPos', None)
 
     file = open(self.directionsFilterCSV, 'rb')
-    CSVreader = csv.reader(file, delimiter=';', quotechar='|') #use an iterator
+    CSVReader = csv.reader(file, delimiter=';', quotechar='|') #use an iterator
     self.directionsFilterRules = []
-    for row in CSVreader:
+    for row in CSVReader:
       if row[0] != '#' and len(row) >= 2:
         regex = re.compile(unicode(row[0].decode("utf-8")))
         self.directionsFilterRules.append((regex, row[1].decode("utf-8")))
@@ -104,7 +104,7 @@ class route(ranaModule):
       if self.selectOnePoint:
         self.set('endPos', None)
       proj = self.m.get('projection', None)
-      if proj != None and self.expectStart == True:
+      if proj is not None and self.expectStart == True:
         lastClick = self.get('lastClickXY', None)
         (x, y) = lastClick
         """
@@ -125,7 +125,7 @@ class route(ranaModule):
       if self.selectOnePoint:
         self.set('startPos', None)
       proj = self.m.get('projection', None)
-      if proj != None and self.expectEnd == True:
+      if proj is not None and self.expectEnd == True:
         lastClick = self.get('lastClickXY', None)
         (x, y) = lastClick
         """
@@ -155,7 +155,7 @@ class route(ranaModule):
         toLat,toLon = toPos
 
         fromPos = self.get("startPos", None)
-        if(fromPos):
+        if fromPos:
           fromLat,fromLon = fromPos
 
           print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
@@ -191,15 +191,15 @@ class route(ranaModule):
       self.set('needRedraw', True) # show the new route
 
     elif message == "route": # find a route
-      if type=='md': # message-list based routing
+      if type == 'md': # message-list based routing
         if args:
           type = args['type']
           go = False
-          if type=='ll2ll':
+          if type == 'll2ll':
             (fromLat,fromLon) = (float(args['fromLat']),float(args['fromLon']))
             (toLat,toLon) = (float(args['toLat']),float(args['toLon']))
             go = True
-          elif type=='pos2ll':
+          elif type == 'pos2ll':
             pos = self.get('pos', None)
             if pos:
               (fromLat,fromLon) = pos
@@ -224,7 +224,7 @@ class route(ranaModule):
 
             self.set('needRedraw', True) # show the new route
       else: # simple route, from here to selected point
-        # disable the point selection guis
+        # disable the point selection GUIs
         self.selectTwoPoints = False
         self.selectOnePoint = False
         toPos = self.get("selectedPos", None)
@@ -264,7 +264,7 @@ class route(ranaModule):
 
     elif message == 'destinationInput':
       entry = self.m.get('textEntry', None)
-      if entry == None:
+      if entry is None:
         return
       entryText = ""
       if self.destinationAddress:
@@ -371,9 +371,8 @@ class route(ranaModule):
     """process a raw route to a unified format"""
     if type == 'gdirections':
     # add a fake destination step, so there is a "destination reached" message
-      destStep = {}
-      destStep[u'descriptionEspeak'] = '<p xml:lang="en">you <b>should</b> be near the destination</p>'
-      destStep[u'descriptionHtml'] = 'you <b>should</b> be near the destination'
+      destStep = {u'descriptionEspeak': '<p xml:lang="en">you <b>should</b> be near the destination</p>',
+                  u'descriptionHtml': 'you <b>should</b> be near the destination'}
       # TODO: make this multilingual
       (lat,lon) = self.route[-1]
       # NOTE: steps have reversed coordinates
@@ -470,7 +469,6 @@ class route(ranaModule):
         step['descriptionEspeak'] = message
       return rawDirections
 
-
   def drawScreenOverlay(self, cr):
     menus = self.m.get('menu', None)
     if menus:
@@ -543,7 +541,7 @@ class route(ranaModule):
       cr.set_line_width(10)
 
       for step in steps:
-        (x,y) = (step)
+        (x,y) = step
         cr.arc(x, y, 3, 0, 2.0 * math.pi)
         cr.stroke()
 
@@ -572,7 +570,6 @@ class route(ranaModule):
 
       z = proj.zoom
 
-
       # these setting seem to work the best for routing results:
       # (they have a different structure than logging traces,
       # eq. long segments delimited by only two points, etc)
@@ -587,8 +584,7 @@ class route(ranaModule):
   #    maxDraw = 300
   #    drawCount = 0
       counter=0
-  #
-  #
+
       for point in self.pxpyRoute[1:]: #draw the track
         counter+=1
         if counter%modulo==0:
@@ -777,9 +773,7 @@ class route(ranaModule):
     elif key == 'destination':
       self.destinationAddress = result
       self.set('destinationAddress', result)
-
     self.set('needRedraw', True)
-
 
   def drawMenu(self, cr, menuName, args=None):
     if menuName == 'currentRoute' or menuName == 'currentRouteBackToMap':
@@ -805,7 +799,7 @@ class route(ranaModule):
 
       if self.route == []:
         text = "There is currently no active route."
-      elif self.text == None: # the new text for the infobox only once
+      elif self.text is None: # the new text for the info-box only once
         dir = self.directions
         duration = dir['Directions']['Duration']['html'] # a string describing the estimated time to finish the route
         units = self.m.get('units', None) # get the correct units
@@ -853,8 +847,6 @@ class route(ranaModule):
 
       menus.addItem('currentRouteTools', 'clear', 'generic', 'route:clear|set:menu:None')
 
-
-
     if menuName == "showAdressRoute":
       menus = self.m.get("menu",None)
       if menus:
@@ -869,8 +861,6 @@ class route(ranaModule):
         menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:main")
         # * route
         menus.drawButton(cr, x2, y2, dx, dy, "route", "generic", "route:addressRoute|set:menu:None")
-        # * tools
-  #      menus.drawButton(cr, x3, y3, dx, dy, "tools", "generic", "set:menu:main")
 
         menus.clearMenu('currentRouteTools', "set:menu:route#currentRoute")
 
