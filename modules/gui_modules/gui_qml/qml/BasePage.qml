@@ -28,6 +28,7 @@ Page {
     }
 
     Flickable {
+        id : pageFlickable
         anchors.fill: parent
         contentWidth: parent.width
         contentHeight: (headerHeight + contentField.childrenRect.height + bottomPadding)
@@ -74,6 +75,7 @@ Page {
         anchors.topMargin : 8
         anchors.leftMargin : 16
         iconSource : "image://icons/"+ rWin.theme +"/back_small.png"
+        opacity : pageFlickable.atYBeginning ? 1.0 : 0.55
         onClicked : {
             rWin.pageStack.pop()
         }
