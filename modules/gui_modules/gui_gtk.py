@@ -215,7 +215,7 @@ class GTKGUI(GUIModule):
     return self.mw.topWindow
 
   def _destroyCB(self, window):
-    """notify modRana that is is shutting down"""
+    """notify modRana about shutdown"""
     self.modrana.shutdown()
 
   #  def getPage(self, flObject, name="", fitOnStart=True):
