@@ -378,14 +378,11 @@ class showPOI(ranaModule):
     self.set("visiblePOIIDs", visibleIDs)
 
   def restoreVisibleIDs(self):
-    print "RESTORE"
     visibleIDs = self.get("visiblePOIIDs", [])
-    print visibleIDs
     if visibleIDs:
       store = self.m.get('storePOI', None)
       if store:
         for id in visibleIDs:
-          print store.getPOI(id)
           self._makePOIVisible(store.getPOI(id))
         if self.visiblePOI: # enable POI drawing only if some POI vere restored
           self.drawPOI()
