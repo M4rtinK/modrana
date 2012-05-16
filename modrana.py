@@ -101,7 +101,7 @@ class ModRana:
 
     self.mapRotationAngle = 0 # in radians
     self.notMovingSpeed = 1 # in m/s
-    
+
     # map center shifting variables
     self.centerShift = (0,0)
 
@@ -234,7 +234,7 @@ class ModRana:
       m.dmod = self.dmod
 
       # run what needs to be done before firstTime is called
-#    self._modulesLoadedPreFirstTime()
+    self._modulesLoadedPreFirstTime()
 
     start = time.clock()
     for m in self.m.values():

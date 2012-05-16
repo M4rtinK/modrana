@@ -280,7 +280,7 @@ class MainWidget(gtk.Widget):
     self.timer1 = gobject.timeout_add(100, self.update, self) #default 100
     self.timer3 = None # will be used for timing long press events
 
-    self.mapRotationAngle = 0 # in radians
+#    self.mapRotationAngle = 0 # in radians
     self.notMovingSpeed = 1 # in m/s
 
     self.topWindow = None
@@ -523,12 +523,12 @@ class MainWidget(gtk.Widget):
       cr.set_source_rgb(0.2,0.2,0.2) # map background
       cr.rectangle(0,0,self.rect.width,self.rect.height)
       cr.fill()
-      if (self.modrana.get("centred", False) and self.modrana.get("rotateMap", False)):
+      if self.modrana.get("centred", False) and self.modrana.get("rotateMap", False):
         proj = self.proj
         (lat, lon) = (proj.lat,proj.lon)
         (x1,y1) = proj.ll2xy(lat, lon)
 
-        (x,y) = self.centerShift
+        (x,y) = self.modrana.centerShift
         cr.translate(x,y)
         cr.save()
         # get the speed and angle
@@ -543,9 +543,9 @@ class MainWidget(gtk.Widget):
         """
         if angle and speed:
           if speed > self.notMovingSpeed: # do we look like we are moving ?
-            self.mapRotationAngle = angle
+            self.modrana.mapRotationAngle = angle
         cr.translate(x1,y1) # translate to the rotation center
-        cr.rotate(radians(360 - self.mapRotationAngle)) # do the rotation
+        cr.rotate(radians(360 - self.modrana.mapRotationAngle)) # do the rotation
         cr.translate(-x1,-y1) # translate back
 
         # Draw the base map, the map overlays, and the screen overlays
