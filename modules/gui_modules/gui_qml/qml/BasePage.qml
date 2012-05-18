@@ -18,7 +18,7 @@ Page {
     property int bottomPadding : 0
     ScrollDecorator {
          id: scrolldecorator
-         flickableItem: infoFlickable
+         flickableItem: pageFlickable
     }
 
     Rectangle {
@@ -44,17 +44,14 @@ Page {
                 id : headerLabel
                 property bool _fitsIn : (paintedWidth <= (parent.width-backButton.width+40))
                 anchors.verticalCenter : parent.verticalCenter
-                anchors.left : _fitsIn ? parent.left : backButton.right
+                x: _fitsIn ? 0 : backButton.width + 24
+                width : _fitsIn ? header.width : header.width - backButton.width - 40
                 anchors.right : parent.right
-                anchors.leftMargin : 24
-                anchors.rightMargin : 16
                 anchors.topMargin : 8
                 anchors.bottomMargin : 8
                 font.pixelSize : 48
                 wrapMode : Text.NoWrap
                 horizontalAlignment : _fitsIn ? Text.AlignHCenter : Text.AlignLeft
-
-
             }
         }
         Rectangle {
