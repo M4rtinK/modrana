@@ -27,6 +27,7 @@ import pygtk
 import time
 import traceback
 import sys
+import math
 
 pygtk.require('2.0')
 import gobject
@@ -34,6 +35,12 @@ import gtk
 from gtk import gdk
 
 from base_gui_module import GUIModule
+
+def simplePythagoreanDistance(x1, y1, x2, y2):
+  """convenience PyThagorean distance :)"""
+  dx = x2 - x1
+  dy = y2 - y1
+  return math.sqrt(dx**2 + dy**2)
 
 def getModule(m,d,i):
   return(GTKGUI(m,d,i))
@@ -50,10 +57,13 @@ class GTKGUI(GUIModule):
     # window state
     self.fullscreen = False
 
+    # map center shifting variables
+    self.centerShift = (0,0)
+    self.expandViewportTiles = 0.0
+
     """
     NOTE: we are calling the device module through the main class
     as it otherwise is first available in firstTime
-
     """
 
     # create the GTK window
@@ -72,6 +82,9 @@ class GTKGUI(GUIModule):
       win = gtk.Window()
     self.win = win
     win.connect("destroy", self._destroyCB)
+
+    # register centering.shift callbacks
+    self._registerCenteringShiftCallbacks()
 
     # resize it to preferred width x height
     (w,h) = self.modrana.dmod.getWinWH()
@@ -232,23 +245,72 @@ class GTKGUI(GUIModule):
     """notify modRana about shutdown"""
     self.modrana.shutdown()
 
-  #  def getPage(self, flObject, name="", fitOnStart=True):
-  #    """create a page from a file like object"""
-  #    pass
-  #
-  #  def showPage(self, page, mangaInstance=None, id=None):
-  #    """show a page on the stage"""
-  #    pass
-
-  #  def getCurrentPage(self):
-  #    """return the page that is currently shown
-  #    if there is no page, return None"""
-  #    pass
-
-
   def statusReport(self):
     """report current status of the gui"""
     return "It works!"
+
+  def _registerCenteringShiftCallbacks(self):
+    """we only update values needed for map drawing when something changes
+    * window is resized
+    * user switches something related in options
+    * etc.
+    we use the key watching mechanism
+    once a related key is changed, we update all centering shift related values
+    """
+    # initial update
+    self._updateCenteringShiftCB()
+
+    # watch centering shift related variables
+    self.watch('posShiftAmount', self._updateCenteringShiftCB)
+    self.watch('posShiftDirection', self._updateCenteringShiftCB)
+    # also watch the viewport
+    self.watch('viewport', self._updateCenteringShiftCB)
+    # and map scaling
+    self.watch('mapScale', self._updateCenteringShiftCB)
+
+  def _updateCenteringShiftCB(self, key=None, oldValue=None, newValue=None):
+    """update shifted centering amount
+
+    this method is called if posShiftAmount or posShiftDirection
+    are set and also once at startup"""
+    # get the needed values
+    # NOTE: some of them might have been updated just now
+    (sx,sy,sw,sh) = self.get('viewport')
+    shiftAmount = self.d.get('posShiftAmount', 0.75)
+    shiftDirection = self.d.get('posShiftDirection', "down")
+    scale = int(self.get('mapScale', 1))
+
+    x=0
+    y=0
+    floatShiftAmount = float(shiftAmount)
+    """this value might show up as string, so we convert it to float, just to be sure"""
+
+    if shiftDirection:
+      if shiftDirection == "down":
+        y =  sh * 0.5 * floatShiftAmount
+      elif shiftDirection == "up":
+        y =  - sh * 0.5 * floatShiftAmount
+      elif shiftDirection == "left":
+        x =  - sw * 0.5 * floatShiftAmount
+      elif shiftDirection == "right":
+        x =  + sw * 0.5 * floatShiftAmount
+      """ we don't need to do anything if direction is set to don't shift (False)
+      - 0,0 will be used """
+    self.centerShift = (x,y)
+
+    # update the viewport expansion variable
+    tileSide = 256
+    mapTiles = self.m.get('mapTiles')
+    if mapTiles: # check the mapTiles for tile side length in pixels, if available
+      tileSide = mapTiles.tileSide
+    tileSide *= scale# apply any possible scaling
+    (centerX,centerY) = ((sw/2.0),(sh/2.0))
+    ulCenterDistance = simplePythagoreanDistance(0, 0, centerX, centerY)
+    centerLLDistance = simplePythagoreanDistance(centerX, centerY, sw, sh)
+    diagonal = max(ulCenterDistance, centerLLDistance)
+    add = int(math.ceil(float(diagonal)/tileSide))
+    self.expandViewportTiles = add
+
 
 class MainWidget(gtk.Widget):
   __gsignals__ = {\
@@ -288,9 +350,6 @@ class MainWidget(gtk.Widget):
     self.redraw = True
 
     self.showRedrawTime = False
-
-    # map center shifting variables
-    self.centerShift = (0,0)
 
     # alternative map drag variables
     self.altMapDragEnabled = False
@@ -528,7 +587,7 @@ class MainWidget(gtk.Widget):
         (lat, lon) = (proj.lat,proj.lon)
         (x1,y1) = proj.ll2xy(lat, lon)
 
-        (x,y) = self.modrana.centerShift
+        (x,y) = self.modrana.gui.centerShift
         cr.translate(x,y)
         cr.save()
         # get the speed and angle
@@ -576,110 +635,6 @@ class MainWidget(gtk.Widget):
     # do the master overlay over everything
     self.drawMasterOverlay(cr)
 
-  # TODO: get this to work or clean it up
-  #  def draw2(self, cr1):
-  #    start = time.clock()
-  #
-  #
-  ##      cr.paint()
-  ##      print cr.get_target()
-  ##      print cr.get_target().get_width()
-  ##      print cr.get_target().get_height()
-  #
-  #    mapAndMapOverlayBuffer = self.getMapAndMapOverlayBuffer()
-  #    if mapAndMapOverlayBuffer:
-  #      cr1.set_source_surface(mapAndMapOverlayBuffer, float(self.centerX), float(self.centerY))
-  #      cr1.paint()
-  #    start1 = time.clock()
-  #    for m in self.m.values():
-  #      m.drawScreenOverlay(cr1)
-  #
-  #    # enable redraw speed debugging
-  #    if 'showRedrawTime' in self and self['showRedrawTime'] == True:
-  #      print "Redraw1 took %1.2f ms" % (1000 * (time.clock() - start))
-  #      print "Redraw2 took %1.2f ms" % (1000 * (time.clock() - start1))
-  #
-  #  def getMapAndMapOverlayBuffer(self):
-  #    if self.mapBuffer == None:
-  #      self.mapBuffer = self.drawMapAndMapOverlay()
-  #    return self.mapBuffer
-  #
-  #  def drawMapAndMapOverlay(self):
-  #    mapAndMapOverlayBuffer = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.rect.width, self.rect.height)
-  #    ct = cairo.Context(mapAndMapOverlayBuffer)
-  #    cr = gtk.gdk.CairoContext(ct)
-  #
-  #    for m in self.m.values():
-  #      m.beforeDraw()
-  #
-  #    menuName = self.modrana.get('menu', None)
-  #    if(menuName != None):
-  #      for m in self.m.values():
-  #        m.drawMenu(cr1, menuName)
-  #    else:
-  #      # map background
-  #      cr.set_source_rgb(0.2,0.2,0.2)
-  #      cr.rectangle(0,0,self.rect.width,self.rect.height)
-  #      cr.fill()
-  #
-  #      cr.save()
-  #      if (self.modrana.get("centred", False)):
-  #        if self.modrana.get("rotateMap", False):
-  #
-  #          # get the speed and angle
-  #          speed = self.modrana.get('speed', 0)
-  #          angle = self.modrana.get('bearing', 0)
-  #
-  #          proj = self.m['projection']
-  #          (lat, lon) = (proj.lat,proj.lon)
-  #          (x1,y1) = proj.ll2xy(lat, lon)
-  #
-  #          """
-  #          only if current direction angle and speed are known,
-  #          submit a new angle
-  #          like this, the map does not revert back to default orientation
-  #          on short GPS errors
-  #          """
-  #          if angle and speed:
-  #            if speed > self.notMovingSpeed: # do we look like we are moving ?
-  #              angle = 360 - angle
-  #              self.mapRotationAngle = radians(angle)
-  #          cr.translate(x1,y1) # translate to the rotation center
-  #          cr.rotate(self.mapRotationAngle) # do the rotation
-  #          cr.translate(-x1,-y1) # translate back
-  #
-  #      # Draw the base map, the map overlays, and the screen overlays
-  #      for m in self.m.values():
-  #        m.drawMap(cr)
-  #      cr.restore()
-  #      for m in self.m.values():
-  #        m.drawMapOverlay(cr)
-  #
-  #      return mapAndMapOverlayBuffer
-
-  ## clean map + overlay generation reference
-  #    staticMap = cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h)
-  #    cr1 = cairo.Context(staticMap)
-  #    for m in self.m.values():
-  #      m.beforeDraw()
-  #    try:
-  #      for m in self.m.values():
-  #        m.drawMap(cr1)
-  #      for m in self.m.values():
-  #        m.drawMapOverlay(cr1)
-  #    except Exception, e:
-  #      print "modRana simple map: an exception occured:\n"
-  #      traceback.print_exc(file=sys.stdout) # find what went wrong
-  #      self.stopSimpleMapDrag()
-  #      return
-  #    self.simpleStaticMap = staticMap
-
-  ## damage area computation reference
-  #    damage = gtk.gdk.region_rectangle((x,y,w,h))
-  #    keep = gtk.gdk.region_rectangle((dx,dy,w,h))
-  #    damage.subtract(keep)
-
-
   ## FASTER MAP DRAGGING ##
 
   def enableDefaultDrag(self):
@@ -691,7 +646,7 @@ class MainWidget(gtk.Widget):
       self.altMapDragEnabled = False
 
   def setCurrentRedrawMethod(self, method=None):
-    if method == None:
+    if method is None:
       self.currentDrawMethod = self.fullDrawMethod
     else:
       self.currentDrawMethod = method
@@ -848,3 +803,110 @@ class MainWidget(gtk.Widget):
   def drawMasterOverlay(self, cr):
     if self.notificationModule:
       self.notificationModule.drawMasterOverlay(cr)
+
+
+
+
+
+      # TODO: get this to work or clean it up
+      #  def draw2(self, cr1):
+      #    start = time.clock()
+      #
+      #
+      ##      cr.paint()
+      ##      print cr.get_target()
+      ##      print cr.get_target().get_width()
+      ##      print cr.get_target().get_height()
+      #
+      #    mapAndMapOverlayBuffer = self.getMapAndMapOverlayBuffer()
+      #    if mapAndMapOverlayBuffer:
+      #      cr1.set_source_surface(mapAndMapOverlayBuffer, float(self.centerX), float(self.centerY))
+      #      cr1.paint()
+      #    start1 = time.clock()
+      #    for m in self.m.values():
+      #      m.drawScreenOverlay(cr1)
+      #
+      #    # enable redraw speed debugging
+      #    if 'showRedrawTime' in self and self['showRedrawTime'] == True:
+      #      print "Redraw1 took %1.2f ms" % (1000 * (time.clock() - start))
+      #      print "Redraw2 took %1.2f ms" % (1000 * (time.clock() - start1))
+      #
+      #  def getMapAndMapOverlayBuffer(self):
+      #    if self.mapBuffer == None:
+      #      self.mapBuffer = self.drawMapAndMapOverlay()
+      #    return self.mapBuffer
+      #
+      #  def drawMapAndMapOverlay(self):
+      #    mapAndMapOverlayBuffer = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.rect.width, self.rect.height)
+      #    ct = cairo.Context(mapAndMapOverlayBuffer)
+      #    cr = gtk.gdk.CairoContext(ct)
+      #
+      #    for m in self.m.values():
+      #      m.beforeDraw()
+      #
+      #    menuName = self.modrana.get('menu', None)
+      #    if(menuName != None):
+      #      for m in self.m.values():
+      #        m.drawMenu(cr1, menuName)
+      #    else:
+      #      # map background
+      #      cr.set_source_rgb(0.2,0.2,0.2)
+      #      cr.rectangle(0,0,self.rect.width,self.rect.height)
+      #      cr.fill()
+      #
+      #      cr.save()
+      #      if (self.modrana.get("centred", False)):
+      #        if self.modrana.get("rotateMap", False):
+      #
+      #          # get the speed and angle
+      #          speed = self.modrana.get('speed', 0)
+      #          angle = self.modrana.get('bearing', 0)
+      #
+      #          proj = self.m['projection']
+      #          (lat, lon) = (proj.lat,proj.lon)
+      #          (x1,y1) = proj.ll2xy(lat, lon)
+      #
+      #          """
+      #          only if current direction angle and speed are known,
+      #          submit a new angle
+      #          like this, the map does not revert back to default orientation
+      #          on short GPS errors
+      #          """
+      #          if angle and speed:
+      #            if speed > self.notMovingSpeed: # do we look like we are moving ?
+      #              angle = 360 - angle
+      #              self.mapRotationAngle = radians(angle)
+      #          cr.translate(x1,y1) # translate to the rotation center
+      #          cr.rotate(self.mapRotationAngle) # do the rotation
+      #          cr.translate(-x1,-y1) # translate back
+      #
+      #      # Draw the base map, the map overlays, and the screen overlays
+      #      for m in self.m.values():
+      #        m.drawMap(cr)
+      #      cr.restore()
+      #      for m in self.m.values():
+      #        m.drawMapOverlay(cr)
+      #
+      #      return mapAndMapOverlayBuffer
+
+      ## clean map + overlay generation reference
+      #    staticMap = cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h)
+      #    cr1 = cairo.Context(staticMap)
+      #    for m in self.m.values():
+      #      m.beforeDraw()
+      #    try:
+      #      for m in self.m.values():
+      #        m.drawMap(cr1)
+      #      for m in self.m.values():
+      #        m.drawMapOverlay(cr1)
+      #    except Exception, e:
+      #      print "modRana simple map: an exception occured:\n"
+      #      traceback.print_exc(file=sys.stdout) # find what went wrong
+      #      self.stopSimpleMapDrag()
+      #      return
+      #    self.simpleStaticMap = staticMap
+
+      ## damage area computation reference
+      #    damage = gtk.gdk.region_rectangle((x,y,w,h))
+      #    keep = gtk.gdk.region_rectangle((dx,dy,w,h))
+      #    damage.subtract(keep)

@@ -75,12 +75,6 @@ def createFolderPath(newPath):
         os.mkdir(newPath)
     return True
 
-def simplePythagoreanDistance(x1, y1, x2, y2):
-  """convenience PyThagorean distance :)"""
-  dx = x2 - x1
-  dy = y2 - y1
-  return math.sqrt(dx**2 + dy**2)
-
 class ModRana:
   """
   This is THE main modRana class.
@@ -101,9 +95,6 @@ class ModRana:
 
     self.mapRotationAngle = 0 # in radians
     self.notMovingSpeed = 1 # in m/s
-
-    # map center shifting variables
-    self.centerShift = (0,0)
 
     # map layers
     self.mapLayers = {}
@@ -272,22 +263,7 @@ class ModRana:
   def _modulesLoadedPreFirstTime(self):
     """this is run after all the modules have been loaded,
     but before their first time is called"""
-    self._updateCenteringShiftCB()
 
-    """to only update values needed for map drawing when something changes
-       * window is resized
-       * user switches something related in options
-       * etc.
-       we use the key watching mechanism
-       once a related key is changed, we update all the values
-       """
-    # watch both centering shift related variables
-    self.watch('posShiftAmount', self._updateCenteringShiftCB)
-    self.watch('posShiftDirection', self._updateCenteringShiftCB)
-    # also watch the viewport
-    self.watch('viewport', self._updateCenteringShiftCB)
-    # and map scaling
-    self.watch('mapScale', self._updateCenteringShiftCB)
     # and mode change
     self.watch('mode', self._modeChangedCB)
     # cache key modifiers
@@ -573,55 +549,12 @@ class ModRana:
     return modes
 
   def getModeLabel(self, modeName):
-    "get a label for a given mode"
+    """get a label for a given mode"""
     try:
       return self.getModes()[modeName]
     except KeyError:
       print('modrana: mode %s does not exist and thus has no label' % modeName)
       return None
-
-  def _updateCenteringShiftCB(self, key=None, oldValue=None, newValue=None):
-    """update shifted centering amount
-
-    this method is called if posShiftAmount or posShiftDirection
-    are set and also once at startup"""
-    # get the needed values
-    # NOTE: some of them might have been updated just now
-    (sx,sy,sw,sh) = self.get('viewport')
-    shiftAmount = self.d.get('posShiftAmount', 0.75)
-    shiftDirection = self.d.get('posShiftDirection', "down")
-    scale = int(self.get('mapScale', 1))
-
-    x=0
-    y=0
-    floatShiftAmount = float(shiftAmount)
-    """this value might show up as string, so we convert it to float, just to be sure"""
-
-    if shiftDirection:
-      if shiftDirection == "down":
-        y =  sh * 0.5 * floatShiftAmount
-      elif shiftDirection == "up":
-        y =  - sh * 0.5 * floatShiftAmount
-      elif shiftDirection == "left":
-        x =  - sw * 0.5 * floatShiftAmount
-      elif shiftDirection == "right":
-        x =  + sw * 0.5 * floatShiftAmount
-      """ we don't need to do anything if direction is set to don't shift (False)
-      - 0,0 will be used """
-    self.centerShift = (x,y)
-    
-    # update the viewport expansion variable    
-    tileSide = 256
-    mapTiles = self.m.get('mapTiles')
-    if mapTiles: # check the mapTiles for tile side length in pixels, if available
-      tileSide = mapTiles.tileSide
-    tileSide *= scale# apply any possible scaling
-    (centerX,centerY) = ((sw/2.0),(sh/2.0))
-    ulCenterDistance = simplePythagoreanDistance(0, 0, centerX, centerY)
-    centerLLDistance = simplePythagoreanDistance(centerX, centerY, sw, sh)
-    diagonal = max(ulCenterDistance, centerLLDistance)
-    add = int(math.ceil(float(diagonal)/tileSide))
-    self.expandViewportTiles = add
 
   def _modeChangedCB(self, key=None, oldMode=None, newMode=None):
     """handle mode change in regards to key modifiers and option key watchers"""

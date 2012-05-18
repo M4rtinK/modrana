@@ -483,7 +483,7 @@ class MapTiles(ranaModule):
         (sx,sy,sw,sh) = self.get('viewport') # get screen parameters
 
         # adjust left corner coordinates if centering shift is on
-        (shiftX,shiftY) = self.modrana.centerShift
+        (shiftX,shiftY) = self.modrana.gui.centerShift
         sx = -shiftX
         sy = -shiftY
         # get the current scale and related info
@@ -525,7 +525,7 @@ class MapTiles(ranaModule):
           # we use polygon overlap testing to only load@draw visible tiles
 
           # screen center point
-          (shiftX,shiftY) = self.modrana.centerShift
+          (shiftX,shiftY) = self.modrana.gui.centerShift
           (centerX,centerY) = ((sw/2.0),(sh/2.0))
           scP = rectangles.Point(centerX,centerY)
 
@@ -552,7 +552,7 @@ class MapTiles(ranaModule):
           v4 = rectangles.Vector(*p4.as_tuple())
 
           # enlarge the area of possibly visible tiles due to rotation
-          add = self.modrana.expandViewportTiles
+          add = self.modrana.gui.expandViewportTiles
           (px1,px2,py1,py2) = (px1-add,px2+add,py1-add,py2+add)
           cx = int(px1)
           cy = int(py1)
