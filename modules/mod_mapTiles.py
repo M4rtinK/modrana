@@ -138,7 +138,7 @@ class MapTiles(ranaModule):
 
     # get layer info
     layerInfo = self.mapLayers.get(layer, None)
-    if layerInfo == None: # is the layer info valid ?
+    if layerInfo is None: # is the layer info valid ?
       print("mapTiles: invalid layer")
       return
     layerPrefix = layerInfo.get('folderPrefix','OpenStreetMap II')
@@ -152,8 +152,6 @@ class MapTiles(ranaModule):
     print "download"
     url = self.getTileUrl(x,y,z,layer)
     print url
-#    request = urllib2.urlopen(url)
-#    tileData = request.read()
     response = self._getConnPool(layer, url).get_url(url)
     print "RESPONSE"
     tileData = response.data
@@ -164,8 +162,8 @@ class MapTiles(ranaModule):
         tileFolder = self.modrana.paths.getMapFolderPath()
         filePath = os.path.join(tileFolder, self.getImagePath(x, y, z, layerPrefix, layerType))
         self._storeTiles.automaticStoreTile(tileData, layerPrefix, z, x, y, layerType, filePath)
-        print "STORED"
-        return(tileData)
+#        print "STORED"
+        return tileData
       else:
         print("mapTiles: tile data returned by remote tileserver was not an image")
         print("NOTE: this probably means that the tileserver returned an"
@@ -214,14 +212,14 @@ class MapTiles(ranaModule):
     """
 
     layerInfo = self.mapLayers.get(layer, None)
-    if(layerInfo == None): # is the layer info valid ?
+    if layerInfo is None: # is the layer info valid ?
       print("mapTiles: invalid layer")
       return
     layerPrefix = layerInfo.get('folderPrefix','OpenStreetMap II')
     layerType = layerInfo.get('type','png')
     # Are we allowed to download it ? (network=='full')
     # -> no need to submit a download request if network access is disabled
-    if(self.get('network','full')=='full'):
+    if self.get('network','full') == 'full':
       filename = os.path.join(self._getTileFolderPath(), (self.getImagePath(x,y,z,layerPrefix, layerType)))
       # add tile download request
       with self.threadlListCondition:
@@ -513,7 +511,7 @@ class MapTiles(ranaModule):
 
           # get the rotation angle
           angle = self.get('bearing', 0.0)
-          if angle == None:
+          if angle is None:
             angle = 0.0
 
           radAngle = radians(angle)
@@ -790,19 +788,19 @@ class MapTiles(ranaModule):
     with self.threadlListCondition:
       if name in self.threads.keys():
         sprint("tile is being downloaded")
-        if(not self.threads[name].finished):
+        if not self.threads[name].finished:
           with self.imagesLock: # substitute the "loading" tile with a "downloading" tile
             downloadingTile = self.downloadingTile
             downloadingTile[1]['addedTimestamp'] = time.time()
             downloadingTile[1]['type'] = "downloading"
 
             self.images[0][name] = downloadingTile
-          return('OK')
+          return'OK'
     
     # second, is it in the disk cache?  (including ones recently-downloaded)
     layerInfo = self.mapLayers.get(layer, None)
-    if(layerInfo == None): # is the layer info valid
-      return('NOK')
+    if layerInfo is None: # is the layer info valid
+      return'NOK'
 
     layerPrefix = layerInfo.get('folderPrefix','OSM')
     layerType = layerInfo.get('type','png')
@@ -879,9 +877,7 @@ class MapTiles(ranaModule):
        dictIndex = 0 -> normal map tiles + tile specific error tiles
        dictIndex = 1 -> special tiles that exist in only once in memory and are drawn directly
        (like "Downloading...",Waiting for download slot..:", etc.) """
-    metadata = {}
-    metadata['addedTimestamp'] = time.time()
-    metadata['type'] = type
+    metadata = {'addedTimestamp': time.time(), 'type': type}
     if expireTimestamp:
       metadata['expireTimestamp'] = expireTimestamp
     with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
