@@ -44,12 +44,6 @@ if gs.GUIString == "GTK":
   import gobject
   import cairo
 
-#loadImage = None
-#def setLoadimage(function):
-#  loadImage = function
-#  print function
-#  return
-
 def getModule(m,d,i):
   return(MapTiles(m,d,i))
 
@@ -149,11 +143,11 @@ class MapTiles(ranaModule):
       # tile was available from storage
       return tileData
 
-    print "download"
+#    print "download"
     url = self.getTileUrl(x,y,z,layer)
-    print url
+#    print url
     response = self._getConnPool(layer, url).get_url(url)
-    print "RESPONSE"
+#    print "RESPONSE"
     tileData = response.data
 
     if tileData:
@@ -289,7 +283,7 @@ class MapTiles(ranaModule):
           """
           self.threadlListCondition.wait()
           if self.shutdownAllThreads:
-            print "\nmapTiles: automatic tile download management thread shutting down"
+            print("\nmapTiles: automatic tile download management thread shutting down")
             break
           with self.downloadRequestPoolLock:
             activeThreads = len(self.threads)
@@ -335,7 +329,7 @@ class MapTiles(ranaModule):
                   self.removeImageFromMemmory(name)
               self.downloadRequestPool = cleanPool
         except Exception, e:
-          print "exception in tile download manager thread:\n%s" % e
+          print("exception in tile download manager thread:\n%s" % e)
 #          traceback.print_exc()
 
 #  def startTileLoadingThread(self):
@@ -418,8 +412,8 @@ class MapTiles(ranaModule):
 #              del self.threads[index]
 
       if self.get('reportTileCachStatus', False): # TODO: set to False by default
-        print "** tile cache status report **"
-        print "threads: %d, images: %d, special tiles: %d, downloadRequestPool:%d" % (len(self.threads), len(self.images[0]),len(self.images[1]),len(self.downloadRequestPool))
+        print("** tile cache status report **")
+        print("threads: %d, images: %d, special tiles: %d, downloadRequestPool:%d" % (len(self.threads), len(self.images[0]),len(self.images[1]),len(self.downloadRequestPool)))
 
 
     """seems that some added error handling in the download thread class can replace this,
@@ -711,7 +705,7 @@ class MapTiles(ranaModule):
 #      pass
 
     except Exception, e:
-      print "mapTiles: exception while drawing the map layer: %s" % e
+      print("mapTiles: exception while drawing the map layer: %s" % e)
       traceback.print_exc()
 
   def drawImage(self, cr, imageSurface, x, y, scale):
@@ -816,7 +810,7 @@ class MapTiles(ranaModule):
         storageType = self.get('tileStorageType', 'files')
         sprint("tile loaded from local storage (%s) in %1.2f ms" % (storageType,(1000 * (time.clock() - start1))))
         sprint("tile cached in memory in %1.2f ms" % (1000 * (time.clock() - start2)))
-      return('OK')
+      return 'OK'
 
     # Image not found anywhere locally - resort to downloading it
     filename = os.path.join(self._getTileFolderPath(), (self.getImagePath(x,y,z,layerPrefix, layerType)))
@@ -867,9 +861,9 @@ class MapTiles(ranaModule):
     """return a pixbuf for a given filePath"""
     try:
       pixbuf = gtk.gdk.pixbuf_new_from_file(filePath)
-      return(pixbuf)
+      return pixbuf
     except Exception, e:
-      print "the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e
+      print("the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e)
       return False
 
   def storeInMemmory(self, surface, name, type="normal", expireTimestamp=None, dictIndex=0):
@@ -1088,17 +1082,17 @@ class MapTiles(ranaModule):
 
     def printErrorMessage(self, e):
         url = self.callback.getTileUrl(self.x,self.y,self.z,self.layer)
-        print "mapTiles: download thread reports error"
-        print "** we were doing this, when an exception occurred:"
-        print "** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s, url: %s" % ( \
+        print("mapTiles: download thread reports error")
+        print("** we were doing this, when an exception occurred:")
+        print("** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s, url: %s" % ( \
                                                                             self.x,
                                                                             self.y,
                                                                             self.z,
                                                                             self.layer,
                                                                             self.filename,
-                                                                            url)
-        print "** this exception occurred: %s\n" % e
-        print "** traceback:\n"
+                                                                            url))
+        print("** this exception occurred: %s\n" % e)
+        print("** traceback:\n")
         traceback.print_exc()
 
     def downloadTile(self,name,x,y,z,layer,filename):
