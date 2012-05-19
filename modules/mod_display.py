@@ -241,7 +241,7 @@ class display(ranaModule):
         if self.pauseScreenBlankingEnabled == True:
           # don't keep screen on
           self.screenBlankingControlStop()
-      """moveState can be also None, which meens that speed is unknown
+      """moveState can be also None, which means that speed is unknown
          in this case, we keep tha status quo"""
 
   def checkGPSFix(self):
