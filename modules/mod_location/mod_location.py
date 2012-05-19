@@ -36,6 +36,7 @@ class Location(ranaModule):
     self.set('elevation', None)
     self.status = "Unknown"
     self.enabled = False
+    self.provider = None
 
     # check if the device handles location by itself
     if not self.modrana.dmod.handlesLocation():
@@ -51,7 +52,7 @@ class Location(ranaModule):
 
   def firstTime(self):
     # periodic screen redraw
-    if self.modrana.dmod.getLocationType() == "gpsd":
+    if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
       print "location: starting GPSD 1 second timer"
       # start screen update 1 per second screen update
       # TODO: event based redrawing
@@ -70,7 +71,7 @@ class Location(ranaModule):
 
     # only try to update position info if
     # location is enabled
-    if self.enabled:
+    if self.enabled and self.provider:
       self.provider._updateGPSD()
 
       fix = self.provider.getFix()
@@ -115,7 +116,7 @@ class Location(ranaModule):
     """
     update position info with new Fix data
     """
-    if fix.position == None:
+    if fix.position is None:
       # wait for valid data
       return
     (lat,lon) = fix.position
@@ -132,14 +133,14 @@ class Location(ranaModule):
 #      if gpsdSpeed == 'knotsPerSecond':
 #        # convert to meters per second
 #        speed = float(speed) * 0.514444444444444 # knots/sec to m/sec
-    if fix.speed != None:
+    if fix.speed is not None:
       self.set('metersPerSecSpeed', fix.speed)
       self.set('speed', fix.speed * 3.6)
     else:
       self.set('metersPerSecSpeed', None)
       self.set('speed', None)
       # elevation
-    if fix.altitude != None:
+    if fix.altitude is not None:
       self.set('elevation', fix.altitude)
     else:
       self.set('elevation', None)
