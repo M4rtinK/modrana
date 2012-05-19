@@ -247,7 +247,7 @@ class display(ranaModule):
   def checkGPSFix(self):
     """check if we have GPS fix"""
     fix = self.get('fix', None)
-    if fix != None:
+    if fix is not None:
       if fix == 0: # no fix
         if self.pauseScreenBlankingEnabled == True:
           self.screenBlankingControlStop()
