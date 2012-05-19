@@ -172,8 +172,10 @@ class device_n900(deviceModule):
 
   def pauseScreenBlanking(self):
     if gs.GUIString == "GTK":
+    #      print("n900: pausing screen blanking in GTK GUI")
       self.mceRequest.req_display_blanking_pause()
     else:
+    #      print("n900: pausing screen blanking in QML GUI")
       QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
 
   def unlockScreen(self):

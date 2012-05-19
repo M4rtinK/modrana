@@ -42,39 +42,42 @@ class display(ranaModule):
     """according to documentation on:
     (http://wiki.maemo.org/PyMaemo/Python-osso_examples#Device_State),
     every display_blanking_pause() call pauses screenblank for 60 seconds,
-    to make sure, we request every 30 seconds"""
+    to make sure, we request it every 30 seconds"""
     self.pauseScreenBlankingEnabled = False
-    self.screenBlankPauseInterval = 30
-    self.lastScreenblankPauseRequest = time.time()
+    self.msScreenBlankPauseIntervalMs = 30000
 
     self.checkMethod = None
     self.checkConditions = False
     self.checkConditionsInterval = 5 # how often to check blanking conditions
     self.lastCheckConditions = time.time()
   def firstTime(self):
-    self.checkScreenBlankingMode() # check the screen blanking mode on startup
-
-    gui = self.modrana.gui
-    if gui:
-      if gui.getIDString() == "GTK":
-        # connect to window state signals
-        gui.topWindow.connect('window-state-event', self.windowStateChangedCallback)
-        gui.topWindow.connect('visibility-notify-event', self.visibilityChangedCallback)
-      elif gui.getIDString() == "QML":
-        # QML handles redrawing by itself
-        pass
-      else:
-        print("display: WARNING, unhandled GUI toolkit, redraw disable if not visible might not work")
+    if gs.GUIString == "GTK":
+      gui = self.modrana.gui
+      # connect to window state signals
+      gui.topWindow.connect('window-state-event', self.windowStateChangedCallback)
+      gui.topWindow.connect('visibility-notify-event', self.visibilityChangedCallback)
+    elif gs.GUIString == "QML":
+      # QML handles redrawing by itself
+      pass
     else:
-      print("display: GUI module not available")
+      print("display: WARNING, unhandled GUI toolkit, redraw disable if not visible might not work")
+
+    # check the screen blanking mode on startup
+    self.checkScreenBlankingMode()
+    # register blanking check update
+    cron = self.m.get('cron', None)
+    if cron:
+      # run the callback directly for the first time
+      self._updateDisplayControlCB
+      cron.addTimeout(self._updateDisplayControlCB, self.msScreenBlankPauseIntervalMs, self, "screen blanking update")
 
   def handleMessage(self, message, type, args):
-    if message=="fullscreen" and type == "ms":
+    if message == "fullscreen" and type == "ms":
       if args == "toggle":
         self.fullscreenToggle()
-    elif message=="blankingModeChanged":
+    elif message == "blankingModeChanged":
       self.checkScreenBlankingMode() # check if screen blanking changed
-    elif message=="checkShowRedrawTime":
+    elif message == "checkShowRedrawTime":
       state = self.get('showRedrawTime', False)
       gui = self.modrana.gui
       if gui and gui.getIDString() == "GTK":
@@ -147,7 +150,6 @@ class display(ranaModule):
     """pause screen blanking for 30 seconds"""
     if self.dmod.screenBlankingControlSupported(): # make sure the device module really supports this
       self.dmod.pauseScreenBlanking()
-      self.lastScreenblankPauseRequest = time.time() # update the timestamp
 
   def unlockScreen(self):
     self.dmod.unlockScreen()
@@ -158,31 +160,31 @@ class display(ranaModule):
       if mode == 'always':
         self.checkConditionsStop()
         self.screenBlankingControlStart()
-        print "display: keep display ON -> always"
+        print("display: keep display ON -> always")
       elif mode == 'never':
         self.checkConditionsStop()
         self.screenBlankingControlStop()
-        print "display: keep display ON -> never :)"
+        print("display: keep display ON -> never :)")
       elif mode == 'moving':
         self.screenBlankingControlStop()
         self.checkConditionsStart(self.checkMovement)
-        print "display: keep display ON -> while moving"
+        print("display: keep display ON -> while moving")
       elif mode == 'movingInFullscreen':
         self.screenBlankingControlStop()
         self.checkConditionsStart(self.checkFullscreenMovement)
-        print "display: keep display ON -> while moving in Fullscreen"
+        print("display: keep display ON -> while moving in Fullscreen")
       elif mode == 'fullscreen':
         self.screenBlankingControlStop()
         self.checkConditionsStart(self.checkFullscreen)
-        print "display: keep display ON -> while in Fullscreen"
+        print("display: keep display ON -> while in Fullscreen")
       elif mode == 'gpsFix':
         self.screenBlankingControlStop()
         self.checkConditionsStart(self.checkGPSFix)
-        print "display: keep display ON -> while there is a GPS fix"
+        print("display: keep display ON -> while there is a GPS fix")
       elif mode == 'centred':
         self.screenBlankingControlStop()
         self.checkConditionsStart(self.checkCentred)
-        print "display: keep display ON -> while there is a GPS fix"
+        print("display: keep display ON -> while there is a GPS fix")
 
   def screenBlankingControlStart(self):
     self.pauseScreenBlanking()
@@ -272,12 +274,11 @@ class display(ranaModule):
       if self.pauseScreenBlankingEnabled == True:
         self.screenBlankingControlStop()
         
-  def update(self):
+  def _updateDisplayControlCB(self):
     if self.pauseScreenBlankingEnabled: # pause screen blanking for 60s
-      currentTime = time.time()
-      if (currentTime - self.lastScreenblankPauseRequest)>self.screenBlankPauseInterval:
-        # request to pause screen blanking for 60 seconds every 30 seconds
-        self.pauseScreenBlanking()
+      # screen blanking for 60 seconds is requested every 30 seconds
+      # (on Fremantle it should be 60s, other platforms might differ)
+      self.pauseScreenBlanking()
     if self.checkConditions: # run a check for screen un/blanking conditions
       currentTime = time.time()
       if (currentTime - self.lastCheckConditions)>self.checkConditionsInterval:
