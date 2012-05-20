@@ -6,7 +6,8 @@ import com.nokia.extras 1.0
 //import QtMobility.systeminfo 1.1
 
 PageStackWindow {
-    property string theme : options.get("currentTheme", "default")
+    // modRana theme
+    property string mTheme : options.get("currentTheme", "default")
     id: rWin
     showStatusBar : false
     initialPage : MapPage {

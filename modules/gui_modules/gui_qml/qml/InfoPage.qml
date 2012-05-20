@@ -18,7 +18,7 @@ BasePage {
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.topMargin : 16
             anchors.top : aboutTitle.bottom
-            source : "image://icons/"+ rWin.theme +"/modrana.svg"
+            source : "image://icons/"+ rWin.mTheme +"/modrana.svg"
         }
 
         Label {

@@ -78,7 +78,7 @@ Page {
         /* TODO: investigate how to replace this by an image loader
          what about rendered size ?
          */
-        source: "../../../../themes/"+ rWin.theme +"/windrose-simple.svg"
+        source: "../../../../themes/"+ rWin.mTheme +"/windrose-simple.svg"
         transform: [Rotation {
                 id: azCompass
                 origin.x: compassImage.width/2
@@ -102,7 +102,7 @@ Page {
             /* TODO: investigate how to replace this by an image loader
              what about rendered size ?
              */
-            source: "../../../../themes/"+ rWin.theme +"/arrow_target.svg"
+            source: "../../../../themes/"+ rWin.mTheme +"/arrow_target.svg"
             width: (compassImage.paintedWidth / compassImage.sourceSize.width)*sourceSize.width
             fillMode: Image.PreserveAspectFit
             x: compassImage.width/2 - width/2

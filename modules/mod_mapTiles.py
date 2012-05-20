@@ -83,8 +83,7 @@ class MapTiles(ranaModule):
                     ('tileNetworkError' , 'themes/default/tile_network_error.png')
                    ]
 
-    gui = self.modrana.gui
-    if gui.getIDString() == "GTK":
+    if gs.GUIString == "GTK":
       self.loadSpecialTiles(specialTiles) # load the special tiles to the special image cache
       self.loadingTile = self.images[1]['tileLoading']
       self.downloadingTile = self.images[1]['tileDownloading']
