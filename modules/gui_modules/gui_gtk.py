@@ -258,7 +258,11 @@ class GTKGUI(GUIModule):
     once a related key is changed, we update all centering shift related values
     """
     # initial update
-    self._updateCenteringShiftCB()
+    try:
+      self._updateCenteringShiftCB()
+    except  Exception, e:
+      print("GTK GUI: initial centering shift update failed")
+      print(e)
 
     # watch centering shift related variables
     self.watch('posShiftAmount', self._updateCenteringShiftCB)
@@ -275,7 +279,8 @@ class GTKGUI(GUIModule):
     are set and also once at startup"""
     # get the needed values
     # NOTE: some of them might have been updated just now
-    (sx,sy,sw,sh) = self.get('viewport')
+    (fallbackW, fallbackH) = self.modrana.dmod.getWinWH()
+    (sx,sy,sw,sh) = self.get('viewport',(0, 0, fallbackW, fallbackH))
     shiftAmount = self.d.get('posShiftAmount', 0.75)
     shiftDirection = self.d.get('posShiftDirection', "down")
     scale = int(self.get('mapScale', 1))
