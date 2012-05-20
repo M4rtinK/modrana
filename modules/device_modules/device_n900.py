@@ -132,7 +132,7 @@ class device_n900(deviceModule):
     return "Nokia N900"
 
   def getWinWH(self):
-    return((800,480))
+    return 800,480
 
   def startInFullscreen(self):
     return True
