@@ -71,12 +71,12 @@ class Paths:
     config = self.modrana.configs.getUserConfig()
     if config:
       path = config.get("tracklog_folder", None)
-    if path == None:
+    if path is None:
     # try to get the path from device module
       if self.modrana.dmod:
         path = self.modrana.dmod.getTracklogFolderPath()
 
-    if path == None: # this means there is no config or device path
+    if path is None: # this means there is no config or device path
       # use default path & assure it exists
       return self._assurePathFolder(self.getProfilePath(), "tracklogs")
     else:
@@ -89,12 +89,12 @@ class Paths:
     config = self.modrana.configs.getUserConfig()
     if config:
       path = config.get("map_folder", None)
-    if path == None:
+    if path is None:
     # try to get the path from device module
       if self.modrana.dmod:
         path = self.modrana.dmod.getMapFolderPath()
 
-    if path == None: # this means there is no config or device path
+    if path is None: # this means there is no config or device path
       # use default path & assure it exists
       return self._assurePathFolder(self.getProfilePath(), "maps")
     else:
@@ -104,7 +104,7 @@ class Paths:
     """return path to the POI folder"""
     if self.modrana.dmod:
       path = self.modrana.dmod.getPOIFolderPath()
-      if path != None: # None means there is no device dependent path
+      if path is not None: # None means there is no device dependent path
         return self._assurePath(path)
       else:
         return self._assurePathFolder(self.getProfilePath(), "poi")
@@ -121,7 +121,7 @@ class Paths:
     """return path to the POI folder"""
     if self.modrana.dmod:
       path = self.modrana.dmod.getLogFolderPath()
-      if path != None: # None means there is no device dependent path
+      if path is not None: # None means there is no device dependent path
         return self._assurePath(path)
       else:
         return self._assurePathFolder(self.getProfilePath(), "debug_logs")
