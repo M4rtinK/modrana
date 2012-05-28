@@ -89,7 +89,7 @@ class textEntry(ranaModule):
       if persistentKey is not None:
         initialText = self.get(persistentKey, initialText)
       # make sure the initialText is a string
-      if not isinstance(initialText, str):
+      if not isinstance(initialText, basestring):
         initialText = "" # replace the non-strong with an empty string
       entry.set_text(initialText)
       entry.select_region(0,-1)
