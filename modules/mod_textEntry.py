@@ -70,7 +70,7 @@ class textEntry(ranaModule):
 #          display.fullscreenToggle()
 #          self.tempUnfullscreen = False
     # save
-    if persistentKey != None:
+    if persistentKey is not None:
       self.set(persistentKey, result)
     self.dmod.textEntryDone()
     instance.handleTextEntryResult(key,result)
@@ -81,23 +81,16 @@ class textEntry(ranaModule):
         label,
         None,
         gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT | gtk.DIALOG_NO_SEPARATOR,
-#                      gtk.STOCK_OK, gtk.RESPONSE_ACCEPT)
         (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT)
-#        ()
         )
-#      dialog = gtk.MessageDialog(
-#        None,
-#        gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-#        gtk.MESSAGE_QUESTION,
-#        gtk.BUTTONS_OK,
-#        None)
-#      dialog.set_markup('Please enter your <b>name</b>:')
       #create the text input field
       entry = gtk.Entry()
       # reload last used input, if available
-      if persistentKey != None:
+      if persistentKey is not None:
         initialText = self.get(persistentKey, initialText)
-
+      # make sure the initialText is a string
+      if not isinstance(initialText, str):
+        initialText = "" # replace the non-strong with an empty string
       entry.set_text(initialText)
       entry.select_region(0,-1)
       # make sure the text is visible (TODO: respect current theme, but make sure the text will be visible ?)
