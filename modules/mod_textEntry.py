@@ -41,11 +41,7 @@ class textEntry(ranaModule):
     self.set('textEntryDone', False)
 
   def respondToTextEntry(self, entry, dialog, response,instance,key, persistentKey):
-#      print "responding to text entry"
-#      self.set('textEntry', entry.get_text())
-#      self.set('textEntryDone', True)
       self.respond(entry.get_text(), instance,key, persistentKey)
-#      print "text entry dialog is quiting"
       dialog.destroy()
 
   def respondToDialog(self, dialog, response_id,entry,instance,key, persistentKey): 
@@ -57,19 +53,9 @@ class textEntry(ranaModule):
         print("** dialog rejected **")
         """the dialog was rejected so we don't
         report the input that could have been entered"""
-
-
-#      self.set('textEntry', entry.get_text())
-#      self.set('textEntryDone', True)
       dialog.destroy()
 
   def respond(self, result, instance, key, persistentKey=None):
-#    if self.tempUnfullscreen:
-#      if display:
-#        if display.fullscreen():
-#          display.fullscreenToggle()
-#          self.tempUnfullscreen = False
-    # save
     if persistentKey is not None:
       self.set(persistentKey, result)
     self.dmod.textEntryDone()
@@ -110,8 +96,6 @@ class textEntry(ranaModule):
         vbox.pack_end(entry)
       else:
         vbox.pack_start(entry, False, 5, 5)
-      #some secondary text
-#      dialog.format_secondary_markup("This will be used for <i>identification</i> purposes")
       #add it and show it
       dialog.vbox.pack_end(vbox, True, True, 0)
       self.clearEntry()
@@ -119,11 +103,6 @@ class textEntry(ranaModule):
       (x,y,w,h) = self.get('viewport')
       dialog.resize(w,height) # resize the dialog to the width of the window and leave height the same
       dialog.set_keep_above(True)
-#      display = self.m.get('display', None)
-#      if display:
-#        if display.getFullscreenEnabled():
-#          display.fullscreenToggle()
-#          self.tempUnfullscreen = True
       self.dmod.textEntryIminent()
       self.entryBoxVisible = True
       dialog.show_all()
