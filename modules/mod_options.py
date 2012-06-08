@@ -176,7 +176,7 @@ class Options(ranaModule):
               'itemDict' : itemDict,
               'storageKey' : storageKey}
     # this means we are probably showing the option in the per mode state list
-    if fakeMode != None:
+    if fakeMode is not None:
       choices['mode'] = fakeMode
       choices['noToolsIcon'] = True # disable the tools in the per mode state list
     self.addOption(title, variable, choices, group, default)
@@ -799,8 +799,8 @@ class Options(ranaModule):
     for category,options in self.options.items():
       for option in options[2]:
         (title,variable,choices,category,default) = option
-        if(default != None):
-          if(not self.d.has_key(variable)):
+        if default is not None:
+          if not self.d.has_key(variable):
             self.set(variable, default)
 
   def _removeNonPersistent(self, inputDict):
@@ -1029,7 +1029,7 @@ class Options(ranaModule):
             valueDescription = "<tt><b>%s</b></tt>" % valueDescription
 
             #assure highlighting
-            if highlightId != None:
+            if highlightId is not None:
               """ run an action before switching to the next menu that
               assures that items in the next menu are properly highlighted
               according to the state of the corresponding variable"""
@@ -1064,7 +1064,7 @@ class Options(ranaModule):
             onClick += "|set:needRedraw:1"
 
 
-          y = y4 + (row) * dy
+          y = y4 + row * dy
           if w1 > h1: # landscape
             dx = (x4-x1)
             w = w1 - dx
