@@ -681,7 +681,7 @@ class Options(ranaModule):
     group = addGroup("Network usage", "network_usage", catNetwork, "generic")
     addOpt("Network", "network",
 #      [("off","No use of network"), #TODO: implement this :)
-      [("minimal", "Only for important data"),
+      [("minimal", "Don't Download Map Tiles"),
        ("full", "Unlimited use of network")],
        group,
        "full")
