@@ -86,7 +86,7 @@ class Options(ranaModule):
       
     if registerToMenu: # add to options menu structure ?
       self.menuModule.addItem(catId, name, icon, action)
-    if backButtonAction != None:
+    if backButtonAction is not None:
       self.options[id] = [backButtonAction ,0,[]]
     else:
       self.options[id] = ["set:menu:%s" % catId,0,[]]
@@ -145,7 +145,7 @@ class Options(ranaModule):
     menu = self.menuModule.getClearedMenu(backAction)
     menuItems = [] # an ordered list of all the menu items
     itemDict = {} # for easily assigning keys to labels
-    if fakeMode != None:
+    if fakeMode is not None:
       mode = fakeMode
     else:
       mode = self.get('mode', 'car')
@@ -157,7 +157,7 @@ class Options(ranaModule):
 
       menuItems.append(item)
       itemDict[key] = (name,id)
-      id = id + 1
+      id += 1
     # load all items to the menu
     menu = self.menuModule.addItemsToThisMenu(menu, menuItems)
     # store the menu in the menu module
@@ -423,7 +423,7 @@ class Options(ranaModule):
         themeList = icons.getThemeList()
         # check if current theme exists
         currentTheme = self.get('currentTheme', None)
-        if currentTheme != None:
+        if currentTheme is not None:
           if currentTheme not in themeList:
             self.set('currentTheme', defaultTheme) # theme not valid, reset to default
 
@@ -851,7 +851,7 @@ class Options(ranaModule):
       elif direction == "down" and index < maxIndex:
         newIndex = index + 1
         self.options[menuName][1] = newIndex
-    elif(message == "save"):
+    elif message == "save":
       self.modrana._saveOptions()
 
     elif type == 'ml' and message == "go2ItemToolsMenu":
@@ -971,7 +971,7 @@ class Options(ranaModule):
         index = firstItemIndex + row
         numItems = len(options)
         cAction = None
-        if(0 <= index < numItems):
+        if 0 <= index < numItems:
           (title,variable,choices,group,default) = options[index]
           # What's it set to currently?
           if 'mode' in choices:
@@ -1046,10 +1046,10 @@ class Options(ranaModule):
             useNext = False
             for c in states:
               (cVal, cName) = (c[0],c[1])
-              if(useNext):
+              if useNext:
                 nextChoice = c
                 useNext = False
-              if(str(value) == str(cVal)):
+              if str(value) == str(cVal):
                 valueDescription = cName
                 useNext = True
                 if len(c) == 3:
