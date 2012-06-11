@@ -47,3 +47,18 @@ class Startup:
     """return parsed CLI arguments"""
     return self.args
 
+  def handleEarlyTasks(self):
+    """
+    handle CLI arguments that can be handled before the general modRana startup
+    -> this usually means some "simple" tasks that return some results to
+        standard output and then shut-down modRana
+    EX.: do an address search, return static map URL and quit
+    """
+    pass
+
+  def handlePostFirstTimeTasks(self):
+    """
+    handle CLI arguments that should take effect once modrana is fully stared
+    EX.: do an address search and display the results inside modRana
+    """
+    pass

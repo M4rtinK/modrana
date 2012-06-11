@@ -53,7 +53,7 @@ importsDoneTimestamp = time.time()
 
 def createFolderPath(newPath):
   """
-  Create a path for a directory and all needed parent forlders
+  Create a path for a directory and all needed parent folders
   -> parent directories will be created
   -> if directory already exists, then do nothing
   -> if there is another filesystem object (like a file) with the same name, raise an exception
@@ -108,8 +108,11 @@ class ModRana:
     self.addTime("GUI creation")
 
     # add the startup handling core module
-    start = startup.Startup(self)
-    self.args = start.getArgs()
+    self.startup = startup.Startup(self)
+    self.args = self.startup.getArgs()
+
+    # handle any early tasks specified from CLI
+    self.startup.handleEarlyTasks()
 
     # add the paths handling core module
     self.paths = paths.Paths(self)
@@ -248,7 +251,7 @@ class ModRana:
     for m in self.m.values():
       m.firstTime()
 
-      # run what needs to be done after firstTime is called
+    # run what needs to be done after firstTime is called
     self._modulesLoadedPostFirstTime()
 
     print( "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start)) )
@@ -298,6 +301,10 @@ class ModRana:
     # check if redrawing time should be printed to terminal
     if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
       self.showRedrawTime = True
+
+    # run any tasks specified by CLI arguments
+    self.startup.handlePostFirstTimeTasks()
+
 
   def getModule(self, name, default=None):
     """
