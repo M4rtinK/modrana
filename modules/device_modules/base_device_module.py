@@ -44,7 +44,7 @@ class deviceModule(ranaModule):
     return the preferred application window size in pixels
     """
     # we'll use VGA as a default value
-    return((640,480))
+    return 640,480
 
   def startInFullscreen(self):
     """weather or not to start modRana in fullscreen
@@ -191,7 +191,7 @@ class deviceModule(ranaModule):
 
   def openUrl(self, url):
     """
-    open a URL
+    open an URL
     """
     pass
 
