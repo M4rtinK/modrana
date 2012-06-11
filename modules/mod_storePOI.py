@@ -48,17 +48,17 @@ class storePOI(ranaModule):
     """connect to the database"""
     DBPath = self.modrana.paths.getPOIDatabasePath()
     if os.path.exists(DBPath): # connect to db
-      print("storePOI: POI database path:\n %s" % DBPath)
+      print(" @ storePOI: POI database path:\n @ %s" % DBPath)
       try:
         self.db = sqlite3.connect(DBPath)
-        print("storePOI: connection to POI db established")
+        print(" @ storePOI: connection to POI db established")
       except Exception, e:
-        print("storePOI: connecting to POI database failed:\n%s" % e)
+        print(" @ storePOI: connecting to POI database failed:\n%s" % e)
     else: # create new db
       try:
         self.db = self.createDatabase(DBPath)
       except Exception, e:
-        print("storePOI: creating POI database failed:\n%s" % e)
+        print(" @ storePOI: creating POI database failed:\n%s" % e)
 
   def disconnectFromDb(self):
     print("storePOI: disconnecting from db")
