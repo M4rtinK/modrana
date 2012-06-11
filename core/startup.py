@@ -31,13 +31,13 @@ class Startup:
     parser.add_argument(
       '-d', metavar="--device", type=str,
       nargs='+', help="specify device type",
-      default="pc", action="store",
+      default=None, action="store",
       choices=["neo","pc", "n900", "n9", "q7"]
     )
     parser.add_argument(
       '-u', metavar="--gui", type=str,
       nargs='+', help="specify user interface type",
-      default="GTK",
+      default=None,
       action="store",
       choices=["GTK", "QML"]
     )

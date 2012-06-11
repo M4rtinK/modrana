@@ -38,13 +38,16 @@ class device_q7(deviceModule):
     return "Smart Devices SmartQ 7 MID"
 
   def getWinWH(self):
-    return((800,480))
+    return (800,480)
 
   def simpleMapDragging(self):
     return True
 
   def startInFullscreen(self):
     return True
+
+  def getSupportedGUIModuleIds(self):
+    return ["GTK"]
 
 if(__name__ == "__main__"):
   a = device_example({}, {})

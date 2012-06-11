@@ -154,10 +154,12 @@ class ModRana:
     # (a unique device module string identificator)
     # make sure there is some argument provided
     if self.args.d:
-      device = self.args.d
+      device = self.args.d[0]
     else:
       # use the Neo device module as fallback
-      device = "neo"
+#      device = "neo"
+      from core import platform_detection
+      device = platform_detection.getBestDeviceModuleId()
 
     device = device.lower() # convert to lowercase
     print "importing modules:"
@@ -171,12 +173,15 @@ class ModRana:
     # make shortcut for the loadModule function
     loadModule = self._loadModule
 
-    # make sure there are some arguments
+    # get GUI ID from the CLI argument
+    GUIString = ""
     if self.args.u:
-      GUIString = self.args.u
-    else:
-      # GTK GUI fallback
-      GUIString = "GTK"
+      GUIString = self.args.u[0]
+    else: # no ID specified
+      # the N900 device module needs the GUIString
+      # at startup
+      if device == "n900":
+        GUIString = "GTK"
     gs.GUIString = GUIString
 
     ## load the device specific module
@@ -193,11 +198,25 @@ class ModRana:
       dmod = loadModule("device_%s" % device, "device")
     self.dmod = dmod
 
-    ## load the GUI module
+    # if no GUIString was specified from CLI,
+    # get preferred GUI module strings from the device module
+
+    if GUIString == "":
+      ids = self.dmod.getSupportedGUIModuleIds()
+      if ids:
+        GUIString = ids[0]
+      else:
+        GUIString = "GTK" # fallback
+      # export the GUI string
+      gs.GUIString = GUIString
+
+    # TODO: if loading GUI module fails, retry other modules in
+    # order of preference as provided by the  device module
 
     # add the GUI module folder to path
     GUIModulesPath = os.path.join(modulesFolder, "gui_modules")
     sys.path.append(GUIModulesPath)
+
     if GUIString == "GTK":
       gui = loadModule("gui_gtk", "gui")
     elif GUIString == "QML":

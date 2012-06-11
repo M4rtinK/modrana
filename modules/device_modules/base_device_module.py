@@ -81,6 +81,13 @@ class deviceModule(ranaModule):
     them out of view - the user might want that the window redraws on the dashboard or not"""
     return False
 
+  def getSupportedGUIModuleIds(self):
+    """
+    supported GUI module IDs, ordered by preference from left to right
+    (the most-preferred should be on the left)
+    """
+    return ["GTK", "QML"] # as default try GTK first and then QML
+
   def handlesLocation(self):
     """report whether the device module handles position updates by itself"""
     return False

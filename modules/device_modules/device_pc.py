@@ -38,13 +38,16 @@ class Device_PC(deviceModule):
     return "A generic Personal Computer"
 
   def getWinWH(self):
-    return((800,480))
+    return (800,480)
 
   def simpleMapDragging(self):
     return False
 
   def startInFullscreen(self):
     return False
+
+  def getSupportedGUIModuleIds(self):
+    return ["GTK", "QML"]
 
 
 if(__name__ == "__main__"):

@@ -38,10 +38,13 @@ class device_netbook(deviceModule):
     return "A generic netbook"
 
   def getWinWH(self):
-    return((1024,600))
+    return (1024,600)
 
   def startInFullscreen(self):
     return False
+
+  def getSupportedGUIModuleIds(self):
+    return ["GTK", "QML"]
     
 
 if(__name__ == "__main__"):

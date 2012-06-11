@@ -26,7 +26,7 @@ def getModule(m,d,i):
   return(AndroidChrot(m,d,i))
 
 class AndroidChroot(deviceModule):
-  """A Neo FreeRunner modRana device-specific module"""
+  """A modRana device-specific module for Android chroot"""
   
   def __init__(self, m, d, i):
     deviceModule.__init__(self, m, d, i)
@@ -39,13 +39,16 @@ class AndroidChroot(deviceModule):
     return "Android chroot"
 
   def getWinWH(self):
-    return((480,600))
+    return (480,600)
 
   def startInFullscreen(self):
     return False
 
   def simpleMapDragging(self):
     return True
+
+  def getSupportedGUIModuleIds(self):
+    return ["GTK"]
 
   def lpSkipCount(self):
     """SHR on Neo fires two clicks after a long press, so we need to skip

@@ -39,13 +39,16 @@ class device_neo(deviceModule):
     return "OpenMoko Neo FreeRunner"
 
   def getWinWH(self):
-    return((480,600))
+    return (480,600)
 
   def startInFullscreen(self):
     return True
 
   def simpleMapDragging(self):
     return True
+
+  def getSupportedGUIModuleIds(self):
+    return ["GTK"]
 
   def lpSkipCount(self):
     """SHR on Neo fires two clicks after a long press, so we need to skip

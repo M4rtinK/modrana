@@ -132,10 +132,13 @@ class device_n900(deviceModule):
     return "Nokia N900"
 
   def getWinWH(self):
-    return 800,480
+    return (800,480)
 
   def startInFullscreen(self):
     return True
+
+  def getSupportedGUIModuleIds(self):
+    return ["GTK", "QML"]
 
   def startAutorotation(self):
     """start the GUI automatic rotation feature"""

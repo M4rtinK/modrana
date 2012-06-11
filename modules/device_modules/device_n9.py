@@ -31,7 +31,7 @@ def getModule(m,d,i):
   return(device_example(m,d,i))
 
 class device_example(deviceModule):
-  """A sample modRana device-specific module"""
+  """A Nokia N9 device module"""
   
   def __init__(self, m, d, i):
     deviceModule.__init__(self, m, d, i)
@@ -46,7 +46,7 @@ class device_example(deviceModule):
 
   def getWinWH(self):
     """N9/N950 screen resolution"""
-    return ((854,480))
+    return (854,480)
 
   def startInFullscreen(self):
     """
@@ -73,6 +73,8 @@ class device_example(deviceModule):
     """
     QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
 
+  def getSupportedGUIModuleIds(self):
+    return ["QML"]
 
   def getLocationType(self):
     return "qt_mobility"
