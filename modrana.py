@@ -152,12 +152,10 @@ class ModRana:
 
     # get the device module string
     # (a unique device module string identificator)
-    # make sure there is some argument provided
     if self.args.d:
       device = self.args.d[0]
-    else:
-      # use the Neo device module as fallback
-#      device = "neo"
+    else: # no device specified from CLI
+      # try to auto-detect the current device
       from core import platform_detection
       device = platform_detection.getBestDeviceModuleId()
 
