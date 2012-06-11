@@ -153,8 +153,8 @@ class ModRana:
     # get the device module string
     # (a unique device module string identificator)
     # make sure there is some argument provided
-    if self.args:
-      device = self.args.d[0]
+    if self.args.d:
+      device = self.args.d
     else:
       # use the Neo device module as fallback
       device = "neo"
@@ -173,7 +173,7 @@ class ModRana:
 
     # make sure there are some arguments
     if self.args.u:
-      GUIString = self.args.u[0]
+      GUIString = self.args.u
     else:
       # GTK GUI fallback
       GUIString = "GTK"
