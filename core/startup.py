@@ -28,20 +28,60 @@ class Startup:
   def __init__(self, modrana):
     self.modrana = modrana
     parser = argparse.ArgumentParser(description="A flexible GPS navigation system.")
+    # device
     parser.add_argument(
-      '-d', metavar="--device", type=str,
-      nargs='+', help="specify device type",
+      '-d', metavar="device ID", type=str,
+      help="specify device type",
       default=None, action="store",
       choices=["neo","pc", "n900", "n9", "q7"]
     )
+    # GUI
     parser.add_argument(
-      '-u', metavar="--gui", type=str,
-      nargs='+', help="specify user interface type",
+      '-u', metavar="GUI ID", type=str,
+      help='specify user interface type (GTK or QML)',
       default=None,
       action="store",
       choices=["GTK", "QML"]
     )
+    # local search
+    parser.add_argument(
+      '--local-search', metavar='search query', type=str,
+      help='specify a local search query EXAMPLE: "pizza"',
+      default=None,
+      action="store"
+    )
+    # local search
+    parser.add_argument(
+      '--local-search-location', metavar='an address or geographic coordinates', type=str,
+      help='specify a geographic location for a local search query (current location is used by default), both addresses and geographic coordinates are supported EXAMPLE: "London" or "12.3,45.6"'
+      ,
+      default=None,
+      action="store"
+    )
+    # address search
+    parser.add_argument(
+      '--address-search', metavar='an address', type=str,
+      help='specify an address search query EXAMPLE: "Baker Street 221b, London"',
+      default=None,
+      action="store"
+    )
+    # wikipedia search
+    parser.add_argument(
+      '--wikipedia-search',
+      metavar = 'search query',
+      type=str,
+      help='specify a local search query EXAMPLE: "Prague castle"',
+      default=None,
+      action="store"
+    )
+    # wikipedia search
+    parser.add_argument(
+      '--return-static-map-url',
+      help='return static map URL for a CLI query (works for local search, address and Wikipedia search)',
+      action="store_false"
+    )
     self.args = parser.parse_args()
+
 
   def getArgs(self):
     """return parsed CLI arguments"""
