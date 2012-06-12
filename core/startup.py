@@ -74,11 +74,11 @@ class Startup:
       default=None,
       action="store"
     )
-    # wikipedia search
+    # return static map url & shutdown
     parser.add_argument(
       '--return-static-map-url',
       help='return static map URL for a CLI query (works for local search, address and Wikipedia search)',
-      action="store_false"
+      action="store_true"
     )
     self.args = parser.parse_args()
 
