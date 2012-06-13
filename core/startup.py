@@ -80,6 +80,15 @@ class Startup:
       help='return static map URL for a CLI query (works for local search, address and Wikipedia search)',
       action="store_true"
     )
+    # return static map url & shutdown
+    parser.add_argument(
+      '--center-on-zl',
+      help='focus on current position on a given zoom level EXAMPLE: 15',
+      metavar="zoom level number",
+      type=int,
+      default=None,
+      action="store"
+    )
     self.args = parser.parse_args()
 
 
