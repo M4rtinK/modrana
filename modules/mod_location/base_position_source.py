@@ -91,7 +91,7 @@ class Fix():
     self.quality = quality
     self.error = error
     self.error_bearing = error_bearing
-    if timestamp == None:
+    if timestamp is None:
       self.timestamp = datetime.utcnow()
     else:
       self.timestamp = timestamp
