@@ -53,7 +53,7 @@ class Startup:
     # local search
     parser.add_argument(
       '--local-search-location', metavar='an address or geographic coordinates', type=str,
-      help='specify a geographic location for a local search query (current location is used by default), both addresses and geographic coordinates with the GEO: prefix are supported EXAMPLE: "London" or "GEO:50.083333,14.416667"'
+      help='specify a geographic location for a local search query (current location is used by default), both addresses and geographic coordinates with the geo: prefix are supported EXAMPLE: "London" or "geo:50.083333,14.416667"'
       ,
       default=None,
       action="store"
@@ -116,8 +116,8 @@ class Startup:
     # enable centering and set zoom level
     parser.add_argument(
       '--focus-on-coordinates',
-      help='focus on given coordinates, NOTE you can use --set-zl to set zoom level, EXAMPLE: "GEO:50.083333,14.416667"',
-      metavar="geographic coordinates with the GEO: prefix",
+      help='focus on given coordinates, NOTE you can use --set-zl to set zoom level, EXAMPLE: "geo:50.083333,14.416667"',
+      metavar="geographic coordinates with the geo: prefix",
       type=str,
       default=None,
       action="store"
@@ -162,8 +162,8 @@ class Startup:
       # try to parse the coordinates
       try:
         coords = self.args.focus_on_coordinates
-        # split off the GEO prefix
-        split1 = str.upper(coords).split("GEO:")
+        # split off the geo prefix
+        split1 = str.upper(coords).split("geo:")
         if len(split1) >= 2:
           # split to coordinates:
           split2 = split1[1].split(",")
@@ -184,7 +184,7 @@ class Startup:
 
         else:
           print("startup: parsing coordinates for the --focus-on-coordinates option failed")
-          print("missing GEO: prefix")
+          print("missing geo: prefix")
 
         # make sure centering is disabled
         self.modrana.set("centred", False)
