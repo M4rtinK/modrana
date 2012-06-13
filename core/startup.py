@@ -159,38 +159,48 @@ class Startup:
       # make sure the map screen is displayed
       self.modrana.set("menu", None)
     elif self.args.focus_on_coordinates is not None:
-      # try to parse the coordinates
-      try:
-        coords = self.args.focus_on_coordinates
-        # split off the geo prefix
-        split1 = str.lower(coords).split("geo:")
-        if len(split1) >= 2:
-          # split to coordinates:
-          split2 = split1[1].split(",")
-          if len(split2) >= 2:
-            lat = float(split2[0])
-            lon = float(split2[1])
-            print("startup: focusing on %f %f" % (lat, lon))
-            # disable centering & show the map screen
-            self.modrana.set("menu", None)
-            self.modrana.set("centred", False)
-            # send the map focusing message
-            message = "mapView:recentre %f %f" % (lat, lon)
-            self._sendMessage(message)
-            self.m.get("messages")
-          else:
-            print("startup: parsing coordinates for the --focus-on-coordinates option failed")
-            print("unknown coordinate format: %s" % split1[1])
+      self._focusOnCoords()
+    elif self.args.local_search is not None:
+      self._localSearch()
 
+  def _focusOnCoords(self):
+    """focus on coordinates provided by CLI"""
+
+    # try to parse the coordinates
+    try:
+      coords = self.args.focus_on_coordinates
+      # split off the geo prefix
+      split1 = str.lower(coords).split("geo:")
+      if len(split1) >= 2:
+        # split to coordinates:
+        split2 = split1[1].split(",")
+        if len(split2) >= 2:
+          lat = float(split2[0])
+          lon = float(split2[1])
+          print("startup: focusing on %f %f" % (lat, lon))
+          # disable centering & show the map screen
+          self.modrana.set("menu", None)
+          self.modrana.set("centred", False)
+          # send the map focusing message
+          message = "mapView:recentre %f %f" % (lat, lon)
+          self._sendMessage(message)
+          self.m.get("messages")
         else:
           print("startup: parsing coordinates for the --focus-on-coordinates option failed")
-          print("missing geo: prefix")
+          print("unknown coordinate format: %s" % split1[1])
 
-        # make sure centering is disabled
-        self.modrana.set("centred", False)
-      except Exception, e:
+      else:
         print("startup: parsing coordinates for the --focus-on-coordinates option failed")
-        print(e)
+        print("missing geo: prefix")
+
+      # make sure centering is disabled
+      self.modrana.set("centred", False)
+    except Exception, e:
+      print("startup: parsing coordinates for the --focus-on-coordinates option failed")
+      print(e)
+
+  def _localSearch(self):
+    pass
 
   def _sendMessage(self, message):
     m = self.modrana.m.get("messages")
