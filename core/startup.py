@@ -115,5 +115,5 @@ class Startup:
       z = self.args.center_on_zl
       self.modrana.set("z", z)
       self.modrana.set("centred", True)
-      # make sure the map is displayed
+      # make sure the map screen is displayed
       self.modrana.set("menu", None)
