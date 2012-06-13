@@ -33,7 +33,7 @@ class Startup:
       '-d', metavar="device ID", type=str,
       help="specify device type",
       default=None, action="store",
-      choices=["neo","pc", "n900", "n9", "q7"]
+      choices=["neo","pc", "n900", "n9", "q7", "android_chroot"]
     )
     # GUI
     parser.add_argument(
@@ -110,4 +110,10 @@ class Startup:
     handle CLI arguments that should take effect once modrana is fully stared
     EX.: do an address search and display the results inside modRana
     """
-    pass
+    # center on current position on a zoom-level
+    if self.args.center_on_zl is not None:
+      z = self.args.center_on_zl
+      self.modrana.set("z", z)
+      self.modrana.set("centred", True)
+      # make sure the map is displayed
+      self.modrana.set("menu", None)
