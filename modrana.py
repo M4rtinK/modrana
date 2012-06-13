@@ -88,6 +88,8 @@ class ModRana:
     self.dmod = None # device specific module
     self.gui = None
 
+    self.GUIString = ""
+
     self.d = {} # persistent dictionary of data
     self.m = {} # dictionary of loaded modules
     self.watches = {} # List of data change watches
@@ -138,7 +140,16 @@ class ModRana:
     self.configs.loadAll()
 
     # start loading modules
-    self.loadModules()
+
+    # device module first
+    self._loadDeviceModule()
+
+    # then the GUI module
+    self._loadGUIModule()
+
+    # and all other modules
+    self._loadModules()
+
     # startup done, print some statistics
     self._startupDone()
 
@@ -150,8 +161,8 @@ class ModRana:
 
   ##  MODULE HANDLING ##
 
-  def loadModules(self):
-    """Load all modules from the specified directory"""
+  def _loadDeviceModule(self):
+    """Load the device module"""
 
     # get the device module string
     # (a unique device module string identificator)
@@ -163,27 +174,21 @@ class ModRana:
       device = platform_detection.getBestDeviceModuleId()
 
     device = device.lower() # convert to lowercase
-    print "importing modules:"
-    start = time.clock()
     self.initInfo={
               'modrana': self,
               'device': device, # TODO: do this directly
               'name': ""
              }
 
-    # make shortcut for the loadModule function
-    loadModule = self._loadModule
-
     # get GUI ID from the CLI argument
-    GUIString = ""
     if self.args.u:
-      GUIString = self.args.u
+      self.GUIString = self.args.u
     else: # no ID specified
       # the N900 device module needs the GUIString
       # at startup
       if device == "n900":
-        GUIString = "GTK"
-    gs.GUIString = GUIString
+        self.GUIString = "GTK"
+    gs.GUIString = self.GUIString
 
     ## load the device specific module
 
@@ -191,42 +196,53 @@ class ModRana:
     # during init
     deviceModulesPath = os.path.join(modulesFolder, "device_modules")
     sys.path.append(deviceModulesPath)
-    dmod = loadModule("device_%s" % device, "device")
+    dmod = self._loadModule("device_%s" % device, "device")
     if dmod is None:
       print("modRana: no device module name provided"
-            "loading the Neo device module as failsafe")
+            "loading the Neo device module as fail-safe")
       device = "neo"
-      dmod = loadModule("device_%s" % device, "device")
+      dmod = self._loadModule("device_%s" % device, "device")
     self.dmod = dmod
 
     # if no GUIString was specified from CLI,
     # get preferred GUI module strings from the device module
 
-    if GUIString == "":
+    if self.GUIString == "":
       ids = self.dmod.getSupportedGUIModuleIds()
       if ids:
-        GUIString = ids[0]
+        self.GUIString = ids[0]
       else:
-        GUIString = "GTK" # fallback
+        self.GUIString = "GTK" # fallback
       # export the GUI string
-      gs.GUIString = GUIString
+      gs.GUIString = self.GUIString
 
     # TODO: if loading GUI module fails, retry other modules in
     # order of preference as provided by the  device module
+
+  def _loadGUIModule(self):
+    """load the GUI module"""
 
     # add the GUI module folder to path
     GUIModulesPath = os.path.join(modulesFolder, "gui_modules")
     sys.path.append(GUIModulesPath)
 
-    if GUIString == "GTK":
-      gui = loadModule("gui_gtk", "gui")
-    elif GUIString == "QML":
-      gui = loadModule("gui_qml", "gui")
+    if self.GUIString == "GTK":
+      gui = self._loadModule("gui_gtk", "gui")
+    elif self.GUIString == "QML":
+      gui = self._loadModule("gui_qml", "gui")
       # make device module available to the GUI module
     if gui:
-      gui.dmod = dmod
+      gui.dmod = self.dmod
     self.gui = gui
 
+  def _loadModules(self):
+    """load all "normal" (other than device & GUI) modules"""
+
+    print("importing modules:")
+    start = time.clock()
+
+    # make shortcut for the loadModule function
+    loadModule = self._loadModule
 
     # get possible module names
     moduleNames = self._getModuleNamesFromFolder(modulesFolder)
