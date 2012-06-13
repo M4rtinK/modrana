@@ -156,7 +156,7 @@ class ModRana:
     # get the device module string
     # (a unique device module string identificator)
     if self.args.d:
-      device = self.args.d[0]
+      device = self.args.d
     else: # no device specified from CLI
       # try to auto-detect the current device
       from core import platform_detection
@@ -177,7 +177,7 @@ class ModRana:
     # get GUI ID from the CLI argument
     GUIString = ""
     if self.args.u:
-      GUIString = self.args.u[0]
+      GUIString = self.args.u
     else: # no ID specified
       # the N900 device module needs the GUIString
       # at startup
