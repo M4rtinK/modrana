@@ -252,7 +252,7 @@ class ModRana:
         moduleName = moduleName.split('.')[0]
         loadModule(moduleName, moduleName[4:])
 
-    print "Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start))
+    print("Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start)))
     self.addTime("all modules loaded")
 
     # make sure all modules have the device module and other variables before first time
