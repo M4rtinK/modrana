@@ -53,7 +53,7 @@ class Startup:
     # local search
     parser.add_argument(
       '--local-search-location', metavar='an address or geographic coordinates', type=str,
-      help='specify a geographic location for a local search query (current location is used by default), both addresses and geographic coordinates are supported EXAMPLE: "London" or "12.3,45.6"'
+      help='specify a geographic location for a local search query (current location is used by default), both addresses and geographic coordinates with the GEO: prefix are supported EXAMPLE: "London" or "GEO:50.083333,14.416667"'
       ,
       default=None,
       action="store"
@@ -117,3 +117,4 @@ class Startup:
       self.modrana.set("centred", True)
       # make sure the map screen is displayed
       self.modrana.set("menu", None)
+
