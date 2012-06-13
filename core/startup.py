@@ -163,7 +163,7 @@ class Startup:
       try:
         coords = self.args.focus_on_coordinates
         # split off the geo prefix
-        split1 = str.upper(coords).split("geo:")
+        split1 = str.lower(coords).split("geo:")
         if len(split1) >= 2:
           # split to coordinates:
           split2 = split1[1].split(",")
