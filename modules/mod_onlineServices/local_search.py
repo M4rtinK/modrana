@@ -63,8 +63,8 @@ class GoogleLocalSearchPoint(LocalSearchPoint):
 
     LocalSearchPoint.__init__(
       self,
-      lat = GLSResult['lat'],
-      lon = GLSResult['lng'],
+      lat = float(GLSResult['lat']),
+      lon = float(GLSResult['lng']),
       name = GLSResult['titleNoFormatting'],
       addressLines = [addressLine],
       phoneNumbers=phoneNumbers
