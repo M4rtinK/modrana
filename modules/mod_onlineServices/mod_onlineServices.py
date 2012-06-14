@@ -216,6 +216,33 @@ class onlineServices(ranaModule):
       self.returnResult = False
 
 
+  # ** OSM static map URL **
+
+  def getOSMStaticMapUrl(self, centerLat, centerLon, zl,
+                         w=350,h=350,
+                         defaultMarker = "ol-marker",
+                         markerList=[]
+                         ):
+    """construct & return OSM static map URL"""
+    prefix = "http://staticmap.openstreetmap.de/staticmap.php"
+    center = "?center=%f,%f" % (centerLat, centerLon)
+    zoom = "&zoom=%d" % zl
+    size = "&size=%dx%d" % (w,h)
+    if markerList:
+      markers= "&markers="
+      for marker in markerList:
+        if len(marker) == 2:
+          lat, lon = marker
+          markerName = defaultMarker
+        else:
+          lat, lon, markerName = marker
+        markers+= "%f,%f,%s|" % (lat, lon, markerName)
+    else:
+      markers = ""
+
+    url = "%s%s%s%s%s" % (prefix, center, zoom, size, markers)
+    return url
+
   # ** Geonames **
       
   def elevFromGeonames(self, lat, lon):
