@@ -8,13 +8,16 @@ class Point:
     self.elevation = elevation # should be in meters
     self.message = message
 
-  def __str__(self):
+  def __unicode__(self):
     if self.getElevation() is None:
       elev = "unknown"
     else:
       elev = "%f m" % self.getElevation()
 
     return '%f,%f elevation: %s "%s"' % (self.lat, self.lon, elev, self.getMessage())
+
+  def __str__(self):
+    return unicode(self).encode('utf-8')
 
   def getLL(self):
     return self.lat,self.lon
