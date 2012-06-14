@@ -53,7 +53,7 @@ class onlineServices(ranaModule):
     url = 'http://ws.geonames.org/srtm3?lat=%f&lng=%f' % (lat,lon)
     try:
       query = urllib.urlopen(url)
-    except:
+    except Exception, e:
       "onlineServices: getting elevation from geonames returned an error"
       return 0
     return query.read()
@@ -66,10 +66,10 @@ class onlineServices(ranaModule):
       self._setWorkStatusText("online elevation lookup starting...")
       results = self.elevFromGeonamesBatch(latLonList)
       self._setWorkStatusText("online elevation lookup done   ")
-      return (results, tracklog) 
+      return results, tracklog
     except Exception, e:
       print('onlineServices: exception suring elevation lookup:\n',e)
-      return (None,tracklog)
+      return None,tracklog
 
 
   def elevFromGeonamesBatch(self, latLonList):
@@ -97,31 +97,31 @@ class onlineServices(ranaModule):
       url = 'http://ws.geonames.org/srtm3?lats=%s&lngs=%s' % (lats,lons)
       try:
         query = urllib.urlopen(url)
-      except:
+      except Exception ,e:
         "onlineServices: getting elevation from geonames returned an error"
         results = "0"
         for i in range(1, len(tempList)):
-          results = results + " 0"
+          results += " 0"
       try:
         results = query.read().split('\r\n')
         query.close()
-      except:
+      except Exception, e:
         "onlineServices: elevation string from geonames has a wrong format"
         results = "0"
         for i in range(1, len(tempList)):
-          results = results + " 0"
+          results += " 0"
 
       index = 0
       for point in tempList: # add the results to the new list with elevation
         latLonElevList.append((point[0],point[1],int(results[index])))
-        index = index +1
+        index += 1
 
     return latLonElevList
 
   def getGmapsInstance(self):
     """get a google maps wrapper instance"""
     key = self.get('googleAPIKey', None)
-    if key == None:
+    if key is None:
       print "onlineServices: a google API key is needed for using the google maps services"
       return None
     # only import when actually needed
@@ -132,8 +132,8 @@ class onlineServices(ranaModule):
   def googleLocalQuery(self, query):
     print "local search query: %s" % query
     gmap = self.getGmapsInstance()
-    numresults = int(self.get('GLSResults', 8))
-    local = gmap.local_search(query, numresults)
+    numResults = int(self.get('GLSResults', 8))
+    local = gmap.local_search(query, numResults)
     return local
 
   def googleLocalQueryLL(self, term, lat, lon):
@@ -142,9 +142,9 @@ class onlineServices(ranaModule):
     return local
 
   def constructGoogleQueryLL(self, term, lat, lon):
-    """get a correctly formated GLS query"""
-    sufix = " loc:%f,%f" % (lat,lon)
-    query = term + sufix
+    """get a correctly formatted GLS query"""
+    suffix = " loc:%f,%f" % (lat,lon)
+    query = term + suffix
     return query
 
   def googleDirectionsAsync(self, start, destination, outputHandler, key):
@@ -155,8 +155,8 @@ class onlineServices(ranaModule):
     self._addWorkerThread(self._onlineRouteLookup, [(start, destination, routeRequestSentTimestamp), "normal"], outputHandler, key)
     
   def googleDirectionsLLAsync(self, start, destination, outputHandler, key):
-    """a background running googledirections query
-    - Lat Lon pairsversion -> for geocoding the start/destination points (NOT first/last route points)
+    """a background running Google Directions query
+    - Lat Lon pairs version -> for geocoding the start/destination points (NOT first/last route points)
        outputHandler will be provided with the results + the specified key string"""
     routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
     self._addWorkerThread(self._onlineRouteLookup, [(start, destination, routeRequestSentTimestamp), "LL"], outputHandler, key)
@@ -164,14 +164,14 @@ class onlineServices(ranaModule):
   def googleDirections(self ,start, destination):
     '''
     Get driving directions from Google.
-    start and directions can be either coordinates tupples or address strings
+    start and directions can be either coordinates tuples or address strings
     '''
 
     otherOptions=""
     if self.get('routingAvoidHighways', False): # optionally avoid highways
-      otherOptions = otherOptions + 'h'
+      otherOptions += 'h'
     if self.get('routingAvoidToll', False): # optionally avoid toll roads
-      otherOptions = otherOptions + 't'
+      otherOptions += 't'
 
     # respect travel mode
     mode = self.get('mode', None)
@@ -184,9 +184,9 @@ class onlineServices(ranaModule):
     else:
       type = ""
 
-     # combine type and aother parameters
+     # combine type and other parameters
     dir = {}
-    # the google language code is the seccond part of this whitespace delimited string
+    # the google language code is the second part of this whitespace delimited string
     googleLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[1]
     dir['hl'] = googleLanguageCode
     directions = self.tryToGetDirections(start, destination, dir, type, otherOptions)
@@ -287,15 +287,15 @@ class onlineServices(ranaModule):
       destinationLL = None
     self._setWorkStatusText("online routing done   ")
     # return result to the thread to handle
-    return (directions, startAddress, destinationAddress, startLL, destinationLL, routeRequestSentTimestamp)
+    return directions, startAddress, destinationAddress, startLL, destinationLL, routeRequestSentTimestamp
 
   def geocode(self, address):
     return geocoding.geocode(address)
 
   def geocodeAsync(self, address, outputHandler, key):
-    self._addWorkerThread(self._onlineGocoding, [address], outputHandler, key)
+    self._addWorkerThread(self._onlineGeocoding, [address], outputHandler, key)
 
-  def _onlineGocoding(self, address):
+  def _onlineGeocoding(self, address):
     self._setWorkStatusText("online geocoding in progress...")
     result = self.geocode(address)
     self._setWorkStatusText("online geocoding done   ")
