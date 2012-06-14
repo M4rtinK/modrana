@@ -24,6 +24,9 @@ import threading
 import time
 import geocoding
 import geonames
+import local_search
+
+DEFAULT_GOOGLE_API_KEY = "ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw"
 
 def getModule(m,d,i):
   return(onlineServices(m,d,i))
@@ -93,6 +96,57 @@ class onlineServices(ranaModule):
     result = self.geocode(address)
     self._setWorkStatusText("online geocoding done   ")
     return result
+
+  def localSearch(self, query, where=None, maxResults=8):
+    """Synchronous generic local search query
+    * if where is not specified, current position is used
+    * returns False if the search failed for some reason
+    """
+    # we use the Google Local Search backend at the moment
+
+    if where is None: # use current position coordinates
+      pos = self.get("pos", None)
+      if pos is None:
+        print("onlineServices: can't do local search - current location unknown")
+        return False
+      else:
+        lat, lon = pos
+        local = self.googleLocalQueryLL(query,lat,lon)
+        if local:
+          points = self._processGLSResponse(local)
+          return points
+        else:
+          return []
+    else: # use location description provided in where
+      queryString = "%s loc:%s" % (query, where)
+      local = self.googleLocalQuery(queryString, maxResults)
+      if local:
+        points = self._processGLSResponse(local)
+        return points
+      else:
+        return []
+
+  def localSearchLL(self, query, lat, lon):
+    """Synchronous generic local search query
+    * around a point specified by latitude and longitude"""
+
+    # we use the Google Local Search backend at the moment
+    local = self.googleLocalQueryLL(query,lat,lon)
+    if local:
+      points = self._processGLSResponse(local)
+      return points
+    else:
+      return []
+
+  def _processGLSResponse(self, response):
+    """load GLS results to LocalSearchPoint objects"""
+    results = response['responseData']['results']
+    points = []
+    for result in results:
+      point = local_search.GoogleLocalSearchPoint(result)
+      points.append(point)
+    return points
+
 
   # ** Background processing **
 
@@ -208,8 +262,8 @@ class onlineServices(ranaModule):
         lats += "%f," % point[0]
         lons += "%f," % point[1]
 
-# TODO: maybe add switching ?
-#      url = 'http://ws.geonames.org/astergdem?lats=%s&lngs=%s' % (lats,lons)
+    # TODO: maybe add switching ?
+    #      url = 'http://ws.geonames.org/astergdem?lats=%s&lngs=%s' % (lats,lons)
       url = 'http://ws.geonames.org/srtm3?lats=%s&lngs=%s' % (lats,lons)
       try:
         query = urllib.urlopen(url)
@@ -238,20 +292,21 @@ class onlineServices(ranaModule):
 
   def getGmapsInstance(self):
     """get a google maps wrapper instance"""
-    key = self.get('googleAPIKey', None)
+    key = self.get('googleAPIKey', DEFAULT_GOOGLE_API_KEY)
     if key is None:
       print "onlineServices: a google API key is needed for using the google maps services"
       return None
     # only import when actually needed
     import googlemaps
-    gmap = googlemaps.GoogleMaps(key)
-    return gmap
+    gMap = googlemaps.GoogleMaps(key)
+    return gMap
 
-  def googleLocalQuery(self, query):
+  def googleLocalQuery(self, query, maxResults=0):
     print "local search query: %s" % query
-    gmap = self.getGmapsInstance()
-    numResults = int(self.get('GLSResults', 8))
-    local = gmap.local_search(query, numResults)
+    gMap = self.getGmapsInstance()
+    if not maxResults:
+      maxResults = int(self.get('GLSResults', 8))
+    local = gMap.local_search(query, maxResults)
     return local
 
   def googleLocalQueryLL(self, term, lat, lon):
@@ -261,8 +316,7 @@ class onlineServices(ranaModule):
 
   def constructGoogleQueryLL(self, term, lat, lon):
     """get a correctly formatted GLS query"""
-    suffix = " loc:%f,%f" % (lat,lon)
-    query = term + suffix
+    query = "%s loc:%f,%f" % (term, lat,lon)
     return query
 
   def googleDirectionsAsync(self, start, destination, outputHandler, key):
