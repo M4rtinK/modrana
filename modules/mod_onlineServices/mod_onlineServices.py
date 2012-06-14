@@ -47,6 +47,120 @@ class onlineServices(ranaModule):
          * make sure there are no results returned after the button is pressed
          * remove the cancel button and the "working" overlay """
       self.stop()
+
+  def _enableOverlay(self):
+    """enable the "working" overlay + set timestamp"""
+    self.sendMessage('ml:notification:workInProgressOverlay:enable')
+    self.workStartTimestamp = time.time()
+
+  def _disableOverlay(self):
+    """disable the "working" overlay + disable the timestamp"""
+    self.sendMessage('ml:notification:workInProgressOverlay:disable')
+    self.workStartTimestamp = None
+
+  def _onlineRouteLookup(self, query, type):
+    """this method online route lookup and is called by the worker thread"""
+    (start, destination, routeRequestSentTimestamp) = query
+    print "worker: routing from",start," to ",destination
+    self._setWorkStatusText("online routing in progress...")
+    # get the route
+    directions = self.googleDirections(start, destination)
+
+    if type == "LL":
+      # reverse geocode the start and destination coordinates (for the info menu)
+      (fromLat,fromLon) = start
+      (toLat,toLon) = destination
+      self._setWorkStatusText("geocoding start...")
+      startAddress = self.googleReverseGeocode(fromLat,fromLon)
+      self._setWorkStatusText("geocoding destination...")
+      destinationAddress = self.googleReverseGeocode(toLat,toLon)
+      # return the original start/dest coordinates
+      startLL = start
+      destinationLL = destination
+    else:
+      # signalize that the original start/dest coordinates are unknown
+      startAddress = start
+      destinationAddress = destination
+      startLL = None
+      destinationLL = None
+    self._setWorkStatusText("online routing done   ")
+    # return result to the thread to handle
+    return directions, startAddress, destinationAddress, startLL, destinationLL, routeRequestSentTimestamp
+
+  def geocode(self, address):
+    return geocoding.geocode(address)
+
+  def geocodeAsync(self, address, outputHandler, key):
+    self._addWorkerThread(self._onlineGeocoding, [address], outputHandler, key)
+
+  def _onlineGeocoding(self, address):
+    self._setWorkStatusText("online geocoding in progress...")
+    result = self.geocode(address)
+    self._setWorkStatusText("online geocoding done   ")
+    return result
+
+  def _setWorkStatusText(self, text):
+    notification = self.m.get('notification', None)
+    if notification:
+      notification.setWorkInProgressOverlayText(text)
+
+  def _addWorkerThread(self, *args):
+    """start the worker thread and provide it the specified arguments"""
+    w = self.Worker(self,*args)
+    w.daemon = True
+    w.start()
+    self.workerThreads.append(w)
+
+  def _done(self, thread):
+    """a thread reporting it is done"""
+    # un-register the thread
+    self._unregisterWorkerThread(thread)
+    # if no other threads are working, disable the overlay
+    if not self.workerThreads:
+      self._disableOverlay()
+
+  def stop(self):
+    """called after pressing the cancel button"""
+    # disable the overlay
+    self._disableOverlay()
+    # tell all threads not to return results TODO: per thread cancelling
+    if self.workerThreads:
+      for thread in self.workerThreads:
+        thread.dontReturnResult()
+
+  def _unregisterWorkerThread(self, thread):
+    if thread in self.workerThreads:
+      self.workerThreads.remove(thread)
+
+  class Worker(threading.Thread):
+    """a worker thread for asynchronous online services access"""
+    def __init__(self,callback, call, args, outputHandler, key):
+      threading.Thread.__init__(self)
+      self.callback = callback # should be a onlineServices module instance
+      self.call = call
+      self.args = args
+      self.outputHandler = outputHandler
+      self.key = key # a key for the output handler
+      self.statusMessage = ""
+      self.returnResult = True
+    def run(self):
+      print("onlineServices: worker starting")
+      # enable the overlay
+      self.callback._enableOverlay()
+      # call the provided method asynchronously from modRana main thread
+      result = self.call(*self.args) # with the provided arguments
+      if self.returnResult: # check if our result is expected and should be returned to the oputpt handler
+        self.outputHandler(self.key, result)
+
+      # cleanup
+      print("onlineServices: worker finished")
+      self.callback._done(self)
+
+    def dontReturnResult(self):
+      self.returnResult = False
+
+
+  # ** Geonames **
       
   def elevFromGeonames(self, lat, lon):
     """get elevation in meters for the specified latitude and longitude from geonames"""
@@ -117,6 +231,8 @@ class onlineServices(ranaModule):
         index += 1
 
     return latLonElevList
+
+  # ** Google Maps **
 
   def getGmapsInstance(self):
     """get a google maps wrapper instance"""
@@ -231,16 +347,6 @@ class onlineServices(ranaModule):
     address = gmap.latlng_to_address(lat,lon)
     return address
 
-  def _enableOverlay(self):
-    """enable the "working" overlay + set timestamp"""
-    self.sendMessage('ml:notification:workInProgressOverlay:enable')
-    self.workStartTimestamp = time.time()
-
-  def _disableOverlay(self):
-    """disable the "working" overlay + disable the timestamp"""
-    self.sendMessage('ml:notification:workInProgressOverlay:disable')
-    self.workStartTimestamp = None
-
   def googleLocalQueryLLAsync(self, term, lat, lon,outputHandler, key):
     """asynchronous Google Local Search query for explicit lat, lon coordiantes"""
     query = self.constructGoogleQueryLL(term, lat, lon)
@@ -260,46 +366,7 @@ class onlineServices(ranaModule):
     self._setWorkStatusText("online POI search done   ")
     return result
 
-  def _onlineRouteLookup(self, query, type):
-    """this method online route lookup and is called by the worker thread"""
-    (start, destination, routeRequestSentTimestamp) = query
-    print "worker: routing from",start," to ",destination
-    self._setWorkStatusText("online routing in progress...")
-    # get the route
-    directions = self.googleDirections(start, destination)
-
-    if type == "LL":
-      # reverse geocode the start and destination coordinates (for the info menu)
-      (fromLat,fromLon) = start
-      (toLat,toLon) = destination
-      self._setWorkStatusText("geocoding start...")
-      startAddress = self.googleReverseGeocode(fromLat,fromLon)
-      self._setWorkStatusText("geocoding destination...")
-      destinationAddress = self.googleReverseGeocode(toLat,toLon)
-      # return the original start/dest coordinates
-      startLL = start
-      destinationLL = destination
-    else:
-      # signalize that the original start/dest coordinates are unknown
-      startAddress = start
-      destinationAddress = destination
-      startLL = None
-      destinationLL = None
-    self._setWorkStatusText("online routing done   ")
-    # return result to the thread to handle
-    return directions, startAddress, destinationAddress, startLL, destinationLL, routeRequestSentTimestamp
-
-  def geocode(self, address):
-    return geocoding.geocode(address)
-
-  def geocodeAsync(self, address, outputHandler, key):
-    self._addWorkerThread(self._onlineGeocoding, [address], outputHandler, key)
-
-  def _onlineGeocoding(self, address):
-    self._setWorkStatusText("online geocoding in progress...")
-    result = self.geocode(address)
-    self._setWorkStatusText("online geocoding done   ")
-    return result
+  # ** Wikipedia search (through  Geonames) **
 
   def wikipediaSearch(self, query):
     return geonames.wikipediaSearch(query)
@@ -313,66 +380,6 @@ class onlineServices(ranaModule):
     self._setWorkStatusText("online Wikipedia search done   ")
     return result
 
-
-  def _setWorkStatusText(self, text):
-    notification = self.m.get('notification', None)
-    if notification:
-      notification.setWorkInProgressOverlayText(text)
-
-  def _addWorkerThread(self, *args):
-    """start the worker thread and provide it the specified arguments"""
-    w = self.Worker(self,*args)
-    w.daemon = True
-    w.start()
-    self.workerThreads.append(w)
-
-  def _done(self, thread):
-    """a thread reporting it is done"""
-    # un-register the thread
-    self._unregisterWorkerThread(thread)
-    # if no other threads are working, disable the overlay
-    if not self.workerThreads:
-      self._disableOverlay()
-
-  def stop(self):
-    """called after pressing the cancel button"""
-    # disable the overlay
-    self._disableOverlay()
-    # tell all threads not to return results TODO: per thread cancelling
-    if self.workerThreads:
-      for thread in self.workerThreads:
-        thread.dontReturnResult()
-
-  def _unregisterWorkerThread(self, thread):
-    if thread in self.workerThreads:
-      self.workerThreads.remove(thread)
-
-  class Worker(threading.Thread):
-    """a worker thread for asynchronous online services access"""
-    def __init__(self,callback, call, args, outputHandler, key):
-      threading.Thread.__init__(self)
-      self.callback = callback # should be a onlineServicess module instance
-      self.call = call
-      self.args = args
-      self.outputHandler = outputHandler
-      self.key = key # a key for the output handler
-      self.statusMessage = ""
-      self.returnResult = True
-    def run(self):
-      print("onlineServices: worker starting")
-      # enable the overlay
-      self.callback._enableOverlay()
-      # call the provided method asynchronously from modRana main thread
-      result = self.call(*self.args) # with the provided arguments
-      if self.returnResult: # check if our result is expected and should be returned to the oputpt handler
-        self.outputHandler(self.key, result)
-            
-      # cleanup
-      print("onlineServices: worker finished")
-      self.callback._done(self)
-
-    def dontReturnResult(self):
-      self.returnResult = False
 
 if(__name__ == "__main__"):
   a = example({}, {})
