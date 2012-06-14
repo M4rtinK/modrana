@@ -46,9 +46,8 @@ class LocalSearchPoint(Point):
       message+="%s\n" % item
     self.setMessage(message)
 
-  def __str__(self):
-    self.getMessage()
-
+  def __unicode__(self):
+    return self.getMessage()
 
 class GoogleLocalSearchPoint(LocalSearchPoint):
   def __init__(self, GLSResult):
