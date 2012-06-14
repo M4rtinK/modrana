@@ -9,22 +9,22 @@ class Point:
     self.message = message
 
   def __str__(self):
-    if self.getElevation() == None:
+    if self.getElevation() is None:
       elev = "unknown"
     else:
       elev = "%f m" % self.getElevation()
 
-    return('%f,%f elevation: %s "%s"' % (self.lat, self.lon, elev, self.getMessage()))
+    return '%f,%f elevation: %s "%s"' % (self.lat, self.lon, elev, self.getMessage())
 
   def getLL(self):
-    return (self.lat,self.lon)
+    return self.lat,self.lon
 
   def setLL(self, lat, lon):
     self.lat = lat
     self.lon = lon
 
   def getLLE(self):
-    return (self.lat,self.lon, self.elevation)
+    return self.lat,self.lon, self.elevation
 
   def setLLE(self, lat, lon, elevation):
     self.lat = lat
@@ -32,10 +32,10 @@ class Point:
     self.elevation = elevation
 
   def getLLEM(self):
-    return (self.lat,self.lon, self.elevation, self.message)
+    return self.lat,self.lon, self.elevation, self.message
 
   def getElevation(self):
-    return (self.elevation)
+    return self.elevation
 
   def setElevation(self, elevation):
     self.elevation = elevation
