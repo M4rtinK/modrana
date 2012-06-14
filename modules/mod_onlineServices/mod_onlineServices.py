@@ -182,7 +182,7 @@ class onlineServices(ranaModule):
       self._setWorkStatusText("online elevation lookup done   ")
       return results, tracklog
     except Exception, e:
-      print('onlineServices: exception suring elevation lookup:\n',e)
+      print('onlineServices: exception during elevation lookup:\n',e)
       return None,tracklog
 
 
@@ -348,7 +348,7 @@ class onlineServices(ranaModule):
     return address
 
   def googleLocalQueryLLAsync(self, term, lat, lon,outputHandler, key):
-    """asynchronous Google Local Search query for explicit lat, lon coordiantes"""
+    """asynchronous Google Local Search query for explicit lat, lon coordinates"""
     query = self.constructGoogleQueryLL(term, lat, lon)
     self.googleLocalQueryAsync(query, outputHandler, key)
     
