@@ -48,11 +48,6 @@ class onlineServices(ranaModule):
          * remove the cancel button and the "working" overlay """
       self.stop()
 
-  def _enableOverlay(self):
-    """enable the "working" overlay + set timestamp"""
-    self.sendMessage('ml:notification:workInProgressOverlay:enable')
-    self.workStartTimestamp = time.time()
-
   def _disableOverlay(self):
     """disable the "working" overlay + disable the timestamp"""
     self.sendMessage('ml:notification:workInProgressOverlay:disable')
@@ -98,6 +93,13 @@ class onlineServices(ranaModule):
     result = self.geocode(address)
     self._setWorkStatusText("online geocoding done   ")
     return result
+
+  # ** Background processing **
+
+  def _enableOverlay(self):
+    """enable the "working" overlay + set timestamp"""
+    self.sendMessage('ml:notification:workInProgressOverlay:enable')
+    self.workStartTimestamp = time.time()
 
   def _setWorkStatusText(self, text):
     notification = self.m.get('notification', None)
