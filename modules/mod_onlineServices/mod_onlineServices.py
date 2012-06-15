@@ -241,6 +241,9 @@ class onlineServices(ranaModule):
       markers = ""
 
     url = "%s%s%s%s%s" % (prefix, center, zoom, size, markers)
+    # remove trailing | if present
+    if url[-1] == "|":
+      url = url[:-1]
     return url
 
   # ** Geonames **
