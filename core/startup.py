@@ -92,21 +92,13 @@ class Startup:
       help='return static map URL for a CLI query (works for local search, address and Wikipedia search)',
       action="store_true"
     )
-    # return static map url & shutdown
+    # enable centering on startup
     parser.add_argument(
       '--center-on-position',
       help='focus on the current position & enable centering',
       default=None,
       action="store_true"
     )
-    # return static map url & shutdown
-    parser.add_argument(
-      '--center',
-      help='focus on the current position at startup',
-      default=None,
-      action="store_true"
-    )
-
     # set zoom level
     parser.add_argument(
       '--set-zl',
@@ -134,7 +126,6 @@ class Startup:
       default=None,
       action="store"
     )
-
 
     self.args = parser.parse_args()
 
