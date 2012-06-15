@@ -235,32 +235,7 @@ class Startup:
 
     else:
       # we need to determine our current location - the location module needs to be loaded & used
-
-      # the location module might need the device module to handle location on some devices
-      self.modrana._loadDeviceModule()
-      # load the location module
-      l = self.modrana._loadModule("mod_location", "location")
-
-
-      l = self.modrana.m.get("location", None)
-      # start location
-      l.startLocation()
-
-      pos = None
-      timeout = 0
-      checkInterval = 0.1 # in seconds
-      while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
-        timeout+=checkInterval
-        if l.provider:
-          if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
-            # GPSD and liblocation need a nudge
-            # to update the fix when the GUI mainloop is not running
-            l.provider._updateGPSD()
-  #        pos = 50.083333, 14.416667 # Prague, for testing
-          pos = l.provider.getFix().position
-          if pos is not None:
-            break
-        time.sleep(checkInterval)
+      pos = self._getCurrentPosition(loadLocationModule=True)
       if pos is not None:
         lat, lon = pos
         points = online.localSearchLL(query, lat, lon)
@@ -298,24 +273,8 @@ class Startup:
       location = self.args.local_search_location
       self._sendMessage("ml:search:localSearch:location;%s;%s" % (location, query))
     else: # determine current location
-      l = self.modrana.m.get("location", None)
-      if l:
-        pos = None
-        timeout = 0
-        checkInterval = 0.1 # in seconds
-        print("startup: trying to determine current position for at most %ds" % LOCAL_SEARCH_LOCATION_TIMEOUT)
         # TODO: move this to asynchronous search processing
-        while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
-          timeout+=checkInterval
-          if l.provider:
-            if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
-              # GPSD and liblocation need a nudge
-              # to update the fix when the GUI mainloop is not running
-              l.provider._updateGPSD()
-            pos = l.provider.getFix().position
-            if pos is not None:
-              break
-          time.sleep(checkInterval)
+        pos = self._getCurrentPosition()
         if pos:
           lat, lon = pos
           self._sendMessage("ml:search:localSearch:coords;%f;%f;%s" % (lat, lon, query))
@@ -334,11 +293,45 @@ class Startup:
     message = "ml:search:search:wikipedia;%s" % query
     self._sendMessage(message)
 
-
   def _sendMessage(self, message):
     m = self.modrana.m.get("messages")
     if m:
       m.sendMessage(message)
+
+  def _getCurrentPosition(self, loadLocationModule=False):
+    """get current position on a system in early startup state"""
+
+    # do we need to load the location module ?
+    # we usually need to if we handle an early task that happens before regular startup
+    if loadLocationModule:
+      # the location module might need the device module to handle location on some devices
+      self.modrana._loadDeviceModule()
+      # load the location module
+      l = self.modrana._loadModule("mod_location", "location")
+      # start location
+      l.startLocation()
+    else:
+      l = self.modrana.m.get("location", None)
+
+    pos = None
+    if l:
+      pos = None
+      timeout = 0
+      checkInterval = 0.1 # in seconds
+      print("startup: trying to determine current position for at most %ds" % LOCAL_SEARCH_LOCATION_TIMEOUT)
+      while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
+        timeout+=checkInterval
+        if l.provider:
+          if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
+            # GPSD and liblocation need a nudge
+            # to update the fix when the GUI mainloop is not running
+            l.provider._updateGPSD()
+          pos = l.provider.getFix().position
+          if pos is not None:
+            break
+        time.sleep(checkInterval)
+    return pos
+
 
   def _enableStdout(self):
     """enable stdout output"""
