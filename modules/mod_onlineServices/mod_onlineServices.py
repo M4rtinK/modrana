@@ -349,6 +349,11 @@ class onlineServices(ranaModule):
     query = "%s loc:%f,%f" % (term, lat,lon)
     return query
 
+  def constructGoogleQuery(self, term, location):
+    """get a correctly formatted GLS query"""
+    query = "%s loc:%s" % (term, location)
+    return query
+
   def googleDirectionsAsync(self, start, destination, outputHandler, key):
     """a background running google directions query
        -> verbatim start and destination will be used in route description, no geocoding
