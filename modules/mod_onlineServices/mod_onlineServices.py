@@ -87,9 +87,11 @@ class onlineServices(ranaModule):
     return directions, startAddress, destinationAddress, startLL, destinationLL, routeRequestSentTimestamp
 
   def geocode(self, address):
+    """synchronous geocoding"""
     return geocoding.geocode(address)
 
   def geocodeAsync(self, address, outputHandler, key):
+    """asynchronous geocoding"""
     self._addWorkerThread(self._onlineGeocoding, [address], outputHandler, key)
 
   def _onlineGeocoding(self, address):
