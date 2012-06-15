@@ -356,6 +356,10 @@ class Startup:
           if pos is not None:
             break
         time.sleep(checkInterval)
+      if loadLocationModule:
+      # properly stop location when done (for early tasks)
+        l.stopLocation()
+
     if pos is None: # as a last resort, try last known position, if available
       print "startup: current position unknown"
       print "startup: using last known position"
