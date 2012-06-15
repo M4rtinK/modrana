@@ -250,23 +250,7 @@ class Startup:
 
     # local search results processing
     if points:
-      result = points[0] # just take the first result
-      lat, lon = result.getLL()
-      print result.getLL()
-      # was zoom level specified from CLI ?
-      if self.args.set_zl is not None:
-        zl = self.args.set_zl
-      else:
-        zl = 15 # sane default ?
-      markerList = [(lat, lon)]
-      url = online.getOSMStaticMapUrl(lat, lon, zl, markerList=markerList)
-      self._enableStdout()
-      print url
-      # done - success
-      self._exit(0)
-    else:
-      print("search returned no results")
-      self._exit(SEARCH_NO_RESULTS_FOUND)
+      self._returnStaticMapUrl(points, online)
 
   def _earlyAddressSearch(self):
     """search for address and return a static map URL for the result/s"""
