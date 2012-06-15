@@ -87,8 +87,8 @@ class ModRana:
     # constants & variable initialization
     self.dmod = None # device specific module
     self.gui = None
-
     self.GUIString = ""
+    self.optLoadingOK = None
 
     self.d = {} # persistent dictionary of data
     self.m = {} # dictionary of loaded modules
