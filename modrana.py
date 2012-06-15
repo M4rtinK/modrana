@@ -95,6 +95,12 @@ class ModRana:
     self.watches = {} # List of data change watches
     self.maxWatchId = 0
 
+    self.initInfo={
+      'modrana': self,
+      'device': None, # TODO: do this directly
+      'name': ""
+    }
+
     self.mapRotationAngle = 0 # in radians
     self.notMovingSpeed = 1 # in m/s
 
@@ -115,6 +121,10 @@ class ModRana:
 
     # handle any early tasks specified from CLI
     self.startup.handleEarlyTasks()
+
+    # early CLI tasks might need a "silent" modRana
+    # so the startup announcement is here
+    print(" == modRana Starting == ")
 
     # add the paths handling core module
     self.paths = paths.Paths(self)
@@ -174,11 +184,8 @@ class ModRana:
       device = platform_detection.getBestDeviceModuleId()
 
     device = device.lower() # convert to lowercase
-    self.initInfo={
-              'modrana': self,
-              'device': device, # TODO: do this directly
-              'name': ""
-             }
+
+    self.initInfo["device"] = device
 
     # get GUI ID from the CLI argument
     if self.args.u:
@@ -753,8 +760,6 @@ if __name__ == "__main__":
     subprocess.call(callArgs)
 
   else:
-    print(" == modRana Starting == ")
-
     program = ModRana()
 
 
