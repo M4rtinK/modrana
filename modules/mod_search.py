@@ -170,23 +170,64 @@ class search(ranaModule):
       resultNr = self.get('searchResultsItemNr', None)
       if resultNr is None:
         return
-      tupple = filter(lambda x: x[2] == int(resultNr), self.list).pop()
-      result = tupple[1]
+      tuple = filter(lambda x: x[2] == int(resultNr), self.list).pop()
+      result = tuple[1]
       store.storeGLSResult(result)
 
-    elif message=='setWhere': # set the search region
-      if type=='ms' and args:
+    elif message == 'setWhere': # set the search region
+      if type == 'ms' and args:
         self.where = args
 
-    elif message=='searchThis': # search for a term in the message string
-      if type=='ms' and args:
+    elif message == 'localSearch':
+      if type == 'ml' and args:
+        online = self.m.get('onlineServices', None)
+        if not online:
+          print "search: online services module not present"
+          return
+        type = args[0]
+        if type == "coords": # search around coordinates
+          # format: type;lat,lon;query
+          # parse coordinates
+          lat = float(args[1])
+          lon = float(args[2])
+          query = args[3]
+          online.googleLocalQueryLLAsync(query, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
+        elif type == "location":
+          # search around a location (address, coordinates, etc. ),
+          # modRana just forwards the location to the search engine
+          location = args[1]
+          query = args[2]
+          queryString = online.constructGoogleQuery(query, location)
+          online.googleLocalQueryAsync(queryString, self.handleSearchResult, "localSearchResultGoogle")
+        elif type == "position": # search around current position
+          query = args[1]
+          pos = self.get("pos", None)
+          if pos:
+            lat, lon = pos
+            online.googleLocalQueryLLAsync(query, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
+          else:
+            print("search: current position unknown")
+        elif type == "view": #search around current map center
+          query = args[1]
+          proj = self.m.get('projection', None)
+          if proj:
+            centreLL = proj.getScreenCentrell()
+            if centreLL:
+              (lat,lon) = centreLL
+              online.googleLocalQueryLLAsync(query, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
+            else:
+              print "search: screen center coordinates unknown"
+
+    # DEPRECIATED ?, use the above
+    elif message == 'searchThis': # search for a term in the message string
+      if type == 'ms' and args:
         searchTerm = args
         online = self.m.get('onlineServices', None)
         if online is None:
           print "search: online services module not present"
           return
 
-        if self.where=='position':
+        if self.where == 'position':
           print "search:near position"
           pos = self.get('pos', None)
           if pos is None:
@@ -194,32 +235,34 @@ class search(ranaModule):
             return
           else:
             (lat,lon) = pos
-        elif self.where=='view':
+        elif self.where == 'view':
           print "search:near view"
           proj = self.m.get('projection', None)
           if proj:
-            centrell = proj.getScreenCentrell()
-            if centrell:
-              (lat,lon) = centrell
+            centreLL = proj.getScreenCentrell()
+            if centreLL:
+              (lat,lon) = centreLL
             else:
-              print "search: screen center cooridnates unknown"
+              print "search: screen center coordinates unknown"
               return
+
+        online.googleLocalQueryLLAsync(searchTerm, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
 
 #        try:
 #          searchList = []
 #          filters = self.filters
-#          for topLevel in filters: # iterate over the filter cathegories
+#          for topLevel in filters: # iterate over the filter categories
 #            for key in filters[topLevel]: # iterate over the search keywords
 #              if filters[topLevel][key] == searchTerm: # is this the search word for the current amenity ?
 #                searchList.append(key) # add the matching search word to the list
-#          term = searchList[0] # we have a list, because an amenity can have theoreticaly more "providers"
+#          term = searchList[0] # we have a list, because an amenity can have theoretically more "providers"
 #
 #        except:
 #          print "search: key not present in the filter dictionary, using the key as search term"
 #          term = searchTerm
 
-        # initiate asynchronous search, taht is running in a separate thread
-        online.googleLocalQueryLLAsync(searchTerm, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
+        # initiate asynchronous search, that is running in a separate thread
+
 #        if local['responseStatus'] != 200:
 #          print "search: google returned %d return code" % local['responseStatus']
 #        print ("search: local search returned %d results") % len(local['responseData']['results'])
@@ -376,7 +419,7 @@ class search(ranaModule):
           numItems = len(resultList)
         else:
           numItems=0
-        if(0 <= index < numItems):
+        if 0 <= index < numItems:
 
           (text1,text2,onClick) = self.describeItem(index, category, resultList)
 
