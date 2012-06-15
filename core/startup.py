@@ -143,7 +143,12 @@ class Startup:
     """
     if self.args.return_static_map_url:
       # the early local search only quickly returns a static map url without loading most of modRana
-      self._earlyLocalSearch()
+      if self.args.local_search is not None:
+        self._earlyLocalSearch()
+      elif self.args.address_search is not None:
+        self._earlyAddressSearch()
+      elif self.args.wikipedia_search is not None:
+        self._earlyWikipediaSearch()
 
 
   def handlePostFirstTimeTasks(self):
@@ -240,6 +245,7 @@ class Startup:
         lat, lon = pos
         points = online.localSearchLL(query, lat, lon)
       else:
+        # done - no position found
         self._exit(LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR)
 
     # local search results processing
@@ -260,8 +266,46 @@ class Startup:
       self._exit(0)
     else:
       print("search returned no results")
-      self.exit(SEARCH_NO_RESULTS_FOUND)
-      # done - no position found
+      self._exit(SEARCH_NO_RESULTS_FOUND)
+
+  def _earlyAddressSearch(self):
+    """search for address and return a static map URL for the result/s"""
+    self._disableStdout()
+    query = self.args.address_search
+    # load the online services module
+    online = self.modrana._loadModule("mod_onlineServices", "onlineServices")
+    results = online.geocode(query)
+    self._returnStaticMapUrl(results, online)
+
+  def _earlyWikipediaSearch(self):
+    """search Wikipedia and return a static map URL for the result/s"""
+    self._disableStdout()
+    query = self.args.wikipedia_search
+    # load the online services module
+    online = self.modrana._loadModule("mod_onlineServices", "onlineServices")
+    results = online.wikipediaSearch(query)
+    self._returnStaticMapUrl(results, online)
+
+  def _returnStaticMapUrl(self, results, online):
+    """return static map url for early search methods & exit"""
+    if results:
+      if self.args.set_zl is not None:
+        zl = self.args.set_zl
+      else:
+        zl = 15 # sane default ?
+      # for now we just take the first result
+      result = results[0]
+      lat, lon = result.getLL()
+      markerList = [(lat, lon)]
+      url = online.getOSMStaticMapUrl(lat, lon, zl, markerList=markerList)
+      self._enableStdout()
+      print url
+      # done - success
+      self._exit(0)
+    else:
+      self._enableStdout()
+      print("search returned no results")
+      self._exit(SEARCH_NO_RESULTS_FOUND)
 
   def _localSearch(self):
     """CLI initiated local search that displays the result in modRana"""
