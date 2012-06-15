@@ -179,7 +179,6 @@ class Startup:
       self._wikipediaSearch()
 
 
-
   def _focusOnCoords(self):
     """focus on coordinates provided by CLI"""
     print("startup: focusing on CLI-provided coordinates")
@@ -343,10 +342,9 @@ class Startup:
 
     pos = None
     if l:
-      pos = None
       timeout = 0
       checkInterval = 0.1 # in seconds
-      print("startup: trying to determine current position for at most %ds" % LOCAL_SEARCH_LOCATION_TIMEOUT)
+      print("startup: trying to determine current position for at most %d s" % LOCAL_SEARCH_LOCATION_TIMEOUT)
       while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
         timeout+=checkInterval
         if l.provider:
@@ -358,6 +356,17 @@ class Startup:
           if pos is not None:
             break
         time.sleep(checkInterval)
+    if pos is None: # as a last resort, try last known position, if available
+      print "startup: current position unknown"
+      print "startup: using last known position"
+      # we might need to load options "manually" if run early
+      if not self.modrana.optLoadingOK:
+        self._loadOptions()
+
+      pos = self.modrana.get("pos", None)
+      if pos is None:
+        print("startup: no last known position")
+
     return pos
 
 
@@ -377,6 +386,13 @@ class Startup:
   def write(self, s):
     """a write function that does nothing for stdout redirection"""
     pass
+
+  def _loadOptions(self):
+    """load the persistent options (for usage by early tasks)"""
+    from core import paths
+    # options needs the paths class to know from where to load the options
+    self.modrana.paths = paths.Paths(self.modrana)
+    self.modrana._loadOptions()
 
   def _exit(self, errorCode=0):
     sys.exit(errorCode)
