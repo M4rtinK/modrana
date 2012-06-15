@@ -54,7 +54,7 @@ def _wikipediaResults2points(results):
 
 # from the googlemaps module
 def fetchJson(query_url, params={}, headers={}):
-    """Retrieve a JSON object from a (parameterized) URL.
+    """Retrieve a JSON object from a (parametrized) URL.
 
     :param query_url: The base URL to query
     :type query_url: string
@@ -63,7 +63,7 @@ def fetchJson(query_url, params={}, headers={}):
     :param headers: Dictionary giving (string) HTTP headers and values
     :type headers: dict
     :return: A `(url, json_obj)` tuple, where `url` is the final,
-    parameterized, encoded URL fetched, and `json_obj` is the data
+    parametrized, encoded URL fetched, and `json_obj` is the data
     fetched from that URL as a JSON-format object.
     :rtype: (string, dict or array)
 
@@ -73,7 +73,7 @@ def fetchJson(query_url, params={}, headers={}):
     print url
     request = urllib2.Request(url, headers=headers)
     response = urllib2.urlopen(request)
-    return (url, json.load(response))
+    return url, json.load(response)
   
 def wikipediaSearch(query):
   url = 'http://ws.geonames.org/wikipediaSearchJSON?'
