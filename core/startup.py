@@ -141,8 +141,9 @@ class Startup:
         standard output and then shut-down modRana
     EX.: do an address search, return static map URL and quit
     """
-    if self.args.local_search is not None:
-      self._localSearch()
+    if self.args.return_static_map_url:
+      # the early local search only quickly returns a static map url without loading most of modRana
+      self._earlyLocalSearch()
 
 
   def handlePostFirstTimeTasks(self):
@@ -165,6 +166,36 @@ class Startup:
       self.modrana.set("menu", None)
     elif self.args.focus_on_coordinates is not None:
       self._focusOnCoords()
+    elif self.args.local_search is not None:
+      query = self.args.local_search
+      # check if location was provided from CLI
+      if self.args.local_search_location is not None:
+        location = self.args.local_search_location
+        self._sendMessage("ml:search:localSearch:location;%s;%s" % (location, query))
+      else: # determine current location
+        l = self.modrana.m.get("location", None)
+        if l:
+          pos = None
+          timeout = 0
+          checkInterval = 0.1 # in seconds
+          print("startup: trying to determine current position for at most %ds" % LOCAL_SEARCH_LOCATION_TIMEOUT)
+          # TODO: move this to asynchronous search processing
+          while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
+            timeout+=checkInterval
+            if l.provider:
+              if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
+                # GPSD and liblocation need a nudge
+                # to update the fix when the GUI mainloop is not running
+                l.provider._updateGPSD()
+              pos = l.provider.getFix().position
+              if pos is not None:
+                break
+            time.sleep(checkInterval)
+          if pos:
+            lat, lon = pos
+            self._sendMessage("ml:search:localSearch:coords;%f;%f;%s" % (lat, lon, query))
+          else:
+            print("startup: local search failed: current position unknown")
 
   def _focusOnCoords(self):
     """focus on coordinates provided by CLI"""
@@ -202,7 +233,7 @@ class Startup:
       print("startup: parsing coordinates for the --focus-on-coordinates option failed")
       print(e)
 
-  def _localSearch(self):
+  def _earlyLocalSearch(self):
     """handle local search"""
     """for local search, we need to know our position, so we need at least the
     location module and of also of course the online services module to do the search
