@@ -276,14 +276,20 @@ class Startup:
       m.sendMessage(message)
 
   def _enableStdout(self):
+    """enable stdout output"""
     sys.stdout = self.originalStdout
     self.originalStdout = None
 
   def _disableStdout(self):
+    """disable stdout output
+    -> this is mainly used for CLI processing so that modRanas status messages don't get into the output
+    that will be parsed by outside programs or scripts
+    """
     self.originalStdout = sys.stdout
     sys.stdout = self
 
   def write(self, s):
+    """a write function that does nothing for stdout redirection"""
     pass
 
   def _exit(self, errorCode=0):
