@@ -21,12 +21,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+import sys
+import time
 
 import argparse
+
+LOCAL_SEARCH_LOCATION_TIMEOUT = 30 # in seconds
+
+# error code a
+SYNTAX_ERROR = 2
+SEARCH_NO_RESULTS_FOUND = 3
+SEARCH_PROVIDER_TIMEOUT_ERROR = 4
+SEARCH_PROVIDER_ERROR = 5
+LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR = 6
 
 class Startup:
   def __init__(self, modrana):
     self.modrana = modrana
+    self.originalStdout = None
     parser = argparse.ArgumentParser(description="A flexible GPS navigation system.")
     # device
     parser.add_argument(
@@ -138,7 +150,9 @@ class Startup:
         standard output and then shut-down modRana
     EX.: do an address search, return static map URL and quit
     """
-    pass
+    if self.args.local_search is not None:
+      self._localSearch()
+
 
   def handlePostFirstTimeTasks(self):
     """
@@ -160,8 +174,6 @@ class Startup:
       self.modrana.set("menu", None)
     elif self.args.focus_on_coordinates is not None:
       self._focusOnCoords()
-    elif self.args.local_search is not None:
-      self._localSearch()
 
   def _focusOnCoords(self):
     """focus on coordinates provided by CLI"""
@@ -200,10 +212,80 @@ class Startup:
       print(e)
 
   def _localSearch(self):
-    pass
+    """handle local search"""
+    """for local search, we need to know our position, so we need at least the
+    location module and of also of course the online services module to do the search
+    """
+    self._disableStdout()
+
+    # the location module might need the device module to handle the location
+    self.modrana._loadDeviceModule()
+    # load the device module
+    l = self.modrana._loadModule("mod_location", "location")
+    # load the online services module
+    online = self.modrana._loadModule("mod_onlineServices", "onlineServices")
+
+    l = self.modrana.m.get("location", None)
+    # start location
+    l.startLocation()
+
+    pos = None
+    timeout = 0
+    checkInterval = 0.1 # in seconds
+    while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
+      timeout+=checkInterval
+      if l.provider:
+        if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
+          # GPSD and liblocation need a nudge
+          # to update the fix when the GUI mainloop is not running
+          l.provider._updateGPSD()
+#        pos = 50.083333, 14.416667 # Prague for testing
+        pos = l.provider.getFix().position
+        if pos is not None:
+          break
+      time.sleep(checkInterval)
+    if pos is not None:
+      query = self.args.local_search
+      lat, lon = pos
+      points = online.localSearchLL(query, lat, lon)
+      if points:
+        result = points[0] # just take the first result
+        lat, lon = result.getLL()
+        print result.getLL()
+        # was zoom level specified from CLI ?
+        if self.args.set_zl is not None:
+          zl = self.args.set_zl
+        else:
+          zl = 15 # sane default ?
+        markerList = [(lat, lon)]
+        url = online.getOSMStaticMapUrl(lat, lon, zl, markerList=markerList)
+        self._enableStdout()
+        print url
+        # done - success
+        self._exit(0)
+      else:
+        print("search returned no results")
+        self.exit(SEARCH_NO_RESULTS_FOUND)
+    else:
+      # done - no position found
+      self._exit(LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR)
 
   def _sendMessage(self, message):
     m = self.modrana.m.get("messages")
     if m:
       m.sendMessage(message)
+
+  def _enableStdout(self):
+    sys.stdout = self.originalStdout
+    self.originalStdout = None
+
+  def _disableStdout(self):
+    self.originalStdout = sys.stdout
+    sys.stdout = self
+
+  def write(self, s):
+    pass
+
+  def _exit(self, errorCode=0):
+    sys.exit(errorCode)
 
