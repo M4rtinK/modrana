@@ -62,7 +62,7 @@ class Startup:
       default=None,
       action="store"
     )
-    # local search
+    # local search location
     parser.add_argument(
       '--local-search-location', metavar='an address or geographic coordinates', type=str,
       help='specify a geographic location for a local search query (current location is used by default), both addresses and geographic coordinates with the geo: prefix are supported EXAMPLE: "London" or "geo:50.083333,14.416667"'
@@ -218,57 +218,74 @@ class Startup:
     """
     self._disableStdout()
 
-    # the location module might need the device module to handle the location
-    self.modrana._loadDeviceModule()
-    # load the device module
-    l = self.modrana._loadModule("mod_location", "location")
     # load the online services module
     online = self.modrana._loadModule("mod_onlineServices", "onlineServices")
 
-    l = self.modrana.m.get("location", None)
-    # start location
-    l.startLocation()
+    query = self.args.local_search
+    points = [] # points defining the result/s
 
-    pos = None
-    timeout = 0
-    checkInterval = 0.1 # in seconds
-    while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
-      timeout+=checkInterval
-      if l.provider:
-        if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
-          # GPSD and liblocation need a nudge
-          # to update the fix when the GUI mainloop is not running
-          l.provider._updateGPSD()
-#        pos = 50.083333, 14.416667 # Prague for testing
-        pos = l.provider.getFix().position
-        if pos is not None:
-          break
-      time.sleep(checkInterval)
-    if pos is not None:
-      query = self.args.local_search
-      lat, lon = pos
-      points = online.localSearchLL(query, lat, lon)
-      if points:
-        result = points[0] # just take the first result
-        lat, lon = result.getLL()
-        print result.getLL()
-        # was zoom level specified from CLI ?
-        if self.args.set_zl is not None:
-          zl = self.args.set_zl
-        else:
-          zl = 15 # sane default ?
-        markerList = [(lat, lon)]
-        url = online.getOSMStaticMapUrl(lat, lon, zl, markerList=markerList)
-        self._enableStdout()
-        print url
-        # done - success
-        self._exit(0)
-      else:
-        print("search returned no results")
-        self.exit(SEARCH_NO_RESULTS_FOUND)
+    # now check if a location for the local search was provided from CLI or if we need to find our location
+    # using GPS or equivalent
+
+    if self.args.local_search_location is not None:
+      # we use the location provided from CLI, no need to load & start location
+      location = self.args.local_search_location
+      points = online.localSearch(query, location)
+
     else:
+      # we need to determine our current location - the location module needs to be loaded & used
+
+      # the location module might need the device module to handle location on some devices
+      self.modrana._loadDeviceModule()
+      # load the location module
+      l = self.modrana._loadModule("mod_location", "location")
+
+
+      l = self.modrana.m.get("location", None)
+      # start location
+      l.startLocation()
+
+      pos = None
+      timeout = 0
+      checkInterval = 0.1 # in seconds
+      while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
+        timeout+=checkInterval
+        if l.provider:
+          if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
+            # GPSD and liblocation need a nudge
+            # to update the fix when the GUI mainloop is not running
+            l.provider._updateGPSD()
+  #        pos = 50.083333, 14.416667 # Prague, for testing
+          pos = l.provider.getFix().position
+          if pos is not None:
+            break
+        time.sleep(checkInterval)
+      if pos is not None:
+        lat, lon = pos
+        points = online.localSearchLL(query, lat, lon)
+      else:
+        self._exit(LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR)
+
+    # local search results processing
+    if points:
+      result = points[0] # just take the first result
+      lat, lon = result.getLL()
+      print result.getLL()
+      # was zoom level specified from CLI ?
+      if self.args.set_zl is not None:
+        zl = self.args.set_zl
+      else:
+        zl = 15 # sane default ?
+      markerList = [(lat, lon)]
+      url = online.getOSMStaticMapUrl(lat, lon, zl, markerList=markerList)
+      self._enableStdout()
+      print url
+      # done - success
+      self._exit(0)
+    else:
+      print("search returned no results")
+      self.exit(SEARCH_NO_RESULTS_FOUND)
       # done - no position found
-      self._exit(LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR)
 
   def _sendMessage(self, message):
     m = self.modrana.m.get("messages")
