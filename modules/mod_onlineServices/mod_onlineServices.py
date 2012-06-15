@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
+import re
 import urllib
 import threading
 import time
@@ -447,6 +448,9 @@ class onlineServices(ranaModule):
     """asynchronous Google Local Search query for """
     print "onlineServices: GLS search"
     # TODO: we use a single thread for both routing and search for now, maybe have separate ones ?
+    # Local Search doesn't like the geo: prefix so we remove it
+    query = re.sub("loc:.*geo:", "loc:", query)
+
     self._addWorkerThread(self._localGoogleSearch, [query], outputHandler, key)
 
   def _localGoogleSearch(self, query):
