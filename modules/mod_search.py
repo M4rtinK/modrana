@@ -184,22 +184,22 @@ class search(ranaModule):
         if not online:
           print "search: online services module not present"
           return
-        type = args[0]
-        if type == "coords": # search around coordinates
+        lsType = args[0]
+        if lsType == "coords": # search around coordinates
           # format: type;lat,lon;query
           # parse coordinates
           lat = float(args[1])
           lon = float(args[2])
           query = args[3]
           online.googleLocalQueryLLAsync(query, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
-        elif type == "location":
+        elif lsType == "location":
           # search around a location (address, coordinates, etc. ),
           # modRana just forwards the location to the search engine
           location = args[1]
           query = args[2]
           queryString = online.constructGoogleQuery(query, location)
           online.googleLocalQueryAsync(queryString, self.handleSearchResult, "localSearchResultGoogle")
-        elif type == "position": # search around current position
+        elif lsType == "position": # search around current position
           query = args[1]
           pos = self.get("pos", None)
           if pos:
@@ -207,7 +207,7 @@ class search(ranaModule):
             online.googleLocalQueryLLAsync(query, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
           else:
             print("search: current position unknown")
-        elif type == "view": #search around current map center
+        elif lsType == "view": #search around current map center
           query = args[1]
           proj = self.m.get('projection', None)
           if proj:
@@ -218,7 +218,29 @@ class search(ranaModule):
             else:
               print "search: screen center coordinates unknown"
 
-    # DEPRECIATED ?, use the above
+    elif message == "search":
+      if type == "ml" and args:
+        sType = args[0]
+        if sType == "address":
+          print("search: address search")
+          query = args[1]
+          online = self.m.get('onlineServices', None)
+          if online:
+            # geocode the text input asynchronously
+            online.geocodeAsync(query, self.handleSearchResult, "address2LL")
+          else:
+            print("search: online services module missing")
+        elif sType == "wikipedia":
+          print("search: Wikipedia search")
+          query = args[1]
+          online = self.m.get('onlineServices', None)
+          if online:
+            # search Wikipedia asynchronously
+            online.wikipediaSearchAsync(query, self.handleSearchResult, "wikipedia")
+          else:
+            print("search: online services module missing")
+
+    # DEPRECIATED ?, use the localSearch method
     elif message == 'searchThis': # search for a term in the message string
       if type == 'ms' and args:
         searchTerm = args
@@ -680,11 +702,13 @@ class search(ranaModule):
       self.sendMessage(message)
 #      self.set('menu', 'searchResults')
     elif key == "address":
-      online = self.m.get('onlineServices')
+      online = self.m.get('onlineServices', None)
       textInput = result
       if online:
         # geocode the text input asynchronously
         online.geocodeAsync(textInput, self.handleSearchResult, "address2LL")
+      else:
+        print("search: online services module missing")
 
     elif key == "wikipedia":
       online = self.m.get('onlineServices')
