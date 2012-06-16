@@ -28,12 +28,14 @@ import argparse
 
 LOCAL_SEARCH_LOCATION_TIMEOUT = 30 # in seconds
 
-# error code a
+# error codes
 SYNTAX_ERROR = 2
 SEARCH_NO_RESULTS_FOUND = 3
 SEARCH_PROVIDER_TIMEOUT_ERROR = 4
 SEARCH_PROVIDER_ERROR = 5
 LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR = 6
+
+USE_LAST_KNOWN_POSITION_KEYWORD = "LAST_KNOWN_POSITION"
 
 class Startup:
   def __init__(self, modrana):
@@ -65,7 +67,11 @@ class Startup:
     # local search location
     parser.add_argument(
       '--local-search-location', metavar='an address or geographic coordinates', type=str,
-      help='specify a geographic location for a local search query (current location is used by default), both addresses and geographic coordinates with the geo: prefix are supported EXAMPLE: "London" or "geo:50.083333,14.416667"'
+      help='specify a geographic location for a local search query '
+           '(current location is used by default), both addresses and'
+           ' geographic coordinates with the geo: prefix are supported;'
+           ' use "%s" to use last known position '
+           'EXAMPLE: "London" or "geo:50.083333,14.416667" or "%s"' % (USE_LAST_KNOWN_POSITION_KEYWORD, USE_LAST_KNOWN_POSITION_KEYWORD)
       ,
       default=None,
       action="store"
@@ -235,7 +241,18 @@ class Startup:
     if self.args.local_search_location is not None:
       # we use the location provided from CLI, no need to load & start location
       location = self.args.local_search_location
-      points = online.localSearch(query, location)
+      if self._useLastKnownPos(location):
+        pos = self._getCurrentPosition(loadLocationModule=True, useLastKnown=True)
+        if pos is None:
+          self._enableStdout()
+          print("no last known position available")
+          # done - no position found
+          self._exit(LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR)
+        else:
+          lat, lon = pos
+          points = online.localSearchLL(query, lat, lon)
+      else:
+        points = online.localSearch(query, location)
 
     else:
       # we need to determine our current location - the location module needs to be loaded & used
@@ -244,12 +261,12 @@ class Startup:
         lat, lon = pos
         points = online.localSearchLL(query, lat, lon)
       else:
+
         # done - no position found
         self._exit(LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR)
 
     # local search results processing
-    if points:
-      self._returnStaticMapUrl(points, online)
+    self._returnStaticMapUrl(points, online)
 
   def _earlyAddressSearch(self):
     """search for address and return a static map URL for the result/s"""
@@ -298,7 +315,16 @@ class Startup:
     # check if location was provided from CLI
     if self.args.local_search_location is not None:
       location = self.args.local_search_location
-      self._sendMessage("ml:search:localSearch:location;%s;%s" % (location, query))
+      if self._useLastKnownPos(location):
+        pos = self._getCurrentPosition(useLastKnown=True)
+        if pos is None:
+          print("startup: no last known position")
+          self._sendMessage("ml:notification:m:No last known position;5")
+        else:
+          lat, lon = pos
+          self._sendMessage("ml:search:localSearch:coords;%f;%f;%s" % (lat, lon, query))
+      else:
+        self._sendMessage("ml:search:localSearch:location;%s;%s" % (location, query))
     else: # determine current location
         # TODO: move this to asynchronous search processing
         pos = self._getCurrentPosition()
@@ -325,7 +351,7 @@ class Startup:
     if m:
       m.sendMessage(message)
 
-  def _getCurrentPosition(self, loadLocationModule=False):
+  def _getCurrentPosition(self, loadLocationModule=False, useLastKnown = False):
     """get current position on a system in early startup state"""
 
     # do we need to load the location module ?
@@ -341,7 +367,7 @@ class Startup:
       l = self.modrana.m.get("location", None)
 
     pos = None
-    if l:
+    if l and not useLastKnown:
       timeout = 0
       checkInterval = 0.1 # in seconds
       print("startup: trying to determine current position for at most %d s" % LOCAL_SEARCH_LOCATION_TIMEOUT)
@@ -361,7 +387,8 @@ class Startup:
         l.stopLocation()
 
     if pos is None: # as a last resort, try last known position, if available
-      print "startup: current position unknown"
+      if not useLastKnown:
+        print "startup: current position unknown"
       print "startup: using last known position"
       # we might need to load options "manually" if run early
       if not self.modrana.optLoadingOK:
@@ -397,6 +424,9 @@ class Startup:
     # options needs the paths class to know from where to load the options
     self.modrana.paths = paths.Paths(self.modrana)
     self.modrana._loadOptions()
+
+  def _useLastKnownPos(self, location):
+    return str.strip(location) == USE_LAST_KNOWN_POSITION_KEYWORD
 
   def _exit(self, errorCode=0):
     sys.exit(errorCode)
