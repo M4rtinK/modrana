@@ -23,6 +23,7 @@ from base_position_source import PositionSource, Fix
 
 class GPSD(PositionSource):
   def __init__(self,location):
+    self.connected = False
     PositionSource.__init__(self, location)
 #  def __init__(self, location):
 #    PositionSource.__init__(location)
