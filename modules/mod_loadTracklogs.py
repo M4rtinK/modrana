@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 #from dbus.service import Object
+import math
 from base_module import ranaModule
 import geo
 import os
@@ -52,7 +53,7 @@ class loadTracklogs(ranaModule):
     if message == 'loadActive':
       # load the active tracklog
       path = self.get('activeTracklogPath', None)
-      if path != None and self.tracklogList:
+      if path is not None and self.tracklogList:
         print("* loading tracklog:\n%s" % path)
 
         # Zeroth, is the tracklog already loaded ?
@@ -88,7 +89,7 @@ class loadTracklogs(ranaModule):
     """return a tracklog folder sub path,
     assure the patch exists before returning it"""
     tracklogFolderPath = self.modrana.paths.getTracklogsFolderPath()
-    if tracklogFolderPath == None:
+    if tracklogFolderPath is None:
       print("loadTracklogs: can't get tracklog sub path - tracklog folder path is unknown")
       return None # tracklog folder path is unknown
     else:
@@ -228,7 +229,7 @@ class loadTracklogs(ranaModule):
 
     tf = self.modrana.paths.getTracklogsFolderPath()
     # does the tracklog folder exist ?
-    if tf == None or not os.path.exists(tf):
+    if tf is None or not os.path.exists(tf):
       return # no tracklog folder, nothing to list
     # get the available directories,
     # each directory represents a category
@@ -284,9 +285,9 @@ class loadTracklogs(ranaModule):
     return filter(lambda x: x['cat'] == cat,  self.tracklogList)
 
   
-  def setTracklogPathCategory(self,path,cathegory):
+  def setTracklogPathCategory(self,path,category):
     pass
-#    """set a cathegory for tracklog identified by path"""
+#    """set a category for tracklog identified by path"""
 #    # does the path/tracklog exist ?
 #    if path not in self.tracklogPathList:
 #      # we try to reload the tracklog list
@@ -359,7 +360,7 @@ class loadTracklogs(ranaModule):
     for path in pathList:
       self.loadTracklog(path, False)
       self.sendMessage('notification:%d of %d loaded#1' % (index, count))
-      index = index + 1
+      index += 1
 
     elapsed = (1000 * (clock() - start))
     print("** Loading tracklogs took %1.2f ms" % elapsed)
@@ -445,7 +446,7 @@ class loadTracklogs(ranaModule):
   def storeTracklog(self,tracklog,filename,cat,type,refresh="True"):
     """store tracklog and return the resulting path"""
     folder = self.modrana.paths.getTracklogsFolderPath()
-    if folder == None:
+    if folder is None:
       print("loadTracklogs: can't store tracklog - path to tracklog folder is unknown or unusable")
       return None
     path = os.path.join(folder, cat)
@@ -474,7 +475,7 @@ class loadTracklogs(ranaModule):
     # TODO: incremental addition of new tracklogs without relisting
     print("tracklog: %s" % filename)
     print("tracklog saved successfully")
-    return (os.path.join(path,filename))
+    return os.path.join(path,filename)
 
 
   def simplePythagoreanDistance(self, x1,y1,x2,y2):
@@ -588,7 +589,7 @@ class GPXTracklog(tracklog):
       print("** loading tracklog from cache")
       self.clusters = cache[filename].clusters
       self.routeInfo = cache[filename].routeInfo
-      if self.routeInfo != None:
+      if self.routeInfo is not None:
         self.elevation = True
       self.perElevList = cache[filename].perElevList
       
@@ -638,8 +639,8 @@ class GPXTracklog(tracklog):
       middle = minElevation + (difference/2)
       firstElevation = float(firstPoint.elevation)
       lastElevation = float(lastPoint.elevation)
-      """because there are many possible statiastics about a given route with elevation,
-      we will store them in a disctionary, so new onec can be quickly added as needed"""
+      """because there are many possible statistics about a given route with elevation,
+      we will store them in a dictionary, so new ones can be quickly added as needed"""
 #      self.routeInfo['firstPoint'] = firstPoint
 #      self.routeInfo['lastPoint'] = lastPoint
 #      self.routeInfo['maxElevationPoint'] = maxElevationPoint
