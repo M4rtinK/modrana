@@ -394,7 +394,7 @@ class loadTracklogs(ranaModule):
     if notify:
       self.sendMessage('notification:loading %s#1' % path)
 
-    if(file): # TODO: add handling of other than GPX files
+    if file: # TODO: add handling of other than GPX files
       # import the GPX module only when really needed
       from upoints import gpx
       track = gpx.Trackpoints() # create new Trackpoints object
@@ -452,7 +452,7 @@ class loadTracklogs(ranaModule):
     path = os.path.join(folder, cat)
     # is it a directory ?
     if not os.path.isdir(path):
-      self.sendMessage("loadTracklogs: can't store tracklog - tracklgo folder is not a directory")
+      self.sendMessage("loadTracklogs: can't store tracklog - tracklog folder is not a directory")
       return None
 
     if type=="GPX":
@@ -540,7 +540,7 @@ class tracklog():
     """returns tracklog name"""
     return self.tracklogName
 
-  def setName(name):
+  def setName(self, name):
     """sets tracklog name"""
     self.tracklogName = name
 
@@ -552,7 +552,7 @@ class tracklog():
     """returns tracklog description"""
     return self.tracklogDescription
 
-  def setDescription(description):
+  def setDescription(self, description):
     """sets tracklog description"""
     self.tracklogDescription = description
 
@@ -599,7 +599,7 @@ class GPXTracklog(tracklog):
       self.clusters = []
 
       rawClusters = geo.clusterTrackpoints(trackpointsList, clusterDistance) # we cluster the points
-      for cluster in rawClusters: # now we find for each cluster a circle encompasing all points
+      for cluster in rawClusters: # now we find for each cluster a circle encompassing all points
         (centreX,centreY,radius) = geo.circleAroundPointCluster(cluster)
         self.clusters.append(clusterOfPoints(cluster, centreX, centreY, radius))
 
@@ -622,7 +622,7 @@ class GPXTracklog(tracklog):
       self.getPerElev() # update the periodic elevation data
 
   def checkElevation(self):
-    pointsWithElevation = filter(lambda x: x.elevation != None, self.trackpointsList[0])
+    pointsWithElevation = filter(lambda x: x.elevation is not None, self.trackpointsList[0])
     if pointsWithElevation: # do we have some points with known elevation ?
       self.elevation = True
       self.routeInfo = {}
