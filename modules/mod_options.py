@@ -618,6 +618,26 @@ class Options(ranaModule):
     # * the POI category
     catPOI = addCat("POI", "poi", "poi")
 
+    # ** online POI search
+    group = addGroup("Markers", "poi_markers", catPOI, "generic")
+    addOpt("Show captions", "hideMarkerCaptionsBelowZl",
+      [(-1, "always"),
+       (5, "below zoomlevel 5"),
+       (7, "below zoomlevel 7"),
+       (10, "below zoomlevel 10"),
+       (11, "below zoomlevel 11"),
+       (12, "below zoomlevel 12"),
+       (13, "below zoomlevel 13"),
+       (14, "below zoomlevel 14"),
+       (15, "below zoomlevel 15"),
+       (16, "below zoomlevel 16"),
+       (17, "below zoomlevel 17"),
+       (18, "below zoomlevel 18"),
+       (65535, "never"),
+      ],
+      group,
+      13)
+
     # ** POI storage
     group = addGroup("POI storage", "poi_storage", catPOI, "generic")
     addOpt("POI database", "POIDBFilename",

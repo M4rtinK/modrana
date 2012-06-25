@@ -66,19 +66,21 @@ class showPOI(ranaModule):
           lat = POI.getLat()
           lon = POI.getLon()
           name = POI.getName()
-          distanceString = ""
-          pos = self.get('pos', None)
-          units = self.m.get('units', None)
-          if pos and units:
-            (lat1,lon1) = pos # current position coordinates
-            kiloMetricDistance = geo.distance(lat,lon,lat1,lon1)
-            unitString = units.km2CurrentUnitString(kiloMetricDistance, 0, True)
-            distanceString = " (%s)" % unitString
+          description = POI.getDescription()
+          hidePOICaptionZl = int(self.get("hideMarkerCaptionsBelowZl", 13))
+          if int(self.get('z',15)) > hidePOICaptionZl:
+            distanceString = ""
+            pos = self.get('pos', None)
+            units = self.m.get('units', None)
+            if pos and units:
+              (lat1,lon1) = pos # current position coordinates
+              kiloMetricDistance = geo.distance(lat,lon,lat1,lon1)
+              unitString = units.km2CurrentUnitString(kiloMetricDistance, 0, True)
+              distanceString = " (%s)" % unitString
 
-          text = "" + name + distanceString
+            text = "" + name + distanceString
 
-          (x,y) = proj.ll2xy(lat, lon)
-          # draw the highlighting circle
+          (x,y) = proj.ll2xy(lat, lon) #   draw the highlighting circle
           cr.set_line_width(8)
           cr.set_source_rgba(0.1, 0.6, 0.1, 0.55) # highlight circle color
           cr.arc(x, y, 15, 0, 2.0 * math.pi)
@@ -96,32 +98,33 @@ class showPOI(ranaModule):
           cr.stroke()
 
           # draw a caption with transparent background
-          cr.set_font_size(25)
-          extents = cr.text_extents(text) # get the text extents
-          (w,h) = (extents[2], extents[3])
-          border = 2
-          cr.set_line_width(2)
-          cr.set_source_rgba(0.1, 0.6, 0.1, 0.45) # transparent blue
-          (rx,ry,rw,rh) = (x - border+12, y + border+h*0.2 + 6, w + 4*border, -(h*1.4))
-          cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
-          cr.fill()
+          if int(self.get('z',15)) > hidePOICaptionZl:
+            cr.set_font_size(25)
+            extents = cr.text_extents(text) # get the text extents
+            (w,h) = (extents[2], extents[3])
+            border = 2
+            cr.set_line_width(2)
+            cr.set_source_rgba(0.1, 0.6, 0.1, 0.45) # transparent blue
+            (rx,ry,rw,rh) = (x - border+12, y + border+h*0.2 + 6, w + 4*border, -(h*1.4))
+            cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
+            cr.fill()
 
-          # register clickable area
-          click = self.m.get('clickHandler', None)
-          if click:
-            """ make the POI caption clickable"""
-            if id is not None: # new POI have id == None
-              click.registerXYWH(rx,ry-(-rh),rw,-rh, "ms:showPOI:setActivePOI:%d|set:menu:showPOI#POIDetail" % id)
-            else: # the last added POI is still set, no need to set the id
-              click.registerXYWH(rx,ry-(-rh),rw,-rh, "set:menu:showPOI#POIDetail")
-          cr.fill()
+            # register clickable area
+            click = self.m.get('clickHandler', None)
+            if click:
+              """ make the POI caption clickable"""
+              if id is not None: # new POI have id == None
+                click.registerXYWH(rx,ry-(-rh),rw,-rh, "ms:showPOI:setActivePOI:%d|set:menu:showPOI#POIDetail" % id)
+              else: # the last added POI is still set, no need to set the id
+                click.registerXYWH(rx,ry-(-rh),rw,-rh, "set:menu:showPOI#POIDetail")
+            cr.fill()
 
-          # draw the actual text
+            # draw the actual text
   #        cr.set_source_rgba(1, 1, 0, 0.95) # slightly transparent white
-          cr.set_source_rgba(1, 1, 1, 0.95) # slightly transparent white
-          cr.move_to(x+15,y+7)
-          cr.show_text(text) # show the transparent result caption
-          cr.stroke()
+            cr.set_source_rgba(1, 1, 1, 0.95) # slightly transparent white
+            cr.move_to(x+15,y+7)
+            cr.show_text(text) # show the transparent result caption
+            cr.stroke()
 
   def handleMessage(self, message, type, args):
     # messages that need the store and/or menus go here
