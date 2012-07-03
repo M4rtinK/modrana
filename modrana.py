@@ -696,7 +696,7 @@ class ModRana:
     """
     # get the path
     modRanaProfileFolderName = '.modrana'
-    userHomePath = os.getenv("HOME")
+    userHomePath = os.getenv("HOME", "")
     profileFolderPath = os.path.join(userHomePath, modRanaProfileFolderName)
     # make sure it exists
     createFolderPath(profileFolderPath)
