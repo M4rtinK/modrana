@@ -43,21 +43,18 @@ class route(ranaModule):
     self.text = None
     self.selectTwoPoints = False
     self.selectOnePoint = False
-    self.selectManyPoints = False
     self.once = True
     self.entry = None
     self.directionsFilterCSV = 'data/directions_filter.csv'
 
     self.expectStart = False
     self.expectEnd = False
-    self.expectMiddle = False
 
     self.startAddress = None
     self.destinationAddress = None
 
     self.set('startPos', None)
     self.set('endPos', None)
-    self.set('middlePos', None)
 
     file = open(self.directionsFilterCSV, 'rb')
     CSVReader = csv.reader(file, delimiter=';', quotechar='|') #use an iterator
@@ -89,15 +86,12 @@ class route(ranaModule):
       self.text = None
       self.selectTwoPoints = False
       self.selectOnePoint = False
-      self.selectManyPoints = False
 
       self.expectStart = False
       self.expectEnd = False
-      self.expectMiddle = False
 
       self.set('startPos', None)
       self.set('endPos', None)
-      self.set('middlePos', None)
 
       # stop Turn-by-turn navigation, that can be possibly running
       self.sendMessage('turnByTurn:stop')
@@ -123,28 +117,6 @@ class route(ranaModule):
       self.expectStart = False
       self.set('needRedraw', True) # refresh the screen to show the new point
 
-    elif message == 'expectMiddle':
-      self.expectMiddle = True
-      self.set('needRedraw', True) # we need to show the changed buttons
-
-    elif message == 'setMiddle':
-      proj = self.m.get('projection', None)
-      if proj is not None and self.expectMiddle == True:
-        lastClick = self.get('lastClickXY', None)
-        (x, y) = lastClick
-        """
-        x and y must be floats, otherwise strange rounding errors occur, whan converting to lat lon coridnates
-        """
-        (lat, lon) = proj.xy2ll(x, y)
-        middlePos=self.get('middlePos', None)
-        if middlePos is None:
-          middlePos=[]
-        middlePos.append((lat,lon))
-        self.set('middlePos', middlePos)
-        self.sendMessage('route:middleInput')
-      self.expectMiddle = False
-      self.set('needRedraw', True) # refresh the screen to show the new point
-
     elif message == 'expectEnd':
       self.expectEnd = True
       self.set('needRedraw', True) # we need to show the changed buttons
@@ -167,29 +139,17 @@ class route(ranaModule):
 
     elif message == "selectTwoPoints":
       self.set('startPos', None)
-      self.set('middlePos', None)
       self.set('endPos', None)
       self.selectOnePoint = False
       self.selectTwoPoints = True
-      self.selectManyPoints = False
-
-    elif message == "selectManyPoints":
-      self.set('startPos', None)
-      self.set('middlePos', None)
-      self.set('endPos', None)
-      self.selectOnePoint = False
-      self.selectTwoPoints = True
-      self.selectManyPoints = True
 
     elif message == "selectOnePoint":
       self.set('startPos', None)
-      self.set('middlePos', None)
       self.set('endPos', None)
       self.selectTwoPoints = True # we reuse the p2p menu
       self.selectOnePoint = True
-      self.selectManyPoints = False
 
-    elif message == "p2pRoute": # simple route, from selected point to selected point
+    elif message == "p2pRoute": # simple route, from here to selected point
       toPos = self.get("endPos", None)
       if toPos:
         toLat,toLon = toPos
@@ -203,39 +163,6 @@ class route(ranaModule):
           # TODO: wait message (would it be needed when using internet routing ?)
           self.doRoute(fromLat, fromLon, toLat, toLon)
           self.set('needRedraw', True) # show the new route
-
-    elif message == "p2phmRoute": # simple route, from start to middle to end
-      toPos = self.get("endPos", None)
-      if toPos:
-        toLat,toLon = toPos
-        fromPos = self.get("startPos", None)
-        if fromPos:
-          fromLat,fromLon=fromPos
-          middlePos = self.get("middlePos", None)
-          if middlePos:
-            print "Routing "
-            print (fromLat, fromLon)
-            print " through "
-            print middlePos
-            print " to %f,%f" % (toLat, toLon)
-            route=list(middlePos)
-            route.insert(0,fromPos)
-            directions={'Directions':{u'Distance':{u'meters' : int(self.get('minAnnounceDistance',100))}, 'Duration':{'html':"unknown"},'Routes':[{u'Distance':{u'meters' : int(self.get('minAnnounceDistance',100))},'Steps':[{'descriptionHtml':"start",u'Point':{'coordinates':[fromLon,fromLat,0]},u'Distance':{u'meters' : int(self.get('minAnnounceDistance',100))}}]}]}}
-            # directions={{[{[{}]}]}}
-            # directions['Directions']['Routes'][0]['Steps'][0]['descriptionHtml']="start"
-            # directions['Directions']['Routes'][0]['Steps'][0][u'Point'] = {'coordinates':[fromLon,fromLat,0]}
-            # directions['Directions']['Routes'][0]['Steps'][0][u'Distance'] = {u'meters' : int(self.get('minAnnounceDistance',100))}
-            ###
-        # duration = dir['Directions']['Duration']['html'] # a string describing the estimated time to finish the route
-        # distance = units.m2CurrentUnitString(float(dir['Directions']['Distance']['meters']))
-            for i in range (1,len(route)):
-              directions['Directions']['Routes'][0]['Steps'].append({'descriptionHtml':self.get('midText')[i-1],u'Point':{'coordinates':[route[i][1],route[i][0],0]},u'Distance':{u'meters' : int(self.get('minAnnounceDistance',100))}})
-            route.append(toPos)
-            self.processAndSaveResults(route, directions, "start", "end", None, None, 0)
-            self.selectTwoPoints = False
-          # TODO: wait message (would it be needed when using internet routing ?)
-            # self.doRoute(fromLat, fromLon, toLat, toLon)
-            self.set('needRedraw', True) # show the new route
 
     elif message == "p2posRoute": # simple route, from here to selected point
       startPos = self.get('startPos', None)
@@ -300,7 +227,6 @@ class route(ranaModule):
         # disable the point selection GUIs
         self.selectTwoPoints = False
         self.selectOnePoint = False
-        self.selectManyPoints = False
         toPos = self.get("selectedPos", None)
         if toPos:
           toLat,toLon = [float(a) for a in toPos.split(",")]
@@ -335,14 +261,6 @@ class route(ranaModule):
         entryText = self.startAddress
       entry.entryBox(self ,'start','Input the start address',entryText)
 #      self.expectTextEntry = 'start'
-
-    elif message == 'middleInput':
-      entry = self.m.get('textEntry', None)
-      if entry is None:
-        return
-      entryText = ""
-      entry.entryBox(self ,'middle','Input the directions for this middle point',entryText)
-#      self.expectTextEntry = 'middle'
 
     elif message == 'destinationInput':
       entry = self.m.get('textEntry', None)
@@ -389,9 +307,6 @@ class route(ranaModule):
 
   def doRoute(self, fromLat, fromLon, toLat, toLon):
     """Route from one point to another, and set that as the active route"""
-    print "DO ROUTE"
-    print fromLat
-    print toLat
     online = self.m.get('onlineServices', None)
     if online:
       online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon), self.handleRoute, "onlineRoute")
@@ -570,11 +485,6 @@ class route(ranaModule):
       (x,y,w,h) = self.get('viewport')
       if clickHandler is not None:
         clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setStart')
-    if self.expectMiddle:
-      clickHandler = self.m.get('clickHandler', None)
-      (x,y,w,h) = self.get('viewport')
-      if clickHandler is not None:
-        clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setMiddle')
     if self.expectEnd:
       clickHandler = self.m.get('clickHandler', None)
       (x,y,w,h) = self.get('viewport')
@@ -799,23 +709,17 @@ class route(ranaModule):
 
     startIcon = "generic:;0.5;;0.5;;"
     endIcon = "generic:;0.5;;0.5;;"
-    middleIcon = "generic:;0.5;;0.5;;"
     if self.expectStart:
       startIcon = "generic:red;0.5;red;0.5;;"
     if self.expectEnd:
       endIcon = "generic:green;0.5;green;0.5;;"
-    if self.expectMiddle:
-      middleIcon = "generic:blue;0.5;blue;0.5;;"
 
     routingAction = 'route:p2pRoute'
     if self.selectOnePoint:
       routingAction = 'route:p2posRoute'
-    if self.selectManyPoints:
-      routingAction = 'route:p2phmRoute'
 
     menus.drawButton(cr, x1-dx, y1, dx, dy, 'start', startIcon, "route:expectStart")
     menus.drawButton(cr, x1, y1-dy, dx, dy, 'end', endIcon, "route:expectEnd")
-    menus.drawButton(cr, x1-dx, y1-dy, dx, dy, 'middle', middleIcon, "route:expectMiddle")
     menus.drawButton(cr, x1, y1, dx, dy, 'route', "generic:;0.5;;0.5;;", routingAction)
 
     # "flush" cairo operations
@@ -827,7 +731,6 @@ class route(ranaModule):
 
     proj = self.m.get('projection', None)
     fromPos = self.get('startPos', None)
-    middlePos = self.get('middlePos', None)
     toPos = self.get('endPos', None)
     if fromPos is not None:
 #      print "drawing start point"
@@ -846,23 +749,6 @@ class route(ranaModule):
       cr.arc(x, y, 15, 0, 2.0 * math.pi)
       cr.stroke()
       cr.fill()
-
-    if middlePos is not None:
-#      print "drawing middle point"
-      for i in range (0,len(middlePos)):
-        (lat,lon) = middlePos[i]
-        cr.set_line_width(10)
-        cr.set_source_rgb(0, 0, 1)
-        (x, y) = proj.ll2xy(lat, lon)
-        cr.arc(x, y, 2, 0, 2.0 * math.pi)
-        cr.stroke()
-        cr.fill()
-
-        cr.set_line_width(8)
-        cr.set_source_rgba(0, 0, 1, 0.95) # transparent green
-        cr.arc(x, y, 15, 0, 2.0 * math.pi)
-        cr.stroke()
-        cr.fill()
 
     if toPos is not None:
 #      print "drawing start point"
@@ -887,12 +773,6 @@ class route(ranaModule):
     elif key == 'destination':
       self.destinationAddress = result
       self.set('destinationAddress', result)
-    elif key == 'middle':
-      m=self.get('midText')
-      if m is None:
-        m=[]
-      m.append(result)
-      self.set('midText', m)
     self.set('needRedraw', True)
 
   def drawMenu(self, cr, menuName, args=None):
