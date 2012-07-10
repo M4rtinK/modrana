@@ -43,6 +43,11 @@ class Segment:
 
   def getMessagePointCount(self):
     return len(self.messagePoints)
+
+  def __unicode__(self):
+    pCount = self.getPointCount()
+    mpCount = self.getMessagePointCount()
+    return "segment: %d points and %d message points" % (pCount, mpCount)
     
 
 class Way:
@@ -65,7 +70,7 @@ class Way:
     count = 0
     for segment in self.segments:
       count+=segment.getPointCount()
-    return "%d segments, %d points total" % (self.getSegmentCount(), count)
+    return "way: %d segments, %d points total" % (self.getSegmentCount(), count)
 
 
 
