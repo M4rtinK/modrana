@@ -503,7 +503,7 @@ class route(ranaModule):
       if not proj.isValid():
         return
 
-      # as you can see, for some reason, the coordinates in direction steps are reversed, (lon,lat,0)
+      # as you can see, for some reason, the coordinates in Google Directions steps are reversed: (lon,lat,0)
       steps = map(lambda x: (x['Point']['coordinates'][1],x['Point']['coordinates'][0]), self.directions['Directions']['Routes'][0]['Steps'])
 
       # draw the destination as a step point
