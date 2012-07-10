@@ -108,7 +108,7 @@ class route(ranaModule):
         lastClick = self.get('lastClickXY', None)
         (x, y) = lastClick
         """
-        x and y must be floats, otherwise strang rounding errors occur, whan converting to lat lon coridnates
+        x and y must be floats, otherwise strange rounding errors occur, when converting to lat lon coordinates
         """
         (lat, lon) = proj.xy2ll(x, y)
         self.set('startPos', (lat,lon))
@@ -318,11 +318,11 @@ class route(ranaModule):
       print "routing from %s to %s" % (start,destination)
       online.googleDirectionsAsync(start, destination, self.handleRoute, "onlineRouteAdress2Adress")
 
-  def handleRoute(self, key, resultsTupple):
+  def handleRoute(self, key, resultsTuple):
     """handle a routing result"""
     if key == "onlineRoute":
-      if len(resultsTupple) == 6:
-        (directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp) = resultsTupple
+      if len(resultsTuple) == 6:
+        (directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp) = resultsTuple
         # remove any possible prev. route description, so new a new one for this route is created
         self.text = None
         if directions: # is there actually something in the directions ?
@@ -330,8 +330,8 @@ class route(ranaModule):
           route = self.decode_line(polyline) # we decode the polyline to a list of points
           self.processAndSaveResults(route, directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp)
     elif key == "onlineRouteAdress2Adress":
-      if len(resultsTupple) == 6:
-        (directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp) = resultsTupple
+      if len(resultsTuple) == 6:
+        (directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp) = resultsTuple
         # remove any possible prev. route description, so new a new one for this route is created
         self.text = None
         if directions: # is there actually something in the directions ?
@@ -424,9 +424,9 @@ class route(ranaModule):
     substrings = inputString.split(' ')
     outputString = ""
     cyrillicStringTemp = ""
-    for substring in substrings: # split the messager to words
+    for substring in substrings: # split the message to words
       cyrillicCharFound = False
-      # test if the word has any cyrillic characters (a single one is enought)
+      # test if the word has any cyrillic characters (a single one is enough)
       for character in substring:
         try: # there are probably some characters that dont have a known name
           unicodeName = unicodedata.name(unicode(character))
