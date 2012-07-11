@@ -25,6 +25,7 @@ import re
 import csv
 import traceback
 import unicodedata
+import way
 from time import clock
 
 def getModule(m,d,i):
@@ -382,9 +383,14 @@ class route(ranaModule):
 
       # make the direction messages Pango compatible
       filteredDirections = self.filterDirections(rawDirections)
-      self.directions = filteredDirections
+
+      self.directions = way.fromGoogleDirectionsResult(rawDirections)
 
   def filterDirections(self, rawDirections):
+    """
+    filter directions according to substitution rules (specified by a CSV file)
+    -> mostly used to replace abbreviations by full words in espeak output
+    """
     i = 0
     for step in rawDirections['Directions']['Routes'][0]['Steps']:
       message = step['descriptionHtml'] #TODO: make a method for this
@@ -503,11 +509,14 @@ class route(ranaModule):
       if not proj.isValid():
         return
 
-      # as you can see, for some reason, the coordinates in Google Directions steps are reversed: (lon,lat,0)
-      steps = map(lambda x: (x['Point']['coordinates'][1],x['Point']['coordinates'][0]), self.directions['Directions']['Routes'][0]['Steps'])
+#      # as you can see, for some reason, the coordinates in Google Directions steps are reversed: (lon,lat,0)
+#      steps = map(lambda x: (x['Point']['coordinates'][1],x['Point']['coordinates'][0]), self.directions['Directions']['Routes'][0]['Steps'])
+#
+#      # draw the destination as a step point
+#      steps.append(self.route[-1])
 
-      # draw the destination as a step point
-      steps.append(self.route[-1])
+      # get LLE tuples for message points
+      steps = self.directions.getSegmentByID(0).getMessagePointsLLE()
 
       # now we convert geographic coordinates to screen coordinates, so we dont need to do it twice
       steps = map(lambda x: (proj.ll2xy(x[0],x[1])), steps)
