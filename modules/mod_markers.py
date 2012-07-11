@@ -65,7 +65,7 @@ class Markers(ranaModule):
 
   def groupExists(self, name):
     """return if a group with a given name exists"""
-    return(name in self.groups.keys())
+    return name in self.groups.keys()
 
   def clearAll(self):
     self.groups = {}
@@ -174,7 +174,7 @@ class PointGroup():
     return self.points
 
   def getColors(self):
-    return(self.bgColor,self.textColor)
+    return self.bgColor, self.textColor
 
   def highlightPoint(self, id):
     try:
@@ -184,8 +184,8 @@ class PointGroup():
       print e
 
   def unhighlightAll(self):
-    for tupple in self.points:
-      tupple[1] = False
+    for tuple in self.points:
+      tuple[1] = False
 
   def setMenuEnabled(self, value):
     self.menu = value
