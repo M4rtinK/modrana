@@ -15,6 +15,7 @@ class Segment:
   def __init__(self, points=[]):
     self.points = points
     self.messagePoints = []
+    self.messagePointsLLE = []
     # caching
     self.dirty = False # signalizes that cached data needs to be updated
     # now update the cache
@@ -29,7 +30,15 @@ class Segment:
     # * message points
 
   def _updateCache(self):
-    pass
+    """update the various caches"""
+
+    # update message point LLE cache
+    mpLLE = []
+    for point in self.messagePoints:
+      mpLLE.append(point.getLLE())
+    self.messagePointsLLE = mpLLE
+
+
 #    messagePoints = []
 #    for point in self.points:
 #      if point.getMessage() is None:
@@ -40,6 +49,14 @@ class Segment:
 
   def addMessagePoint(self, point):
     self.messagePoints.append(point)
+    self._updateCache()
+
+  def addMessagePoints(self, points):
+    self.messagePoints.extend(points)
+    self._updateCache()
+
+  def getMessagePointsLLE(self):
+    return self.messagePointsLLE
 
   def getMessagePointCount(self):
     return len(self.messagePoints)
@@ -72,8 +89,6 @@ class Way:
       count+=segment.getPointCount()
     return "way: %d segments, %d points total" % (self.getSegmentCount(), count)
 
-
-
 def fromGoogleDirectionsResult(gResult):
   steps = gResult['Directions']['Routes'][0]['Steps']
   points = _decodePolyline(gResult['Directions']['Polyline']['points'])
@@ -89,7 +104,8 @@ def fromGoogleDirectionsResult(gResult):
     lat = step['Point']['coordinates'][1]
     lon = step['Point']['coordinates'][0]
     point = Point(lat, lon, message=message)
-    segment.addMessagePoint(point)
+    messagePoints.append(point)
+  segment.addMessagePoints(messagePoints)
   way.addSegment(segment)
   return way
 
