@@ -205,7 +205,7 @@ class ModRana:
     sys.path.append(deviceModulesPath)
     dmod = self._loadModule("device_%s" % device, "device")
     if dmod is None:
-      print("modRana: no device module name provided"
+      print("modRana: !! device module failed to load !!\n"
             "loading the Neo device module as fail-safe")
       device = "neo"
       dmod = self._loadModule("device_%s" % device, "device")
