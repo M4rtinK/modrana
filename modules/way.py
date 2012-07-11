@@ -20,8 +20,8 @@ class Segment:
     # now update the cache
     self._updateCache()
 
-  def getPointByID(self, index, default=None):
-    return self.points.get(index, default)
+  def getPointByID(self, index):
+    self.points[index]
 
   def getPointCount(self):
     return len(self.points)
@@ -35,8 +35,8 @@ class Segment:
 #      if point.getMessage() is None:
 #        messagePoints.append(point)
 
-  def getMessagePointByID(self, index, default=None):
-    return self.messagePoints.get(index, default)
+  def getMessagePointByID(self, index):
+    return self.messagePoints[index]
 
   def addMessagePoint(self, point):
     self.messagePoints.append(point)
@@ -44,7 +44,7 @@ class Segment:
   def getMessagePointCount(self):
     return len(self.messagePoints)
 
-  def __unicode__(self):
+  def __str__(self):
     pCount = self.getPointCount()
     mpCount = self.getMessagePointCount()
     return "segment: %d points and %d message points" % (pCount, mpCount)
@@ -59,13 +59,13 @@ class Way:
     """add a segment"""
     self.segments.append(segment)
 
-  def getSegmentByID(self, index, default=None):
-    return self.segments.get(index, default)
+  def getSegmentByID(self, index):
+    return self.segments[index]
 
   def getSegmentCount(self):
     return len(self.segments)
 
-  def __unicode__(self):
+  def __str__(self):
     """textual state description"""
     count = 0
     for segment in self.segments:
@@ -90,6 +90,8 @@ def fromGoogleDirectionsResult(gResult):
     lon = step['Point']['coordinates'][0]
     point = Point(lat, lon, message=message)
     segment.addMessagePoint(point)
+  way.addSegment(segment)
+  return way
 
 def fromMonavResult(mResult):
   pass
