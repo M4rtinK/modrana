@@ -44,6 +44,7 @@ class turnByTurn(ranaModule):
     self.goToInitialState()
 
   def goToInitialState(self):
+    """restore initial state"""
     self.steps = []
     self.currentStepIndex = 0
     self.currentStepIndicator = None
@@ -417,9 +418,9 @@ class turnByTurn(ranaModule):
           print("turn reached trigger distance: %f m" % pReachedDist)
 
           if pos2currentStep > pReachedDist:
-            """this means we are out of the "capture circle" of the closest step"""
+            #this means we are out of the "capture circle" of the closest step
 
-            """what is more distant, the closest or the next step ?"""
+            # what is more distant, the closest or the next step ?
             if pos2nextStep < currentStep2nextStep:
               """we are mostly probably already past the closest step,
               so we switch to the next step at once"""
@@ -431,8 +432,6 @@ class turnByTurn(ranaModule):
               getting a new route or rerouting"""
               plaintextMessage = nextStep['descriptionEspeak']
               self.sayTurn(plaintextMessage, pos2nextStep)
-
-
             else:
               """we have probably not yet reached the closest step,
                  so we start navigation from it"""
@@ -462,7 +461,7 @@ class turnByTurn(ranaModule):
     # remove location watch
     if self.locationWatchID:
       self.removeWatch(self.locationWatchID)
-    
+    # cleanup
     self.goToInitialState()
     print("tbt: stopped")
 
