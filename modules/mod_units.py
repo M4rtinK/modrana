@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
-# A module handling unit conversions and dispplaying correct units acording to current settings.
+# A module handling unit conversions and displaying correct units according to current settings.
 #----------------------------------------------------------------------------
 # Copyright 2010, Martin Kolman
 #
@@ -36,9 +36,9 @@ class units(ranaModule):
     ranaModule.__init__(self, m, d, i)
     """
     # we consider 2km/h as as stationary 
-    (to filter out the standart GPS drift while not moving)
+    (to filter out the standard GPS drift while not moving)
     """
-    self.notMovingspeed  = 2
+    self.notMovingSpeed  = 2
     
   def m2km(self, m):
     return (m / 1000.0) # m to km
@@ -141,7 +141,7 @@ class units(ranaModule):
       return "%1.2f miles" % self.km2Miles(km)
     
   def km2CurrentUnitPerHourString(self, km, dp=None, short=True):
-    """return a string with the speed rouded to the current unit
+    """return a string with the speed rounded to the current unit
        %f1.2 speed_unit_per_hour
        example: 5.25 kmh
        """
@@ -181,7 +181,7 @@ class units(ranaModule):
       return "" + numberString + " " + unitString
 
   def km2CurrentUnitPerHourStringTwoDP(self, km):
-    """return a string with the speed rouded to two decimal places with the current unit
+    """return a string with the speed rounded to two decimal places with the current unit
        %f1.2 speed_unit_per_hour
        example: 5.25 kmh
        """
@@ -247,18 +247,18 @@ class units(ranaModule):
     return time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
 
   def getNotMovingSpeedKM(self):
-    return self.notMovingspeed
+    return self.notMovingSpeed
 
   def moving(self):
     """return
-       True if the current speed is above the not moving threshodl,
+       True if the current speed is above the not moving threshold,
        False if below the thresholds
        None if the current speed is unknown
        """
 
     currentspeedKMH = self.get('speed', None)
     if currentspeedKMH is not None:
-      return (currentspeedKMH>self.notMovingspeed)
+      return currentspeedKMH>self.notMovingSpeed
     else:
       # signalise that we can't decide this
       return None
