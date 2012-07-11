@@ -423,7 +423,7 @@ class turnByTurn(ranaModule):
             if pos2nextStep < currentStep2nextStep:
               """we are mostly probably already past the closest step,
               so we switch to the next step at once"""
-              print "tbt: already past closest turn, switching to next turn"
+              print("tbt: already past closest turn, switching to next turn")
               self.setStepAsCurrent(nextStep)
               """we play the message for the next step,
               with current distance to this step,
@@ -451,7 +451,7 @@ class turnByTurn(ranaModule):
           """we dont have some of the data, that is needed to decide
           if we start the navigation from the closest step of from the step that is after it
           -> we just start from the closest step"""
-          """tbt: not enough data to decide, using closest turn"""
+          print("tbt: not enough data to decide, using closest turn")
           self.setStepAsCurrent(cs)
     self.doNavigationUpdate() # run a first time navigation update
     self.locationWatchID = self.watch('locationUpdated', self.locationUpdateCB)
@@ -477,11 +477,11 @@ class turnByTurn(ranaModule):
     """do a navigation update"""
     # make sure there really are some steps
     if not self.steps:
-      print "tbt: error no navigation steps"
+      print("tbt: error no navigation steps")
       return
     pos = self.get('pos', None)
     if pos is None:
-      print "tbt: skipping update, invalid position"
+      print("tbt: skipping update, invalid position")
       return
 
     # get/compute/update necessary the values
