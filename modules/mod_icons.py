@@ -317,7 +317,7 @@ class icons(ranaModule):
     else:
       outlineColorRGBATupple = self.buttonOutlineColor
 
-    # apply the alfa values
+    # apply the alpha values
     try:
       (r,g,b,a) = fillColorRGBATupple
       fillColorRGBATupple = (r,g,b,fillAlpha)
