@@ -27,7 +27,7 @@ class Point:
     self.lon = lon
 
   def getLLE(self):
-    return self.lat,self.lon, self.elevation
+    return self.lat, self.lon, self.elevation
 
   def setLLE(self, lat, lon, elevation):
     self.lat = lat
