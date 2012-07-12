@@ -2,7 +2,43 @@
 # -*- coding: utf-8 -*-
 from point import Point
 
-class Segment:
+class TurnByTurnPoint(Point):
+  def __init__(self, lat, lon, elevation=None, message=None, SSMLMessage=None):
+    Point.__init__(self, lat, lon, elevation, message)
+    self.currentDistance = None # in meters
+    self.distanceFromStart = None # in meters
+    self.visited = False
+    self.SSMLMessage = None
+
+  def getCurrentDistance(self):
+    return self.currentDistance
+
+  def setCurrentDistance(self, mDistance):
+    self.currentDistance = mDistance
+
+  def getDistanceFromStart(self):
+    return self.distanceFromStart
+
+  def setDistanceFromStart(self, distanceFromStart):
+    self.distanceFromStart = distanceFromStart
+
+  def getVisited(self):
+    return self.visited
+
+  def setVisited(self, value):
+    self.visited = value
+
+  def getSSMLMessage(self):
+    return self.SSMLMessage
+
+  def setSSMLMessage(self, message):
+    self.SSMLMessage = message
+
+
+
+
+
+class Way:
   """a segment of the way
       * Points denote the way
       * Message points are currently mainly used for t-b-t routing announcements
@@ -16,6 +52,7 @@ class Segment:
     self.points = points
     self.messagePoints = []
     self.messagePointsLLE = []
+    self.length = None # in meters
     # caching
     self.dirty = False # signalizes that cached data needs to be updated
     # now update the cache
@@ -44,8 +81,6 @@ class Segment:
 #      if point.getMessage() is None:
 #        messagePoints.append(point)
 
-  def getMessagePointByID(self, index):
-    return self.messagePoints[index]
 
   def addMessagePoint(self, point):
     self.messagePoints.append(point)
@@ -54,6 +89,29 @@ class Segment:
   def addMessagePoints(self, points):
     self.messagePoints.extend(points)
     self._updateCache()
+
+  def getMessagePointByID(self, index):
+    return self.messagePoints[index]
+
+  def getMessagePointID(self, point):
+    """return the index of a given message point or None
+    if the given point doesn't exist in the message point list"""
+    try:
+      return self.messagePoints.index(point)
+    except ValueError:
+      return None
+
+  def getLength(self):
+    """way length in meters"""
+    return self.length
+
+  def _setLength(self, mLength):
+    """for use if the length on of the way is reliably known from external
+    sources"""
+    self.length = mLength
+
+  def getMessagePoints(self):
+    return self.messagePoints
 
   def getMessagePointsLLE(self):
     return self.messagePointsLLE
@@ -65,48 +123,45 @@ class Segment:
     pCount = self.getPointCount()
     mpCount = self.getMessagePointCount()
     return "segment: %d points and %d message points" % (pCount, mpCount)
-    
-
-class Way:
-  """a way consisting of one or more segments"""
-  def __init__(self):
-    self.segments = []
-
-  def addSegment(self, segment):
-    """add a segment"""
-    self.segments.append(segment)
-
-  def getSegmentByID(self, index):
-    return self.segments[index]
-
-  def getSegmentCount(self):
-    return len(self.segments)
-
-  def __str__(self):
-    """textual state description"""
-    count = 0
-    for segment in self.segments:
-      count+=segment.getPointCount()
-    return "way: %d segments, %d points total" % (self.getSegmentCount(), count)
 
 def fromGoogleDirectionsResult(gResult):
   steps = gResult['Directions']['Routes'][0]['Steps']
   points = _decodePolyline(gResult['Directions']['Polyline']['points'])
-  way = Way()
-  segment = Segment(points)
+  # length of the route can computed from its metadata
+
+  print gResult
+
+  mLength = gResult['Directions']['Distance']['meters']
+  mLength += gResult['Directions']['Routes'][0]['Steps'][-1]["Distance"]["meters"]
+  way = Way(points)
+  way._setLength(mLength)
   messagePoints = []
+
+  mDistanceFromStart = gResult['Directions']['Routes'][0]['Steps'][-1]["Distance"]["meters"]
+  #          # add and compute the distance from start
+  #          step['mDistanceFromStart'] = mDistanceFromStart
+  #          mDistanceFromLast = step["Distance"]["meters"]
+  #          mDistanceFromStart = mDistanceFromStart + mDistanceFromLast
+
   for step in steps:
     # TODO: abbreviation filtering
     message = step['descriptionHtml']
+    SSMLMessage = step['descriptionEspeak']
     # as you can see, for some reason,
     # the coordinates in Google Directions steps are reversed:
     # (lon,lat,0)
     lat = step['Point']['coordinates'][1]
     lon = step['Point']['coordinates'][0]
-    point = Point(lat, lon, message=message)
+    point = TurnByTurnPoint(lat, lon, message=message)
+    point.setDistanceFromStart(mDistanceFromStart)
+    point.setSSMLMessage(SSMLMessage)
+    # store point to temporary list
     messagePoints.append(point)
-  segment.addMessagePoints(messagePoints)
-  way.addSegment(segment)
+    # update distance for next point
+    mDistanceFromLast = step["Distance"]["meters"]
+    mDistanceFromStart = mDistanceFromStart + mDistanceFromLast
+
+  way.addMessagePoints(messagePoints)
   return way
 
 def fromMonavResult(mResult):
@@ -169,3 +224,26 @@ def _decodePolyline(encoded):
       array.append((lat * 1e-5, lng * 1e-5))
 
     return array
+
+
+#class Ways:
+#  """a way consisting of one or more segments"""
+#  def __init__(self):
+#    self.segments = []
+#
+#  def addSegment(self, segment):
+#    """add a segment"""
+#    self.segments.append(segment)
+#
+#  def getSegmentByID(self, index):
+#    return self.segments[index]
+#
+#  def getSegmentCount(self):
+#    return len(self.segments)
+#
+#  def __str__(self):
+#    """textual state description"""
+#    count = 0
+#    for segment in self.segments:
+#      count+=segment.getPointCount()
+#    return "way: %d segments, %d points total" % (self.getSegmentCount(), count)

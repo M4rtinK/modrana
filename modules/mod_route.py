@@ -159,7 +159,7 @@ class route(ranaModule):
         if fromPos:
           fromLat,fromLon = fromPos
 
-          print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
+          print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
 
           # TODO: wait message (would it be needed when using internet routing ?)
           self.doRoute(fromLat, fromLon, toLat, toLon)
@@ -186,7 +186,7 @@ class route(ranaModule):
       (toLat,toLon) = toPos
       (fromLat,fromLon) = fromPos
 
-      print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
+      print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
 
       self.doRoute(fromLat, fromLon, toLat, toLon)
       self.set('needRedraw', True) # show the new route
@@ -207,7 +207,7 @@ class route(ranaModule):
               (toLat,toLon) = (float(args['toLat']),float(args['toLon']))
               go = True
           if go: # are ve GO for routing ?
-            print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
+            print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
             try:
               self.doRoute(fromLat, fromLon, toLat, toLon)
             except Exception, e:
@@ -235,7 +235,7 @@ class route(ranaModule):
           fromPos = self.get("pos", None)
           if fromPos:
             (fromLat, fromLon) = fromPos
-            print "Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon)
+            print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
 
             # TODO: wait message (would it be needed when using internet routing ?)
             self.doRoute(fromLat, fromLon, toLat, toLon)
@@ -244,10 +244,10 @@ class route(ranaModule):
     elif message == 'storeRoute':
       loadTracklogs = self.m.get('loadTracklogs', None)
       if loadTracklogs is None:
-        print "route: cant store route without the loadTracklog module"
+        print("route: cant store route without the loadTracklog module")
         return
       if self.route == []:
-        print "route: the route is empty, so it will not be stored"
+        print("route: the route is empty, so it will not be stored")
         return
 
       loadTracklogs.storeRouteAndSetActive(self.route, '', 'online') # TODO: rewrite this when we support more routing providers
@@ -276,10 +276,10 @@ class route(ranaModule):
 
     elif message == 'addressRoute':
       if self.startAddress and self.destinationAddress:
-        print "address routing"
+        print("route: address routing")
         self.doAddressRoute(self.startAddress,self.destinationAddress)
       else:
-        print "cant route, start or destination (or both) not set"
+        print("route: can't route, start or destination (or both) not set")
 
     elif message == 'posToStart':
       pos = self.get('pos', None)
@@ -299,7 +299,7 @@ class route(ranaModule):
       if type == 'ms' and args == "fromPosToDest":
         """reroute from current position to destination"""
         # is there a destination and valid position ?
-        print "rerouting from current position to last destination"
+        print("route: rerouting from current position to last destination")
         pos = self.get('pos', None)
         if self.destination and pos:
           (pLat, pLon) = pos
@@ -316,7 +316,7 @@ class route(ranaModule):
     """Route from one point to another, and set that as the active route"""
     online = self.m.get('onlineServices', None)
     if online:
-      print "routing from %s to %s" % (start,destination)
+      print("route: routing from %s to %s" % (start,destination))
       online.googleDirectionsAsync(start, destination, self.handleRoute, "onlineRouteAdress2Adress")
 
   def handleRoute(self, key, resultsTuple):
@@ -516,7 +516,7 @@ class route(ranaModule):
 #      steps.append(self.route[-1])
 
       # get LLE tuples for message points
-      steps = self.directions.getSegmentByID(0).getMessagePointsLLE()
+      steps = self.directions.getMessagePointsLLE()
 
       # now we convert geographic coordinates to screen coordinates, so we dont need to do it twice
       steps = map(lambda x: (proj.ll2xy(x[0],x[1])), steps)
@@ -608,8 +608,8 @@ class route(ranaModule):
       # make a line to the last point (the modulo method sometimes skips the end of the track)
   #    [cr.line_to(x[0],x[1])for x in route[1:]] # list comprehension drawing :D
 
-  #    print drawCount
-  #    print modulo
+  #    print(drawCount)
+  #    print(modulo)
 
       # make sure the last point is connected
       (px,py) = self.pxpyRoute[-1]
@@ -630,7 +630,7 @@ class route(ranaModule):
     if self.selectTwoPoints:
       self.drawPointSelectors(cr)
 
-#    print "Redraw took %1.9f ms" % (1000 * (clock() - start1))
+#    print("Redraw took %1.9f ms" % (1000 * (clock() - start1)))
 
 
   def getCurrentRoute(self):
@@ -742,7 +742,7 @@ class route(ranaModule):
     fromPos = self.get('startPos', None)
     toPos = self.get('endPos', None)
     if fromPos is not None:
-#      print "drawing start point"
+#      print("drawing start point")
       cr.set_line_width(10)
       cr.set_source_rgb(1, 0, 0)
       (lat,lon) = fromPos
@@ -760,7 +760,7 @@ class route(ranaModule):
       cr.fill()
 
     if toPos is not None:
-#      print "drawing start point"
+#      print("drawing start point")
       cr.set_line_width(10)
       cr.set_source_rgb(0, 1, 0)
       (lat,lon) = toPos
@@ -788,7 +788,7 @@ class route(ranaModule):
     if menuName == 'currentRoute' or menuName == 'currentRouteBackToMap':
       menus = self.m.get("menu",None)
       if menus is None:
-        print "route: no menus module, no menus will be drawn"
+        print("route: no menu module, no menus will be drawn")
         return
 
       # if called from the osd menu, go back to map at escape
@@ -896,6 +896,6 @@ if(__name__ == '__main__'):
   d = {'transport':'car'}
   a = route({},d)
   a.doRoute(51.51565, 0.06036, 51.65299, -0.19974) # Beckton -> Barnet
-  print a.route
+  print(a.route)
   
   
