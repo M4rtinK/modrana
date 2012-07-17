@@ -36,9 +36,9 @@ def getModule(m,d,i):
   - gobject.timeout_add, QTimer, etc.
   """
   if gs.GUIString == 'QML':
-    return(CronQt(m,d,i))
+    return CronQt(m,d,i)
   else: # GTK for now
-    return(CronGTK(m,d,i))
+    return CronGTK(m,d,i)
 
 class Cron(ranaModule):
   """A timing and scheduling module for modRana"""

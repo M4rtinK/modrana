@@ -99,9 +99,9 @@ class tracklog(ranaModule):
       self.saveInterval=int(self.get('tracklogSaveInterval', 10))
       self.set('needRedraw', True)
 
-    elif(message == 'nameInput'):
+    elif message == 'nameInput':
       entry = self.m.get('textEntry', None)
-      if entry == None:
+      if entry is None:
         return
       entryText = ""
       logNameEntry = self.get('logNameEntry', None)
@@ -110,7 +110,7 @@ class tracklog(ranaModule):
       entry.entryBox(self ,'logNameEntry','Write tracklog name',entryText)
       self.set('needRedraw', True)
 
-    elif(message == 'clearTrace'):
+    elif message == 'clearTrace':
       self.pxpyIndex=[]
 
     elif message == 'setupColorMenu':
@@ -152,7 +152,7 @@ class tracklog(ranaModule):
         # update traveled distance
         self.storeCurrentPosition()
         currentCoords = self.get('pos', None)
-        if (self.lastCoords!=None and currentCoords!=None):
+        if self.lastCoords is not None and currentCoords is not None:
           (lat1,lon1) = self.lastCoords
           (lat2,lon2) = currentCoords
           self.distance+=geo.distance(lat1,lon1,lat2,lon2)
@@ -177,7 +177,7 @@ class tracklog(ranaModule):
     options = self.m.get('options', None)
     tracklogFolder = self.modrana.paths.getTracklogsFolderPath()
 
-    if name==None:
+    if name is None:
       name = self.generateLogName()
 
     self.currentLogName = name
@@ -255,7 +255,7 @@ class tracklog(ranaModule):
       # now we make the tracklog manager aware, that there is a new log
       loadTl = self.m.get('loadTracklogs', None)
       if loadTl:
-#        # we also set the correct cathegory ('log')
+#        # we also set the correct category ('log')
 #        loadTl.setTracklogPathCategory(path, 'log')
         loadTl.listAvailableTracklogs() #TODO: incremental addition
 
@@ -370,7 +370,7 @@ class tracklog(ranaModule):
 #      (lat,lon) = n
 #      (x,y) = proj.ll2xy(lat,lon)
 #      if(proj.onscreen(x,y)):
-#        if first: #the first coordintes are wrong co we skip them
+#        if first: #the first coordinates are wrong co we skip them
 #          self.line(cr, x, y)
 #          first = False
 #        else:
@@ -545,7 +545,7 @@ class tracklog(ranaModule):
       menus.drawSixPlusOneMenu(cr, menuName, parentAction, fiveButtons, box)
 
     else:
-      return # we arent the active menu so we dont do anything
+      return # we aren't the active menu so we dont do anything
 
   def drawMapOverlay(self, cr):
     proj = self.m.get('projection', None)
@@ -563,7 +563,7 @@ class tracklog(ranaModule):
       """
 
       posXY = proj.getCurrentPosxy()
-      if posXY and self.loggingEnabled and not(self.loggingPaused):
+      if posXY and self.loggingEnabled and not self.loggingPaused:
         (x,y) = posXY
         cr.move_to(x,y)
       else:
@@ -573,9 +573,9 @@ class tracklog(ranaModule):
 
       z = proj.zoom
 
-      if z < 16 and z > 10:
+      if 16 > z > 10:
         modulo = 2**(16-z)
-      elif (z <= 10):
+      elif z <= 10:
         modulo = 32
       else:
         modulo = 1

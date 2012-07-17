@@ -29,7 +29,7 @@ if gs.GUIString == "GTK":
   import pangocairo
 
 def getModule(m,d,i):
-  return(turnByTurn(m,d,i))
+  return turnByTurn(m,d,i)
 
 class turnByTurn(ranaModule):
   """A turn by turn navigation module."""
@@ -44,7 +44,8 @@ class turnByTurn(ranaModule):
     self.goToInitialState()
 
   def goToInitialState(self):
-    self.steps = []
+    """restore initial state"""
+    self.route = None
     self.currentStepIndex = 0
     self.currentStepIndicator = None
     self.espeakFirstAndHalfTrigger = False
@@ -85,7 +86,7 @@ class turnByTurn(ranaModule):
       # 3. restart routing for to this new route from the closest point
       self.sendMessage("ms:turnByTurn:start:closest")
     elif message == "toggleBoxHiding":
-      print "turnByTurn: toggling navigation box visibility"
+      print("turnByTurn: toggling navigation box visibility")
       self.navigationBoxHidden = not self.navigationBoxHidden
     elif message == "switchToPreviousTurn":
       self.switchToPreviousStep()
@@ -100,14 +101,13 @@ class turnByTurn(ranaModule):
       #TODO: add support for modRana notifications once they support line wrapping
 
   def drawMapOverlay(self,cr):
-      if self.steps:
+      if self.route:
         # get current step
         currentStep = self.getCurrentStep()
         proj = self.m.get('projection', None)
         # draw the current step indicator circle
         if currentStep and proj:
-          lat = currentStep['Point']['coordinates'][1]
-          lon = currentStep['Point']['coordinates'][0]
+          (lat, lon) = currentStep.getLL()
           (pointX, pointY) = proj.ll2xy(lat, lon)
           cr.set_source_rgb(1, 0, 0)
           cr.set_line_width(4)
@@ -116,7 +116,7 @@ class turnByTurn(ranaModule):
           cr.fill()
 
   def drawScreenOverlay(self, cr):
-    if self.steps: # is there something relevant to draw ?
+    if self.route: # is there something relevant to draw ?
     
       # get current step
       currentStep = self.getCurrentStep()
@@ -133,7 +133,6 @@ class turnByTurn(ranaModule):
 
         # construct parametric background for the cairo drawn buttons
         background="generic:;0;;1;5;0"
-#        background="generic:;;;;;"
         
         if self.navigationBoxHidden:
           # * show button
@@ -153,13 +152,16 @@ class turnByTurn(ranaModule):
           layout = pg.create_layout()
 
           # get the current turn message
-          message = currentStep['descriptionHtml']
+          message = currentStep.getMessage()
       
           # display current distance to the next point & other unit conversions
           units = self.m.get('units', None)
           if units and self.currentDistance:
             distString = units.m2CurrentUnitString(self.currentDistance,1,True)
-            currentDistString = units.m2CurrentUnitString(currentStep['mDistanceFromStart'],1,True)
+            if currentStep.getDistanceFromStart():
+              currentDistString = units.m2CurrentUnitString(currentStep.getDistanceFromStart(),1,True)
+            else:
+              currentDistString = "?"
             routeLengthString = units.m2CurrentUnitString(self.mRouteLength,1,True)
           else:
             distString = ""
@@ -179,7 +181,7 @@ class turnByTurn(ranaModule):
           layout.set_font_description(pango.FontDescription("Sans Serif 24")) #TODO: custom font size ?
           (lw,lh) = layout.get_size()
           if lw == 0 or lh == 0:
-            # no need to draw a zero are layout
+            # no need to draw a zero area layout
             return
 
           # get coordinates for the area available for text
@@ -202,7 +204,7 @@ class turnByTurn(ranaModule):
 
             if cut:
               """ notify the user that a part of the text was cut,
-              by drawing a red line and a scissors icon"""
+                          by drawing a red line and a scissors icon"""
               # draw the red line
               cr.set_source_rgb(1,0,0)
               cr.set_line_width(bh*0.01)
@@ -215,7 +217,6 @@ class turnByTurn(ranaModule):
               #TODO: show the whole message in a notifications after clicking the scissors
               # (this needs line wrapping support in modRana notifications)
 
-
             # clip out the overflowing part of the text
             cr.rectangle(ulX,ulY,usableWidth,clipHeight)
             cr.translate(ulX,ulY)
@@ -227,7 +228,7 @@ class turnByTurn(ranaModule):
 
           # use the bottom of the infobox to display info
           (bottomX,bottomY) = (bx, by+bh-6*border)
-          note = "%s/%s, %d/%d   <sub> tap this box to reroute</sub>" % (currentDistString, routeLengthString, self.currentStepIndex+1,len(self.steps))
+          note = "%s/%s, %d/%d   <sub> tap this box to reroute</sub>" % (currentDistString, routeLengthString, self.currentStepIndex+1, self.getMaxStepIndex()+1)
           menus.drawText(cr, "%s" % note, bottomX, bottomY, bw, 6*border, 0, rgbaColor=self.navigationBoxText)
           # make clickable
           clickHandler = self.m.get('clickHandler', None)
@@ -248,7 +249,7 @@ class turnByTurn(ranaModule):
 
 
   def sayTurn(self,message,distanceInMeters,forceLanguageCode=False):
-    """say a text-to-speach message about a turn
+    """say a text-to-speech message about a turn
        this basically wraps the simple say method from voice and adds some more information,
        like current distance to the turn
        """
@@ -268,9 +269,9 @@ class turnByTurn(ranaModule):
       """ the message can contain unicode, this might cause an exception when printing it
       in some systems (SHR-u on Neo, for example)"""
       try:
-        print "saying: %s" % text
+        print("saying: %s" % text)
       except UnicodeEncodeError:
-        print "voice: printing the current message to stdout failed do to unicode conversion error"
+        print("voice: printing the current message to stdout failed do to unicode conversion error")
 
       if forceLanguageCode:
         espeakLanguageCode = forceLanguageCode
@@ -279,79 +280,90 @@ class turnByTurn(ranaModule):
         espeakLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[0]
       return voice.say(text,espeakLanguageCode)
 
+  def getMaxStepIndex(self):
+    return self.route.getMessagePointCount() - 1
+
   def getStartingStep(self, which='first'):
-    if self.steps:
+    if self.route:
       if which == 'first':
-        return self.steps[0]
+        return self.getStep(0)
       if which == 'closest':
         return self.getClosestStep()
 
   def getClosestStep(self):
+    """get the geographically closest step"""
     proj = self.m.get('projection', None) # we also need the projection module
     pos = self.get('pos', None) # and current position
     if pos and proj:
       (lat1,lon1) = pos
-      tempSteps = self.steps
+      tempSteps = self.route.getMessagePoints()
       for step in tempSteps:
-        lat2 = step['Point']['coordinates'][1]
-        lon2 = step['Point']['coordinates'][0]
-        step['currentDistance'] = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
-      closestStep = sorted(tempSteps, key=lambda x: x['currentDistance'])[0]
+        (lat2, lon2) = step.getLL()
+        step.setCurrentDistance = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
+      closestStep = sorted(tempSteps, key=lambda x: x.getCurrentDistance())[0]
+
       return closestStep
 
-  def getStep(self, id):
+  def getStep(self, index):
     """return steps for valid index, None otherwise"""
-    maxIndex = len(self.steps) - 1
-    if id > maxIndex or id < -(maxIndex+1):
-      print "wrong turn index: %d, max index is: %d" % (id, maxIndex)
+    maxIndex = self.getMaxStepIndex()
+    if index > maxIndex or index < -(maxIndex+1):
+      print("turnByTurn: wrong turn index: %d, max index is: %d" % (index, maxIndex))
       return None
     else:
-      return self.steps[id]
+      return self.route.getMessagePointByID(index)
 
   def setStepAsCurrent(self, step):
     """set a given step as current step"""
-    id = step['id']
-    self.currentStepIndex = id
+    id = self.route.getMessagePointID(step)
+    self._setCurrentStepIndex(id)
 
   def getCurrentStep(self):
     """return current step"""
-    return self.steps[self.currentStepIndex]
+    return self.route.getMessagePointByID(self.currentStepIndex)
+
+  def getStepID(self, step):
+    return self.route.getMessagePointID(step)
 
   def getCurrentStepVisitStatus(self):
     """report visit status for  current step"""
-    return self.steps[self.currentStepIndex]['visited']
+    return self.getCurrentStep().getVisited()
 
   def markCurrentStepAsVisited(self):
     """mark current step as visited"""
-    self.steps[self.currentStepIndex]['visited'] = True
+    self.getCurrentStep().setVisited(True)
 
   def switchToPreviousStep(self):
     """switch to previous step and clean up"""
     nextIndex = self.currentStepIndex - 1
     if nextIndex >= 0:
-      self.currentStepIndex = nextIndex
+      self._setCurrentStepIndex(nextIndex)
       self.espeakFirstTrigger = False
       self.espeakSecondTrigger = False
-      print "switching to previous step"
+      print("switching to previous step")
     else:
-      print "previous step reached"
+      print("previous step reached")
 
   def switchToNextStep(self):
     """switch to next step and clean up"""
-    maxIndex = len(self.steps) - 1
+    maxIndex = self.getMaxStepIndex()
     nextIndex = self.currentStepIndex + 1
     if nextIndex <= maxIndex:
-      self.currentStepIndex = nextIndex
+      self._setCurrentStepIndex(nextIndex)
       self.espeakFirstAndHalfTrigger = False
       self.espeakFirstTrigger = False
       self.espeakSecondTrigger = False
-      print "switching to next step"
+      print("switching to next step")
     else:
-      print "last step reached"
+      print("last step reached")
+
+  def _setCurrentStepIndex(self, index):
+    self.currentStepIndex = index
+    self._doNavigationUpdate()
 
   def enabled(self):
     """return True if enabled, false otherwise"""
-    if self.steps:
+    if self.route:
       return True
     else:
       return False
@@ -365,32 +377,23 @@ class turnByTurn(ranaModule):
     """NOTE: turn and step are used interchangeably in the documentation"""
     m = self.m.get('route', None)
     if m:
-      (dirs,routeRequestSentTimestamp) = m.getCurrentDirections()
-      if dirs: # is the route nonempty ?
+      (route,routeRequestSentTimestamp) = m.getCurrentDirections()
+      if route: # is the route nonempty ?
+        self.route = route
         # show the warning message
         self.sendMessage('ml:notification:m:use at own risk, watch for cliffs, etc.;3')
-        route = dirs['Directions']['Routes'][0]
         # for some reason the combined distance does not account for the last step
-        self.mRouteLength = route['Distance']['meters'] + route['Steps'][-1]["Distance"]["meters"]
-        self.steps = []
-        mDistanceFromStart = route['Steps'][-1]["Distance"]["meters"]
-        for step in route['Steps']:
-          step['currentDistance'] = None # add the currentDistance key
-          # add and compute the distance from start
-          step['mDistanceFromStart'] = mDistanceFromStart
-          mDistanceFromLast = step["Distance"]["meters"]
-          mDistanceFromStart = mDistanceFromStart + mDistanceFromLast
-          self.steps.append(step)
-        self.steps = dirs['Directions']['Routes'][0]['Steps']
+        self.mRouteLength = route.getLength()
+
         # some statistics
         metersPerSecSpeed = self.get('metersPerSecSpeed', None)
         dt = time.time() - routeRequestSentTimestamp
-        print "route lookup took: %f s" % dt
+        print("turnByTurn: route lookup took: %f s" % dt)
         if dt and metersPerSecSpeed:
           dm = dt * metersPerSecSpeed
-          print "distance traveled during lookup: %f m" % dm
+          print("distance traveled during lookup: %f m" % dm)
         """the duration of the road lookup and other variables are currently not used
-        in the heuristics but might be added later to make the heursitics more robust"""
+        in the heuristics but might be added later to make the heuristics more robust"""
 
 
         """now we decide if we use the closest turn, or the next one,
@@ -398,63 +401,61 @@ class turnByTurn(ranaModule):
         cs = self.getClosestStep() # get geographically closest step
         pos = self.get('pos', None) # get current position
         pReachedDist = int(self.get('pointReachedDistance', 30)) # get the trigger distance
-        nextTurnId = cs['id'] + 1
+        nextTurnId = self.getStepID(cs) + 1
         nextStep = self.getStep(nextTurnId)
         # check if we have all the data needed for our heuristics
-        print "tbt: trying to guess correct step to start navigation"
+        print("tbt: trying to guess correct step to start navigation")
         if nextStep and pos and pReachedDist:
           (lat,lon) = pos
-          (csLat,csLon) = (cs['Point']['coordinates'][1],cs['Point']['coordinates'][0])
-          (nsLat,nsLon) = (nextStep['Point']['coordinates'][1],nextStep['Point']['coordinates'][0])
+          (csLat,csLon) = cs.getLL()
+          (nsLat,nsLon) = nextStep.getLL()
           pos2nextStep = geo.distance(lat,lon,nsLat,nsLon)*1000
           pos2currentStep = geo.distance(lat,lon,csLat,csLon)*1000
           currentStep2nextStep = geo.distance(csLat,csLon,nsLat,nsLon)*1000
 #          print "pos",(lat,lon)
 #          print "cs",(csLat,csLon)
 #          print "ns",(nsLat,nsLon)
-          print "position to next turn: %f m" % pos2nextStep
-          print "position to current turn: %f m" % pos2currentStep
-          print "current turn to next turn: %f m" % currentStep2nextStep
-          print "turn reached trigger distance: %f m" % pReachedDist
+          print("position to next turn: %f m" % pos2nextStep)
+          print("position to current turn: %f m" % pos2currentStep)
+          print("current turn to next turn: %f m" % currentStep2nextStep)
+          print("turn reached trigger distance: %f m" % pReachedDist)
 
           if pos2currentStep > pReachedDist:
-            """this means we are out of the "capture circle" of the closest step"""
+            #this means we are out of the "capture circle" of the closest step
 
-            """what is more distant, the closest or the next step ?"""
+            # what is more distant, the closest or the next step ?
             if pos2nextStep < currentStep2nextStep:
               """we are mostly probably already past the closest step,
               so we switch to the next step at once"""
-              print "tbt: already past closest turn, switching to next turn"
+              print("tbt: already past closest turn, switching to next turn")
               self.setStepAsCurrent(nextStep)
               """we play the message for the next step,
               with current distance to this step,
               to assure there is some voice output immediately after
               getting a new route or rerouting"""
-              plaintextMessage = nextStep['descriptionEspeak']
+              plaintextMessage = nextStep.getSSMLMessage()
               self.sayTurn(plaintextMessage, pos2nextStep)
-
-
             else:
               """we have probably not yet reached the closest step,
                  so we start navigation from it"""
-              print "tbt: closest turn not yet reached"
+              print("tbt: closest turn not yet reached")
               self.setStepAsCurrent(cs)
 
           else:
             """we are inside the  "capture circle" of the closest step,
-            this meens the navigation will trigger the voice message by itself
+            this means the navigation will trigger the voice message by itself
             and correctly switch to next step
             -> no need to switch to next step from here"""
-            print "tbt: inside reach distance of closest turn"
+            print("tbt: inside reach distance of closest turn")
             self.setStepAsCurrent(cs)
 
         else:
           """we dont have some of the data, that is needed to decide
           if we start the navigation from the closest step of from the step that is after it
           -> we just start from the closest step"""
-          """tbt: not enough data to decide, using closest turn"""
+          print("tbt: not enough data to decide, using closest turn")
           self.setStepAsCurrent(cs)
-    self.doNavigationUpdate() # run a first time navigation update
+    self._doNavigationUpdate() # run a first time navigation update
     self.locationWatchID = self.watch('locationUpdated', self.locationUpdateCB)
     print("tbt: started")
       
@@ -463,33 +464,32 @@ class turnByTurn(ranaModule):
     # remove location watch
     if self.locationWatchID:
       self.removeWatch(self.locationWatchID)
-    
+    # cleanup
     self.goToInitialState()
     print("tbt: stopped")
 
   def locationUpdateCB(self, key, newValue, oldValue):
     """position changed, do a tbt navigation update"""
     if key == "locationUpdated": # just to be sure
-      self.doNavigationUpdate()
+      self._doNavigationUpdate()
     else:
-      print "tbt: invalid key: %r" % key
+      print("tbt: invalid key: %r" % key)
 
-  def doNavigationUpdate(self):
+  def _doNavigationUpdate(self):
     """do a navigation update"""
     # make sure there really are some steps
-    if not self.steps:
-      print "tbt: error no navigation steps"
+    if not self.route:
+      print("tbt: error no route")
       return
     pos = self.get('pos', None)
-    if pos == None:
-      print "tbt: skipping update, invalid position"
+    if pos is None:
+      print("tbt: skipping update, invalid position")
       return
 
     # get/compute/update necessary the values
     (lat1,lon1) = pos
     currentStep = self.getCurrentStep()
-    lat2 = currentStep['Point']['coordinates'][1]
-    lon2 = currentStep['Point']['coordinates'][0]
+    lat2, lon2 = currentStep.getLL()
     currentDistance = geo.distance(lat1,lon1,lat2,lon2)*1000 # km to m
     self.currentDistance = currentDistance # update current distance
 
@@ -542,7 +542,7 @@ class turnByTurn(ranaModule):
       # check if we can miss the point by going too fast -> mps speed > point reached distance
       if metersPerSecSpeed > pointReachedDistance*0.75:
         pointReachedDistance = metersPerSecSpeed*2
-        print "tbt: enlarging point reached distance to: %1.2f m due to large speed (%1.2f m/s)" % (pointReachedDistance, metersPerSecSpeed)
+        print("tbt: enlarging point reached distance to: %1.2f m due to large speed (%1.2f m/s)" % (pointReachedDistance, metersPerSecSpeed))
 
       # speed & time based triggering
       lowSpeed = float(self.get('minAnnounceSpeed', 13.89))
@@ -559,22 +559,22 @@ class turnByTurn(ranaModule):
       distance = max(distance, warnTime * metersPerSecSpeed)
 
       if self.get('debugTbT', False):
-        print "#####"
-        print "min/max announce time: %d/%d s" % (lowTime, highTime)
-        print "trigger distance: %1.2f m (%1.2f s warning)" % (distance, distance/float(metersPerSecSpeed))
-        print "current distance: %1.2f m" % currentDistance
-        print "current speed: %1.2f m/s (%1.2f km/h)" % (metersPerSecSpeed, metersPerSecSpeed*3.6)
-        print "point reached distance: %f m" % pointReachedDistance
-        print "1. triggered=%r, 1.5. triggered=%r, 2. triggered=%r" % (self.espeakFirstTrigger, self.espeakFirstAndHalfTrigger, self.espeakSecondTrigger)
+        print("#####")
+        print("min/max announce time: %d/%d s" % (lowTime, highTime))
+        print("trigger distance: %1.2f m (%1.2f s warning)" % (distance, distance/float(metersPerSecSpeed)))
+        print("current distance: %1.2f m" % currentDistance)
+        print("current speed: %1.2f m/s (%1.2f km/h)" % (metersPerSecSpeed, metersPerSecSpeed*3.6))
+        print("point reached distance: %f m" % pointReachedDistance)
+        print("1. triggered=%r, 1.5. triggered=%r, 2. triggered=%r" % (self.espeakFirstTrigger, self.espeakFirstAndHalfTrigger, self.espeakSecondTrigger))
         if warnTime > 30:
-          print "optional (20 s) trigger distance: %1.2f" % (20.0*metersPerSecSpeed)
+          print("optional (20 s) trigger distance: %1.2f" % (20.0*metersPerSecSpeed))
 
       if currentDistance <= pointReachedDistance:
         """this means we reached the point"""
         if self.espeakSecondTrigger == False:
-          print "triggering espeak nr. 2"
+          print("triggering espeak nr. 2")
           # say the message without distance
-          plaintextMessage = currentStep['descriptionEspeak']
+          plaintextMessage = currentStep.getSSMLMessage()
           # consider turn said even if it was skipped (ignore errors)
           self.sayTurn(plaintextMessage, 0)
           self.markCurrentStepAsVisited() # mark this point as visited
@@ -585,8 +585,8 @@ class turnByTurn(ranaModule):
         if currentDistance <= distance:
           """this means we reached an optimal distance for saying the message"""
           if self.espeakFirstTrigger == False:
-            print "triggering espeak nr. 1"
-            plaintextMessage = currentStep['descriptionEspeak']
+            print("triggering espeak nr. 1")
+            plaintextMessage = currentStep.getSSMLMessage()
             if self.sayTurn(plaintextMessage, currentDistance):
               self.espeakFirstTrigger = True # first message done
         if self.espeakFirstAndHalfTrigger == False and warnTime > 30:
@@ -594,7 +594,7 @@ class turnByTurn(ranaModule):
             """in case that the warning time gets too big, add an intermediate warning at 20 seconds
             NOTE: this means it is said after the first trigger
             """
-            plaintextMessage = currentStep['descriptionEspeak']
+            plaintextMessage = currentStep.getSSMLMessage()
             if self.sayTurn(plaintextMessage, currentDistance):
               self.espeakFirstAndHalfTrigger = True # intermediate message done
 
