@@ -612,7 +612,7 @@ class route(ranaModule):
       cr.set_source_rgb(1, 1, 0)
       cr.set_line_width(7)
       for step in steps:
-        (x,y) = (step)
+        (x,y) = step
         cr.arc(x, y, 2, 0, 2.0 * math.pi)
         cr.stroke()
       cr.fill()
@@ -787,7 +787,7 @@ class route(ranaModule):
 
       menus.addItem('currentRouteTools', 'clear', 'generic', 'route:clear|set:menu:None')
 
-    if menuName == "showAdressRoute":
+    if menuName == "showAddressRoute":
       menus = self.m.get("menu",None)
       if menus:
         (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()

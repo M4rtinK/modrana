@@ -46,7 +46,7 @@ class menus(ranaModule):
     self.fullscreen = False
     self.mainScreenCoords = {}
     self.userConfig = self.modrana.configs.getUserConfig()
-    self.hideMapSreenButtons = False
+    self.hideMapScreenButtons = False
     self.lastHideCheckTimestamp = time.time()
     self.itemMenuGrid = (None,[])
 
@@ -75,7 +75,7 @@ class menus(ranaModule):
         hideDelay = self.get('hideDelay', 'never')
         if hideDelay != 'never': # is button hiding enabled ?
           if (timestamp - self.lastActivity) > int(hideDelay): # have we reached the timeout ?
-            self.hideMapSreenButtons = True
+            self.hideMapScreenButtons = True
       else:
         self.lastActivity=timestamp
         """reset lastActivity if not in map screen,
@@ -84,7 +84,7 @@ class menus(ranaModule):
 
   def buttonsHidingOn(self):
     """report whether button hiding is enabled"""
-    return self.hideMapSreenButtons
+    return self.hideMapScreenButtons
 
   def drawScreenOverlay(self, cr):
     """Draw an overlay on top of the map, showing various information
@@ -103,13 +103,13 @@ class menus(ranaModule):
       m.registerXYWH(x,y,x+w,y+h, "menu:screenClicked")
 
     """check out if button hiding is on and behave accordingly"""
-    if self.hideMapSreenButtons:
+    if self.hideMapScreenButtons:
         (x1,y1) = proj.screenPos(0.6, -0.96)
         text = "tap screen to show menu"
         self.drawText(cr, text, x1, y1, w/3, h, 0) # draw a reminder
         cr.stroke()
     else:
-      self.hideMapSreenButtons = False
+      self.hideMapScreenButtons = False
 
       # default main button coordinates
       buttons = {}
@@ -1097,7 +1097,7 @@ class menus(ranaModule):
      self.addItem('route', 'Here to Point#Point to Here', 'generic', 'set:menu:None|route:selectOnePoint')
      POISelectedAction2 = "showPOI:routeToActivePOI"
      self.addItem('route', 'Here to POI', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:menu#list#POICategories" % POISelectedAction2)
-     self.addItem('route', 'to Address#Address', 'generic', 'set:menu:route#showAdressRoute')
+     self.addItem('route', 'to Address#Address', 'generic', 'set:menu:route#showAddressRoute')
      self.addItem('route', 'Clear', 'generic', 'route:clear|set:menu:None')
      self.addItem('route', 'route#Current', 'generic', 'set:menu:currentRoute')
 
@@ -1472,7 +1472,7 @@ class menus(ranaModule):
       self.set('editBatchMenuActive', True)
     elif message == 'screenClicked':
       self.lastActivity = int(time.time())
-      self.hideMapSreenButtons = False # show the buttons at once
+      self.hideMapScreenButtons = False # show the buttons at once
       self.set('needRedraw', True)
     elif type =='ml' and message=='highlightItem':
       menuName, id = args
