@@ -75,16 +75,6 @@ class route(ranaModule):
     self.expectStart = False
     self.expectEnd = False
 
-  def firstTime(self):
-    """Load stored addresses at startup.
-           TODO: toggle for this, privacy reasons perhaps ?"""
-    startAddress = self.get('startAddress', None)
-    if startAddress:
-      self.startAddress = startAddress
-    destinationAddress = self.get('destinationAddress', None)
-    if destinationAddress:
-      self.destinationAddress = destinationAddress
-
   def handleMessage(self, message, type, args):
     if message == "clear":
       self._goToInitialState()
@@ -253,27 +243,34 @@ class route(ranaModule):
     elif message == 'startInput':
       entry = self.m.get('textEntry', None)
       if entry is None:
+        print("route: text entry module not available")
         return
-      entryText = ""
-      if self.startAddress:
-        entryText = self.startAddress
+      entryText = self.get('startAddress', "")
       entry.entryBox(self ,'start','Input the start address',entryText)
 
     elif message == 'destinationInput':
       entry = self.m.get('textEntry', None)
       if entry is None:
+        print("route: text entry module not available")
         return
-      entryText = ""
-      if self.destinationAddress:
-        entryText = self.destinationAddress
+      entryText = self.get('destinationAddress', "")
       entry.entryBox(self,'destination','Input the destination address',entryText)
 
     elif message == 'addressRoute':
-      if self.startAddress and self.destinationAddress:
+      startAddress = self.get('startAddress', None)
+      destinationAddress = self.get('destinationAddress', None)
+      if startAddress and destinationAddress:
         print("route: address routing")
-        self.doAddressRoute(self.startAddress,self.destinationAddress)
-      else:
+        self.set('menu', None) # go to the map screen
+        self.doAddressRoute(startAddress, destinationAddress)
+      else: # notify the user about insufficient input and remain in the menu
         print("route: can't route, start or destination (or both) not set")
+        if startAddress is None and destinationAddress is None:
+          self.notify("Can't route: start & destination not set", 3000)
+        elif startAddress is None:
+          self.notify("Can't route: start not set", 3000)
+        elif destinationAddress is None:
+          self.notify("Can't route: destination not set", 3000)
 
     elif message == 'posToStart':
       pos = self.get('pos', None)
@@ -800,7 +797,7 @@ class route(ranaModule):
         # * draw "escape" button
         menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:main")
         # * route
-        menus.drawButton(cr, x2, y2, dx, dy, "route", "generic", "route:addressRoute|set:menu:None")
+        menus.drawButton(cr, x2, y2, dx, dy, "route", "generic", "route:addressRoute")
 
         menus.clearMenu('currentRouteTools', "set:menu:route#currentRoute")
 
