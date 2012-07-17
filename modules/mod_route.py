@@ -203,7 +203,7 @@ class route(ranaModule):
               (fromLat,fromLon) = pos
               (toLat,toLon) = (float(args['toLat']),float(args['toLon']))
               go = True
-          if go: # are ve GO for routing ?
+          if go: # are we GO for routing ?
             print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
             try:
               self.doRoute(fromLat, fromLon, toLat, toLon)
@@ -258,7 +258,6 @@ class route(ranaModule):
       if self.startAddress:
         entryText = self.startAddress
       entry.entryBox(self ,'start','Input the start address',entryText)
-#      self.expectTextEntry = 'start'
 
     elif message == 'destinationInput':
       entry = self.m.get('textEntry', None)
@@ -267,9 +266,7 @@ class route(ranaModule):
       entryText = ""
       if self.destinationAddress:
         entryText = self.destinationAddress
-
       entry.entryBox(self,'destination','Input the destination address',entryText)
-#      self.expectTextEntry = 'destination'
 
     elif message == 'addressRoute':
       if self.startAddress and self.destinationAddress:
@@ -314,7 +311,7 @@ class route(ranaModule):
     online = self.m.get('onlineServices', None)
     if online:
       print("route: routing from %s to %s" % (start,destination))
-      online.googleDirectionsAsync(start, destination, self.handleRoute, "onlineRouteAdress2Adress")
+      online.googleDirectionsAsync(start, destination, self.handleRoute, "onlineRouteAddress2Address")
 
   def handleRoute(self, key, resultsTuple):
     """handle a routing result"""
@@ -331,7 +328,7 @@ class route(ranaModule):
           self.duration = directions['Directions']['Duration']['html']
           dirs = way.fromGoogleDirectionsResult(directions)
           self.processAndSaveResults(dirs, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp)
-    elif key == "onlineRouteAdress2Adress":
+    elif key == "onlineRouteAddress2Address":
       if len(resultsTuple) == 6:
         (directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp) = resultsTuple
         # remove any possible prev. route description, so new a new one for this route is created
@@ -671,12 +668,10 @@ class route(ranaModule):
 
   def drawPointSelectors(self,cr):
     # draw point selectors
-
     proj = self.m.get('projection', None)
     fromPos = self.get('startPos', None)
     toPos = self.get('endPos', None)
     if fromPos is not None:
-#      print("drawing start point")
       cr.set_line_width(10)
       cr.set_source_rgb(1, 0, 0)
       (lat,lon) = fromPos
@@ -694,7 +689,6 @@ class route(ranaModule):
       cr.fill()
 
     if toPos is not None:
-#      print("drawing start point")
       cr.set_line_width(10)
       cr.set_source_rgb(0, 1, 0)
       (lat,lon) = toPos
