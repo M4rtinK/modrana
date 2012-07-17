@@ -35,15 +35,8 @@ class route(ranaModule):
   """Routes"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+    self._goToInitialState()
     self.routeRequestSentTimestamp = None
-    self.pxpyRoute = []
-    self.directions = None
-    self.duration = None # in seconds
-    self.start = None
-    self.destination = None
-    self.text = None
-    self.selectTwoPoints = False
-    self.selectOnePoint = False
     self.once = True
     self.entry = None
     self.directionsFilterCSV = 'data/directions_filter.csv'
@@ -66,6 +59,22 @@ class route(ranaModule):
         self.directionsFilterRules.append((regex, row[1].decode("utf-8")))
     file.close()
 
+  def _goToInitialState(self):
+    """restorer initial routing state
+    -> used in init and when rerouting"""
+    self.routeRequestSentTimestamp = None
+    self.pxpyRoute = [] # route in screen coordinates
+    self.directions = [] # directions object
+    self.duration = None # in seconds
+    self.start = None
+    self.destination = None
+    self.text = None
+    self.selectTwoPoints = False
+    self.selectOnePoint = False
+
+    self.expectStart = False
+    self.expectEnd = False
+
   def firstTime(self):
     """Load stored addresses at startup.
            TODO: toggle for this, privacy reasons perhaps ?"""
@@ -78,19 +87,7 @@ class route(ranaModule):
 
   def handleMessage(self, message, type, args):
     if message == "clear":
-      self.routeRequestSentTimestamp = None
-      self.pxpyRoute = []
-      self.directions = []
-      self.duration = None
-      self.start = None
-      self.destination = None
-      self.text = None
-      self.selectTwoPoints = False
-      self.selectOnePoint = False
-
-      self.expectStart = False
-      self.expectEnd = False
-
+      self._goToInitialState()
       self.set('startPos', None)
       self.set('endPos', None)
 
