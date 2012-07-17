@@ -158,7 +158,10 @@ class turnByTurn(ranaModule):
           units = self.m.get('units', None)
           if units and self.currentDistance:
             distString = units.m2CurrentUnitString(self.currentDistance,1,True)
-            currentDistString = units.m2CurrentUnitString(currentStep.getDistanceFromStart(),1,True)
+            if currentStep.getDistanceFromStart():
+              currentDistString = units.m2CurrentUnitString(currentStep.getDistanceFromStart(),1,True)
+            else:
+              currentDistString = "?"
             routeLengthString = units.m2CurrentUnitString(self.mRouteLength,1,True)
           else:
             distString = ""
@@ -178,7 +181,7 @@ class turnByTurn(ranaModule):
           layout.set_font_description(pango.FontDescription("Sans Serif 24")) #TODO: custom font size ?
           (lw,lh) = layout.get_size()
           if lw == 0 or lh == 0:
-            # no need to draw a zero are layout
+            # no need to draw a zero area layout
             return
 
           # get coordinates for the area available for text
@@ -201,7 +204,7 @@ class turnByTurn(ranaModule):
 
             if cut:
               """ notify the user that a part of the text was cut,
-              by drawing a red line and a scissors icon"""
+                          by drawing a red line and a scissors icon"""
               # draw the red line
               cr.set_source_rgb(1,0,0)
               cr.set_line_width(bh*0.01)
@@ -313,7 +316,7 @@ class turnByTurn(ranaModule):
   def setStepAsCurrent(self, step):
     """set a given step as current step"""
     id = self.route.getMessagePointID(step)
-    self.currentStepIndex = id
+    self._setCurrentStepIndex(id)
 
   def getCurrentStep(self):
     """return current step"""
@@ -334,7 +337,7 @@ class turnByTurn(ranaModule):
     """switch to previous step and clean up"""
     nextIndex = self.currentStepIndex - 1
     if nextIndex >= 0:
-      self.currentStepIndex = nextIndex
+      self._setCurrentStepIndex(nextIndex)
       self.espeakFirstTrigger = False
       self.espeakSecondTrigger = False
       print("switching to previous step")
@@ -346,13 +349,17 @@ class turnByTurn(ranaModule):
     maxIndex = self.getMaxStepIndex()
     nextIndex = self.currentStepIndex + 1
     if nextIndex <= maxIndex:
-      self.currentStepIndex = nextIndex
+      self._setCurrentStepIndex(nextIndex)
       self.espeakFirstAndHalfTrigger = False
       self.espeakFirstTrigger = False
       self.espeakSecondTrigger = False
       print("switching to next step")
     else:
       print("last step reached")
+
+  def _setCurrentStepIndex(self, index):
+    self.currentStepIndex = index
+    self._doNavigationUpdate()
 
   def enabled(self):
     """return True if enabled, false otherwise"""
@@ -448,7 +455,7 @@ class turnByTurn(ranaModule):
           -> we just start from the closest step"""
           print("tbt: not enough data to decide, using closest turn")
           self.setStepAsCurrent(cs)
-    self.doNavigationUpdate() # run a first time navigation update
+    self._doNavigationUpdate() # run a first time navigation update
     self.locationWatchID = self.watch('locationUpdated', self.locationUpdateCB)
     print("tbt: started")
       
@@ -464,11 +471,11 @@ class turnByTurn(ranaModule):
   def locationUpdateCB(self, key, newValue, oldValue):
     """position changed, do a tbt navigation update"""
     if key == "locationUpdated": # just to be sure
-      self.doNavigationUpdate()
+      self._doNavigationUpdate()
     else:
       print("tbt: invalid key: %r" % key)
 
-  def doNavigationUpdate(self):
+  def _doNavigationUpdate(self):
     """do a navigation update"""
     # make sure there really are some steps
     if not self.route:

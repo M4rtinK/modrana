@@ -35,10 +35,10 @@ class route(ranaModule):
   """Routes"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    self.route = [] # maybe remove this ?
     self.routeRequestSentTimestamp = None
     self.pxpyRoute = []
-    self.directions = []
+    self.directions = None
+    self.duration = None # in seconds
     self.start = None
     self.destination = None
     self.text = None
@@ -78,10 +78,10 @@ class route(ranaModule):
 
   def handleMessage(self, message, type, args):
     if message == "clear":
-      self.route = []
       self.routeRequestSentTimestamp = None
       self.pxpyRoute = []
       self.directions = []
+      self.duration = None
       self.start = None
       self.destination = None
       self.text = None
@@ -246,11 +246,11 @@ class route(ranaModule):
       if loadTracklogs is None:
         print("route: cant store route without the loadTracklog module")
         return
-      if self.route == []:
+      if not self.directions:
         print("route: the route is empty, so it will not be stored")
         return
 
-      loadTracklogs.storeRouteAndSetActive(self.route, '', 'online') # TODO: rewrite this when we support more routing providers
+      loadTracklogs.storeRouteAndSetActive(self.directions.getPointsLLE(), '', 'online') # TODO: rewrite this when we support more routing providers
 
 
     elif message == 'startInput':
@@ -326,36 +326,39 @@ class route(ranaModule):
         (directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp) = resultsTuple
         # remove any possible prev. route description, so new a new one for this route is created
         self.text = None
+
+        # TODO: support other providers than Google & offline routing
+
         if directions: # is there actually something in the directions ?
-          polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
-          route = self.decode_line(polyline) # we decode the polyline to a list of points
-          self.processAndSaveResults(route, directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp)
+          # create the directions Way object
+          self.duration = directions['Directions']['Duration']['html']
+          dirs = way.fromGoogleDirectionsResult(directions)
+          self.processAndSaveResults(dirs, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp)
     elif key == "onlineRouteAdress2Adress":
       if len(resultsTuple) == 6:
         (directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp) = resultsTuple
         # remove any possible prev. route description, so new a new one for this route is created
         self.text = None
         if directions: # is there actually something in the directions ?
-          polyline = directions['Directions']['Polyline']['points'] # the route is encoded as a polyline
-          route = self.decode_line(polyline) # we decode the polyline to a list of points
-          self.processAndSaveResults(route, directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp)
+          # create the directions Way object
+          dirs = way.fromGoogleDirectionsResult(directions)
+          self.processAndSaveResults(dirs, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp)
 
     autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
     if autostart == 'enabled':
       self.sendMessage('ms:turnByTurn:start:%s' % autostart)
     self.set('needRedraw', True)
     
-  def processAndSaveResults(self, route, directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp):
+  def processAndSaveResults(self, directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp):
     """process and save routing results"""
-    self.route = route
     self.routeRequestSentTimestamp = routeRequestSentTimestamp
     proj = self.m.get('projection', None)
     if proj:
-      self.pxpyRoute = [proj.ll2pxpyRel(x[0],x[1]) for x in route]
-    self.processAndSaveDirections(directions, 'gdirections')
+      self.pxpyRoute = [proj.ll2pxpyRel(x[0],x[1]) for x in directions.getPointsLLE()]
+    self.processAndSaveDirections(directions)
 
-    (fromLat, fromLon) = route[0]
-    (toLat, toLon) = route[-1]
+    (fromLat, fromLon) = directions.getPointByID(0).getLL()
+    (toLat, toLon) = directions.getPointByID(-1).getLL()
 
     self.startAddress = startAddress
     self.destinationAddress = destinationAddress
@@ -368,43 +371,48 @@ class route(ranaModule):
       self.start = (fromLat, fromLon)
       self.destination = (toLat, toLon)
 
-  def processAndSaveDirections(self, rawDirections, type):
-    """process a raw route to a unified format"""
-    if type == 'gdirections':
+  def processAndSaveDirections(self, directions):
+    """process and save directions"""
+
+    # apply filters
+    directions = self.filterDirections(directions)
+
     # add a fake destination step, so there is a "destination reached" message
-      destStep = {u'descriptionEspeak': '<p xml:lang="en">you <b>should</b> be near the destination</p>',
-                  u'descriptionHtml': 'you <b>should</b> be near the destination'}
+    if directions.getPointCount() > 0:
+      (lat, lon) = directions.getPointByID(-1).getLL()
+      destStep = way.TurnByTurnPoint(lat, lon)
+      destStep.setSSMLMessage('<p xml:lang="en">you <b>should</b> be near the destination</p>')
+      destStep.setMessage('you <b>should</b> be near the destination')
+      destStep.setDistanceFromStart(directions.getLength())
       # TODO: make this multilingual
-      (lat,lon) = self.route[-1]
-      # NOTE: steps have reversed coordinates
-      destStep[u'Point'] = {'coordinates':[lon,lat,0]}
-      destStep[u'Distance'] = {u'meters' : int(self.get('minAnnounceDistance',100))}
-      rawDirections['Directions']['Routes'][0]['Steps'].append(destStep) # add it to the end of the list
+      # add it to the end of the message point list
+      directions.addMessagePoint(destStep)
 
-      # make the direction messages Pango compatible
-      filteredDirections = self.filterDirections(rawDirections)
+    # save
+    self.directions = directions
 
-      self.directions = way.fromGoogleDirectionsResult(rawDirections)
-
-  def filterDirections(self, rawDirections):
+  def filterDirections(self, directions):
     """
     filter directions according to substitution rules (specified by a CSV file)
     -> mostly used to replace abbreviations by full words in espeak output
+    -> also assure Pango compatibility (eq. get rid of  <div> and company)
     """
-    i = 0
-    for step in rawDirections['Directions']['Routes'][0]['Steps']:
-      message = step['descriptionHtml'] #TODO: make a method for this
+    steps = directions.getMessagePoints()
+
+    for step in steps:
+      originalMessage = "".join(step.getMessage())
+      message = step.getMessage() #TODO: make a method for this
       message = re.sub(r'<div[^>]*?>', '\n<i>', message)
       message = re.sub(r'</div[^>]*?>', '</i>', message)
       message = re.sub(r'<wbr/>', ', ', message)
       message = re.sub(r'<wbr>', ', ', message)
 #        message = re.sub(r'<[^>]*?>', '<b>', message)
 #        message = re.sub(r'</div[^>]*?>', '</i>', message)
-      step['descriptionHtml'] = message
-      # get a special version for espeak
-      message = step['descriptionHtml']
+      step.setMessage(message)
+      # special processing of the original message for Espeak
+      message = originalMessage
 
-      """check if cyrillic -> russian voice is enabled"""
+      # check if cyrillic -> russian voice is enabled
       cyrillicVoice = self.get('voiceNavigationCyrillicVoice', 'ru')
       if cyrillicVoice:
         message = self.processCyrillicString(message, cyrillicVoice)
@@ -413,15 +421,18 @@ class route(ranaModule):
       message = re.sub(r'</div[^>]*?>', '', message)
       message = re.sub(r'<b>', '<emphasis level="strong">', message)
       message = re.sub(r'</b>', '</emphasis>', message)
-      step['descriptionEspeak'] = message
-      step['visited'] = False
-      step['id'] = i
-      i += 1
 
-    # apply external rules rom a CSV file
-    rawDirections = self.applyRulesFromCSVFile(rawDirections)
+      # apply external rules from a CSV file
+      for (regex, replacement) in self.directionsFilterRules:
+        # replace strings according to the csv file
+        message = regex.sub(replacement, message, re.UNICODE)
+      step.setSSMLMessage(message)
 
-    return rawDirections
+    # replace old message points with new ones
+    directions.clearMessagePoints()
+    directions.addMessagePoints(steps)
+
+    return directions
 
   def processCyrillicString(self,inputString, voiceCode):
     """test if a given string contains any words with cyrillic characters
@@ -466,20 +477,11 @@ class route(ranaModule):
       cyrillicStringTemp = ""
     return outputString
 
-  def applyRulesFromCSVFile(self,rawDirections):
-      for step in rawDirections['Directions']['Routes'][0]['Steps']:
-        message = step['descriptionEspeak']
-        for (regex, replacement) in self.directionsFilterRules:
-          # replace strings according to the csv file
-          message = regex.sub(replacement, message, re.UNICODE)
-        step['descriptionEspeak'] = message
-      return rawDirections
-
   def drawScreenOverlay(self, cr):
     menus = self.m.get('menu', None)
     if menus:
       if not menus.buttonsHidingOn(): # check if the buttons should not be hidden
-        if self.route: # current route info button
+        if self.directions: # current route info button
           self.drawCurrentRouteInfoButton(cr)
 
         if self.selectTwoPoints: # point selection menu
@@ -501,19 +503,13 @@ class route(ranaModule):
     """Draw a route"""
 #    start1 = clock()
 
-    if self.route and self.directions:
+    if self.directions:
       # Where is the map?
       proj = self.m.get('projection', None)
       if proj is None:
         return
       if not proj.isValid():
         return
-
-#      # as you can see, for some reason, the coordinates in Google Directions steps are reversed: (lon,lat,0)
-#      steps = map(lambda x: (x['Point']['coordinates'][1],x['Point']['coordinates'][0]), self.directions['Directions']['Routes'][0]['Steps'])
-#
-#      # draw the destination as a step point
-#      steps.append(self.route[-1])
 
       # get LLE tuples for message points
       steps = self.directions.getMessagePointsLLE()
@@ -632,68 +628,9 @@ class route(ranaModule):
 
 #    print("Redraw took %1.9f ms" % (1000 * (clock() - start1)))
 
-
-  def getCurrentRoute(self):
-    # return the current route
-    return self.route
-
   def getCurrentDirections(self):
     # return the current route
     return self.directions, self.routeRequestSentTimestamp
-
-  #from: http://seewah.blogspot.com/2009/11/gpolyline-decoding-in-python.html
-  def decode_line(self, encoded):
-
-    """Decodes a polyline that was encoded using the Google Maps method.
-
-    See http://code.google.com/apis/maps/documentation/polylinealgorithm.html
-
-    This is a straightforward Python port of Mark McClure's JavaScript polyline decoder
-    (http://facstaff.unca.edu/mcmcclur/GoogleMaps/EncodePolyline/decode.js)
-    and Peter Chng's PHP polyline decode
-    (http://unitstep.net/blog/2008/08/02/decoding-google-maps-encoded-polylines-using-php/)
-    """
-
-    encoded_len = len(encoded)
-    index = 0
-    array = []
-    lat = 0
-    lng = 0
-
-    while index < encoded_len:
-
-        b = 0
-        shift = 0
-        result = 0
-
-        while True:
-            b = ord(encoded[index]) - 63
-            index += 1
-            result |= (b & 0x1f) << shift
-            shift += 5
-            if b < 0x20:
-                break
-
-        dLat = ~(result >> 1) if result & 1 else result >> 1
-        lat += dLat
-
-        shift = 0
-        result = 0
-
-        while True:
-            b = ord(encoded[index]) - 63
-            index += 1
-            result |= (b & 0x1f) << shift
-            shift += 5
-            if b < 0x20:
-                break
-
-        dLng = ~(result >> 1) if result & 1 else result >> 1
-        lng += dLng
-
-        array.append((lat * 1e-5, lng * 1e-5))
-
-    return array
 
   def drawCurrentRouteInfoButton(self,cr):
     (x,y,w,h) = self.get('viewport')
@@ -797,29 +734,32 @@ class route(ranaModule):
       else:
         parent = 'set:menu:route'
 
-      if self.route == []:
-        action = "set:menu:None"
-      else:
-        (lat,lon) = self.route[0]
+      if self.directions:
+        (lat,lon) = self.directions.getPointByID(0).getLL()
         action = "mapView:recentre %f %f|set:menu:None" % (lat, lon)
+
+      else:
+        action = "set:menu:None"
 
       button1 = ("map#show on", "generic", action)
       button2 = ("tools", "tools", "set:menu:currentRouteTools")
 
-      if self.route == []:
+      if not self.directions:
         text = "There is currently no active route."
       elif self.text is None: # the new text for the info-box only once
-        dir = self.directions
-        duration = dir['Directions']['Duration']['html'] # a string describing the estimated time to finish the route
+        if self.duration:
+          duration = self.duration # a string describing the estimated time to finish the route
+        else:
+          duration = "unknown"
         units = self.m.get('units', None) # get the correct units
-        distance = units.m2CurrentUnitString(float(dir['Directions']['Distance']['meters']))
-        steps = len(dir['Directions']['Routes'][0]['Steps']) # number of steps
+        distance = units.m2CurrentUnitString(self.directions.getLength())
+        steps = self.directions.getMessagePointCount() # number of steps
 
         start = ""
         startAddress = self.startAddress
         (lat1,lon1) = (self.start[0],self.start[1])
         for item in startAddress.split(','):
-          start += "\n%s" % item
+          start += "%s\n" % item
 
         destination = ""
         destinationAddress = self.destinationAddress
@@ -828,7 +768,7 @@ class route(ranaModule):
           destination += "\n%s" % item
 
         text = "%s" % start
-        text+= "\n%s" % destination
+        text+= "%s" % destination
         text+= "\n\n%s in about %s and %s steps" % (distance, duration, steps)
         text+= "\n(%f,%f)->(%f,%f)" % (lat1,lon1,lat2,lon2)
 

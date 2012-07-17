@@ -49,17 +49,22 @@ class Way:
   """
 
   def __init__(self, points=[]):
-    self.points = points
+    self.points = points # stored as LLE tuples
     self.messagePoints = []
     self.messagePointsLLE = []
     self.length = None # in meters
+    self.duration = None # in seconds
     # caching
     self.dirty = False # signalizes that cached data needs to be updated
     # now update the cache
     self._updateCache()
 
   def getPointByID(self, index):
-    self.points[index]
+    (lat, lon, elevation) = self.points[index]
+    return Point(lat, lon, elevation)
+
+  def getPointsLLE(self):
+    return self.points
 
   def getPointCount(self):
     return len(self.points)
@@ -75,19 +80,16 @@ class Way:
       mpLLE.append(point.getLLE())
     self.messagePointsLLE = mpLLE
 
-
-#    messagePoints = []
-#    for point in self.points:
-#      if point.getMessage() is None:
-#        messagePoints.append(point)
-
-
   def addMessagePoint(self, point):
     self.messagePoints.append(point)
     self._updateCache()
 
   def addMessagePoints(self, points):
     self.messagePoints.extend(points)
+    self._updateCache()
+
+  def setMessagePointByID(self, index, mPoint):
+    self.messagePoints[index] = mPoint
     self._updateCache()
 
   def getMessagePointByID(self, index):
@@ -101,14 +103,22 @@ class Way:
     except ValueError:
       return None
 
-  def getLength(self):
-    """way length in meters"""
-    return self.length
+  def getMessagePoints(self):
+    """ return a list of message point objects"""
+    return self.messagePoints
 
-  def _setLength(self, mLength):
-    """for use if the length on of the way is reliably known from external
-    sources"""
-    self.length = mLength
+  def getMessagePointsLLE(self):
+    """return list of message point LLE tuples"""
+    return self.points
+
+  def clearMessagePoints(self):
+    """clear all message points"""
+    self.messagePoints = []
+    self._updateCache()
+
+
+
+
 
   def getMessagePoints(self):
     return self.messagePoints
@@ -119,6 +129,16 @@ class Way:
   def getMessagePointCount(self):
     return len(self.messagePoints)
 
+
+  def getLength(self):
+    """way length in meters"""
+    return self.length
+
+  def _setLength(self, mLength):
+    """for use if the length on of the way is reliably known from external
+    sources"""
+    self.length = mLength
+
   def __str__(self):
     pCount = self.getPointCount()
     mpCount = self.getMessagePointCount()
@@ -128,8 +148,6 @@ def fromGoogleDirectionsResult(gResult):
   steps = gResult['Directions']['Routes'][0]['Steps']
   points = _decodePolyline(gResult['Directions']['Polyline']['points'])
   # length of the route can computed from its metadata
-
-  print gResult
 
   mLength = gResult['Directions']['Distance']['meters']
   mLength += gResult['Directions']['Routes'][0]['Steps'][-1]["Distance"]["meters"]
@@ -146,7 +164,6 @@ def fromGoogleDirectionsResult(gResult):
   for step in steps:
     # TODO: abbreviation filtering
     message = step['descriptionHtml']
-    SSMLMessage = step['descriptionEspeak']
     # as you can see, for some reason,
     # the coordinates in Google Directions steps are reversed:
     # (lon,lat,0)
@@ -154,7 +171,6 @@ def fromGoogleDirectionsResult(gResult):
     lon = step['Point']['coordinates'][0]
     point = TurnByTurnPoint(lat, lon, message=message)
     point.setDistanceFromStart(mDistanceFromStart)
-    point.setSSMLMessage(SSMLMessage)
     # store point to temporary list
     messagePoints.append(point)
     # update distance for next point
@@ -221,7 +237,8 @@ def _decodePolyline(encoded):
       dLng = ~(result >> 1) if result & 1 else result >> 1
       lng += dLng
 
-      array.append((lat * 1e-5, lng * 1e-5))
+      # append empty width for LLE tuple compatibility
+      array.append( (lat * 1e-5, lng * 1e-5, None) )
 
     return array
 
