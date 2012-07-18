@@ -28,6 +28,8 @@ import unicodedata
 import way
 from time import clock
 
+DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
+
 def getModule(m,d,i):
   return(route(m,d,i))
 
@@ -39,12 +41,11 @@ class route(ranaModule):
     self.routeRequestSentTimestamp = None
     self.once = True
     self.entry = None
-    self.directionsFilterCSV = 'data/directions_filter.csv'
 
     self.set('startPos', None)
     self.set('endPos', None)
 
-    file = open(self.directionsFilterCSV, 'rb')
+    file = open(DIRECTIONS_FILTER_CSV_PATH, 'rb')
     CSVReader = csv.reader(file, delimiter=';', quotechar='|') #use an iterator
     self.directionsFilterRules = []
     for row in CSVReader:
@@ -70,6 +71,8 @@ class route(ranaModule):
 
     self.expectStart = False
     self.expectEnd = False
+
+    self.routeDetailGeocodingTriggered = False
 
   def handleMessage(self, message, type, args):
     if message == "clear":
@@ -305,54 +308,60 @@ class route(ranaModule):
     # clear old addresses
     self.startAddress = None
     self.destinationAddress = None
+    # the new result would probably have different start and destination coordinates
+    self.routeDetailGeocodingTriggered = False
     online = self.m.get('onlineServices', None)
     if online:
-      online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon), self.handleRoute, "onlineRoute")
+      online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon), self._handleResults, "onlineRoute")
       
   def doAddressRoute(self, start, destination):
     """Route from one point to another, and set that as the active route"""
-    # disable point selectors
-    self.selectTwoPoints = False
-    self.selectOnePoint = False
-    # overwrite addresses
-    self.startAddress = start
-    self.destinationAddress = destination
-    # clear start and destination points
-    self.start = None
-    self.destination = None
+    # cleanup any possible previous routes
+    self._goToInitialState()
     online = self.m.get('onlineServices', None)
     if online:
       print("route: routing from %s to %s" % (start,destination))
-      online.googleDirectionsAsync(start, destination, self.handleRoute, "onlineRouteAddress2Address")
+      online.googleDirectionsAsync(start, destination, self._handleResults, "onlineRouteAddress2Address")
 
-  def handleRoute(self, key, resultsTuple):
+  def _handleResults(self, key, resultsTuple):
     """handle a routing result"""
-    if key == "onlineRoute":
-      (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
-      # remove any possible prev. route description, so new a new one for this route is created
-      self.text = None
+    if key in ("onlineRoute", "onlineRouteAddress2Address"):
+      if key == "onlineRoute":
+        (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
+        # remove any possible prev. route description, so new a new one for this route is created
+        self.text = None
 
-      # TODO: support other providers than Google & offline routing
+        # TODO: support other providers than Google & offline routing
 
-      if directions: # is there actually something in the directions ?
-        # create the directions Way object
-        self.duration = directions['Directions']['Duration']['html']
-        dirs = way.fromGoogleDirectionsResult(directions)
-        self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
-    elif key == "onlineRouteAddress2Address":
-      (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
-      # remove any possible prev. route description, so new a new one for this route is created
-      self.text = None
-      if directions: # is there actually something in the directions ?
-        self.duration = directions['Directions']['Duration']['html']
-        # create the directions Way object
-        dirs = way.fromGoogleDirectionsResult(directions)
-        self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
+        if directions: # is there actually something in the directions ?
+          # create the directions Way object
+          self.duration = directions['Directions']['Duration']['html']
+          dirs = way.fromGoogleDirectionsResult(directions)
+          self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
+      elif key == "onlineRouteAddress2Address":
+        (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
+        # remove any possible prev. route description, so new a new one for this route is created
+        self.text = None
+        if directions: # is there actually something in the directions ?
+          self.duration = directions['Directions']['Duration']['html']
+          # create the directions Way object
+          dirs = way.fromGoogleDirectionsResult(directions)
+          self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
+      # handle navigation autostart
+      autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
+      if autostart == 'enabled':
+        self.sendMessage('ms:turnByTurn:start:%s' % autostart)
+      self.set('needRedraw', True)
+    elif key == "startAddress":
+      self.startAddress = resultsTuple
+      self.text = None # clear route detail cache
+    elif key == "destinationAddress":
+      self.destinationAddress = resultsTuple
+      self.text = None # clear route detail cache
 
-    autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
-    if autostart == 'enabled':
-      self.sendMessage('ms:turnByTurn:start:%s' % autostart)
-    self.set('needRedraw', True)
+
+
+
     
   def processAndSaveResults(self, directions, start, destination, routeRequestSentTimestamp):
     """process and save routing results"""
@@ -449,7 +458,7 @@ class route(ranaModule):
           if unicodeName.find('CYRILLIC') != -1:
             cyrillicCharFound = True
             break
-        except:
+        except Exception, e:
           """just skip this as the character is  most probably unknown"""
           pass
       if cyrillicCharFound: # the substring contains at least one cyrillic character
@@ -744,6 +753,11 @@ class route(ranaModule):
       if not self.directions:
         text = "There is currently no active route."
       elif self.text is None: # the new text for the info-box only once
+        # check if start and destination geocoding is needed
+        if not self.routeDetailGeocodingTriggered:
+          self._geocodeStartAndDestination()
+          self.routeDetailGeocodingTriggered = True
+
         if self.duration:
           duration = self.duration # a string describing the estimated time to finish the route
         else:
@@ -833,6 +847,25 @@ class route(ranaModule):
 
         menus.showText(cr, startText, x4+w1/20, y4+dy/5, w1-x4-(w1/20)*2)
         menus.showText(cr, destinationText, x4+w1/20, y4+2*dy+dy/5, w1-x4-(w1/20)*2)
+
+  def _geocodeStartAndDestination(self):
+    """get the address of start and destination coordinates by using geocoding"""
+    online = self.m.get('onlineServices', None)
+    if online:
+      # start coordinates
+      if self.start:
+        (sLat, sLon) = self.start
+      else:
+        (sLat, sLon) = self.directions.getPointByID(0).getLL()
+      # geocode start
+      online.reverseGeocodeAsync(sLat, sLon, self._handleResults, "startAddress", "Geocoding start")
+
+      # destination coordinates
+      if self.destination:
+        (dLat, dLon) = self.destination
+      else:
+        (dLat, dLon) = self.directions.getPointByID(-1).getLL()
+      online.reverseGeocodeAsync(dLat, dLon, self._handleResults, "destinationAddress", "Geocoding destination")
 
 if(__name__ == '__main__'):
   d = {'transport':'car'}
