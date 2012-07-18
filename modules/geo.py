@@ -147,7 +147,7 @@ def circleAroundPointCluster(cluster):
     pointX = maxLon['latitude']
     pointY = maxLon['longitude']
     radius = distance(centreX, centreY, pointX, pointY)
-  """now we check if all points are inside the circle and adjut it if not"""
+  """now we check if all points are inside the circle and adjust it if not"""
   for point in cluster:
     currentX = point['latitude']
     currentY = point['longitude']
@@ -258,7 +258,7 @@ def perElevList(trackpointsList, numPoints=200):
 
       periodicElevationList.append((point[0],newElev, lat, lon))
 
-    index = index + 1
+    index += 1
 
   periodicElevationList.append(distanceList[-1]) # add the last point of the track
 
