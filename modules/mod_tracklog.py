@@ -562,7 +562,7 @@ class tracklog(ranaModule):
       TODO: use the modulo method for drawing stored tracklogs
       """
 
-      posXY = proj.getCurrentPosxy()
+      posXY = proj.getCurrentPospxpy()
       if posXY and self.loggingEnabled and not self.loggingPaused:
         (x,y) = posXY
         cr.move_to(x,y)

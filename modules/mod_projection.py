@@ -252,13 +252,6 @@ class Projection(ranaModule):
       (lat,lon) = pos
       return self.ll2pxpy(lat, lon)
 
-  def getCurrentPosxy(self):
-    """returns pxpy coordinates of the current position, or None"""
-    pos = self.get('pos', None)
-    if pos:
-      (lat,lon) = pos
-      return self.ll2xy(lat, lon)
-
   def getScreenCentrell(self):
     if self.lat and self.lon:
       return self.lat,self.lon
