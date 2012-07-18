@@ -214,11 +214,6 @@ def perElevList(trackpointsList, numPoints=200):
 #      print point
 #      print nextPoint
 
-
-
-
-
-
       prevElev = prevPoint[1]
       nextElev = nextPoint[1]
 
