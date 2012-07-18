@@ -397,20 +397,20 @@ class onlineServices(ranaModule):
       directions = gmap.directions(start, destination, dir)
     except googlemaps.googlemaps.GoogleMapsError, e:
       if e.status == 602:
-        print "onlineServices:Gdirections:routing failed -> address not found" % e
+        print("onlineServices:Gdirections:routing failed -> address not found" % e)
         self.sendMessage("ml:notification:m:Address(es) not found;5")
       elif e.status == 604:
-        print "onlineServices:Gdirections:routing failed -> no route found" % e
+        print("onlineServices:Gdirections:routing failed -> no route found" % e)
         self.sendMessage("ml:notification:m:No route found;5")
       elif e.status == 400:
         if not seccondTime: # guard against potential infinite loop for consequent 400 errors
-          print "onlineServices:Gdirections:bad response to travel mode, trying default travel mode"
+          print("onlineServices:Gdirections:bad response to travel mode, trying default travel mode")
           self.set('needRedraw', True)
           directions = self.tryToGetDirections(start, destination, dir, travelMode="",otherOptions=otherOptions ,seccondTime=True)
       else:
-        print "onlineServices:Gdirections:routing failed with exception googlemaps status code:%d" % e.status
+        print("onlineServices:Gdirections:routing failed with exception googlemaps status code:%d" % e.status)
     except Exception, e:
-      print "onlineServices:Gdirections:routing failed with non-googlemaps exception:\n%s" % e
+      print("onlineServices:Gdirections:routing failed with non-googlemaps exception:\n%s" % e)
     self.set('needRedraw', True)
     return directions
 
@@ -419,10 +419,25 @@ class onlineServices(ranaModule):
     destination = (lat2, lon2)
     return self.googleDirections(start, destination)
 
-  def googleReverseGeocode(self, lat, lon):
-    gmap = self.getGmapsInstance()
-    address = gmap.latlng_to_address(lat,lon)
+  def _googleReverseGeocode(self, lat, lon):
+    gMap = self.getGmapsInstance()
+    address = gMap.latlng_to_address(lat,lon)
     return address
+
+  def _reverseGeocode(self, lat, lon, message):
+    """do blocking reverse geocoding using one of the available methods
+    -> this method is run from the worker thread"""
+    print("onlineServices: reverse geocoding")
+    self._setWorkStatusText("%s..." % message)
+    #TODO: support other reverse geocoding methods than Google
+    address = self._googleReverseGeocode(lat, lon)
+    self._setWorkStatusText("Geocoding done.")
+    return address
+
+
+  def reverseGeocodeAsync(self, lat, lon, outputHandler, key, message="Geocoding"):
+    self._addWorkerThread(self._reverseGeocode, [lat, lon, message], outputHandler, key)
+
 
   def googleLocalQueryLLAsync(self, term, lat, lon,outputHandler, key):
     """asynchronous Google Local Search query for explicit lat, lon coordinates"""
@@ -440,7 +455,7 @@ class onlineServices(ranaModule):
 
   def _localGoogleSearch(self, query):
     """this method performs Google Local online-search and is called by the worker thread"""
-    print "onlineServices: performing GLS"
+    print("onlineServices: performing GLS")
     self._setWorkStatusText("online POI search in progress...")
     result = self.googleLocalQuery(query)
     self._setWorkStatusText("online POI search done   ")
