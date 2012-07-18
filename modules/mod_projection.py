@@ -22,6 +22,7 @@ from base_module import ranaModule
 from tilenames import *
 import geo
 from math import *
+import math
 
 def getModule(m,d,i):
   return(Projection(m,d,i))
@@ -78,7 +79,7 @@ class Projection(ranaModule):
     self.zoom = z
 
     viewport = self.get('viewport', None)
-    if viewport == None:
+    if viewport is None:
       # initial size, we dont know the screen size
       # handleResize should trigger when the window is actually created
       # then the view would be set to the correct size
@@ -107,7 +108,7 @@ class Projection(ranaModule):
     
   def isValid(self):
     """Test if the module contains all the information needed to do conversions"""
-    return(self.xyValid and self.llValid)
+    return self.xyValid and self.llValid
   
   def setView(self,x,y,w,h):
 #    print "setting view xywh:%d,%d,%d,%d" % (x,y,w,h)
@@ -117,7 +118,7 @@ class Projection(ranaModule):
     self.xc = x + self.w
     self.yc = y + self.h
     self.xyValid = True
-    if(self.needsEdgeFind):
+    if self.needsEdgeFind:
       self.findEdges()
     
   def recentre(self,lat,lon,zoom = None):
@@ -126,7 +127,7 @@ class Projection(ranaModule):
     (with optional zoom level)"""
     self.lat = lat
     self.lon = lon
-    if(zoom != None):
+    if zoom is not None:
       self.implementNewZoom(zoom)
       # note: implementNewZoom calls findEdges, hence the else: statement
     else:
@@ -137,7 +138,7 @@ class Projection(ranaModule):
     """Change the zoom level, keeping same map centre
     if isAdjustment is true, then value is relative to current zoom
     otherwise it's an absolute value"""
-    if(isAdjustment):
+    if isAdjustment:
       # TODO: maybe we don't want all zoom levels?
       self.implementNewZoom(self.zoom + value)
     else:
@@ -146,7 +147,7 @@ class Projection(ranaModule):
   def limitZoom(self):
     """Check the zoom level, and move it if necessary to one of
     the 'allowed' zoom levels"""
-    if(self.zoom < 6):
+    if self.zoom < 6:
       self.zoom = 6
 
   def implementNewZoom(self, zoom):
@@ -159,7 +160,7 @@ class Projection(ranaModule):
   def findEdges(self):
 #    print "find edges %f,%f" % (self.lat,self.lon)
     """Update the projection meta-info based on its fundamental parameters"""
-    if(not self.xyValid or not self.llValid):
+    if not self.xyValid or not self.llValid:
       # If the display is not known yet, then we can't do anything, but we'll
       # mark it as something that needs doing as soon as the display
       # becomes valid
@@ -197,7 +198,7 @@ class Projection(ranaModule):
     px2 = px + 0.5 * self.w / tileSide
     py1 = py - 0.5 * self.h / tileSide
     py2 = py + 0.5 * self.h / tileSide
-    return (px1,px2,py1,py2)
+    return px1,px2,py1,py2
 
   def handleResize(self, newW, newH):
     """When the window resizes, set the view accordingly."""
@@ -210,7 +211,7 @@ class Projection(ranaModule):
     """Given a position on screen (where 0,0 is top-left and 1,1 is bottom right) get the coordinates"""
     x = self.xc + ((px - 1) * self.w)
     y = self.yc + ((py - 1) * self.h)
-    return(x,y)
+    return x,y
 
   def screenWidth(self, pw):
     """Proportional width to pixels(0=0, 1=full screen height)."""
@@ -218,7 +219,7 @@ class Projection(ranaModule):
       pw = 1
     if pw < 0:
       pw = 0
-    return (pw * self.w)
+    return pw * self.w
 
   def screenHeight(self, py):
     """Proportional height to pixels (0=0, 1=full screen height)."""
@@ -226,7 +227,7 @@ class Projection(ranaModule):
       py = 1
     if py < 0:
       py = 0
-    return (py * self.h)
+    return py * self.h
 
 #  def screenBBoxLL(self):
 #    """get lat,lon of upper left and lower right screen corners
@@ -238,7 +239,7 @@ class Projection(ranaModule):
 #
 #  def screenBBoxpxpy(self):
 #    """get lat,lon of upper left and lower right screen corners
-#       -> get the screen bounding box in geograhical units"""
+#       -> get the screen bounding box in geographical units"""
 #    (lat1,lon1) = self.xy2ll(0,0)
 #    (lat2,lon2) = self.xy2ll(self.w,self.h)
 #
@@ -249,25 +250,25 @@ class Projection(ranaModule):
     pos = self.get('pos', None)
     if pos:
       (lat,lon) = pos
-      return (self.ll2pxpy(lat, lon))
+      return self.ll2pxpy(lat, lon)
 
   def getCurrentPosxy(self):
     """returns pxpy coordinates of the current position, or None"""
     pos = self.get('pos', None)
     if pos:
       (lat,lon) = pos
-      return (self.ll2xy(lat, lon))
+      return self.ll2xy(lat, lon)
 
   def getScreenCentrell(self):
     if self.lat and self.lon:
-      return ((self.lat,self.lon))
+      return self.lat,self.lon
     else:
       return None
   
   def nudge(self,dx,dy):
 #    print "nudging by: %d,%d" % (dx,dy)
     """Move the map by a number of pixels relative to its current position"""
-    if(dx == 0 and dy == 0):
+    if dx == 0 and dy == 0:
       return
     # Calculate the lat/long of the pixel offset by dx,dy from the centre,
     # and centre the map on that
@@ -282,18 +283,18 @@ class Projection(ranaModule):
     px,py = latlon2xy(lat,lon,self.zoom)
     x = (px - self.px1) * self.scale
     y = (py - self.py1) * self.scale
-    return(x,y)
+    return x,y
   
   def ll2pxpy(self,lat,lon):
     """Convert geographic units to projection units"""
     px,py = latlon2xy(lat,lon,self.zoom)
-    return(px,py)
+    return px,py
 
   def ll2pxpyRel(self,lat,lon):
     """Convert geographic units to relative projection units"""
     px = (lon + 180) / 360
     py = (1 - log(tan(radians(lat)) + sec(radians(lat))) / pi) / 2
-    return(px,py)
+    return px,py
 
   def pxpyRel2xy(self,px,py):
     """Convert relative projection units
@@ -303,13 +304,13 @@ class Projection(ranaModule):
     (px,py) = (px*n,py*n)
     x = self.w * (px - self.px1) / self.pdx
     y = self.h * (py - self.py1) / self.pdy
-    return(x,y)
+    return x,y
   
   def pxpy2xy(self,px,py):
     """Convert projection units to display units"""
     x = self.w * (px - self.px1) / self.pdx
     y = self.h * (py - self.py1) / self.pdy
-    return(x,y)
+    return x,y
 
 
   def xy2ll(self,x,y):
@@ -317,14 +318,14 @@ class Projection(ranaModule):
     px = self.px1 + x / self.scale
     py = self.py1 + y / self.scale
     lat,lon = xy2latlon(px, py, self.zoom)
-    return(lat,lon)
+    return lat,lon
 
   def onscreen(self,x,y):
     """Test if a position (in display units) is visible"""
-    return(x >= 0 and x < self.w and y >= 0 and y < self.h)
+    return 0 <= x < self.w and 0 <= y < self.h
   
   def relXY(self,x,y):
-    return(x/self.w, y/self.h)
+    return x/self.w, y/self.h
 
   def km2px(self, distanceInKm):
     """(experimental) km to screen pixel conversion"""
@@ -355,9 +356,9 @@ class Projection(ranaModule):
     (cornerX,cornerY) = self.xy2ll(cornerXpixel, cornerYpixel) # we convert them to projection coordinates
     (anotherCornerXpixel,anotherCornerYpixel) = self.screenPos(1, 1) # we take the coordinates of another corner of the screen
     (anotherCornerX,anotherCornerY) = self.xy2ll(anotherCornerXpixel, anotherCornerYpixel) # we convert them to projection coordinates
-    """radius = diagonla/2"""
+    """radius = diagonal/2"""
     radius = geo.distance(anotherCornerX, anotherCornerY, cornerX , cornerY)/2.0
-    return(centreX, centreY, radius) # we return the centre coordinates and the radius
+    return centreX, centreY, radius # we return the centre coordinates and the radius
 
   def radiusEdges(self, lat, lon, radiusInKm):
     """return edges of a box around the given point and radius
@@ -373,7 +374,7 @@ class Projection(ranaModule):
     px2 = x + 0.5 * side
     py1 = y - 0.5 * side
     py2 = y + 0.5 * side
-    return(px1,py1,px2,py2)
+    return px1,py1,px2,py2
 
   def num2deg(self, xtile, ytile):
     """tile to degrees, implementation from OSM wiki"""
@@ -382,7 +383,7 @@ class Projection(ranaModule):
     lon_deg = xtile / n * 360.0 - 180.0
     lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * ytile / n)))
     lat_deg = math.degrees(lat_rad)
-    return(lat_deg, lon_deg)
+    return lat_deg, lon_deg
 
   def pixelBearing(self, x1, y1, x2, y2):
     """Bearing from one point to another in degrees (0-360) from pixel coordinates"""
@@ -392,9 +393,9 @@ class Projection(ranaModule):
     x = cos(radians(x1)) * sin(radians(x2)) - \
             sin(radians(x1)) * cos(radians(x2)) * cos(radians(dY))
     bearing = degrees(atan2(y, x))
-    if(bearing < 0.0):
+    if bearing < 0.0:
       bearing += 360.0
-    return(bearing)
+    return bearing
 
 
 #  def shiftllPoint(self, x, y, distanceInKm, where='west'):
