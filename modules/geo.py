@@ -29,7 +29,7 @@ def distance(lat1,lon1,lat2,lon2):
           cos(radians(lat1)) * cos(radians(lat2)) * \
           sin(dLon/2.0) * sin(dLon/2.0)
   c = 2 * atan2(sqrt(a), sqrt(1.0-a))
-  return(R * c)
+  return R * c
 
 def simplePythagoreanDistance(x1, y1, x2, y2):
   dx = x2 - x1
@@ -56,9 +56,9 @@ def bearing(lat1,lon1,lat2,lon2):
   x = cos(radians(lat1)) * sin(radians(lat2)) - \
           sin(radians(lat1)) * cos(radians(lat2)) * cos(radians(dLon))
   bearing = degrees(atan2(y, x))
-  if(bearing < 0.0):
+  if bearing < 0.0:
     bearing += 360.0
-  return(bearing)
+  return bearing
 
   # found on:
   # http://www.quanative.com/2010/01/01/server-side-marker-clustering-for-google-maps-with-python/
@@ -132,7 +132,7 @@ def circleAroundPointCluster(cluster):
   maxLon = max(cluster, key=lambda x: x['longitude'])
   minLon = min(cluster, key=lambda x: x['longitude'])
   # extremes = [maxLat, minLat, maxLon, minLon]
-  """now we find the nort-south and west-east distances using the points above"""
+  """now we find the north-south and west-east distances using the points above"""
   latDist = distance(maxLat['latitude'],maxLat['longitude'],minLat['latitude'],minLat['longitude'])
   lonDist = distance(maxLon['latitude'],maxLon['longitude'],minLon['latitude'],minLon['longitude'])
   if latDist >= lonDist: #the horizontal distance is the longest
@@ -155,7 +155,7 @@ def circleAroundPointCluster(cluster):
     if distanceFromPointToCentre > radius:
       radius = distanceFromPointToCentre
 
-  return(centreX, centreY, radius)
+  return centreX, centreY, radius
 
 
 def perElevList(trackpointsList, numPoints=200):
@@ -163,8 +163,7 @@ def perElevList(trackpointsList, numPoints=200):
   points = [{'lat': point.latitude,'lon': point.longitude, 'elev': point.elevation} for point in trackpointsList[0]]
 
   # create a list, where we have (cumulative distance from starting point, elevation)
-  distanceList = []
-  distanceList.append((0,points[0]['elev'],points[0]['lat'],points[0]['lon']))
+  distanceList = [(0, points[0]['elev'], points[0]['lat'], points[0]['lon'])]
   prevIndex = 0
   totalDist = 0
   for point in points[1:]:
@@ -172,7 +171,7 @@ def perElevList(trackpointsList, numPoints=200):
     (pLat,pLon) = (prevPoint['lat'], prevPoint['lon'])
     (lat,lon,elev) = (point['lat'], point['lon'], point['elev'])
     dist = distance(pLat, pLon, lat, lon)
-    prevIndex = prevIndex + 1
+    prevIndex += 1
     totalDist+= dist
     distanceList.append((totalDist,elev,point['lat'],point['lon']))
 
@@ -184,8 +183,7 @@ def perElevList(trackpointsList, numPoints=200):
 
   distanceList.sort() # now we sort the list by distance
 
-  periodicElevationList = []
-  periodicElevationList.append(distanceList[0]) # add the first point of the track
+  periodicElevationList = [distanceList[0]]
   index = 0
 #  print "length: %d" % len(distanceList)
 
@@ -195,21 +193,21 @@ def perElevList(trackpointsList, numPoints=200):
        where the opposite side is the elevation difference
      * using trigonometric calculations, we find the interpolated elevation of the current periodic point
 
-     then we store the point in our new list and thats it
+     then we store the point in our new list and that's it
 
      we are doing this, to get carts with uniform x axis distribution,
-     even when the points in the tracklog are no uniformly distributed (e.g. routiong results)
+     even when the points in the tracklog are no uniformly distributed (e.g. routing results)
   """
   for point in distanceList:
-    if point[1] == None:
+    if point[1] is None:
       prevIndex = index-1
-      while distanceList[prevIndex][1] == None:
-        prevIndex = prevIndex - 1
+      while distanceList[prevIndex][1] is None:
+        prevIndex -= 1
       prevPoint = distanceList[prevIndex]
 
       nextIndex = index+1
-      while distanceList[nextIndex][1] == None:
-        nextIndex = nextIndex + 1
+      while distanceList[nextIndex][1] is None:
+        nextIndex += 1
       nextPoint = distanceList[nextIndex]
 
 #      print prevPoint
