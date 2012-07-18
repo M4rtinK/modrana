@@ -36,7 +36,7 @@ def simplePythagoreanDistance(x1, y1, x2, y2):
   dy = y2 - y1
   return sqrt(dx**2 + dy**2)
 
-def combinedistance(pointList):
+def combinedDistance(pointList):
   """return combined distance for a list of ordered points
   NOTE: not tested yet !!"""
   combinedDistance = 0
@@ -222,21 +222,21 @@ def perElevList(trackpointsList, numPoints=200):
         newElev = prevElev
 
       elif prevElev > nextElev:
-        oposite = abs(prevPoint[1]-nextPoint[1])
-        adjecent = abs(prevPoint[0]-nextPoint[0])
-        beta = atan(oposite/adjecent)
+        opposite = abs(prevPoint[1]-nextPoint[1])
+        adjacent = abs(prevPoint[0]-nextPoint[0])
+        beta = atan(opposite/adjacent)
         alpha = pi - beta - pi/2
-        adjecentPart = nextPoint[0] - point[0]
-        dElev =  adjecentPart / tan(alpha)
+        adjacentPart = nextPoint[0] - point[0]
+        dElev =  adjacentPart / tan(alpha)
         newElev = nextElev + dElev
 
       elif prevElev < nextElev:
-        oposite = abs(prevPoint[1]-nextPoint[1])
-        adjecent = abs(prevPoint[0]-nextPoint[0])
-        beta = atan(oposite/adjecent)
+        opposite = abs(prevPoint[1]-nextPoint[1])
+        adjacent = abs(prevPoint[0]-nextPoint[0])
+        beta = atan(opposite/adjacent)
         alpha = pi - beta - pi/2
-        adjecentPart = point[0] - prevPoint[0]
-        dElev = adjecentPart / tan(alpha)
+        adjacentPart = point[0] - prevPoint[0]
+        dElev = adjacentPart / tan(alpha)
         newElev = prevElev + dElev
 
       # add coordinates to periodic points
@@ -262,7 +262,7 @@ def perElevList(trackpointsList, numPoints=200):
 
   periodicElevationList.append(distanceList[-1]) # add the last point of the track
 
-  return(periodicElevationList)
+  return periodicElevationList
 
 
 
