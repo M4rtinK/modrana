@@ -92,7 +92,7 @@ class route(ranaModule):
       if self.selectOnePoint:
         self.set('endPos', None)
       proj = self.m.get('projection', None)
-      if proj is not None and self.expectStart == True:
+      if proj and self.expectStart:
         lastClick = self.get('lastClickXY', None)
         (x, y) = lastClick
         """
@@ -101,6 +101,7 @@ class route(ranaModule):
         (lat, lon) = proj.xy2ll(x, y)
         self.set('startPos', (lat,lon))
         self.start = (lat,lon)
+        self.destination = None # clear destination
 
       self.expectStart = False
       self.set('needRedraw', True) # refresh the screen to show the new point
@@ -113,7 +114,7 @@ class route(ranaModule):
       if self.selectOnePoint:
         self.set('startPos', None)
       proj = self.m.get('projection', None)
-      if proj is not None and self.expectEnd == True:
+      if proj and self.expectEnd:
         lastClick = self.get('lastClickXY', None)
         (x, y) = lastClick
         """
@@ -122,6 +123,7 @@ class route(ranaModule):
         (lat, lon) = proj.xy2ll(x, y)
         self.set('endPos', (lat,lon))
         self.destination = (lat,lon)
+        self.start = None # clear start
 
       self.expectEnd = False
       self.set('needRedraw', True) # refresh the screen to show the new point
