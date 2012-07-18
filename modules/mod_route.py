@@ -100,7 +100,7 @@ class route(ranaModule):
         """
         (lat, lon) = proj.xy2ll(x, y)
         self.set('startPos', (lat,lon))
-        self.testStart = (lat,lon)
+        self.start = (lat,lon)
 
       self.expectStart = False
       self.set('needRedraw', True) # refresh the screen to show the new point
@@ -121,6 +121,7 @@ class route(ranaModule):
         """
         (lat, lon) = proj.xy2ll(x, y)
         self.set('endPos', (lat,lon))
+        self.destination = (lat,lon)
 
       self.expectEnd = False
       self.set('needRedraw', True) # refresh the screen to show the new point
@@ -296,15 +297,28 @@ class route(ranaModule):
           (pLat, pLon) = pos
           (dLat, dLon) = (self.destination[0], self.destination[1])
           self.doRoute(pLat, pLon, dLat, dLon)
+          self.start = None
 
   def doRoute(self, fromLat, fromLon, toLat, toLon):
     """Route from one point to another, and set that as the active route"""
+    # clear old addresses
+    self.startAddress = None
+    self.destinationAddress = None
     online = self.m.get('onlineServices', None)
     if online:
       online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon), self.handleRoute, "onlineRoute")
       
   def doAddressRoute(self, start, destination):
     """Route from one point to another, and set that as the active route"""
+    # disable point selectors
+    self.selectTwoPoints = False
+    self.selectOnePoint = False
+    # overwrite addresses
+    self.startAddress = start
+    self.destinationAddress = destination
+    # clear start and destination points
+    self.start = None
+    self.destination = None
     online = self.m.get('onlineServices', None)
     if online:
       print("route: routing from %s to %s" % (start,destination))
@@ -313,34 +327,33 @@ class route(ranaModule):
   def handleRoute(self, key, resultsTuple):
     """handle a routing result"""
     if key == "onlineRoute":
-      if len(resultsTuple) == 6:
-        (directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp) = resultsTuple
-        # remove any possible prev. route description, so new a new one for this route is created
-        self.text = None
+      (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
+      # remove any possible prev. route description, so new a new one for this route is created
+      self.text = None
 
-        # TODO: support other providers than Google & offline routing
+      # TODO: support other providers than Google & offline routing
 
-        if directions: # is there actually something in the directions ?
-          # create the directions Way object
-          self.duration = directions['Directions']['Duration']['html']
-          dirs = way.fromGoogleDirectionsResult(directions)
-          self.processAndSaveResults(dirs, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp)
+      if directions: # is there actually something in the directions ?
+        # create the directions Way object
+        self.duration = directions['Directions']['Duration']['html']
+        dirs = way.fromGoogleDirectionsResult(directions)
+        self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
     elif key == "onlineRouteAddress2Address":
-      if len(resultsTuple) == 6:
-        (directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp) = resultsTuple
-        # remove any possible prev. route description, so new a new one for this route is created
-        self.text = None
-        if directions: # is there actually something in the directions ?
-          # create the directions Way object
-          dirs = way.fromGoogleDirectionsResult(directions)
-          self.processAndSaveResults(dirs, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp)
+      (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
+      # remove any possible prev. route description, so new a new one for this route is created
+      self.text = None
+      if directions: # is there actually something in the directions ?
+        self.duration = directions['Directions']['Duration']['html']
+        # create the directions Way object
+        dirs = way.fromGoogleDirectionsResult(directions)
+        self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
 
     autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
     if autostart == 'enabled':
       self.sendMessage('ms:turnByTurn:start:%s' % autostart)
     self.set('needRedraw', True)
     
-  def processAndSaveResults(self, directions, startAddress, destinationAddress, start, destination, routeRequestSentTimestamp):
+  def processAndSaveResults(self, directions, start, destination, routeRequestSentTimestamp):
     """process and save routing results"""
     self.routeRequestSentTimestamp = routeRequestSentTimestamp
     proj = self.m.get('projection', None)
@@ -351,15 +364,11 @@ class route(ranaModule):
     (fromLat, fromLon) = directions.getPointByID(0).getLL()
     (toLat, toLon) = directions.getPointByID(-1).getLL()
 
-    self.startAddress = startAddress
-    self.destinationAddress = destinationAddress
     """use coordinates for start dest or use first/last point from the route
        if start/dest coordinates are unknown (None)"""
-    if start is not None and destination is not None:
-      self.start = start
-      self.destination = destination
-    else:
+    if self.start is None:
       self.start = (fromLat, fromLon)
+    if self.destination is None:
       self.destination = (toLat, toLon)
 
   def processAndSaveDirections(self, directions):
@@ -397,8 +406,6 @@ class route(ranaModule):
       message = re.sub(r'</div[^>]*?>', '</i>', message)
       message = re.sub(r'<wbr/>', ', ', message)
       message = re.sub(r'<wbr>', ', ', message)
-#        message = re.sub(r'<[^>]*?>', '<b>', message)
-#        message = re.sub(r'</div[^>]*?>', '</i>', message)
       step.setMessage(message)
       # special processing of the original message for Espeak
       message = originalMessage
@@ -508,26 +515,27 @@ class route(ranaModule):
       # now we convert geographic coordinates to screen coordinates, so we dont need to do it twice
       steps = map(lambda x: (proj.ll2xy(x[0],x[1])), steps)
 
-      start = proj.ll2xy(self.start[0], self.start[1])
-      destination = proj.ll2xy(self.destination[0], self.destination[1])
+      if self.start:
+        start = proj.ll2xy(self.start[0], self.start[1])
+        # line from starting point to start of the route
+        (x,y) = start
+        (px1,py1) = self.pxpyRoute[0]
+        (x1,y1) = proj.pxpyRel2xy(px1, py1)
+        cr.set_source_rgba(0, 0, 0.5, 0.45)
+        cr.set_line_width(10)
+        cr.move_to(x,y)
+        cr.line_to(x1,y1)
+        cr.stroke()
 
-      # line from starting point to start of the route
-      (x,y) = start
-      (px1,py1) = self.pxpyRoute[0]
-      (x1,y1) = proj.pxpyRel2xy(px1, py1)
-      cr.set_source_rgba(0, 0, 0.5, 0.45)
-      cr.set_line_width(10)
-      cr.move_to(x,y)
-      cr.line_to(x1,y1)
-      cr.stroke()
-
-      # line from the destination point to end of the route
-      (x,y) = destination
-      (px1,py1) = self.pxpyRoute[-1]
-      (x1,y1) = proj.pxpyRel2xy(px1, py1)
-      cr.move_to(x,y)
-      cr.line_to(x1,y1)
-      cr.stroke()
+      if self.destination:
+        destination = proj.ll2xy(self.destination[0], self.destination[1])
+        # line from the destination point to end of the route
+        (x,y) = destination
+        (px1,py1) = self.pxpyRoute[-1]
+        (x1,y1) = proj.pxpyRel2xy(px1, py1)
+        cr.move_to(x,y)
+        cr.line_to(x1,y1)
+        cr.stroke()
 
       cr.fill()
 
@@ -743,22 +751,27 @@ class route(ranaModule):
         distance = units.m2CurrentUnitString(self.directions.getLength())
         steps = self.directions.getMessagePointCount() # number of steps
 
-        start = ""
-        startAddress = self.startAddress
-        (lat1,lon1) = (self.start[0],self.start[1])
-        for item in startAddress.split(','):
-          start += "%s\n" % item
+        if self.startAddress:
+          start = ""
+          for item in self.startAddress.split(','):
+            start += "%s\n" % item
+        else:
+          start = "start address unknown"
 
-        destination = ""
-        destinationAddress = self.destinationAddress
-        (lat2,lon2) = (self.destination[0],self.destination[1])
-        for item in destinationAddress.split(','):
-          destination += "\n%s" % item
+        if self.destinationAddress:
+          destination = ""
+          for item in self.destinationAddress.split(','):
+            destination += "\n%s" % item
+        else:
+          destination = "\ndestination address unknown"
 
         text = "%s" % start
         text+= "%s" % destination
         text+= "\n\n%s in about %s and %s steps" % (distance, duration, steps)
-        text+= "\n(%f,%f)->(%f,%f)" % (lat1,lon1,lat2,lon2)
+        if self.start and self.destination:
+          (lat1,lon1) = (self.start[0],self.start[1])
+          (lat2,lon2) = (self.destination[0],self.destination[1])
+          text+= "\n(%f,%f)->(%f,%f)" % (lat1,lon1,lat2,lon2)
 
         self.text = text
       else:

@@ -60,31 +60,14 @@ class onlineServices(ranaModule):
   def _onlineRouteLookup(self, query, type):
     """this method online route lookup and is called by the worker thread"""
     (start, destination, routeRequestSentTimestamp) = query
+
     print "worker: routing from",start," to ",destination
     self._setWorkStatusText("online routing in progress...")
     # get the route
     directions = self.googleDirections(start, destination)
-
-    if type == "LL":
-      # reverse geocode the start and destination coordinates (for the info menu)
-      (fromLat,fromLon) = start
-      (toLat,toLon) = destination
-      self._setWorkStatusText("geocoding start...")
-      startAddress = self.googleReverseGeocode(fromLat,fromLon)
-      self._setWorkStatusText("geocoding destination...")
-      destinationAddress = self.googleReverseGeocode(toLat,toLon)
-      # return the original start/dest coordinates
-      startLL = start
-      destinationLL = destination
-    else:
-      # signalize that the original start/dest coordinates are unknown
-      startAddress = start
-      destinationAddress = destination
-      startLL = None
-      destinationLL = None
     self._setWorkStatusText("online routing done   ")
     # return result to the thread to handle
-    return directions, startAddress, destinationAddress, startLL, destinationLL, routeRequestSentTimestamp
+    return directions, start, destination, routeRequestSentTimestamp
 
   def geocode(self, address):
     """synchronous geocoding"""

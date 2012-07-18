@@ -95,7 +95,7 @@ class turnByTurn(ranaModule):
     elif message == "showMessageInsideNotification":
       currentStep = self.getCurrentStep()
       if currentStep:
-        message = "<i>turn description:</i>\n%s" % currentStep['descriptionHtml']
+        message = "<i>turn description:</i>\n%s" % currentStep.getMessage()
         if self.dmod.hasNotificationSupport():
           self.dmod.notify(message,7000)
       #TODO: add support for modRana notifications once they support line wrapping
