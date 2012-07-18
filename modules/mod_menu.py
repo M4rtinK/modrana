@@ -687,7 +687,8 @@ class menus(ranaModule):
       lat, lon = point.getLL()
       menu = self.getClearedMenu(backAction)
       gi = self.generateItem # for better readability
-      routing = 'md:route:route:type=pos2ll;toLat=%f;toLon=%f;show=start' % (lat,lon)
+      # clear old route and route to the point
+      routing = 'route:clearRoute|md:route:route:type=pos2ll;toLat=%f;toLon=%f;show=start' % (lat,lon)
       items = [
       gi('here#route', 'generic', routing),
       gi('to POI#add', 'generic', 'ms:menu:handleToolsMenuPoint:store'), # TODO implement this

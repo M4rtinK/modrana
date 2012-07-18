@@ -41,12 +41,6 @@ class route(ranaModule):
     self.entry = None
     self.directionsFilterCSV = 'data/directions_filter.csv'
 
-    self.expectStart = False
-    self.expectEnd = False
-
-    self.startAddress = None
-    self.destinationAddress = None
-
     self.set('startPos', None)
     self.set('endPos', None)
 
@@ -68,6 +62,8 @@ class route(ranaModule):
     self.duration = None # in seconds
     self.start = None
     self.destination = None
+    self.startAddress = None
+    self.destinationAddress = None
     self.text = None
     self.selectTwoPoints = False
     self.selectOnePoint = False
@@ -196,6 +192,7 @@ class route(ranaModule):
               (fromLat,fromLon) = pos
               (toLat,toLon) = (float(args['toLat']),float(args['toLon']))
               go = True
+
           if go: # are we GO for routing ?
             print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
             try:
@@ -242,6 +239,8 @@ class route(ranaModule):
 
       loadTracklogs.storeRouteAndSetActive(self.directions.getPointsLLE(), '', 'online') # TODO: rewrite this when we support more routing providers
 
+    elif message == "clearRoute":
+      self._goToInitialState()
 
     elif message == 'startInput':
       entry = self.m.get('textEntry', None)

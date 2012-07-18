@@ -313,11 +313,12 @@ class search(ranaModule):
       """get a route from current position to active search result
          * center on the current position
          -> we want to actually got to there :)"""
-      activeResultTupple = self.getActiveResultTupple()
-      activeResult = activeResultTupple[1]
+      activeResultTuple = self.getActiveResultTupple()
+      activeResult = activeResultTuple[1]
       lat = float(activeResult['lat'])
       lon = float(activeResult['lng'])
-      self.sendMessage('md:route:route:type=pos2ll;toLat=%f;toLon=%f;show=start' % (lat,lon) )
+      # clear any old route and route to the result
+      self.sendMessage('route:clearRoute|md:route:route:type=pos2ll;toLat=%f;toLon=%f;show=start' % (lat,lon) )
 
     self.set("needRedraw", True)
 

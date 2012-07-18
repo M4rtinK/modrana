@@ -279,7 +279,8 @@ class storePOI(ranaModule):
         pos = self.callback.get('pos', None)
         if pos:
           (fromLat, fromLon) = pos
-          self.callback.sendMessage('md:route:route:type=ll2ll;fromLat=%f;fromLon=%f;toLat=%f;toLon=%f;' % (fromLat,fromLon,self.getLat(),self.getLon()))
+          # clear old route and route to the point
+          self.callback.sendMessage('route:clearRoute|md:route:route:type=ll2ll;fromLat=%f;fromLon=%f;toLat=%f;toLon=%f;' % (fromLat,fromLon,self.getLat(),self.getLon()))
 
   def getEmptyPOI(self):
     """get a POI with all variables set to None"""
