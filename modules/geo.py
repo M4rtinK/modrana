@@ -19,17 +19,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from math import *
+import time
 
-def distance(lat1,lon1,lat2,lon2):
-  """Distance between two points in km"""
-  R = 6371.0
+EARTH_RADIUS = 6371.0
+
+def distanceOld(lat1,lon1,lat2,lon2):
+  """Distance between two points in km
+  DEPRECIATED: the Marble distance algorithm was found to be just as precise
+  while being 20% faster"""
   dLat = radians(lat2-lat1)
   dLon = radians(lon2-lon1)
   a = sin(dLat/2.0) * sin(dLat/2.0) + \
           cos(radians(lat1)) * cos(radians(lat2)) * \
           sin(dLon/2.0) * sin(dLon/2.0)
-  c = 2 * atan2(sqrt(a), sqrt(1.0-a))
-  return R * c
+  return 2 * atan2(sqrt(a), sqrt(1.0-a)) * EARTH_RADIUS
 
 def simplePythagoreanDistance(x1, y1, x2, y2):
   dx = x2 - x1
@@ -60,7 +63,149 @@ def bearing(lat1,lon1,lat2,lon2):
     bearing += 360.0
   return bearing
 
-  # found on:
+def simpleDistancePointToLine(x,y,x1,y1,x2,y2):
+  """distance from point to line in the plane"""
+  # source: http://www.allegro.cc/forums/thread/589720
+  A = x - x1
+  B = y - y1
+  C = x2 - x1
+  D = y2 - y1
+
+  dot = A * C + B * D
+  len_sq = C * C + D * D
+  if len_sq==0:
+    dist= A*A +B*B
+    return dist
+
+  param = dot / len_sq
+
+  if param < 0:
+    xx = x1
+    yy = y1
+  elif param > 1:
+    xx = x2
+    yy = y2
+  else:
+    xx = x1 + param * C
+    yy = y1 + param * D
+
+  dx = x - xx
+  dy = y - yy
+  dist = dx * dx + dy * dy
+  return dist
+
+def distancePointToLine(pLat, pLon, aLat, aLon, bLat, bLon):
+  distancePointToLineRadians(radians(pLat), radians(pLon),
+                             radians(aLat), radians(aLon),
+                             radians(bLat), radians(bLon))
+
+def distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon):
+  """compute distance between a point and a line on Earth
+  -> based on C++ code from Marble"""
+  y0 = pLat
+  x0 = pLon
+  y1 = aLat
+  x1 = aLon
+  y2 = bLat
+  x2 = bLon
+  y01 = x0 - x1
+  x01 = y0 - y1
+  y10 = x1 - x0
+  x10 = y1 - y0
+  y21 = x2 - x1
+  x21 = y2 - y1
+  len =(x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)
+  # for correct float division, one of the arguments needs to be a float
+  t = (x01*x21 + y01*y21) / float(len)
+
+  # NOTE: a version without the approximate distance might be needed in the future,
+  # the 7 digit precision should be enough for now though
+  if t < 0.0:
+    return  distanceApproxRadians(pLat, pLon, aLat, aLon)
+  elif t > 1.0:
+    return  distanceApproxRadians(pLat, pLon, bLat, bLon)
+  else:
+    nom = abs( x21 * y10 - x10 * y21 )
+    den = sqrt( x21 * x21 + y21 * y21 )
+    return EARTH_RADIUS * ( nom / float(den) )
+
+#  qreal RouteSegment::distancePointToLine(const GeoDataCoordinates &p, const GeoDataCoordinates &a, const GeoDataCoordinates &b) const
+#  {
+#  qreal const y0 = p.latitude();
+#qreal const x0 = p.longitude();
+#qreal const y1 = a.latitude();
+#qreal const x1 = a.longitude();
+#qreal const y2 = b.latitude();
+#qreal const x2 = b.longitude();
+#qreal const y01 = x0 - x1;
+#qreal const x01 = y0 - y1;
+#qreal const y10 = x1 - x0;
+#qreal const x10 = y1 - y0;
+#qreal const y21 = x2 - x1;
+#qreal const x21 = y2 - y1;
+#qreal const len =(x1-x2)*(x1-x2)+(y1-y2)*(y1-y2);
+#qreal const t = (x01*x21 + y01*y21) / len;
+#if ( t<0.0 ) {
+#return EARTH_RADIUS * distanceSphere(p, a);
+#} else if ( t > 1.0 ) {
+#return EARTH_RADIUS * distanceSphere(p, b);
+#} else {
+#  qreal const nom = qAbs( x21 * y10 - x10 * y21 );
+#qreal const den = sqrt( x21 * x21 + y21 * y21 );
+#return EARTH_RADIUS * nom / den;
+#}
+#}
+
+def distance(lat1,lon1, lat2, lon2):
+  """computes geographic distance
+  -> based on C++ code from Marble"""
+  lat1 = radians(lat1)
+  lon1 = radians(lon1)
+  lat2 = radians(lat2)
+  lon2 = radians(lon2)
+  h1 = sin( 0.5 * ( lat2 - lat1 ) )
+  h2 = sin( 0.5 * ( lon2 - lon1 ) )
+  d = h1 * h1 + cos( lat1 ) * cos( lat2 ) * h2 * h2
+  return 2.0 * atan2( sqrt( d ), sqrt( 1.0 - d ) ) * EARTH_RADIUS
+
+def distanceApprox(lat1, lon1, lat2, lon2):
+  """This method roughly calculates the shortest distance between two points on a sphere.
+      It's probably faster than distanceSphere(...) but for 7 significant digits only has
+      accuracy of about 1 arcminute
+      -> based on C++ code from Marble"""
+  lat1 = radians(lat1)
+  lon1 = radians(lon1)
+  lat2 = radians(lat2)
+  lon2 = radians(lon2)
+  return acos( sin( lat1 ) * sin( lat2 ) + cos( lat1 ) * cos( lat2 ) * cos( lon1 - lon2 ) ) * EARTH_RADIUS
+
+def distanceRadians(lat1,lon1, lat2, lon2):
+  """computes geographic distance
+  -> based on C++ code from Marble"""
+  h1 = sin( 0.5 * ( lat2 - lat1 ) )
+  h2 = sin( 0.5 * ( lon2 - lon1 ) )
+  d = h1 * h1 + cos( lat1 ) * cos( lat2 ) * h2 * h2
+  return 2.0 * atan2( sqrt( d ), sqrt( 1.0 - d ) ) * EARTH_RADIUS
+
+def distanceApproxRadians(lat1, lon1, lat2, lon2):
+  """This method roughly calculates the shortest distance between two points on a sphere.
+      It's probably faster than distanceSphere(...) but for 7 significant digits only has
+      accuracy of about 1 arcminute
+      -> based on C++ code from Marble"""
+  return acos( sin( lat1 ) * sin( lat2 ) + cos( lat1 ) * cos( lat2 ) * cos( lon1 - lon2 ) ) * EARTH_RADIUS
+
+
+
+
+
+
+
+
+
+
+
+
+# found on:
   # http://www.quanative.com/2010/01/01/server-side-marker-clustering-for-google-maps-with-python/
 def clusterTrackpoints(trackpointsList , cluster_distance):
   """
@@ -263,6 +408,83 @@ def perElevList(trackpointsList, numPoints=200):
   periodicElevationList.append(distanceList[-1]) # add the last point of the track
 
   return periodicElevationList
+
+def distanceBenchmark(LLE, sampleSize=None):
+  """geographic distance measurement method benchmark"""
+
+  lat, lon = 49.2, 16.616667 # Brno
+  print("#Geographic distance algorithm benchmark start #")
+  print("%d points" % len(LLE))
+
+  # first test on classic lat, lon, elevation tuples with coordinates in degrees
+
+  # Classic modRana method
+  start1 = time.clock()
+  l = map(lambda x: distanceOld(lat, lon, x[0], x[1]), LLE)
+  print("%1.9f ms Classic modRana method" % (1000 * (time.clock() - start1)))
+  if sampleSize:
+    print l[0:sampleSize-1]
+
+  # Marble method
+  start1 = time.clock()
+  l = map(lambda x: distance(lat, lon, x[0], x[1]), LLE)
+  print("%1.9f ms Marble method" % (1000 * (time.clock() - start1)))
+  if sampleSize:
+    print l[0:sampleSize-1]
+
+  # Marble approximate
+  start1 = time.clock()
+  l = map(lambda x: distanceApprox(lat, lon, x[0], x[1]), LLE)
+  print("%1.9f ms Marble approximate method" % (1000 * (time.clock() - start1)))
+  if sampleSize:
+    print l[0:sampleSize-1]
+
+  # lets check on precomputed coordinates in radians
+  LLERadians = map(lambda x: (radians(x[0]),radians(x[1]), x[2]), LLE)
+  lat = radians(lat)
+  lon = radians(lon)
+  # Marble method on radians
+  start1 = time.clock()
+  l = map(lambda x: distanceRadians(lat, lon, x[0], x[1]), LLERadians)
+  print("%1.9f ms Marble method on radians" % (1000 * (time.clock() - start1)))
+  if sampleSize:
+    print l[0:sampleSize-1]
+
+  # Marble approximate method on radians
+  start1 = time.clock()
+  l = map(lambda x: distanceApproxRadians(lat, lon, x[0], x[1]), LLERadians)
+  print("%1.9f ms Marble approximate method on radians" % (1000 * (time.clock() - start1)))
+  if sampleSize:
+    print l[0:sampleSize-1]
+
+  # done
+  print("# benchmark finished #")
+
+## RESULTS ##
+# (a route from prague to Sevastopol was used)
+#  * N900 example (varies a bit) *
+#
+# #Geographic distance algorithm benchmark start #
+# 6456 points
+# 510.000000000 ms Classic modRana method
+# 400.000000000 ms Marble method
+# 370.000000000 ms Marble approximate method
+# 340.000000000 ms Marble method on radians
+# 290.000000000 ms Marble approximate method on radians
+# # benchmark finished #
+#
+# * Core i5 Notebook *
+#
+# #Geographic distance algorithm benchmark start #
+# 6456 points
+# 30.000000000 ms Classic modRana method
+# 20.000000000 ms Marble method
+# 10.000000000 ms Marble approximate method
+# 20.000000000 ms Marble method on radians
+# 10.000000000 ms Marble approximate method on radians
+# # benchmark finished #
+
+
 
 
 
