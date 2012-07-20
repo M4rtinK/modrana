@@ -18,10 +18,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from threading import Thread
 from base_module import ranaModule
 import geo
 import math
 import time
+
+REROUTE_CHECK_INTERVAL = 5000 # in ms
+#in m/s, about 46 km/h - if this speed is reached, the rerouting threshold is multiplied
+# by REROUTING_THRESHOLD_MULTIPLIER
+INCREASE_REROUTING_THRESHOLD_SPEED = 20
+REROUTING_DEFAULT_THRESHOLD = 30
+# not enabled at the moment - needs more field testing
+REROUTING_THRESHOLD_MULTIPLIER = 1.0
+# how many times needs the threshold be crossed to
+# trigger rerouting
+REROUTING_TRIGGER_COUNT = 3
+
 # only import GKT libs if GTK GUI is used
 from core import gs
 if gs.GUIString == "GTK":
@@ -40,7 +53,8 @@ class turnByTurn(ranaModule):
     # initial colors
     self.navigationBoxBackground = (0,0,1,0.3) # very transparent blue
     self.navigationBoxText = (1,1,1,1) # non-transparent white
-
+    self.TBTWorker = None
+    self.TBTWorkerEnabled = False
     self.goToInitialState()
 
   def goToInitialState(self):
@@ -56,7 +70,11 @@ class turnByTurn(ranaModule):
     self.navigationBoxHidden = False
     self.mRouteLength = 0
     self.locationWatchID = None
-
+    self.onRoute = False
+    #rerouting is enabled once the route is reached for the first time
+    self.routeReached = False
+    self.reroutingThresholdMultiplier = 1.0
+    self.reroutingThresholdCrossedCounter = 0
 
   def firstTime(self):
     icons = self.m.get('icons', None)
@@ -228,7 +246,11 @@ class turnByTurn(ranaModule):
 
           # use the bottom of the infobox to display info
           (bottomX,bottomY) = (bx, by+bh-6*border)
-          note = "%s/%s, %d/%d   <sub> tap this box to reroute</sub>" % (currentDistString, routeLengthString, self.currentStepIndex+1, self.getMaxStepIndex()+1)
+          if self.routeReached and self._automaticReroutingEnabled():
+            arString = "automatic rerouting enabled"
+          else:
+            arString ="tap this box to reroute"
+          note = "%s/%s, %d/%d   <sub> %s</sub>" % (currentDistString, routeLengthString, self.currentStepIndex+1, self.getMaxStepIndex()+1, arString)
           menus.drawText(cr, "%s" % note, bottomX, bottomY, bw, 6*border, 0, rgbaColor=self.navigationBoxText)
           # make clickable
           clickHandler = self.m.get('clickHandler', None)
@@ -247,6 +269,8 @@ class turnByTurn(ranaModule):
           # * hide button
           menus.drawButton(cr, bx+2*switchButtonWidth, by, hideButtonWidth, buttonStripOffset, "", "center:hide;0.1>%s" % background, "turnByTurn:toggleBoxHiding")
 
+  def _automaticReroutingEnabled(self):
+    return self.get('reroutingThreshold', REROUTING_DEFAULT_THRESHOLD)
 
   def sayTurn(self,message,distanceInMeters,forceLanguageCode=False):
     """say a text-to-speech message about a turn
@@ -380,6 +404,11 @@ class turnByTurn(ranaModule):
       (route,routeRequestSentTimestamp) = m.getCurrentDirections()
       if route: # is the route nonempty ?
         self.route = route
+        # get route in radians for automatic rerouting
+        self.radiansRoute = route.getPointsLLERadians(dropElevation=True)
+        # start rerouting watch
+        self._startTBTWorker()
+
         # show the warning message
         self.sendMessage('ml:notification:m:use at own risk, watch for cliffs, etc.;3')
         # for some reason the combined distance does not account for the last step
@@ -425,8 +454,8 @@ class turnByTurn(ranaModule):
 
             # what is more distant, the closest or the next step ?
             if pos2nextStep < currentStep2nextStep:
-              """we are mostly probably already past the closest step,
-              so we switch to the next step at once"""
+              # we are mostly probably already past the closest step,
+              # so we switch to the next step at once
               print("tbt: already past closest turn, switching to next turn")
               self.setStepAsCurrent(nextStep)
               """we play the message for the next step,
@@ -436,8 +465,8 @@ class turnByTurn(ranaModule):
               plaintextMessage = nextStep.getSSMLMessage()
               self.sayTurn(plaintextMessage, pos2nextStep)
             else:
-              """we have probably not yet reached the closest step,
-                 so we start navigation from it"""
+              # we have probably not yet reached the closest step,
+              # so we start navigation from it
               print("tbt: closest turn not yet reached")
               self.setStepAsCurrent(cs)
 
@@ -466,6 +495,8 @@ class turnByTurn(ranaModule):
       self.removeWatch(self.locationWatchID)
     # cleanup
     self.goToInitialState()
+    self.TBTWorkerEnabled = False
+    self.TBTWorker = None
     print("tbt: stopped")
 
   def locationUpdateCB(self, key, newValue, oldValue):
@@ -540,9 +571,16 @@ class turnByTurn(ranaModule):
 
     if metersPerSecSpeed:
       # check if we can miss the point by going too fast -> mps speed > point reached distance
+      # also enlarge the rerouting threshold as it looks like it needs to be larger
+      # when moving at high speed to prevent unnecessary rerouting
       if metersPerSecSpeed > pointReachedDistance*0.75:
         pointReachedDistance = metersPerSecSpeed*2
-        print("tbt: enlarging point reached distance to: %1.2f m due to large speed (%1.2f m/s)" % (pointReachedDistance, metersPerSecSpeed))
+#        print("tbt: enlarging point reached distance to: %1.2f m due to large speed (%1.2f m/s)" % (pointReachedDistance, metersPerSecSpeed))
+
+      if metersPerSecSpeed > INCREASE_REROUTING_THRESHOLD_SPEED:
+        self.reroutingThresholdMultiplier = REROUTING_THRESHOLD_MULTIPLIER
+      else:
+        self.reroutingThresholdMultiplier = 1.0
 
       # speed & time based triggering
       lowSpeed = float(self.get('minAnnounceSpeed', 13.89))
@@ -598,7 +636,101 @@ class turnByTurn(ranaModule):
             if self.sayTurn(plaintextMessage, currentDistance):
               self.espeakFirstAndHalfTrigger = True # intermediate message done
 
-              
+      ## automatic rerouting ##
+
+      # is automatic rerouting enabled from options
+      # enabled == threshold that is not not None
+      if self._automaticReroutingEnabled():
+        # rerouting is enabled only once the route is reached for the first time
+        if self.onRoute and not self.routeReached:
+          self.routeReached = True
+          print('tbt: route reached, rerouting enabled')
+
+        # did the TBT worker detect that the rerouting threshold was reached ?
+        if self.routeReached and not self.onRoute:
+          if self.reroutingThresholdCrossedCounter >= REROUTING_TRIGGER_COUNT:
+            # trigger rerouting
+            self.sendMessage("turnByTurn:reroute")
+        else:
+          # reset the counter
+          self.reroutingThresholdCrossedCounter = 0
+
+  def _followingRoute(self):
+    """are we still following the route or is rerouting needed"""
+    start1 = time.clock()
+    pos = self.get('pos', None)
+    proj = self.m.get('projection', None)
+    if pos and proj:
+      pLat, pLon = pos
+      # we use Radians to get rid of radian conversion overhead for
+      # the geographic distance computation method
+      radiansLL = self.radiansRoute
+      pLat = geo.radians(pLat)
+      pLon = geo.radians(pLon)
+      if len(radiansLL) == 0:
+        print("Divergence: can't follow a zero point route")
+        return False
+      elif len(radiansLL) == 1: # 1 point route
+        aLat, aLon = radiansLL[0]
+        minDistance = geo.distanceApproxRadians(pLat, pLon, aLat, aLon)
+      else: # 2+ points route
+        aLat, aLon = radiansLL[0]
+        bLat, bLon = radiansLL[1]
+        minDistance = geo.distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon)
+        aLat, aLon = bLat, bLon
+        for point in radiansLL[1:]:
+          bLat, bLon = point
+          dist = geo.distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon)
+          if dist < minDistance:
+            minDistance = dist
+          aLat, aLon = bLat, bLon
+      # the multiplier tries to compensate for high speed movement
+      threshold = self.get('reroutingThreshold', REROUTING_DEFAULT_THRESHOLD)*self.reroutingThresholdMultiplier
+      print("Divergence from route: %1.2f/%1.2f m computed in %1.0f ms" % (minDistance*1000, float(threshold), (1000 * (time.clock() - start1))) )
+      return minDistance*1000 < threshold
+
+  def _startTBTWorker(self):
+    startThread = True
+    if not self.TBTWorker: # reuse previous thread or start new one
+      self.TBTWorkerEnabled = True
+      t = Thread(target=self._TBTWorker)
+      t.daemon = True
+      t.start()
+      self.TBTWorker = t
+
+  def _TBTWorker(self):
+    """this function is run in its own thread and check if
+    we are following the current route"""
+    print("TBTWorker: started")
+    while self.route and self.TBTWorkerEnabled:
+      # first make sure automatic rerouting is enabled
+      # eq. reroutingThreshold != None
+      if self._automaticReroutingEnabled():
+        # check if we are still following the route
+#        print('TBTWorker: checking divergence from route')
+        self.onRoute = self._followingRoute()
+        if self.routeReached and not self.onRoute:
+          print('TBTWorker: divergence detected')
+          # switch to quick updates
+          for i in range(0, REROUTING_TRIGGER_COUNT+1):
+            time.sleep(1)
+            onRoute = self._followingRoute()
+            if onRoute: # divergence stopped
+              self.onRoute = onRoute
+              print('TBTWorker: false alarm')
+              break
+            else: # still diverging from current route
+              self.onRoute = onRoute
+              # increase divergence counter
+              self.reroutingThresholdCrossedCounter+=1
+              print('TBTWorker: increasing divergence counter (%d)' % self.reroutingThresholdCrossedCounter)
+      time.sleep(REROUTE_CHECK_INTERVAL/1000.0)
+    print("TBTWorker: shutting down")
+
+  def shutdown(self):
+    # cleanup
+    self.stopTBT()
+
 if(__name__ == "__main__"):
   a = example({}, {})
   a.update()
