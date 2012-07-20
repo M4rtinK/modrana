@@ -28,7 +28,7 @@ def getModule(m,d,i):
   return(voice(m,d,i))
 
 class voice(ranaModule):
-  """Handle text to speach."""
+  """Handle text to speech."""
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
@@ -45,7 +45,7 @@ class voice(ranaModule):
 
   def firstTime(self):
     es = self.get("voiceString", None)
-    if es == None:
+    if es is None:
       self.resetStringToDefault(self.defaultProvider)
 
   def resetStringToDefault(self, type):
@@ -127,7 +127,7 @@ class voice(ranaModule):
     mode = self.get('voiceParameters', None)
     if mode == "manual": # user editable voice string
       voiceString = self.get("voiceString", None)
-      if voiceString != None:
+      if voiceString is not None:
 
         # replace language and message variables with appropriate values (if present)
         voiceString = re.sub("%language%", languageCode, voiceString)
@@ -161,7 +161,7 @@ class voice(ranaModule):
   def speaking(self):
     """return True if there is voice output in progress, False if not"""
     if self.espaekProcess: # is there a espeak process
-      if self.espaekProcess.poll() != None: # none means the process is still running
+      if self.espaekProcess.poll() is not None: # none means the process is still running
         return False # not talking
       else:
         return True # talking
