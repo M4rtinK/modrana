@@ -632,7 +632,6 @@ class Options(ranaModule):
       # for some reason, the items menu doesn't work correctly for
       # non-string values (eq. 10 won't work correctly but "10" would
 
-
     # * the POI category
     catPOI = addCat("POI", "poi", "poi")
 
