@@ -475,6 +475,56 @@ class Options(ranaModule):
     # * the Navigation category
     catNavigation = addCat("Navigation", "navigation", "navigation")
 
+    # * navigation language
+    group = addGroup("Language", "tbt_language", catNavigation, "generic")
+
+    # in the first string: first one goes to espeak, the second part goes to Google
+    directionsLanguages =[('ca ca', 'Catalan'),
+      ('zh-yue zh-TW', 'Chinese(Cantonese)'),
+      ('zh zh-CN', 'Chinese(Mandarin)'),
+      ('hr hr', 'Croatian'),
+      ('cs cs', 'Czech'),
+      ('nl nl', 'Dutch'),
+      ('en en', 'English'),
+      ('fi fi', 'Finnish'),
+      ('fr fr', 'French'),
+      ('de de', 'German'),
+      ('el el', 'Greek'),
+      ('hi hi', 'Hindi'),
+      ('hu hu', 'Hungarian'),
+      ('id id', 'Indonesian'),
+      ('it it', 'Italian'),
+      ('lv lv', 'Latvian'),
+      ('no no', 'Norwegian'),
+      ('pl pl', 'Polish'),
+      ('pt pt-BR', 'Portuguese(Brazil)'),
+      ('pt-pt pt-PT', 'Portuguese(European)'),
+      ('ro ro', 'Romanian'),
+      ('ru ru', 'Russian'),
+      ('sr sr', 'Serbian'),
+      ('sk sk', 'Slovak'),
+      ('es es', 'Spanish'),
+      ('ta ta', 'Tamil'),
+      ('tr tr', 'Turkish'),
+      ('vi vi', 'Vietnamese')]
+
+    addItems("Language for directions", 'directionsLanguage',
+      directionsLanguages,
+      group,
+      "en en") # TODO: use locale for default language ?
+
+    addOpt("read Cyrillic with", "voiceNavigationCyrillicVoice",
+      [('ru',"Russian voice"),
+        (False,"current voice")],
+      group,
+      'ru')
+
+    # ** online routing submenu
+    group = addGroup("Route options", "route_options", catNavigation, "generic")
+    addBoolOpt("Avoid major highways ", "routingAvoidHighways", group, False)
+
+    addBoolOpt("Avoid toll roads", "routingAvoidToll", group, False)
+
     # * turn by turn navigation
     group = addGroup("Turn by turn", "turn_by_turn", catNavigation, "generic")
 
@@ -563,57 +613,25 @@ class Options(ranaModule):
        group,
        "2.0")
 
+    # ** rerouting submenu
+    group = addGroup("Rerouting", "rerouting", catNavigation, "generic")
+    addItems("Rerouting trigger distance", "reroutingThreshold",
+      [(None,"<b>disabled</b>"),
+       ("10","10 m"),
+       ("20","20 m"),
+       ("30","30 m (default)"),
+       ("40","40 m"),
+       ("50","50 m"),
+       ("75","75 m"),
+       ("100","100 m"),
+       ("200","200 m"),
+       ("500","500 m"),
+       ("1000","1000 m")],
+      group,
+      "30")
+      # for some reason, the items menu doesn't work correctly for
+      # non-string values (eq. 10 won't work correctly but "10" would
 
-    # * navigation language
-    group = addGroup("Language", "tbt_language", catNavigation, "generic")
-
-    # in the first string: first one goes to espeak, the second part goes to Google
-    directionsLanguages =[('ca ca', 'Catalan'),
-                          ('zh-yue zh-TW', 'Chinese(Cantonese)'),
-                          ('zh zh-CN', 'Chinese(Mandarin)'),
-                          ('hr hr', 'Croatian'),
-                          ('cs cs', 'Czech'),
-                          ('nl nl', 'Dutch'),
-                          ('en en', 'English'),
-                          ('fi fi', 'Finnish'),
-                          ('fr fr', 'French'),
-                          ('de de', 'German'),
-                          ('el el', 'Greek'),
-                          ('hi hi', 'Hindi'),
-                          ('hu hu', 'Hungarian'),
-                          ('id id', 'Indonesian'),
-                          ('it it', 'Italian'),
-                          ('lv lv', 'Latvian'),
-                          ('no no', 'Norwegian'),
-                          ('pl pl', 'Polish'),
-                          ('pt pt-BR', 'Portuguese(Brazil)'),
-                          ('pt-pt pt-PT', 'Portuguese(European)'),
-                          ('ro ro', 'Romanian'),
-                          ('ru ru', 'Russian'),
-                          ('sr sr', 'Serbian'),
-                          ('sk sk', 'Slovak'),
-                          ('es es', 'Spanish'),
-                          ('ta ta', 'Tamil'),
-                          ('tr tr', 'Turkish'),
-                          ('vi vi', 'Vietnamese')]
-
-    addItems("Language for directions", 'directionsLanguage',
-         directionsLanguages,
-         group,
-         "en en") # TODO: use locale for default language ?
-
-    addOpt("read Cyrillic with", "voiceNavigationCyrillicVoice",
-      [('ru',"Russian voice"),
-       (False,"current voice")],
-       group,
-       'ru')
-
-
-    # ** online routing submenu
-    group = addGroup("Online routing", "online_routing", catNavigation, "generic")
-    addBoolOpt("Avoid major highways ", "routingAvoidHighways", group, False)
-
-    addBoolOpt("Avoid toll roads", "routingAvoidToll", group, False)
 
     # * the POI category
     catPOI = addCat("POI", "poi", "poi")

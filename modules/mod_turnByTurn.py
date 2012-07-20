@@ -685,7 +685,7 @@ class turnByTurn(ranaModule):
             minDistance = dist
           aLat, aLon = bLat, bLon
       # the multiplier tries to compensate for high speed movement
-      threshold = self.get('reroutingThreshold', REROUTING_DEFAULT_THRESHOLD)*self.reroutingThresholdMultiplier
+      threshold = float(self.get('reroutingThreshold', REROUTING_DEFAULT_THRESHOLD))*self.reroutingThresholdMultiplier
       print("Divergence from route: %1.2f/%1.2f m computed in %1.0f ms" % (minDistance*1000, float(threshold), (1000 * (time.clock() - start1))) )
       return minDistance*1000 < threshold
 
