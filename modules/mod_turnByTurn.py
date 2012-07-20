@@ -35,6 +35,9 @@ REROUTING_THRESHOLD_MULTIPLIER = 1.0
 # trigger rerouting
 REROUTING_TRIGGER_COUNT = 3
 
+MAX_CONSECUTIVE_AUTOMATIC_REROUTES = 3
+AUTOMATIC_REROUTE_COUNTER_EXPIRATION_TIME = 600 # in seconds
+
 # only import GKT libs if GTK GUI is used
 from core import gs
 if gs.GUIString == "GTK":
@@ -56,6 +59,10 @@ class turnByTurn(ranaModule):
     self.TBTWorker = None
     self.TBTWorkerEnabled = False
     self.goToInitialState()
+    self.automaticRerouteCounter = 0 # counts consecutive automatic reroutes
+    self.lastAutomaticRerouteTimestamp = time.time()
+    # reroute even though the route was not yet reached (for special cases)
+    self.overrideRouteReached = False
 
   def goToInitialState(self):
     """restore initial state"""
@@ -92,17 +99,10 @@ class turnByTurn(ranaModule):
         self.startTBT(fromWhere)
     elif message == 'stop':
       self.stopTBT()
-    elif message == 'reroute':
-      # 1. say rerouting is in progress
-      voiceMessage = "rerouting"
-      voice = self.m.get('voice', None)
-      if voice:
-        voice.say(voiceMessage, "en") # make sure rerouting said with english voice
-      time.sleep(2) #TODO: improve this
-      # 2. get a new route from current position to destination
-      self.sendMessage("ms:route:reroute:fromPosToDest")
-      # 3. restart routing for to this new route from the closest point
-      self.sendMessage("ms:turnByTurn:start:closest")
+    elif message == 'reroute': # manual rerouting
+      # reset automatic reroute counter
+      self.automaticRerouteCounter = 0
+      self._reroute()
     elif message == "toggleBoxHiding":
       print("turnByTurn: toggling navigation box visibility")
       self.navigationBoxHidden = not self.navigationBoxHidden
@@ -117,6 +117,54 @@ class turnByTurn(ranaModule):
         if self.dmod.hasNotificationSupport():
           self.dmod.notify(message,7000)
       #TODO: add support for modRana notifications once they support line wrapping
+
+  def _rerouteAuto(self):
+    """this function is called when automatic rerouting is triggered"""
+
+    # check time from last automatic reroute
+    dt = time.time() - self.lastAutomaticRerouteTimestamp
+    if dt >= AUTOMATIC_REROUTE_COUNTER_EXPIRATION_TIME:
+      # reset the automatic reroute counter
+      self.automaticRerouteCounter = 0
+      print('tbt: automatic reroute counter expired, clearing')
+
+    # on some routes, when we are moving away from the start of the route, it
+    # is needed to reroute a couple of times before the correct way is found
+    # on the other hand there should be a limit on the number of times
+    # modRana reroutes in a row
+    #
+    # SOLUTION:
+    # 1. enable automatic rerouting even though the route was not yet reached
+    # (as we are moving away from it)
+    # 2. do this only a limited number of times (up to 3 times in a row)
+    # 3. the counter is reset by manual rerouting, by reaching the route or after 10 minutes
+
+    if self.automaticRerouteCounter < MAX_CONSECUTIVE_AUTOMATIC_REROUTES:
+      print('tbt: faking that route was reached to enable new rerouting')
+      self.overrideRouteReached = True
+    else:
+      print('tbt: too many consecutive reroutes (%d),' % self.automaticRerouteCounter)
+      print('reach the route to enable automatic rerouting')
+      print('or reroute manually')
+
+    # increment the automatic reroute counter & update the timestamp
+    self.automaticRerouteCounter+=1
+    self.lastAutomaticRerouteTimestamp = time.time()
+
+    # trigger rerouting
+    self._reroute()
+
+  def _reroute(self):
+    # 1. say rerouting is in progress
+    voiceMessage = "rerouting"
+    voice = self.m.get('voice', None)
+    if voice:
+      voice.say(voiceMessage, "en") # make sure rerouting said with english voice
+    time.sleep(2) #TODO: improve this
+    # 2. get a new route from current position to destination
+    self.sendMessage("ms:route:reroute:fromPosToDest")
+    # 3. restart routing for to this new route from the closest point
+    self.sendMessage("ms:turnByTurn:start:closest")
 
   def drawMapOverlay(self,cr):
       if self.route:
@@ -290,12 +338,13 @@ class turnByTurn(ranaModule):
         # TODO: language specific distance strings
       text = distString + message
 
-      """ the message can contain unicode, this might cause an exception when printing it
-      in some systems (SHR-u on Neo, for example)"""
-      try:
-        print("saying: %s" % text)
-      except UnicodeEncodeError:
-        print("voice: printing the current message to stdout failed do to unicode conversion error")
+#      """ the message can contain unicode, this might cause an exception when printing it
+#      in some systems (SHR-u on Neo, for example)"""
+#      try:
+#        print("saying: %s" % text)
+#        pass
+#      except UnicodeEncodeError:
+#        print("voice: printing the current message to stdout failed do to unicode conversion error")
 
       if forceLanguageCode:
         espeakLanguageCode = forceLanguageCode
@@ -364,9 +413,9 @@ class turnByTurn(ranaModule):
       self._setCurrentStepIndex(nextIndex)
       self.espeakFirstTrigger = False
       self.espeakSecondTrigger = False
-      print("switching to previous step")
+      print("tbt: switching to previous step")
     else:
-      print("previous step reached")
+      print("tbt: previous step reached")
 
   def switchToNextStep(self):
     """switch to next step and clean up"""
@@ -377,9 +426,19 @@ class turnByTurn(ranaModule):
       self.espeakFirstAndHalfTrigger = False
       self.espeakFirstTrigger = False
       self.espeakSecondTrigger = False
-      print("switching to next step")
+      print("tbt: switching to next step")
     else:
-      print("last step reached")
+      print("tbt: last step reached")
+      self._lastStepReached()
+
+  def _lastStepReached(self):
+    """handle all tasks that are needed once the last step is reached"""
+    #disable automatic rerouting
+    self._stopTBTWorker()
+    # automatic rerouting needs to be disabled to prevent rerouting
+    # once the destination was reached
+
+
 
   def _setCurrentStepIndex(self, index):
     self.currentStepIndex = index
@@ -495,8 +554,7 @@ class turnByTurn(ranaModule):
       self.removeWatch(self.locationWatchID)
     # cleanup
     self.goToInitialState()
-    self.TBTWorkerEnabled = False
-    self.TBTWorker = None
+    self._stopTBTWorker()
     print("tbt: stopped")
 
   def locationUpdateCB(self, key, newValue, oldValue):
@@ -644,16 +702,23 @@ class turnByTurn(ranaModule):
         # rerouting is enabled only once the route is reached for the first time
         if self.onRoute and not self.routeReached:
           self.routeReached = True
+          self.automaticRerouteCounter = 0
           print('tbt: route reached, rerouting enabled')
 
         # did the TBT worker detect that the rerouting threshold was reached ?
-        if self.routeReached and not self.onRoute:
+        if self._reroutingConditionsMet():
+          # test if enough consecutive divergence point were recorded
           if self.reroutingThresholdCrossedCounter >= REROUTING_TRIGGER_COUNT:
+            # reset the routeReached override
+            self.overrideRouteReached = False
             # trigger rerouting
-            self.sendMessage("turnByTurn:reroute")
+            self._rerouteAuto()
         else:
           # reset the counter
           self.reroutingThresholdCrossedCounter = 0
+
+  def _reroutingConditionsMet(self):
+    return (self.routeReached or self.overrideRouteReached) and not self.onRoute
 
   def _followingRoute(self):
     """are we still following the route or is rerouting needed"""
@@ -690,6 +755,7 @@ class turnByTurn(ranaModule):
       return minDistance*1000 < threshold
 
   def _startTBTWorker(self):
+    print "tbt: starting worker thread"
     startThread = True
     if not self.TBTWorker: # reuse previous thread or start new one
       self.TBTWorkerEnabled = True
@@ -697,6 +763,12 @@ class turnByTurn(ranaModule):
       t.daemon = True
       t.start()
       self.TBTWorker = t
+    else:
+      print "tbt: reusing worker thread"
+
+  def _stopTBTWorker(self):
+    self.TBTWorkerEnabled = False
+    self.TBTWorker = None
 
   def _TBTWorker(self):
     """this function is run in its own thread and check if
@@ -709,7 +781,7 @@ class turnByTurn(ranaModule):
         # check if we are still following the route
 #        print('TBTWorker: checking divergence from route')
         self.onRoute = self._followingRoute()
-        if self.routeReached and not self.onRoute:
+        if self._reroutingConditionsMet():
           print('TBTWorker: divergence detected')
           # switch to quick updates
           for i in range(0, REROUTING_TRIGGER_COUNT+1):
