@@ -1,5 +1,6 @@
 """a modRana class representing an unified tracklog or route"""
 # -*- coding: utf-8 -*-
+from modules import geo
 from point import Point
 
 class TurnByTurnPoint(Point):
@@ -50,6 +51,7 @@ class Way:
 
   def __init__(self, points=[]):
     self.points = points # stored as LLE tuples
+    self.pointsInRadians = None
     self.messagePoints = []
     self.messagePointsLLE = []
     self.length = None # in meters
@@ -64,7 +66,18 @@ class Way:
     return Point(lat, lon, elevation)
 
   def getPointsLLE(self):
+    """return the way points as LLE tuples"""
     return self.points
+
+  def getPointsLLERadians(self, dropElevation=False):
+    """return the way as LLE tuples in radians"""
+    # do we have cached radians version of the LLE tuples ?
+    if self.pointsInRadians is not None:
+      return self.pointsInRadians
+    else:
+      radians = geo.lleTuples2radians(self.points, dropElevation)
+      self.pointsInRadians = radians
+      return radians
 
   def getPointCount(self):
     return len(self.points)
