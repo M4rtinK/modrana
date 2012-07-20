@@ -115,6 +115,9 @@ def distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon):
   y21 = x2 - x1
   x21 = y2 - y1
   len =(x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)
+  # handle zero-length lines
+  if len == 0:
+    return distanceApproxRadians(pLat, pLon, aLat, aLon)
   # for correct float division, one of the arguments needs to be a float
   t = (x01*x21 + y01*y21) / float(len)
 
@@ -128,33 +131,6 @@ def distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon):
     nom = abs( x21 * y10 - x10 * y21 )
     den = sqrt( x21 * x21 + y21 * y21 )
     return EARTH_RADIUS * ( nom / float(den) )
-
-#  qreal RouteSegment::distancePointToLine(const GeoDataCoordinates &p, const GeoDataCoordinates &a, const GeoDataCoordinates &b) const
-#  {
-#  qreal const y0 = p.latitude();
-#qreal const x0 = p.longitude();
-#qreal const y1 = a.latitude();
-#qreal const x1 = a.longitude();
-#qreal const y2 = b.latitude();
-#qreal const x2 = b.longitude();
-#qreal const y01 = x0 - x1;
-#qreal const x01 = y0 - y1;
-#qreal const y10 = x1 - x0;
-#qreal const x10 = y1 - y0;
-#qreal const y21 = x2 - x1;
-#qreal const x21 = y2 - y1;
-#qreal const len =(x1-x2)*(x1-x2)+(y1-y2)*(y1-y2);
-#qreal const t = (x01*x21 + y01*y21) / len;
-#if ( t<0.0 ) {
-#return EARTH_RADIUS * distanceSphere(p, a);
-#} else if ( t > 1.0 ) {
-#return EARTH_RADIUS * distanceSphere(p, b);
-#} else {
-#  qreal const nom = qAbs( x21 * y10 - x10 * y21 );
-#qreal const den = sqrt( x21 * x21 + y21 * y21 );
-#return EARTH_RADIUS * nom / den;
-#}
-#}
 
 def distance(lat1,lon1, lat2, lon2):
   """computes geographic distance
@@ -195,16 +171,20 @@ def distanceApproxRadians(lat1, lon1, lat2, lon2):
   return acos( sin( lat1 ) * sin( lat2 ) + cos( lat1 ) * cos( lat2 ) * cos( lon1 - lon2 ) ) * EARTH_RADIUS
 
 
+def ll2radians(lat, lon):
+  """convert lat and lon in degrees to radians"""
+  return radians(lat), radians(lon)
 
+def lle2radians(lat, lon, elevation):
+  """convert lat and lon in degrees to radians - convenience function for LLE tuples"""
+  return radians(lat), radians(lon), elevation
 
-
-
-
-
-
-
-
-
+def lleTuples2radians(lleTuples, discardElevation=False):
+  """converts (lat, lon, elevation) tuples from degrees to radians"""
+  if discardElevation:
+    return map(lambda x: (radians(x[0]),radians(x[1])), lleTuples)
+  else:
+    return map(lambda x: (radians(x[0]),radians(x[1]), x[2]), lleTuples)
 # found on:
   # http://www.quanative.com/2010/01/01/server-side-marker-clustering-for-google-maps-with-python/
 def clusterTrackpoints(trackpointsList , cluster_distance):
