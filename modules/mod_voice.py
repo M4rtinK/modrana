@@ -51,10 +51,10 @@ class voice(ranaModule):
   def resetStringToDefault(self, type):
     if type in self.defaultStrings:
       s = self.defaultStrings[type]
-      print "voice: resetting voice string to default using string for: %s" % type
+      print("voice: resetting voice string to default using string for: %s" % type)
       self.set("voiceString", s)
     else:
-      print "voice: cant reset string to default, no string for:", type
+      print("voice: cant reset string to default, no string for:", type)
 
   def getDefaultString(self, type):
     if type in self.defaultStrings:
@@ -85,13 +85,13 @@ class voice(ranaModule):
             # TODO: language specific distance strings
           output = distString + plaintextMessage
 
-
-          """ the message can contain unicode, this might cause an exception when printing it
-          in some systems (SHR-u on Neo, for example)"""
-          try:
-            print "saying: %s" % output
-          except UnicodeEncodeError:
-            print "voice: printing the current message to stdout failed do to unicode conversion error"
+          if self.get('debugPrintVoiceMessages', False):
+            # the message can contain unicode, this might cause an exception when printing it
+            # in some systems (SHR-u on Neo, for example)
+            try:
+              print("saying: %s" % output)
+            except UnicodeEncodeError:
+              print("voice: printing the current message to stdout failed do to unicode conversion error")
           if forceLanguageCode:
             espeakLanguageCode = forceLanguageCode
           else:
