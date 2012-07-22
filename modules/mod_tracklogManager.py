@@ -37,7 +37,7 @@ class tracklogManager(ranaModule):
     self.LTModule = self.m.get('loadTracklogs', None)
     # we don't know what tracklogs are available yet
     # but we don't need that to setup the categories menu
-    self.setupCathegoriesMenu()
+    self.setupCategoriesMenu()
 
   def handleMessage(self, message, type, args):
     if message in ["up","down","reset"]:
@@ -47,16 +47,16 @@ class tracklogManager(ranaModule):
         self.scrollDict[currentCat] = 0
       # load scrolling index for category
       scroll = self.scrollDict[currentCat]
-      if(message == "up"):
-        if(scroll > 0):
+      if message == "up":
+        if scroll > 0:
           scroll -= 1
           self.set("needRedraw", True)
-      elif(message == "down"):
+      elif message == "down":
         if (scroll + 1) < self.currentNumItems:
           print "down"
           scroll += 1
           self.set("needRedraw", True)
-      elif(message == "reset"):
+      elif message == "reset":
         scroll = 0
         self.set("needRedraw", True)
       # save the result
@@ -97,12 +97,12 @@ class tracklogManager(ranaModule):
 
     elif message == 'setActiveTracklogToCurrentCat':
       path = self.LTModule.getActiveTracklogPath()
-      currentCathegory = self.get('currentTracCat', None)
-      if currentCathegory:
-        print "changing cathegory for:"
+      currentCategory = self.get('currentTracCat', None)
+      if currentCategory:
+        print "changing category for:"
         print "%s" % path
-        print "to: %s" % currentCathegory
-        self.LTModule.setTracklogPathCategory(path, currentCathegory)
+        print "to: %s" % currentCategory
+        self.LTModule.setTracklogPathCategory(path, currentCategory)
 
     elif message == 'setupColorMenu':
       m = self.m.get('showGPX', None)
@@ -131,13 +131,13 @@ class tracklogManager(ranaModule):
     # relist all tracklogs
     self.LTModule.listAvailableTracklogs()
 
-  def setupCathegoriesMenu(self):
+  def setupCategoriesMenu(self):
     # setup the categories menu
 
     menus = self.m.get("menu",None)
 
-    # setup the cathegory dashboard
-    menu = 'tracklogManagerCathegories'
+    # setup the category dashboard
+    menu = 'tracklogManagerCategories'
     nextAction = '|set:menu:tracklogManager#tracklogManager'
     menus.clearMenu(menu, "set:menu:main")
     
@@ -149,7 +149,7 @@ class tracklogManager(ranaModule):
       menus.addItem(menu, text, icon, "set:currentTracCat:%s" % catId + nextAction)
 
     # setup the set category menu
-    menu = 'tracklogSetCathegory'
+    menu = 'tracklogSetCategory'
     nextAction = '|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogManager#tracklogInfo'
     menus.clearMenu(menu, "|tracklogManager:setActiveTracklogToCurrentCat|set:menu:tracklogManager#tracklogInfo")
     for category in categories:
@@ -160,7 +160,7 @@ class tracklogManager(ranaModule):
 
   def drawMenu(self, cr, menuName, args=None):
     # is this menu the correct menu ?
-    if menuName == 'tracklogManager' or menuName == 'tracklogInfo' or menuName == 'tracklogManagerCathegories':
+    if menuName == 'tracklogManager' or menuName == 'tracklogInfo' or menuName == 'tracklogManagerCategories':
       # setup the viewport
       menus = self.m.get("menu",None)
       (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
@@ -172,8 +172,8 @@ class tracklogManager(ranaModule):
     else:
       return # we aren't the active menu so we don't do anything
 
-    if menuName == 'tracklogManagerCathegories':
-      self.setupCathegoriesMenu()
+    if menuName == 'tracklogManagerCategories':
+      self.setupCategoriesMenu()
 
 
     elif menuName == 'tracklogManager':
@@ -181,7 +181,7 @@ class tracklogManager(ranaModule):
       menus = self.m.get("menu",None)
 
       # * draw "escape" button
-      menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:tracklogManagerCathegories")
+      menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:tracklogManagerCategories")
       # * scroll up
       menus.drawButton(cr, x2, y2, dx, dy, "", "up_list", "%s:up" % self.moduleName)
       # * scroll down
@@ -196,11 +196,11 @@ class tracklogManager(ranaModule):
         index = self.getScroll() + row
         numItems = len(list)
         self.currentNumItems = numItems
-        if(0 <= index < numItems):
+        if 0 <= index < numItems:
 
           (text1,text2,onClick) = self.describeTracklog(list[index], cat)
 
-          y = y4 + (row) * dy
+          y = y4 + row * dy
           w = w1 - (x4-x1)
 
           # Draw background and make clickable
@@ -230,7 +230,7 @@ class tracklogManager(ranaModule):
       menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:tracklogManager#tracklogManager")
       track = self.LTModule.getActiveTracklog()
       # is there an active tracklog ?
-      if track == None:
+      if track is None:
         """ there is no active tracklog,
            so we don't draw the rest of the menu
            we also don't setup the tools sub menu
@@ -261,13 +261,13 @@ class tracklogManager(ranaModule):
       # * draw an info box
       menus.drawButton(cr, x4, y4+dy, w, h1-(y4+dy), "", "generic", "set:menu:tracklogManager#tracklogInfo")
 
-      pointcount = 0
+      pointCount = 0
       if track.trackpointsList:
-        pointcount = len(track.trackpointsList[0])
+        pointCount = len(track.trackpointsList[0])
       else:
-        pointcount = 0
+        pointCount = 0
 
-      text = "number of points: %d\n" % pointcount
+      text = "number of points: %d\n" % pointCount
       if track.elevation == True:
         units = self.m.get('units', None)
         if units:
@@ -322,17 +322,17 @@ class tracklogManager(ranaModule):
       action)
 
   def showText(self,cr,text,x,y,widthLimit=None,fontsize=40):
-    if(text):
+    if text:
       cr.set_font_size(fontsize)
       stats = cr.text_extents(text)
-      (textwidth, textheight) = stats[2:4]
+      (textWidth, textHeight) = stats[2:4]
 
-      if(widthLimit and textwidth > widthLimit):
-        cr.set_font_size(fontsize * widthLimit / textwidth)
+      if widthLimit and textWidth > widthLimit:
+        cr.set_font_size(fontsize * widthLimit / textWidth)
         stats = cr.text_extents(text)
-        (textwidth, textheight) = stats[2:4]
+        (textWidth, textHeight) = stats[2:4]
 
-      cr.move_to(x, y+textheight)
+      cr.move_to(x, y+textHeight)
       cr.show_text(text)
 
   def _handleElevationLookupResults(self, key, results):
@@ -341,7 +341,7 @@ class tracklogManager(ranaModule):
       index = 0
       for onlinePoint in onlineElevList: # add the new elevation data to the tracklog
         originalTracklog.trackpointsList[0][index].elevation = onlinePoint[2]
-        index = index + 1
+        index += 1
       originalTracklog.modified() # make the tracklog update
       originalTracklog.replaceFile() # replace the old tracklog file
 
