@@ -66,36 +66,36 @@ class tracklog(ranaModule):
     if message == "incrementStartIndex":
       self.startButtonIndex = (self.startButtonIndex+1)%2 # when we go to 2, we return to 0
     elif message == "startLogging":
-      print "starting to log"
+      print("tracklog: starting to log")
       # start a new log
       if not self.loggingEnabled:
         self.loggingEnabled = True
-        print "initializing the log file"
+        print("tracklog: initializing the log file")
         self.initLog()
       # or resume an existing one
       elif self.loggingEnabled == True & self.loggingPaused == True:
-        print "resuming the logging"
+        print "tracklog: resuming the logging"
         self.loggingPaused = False
       self.set('needRedraw', True)
 
     elif message == "pauseLogging":
-      print "pausing the logging"
+      print("tracklog: pausing the logging")
       self.saveLogIncrement()
       self.loggingPaused = True
       self.set('needRedraw', True)
 
     elif message == "stopLogging":
-      print "stopping the logging"
+      print("tracklog: stopping the logging")
       self.stopLogging()
       self.set('needRedraw', True)
       
     elif message == "setNewLoggingInterval":
-      print "setting new log interval"
+      print("tracklog: setting new log interval")
       self.logInterval=int(self.get('tracklogLogInterval', 1))
       self.set('needRedraw', True)
 
     elif message == "setNewSavingInterval":
-      print "setting new save interval"
+      print("tracklog: setting new save interval")
       self.saveInterval=int(self.get('tracklogSaveInterval', 10))
       self.set('needRedraw', True)
 
@@ -143,7 +143,7 @@ class tracklog(ranaModule):
         self.avgSpeed = self.avg1/self.avg2
 
       if (currentTimestamp - self.lastTimestamp)>self.logInterval:
-        print "updating the log"
+        print("tracklog: updating the log")
         (lat,lon) = self.get('pos', None)
         elevation = self.get('elevation', None) # TODO: add elevation logging support
         currentLatLonElevTime = (lat,lon, elevation, time.strftime("%Y-%m-%dT%H:%M:%S"))
@@ -159,7 +159,7 @@ class tracklog(ranaModule):
           self.lastCoords = currentCoords
 
       if (currentTimestamp - self.lastSavedTimestamp)>self.saveInterval:
-        print "saving log increment"
+        print("tracklog: saving log increment")
         self.saveLogIncrement()
         self.lastSavedTimestamp = currentTimestamp
         self.set('needRedraw', True)
@@ -201,7 +201,7 @@ class tracklog(ranaModule):
 
     self.lastTimestamp = self.lastSavedTimestamp = int(time.time())
     self.lastCoords = self.get('pos', None)
-    print "log file initialized"
+    print("tracklog: log file initialized")
 
 
   def saveGPXLog(self, GPXTracklog, filename):
@@ -272,7 +272,7 @@ class tracklog(ranaModule):
 
   def storeCurrentPosition(self):
     pos = self.get('pos', None)
-    proj =self.m.get('projection', None)
+    proj = self.m.get('projection', None)
 
     if pos and proj:
       (lat,lon) = pos
@@ -463,7 +463,7 @@ class tracklog(ranaModule):
     if menuName == 'tracklog':
       # is the submenu initialized ?
       if self.toolsMenuDone == False:
-        print "setting up tracklogTools menu"
+        print("tracklog: setting up tracklogTools menu")
         self.initToolsMenu()
         self.toolsMenuDone = True
       # setup the viewport
