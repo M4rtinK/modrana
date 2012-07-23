@@ -1117,7 +1117,7 @@ class menus(ranaModule):
     self.addItem('main', 'options', 'options', 'set:menu:options')
     self.addItem('main', 'download', 'download', 'set:menu:data')
     self.addItem('main', 'mode', 'mode', 'set:menu:modes')
-    self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManagerCathegories')
+    self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManagerCategories')
     self.addItem('main', 'log a track', 'log', 'set:menu:tracklog#tracklog')
     self.addItem('main', 'info', 'info', 'set:menu:info')
     self.setupModesMenu()
