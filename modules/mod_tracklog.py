@@ -194,7 +194,7 @@ class tracklog(ranaModule):
 #      self.currentLogGPX.author = "modRana - a flexible GPS navigation system"
 #      self.currentLogGPX.link = "http://nlp.fi.muni.cz/trac/gps_navigace"
 
-      filename = name + ".gpx"
+      filename = "%s.gpx" % name
       self.currentLogFileName = filename
       self.currentLogPath = os.path.join(tracklogFolder, self.category, filename)
       self.saveGPXLog(self.currentLogGPX, self.currentLogFileName)
@@ -258,7 +258,6 @@ class tracklog(ranaModule):
 #        # we also set the correct category ('log')
 #        loadTl.setTracklogPathCategory(path, 'log')
         loadTl.listAvailableTracklogs() #TODO: incremental addition
-
 
 
   def clean(self):
