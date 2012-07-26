@@ -128,6 +128,13 @@ class ModRana:
 
     # add the paths handling core module
     self.paths = paths.Paths(self)
+
+    # print version string
+    version = self.paths.getVersionString()
+    if version is None:
+      version = "unknown version"
+    print("  %s" % version)
+
     # add the configs handling core module
     self.configs = configs.Configs(self)
 
