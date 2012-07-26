@@ -1,5 +1,10 @@
 """a modRana class representing an unified tracklog or route"""
 # -*- coding: utf-8 -*-
+from __future__ import with_statement # for python 2.5
+import csv
+import os
+import thread
+import core.exceptions
 from modules import geo
 from point import Point
 
@@ -56,13 +61,18 @@ class Way:
     self.messagePointsLLE = []
     self.length = None # in meters
     self.duration = None # in seconds
+    self.pointsLock = thread.RLock()
+
     # caching
     self.dirty = False # signalizes that cached data needs to be updated
     # now update the cache
     self._updateCache()
 
+
+
   def getPointByID(self, index):
-    (lat, lon, elevation) = self.points[index]
+    p = self.points[index]
+    (lat, lon, elevation) = (p[0], p[1], p[2])
     return Point(lat, lon, elevation)
 
   def getPointsLLE(self):
@@ -78,6 +88,13 @@ class Way:
       radians = geo.lleTuples2radians(self.points, dropElevation)
       self.pointsInRadians = radians
       return radians
+
+  def addPoint(self, point):
+    lat, lon , elevation = point.getLLE()
+    self.points.append( (lat, lon , elevation) )
+
+  def addPointLLE(self, lat, lon, elevation=None):
+    self.points.append( (lat, lon , elevation) )
 
   def getPointCount(self):
     return len(self.points)
@@ -129,10 +146,6 @@ class Way:
     self.messagePoints = []
     self._updateCache()
 
-
-
-
-
   def getMessagePoints(self):
     return self.messagePoints
 
@@ -142,7 +155,6 @@ class Way:
   def getMessagePointCount(self):
     return len(self.messagePoints)
 
-
   def getLength(self):
     """way length in meters"""
     return self.length
@@ -151,6 +163,35 @@ class Way:
     """for use if the length on of the way is reliably known from external
     sources"""
     self.length = mLength
+
+
+  # GPX export
+
+  def saveToGPX(self):
+    """save way to GPX file
+    points are saved as trackpoints, message points as routepoints"""
+
+
+  # CSV  export
+
+  def saveToCSV(self, path, append=False):
+    """save all points to a CSV file
+    NOTE: message points are not (yet) handled
+    TODO: message point support"""
+    timestamp = geo.timestampUTC()
+    try:
+      f = open(path, "wb")
+      writer = csv.writer(f, dialect=csv.excel)
+      points = self.getPointsLLE()
+      for p in points:
+        writer.writeRow(p[0], p[1], p[2], timestamp)
+      f.close()
+      print('way: %d points saved to %s as CSV' % (path, len(points)))
+      return True
+    except Exception, e:
+      print('way: saving to CSV failed')
+      print(e)
+      return False
 
   def __str__(self):
     pCount = self.getPointCount()
@@ -198,6 +239,180 @@ def fromMonavResult(mResult):
 
 def fromGPX(GPX):
   pass
+
+def fromCSV(CSV, delimiter=',', fieldCount=None):
+  """create a way object from a CSV file specified by path
+  Assumed field order:
+  lat,lon,elevation,timestamp
+
+  If the fieldCount parameter is set, modRana assumes that the file has exactly the provided number
+  of fields. As a result, content of any additional fields on a line will be dropped and
+  if any line has less fields than fieldCount, parsing will fail.
+
+ If the fieldCount parameter is not set, modRana checks the field count for every filed and tries to get usable
+  data from it. Lines that fail to parse (have too 0 or 1 fields or fail at float parsing) are dropped. In this mode,
+  a list of LLET tuples is returned.
+
+  TODO: some range checks ?
+
+  """
+  try:
+    f = open(CSV, 'r')
+  except IOError, e:
+    if e.errno == 2:
+      raise core.exceptions.FileNotFound
+    elif e.errno == 13:
+      raise core.exceptions.FileAccessPermissionDenied
+    f.close()
+
+  points = []
+
+  reader = csv.reader(f, delimiter=delimiter)
+
+  if fieldCount: # assume fixed field count
+    try:
+      if fieldCount == 2: # lat, lon
+        points = map(lambda x: (x[0], x[1]), reader)
+      elif fieldCount == 3: # lat, lon, elevation
+        points = map(lambda x: (x[0], x[1], x[2]), reader)
+      elif fieldCount == 4: # lat, lon, elevation, timestamp
+        points = map(lambda x: (x[0], x[1], x[2], x[3]), reader)
+      else:
+        print("Way: wrong field count - use 2, 3 or 4")
+        raise ValueError
+    except Exception, e:
+      print('Way: parsing CSV file at path: %s failed')
+      print(e)
+      f.close()
+      return None
+  else:
+    parsingErrorCount = 0
+    for r in reader:
+      fields = len(r)
+      try:
+        if fields >= 4:
+          points.append(float(r[0]), float(r[1]), float(r[2]), r[3])
+        elif fields == 3:
+          points.append(float(r[0]), float(r[1]), float(r[2]), None)
+        elif fields == 2:
+          points.append(float(r[0]), float(r[1]), None, None)
+        else:
+          print('Way: error, line %d has 1 or 0 fields, needs at least 2 (lat, lon):\n%r' % (reader.line_no, r))
+          parsingErrorCount+=1
+      except Exception, e:
+        print('Way: parsing CSV line %d failed' % reader.line_no)
+        parsingErrorCount+=1
+
+  # close the file
+  f.close()
+  print('Way: CSV file parsing finished, %d points added with %d errors' % (len(points), parsingErrorCount))
+  return Way(points)
+
+class AppendOnlyWay(Way):
+  """a way subclass that is optimized for efficient incremental storage file storage
+  -> points can be only appended or completely replaced, no insert support at he moment
+  -> only CSV storage is supported at the moment
+  -> call openCSV(path) to start incremental file storage
+  -> call flush() if to write the points added since open* or last flush to disk
+  -> call close() once you are finished - this flushes any remaining points to disk
+  and closes the file
+  NOTE: this subclass also records per-point timestamps when points are added and these timestamps
+  are stored in the output file
+
+  Point storage & point appending
+  -> points are added both to the main point list and the increment temporary list
+  -> on every flush, the increment list is added to the file in storage and cleared
+  -> like this, we don't need to combine the two lists when we need to return all points
+  -> only possible downside is duplicate space needed for the points if flush is never called,
+  as the same points would be stored both in points and increment
+  -> if flush is called regularly (which is the expected behaviour when using this class), this should not be an issue
+
+  """
+  def __init__(self, points=[]):
+    Way.__init__(self)
+
+    self.points = [] # stored as (lat, lon, elevation, timestamp) tuples
+    self.increment = [] # not yet saved increment, also LLET
+    self.file = None
+    self.filePath = None
+    self.writer = None
+
+    if points:
+      with self.pointsLock:
+        #mark all points added on startup with a single timestamp
+        timestamp = geo.timestampUTC()
+        # convert to LLET
+        points = map(lambda x: (x[0],x[1],x[2],timestamp), points)
+
+        # mark points as not yet saved
+        self.increment = points
+        # and also add to main point list
+        self.points = points
+
+  def getPointsLLE(self):
+    # drop the timestamp
+    return map(lambda x: (x[0],x[1],x[2]), self.points)
+
+  def getPointsLLET(self):
+    """returns all points in LLET format, both saved an not yet saved to storage"""
+    return self.points
+
+  def getPointCount(self):
+    return len(self.points) + len(self.increment)
+
+  def addPoint(self, point):
+    with self.pointsLock:
+      lat, lon , elevation = point.getLLE()
+      self.points.append( (lat, lon , elevation, geo.timestampUTC()) )
+      self.increment.append( (lat, lon , elevation, geo.timestampUTC()) )
+
+  def addPointLLE(self, lat, lon, elevation=None):
+    with self.pointsLock:
+      self.points.append( (lat, lon , elevation, geo.timestampUTC()) )
+      self.increment.append( (lat, lon , elevation, geo.timestampUTC()) )
+
+  def startWritingCSV(self, path):
+    try:
+      self.file = open(path, "wb")
+      self.writer = csv.writer(self.file)
+      self.filePath = path
+      # flush any pending points
+      self.flush()
+      print('AOWay: started writing to: %s' % path)
+    except Exception, e:
+      print('AOWay: opening CSV file for writing failed, path: %s' % path)
+      print(e)
+      self._cleanup() # revert to initial state
+      return False
+
+  def flush(self):
+    """flush all points that are only in memory to storage"""
+    # get the pointsLock, the current increment to local variable and clear the original
+    # we release the lock afterwards so that other threads can start adding more points right away
+    with self.pointsLock:
+      increment = self.increment()
+      self.increment = []
+    # write the rows
+    self.writer.writeRows()
+    # make sure it actually gets written to storage
+    self.file.flush()
+    os.fsync()
+
+  def close(self):
+    # save any increments
+    if self.increment:
+      self.flush()
+    # close the file
+    self.file.close()
+    print('AOWay: file closed: %s' % self.filePath)
+    # cleanup
+    self._cleanup()
+
+  def _cleanup(self):
+    self.file = None
+    self.writer = None
+    self.filePath = None
+    self.increment = []
 
 
 #from: http://seewah.blogspot.com/2009/11/gpolyline-decoding-in-python.html
