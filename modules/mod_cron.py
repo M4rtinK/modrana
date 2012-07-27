@@ -110,7 +110,6 @@ class CronGTK(Cron):
     self.nextId = 0
     # cronTab and activeIds should be in sync
     self.cronTab = {"idle":{}, "timeout":{}}
-#    self.info = {}
     self.dataLock = threading.RLock()
 
   def _getID(self):
@@ -165,7 +164,6 @@ class CronQt(Cron):
     self.nextId = 0
     # cronTab and activeIds should be in sync
     self.cronTab = {"idle":{}, "timeout":{}}
-    #    self.info = {}
     self.dataLock = threading.RLock()
 
   def _getID(self):
