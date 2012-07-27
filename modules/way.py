@@ -426,6 +426,9 @@ class AppendOnlyWay(Way):
       self.points.append( (lat, lon , elevation, geo.timestampUTC()) )
       self.increment.append( (lat, lon , elevation, geo.timestampUTC()) )
 
+  def getFilePath(self):
+    return self.filePath
+
   def startWritingCSV(self, path):
     try:
       self.file = open(path, "wb")
@@ -462,6 +465,20 @@ class AppendOnlyWay(Way):
     print('AOWay: file closed: %s' % self.filePath)
     # cleanup
     self._cleanup()
+
+  def deleteFile(self):
+    """delete the currently open file"""
+    path = self.filePath
+    if self.file:
+      try:
+        self.close() # close it
+        os.remove(path) # and delete it
+      except Exception, e:
+        print('AOWay: deleting currently open file failed')
+        print(e)
+    else:
+      print("AOWay: can't delete current file - no file open")
+
 
   def _cleanup(self):
     self.file = None
