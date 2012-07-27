@@ -5,7 +5,9 @@ import csv
 import os
 import thread
 import core.exceptions
+import core.paths
 from modules import geo
+from modules.upoints import gpx
 from point import Point
 
 class TurnByTurnPoint(Point):
@@ -152,6 +154,8 @@ class Way:
   def getMessagePointsLLE(self):
     return self.messagePointsLLE
 
+
+
   def getMessagePointCount(self):
     return len(self.messagePoints)
 
@@ -167,9 +171,60 @@ class Way:
 
   # GPX export
 
-  def saveToGPX(self):
+  def saveToGPX(self, path, turns=False):
     """save way to GPX file
-    points are saved as trackpoints, message points as routepoints"""
+    points are saved as trackpoints,
+    message points as routepoints with turn description in the <desc> field"""
+    try: # first check if we cant open the file for writing
+      f = open(path, "wb")
+
+      # Handle trackpoints
+      # check for stored timestamps
+      if self.points and len(self.points[0]) >= 4: # LLET
+        trackpoints = map(lambda x:
+        gpx.Trackpoint(x[0],x[1],None,None,x[2],x[3]),
+          self.points)
+      else: # LLE
+        trackpoints = map(lambda x:
+        gpx.Trackpoint(x[0],x[1],None,None,x[2],None),
+          self.points)
+
+      # Handle message points
+      # message is stored in <desc>
+      messagePoints = self.getMessagePoints()
+      index = 1
+      mpCount = len(messagePoints)
+      if turns: # message points contain Turn-By-Turn directions
+        routepoints = gpx.Routepoints()
+        for mp in messagePoints:
+          if turns:
+            name = "Turn %d/%d" % (index, mpCount)
+          lat, lon, elev, message = mp.getLLEM()
+          routepoints.append(gpx.Routepoint(lat, lon, name, message, elev, None))
+          index+=1
+        print('way: %d points, %d routepoints saved to %s in GPX format' % (path, len(trackpoints), len(routepoints)))
+      else:
+        waypoints = []
+        for mp in messagePoints:
+          if turns:
+            name = "Turn %d/%d" % (index, mpCount)
+          lat, lon, elev, message = mp.getLLEM()
+          waypoints.append(gpx.Routepoint(lat, lon, name, message, elev, None))
+          index+=1
+        print('way: %d points, %d waypoints saved to %s in GPX format' % (path, len(trackpoints), len(waypoints)))
+
+      # write the GPX tree to file
+      xmlTree = trackpoints.export_gpx_file()
+      xmlTree.write(f)
+      # close the file
+      f.close()
+      return True
+    except Exception, e:
+      print('way: saving to GPX format failed')
+      print(e)
+      return False
+
+
 
 
   # CSV  export
