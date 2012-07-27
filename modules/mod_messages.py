@@ -41,13 +41,14 @@ class messageModule(ranaModule):
         return
 
       if module == 'set':
+        # set a value in the persistent dict
         (key,value) = text.split(":", 1)
         for i in(None, True, False):
           if value == str(i):
             value = i
         self.set(key, value)
         
-      elif module == 'toggle':
+      elif module == 'toggle': # toggle a boolean value in the persistent dict
         self.set(text, not self.get(text,0))
 
       elif module == "*": # send to all modules
@@ -55,6 +56,8 @@ class messageModule(ranaModule):
           m.handleMessage(text)
 
       elif module == 'ms': # short for message + single simple string
+        # Example:
+        # "ms:module_name:message_text:payload_string"
         (module, key, string) = text.split(':', 2)
         m = self.m.get(module, None)
         if m is not None:
@@ -63,6 +66,8 @@ class messageModule(ranaModule):
           print "Message addressed to %s which isn't loaded" % module
 
       elif module == 'ml': # short for message + list of strings
+        # Example:
+        # "ml:module_name:message_text:foo0;foo1;foo2"
         tokens = text.split(':', 2)
         module = tokens[0]
         key = tokens[1]
@@ -74,7 +79,9 @@ class messageModule(ranaModule):
         else:
           print "Message addressed to %s which isn't loaded" % module
 
-      elif module == 'md': # short for message + dictionary of string:string key:value pairs
+      elif module == 'md': # short for message + dictionary of string=string key:value pairs
+        # Example:
+        # "md:module_name:message_text:key0=value0;key1=value1;key2=value2"
         tokens = text.split(':', 3)
         module = tokens[0]
         mainKey = tokens[1]
