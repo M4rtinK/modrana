@@ -421,10 +421,15 @@ class AppendOnlyWay(Way):
       self.points.append( (lat, lon , elevation, geo.timestampUTC()) )
       self.increment.append( (lat, lon , elevation, geo.timestampUTC()) )
 
-  def addPointLLE(self, lat, lon, elevation=None):
+  def addPointLLE(self, lat, lon, elevation):
     with self.pointsLock:
       self.points.append( (lat, lon , elevation, geo.timestampUTC()) )
       self.increment.append( (lat, lon , elevation, geo.timestampUTC()) )
+
+  def addPointLLET(self, lat, lon, elevation, timestamp):
+    with self.pointsLock:
+      self.points.append( (lat, lon , elevation, timestamp) )
+      self.increment.append( (lat, lon , elevation, timestamp) )
 
   def getFilePath(self):
     return self.filePath
