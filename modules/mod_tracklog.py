@@ -194,8 +194,8 @@ class tracklog(ranaModule):
       self.logPath = os.path.join(tracklogFolder, self.category, filename)
 
       # initialize temporary CSV log files
-      path1 = os.path.join(tracklogFolder, self.category, "%.temporary_csv_1" % name)
-      path2 = os.path.join(tracklogFolder, self.category, "%.temporary_csv_2" % name)
+      path1 = os.path.join(tracklogFolder, self.category, "%s.temporary_csv_1" % name)
+      path2 = os.path.join(tracklogFolder, self.category, "%s.temporary_csv_2" % name)
 
       log1 = way.AppendOnlyWay()
       log1.startWritingCSV(path1)
