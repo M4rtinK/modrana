@@ -96,7 +96,7 @@ class Cron(ranaModule):
     """remove timeout with a given id"""
     pass
 
-  def modifyTimeout(self,id, newTimeout):
+  def modifyTimeout(self, id, newTimeout):
     """modify the duration of a timeout in progress"""
     pass
 
@@ -143,7 +143,7 @@ class CronGTK(Cron):
       else:
         print("cron: can't remove timeout, wrong id: ", id)
 
-  def modifyTimeout(self,id, newTimeout):
+  def modifyTimeout(self, id, newTimeout):
     """modify the duration of a timeout in progress"""
     with self.dataLock:
       if id in self.cronTab['timeout'].keys():
