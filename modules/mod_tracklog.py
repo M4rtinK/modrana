@@ -23,6 +23,8 @@ import time
 import os
 import geo
 from core import gs
+from modules import way
+
 if gs.GUIString == "GTK":
   import gtk
 
@@ -43,11 +45,17 @@ class tracklog(ranaModule):
     self.lastTimestamp = None
     self.lastSavedTimestamp = None
     self.lastCoords = None
-    self.currentLogGPX = None #a GPX tree for current log
-    self.currentTempLog = None #a temporary log segment before saving to file
-    self.currentLogName = None #name of the current log
-    self.currentLogFileName = None #name of the current log
-    self.currentLogPath = None #path to the current log
+    self.logName = None #name of the current log
+    self.logFilename = None #name of the current log
+    self.logPath = None #path to the current log
+    # primary and secondary AOWay objects for
+    # persistent log storage during logging
+    self.log1 = None
+    self.log2 = None
+    # timer ids
+    self.updateLogTimerId = None
+    self.saveLogTimerId = None
+
     self.maxSpeed = None
     self.avg1 = 0
     self.avg2 = 0
@@ -60,7 +68,6 @@ class tracklog(ranaModule):
     self.pxpyIndex = []
 
 #    self.startupTimestamp = time.strftime("%Y%m%dT%H%M%S")
-
 
   def handleMessage(self, message, type, args):
     if message == "incrementStartIndex":
@@ -79,29 +86,18 @@ class tracklog(ranaModule):
       self.set('needRedraw', True)
 
     elif message == "pauseLogging":
-      print("tracklog: pausing the logging")
-      self.saveLogIncrement()
-      self.loggingPaused = True
+      self.pauseLogging()
       self.set('needRedraw', True)
 
     elif message == "stopLogging":
-      print("tracklog: stopping the logging")
+      print("tracklog: stopping logging")
       self.stopLogging()
-      self.set('needRedraw', True)
-      
-    elif message == "setNewLoggingInterval":
-      print("tracklog: setting new log interval")
-      self.logInterval=int(self.get('tracklogLogInterval', 1))
-      self.set('needRedraw', True)
-
-    elif message == "setNewSavingInterval":
-      print("tracklog: setting new save interval")
-      self.saveInterval=int(self.get('tracklogSaveInterval', 10))
       self.set('needRedraw', True)
 
     elif message == 'nameInput':
       entry = self.m.get('textEntry', None)
       if entry is None:
+        print("tracklog: error, text entry module is not loaded")
         return
       entryText = ""
       logNameEntry = self.get('logNameEntry', None)
@@ -127,42 +123,42 @@ class tracklog(ranaModule):
     if key == 'logNameEntry':
       self.set('logNameEntry', result)
 
-  def update(self):
-    if self.loggingEnabled & (not self.loggingPaused):
-      currentTimestamp = time.time()
-
-      # update the current log speed statistics
-      currentSpeed = self.get('speed', None)
-      if currentSpeed:
-        # max speed
-        if currentSpeed>self.maxSpeed:
-          self.maxSpeed = currentSpeed
-        # avg speed
-        self.avg1 += currentSpeed
-        self.avg2 += (currentTimestamp - self.lastTimestamp)
-        self.avgSpeed = self.avg1/self.avg2
-
-      if (currentTimestamp - self.lastTimestamp)>self.logInterval:
-        print("tracklog: updating the log")
-        (lat,lon) = self.get('pos', None)
-        elevation = self.get('elevation', None) # TODO: add elevation logging support
-        currentLatLonElevTime = (lat,lon, elevation, time.strftime("%Y-%m-%dT%H:%M:%S"))
-        self.currentTempLog.append(currentLatLonElevTime)
-        self.lastTimestamp = currentTimestamp
-        # update traveled distance
-        self.storeCurrentPosition()
-        currentCoords = self.get('pos', None)
-        if self.lastCoords is not None and currentCoords is not None:
-          (lat1,lon1) = self.lastCoords
-          (lat2,lon2) = currentCoords
-          self.distance+=geo.distance(lat1,lon1,lat2,lon2)
-          self.lastCoords = currentCoords
-
-      if (currentTimestamp - self.lastSavedTimestamp)>self.saveInterval:
-        print("tracklog: saving log increment")
-        self.saveLogIncrement()
-        self.lastSavedTimestamp = currentTimestamp
-        self.set('needRedraw', True)
+#  def update(self):
+#    if self.loggingEnabled & (not self.loggingPaused):
+#      currentTimestamp = time.time()
+#
+#      # update the current log speed statistics
+#      currentSpeed = self.get('speed', None)
+#      if currentSpeed:
+#        # max speed
+#        if currentSpeed>self.maxSpeed:
+#          self.maxSpeed = currentSpeed
+#        # avg speed
+#        self.avg1 += currentSpeed
+#        self.avg2 += (currentTimestamp - self.lastTimestamp)
+#        self.avgSpeed = self.avg1/self.avg2
+#
+#      if (currentTimestamp - self.lastTimestamp)>self.logInterval:
+#        print("tracklog: updating the log")
+#        (lat,lon) = self.get('pos', None)
+#        elevation = self.get('elevation', None) # TODO: add elevation logging support
+#        currentLatLonElevTime = (lat,lon, elevation, time.strftime("%Y-%m-%dT%H:%M:%S"))
+#        self.currentTempLog.append(currentLatLonElevTime)
+#        self.lastTimestamp = currentTimestamp
+#        # update traveled distance
+#        self.storeCurrentPosition()
+#        currentCoords = self.get('pos', None)
+#        if self.lastCoords is not None and currentCoords is not None:
+#          (lat1,lon1) = self.lastCoords
+#          (lat2,lon2) = currentCoords
+#          self.distance+=geo.distance(lat1,lon1,lat2,lon2)
+#          self.lastCoords = currentCoords
+#
+#      if (currentTimestamp - self.lastSavedTimestamp)>self.saveInterval:
+#        print("tracklog: saving log increment")
+#        self._saveLogIncrement()
+#        self.lastSavedTimestamp = currentTimestamp
+#        self.set('needRedraw', True)
 
   def initLog(self,type='gpx',name=None):
     """start a new log, zero the appropriate variables, etc."""
@@ -174,13 +170,12 @@ class tracklog(ranaModule):
     self.currentTempLog = []
     self.distance = 0
     self.pxpyIndex = []
-    options = self.m.get('options', None)
     tracklogFolder = self.modrana.paths.getTracklogsFolderPath()
 
     if name is None:
       name = self.generateLogName()
 
-    self.currentLogName = name
+    self.logName = name
 
     if type=='gpx':
       """ importing the GPX module can be time consuming so import it
@@ -195,47 +190,84 @@ class tracklog(ranaModule):
 #      self.currentLogGPX.link = "http://nlp.fi.muni.cz/trac/gps_navigace"
 
       filename = "%s.gpx" % name
-      self.currentLogFileName = filename
-      self.currentLogPath = os.path.join(tracklogFolder, self.category, filename)
-      self.saveGPXLog(self.currentLogGPX, self.currentLogFileName)
+      self.logFilename = filename
+      self.logPath = os.path.join(tracklogFolder, self.category, filename)
+
+      # initialize temporary CSV log files
+      path1 = os.path.join(tracklogFolder, self.category, "%.temporary_csv_1" % name)
+      path2 = os.path.join(tracklogFolder, self.category, "%.temporary_csv_2" % name)
+
+      log1 = way.AppendOnlyWay()
+      log1.startWritingCSV(path1)
+      self.log1 = log1
+
+      log2 = way.AppendOnlyWay()
+      log2.startWritingCSV(path2)
+      self.log2 = log2
+
+      # start update and save timers
+      self._startTimers()
 
     self.lastTimestamp = self.lastSavedTimestamp = int(time.time())
     self.lastCoords = self.get('pos', None)
     print("tracklog: log file initialized")
 
-
-  def saveGPXLog(self, GPXTracklog, filename):
-#      f = open(self.currentLogPath,'w')
-#      xmlTree = self.currentLogGPX.export_gpx_file("1.1")
-#      xmlTree.write(f)
-#      f.close()
-    loadTl = self.m.get('loadTracklogs', None)
-    if loadTl:
-      loadTl.storeTracklog(GPXTracklog, filename, self.category, "GPX", False)
-
-
-
-  def saveLogIncrement(self):
-    """save current log increment
-    TODO: support for more log types"""
-    """
-    GPX Trackpoint takes parameters in this order:
-    latitude, longitude, name=None, description=None, elevation=None, time=None
-
-    """
-
-    """ importing the GPX module can be time consuming so import it
-    when it is really needed"""
-    from upoints import gpx
-    newTrackpoints = map(lambda x: gpx.Trackpoint(x[0],x[1],None,None,x[2],x[3]), self.currentTempLog)
-
-    if len(self.currentLogGPX)==0:
-      self.currentLogGPX.append(newTrackpoints)
+  def pauseLogging(self):
+    """pause logging"""
+    if self.loggingEnabled:
+      self._saveLogIncrement() # save increment
+      self.loggingPaused = True # pause logging
+      print('tracklog: logging paused')
     else:
-      self.currentLogGPX[0].extend(newTrackpoints)
-    self.saveGPXLog(self.currentLogGPX, self.currentLogFileName)
-    #the current temporary log segment has been saved to disk, we can empty it
-    self.currentTempLog = []
+      print("tracklog: can't pause logging - no logging in progress")
+
+  def unPauseLogging(self):
+    """pause logging"""
+    if self.loggingEnabled:
+      self._saveLogIncrement() # save increment
+      self.loggingPaused = False # un-pause logging
+      print('tracklog: logging un-paused')
+    else:
+      print("tracklog: can't un-pause logging - no logging in progress")
+
+  def _updateLogCB(self):
+    """add current position at the end of the log"""
+    pos = self.get('pos', None)
+    if pos and not self.loggingPaused:
+      timestamp = geo.timestampUTC()
+      lat, lon = pos
+      elevation = self.get('elevation', None)
+      self.log1.addPointLLET(lat, lon, elevation, timestamp)
+      self.log2.addPointLLET(lat, lon, elevation, timestamp)
+
+      # update statistics for the current log
+      if self.loggingEnabled and (not self.loggingPaused):
+        # update the current log speed statistics
+        currentSpeed = self.get('speed', None)
+        if currentSpeed:
+          # max speed
+          if currentSpeed > self.maxSpeed:
+            self.maxSpeed = currentSpeed
+          # avg speed
+          self.avg1 += currentSpeed
+          self.avg2 += (time.time() - self.lastTimestamp)
+          self.avgSpeed = self.avg1/self.avg2
+
+        # update traveled distance
+        lLat, lLon = self.lastCoords
+        self.distance+=geo.distance(lLat, lLon, lat, lon)
+        self.lastCoords = lat, lon
+
+  def _saveLogCB(self):
+    """save the log to temporary files in storage
+    (only the increment from last save needs to be stored)"""
+    if not self.loggingPaused:
+      self._saveLogIncrement()
+
+  def _saveLogIncrement(self):
+    """save current log increment to storage"""
+    self.log1.flush()
+    self.log2.flush()
 
   def generateLogName(self):
     """generate a unique name for a log"""
@@ -246,24 +278,89 @@ class tracklog(ranaModule):
       prefix = logNameEntry
     return prefix + "_" + timeString
 
+  def _startTimers(self):
+    """start the update and save timers"""
+    cron = self.m.get('cron', None)
+    if cron:
+      # in milliseconds, stored as seconds
+      updateTimeout = int(self.get('tracklogLogInterval', 1))*1000
+      saveTimeout = int(self.get('tracklogSaveInterval', 10))*1000
+      # update timer
+      self.updateLogTimerId = cron.addTimeout(self._updateLogCB(), updateTimeout, self, "update tracklog with current position")
+      # save timer
+      self.updateLogTimerId = cron.addTimeout(self._saveLogCB(), saveTimeout, self, "save tracklog increment")
+      # update timer intervals if they are changed
+      # in the persistent dictionary
+      self.modrana.watch('tracklogLogInterval', self._updateIntervalChangedCB)
+      self.modrana.watch('tracklogSaveInterval', self._saveIntervalChangedCB)
+
+  def _updateIntervalChangedCB(self, key, oldInterval, newInterval):
+    if self.updateLogTimerId:
+      cron = self.m.get('cron', True)
+      interval = int(newInterval)*1000
+      if cron:
+        cron.modifyTimeout(self.updateLogTimerId, interval)
+        print('tracklog: tracklog update interval changed to %s s' % newInterval)
+      else:
+        print("tracklog: error, the cron module is not loaded")
+
+  def _saveIntervalChangedCB(self, key, oldInterval, newInterval):
+    if self.updateLogTimerId:
+      cron = self.m.get('cron', True)
+      interval = int(newInterval)*1000
+      if cron:
+        cron.modifyTimeout(self.saveLogTimerId, interval)
+        print('tracklog: tracklog save interval changed to %s s' % newInterval)
+      else:
+        print("tracklog: error, the cron module is not loaded")
+
+  def _stopTimers(self):
+    """stop the update and save timers"""
+    cron = self.m.get('cron', None)
+    if cron:
+      cron.removeTimeout(self.updateLogTimerId)
+      cron.removeTimeout(self.saveLogTimerId)
+      self.saveLogTimerId = None
+      self.updateLogTimerId = None
+
   def stopLogging(self):
-      self.saveLogIncrement()
-#      path = self.currentLogPath
-      self.clean()
-      self.loggingEnabled = False
-      self.startButtonIndex=0
-      # now we make the tracklog manager aware, that there is a new log
-      loadTl = self.m.get('loadTracklogs', None)
-      if loadTl:
+    """stop logging, export the log to GPX and delete the temporary
+    log files"""
+    # stop timers
+    self._stopTimers()
+
+    # save current log increment to storage (in CSV)
+    self._saveLogIncrement()
+
+    # try to export the log to GPX
+    # first from the primary log
+    if not self.log1.saveToGPX(self.logPath):
+      self.log2.saveToGPX(self.logPath) # try the secondary log
+
+    # cleanup
+    # -> this deletes the temporary log files
+    # and discards the temporary AOWay objects
+    self._cleanup()
+    self.loggingEnabled = False
+    self.startButtonIndex=0
+    # now we make the tracklog manager aware, that there is a new log
+    loadTl = self.m.get('loadTracklogs', None)
+    if loadTl:
 #        # we also set the correct category ('log')
 #        loadTl.setTracklogPathCategory(path, 'log')
-        loadTl.listAvailableTracklogs() #TODO: incremental addition
+      loadTl.listAvailableTracklogs() #TODO: incremental addition
 
 
-  def clean(self):
+  def _cleanup(self, deleteTempLogs=True):
     """zero unneeded datastructures after logging is stopped"""
-    self.currentLogGPX = None
-    self.currentTempLog = None
+
+    if deleteTempLogs:
+      self.log1.deleteFile()
+      self.log2.deleteFile()
+
+    self.log1 = None
+    self.log2 = None
+
     self.loggingStartTimestamp = None
 #    self.maxSpeed = None
 #    self.avgSpeed = None
@@ -507,7 +604,7 @@ class tracklog(ranaModule):
       if not self.loggingEnabled:
         text+= "%s" % self.generateLogName()
       else:
-        text+= "%s" % self.currentLogName
+        text+= "%s" % self.logName
 
       text+= "\n\nlogging interval %d s, saving every %d s" % (self.logInterval, self.saveInterval)
       if self.loggingStartTimestamp:
