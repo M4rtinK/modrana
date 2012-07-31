@@ -3,7 +3,10 @@
 from __future__ import with_statement # for python 2.5
 import csv
 import os
-import thread
+import threading
+import traceback
+import sys
+import time
 import core.exceptions
 import core.paths
 from modules import geo
@@ -42,10 +45,6 @@ class TurnByTurnPoint(Point):
   def setSSMLMessage(self, message):
     self.SSMLMessage = message
 
-
-
-
-
 class Way:
   """a segment of the way
       * Points denote the way
@@ -63,7 +62,7 @@ class Way:
     self.messagePointsLLE = []
     self.length = None # in meters
     self.duration = None # in seconds
-    self.pointsLock = thread.RLock()
+    self.pointsLock = threading.RLock()
 
     # caching
     self.dirty = False # signalizes that cached data needs to be updated
@@ -177,17 +176,22 @@ class Way:
     message points as routepoints with turn description in the <desc> field"""
     try: # first check if we cant open the file for writing
       f = open(path, "wb")
-
       # Handle trackpoints
+      trackpoints = gpx.Trackpoints()
       # check for stored timestamps
       if self.points and len(self.points[0]) >= 4: # LLET
-        trackpoints = map(lambda x:
+        trackpoints.append(
+        map(lambda x:
         gpx.Trackpoint(x[0],x[1],None,None,x[2],x[3]),
-          self.points)
+        self.points)
+        )
+
       else: # LLE
-        trackpoints = map(lambda x:
+        trackpoints.append(
+        map(lambda x:
         gpx.Trackpoint(x[0],x[1],None,None,x[2],None),
-          self.points)
+        self.points)
+        )
 
       # Handle message points
       # message is stored in <desc>
@@ -211,9 +215,10 @@ class Way:
           lat, lon, elev, message = mp.getLLEM()
           waypoints.append(gpx.Routepoint(lat, lon, name, message, elev, None))
           index+=1
-        print('way: %d points, %d waypoints saved to %s in GPX format' % (path, len(trackpoints), len(waypoints)))
+        print('way: %d points, %d waypoints saved to %s in GPX format' % (len(trackpoints), len(waypoints), path))
 
       # write the GPX tree to file
+      # TODO: waypoints & routepoints support
       xmlTree = trackpoints.export_gpx_file()
       xmlTree.write(f)
       # close the file
@@ -221,7 +226,8 @@ class Way:
       return True
     except Exception, e:
       print('way: saving to GPX format failed')
-      print(e)
+#      print(e)
+      traceback.print_exc(file=sys.stdout) # find what went wrong
       return False
 
 
@@ -453,13 +459,13 @@ class AppendOnlyWay(Way):
     # get the pointsLock, the current increment to local variable and clear the original
     # we release the lock afterwards so that other threads can start adding more points right away
     with self.pointsLock:
-      increment = self.increment()
+      increment = self.increment
       self.increment = []
     # write the rows
-    self.writer.writeRows()
+    self.writer.writerows(increment)
     # make sure it actually gets written to storage
     self.file.flush()
-    os.fsync()
+    os.fsync(self.file.fileno())
 
   def close(self):
     # save any increments
