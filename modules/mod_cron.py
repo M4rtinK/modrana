@@ -132,6 +132,7 @@ class CronGTK(Cron):
     timeoutTuple = (callback, args, timeout, caller, description, realId)
     with self.dataLock:
       self.cronTab['timeout'][id] = timeoutTuple
+    return id
 
   def removeTimeout(self, id):
     """remove timeout with a given id"""
@@ -199,6 +200,8 @@ class CronQt(Cron):
       self.cronTab['timeout'][id] = timeoutTuple
     # start the timer
     timer.start(timeout)
+    # return the id
+    return id
 
   def removeTimeout(self, id):
     """remove timeout with a given id"""
