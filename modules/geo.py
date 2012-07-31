@@ -186,6 +186,9 @@ def lleTuples2radians(lleTuples, discardElevation=False):
   else:
     return map(lambda x: (radians(x[0]),radians(x[1]), x[2]), lleTuples)
 
+def timestampUTC():
+  return time.strftime("%Y-%m-%dT%H:%M:%S")
+
 
 # found on:
   # http://www.quanative.com/2010/01/01/server-side-marker-clustering-for-google-maps-with-python/
