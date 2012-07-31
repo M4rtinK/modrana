@@ -54,7 +54,7 @@ GPX_VERSIONS = {
 #  "1.1": "http://www.topografix.com/GPX/1/1",
   "1.1": {
           'version':"1.1", 
-          'creator':"modRana - http://nlp.fi.muni.cz/projekty/gps_navigace/", 
+          'creator':"modRana - http://www.modrana.org",
           'xmlns:xsi':"http://www.w3.org/2001/XMLSchema-instance", 
           'xmlns':"http://www.topografix.com/GPX/1/1", 
           'xsi:schemaLocation':"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"
