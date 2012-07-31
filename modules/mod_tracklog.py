@@ -254,15 +254,17 @@ class tracklog(ranaModule):
           self.avgSpeed = self.avg1/self.avg2
 
         # update traveled distance
-        lLat, lLon = self.lastCoords
-        self.distance+=geo.distance(lLat, lLon, lat, lon)
-        self.lastCoords = lat, lon
+        if self.lastCoords:
+          lLat, lLon = self.lastCoords
+          self.distance+=geo.distance(lLat, lLon, lat, lon)
+          self.lastCoords = lat, lon
 
   def _saveLogCB(self):
     """save the log to temporary files in storage
     (only the increment from last save needs to be stored)"""
     if not self.loggingPaused:
       self._saveLogIncrement()
+      print('tracklog: temporary log files saved')
 
   def _saveLogIncrement(self):
     """save current log increment to storage"""
@@ -286,9 +288,9 @@ class tracklog(ranaModule):
       updateTimeout = int(self.get('tracklogLogInterval', 1))*1000
       saveTimeout = int(self.get('tracklogSaveInterval', 10))*1000
       # update timer
-      self.updateLogTimerId = cron.addTimeout(self._updateLogCB(), updateTimeout, self, "update tracklog with current position")
+      self.updateLogTimerId = cron.addTimeout(self._updateLogCB, updateTimeout, self, "update tracklog with current position")
       # save timer
-      self.updateLogTimerId = cron.addTimeout(self._saveLogCB(), saveTimeout, self, "save tracklog increment")
+      self.saveLogTimerId = cron.addTimeout(self._saveLogCB, saveTimeout, self, "save tracklog increment")
       # update timer intervals if they are changed
       # in the persistent dictionary
       self.modrana.watch('tracklogLogInterval', self._updateIntervalChangedCB)
@@ -346,14 +348,13 @@ class tracklog(ranaModule):
     # now we make the tracklog manager aware, that there is a new log
     loadTl = self.m.get('loadTracklogs', None)
     if loadTl:
-#        # we also set the correct category ('log')
-#        loadTl.setTracklogPathCategory(path, 'log')
       loadTl.listAvailableTracklogs() #TODO: incremental addition
 
 
   def _cleanup(self, deleteTempLogs=True):
     """zero unneeded datastructures after logging is stopped"""
 
+    # delete the temporary log files
     if deleteTempLogs:
       self.log1.deleteFile()
       self.log2.deleteFile()
@@ -362,8 +363,8 @@ class tracklog(ranaModule):
     self.log2 = None
 
     self.loggingStartTimestamp = None
-#    self.maxSpeed = None
-#    self.avgSpeed = None
+    self.maxSpeed = None
+    self.avgSpeed = None
 
 
   def storeCurrentPosition(self):
@@ -701,7 +702,7 @@ class tracklog(ranaModule):
 
     
   def shutdown(self):
-    # try to save and stop the log
+    # try to stop and save the log
     if self.loggingEnabled:
       self.stopLogging()
 
