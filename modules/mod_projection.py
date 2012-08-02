@@ -110,7 +110,7 @@ class Projection(ranaModule):
     """Test if the module contains all the information needed to do conversions"""
     return self.xyValid and self.llValid
   
-  def setView(self,x,y,w,h):
+  def setView(self, x, y, w, h):
 #    print "setting view xywh:%d,%d,%d,%d" % (x,y,w,h)
     """Setup the display"""
     self.w = w
@@ -121,7 +121,7 @@ class Projection(ranaModule):
     if self.needsEdgeFind:
       self.findEdges()
     
-  def recentre(self,lat,lon,zoom = None):
+  def recentre(self, lat, lon, zoom = None):
 #    print "recentering to: %f,%f" % (lat,lon)
     """Move the projection to a particular geographic location
     (with optional zoom level)"""
@@ -207,7 +207,7 @@ class Projection(ranaModule):
     self.set('needRedraw', True)
 
 
-  def screenPos(self,px,py):
+  def screenPos(self, px, py):
     """Given a position on screen (where 0,0 is top-left and 1,1 is bottom right) get the coordinates"""
     x = self.xc + ((px - 1) * self.w)
     y = self.yc + ((py - 1) * self.h)
@@ -283,7 +283,7 @@ class Projection(ranaModule):
     px,py = latlon2xy(lat,lon,self.zoom)
     return px,py
 
-  def ll2pxpyRel(self,lat,lon):
+  def ll2pxpyRel(self, lat, lon):
     """Convert geographic units to relative projection units"""
     px = (lon + 180) / 360
     py = (1 - log(tan(radians(lat)) + sec(radians(lat))) / pi) / 2
@@ -292,32 +292,31 @@ class Projection(ranaModule):
   def pxpyRel2xy(self,px,py):
     """Convert relative projection units
     to display units"""
-
     n = 2**self.zoom
     (px,py) = (px*n,py*n)
     x = self.w * (px - self.px1) / self.pdx
     y = self.h * (py - self.py1) / self.pdy
     return x,y
   
-  def pxpy2xy(self,px,py):
+  def pxpy2xy(self, px, py):
     """Convert projection units to display units"""
     x = self.w * (px - self.px1) / self.pdx
     y = self.h * (py - self.py1) / self.pdy
     return x,y
 
 
-  def xy2ll(self,x,y):
+  def xy2ll(self, x, y):
     """Convert display units to geographic units"""
     px = self.px1 + x / self.scale
     py = self.py1 + y / self.scale
     lat,lon = xy2latlon(px, py, self.zoom)
     return lat,lon
 
-  def onscreen(self,x,y):
+  def onscreen(self, x, y):
     """Test if a position (in display units) is visible"""
     return 0 <= x < self.w and 0 <= y < self.h
   
-  def relXY(self,x,y):
+  def relXY(self, x, y):
     return x/self.w, y/self.h
 
   def km2px(self, distanceInKm):
