@@ -28,6 +28,17 @@ from modules import way
 if gs.GUIString == "GTK":
   import gtk
 
+DONT_ADD_TO_TRACE_THRESHOLD = 1
+# if a point is less distant from the last
+# point added to the trace than DONT_ADD_TO_TRACE_THRESHOLD
+# it is not added to the trace point list
+#
+# Usage: to get rid of points that have very similar coordinates,
+# that are generated when for example waiting
+# at teh traffic lights
+#
+# NOTE: all points are still stored, just not drawn
+
 
 def getModule(m,d,i):
   return(tracklog(m,d,i))
