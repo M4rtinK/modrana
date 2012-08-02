@@ -24,6 +24,10 @@ from math import radians
 from time import clock
 #from tilenames import *
 
+if gs.GUIString == "GTK":
+  import gtk
+  import cairo
+
 def getModule(m,d,i):
   return(positionMarker(m,d,i))
 
@@ -32,26 +36,21 @@ class positionMarker(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    gui = self.modrana.gui
-    if gui and gui.getIDString() == "GTK":
-      import gtk
-      import cairo
-    
 
   def drawMapOverlay(self, cr):
     """Draw an "own position" marker"""
 
     # Where are we?
     pos = self.get('pos', None)
-    if(pos == None):
+    if pos is None:
       return
     (lat,lon) = pos
 
     # Where is the map?
     proj = self.m.get('projection', None)
-    if(proj == None):
+    if proj is None:
       return
-    if(not proj.isValid()):
+    if not proj.isValid():
       return
 
     # Where are we on the map?
@@ -61,12 +60,12 @@ class positionMarker(ranaModule):
     angle = self.get('bearing', 0)
 
     speed = self.get('speed', 0)
-    if speed == None:
+    if speed is None:
       self.drawStandingCircle(cr, x1, y1)
     elif speed < 1: # do we look like we are moving ?
-      self.drawStandingCircle(cr, x1, y1) # draw tangogps style marker without bearing
+      self.drawStandingCircle(cr, x1, y1) # draw TangoGPS style marker without bearing
     else:
-      self.drawMovingCircle(cr, x1, y1, angle) # draw tangogps style marker with bearing
+      self.drawMovingCircle(cr, x1, y1, angle) # draw TangoGPS style marker with bearing
 #     Draw yellow/black triangle showing us
 #      self.drawArrow(cr, x1, y1, angle)
 
