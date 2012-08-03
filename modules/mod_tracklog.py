@@ -21,6 +21,7 @@
 from base_module import ranaModule
 import time
 import os
+from collections import deque
 import geo
 from core import gs
 from modules import way
@@ -53,8 +54,7 @@ class tracklog(ranaModule):
     self.loggingStartTimestamp = None
     self.logInterval = 1 #loggin interval in seconds
     self.saveInterval = 10 #saving interval in seconds
-    self.lastTimestamp = None
-    self.lastSavedTimestamp = None
+    self.lastUpdateTimestamp = None
     self.lastCoords = None
     self.logName = None #name of the current log
     self.logFilename = None #name of the current log
@@ -66,7 +66,7 @@ class tracklog(ranaModule):
     # timer ids
     self.updateLogTimerId = None
     self.saveLogTimerId = None
-
+    # statistics
     self.maxSpeed = None
     self.avg1 = 0
     self.avg2 = 0
@@ -74,11 +74,13 @@ class tracklog(ranaModule):
     self.distance = None
     self.toolsMenuDone = False
     self.category='logs'
+    # trace
     self.traceColor = 'blue'
+    self.lastTracePoint = None
     self.traceIndex = 0
-    self.pxpyIndex = []
+    self.pxpyIndex = deque()
 
-#    self.startupTimestamp = time.strftime("%Y%m%dT%H%M%S")
+  #    self.startupTimestamp = time.strftime("%Y%m%dT%H%M%S")
 
   def handleMessage(self, message, type, args):
     if message == "incrementStartIndex":
@@ -180,7 +182,7 @@ class tracklog(ranaModule):
     self.avgSpeed = 0
     self.currentTempLog = []
     self.distance = 0
-    self.pxpyIndex = []
+    self.pxpyIndex.clear()
     tracklogFolder = self.modrana.paths.getTracklogsFolderPath()
 
     if name is None:
@@ -219,7 +221,7 @@ class tracklog(ranaModule):
       # start update and save timers
       self._startTimers()
 
-    self.lastTimestamp = self.lastSavedTimestamp = int(time.time())
+    self.lastUpdateTimestamp = time.time()
     self.lastCoords = self.get('pos', None)
     print("tracklog: log file initialized")
 
@@ -252,7 +254,7 @@ class tracklog(ranaModule):
       self.log2.addPointLLET(lat, lon, elevation, timestamp)
 
       # update statistics for the current log
-      if self.loggingEnabled and (not self.loggingPaused):
+      if self.loggingEnabled and not self.loggingPaused:
         # update the current log speed statistics
         currentSpeed = self.get('speed', None)
         if currentSpeed:
@@ -261,14 +263,37 @@ class tracklog(ranaModule):
             self.maxSpeed = currentSpeed
           # avg speed
           self.avg1 += currentSpeed
-          self.avg2 += (time.time() - self.lastTimestamp)
+          self.avg2 += (time.time() - self.lastUpdateTimestamp)
           self.avgSpeed = self.avg1/self.avg2
+          self.lastUpdateTimestamp = time.time()
 
         # update traveled distance
         if self.lastCoords:
           lLat, lLon = self.lastCoords
           self.distance+=geo.distance(lLat, lLon, lat, lon)
           self.lastCoords = lat, lon
+
+        # update the on-map trace
+        if self.lastTracePoint:
+          lat1, lon1 = self.lastTracePoint
+          # check if the point is distant enough from the last added point
+          # (which was either the first point or also passed the test)
+          if geo.distanceApprox(lat, lon, lat1, lon1)*1000 >= DONT_ADD_TO_TRACE_THRESHOLD:
+            self._addLL2Trace(lat, lon)
+        else: # this is the first known log point, just add it
+          self._addLL2Trace(lat, lon)
+
+  def _addLL2Trace(self, lat, lon):
+    proj = self.m.get('projection')
+    if proj:
+      (px,py) = proj.ll2pxpyRel(lat, lon)
+      index = self.traceIndex
+      # the pxpyIndex deque is created in reverse order
+      # so that it doesn't need to be reversed when its
+      # drawn on the map from current position to first point
+      self.pxpyIndex.appendleft((px,py,index))
+      self.traceIndex+=1
+      self.lastTracePoint = (lat, lon)
 
   def _saveLogCB(self):
     """save the log to temporary files in storage
@@ -369,13 +394,17 @@ class tracklog(ranaModule):
     if deleteTempLogs:
       self.log1.deleteFile()
       self.log2.deleteFile()
-
     self.log1 = None
     self.log2 = None
 
+    # statistics
     self.loggingStartTimestamp = None
     self.maxSpeed = None
     self.avgSpeed = None
+    # on-map trace
+    self.lastTracePoint = None
+    self.traceIndex = 0
+    self.pxpyIndex.clear()
 
 
   def storeCurrentPosition(self):
@@ -657,7 +686,6 @@ class tracklog(ranaModule):
 
   def drawMapOverlay(self, cr):
     proj = self.m.get('projection', None)
-
     if proj and self.pxpyIndex:
 #      cr.set_source_rgba(0, 0, 1, 1)
       cr.set_source_color(gtk.gdk.color_parse(self.traceColor))
@@ -670,12 +698,11 @@ class tracklog(ranaModule):
       TODO: use the modulo method for drawing stored tracklogs
       """
 
-      posXY = proj.getCurrentPospxpy()
+      posXY = proj.getCurrentPosXY()
       if posXY and self.loggingEnabled and not self.loggingPaused:
-        (x,y) = posXY
-        cr.move_to(x,y)
+        cr.move_to(*posXY) # start drawing from current position
       else:
-        (px,py,index) = self.pxpyIndex[-1]
+        (px,py,index) = self.pxpyIndex[0] # start drawing from first trace point
         (x,y) = proj.pxpyRel2xy(px, py)
         cr.move_to(x,y)
 
@@ -692,8 +719,8 @@ class tracklog(ranaModule):
       drawCount = 0
       counter=0
 #
-#
-      for point in reversed(self.pxpyIndex): #draw the track
+      #draw the track
+      for point in self.pxpyIndex:  # pypyIndex is already in reverse order
         counter+=1
         if counter%modulo==0:
           drawCount+=1
@@ -702,6 +729,7 @@ class tracklog(ranaModule):
           (px,py,index) = point
           (x,y) = proj.pxpyRel2xy(px, py)
           cr.line_to(x,y)
+      # TODO: don't iterate, just get items based on index
           
       # draw a track to current position (if known):
 
