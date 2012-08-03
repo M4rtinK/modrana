@@ -23,6 +23,7 @@ import math
 from math import radians
 from time import clock
 #from tilenames import *
+from core import gs
 
 if gs.GUIString == "GTK":
   import gtk
