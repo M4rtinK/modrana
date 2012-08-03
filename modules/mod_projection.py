@@ -246,11 +246,20 @@ class Projection(ranaModule):
 #    return (lat1,lon1,lat2,lon2)
 
   def getCurrentPospxpy(self):
-    """returns pxpy coordinates of the current position, or None"""
+    """returns px py coordinates of the current position, or None"""
     pos = self.get('pos', None)
     if pos:
       (lat,lon) = pos
       return self.ll2pxpy(lat, lon)
+    else:
+      return None
+
+  def getCurrentPosXY(self):
+    """returns x y coordinates of the current position, or None"""
+    pos = self.get('pos', None)
+    if pos:
+      (lat,lon) = pos
+      return self.ll2xy(lat, lon)
     else:
       return None
 
