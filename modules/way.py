@@ -4,9 +4,6 @@ from __future__ import with_statement # for python 2.5
 import csv
 import os
 import threading
-import traceback
-import sys
-import time
 import core.exceptions
 import core.paths
 from modules import geo
@@ -230,8 +227,7 @@ class Way:
       return True
     except Exception, e:
       print('way: saving to GPX format failed')
-#      print(e)
-      traceback.print_exc(file=sys.stdout) # find what went wrong
+      print(e)
       return False
 
 
