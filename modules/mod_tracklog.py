@@ -419,19 +419,6 @@ class tracklog(ranaModule):
     self.traceIndex = 0
     self.pxpyIndex.clear()
 
-#    proj = self.m.get('projection', None)
-#    if proj:
-##      (lat,lon) = self.get('pos', None)
-#      (lat,lon) = (48.0,16.0)
-##      print proj.ll2pxpy(lat, lon)
-#      print (lat,lon)
-#      (px,py) =  proj.ll2pxpy(lat, lon)
-#      print (px, py)
-#      (x,y) = proj.pxpy2xy(px, py)
-#      print (x,y)
-#      print proj.xy2ll(x, y)
-
-
 #  def getVisiblePoints(self):
 #    # get only the points, that are currently visible
 #    proj = self.m.get('projection', None)
