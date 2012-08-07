@@ -18,13 +18,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+import shutil
 from base_module import ranaModule
+import glob
 import time
 import os
 from collections import deque
 import geo
+import way
 from core import gs
-from modules import way
 
 if gs.GUIString == "GTK":
   import gtk
@@ -81,6 +83,11 @@ class tracklog(ranaModule):
     self.pxpyIndex = deque()
 
   #    self.startupTimestamp = time.strftime("%Y%m%dT%H%M%S")
+
+  def firstTime(self):
+    # rescue any log files that were not exported to GPX previously
+    # eq, due to modRana or device crashing
+    self._rescueLogs()
 
   def handleMessage(self, message, type, args):
     if message == "incrementStartIndex":
@@ -183,7 +190,7 @@ class tracklog(ranaModule):
     self.currentTempLog = []
     self.distance = 0
     self.pxpyIndex.clear()
-    tracklogFolder = self.modrana.paths.getTracklogsFolderPath()
+    logFolder = self.getLogFolderPath()
 
     if name is None:
       name = self.generateLogName()
@@ -204,11 +211,11 @@ class tracklog(ranaModule):
 
       filename = "%s.gpx" % name
       self.logFilename = filename
-      self.logPath = os.path.join(tracklogFolder, self.category, filename)
+      self.logPath = os.path.join(logFolder, filename)
 
       # initialize temporary CSV log files
-      path1 = os.path.join(tracklogFolder, self.category, "%s.temporary_csv_1" % name)
-      path2 = os.path.join(tracklogFolder, self.category, "%s.temporary_csv_2" % name)
+      path1 = os.path.join(logFolder, self.category, "%s.temporary_csv_1" % name)
+      path2 = os.path.join(logFolder, self.category, "%s.temporary_csv_2" % name)
 
       log1 = way.AppendOnlyWay()
       log1.startWritingCSV(path1)
@@ -316,6 +323,11 @@ class tracklog(ranaModule):
       prefix = logNameEntry
     return prefix + "_" + timeString
 
+  def getLogFolderPath(self):
+    """return path to the log folder"""
+    tracklogFolder = self.modrana.paths.getTracklogsFolderPath()
+    return os.path.join(tracklogFolder, self.category)
+
   def _startTimers(self):
     """start the update and save timers"""
     cron = self.m.get('cron', None)
@@ -374,6 +386,7 @@ class tracklog(ranaModule):
     # first from the primary log
     if not self.log1.saveToGPX(self.logPath):
       self.log2.saveToGPX(self.logPath) # try the secondary log
+    # TODO: check if the GPX file is loadable and retry ?
 
     # cleanup
     # -> this deletes the temporary log files
@@ -739,6 +752,100 @@ class tracklog(ranaModule):
       cr.stroke()
       cr.fill()
 
+  def _rescueLogs(self):
+    """rescue any log files that were not exported to GPX previously"""
+
+    # get log folder path
+    logFolder = self.getLogFolderPath()
+
+    # check out the log folder for temporary files
+
+    # first scan for primary logs
+    primaryLogs = glob.glob("%s/*.temporary_csv_1" % logFolder)
+    secondaryLogs = glob.glob("%s/*.temporary_csv_2" % logFolder)
+
+    if primaryLogs or secondaryLogs:
+      self.notify("exporting unsaved tracklogs to GPX")
+      self.set('needRedraw', True)
+
+    if primaryLogs:
+      print('tracklog: exporting %d unsaved primary log files to GPX' % len(primaryLogs))
+      for logPath in primaryLogs:
+        # export any found files
+        print('tracklog: exporting %s to GPX' % logPath)
+        try:
+          w1 = way.fromCSV(logPath, delimiter=",")
+          exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
+          # does the GPX file already exist ?
+          # TODO: check if the GPX file is corrupted and swap with newly exported one ?
+          # (eq. caused by a crash during saving the GPX file)
+          if os.path.exists(exportPath): # save to backup path
+            exportPath = "%s_1.gpx" % os.path.splitext(logPath)[0]
+          w1.saveToGPX(exportPath)
+          print('tracklog: GPX export successful')
+          # success, delete temporary files
+
+          # primary
+          os.remove(logPath)
+          print('tracklog: temporary file %s deleted' % logPath)
+          # secondary
+          secondaryPath = "%s.temporary_csv_2" % os.path.splitext(logPath)[0]
+          if os.path.exists(secondaryPath):
+            os.remove(secondaryPath)
+            print('tracklog: temporary file %s deleted' % secondaryPath)
+
+        except Exception, e:
+          print('tracklog: exporting unsaved primary log file failed')
+          print(e)
+          failedPath = "%s_1.csv" % os.path.splitext(logPath)[0]
+          print('tracklog: renaming to %s instead' % failedPath)
+          try:
+            shutil.move(logPath, failedPath)
+            print("tracklog: renaming successful")
+          except Exception, e:
+            ('tracklog: renaming %s to %s failed' % (logPath, failedPath))
+            print(e)
+
+
+    # rescan for secondary logs
+    # (there should be only secondary logs that
+    # either don't have primary logs or where primary logs
+    # failed to parse (primary logs delete secondary logs
+    # after successful processing)
+
+    secondaryLogs = glob.glob("%s/*.temporary_csv_2" % logFolder)
+    if secondaryLogs:
+      print('tracklog: exporting %d unsaved secondary log files to GPX' % len(primaryLogs))
+      for logPath in secondaryLogs:
+        # export any found files
+        print('tracklog: exporting %s to GPX' % logPath)
+        try:
+          w2 = way.fromCSV(logPath, delimiter=",")
+          exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
+          # does the GPX file already exist ?
+          # TODO: check if the GPX file is corrupted and swap with newly exported one ?
+          # (eq. caused by a crash during saving the GPX file)
+          if os.path.exists(exportPath): # save to backup path
+            exportPath = "%s_2.gpx" % os.path.splitext(logPath)[0]
+          w2.saveToGPX(exportPath)
+          print('tracklog: GPX export successful')
+          # success, delete temporary file
+
+          # secondary
+          # (primary is either not there or was already removed in primary pass)
+          os.remove(logPath)
+          print('tracklog: temporary file %s deleted' % logPath)
+
+        except Exception, e:
+          print('tracklog: exporting unsaved secondary log file failed')
+          failedPath = "%s_2.csv" % os.path.splitext(logPath)[0]
+          print('tracklog: renaming to %s instead' % failedPath)
+          try:
+            shutil.move(logPath, failedPath)
+            print("tracklog: renaming successful")
+          except Exception, e:
+            ('tracklog: renaming %s to %s failed' % (logPath, failedPath))
+            print(e)
     
   def shutdown(self):
     # try to stop and save the log
