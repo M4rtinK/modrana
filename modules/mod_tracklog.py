@@ -214,8 +214,8 @@ class tracklog(ranaModule):
       self.logPath = os.path.join(logFolder, filename)
 
       # initialize temporary CSV log files
-      path1 = os.path.join(logFolder, self.category, "%s.temporary_csv_1" % name)
-      path2 = os.path.join(logFolder, self.category, "%s.temporary_csv_2" % name)
+      path1 = os.path.join(logFolder, "%s.temporary_csv_1" % name)
+      path2 = os.path.join(logFolder, "%s.temporary_csv_2" % name)
 
       log1 = way.AppendOnlyWay()
       log1.startWritingCSV(path1)
@@ -311,8 +311,16 @@ class tracklog(ranaModule):
 
   def _saveLogIncrement(self):
     """save current log increment to storage"""
-    self.log1.flush()
-    self.log2.flush()
+    try:
+      self.log1.flush()
+    except Exception, e:
+      print('tracklog: saving primary temporary log failed')
+      print e
+    try:
+      self.log2.flush()
+    except Exception, e:
+      print('tracklog: saving secondary temporary log failed')
+      print e
 
   def generateLogName(self):
     """generate a unique name for a log"""
@@ -383,6 +391,7 @@ class tracklog(ranaModule):
     self._saveLogIncrement()
 
     # try to export the log to GPX
+    self.notify("saving tracklog", 3000)
     # first from the primary log
     if not self.log1.saveToGPX(self.logPath):
       self.log2.saveToGPX(self.logPath) # try the secondary log
