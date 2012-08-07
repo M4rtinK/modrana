@@ -66,7 +66,8 @@ class showGPX(ranaModule):
         additionalActions = '|' + additionalActions
 
     for color in self.distinctColors:
-      menus.addItem('chooseDistColor', '%s' % color, 'generic', 'set:distinctColorRegister:%s%s' % (color,additionalActions))
+      markup = '<span foreground="%s">%s</span>' % (color, color)
+      menus.addItem('chooseDistColor', markup, 'generic', 'set:distinctColorRegister:%s%s' % (color,additionalActions))
 
 
   def getDistinctColorName(self):
@@ -85,9 +86,9 @@ class showGPX(ranaModule):
   def drawMapOverlay(self, cr):
     """get a file, load it and display it on the map"""
     proj = self.m.get('projection', None)
-    if(proj == None):
+    if proj is None:
       return
-    if(not proj.isValid()):
+    if not proj.isValid():
       return
 
 #    mapDt = self.m.get('mapData', None) # get the mapdata module
@@ -159,10 +160,10 @@ class showGPX(ranaModule):
        then return the tracks that do exist """
     loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
     if loadTl:
-      availiblePaths = loadTl.getTracklogPathList()
+      availablePaths = loadTl.getTracklogPathList()
 
       # look which files exist and which don't
-      nonexistent = filter(lambda x: x not in availiblePaths, tracks)
+      nonexistent = filter(lambda x: x not in availablePaths, tracks)
       # remove nonexistent tracks:
       
       # from the persistent list
@@ -180,7 +181,7 @@ class showGPX(ranaModule):
 
   def getActiveTracklogPath(self):
     loadTl = self.m.get('loadTracklogs', None)
-    if loadTl == None:
+    if loadTl is None:
       return
     return loadTl.getActiveTracklogPath()
 
@@ -212,7 +213,7 @@ class showGPX(ranaModule):
     """check if a tracklog is visible
        returns False or True"""
     visibleTracklogs = self.get('visibleTracklogsDict', {})
-    return (path in visibleTracklogs)
+    return path in visibleTracklogs
 
   def setTrackColor(self,path,colorName):
     visibleTracklogs = self.get('visibleTracklogsDict', {})
@@ -239,7 +240,7 @@ class showGPX(ranaModule):
     proj = self.m.get('projection', None)
 
     #are the projection and screen usable ?
-    if proj == None or GPXTracklog == None:
+    if proj is None or GPXTracklog is None:
       # we don't have WHAT to draw or HOW or BOTH :D
       print "draw track: skipping one track (tracklog or projection == None)"
       return
@@ -415,7 +416,7 @@ class showGPX(ranaModule):
     elif message == 'allVisible':
       # make all available tracklogs visible
       loadTl = self.m.get('loadTracklogs', None)
-      if loadTl == None:
+      if loadTl is None:
         return
 
       availableTracklogs = loadTl.getTracklogPathList()
