@@ -4,6 +4,7 @@ from __future__ import with_statement # for python 2.5
 import csv
 import os
 import threading
+import threading
 import core.exceptions
 import core.paths
 from modules import geo
@@ -364,7 +365,6 @@ def fromCSV(path, delimiter=',', fieldCount=None):
 
     for r in reader:
       fields = len(r)
-      print r
       try:
         # float vs mFloat
         #
