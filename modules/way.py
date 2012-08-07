@@ -194,6 +194,10 @@ class Way:
         )
 
       # Handle message points
+
+      # TODO: find how to make a GPX trac with segments of different types
+      # is it as easy just dumping the segment lists to Trackpoints ?
+
       # message is stored in <desc>
       messagePoints = self.getMessagePoints()
       index = 1
@@ -215,7 +219,7 @@ class Way:
           lat, lon, elev, message = mp.getLLEM()
           waypoints.append(gpx.Routepoint(lat, lon, name, message, elev, None))
           index+=1
-        print('way: %d points, %d waypoints saved to %s in GPX format' % (len(trackpoints), len(waypoints), path))
+        print('way: %d points, %d waypoints saved to %s in GPX format' % (len(trackpoints[0]), len(waypoints), path))
 
       # write the GPX tree to file
       # TODO: waypoints & routepoints support
@@ -301,7 +305,7 @@ def fromMonavResult(mResult):
 def fromGPX(GPX):
   pass
 
-def fromCSV(CSV, delimiter=',', fieldCount=None):
+def fromCSV(path, delimiter=',', fieldCount=None):
   """create a way object from a CSV file specified by path
   Assumed field order:
   lat,lon,elevation,timestamp
@@ -318,7 +322,7 @@ def fromCSV(CSV, delimiter=',', fieldCount=None):
 
   """
   try:
-    f = open(CSV, 'r')
+    f = open(path, 'r')
   except IOError, e:
     if e.errno == 2:
       raise core.exceptions.FileNotFound
@@ -348,21 +352,46 @@ def fromCSV(CSV, delimiter=',', fieldCount=None):
       return None
   else:
     parsingErrorCount = 0
+    lineNumber = 1
+
+    def eFloat(item):
+      """"""
+      if item: # 0 would still be '0' -> nonempty string
+        try:
+          return float(item)
+        except Exception: # parsing error
+          print("way: parsing elevation failed, data: ", item)
+          print(e)
+          return None
+      else:
+        return None
+
     for r in reader:
       fields = len(r)
+      print r
       try:
+        # float vs mFloat
+        #
+        # we really need lat & lon, but can live with missing elevation
+        #
+        # so we use float far lat and lon
+        # (which means that the line will error out if lat or lon
+        # is missing or corrupted)
+        # but use eFloat for elevation (we can live with missing elevation)
         if fields >= 4:
-          points.append(float(r[0]), float(r[1]), float(r[2]), r[3])
+          points.append((float(r[0]), float(r[1]), eFloat(r[2]), r[3]) )
         elif fields == 3:
-          points.append(float(r[0]), float(r[1]), float(r[2]), None)
+          points.append((float(r[0]), float(r[1]), eFloat(r[2]), None))
         elif fields == 2:
-          points.append(float(r[0]), float(r[1]), None, None)
+          points.append((float(r[0]), float(r[1]), None, None))
         else:
           print('Way: error, line %d has 1 or 0 fields, needs at least 2 (lat, lon):\n%r' % (reader.line_no, r))
           parsingErrorCount+=1
       except Exception, e:
-        print('Way: parsing CSV line %d failed' % reader.line_no)
+        print('Way: parsing CSV line %d failed' % lineNumber)
+        print(e)
         parsingErrorCount+=1
+      lineNumber+=1
 
   # close the file
   f.close()
