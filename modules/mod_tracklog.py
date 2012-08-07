@@ -765,7 +765,7 @@ class tracklog(ranaModule):
     secondaryLogs = glob.glob("%s/*.temporary_csv_2" % logFolder)
 
     if primaryLogs or secondaryLogs:
-      self.notify("exporting unsaved tracklogs to GPX")
+      self.notify("exporting temporary tracklogs to GPX", 5000)
       self.set('needRedraw', True)
 
     if primaryLogs:
