@@ -419,23 +419,6 @@ class tracklog(ranaModule):
     self.traceIndex = 0
     self.pxpyIndex.clear()
 
-
-  def storeCurrentPosition(self):
-    pos = self.get('pos', None)
-    proj = self.m.get('projection', None)
-
-    if pos and proj:
-      (lat,lon) = pos
-      (px,py) = proj.ll2pxpyRel(lat, lon)
-      index = self.traceIndex
-      """
-      for not, latLonIndex is unsorted, if we sort it according
-      to lat + lon + index to speed up filter, we would need another list in
-      insert order
-      """
-      self.pxpyIndex.append((px,py,index))
-      self.traceIndex+=1
-
 #    proj = self.m.get('projection', None)
 #    if proj:
 ##      (lat,lon) = self.get('pos', None)
