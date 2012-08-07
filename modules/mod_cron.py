@@ -151,7 +151,7 @@ class CronGTK(Cron):
         # load the timeout description
         (callback, args, timeout, caller, description, realId) = self.cronTab['timeout'][id]
         gobject.source_remove(realId) # remove the old timeout
-        realId = gobject.timeout_add(self._doTimeout, newTimeout, id, callback, args) # new timeout
+        realId = gobject.timeout_add(newTimeout, self._doTimeout, id, callback, args) # new timeout
         # update the timeout description
         self.cronTab['timeout'][id] = (callback, args, newTimeout, caller, description, realId)
       else:
