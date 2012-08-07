@@ -450,67 +450,6 @@ class tracklog(ranaModule):
 #      print visiblePoints
 #      return visiblePoints
 
-
-#  def load(self, filename):
-#    # TODO: share this with replayGpx
-#    self.nodes = []
-#    file = open(filename, 'r')
-#    if(file):
-#      """ importing the GPX module can be time consuming so import it
-#      when it is really needed"""
-#      from upoints import gpx
-#      track = gpx.Trackpoints() # create new Trackpoints object
-#      track.import_locations(file) # load a gpx file into it
-#      for point in track[0]: #iterate over the points, track[0] is list of all points in file
-#        lat = point.latitude
-#        lon = point.longitude
-#        self.nodes.append([lat,lon])
-#      file.close()
-#      self.numNodes = len(self.nodes)
-#      self.set("centreOnce", True)
-#      self.pos = int(self.get("replayStart",0) * self.numNodes)
-      
-#only for GPX 1.0, the above works for GPX 1.1
-#      regexp = re.compile("<trkpt lat=['\"](.*?)['\"] lon=['\"](.*?)['\"]")
-#      for text in file:
-#        matches = regexp.match(text)
-#        if(matches):
-#          lat = float(matches.group(1))
-#          lon = float(matches.group(2))
-#          self.nodes.append([lat,lon])
-#      file.close()
-
-#  def scheduledUpdate(self):
-#    pos = self.get('pos', None)
-#    if(pos != None):
-#      self.nodes.append(pos)
-#      #(lat,lon) = pos
-#      #print "Logging %f, %f" % (lat,lon)
-#    self.saveMinimal("data/tracklogs/%s.txt" % self.startupTimestamp);
-#
-#  def drawMapOverlay(self, cr):
-#    # Where is the map?
-#    proj = self.m.get('projection', None)
-#    if(proj == None):
-#      return
-#    if(not proj.isValid()):
-#      return
-#
-#    # Draw all trackpoints as lines (TODO: optimisation)
-#    cr.set_source_rgb(0,0,0.5)
-#    first = True
-#    for n in self.nodes:
-#      (lat,lon) = n
-#      (x,y) = proj.ll2xy(lat,lon)
-#      if(proj.onscreen(x,y)):
-#        if first: #the first coordinates are wrong co we skip them
-#          self.line(cr, x, y)
-#          first = False
-#        else:
-#          self.line(cr, x, y)
-#
-#      cr.fill()
-    
   def point(self, cr, x, y):
     s = 2 #default 2
     cr.rectangle(x-s,y-s,2*s,2*s)
