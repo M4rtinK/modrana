@@ -50,7 +50,6 @@ class tracklog(ranaModule):
   """Record tracklogs"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    self.startButtonIndex = 0
     self.loggingEnabled = False
     self.loggingPaused = False
     self.loggingStartTimestamp = None
@@ -90,9 +89,7 @@ class tracklog(ranaModule):
     self._rescueLogs()
 
   def handleMessage(self, message, type, args):
-    if message == "incrementStartIndex":
-      self.startButtonIndex = (self.startButtonIndex+1)%2 # when we go to 2, we return to 0
-    elif message == "startLogging":
+    if message == "startLogging":
       print("tracklog: starting to log")
       # start a new log
       if not self.loggingEnabled:
@@ -142,43 +139,6 @@ class tracklog(ranaModule):
   def handleTextEntryResult(self, key, result):
     if key == 'logNameEntry':
       self.set('logNameEntry', result)
-
-#  def update(self):
-#    if self.loggingEnabled & (not self.loggingPaused):
-#      currentTimestamp = time.time()
-#
-#      # update the current log speed statistics
-#      currentSpeed = self.get('speed', None)
-#      if currentSpeed:
-#        # max speed
-#        if currentSpeed>self.maxSpeed:
-#          self.maxSpeed = currentSpeed
-#        # avg speed
-#        self.avg1 += currentSpeed
-#        self.avg2 += (currentTimestamp - self.lastTimestamp)
-#        self.avgSpeed = self.avg1/self.avg2
-#
-#      if (currentTimestamp - self.lastTimestamp)>self.logInterval:
-#        print("tracklog: updating the log")
-#        (lat,lon) = self.get('pos', None)
-#        elevation = self.get('elevation', None) # TODO: add elevation logging support
-#        currentLatLonElevTime = (lat,lon, elevation, time.strftime("%Y-%m-%dT%H:%M:%S"))
-#        self.currentTempLog.append(currentLatLonElevTime)
-#        self.lastTimestamp = currentTimestamp
-#        # update traveled distance
-#        self.storeCurrentPosition()
-#        currentCoords = self.get('pos', None)
-#        if self.lastCoords is not None and currentCoords is not None:
-#          (lat1,lon1) = self.lastCoords
-#          (lat2,lon2) = currentCoords
-#          self.distance+=geo.distance(lat1,lon1,lat2,lon2)
-#          self.lastCoords = currentCoords
-#
-#      if (currentTimestamp - self.lastSavedTimestamp)>self.saveInterval:
-#        print("tracklog: saving log increment")
-#        self._saveLogIncrement()
-#        self.lastSavedTimestamp = currentTimestamp
-#        self.set('needRedraw', True)
 
   def initLog(self,type='gpx',name=None):
     """start a new log, zero the appropriate variables, etc."""
@@ -402,7 +362,6 @@ class tracklog(ranaModule):
     # and discards the temporary AOWay objects
     self._cleanup()
     self.loggingEnabled = False
-    self.startButtonIndex=0
     # now we make the tracklog manager aware, that there is a new log
     loadTl = self.m.get('loadTracklogs', None)
     if loadTl:
@@ -534,14 +493,8 @@ class tracklog(ranaModule):
         print("tracklog: setting up tracklogTools menu")
         self.initToolsMenu()
         self.toolsMenuDone = True
-      # setup the viewport
-      menus = self.m.get("menu",None)
-      (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
-      (x1,y1) = e1
-      (x2,y2) = e2
-      (x3,y3) = e3
-      (x4,y4) = e4
-      (w1,h1,dx,dy) = alloc
+
+
 
       parentAction = 'set:menu:main'
 
@@ -550,26 +503,37 @@ class tracklog(ranaModule):
       [list of string-lists for toggling, index of string-list to show]
       """
 
-      fiveButtons=[
-                  [ [
-                    ["start", "start", "tracklog:incrementStartIndex|tracklog:startLogging|set:needRedraw:True"],
-                    ["pause", "pause", "tracklog:incrementStartIndex|tracklog:pauseLogging|set:needRedraw:True"]
-                  ], self.startButtonIndex ],
-                  [ [["stop", "stop", "tracklog:stopLogging"]], 0 ],
-                  [ [["split", "split", "tracklog:stopLogging|tracklog:startLogging"]], 0 ],
-                  [ [["name#edit", "generic", "tracklog:nameInput"]], 0 ],
-                  [ [["tools", "tools", "set:menu:tracklogTools"]], 0 ],
-                  ]
-
       units = self.m.get('units', None)
 
+      # main status text
+
+      startButtonIndex = 0
       text = ""
       if self.loggingEnabled:
-        text+= '<span foreground="green">logging is ON</span>'
-      elif self.loggingPaused:
-        text+= "logging paused"
+        if self.loggingPaused:
+          text+= '<span foreground="cyan">logging is <i>PAUSED</i></span>'
+          startButtonIndex = 2 # resume
+        else:
+          text+= '<span foreground="green">logging is ON</span>'
+          startButtonIndex = 1 # pause
       else:
         text+= '<span foreground="red">logging is OFF</span>'
+        startButtonIndex = 0 # start
+
+      # buttons
+
+      fiveButtons=[
+        [ [
+          ["start", "start", "tracklog:startLogging|set:needRedraw:True"],
+          ["pause", "pause", "tracklog:pauseLogging|set:needRedraw:True"],
+          ["resume", "start", "tracklog:startLogging|set:needRedraw:True"]
+        ], startButtonIndex ],
+        [ [["stop", "stop", "tracklog:stopLogging"]], 0 ],
+        [ [["split", "split", "tracklog:stopLogging|tracklog:startLogging"]], 0 ],
+        [ [["name#edit", "generic", "tracklog:nameInput"]], 0 ],
+        [ [["tools", "tools", "set:menu:tracklogTools"]], 0 ],
+      ]
+
 
       text+="\n\n"
 
@@ -610,7 +574,11 @@ class tracklog(ranaModule):
         text+= "\ndistance traveled <span foreground='white'>%s</span>\n" % distanceString
 
       box = (text , "set:menu:tracklog#tracklog")
-      menus.drawSixPlusOneMenu(cr, menuName, parentAction, fiveButtons, box)
+      menus = self.m.get("menu",None)
+      if menus:
+        menus.drawSixPlusOneMenu(cr, menuName, parentAction, fiveButtons, box)
+      else:
+        print('tracklog: error, menus module is missing')
 
     else:
       return # we aren't the active menu so we dont do anything
@@ -618,7 +586,6 @@ class tracklog(ranaModule):
   def drawMapOverlay(self, cr):
     proj = self.m.get('projection', None)
     if proj and self.pxpyIndex:
-#      cr.set_source_rgba(0, 0, 1, 1)
       cr.set_source_color(gtk.gdk.color_parse(self.traceColor))
       cr.set_line_width(10)
 
@@ -649,7 +616,7 @@ class tracklog(ranaModule):
       maxDraw = 300
       drawCount = 0
       counter=0
-#
+
       #draw the track
       for point in self.pxpyIndex:  # pypyIndex is already in reverse order
         counter+=1
