@@ -29,28 +29,12 @@ BasePage {
             text : "<h3>Dou you like modRana ? <b>Donate !</b></h3>"
         }
 
-        Rectangle {
+        PayPalButton {
             id : ppButton
             anchors.top : donateLabel.bottom
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.topMargin : 32
-            color : ppMA.pressed ? "yellow" : "gold"
-            radius : 30
-            width : 210
-            height : 60
-            Label {
-                anchors.horizontalCenter : parent.horizontalCenter
-                anchors.verticalCenter : parent.verticalCenter
-                text : "<h2>PayPal</h2>"
-            }
-            MouseArea {
-                id : ppMA
-                anchors.fill : parent
-                onClicked : {
-                    console.log('PayPal button clicked')
-                    Qt.openUrlExternally(modules.getS("info", "getPayPalUrl"))
-                }
-            }
+            url : modules.getS("info", "getPayPalUrl")
         }
 
         Rectangle {
