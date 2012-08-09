@@ -29,24 +29,31 @@ BasePage {
             text : "<h3>Dou you like modRana ? <b>Donate !</b></h3>"
         }
 
-        PayPalButton {
-            id : ppButton
+        Row {
+            id : ppFlattrRow
             anchors.top : donateLabel.bottom
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.topMargin : 32
-            url : modules.getS("info", "getPayPalUrl")
-        }
+            spacing : 20
+            PayPalButton {
+                id : ppButton
+                //anchors.top : donateLabel.bottom
+                anchors.verticalCenter : parent.verticalCenter
+                //anchors.topMargin : 32
+                url : modules.getS("info", "getPayPalUrl")
+            }
 
-        FlattrButton {
-            id : flattrButton
-            anchors.top : ppButton.bottom
-            anchors.horizontalCenter : parent.horizontalCenter
-            anchors.topMargin : 32
-            url : modules.getS("info", "getFlattrUrl")
+            FlattrButton {
+                id : flattrButton
+                //anchors.top : ppButton.bottom
+                anchors.verticalCenter : parent.verticalCenter
+                //anchors.topMargin : 32
+                url : modules.getS("info", "getFlattrUrl")
+            }
         }
         Label {
             id : contactInfo
-            anchors.top : flattrButton.bottom
+            anchors.top : ppFlattrRow.bottom
             anchors.topMargin : 32
             height : paintedHeight + 31
             anchors.horizontalCenter : parent.horizontalCenter
