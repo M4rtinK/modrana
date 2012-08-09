@@ -37,29 +37,12 @@ BasePage {
             url : modules.getS("info", "getPayPalUrl")
         }
 
-        Rectangle {
+        FlattrButton {
             id : flattrButton
             anchors.top : ppButton.bottom
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.topMargin : 32
-            color : flattrMA.pressed ? "limegreen" : "green"
-            radius : 5
-            width : 210
-            height : 45
-            Label {
-                anchors.horizontalCenter : parent.horizontalCenter
-                anchors.verticalCenter : parent.verticalCenter
-                text : "<h3>Flattr this !</h3>"
-                color : "white"
-            }
-            MouseArea {
-                id : flattrMA
-                anchors.fill : parent
-                onClicked : {
-                    console.log('Flattr button clicked')
-                    Qt.openUrlExternally(modules.getS("info", "getFlattrUrl"))
-                }
-            }
+            url : modules.getS("info", "getFlattrUrl")
         }
         Label {
             id : contactInfo
