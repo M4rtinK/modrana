@@ -41,6 +41,9 @@ class info(ranaModule):
   def getFlattrUrl(self):
     return "https://flattr.com/thing/678708/modRana-flexible-GPS-navigation-system"
 
+  def getBitcoinAddress(self):
+    return "14DXzkqqYCfSG5vZNYPnPiZzg3wW2hXsE8"
+
   def getDiscussionUrls(self):
     """
     return a list of modRana-relevant discussions, with the most relevant discussion on top
