@@ -34,7 +34,7 @@ BasePage {
             anchors.top : donateLabel.bottom
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.topMargin : 32
-            spacing : 20
+            spacing : 32
             PayPalButton {
                 id : ppButton
                 //anchors.top : donateLabel.bottom
@@ -51,9 +51,18 @@ BasePage {
                 url : modules.getS("info", "getFlattrUrl")
             }
         }
+
+        BitcoinButton {
+            id : bitcoinButton
+            anchors.top : ppFlattrRow.bottom
+            anchors.topMargin : 32
+            anchors.horizontalCenter : parent.horizontalCenter
+            url : modules.getS("info", "getBitcoinAddress")
+        }
+
         Label {
             id : contactInfo
-            anchors.top : ppFlattrRow.bottom
+            anchors.top : bitcoinButton.bottom
             anchors.topMargin : 32
             height : paintedHeight + 31
             anchors.horizontalCenter : parent.horizontalCenter
@@ -65,7 +74,5 @@ BasePage {
                 Qt.openUrlExternally(link)
             }
         }
-
-
     }
 }
