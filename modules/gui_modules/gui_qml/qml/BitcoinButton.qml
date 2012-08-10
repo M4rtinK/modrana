@@ -121,7 +121,11 @@ Rectangle {
                 anchors.horizontalCenter : parent.horizontalCenter
                 text: "Copy address"
                 iconSource : "image://theme/icon-m-toolbar-cut-paste"
-                onClicked: bitcoinDialog.accept()
+                onClicked: {
+                    urlField.selectAll()
+                    urlField.copy()
+                    rWin.notify("Bitcoin address copied to clipboard", 3000)
+                }
             }
         }
 
