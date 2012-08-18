@@ -486,7 +486,7 @@ class menus(ranaModule):
         itemGrid = self.itemMenuGrid[1][0:-1]
       else:
         id = pageNumber *(itemSlots-2)+1
-        if (itemCount-id-2) < (itemSlots-1):
+        if (itemCount-id-1) < (itemSlots-1):
           # this is the last page
           # draw only the "less" button
           (x,y) = self.itemMenuGrid[1][0]
