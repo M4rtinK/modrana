@@ -6,6 +6,10 @@ N<;North<;
 S<;South<;
 E<;East<;
 W<;West<;
+N\.;North;
+S\.;South;
+E\.;East;
+W\.;West;
 NW ; Northwest ;
 NE ; Northeast ;
 SW ; Southwest ;
@@ -14,27 +18,37 @@ NW<; Northwest<;
 NE<; Northeast<;
 SW<; Southwest<;
 SE<; Southeast<;
-St. ;Saint ;
-St.<;Street<
+NW\.; Northwest;
+NE\.; Northeast;
+SW\.; Southwest;
+SE\.; Southeast;
+St\. ;Saint ;
+St\.<;Street<
 St<;Street<
-Dr.<;Drive<
-Dr/;Drive<
+Dr\.<;Drive<
+Dr/;Drive/
 Dr<;Drive<
 Ave<;Avenue<
+Ave\.;Avenue
 Cir<;Circle<
+Cir\.;Circle
 Hts;Heights
 Hwy;Highway
 Ln;Lane
 Pde;Parade
 Pkwy;Parkway
 Pl<;Place<
+Pl\.;Place
 Plz;Plaza
 Rd;Road
 Sq<;Square<
+Sq\.;Square
 Tce;Terrace
 Trk;Track
 Wy<;Way<
+Wy\.;Way
 Aly<;Alley<
+Aly\.;Alley
 Blvd;Boulevard
 Crt;Court
 Ct;Court
