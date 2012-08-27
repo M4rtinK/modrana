@@ -1039,9 +1039,9 @@ class MapTiles(ranaModule):
       # something is wrong with the server or url
       except urllib2.HTTPError, e:
         if self.useImageSurface:
-          self.callback.storeInMemmory(tileDownloadFailedSurface,self.name,'semiPermanentError',expireTimestamp)
           tileDownloadFailedSurface = self.callback.images[1]['tileDownloadFailed'][0]
           expireTimestamp = time.time() + 10
+          self.callback.storeInMemmory(tileDownloadFailedSurface,self.name,'semiPermanentError',expireTimestamp)
           """
           like this, when tile download fails due to a http error,
           the error tile is loaded instead
