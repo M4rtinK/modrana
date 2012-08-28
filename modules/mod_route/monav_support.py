@@ -25,17 +25,16 @@ import os
 
 import monav
 
+# Marble stores monav data like this on the N900:
+# /home/user/MyDocs/.local/share/marble/maps/earth/monav/motorcar/europe/czech_republic
+
 MONAV_BINARY_PATH = 'modules/mod_route/monav_arm7/monav-server'
 # TODO: other architectures
 
 class Monav:
-  def __init__(self, dataDirectory):
+  def __init__(self):
     self.monavServer = None
     self.connection = None
-    self.dataDirectory = dataDirectory
-
-  def setDataDirectory(self, path):
-    self.dataDirectory = path
 
   def startServer(self, port=None):
     print('monav_support: starting Monav server')
@@ -70,13 +69,15 @@ class Monav:
     else:
       return False
 
-  def monavDirections(self, start, destination, callback, key):
+  def monavDirections(self, dataDirectory, waypoints):
     """search ll2ll route using Monav"""
-    # TODO: support more waypoints
+    # check if Monav server is running
+    if not self.serverRunning():
+      self.startServer() # start the server
+
     print('monav: starting route search')
-    waypoints = [start, destination]
     start = time.clock()
-    result = monav.get_route(self.dataDirectory,
+    result = monav.get_route(dataDirectory,
                              waypoints,
                              connection=self.connection)
     print('monav: search finished in %1.2 ms'  % (1000 * (time.clock() - start)) )
