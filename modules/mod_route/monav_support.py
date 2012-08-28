@@ -39,11 +39,17 @@ class Monav:
   def startServer(self, port=None):
     print('monav_support: starting Monav server')
     try:
-      self.monavServer = subprocess.Popen(
-        "%s" % MONAV_BINARY_PATH
-      )
-      self.connection = monav.TcpConnection()
-      # TODO: use other port than 8040, check out tileserver code
+      # first check if monav server is already running
+      try:
+        self.connection = monav.TcpConnection()
+        print('monav_support: server already running')
+      except Exception, e:
+        print('monav_support: server not yet running')
+        self.monavServer = subprocess.Popen(
+          "%s" % MONAV_BINARY_PATH
+        )
+        self.connection = monav.TcpConnection()
+        # TODO: use other port than 8040 ?, check out tileserver code
     except Exception, e:
       print('monav_support: starting Monav server failed')
       print(e)
