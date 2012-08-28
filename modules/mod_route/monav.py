@@ -42,7 +42,7 @@ class TcpConnection(object):
         self._socket.connect((host, port))
 
     def write(self, message):
-        """Write a Google protocol buffers messsage to the socket.
+        """Write a Google protocol buffers message to the socket.
 
         """
         # Writing is a 2 step process.
