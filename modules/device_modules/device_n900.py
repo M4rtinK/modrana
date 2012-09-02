@@ -528,6 +528,12 @@ class device_n900(deviceModule):
       print "n900 - location:getting fix failed (on a regular update + exception: %s)" % e
 
 
+  # ** Internet connectivity **
+
+  def enableInternetConnectivity(self):
+    """autoconnect to the Internet using DBUS"""
+    subprocess.call(["sh", "modules/device_modules/n900_maemo5_autoconnect_dbus.sh"])
+
 if(__name__ == "__main__"):
   a = n900({}, {})
   a.update()

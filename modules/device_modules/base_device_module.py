@@ -202,6 +202,13 @@ class deviceModule(ranaModule):
     """
     pass
 
+  def enableInternetConnectivity(self):
+    """try to make sure that the device connects to the internet"""
+    # TODO: respect the modRana internet connectivity state
+    pass
+
+
+
 #  def getAutorotationSupported(self):
 #    return False
 #
