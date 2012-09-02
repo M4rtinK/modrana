@@ -201,12 +201,15 @@ class search(ranaModule):
           online.googleLocalQueryAsync(queryString, self.handleSearchResult, "localSearchResultGoogle")
         elif lsType == "position": # search around current position
           query = args[1]
-          pos = self.get("pos", None)
-          if pos:
+          fix = self.get('fix', 0)
+          pos = self.get('pos', None)
+
+          if fix > 1 and pos:
             lat, lon = pos
             online.googleLocalQueryLLAsync(query, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
           else:
-            print("search: current position unknown")
+            print("search: position unknown - trying to get GPS lock")
+            online.googleLocalQueryPosAsync(query, self.handleSearchResult, "localSearchResultGoogle")
         elif lsType == "view": #search around current map center
           query = args[1]
           proj = self.m.get('projection', None)
