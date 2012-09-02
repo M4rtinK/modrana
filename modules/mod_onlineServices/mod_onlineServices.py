@@ -355,10 +355,9 @@ class onlineServices(ranaModule):
     self._addWorkerThread(self._onlineRouteLookup, [(start, destination, routeRequestSentTimestamp), "LL"], outputHandler, key)
 
   def googleDirections(self ,start, destination):
-    '''
-    Get driving directions from Google.
+    """ Get driving directions from Google.
     start and directions can be either coordinates tuples or address strings
-    '''
+    """
 
     otherOptions=""
     if self.get('routingAvoidHighways', False): # optionally avoid highways
@@ -443,15 +442,43 @@ class onlineServices(ranaModule):
     """asynchronous Google Local Search query for explicit lat, lon coordinates"""
     query = self.constructGoogleQueryLL(term, lat, lon)
     self.googleLocalQueryAsync(query, outputHandler, key)
-    
-  def googleLocalQueryAsync(self,query,outputHandler, key):
+
+  def googleLocalQueryPosAsync(self, term, outputHandler, key, locationTimeout=30):
+    """asynchronous Google Local Search query around current position,
+    if current position is unknown, wait for locationTimeout seconds before failing"""
+    self._addWorkerThread(self._locateCurrentPosition, [term, locationTimeout], outputHandler, key)
+
+  def googleLocalQueryAsync(self, query, outputHandler, key):
     """asynchronous Google Local Search query for """
-    print "onlineServices: GLS search"
+    print("onlineServices: GLS search")
     # TODO: we use a single thread for both routing and search for now, maybe have separate ones ?
     # Local Search doesn't like the geo: prefix so we remove it
     query = re.sub("loc:.*geo:", "loc:", query)
 
     self._addWorkerThread(self._localGoogleSearch, [query], outputHandler, key)
+
+  def _locateCurrentPosition(self, term, locationTimeout):
+    """try to locate current position and run search when done or time out"""
+    self._setWorkStatusText("GPS fix in progress...")
+    sleepTime = 0.5 # in seconds
+    pos = None
+    fix = 0
+    startTimestamp = time.time()
+    while (time.time() - startTimestamp) < locationTimeout:
+      pos = self.get('pos', None)
+      fix = self.get('fix', 1)
+      if fix > 1 and pos:
+        break
+      time.sleep(sleepTime)
+    if fix > 1 and pos: # got GPS fix ?
+      lat, lon = pos
+      query = self.constructGoogleQueryLL(term, lat, lon)
+      query = re.sub("loc:.*geo:", "loc:", query)
+      result = self._localGoogleSearch(query)
+      return result
+    else: # no GPS lock
+      self.notify("failed to get GPS fix", 5000)
+      return None
 
   def _localGoogleSearch(self, query):
     """this method performs Google Local online-search and is called by the worker thread"""
