@@ -24,7 +24,7 @@
 import sys
 import time
 
-import argparse
+import core.argparse as argparse
 
 LOCAL_SEARCH_LOCATION_TIMEOUT = 30 # in seconds
 
@@ -312,6 +312,12 @@ class Startup:
     print("startup: searching for CLI-provided query")
     query = self.args.local_search
 
+    # try to make sure Internet connectivity is available
+    # -> Internet is needed for a quick fix & the search itself
+    # -> if the device is offline, it might need this "nudge"
+    # to reconnect
+    self.modrana.dmod.enableInternetConnectivity()
+
     # check if location was provided from CLI
     if self.args.local_search_location is not None:
       location = self.args.local_search_location
@@ -325,14 +331,8 @@ class Startup:
           self._sendMessage("ml:search:localSearch:coords;%f;%f;%s" % (lat, lon, query))
       else:
         self._sendMessage("ml:search:localSearch:location;%s;%s" % (location, query))
-    else: # determine current location
-        # TODO: move this to asynchronous search processing
-        pos = self._getCurrentPosition()
-        if pos:
-          lat, lon = pos
-          self._sendMessage("ml:search:localSearch:coords;%f;%f;%s" % (lat, lon, query))
-        else:
-          print("startup: local search failed: current position unknown")
+    else: # determine current location and then do the search
+      self._sendMessage("ml:search:localSearch:position;%s" % query)
 
   def _addressSearch(self):
     print("startup: searching where is the CLI-provided address")
@@ -372,7 +372,6 @@ class Startup:
       checkInterval = 0.1 # in seconds
       print("startup: trying to determine current position for at most %d s" % LOCAL_SEARCH_LOCATION_TIMEOUT)
       while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
-        timeout+=checkInterval
         if l.provider:
           if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
             # GPSD and liblocation need a nudge
@@ -381,6 +380,8 @@ class Startup:
           pos = l.provider.getFix().position
           if pos is not None:
             break
+
+        timeout+=checkInterval
         time.sleep(checkInterval)
       if loadLocationModule:
       # properly stop location when done (for early tasks)
