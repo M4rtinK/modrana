@@ -62,9 +62,10 @@ class menus(ranaModule):
     self.spButtonHiOutlineTup = ("yellow",1.0)
 
 
-  def update(self):
+  def beforeDraw(self):
     # check if buttons should be hidden, every second by default
     # TODO: implement this by using a timer ?
+    # -> this would help to reuse the button hiding code for other GUIs
     timestamp = time.time()
     if (timestamp - self.lastHideCheckTimestamp) > 1:
       self.lastHideCheckTimestamp = timestamp
