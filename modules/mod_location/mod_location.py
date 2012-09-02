@@ -117,9 +117,12 @@ class Location(ranaModule):
     update position info with new Fix data
     """
     if fix.position is None:
+      # set fix class to 0 - nothing yet
+      self.set('fix', 0)
       # wait for valid data
       return
     (lat,lon) = fix.position
+    fixClass = 2 # 2D data
 
     # position
     self.set('pos', (lat,lon))
@@ -142,8 +145,18 @@ class Location(ranaModule):
       # elevation
     if fix.altitude is not None:
       self.set('elevation', fix.altitude)
+      fixClass = 3
     else:
       self.set('elevation', None)
+
+    # set fix class
+    # NOTE:
+    # 0 - no sats
+    # 1 - no fix
+    # 2 - 2D
+    # 3 - 3D
+    self.set("fix", fixClass)
+
 
     """always set this key to current epoch once the location is updated
     so that modules can watch it and react on position updates"""
@@ -154,12 +167,15 @@ class Location(ranaModule):
 
   def startLocation(self):
     """start location - device based or gpsd"""
-    print "location: enabling location"
-    if self.modrana.dmod.handlesLocation():
-      self.modrana.dmod.startLocation()
+    if not self.enabled:
+      print "location: enabling location"
+      if self.modrana.dmod.handlesLocation():
+        self.modrana.dmod.startLocation()
+      else:
+        self.provider.start()
+      self.enabled = True
     else:
-      self.provider.start()
-    self.enabled = True
+      print('location: location already enabled')
 
   def stopLocation(self):
     """stop location - device based or gpsd"""
