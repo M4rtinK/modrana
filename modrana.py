@@ -667,11 +667,10 @@ class ModRana:
       f = open(self.paths.getOptionsFilePath(), "r")
       newData = marshal.load(f)
       f.close()
-      # TODO: check out if this is needed anymore
-      if 'tileFolder' in newData: #TODO: do this more elegantly
-        del newData['tileFolder']
-      if 'tracklogFolder' in newData: #TODO: do this more elegantly
-        del newData['tracklogFolder']
+      purgeKeys = ["fix"]
+      for key in purgeKeys:
+        if key in newData:
+          del newData[key]
       for k,v in newData.items():
         self.set(k,v)
       success = True
