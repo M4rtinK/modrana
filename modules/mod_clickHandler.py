@@ -22,7 +22,7 @@ from base_module import ranaModule
 from rect import rect
 
 def getModule(m,d,i):
-  return(clickHandler(m,d,i))
+  return clickHandler(m,d,i)
 
 class clickHandler(ranaModule):
   """handle mouse clicks"""
