@@ -520,8 +520,15 @@ class Options(ranaModule):
       'ru')
 
     # ** online routing submenu
-    group = addGroup("Route options", "route_options", catNavigation, "generic")
-    addBoolOpt("Avoid major highways ", "routingAvoidHighways", group, False)
+    group = addGroup("Routing", "routing", catNavigation, "generic")
+
+    addOpt("Routing provider", "routingProvider",
+      [("GoogleDirections","Google - <b>online</b>"),
+        ("Monav","Monav - <b>on device</b>")],
+      group,
+      "GoogleDirections")
+
+    addBoolOpt("Avoid major highways", "routingAvoidHighways", group, False)
 
     addBoolOpt("Avoid toll roads", "routingAvoidToll", group, False)
 
