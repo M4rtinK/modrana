@@ -33,25 +33,25 @@ class clickHandler(ranaModule):
 
   def beforeDraw(self):
     self.areas = []
-    self.dragareas = []
-    self.dragscreen = None
+    self.dragAreas = []
+    self.dragScreen = None
     self.timedActionInProgress = None
 
   def register(self, rect, action, timedAction):
     self.areas.append([rect, action, timedAction])
-  
+
   def registerXYWH(self, x1,y1,dx,dy, action, timedAction=None):
     if timedAction: # at least one timed action
       self.timedActionInProgress = True
     area = rect(x1,y1,dx,dy)
     self.register(area, action, timedAction)
-  
+
   def registerXYXY(self, x1,y1,x2,y2, action, timedAction=None):
     if timedAction: # at least one timed action
       self.timedActionInProgress = True
     area = rect(x1,y1,x2-x1,y2-y1)
     self.register(area, action, timedAction)
-    
+
   def handleClick(self, x, y, msDuration):
 #    print "Clicked at %d,%d for %d" % (x,y,msDuration)
     if self.ignoreNextClicks > 0:
@@ -91,29 +91,29 @@ class clickHandler(ranaModule):
               else:
                 print "No message handler to receive clicks"
               self.ignoreNextClicks = self.dmod.lpSkipCount()
-          
+
   def registerDraggable(self, x1,y1,x2,y2, module):
-    self.dragareas.append((rect(x1,y1,x2-x1,y2-y1), module))
+    self.dragAreas.append((rect(x1,y1,x2-x1,y2-y1), module))
 
   def registerDraggableEntireScreen(self, module):
     print "Entire screen is draggable for %s " % module
-    self.dragscreen = module
+    self.dragScreen = module
 
   def handleDrag(self,startX,startY,dx,dy,x,y,msDuration):
     # react on timed actions interactively
-    if self.dragscreen:
-      m = self.m.get(self.dragscreen, None)
+    if self.dragScreen:
+      m = self.m.get(self.dragScreen, None)
       if m is not None:
         m.dragEvent(startX,startY,dx,dy,x,y)
     else:
-	    for area in self.dragareas:
-	      (rect, module) = area
-	      if rect.contains(startX,startY):
-	        m = self.m.get(module, None)
-	        if m is not None:
-	          m.dragEvent(startX,startY,dx,dy,x,y)
-	        else:
-	          print "Drag registered to nonexistent module %s" % module
+      for area in self.dragAreas:
+        (rect, module) = area
+        if rect.contains(startX,startY):
+          m = self.m.get(module, None)
+          if m is not None:
+            m.dragEvent(startX,startY,dx,dy,x,y)
+          else:
+            print "Drag registered to nonexistent module %s" % module
 
 if(__name__ == "__main__"):
   print "Testing rect"
