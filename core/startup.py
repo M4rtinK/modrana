@@ -308,7 +308,7 @@ class Startup:
       self._exit(SEARCH_NO_RESULTS_FOUND)
 
   def _localSearch(self):
-    """CLI initiated local search that displays the result in modRana"""
+    """CLI initiated online local search that displays the result inside modRana"""
     print("startup: searching for CLI-provided query")
     query = self.args.local_search
 
@@ -335,12 +335,26 @@ class Startup:
       self._sendMessage("ml:search:localSearch:position;%s" % query)
 
   def _addressSearch(self):
+    """CLI initiated online address search, that shows results inside modRana"""
+    # try to make sure Internet connectivity is available
+    # -> Internet is needed for a quick fix & the search itself
+    # -> if the device is offline, it might need this "nudge"
+    # to reconnect
+    self.modrana.dmod.enableInternetConnectivity()
+
     print("startup: searching where is the CLI-provided address")
     query = self.args.address_search
     message = "ml:search:search:address;%s" % query
     self._sendMessage(message)
 
   def _wikipediaSearch(self):
+    """CLI initiated online Wikipedia search, that shows results inside modRana"""
+    # try to make sure Internet connectivity is available
+    # -> Internet is needed for a quick fix & the search itself
+    # -> if the device is offline, it might need this "nudge"
+    # to reconnect
+    self.modrana.dmod.enableInternetConnectivity()
+
     print("startup: searching Wikipedia for CLI-provided query")
     query = self.args.wikipedia_search
     message = "ml:search:search:wikipedia;%s" % query

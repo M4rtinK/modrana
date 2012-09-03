@@ -74,6 +74,10 @@ class route(ranaModule):
 
     self.routeDetailGeocodingTriggered = False
 
+    # Monav
+    self.monav = None
+    self.monavDataFolder = None
+
   def handleMessage(self, message, type, args):
     if message == "clear":
       self._goToInitialState()
@@ -310,10 +314,45 @@ class route(ranaModule):
     self.destinationAddress = None
     # the new result would probably have different start and destination coordinates
     self.routeDetailGeocodingTriggered = False
-    online = self.m.get('onlineServices', None)
-    if online:
-      online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon), self._handleResults, "onlineRoute")
-      
+
+    #TODO: respect offline mode and automatically
+    # use offline routing methods
+
+    # TODO: notify user if no offline routing data is available for the current area
+
+    provider = self.get('routingProvider', "GoogleDirections")
+    if provider == "Monav":
+      waypoints = [(fromLat, fromLon), (toLat, toLon)]
+      route = self.getMonavRoute(waypoints)
+      #TODO: asynchronous processing & error notifications
+      self._handleResults("MonavRoute", route)
+
+    else: # use Google Directions as fallback
+      online = self.m.get('onlineServices', None)
+      if online:
+        online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon), self._handleResults, "onlineRoute")
+
+  def getMonavRoute(self, waypoints):
+    monavDataFolder = '' #TODO: implement this
+    if monavDataFolder:
+      try:
+        # is Monav initialized ?
+        if self.monav is None:
+          # start Monav
+          import monav_support
+          self.monav = monav_support.Monav()
+          self.monav.startServer()
+        route = self.monav.monavDirections(monavDataFolder, waypoints)
+        return route
+
+      except Exception, e:
+        print('route: Monav route lookup failed')
+        print(e)
+        return None
+    else:
+      print("route: no Monav routing data - can't route")
+      return None
+
   def doAddressRoute(self, start, destination):
     """Route from one point to another, and set that as the active route"""
     # cleanup any possible previous routes
@@ -352,6 +391,11 @@ class route(ranaModule):
       if autostart == 'enabled':
         self.sendMessage('ms:turnByTurn:start:%s' % autostart)
       self.set('needRedraw', True)
+    elif key == "MonavRoute":
+      (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
+      self.duration = "" # TODO : correct duration
+      dirs = way.fromMonavResult(directions)
+      self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
     elif key == "startAddress":
       self.startAddress = resultsTuple
       self.text = None # clear route detail cache
@@ -359,10 +403,6 @@ class route(ranaModule):
       self.destinationAddress = resultsTuple
       self.text = None # clear route detail cache
 
-
-
-
-    
   def processAndSaveResults(self, directions, start, destination, routeRequestSentTimestamp):
     """process and save routing results"""
     self.routeRequestSentTimestamp = routeRequestSentTimestamp
@@ -866,6 +906,11 @@ class route(ranaModule):
       else:
         (dLat, dLon) = self.directions.getPointByID(-1).getLL()
       online.reverseGeocodeAsync(dLat, dLon, self._handleResults, "destinationAddress", "Geocoding destination")
+
+  def shutdown(self):
+    # stop the Monav server, if running
+    if self.monav:
+      self.monav.stopServer()
 
 if(__name__ == '__main__'):
   d = {'transport':'car'}

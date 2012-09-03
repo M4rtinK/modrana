@@ -57,31 +57,13 @@ class onlineServices(ranaModule):
     self.sendMessage('ml:notification:workInProgressOverlay:disable')
     self.workStartTimestamp = None
 
-  def _onlineRouteLookup(self, query, type):
-    """this method online route lookup and is called by the worker thread"""
-    (start, destination, routeRequestSentTimestamp) = query
-
-    print "worker: routing from",start," to ",destination
-    self._setWorkStatusText("online routing in progress...")
-    # get the route
-    directions = self.googleDirections(start, destination)
-    self._setWorkStatusText("online routing done   ")
-    # return result to the thread to handle
-    return directions, start, destination, routeRequestSentTimestamp
-
   def geocode(self, address):
     """synchronous geocoding"""
     return geocoding.geocode(address)
 
   def geocodeAsync(self, address, outputHandler, key):
     """asynchronous geocoding"""
-    self._addWorkerThread(self._onlineGeocoding, [address], outputHandler, key)
-
-  def _onlineGeocoding(self, address):
-    self._setWorkStatusText("online geocoding in progress...")
-    result = self.geocode(address)
-    self._setWorkStatusText("online geocoding done   ")
-    return result
+    self._addWorkerThread(Worker._onlineGeocoding, [address], outputHandler, key)
 
   def localSearch(self, query, where=None, maxResults=8):
     """Synchronous generic local search query
@@ -133,83 +115,11 @@ class onlineServices(ranaModule):
       points.append(point)
     return points
 
+          # ** OSM static map URL **
 
-  # ** Background processing **
-
-  def _enableOverlay(self):
-    """enable the "working" overlay + set timestamp"""
-    self.sendMessage('ml:notification:workInProgressOverlay:enable')
-    self.workStartTimestamp = time.time()
-
-  def _setWorkStatusText(self, text):
-    notification = self.m.get('notification', None)
-    if notification:
-      notification.setWorkInProgressOverlayText(text)
-
-  def _addWorkerThread(self, *args):
-    """start the worker thread and provide it the specified arguments"""
-    w = self.Worker(self,*args)
-    w.daemon = True
-    w.start()
-    self.workerThreads.append(w)
-
-  def _done(self, thread):
-    """a thread reporting it is done"""
-    # un-register the thread
-    self._unregisterWorkerThread(thread)
-    # if no other threads are working, disable the overlay
-    if not self.workerThreads:
-      self._disableOverlay()
-
-  def stop(self):
-    """called after pressing the cancel button"""
-    # disable the overlay
-    self._disableOverlay()
-    # tell all threads not to return results TODO: per thread cancelling
-    if self.workerThreads:
-      for thread in self.workerThreads:
-        thread.dontReturnResult()
-
-  def _unregisterWorkerThread(self, thread):
-    if thread in self.workerThreads:
-      self.workerThreads.remove(thread)
-
-  class Worker(threading.Thread):
-    """a worker thread for asynchronous online services access"""
-    def __init__(self,callback, call, args, outputHandler, key):
-      threading.Thread.__init__(self)
-      self.callback = callback # should be a onlineServices module instance
-      self.call = call
-      self.args = args
-      self.outputHandler = outputHandler
-      self.key = key # a key for the output handler
-      self.statusMessage = ""
-      self.returnResult = True
-    def run(self):
-      print("onlineServices: worker starting")
-      # enable the overlay
-      self.callback._enableOverlay()
-      # call the provided method asynchronously from modRana main thread
-      result = self.call(*self.args) # with the provided arguments
-      if self.returnResult: # check if our result is expected and should be returned to the oputpt handler
-        self.outputHandler(self.key, result)
-
-      # cleanup
-      print("onlineServices: worker finished")
-      self.callback._done(self)
-
-    def dontReturnResult(self):
-      self.returnResult = False
-
-
-  # ** OSM static map URL **
-
-  def getOSMStaticMapUrl(self, centerLat, centerLon, zl,
-                         w=350,h=350,
-                         defaultMarker = "ol-marker",
-                         markerList=[]
-                         ):
+  def getOSMStaticMapUrl(self, centerLat, centerLon, zl, w=350, h=350, defaultMarker="ol-marker", markerList=None):
     """construct & return OSM static map URL"""
+    if not markerList: markerList = []
     prefix = "http://staticmap.openstreetmap.de/staticmap.php"
     center = "?center=%f,%f" % (centerLat, centerLon)
     zoom = "&zoom=%d" % zl
@@ -245,32 +155,21 @@ class onlineServices(ranaModule):
     return query.read()
 
   def elevFromGeonamesBatchAsync(self, latLonList, outputHandler, key, tracklog=None):
-    self._addWorkerThread(self._elevFromGeonamesBatch, [latLonList, tracklog], outputHandler, key)
+    self._addWorkerThread(Worker._elevFromGeonamesBatch, [latLonList, tracklog], outputHandler, key)
 
-  def _elevFromGeonamesBatch(self, latLonList, tracklog):
-    try:
-      self._setWorkStatusText("online elevation lookup starting...")
-      results = self.elevFromGeonamesBatch(latLonList)
-      self._setWorkStatusText("online elevation lookup done   ")
-      return results, tracklog
-    except Exception, e:
-      print('onlineServices: exception during elevation lookup:\n',e)
-      return None,tracklog
-
-
-  def elevFromGeonamesBatch(self, latLonList):
-    """
-    get elevation in meters for the specified latitude and longitude from geonames
-    it is possible to ask for up to 20 coordinates at once
+  def elevFromGeonamesBatch(self, latLonList, threadCB):
+    """ get elevation in meters for the specified latitude and longitude from
+     geonames synchronously, it is possible to ask for up to 20 coordinates
+     at once
     """
     maxCoordinates = 20 #geonames only allows 20 coordinates per query
     latLonElevList = []
-    tempList = []
     mL = len(latLonList)
     while len(latLonList) > 0:
-      self._setWorkStatusText("%d of %d done" % (mL-len(latLonList),mL) )
+      if threadCB: # report progress to running thread
+        threadCB._setWorkStatusText("%d of %d done" % (mL-len(latLonList),mL) )
       tempList = latLonList[0:maxCoordinates]
-      latLonList = latLonList[maxCoordinates:len(latLonList)]
+#      latLonList = latLonList[maxCoordinates:len(latLonList)]
 
       lats = ""
       lons = ""
@@ -281,18 +180,20 @@ class onlineServices(ranaModule):
     # TODO: maybe add switching ?
     #      url = 'http://ws.geonames.org/astergdem?lats=%s&lngs=%s' % (lats,lons)
       url = 'http://ws.geonames.org/srtm3?lats=%s&lngs=%s' % (lats,lons)
+      query = None
       try:
         query = urllib.urlopen(url)
       except Exception ,e:
-        "onlineServices: getting elevation from geonames returned an error"
+        print("online: getting elevation from geonames returned an error")
         results = "0"
         for i in range(1, len(tempList)):
           results += " 0"
       try:
-        results = query.read().split('\r\n')
-        query.close()
+        if query:
+          results = query.read().split('\r\n')
+          query.close()
       except Exception, e:
-        "onlineServices: elevation string from geonames has a wrong format"
+        print("online: elevation string from geonames has a wrong format")
         results = "0"
         for i in range(1, len(tempList)):
           results += " 0"
@@ -330,11 +231,6 @@ class onlineServices(ranaModule):
     local = self.googleLocalQuery(query)
     return local
 
-  def constructGoogleQueryLL(self, term, lat, lon):
-    """get a correctly formatted GLS query"""
-    query = "%s loc:%f,%f" % (term, lat,lon)
-    return query
-
   def constructGoogleQuery(self, term, location):
     """get a correctly formatted GLS query"""
     query = "%s loc:%s" % (term, location)
@@ -345,14 +241,19 @@ class onlineServices(ranaModule):
        -> verbatim start and destination will be used in route description, no geocoding
        outputHandler will be provided with the results + the specified key string"""
     routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
-    self._addWorkerThread(self._onlineRouteLookup, [(start, destination, routeRequestSentTimestamp), "normal"], outputHandler, key)
+
+    args = [(start, destination, routeRequestSentTimestamp)]
+    flags = {'net': True}
+    self._addWorkerThread(Worker._onlineRouteLookup, args, outputHandler, key, flags)
     
   def googleDirectionsLLAsync(self, start, destination, outputHandler, key):
     """a background running Google Directions query
     - Lat Lon pairs version -> for geocoding the start/destination points (NOT first/last route points)
        outputHandler will be provided with the results + the specified key string"""
     routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
-    self._addWorkerThread(self._onlineRouteLookup, [(start, destination, routeRequestSentTimestamp), "LL"], outputHandler, key)
+    args = [(start, destination, routeRequestSentTimestamp)]
+    flags = {'net': True}
+    self._addWorkerThread(Worker._onlineRouteLookup, args, outputHandler, key, flags)
 
   def googleDirections(self ,start, destination):
     """ Get driving directions from Google.
@@ -385,7 +286,7 @@ class onlineServices(ranaModule):
 
     return directions
 
-  def tryToGetDirections(self, start, destination, dir, travelMode, otherOptions, seccondTime=False):
+  def tryToGetDirections(self, start, destination, dir, travelMode, otherOptions, secondTime=False):
     gmap = self.getGmapsInstance()
     parameters = travelMode + otherOptions
     dir['dirflg'] = parameters
@@ -402,10 +303,11 @@ class onlineServices(ranaModule):
         print("onlineServices:Gdirections:routing failed -> no route found" % e)
         self.sendMessage("ml:notification:m:No route found;5")
       elif e.status == 400:
-        if not seccondTime: # guard against potential infinite loop for consequent 400 errors
+        if not secondTime: # guard against potential infinite loop for consequent 400 errors
           print("onlineServices:Gdirections:bad response to travel mode, trying default travel mode")
           self.set('needRedraw', True)
-          directions = self.tryToGetDirections(start, destination, dir, travelMode="",otherOptions=otherOptions ,seccondTime=True)
+          directions = self.tryToGetDirections(start, destination, dir, travelMode="",otherOptions=otherOptions ,
+            secondTime=True)
       else:
         print("onlineServices:Gdirections:routing failed with exception googlemaps status code:%d" % e.status)
     except Exception, e:
@@ -423,102 +325,31 @@ class onlineServices(ranaModule):
     address = gMap.latlng_to_address(lat,lon)
     return address
 
-  def _reverseGeocode(self, lat, lon, message):
-    """do blocking reverse geocoding using one of the available methods
-    -> this method is run from the worker thread"""
-    print("onlineServices: reverse geocoding")
-    self._setWorkStatusText("%s..." % message)
-    #TODO: support other reverse geocoding methods than Google
-    address = self._googleReverseGeocode(lat, lon)
-    self._setWorkStatusText("Geocoding done.")
-    return address
-
-
-  def reverseGeocodeAsync(self, lat, lon, outputHandler, key, message="Geocoding"):
-    self._addWorkerThread(self._reverseGeocode, [lat, lon, message], outputHandler, key)
-
+  def reverseGeocodeAsync(self, lat, lon, outputHandler, key, message="geocoding"):
+    """asynchronous reverse geocoding"""
+    flags = {'net': True}
+    self._addWorkerThread(Worker._reverseGeocode, [lat, lon, message], outputHandler, key, flags)
 
   def googleLocalQueryLLAsync(self, term, lat, lon,outputHandler, key):
     """asynchronous Google Local Search query for explicit lat, lon coordinates"""
-    query = self.constructGoogleQueryLL(term, lat, lon)
-    self.googleLocalQueryAsync(query, outputHandler, key)
+    location = "%f,%f" % (lat, lon)
+    self.googleLocalQueryAsync(term, location, outputHandler, key)
 
-  def googleLocalQueryPosAsync(self, term, outputHandler, key, locationTimeout=30):
+  def googleLocalQueryPosAsync(self, term, outputHandler, key):
     """asynchronous Google Local Search query around current position,
     if current position is unknown, wait for locationTimeout seconds before failing"""
-    self._addWorkerThread(self._locateCurrentPosition, [term, locationTimeout], outputHandler, key)
+    flags = {
+      'GPS': True,
+      'net': True
+    }
+    self._addWorkerThread(Worker._localGoogleSearch, [term], outputHandler, key)
 
-  def googleLocalQueryAsync(self, query, outputHandler, key):
+  def googleLocalQueryAsync(self, term, location, outputHandler, key):
     """asynchronous Google Local Search query for """
-    print("onlineServices: GLS search")
+    print("online: GLS search")
     # TODO: we use a single thread for both routing and search for now, maybe have separate ones ?
-    # Local Search doesn't like the geo: prefix so we remove it
-    query = re.sub("loc:.*geo:", "loc:", query)
-
-    self._addWorkerThread(self._localGoogleSearch, [query], outputHandler, key)
-
-  def _locateCurrentPosition(self, term, locationTimeout):
-    """try to locate current position and run search when done or time out"""
-    self._setWorkStatusText("GPS fix in progress...")
-    sleepTime = 0.5 # in seconds
-    pos = None
-    fix = 0
-    startTimestamp = time.time()
-    while (time.time() - startTimestamp) < locationTimeout:
-      pos = self.get('pos', None)
-      fix = self.get('fix', 1)
-      if fix > 1 and pos:
-        break
-      time.sleep(sleepTime)
-    if fix > 1 and pos: # got GPS fix ?
-      lat, lon = pos
-      query = self.constructGoogleQueryLL(term, lat, lon)
-      query = re.sub("loc:.*geo:", "loc:", query)
-      result = self._localGoogleSearch(query)
-      return result
-    else: # no GPS lock
-      self.notify("failed to get GPS fix", 5000)
-      return None
-
-  def _checkConnectivity(self):
-    """check Internet connectivity - if no Internet connectivity is available, wait for up to 30 seconds
-    and then fail (this is used to handle cases where the device was offline and the Internet connection is
-    just being established)"""
-    status = self.modrana.dmod.getInternetConnectivityStatus()
-    if status is None: # Connectivity status monitoring not supported
-      return status # skip
-    elif status == True:
-      return status # Internet connectivity is most probably available
-    elif status == False:
-      startTimestamp = time.time()
-      self._setWorkStatusText("waiting for Internet connectivity...")
-      while (time.time() - startTimestamp) < 30:
-        status = self.modrana.dmod.getInternetConnectivityStatus()
-        print('online: waiting for internet connectivity')
-        print(status)
-        if status == True or status is None:
-          break
-        time.sleep(1)
-      return status
-    else:
-      print('online: warning, unknown connection status:')
-      print(status)
-      return status
-
-  def _localGoogleSearch(self, query):
-    """this method performs Google Local online-search and is called by the worker thread"""
-    status = self._checkConnectivity()
-    if (status is None) or (status == True):
-      # Internet connectivity is either available or its state is
-      # unknown
-      print("onlineServices: performing GLS")
-      self._setWorkStatusText("online POI search in progress...")
-      result = self.googleLocalQuery(query)
-      self._setWorkStatusText("online POI search done   ")
-      return result
-    else:
-      print('online: Internet connectivity not available or in unknown state')
-      return None
+    flags = {'net': True}
+    self._addWorkerThread(Worker._localGoogleSearch, [term, location], outputHandler, key, flags)
 
   # ** Wikipedia search (through  Geonames) **
 
@@ -526,17 +357,224 @@ class onlineServices(ranaModule):
     return geonames.wikipediaSearch(query)
 
   def wikipediaSearchAsync(self, query, outputHandler, key):
-    self._addWorkerThread(self._onlineWikipediaSearch, [query], outputHandler, key)
-    
-  def _onlineWikipediaSearch(self, query):
-    self._setWorkStatusText("online Wikipedia search in progress...")
-    result = self.wikipediaSearch(query)
-    self._setWorkStatusText("online Wikipedia search done   ")
+    flags = {'net': True}
+    self._addWorkerThread(Worker._onlineWikipediaSearch, [query], outputHandler, key)
+
+  # ** Background processing **
+
+  def _enableOverlay(self):
+    """enable the "working" overlay + set timestamp"""
+    self.sendMessage('ml:notification:workInProgressOverlay:enable')
+    self.workStartTimestamp = time.time()
+
+  def _addWorkerThread(self, *args):
+    """start the worker thread and provide it the specified arguments"""
+    w = Worker(self,*args)
+    w.daemon = True
+    w.start()
+    self.workerThreads.append(w)
+
+  def _done(self, thread):
+    """a thread reporting it is done"""
+    # un-register the thread
+    self._unregisterWorkerThread(thread)
+    # if no other threads are working, disable the overlay
+    if not self.workerThreads:
+      self._disableOverlay()
+
+  def stop(self):
+    """called after pressing the cancel button"""
+    # disable the overlay
+    self._disableOverlay()
+    # tell all threads not to return results TODO: per thread cancelling
+    if self.workerThreads:
+      for thread in self.workerThreads:
+        thread.dontReturnResult()
+
+  def _unregisterWorkerThread(self, thread):
+    if thread in self.workerThreads:
+      self.workerThreads.remove(thread)
+
+class Worker(threading.Thread):
+  """a worker thread for asynchronous online services access"""
+  def __init__(self, callback, call, args, outputHandler, key, flags=None):
+    if not flags: flags = []
+    threading.Thread.__init__(self)
+    self.online = callback # should be a onlineServices module instance
+    self.call = call
+    self.args = args
+    self.outputHandler = outputHandler
+    self.key = key # a key for the output handler
+    self.flags = flags or {}
+    self.statusMessage = ""
+    self.returnResult = True
+
+  def run(self):
+    print("onlineServices: worker starting")
+    # enable the overlay
+    self.online._enableOverlay()
+    # check for flags that the method might need
+    # before it can bwe started
+    start = True
+
+    if self.flags.get('GPS', False):
+      pos = self._locateCurrentPosition()
+      if not pos:
+        pos = self.online.get('pos', None)
+        if pos:
+          self._notify('using last known position', 3000)
+        else:
+          self._notify('failed to get GPS fix', 5000)
+          start = False
+
+    if self.flags.get('net', False):
+      status = self._checkConnectivity()
+      # None - connectivity state unknown
+      # False - disconnected
+      # True - connected
+
+      if not ((status is None) or (status == True)):
+        # don't need to run a job that needs Internet connectivity
+        # if no connectivity is available
+        self._notify('failed: no Internet connectivity', 5000)
+        start = False
+
+    if start: # are we ready to start the main processing ?
+      # call the provided method asynchronously from modRana main thread
+      result = self.call(self, *self.args) # with the provided arguments
+      if self.returnResult: # check if our result is expected and should be returned to the output handler
+        self.outputHandler(self.key, result)
+
+    # cleanup
+    print("onlineServices: worker finished")
+    self.online._done(self)
+
+  def dontReturnResult(self):
+    self.returnResult = False
+
+  def _locateCurrentPosition(self, locationTimeout=30):
+    """try to locate current position and run search when done or time out"""
+    self._setWorkStatusText("GPS fix in progress...")
+    sleepTime = 0.5 # in seconds
+    pos = None
+    fix = 0
+    startTimestamp = time.time()
+    elapsed = 0
+    while elapsed < locationTimeout and self.returnResult:
+      pos = self.online.get('pos', None)
+      fix = self.online.get('fix', 1)
+      if fix > 1 and pos:
+        break
+      time.sleep(sleepTime)
+      elapsed = time.time() - startTimestamp
+    if fix > 1 and pos: # got GPS fix ?
+      return pos
+    else: # no GPS lock
+      self._notify("failed to get GPS fix", 5000)
+      return None
+
+  def _checkConnectivity(self):
+    """check Internet connectivity - if no Internet connectivity is available, wait for up to 30 seconds
+    and then fail (this is used to handle cases where the device was offline and the Internet connection is
+    just being established)"""
+    status = self.online.modrana.dmod.getInternetConnectivityStatus()
+    if status is None: # Connectivity status monitoring not supported
+      return status # skip
+    elif status == True:
+      return status # Internet connectivity is most probably available
+    elif status == False:
+      startTimestamp = time.time()
+      self._setWorkStatusText("waiting for Internet connectivity...")
+      elapsed = 0
+      while elapsed < 30 and self.returnResult:
+        status = self.online.modrana.dmod.getInternetConnectivityStatus()
+        print('online: waiting for internet connectivity')
+        print(status)
+        if status == True or status is None:
+          break
+        time.sleep(1)
+        elapsed = time.time() - startTimestamp
+      return status
+    else:
+      print('online: warning, unknown connection status:')
+      print(status)
+      return status
+
+  def _notify(self, message, msTimeout):
+    if self.flags.get('notify', True):
+      self.online.notify(message, msTimeout)
+
+  def _setWorkStatusText(self, text):
+    self.statusMessage = text
+    notification = self.online.m.get('notification', None)
+    if notification:
+      notification.setWorkInProgressOverlayText(text)
+
+  # Google
+  def _onlineRouteLookup(self, query):
+    """this method online route lookup and is called by the worker thread"""
+    (start, destination, routeRequestSentTimestamp) = query
+    print("worker: routing from %s to %s" % (start, destination))
+    self._setWorkStatusText("online routing in progress...")
+    # get the route
+    directions = self.online.googleDirections(start, destination)
+    self._setWorkStatusText("online routing done   ")
+    # return result to the thread to handle
+    return directions, start, destination, routeRequestSentTimestamp
+
+  def _localGoogleSearch(self, term, location=None):
+    if location:
+        query = self.online.constructGoogleQuery(term, location)
+    else:
+      # use current position:
+      pos = self.online.get('pos', None)
+      if pos:
+        location = "%f,%f" % pos
+        query = self.online.constructGoogleQuery(term, location)
+      else:
+        print('online: local search: search location unknown')
+        return None
+
+    # Local Search doesn't like the geo: prefix so we remove it
+    query = re.sub("loc:.*geo:", "loc:", query)
+
+    """this method performs Google Local online-search and is called in the worker thread"""
+    print("onlineServices: performing GLS")
+    self._setWorkStatusText("online POI search in progress...")
+    result = self.online.googleLocalQuery(query)
+    self._setWorkStatusText("online POI search done   ")
     return result
 
+  def _onlineGeocoding(self, address):
+    self._setWorkStatusText("online geocoding in progress...")
+    result = self.online.geocode(address)
+    self._setWorkStatusText("online geocoding done   ")
+    return result
 
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()
+  def _reverseGeocode(self, lat, lon, message):
+    """do blocking reverse geocoding using one of the available methods
+    -> this method is run from the worker thread"""
+    print("onlineServices: reverse geocoding")
+    self._setWorkStatusText("%s..." % message)
+    #TODO: support other reverse geocoding methods than Google
+    address = self.online._googleReverseGeocode(lat, lon)
+    self._setWorkStatusText("geocoding done.")
+    return address
+
+  # Geonames
+
+  def _elevFromGeonamesBatch(self, latLonList, tracklog):
+    try:
+      self._setWorkStatusText("online elevation lookup starting...")
+      results = self.online.elevFromGeonamesBatch(latLonList)
+      self._setWorkStatusText("online elevation lookup done   ")
+      return results, tracklog
+    except Exception, e:
+      print('onlineServices: exception during elevation lookup:\n',e)
+      return None,tracklog
+
+  def _onlineWikipediaSearch(self, query):
+    self._setWorkStatusText("online Wikipedia search in progress...")
+    result = self.online.wikipediaSearch(query)
+    self._setWorkStatusText("online Wikipedia search done   ")
+    return result

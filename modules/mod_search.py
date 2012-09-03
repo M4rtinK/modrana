@@ -196,9 +196,8 @@ class search(ranaModule):
           # search around a location (address, coordinates, etc. ),
           # modRana just forwards the location to the search engine
           location = args[1]
-          query = args[2]
-          queryString = online.constructGoogleQuery(query, location)
-          online.googleLocalQueryAsync(queryString, self.handleSearchResult, "localSearchResultGoogle")
+          term = args[2]
+          online.googleLocalQueryAsync(term, location, self.handleSearchResult, "localSearchResultGoogle")
         elif lsType == "position": # search around current position
           query = args[1]
           fix = self.get('fix', 0)
