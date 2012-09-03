@@ -28,29 +28,33 @@ class clickHandler(ranaModule):
   """handle mouse clicks"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
+    self.emptyLayers = {2:[], 0:[]}
     self.beforeDraw()
     self.ignoreNextClicks = 0
 
   def beforeDraw(self):
-    self.areas = []
+    self.layers = self.emptyLayers
     self.dragAreas = []
     self.dragScreen = None
     self.timedActionInProgress = None
 
-  def register(self, rect, action, timedAction):
-    self.areas.append([rect, action, timedAction])
+  def register(self, rect, action, timedAction, layerNumber):
+    #NOTE: layers with higher number "cover" layers with lower number
+    #currently layers 0 and 2 are used
+    # -> if a click is "caught" in in upper layer, it is not propagated to the layer below
+    self.layers[layerNumber].append([rect, action, timedAction])
 
-  def registerXYWH(self, x1,y1,dx,dy, action, timedAction=None):
+  def registerXYWH(self, x1, y1, dx, dy, action, timedAction=None, layer=0):
     if timedAction: # at least one timed action
       self.timedActionInProgress = True
-    area = rect(x1,y1,dx,dy)
-    self.register(area, action, timedAction)
+    area = rect(x1, y1, dx, dy)
+    self.register(area, action, timedAction, layer)
 
-  def registerXYXY(self, x1,y1,x2,y2, action, timedAction=None):
+  def registerXYXY(self, x1,y1,x2,y2, action, timedAction=None, layer=0):
     if timedAction: # at least one timed action
       self.timedActionInProgress = True
-    area = rect(x1,y1,x2-x1,y2-y1)
-    self.register(area, action, timedAction)
+    area = rect(x1, y1, x2-x1, y2-y1)
+    self.register(area, action, timedAction, layer)
 
   def handleClick(self, x, y, msDuration):
 #    print "Clicked at %d,%d for %d" % (x,y,msDuration)
@@ -58,48 +62,68 @@ class clickHandler(ranaModule):
       self.ignoreNextClicks -= 1
 #      print "ignoring click, %d remaining" % self.ignoreNextClicks
     else:
-      for area in self.areas:
-        (rect, action, timedAction) = area
-        if rect.contains(x,y):
-          m = self.m.get("messages", None)
-          if m:
-            print "Clicked, sending %s" % action
-            self.set('lastClickXY', (x,y))
-            m.routeMessage(action)
-          else:
-            print "No message handler to receive clicks"
+      hit = False
+      for area in self.layers[2]:
+        hit = self._processClickArea(area, x, y)
+      if not hit: # no hit in upper layer, continue to lower layer
+        for area in self.layers[0]:
+          self._processClickArea(area, x, y)
+
     self.set('needRedraw', True)
+
+  def _processClickArea(self, area, x, y):
+    hit = False
+    (rect, action, timedAction) = area
+    if rect.contains(x, y):
+      m = self.m.get("messages", None)
+      if m:
+        print("Clicked, sending %s" % action)
+        hit = True
+        self.set('lastClickXY', (x, y))
+        m.routeMessage(action)
+      else:
+        print("No message handler to receive clicks")
+    return hit
 
   def handleLongPress(self, pressStartEpoch, msCurrentDuration, startX, startY, x, y):
     """handle long press"""
-
-    """ make sure subsequent long presses are ignored until release """
+    # make sure subsequent long presses are ignored until release
     if self.ignoreNextClicks == 0:
-      for area in self.areas:
-        (rect, normalAction, timedAction) = area
-        if timedAction: # we are interested only in timed actions
-          if rect.contains(x,y):
-            (givenMsDuration, action) = timedAction
-            if givenMsDuration <= msCurrentDuration:
-              m = self.m.get("messages", None)
-              if m:
-                print "Long-clicked (%f ms), sending %s" % (givenMsDuration, action)
-                self.set('lastClickXY', (x,y))
-                self.modrana.gui.lockDrag()
-                m.routeMessage(action)
-                self.set('needRedraw', True)
-              else:
-                print "No message handler to receive clicks"
-              self.ignoreNextClicks = self.dmod.lpSkipCount()
+      hit = False
+      for area in self.layers[2]:
+        hit = self._processLPArea(area, msCurrentDuration, x, y)
+      if not hit: # no hit in upper layer, continue to lower layer
+        for area in self.layers[0]:
+          self._processLPArea(area, msCurrentDuration, x, y)
 
-  def registerDraggable(self, x1,y1,x2,y2, module):
-    self.dragAreas.append((rect(x1,y1,x2-x1,y2-y1), module))
+  def _processLPArea(self, area, msCurrentDuration, x, y):
+    hit = False
+    (rect, normalAction, timedAction) = area
+    if timedAction: # we are interested only in timed actions
+      if rect.contains(x,y):
+        (givenMsDuration, action) = timedAction
+        if givenMsDuration <= msCurrentDuration:
+          m = self.m.get("messages", None)
+          if m:
+            print("Long-clicked (%f ms), sending %s" % (givenMsDuration, action))
+            hit = True
+            self.set('lastClickXY', (x,y))
+            self.modrana.gui.lockDrag()
+            m.routeMessage(action)
+            self.set('needRedraw', True)
+          else:
+            print("No message handler to receive clicks")
+          self.ignoreNextClicks = self.dmod.lpSkipCount()
+    return hit
+
+  def registerDraggable(self, x1, y1, x2, y2, module):
+    self.dragAreas.append((rect(x1, y1, x2-x1, y2-y1), module))
 
   def registerDraggableEntireScreen(self, module):
     print "Entire screen is draggable for %s " % module
     self.dragScreen = module
 
-  def handleDrag(self,startX,startY,dx,dy,x,y,msDuration):
+  def handleDrag(self, startX, startY, dx, dy, x, y, msDuration):
     # react on timed actions interactively
     if self.dragScreen:
       m = self.m.get(self.dragScreen, None)
