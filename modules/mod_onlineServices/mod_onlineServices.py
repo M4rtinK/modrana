@@ -480,13 +480,45 @@ class onlineServices(ranaModule):
       self.notify("failed to get GPS fix", 5000)
       return None
 
+  def _checkConnectivity(self):
+    """check Internet connectivity - if no Internet connectivity is available, wait for up to 30 seconds
+    and then fail (this is used to handle cases where the device was offline and the Internet connection is
+    just being established)"""
+    status = self.modrana.dmod.getInternetConnectivityStatus()
+    if status is None: # Connectivity status monitoring not supported
+      return status # skip
+    elif status == True:
+      return status # Internet connectivity is most probably available
+    elif status == False:
+      startTimestamp = time.time()
+      self._setWorkStatusText("waiting for Internet connectivity...")
+      while (time.time() - startTimestamp) < 30:
+        status = self.modrana.dmod.getInternetConnectivityStatus()
+        print('online: waiting for internet connectivity')
+        print(status)
+        if status == True or status is None:
+          break
+        time.sleep(1)
+      return status
+    else:
+      print('online: warning, unknown connection status:')
+      print(status)
+      return status
+
   def _localGoogleSearch(self, query):
     """this method performs Google Local online-search and is called by the worker thread"""
-    print("onlineServices: performing GLS")
-    self._setWorkStatusText("online POI search in progress...")
-    result = self.googleLocalQuery(query)
-    self._setWorkStatusText("online POI search done   ")
-    return result
+    status = self._checkConnectivity()
+    if (status is None) or (status == True):
+      # Internet connectivity is either available or its state is
+      # unknown
+      print("onlineServices: performing GLS")
+      self._setWorkStatusText("online POI search in progress...")
+      result = self.googleLocalQuery(query)
+      self._setWorkStatusText("online POI search done   ")
+      return result
+    else:
+      print('online: Internet connectivity not available or in unknown state')
+      return None
 
   # ** Wikipedia search (through  Geonames) **
 
