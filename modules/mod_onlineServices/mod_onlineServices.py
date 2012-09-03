@@ -63,9 +63,10 @@ class onlineServices(ranaModule):
 
   def geocodeAsync(self, address, outputHandler, key):
     """asynchronous geocoding"""
-    self._addWorkerThread(Worker._onlineGeocoding, [address], outputHandler, key)
+    flags = {'net': True}
+    self._addWorkerThread(Worker._onlineGeocoding, [address], outputHandler, key, flags)
 
-  def localSearch(self, query, where=None, maxResults=8):
+  def localSearch(self, term, where=None, maxResults=8):
     """Synchronous generic local search query
     * if where is not specified, current position is used
     * returns False if the search failed for some reason
@@ -79,14 +80,14 @@ class onlineServices(ranaModule):
         return False
       else:
         lat, lon = pos
-        local = self.googleLocalQueryLL(query,lat,lon)
+        local = self.googleLocalQueryLL(term,lat,lon)
         if local:
           points = self._processGLSResponse(local)
           return points
         else:
           return []
     else: # use location description provided in where
-      queryString = "%s loc:%s" % (query, where)
+      queryString = "%s loc:%s" % (term, where)
       local = self.googleLocalQuery(queryString, maxResults)
       if local:
         points = self._processGLSResponse(local)
@@ -94,12 +95,12 @@ class onlineServices(ranaModule):
       else:
         return []
 
-  def localSearchLL(self, query, lat, lon):
+  def localSearchLL(self, term, lat, lon):
     """Synchronous generic local search query
     * around a point specified by latitude and longitude"""
 
     # we use the Google Local Search backend at the moment
-    local = self.googleLocalQueryLL(query,lat,lon)
+    local = self.googleLocalQueryLL(term,lat,lon)
     if local:
       points = self._processGLSResponse(local)
       return points
@@ -155,7 +156,8 @@ class onlineServices(ranaModule):
     return query.read()
 
   def elevFromGeonamesBatchAsync(self, latLonList, outputHandler, key, tracklog=None):
-    self._addWorkerThread(Worker._elevFromGeonamesBatch, [latLonList, tracklog], outputHandler, key)
+    flags = {'net': True}
+    self._addWorkerThread(Worker._elevFromGeonamesBatch, [latLonList, tracklog], outputHandler, key, flags)
 
   def elevFromGeonamesBatch(self, latLonList, threadCB):
     """ get elevation in meters for the specified latitude and longitude from
@@ -342,7 +344,7 @@ class onlineServices(ranaModule):
       'GPS': True,
       'net': True
     }
-    self._addWorkerThread(Worker._localGoogleSearch, [term], outputHandler, key)
+    self._addWorkerThread(Worker._localGoogleSearch, [term], outputHandler, key, flags)
 
   def googleLocalQueryAsync(self, term, location, outputHandler, key):
     """asynchronous Google Local Search query for """
@@ -358,7 +360,7 @@ class onlineServices(ranaModule):
 
   def wikipediaSearchAsync(self, query, outputHandler, key):
     flags = {'net': True}
-    self._addWorkerThread(Worker._onlineWikipediaSearch, [query], outputHandler, key)
+    self._addWorkerThread(Worker._onlineWikipediaSearch, [query], outputHandler, key, flags)
 
   # ** Background processing **
 
@@ -398,14 +400,14 @@ class onlineServices(ranaModule):
 class Worker(threading.Thread):
   """a worker thread for asynchronous online services access"""
   def __init__(self, callback, call, args, outputHandler, key, flags=None):
-    if not flags: flags = []
     threading.Thread.__init__(self)
     self.online = callback # should be a onlineServices module instance
     self.call = call
     self.args = args
     self.outputHandler = outputHandler
     self.key = key # a key for the output handler
-    self.flags = flags or {}
+    if not flags: flags = {}
+    self.flags = flags
     self.statusMessage = ""
     self.returnResult = True
 
