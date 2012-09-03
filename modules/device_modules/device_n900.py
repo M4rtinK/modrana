@@ -25,6 +25,7 @@ import subprocess
 from base_device_module import deviceModule
 #N900 specific:
 import dbus.glib
+import conic # provide by python-conic on Maemo 5
 from core import gs
 # only import GTK, Hildon & Liblocation when using GTK GUI
 if gs.GUIString == "GTK":
@@ -63,7 +64,13 @@ class device_n900(deviceModule):
     self.mceSignal = self.bus.get_object('com.nokia.mce','/com/nokia/mce/signal')
     self.mceSignalInterface = dbus.Interface(self.mceSignal,'com.nokia.mce.signal')
     self.mceSignalInterface.connect_to_signal("display_status_ind", self.screenStateChangedCallback)
-    print "N900: dbus initialized"
+    print "N900: DBUS initialized"
+
+    # Internet connectivity related
+    self.connectivityStatus = False
+    self.conicConnection = conic.Connection()
+    self.conicConnection.connect("connection-event", self._connectionStateCB)
+    self.conicConnection.set_property("automatic-connection-events", True)
 
     if gs.GUIString == "GTK":
       # liblocation
@@ -109,6 +116,10 @@ class device_n900(deviceModule):
       # enable volume keys usage
       if self.get('useVolumeKeys', True):
         self._updateVolumeKeys()
+
+  def shutdown(self):
+    # disconnect libconic connection tracking
+    self.conicConnection.set_property("automatic-connection-events", False)
 
   def startInFullscreen(self):
     return True
@@ -529,6 +540,25 @@ class device_n900(deviceModule):
 
 
   # ** Internet connectivity **
+
+  def getInternetConnectivityStatus(self):
+    """report Internet connectivity status based on data from libconic"""
+    return self.connectivityStatus
+
+  def _connectionStateCB(self, connection, event):
+    """handle Internet connectivity state changes"""
+#    print("connection_cb(%s, %s)" % (connection, event))
+    status = event.get_status()
+    error = event.get_error()
+    iap_id = event.get_iap_id()
+    bearer = event.get_bearer_type()
+
+    if status == conic.STATUS_CONNECTED:
+      self.connectivityStatus = True
+    elif status == conic.STATUS_DISCONNECTED:
+      self.connectivityStatus = False
+    elif status == conic.STATUS_DISCONNECTING:
+      self.connectivityStatus = False
 
   def enableInternetConnectivity(self):
     """autoconnect to the Internet using DBUS"""
