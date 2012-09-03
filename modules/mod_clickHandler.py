@@ -28,12 +28,11 @@ class clickHandler(ranaModule):
   """handle mouse clicks"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    self.emptyLayers = {2:[], 0:[]}
     self.beforeDraw()
     self.ignoreNextClicks = 0
 
   def beforeDraw(self):
-    self.layers = self.emptyLayers
+    self.layers = {2:[], 0:[]}
     self.dragAreas = []
     self.dragScreen = None
     self.timedActionInProgress = None
