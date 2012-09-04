@@ -141,7 +141,8 @@ class notification(ranaModule):
     TODO: this and the other context buttons should be moved to a separate module,
     named contextMenu or something in the same style"""
     menus = self.m.get('menu', None)
-    if menus:
+    click = self.m.get('clickHandler', None)
+    if menus and click:
       if coords: #use the provided coords
         (x1,y1,dx,dy) = coords
       else: # use the bottom right corner
@@ -152,7 +153,8 @@ class notification(ranaModule):
         y1 = y
       """ the cancel button sends a cancel message to onlineServices
       to disable currently running operation"""
-      menus.drawButton(cr, x1, y1, dx, dy, '#<span foreground="red">cancel</span>', "generic:;0.5;;0.5;;", 'onlineServices:cancelOperation')
+      menus.drawButton(cr, x1, y1, dx, dy, '#<span foreground="red">cancel</span>', "generic:;0.5;;0.5;;", '')
+      click.registerXYWH(x1, y1, dx, dy, "onlineServices:cancelOperation", layer=2)
 
   def handleNotification(self, message, timeout=None, icon=""):
     # TODO: icon support
