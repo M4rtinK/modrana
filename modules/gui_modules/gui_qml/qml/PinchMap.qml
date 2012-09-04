@@ -4,8 +4,6 @@ import "functions.js" as F
 
 Rectangle {
     id: pinchmap;
-    //property double centerLatitude: 0;
-    //property double centerLongitude: 0;
     property int zoomLevel: 10;
     property int oldZoomLevel: 99
     property int maxZoomLevel: 18;
@@ -43,11 +41,12 @@ Rectangle {
     property bool tooManyPoints: true
 
     //property alias model: geocacheDisplay.model
+    property alias markerModel: markerDisplay.model
 
     property int tileserverPort : mapTiles.tileserverPort()
-
+    property int status: PageStatus.active
     signal drag // signals that map-drag has been detected
-
+    property bool needsUpdate: false
     transform: Rotation {
         angle: 0
         origin.x: pinchmap.width/2
@@ -55,13 +54,35 @@ Rectangle {
         id: rot
     }
 
+    onMaxZoomLevelChanged: {
+        if (pinchmap.maxZoomLevel < pinchmap.zoomLevel) {
+            setZoomLevel(maxZoomLevel);
+        }
+    }
+
+    onStatusChanged: {
+        if (status == PageStatus.active && needsUpdate) {
+            needsUpdate = false;
+            pinchmap.setCenterLatLon(pinchmap.latitude, pinchmap.longitude);
+        }
+    }
+
     onWidthChanged: {
-        pinchmap.setCenterLatLon(pinchmap.latitude, pinchmap.longitude);
+        if (status != PageStatus.active) {
+            needsUpdate = true;
+        } else {
+            pinchmap.setCenterLatLon(pinchmap.latitude, pinchmap.longitude);
+        }
     }
 
     onHeightChanged: {
-        pinchmap.setCenterLatLon(pinchmap.latitude, pinchmap.longitude);
+        if (status != PageStatus.active) {
+            needsUpdate = true;
+        } else {
+            pinchmap.setCenterLatLon(pinchmap.latitude, pinchmap.longitude);
+        }
     }
+
 
     function setZoomLevel(z) {
         setZoomLevelPoint(z, pinchmap.width/2, pinchmap.height/2);
@@ -325,8 +346,20 @@ Rectangle {
             }
         }
         */
+
+        Item {
+            id: markerDisplayContainer
+            Repeater {
+                id: markerDisplay
+                delegate: Marker {
+                    coordinate: model.coordinate
+                    targetPoint: getMappointFromCoord(model.coordinate.lat, model.coordinate.lon)
+                    verticalSpacing: model.numSimilar
+                    z: 2000
+                }
+            }
+        }
     }
-    
     Image {
         id: targetIndicator
         source: "image://icons/"+ rWin.mTheme +"/target-indicator-cross.png"
@@ -340,17 +373,6 @@ Rectangle {
             origin.x: targetIndicator.width/2
             origin.y: targetIndicator.height/2
         }
-
-        NumberAnimation {
-            running: true
-            target: rotationTarget;
-            property: "angle";
-            from: 0;
-            to: 359;
-            duration: 2000
-            loops: Animation.Infinite
-        }
-
     }
 
     Rectangle {
@@ -410,34 +432,12 @@ Rectangle {
         font.pixelSize: 24
     }
 
-    /*
-    onCornerTileYChanged: {
-        updateGeocaches();
-    }
-
-    onCornerTileXChanged: {
-        updateGeocaches();
-    }*/
-
     PinchArea {
         id: pincharea;
-
         property double __oldZoom;
-
         anchors.fill: parent;
 
         function calcZoomDelta(p) {
-            /*var newScale = zoom * p.scale
-            //pinchmap.zoomLevel += Math.floor(newScale / 2)
-            scalemap.setScale(newScale % 2)
-            var panX = -(((p.center.x - map.rootX) * newScale)-(p.center.x - map.rootX) )
-            //console.log("Scale is now " + newScale +
-
-            pan(panX, -(((p.center.y - map.rootY) * newScale) - (p.center.y - map.rootY)))
-            //map.pan(
-            //__oldZoom = (newScale % 2)
-            //console.log("Now, __oldZoom is " + __oldZoom + " and Map is at " + pinchmap.zoomLevel)
-             */
             pinchmap.setZoomLevelPoint(Math.round((Math.log(p.scale)/Math.log(2)) + __oldZoom), p.center.x, p.center.y);
             if (rotationEnabled) {
                 rot.angle = p.rotation
@@ -495,10 +495,8 @@ Rectangle {
                 __lastX = mouse.x;
                 __lastY = mouse.y;
                 /*
-                once the pan threshold is reached,
-                additional checking is unnecessary
-                for the press duration as nothing sets
-                __wasClick back to true
+                once the pan threshold is reached, additional checking is unnecessary
+                for the press duration as nothing sets __wasClick back to true
                 */
                 if (__wasClick && Math.pow(mouse.x - __firstX, 2) + Math.pow(mouse.y - __firstY, 2) > maxClickDistance) {
                     __wasClick = false;
