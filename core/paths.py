@@ -22,6 +22,8 @@
 import os
 import modrana_utils
 
+MONAV_DATA_FOLDER_NAME = "monav_data"
+
 class Paths:
   """
   Handle paths to various folders:
@@ -127,6 +129,29 @@ class Paths:
         return self._assurePathFolder(self.getProfilePath(), "debug_logs")
     else:
       return self._assurePathFolder(self.getProfilePath(), "debug_logs")
+
+
+  ## Monav ##
+
+  def getMonavDataPath(self):
+    """return a path where the all the Monav routing data is stored,
+    this path can be used both for manipulating the data (add,delete, update) &
+    using the data for routing)
+    """
+    return os.path.join(self.getMapFolderPath(), MONAV_DATA_FOLDER_NAME)
+
+  def getMonavBinaryPath(self):
+    deviceID = self.modrana.dmod.getDeviceIDString()
+    if deviceID == 'n900':
+      arch = 'armv7'
+    elif deviceID == 'pc':
+      arch = 'amd64'
+      # this is mostly for development testing and should
+      # be superseded by properly packaged up-to-date Monav
+      # with working Python bindings support & Unicode handling
+    else:
+      return None # no known path to Monav binaries
+    return os.path.join('modules/mod_route/', arch)
 
   def getVersionString(self):
     """
