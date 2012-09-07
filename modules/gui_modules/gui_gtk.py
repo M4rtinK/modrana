@@ -533,7 +533,7 @@ class MainWidget(gtk.Widget):
       if self.altMapDragEnabled:
         # start simple map drag if its not already in progress
         menuName = self.modrana.get('menu', None)
-        if menuName == None and not self.altMapDragInProgress:
+        if menuName is None and not self.altMapDragInProgress:
           self.altDragStart(x-startX,y-startY,dx,dy)
         elif self.altMapDragInProgress:
           self.altDragHandler(x-startX,y-startY,dx,dy)
