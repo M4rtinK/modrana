@@ -148,18 +148,27 @@ def get_route(data_directory, waypoints, lookup_radius=10000, lookup_edge_names=
     # Close the connection (just in case)
     connection.close()
 
+# modRana:
+# return result & return code
+# is routing fails, return None & the corresponding result code
     if result.type == RoutingResult.SUCCESS:
-        return result
-    elif result.type == RoutingResult.LOAD_FAILED:
-        raise Exception(str(result.type) + ": failed to load data directory")
-    elif result.type == RoutingResult.LOOKUP_FAILED:
-        raise Exception(str(result.type) + ": failed to lookup nearest edge")
-    elif result.type == RoutingResult.ROUTE_FAILED:
-        raise Exception(str(result.type) + ": failed to compute route")
-    elif result.type == RoutingResult.NAME_LOOKUP_FAILED:
-        raise Exception(str(result.type) + ": name lookup failed")
-    elif result.type == RoutingResult.TYPE_LOOKUP_FAILED:
-        raise Exception(str(result.type) + ": type lookup failed")
+      return result, result.type
     else:
-        raise Exception(str(result.type) + ": return value not recognized")
+      return None, result.type
+
+
+#    if result.type == RoutingResult.SUCCESS:
+#        return result
+#    elif result.type == RoutingResult.LOAD_FAILED:
+#        raise Exception(str(result.type) + ": failed to load data directory")
+#    elif result.type == RoutingResult.LOOKUP_FAILED:
+#        raise Exception(str(result.type) + ": failed to lookup nearest edge")
+#    elif result.type == RoutingResult.ROUTE_FAILED:
+#        raise Exception(str(result.type) + ": failed to compute route")
+#    elif result.type == RoutingResult.NAME_LOOKUP_FAILED:
+#        raise Exception(str(result.type) + ": name lookup failed")
+#    elif result.type == RoutingResult.TYPE_LOOKUP_FAILED:
+#        raise Exception(str(result.type) + ": type lookup failed")
+#    else:
+#        raise Exception(str(result.type) + ": return value not recognized")
 
