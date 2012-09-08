@@ -140,7 +140,7 @@ class Paths:
     """
     return os.path.join(self.getMapFolderPath(), MONAV_DATA_FOLDER_NAME)
 
-  def getMonavBinaryPath(self):
+  def getMonavServerBinaryPath(self):
     deviceID = self.modrana.dmod.getDeviceIDString()
     if deviceID == 'n900':
       arch = 'armv7'
@@ -151,7 +151,8 @@ class Paths:
       # with working Python bindings support & Unicode handling
     else:
       return None # no known path to Monav binaries
-    return os.path.join('modules/mod_route/', arch)
+    folder = "monav_%s" % arch
+    return os.path.join('modules/mod_route/', folder, 'monav-server')
 
   def getVersionString(self):
     """
