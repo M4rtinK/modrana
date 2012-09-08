@@ -34,9 +34,10 @@ import time
 DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
 
 ROUTING_SUCCESS = 0
-ROUTING_LOAD_FAILED = 1 # failed to load routing data
-ROUTING_LOOKUP_FAILED = 2 # failed to locate nearest way/edge
-ROUTING_ROUTE_FAILED = 3 # failed to compute route
+ROUTING_NO_DATA = 1 # failed to load routing data
+ROUTING_LOAD_FAILED = 2 # failed to load routing data
+ROUTING_LOOKUP_FAILED = 3 # failed to locate nearest way/edge
+ROUTING_ROUTE_FAILED = 4 # failed to compute route
 
 def getModule(m,d,i):
   return(route(m,d,i))
@@ -359,7 +360,9 @@ class route(ranaModule):
     subFolder = modeFolders.get(mode, 'routing_car')
 
     try:
+      # list all directories in the Monav data folder
       dataPacks = os.listdir(mainMonavFolder)
+      dataPacks = filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks )
     except Exception, e:
       print("route: can't list Monav data directory")
       print(e)
@@ -400,7 +403,7 @@ class route(ranaModule):
 
     else:
       print("route: no Monav routing data - can't route")
-      return None
+      return None, ROUTING_NO_DATA
 
   def doAddressRoute(self, start, destination):
     """Route from one point to another, and set that as the active route"""
