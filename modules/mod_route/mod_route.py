@@ -18,7 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_module import ranaModule
+from modules.base_module import ranaModule
+
 import os
 import sys
 import math
@@ -28,8 +29,14 @@ import traceback
 import unicodedata
 import way
 from time import clock
+import time
 
 DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
+
+ROUTING_SUCCESS = 0
+ROUTING_LOAD_FAILED = 1 # failed to load routing data
+ROUTING_LOOKUP_FAILED = 2 # failed to locate nearest way/edge
+ROUTING_ROUTE_FAILED = 3 # failed to compute route
 
 def getModule(m,d,i):
   return(route(m,d,i))
@@ -323,11 +330,15 @@ class route(ranaModule):
 
     provider = self.get('routingProvider', "GoogleDirections")
     if provider == "Monav":
+      sentTimestamp = time.time()
       print('routing: using Monav as routing provider')
       waypoints = [(fromLat, fromLon), (toLat, toLon)]
-      route = self.getMonavRoute(waypoints)
+      result = self.getMonavRoute(waypoints)
       #TODO: asynchronous processing & error notifications
-      self._handleResults("MonavRoute", route)
+      # as monav is VERY fast for routing, the routing might still get done
+      # asynchronously, but the work-in-progress overlay might show up
+      # only once the search takes longer than say 2 seconds
+      self._handleResults("MonavRoute", (result, waypoints[0], waypoints[-1], sentTimestamp) )
 
     else: # use Google Directions as fallback
       online = self.m.get('onlineServices', None)
@@ -336,27 +347,57 @@ class route(ranaModule):
 
   def getMonavRoute(self, waypoints):
     mainMonavFolder = self.modrana.paths.getMonavDataPath()
-    monavDataFolder = os.path.join(mainMonavFolder, 'Czech_Republic/routing_car')
-    # TODO: multiple & configurable packs
-    # TODO: mode support (motorcar, walking, bike etc. support)
-    monavDataFolder = os.path.abspath(monavDataFolder)
+    mode = self.get('mode', 'car')
+    # get mode based sub-folder
+    # TODO: handle not all mode folders being available
+    # (eq. user only downloading routing data for cars)
+    modeFolders = {
+      'cycle':'routing_bike',
+      'walk':'routing_pedestrian',
+      'car':'routing_car'
+    }
+    subFolder = modeFolders.get(mode, 'routing_car')
 
-    if monavDataFolder:
+    try:
+      dataPacks = os.listdir(mainMonavFolder)
+    except Exception, e:
+      print("route: can't list Monav data directory")
+      print(e)
+      dataPacks = []
+
+
+    if dataPacks:
+      # TODO: bounding box based pack selection
+
+      preferredPack = self.get('preferredMonavDataPack', None)
+      if preferredPack in dataPacks:
+        packName = preferredPack
+      else:
+        # just take the first (and possibly only) pack
+        packName = sorted(dataPacks)[0]
+
+      monavDataFolder = os.path.abspath(os.path.join(mainMonavFolder, packName, subFolder))
+      print('Monav data folder:\n%s' % monavDataFolder)
+      print(os.path.exists(monavDataFolder))
       try:
         # is Monav initialized ?
         if self.monav is None:
           # start Monav
+
+          # only import Monav & company when actually needed
+          # -> the protobuf modules are quite large
           import monav_support
           self.monav = monav_support.Monav(self.modrana.paths.getMonavServerBinaryPath())
           self.monav.startServer()
-        route = self.monav.monavDirections(monavDataFolder, waypoints)
-        return route
+        result, returnCode = self.monav.monavDirections(monavDataFolder, waypoints)
 
       except Exception, e:
         print('route: Monav route lookup failed')
         print(e)
         traceback.print_exc(file=sys.stdout) # find what went wrong
         return None
+      return result, returnCode
+
     else:
       print("route: no Monav routing data - can't route")
       return None
@@ -384,6 +425,9 @@ class route(ranaModule):
           # create the directions Way object
           self.duration = directions['Directions']['Duration']['html']
           dirs = way.fromGoogleDirectionsResult(directions)
+          #TODO: use seconds from Way object directly
+          #(needs seconds to human representation conversion)
+          #self.duration = dirs.getDuration()
           self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
       elif key == "onlineRouteAddress2Address":
         (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
@@ -391,6 +435,10 @@ class route(ranaModule):
         self.text = None
         if directions: # is there actually something in the directions ?
           self.duration = directions['Directions']['Duration']['html']
+          #TODO: use seconds from Way object directly
+          #(needs seconds to human representation conversion)
+          #self.duration = dirs.getDuration()
+
           # create the directions Way object
           dirs = way.fromGoogleDirectionsResult(directions)
           self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
@@ -400,10 +448,15 @@ class route(ranaModule):
         self.sendMessage('ms:turnByTurn:start:%s' % autostart)
       self.set('needRedraw', True)
     elif key == "MonavRoute":
-      (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
+      (result, start, destination, routeRequestSentTimestamp) = resultsTuple
+      directions, returnCode = result
       self.duration = "" # TODO : correct predicted route duration
       dirs = way.fromMonavResult(directions)
-      self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
+      if dirs:
+        self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
+      else: # routing failed
+        #TODO: show what & why failed
+        self.notify('offline routing failed', 5000)
     elif key == "startAddress":
       self.startAddress = resultsTuple
       self.text = None # clear route detail cache
