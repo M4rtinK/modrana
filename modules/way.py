@@ -98,6 +98,17 @@ class Way:
   def getPointCount(self):
     return len(self.points)
 
+  # Duration specifies how long it takes to travel a route
+  # it can either come from logging (it took this many seconds
+  # to record this way) or from routing (it is expected that
+  # traveling this route with this travel mode takes this seconds)
+
+  def getDuration(self, sDuration):
+    self.duration = sDuration
+
+  def setDuration(self, sDuration):
+    return self.duration
+
     # * message points
 
   def _updateCache(self):
@@ -264,11 +275,14 @@ def fromGoogleDirectionsResult(gResult):
   steps = gResult['Directions']['Routes'][0]['Steps']
   points = _decodePolyline(gResult['Directions']['Polyline']['points'])
   # length of the route can computed from its metadata
-
   mLength = gResult['Directions']['Distance']['meters']
   mLength += gResult['Directions']['Routes'][0]['Steps'][-1]["Distance"]["meters"]
+  # the route also contains the expected duration in seconds
+  sDuration = gResult['Directions']['Duration']['seconds']
+
   way = Way(points)
   way._setLength(mLength)
+  way.setDuration(sDuration)
   messagePoints = []
 
   mDistanceFromStart = gResult['Directions']['Routes'][0]['Steps'][-1]["Distance"]["meters"]
@@ -296,8 +310,16 @@ def fromGoogleDirectionsResult(gResult):
   way.addMessagePoints(messagePoints)
   return way
 
-def fromMonavResult(mResult):
-  pass
+def fromMonavResult(result):
+  # convert route nodes from the Monav routing result
+  # to (lat, lon) tuples
+  if result:
+    routePoints = map(lambda x: (x.latitude, x.longitude, None), result.nodes)
+    way = Way(routePoints)
+    way.setDuration(result.seconds)
+    return way
+  else:
+    return None
 
 def fromGPX(GPX):
   pass
