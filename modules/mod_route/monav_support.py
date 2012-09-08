@@ -21,10 +21,12 @@
 from threading import Thread
 import time
 import subprocess
-import signal
-import os
+import traceback
+import sys
 
 import monav
+
+from signals_pb2 import RoutingResult
 
 # Marble stores monav data like this on the N900:
 # /home/user/MyDocs/.local/share/marble/maps/earth/monav/motorcar/europe/czech_republic
@@ -32,8 +34,10 @@ import monav
 class Monav:
   def __init__(self, monavBinaryPath):
     self.monavServer = None
-    self.connection = None
+    self.serverPort = 8040
     self.monavServerBinaryPath = monavBinaryPath
+    # make return codes easily accessible
+    self.returnCodes = RoutingResult
 
   def startServer(self, port=None):
     print('monav_support: starting Monav server')
@@ -67,8 +71,6 @@ class Monav:
           time.sleep(sleepTime)
           elapsed = time.time() - startTimestamp
         started = True
-
-        self.connection = monav.TcpConnection()
         # TODO: use other port than 8040 ?, check out tileserver code
     except Exception, e:
       print('monav_support: starting Monav server failed')
@@ -90,7 +92,6 @@ class Monav:
       print('monav_support: stopping Monav server failed')
       print(e)
     self.monavServer = None
-    self.connection = None
     if stopped:
       print('monav_support: Monav server stopped')
 
@@ -107,11 +108,18 @@ class Monav:
       self.startServer() # start the server
     print('monav: starting route search')
     start = time.clock()
-    result = monav.get_route(dataDirectory,
-                             waypoints,
-                             connection=self.connection)
+    connection = monav.TcpConnection(self.serverPort)
+    try:
+      result, returnCode = monav.get_route(dataDirectory,
+                                           waypoints,
+                                           connection = connection)
+    except Exception, e:
+      print('monav_support: routing failed')
+      print(e)
+      traceback.print_exc(file=sys.stdout) # find what went wrong
+      return None, None
     print('monav: search finished in %1.2f ms'  % (1000 * (time.clock() - start)) )
-    return result
+    return result, returnCode
 
   def monavDirectionsAsync(self, start, destination, callback, key):
     """search ll2ll route asynchronously using Monav"""
