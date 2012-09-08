@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
+import os
 import sys
 import math
 import re
@@ -322,6 +323,7 @@ class route(ranaModule):
 
     provider = self.get('routingProvider', "GoogleDirections")
     if provider == "Monav":
+      print('routing: using Monav as routing provider')
       waypoints = [(fromLat, fromLon), (toLat, toLon)]
       route = self.getMonavRoute(waypoints)
       #TODO: asynchronous processing & error notifications
@@ -333,14 +335,19 @@ class route(ranaModule):
         online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon), self._handleResults, "onlineRoute")
 
   def getMonavRoute(self, waypoints):
-    monavDataFolder = '' #TODO: implement this
+    mainMonavFolder = self.modrana.paths.getMonavDataPath()
+    monavDataFolder = os.path.join(mainMonavFolder, 'Czech_Republic/routing_car')
+    # TODO: multiple & configurable packs
+    # TODO: mode support (motorcar, walking, bike etc. support)
+    monavDataFolder = os.path.abspath(monavDataFolder)
+
     if monavDataFolder:
       try:
         # is Monav initialized ?
         if self.monav is None:
           # start Monav
           import monav_support
-          self.monav = monav_support.Monav()
+          self.monav = monav_support.Monav(self.modrana.paths.getMonavServerBinaryPath())
           self.monav.startServer()
         route = self.monav.monavDirections(monavDataFolder, waypoints)
         return route
@@ -348,6 +355,7 @@ class route(ranaModule):
       except Exception, e:
         print('route: Monav route lookup failed')
         print(e)
+        traceback.print_exc(file=sys.stdout) # find what went wrong
         return None
     else:
       print("route: no Monav routing data - can't route")
@@ -393,7 +401,7 @@ class route(ranaModule):
       self.set('needRedraw', True)
     elif key == "MonavRoute":
       (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
-      self.duration = "" # TODO : correct duration
+      self.duration = "" # TODO : correct predicted route duration
       dirs = way.fromMonavResult(directions)
       self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
     elif key == "startAddress":
