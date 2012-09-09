@@ -472,7 +472,7 @@ class route(ranaModule):
       else: # routing failed
         # show what & why failed
         if returnCode == ROUTING_LOOKUP_FAILED:
-          self.notify('no routes near start or destination', 3000)
+          self.notify('no ways near start or destination', 3000)
         elif returnCode == ROUTING_NO_DATA:
           self.notify('no routing data available', 3000)
         elif returnCode == ROUTING_LOAD_FAILED:
