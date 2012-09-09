@@ -34,6 +34,7 @@ SEARCH_NO_RESULTS_FOUND = 3
 SEARCH_PROVIDER_TIMEOUT_ERROR = 4
 SEARCH_PROVIDER_ERROR = 5
 LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR = 6
+CURRENT_POSITION_UNKNOWN_ERROR = 7
 
 USE_LAST_KNOWN_POSITION_KEYWORD = "LAST_KNOWN_POSITION"
 
@@ -98,6 +99,13 @@ class Startup:
       help='return static map URL for a CLI query (works for local search, address and Wikipedia search)',
       action="store_true"
     )
+    # return current coordinates
+    parser.add_argument(
+      '--return-current-coordinates',
+      help='return current coordinates: latitude,longitude[,elevation] EXAMPLE: 1.23,4.5,600 or 1.23,4.5',
+      default=None,
+      action="store_true"
+    )
     # enable centering on startup
     parser.add_argument(
       '--center-on-position',
@@ -155,6 +163,9 @@ class Startup:
         self._earlyAddressSearch()
       elif self.args.wikipedia_search is not None:
         self._earlyWikipediaSearch()
+    elif self.args.return_current_coordinates:
+      self._earlyReturnCoordinates()
+
 
 
   def handlePostFirstTimeTasks(self):
@@ -286,6 +297,25 @@ class Startup:
     results = online.wikipediaSearch(query)
     self._returnStaticMapUrl(results, online)
 
+  def _earlyReturnCoordinates(self):
+    """return current coordinates (latitude, longitude, elevation) & exit"""
+    self._disableStdout()
+    # we need to determine our current location - the location module needs to be loaded & used
+    pos = self._getCurrentPosition(loadLocationModule=True, useLastKnown=False)
+    if pos is not None:
+      lat, lon = pos
+      elev = self.modrana.get('elevation', None)
+      if self.modrana.get('fix', None) == 3 and elev:
+        output = "%f,%f,%f" % (lat, lon, elev)
+      else:
+        output = "%f,%f" % (lat, lon)
+      self._enableStdout()
+      print output
+      self._exit(0)
+    else:
+      # done - no position found
+      self._exit(CURRENT_POSITION_UNKNOWN_ERROR)
+
   def _returnStaticMapUrl(self, results, online):
     """return static map url for early search methods & exit"""
     if results:
@@ -299,7 +329,7 @@ class Startup:
       markerList = [(lat, lon)]
       url = online.getOSMStaticMapUrl(lat, lon, zl, markerList=markerList)
       self._enableStdout()
-      print url
+      print(url)
       # done - success
       self._exit(0)
     else:
@@ -365,8 +395,27 @@ class Startup:
     if m:
       m.sendMessage(message)
 
-  def _getCurrentPosition(self, loadLocationModule=False, useLastKnown = False):
+  def _fixCB(self, key, newValue, oldValue, startTimestamp, main):
+    print('fix value: %d' % newValue)
+    stop = False
+    # wait for 3D lock for up to 30 seconds
+    if time.time() - startTimestamp > 30:
+      stop = True
+    elif newValue == 3: # 3 = 3D lock
+      stop = True
+    if stop:
+      # quite the main loop so that _getCurrentPosition can finish
+      main.quit()
+
+  def _getCurrentPosition(self, loadLocationModule=False, useLastKnown=False):
     """get current position on a system in early startup state"""
+
+    # liblocation needs the main loop to work properly
+    import gobject
+    main = gobject.MainLoop()
+
+    # register fix CB
+    self.modrana.watch('fix', self._fixCB, time.time(), main)
 
     # do we need to load the location module ?
     # we usually need to if we handle an early task that happens before regular startup
@@ -375,43 +424,65 @@ class Startup:
       self.modrana._loadDeviceModule()
       # load the location module
       l = self.modrana._loadModule("mod_location", "location")
+      print('startup: N900 location module loaded')
       # start location
       l.startLocation()
+      print('startup: N900 location started')
     else:
       l = self.modrana.m.get("location", None)
 
-    pos = None
-    if l and not useLastKnown:
-      timeout = 0
-      checkInterval = 0.1 # in seconds
-      print("startup: trying to determine current position for at most %d s" % LOCAL_SEARCH_LOCATION_TIMEOUT)
-      while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
-        if l.provider:
-          if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
-            # GPSD and liblocation need a nudge
-            # to update the fix when the GUI mainloop is not running
-            l.provider._updateGPSD()
-          pos = l.provider.getFix().position
-          if pos is not None:
-            break
+    # TODO: Qt support (blame the #mccXII) :)
+    # the fix watch will kill the main loop once a 3D fix is established
+    # or once it times out
+    main.run()
 
-        timeout+=checkInterval
-        time.sleep(checkInterval)
-      if loadLocationModule:
-      # properly stop location when done (for early tasks)
-        l.stopLocation()
+    fix = self.modrana.get('fix', None)
+    if fix in (2,3):
+      pos = self.modrana.get('pos', None)
+    else:
+      pos = None # timed out without finding position
+
+#    pos = None
+#    if l and not useLastKnown:
+#      timeout = 0
+#      checkInterval = 0.1 # in seconds
+#      print("startup: trying to determine current position for at most %d s" % LOCAL_SEARCH_LOCATION_TIMEOUT)
+#      while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
+#        if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
+#          # GPSD and liblocation need a nudge
+#          # to update the fix when the GUI mainloop is not running
+#          #self.modrana.dmod._libLocationUpdateCB()
+#          print self.modrana.dmod.lDevice.online
+#          print self.modrana.dmod.lDevice.status
+#          print self.modrana.dmod.lDevice.satellites_in_view
+#          print self.modrana.dmod.lDevice.fix
+#        if l.provider:
+#          pos = l.provider.getFix().position
+#        else:
+#          pos = self.modrana.get('pos', None)
+#        print pos
+#        if pos is not None:
+#          break
+#
+#        timeout+=checkInterval
+#        time.sleep(checkInterval)
+
+    if loadLocationModule:
+    # properly stop location when done (for early tasks)
+      l.stopLocation()
 
     if pos is None: # as a last resort, try last known position, if available
       if not useLastKnown:
         print "startup: current position unknown"
-      print "startup: using last known position"
-      # we might need to load options "manually" if run early
-      if not self.modrana.optLoadingOK:
-        self._loadOptions()
+      else:
+        print "startup: using last known position"
+        # we might need to load options "manually" if run early
+        if not self.modrana.optLoadingOK:
+          self._loadOptions()
 
-      pos = self.modrana.get("pos", None)
-      if pos is None:
-        print("startup: no last known position")
+        pos = self.modrana.get("pos", None)
+        if pos is None:
+          print("startup: no last known position")
 
     return pos
 
