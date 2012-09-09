@@ -392,14 +392,25 @@ class route(ranaModule):
           import monav_support
           self.monav = monav_support.Monav(self.modrana.paths.getMonavServerBinaryPath())
           self.monav.startServer()
-        result, returnCode = self.monav.monavDirections(monavDataFolder, waypoints)
+        result = self.monav.monavDirections(monavDataFolder, waypoints)
+
 
       except Exception, e:
         print('route: Monav route lookup failed')
         print(e)
         traceback.print_exc(file=sys.stdout) # find what went wrong
-        return None
-      return result, returnCode
+        return None, None
+
+      if result.type == result.SUCCESS:
+        return result, ROUTING_SUCCESS
+      elif result.type == result.LOAD_FAILED:
+        return result, ROUTING_LOAD_FAILED
+      elif result.type == result.LOOKUP_FAILED:
+        return result, ROUTING_LOOKUP_FAILED
+      elif result.type == result.ROUTE_FAILED:
+        return result, ROUTING_ROUTE_FAILED
+      else:
+        return result, None
 
     else:
       print("route: no Monav routing data - can't route")
@@ -453,13 +464,23 @@ class route(ranaModule):
     elif key == "MonavRoute":
       (result, start, destination, routeRequestSentTimestamp) = resultsTuple
       directions, returnCode = result
-      self.duration = "" # TODO : correct predicted route duration
-      dirs = way.fromMonavResult(directions)
-      if dirs:
+
+      if returnCode == ROUTING_SUCCESS:
+        self.duration = "" # TODO : correct predicted route duration
+        dirs = way.fromMonavResult(directions)
         self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
       else: # routing failed
-        #TODO: show what & why failed
-        self.notify('offline routing failed', 5000)
+        # show what & why failed
+        if returnCode == ROUTING_LOOKUP_FAILED:
+          self.notify('no routes near start or destination', 3000)
+        elif returnCode == ROUTING_NO_DATA:
+          self.notify('no routing data available', 3000)
+        elif returnCode == ROUTING_LOAD_FAILED:
+          self.notify('failed to load routing data', 3000)
+        elif returnCode == ROUTING_ROUTE_FAILED:
+          self.notify('failed to compute route', 3000)
+        else:
+          self.notify('offline routing failed', 5000)
     elif key == "startAddress":
       self.startAddress = resultsTuple
       self.text = None # clear route detail cache
