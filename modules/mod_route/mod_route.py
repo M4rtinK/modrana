@@ -411,7 +411,8 @@ class route(ranaModule):
     # basically just list all directories in the Monav data folder
     mainMonavFolder = self.modrana.paths.getMonavDataPath()
     dataPacks = os.listdir(mainMonavFolder)
-    return filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks )
+    dataPacks = filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks )
+    return dataPacks.sort()
 
   def doAddressRoute(self, start, destination):
     """Route from one point to another, and set that as the active route"""
