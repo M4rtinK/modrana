@@ -392,7 +392,9 @@ class route(ranaModule):
         print(e)
         traceback.print_exc(file=sys.stdout) # find what went wrong
         return None, None
-      if result.type == result.SUCCESS:
+      if result is None:
+        return result, None
+      elif result.type == result.SUCCESS:
         return result, ROUTING_SUCCESS
       elif result.type == result.LOAD_FAILED:
         return result, ROUTING_LOAD_FAILED
@@ -876,17 +878,24 @@ class route(ranaModule):
       if not self.directions:
         text = "There is currently no active route."
       elif self.text is None: # the new text for the info-box only once
+        # check for online status
+        online = (self.modrana.dmod.getInternetConnectivityStatus() in (True, None))
         # check if start and destination geocoding is needed
         if not self.routeDetailGeocodingTriggered:
-          self._geocodeStartAndDestination()
-          self.routeDetailGeocodingTriggered = True
+          if online:
+            self._geocodeStartAndDestination()
+            self.routeDetailGeocodingTriggered = True
 
         if self.duration:
           duration = self.duration # a string describing the estimated time to finish the route
         else:
-          duration = "unknown"
+          duration = "? minutes"
         units = self.m.get('units', None) # get the correct units
-        distance = units.m2CurrentUnitString(self.directions.getLength())
+        length = self.directions.getLength()
+        if length:
+          distance = units.m2CurrentUnitString(length)
+        else:
+          distance = "? km"
         steps = self.directions.getMessagePointCount() # number of steps
 
         if self.startAddress:
