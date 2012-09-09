@@ -261,7 +261,12 @@ class Options(ranaModule):
     return self.keyDefault.get(key, default)
 
   def firstTime(self):
-    """Create a load of options.  You can add your own options in here,
+    # initialize the options menu
+    self.initOptionsMenu()
+
+  def initOptionsMenu(self):
+    """Create the options menu structure.
+    You can add your own options in here,
     or alternatively create them at runtime from your module's firstTime()
     function by calling addOption.  That would be best if your module is
     only occasionally used, this function is best if the option is likely
