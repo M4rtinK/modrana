@@ -469,6 +469,13 @@ class route(ranaModule):
         self.duration = "" # TODO : correct predicted route duration
         dirs = way.fromMonavResult(directions)
         self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
+
+        # handle navigation autostart
+        autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
+        if autostart == 'enabled':
+          self.sendMessage('ms:turnByTurn:start:%s' % autostart)
+        self.set('needRedraw', True)
+
       else: # routing failed
         # show what & why failed
         if returnCode == ROUTING_LOOKUP_FAILED:
