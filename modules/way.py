@@ -314,12 +314,75 @@ def fromMonavResult(result):
   # convert route nodes from the Monav routing result
   # to (lat, lon) tuples
   if result:
+    # route points
     routePoints = map(lambda x: (x.latitude, x.longitude, None), result.nodes)
     way = Way(routePoints)
     way.setDuration(result.seconds)
+    # generate directions
+    messagePoints = _detectMonavTurns(result)
+    way.addMessagePoints(messagePoints)
     return way
   else:
     return None
+
+def _detectMonavTurns(result):
+  """go through the edges and try to detect turns,
+  return a list of RoutingPoints for the turns
+  """
+
+  # How to get the corresponding nodes for edges
+  # -> edges are ordered and contain the n_segments property
+  # -> n_segments describes from how many segments the given edge consists
+  # -> by counting n_segments for subsequent edges, we get the node id
+  # EXAMPLE:
+  # a route with 2 edges, 3 segments each
+  # -> firs point has id 0
+  # -> the last point od the first edge has id 3
+  # -> the last point of the route has id 6
+
+  turns = []
+
+  edges = result.edges
+  nodes = result.nodes
+  names = result.edge_names
+  types = result.edge_types
+
+  nodeId = 0
+  # need at least two edges for any meaningful routing
+  if len(edges) >=2:
+    lastEdgeId = edges[0].type_id
+    lastEdgeNameId = edges[0].name_id
+    for edge in edges[1:]:
+      edgeId = edge.type_id
+      nameId = edge.name_id
+      if lastEdgeId != edgeId or lastEdgeNameId != edgeId:
+        # this might be a turn ! :)
+        name = names[nameId]
+        turnDescription = _getTurnDescription(None, name=name)
+        print turnDescription
+        # get the corresponding node
+        node = nodes[nodeId]
+        turns.append(TurnByTurnPoint(node.latitude, node.longitude, message=turnDescription))
+
+      lastEdgeId = edgeId
+      lastEdgeNameId = nameId
+      nodeId+=edge.n_segments # increment the node counter
+  return turns
+
+def _getTurnDescription(type, name=None):
+  message = "you might need to turn left or right"
+  if name:
+    message = "turn to %s" % name
+  return message
+
+
+
+
+
+
+
+
+
 
 def fromGPX(GPX):
   pass
