@@ -68,7 +68,11 @@ class Monav:
         # and then return
         while elapsed < timeout:
           if self.monavServer:
-            break
+            try:
+              monav.TcpConnection()
+              break
+            except Exception:
+              pass # not yet fully started
           time.sleep(sleepTime)
           elapsed = time.time() - startTimestamp
         started = True
