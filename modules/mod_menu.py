@@ -422,7 +422,7 @@ class menus(ranaModule):
     """draw the item menu"""
     vp = self.get('viewport', None)
     if not vp:
-      print('menu:ERROR, no viewport found')
+      print('menu: ERROR, no viewport found')
       return
     else:
       (x1,y1,w,h) = vp
