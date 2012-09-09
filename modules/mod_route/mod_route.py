@@ -347,7 +347,7 @@ class route(ranaModule):
         online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon), self._handleResults, "onlineRoute")
 
   def getMonavRoute(self, waypoints):
-    mainMonavFolder = self.modrana.paths.getMonavDataPath()
+
     mode = self.get('mode', 'car')
     # get mode based sub-folder
     # TODO: handle not all mode folders being available
@@ -358,49 +358,40 @@ class route(ranaModule):
       'car':'routing_car'
     }
     subFolder = modeFolders.get(mode, 'routing_car')
-
     try:
-      # list all directories in the Monav data folder
-      dataPacks = os.listdir(mainMonavFolder)
-      dataPacks = filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks )
+      dataPacks = self.getAvailableMonavDataPacks()
     except Exception, e:
       print("route: can't list Monav data directory")
       print(e)
       dataPacks = []
 
-
     if dataPacks:
       # TODO: bounding box based pack selection
-
       preferredPack = self.get('preferredMonavDataPack', None)
       if preferredPack in dataPacks:
         packName = preferredPack
       else:
         # just take the first (and possibly only) pack
         packName = sorted(dataPacks)[0]
-
+      mainMonavFolder = self.modrana.paths.getMonavDataPath()
       monavDataFolder = os.path.abspath(os.path.join(mainMonavFolder, packName, subFolder))
       print('Monav data folder:\n%s' % monavDataFolder)
       print(os.path.exists(monavDataFolder))
       try:
         # is Monav initialized ?
         if self.monav is None:
-          # start Monav
-
+          # start Monav #
           # only import Monav & company when actually needed
           # -> the protobuf modules are quite large
           import monav_support
           self.monav = monav_support.Monav(self.modrana.paths.getMonavServerBinaryPath())
           self.monav.startServer()
         result = self.monav.monavDirections(monavDataFolder, waypoints)
-
-
       except Exception, e:
         print('route: Monav route lookup failed')
         print(e)
         traceback.print_exc(file=sys.stdout) # find what went wrong
         return None, None
-
       if result.type == result.SUCCESS:
         return result, ROUTING_SUCCESS
       elif result.type == result.LOAD_FAILED:
@@ -411,10 +402,16 @@ class route(ranaModule):
         return result, ROUTING_ROUTE_FAILED
       else:
         return result, None
-
     else:
       print("route: no Monav routing data - can't route")
       return None, ROUTING_NO_DATA
+
+  def getAvailableMonavDataPacks(self):
+    """return all available Monav data packs in the main monav data folder"""
+    # basically just list all directories in the Monav data folder
+    mainMonavFolder = self.modrana.paths.getMonavDataPath()
+    dataPacks = os.listdir(mainMonavFolder)
+    return filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks )
 
   def doAddressRoute(self, start, destination):
     """Route from one point to another, and set that as the active route"""
