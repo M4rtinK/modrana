@@ -34,7 +34,6 @@ from signals_pb2 import RoutingResult
 class Monav:
   def __init__(self, monavBinaryPath):
     self.monavServer = None
-    self.serverPort = 8040
     self.monavServerBinaryPath = monavBinaryPath
     # make return codes easily accessible
     self.returnCodes = RoutingResult
@@ -45,7 +44,7 @@ class Monav:
     try:
       # first check if monav server is already running
       try:
-        self.connection = monav.TcpConnection()
+        monav.TcpConnection()
         print('monav_support: server already running')
       except Exception, e:
         print('monav_support: starting monav server in:')
@@ -108,7 +107,7 @@ class Monav:
       self.startServer() # start the server
     print('monav: starting route search')
     start = time.clock()
-    connection = monav.TcpConnection(self.serverPort)
+    connection = monav.TcpConnection()
     try:
       result, returnCode = monav.get_route(dataDirectory,
                                            waypoints,
