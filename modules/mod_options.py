@@ -49,6 +49,9 @@ class Options(ranaModule):
     # item tools special menu name
     self.keyStateListGroupID = None
 
+    # option content variables
+    self.monavPackList = []
+
   def _getCategoryID(self, id):
     return "opt_cat_%s" % id # get a standardized id
 
@@ -138,26 +141,31 @@ class Options(ranaModule):
               }
     self.addOption(title, variable, choices, group, None)
 
-  def addItemsOption(self, title, variable, items, group, default=None, fakeMode=None):
+  def _generateItems(self, keyNameList, mode, variable, backAction):
+    menuItems = [] # an ordered list of all the menu items
+    itemDict = {} # for easily assigning keys to labels
+    id = 1 # id 0 is the escape button
+    for key, name in keyNameList:
+      item = self.menuModule.generateItem("#%s" % name, "generic",
+        "setWithMode:%s:%s:%s|%s" % (mode, variable, key, backAction))
+      menuItems.append(item)
+      itemDict[key] = (name,id)
+      id += 1
+    return menuItems, itemDict
+
+  def addItemsOption(self, title, variable, items, group, default=None, fakeMode=None, preAction=None):
     # the back action returns back to the group
     backAction = "set:menu:options#%s" % group
     # create and add the menu
     menu = self.menuModule.getClearedMenu(backAction)
-    menuItems = [] # an ordered list of all the menu items
-    itemDict = {} # for easily assigning keys to labels
+
     if fakeMode is not None:
       mode = fakeMode
     else:
       mode = self.get('mode', 'car')
 
-    id = 1 # id 0 us the escape button
-    for key, name in items:
-      item = self.menuModule.generateItem("#%s" % name, "generic",
-      "setWithMode:%s:%s:%s|%s" % (mode, variable, key, backAction))
+    menuItems, itemDict = self._generateItems(items, mode, variable, backAction)
 
-      menuItems.append(item)
-      itemDict[key] = (name,id)
-      id += 1
     # load all items to the menu
     menu = self.menuModule.addItemsToThisMenu(menu, menuItems)
     # store the menu in the menu module
@@ -174,7 +182,9 @@ class Options(ranaModule):
               'default':default,
               'items':items,
               'itemDict' : itemDict,
-              'storageKey' : storageKey}
+              'storageKey' : storageKey,
+              'preAction' : preAction # send this message before entering the menu
+    }
     # this means we are probably showing the option in the per mode state list
     if fakeMode is not None:
       choices['mode'] = fakeMode
@@ -536,6 +546,17 @@ class Options(ranaModule):
     addBoolOpt("Avoid major highways", "routingAvoidHighways", group, False)
 
     addBoolOpt("Avoid toll roads", "routingAvoidToll", group, False)
+
+    # ** routing data submenu
+    group = addGroup("data#Routing", "routing_data", catNavigation, "generic")
+
+    self._reloadMonavPackList()
+    #TODO: on demand reloading
+    addItems("Monav data pack", 'preferredMonavDataPack',
+      self.monavPackList,
+      group,
+      "no preferred pack"
+    )
 
     # * turn by turn navigation
     group = addGroup("Turn by turn", "turn_by_turn", catNavigation, "generic")
@@ -968,6 +989,23 @@ class Options(ranaModule):
     elif type == "ms" and message == "makeKeyModeUnSpecific":
       self.modrana.removeKeyModifier(args)
 
+    elif type == 'ml' and message == 'update':
+      if len(args) >= 1:
+        target = args[0]
+        if target == 'packListMonav':
+          self._reloadMonavPackList()
+      else:
+        print('options: error - update target not specified')
+
+  def _reloadMonavPackList(self):
+    route = self.m.get('route', None)
+    if route:
+      print('options: reloading Monav data pack list')
+      # wee need a list of (name, key) tuples
+      self.monavPackList = map(lambda x:(x, x), route.getAvailableMonavDataPacks())
+
+
+
   def _updateVoiceManual(self, action):
     """add or remove custom voice parameters option items"""
 
@@ -1078,16 +1116,21 @@ class Options(ranaModule):
             """if no description is found, just display the value"""
             valueDescription = "<tt><b>%s</b></tt>" % valueDescription
 
+            preAction = ""
+            # add any pre-actions (actions that should run before the
+            # menu is entered, eq updating data, etc.)
+            pre = choices.get('preAction', "")
+            if pre:
+              preAction+="%s|" % pre
+
             #assure highlighting
             if highlightId is not None:
-              """ run an action before switching to the next menu that
-              assures that items in the next menu are properly highlighted
-              according to the state of the corresponding variable"""
-              pre = "ml:menu:highlightItem:%s;%d|" % (choices['storageKey'], highlightId)
-            else:
-              pre = "" # no id that needs highlighting found
+              # add an action before switching to the next menu that
+              # assures that items in the next menu are properly highlighted
+              # according to the state of the corresponding variable
+              preAction+= "ml:menu:highlightItem:%s;%d|" % (choices['storageKey'], highlightId)
 
-            onClick = "%sset:menu:options1Item*%s*%s*%s" % (pre, group, variable, mode)
+            onClick = "%sset:menu:options1Item*%s*%s*%s" % (preAction, group, variable, mode)
 
           elif optionType == 'toggle':
             states = choices['states']
