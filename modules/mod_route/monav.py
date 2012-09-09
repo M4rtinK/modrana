@@ -148,13 +148,7 @@ def get_route(data_directory, waypoints, lookup_radius=10000, lookup_edge_names=
     # Close the connection (just in case)
     connection.close()
 
-# modRana:
-# return result & return code
-# is routing fails, return None & the corresponding result code
-    if result.type == RoutingResult.SUCCESS:
-      return result, result.type
-    else:
-      return None, result.type
+    return result
 
 
 #    if result.type == RoutingResult.SUCCESS:

@@ -109,16 +109,16 @@ class Monav:
     start = time.clock()
     connection = monav.TcpConnection()
     try:
-      result, returnCode = monav.get_route(dataDirectory,
+      result = monav.get_route(dataDirectory,
                                            waypoints,
                                            connection = connection)
     except Exception, e:
       print('monav_support: routing failed')
       print(e)
       traceback.print_exc(file=sys.stdout) # find what went wrong
-      return None, None
+      return None
     print('monav: search finished in %1.2f ms'  % (1000 * (time.clock() - start)) )
-    return result, returnCode
+    return result
 
   def monavDirectionsAsync(self, start, destination, callback, key):
     """search ll2ll route asynchronously using Monav"""
