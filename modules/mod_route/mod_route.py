@@ -900,7 +900,7 @@ class route(ranaModule):
         units = self.m.get('units', None) # get the correct units
         length = self.directions.getLength()
         if length:
-          distance = units.m2CurrentUnitString(length)
+          distance = units.m2CurrentUnitString(length,1)
         else:
           distance = "? km"
         steps = self.directions.getMessagePointCount() # number of steps
