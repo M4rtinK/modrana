@@ -18,11 +18,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+import os
 from threading import Thread
 import time
 import subprocess
 import traceback
 import sys
+import signal
 
 import monav
 
@@ -82,8 +84,9 @@ class Monav:
     stopped = False
     try:
       if self.monavServer:
-        #os.kill(self.monavServer.pid, signal.SIGKILL)
-        self.monavServer.terminate()
+        # Python 2.5 doesn't have POpen.terminate(),
+        # so we use this
+        os.kill(self.monavServer.pid, signal.SIGKILL)
         stopped = True
       else:
         print('monav_support: no Monav server process found')
