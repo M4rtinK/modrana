@@ -355,7 +355,8 @@ def _detectMonavTurns(result):
     for edge in edges[1:]:
       edgeId = edge.type_id
       nameId = edge.name_id
-      if lastEdgeId != edgeId or lastEdgeNameId != edgeId:
+#      if lastEdgeId != edgeId and lastEdgeNameId != edgeId:
+      if lastEdgeId != edgeId:
         # this might be a turn ! :)
         name = names[nameId]
         turnDescription = _getTurnDescription(None, name=name)
