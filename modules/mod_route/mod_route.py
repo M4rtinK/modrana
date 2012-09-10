@@ -358,12 +358,7 @@ class route(ranaModule):
       'car':'routing_car'
     }
     subFolder = modeFolders.get(mode, 'routing_car')
-    try:
-      dataPacks = self.getAvailableMonavDataPacks()
-    except Exception, e:
-      print("route: can't list Monav data directory")
-      print(e)
-      dataPacks = []
+    dataPacks = self.getAvailableMonavDataPacks()
 
     if dataPacks:
       # TODO: bounding box based pack selection
@@ -411,10 +406,15 @@ class route(ranaModule):
   def getAvailableMonavDataPacks(self):
     """return all available Monav data packs in the main monav data folder"""
     # basically just list all directories in the Monav data folder
-    mainMonavFolder = self.modrana.paths.getMonavDataPath()
-    dataPacks = os.listdir(mainMonavFolder)
-    dataPacks = filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks )
-    return sorted(dataPacks)
+    try:
+      mainMonavFolder = self.modrana.paths.getMonavDataPath()
+      dataPacks = os.listdir(mainMonavFolder)
+      dataPacks = filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks )
+      return sorted(dataPacks)
+    except Exception, e:
+      print('route: listing the Monav data packs failed')
+      print(e)
+      return []
 
   def doAddressRoute(self, start, destination):
     """Route from one point to another, and set that as the active route"""

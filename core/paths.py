@@ -138,7 +138,7 @@ class Paths:
     this path can be used both for manipulating the data (add,delete, update) &
     using the data for routing)
     """
-    return os.path.join(self.getMapFolderPath(), MONAV_DATA_FOLDER_NAME)
+    return self._assurePathFolder(self.getMapFolderPath(), MONAV_DATA_FOLDER_NAME)
 
   def getMonavServerBinaryPath(self):
     deviceID = self.modrana.dmod.getDeviceIDString()
