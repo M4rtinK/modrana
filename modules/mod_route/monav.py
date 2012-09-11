@@ -39,6 +39,10 @@ class TcpConnection(object):
 
         """
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # modRana modification to fix 'Not all bytes of message received.'
+        # right after monav-server startup:
+        self._socket.setblocking(1)
+        # TODO: fill in a bug report/pull request on Monav issue tracker
         self._socket.connect((host, port))
 
     def write(self, message):

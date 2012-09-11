@@ -78,8 +78,6 @@ class Monav:
             try:
               # test if the server is up and accepting connections
               monav.TcpConnection()
-              time.sleep(2) # the Monav server might need some time to stabilise
-              # TODO: fill in a bug report on Monav bug tracker
               break
             except Exception:
               pass # not yet fully started
@@ -135,7 +133,6 @@ class Monav:
         print('monav_support: routing failed')
         print(e)
         traceback.print_exc(file=sys.stdout) # find what went wrong
-        time.sleep(1) # the Monav server might need some time to stabilise
         if tryNr < RETRY_COUNT:
           print('monav_support: retrying')
     if tryNr < RETRY_COUNT:
