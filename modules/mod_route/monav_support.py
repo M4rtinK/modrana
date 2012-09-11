@@ -25,8 +25,15 @@ import subprocess
 import traceback
 import sys
 import signal
-
 import monav
+
+RETRY_COUNT = 3 # if routing fails, try RETRY_COUNT more times
+# there might be some situations where the Monav server might fail
+# to return a route even if it exists - it seems to be prone to these
+# errors especially at startup, even though it is possible to
+# succesfully initiate a connection with it & query its version
+#
+# Monav routing is also very fast, so doing more tries is not a problem
 
 from signals_pb2 import RoutingResult
 
@@ -69,7 +76,10 @@ class Monav:
         while elapsed < timeout:
           if self.monavServer:
             try:
+              # test if the server is up and accepting connections
               monav.TcpConnection()
+              time.sleep(2) # the Monav server might need some time to stabilise
+              # TODO: fill in a bug report on Monav bug tracker
               break
             except Exception:
               pass # not yet fully started
@@ -114,18 +124,26 @@ class Monav:
       self.startServer() # start the server
     print('monav: starting route search')
     start = time.clock()
-    connection = monav.TcpConnection()
-    try:
-      result = monav.get_route(dataDirectory,
-                                           waypoints,
-                                           connection = connection)
-    except Exception, e:
-      print('monav_support: routing failed')
-      print(e)
-      traceback.print_exc(file=sys.stdout) # find what went wrong
+    tryNr = 0
+    result = None
+    while tryNr < RETRY_COUNT:
+      tryNr+=1
+      try:
+        result = monav.get_route(dataDirectory, waypoints)
+        break
+      except Exception, e:
+        print('monav_support: routing failed')
+        print(e)
+        traceback.print_exc(file=sys.stdout) # find what went wrong
+        time.sleep(1) # the Monav server might need some time to stabilise
+        if tryNr < RETRY_COUNT:
+          print('monav_support: retrying')
+    if tryNr < RETRY_COUNT:
+      print('monav: search finished in %1.2f ms and %d tries'  % (1000 * (time.clock() - start), tryNr))
+      return result
+    else:
+      print('monav: search failed after %d retries' % tryNr)
       return None
-    print('monav: search finished in %1.2f ms'  % (1000 * (time.clock() - start)) )
-    return result
 
   def monavDirectionsAsync(self, start, destination, callback, key):
     """search ll2ll route asynchronously using Monav"""
