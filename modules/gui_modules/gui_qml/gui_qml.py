@@ -52,10 +52,11 @@ def newlines2brs(text):
   """ QML uses <br> instead of \n for linebreak """
   return re.sub('\n', '<br>', text)
 
+
 class Logger:
   def __init__(self, log=True):
     pass
-    self.log=log
+    self.log = log
 
   def debug(self, message):
     if self.log:
@@ -63,8 +64,9 @@ class Logger:
 
 logger = Logger(log=False)
 
-def getModule(m,d,i):
-    return(QMLGUI(m,d,i))
+def getModule(m, d, i):
+  return(QMLGUI(m, d, i))
+
 
 class QMLGUI(GUIModule):
   """A Qt + QML GUI module"""
@@ -75,7 +77,7 @@ class QMLGUI(GUIModule):
     # some constants
     self.msLongPress = 400
     self.centeringDisableThreshold = 2048
-    size = (800,480) # initial window size
+    size = (800, 480) # initial window size
 
     # window state
     self.fullscreen = False
@@ -97,14 +99,14 @@ class QMLGUI(GUIModule):
     self.window.resize(*size)
     self.window.setCentralWidget(self.view)
     self.view.setResizeMode(QDeclarativeView.SizeRootObjectToView)
-#    self.view.setResizeMode(QDeclarativeView.SizeViewToRootObject)
+    #    self.view.setResizeMode(QDeclarativeView.SizeViewToRootObject)
 
     # add image providers
     self.iconProvider = IconImageProvider()
-    self.view.engine().addImageProvider("icons",self.iconProvider)
+    self.view.engine().addImageProvider("icons", self.iconProvider)
     # add tiles provider
     self.tilesProvider = TileImageProvider(self)
-    self.view.engine().addImageProvider("tiles",self.tilesProvider)
+    self.view.engine().addImageProvider("tiles", self.tilesProvider)
 
     rc = self.view.rootContext()
     # make options accessible from QML
@@ -122,7 +124,6 @@ class QMLGUI(GUIModule):
     # make tile loading accessible from QML
     tiles = MapTiles(self)
     rc.setContextProperty("mapTiles", tiles)
-
 
     self.window.closeEvent = self._qtWindowClosed
     #self.window.show()
@@ -173,7 +174,7 @@ class QMLGUI(GUIModule):
   def startMainLoop(self):
     """start the main loop or its equivalent"""
 
-#    print "QML start main loop"
+    #    print "QML start main loop"
 
     if self.modrana.dmod.startInFullscreen():
       self.toggleFullscreen()
@@ -194,8 +195,12 @@ class QMLGUI(GUIModule):
       for item in self._notificationQueue:
         self.notify(*item)
 
+      #    print "loaded modules:"
+      #    print sys.modules.keys()
+
     self.app.exec_()
-#    print "QML main loop started"
+
+  #    print "QML main loop started"
 
   def _qtWindowClosed(self, event):
     print('Qt window closing down')
@@ -225,7 +230,7 @@ class QMLGUI(GUIModule):
     text = newlines2brs(text)
     print("QML GUI notify:\n message: %s, timeout: %d" % (text, msTimeout))
     if self.rootObject:
-      self.rootObject.notify(text,msTimeout)
+      self.rootObject.notify(text, msTimeout)
     else:
       self._notificationQueue.append((text, msTimeout, icon))
 
@@ -239,8 +244,10 @@ class QMLGUI(GUIModule):
     else:
       return None
 
+
 class Platform(QtCore.QObject):
   """make current platform available to QML and integrable as a property"""
+
   def __init__(self, modrana):
     QtCore.QObject.__init__(self)
     self.modrana = modrana
@@ -305,10 +312,12 @@ class Platform(QtCore.QObject):
     # the Fremantle theme is incomplete
     return self.modrana.dmod.getDeviceIDString() == "n900"
 
+
 class Modules(QtCore.QObject):
   """
   modRana module access from QML
   """
+
   def __init__(self, modrana):
     QtCore.QObject.__init__(self)
     self.modrana = modrana
@@ -352,21 +361,23 @@ class Modules(QtCore.QObject):
       print("QML GUI: module %s not loaded" % moduleName)
       return None
 
+
 class IconImageProvider(QDeclarativeImageProvider):
   """the IconImageProvider class provides icon images to the QML layer as
   QML does not seem to handle .. in the url very well"""
+
   def __init__(self):
     QDeclarativeImageProvider.__init__(self, QDeclarativeImageProvider.ImageType.Image)
 
   def requestImage(self, iconPath, size, requestedSize):
     try:
       #TODO: theme name caching ?
-      f = open('themes/%s' % iconPath,'r')
-#      print "ICON"
-#      print iconPath
-#      print size
-#      print requestedSize
-      img=QImage()
+      f = open('themes/%s' % iconPath, 'r')
+      #      print "ICON"
+      #      print iconPath
+      #      print size
+      #      print requestedSize
+      img = QImage()
       img.loadFromData(f.read())
       f.close()
       return img
@@ -375,18 +386,20 @@ class IconImageProvider(QDeclarativeImageProvider):
       print iconPath
       print 'themes/%s' % (iconPath)
 
+
 class TileImageProvider(QDeclarativeImageProvider):
   """
   the TileImageProvider class provides images images to the QML map element
   NOTE: this image provider is currently only used as fallback in case
   the localhost tileserver won't start
   """
+
   def __init__(self, gui):
     QDeclarativeImageProvider.__init__(self, QDeclarativeImageProvider.ImageType.Image)
     self.gui = gui
-    self.loading = QImage(1,1, QImage.Format_RGB32)
-    self.ready = QImage(2,1, QImage.Format_RGB32)
-    self.error = QImage(3,1, QImage.Format_RGB32)
+    self.loading = QImage(1, 1, QImage.Format_RGB32)
+    self.ready = QImage(2, 1, QImage.Format_RGB32)
+    self.error = QImage(3, 1, QImage.Format_RGB32)
     self.manager = QNetworkAccessManager()
 
   def requestImage(self, tileInfo, size, requestedSize):
@@ -394,8 +407,8 @@ class TileImageProvider(QDeclarativeImageProvider):
     the tile info should look like this:
     layerID/zl/x/y
     """
-#    print "IMAGE REQUESTED"
-#    print tileInfo
+    #    print "IMAGE REQUESTED"
+    #    print tileInfo
     try:
       # split the string provided by QML
       split = tileInfo.split("/")
@@ -412,7 +425,7 @@ class TileImageProvider(QDeclarativeImageProvider):
       # create a file-like object
       f = cStringIO.StringIO(tileData)
       # create image object
-      img=QImage()
+      img = QImage()
       # lod the image from in memory buffer
       img.loadFromData(f.read())
       # cleanup
@@ -427,7 +440,6 @@ class TileImageProvider(QDeclarativeImageProvider):
 
 
 class MapTiles(QtCore.QObject):
-
   def __init__(self, gui):
     QtCore.QObject.__init__(self)
     self.gui = gui
@@ -447,17 +459,17 @@ class MapTiles(QtCore.QObject):
     True - tile already in storage or in memory
     False - tile download in progress, retry in a while
     """
-#    print layer, z, x, y
+    #    print layer, z, x, y
     if self.gui._mapTiles.tileInMemory(layer, z, x, y):
-#      print "available in memory"
+    #      print "available in memory"
       return True
     elif self.gui._mapTiles.tileInStorage(layer, z, x, y):
-#      print "available in storage"
+    #      print "available in storage"
       return True
     else: # not in memory or storage
       # add a tile download request
       self.gui._mapTiles.addTileDownloadRequest(layer, z, x, y)
-#      print "dling try later"
+      #      print "dling try later"
       return False
 
 # from AGTL
@@ -469,17 +481,17 @@ class Fix():
   min_timediff = datetime.utcnow() - datetime.utcfromtimestamp(0)
 
   def __init__(self,
-               position = None,
-               altitude = None,
-               bearing = None,
-               speed = None,
-               sats = 0,
-               sats_known = 0,
-               dgps = False,
-               quality = 0,
-               error = 0,
-               error_bearing = 0,
-               timestamp = None):
+               position=None,
+               altitude=None,
+               bearing=None,
+               speed=None,
+               sats=0,
+               sats_known=0,
+               dgps=False,
+               quality=0,
+               error=0,
+               error_bearing=0,
+               timestamp=None):
     self.position = position
     self.altitude = altitude
     self.bearing = bearing
@@ -495,8 +507,8 @@ class Fix():
     else:
       self.timestamp = timestamp
 
-class FixWrapper(QtCore.QObject):
 
+class FixWrapper(QtCore.QObject):
   def __init__(self, fix):
     QtCore.QObject.__init__(self)
     self.data = fix
@@ -551,8 +563,8 @@ class FixWrapper(QtCore.QObject):
   speedValid = QtCore.Property(bool, _speed_valid, notify=changed)
   altitudeValid = QtCore.Property(bool, _altitude_valid, notify=changed)
 
-class GPSDataWrapper(QtCore.QObject):
 
+class GPSDataWrapper(QtCore.QObject):
   changed = QtCore.Signal()
   changed_target = QtCore.Signal()
   changed_distance_bearing = QtCore.Signal()
@@ -561,10 +573,10 @@ class GPSDataWrapper(QtCore.QObject):
     QtCore.QObject.__init__(self)
     self.modrana = modrana
     self.gui = gui
-#    self.modrana.connect('good-fix', self._on_good_fix)
-#    self.modrana.connect('no-fix', self._on_no_fix)
-#    self.modrana.connect('target-changed', self._on_target_changed)
-    self.modrana.watch('locationUpdated',self._posChangedCB)
+    #    self.modrana.connect('good-fix', self._on_good_fix)
+    #    self.modrana.connect('no-fix', self._on_no_fix)
+    #    self.modrana.connect('target-changed', self._on_target_changed)
+    self.modrana.watch('locationUpdated', self._posChangedCB)
 
     pos = self.modrana.get('pos', None)
     speed = self.modrana.get('speed', 0)
@@ -580,7 +592,7 @@ class GPSDataWrapper(QtCore.QObject):
   @QtCore.Slot(bool, float, float, bool, float, bool, float, float, QtCore.QObject)
   def positionChanged(self, valid, lat, lon, altvalid, alt, speedvalid, speed, error, timestamp):
     if valid:
-      pos = (lat,lon)
+      pos = (lat, lon)
       self._on_good_fix(Fix(pos, alt, bearing, speed))
 
   def _posChangedCB(self, key, oldValue, newValue):
@@ -657,41 +669,44 @@ class GPSDataWrapper(QtCore.QObject):
   data = QtCore.Property(QtCore.QObject, _gps_data, notify=changed)
   lastGoodFix = QtCore.Property(QtCore.QObject, _gps_last_good_fix, notify=changed)
   hasFix = QtCore.Property(bool, _gps_has_fix, notify=changed)
-#  targetValid = QtCore.Property(bool, _target_valid, notify=changed_target)
-#  target = QtCore.Property(QtCore.QObject, _target, notify=changed_target)
-#  targetDistanceValid = QtCore.Property(bool, _gps_target_distance_valid, notify=changed_distance_bearing)
-#  targetDistance = QtCore.Property(float, _gps_target_distance, notify=changed_distance_bearing)
-#  targetBearing = QtCore.Property(float, _gps_target_bearing, notify=changed_distance_bearing)
+  #  targetValid = QtCore.Property(bool, _target_valid, notify=changed_target)
+  #  target = QtCore.Property(QtCore.QObject, _target, notify=changed_target)
+  #  targetDistanceValid = QtCore.Property(bool, _gps_target_distance_valid, notify=changed_distance_bearing)
+  #  targetDistance = QtCore.Property(float, _gps_target_distance, notify=changed_distance_bearing)
+  #  targetBearing = QtCore.Property(float, _gps_target_bearing, notify=changed_distance_bearing)
   status = QtCore.Property(str, _gps_status, notify=changed)
 
+
 class Options(QtCore.QObject):
-    """make options available to QML and integrable as a property"""
-    def __init__(self, modrana):
-        QtCore.QObject.__init__(self)
-        self.modrana = modrana
+  """make options available to QML and integrable as a property"""
 
-    """ like this, the function can accept
-    and return different types to and from QML
-    (basically anything that matches some of the decorators)
-    as per PySide developers, there should be no perfromance
-    penalty for doing this and the order of the decorators
-    doesn't mater"""
-    @QtCore.Slot(str, bool, result=bool)
-    @QtCore.Slot(str, int, result=int)
-    @QtCore.Slot(str, str, result=str)
-    @QtCore.Slot(str, float, result=float)
-    def get(self, key, default):
-      """get a value from the modRanas persistent options dictionary"""
-      print("GET")
-      print(key, default, self.modrana.get(key, default))
-      return self.modrana.get(key, default)
+  def __init__(self, modrana):
+    QtCore.QObject.__init__(self)
+    self.modrana = modrana
 
-    @QtCore.Slot(str, bool)
-    @QtCore.Slot(str, int)
-    @QtCore.Slot(str, str)
-    @QtCore.Slot(str, float)
-    def set(self, key, value):
-      """set a keys value in modRanas persistent options dictionary"""
-      print("SET")
-      print(key, value)
-      return self.modrana.set(key, value)
+  """ like this, the function can accept
+ and return different types to and from QML
+ (basically anything that matches some of the decorators)
+ as per PySide developers, there should be no perfromance
+ penalty for doing this and the order of the decorators
+ doesn't mater"""
+
+  @QtCore.Slot(str, bool, result=bool)
+  @QtCore.Slot(str, int, result=int)
+  @QtCore.Slot(str, str, result=str)
+  @QtCore.Slot(str, float, result=float)
+  def get(self, key, default):
+    """get a value from the modRanas persistent options dictionary"""
+    print("GET")
+    print(key, default, self.modrana.get(key, default))
+    return self.modrana.get(key, default)
+
+  @QtCore.Slot(str, bool)
+  @QtCore.Slot(str, int)
+  @QtCore.Slot(str, str)
+  @QtCore.Slot(str, float)
+  def set(self, key, value):
+    """set a keys value in modRanas persistent options dictionary"""
+    print("SET")
+    print(key, value)
+    return self.modrana.set(key, value)
