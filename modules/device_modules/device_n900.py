@@ -25,30 +25,35 @@ import subprocess
 from base_device_module import deviceModule
 #N900 specific:
 import dbus.glib
-import conic # provide by python-conic on Maemo 5
 from core import gs
 # only import GTK, Hildon & Liblocation when using GTK GUI
 if gs.GUIString == "GTK":
   import hildon
   import location
-#  import dbus.glib
+  import conic # provide by python-conic on Maemo 5
+  # NOTE: conic imports Glib & Gobject, which cause segfaults for the Qt based QML GUI
+  # therefore, it is important it is loaded only with fort the GTK GUI
+  #  import dbus.glib
   import gtk
+
   """
   why dbus.glib ?
   if you import only "dbus", it can't find its mainloop for callbacks
   """
 else:
   from QtMobility.SystemInfo import QSystemScreenSaver
+
   """ ^^ back-light control"""
 
 import time
 
-def getModule(m,d,i):
-  return(device_n900(m,d,i))
+def getModule(m, d, i):
+  return(device_n900(m, d, i))
+
 
 class device_n900(deviceModule):
   """A N900 modRana device-specific module"""
-  
+
   def __init__(self, m, d, i):
     deviceModule.__init__(self, m, d, i)
     self.rotationObject = None
@@ -60,17 +65,15 @@ class device_n900(deviceModule):
 
     # screen blanking related
     self.bus = dbus.SystemBus()
-    self.mceRequest = self.bus.get_object('com.nokia.mce','/com/nokia/mce/request')
-    self.mceSignal = self.bus.get_object('com.nokia.mce','/com/nokia/mce/signal')
-    self.mceSignalInterface = dbus.Interface(self.mceSignal,'com.nokia.mce.signal')
+    self.mceRequest = self.bus.get_object('com.nokia.mce', '/com/nokia/mce/request')
+    self.mceSignal = self.bus.get_object('com.nokia.mce', '/com/nokia/mce/signal')
+    self.mceSignalInterface = dbus.Interface(self.mceSignal, 'com.nokia.mce.signal')
     self.mceSignalInterface.connect_to_signal("display_status_ind", self.screenStateChangedCallback)
     print "N900: DBUS initialized"
 
     # Internet connectivity related
     self.connectivityStatus = False
-    self.conicConnection = conic.Connection()
-    self.conicConnection.connect("connection-event", self._connectionStateCB)
-    self.conicConnection.set_property("automatic-connection-events", True)
+    self.conicConnection = None
 
     if gs.GUIString == "GTK":
       # liblocation
@@ -78,11 +81,23 @@ class device_n900(deviceModule):
       self.lDevice = None
       """location starting is handled by mod_location
       in its firstTime call"""
+
+      # libconic
+      self._conicConnect()
+
     else:
       print("N900 Qt screen saver controller created")
       self.qScreenSaver = QSystemScreenSaver()
 
     print "N900 device specific module initialized"
+
+  def _conicConnect(self):
+    if self.conicConnection is None:
+      self.conicConnection = conic.Connection()
+      self.conicConnection.connect("connection-event", self._connectionStateCB)
+      self.conicConnection.set_property("automatic-connection-events", True)
+      #Todo: connectivity state monitoring for the QML GUI (Qt mobility probably does this ?)
+
 
   def firstTime(self):
     # setup window state callbacks
@@ -119,7 +134,8 @@ class device_n900(deviceModule):
 
   def shutdown(self):
     # disconnect libconic connection tracking
-    self.conicConnection.set_property("automatic-connection-events", False)
+    if self.conicConnection:
+      self.conicConnection.set_property("automatic-connection-events", False)
 
   def startInFullscreen(self):
     return True
@@ -143,7 +159,7 @@ class device_n900(deviceModule):
     return "Nokia N900"
 
   def getWinWH(self):
-    return (800,480)
+    return (800, 480)
 
   def startInFullscreen(self):
     return True
@@ -155,9 +171,11 @@ class device_n900(deviceModule):
     """start the GUI automatic rotation feature"""
     try:
       import n900_maemo5_portrait
+
       rotationMode = self.get('rotationMode', "auto") # get last used mode
       lastModeNumber = self.getRotationModeNumber(rotationMode) # get last used mode number
-      rObject = n900_maemo5_portrait.FremantleRotation(self.ossoAppName, main_window=self.topWindow, mode=lastModeNumber)
+      rObject = n900_maemo5_portrait.FremantleRotation(self.ossoAppName, main_window=self.topWindow,
+        mode=lastModeNumber)
       print "N900 rotation object initialized"
       return rObject
     except Exception, e:
@@ -230,7 +248,7 @@ class device_n900(deviceModule):
     if display:
       if state == "on" or state == "dimm":
         display.enableRedraw(reason="N900 display on or dimmed")
-      elif state== "off":
+      elif state == "off":
         display.disableRedraw(reason="N900 display blanked")
 
   def hasNotificationSupport(self):
@@ -272,10 +290,12 @@ class device_n900(deviceModule):
       self.topWindow.connect("realize", self.enable_volume_cb)
 
   def disableVolumeKeys(self):
-    self.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"), 32, gtk.gdk.PROP_MODE_REPLACE, [0]);
+    self.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"),
+      32, gtk.gdk.PROP_MODE_REPLACE, [0]);
 
   def enable_volume_cb(self, window=None):
-    self.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"), 32, gtk.gdk.PROP_MODE_REPLACE, [1]);
+    self.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"),
+      32, gtk.gdk.PROP_MODE_REPLACE, [1]);
 
   def _updateVolumeKeys(self):
     """check if volume keys should be used or not"""
@@ -298,25 +318,25 @@ class device_n900(deviceModule):
     """
     open a URL using the Maemo specific browser command
     """
-    subprocess.Popen(['browser', '--url=%s' %url])
+    subprocess.Popen(['browser', '--url=%s' % url])
 
   def _addHildonAppMenu(self):
     menu = hildon.AppMenu()
     self.centeringToggleButton = gtk.ToggleButton(label="Centering")
-    self.centeringToggleButton.connect('toggled',self._toggle, 'centred')
+    self.centeringToggleButton.connect('toggled', self._toggle, 'centred')
     self.rotationToggleButton = gtk.ToggleButton(label="Map rotation")
-    self.rotationToggleButton.connect('toggled',self._toggle,'rotateMap')
+    self.rotationToggleButton.connect('toggled', self._toggle, 'rotateMap')
     self.soundToggleButton = gtk.ToggleButton(label="Sound")
-    self.soundToggleButton.connect('toggled',self._toggle,'soundEnabled')
+    self.soundToggleButton.connect('toggled', self._toggle, 'soundEnabled')
 
     mapButton = gtk.Button("Map screen")
-    mapButton.connect('clicked',self._switchToMenu, None)
+    mapButton.connect('clicked', self._switchToMenu, None)
     optionsButton = gtk.Button("Options")
-    optionsButton.connect('clicked',self._switchToMenu,'options')
+    optionsButton.connect('clicked', self._switchToMenu, 'options')
     searchButton = gtk.Button("Search")
-    searchButton.connect('clicked',self._switchToMenu,'search')
+    searchButton.connect('clicked', self._switchToMenu, 'search')
     routeButton = gtk.Button("Route")
-    routeButton.connect('clicked',self._switchToMenu,'route')
+    routeButton.connect('clicked', self._switchToMenu, 'route')
 
     self._updateAppMenu() # update initial button states
 
@@ -341,23 +361,23 @@ class device_n900(deviceModule):
     self.watch('centred', self._updateAppMenu)
 
 
-  def _toggle(self,toggleButton, key):
+  def _toggle(self, toggleButton, key):
     print "N900: key %s toggled" % key
     self.set(key, toggleButton.get_active())
 
-  def _switchToMenu(self,toggleButton, menu):
+  def _switchToMenu(self, toggleButton, menu):
     """callback for the appMenu buttons, switch to a specified menu"""
     self.set('menu', menu)
     self.set('needRedraw', True)
 
   def _updateAppMenu(self, key=None, value=None, oldValue=None):
-    print self.get("centred",True)
+    print self.get("centred", True)
     if self.centeringToggleButton:
-      self.centeringToggleButton.set_active(self.get("centred",True))
+      self.centeringToggleButton.set_active(self.get("centred", True))
     if self.rotationToggleButton:
-      self.rotationToggleButton.set_active(self.get("rotateMap",True))
+      self.rotationToggleButton.set_active(self.get("rotateMap", True))
     if self.soundToggleButton:
-      self.soundToggleButton.set_active(self.get("soundEnabled",True))
+      self.soundToggleButton.set_active(self.get("soundEnabled", True))
 
   def hasKineticScrollingList(self):
     return True
@@ -379,12 +399,12 @@ class device_n900(deviceModule):
   # ** LOCATION **
 
   def handlesLocation(self):
-      """on N900 location is handled through liblocation"""
-      if gs.GUIString == "GTK":
-        # use liblocation
-        return True
-      else:
-        return False
+    """on N900 location is handled through liblocation"""
+    if gs.GUIString == "GTK":
+      # use liblocation
+      return True
+    else:
+      return False
 
   def getLocationType(self):
     """modRana uses liblocation on N900"""
@@ -428,7 +448,7 @@ class device_n900(deviceModule):
       except Exception, e:
         print "n900 - location: - opening the GPS device failed: %s" % e
         self.status = "No GPSD running"
-        
+
       # connect callbacks
       #self.lControl.connect("error-verbose", self._liblocationErrorCB)
       self.lDevice.connect("changed", self._libLocationUpdateCB)
@@ -453,15 +473,15 @@ class device_n900(deviceModule):
 
   def _liblocationErrorCB(self, control, error):
     if error == location.ERROR_USER_REJECTED_DIALOG:
-        print("User didn't enable requested methods")
+      print("User didn't enable requested methods")
     elif error == location.ERROR_USER_REJECTED_SETTINGS:
-        print("User changed settings, which disabled location")
+      print("User changed settings, which disabled location")
     elif error == location.ERROR_BT_GPS_NOT_AVAILABLE:
-        print("Problems with BT GPS")
+      print("Problems with BT GPS")
     elif error == location.ERROR_METHOD_NOT_ALLOWED_IN_OFFLINE_MODE:
-        print("Requested method is not allowed in offline mode")
+      print("Requested method is not allowed in offline mode")
     elif error == location.ERROR_SYSTEM:
-        print("System error")
+      print("System error")
 
   def _libLocationUpdateCB(self, device):
     """
@@ -497,8 +517,8 @@ class device_n900(deviceModule):
         """
 
         if fix[1] & location.GPS_DEVICE_LATLONG_SET:
-          (lat,lon) = fix[4:6]
-          self.set('pos', (lat,lon))
+          (lat, lon) = fix[4:6]
+          self.set('pos', (lat, lon))
 
         if fix[1] & location.GPS_DEVICE_TRACK_SET:
           bearing = fix[9]
@@ -506,7 +526,7 @@ class device_n900(deviceModule):
 
         if fix[1] & location.GPS_DEVICE_SPEED_SET:
           self.set('speed', fix[11]) # km/h
-          metersPerSecSpeed = fix[11]/3.6 # km/h -> metres per second
+          metersPerSecSpeed = fix[11] / 3.6 # km/h -> metres per second
           self.set('metersPerSecSpeed', metersPerSecSpeed) # m/s
 
         if fix[1] & location.GPS_DEVICE_ALTITUDE_SET:
@@ -524,11 +544,10 @@ class device_n900(deviceModule):
           print self.get('speed', None)
           print "#############################"
 
-
         """always set this key to current epoch once the location is updated
-        so that modules can watch it and react"""
+ so that modules can watch it and react"""
         self.set('locationUpdated', time.time())
-#        print "updating location"
+        #        print "updating location"
         self.set('needRedraw', True)
 
       else:
@@ -547,7 +566,7 @@ class device_n900(deviceModule):
 
   def _connectionStateCB(self, connection, event):
     """handle Internet connectivity state changes"""
-#    print("connection_cb(%s, %s)" % (connection, event))
+    #    print("connection_cb(%s, %s)" % (connection, event))
     status = event.get_status()
     error = event.get_error()
     iap_id = event.get_iap_id()
