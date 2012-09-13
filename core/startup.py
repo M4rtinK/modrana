@@ -48,7 +48,7 @@ class Startup:
       '-d', metavar="device ID", type=str,
       help="specify device type",
       default=None, action="store",
-      choices=["neo","pc", "n900", "n9", "q7", "android_chroot"]
+      choices=["neo", "pc", "n900", "n9", "q7", "android_chroot"]
     )
     # GUI
     parser.add_argument(
@@ -72,7 +72,8 @@ class Startup:
            '(current location is used by default), both addresses and'
            ' geographic coordinates with the geo: prefix are supported;'
            ' use "%s" to use last known position '
-           'EXAMPLE: "London" or "geo:50.083333,14.416667" or "%s"' % (USE_LAST_KNOWN_POSITION_KEYWORD, USE_LAST_KNOWN_POSITION_KEYWORD)
+           'EXAMPLE: "London" or "geo:50.083333,14.416667" or "%s"' % (
+      USE_LAST_KNOWN_POSITION_KEYWORD, USE_LAST_KNOWN_POSITION_KEYWORD)
       ,
       default=None,
       action="store"
@@ -87,7 +88,7 @@ class Startup:
     # wikipedia search
     parser.add_argument(
       '--wikipedia-search',
-      metavar = 'search query',
+      metavar='search query',
       type=str,
       help='specify a local search query EXAMPLE: "Prague castle"',
       default=None,
@@ -134,7 +135,8 @@ class Startup:
     # enable centering and set zoom level
     parser.add_argument(
       '--focus-on-coordinates',
-      help='focus on given coordinates, NOTE you can use --set-zl to set zoom level, EXAMPLE: "geo:50.083333,14.416667"',
+      help='focus on given coordinates, NOTE you can use --set-zl to set zoom level, EXAMPLE: "geo:50.083333,14.416667"'
+      ,
       metavar="geographic coordinates with the geo: prefix",
       type=str,
       default=None,
@@ -165,7 +167,6 @@ class Startup:
         self._earlyWikipediaSearch()
     elif self.args.return_current_coordinates:
       self._earlyReturnCoordinates()
-
 
 
   def handlePostFirstTimeTasks(self):
@@ -272,7 +273,6 @@ class Startup:
         lat, lon = pos
         points = online.localSearchLL(query, lat, lon)
       else:
-
         # done - no position found
         self._exit(LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR)
 
@@ -310,7 +310,7 @@ class Startup:
       else:
         output = "%f,%f" % (lat, lon)
       self._enableStdout()
-      print output
+      print(output)
       self._exit(0)
     else:
       # done - no position found
@@ -323,7 +323,7 @@ class Startup:
         zl = self.args.set_zl
       else:
         zl = 15 # sane default ?
-      # for now we just take the first result
+        # for now we just take the first result
       result = results[0]
       lat, lon = result.getLL()
       markerList = [(lat, lon)]
@@ -412,6 +412,7 @@ class Startup:
 
     # liblocation needs the main loop to work properly
     import gobject
+
     main = gobject.MainLoop()
 
     # register fix CB
@@ -437,35 +438,35 @@ class Startup:
     main.run()
 
     fix = self.modrana.get('fix', None)
-    if fix in (2,3):
+    if fix in (2, 3):
       pos = self.modrana.get('pos', None)
     else:
       pos = None # timed out without finding position
 
-#    pos = None
-#    if l and not useLastKnown:
-#      timeout = 0
-#      checkInterval = 0.1 # in seconds
-#      print("startup: trying to determine current position for at most %d s" % LOCAL_SEARCH_LOCATION_TIMEOUT)
-#      while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
-#        if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
-#          # GPSD and liblocation need a nudge
-#          # to update the fix when the GUI mainloop is not running
-#          #self.modrana.dmod._libLocationUpdateCB()
-#          print self.modrana.dmod.lDevice.online
-#          print self.modrana.dmod.lDevice.status
-#          print self.modrana.dmod.lDevice.satellites_in_view
-#          print self.modrana.dmod.lDevice.fix
-#        if l.provider:
-#          pos = l.provider.getFix().position
-#        else:
-#          pos = self.modrana.get('pos', None)
-#        print pos
-#        if pos is not None:
-#          break
-#
-#        timeout+=checkInterval
-#        time.sleep(checkInterval)
+    #    pos = None
+    #    if l and not useLastKnown:
+    #      timeout = 0
+    #      checkInterval = 0.1 # in seconds
+    #      print("startup: trying to determine current position for at most %d s" % LOCAL_SEARCH_LOCATION_TIMEOUT)
+    #      while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
+    #        if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
+    #          # GPSD and liblocation need a nudge
+    #          # to update the fix when the GUI mainloop is not running
+    #          #self.modrana.dmod._libLocationUpdateCB()
+    #          print self.modrana.dmod.lDevice.online
+    #          print self.modrana.dmod.lDevice.status
+    #          print self.modrana.dmod.lDevice.satellites_in_view
+    #          print self.modrana.dmod.lDevice.fix
+    #        if l.provider:
+    #          pos = l.provider.getFix().position
+    #        else:
+    #          pos = self.modrana.get('pos', None)
+    #        print pos
+    #        if pos is not None:
+    #          break
+    #
+    #        timeout+=checkInterval
+    #        time.sleep(checkInterval)
 
     if loadLocationModule:
     # properly stop location when done (for early tasks)
