@@ -25,11 +25,13 @@ import socket
 from time import sleep
 import re
 
-def getModule(m,d,i):
-  return(messageModule(m,d,i))
+def getModule(m, d, i):
+  return(messageModule(m, d, i))
+
 
 class messageModule(ranaModule):
   """Handles messages"""
+
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
 
@@ -42,14 +44,14 @@ class messageModule(ranaModule):
 
       if module == 'set':
         # set a value in the persistent dict
-        (key,value) = text.split(":", 1)
-        for i in(None, True, False):
+        (key, value) = text.split(":", 1)
+        for i in (None, True, False):
           if value == str(i):
             value = i
         self.set(key, value)
-        
+
       elif module == 'toggle': # toggle a boolean value in the persistent dict
-        self.set(text, not self.get(text,0))
+        self.set(text, not self.get(text, 0))
 
       elif module == "*": # send to all modules
         for m in self.m.items():
@@ -61,7 +63,7 @@ class messageModule(ranaModule):
         (module, key, string) = text.split(':', 2)
         m = self.m.get(module, None)
         if m is not None:
-          m.handleMessage(key,'ms',string)
+          m.handleMessage(key, 'ms', string)
         else:
           print "Message addressed to %s which isn't loaded" % module
 
@@ -75,7 +77,7 @@ class messageModule(ranaModule):
         list = semicolonSepList.split(';')
         m = self.m.get(module, None)
         if m is not None:
-          m.handleMessage(key,'ml',list)
+          m.handleMessage(key, 'ml', list)
         else:
           print "Message addressed to %s which isn't loaded" % module
 
@@ -88,21 +90,29 @@ class messageModule(ranaModule):
         semicolonSepDict = tokens[2]
         d = {}
         for keyValue in semicolonSepDict.split(';'):
-          kvList = keyValue.split('=',1)
-          if len(kvList)>=2:
-            (key,value) = (kvList[0],kvList[1])
+          kvList = keyValue.split('=', 1)
+          if len(kvList) >= 2:
+            (key, value) = (kvList[0], kvList[1])
             d[key] = value
         m = self.m.get(module, None)
         if m is not None:
-          m.handleMessage(mainKey,'md',d)
+          m.handleMessage(mainKey, 'md', d)
         else:
           print "Message addressed to %s which isn't loaded" % module
 
       elif module == "setWithMode":
         (mode, key, value) = text.split(":", 2)
-        for i in(None, True, False):
+        for i in (None, True, False):
           if value == str(i):
             value = i
+        self.set(key, value, mode=mode)
+
+      elif module == "setWithCurrentMode":
+        (key, value) = text.split(":", 1)
+        for i in (None, True, False):
+          if value == str(i):
+            value = i
+        mode = self.get('mode', 'car')
         self.set(key, value, mode=mode)
 
       else:
