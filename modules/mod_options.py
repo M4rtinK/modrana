@@ -22,11 +22,13 @@ from base_module import ranaModule
 import marshal
 import modrana_utils
 
-def getModule(m,d,i):
-  return(Options(m,d,i))
+def getModule(m, d, i):
+  return(Options(m, d, i))
+
 
 class Options(ranaModule):
   """Handle options"""
+
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.options = {}
@@ -39,7 +41,7 @@ class Options(ranaModule):
     modrana_utils.createFolderPath(self.profileFolderPath)
 
     # load persistent options
-#    self.load()
+    #    self.load()
     self.on = '<span color="green">ON</span>'
     self.off = '<span color="red">OFF</span>'
 
@@ -55,24 +57,24 @@ class Options(ranaModule):
   def _getCategoryID(self, id):
     return "opt_cat_%s" % id # get a standardized id
 
-  def addCategory(self,name,inId,icon,actionPrefix="",actionSufix=""):
+  def addCategory(self, name, inId, icon, actionPrefix="", actionSufix=""):
     """this method should be run only after menu module instance
     is available in self.menuModule and the options menu is cleared,
     eq. has at least the escape button"""
     # first we add the category button to the options
     id = self._getCategoryID(inId) # get a standardized id
-    action="%sset:menu:%s%s" % (actionPrefix,id,actionSufix)
+    action = "%sset:menu:%s%s" % (actionPrefix, id, actionSufix)
     self.menuModule.addItem('options', name, icon, action)
     # initialize menu for the new category menu
-    self.menuModule.clearMenu(id,"set:menu:options")
+    self.menuModule.clearMenu(id, "set:menu:options")
     # as a convenience, return the id
     return inId
 
   def _getGroupId(self, catId, id):
     parentId = self._getCategoryID(catId)
     return "%s_opt_group_%s" % (parentId, id)
-  
-  def addGroup(self,name,id,parentId,icon,actionPrefix="",
+
+  def addGroup(self, name, id, parentId, icon, actionPrefix="",
                actionSufix="", registerToMenu=True, backButtonAction=None):
     """this method ads a new (empty) options group to category specified by
     catId, as a convenience feature, the id of the new group is returned"""
@@ -83,16 +85,16 @@ class Options(ranaModule):
     handled entirely by the pre and post actions
     """
     if not parentId:
-      action="%s%s" % (actionPrefix,actionSufix)
+      action = "%s%s" % (actionPrefix, actionSufix)
     else:
-      action="%sset:menu:options#%s%s" % (actionPrefix,id,actionSufix)
-      
+      action = "%sset:menu:options#%s%s" % (actionPrefix, id, actionSufix)
+
     if registerToMenu: # add to options menu structure ?
       self.menuModule.addItem(catId, name, icon, action)
     if backButtonAction is not None:
-      self.options[id] = [backButtonAction ,0,[]]
+      self.options[id] = [backButtonAction, 0, []]
     else:
-      self.options[id] = ["set:menu:%s" % catId,0,[]]
+      self.options[id] = ["set:menu:%s" % catId, 0, []]
     return id
 
   def setGroupParent(self, groupID, parentID):
@@ -121,35 +123,39 @@ class Options(ranaModule):
     off = self.off
 
     if action:
-      states = ((False,off,action),(True,on,action))
+      states = ((False, off, action), (True, on, action))
     else:
-      states = ((False,off),(True,on))
-    data = {"type":"toggle",
-               "states": states }
-    self.addOption(title,variable,data,group,default)
+      states = ((False, off), (True, on))
+    data = {"type": "toggle",
+            "states": states}
+    self.addOption(title, variable, data, group, default)
 
   def addToggleOption(self, title, variable, choices, group, default=None):
-    data = {"type":"toggle",
-               "states": choices }
-    self.addOption(title,variable,data,group,default)
+    data = {"type": "toggle",
+            "states": choices}
+    self.addOption(title, variable, data, group, default)
 
 
   def addEditOption(self, title, variable, group, label="Edit variable", description=None):
-    choices = {"type":"showAndEditVariable",
+    choices = {"type": "showAndEditVariable",
                "label": label,
                "description": description
-              }
+    }
     self.addOption(title, variable, choices, group, None)
 
-  def _generateItems(self, keyNameList, mode, variable, backAction):
+  def _generateItems(self, valueNameList, variable, backAction, fakeMode=None):
     menuItems = [] # an ordered list of all the menu items
     itemDict = {} # for easily assigning keys to labels
     id = 1 # id 0 is the escape button
-    for key, name in keyNameList:
-      item = self.menuModule.generateItem("#%s" % name, "generic",
-        "setWithMode:%s:%s:%s|%s" % (mode, variable, key, backAction))
+    for value, name in valueNameList:
+      if fakeMode is None: # just use the current mode
+        item = self.menuModule.generateItem("#%s" % name, "generic",
+          "setWithCurrentMode:%s:%s|%s" % (variable, value, backAction))
+      else:# use a fake mode (used for per mode option state list)
+        item = self.menuModule.generateItem("#%s" % name, "generic",
+          "setWithMode:%s:%s:%s|%s" % (fakeMode, variable, value, backAction))
       menuItems.append(item)
-      itemDict[key] = (name,id)
+      itemDict[value] = (name, id)
       id += 1
     return menuItems, itemDict
 
@@ -158,32 +164,26 @@ class Options(ranaModule):
     backAction = "set:menu:options#%s" % group
     # create and add the menu
     menu = self.menuModule.getClearedMenu(backAction)
-
-    if fakeMode is not None:
-      mode = fakeMode
-    else:
-      mode = self.get('mode', 'car')
-
-    menuItems, itemDict = self._generateItems(items, mode, variable, backAction)
+    menuItems, itemDict = self._generateItems(items, variable, backAction, fakeMode=fakeMode)
 
     # load all items to the menu
     menu = self.menuModule.addItemsToThisMenu(menu, menuItems)
     # store the menu in the menu module
     """NOTE: for the returning back to the group to work correctly,
     the menu is stored under a key combined from the variable and group names"""
-    storageKey = self._getItemsOptionStorageKey(group, variable, mode)
-
+    storageKey = self._getItemsOptionStorageKey(group, variable, fakeMode=fakeMode)
+    # add the Item menu entry button
     self.menuModule.addItemMenu(storageKey, menu, wideButtons=True)
 
     # also store in the local options structure
-    choices = {"type":"selectOneItem",
-              'label':"",
-              'description':"",
-              'default':default,
-              'items':items,
-              'itemDict' : itemDict,
-              'storageKey' : storageKey,
-              'preAction' : preAction # send this message before entering the menu
+    choices = {"type": "selectOneItem",
+               'label': "",
+               'description': "",
+               'default': default,
+               'items': items,
+               'itemDict': itemDict,
+               'storageKey': storageKey,
+               'preAction': preAction # send this message before entering the menu
     }
     # this means we are probably showing the option in the per mode state list
     if fakeMode is not None:
@@ -191,10 +191,13 @@ class Options(ranaModule):
       choices['noToolsIcon'] = True # disable the tools in the per mode state list
     self.addOption(title, variable, choices, group, default)
 
-  def _getItemsOptionStorageKey(self, group, variable, mode):
+  def _getItemsOptionStorageKey(self, group, variable, fakeMode=None):
     """return menu name for the special item selection itemized menu
     """
-    return "options1Item*%s*%s*%s" % (group, variable, mode)
+    if fakeMode is None:
+      return "options1Item*%s*%s" % (group, variable)
+    else:
+      return "options1Item*%s*%s*%s" % (group, variable, fakeMode)
 
   def _highlightActiveItem(self, menu, variable):
     """highlight currently active item in the item selection menu"""
@@ -206,12 +209,12 @@ class Options(ranaModule):
 
   def addOption(self, title, variable, choices, group, default=None):
     """add an option item"""
-  
+
     """ add group name to choices,
-    this is needed for the item tools menu to know where to return"""
+this is needed for the item tools menu to know where to return"""
     choices['groupName'] = group
 
-    newOption = [title,variable, choices,group,default]
+    newOption = [title, variable, choices, group, default]
     if self.options.has_key(group):
       self.options[group][2].append(newOption)
       self.keyDefault[variable] = default
@@ -221,7 +224,7 @@ class Options(ranaModule):
   def addRawOption(self, optionData):
     """add a raw option to options
     NOTE: the options contains its group ID"""
-    (title,variable, choices,group,default) = optionData
+    (title, variable, choices, group, default) = optionData
     """ as some options have have side effects when they are created,
     we need to check option the type and replicate those effect as needed"""
     type = choices['type']
@@ -232,7 +235,7 @@ class Options(ranaModule):
       else:
         fakeMode = None
       items = choices['items']
-      self.addItemsOption(title, variable, items, group, default, fakeMode = fakeMode)
+      self.addItemsOption(title, variable, items, group, default, fakeMode=fakeMode)
     else: # no side effects, just add the raw option
       if self.options.has_key(group):
         self.options[group][2].append(optionData)
@@ -246,12 +249,12 @@ class Options(ranaModule):
     group = self._getGroupId(categoryId, groupId)
 
     if self.options.has_key(group):
-      remove = lambda x:x[1]==variable
+      remove = lambda x: x[1] == variable
       self.options[group][2][:] = [x for x in self.options[group][2] if not remove(x)]
       if variable in self.keyDefault:
         del self.keyDefault[variable]
     else:
-      print "options: group %s does not exist, so option with variable %s can not be removed" % (group,variable)
+      print "options: group %s does not exist, so option with variable %s can not be removed" % (group, variable)
 
   def getOption(self, groupID, index):
     """get a options item from a given group by its index"""
@@ -300,7 +303,7 @@ class Options(ranaModule):
     layerNameKey = []
     for key in layers.keys():
       name = layers[key]['label']
-      layerNameKey.append( (key, name) )
+      layerNameKey.append((key, name))
     layerNameKey.sort()
     layerNameKey.append((None, "Empty layer"))
     addItems("Main map", "layer", layerNameKey, group, "mapnik")
@@ -313,12 +316,12 @@ class Options(ranaModule):
     addItems("Background map", "layer2", layerNameKey, group, "cycle")
 
     addOpt("Transparency ratio", "transpRatio",
-            [("0.25,1","overlay:25%"),
-            ("0.5,1","overlay:50%"),
-            ("0.75,1","overlay:75%"),
-            ("1,1","overlay:100%")],
-             group,
-             "0.5,1")
+      [("0.25,1", "overlay:25%"),
+        ("0.5,1", "overlay:50%"),
+        ("0.75,1", "overlay:75%"),
+        ("1,1", "overlay:100%")],
+      group,
+      "0.5,1")
 
     # ** Rotation
     group = addGroup("Rotation", "map_rotation", catMap, "generic")
@@ -327,42 +330,42 @@ class Options(ranaModule):
     # ** Scaling
     group = addGroup("Scaling", "map_scaling", catMap, "generic")
     addOpt("Map scale", "mapScale",
-                 [(1,"1X"),
-                  (2,"2X"),
-                  (4,"4X")],
-                   group,
-                   1)
+      [(1, "1X"),
+        (2, "2X"),
+        (4, "4X")],
+      group,
+      1)
 
     # ** centering
     group = addGroup("Centering", "centering", catMap, "generic")
     addBoolOpt("Centre map", "centred", group, True)
 
     addOpt("Centering shift", "posShiftDirection",
-      [("down","shift down"),
-       ("up","shift up"),
-       ("left","shift left"),
-       ("right","shift right"),
-       (False,"don't shift")],
-       group,
-       "down")
+      [("down", "shift down"),
+        ("up", "shift up"),
+        ("left", "shift left"),
+        ("right", "shift right"),
+        (False, "don't shift")],
+      group,
+      "down")
 
     addOpt("Centering shift amount", "posShiftAmount",
-      [(0.25,"25%"),
-       (0.5,"50%"),
-       (0.75,"75%"),
-       (1.0,"edge of the screen")],
-       group,
-       0.75)
+      [(0.25, "25%"),
+        (0.5, "50%"),
+        (0.75, "75%"),
+        (1.0, "edge of the screen")],
+      group,
+      0.75)
 
     changedMsg = "mapView:centeringDisableThresholdChanged"
     addOpt("Disable by dragging", "centeringDisableThreshold",
-      [(2048,"normal drag - <i>default</i>",changedMsg),
-       (15000,"long drag",changedMsg),
-       (40000,"really long drag",changedMsg),
-       (80000,"extremely long drag",changedMsg),
-       (False,self.off,changedMsg)],
-       group,
-       2048)
+      [(2048, "normal drag - <i>default</i>", changedMsg),
+        (15000, "long drag", changedMsg),
+        (40000, "really long drag", changedMsg),
+        (80000, "extremely long drag", changedMsg),
+        (False, self.off, changedMsg)],
+      group,
+      2048)
 
     # ** dragging
     group = addGroup("Dragging", "dragging", catMap, "generic")
@@ -373,18 +376,18 @@ class Options(ranaModule):
       defaultMode = "default"
 
     addOpt("Map dragging", "mapDraggingMode",
-      [("default","full redraw - <i>default</i>","mapView:dragModeChanged"),
-       ("staticMapDrag","drag visible map - <i>fastest</i>", "mapView:dragModeChanged")],
-       group,
-       defaultMode)
+      [("default", "full redraw - <i>default</i>", "mapView:dragModeChanged"),
+        ("staticMapDrag", "drag visible map - <i>fastest</i>", "mapView:dragModeChanged")],
+      group,
+      defaultMode)
 
     # ** tile storage
     group = addGroup("Tile storage", "tile_storage", catMap, "generic")
     addOpt("Tile storage", "tileStorageType",
-                 [('files',"files (default, more space used)"),
-                  ('sqlite',"sqlite (new, less space used)")],
-                   group,
-                   'files')
+      [('files', "files (default, more space used)"),
+        ('sqlite', "sqlite (new, less space used)")],
+      group,
+      'files')
     addBoolOpt("Store downloaded tiles", "storeDownloadedTiles", group, True)
 
     # * the view category *
@@ -393,22 +396,22 @@ class Options(ranaModule):
     # ** GUI
     group = addGroup("GUI", "gui", catView, "generic")
     addOpt("Hide main buttons", "hideDelay",
-                 [("never","never hide buttons"),
-                  ("5","hide buttons after 5 seconds"),
-                  ("10","hide buttons after 10 seconds"),
-                  ("15","hide buttons after 15 seconds"),
-                  ("30","hide buttons after 30 seconds"),
-                  ("60","hide buttons after 1 minute"),
-                  ("120", "hide buttons after 2 minutes")],
-                   group,
-                   "10")
+      [("never", "never hide buttons"),
+        ("5", "hide buttons after 5 seconds"),
+        ("10", "hide buttons after 10 seconds"),
+        ("15", "hide buttons after 15 seconds"),
+        ("30", "hide buttons after 30 seconds"),
+        ("60", "hide buttons after 1 minute"),
+        ("120", "hide buttons after 2 minutes")],
+      group,
+      "10")
 
     addOpt("GUI Rotation", "rotationMode",
-                 [("auto","automatic","device:modeChanged"),
-                  ("landscape","landscape","device:modeChanged"),
-                  ("portrait","portrait","device:modeChanged")],
-                   group,
-                   "auto")
+      [("auto", "automatic", "device:modeChanged"),
+        ("landscape", "landscape", "device:modeChanged"),
+        ("portrait", "portrait", "device:modeChanged")],
+      group,
+      "auto")
 
 
     # ** screen
@@ -418,15 +421,16 @@ class Options(ranaModule):
       if display.screenBlankingControlSupported():
         group = addGroup("Screen", "screen", catView, "generic")
         addOpt("Keep display ON", "screenBlankingMode",
-        [("always", "always", "display:blankingModeChanged"),
-         ("centred", "while centred", "display:blankingModeChanged"),
-         ("moving", "while moving", "display:blankingModeChanged"),
-         ("movingInFullscreen", "while moving in fullscreen", "display:blankingModeChanged"),
-         ("fullscreen", "while in fullscreen", "display:blankingModeChanged"),
-         ("gpsFix", "while there is a GPS fix", "display:blankingModeChanged"), #TODO: while there is actually a GPS lock
-         ("never", "never", "display:blankingModeChanged")],
-         group,
-         "always")
+          [("always", "always", "display:blankingModeChanged"),
+            ("centred", "while centred", "display:blankingModeChanged"),
+            ("moving", "while moving", "display:blankingModeChanged"),
+            ("movingInFullscreen", "while moving in fullscreen", "display:blankingModeChanged"),
+            ("fullscreen", "while in fullscreen", "display:blankingModeChanged"),
+            ("gpsFix", "while there is a GPS fix", "display:blankingModeChanged"),
+            #TODO: while there is actually a GPS lock
+            ("never", "never", "display:blankingModeChanged")],
+          group,
+          "always")
       if display.usesDashboard():
         addBoolOpt("Redraw when on dashboard", "redrawOnDashboard", group, False)
 
@@ -443,39 +447,38 @@ class Options(ranaModule):
             self.set('currentTheme', defaultTheme) # theme not valid, reset to default
 
         themeChangedMessage = "icons:themeChanged"
-        nameValueList = map(lambda x: (x,x,themeChangedMessage), themeList)
-        
+        nameValueList = map(lambda x: (x, x, themeChangedMessage), themeList)
+
         addOpt("Current theme", "currentTheme",
-        nameValueList,
-         group,
-         defaultTheme)
+          nameValueList,
+          group,
+          defaultTheme)
 
 
     # ** units
     group = addGroup("formats#Units and", "units", catView, "generic")
     addOpt("Units", "unitType",
-                 [("km","use kilometers"),
-                  ("mile", "use miles")],
-                   group,
-                   "km")
+      [("km", "use kilometers"),
+        ("mile", "use miles")],
+      group,
+      "km")
 
     addOpt("Time format", "currentTimeFormat",
-                 [("24h","24 hours"),
-                  ("12h", "12 hours")],
-                   group,
-                   "24h")
+      [("24h", "24 hours"),
+        ("12h", "12 hours")],
+      group,
+      "24h")
 
     # ** menus
     group = addGroup("Menus", "menus", catView, "generic")
     addOpt("Listable menu rows", "listableMenuRows",
-                 [(2,"2 rows"),
-                  (3,"3 rows"),
-                  (4,"4 rows"),
-                  (5,"5 rows"),
-                  (6,"6 rows")],
-                   group,
-                   4)
-
+      [(2, "2 rows"),
+        (3, "3 rows"),
+        (4, "4 rows"),
+        (5, "5 rows"),
+        (6, "6 rows")],
+      group,
+      4)
 
     if self.dmod.hasButtons():
       # TODO: change this once there are more options for key shortcuts
@@ -494,7 +497,7 @@ class Options(ranaModule):
     group = addGroup("Language", "tbt_language", catNavigation, "generic")
 
     # in the first string: first one goes to espeak, the second part goes to Google
-    directionsLanguages =[('ca ca', 'Catalan'),
+    directionsLanguages = [('ca ca', 'Catalan'),
       ('zh-yue zh-TW', 'Chinese(Cantonese)'),
       ('zh zh-CN', 'Chinese(Mandarin)'),
       ('hr hr', 'Croatian'),
@@ -529,8 +532,8 @@ class Options(ranaModule):
       "en en") # TODO: use locale for default language ?
 
     addOpt("read Cyrillic with", "voiceNavigationCyrillicVoice",
-      [('ru',"Russian voice"),
-        (False,"current voice")],
+      [('ru', "Russian voice"),
+        (False, "current voice")],
       group,
       'ru')
 
@@ -538,8 +541,8 @@ class Options(ranaModule):
     group = addGroup("Routing", "routing", catNavigation, "generic")
 
     addOpt("Routing provider", "routingProvider",
-      [("GoogleDirections","Google - <b>online</b>"),
-        ("Monav","Monav - <b>on device</b>")],
+      [("GoogleDirections", "Google - <b>online</b>"),
+        ("Monav", "Monav - <b>on device</b>")],
       group,
       "GoogleDirections")
 
@@ -562,109 +565,109 @@ class Options(ranaModule):
     group = addGroup("Turn by turn", "turn_by_turn", catNavigation, "generic")
 
     addOpt("Autostart navigation", "autostartNavigationDefaultOnAutoselectTurn",
-      [('disabled',"OFF"),
-       ('enabled',"ON")],
-       group,
-       'enabled')
+      [('disabled', "OFF"),
+        ('enabled', "ON")],
+      group,
+      'enabled')
 
     addOpt("Make final turn announcement at", "pointReachedDistance",
-      [(10,"10 m"),
-       (20,"20 m"),
-       (30,"30 m"),
-       (60,"60 m"),
-       (100,"100 m"),
-       (200,"200 m"),
-       (300,"300 m"),
-       (400,"400 m"),
-       (500,"500 m")],
-       group,
-       30)
+      [(10, "10 m"),
+        (20, "20 m"),
+        (30, "30 m"),
+        (60, "60 m"),
+        (100, "100 m"),
+        (200, "200 m"),
+        (300, "300 m"),
+        (400, "400 m"),
+        (500, "500 m")],
+      group,
+      30)
 
     addOpt("Announce turns at least this far ahead", "minAnnounceDistance",
-      [(10,"10 m"),
-       (20,"20 m"),
-       (30,"30 m"),
-       (60,"60 m"),
-       (100,"100 m"),
-       (200,"200 m"),
-       (300,"300 m"),
-       (500,"500 m")],
-       group,
-       100)
+      [(10, "10 m"),
+        (20, "20 m"),
+        (30, "30 m"),
+        (60, "60 m"),
+        (100, "100 m"),
+        (200, "200 m"),
+        (300, "300 m"),
+        (500, "500 m")],
+      group,
+      100)
 
     addOpt("Announce turns at least this long ahead", "minAnnounceTime",
-      [(5,"5 s"),
-       (10,"10 s"),
-       (20,"20 s"),
-       (30,"30 s"),
-       (45,"45 s"),
-       (60,"60 s"),
-       (90,"90 s")],
-       group,
-       10)
+      [(5, "5 s"),
+        (10, "10 s"),
+        (20, "20 s"),
+        (30, "30 s"),
+        (45, "45 s"),
+        (60, "60 s"),
+        (90, "90 s")],
+      group,
+      10)
 
     # Note: actual values are in m/s, accurate to 2 decimal places.  We
     # store them as strings so lookup will work reliably.
     addOpt("Increase turn announcement time above", "minAnnounceSpeed",
-      [("5.56","20 km/h (12 mph)"),
-       ("8.33","30 km/h (20 mph)"),
-       ("11.11","40 km/h (25 mph)"),
-       ("13.89","50 km/h (30 mph)"),
-       ("22.22","80 km/h (50 mph)"),
-       ("27.78","100 km/h (60 mph)")],
-       group,
-       "13.89")
+      [("5.56", "20 km/h (12 mph)"),
+        ("8.33", "30 km/h (20 mph)"),
+        ("11.11", "40 km/h (25 mph)"),
+        ("13.89", "50 km/h (30 mph)"),
+        ("22.22", "80 km/h (50 mph)"),
+        ("27.78", "100 km/h (60 mph)")],
+      group,
+      "13.89")
 
     # Note: actual values are in m/s, accurate to 2 decimal places.  We
     # store them as strings so lookup will work reliably.
     addOpt("Constant turn announcement time above", "maxAnnounceSpeed",
-      [("13.89","50 km/h (30 mph)"),
-       ("22.22","80 km/h (50 mph)"),
-       ("27.78","100 km/h (60 mph)"),
-       ("33.33","120 km/h (75 mph)"),
-       ("44.44","160 km/h (100 mph)")],
-       group,
-       "27.78")
+      [("13.89", "50 km/h (30 mph)"),
+        ("22.22", "80 km/h (50 mph)"),
+        ("27.78", "100 km/h (60 mph)"),
+        ("33.33", "120 km/h (75 mph)"),
+        ("44.44", "160 km/h (100 mph)")],
+      group,
+      "27.78")
 
     addOpt("Maximum turn announcement time", "maxAnnounceTime",
-      [(20,"20 s"),
-       (30,"30 s"),
-       (45,"45 s"),
-       (60,"60 s"),
-       (90,"90 s"),
-       (120,"120 s")],
-       group,
-       60)
+      [(20, "20 s"),
+        (30, "30 s"),
+        (45, "45 s"),
+        (60, "60 s"),
+        (90, "90 s"),
+        (120, "120 s")],
+      group,
+      60)
 
     # Note: these are exponents, stored as strings so lookup will work reliably.
     addOpt("Announcement time increase type", "announcePower",
-      [("1.0","Linear with speed"),
-       ("0.5","Very quickly, then linear"),
-       ("0.75","Quickly, then linear"),
-       ("1.5","Slowly, then linear"),
-       ("2.0","Quite slowly, then linear"),
-       ("4.0","Very slowly, then quite fast")],
-       group,
-       "2.0")
+      [("1.0", "Linear with speed"),
+        ("0.5", "Very quickly, then linear"),
+        ("0.75", "Quickly, then linear"),
+        ("1.5", "Slowly, then linear"),
+        ("2.0", "Quite slowly, then linear"),
+        ("4.0", "Very slowly, then quite fast")],
+      group,
+      "2.0")
 
     # ** rerouting submenu
     group = addGroup("Rerouting", "rerouting", catNavigation, "generic")
     addItems("Rerouting trigger distance", "reroutingThreshold",
-      [(None,"<b>disabled</b>"),
-       ("10","10 m"),
-       ("20","20 m"),
-       ("30","30 m (default)"),
-       ("40","40 m"),
-       ("50","50 m"),
-       ("75","75 m"),
-       ("100","100 m"),
-       ("200","200 m"),
-       ("500","500 m"),
-       ("1000","1000 m")],
+      [(None, "<b>disabled</b>"),
+        ("10", "10 m"),
+        ("20", "20 m"),
+        ("30", "30 m (default)"),
+        ("40", "40 m"),
+        ("50", "50 m"),
+        ("75", "75 m"),
+        ("100", "100 m"),
+        ("200", "200 m"),
+        ("500", "500 m"),
+        ("1000", "1000 m")],
       group,
       "30")
-      # for some reason, the items menu doesn't work correctly for
-      # non-string values (eq. 10 won't work correctly but "10" would
+    # for some reason, the items menu doesn't work correctly for
+    # non-string values (eq. 10 won't work correctly but "10" would
 
     # * the POI category
     catPOI = addCat("POI", "poi", "poi")
@@ -673,18 +676,18 @@ class Options(ranaModule):
     group = addGroup("Markers", "poi_markers", catPOI, "generic")
     addOpt("Show captions", "hideMarkerCaptionsBelowZl",
       [(-1, "always"),
-       (5, "below zoomlevel 5"),
-       (7, "below zoomlevel 7"),
-       (10, "below zoomlevel 10"),
-       (11, "below zoomlevel 11"),
-       (12, "below zoomlevel 12"),
-       (13, "below zoomlevel 13"),
-       (14, "below zoomlevel 14"),
-       (15, "below zoomlevel 15"),
-       (16, "below zoomlevel 16"),
-       (17, "below zoomlevel 17"),
-       (18, "below zoomlevel 18"),
-       (65535, "never"),
+        (5, "below zoomlevel 5"),
+        (7, "below zoomlevel 7"),
+        (10, "below zoomlevel 10"),
+        (11, "below zoomlevel 11"),
+        (12, "below zoomlevel 12"),
+        (13, "below zoomlevel 13"),
+        (14, "below zoomlevel 14"),
+        (15, "below zoomlevel 15"),
+        (16, "below zoomlevel 16"),
+        (17, "below zoomlevel 17"),
+        (18, "below zoomlevel 18"),
+        (65535, "never"),
       ],
       group,
       13)
@@ -692,41 +695,40 @@ class Options(ranaModule):
     # ** POI storage
     group = addGroup("POI storage", "poi_storage", catPOI, "generic")
     addOpt("POI database", "POIDBFilename",
-      [("poi.db","shared with Mappero (EXPERIMENTAL)","storePOI:reconnectToDb"),
-       ("modrana_poi.db","modRana only (default)", "storePOI:reconnectToDb")],
-       group,
-       "modrana_poi.db")
+      [("poi.db", "shared with Mappero (EXPERIMENTAL)", "storePOI:reconnectToDb"),
+        ("modrana_poi.db", "modRana only (default)", "storePOI:reconnectToDb")],
+      group,
+      "modrana_poi.db")
 
     """ExportPOIDatabaseToCSV is just a dummy value,
        we just need to send a dump message to storePOI"""
     addOpt("Export POI Database to CSV", "EportPOIDatabaseToCSV",
-      [("dump","click to export","storePOI:dumpToCSV"),
-       ("dump","click to export","storePOI:dumpToCSV")],
-       group,
-       "dump")
+      [("dump", "click to export", "storePOI:dumpToCSV"),
+        ("dump", "click to export", "storePOI:dumpToCSV")],
+      group,
+      "dump")
 
     # ** online POI search
     group = addGroup("Online search", "poi_online", catPOI, "generic")
     addOpt("Google local search ordering", "GLSOrdering",
-      [("default","ordering from Google"),
-       ("distance", "order by distance")
+      [("default", "ordering from Google"),
+        ("distance", "order by distance")
       ],
-       group,
-       "default")
+      group,
+      "default")
 
     addOpt("Google local search results", "GLSResults",
-      [("8","max 8 results"),
-       ("16", "max 16 results"),
-       ("32", "max 32 results")],
-       group,
-       "8")
-
+      [("8", "max 8 results"),
+        ("16", "max 16 results"),
+        ("32", "max 32 results")],
+      group,
+      "8")
 
     addOpt("Google local search captions", "drawGLSResultCaptions",
-      [("True","draw captions"),
-       ("False", "dont draw captions")],
-       group,
-       "True")
+      [("True", "draw captions"),
+        ("False", "dont draw captions")],
+      group,
+      "True")
 
     # * the Location category *
     catLocation = addCat("Location", "location", "gps_satellite")
@@ -740,32 +742,32 @@ class Options(ranaModule):
       if self.device == 'neo':
         knots = "knots per second (old SHR)"
         meters = "meters per second (new SHR)"
-      addOpt("GPSD reports speed in","gpsdSpeedUnit",
-      [('knotsPerSecond', knots),
-       ('metersPerSecond', meters)],
-       group,
-       'knotsPerSecond')
+      addOpt("GPSD reports speed in", "gpsdSpeedUnit",
+        [('knotsPerSecond', knots),
+          ('metersPerSecond', meters)],
+        group,
+        'knotsPerSecond')
 
     # * the Network category *
     catNetwork = addCat("Network", "network", "network")
     # * network *
     group = addGroup("Network usage", "network_usage", catNetwork, "generic")
     addOpt("Network", "network",
-#      [("off","No use of network"), #TODO: implement this :)
+      #      [("off","No use of network"), #TODO: implement this :)
       [("minimal", "Don't Download Map Tiles"),
-       ("full", "Unlimited use of network")],
-       group,
-       "full")
+        ("full", "Unlimited use of network")],
+      group,
+      "full")
 
-    addOpt("Max nr. of threads for tile auto-download","maxAutoDownloadThreads2",
+    addOpt("Max nr. of threads for tile auto-download", "maxAutoDownloadThreads2",
       [(5, "5"),
-       (10, "10 (default)"),
-       (20, "20"),
-       (30, "30"),
-       (40, "40"),
-       (50, "50")],
-       group,
-       10)
+        (10, "10 (default)"),
+        (20, "20"),
+        (30, "30"),
+        (40, "40"),
+        (50, "50")],
+      group,
+      10)
 
     # * the Sound category *
     catSound = addCat("Sound", "sound", "sound")
@@ -777,53 +779,51 @@ class Options(ranaModule):
     # * espeak group
     group = addGroup("Voice", "voice_out", catSound, "espeak")
 
-    addOpt("Test voice output","voiceTest",
-      [("test", "<b>press to start test</b>","voice:voiceTest"),
-       ("test", "<b>press to start test</b>", "voice:voiceTest")],
-       group,
-       "test")
+    addOpt("Test voice output", "voiceTest",
+      [("test", "<b>press to start test</b>", "voice:voiceTest"),
+        ("test", "<b>press to start test</b>", "voice:voiceTest")],
+      group,
+      "test")
 
-    addOpt("Voice parameters","voiceParameters",
-      [("auto", "<b>automatic</b>","ms:options:espeakParams:auto"),
-       ("manual", "<b>manual</b>", "ms:options:espeakParams:manual")],
-       group,
-       "auto")
-
-
+    addOpt("Voice parameters", "voiceParameters",
+      [("auto", "<b>automatic</b>", "ms:options:espeakParams:auto"),
+        ("manual", "<b>manual</b>", "ms:options:espeakParams:manual")],
+      group,
+      "auto")
 
     if self.get('voiceParameters', None) == "manual":
       self._updateVoiceManual('add')
 
     # *** special group for a list per mode item states ***
     self.keyStateListGroupID = addGroup("specialTools", 'specialGroup', 'specialParent',
-    "generic", registerToMenu=False, backButtonAction="set:menu:optionsItemTools")    
+      "generic", registerToMenu=False, backButtonAction="set:menu:optionsItemTools")
 
-#    addOpt("Network", "threadedDownload",
-##      [("off","No use of network"),
-#      [("True", "Use threads for download"),
-#       ("False", "Don't use threads for download")],
-#       "network",
-#       "on")
+    #    addOpt("Network", "threadedDownload",
+    ##      [("off","No use of network"),
+    #      [("True", "Use threads for download"),
+    #       ("False", "Don't use threads for download")],
+    #       "network",
+    #       "on")
 
-#    addBoolOpt("Logging", "logging", "logging", True)
-#    options = []
-#    for i in (1,2,5,10,20,40,60):
-#      options.append((i, "%d sec" % i))
-#    addOpt("Frequency", "log_period", options, "logging", 2)
+    #    addBoolOpt("Logging", "logging", "logging", True)
+    #    options = []
+    #    for i in (1,2,5,10,20,40,60):
+    #      options.append((i, "%d sec" % i))
+    #    addOpt("Frequency", "log_period", options, "logging", 2)
 
-#    addBoolOpt("Vector maps", "vmap", "map", True)
-
-
-#             [("0.5,0.5","over:50%,back:50%"),
-#              ("0.25,0.75","over:25%,back:75%"),
-#              ("0.75,0.25","over:75%,back:50%")],
-#               "map",
-#               "0.5,0.5")
+    #    addBoolOpt("Vector maps", "vmap", "map", True)
 
 
+    #             [("0.5,0.5","over:50%,back:50%"),
+    #              ("0.25,0.75","over:25%,back:75%"),
+    #              ("0.75,0.25","over:75%,back:50%")],
+    #               "map",
+    #               "0.5,0.5")
 
-#    addBoolOpt("Old tracklogs", "old_tracklogs", "map", False)
-#    addBoolOpt("Latest tracklog", "tracklog", "map", True)
+
+
+    #    addBoolOpt("Old tracklogs", "old_tracklogs", "map", False)
+    #    addBoolOpt("Latest tracklog", "tracklog", "map", True)
 
     # * the Debug category
     catDebug = addCat("Debug", "debug", "debug")
@@ -858,18 +858,18 @@ class Options(ranaModule):
 
 
 
-#    addOpt("Tracklogs", "showTracklog",
-#    [(False, "Don't draw tracklogs"),
-#     ("simple", "Draw simple tracklogs")],
-#     "view",
-#     False)
+    #    addOpt("Tracklogs", "showTracklog",
+    #    [(False, "Don't draw tracklogs"),
+    #     ("simple", "Draw simple tracklogs")],
+    #     "view",
+    #     False)
     self._setUndefinedToDefault()
 
   def _setUndefinedToDefault(self):
     # Set all undefined options to default values
-    for category,options in self.options.items():
+    for category, options in self.options.items():
       for option in options[2]:
-        (title,variable,choices,category,default) = option
+        (title, variable, choices, category, default) = option
         if default is not None:
           if not self.d.has_key(variable):
             self.set(variable, default)
@@ -882,7 +882,9 @@ class Options(ranaModule):
     try:
       return dict((k, v) for k, v in inputDict.iteritems() if k[0] != '#')
     except Exception, e:
-      print('options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n', e)
+      print(
+      'options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n'
+      , e)
       return self.d
 
   def _reloadKeyStateList(self, groupID, index, key):
@@ -896,7 +898,6 @@ class Options(ranaModule):
 
     # get data for the given option
     optionData = self.getOption(groupID, index)
-
 
     # modify the option
     for mode in modes:
@@ -912,10 +913,10 @@ class Options(ranaModule):
       self.addRawOption(optionD)
 
   def handleMessage(self, message, type, args):
-    if type=="ml" and message=="scroll":
-      (direction,menuName) = args
+    if type == "ml" and message == "scroll":
+      (direction, menuName) = args
       index = self.options[menuName][1]
-      maxIndex = len(self.options[menuName][2])-1
+      maxIndex = len(self.options[menuName][2]) - 1
       if direction == "up" and index > 0:
         newIndex = index - 1
         self.options[menuName][1] = newIndex
@@ -932,13 +933,13 @@ class Options(ranaModule):
       menus = self.m.get('menu', None)
       if menus:
         menuName = 'optionsItemTools'
-        reset='ms:options:resetKey:%s' % key
+        reset = 'ms:options:resetKey:%s' % key
         notify = "ml:notification:m:Item has been reset to default;3"
         resetAction = "%s|%s|set:menu:options#%s" % (reset, notify, groupID)
         menus.clearMenu(menuName, 'set:menu:options#%s' % groupID)
         menus.addItem(menuName, 'state list#per mode', 'generic',
-                      'ml:options:go2ItemStateListMenu:%s;%d;%s' % (groupID, index, key)
-                      )
+          'ml:options:go2ItemStateListMenu:%s;%d;%s' % (groupID, index, key)
+        )
         menus.addItem(menuName, 'default#reset to', 'generic', resetAction)
         self.set('menu', menuName)
     elif type == 'ml' and message == "go2ItemStateListMenu":
@@ -955,7 +956,7 @@ class Options(ranaModule):
       self.modrana.purgeKey(key)
       default = self.getKeyDefault(key)
       self.set(key, default)
-      
+
     elif type == 'ml' and message == 'addKeyModifier':
       """make the value of a key mode specific"""
       (key, mode) = args
@@ -965,7 +966,7 @@ class Options(ranaModule):
       """make the value of a key mode unspecific"""
       self.modrana.removeKeyModifier(key, mode=mode)
 
-    elif type=="ms" and message == "espeakParams":
+    elif type == "ms" and message == "espeakParams":
       # switch between espeak parameter modes
       if args == "manual":
         self._updateVoiceManual("remove")
@@ -978,7 +979,7 @@ class Options(ranaModule):
       entry = self.m.get('textEntry', None)
       if entry:
         key = "editVariable_%s" % variable
-        entry.entryBox(self,key, label, initialText, description)
+        entry.entryBox(self, key, label, initialText, description)
 
     #messages to toggles a key to be mode un/specific
     #Mode specific keys:
@@ -1002,8 +1003,7 @@ class Options(ranaModule):
     if route:
       print('options: reloading Monav data pack list')
       # wee need a list of (name, key) tuples
-      self.monavPackList = map(lambda x:(x, x), route.getAvailableMonavDataPacks())
-
+      self.monavPackList = map(lambda x: (x, x), route.getAvailableMonavDataPacks())
 
 
   def _updateVoiceManual(self, action):
@@ -1011,15 +1011,15 @@ class Options(ranaModule):
 
     if action == "add":
       groupId = self._getGroupId("sound", "voice_out")
-      description="<b>Note:</b> <tt>%language%</tt> will be replaced by current language code, <tt>%message%</tt> will be replaced by the message and <tt>%qmessage%</tt> will be replaced by the message in quotes"
+      description = "<b>Note:</b> <tt>%language%</tt> will be replaced by current language code, <tt>%message%</tt> will be replaced by the message and <tt>%qmessage%</tt> will be replaced by the message in quotes"
 
       self.addEditOption("Edit voice string", "voiceString", groupId, "Edit voice string", description=description)
 
       message = "ms:voice:resetStringToDefault:espeak"
       self.addToggleOption("Reset voice string with <b>Espeak</b> default", "placeholder",
-      [("foo","<i>click to use this default</i>",message)],
-       groupId,
-       "foo")
+        [("foo", "<i>click to use this default</i>", message)],
+        groupId,
+        "foo")
 
     elif action == "remove":
       self.removeOption("sound", "voice_out", "voiceString")
@@ -1029,43 +1029,46 @@ class Options(ranaModule):
     (type, variable) = key.split("_", 1)
     if type == "editVariable":
       print "editing variable: %s with: %s" % (variable, result)
-      self.set(variable,result)
+      self.set(variable, result)
 
   def drawMenu(self, cr, menuName, args=None):
     # custom options list drawing
     clickHandler = self.m.get('clickHandler', None)
     if self.menuModule and clickHandler:
       # elements allocation
-      (e1,e2,e3,e4,alloc) = self.menuModule.threePlusOneMenuCoords()
-      (x1,y1) = e1
-      (x2,y2) = e2
-      (x3,y3) = e3
-      (x4,y4) = e4
-      (w1,h1,dx,dy) = alloc
+      (e1, e2, e3, e4, alloc) = self.menuModule.threePlusOneMenuCoords()
+      (x1, y1) = e1
+      (x2, y2) = e2
+      (x3, y3) = e3
+      (x4, y4) = e4
+      (w1, h1, dx, dy) = alloc
 
       (cancelButtonAction, firstItemIndex, options) = self.options[menuName]
 
       # Top row:
       # * parent menu
       timeout = self.modrana.gui.msLongPress
-      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "back", cancelButtonAction, timedAction=(timeout,"set:menu:None"))
+      self.menuModule.drawButton(cr, x1, y1, dx, dy, "", "back", cancelButtonAction,
+        timedAction=(timeout, "set:menu:None"))
       # * scroll up
       self.menuModule.drawButton(cr, x2, y2, dx, dy, "", "up_list", "ml:options:scroll:up;%s" % menuName)
       # * scroll down
       self.menuModule.drawButton(cr, x3, y3, dx, dy, "", "down_list", "ml:options:scroll:down;%s" % menuName)
 
       # One option per row
-      for row in (0,1,2):
+      for row in (0, 1, 2):
         index = firstItemIndex + row
         numItems = len(options)
         cAction = None
         if 0 <= index < numItems:
-          (title,variable,choices,group,default) = options[index]
+          (title, variable, choices, group, default) = options[index]
           # What's it set to currently?
           if 'mode' in choices:
             mode = choices['mode']
+            fakeMode = mode
           else:
             mode = self.get('mode', 'car')
+            fakeMode = None
           value = self.get(variable, None, mode=mode)
 
           """ if the key has a modifier in this mode,
@@ -1076,16 +1079,16 @@ class Options(ranaModule):
             if self.get('mode', 'car') == choices['mode']:
               # current mode
               title = "%s: <small><sup><b>[%s]</b></sup></small>" % (
-              title, self.modrana.getModeLabel(mode))
+                title, self.modrana.getModeLabel(mode))
             else:
               title = "%s: <small><sup>[%s]</sup></small>" % (
-              title, self.modrana.getModeLabel(mode))
+                title, self.modrana.getModeLabel(mode))
 
           else:
             # normal option display
             if self.modrana.hasKeyModifierInMode(variable, mode):
               title = "%s: <small><sup><b>[%s]</b></sup></small>" % (
-              title, self.modrana.getModeLabel(mode))
+                title, self.modrana.getModeLabel(mode))
             else:
               title = "%s:" % title
 
@@ -1112,7 +1115,7 @@ class Options(ranaModule):
             default = choices['default']
             value = self.get(variable, default, mode=mode)
             # show label for the given value
-            valueDescription, highlightId = choices['itemDict'].get(value, (value,None))
+            valueDescription, highlightId = choices['itemDict'].get(value, (value, None))
             """if no description is found, just display the value"""
             valueDescription = "<tt><b>%s</b></tt>" % valueDescription
 
@@ -1121,16 +1124,20 @@ class Options(ranaModule):
             # menu is entered, eq updating data, etc.)
             pre = choices.get('preAction', "")
             if pre:
-              preAction+="%s|" % pre
+              preAction += "%s|" % pre
 
             #assure highlighting
             if highlightId is not None:
               # add an action before switching to the next menu that
               # assures that items in the next menu are properly highlighted
               # according to the state of the corresponding variable
-              preAction+= "ml:menu:highlightItem:%s;%d|" % (choices['storageKey'], highlightId)
+              preAction += "ml:menu:highlightItem:%s;%d|" % (choices['storageKey'], highlightId)
 
-            onClick = "%sset:menu:options1Item*%s*%s*%s" % (preAction, group, variable, mode)
+            if fakeMode is None:
+              onClick = "%sset:menu:options1Item*%s*%s" % (preAction, group, variable)
+            else:
+              onClick = "%sset:menu:options1Item*%s*%s*%s" % (preAction, group, variable, fakeMode)
+              # the fake mode is used for listing and setting options for other mode than the current one
 
           elif optionType == 'toggle':
             states = choices['states']
@@ -1138,7 +1145,7 @@ class Options(ranaModule):
             valueDescription = str(value)
             useNext = False
             for c in states:
-              (cVal, cName) = (c[0],c[1])
+              (cVal, cName) = (c[0], c[1])
               if useNext:
                 nextChoice = c
                 useNext = False
@@ -1156,17 +1163,16 @@ class Options(ranaModule):
             onClick += "|options:save"
             onClick += "|set:needRedraw:1"
 
-
           y = y4 + row * dy
           if w1 > h1: # landscape
-            dx = (x4-x1)
+            dx = (x4 - x1)
             w = w1 - dx
           else: # portrait
             dx = (x2)
             w = w1
 
-          smallButtonW = dx/2.0
-          smallButtonH = dy/2.0
+          smallButtonW = dx / 2.0
+          smallButtonH = dy / 2.0
 
           # Draw the option button and make it clickable
           self.menuModule.drawButton(cr,
@@ -1178,8 +1184,8 @@ class Options(ranaModule):
             "generic", # background for a 3x1 icon
             "")
           # due to the button on the righ, register a slightly smaller area
-          clickHandler.registerXYWH(x4, y, w-smallButtonW, dy, onClick)
-            
+          clickHandler.registerXYWH(x4, y, w - smallButtonW, dy, onClick)
+
           # draw mode specific combined toggle & indicator
           if self.modrana.hasKeyModifierInMode(variable, mode):
             toggleText = '<span color="green">ON</span>#per Mode'
@@ -1189,7 +1195,7 @@ class Options(ranaModule):
             modeSpecToggleAction = "ml:options:addKeyModifier:%s;%s" % (variable, mode)
 
           self.menuModule.drawButton(cr,
-            x4+w-smallButtonW,
+            x4 + w - smallButtonW,
             y,
             smallButtonW,
             smallButtonH,
@@ -1201,27 +1207,26 @@ class Options(ranaModule):
           if 'noToolsIcon' not in choices:
             # draw tools button
             self.menuModule.drawButton(cr,
-              x4+w-smallButtonW,
-              y+smallButtonH,
+              x4 + w - smallButtonW,
+              y + smallButtonH,
               smallButtonW,
               smallButtonH,
               None,
               "tools", # tools icon
               "ml:options:go2ItemToolsMenu:%s;%d;%s" % (groupName, index, variable))
 
-
           border = 20
 
           # 1st line: option name
-          self.menuModule.showText(cr, title, x4+border, y+border, w*0.95 - smallButtonW - border)
+          self.menuModule.showText(cr, title, x4 + border, y + border, w * 0.95 - smallButtonW - border)
 
           # 2nd line: current value
-          self.menuModule.showText(cr, valueDescription, x4 + 0.15 * w, y + 0.6 * dy, w*0.85 - smallButtonW - border)
+          self.menuModule.showText(cr, valueDescription, x4 + 0.15 * w, y + 0.6 * dy, w * 0.85 - smallButtonW - border)
 
           # in corner: row number
-          indexX = x4+w*0.90-smallButtonW
-          self.menuModule.showText(cr, "%d/%d" % (index+1, numItems), indexX, y+dy*0.07, w * 0.10 - border, 20)
+          indexX = x4 + w * 0.90 - smallButtonW
+          self.menuModule.showText(cr, "%d/%d" % (index + 1, numItems), indexX, y + dy * 0.07, w * 0.10 - border, 20)
 
 if(__name__ == "__main__"):
-  a = options({},{'viewport':(0,0,600,800)})
+  a = options({}, {'viewport': (0, 0, 600, 800)})
   a.firstTime()
