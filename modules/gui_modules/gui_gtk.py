@@ -40,10 +40,12 @@ def simplePythagoreanDistance(x1, y1, x2, y2):
   """convenience PyThagorean distance :)"""
   dx = x2 - x1
   dy = y2 - y1
-  return math.sqrt(dx**2 + dy**2)
+  return math.sqrt(dx ** 2 + dy ** 2)
 
-def getModule(m,d,i):
-  return(GTKGUI(m,d,i))
+
+def getModule(m, d, i):
+  return(GTKGUI(m, d, i))
+
 
 class GTKGUI(GUIModule):
   """A GTK GUI module"""
@@ -58,7 +60,7 @@ class GTKGUI(GUIModule):
     self.fullscreen = False
 
     # map center shifting variables
-    self.centerShift = (0,0)
+    self.centerShift = (0, 0)
     self.expandViewportTiles = 0.0
 
     """
@@ -73,6 +75,7 @@ class GTKGUI(GUIModule):
     if self.modrana.dmod.getDeviceIDString() == 'n900':
       try:
         import hildon
+
         win = hildon.StackableWindow()
       except Exception, e:
         print("creating hildon stackable window failed")
@@ -87,8 +90,8 @@ class GTKGUI(GUIModule):
     self._registerCenteringShiftCallbacks()
 
     # resize it to preferred width x height
-    (w,h) = self.modrana.dmod.getWinWH()
-    self.resize(w,h)
+    (w, h) = self.modrana.dmod.getWinWH()
+    self.resize(w, h)
     self.modrana.addTime("window created")
     # set title
     self.setWindowTitle("modRana")
@@ -99,7 +102,7 @@ class GTKGUI(GUIModule):
     self.mw = MainWidget(self.modrana)
     self.mw.topWindow = win
     # make the main window accessible from modules
-    self.topWindow=win
+    self.topWindow = win
     self.modrana.addTime("map widget created")
 
     # Event handling
@@ -139,11 +142,12 @@ class GTKGUI(GUIModule):
         print(e)
         print("using the webbrowser module as fallback")
         import webbrowser
+
         webbrowser.open(url)
 
   def resize(self, w, h):
     """resize the GUI to given width and height"""
-    self.win.resize(w,h)
+    self.win.resize(w, h)
 
   def getWindow(self):
     """return the main window"""
@@ -280,28 +284,28 @@ class GTKGUI(GUIModule):
     # get the needed values
     # NOTE: some of them might have been updated just now
     (fallbackW, fallbackH) = self.modrana.dmod.getWinWH()
-    (sx,sy,sw,sh) = self.get('viewport',(0, 0, fallbackW, fallbackH))
+    (sx, sy, sw, sh) = self.get('viewport', (0, 0, fallbackW, fallbackH))
     shiftAmount = self.d.get('posShiftAmount', 0.75)
     shiftDirection = self.d.get('posShiftDirection', "down")
     scale = int(self.get('mapScale', 1))
 
-    x=0
-    y=0
+    x = 0
+    y = 0
     floatShiftAmount = float(shiftAmount)
     """this value might show up as string, so we convert it to float, just to be sure"""
 
     if shiftDirection:
       if shiftDirection == "down":
-        y =  sh * 0.5 * floatShiftAmount
+        y = sh * 0.5 * floatShiftAmount
       elif shiftDirection == "up":
-        y =  - sh * 0.5 * floatShiftAmount
+        y = - sh * 0.5 * floatShiftAmount
       elif shiftDirection == "left":
-        x =  - sw * 0.5 * floatShiftAmount
+        x = - sw * 0.5 * floatShiftAmount
       elif shiftDirection == "right":
-        x =  + sw * 0.5 * floatShiftAmount
+        x = + sw * 0.5 * floatShiftAmount
       """ we don't need to do anything if direction is set to don't shift (False)
       - 0,0 will be used """
-    self.centerShift = (x,y)
+    self.centerShift = (x, y)
 
     # update the viewport expansion variable
     tileSide = 256
@@ -309,21 +313,22 @@ class GTKGUI(GUIModule):
     if mapTiles: # check the mapTiles for tile side length in pixels, if available
       tileSide = mapTiles.tileSide
     tileSide *= scale# apply any possible scaling
-    (centerX,centerY) = ((sw/2.0),(sh/2.0))
+    (centerX, centerY) = ((sw / 2.0), (sh / 2.0))
     ulCenterDistance = simplePythagoreanDistance(0, 0, centerX, centerY)
     centerLLDistance = simplePythagoreanDistance(centerX, centerY, sw, sh)
     diagonal = max(ulCenterDistance, centerLLDistance)
-    add = int(math.ceil(float(diagonal)/tileSide))
+    add = int(math.ceil(float(diagonal) / tileSide))
     self.expandViewportTiles = add
 
 
 class MainWidget(gtk.Widget):
   __gsignals__ = {\
     'realize': 'override',
-    'expose-event' : 'override',
+    'expose-event': 'override',
     'size-allocate': 'override',
     'size-request': 'override',
     }
+
   def __init__(self, modrana):
     gtk.Widget.__init__(self)
     self.modrana = modrana
@@ -347,7 +352,7 @@ class MainWidget(gtk.Widget):
     self.timer1 = gobject.timeout_add(100, self.update, self) #default 100
     self.timer3 = None # will be used for timing long press events
 
-#    self.mapRotationAngle = 0 # in radians
+    #    self.mapRotationAngle = 0 # in radians
     self.notMovingSpeed = 1 # in m/s
 
     self.topWindow = None
@@ -359,7 +364,7 @@ class MainWidget(gtk.Widget):
     # alternative map drag variables
     self.altMapDragEnabled = False
     self.altMapDragInProgress = False
-    self.shift = (0,0,0,0)
+    self.shift = (0, 0, 0, 0)
 
     self.defaultMethodBindings() # use default map dragging method binding
 
@@ -427,14 +432,14 @@ class MainWidget(gtk.Widget):
 
     if self.redraw:
       try:
-        self.window.invalidate_rect((0,0,self.rect.width,self.rect.height),False)
+        self.window.invalidate_rect((0, 0, self.rect.width, self.rect.height), False)
       except Exception, e:
         print("error in screen invalidating function"
               "exception: %s" % e)
 
   def pressed(self, w, event):
     """Press-handler"""
-    self.lastPressEpoch=event.time
+    self.lastPressEpoch = event.time
     self.pressInProgress = True
 
     self.dragStartX = event.x
@@ -445,7 +450,7 @@ class MainWidget(gtk.Widget):
     self.dragY = event.y
 
     if not self.pressLengthTimer:
-      self.pressLengthTimer = gobject.timeout_add(50, self.checkStillPressed, event.time, time.time(), event.x,event.y)
+      self.pressLengthTimer = gobject.timeout_add(50, self.checkStillPressed, event.time, time.time(), event.x, event.y)
 
   def moved(self, w, event):
     """Drag-handler"""
@@ -482,7 +487,7 @@ class MainWidget(gtk.Widget):
     distSq = dx * dx + dy * dy
     # Adjust this to the length^2 of a gerfingerpoken on your touchscreen (1024 is for Freerunner, since it's very high resolution)
     if distSq < 1024:
-      self.click(event.x, event.y,msDuration)
+      self.click(event.x, event.y, msDuration)
 
   def checkStillPressed(self, pressStartEpoch, pressStartTime, startX, startY):
     """check if a press is still in progress and report:
@@ -496,7 +501,7 @@ class MainWidget(gtk.Widget):
     """just to be sure, time out after 60 seconds
     - provided the released signal is always called, this timeout might not be necessary,
     but better be safe, than eat the whole battery if the timer is not terminated"""
-    dt = (time.time() - pressStartTime)*1000
+    dt = (time.time() - pressStartTime) * 1000
     if dt > 60000:
       print "long press timeout reached"
       return False
@@ -509,17 +514,17 @@ class MainWidget(gtk.Widget):
 
   def click(self, x, y, msDuration):
     """this fires after a drag is finished or mouse button released"""
-    m = self.modrana.getModule("clickHandler",None)
+    m = self.modrana.getModule("clickHandler", None)
     if m:
-      m.handleClick(x,y,msDuration)
+      m.handleClick(x, y, msDuration)
       self.update()
 
-  def handleDrag(self,x,y,dx,dy,startX,startY,msDuration):
+  def handleDrag(self, x, y, dx, dy, startX, startY, msDuration):
     """
     handle dragging on the screen
     """
     # check if centering is on
-    if self.modrana.get("centred",True):
+    if self.modrana.get("centred", True):
       fullDx = x - startX
       fullDy = y - startY
       distSq = fullDx * fullDx + fullDy * fullDy
@@ -534,25 +539,30 @@ class MainWidget(gtk.Widget):
         # start simple map drag if its not already in progress
         menuName = self.modrana.get('menu', None)
         if menuName is None and not self.altMapDragInProgress:
-          self.altDragStart(x-startX,y-startY,dx,dy)
+          self.altDragStart(x - startX, y - startY, dx, dy)
         elif self.altMapDragInProgress:
-          self.altDragHandler(x-startX,y-startY,dx,dy)
+          self.altDragHandler(x - startX, y - startY, dx, dy)
       else:
-        m = self.modrana.getModule("clickHandler",None)
+        m = self.modrana.getModule("clickHandler", None)
         if m:
-          m.handleDrag(startX,startY,dx,dy,x,y,msDuration)
+          m.handleDrag(startX, startY, dx, dy, x, y, msDuration)
 
   def handleLongPress(self, pressStartEpoch, msCurrentDuration, startX, startY, x, y):
     """handle long press"""
-    m = self.modrana.getModule("clickHandler",None)
+    m = self.modrana.getModule("clickHandler", None)
     if m:
       m.handleLongPress(pressStartEpoch, msCurrentDuration, startX, startY, x, y)
 
   def draw(self, cr, event):
     """ re/Draw the modRana GUI """
     start = time.clock()
+    # run the beforeDraw method for any draw method
+    modules = self.modrana.getModules().values()
+    for m in modules:
+      m.beforeDraw()
+
     # run the currently used draw method
-    self.currentDrawMethod(cr,event)
+    self.currentDrawMethod(cr, event)
     # enable redraw speed debugging
     if self.showRedrawTime:
       print "Redraw took %1.2f ms" % (1000 * (time.clock() - start))
@@ -572,9 +582,6 @@ class MainWidget(gtk.Widget):
 
     # get all modules
     modules = self.modrana.getModules().values()
-    #
-    for m in modules:
-      m.beforeDraw()
 
     menuName = self.modrana.get('menu', None)
     if menuName: # draw the menu
@@ -584,16 +591,16 @@ class MainWidget(gtk.Widget):
       else:
         print("GTK GUI: error, menu module missing")
     else: # draw the map
-      cr.set_source_rgb(0.2,0.2,0.2) # map background
-      cr.rectangle(0,0,self.rect.width,self.rect.height)
+      cr.set_source_rgb(0.2, 0.2, 0.2) # map background
+      cr.rectangle(0, 0, self.rect.width, self.rect.height)
       cr.fill()
       if self.modrana.get("centred", False) and self.modrana.get("rotateMap", False):
         proj = self.proj
-        (lat, lon) = (proj.lat,proj.lon)
-        (x1,y1) = proj.ll2xy(lat, lon)
+        (lat, lon) = (proj.lat, proj.lon)
+        (x1, y1) = proj.ll2xy(lat, lon)
 
-        (x,y) = self.modrana.gui.centerShift
-        cr.translate(x,y)
+        (x, y) = self.modrana.gui.centerShift
+        cr.translate(x, y)
         cr.save()
         # get the speed and angle
         speed = self.modrana.get('speed', 0)
@@ -608,9 +615,9 @@ class MainWidget(gtk.Widget):
         if angle and speed:
           if speed > self.notMovingSpeed: # do we look like we are moving ?
             self.modrana.mapRotationAngle = angle
-        cr.translate(x1,y1) # translate to the rotation center
+        cr.translate(x1, y1) # translate to the rotation center
         cr.rotate(radians(360 - self.modrana.mapRotationAngle)) # do the rotation
-        cr.translate(-x1,-y1) # translate back
+        cr.translate(-x1, -y1) # translate back
 
         # Draw the base map, the map overlays, and the screen overlays
         try:
@@ -622,7 +629,7 @@ class MainWidget(gtk.Widget):
           print "modRana GTK main loop: an exception occurred:\n"
           traceback.print_exc(file=sys.stdout) # find what went wrong
         cr.restore()
-        cr.translate(-x,-y)
+        cr.translate(-x, -y)
         for m in modules:
           m.drawScreenOverlay(cr)
       else: # centering is disabled, just draw the map
@@ -665,7 +672,7 @@ class MainWidget(gtk.Widget):
     self.altDragRevert = None # reverts the current alt map drag to default
     self.currentDrawMethod = self.fullDrawMethod
 
-  def initGCandBackingPixmap(self,w,h):
+  def initGCandBackingPixmap(self, w, h):
     if self.window:
       self.gc = self.window.new_gc(background=(gtk.gdk.color_parse('white')))
       self.gc.set_clip_rectangle(gtk.gdk.Rectangle(0, 0, w, h))
@@ -687,29 +694,29 @@ class MainWidget(gtk.Widget):
     # enable alternative map drag
     self.altMapDragEnabled = True
 
-  def staticMapDragStart(self,shiftX,shiftY,dx,dy):
+  def staticMapDragStart(self, shiftX, shiftY, dx, dy):
     """start the simple map dragging procedure"""
     self.altMapDragInProgress = True
     self.setCurrentRedrawMethod(self.staticMapPixmapDrag)
     # get the map and overlay
     try:
-      (sx,sy,w,h) = self.modrana.get('viewport', None)
+      (sx, sy, w, h) = self.modrana.get('viewport', None)
     except TypeError:
       print "gtk gui: viewport not available"
       return
 
     # store current screen content in backing pixmap
-    self.backingPixmap.draw_drawable(self.gc, self.window, 0, 0, 0,0,-1,-1)
+    self.backingPixmap.draw_drawable(self.gc, self.window, 0, 0, 0, 0, -1, -1)
     # initiate first drag
-    self.staticMapDrag(shiftX, shiftY,dx,dy)
-    self.modrana.set('needRedraw',True)
+    self.staticMapDrag(shiftX, shiftY, dx, dy)
+    self.modrana.set('needRedraw', True)
 
   def staticMapDragEnd(self, event):
     """revert the changes needed for the drag"""
     proj = self.proj
-    (shiftX,shiftY,dx,dy) = self.shift
+    (shiftX, shiftY, dx, dy) = self.shift
     proj.nudge(shiftX, shiftY)
-    self.shift = (0,0,0,0)
+    self.shift = (0, 0, 0, 0)
 
     # disable alternative map drag
     self.altMapDragInProgress = False
@@ -718,18 +725,18 @@ class MainWidget(gtk.Widget):
     self.setCurrentRedrawMethod()
 
     # redraw the whole screen
-    self.modrana.set('needRedraw',True)
+    self.modrana.set('needRedraw', True)
 
-  def staticMapDrag(self,shiftX,shiftY,dx,dy):
+  def staticMapDrag(self, shiftX, shiftY, dx, dy):
     """drag the map"""
-    self.shift = (shiftX,shiftY,dx,dy)
-    (x,y,w,h) = (self.rect.x, self.rect.y, self.rect.width, self.rect.height)
-    self.modrana.set('needRedraw',True)
+    self.shift = (shiftX, shiftY, dx, dy)
+    (x, y, w, h) = (self.rect.x, self.rect.y, self.rect.width, self.rect.height)
+    self.modrana.set('needRedraw', True)
 
   def staticMapPixmapDrag(self, cr, event):
-    (x,y,w,h) = (self.rect.x, self.rect.y, self.rect.width, self.rect.height)
-    (shiftX,shiftY,dx,dy) = self.shift
-    self.window.draw_drawable(self.gc, self.backingPixmap, 0,0,int(shiftX),int(shiftY),-1,-1)
+    (x, y, w, h) = (self.rect.x, self.rect.y, self.rect.width, self.rect.height)
+    (shiftX, shiftY, dx, dy) = self.shift
+    self.window.draw_drawable(self.gc, self.backingPixmap, 0, 0, int(shiftX), int(shiftY), -1, -1)
 
   def staticMapRevert(self):
     """revert changes needed for static map dragging"""
@@ -740,11 +747,11 @@ class MainWidget(gtk.Widget):
     self.set_flags(self.flags() | gtk.REALIZED)
     self.window = gdk.Window(\
       self.get_parent_window(),
-      width = self.allocation.width,
-      height = self.allocation.height,
-      window_type = gdk.WINDOW_CHILD,
-      wclass = gdk.INPUT_OUTPUT,
-      event_mask = self.get_events() | gdk.EXPOSURE_MASK)
+      width=self.allocation.width,
+      height=self.allocation.height,
+      window_type=gdk.WINDOW_CHILD,
+      wclass=gdk.INPUT_OUTPUT,
+      event_mask=self.get_events() | gdk.EXPOSURE_MASK)
     self.window.set_user_data(self)
     self.style.attach(self.window)
     self.style.set_background(self.window, gtk.STATE_NORMAL)
@@ -793,7 +800,7 @@ class MainWidget(gtk.Widget):
       self.rect.height)
     cr.clip()
 
-    self.draw(cr,event)
+    self.draw(cr, event)
 
   def do_expose_event(self, event):
     """handle screen redraw"""
