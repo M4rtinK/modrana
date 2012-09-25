@@ -836,7 +836,7 @@ this is needed for the item tools menu to know where to return"""
     addBoolOpt("Log modRana stdout to file", "loggingStatus", group, False, "log:checkLoggingStatus")
     # ** tiles
     group = addGroup("Tiles", "tiles", catDebug, "generic")
-    addBoolOpt("Print tile cache status to terminal", "reportTileCachStatus", group, False)
+    addBoolOpt("Print tile cache status to terminal", "reportTileCacheStatus", group, False)
     addBoolOpt("Tile loading status to terminal", "tileLoadingDebug", group, False)
     addBoolOpt("Redraw screen once a new tile is loaded", "tileLoadedRedraw", group, True)
     addBoolOpt("Remove dups before batch dl", "checkTiles", group, False)
@@ -883,8 +883,8 @@ this is needed for the item tools menu to know where to return"""
       return dict((k, v) for k, v in inputDict.iteritems() if k[0] != '#')
     except Exception, e:
       print(
-      'options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n'
-      , e)
+        'options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n'
+        , e)
       return self.d
 
   def _reloadKeyStateList(self, groupID, index, key):
