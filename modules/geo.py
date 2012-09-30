@@ -23,47 +23,50 @@ import time
 
 EARTH_RADIUS = 6371.0
 
-def distanceOld(lat1,lon1,lat2,lon2):
+def distanceOld(lat1, lon1, lat2, lon2):
   """Distance between two points in km
   DEPRECIATED: the Marble distance algorithm was found to be just as precise
   while being 20% faster"""
-  dLat = radians(lat2-lat1)
-  dLon = radians(lon2-lon1)
-  a = sin(dLat/2.0) * sin(dLat/2.0) + \
-          cos(radians(lat1)) * cos(radians(lat2)) * \
-          sin(dLon/2.0) * sin(dLon/2.0)
-  return 2 * atan2(sqrt(a), sqrt(1.0-a)) * EARTH_RADIUS
+  dLat = radians(lat2 - lat1)
+  dLon = radians(lon2 - lon1)
+  a = sin(dLat / 2.0) * sin(dLat / 2.0) +\
+      cos(radians(lat1)) * cos(radians(lat2)) *\
+      sin(dLon / 2.0) * sin(dLon / 2.0)
+  return 2 * atan2(sqrt(a), sqrt(1.0 - a)) * EARTH_RADIUS
+
 
 def simplePythagoreanDistance(x1, y1, x2, y2):
   dx = x2 - x1
   dy = y2 - y1
-  return sqrt(dx**2 + dy**2)
+  return sqrt(dx ** 2 + dy ** 2)
+
 
 def combinedDistance(pointList):
   """return combined distance for a list of ordered points
   NOTE: not tested yet !!"""
   combinedDistance = 0
-  (lat1,lon1) = pointList[0]
+  (lat1, lon1) = pointList[0]
   for point in pointList[1:]:
-    (lat2,lon2) = point
-    combinedDistance+=distance(lat1, lon1, lat2, lon2)
-    (lat1,lon1) = (lat2,lon2)
+    (lat2, lon2) = point
+    combinedDistance += distance(lat1, lon1, lat2, lon2)
+    (lat1, lon1) = (lat2, lon2)
   return combinedDistance
 
 
-def bearing(lat1,lon1,lat2,lon2):
+def bearing(lat1, lon1, lat2, lon2):
   """Bearing from one point to another in degrees (0-360)"""
-  dLat = lat2-lat1
-  dLon = lon2-lon1
+  dLat = lat2 - lat1
+  dLon = lon2 - lon1
   y = sin(radians(dLon)) * cos(radians(lat2))
-  x = cos(radians(lat1)) * sin(radians(lat2)) - \
-          sin(radians(lat1)) * cos(radians(lat2)) * cos(radians(dLon))
+  x = cos(radians(lat1)) * sin(radians(lat2)) -\
+      sin(radians(lat1)) * cos(radians(lat2)) * cos(radians(dLon))
   bearing = degrees(atan2(y, x))
   if bearing < 0.0:
     bearing += 360.0
   return bearing
 
-def simpleDistancePointToLine(x,y,x1,y1,x2,y2):
+
+def simpleDistancePointToLine(x, y, x1, y1, x2, y2):
   """distance from point to line in the plane"""
   # source: http://www.allegro.cc/forums/thread/589720
   A = x - x1
@@ -73,8 +76,8 @@ def simpleDistancePointToLine(x,y,x1,y1,x2,y2):
 
   dot = A * C + B * D
   len_sq = C * C + D * D
-  if len_sq==0:
-    dist= A*A +B*B
+  if len_sq == 0:
+    dist = A * A + B * B
     return dist
 
   param = dot / len_sq
@@ -94,10 +97,12 @@ def simpleDistancePointToLine(x,y,x1,y1,x2,y2):
   dist = dx * dx + dy * dy
   return dist
 
+
 def distancePointToLine(pLat, pLon, aLat, aLon, bLat, bLon):
   distancePointToLineRadians(radians(pLat), radians(pLon),
-                             radians(aLat), radians(aLon),
-                             radians(bLat), radians(bLon))
+    radians(aLat), radians(aLon),
+    radians(bLat), radians(bLon))
+
 
 def distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon):
   """compute distance between a point and a line on Earth
@@ -114,12 +119,12 @@ def distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon):
   x10 = y1 - y0
   y21 = x2 - x1
   x21 = y2 - y1
-  len =(x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)
+  len = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
   # handle zero-length lines
   if len == 0:
     return distanceApproxRadians(pLat, pLon, aLat, aLon)
-  # for correct float division, one of the arguments needs to be a float
-  t = (x01*x21 + y01*y21) / float(len)
+    # for correct float division, one of the arguments needs to be a float
+  t = (x01 * x21 + y01 * y21) / float(len)
 
   # NOTE: a version without the approximate distance might be needed in the future,
   # the 7 digit precision should be enough for now though
@@ -128,21 +133,23 @@ def distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon):
   elif t > 1.0:
     return  distanceApproxRadians(pLat, pLon, bLat, bLon)
   else:
-    nom = abs( x21 * y10 - x10 * y21 )
-    den = sqrt( x21 * x21 + y21 * y21 )
+    nom = abs(x21 * y10 - x10 * y21)
+    den = sqrt(x21 * x21 + y21 * y21)
     return EARTH_RADIUS * ( nom / float(den) )
 
-def distance(lat1,lon1, lat2, lon2):
+
+def distance(lat1, lon1, lat2, lon2):
   """computes geographic distance
   -> based on C++ code from Marble"""
   lat1 = radians(lat1)
   lon1 = radians(lon1)
   lat2 = radians(lat2)
   lon2 = radians(lon2)
-  h1 = sin( 0.5 * ( lat2 - lat1 ) )
-  h2 = sin( 0.5 * ( lon2 - lon1 ) )
-  d = h1 * h1 + cos( lat1 ) * cos( lat2 ) * h2 * h2
-  return 2.0 * atan2( sqrt( d ), sqrt( 1.0 - d ) ) * EARTH_RADIUS
+  h1 = sin(0.5 * ( lat2 - lat1 ))
+  h2 = sin(0.5 * ( lon2 - lon1 ))
+  d = h1 * h1 + cos(lat1) * cos(lat2) * h2 * h2
+  return 2.0 * atan2(sqrt(d), sqrt(1.0 - d)) * EARTH_RADIUS
+
 
 def distanceApprox(lat1, lon1, lat2, lon2):
   """This method roughly calculates the shortest distance between two points on a sphere.
@@ -153,105 +160,161 @@ def distanceApprox(lat1, lon1, lat2, lon2):
   lon1 = radians(lon1)
   lat2 = radians(lat2)
   lon2 = radians(lon2)
-  return acos( sin( lat1 ) * sin( lat2 ) + cos( lat1 ) * cos( lat2 ) * cos( lon1 - lon2 ) ) * EARTH_RADIUS
+  return acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2)) * EARTH_RADIUS
 
-def distanceRadians(lat1,lon1, lat2, lon2):
+
+def distanceRadians(lat1, lon1, lat2, lon2):
   """computes geographic distance
   -> based on C++ code from Marble"""
-  h1 = sin( 0.5 * ( lat2 - lat1 ) )
-  h2 = sin( 0.5 * ( lon2 - lon1 ) )
-  d = h1 * h1 + cos( lat1 ) * cos( lat2 ) * h2 * h2
-  return 2.0 * atan2( sqrt( d ), sqrt( 1.0 - d ) ) * EARTH_RADIUS
+  h1 = sin(0.5 * ( lat2 - lat1 ))
+  h2 = sin(0.5 * ( lon2 - lon1 ))
+  d = h1 * h1 + cos(lat1) * cos(lat2) * h2 * h2
+  return 2.0 * atan2(sqrt(d), sqrt(1.0 - d)) * EARTH_RADIUS
+
 
 def distanceApproxRadians(lat1, lon1, lat2, lon2):
   """This method roughly calculates the shortest distance between two points on a sphere.
       It's probably faster than distanceSphere(...) but for 7 significant digits only has
       accuracy of about 1 arcminute
       -> based on C++ code from Marble"""
-  return acos( sin( lat1 ) * sin( lat2 ) + cos( lat1 ) * cos( lat2 ) * cos( lon1 - lon2 ) ) * EARTH_RADIUS
+  return acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2)) * EARTH_RADIUS
 
 
 def ll2radians(lat, lon):
   """convert lat and lon in degrees to radians"""
   return radians(lat), radians(lon)
 
+
 def lle2radians(lat, lon, elevation):
   """convert lat and lon in degrees to radians - convenience function for LLE tuples"""
   return radians(lat), radians(lon), elevation
 
+
 def lleTuples2radians(lleTuples, discardElevation=False):
   """converts (lat, lon, elevation) tuples from degrees to radians"""
   if discardElevation:
-    return map(lambda x: (radians(x[0]),radians(x[1])), lleTuples)
+    return map(lambda x: (radians(x[0]), radians(x[1])), lleTuples)
   else:
-    return map(lambda x: (radians(x[0]),radians(x[1]), x[2]), lleTuples)
+    return map(lambda x: (radians(x[0]), radians(x[1]), x[2]), lleTuples)
+
 
 def timestampUTC():
   return time.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-# found on:
-  # http://www.quanative.com/2010/01/01/server-side-marker-clustering-for-google-maps-with-python/
-def clusterTrackpoints(trackpointsList , cluster_distance):
+def turnAngle(first, middle, last):
+  """
+  compute turn angle for a turn described by three points
+  """
+  lat_x, lon_x = first
+  lat_y, lon_y = middle
+  lat_z, lon_z = last
+  #  input: 3 points X, Y, Z defined by (lat, lon) tupples ( in the usual <0..180 range)
+  #  1) plane conversion - cartesian coordinates with the pole in the middle:
+  X_x = EARTH_RADIUS * cos(lon_x) * cos(lat_x, )
+  X_y = EARTH_RADIUS * cos(lon_y) * sin(lat_x, )
+
+  Y_x = EARTH_RADIUS * cos(lon_y) * cos(lat_y)
+  Y_y = EARTH_RADIUS * cos(lon_y) * sin(lat_y)
+
+  Z_x = EARTH_RADIUS * cos(lon_z) * cos(lat_z)
+  Z_y = EARTH_RADIUS * cos(lon_z) * sin(lat_z)
+
+  #  2) determine the XYZ angle (=alpha):
+  #  first for clarity the u, v vector (u cerrsponds the XY segment, v the YZ segment)
+  u_x, u_y = (Y_x - X_x, Y_y - X_y)
+  v_x, v_y = (Z_x - Y_x, Z_y - Y_y)
+  alpha = acos((u_x * v_x + u_y * v_y) / sqrt((u_x - v_x) ^ 2 + (u_y - v_y) ^ 2))
+
+  #  3) and finaly we determine the oreintation of the turn - left or right:
+  test = u_x * v_y - v_x * u_y
+
+  #  test=0 - not really a turn - all three points would make a line
+  #  test<0 - right turn
+  #  test>0 - left turn
+
+  if test < 0:
+    return alpha
+  else:
+    return 180 + alpha
+
+    # Final turn angle:
+    #
+    # 135 180 225
+    #    \ | /
+    # 90 ----- 270
+    #    / | \
+    #  45  0 360
+    #
+    # initial direction direction of travel = 0 degrees
+
+
+
+
+    # found on:
+    # http://www.quanative.com/2010/01/01/server-side-marker-clustering-for-google-maps-with-python/
+
+
+def clusterTrackpoints(trackpointsList, cluster_distance):
   """
   Groups points that are less than cluster_distance pixels apart at
   a given zoom level into a cluster.
   """
   clusters = []
   if trackpointsList:
-    points = [{'latitude': point.latitude,'longitude': point.longitude} for point in trackpointsList[0]]
+    points = [{'latitude': point.latitude, 'longitude': point.longitude} for point in trackpointsList[0]]
     while len(points) > 0:
-        point1 = points.pop()
-        cluster = []
-        for point2 in points[:]:
+      point1 = points.pop()
+      cluster = []
+      for point2 in points[:]:
+        pixel_distance = distance(point1['latitude'],
+          point1['longitude'],
+          point2['latitude'],
+          point2['longitude'])
 
-            pixel_distance = distance(point1['latitude'],
-                                      point1['longitude'],
-                                      point2['latitude'],
-                                      point2['longitude'])
+        if pixel_distance < cluster_distance:
+          points.remove(point2)
+          cluster.append(point2)
 
-            if pixel_distance < cluster_distance:
-                points.remove(point2)
-                cluster.append(point2)
-
-        # add the first point to the cluster
-        if len(cluster) > 0:
-            cluster.append(point1)
-            clusters.append(cluster)
-        else:
-            clusters.append([point1])
+      # add the first point to the cluster
+      if len(cluster) > 0:
+        cluster.append(point1)
+        clusters.append(cluster)
+      else:
+        clusters.append([point1])
 
   return clusters
 
-def old_clusterTrackpoints(trackpointsList , cluster_distance):
+
+def old_clusterTrackpoints(trackpointsList, cluster_distance):
   """
   Groups points that are less than cluster_distance pixels apart at
   a given zoom level into a cluster.
   """
-  points = [{'latitude': point.latitude,'longitude': point.longitude} for point in trackpointsList[0]]
+  points = [{'latitude': point.latitude, 'longitude': point.longitude} for point in trackpointsList[0]]
   clusters = []
   while len(points) > 0:
-      point1 = points.pop()
-      cluster = []
-      for point2 in points[:]:
+    point1 = points.pop()
+    cluster = []
+    for point2 in points[:]:
+      pixel_distance = distance(point1['latitude'],
+        point1['longitude'],
+        point2['latitude'],
+        point2['longitude'])
 
-          pixel_distance = distance(point1['latitude'],
-                                    point1['longitude'],
-                                    point2['latitude'],
-                                    point2['longitude'])
+      if pixel_distance < cluster_distance:
+        points.remove(point2)
+        cluster.append(point2)
 
-          if pixel_distance < cluster_distance:
-              points.remove(point2)
-              cluster.append(point2)
-
-      # add the first point to the cluster
-      if len(cluster) > 0:
-          cluster.append(point1)
-          clusters.append(cluster)
-      else:
-          clusters.append([point1])
+    # add the first point to the cluster
+    if len(cluster) > 0:
+      cluster.append(point1)
+      clusters.append(cluster)
+    else:
+      clusters.append([point1])
 
   return clusters
+
 
 def circleAroundPointCluster(cluster):
   """Find a circle around a given point cluster and return its centre and radius"""
@@ -263,17 +326,17 @@ def circleAroundPointCluster(cluster):
   minLon = min(cluster, key=lambda x: x['longitude'])
   # extremes = [maxLat, minLat, maxLon, minLon]
   """now we find the north-south and west-east distances using the points above"""
-  latDist = distance(maxLat['latitude'],maxLat['longitude'],minLat['latitude'],minLat['longitude'])
-  lonDist = distance(maxLon['latitude'],maxLon['longitude'],minLon['latitude'],minLon['longitude'])
+  latDist = distance(maxLat['latitude'], maxLat['longitude'], minLat['latitude'], minLat['longitude'])
+  lonDist = distance(maxLon['latitude'], maxLon['longitude'], minLon['latitude'], minLon['longitude'])
   if latDist >= lonDist: #the horizontal distance is the longest
-    centreX = (maxLat['latitude'] + minLat['latitude'])/2.0
-    centreY = (maxLat['longitude'] + minLat['longitude'])/2.0
+    centreX = (maxLat['latitude'] + minLat['latitude']) / 2.0
+    centreY = (maxLat['longitude'] + minLat['longitude']) / 2.0
     pointX = maxLat['latitude']
     pointY = maxLat['longitude']
     radius = distance(centreX, centreY, pointX, pointY)
   else: #the vertical distance is the longest
-    centreX = (maxLon['latitude'] + minLon['latitude'])/2.0
-    centreY = (maxLon['longitude'] + minLon['longitude'])/2.0
+    centreX = (maxLon['latitude'] + minLon['latitude']) / 2.0
+    centreY = (maxLon['longitude'] + minLon['longitude']) / 2.0
     pointX = maxLon['latitude']
     pointY = maxLon['longitude']
     radius = distance(centreX, centreY, pointX, pointY)
@@ -281,7 +344,7 @@ def circleAroundPointCluster(cluster):
   for point in cluster:
     currentX = point['latitude']
     currentY = point['longitude']
-    distanceFromPointToCentre = distance(centreX,centreY,currentX,currentY)
+    distanceFromPointToCentre = distance(centreX, centreY, currentX, currentY)
     if distanceFromPointToCentre > radius:
       radius = distanceFromPointToCentre
 
@@ -290,7 +353,7 @@ def circleAroundPointCluster(cluster):
 
 def perElevList(trackpointsList, numPoints=200):
   """determine elevation in regular interval, numPoints gives the number of intervals"""
-  points = [{'lat': point.latitude,'lon': point.longitude, 'elev': point.elevation} for point in trackpointsList[0]]
+  points = [{'lat': point.latitude, 'lon': point.longitude, 'elev': point.elevation} for point in trackpointsList[0]]
 
   # create a list, where we have (cumulative distance from starting point, elevation)
   distanceList = [(0, points[0]['elev'], points[0]['lat'], points[0]['lon'])]
@@ -298,16 +361,16 @@ def perElevList(trackpointsList, numPoints=200):
   totalDist = 0
   for point in points[1:]:
     prevPoint = points[prevIndex]
-    (pLat,pLon) = (prevPoint['lat'], prevPoint['lon'])
-    (lat,lon,elev) = (point['lat'], point['lon'], point['elev'])
+    (pLat, pLon) = (prevPoint['lat'], prevPoint['lon'])
+    (lat, lon, elev) = (point['lat'], point['lon'], point['elev'])
     dist = distance(pLat, pLon, lat, lon)
     prevIndex += 1
-    totalDist+= dist
-    distanceList.append((totalDist,elev,point['lat'],point['lon']))
+    totalDist += dist
+    distanceList.append((totalDist, elev, point['lat'], point['lon']))
 
   trackLength = distanceList[-1][0]
   delta = trackLength / numPoints
-  for i in range(1,numPoints): # like this, we should always be between two points with known elevation
+  for i in range(1, numPoints): # like this, we should always be between two points with known elevation
     currentDistance = i * delta
     distanceList.append((currentDistance, None)) # we add the new points in regular intervals
 
@@ -315,7 +378,7 @@ def perElevList(trackpointsList, numPoints=200):
 
   periodicElevationList = [distanceList[0]]
   index = 0
-#  print "length: %d" % len(distanceList)
+  #  print "length: %d" % len(distanceList)
 
   """when we find a point with unknown elevation, we:
      * find the first points with known elevation to the "left" and "right"
@@ -330,19 +393,19 @@ def perElevList(trackpointsList, numPoints=200):
   """
   for point in distanceList:
     if point[1] is None:
-      prevIndex = index-1
+      prevIndex = index - 1
       while distanceList[prevIndex][1] is None:
         prevIndex -= 1
       prevPoint = distanceList[prevIndex]
 
-      nextIndex = index+1
+      nextIndex = index + 1
       while distanceList[nextIndex][1] is None:
         nextIndex += 1
       nextPoint = distanceList[nextIndex]
 
-#      print prevPoint
-#      print point
-#      print nextPoint
+      #      print prevPoint
+      #      print point
+      #      print nextPoint
 
       prevElev = prevPoint[1]
       nextElev = nextPoint[1]
@@ -352,47 +415,48 @@ def perElevList(trackpointsList, numPoints=200):
         newElev = prevElev
 
       elif prevElev > nextElev:
-        opposite = abs(prevPoint[1]-nextPoint[1])
-        adjacent = abs(prevPoint[0]-nextPoint[0])
-        beta = atan(opposite/adjacent)
-        alpha = pi - beta - pi/2
+        opposite = abs(prevPoint[1] - nextPoint[1])
+        adjacent = abs(prevPoint[0] - nextPoint[0])
+        beta = atan(opposite / adjacent)
+        alpha = pi - beta - pi / 2
         adjacentPart = nextPoint[0] - point[0]
-        dElev =  adjacentPart / tan(alpha)
+        dElev = adjacentPart / tan(alpha)
         newElev = nextElev + dElev
 
       elif prevElev < nextElev:
-        opposite = abs(prevPoint[1]-nextPoint[1])
-        adjacent = abs(prevPoint[0]-nextPoint[0])
-        beta = atan(opposite/adjacent)
-        alpha = pi - beta - pi/2
+        opposite = abs(prevPoint[1] - nextPoint[1])
+        adjacent = abs(prevPoint[0] - nextPoint[0])
+        beta = atan(opposite / adjacent)
+        alpha = pi - beta - pi / 2
         adjacentPart = point[0] - prevPoint[0]
         dElev = adjacentPart / tan(alpha)
         newElev = prevElev + dElev
 
       # add coordinates to periodic points
-      (lat1,lon1) = prevPoint[2:4]
-      (lat2,lon2) = nextPoint[2:4]
-#      (lat,lon) = point[2:4]
-      d = distance(lat1,lon1,lat2,lon2) # distance between the two known points
+      (lat1, lon1) = prevPoint[2:4]
+      (lat2, lon2) = nextPoint[2:4]
+      #      (lat,lon) = point[2:4]
+      d = distance(lat1, lon1, lat2, lon2) # distance between the two known points
       dPart = point[0] - prevPoint[0] # distance to the periodic point
 
-      actual = dPart/d # the actual distance fraction
+      actual = dPart / d # the actual distance fraction
       rest = 1 - actual # how much remains
 
       # get the periodic point coordinates, depending on its distance from known points
-      lat = (rest*lat1)+(actual*lat2)
-      lon = (rest*lon1)+(actual*lon2)
+      lat = (rest * lat1) + (actual * lat2)
+      lon = (rest * lon1) + (actual * lon2)
 
-#      print (d,dPart)
-#      print (actual,rest)
+      #      print (d,dPart)
+      #      print (actual,rest)
 
-      periodicElevationList.append((point[0],newElev, lat, lon))
+      periodicElevationList.append((point[0], newElev, lat, lon))
 
     index += 1
 
   periodicElevationList.append(distanceList[-1]) # add the last point of the track
 
   return periodicElevationList
+
 
 def distanceBenchmark(LLE, sampleSize=None):
   """geographic distance measurement method benchmark"""
@@ -408,24 +472,24 @@ def distanceBenchmark(LLE, sampleSize=None):
   l = map(lambda x: distanceOld(lat, lon, x[0], x[1]), LLE)
   print("%1.9f ms Classic modRana method" % (1000 * (time.clock() - start1)))
   if sampleSize:
-    print l[0:sampleSize-1]
+    print l[0:sampleSize - 1]
 
   # Marble method
   start1 = time.clock()
   l = map(lambda x: distance(lat, lon, x[0], x[1]), LLE)
   print("%1.9f ms Marble method" % (1000 * (time.clock() - start1)))
   if sampleSize:
-    print l[0:sampleSize-1]
+    print l[0:sampleSize - 1]
 
   # Marble approximate
   start1 = time.clock()
   l = map(lambda x: distanceApprox(lat, lon, x[0], x[1]), LLE)
   print("%1.9f ms Marble approximate method" % (1000 * (time.clock() - start1)))
   if sampleSize:
-    print l[0:sampleSize-1]
+    print l[0:sampleSize - 1]
 
   # lets check on precomputed coordinates in radians
-  LLERadians = map(lambda x: (radians(x[0]),radians(x[1]), x[2]), LLE)
+  LLERadians = map(lambda x: (radians(x[0]), radians(x[1]), x[2]), LLE)
   lat = radians(lat)
   lon = radians(lon)
   # Marble method on radians
@@ -433,14 +497,14 @@ def distanceBenchmark(LLE, sampleSize=None):
   l = map(lambda x: distanceRadians(lat, lon, x[0], x[1]), LLERadians)
   print("%1.9f ms Marble method on radians" % (1000 * (time.clock() - start1)))
   if sampleSize:
-    print l[0:sampleSize-1]
+    print l[0:sampleSize - 1]
 
   # Marble approximate method on radians
   start1 = time.clock()
   l = map(lambda x: distanceApproxRadians(lat, lon, x[0], x[1]), LLERadians)
   print("%1.9f ms Marble approximate method on radians" % (1000 * (time.clock() - start1)))
   if sampleSize:
-    print l[0:sampleSize-1]
+    print l[0:sampleSize - 1]
 
   # done
   print("# benchmark finished #")
@@ -475,5 +539,5 @@ def distanceBenchmark(LLE, sampleSize=None):
 
 
 if(__name__ == "__main__"):
-  print distance(51,-1,52,1)
-  print bearing(51,-1,52,1)
+  print distance(51, -1, 52, 1)
+  print bearing(51, -1, 52, 1)
