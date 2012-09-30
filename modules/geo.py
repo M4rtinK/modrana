@@ -211,8 +211,8 @@ def turnAngle(first, middle, last):
   lat_z, lon_z = last
   #  input: 3 points X, Y, Z defined by (lat, lon) tupples ( in the usual <0..180 range)
   #  1) plane conversion - cartesian coordinates with the pole in the middle:
-  X_x = EARTH_RADIUS * cos(lon_x) * cos(lat_x, )
-  X_y = EARTH_RADIUS * cos(lon_y) * sin(lat_x, )
+  X_x = EARTH_RADIUS * cos(lon_x) * cos(lat_x)
+  X_y = EARTH_RADIUS * cos(lon_y) * sin(lat_x)
 
   Y_x = EARTH_RADIUS * cos(lon_y) * cos(lat_y)
   Y_y = EARTH_RADIUS * cos(lon_y) * sin(lat_y)
