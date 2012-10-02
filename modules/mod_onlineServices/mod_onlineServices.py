@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_module import ranaModule
+from modules.base_module import ranaModule
 import re
 import urllib
 import threading
@@ -300,23 +300,23 @@ class onlineServices(ranaModule):
 
     try:
       directions = gMap.directions(start, destination, dir)
-    except googlemaps.googlemaps.GoogleMapsError, e:
+    except googlemaps.GoogleMapsError, e:
       if e.status == 602:
-        print("onlineServices:Gdirections:routing failed -> address not found" % e)
+        print("onlineServices:GDirections:routing failed -> address not found" % e)
         self.sendMessage("ml:notification:m:Address(es) not found;5")
       elif e.status == 604:
-        print("onlineServices:Gdirections:routing failed -> no route found" % e)
+        print("onlineServices:GDirections:routing failed -> no route found" % e)
         self.sendMessage("ml:notification:m:No route found;5")
       elif e.status == 400:
         if not secondTime: # guard against potential infinite loop for consequent 400 errors
-          print("onlineServices:Gdirections:bad response to travel mode, trying default travel mode")
+          print("onlineServices:GDirections:bad response to travel mode, trying default travel mode")
           self.set('needRedraw', True)
           directions = self.tryToGetDirections(start, destination, dir, travelMode="", otherOptions=otherOptions,
             secondTime=True)
       else:
-        print("onlineServices:Gdirections:routing failed with exception googlemaps status code:%d" % e.status)
+        print("onlineServices:GDirections:routing failed with exception googlemaps status code:%d" % e.status)
     except Exception, e:
-      print("onlineServices:Gdirections:routing failed with non-googlemaps exception:\n%s" % e)
+      print("onlineServices:GDirections:routing failed with non-googlemaps exception:\n%s" % e)
     self.set('needRedraw', True)
     return directions
 
@@ -487,9 +487,9 @@ class Worker(threading.Thread):
     status = self.online.modrana.dmod.getInternetConnectivityStatus()
     if status is None: # Connectivity status monitoring not supported
       return status # skip
-    elif status == True:
+    elif status is True:
       return status # Internet connectivity is most probably available
-    elif status == False:
+    elif status is False:
       startTimestamp = time.time()
       self._setWorkStatusText("waiting for Internet connectivity...")
       elapsed = 0
