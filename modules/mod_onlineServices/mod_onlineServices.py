@@ -29,20 +29,21 @@ import local_search
 
 DEFAULT_GOOGLE_API_KEY = "ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw"
 
-def getModule(m,d,i):
-  return(onlineServices(m,d,i))
+def getModule(m, d, i):
+  return(onlineServices(m, d, i))
+
 
 class onlineServices(ranaModule):
   """A module for talking to various online services"""
-  
+
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.workerThreads = []
     self.drawOverlay = False
 
-#  # testing
-#  def firstTime(self):
-#    self._enableOverlay()
+  #  # testing
+  #  def firstTime(self):
+  #    self._enableOverlay()
 
   def handleMessage(self, message, type, args):
     if message == "cancelOperation":
@@ -80,7 +81,7 @@ class onlineServices(ranaModule):
         return False
       else:
         lat, lon = pos
-        local = self.googleLocalQueryLL(term,lat,lon)
+        local = self.googleLocalQueryLL(term, lat, lon)
         if local:
           points = self._processGLSResponse(local)
           return points
@@ -100,7 +101,7 @@ class onlineServices(ranaModule):
     * around a point specified by latitude and longitude"""
 
     # we use the Google Local Search backend at the moment
-    local = self.googleLocalQueryLL(term,lat,lon)
+    local = self.googleLocalQueryLL(term, lat, lon)
     if local:
       points = self._processGLSResponse(local)
       return points
@@ -116,7 +117,7 @@ class onlineServices(ranaModule):
       points.append(point)
     return points
 
-          # ** OSM static map URL **
+    # ** OSM static map URL **
 
   def getOSMStaticMapUrl(self, centerLat, centerLon, zl, w=350, h=350, defaultMarker="ol-marker", markerList=None):
     """construct & return OSM static map URL"""
@@ -124,16 +125,16 @@ class onlineServices(ranaModule):
     prefix = "http://staticmap.openstreetmap.de/staticmap.php"
     center = "?center=%f,%f" % (centerLat, centerLon)
     zoom = "&zoom=%d" % zl
-    size = "&size=%dx%d" % (w,h)
+    size = "&size=%dx%d" % (w, h)
     if markerList:
-      markers= "&markers="
+      markers = "&markers="
       for marker in markerList:
         if len(marker) == 2:
           lat, lon = marker
           markerName = defaultMarker
         else:
           lat, lon, markerName = marker
-        markers+= "%f,%f,%s|" % (lat, lon, markerName)
+        markers += "%f,%f,%s|" % (lat, lon, markerName)
     else:
       markers = ""
 
@@ -144,10 +145,10 @@ class onlineServices(ranaModule):
     return url
 
   # ** Geonames **
-      
+
   def elevFromGeonames(self, lat, lon):
     """get elevation in meters for the specified latitude and longitude from geonames"""
-    url = 'http://ws.geonames.org/srtm3?lat=%f&lng=%f' % (lat,lon)
+    url = 'http://ws.geonames.org/srtm3?lat=%f&lng=%f' % (lat, lon)
     try:
       query = urllib.urlopen(url)
     except Exception, e:
@@ -169,9 +170,9 @@ class onlineServices(ranaModule):
     mL = len(latLonList)
     while len(latLonList) > 0:
       if threadCB: # report progress to running thread
-        threadCB._setWorkStatusText("%d of %d done" % (mL-len(latLonList),mL) )
+        threadCB._setWorkStatusText("%d of %d done" % (mL - len(latLonList), mL))
       tempList = latLonList[0:maxCoordinates]
-#      latLonList = latLonList[maxCoordinates:len(latLonList)]
+      #      latLonList = latLonList[maxCoordinates:len(latLonList)]
 
       lats = ""
       lons = ""
@@ -179,13 +180,13 @@ class onlineServices(ranaModule):
         lats += "%f," % point[0]
         lons += "%f," % point[1]
 
-    # TODO: maybe add switching ?
-    #      url = 'http://ws.geonames.org/astergdem?lats=%s&lngs=%s' % (lats,lons)
-      url = 'http://ws.geonames.org/srtm3?lats=%s&lngs=%s' % (lats,lons)
+        # TODO: maybe add switching ?
+        #      url = 'http://ws.geonames.org/astergdem?lats=%s&lngs=%s' % (lats,lons)
+      url = 'http://ws.geonames.org/srtm3?lats=%s&lngs=%s' % (lats, lons)
       query = None
       try:
         query = urllib.urlopen(url)
-      except Exception ,e:
+      except Exception, e:
         print("online: getting elevation from geonames returned an error")
         results = "0"
         for i in range(1, len(tempList)):
@@ -202,7 +203,7 @@ class onlineServices(ranaModule):
 
       index = 0
       for point in tempList: # add the results to the new list with elevation
-        latLonElevList.append((point[0],point[1],int(results[index])))
+        latLonElevList.append((point[0], point[1], int(results[index])))
         index += 1
 
     return latLonElevList
@@ -215,8 +216,9 @@ class onlineServices(ranaModule):
     if key is None:
       print "onlineServices: a google API key is needed for using the google maps services"
       return None
-    # only import when actually needed
+      # only import when actually needed
     import googlemaps
+
     gMap = googlemaps.GoogleMaps(key)
     return gMap
 
@@ -247,7 +249,7 @@ class onlineServices(ranaModule):
     args = [(start, destination, routeRequestSentTimestamp)]
     flags = {'net': True}
     self._addWorkerThread(Worker._onlineRouteLookup, args, outputHandler, key, flags)
-    
+
   def googleDirectionsLLAsync(self, start, destination, outputHandler, key):
     """a background running Google Directions query
     - Lat Lon pairs version -> for geocoding the start/destination points (NOT first/last route points)
@@ -257,12 +259,12 @@ class onlineServices(ranaModule):
     flags = {'net': True}
     self._addWorkerThread(Worker._onlineRouteLookup, args, outputHandler, key, flags)
 
-  def googleDirections(self ,start, destination):
+  def googleDirections(self, start, destination):
     """ Get driving directions from Google.
     start and directions can be either coordinates tuples or address strings
     """
 
-    otherOptions=""
+    otherOptions = ""
     if self.get('routingAvoidHighways', False): # optionally avoid highways
       otherOptions += 'h'
     if self.get('routingAvoidToll', False): # optionally avoid toll roads
@@ -272,14 +274,14 @@ class onlineServices(ranaModule):
     mode = self.get('mode', None)
     if mode == 'cycle':
       type = "b"
-    elif mode == 'foot':
+    elif mode == 'walk':
       type = "w"
     elif mode == 'train' or mode == 'bus':
       type = 'r'
     else:
       type = ""
 
-     # combine type and other parameters
+      # combine type and other parameters
     dir = {}
     # the google language code is the second part of this whitespace delimited string
     googleLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[1]
@@ -289,14 +291,15 @@ class onlineServices(ranaModule):
     return directions
 
   def tryToGetDirections(self, start, destination, dir, travelMode, otherOptions, secondTime=False):
-    gmap = self.getGmapsInstance()
+    gMap = self.getGmapsInstance()
     parameters = travelMode + otherOptions
     dir['dirflg'] = parameters
     directions = ""
     # only import when actually needed
     import googlemaps
+
     try:
-      directions = gmap.directions(start, destination, dir)
+      directions = gMap.directions(start, destination, dir)
     except googlemaps.googlemaps.GoogleMapsError, e:
       if e.status == 602:
         print("onlineServices:Gdirections:routing failed -> address not found" % e)
@@ -308,7 +311,7 @@ class onlineServices(ranaModule):
         if not secondTime: # guard against potential infinite loop for consequent 400 errors
           print("onlineServices:Gdirections:bad response to travel mode, trying default travel mode")
           self.set('needRedraw', True)
-          directions = self.tryToGetDirections(start, destination, dir, travelMode="",otherOptions=otherOptions ,
+          directions = self.tryToGetDirections(start, destination, dir, travelMode="", otherOptions=otherOptions,
             secondTime=True)
       else:
         print("onlineServices:Gdirections:routing failed with exception googlemaps status code:%d" % e.status)
@@ -317,14 +320,14 @@ class onlineServices(ranaModule):
     self.set('needRedraw', True)
     return directions
 
-  def googleDirectionsLL(self ,lat1, lon1, lat2, lon2):
+  def googleDirectionsLL(self, lat1, lon1, lat2, lon2):
     start = (lat1, lon1)
     destination = (lat2, lon2)
     return self.googleDirections(start, destination)
 
   def _googleReverseGeocode(self, lat, lon):
     gMap = self.getGmapsInstance()
-    address = gMap.latlng_to_address(lat,lon)
+    address = gMap.latlng_to_address(lat, lon)
     return address
 
   def reverseGeocodeAsync(self, lat, lon, outputHandler, key, message="geocoding"):
@@ -332,7 +335,7 @@ class onlineServices(ranaModule):
     flags = {'net': True}
     self._addWorkerThread(Worker._reverseGeocode, [lat, lon, message], outputHandler, key, flags)
 
-  def googleLocalQueryLLAsync(self, term, lat, lon,outputHandler, key):
+  def googleLocalQueryLLAsync(self, term, lat, lon, outputHandler, key):
     """asynchronous Google Local Search query for explicit lat, lon coordinates"""
     location = "%f,%f" % (lat, lon)
     self.googleLocalQueryAsync(term, location, outputHandler, key)
@@ -371,7 +374,7 @@ class onlineServices(ranaModule):
 
   def _addWorkerThread(self, *args):
     """start the worker thread and provide it the specified arguments"""
-    w = Worker(self,*args)
+    w = Worker(self, *args)
     w.daemon = True
     w.start()
     self.workerThreads.append(w)
@@ -397,8 +400,10 @@ class onlineServices(ranaModule):
     if thread in self.workerThreads:
       self.workerThreads.remove(thread)
 
+
 class Worker(threading.Thread):
   """a worker thread for asynchronous online services access"""
+
   def __init__(self, callback, call, args, outputHandler, key, flags=None):
     threading.Thread.__init__(self)
     self.online = callback # should be a onlineServices module instance
@@ -526,7 +531,7 @@ class Worker(threading.Thread):
 
   def _localGoogleSearch(self, term, location=None):
     if location:
-        query = self.online.constructGoogleQuery(term, location)
+      query = self.online.constructGoogleQuery(term, location)
     else:
       # use current position:
       pos = self.online.get('pos', None)
@@ -572,8 +577,8 @@ class Worker(threading.Thread):
       self._setWorkStatusText("online elevation lookup done   ")
       return results, tracklog
     except Exception, e:
-      print('onlineServices: exception during elevation lookup:\n',e)
-      return None,tracklog
+      print('onlineServices: exception during elevation lookup:\n', e)
+      return None, tracklog
 
   def _onlineWikipediaSearch(self, query):
     self._setWorkStatusText("online Wikipedia search in progress...")
