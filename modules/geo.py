@@ -224,7 +224,7 @@ def turnAngle(first, middle, last):
   #  first for clarity the u, v vector (u cerrsponds the XY segment, v the YZ segment)
   u_x, u_y = (Y_x - X_x, Y_y - X_y)
   v_x, v_y = (Z_x - Y_x, Z_y - Y_y)
-  alpha = acos((u_x * v_x + u_y * v_y) / sqrt((u_x - v_x) ^ 2 + (u_y - v_y) ^ 2))
+  alpha = acos((u_x * v_x + u_y * v_y) / sqrt((u_x - v_x) ** 2 + (u_y - v_y) ** 2))
 
   #  3) and finaly we determine the oreintation of the turn - left or right:
   test = u_x * v_y - v_x * u_y
