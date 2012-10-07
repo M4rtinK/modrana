@@ -43,6 +43,7 @@ class TurnByTurnPoint(Point):
   def setSSMLMessage(self, message):
     self.SSMLMessage = message
 
+
 class Way:
   """a segment of the way
       * Points denote the way
@@ -68,7 +69,6 @@ class Way:
     self._updateCache()
 
 
-
   def getPointByID(self, index):
     p = self.points[index]
     (lat, lon, elevation) = (p[0], p[1], p[2])
@@ -89,11 +89,11 @@ class Way:
       return radians
 
   def addPoint(self, point):
-    lat, lon , elevation = point.getLLE()
-    self.points.append( (lat, lon , elevation) )
+    lat, lon, elevation = point.getLLE()
+    self.points.append((lat, lon, elevation))
 
   def addPointLLE(self, lat, lon, elevation=None):
-    self.points.append( (lat, lon , elevation) )
+    self.points.append((lat, lon, elevation))
 
   def getPointCount(self):
     return len(self.points)
@@ -163,7 +163,6 @@ class Way:
     return self.messagePointsLLE
 
 
-
   def getMessagePointCount(self):
     return len(self.messagePoints)
 
@@ -190,16 +189,16 @@ class Way:
       # check for stored timestamps
       if self.points and len(self.points[0]) >= 4: # LLET
         trackpoints.append(
-        map(lambda x:
-        gpx.Trackpoint(x[0],x[1],None,None,x[2],x[3]),
-        self.points)
+          map(lambda x:
+          gpx.Trackpoint(x[0], x[1], None, None, x[2], x[3]),
+            self.points)
         )
 
       else: # LLE
         trackpoints.append(
-        map(lambda x:
-        gpx.Trackpoint(x[0],x[1],None,None,x[2],None),
-        self.points)
+          map(lambda x:
+          gpx.Trackpoint(x[0], x[1], None, None, x[2], None),
+            self.points)
         )
 
       # Handle message points
@@ -218,7 +217,7 @@ class Way:
             name = "Turn %d/%d" % (index, mpCount)
           lat, lon, elev, message = mp.getLLEM()
           routepoints.append(gpx.Routepoint(lat, lon, name, message, elev, None))
-          index+=1
+          index += 1
         print('way: %d points, %d routepoints saved to %s in GPX format' % (path, len(trackpoints), len(routepoints)))
       else:
         waypoints = []
@@ -227,7 +226,7 @@ class Way:
             name = "Turn %d/%d" % (index, mpCount)
           lat, lon, elev, message = mp.getLLEM()
           waypoints.append(gpx.Routepoint(lat, lon, name, message, elev, None))
-          index+=1
+          index += 1
         print('way: %d points, %d waypoints saved to %s in GPX format' % (len(trackpoints[0]), len(waypoints), path))
 
       # write the GPX tree to file
@@ -241,8 +240,6 @@ class Way:
       print('way: saving to GPX format failed')
       print(e)
       return False
-
-
 
 
   # CSV  export
@@ -270,6 +267,7 @@ class Way:
     pCount = self.getPointCount()
     mpCount = self.getMessagePointCount()
     return "segment: %d points and %d message points" % (pCount, mpCount)
+
 
 def fromGoogleDirectionsResult(gResult):
   steps = gResult['Directions']['Routes'][0]['Steps']
@@ -310,6 +308,7 @@ def fromGoogleDirectionsResult(gResult):
   way.addMessagePoints(messagePoints)
   return way
 
+
 def fromMonavResult(result):
   # convert route nodes from the Monav routing result
   # to (lat, lon) tuples
@@ -324,7 +323,7 @@ def fromMonavResult(result):
       # but as it should return 0, it should not be an issue
       for node in result.nodes:
         routePoints.append((node.latitude, node.longitude, None))
-        mLength+=geo.distance(prevLat, prevLon, node.latitude, node.longitude)*1000
+        mLength += geo.distance(prevLat, prevLon, node.latitude, node.longitude) * 1000
         prevLat, prevLon = node.latitude, node.longitude
 
     way = Way(routePoints)
@@ -336,6 +335,7 @@ def fromMonavResult(result):
     return way
   else:
     return None
+
 
 def _detectMonavTurns(result):
   """go through the edges and try to detect turns,
@@ -359,28 +359,60 @@ def _detectMonavTurns(result):
   names = result.edge_names
   types = result.edge_types
 
-  nodeId = 0
   # need at least two edges for any meaningful routing
-  if len(edges) >=2:
-    lastEdgeId = edges[0].type_id
-    lastEdgeNameId = edges[0].name_id
+  if len(edges) >= 2:
+    maxId = len(edges) - 1
+    lastEdge = edges[0]
+
+    nodeId = 0
+    maxNodeId = len(nodes) - 1
+    edgeId = 1
     for edge in edges[1:]:
+      nodeId += lastEdge.n_segments
       edgeId = edge.type_id
       nameId = edge.name_id
-#      if lastEdgeId != edgeId and lastEdgeNameId != edgeId:
-      if lastEdgeId != edgeId:
-        # this might be a turn ! :)
-        name = names[nameId]
-        turnDescription = _getTurnDescription(None, name=name)
-        print turnDescription
-        # get the corresponding node
-        node = nodes[nodeId]
-        turns.append(TurnByTurnPoint(node.latitude, node.longitude, message=turnDescription))
+      name = names[nameId]
 
-      lastEdgeId = edgeId
-      lastEdgeNameId = nameId
-      nodeId+=edge.n_segments # increment the node counter
+      #      if lastEdge.branching_possible:
+      if True: # looks like branching possible is not needed
+        # turn directions are actually needed only
+        # when there are some other roads to to turn to
+        lastName = names[lastEdge.name_id]
+        if lastEdge.type_id != edgeId or lastName != name:
+          # if route type or name changes, it might be a turn
+          node = nodes[nodeId]
+          #          if nodeId <= maxNodeId:
+          #            prevNode = nodes[nodeId-1]
+          #            nextNode = nodes[nodeId+1]
+          #            # NOTE: if the turn consists
+          #            # from many segments, taking more points into
+          #            # account might be needed
+          #            first = prevNode.latitude, prevNode.longitude
+          #            middle = node.latitude, prevNode.longitude
+          #            last = nextNode.latitude, prevNode.longitude
+          #            angle = geo.turnAngle(first, middle, last)
+          #            name+="%1.0f degrees" % angle
+          #          else:
+          #            angle = None
+
+          turnDescription = _getTurnDescription(None, name=name)
+          print(turnDescription)
+          # get the corresponding node
+
+          turns.append(TurnByTurnPoint(node.latitude, node.longitude, message=turnDescription))
+
+      lastEdge = edge
   return turns
+
+#    prevEdge = edges[0]
+#    thisEdge = edges[1]
+#
+#    # we stop one edge before maxId,
+#    # so we don't have to check if there
+#    # is a next edge
+#    for i in range(2, maxId):
+#      nextEdge =
+
 
 def _getTurnDescription(type, name=None):
   message = "you might need to turn left or right"
@@ -389,16 +421,9 @@ def _getTurnDescription(type, name=None):
   return message
 
 
-
-
-
-
-
-
-
-
 def fromGPX(GPX):
   pass
+
 
 def fromCSV(path, delimiter=',', fieldCount=None):
   """create a way object from a CSV file specified by path
@@ -473,24 +498,25 @@ def fromCSV(path, delimiter=',', fieldCount=None):
         # is missing or corrupted)
         # but use eFloat for elevation (we can live with missing elevation)
         if fields >= 4:
-          points.append((float(r[0]), float(r[1]), eFloat(r[2]), r[3]) )
+          points.append((float(r[0]), float(r[1]), eFloat(r[2]), r[3]))
         elif fields == 3:
           points.append((float(r[0]), float(r[1]), eFloat(r[2]), None))
         elif fields == 2:
           points.append((float(r[0]), float(r[1]), None, None))
         else:
           print('Way: error, line %d has 1 or 0 fields, needs at least 2 (lat, lon):\n%r' % (reader.line_no, r))
-          parsingErrorCount+=1
+          parsingErrorCount += 1
       except Exception, e:
         print('Way: parsing CSV line %d failed' % lineNumber)
         print(e)
-        parsingErrorCount+=1
-      lineNumber+=1
+        parsingErrorCount += 1
+      lineNumber += 1
 
   # close the file
   f.close()
   print('Way: CSV file parsing finished, %d points added with %d errors' % (len(points), parsingErrorCount))
   return Way(points)
+
 
 class AppendOnlyWay(Way):
   """a way subclass that is optimized for efficient incremental storage file storage
@@ -512,6 +538,7 @@ class AppendOnlyWay(Way):
   -> if flush is called regularly (which is the expected behaviour when using this class), this should not be an issue
 
   """
+
   def __init__(self, points=[]):
     Way.__init__(self)
 
@@ -526,7 +553,7 @@ class AppendOnlyWay(Way):
         #mark all points added on startup with a single timestamp
         timestamp = geo.timestampUTC()
         # convert to LLET
-        points = map(lambda x: (x[0],x[1],x[2],timestamp), points)
+        points = map(lambda x: (x[0], x[1], x[2], timestamp), points)
 
         # mark points as not yet saved
         self.increment = points
@@ -535,7 +562,7 @@ class AppendOnlyWay(Way):
 
   def getPointsLLE(self):
     # drop the timestamp
-    return map(lambda x: (x[0],x[1],x[2]), self.points)
+    return map(lambda x: (x[0], x[1], x[2]), self.points)
 
   def getPointsLLET(self):
     """returns all points in LLET format, both saved an not yet saved to storage"""
@@ -546,19 +573,19 @@ class AppendOnlyWay(Way):
 
   def addPoint(self, point):
     with self.pointsLock:
-      lat, lon , elevation = point.getLLE()
-      self.points.append( (lat, lon , elevation, geo.timestampUTC()) )
-      self.increment.append( (lat, lon , elevation, geo.timestampUTC()) )
+      lat, lon, elevation = point.getLLE()
+      self.points.append((lat, lon, elevation, geo.timestampUTC()))
+      self.increment.append((lat, lon, elevation, geo.timestampUTC()))
 
   def addPointLLE(self, lat, lon, elevation):
     with self.pointsLock:
-      self.points.append( (lat, lon , elevation, geo.timestampUTC()) )
-      self.increment.append( (lat, lon , elevation, geo.timestampUTC()) )
+      self.points.append((lat, lon, elevation, geo.timestampUTC()))
+      self.increment.append((lat, lon, elevation, geo.timestampUTC()))
 
   def addPointLLET(self, lat, lon, elevation, timestamp):
     with self.pointsLock:
-      self.points.append( (lat, lon , elevation, timestamp) )
-      self.increment.append( (lat, lon , elevation, timestamp) )
+      self.points.append((lat, lon, elevation, timestamp))
+      self.increment.append((lat, lon, elevation, timestamp))
 
   def getFilePath(self):
     return self.filePath
@@ -584,7 +611,7 @@ class AppendOnlyWay(Way):
     with self.pointsLock:
       increment = self.increment
       self.increment = []
-    # write the rows
+      # write the rows
     self.writer.writerows(increment)
     # make sure it actually gets written to storage
     self.file.flush()
@@ -594,7 +621,7 @@ class AppendOnlyWay(Way):
     # save any increments
     if self.increment:
       self.flush()
-    # close the file
+      # close the file
     self.file.close()
     print('AOWay: file closed: %s' % self.filePath)
     # cleanup
@@ -623,78 +650,76 @@ class AppendOnlyWay(Way):
 
 #from: http://seewah.blogspot.com/2009/11/gpolyline-decoding-in-python.html
 def _decodePolyline(encoded):
+  """Decodes a polyline that was encoded using the Google Maps method.
 
-    """Decodes a polyline that was encoded using the Google Maps method.
+  See http://code.google.com/apis/maps/documentation/polylinealgorithm.html
 
-    See http://code.google.com/apis/maps/documentation/polylinealgorithm.html
+  This is a straightforward Python port of Mark McClure's JavaScript polyline decoder
+  (http://facstaff.unca.edu/mcmcclur/GoogleMaps/EncodePolyline/decode.js)
+  and Peter Chng's PHP polyline decode
+  (http://unitstep.net/blog/2008/08/02/decoding-google-maps-encoded-polylines-using-php/)
+  """
 
-    This is a straightforward Python port of Mark McClure's JavaScript polyline decoder
-    (http://facstaff.unca.edu/mcmcclur/GoogleMaps/EncodePolyline/decode.js)
-    and Peter Chng's PHP polyline decode
-    (http://unitstep.net/blog/2008/08/02/decoding-google-maps-encoded-polylines-using-php/)
-    """
+  encoded_len = len(encoded)
+  index = 0
+  array = []
+  lat = 0
+  lng = 0
 
-    encoded_len = len(encoded)
-    index = 0
-    array = []
-    lat = 0
-    lng = 0
+  while index < encoded_len:
+    b = 0
+    shift = 0
+    result = 0
 
-    while index < encoded_len:
+    while True:
+      b = ord(encoded[index]) - 63
+      index += 1
+      result |= (b & 0x1f) << shift
+      shift += 5
+      if b < 0x20:
+        break
 
-      b = 0
-      shift = 0
-      result = 0
+    dLat = ~(result >> 1) if result & 1 else result >> 1
+    lat += dLat
 
-      while True:
-        b = ord(encoded[index]) - 63
-        index += 1
-        result |= (b & 0x1f) << shift
-        shift += 5
-        if b < 0x20:
-          break
+    shift = 0
+    result = 0
 
-      dLat = ~(result >> 1) if result & 1 else result >> 1
-      lat += dLat
+    while True:
+      b = ord(encoded[index]) - 63
+      index += 1
+      result |= (b & 0x1f) << shift
+      shift += 5
+      if b < 0x20:
+        break
 
-      shift = 0
-      result = 0
+    dLng = ~(result >> 1) if result & 1 else result >> 1
+    lng += dLng
 
-      while True:
-        b = ord(encoded[index]) - 63
-        index += 1
-        result |= (b & 0x1f) << shift
-        shift += 5
-        if b < 0x20:
-          break
+    # append empty width for LLE tuple compatibility
+    array.append((lat * 1e-5, lng * 1e-5, None))
 
-      dLng = ~(result >> 1) if result & 1 else result >> 1
-      lng += dLng
-
-      # append empty width for LLE tuple compatibility
-      array.append( (lat * 1e-5, lng * 1e-5, None) )
-
-    return array
+  return array
 
 
-#class Ways:
-#  """a way consisting of one or more segments"""
-#  def __init__(self):
-#    self.segments = []
-#
-#  def addSegment(self, segment):
-#    """add a segment"""
-#    self.segments.append(segment)
-#
-#  def getSegmentByID(self, index):
-#    return self.segments[index]
-#
-#  def getSegmentCount(self):
-#    return len(self.segments)
-#
-#  def __str__(self):
-#    """textual state description"""
-#    count = 0
-#    for segment in self.segments:
-#      count+=segment.getPointCount()
-#    return "way: %d segments, %d points total" % (self.getSegmentCount(), count)
+  #class Ways:
+  #  """a way consisting of one or more segments"""
+  #  def __init__(self):
+  #    self.segments = []
+  #
+  #  def addSegment(self, segment):
+  #    """add a segment"""
+  #    self.segments.append(segment)
+  #
+  #  def getSegmentByID(self, index):
+  #    return self.segments[index]
+  #
+  #  def getSegmentCount(self):
+  #    return len(self.segments)
+  #
+  #  def __str__(self):
+  #    """textual state description"""
+  #    count = 0
+  #    for segment in self.segments:
+  #      count+=segment.getPointCount()
+  #    return "way: %d segments, %d points total" % (self.getSegmentCount(), count)
