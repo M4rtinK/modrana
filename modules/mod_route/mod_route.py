@@ -39,11 +39,13 @@ ROUTING_LOAD_FAILED = 2 # failed to load routing data
 ROUTING_LOOKUP_FAILED = 3 # failed to locate nearest way/edge
 ROUTING_ROUTE_FAILED = 4 # failed to compute route
 
-def getModule(m,d,i):
-  return(route(m,d,i))
+def getModule(m, d, i):
+  return(route(m, d, i))
+
 
 class route(ranaModule):
   """Routes"""
+
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self._goToInitialState()
@@ -111,8 +113,8 @@ class route(ranaModule):
         x and y must be floats, otherwise strange rounding errors occur, when converting to lat lon coordinates
         """
         (lat, lon) = proj.xy2ll(x, y)
-        self.set('startPos', (lat,lon))
-        self.start = (lat,lon)
+        self.set('startPos', (lat, lon))
+        self.start = (lat, lon)
         self.destination = None # clear destination
 
       self.expectStart = False
@@ -133,8 +135,8 @@ class route(ranaModule):
         x and y must be floats, otherwise strange rounding errors occur, when converting to lat lon coordinates
         """
         (lat, lon) = proj.xy2ll(x, y)
-        self.set('endPos', (lat,lon))
-        self.destination = (lat,lon)
+        self.set('endPos', (lat, lon))
+        self.destination = (lat, lon)
         self.start = None # clear start
 
       self.expectEnd = False
@@ -155,11 +157,11 @@ class route(ranaModule):
     elif message == "p2pRoute": # simple route, from here to selected point
       toPos = self.get("endPos", None)
       if toPos:
-        toLat,toLon = toPos
+        toLat, toLon = toPos
 
         fromPos = self.get("startPos", None)
         if fromPos:
-          fromLat,fromLon = fromPos
+          fromLat, fromLon = fromPos
 
           print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
 
@@ -185,8 +187,8 @@ class route(ranaModule):
         fromPos = pos
         toPos = endPos
 
-      (toLat,toLon) = toPos
-      (fromLat,fromLon) = fromPos
+      (toLat, toLon) = toPos
+      (fromLat, fromLon) = fromPos
 
       print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
 
@@ -199,14 +201,14 @@ class route(ranaModule):
           type = args['type']
           go = False
           if type == 'll2ll':
-            (fromLat,fromLon) = (float(args['fromLat']),float(args['fromLon']))
-            (toLat,toLon) = (float(args['toLat']),float(args['toLon']))
+            (fromLat, fromLon) = (float(args['fromLat']), float(args['fromLon']))
+            (toLat, toLon) = (float(args['toLat']), float(args['toLon']))
             go = True
           elif type == 'pos2ll':
             pos = self.get('pos', None)
             if pos:
-              (fromLat,fromLon) = pos
-              (toLat,toLon) = (float(args['toLat']),float(args['toLon']))
+              (fromLat, fromLon) = pos
+              (toLat, toLon) = (float(args['toLat']), float(args['toLon']))
               go = True
 
           if go: # are we GO for routing ?
@@ -221,10 +223,10 @@ class route(ranaModule):
               """switch to map view and go to start/destination, if requested"""
               where = args['show']
               if where == 'start':
-                (cLat, cLon) = (fromLat,fromLon)
+                (cLat, cLon) = (fromLat, fromLon)
               elif where == "destination":
-                (cLat, cLon) = (toLat,toLon)
-              self.sendMessage('mapView:recentre %f %f|set:menu:None' % (cLat,cLon))
+                (cLat, cLon) = (toLat, toLon)
+              self.sendMessage('mapView:recentre %f %f|set:menu:None' % (cLat, cLon))
 
             self.set('needRedraw', True) # show the new route
       else: # simple route, from here to selected point
@@ -233,7 +235,7 @@ class route(ranaModule):
         self.selectOnePoint = False
         toPos = self.get("selectedPos", None)
         if toPos:
-          toLat,toLon = [float(a) for a in toPos.split(",")]
+          toLat, toLon = [float(a) for a in toPos.split(",")]
 
           fromPos = self.get("pos", None)
           if fromPos:
@@ -253,7 +255,8 @@ class route(ranaModule):
         print("route: the route is empty, so it will not be stored")
         return
 
-      loadTracklogs.storeRouteAndSetActive(self.directions.getPointsLLE(), '', 'online') # TODO: rewrite this when we support more routing providers
+      loadTracklogs.storeRouteAndSetActive(self.directions.getPointsLLE(), '',
+        'online') # TODO: rewrite this when we support more routing providers
 
     elif message == "clearRoute":
       self._goToInitialState()
@@ -264,7 +267,7 @@ class route(ranaModule):
         print("route: text entry module not available")
         return
       entryText = self.get('startAddress', "")
-      entry.entryBox(self ,'start','Input the start address',entryText)
+      entry.entryBox(self, 'start', 'Input the start address', entryText)
 
     elif message == 'destinationInput':
       entry = self.m.get('textEntry', None)
@@ -272,7 +275,7 @@ class route(ranaModule):
         print("route: text entry module not available")
         return
       entryText = self.get('destinationAddress', "")
-      entry.entryBox(self,'destination','Input the destination address',entryText)
+      entry.entryBox(self, 'destination', 'Input the destination address', entryText)
 
     elif message == 'addressRoute':
       startAddress = self.get('startAddress', None)
@@ -316,6 +319,17 @@ class route(ranaModule):
           self.doRoute(pLat, pLon, dLat, dLon)
           self.start = None
 
+    elif type == 'ms' and message == 'addressRouteMenu':
+      if args == 'swap':
+        # get current values
+        start = self.get('startAddress', None)
+        destination = self.get('destinationAddress', None)
+        # swap them
+        self.set('startAddress', destination)
+        self.set('destinationAddress', start)
+        # redraw the screen to show the change
+        self.set('needRedraw', True)
+
   def doRoute(self, fromLat, fromLon, toLat, toLon):
     """Route from one point to another, and set that as the active route"""
     # clear old addresses
@@ -339,7 +353,7 @@ class route(ranaModule):
       # as monav is VERY fast for routing, the routing might still get done
       # asynchronously, but the work-in-progress overlay might show up
       # only once the search takes longer than say 2 seconds
-      self._handleResults("MonavRoute", (result, waypoints[0], waypoints[-1], sentTimestamp) )
+      self._handleResults("MonavRoute", (result, waypoints[0], waypoints[-1], sentTimestamp))
 
     else: # use Google Directions as fallback
       online = self.m.get('onlineServices', None)
@@ -347,15 +361,14 @@ class route(ranaModule):
         online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon), self._handleResults, "onlineRoute")
 
   def getMonavRoute(self, waypoints):
-
     mode = self.get('mode', 'car')
     # get mode based sub-folder
     # TODO: handle not all mode folders being available
     # (eq. user only downloading routing data for cars)
     modeFolders = {
-      'cycle':'routing_bike',
-      'walk':'routing_pedestrian',
-      'car':'routing_car'
+      'cycle': 'routing_bike',
+      'walk': 'routing_pedestrian',
+      'car': 'routing_car'
     }
     subFolder = modeFolders.get(mode, 'routing_car')
     dataPacks = self.getAvailableMonavDataPacks()
@@ -379,6 +392,7 @@ class route(ranaModule):
           # only import Monav & company when actually needed
           # -> the protobuf modules are quite large
           import monav_support
+
           self.monav = monav_support.Monav(self.modrana.paths.getMonavServerBinaryPath())
           self.monav.startServer()
         result = self.monav.monavDirections(monavDataFolder, waypoints)
@@ -409,7 +423,7 @@ class route(ranaModule):
     try:
       mainMonavFolder = self.modrana.paths.getMonavDataPath()
       dataPacks = os.listdir(mainMonavFolder)
-      dataPacks = filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks )
+      dataPacks = filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks)
       return sorted(dataPacks)
     except Exception, e:
       print('route: listing the Monav data packs failed')
@@ -422,7 +436,7 @@ class route(ranaModule):
     self._goToInitialState()
     online = self.m.get('onlineServices', None)
     if online:
-      print("route: routing from %s to %s" % (start,destination))
+      print("route: routing from %s to %s" % (start, destination))
       online.googleDirectionsAsync(start, destination, self._handleResults, "onlineRouteAddress2Address")
 
   def _handleResults(self, key, resultsTuple):
@@ -456,7 +470,7 @@ class route(ranaModule):
           # create the directions Way object
           dirs = way.fromGoogleDirectionsResult(directions)
           self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
-      # handle navigation autostart
+        # handle navigation autostart
       autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
       if autostart == 'enabled':
         self.sendMessage('ms:turnByTurn:start:%s' % autostart)
@@ -500,7 +514,7 @@ class route(ranaModule):
     self.routeRequestSentTimestamp = routeRequestSentTimestamp
     proj = self.m.get('projection', None)
     if proj:
-      self.pxpyRoute = [proj.ll2pxpyRel(x[0],x[1]) for x in directions.getPointsLLE()]
+      self.pxpyRoute = [proj.ll2pxpyRel(x[0], x[1]) for x in directions.getPointsLLE()]
     self.processAndSaveDirections(directions)
 
     (fromLat, fromLon) = directions.getPointByID(0).getLL()
@@ -574,7 +588,7 @@ class route(ranaModule):
 
     return directions
 
-  def processCyrillicString(self,inputString, voiceCode):
+  def processCyrillicString(self, inputString, voiceCode):
     """test if a given string contains any words with cyrillic characters
     if it does, tell espeak (by adding a sgml tag) to speak such words
     using voiceCode"""
@@ -610,7 +624,7 @@ class route(ranaModule):
         else: # no cyrillic string in progress
           # just store the current substring
           outputString = outputString + ' ' + substring
-    # cleanup
+      # cleanup
     if cyrillicStringTemp: #is there an "open" cyrillic string ?
       cyrillicStringTemp += '</p>' # close the string
       outputString += ' ' + cyrillicStringTemp
@@ -630,18 +644,18 @@ class route(ranaModule):
     #register clickable areas for manual point input
     if self.expectStart:
       clickHandler = self.m.get('clickHandler', None)
-      (x,y,w,h) = self.get('viewport')
+      (x, y, w, h) = self.get('viewport')
       if clickHandler is not None:
-        clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setStart')
+        clickHandler.registerXYWH(x, y, x + w, y + h, 'route:setStart')
     if self.expectEnd:
       clickHandler = self.m.get('clickHandler', None)
-      (x,y,w,h) = self.get('viewport')
+      (x, y, w, h) = self.get('viewport')
       if clickHandler is not None:
-        clickHandler.registerXYWH(x, y, x+w, y+h, 'route:setEnd')
+        clickHandler.registerXYWH(x, y, x + w, y + h, 'route:setEnd')
 
   def drawMapOverlay(self, cr):
     """Draw a route"""
-#    start1 = clock()
+    #    start1 = clock()
 
     if self.directions:
       # Where is the map?
@@ -655,28 +669,28 @@ class route(ranaModule):
       steps = self.directions.getMessagePointsLLE()
 
       # now we convert geographic coordinates to screen coordinates, so we dont need to do it twice
-      steps = map(lambda x: (proj.ll2xy(x[0],x[1])), steps)
+      steps = map(lambda x: (proj.ll2xy(x[0], x[1])), steps)
 
       if self.start:
         start = proj.ll2xy(self.start[0], self.start[1])
         # line from starting point to start of the route
-        (x,y) = start
-        (px1,py1) = self.pxpyRoute[0]
-        (x1,y1) = proj.pxpyRel2xy(px1, py1)
+        (x, y) = start
+        (px1, py1) = self.pxpyRoute[0]
+        (x1, y1) = proj.pxpyRel2xy(px1, py1)
         cr.set_source_rgba(0, 0, 0.5, 0.45)
         cr.set_line_width(10)
-        cr.move_to(x,y)
-        cr.line_to(x1,y1)
+        cr.move_to(x, y)
+        cr.line_to(x1, y1)
         cr.stroke()
 
       if self.destination:
         destination = proj.ll2xy(self.destination[0], self.destination[1])
         # line from the destination point to end of the route
-        (x,y) = destination
-        (px1,py1) = self.pxpyRoute[-1]
-        (x1,y1) = proj.pxpyRel2xy(px1, py1)
-        cr.move_to(x,y)
-        cr.line_to(x1,y1)
+        (x, y) = destination
+        (px1, py1) = self.pxpyRoute[-1]
+        (x1, y1) = proj.pxpyRel2xy(px1, py1)
+        cr.move_to(x, y)
+        cr.line_to(x1, y1)
         cr.stroke()
 
       cr.fill()
@@ -687,7 +701,7 @@ class route(ranaModule):
       cr.set_line_width(10)
 
       for step in steps:
-        (x,y) = step
+        (x, y) = step
         cr.arc(x, y, 3, 0, 2.0 * math.pi)
         cr.stroke()
 
@@ -698,9 +712,9 @@ class route(ranaModule):
 
       # draw the points from the polyline as a polyline :)
 
-      (px,py) = self.pxpyRoute[0]
-      (x,y) = proj.pxpyRel2xy(px, py)
-      cr.move_to(x,y)
+      (px, py) = self.pxpyRoute[0]
+      (x, y) = proj.pxpyRel2xy(px, py)
+      cr.move_to(x, y)
 
       # well, this SHOULD be faster and this is a performance critical section after all...
       #    map(lambda x: cr.line_to(x[0],x[1]), route[1:]) # lambda drawing :)
@@ -721,37 +735,37 @@ class route(ranaModule):
       # eq. long segments delimited by only two points, etc)
       # basically, routing results have only the really needed points -> less points than traces
       if 16 > z > 10:
-        modulo = 2**(14-z)
+        modulo = 2 ** (14 - z)
       elif z <= 10:
         modulo = 16
       else:
         modulo = 1
 
-  #    maxDraw = 300
-  #    drawCount = 0
-      counter=0
+        #    maxDraw = 300
+        #    drawCount = 0
+      counter = 0
 
       for point in self.pxpyRoute[1:]: #draw the track
-        counter+=1
-        if counter%modulo==0:
-  #      if 1:
-  #        drawCount+=1
-  #        if drawCount>maxDraw:
-  #          break
-          (px,py) = point
-          (x,y) = proj.pxpyRel2xy(px, py)
-          cr.line_to(x,y)
+        counter += 1
+        if counter % modulo == 0:
+        #      if 1:
+        #        drawCount+=1
+        #        if drawCount>maxDraw:
+        #          break
+          (px, py) = point
+          (x, y) = proj.pxpyRel2xy(px, py)
+          cr.line_to(x, y)
 
-      # make a line to the last point (the modulo method sometimes skips the end of the track)
-  #    [cr.line_to(x[0],x[1])for x in route[1:]] # list comprehension drawing :D
+          # make a line to the last point (the modulo method sometimes skips the end of the track)
+          #    [cr.line_to(x[0],x[1])for x in route[1:]] # list comprehension drawing :D
 
-  #    print(drawCount)
-  #    print(modulo)
+          #    print(drawCount)
+          #    print(modulo)
 
       # make sure the last point is connected
-      (px,py) = self.pxpyRoute[-1]
-      (x,y) = proj.pxpyRel2xy(px, py)
-      cr.line_to(x,y)
+      (px, py) = self.pxpyRoute[-1]
+      (x, y) = proj.pxpyRel2xy(px, py)
+      cr.line_to(x, y)
 
       cr.stroke()
 
@@ -759,27 +773,27 @@ class route(ranaModule):
       cr.set_source_rgb(1, 1, 0)
       cr.set_line_width(7)
       for step in steps:
-        (x,y) = step
+        (x, y) = step
         cr.arc(x, y, 2, 0, 2.0 * math.pi)
         cr.stroke()
       cr.fill()
-    # draw the the start/dest indicators over the route
+      # draw the the start/dest indicators over the route
     if self.selectTwoPoints:
       self.drawPointSelectors(cr)
 
-#    print("Redraw took %1.9f ms" % (1000 * (clock() - start1)))
+    #    print("Redraw took %1.9f ms" % (1000 * (clock() - start1)))
 
   def getCurrentDirections(self):
     # return the current route
     return self.directions, self.routeRequestSentTimestamp
 
-  def drawCurrentRouteInfoButton(self,cr):
-    (x,y,w,h) = self.get('viewport')
+  def drawCurrentRouteInfoButton(self, cr):
+    (x, y, w, h) = self.get('viewport')
     menus = self.m.get('menu', None)
-    dx = min(w,h) / 5.0
+    dx = min(w, h) / 5.0
     dy = dx
-    x1 = (x+w)-dx
-    y1 = (y-dy)+h
+    x1 = (x + w) - dx
+    y1 = (y - dy) + h
     if self.selectTwoPoints:
       """move to avoid collision with the point selection menu"""
       x1 -= dx
@@ -787,12 +801,12 @@ class route(ranaModule):
     menus.drawButton(cr, x1, y1, dx, dy, 'info#route', "generic:;0.5;;0.5;;", 'set:menu:route#currentRouteBackToMap')
 
   def drawTwoPointsMenu(self, cr):
-    (x,y,w,h) = self.get('viewport')
-    dx = min(w,h) / 5.0
+    (x, y, w, h) = self.get('viewport')
+    dx = min(w, h) / 5.0
     dy = dx
     menus = self.m.get('menu', None)
-    x1 = (x+w)-dx
-    y1 = (y-dy)+h
+    x1 = (x + w) - dx
+    y1 = (y - dy) + h
 
     startIcon = "generic:;0.5;;0.5;;"
     endIcon = "generic:;0.5;;0.5;;"
@@ -805,15 +819,15 @@ class route(ranaModule):
     if self.selectOnePoint:
       routingAction = 'route:p2posRoute'
 
-    menus.drawButton(cr, x1-dx, y1, dx, dy, 'start', startIcon, "route:expectStart")
-    menus.drawButton(cr, x1, y1-dy, dx, dy, 'end', endIcon, "route:expectEnd")
+    menus.drawButton(cr, x1 - dx, y1, dx, dy, 'start', startIcon, "route:expectStart")
+    menus.drawButton(cr, x1, y1 - dy, dx, dy, 'end', endIcon, "route:expectEnd")
     menus.drawButton(cr, x1, y1, dx, dy, 'route', "generic:;0.5;;0.5;;", routingAction)
 
     # "flush" cairo operations
     cr.stroke()
     cr.fill()
 
-  def drawPointSelectors(self,cr):
+  def drawPointSelectors(self, cr):
     # draw point selectors
     proj = self.m.get('projection', None)
     fromPos = self.get('startPos', None)
@@ -821,7 +835,7 @@ class route(ranaModule):
     if fromPos is not None:
       cr.set_line_width(10)
       cr.set_source_rgb(1, 0, 0)
-      (lat,lon) = fromPos
+      (lat, lon) = fromPos
 
       (x, y) = proj.ll2xy(lat, lon)
 
@@ -838,7 +852,7 @@ class route(ranaModule):
     if toPos is not None:
       cr.set_line_width(10)
       cr.set_source_rgb(0, 1, 0)
-      (lat,lon) = toPos
+      (lat, lon) = toPos
       (x, y) = proj.ll2xy(lat, lon)
       cr.arc(x, y, 2, 0, 2.0 * math.pi)
       cr.stroke()
@@ -861,7 +875,7 @@ class route(ranaModule):
 
   def drawMenu(self, cr, menuName, args=None):
     if menuName == 'currentRoute' or menuName == 'currentRouteBackToMap':
-      menus = self.m.get("menu",None)
+      menus = self.m.get("menu", None)
       if menus is None:
         print("route: no menu module, no menus will be drawn")
         return
@@ -873,7 +887,7 @@ class route(ranaModule):
         parent = 'set:menu:route'
 
       if self.directions:
-        (lat,lon) = self.directions.getPointByID(0).getLL()
+        (lat, lon) = self.directions.getPointByID(0).getLL()
         action = "mapView:recentre %f %f|set:menu:None" % (lat, lon)
 
       else:
@@ -900,7 +914,7 @@ class route(ranaModule):
         units = self.m.get('units', None) # get the correct units
         length = self.directions.getLength()
         if length:
-          distance = units.m2CurrentUnitString(length,1)
+          distance = units.m2CurrentUnitString(length, 1)
         else:
           distance = "? km"
         steps = self.directions.getMessagePointCount() # number of steps
@@ -920,12 +934,12 @@ class route(ranaModule):
           destination = "\ndestination address unknown"
 
         text = "%s" % start
-        text+= "%s" % destination
-        text+= "\n\n%s in about %s and %s steps" % (distance, duration, steps)
+        text += "%s" % destination
+        text += "\n\n%s in about %s and %s steps" % (distance, duration, steps)
         if self.start and self.destination:
-          (lat1,lon1) = (self.start[0],self.start[1])
-          (lat2,lon2) = (self.destination[0],self.destination[1])
-          text+= "\n(%f,%f)->(%f,%f)" % (lat1,lon1,lat2,lon2)
+          (lat1, lon1) = (self.start[0], self.start[1])
+          (lat2, lon2) = (self.destination[0], self.destination[1])
+          text += "\n(%f,%f)->(%f,%f)" % (lat1, lon1, lat2, lon2)
 
         self.text = text
       else:
@@ -934,17 +948,19 @@ class route(ranaModule):
       if self.once:
         self.once = False
 
-      box = (text , "set:menu:route#currentRoute")
+      box = (text, "set:menu:route#currentRoute")
       menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
       menus.clearMenu('currentRouteTools', "set:menu:route#currentRoute")
-      menus.addItem('currentRouteTools', 'tracklog#save as', 'generic', 'route:storeRoute|set:currentTracCat:online|set:menu:tracklogManager#tracklogInfo')
+      menus.addItem('currentRouteTools', 'tracklog#save as', 'generic',
+        'route:storeRoute|set:currentTracCat:online|set:menu:tracklogManager#tracklogInfo')
 
       # add turn-by-turn navigation buttons
       tbt = self.m.get('turnByTurn', None)
       if tbt:
         if tbt.enabled():
           menus.addItem('currentRouteTools', 'navigation#stop', 'generic', 'turnByTurn:stop|set:menu:None')
-          menus.addItem('currentRouteTools', 'navigation#restart', 'generic', 'turnByTurn:stop|ms:turnByTurn:start:closest|set:menu:None')
+          menus.addItem('currentRouteTools', 'navigation#restart', 'generic',
+            'turnByTurn:stop|ms:turnByTurn:start:closest|set:menu:None')
           self.set('needRedraw', True) # refresh the screen to show the changed button
         else:
           menus.addItem('currentRouteTools', 'navigation#start', 'generic', 'ms:turnByTurn:start:enabled|set:menu:None')
@@ -952,26 +968,30 @@ class route(ranaModule):
       menus.addItem('currentRouteTools', 'clear', 'generic', 'route:clear|set:menu:None')
 
     if menuName == "showAddressRoute":
-      menus = self.m.get("menu",None)
+      menus = self.m.get("menu", None)
       if menus:
-        (e1,e2,e3,e4,alloc) = menus.threePlusOneMenuCoords()
-        (x1,y1) = e1
-        (x2,y2) = e2
-        (x3,y3) = e3
-        (x4,y4) = e4
-        (w1,h1,dx,dy) = alloc
+        (e1, e2, e3, e4, alloc) = menus.threePlusOneMenuCoords()
+        (x1, y1) = e1
+        (x2, y2) = e2
+        (x3, y3) = e3
+        (x4, y4) = e4
+        (w1, h1, dx, dy) = alloc
 
         # * draw "escape" button
         menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:main")
+        # * swap
+        menus.drawButton(cr, x2, y2, dx, dy, "swap", "generic", "ms:route:addressRouteMenu:swap")
         # * route
-        menus.drawButton(cr, x2, y2, dx, dy, "route", "generic", "route:addressRoute")
+        menus.drawButton(cr, x3, y3, dx, dy, "route", "generic", "route:addressRoute")
 
         menus.clearMenu('currentRouteTools', "set:menu:route#currentRoute")
 
-        menus.drawButton(cr, x4, y4, w1-x4, dy,  "start", "generic", "route:startInput")
-        menus.drawButton(cr, x4, y4+2*dy, w1-x4, dy, "destination", "generic", "route:destinationInput")
-        menus.drawButton(cr, x4, y4+dy, (w1-x4)/2, dy, "as start#position", "generic", "route:posToStart|set:needRedraw:True")
-        menus.drawButton(cr, x4+(w1-x4)/2, y4+dy, (w1-x4)/2, dy, "as destination#position", "generic", "route:posToDestination|set:needRedraw:True")
+        menus.drawButton(cr, x4, y4, w1 - x4, dy, "start", "generic", "route:startInput")
+        menus.drawButton(cr, x4, y4 + 2 * dy, w1 - x4, dy, "destination", "generic", "route:destinationInput")
+        menus.drawButton(cr, x4, y4 + dy, (w1 - x4) / 2, dy, "as start#position", "generic",
+          "route:posToStart|set:needRedraw:True")
+        menus.drawButton(cr, x4 + (w1 - x4) / 2, y4 + dy, (w1 - x4) / 2, dy, "as destination#position", "generic",
+          "route:posToDestination|set:needRedraw:True")
 
         # try to get last used addresses
         startText = self.get('startAddress', None)
@@ -984,8 +1004,8 @@ class route(ranaModule):
         if destinationText is None:
           destinationText = "click to input destination address"
 
-        menus.showText(cr, startText, x4+w1/20, y4+dy/5, w1-x4-(w1/20)*2)
-        menus.showText(cr, destinationText, x4+w1/20, y4+2*dy+dy/5, w1-x4-(w1/20)*2)
+        menus.showText(cr, startText, x4 + w1 / 20, y4 + dy / 5, w1 - x4 - (w1 / 20) * 2)
+        menus.showText(cr, destinationText, x4 + w1 / 20, y4 + 2 * dy + dy / 5, w1 - x4 - (w1 / 20) * 2)
 
   def _geocodeStartAndDestination(self):
     """get the address of start and destination coordinates by using geocoding"""
@@ -996,7 +1016,7 @@ class route(ranaModule):
         (sLat, sLon) = self.start
       else:
         (sLat, sLon) = self.directions.getPointByID(0).getLL()
-      # geocode start
+        # geocode start
       online.reverseGeocodeAsync(sLat, sLon, self._handleResults, "startAddress", "Geocoding start")
 
       # destination coordinates
@@ -1012,8 +1032,8 @@ class route(ranaModule):
       self.monav.stopServer()
 
 if(__name__ == '__main__'):
-  d = {'transport':'car'}
-  a = route({},d)
+  d = {'transport': 'car'}
+  a = route({}, d)
   a.doRoute(51.51565, 0.06036, 51.65299, -0.19974) # Beckton -> Barnet
   print(a.route)
   
