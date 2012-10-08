@@ -7,8 +7,9 @@ from cStringIO import StringIO
 #import time
 
 class Empty(Exception):
-    "Exception raised by the Synchronized circular stack"
-    pass
+  "Exception raised by the Synchronized circular stack"
+  pass
+
 
 class SynchronizedCircularStack:
   """
@@ -21,7 +22,8 @@ class SynchronizedCircularStack:
 
 
   """
-  def __init__(self,maxItems=0):
+
+  def __init__(self, maxItems=0):
     self.list = []
     self.listLock = threading.Lock()
     self.maxItems = maxItems
@@ -32,9 +34,9 @@ class SynchronizedCircularStack:
       self.list.append(item)
       # check list size
       if self.maxItems:
-          # discard oldest items to get back to the limit
-          while len(self.list) > self.maxItems:
-            del self.list[0]
+        # discard oldest items to get back to the limit
+        while len(self.list) > self.maxItems:
+          del self.list[0]
 
   def batchPush(self, itemList):
     """batch push items in a smart way"""
@@ -71,9 +73,9 @@ class SynchronizedCircularStack:
     """
     with self.listLock:
       if len(self.list) == 0:
-        return (None,False)
+        return None, False
       else:
-        return (self.list.pop(),True)
+        return self.list.pop(), True
 
   def isIn(self, item):
     """item existence testing"""
@@ -87,9 +89,10 @@ class SynchronizedCircularStack:
 class ListContainer:
   """a WIP efficient list container, that does not need to actually store the
   whole list in memory"""
+
   def __init__(self):
     pass
-  
+
   def getItem(self, index):
     """return item with a given index"""
     pass
@@ -102,11 +105,13 @@ class ListContainer:
     """-1 indicates unknown item count"""
     pass
 
+
 class SimpleListContainer(ListContainer):
-  def __init__(self, items=[]):
+  def __init__(self, items=None):
+    if not items: items = []
     ListContainer.__init__(self)
     self.items = items
-    
+
   def getItem(self, index):
     return self.items[index]
 
@@ -116,10 +121,12 @@ class SimpleListContainer(ListContainer):
   def getLength(self):
     return len(self.items)
 
+
 class PointListContainer(ListContainer):
-  def __init__(self, points=[]):
+  def __init__(self, points=None):
+    if not points: points = []
     ListContainer.__init__(self)
-    self.points=points
+    self.points = points
 
   def getItem(self, index):
     return self.points[index]
@@ -129,6 +136,7 @@ class PointListContainer(ListContainer):
 
   def getLength(self):
     return len(self.points)
+
 
 def isTheStringAnImage(s):
   """test if the string contains an image
@@ -146,7 +154,7 @@ def isTheStringAnImage(s):
   # as most tiles are PNGs, check for PNG first
   if h[:8] == "\211PNG\r\n\032\n":
     return True
-  elif h[6:10] in ('JFIF','Exif'): # JPEG in JFIF or Exif format
+  elif h[6:10] in ('JFIF', 'Exif'): # JPEG in JFIF or Exif format
     return True
   elif h[:6] in ('GIF87a', 'GIF89a'): # GIF ('87 and '89 variants)
     return True
@@ -154,6 +162,7 @@ def isTheStringAnImage(s):
     return True
   else: # probably not an image file
     return False
+
 
 def createFolderPath(newPath):
   """
@@ -174,27 +183,27 @@ def createFolderPath(newPath):
     print("creating path: %s" % newPath)
     head, tail = os.path.split(newPath)
     if head and not os.path.isdir(head):
-        createFolderPath(head) # NOTE: recursion
+      createFolderPath(head) # NOTE: recursion
     if tail:
-        os.mkdir(newPath)
+      os.mkdir(newPath)
     return True
 
 # from:
 # http://www.5dollarwhitebox.org/drupal/node/84
 def bytes2PrettyUnitString(bytes):
-    bytes = float(bytes)
-    if bytes >= 1099511627776:
-        terabytes = bytes / 1099511627776
-        size = '%.2fTB' % terabytes
-    elif bytes >= 1073741824:
-        gigabytes = bytes / 1073741824
-        size = '%.2fGB' % gigabytes
-    elif bytes >= 1048576:
-        megabytes = bytes / 1048576
-        size = '%.2fMB' % megabytes
-    elif bytes >= 1024:
-        kilobytes = bytes / 1024
-        size = '%.2fKB' % kilobytes
-    else:
-        size = '%.2fb' % bytes
-    return size
+  bytes = float(bytes)
+  if bytes >= 1099511627776:
+    terabytes = bytes / 1099511627776
+    size = '%.2fTB' % terabytes
+  elif bytes >= 1073741824:
+    gigabytes = bytes / 1073741824
+    size = '%.2fGB' % gigabytes
+  elif bytes >= 1048576:
+    megabytes = bytes / 1048576
+    size = '%.2fMB' % megabytes
+  elif bytes >= 1024:
+    kilobytes = bytes / 1024
+    size = '%.2fKB' % kilobytes
+  else:
+    size = '%.2fb' % bytes
+  return size
