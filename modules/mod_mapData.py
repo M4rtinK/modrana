@@ -186,11 +186,11 @@ class mapData(ranaModule):
         self.get('zoomDownSize', 0)) # how many zoomlevels down (from current zoomlevel) should we download ?
 
       layer = self.get('layer', None)
-      maplayers = self.modrana.getMapLayers()
-      if maplayers == {}:
-        maxZoomLimit == 17
+      mapLayers = self.modrana.getMapLayers()
+      if mapLayers == {}:
+        maxZoomLimit = 17
       else:
-        maxZoomLimit = maplayers[layer]['maxZoom']
+        maxZoomLimit = mapLayers[layer]['maxZoom']
 
       if maxZ > maxZoomLimit:
         maxZ = 17 #TODO: make layer specific
