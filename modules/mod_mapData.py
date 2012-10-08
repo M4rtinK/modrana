@@ -126,13 +126,13 @@ class mapData(ranaModule):
 
   def getTileUrlAndPath(self, x, y, z, layer):
     mapTiles = self.m.get('mapTiles', None)
-    tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
     mapLayers = self.modrana.getMapLayers() # a dictionary describing supported map layers
     extension = mapLayers[layer]['type'] # what is the extension for the current layer ?
     folderPrefix = mapLayers[layer]['folderPrefix'] # what is the extension for the current layer ?
     url = self.getTileUrl(x, y, z, layer) # generate url
-    filePath = tileFolder + mapTiles.getImagePath(x, y, z, folderPrefix, extension)
-    fileFolder = tileFolder + mapTiles.getImageFolder(x, z, folderPrefix)
+    tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
+    filePath = os.path.join(tileFolder, mapTiles.getImagePath(x, y, z, folderPrefix, extension))
+    fileFolder = os.path.join(tileFolder, mapTiles.getImageFolder(x, z, folderPrefix))
     return url, filePath, fileFolder, folderPrefix, extension
 
   def addToQueue(self, neededTiles):
@@ -445,8 +445,8 @@ class mapData(ranaModule):
         for t in neededTiles:
           tile = t
           break
-        (z, x, y) = (tile[2], tile[0], tile[1])
-        (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
+        (x, y, z) = (tile[0], tile[1], tile[2])
+        url = self.callback.getTileUrl(x, y, z, self.layer)
       else:
         url = ""
       return url
@@ -601,8 +601,8 @@ class mapData(ranaModule):
         for t in neededTiles:
           tile = t
           break
-        (z, x, y) = (tile[2], tile[0], tile[1])
-        (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
+        (x, y, z) = (tile[0], tile[1], tile[2])
+        url = self.callback.getTileUrl(x, y, z, self.layer)
       else:
         url = ""
       return url
