@@ -32,33 +32,36 @@ import modrana_utils
 
 # socket timeout
 import socket
+
 timeout = 30 # this sets timeout for all sockets
 socket.setdefaulttimeout(timeout)
 
 
 class TileNotImageException(Exception):
-       def __init__(self):
-           self.parameter = 1
-       def __str__(self):
+  def __init__(self):
+    self.parameter = 1
 
-         message = "the downloaded tile is not an image as per \
+  def __str__(self):
+    message = "the downloaded tile is not an image as per \
 its magic number (it is probably an error response webpage \
 returned by the server)"
 
-         return message
-         
-def getModule(m,d,i):
-  return(mapData(m,d,i))
+    return message
+
+
+def getModule(m, d, i):
+  return(mapData(m, d, i))
+
 
 class mapData(ranaModule):
   """Handle downloading of map data"""
-  
+
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.stopThreading = True
     self.dlListLock = threading.Lock() # well, its actually a set
     self.currentDownloadList = [] # list of files and urls for the current download batch
-#    self.currentTilesToGet = [] # used for reporting the (actual) size of the tiles for download
+    #    self.currentTilesToGet = [] # used for reporting the (actual) size of the tiles for download
     self.sizeThread = None
     self.getFilesThread = None
     self.aliasForSet = self.set
@@ -83,9 +86,9 @@ class mapData(ranaModule):
     """List all tiles touched by a polyline"""
     tiles = {}
     for pos in route:
-      (lat,lon) = pos
-      (tx,ty) = tileXY(lat, lon, 15)
-      tile = "%d,%d" % (tx,ty)
+      (lat, lon) = pos
+      (tx, ty) = tileXY(lat, lon, 15)
+      tile = "%d,%d" % (tx, ty)
       if not tiles.has_key(tile):
         tiles[tile] = True
     return tiles.keys()
@@ -98,20 +101,20 @@ class mapData(ranaModule):
     print "Checking if there are duplicated tiles"
     start = clock()
     tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-    if tileFolder == None:
+    if tileFolder is None:
       print "mapData: tile folder path unknown or unusable"
       return []
     layer = self.get('layer', None) # TODO: manual layer setting
-    maplayers = self.modrana.getMapLayers() # a dictionary describing supported map layers
-    extension = maplayers[layer]['type'] # what is the extension for the current layer ?
-    folderPrefix = maplayers[layer]['folderPrefix'] # what is the extension for the current layer ?
+    mapLayers = self.modrana.getMapLayers() # a dictionary describing supported map layers
+    extension = mapLayers[layer]['type'] # what is the extension for the current layer ?
+    folderPrefix = mapLayers[layer]['folderPrefix'] # what is the extension for the current layer ?
 
     mapTiles = self.m.get('mapTiles', None)
 
     neededTiles = []
 
     for tile in tilesToDownload: # check what tiles are already stored
-      (z,x,y) = (tile[2],tile[0],tile[1])
+      (z, x, y) = (tile[2], tile[0], tile[1])
       filePath = tileFolder + mapTiles.getImagePath(x, y, z, folderPrefix, extension)
       if not os.path.exists(filePath): # we don't have this file
         neededTiles.append(tile)
@@ -121,7 +124,7 @@ class mapData(ranaModule):
     return neededTiles
 
 
-  def getTileUrlAndPath(self,x,y,z,layer):
+  def getTileUrlAndPath(self, x, y, z, layer):
     mapTiles = self.m.get('mapTiles', None)
     tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
     maplayers = self.modrana.getMapLayers() # a dictionary describing supported map layers
@@ -130,7 +133,7 @@ class mapData(ranaModule):
     url = self.getTileUrl(x, y, z, layer) # generate url
     filePath = tileFolder + mapTiles.getImagePath(x, y, z, folderPrefix, extension)
     fileFolder = tileFolder + mapTiles.getImageFolder(x, z, folderPrefix)
-    return url,filePath, fileFolder, folderPrefix, extension
+    return url, filePath, fileFolder, folderPrefix, extension
 
   def addToQueue(self, neededTiles):
     """load urls and filenames to download queue,
@@ -146,20 +149,20 @@ class mapData(ranaModule):
     with self.dlListLock: # make sure the set of needed tiles is accessed in an atomic way
       self.currentDownloadList = neededTiles # load the files to the download queue variable
 
-  def getTileUrl(self,x,y,z,layer):
-      """Return url for given tile coordinates and layer"""
-      mapTiles = self.m.get('mapTiles', None)
-      if mapTiles:
-        url = mapTiles.getTileUrl(x,y,z,layer)
-        return url
-      else:
-        return None
+  def getTileUrl(self, x, y, z, layer):
+    """Return url for given tile coordinates and layer"""
+    mapTiles = self.m.get('mapTiles', None)
+    if mapTiles:
+      url = mapTiles.getTileUrl(x, y, z, layer)
+      return url
+    else:
+      return None
 
   def handleMessage(self, message, type, args):
     if message == "refreshTilecount":
       size = int(self.get("downloadSize", 4))
       type = self.get("downloadType")
-      if(type != "data"):
+      if type != "data":
         print "Error: mod_mapData can't download %s" % type
         return
 
@@ -172,14 +175,15 @@ class mapData(ranaModule):
       if self.getFilesThread:
         if self.getFilesThread.isAlive() == False:
           self.getFilesThread = None
-      
+
       location = self.get("downloadArea", "here") # here or route
 
       z = self.get('z', 15) # this is the current zoomlevel as show on the map screen
       minZ = z - int(self.get('zoomUpSize', 0)) # how many zoomlevels up (from current zoomelevel) should we download ?
       if minZ < 0:
         minZ = 0
-      maxZ = z + int(self.get('zoomDownSize', 0)) # how many zoomlevels down (from current zoomlevel) should we download ?
+      maxZ = z + int(
+        self.get('zoomDownSize', 0)) # how many zoomlevels down (from current zoomlevel) should we download ?
 
       layer = self.get('layer', None)
       maplayers = self.modrana.getMapLayers()
@@ -190,9 +194,9 @@ class mapData(ranaModule):
 
       if maxZ > maxZoomLimit:
         maxZ = 17 #TODO: make layer specific
-#      z = currentZ # current Zoomlevel
+      #      z = currentZ # current Zoomlevel
       diffZ = maxZ - minZ
-      midZ = int(minZ + (diffZ/2.0))
+      midZ = int(minZ + (diffZ / 2.0))
 
       """well, its not exactly middle, its jut a value that decides, if we split down or just round up
          splitting from a zoomlevel too high can lead to much more tiles than requested
@@ -209,17 +213,16 @@ class mapData(ranaModule):
 
       if location == "here":
         # Find which tile we're on
-        pos = self.get("pos",None)
+        pos = self.get("pos", None)
         if pos is not None:
-          (lat,lon) = pos
+          (lat, lon) = pos
           # be advised: the xy in this case are not screen coordinates but tile coordinates
-          (x,y) = latlon2xy(lat,lon,midZ)
-          tilesAroundHere = set(self.spiral(x,y,midZ,size)) # get tiles around our position as a set
+          (x, y) = latlon2xy(lat, lon, midZ)
+          tilesAroundHere = set(self.spiral(x, y, midZ, size)) # get tiles around our position as a set
           # now get the tiles from other zoomlevels as specified
           zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundHere, midZ, maxZ, minZ)
 
           self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-
 
       if location == "route":
         loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
@@ -228,19 +231,19 @@ class mapData(ranaModule):
         also might need to add interpolated points, we make a local copy of
         the original list"""
         #latLonOnly = filter(lambda x: [x.latitude,x.longitude])
-        trackpointsListCopy = map(lambda x: {'latitude': x.latitude,'longitude': x.longitude}, GPXTracklog.trackpointsList[0])[:]
+        trackpointsListCopy =
+        map(lambda x: {'latitude': x.latitude, 'longitude': x.longitude}, GPXTracklog.trackpointsList[0])[:]
         tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, midZ)
         zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
 
         self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-        
 
       if location == "view":
         proj = self.m.get('projection', None)
-        (screenCenterX,screenCenterY) = proj.screenPos(0.5, 0.5) # get pixel coordinates for the screen center
-        (lat,lon) = proj.xy2ll(screenCenterX,screenCenterY) # convert to geographic coordinates
-        (x,y) = latlon2xy(lat,lon,midZ) # convert to tile coordinates
-        tilesAroundView = set(self.spiral(x,y,midZ,size)) # get tiles around these coordinates
+        (screenCenterX, screenCenterY) = proj.screenPos(0.5, 0.5) # get pixel coordinates for the screen center
+        (lat, lon) = proj.xy2ll(screenCenterX, screenCenterY) # convert to geographic coordinates
+        (x, y) = latlon2xy(lat, lon, midZ) # convert to tile coordinates
+        tilesAroundView = set(self.spiral(x, y, midZ, size)) # get tiles around these coordinates
         # now get the tiles from other zoomlevels as specified
         zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundView, midZ, maxZ, minZ)
 
@@ -263,7 +266,8 @@ class mapData(ranaModule):
 
       self.totalSize = 0
       maxThreads = self.get('maxSizeThreads', 5)
-      sizeThread = self.GetSize(self, neededTiles, layer, maxThreads) # the second parameter is the max number of threads TODO: tweak this
+      sizeThread = self.GetSize(self, neededTiles, layer,
+        maxThreads) # the second parameter is the max number of threads TODO: tweak this
       print  "getSize received, starting sizeThread"
       sizeThread.start()
       self.sizeThread = sizeThread
@@ -281,7 +285,7 @@ class mapData(ranaModule):
         if self.getFilesThread.finished == False:
           print "download already in progress"
           return
-        
+
       maxThreads = self.get('maxDlThreads', 5)
       """
       2.Oct.2010 2:41 :D
@@ -290,14 +294,14 @@ class mapData(ranaModule):
       this currently happens only on the N900, not on PC (or I was simply not able to to reproduce it)
       therefore, when on N900 with sqlite tile storage, use only simple single-threaded download
       """
-#      if self.device=='n900':
-#        storageType = self.get('tileStorageType', None)
-#        if storageType=='sqlite':
-#          mode='singleThreaded'
-#        else:
-#          mode='multiThreaded'
-#      else:
-#        mode='multiThreaded'
+      #      if self.device=='n900':
+      #        storageType = self.get('tileStorageType', None)
+      #        if storageType=='sqlite':
+      #          mode='singleThreaded'
+      #        else:
+      #          mode='multiThreaded'
+      #      else:
+      #        mode='multiThreaded'
       """
       2.Oct.2010 3:42 ^^
       scratch this
@@ -316,7 +320,7 @@ class mapData(ranaModule):
       self.stopSizeThreads()
 
     if message == "up":
-      if(self.scroll > 0):
+      if self.scroll > 0:
         self.scroll -= 1
         self.set('needRedraw', True)
     if message == "down":
@@ -364,16 +368,16 @@ class mapData(ranaModule):
         2x,2y  |2x+1,2y
         2x,2y+1|2x+1,2y+1
         """
-        leftUpperTile = (2*x, 2*y, z+1)
-        rightUpperTile = (2*x+1, 2*y, z+1)
-        leftLowerTile = (2*x, 2*y+1, z+1)
-        rightLowerTile = (2*x+1, 2*y+1, z+1)
+        leftUpperTile = (2 * x, 2 * y, z + 1)
+        rightUpperTile = (2 * x + 1, 2 * y, z + 1)
+        leftLowerTile = (2 * x, 2 * y + 1, z + 1)
+        rightLowerTile = (2 * x + 1, 2 * y + 1, z + 1)
         newTilesFromSplit.add(leftUpperTile)
         newTilesFromSplit.add(rightUpperTile)
         newTilesFromSplit.add(leftLowerTile)
         newTilesFromSplit.add(rightLowerTile)
       extendedTiles.update(newTilesFromSplit) # add the new tiles to the main set
-      print "we are at z=%d, %d new tiles from %d" % (z, len(newTilesFromSplit), (z+1))
+      print "we are at z=%d, %d new tiles from %d" % (z, len(newTilesFromSplit), (z + 1))
       previousZoomlevelTiles = newTilesFromSplit # set the new tiles s as prev. tiles for next iteration
 
     """start of the tile coordinates rounding code"""
@@ -392,9 +396,9 @@ class mapData(ranaModule):
         we divide each coordinate with 2 to get the upper tile
         some upper tiles can be found up to four times, so this could be most probably
         optimized if need be (for charting the Jupiter, Sun or a Dyson sphere ? :)"""
-        upperTileX = int(x/2.0)
-        upperTileY = int(y/2.0)
-        upperTile = (upperTileX,upperTileY, z)
+        upperTileX = int(x / 2.0)
+        upperTileY = int(y / 2.0)
+        upperTile = (upperTileX, upperTileY, z)
         newTilesFromRounding.add(upperTile)
       extendedTiles.update(newTilesFromRounding) # add the new tiles to the main set
       print "we are at z=%d, %d new tiles" % (z, len(newTilesFromRounding))
@@ -410,13 +414,14 @@ class mapData(ranaModule):
   class GetSize(Thread):
     """a class used for estimating the size of tiles for given set of coordinates,
        it also removes locally available tiles from the set"""
+
     def __init__(self, callback, neededTiles, layer, maxThreads):
       Thread.__init__(self)
       self.callback = callback
-      self.callbackSet=neededTiles # reference to the actual global set
-      self.neededTiles=neededTiles.copy() # local version
-      self.maxThreads=maxThreads
-      self.layer=layer
+      self.callbackSet = neededTiles # reference to the actual global set
+      self.neededTiles = neededTiles.copy() # local version
+      self.maxThreads = maxThreads
+      self.layer = layer
       self.processed = 0
       self.urlCount = len(neededTiles)
       self.totalSize = 0
@@ -429,8 +434,9 @@ class mapData(ranaModule):
       """create the connection pool -> to facilitate socket reuse"""
       timeout = self.callback.onlineRequestTimeout
       #headers = { 'User-Agent' : "Mozilla/5.0 (compatible; MSIE 5.5; Linux)" }
-      headers = { 'User-Agent' : "modRana flexible GPS navigation system (compatible; Linux)" }
-      connPool = urllib3.connection_from_url(url, headers=headers, timeout=timeout, maxsize=self.maxThreads, block=False)
+      headers = {'User-Agent': "modRana flexible GPS navigation system (compatible; Linux)"}
+      connPool = urllib3.connection_from_url(url, headers=headers, timeout=timeout, maxsize=self.maxThreads,
+        block=False)
       return connPool
 
     def getAnUrl(self, neededTiles):
@@ -440,7 +446,7 @@ class mapData(ranaModule):
         for t in neededTiles:
           tile = t
           break
-        (z,x,y) = (tile[2],tile[0],tile[1])
+        (z, x, y) = (tile[2], tile[0], tile[1])
         (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
       else:
         url = ""
@@ -448,14 +454,14 @@ class mapData(ranaModule):
 
     def run(self):
       print "**!! batch tile size estimation is starting !!**"
-      maxThreads=self.maxThreads
+      maxThreads = self.maxThreads
       shutdown = threading.Event()
       localDlListLock = threading.Lock()
       incrementLock = threading.Lock()
       threads = []
-      for i in range(0,maxThreads): # start threads
+      for i in range(0, maxThreads): # start threads
         """start download thread"""
-        t = Thread(target=self.getSizeWorker, args=(shutdown,incrementLock,localDlListLock))
+        t = Thread(target=self.getSizeWorker, args=(shutdown, incrementLock, localDlListLock))
         t.daemon = True
         t.start()
         threads.append(t)
@@ -463,33 +469,33 @@ class mapData(ranaModule):
       while True:
         time.sleep(self.callback.batchInfoUpdateInterval) # this governs how often we check status of the worker threads
         print "Batch size working...",
-        print "(threads: %i)," % (threading.activeCount()-1, ),
-        print"pending: %d, done: %d" % (len(self.neededTiles),self.processed)
+        print "(threads: %i)," % (threading.activeCount() - 1, ),
+        print"pending: %d, done: %d" % (len(self.neededTiles), self.processed)
         if self.quit == True: # we were ordered to quit
           print "***get size quiting"
           shutdown.set() # dismiss all workers
           self.finished = True
           break
         if not self.neededTiles: # we processed everything
-              print "***get size finished"
-              shutdown.set()
-              self.finished = True
-              break
+          print "***get size finished"
+          shutdown.set()
+          self.finished = True
+          break
 
-    def getSizeWorker(self, shutdown, incrementLock,localDlListLock):
+    def getSizeWorker(self, shutdown, incrementLock, localDlListLock):
       """a worker thread method for estimating tile size"""
       while 1:
         if shutdown.isSet():
           print "file size estimation thread is shutting down"
           break
-        # try to get some work
+          # try to get some work
         with localDlListLock:
           if self.neededTiles:
             item = self.neededTiles.pop()
           else:
             print "no more work, worker quiting"
             break
-        # try to retrieve size of a tile
+          # try to retrieve size of a tile
         size = 0
         try:
           size = self.getSizeForURL(item)
@@ -502,8 +508,8 @@ class mapData(ranaModule):
             self.callbackSet.discard(item)
           size = 0 # tiles we don't have don't need to be downloaded, therefore 0
         with incrementLock:
-          self.processed+=1
-          self.totalSize+=size
+          self.processed += 1
+          self.totalSize += size
 
     def getSizeForURL(self, tile):
       """get a size of a tile from its metadata
@@ -511,20 +517,21 @@ class mapData(ranaModule):
            return None if the tile is available
            return 0 if there is an Exception"""
       size = 0
+      url = "unknown url"
       try:
         # xet the coordinates
-        (z,x,y) = (tile[2],tile[0],tile[1])
+        (z, x, y) = (tile[2], tile[0], tile[1])
         # get the url and other info
         (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
         m = self.callback.m.get('storeTiles', None) # get the tile storage module
         # get the store tiles module
         if m:
           # does the tile exist ?
-          if m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
+          if m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread=True): # if the file does not exist
             size = None # it exists, return None
           else:
             # the tile does not exist, get ist http header
-            request = self.connPool.urlopen('HEAD',url)
+            request = self.connPool.urlopen('HEAD', url)
             size = int(request.getheaders()['content-length'])
       except IOError:
         print "Could not open document: %s" % url
@@ -534,16 +541,17 @@ class mapData(ranaModule):
         print e
         size = 0
       return size
-    
+
 
   class GetFiles(Thread):
     """a class used for downloading tiles based on a given set of coordinates"""
+
     def __init__(self, callback, neededTiles, layer, maxThreads):
       Thread.__init__(self)
       self.callback = callback
       self.neededTiles = neededTiles
       self.maxThreads = maxThreads
-      self.layer=layer
+      self.layer = layer
 
       self.retryCount = 3
 
@@ -572,7 +580,7 @@ class mapData(ranaModule):
 
     def getFailedDownloads(self):
       return self.failedDownloads
-    
+
     def getFailedDownloadCount(self):
       return len(self.failedDownloads)
 
@@ -594,16 +602,16 @@ class mapData(ranaModule):
         for t in neededTiles:
           tile = t
           break
-        (z,x,y) = (tile[2],tile[0],tile[1])
+        (z, x, y) = (tile[2], tile[0], tile[1])
         (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
       else:
         url = ""
       return url
-    
+
     def createConnectionPool(self, url):
       """create the connection pool -> to facilitate socket reuse"""
       timeout = self.callback.onlineRequestTimeout
-      connPool = urllib3.connection_from_url(url,timeout=timeout,maxsize=self.maxThreads, block=False)
+      connPool = urllib3.connection_from_url(url, timeout=timeout, maxsize=self.maxThreads, block=False)
       return connPool
 
     def run(self):
@@ -614,9 +622,9 @@ class mapData(ranaModule):
       workFinished = False
 
       threads = []
-      for i in range(0,maxThreads): # start threads
+      for i in range(0, maxThreads): # start threads
         """start download threads"""
-        t = Thread(target=self.getTilesWorker, args=(shutdown,incrementLock))
+        t = Thread(target=self.getTilesWorker, args=(shutdown, incrementLock))
         t.daemon = True
         t.start()
         threads.append(t)
@@ -626,8 +634,8 @@ class mapData(ranaModule):
       while True:
         time.sleep(self.callback.batchInfoUpdateInterval)
         print "Batch tile dl working...",
-        print"(threads: %i)" % (threading.activeCount()-1, ),
-        print"pending: %d, done: %d" % (len(self.neededTiles),self.processed)
+        print"(threads: %i)" % (threading.activeCount() - 1, ),
+        print"pending: %d, done: %d" % (len(self.neededTiles), self.processed)
         # there is some downloading going on so a notification will be needed
         self.callback.notificateOnce = True
         if self.quit == True: # we were ordered to quit
@@ -639,8 +647,8 @@ class mapData(ranaModule):
           if self.failedDownloads: # retry failed downloads
             if self.retryCount > 0:
               # retry failed tiles
-              self.retryCount-=1
-              self.retryInProgress+=1
+              self.retryCount -= 1
+              self.retryInProgress += 1
               self.neededTiles = list(self.failedDownloads) # make a copy
               self._resetCounts()
             else: # retries exhausted, quit
@@ -659,13 +667,12 @@ class mapData(ranaModule):
           break
 
 
-
     def getTilesWorker(self, shutdown, incrementLock):
       while 1:
         if shutdown.isSet():
           print "file download thread is shutting down"
           break
-        # try to get some work
+          # try to get some work
         try:
           with self.callback.dlListLock:
             item = self.neededTiles.pop()
@@ -673,37 +680,36 @@ class mapData(ranaModule):
           print "waiting for more work"
           time.sleep(2)
           continue
-          
+
         # try to retrieve and store the tile
         failed = False
         dl = False
         try:
-
           dlSize = self.saveTileForURL(item)
         except Exception, e:
           failed = True
           # TODO: try to re-download failed tiles
           print "exception in get tiles thread:\n%s" % e
-#          import traceback, sys
-#          traceback.print_exc(file=sys.stdout) # find what went wrong
+        #          import traceback, sys
+        #          traceback.print_exc(file=sys.stdout) # find what went wrong
         # increment the counter in a thread safe way
         with incrementLock:
-          self.processed+=1
+          self.processed += 1
           if failed:
             self.failedDownloads.append(item)
-          elif dlSize!=False:
-            self.downloaded+=1
-            self.transfered+=dlSize
+          elif dlSize != False:
+            self.downloaded += 1
+            self.transfered += dlSize
 
     def saveTileForURL(self, tile):
       """save a tile for url created from its coordinates"""
-      (z,x,y) = (tile[2],tile[0],tile[1])
+      (z, x, y) = (tile[2], tile[0], tile[1])
       (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
       m = self.callback.m.get('storeTiles', None) # get the tile storage module
       if m:
         # does the the file exist ?
         # TODO: maybe make something like tile objects so we don't have to pass so many parameters ?
-        if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread = True): # if the file does not exist
+        if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread=True): # if the file does not exist
           request = self.connPool.get_url(url)
           size = int(request.getheaders()['content-length'])
           content = request.data
@@ -719,7 +725,6 @@ class mapData(ranaModule):
           """
           if modrana_utils.isTheStringAnImage(content):
             #its an image, save it
-            fromThread=True
             m.automaticStoreTile(content, folderPrefix, z, x, y, layerType, filename)
           else:
             # its not ana image, raise exception
@@ -733,40 +738,44 @@ class mapData(ranaModule):
     tiles = {}
     tileset = [[int(b) for b in a.split(",")] for a in tileset]
     for tile in tileset:
-      (x,y) = tile
-      for dx in range(-amount, amount+1):
-        for dy in range(-amount, amount+1):
-          tiles["%d,%d" % (x+dx,y+dy)] = True
+      (x, y) = tile
+      for dx in range(-amount, amount + 1):
+        for dy in range(-amount, amount + 1):
+          tiles["%d,%d" % (x + dx, y + dy)] = True
     return tiles.keys()
 
   def spiral(self, x, y, z, distance):
-    (x,y) = (int(round(x)),int(round(y)))
+    (x, y) = (int(round(x)), int(round(y)))
     """for now we are downloading just tiles,
     so I modified this to round the coordinates right after we get them"""
+
     class spiraller:
-      def __init__(self,x,y,z):
+      def __init__(self, x, y, z):
         self.x = x
         self.y = y
         self.z = z
-        self.tiles = [(x,y,z)]
-      def moveX(self,dx, direction):
+        self.tiles = [(x, y, z)]
+
+      def moveX(self, dx, direction):
         for i in range(dx):
           self.x += direction
           self.touch(self.x, self.y, self.z)
-      def moveY(self,dy, direction):
+
+      def moveY(self, dy, direction):
         for i in range(dy):
           self.y += direction
           self.touch(self.x, self.y, self.z)
-      def touch(self,x,y,z):
-        self.tiles.append((x,y,z))
-        
-    s =spiraller(x,y,z)
-    for d in range(1,distance+1):
+
+      def touch(self, x, y, z):
+        self.tiles.append((x, y, z))
+
+    s = spiraller(x, y, z)
+    for d in range(1, distance + 1):
       s.moveX(1, 1) # 1 right
-      s.moveY(d*2-1, -1) # d*2-1 up
-      s.moveX(d*2, -1)   # d*2 left
-      s.moveY(d*2, 1)    # d*2 down
-      s.moveX(d*2, 1)    # d*2 right
+      s.moveY(d * 2 - 1, -1) # d*2-1 up
+      s.moveX(d * 2, -1)   # d*2 left
+      s.moveY(d * 2, 1)    # d*2 down
+      s.moveX(d * 2, 1)    # d*2 right
     return s.tiles
 
   def getTilesForRoute(self, route, radius, z):
@@ -796,11 +805,11 @@ class mapData(ranaModule):
     start = clock()
     tilesToDownload = set()
     for point in route: #now we iterate over all points of the route
-      (lat,lon) = (point['latitude'], point['longitude'])
+      (lat, lon) = (point['latitude'], point['longitude'])
       # be advised: the xy in this case are not screen coordinates but tile coordinates
-      (x,y) = latlon2xy(lat,lon,z)
+      (x, y) = latlon2xy(lat, lon, z)
       # the spiral gives us tiles around coordinates for a given radius
-      currentPointTiles = self.spiral(x,y,z,radius)
+      currentPointTiles = self.spiral(x, y, z, radius)
       """now we take the resulting list  and process it in such a way,
       that the tiles coordinates can be stored in a set,
       so we will save only unique tiles"""
@@ -815,14 +824,15 @@ class mapData(ranaModule):
     until their distance is less or or equal to maxDistance
     (this is actually a wrapper for a local recursive function)"""
     pointsBetween = []
+
     def localAddPointsToLine(lat1, lon1, lat2, lon2, maxDistance):
       distance = geo.distance(lat1, lon1, lat2, lon2)
       if distance <= maxDistance: # the termination criterion
         return
       else:
-        middleLat = (lat1 + lat2)/2.0 # fin the midpoint between the two points
-        middleLon = (lon1 + lon2)/2.0
-        pointsBetween.extend([{'latitude': middleLat,'longitude': middleLon}])
+        middleLat = (lat1 + lat2) / 2.0 # fin the midpoint between the two points
+        middleLon = (lon1 + lon2) / 2.0
+        pointsBetween.extend([{'latitude': middleLat, 'longitude': middleLon}])
         # process the 2 new line segments
         localAddPointsToLine(lat1, lon1, middleLat, middleLon, maxDistance)
         localAddPointsToLine(middleLat, middleLon, lat2, lon2, maxDistance)
@@ -840,9 +850,9 @@ class mapData(ranaModule):
       -> look at the map OR the batch progress :)**"""
       time.sleep(0.5)
       self.set('needRedraw', True)
-      (x1,y1,w,h) = self.get('viewport', None)
+      (x1, y1, w, h) = self.get('viewport', None)
       self.set('dataMenu', 'edit')
-      menus = self.m.get("menu",None)
+      menus = self.m.get("menu", None)
       sizeThread = self.sizeThread
       getFilesThread = self.getFilesThread
       self.set("batchMenuEntered", True)
@@ -853,7 +863,7 @@ class mapData(ranaModule):
       elif w < h:
         cols = 3
         rows = 4
-      elif w == h:
+      else: # w == h
         cols = 4
         rows = 4
 
@@ -862,45 +872,43 @@ class mapData(ranaModule):
       # * draw "escape" button
       menus.drawButton(cr, x1, y1, dx, dy, "", "back", "menu:rebootDataMenu|set:menu:main")
       # * draw "edit" button
-      menus.drawButton(cr, (x1+w)-2*dx, y1, dx, dy, "edit", "tools", "menu:setupEditBatchMenu|set:menu:editBatch")
+      menus.drawButton(cr, (x1 + w) - 2 * dx, y1, dx, dy, "edit", "tools", "menu:setupEditBatchMenu|set:menu:editBatch")
       # * draw "start" button
       if self.getFilesThread:
         if self.getFilesThread.isFinished():
-          menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "retry", "start", "mapData:download")
+          menus.drawButton(cr, (x1 + w) - 1 * dx, y1, dx, dy, "retry", "start", "mapData:download")
         else:
-          menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "stop", "stop", "mapData:stopDownloadThreads")
+          menus.drawButton(cr, (x1 + w) - 1 * dx, y1, dx, dy, "stop", "stop", "mapData:stopDownloadThreads")
       else:
-        menus.drawButton(cr, (x1+w)-1*dx, y1, dx, dy, "start", "start", "mapData:download")
-      # * draw the combined info area and size button (aka "box")
+        menus.drawButton(cr, (x1 + w) - 1 * dx, y1, dx, dy, "start", "start", "mapData:download")
+        # * draw the combined info area and size button (aka "box")
       boxX = x1
-      boxY = y1+dy
+      boxY = y1 + dy
       boxW = w
-      boxH = h-dy
+      boxH = h - dy
       if self.sizeThread:
         menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "generic", "mapData:stopSizeThreads")
       else:
         menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "generic", "mapData:getSize")
-      # * display information about download status
+        # * display information about download status
       getFilesText = self.getFilesText(getFilesThread)
       sizeText = self.getSizeText(sizeThread)
-      getFilesTextX = boxX + dx/8
-      getFilesTextY = boxY + boxH*1/10
-      menus.showText(cr, "%s\n\n%s" % (getFilesText, sizeText), getFilesTextX, getFilesTextY, w-dx/4, 40)
+      getFilesTextX = boxX + dx / 8
+      getFilesTextY = boxY + boxH * 1 / 10
+      menus.showText(cr, "%s\n\n%s" % (getFilesText, sizeText), getFilesTextX, getFilesTextY, w - dx / 4, 40)
 
-#      # * display information about size of the tiles
-#      sizeTextX = boxX + dx/8
-#      sizeTextY = boxY + boxH*2/4
-#      menus.showText(cr, sizeText, sizeTextX, sizeTextY, w-dx/4, 40)
+      #      # * display information about size of the tiles
+      #      sizeTextX = boxX + dx/8
+      #      sizeTextY = boxY + boxH*2/4
+      #      menus.showText(cr, sizeText, sizeTextX, sizeTextY, w-dx/4, 40)
 
       # * display information about free space available (for the filesystem with tilefolder)
       freeSpaceText = self.getFreeSpaceText()
-      freeSpaceTextX = boxX + dx/8
-      freeSpaceTextY = boxY + boxH * 3/4
-      menus.showText(cr, freeSpaceText, freeSpaceTextX, freeSpaceTextY, w-dx/4, 40)
+      freeSpaceTextX = boxX + dx / 8
+      freeSpaceTextY = boxY + boxH * 3 / 4
+      menus.showText(cr, freeSpaceText, freeSpaceTextX, freeSpaceTextY, w - dx / 4, 40)
 
     if menuName == 'chooseRouteForDl':
-
-
       menus = self.m.get('menu', None)
       tracks = self.m.get('loadTracklogs', None).getTracklogList()
       print tracks
@@ -913,16 +921,16 @@ class mapData(ranaModule):
 
         status = self.get('editBatchMenuActive', False)
         if status == True:
-          action+= '|menu:setupEditBatchMenu|set:menu:editBatch'
+          action += '|menu:setupEditBatchMenu|set:menu:editBatch'
         else:
-          action+= '|set:menu:data2'
+          action += '|set:menu:data2'
         name = tracks[index]['filename']
         desc = 'cat.: ' + track['cat'] + '   size:' + track['size'] + '   last modified:' + track['lastModified']
-#        if track.perElevList:
-#          length = track.perElevList[-1][0]
-#          units = self.m.get('units', None)
-#          desc+=", %s" % units.km2CurrentUnitString(length)
-        return name,desc,action
+        #        if track.perElevList:
+        #          length = track.perElevList[-1][0]
+        #          units = self.m.get('units', None)
+        #          desc+=", %s" % units.km2CurrentUnitString(length)
+        return name, desc, action
 
 
       status = self.get('editBatchMenuActive', False)
@@ -946,7 +954,7 @@ class mapData(ranaModule):
     else:
       (currentTileCount, totalTileCount, BTotalTransferred, failedCount) = getFilesThread.getProgress()
       if getFilesThread.isAlive() == True:
-        MBTotalTransferred = BTotalTransferred/float(1048576)
+        MBTotalTransferred = BTotalTransferred / float(1048576)
         totalTileCount = getFilesThread.urlCount
         currentTileCount = getFilesThread.processed
         retryNumber = getFilesThread.getRetryInProgress()
@@ -960,7 +968,8 @@ class mapData(ranaModule):
           failedCountString = "1 download failed"
         else:
           failedCountString = "%d downloads failed" % failedCount
-        text = "<b>%s</b>: <b>%d</b> of <b>%d</b> tiles done\n<b>%1.2f MB</b> transferred, %s" % (action, currentTileCount, totalTileCount, MBTotalTransferred, failedCountString)
+        text = "<b>%s</b>: <b>%d</b> of <b>%d</b> tiles done\n<b>%1.2f MB</b> transferred, %s" % (
+        action, currentTileCount, totalTileCount, MBTotalTransferred, failedCountString)
       elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
         if getFilesThread.getDownloadCount():
           # some downloads occurred
@@ -985,12 +994,12 @@ class mapData(ranaModule):
     elif sizeThread.isAlive():
       totalTileCount = sizeThread.urlCount
       currentTileCount = sizeThread.processed
-      currentSize = sizeThread.totalSize/1048576 # = 1024.0*1024.0
+      currentSize = sizeThread.totalSize / 1048576 # = 1024.0*1024.0
       text = "Checking: %d of %d tiles complete(<b>%1.0f MB</b>)" % (currentTileCount, totalTileCount, currentSize)
       return text
     elif sizeThread.isAlive() == False:
-      sizeInMB = sizeThread.totalSize/(1024.0*1024.0)
-      text = "Total size for download: %1.2f MB" % (sizeInMB)
+      sizeInMB = sizeThread.totalSize / (1024.0 * 1024.0)
+      text = "Total size for download: %1.2f MB" % sizeInMB
       return text
 
   def getFreeSpaceText(self):
@@ -998,14 +1007,14 @@ class mapData(ranaModule):
     path = self._getTileFolderPath()
     f = os.statvfs(path)
     freeSpaceInBytes = (f.f_bsize * f.f_bavail)
-    freeSpaceInMB = freeSpaceInBytes/(1024.0*1024.0)
+    freeSpaceInMB = freeSpaceInBytes / (1024.0 * 1024.0)
     text = "Free space available: %1.1f MB" % freeSpaceInMB
     return text
 
   def stopSizeThreads(self):
     if self.sizeThread:
       try:
-        self.sizeThread.quit=True
+        self.sizeThread.quit = True
       except Exception, e:
         print("error while shutting down size thread")
         print(e)
@@ -1016,7 +1025,7 @@ class mapData(ranaModule):
   def stopBatchDownloadThreads(self):
     if self.getFilesThread:
       try:
-        self.getFilesThread.quit=True
+        self.getFilesThread.quit = True
       except Exception, e:
         print("error while shutting down files thread")
         print(e)
