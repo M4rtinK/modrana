@@ -38,10 +38,10 @@ if gs.GUIString == "GTK":
   import gtk
 
 def getModule(m, d, i):
-  return(storeTiles(m, d, i))
+  return(StoreTiles(m, d, i))
 
 
-class storeTiles(ranaModule):
+class StoreTiles(ranaModule):
   """Single-file-fs tile storage"""
   #TODO: maybe run this in separate thread ?
 
