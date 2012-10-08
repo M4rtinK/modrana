@@ -502,8 +502,14 @@ class StoreTiles(ranaModule):
         try:
           os.makedirs(folderPath) # create the folder
         except Exception, e:
-          print("mapTiles: can't create folder %s for %s" % (folderPath, filename))
-          print(e)
+          # errno 17 - folder already exists
+          # this is most probably cased by another thread creating the folder between
+          # the check & our os.makedirs() call
+          # -> we can safely ignore it (as the the only thing we are now interested in,
+          # is having a folder to store the tile in)
+          if e.errno != 17:
+            print("storeTiles: can't create folder %s for %s" % (folderPath, filename))
+            print(e)
 
       f = open(filename, 'w') # write the tile to a file
       f.write(tile)
