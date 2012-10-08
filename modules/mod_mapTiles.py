@@ -139,15 +139,15 @@ class MapTiles(ranaModule):
     layerType = layerInfo.get('type', 'png')
     tileData = self._storeTiles.getTileData(layerPrefix, z, x, y, layerType)
     if tileData:
-    #      print "got tile FROM disk CACHE"
+    #      print("got tile FROM disk CACHE")
       # tile was available from storage
       return tileData
 
-    #    print "download"
+    #    print("download")
     url = self.getTileUrl(x, y, z, layer)
-    #    print url
+    #    print(url)
     response = self._getConnPool(layer, url).get_url(url)
-    #    print "RESPONSE"
+    #    print("RESPONSE")
     tileData = response.data
 
     if tileData:
@@ -156,7 +156,7 @@ class MapTiles(ranaModule):
         tileFolder = self.modrana.paths.getMapFolderPath()
         filePath = os.path.join(tileFolder, self.getImagePath(x, y, z, layerPrefix, layerType))
         self._storeTiles.automaticStoreTile(tileData, layerPrefix, z, x, y, layerType, filePath)
-        #        print "STORED"
+        #        print("STORED")
         return tileData
       else:
         print("mapTiles: tile data returned by remote tileserver was not an image")
@@ -950,7 +950,7 @@ Therefore we use it as default."""
   def getImageFolder(self, x, z, prefix):
     """Get a unique name for a tile image
     (suitable for use as part of filenames, dictionary keys, etc)"""
-    return "%s/%d/%d" % (prefix, z, x)
+    return os.path.join(prefix, str(z), str(x))
 
   def _getTileFolderPath(self):
     """helper function that returns path to the tile folder"""
