@@ -127,9 +127,9 @@ class mapData(ranaModule):
   def getTileUrlAndPath(self, x, y, z, layer):
     mapTiles = self.m.get('mapTiles', None)
     tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-    maplayers = self.modrana.getMapLayers() # a dictionary describing supported map layers
-    extension = maplayers[layer]['type'] # what is the extension for the current layer ?
-    folderPrefix = maplayers[layer]['folderPrefix'] # what is the extension for the current layer ?
+    mapLayers = self.modrana.getMapLayers() # a dictionary describing supported map layers
+    extension = mapLayers[layer]['type'] # what is the extension for the current layer ?
+    folderPrefix = mapLayers[layer]['folderPrefix'] # what is the extension for the current layer ?
     url = self.getTileUrl(x, y, z, layer) # generate url
     filePath = tileFolder + mapTiles.getImagePath(x, y, z, folderPrefix, extension)
     fileFolder = tileFolder + mapTiles.getImageFolder(x, z, folderPrefix)
