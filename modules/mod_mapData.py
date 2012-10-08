@@ -231,8 +231,7 @@ class mapData(ranaModule):
         also might need to add interpolated points, we make a local copy of
         the original list"""
         #latLonOnly = filter(lambda x: [x.latitude,x.longitude])
-        trackpointsListCopy =
-        map(lambda x: {'latitude': x.latitude, 'longitude': x.longitude}, GPXTracklog.trackpointsList[0])[:]
+        trackpointsListCopy = map(lambda x: {'latitude': x.latitude, 'longitude': x.longitude}, GPXTracklog.trackpointsList[0])[:]
         tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, midZ)
         zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
 
