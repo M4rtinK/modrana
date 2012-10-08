@@ -194,7 +194,7 @@ class mapData(ranaModule):
 
       if maxZ > maxZoomLimit:
         maxZ = 17 #TODO: make layer specific
-      #      z = currentZ # current Zoomlevel
+        #      z = currentZ # current Zoomlevel
       diffZ = maxZ - minZ
       midZ = int(minZ + (diffZ / 2.0))
 
@@ -495,7 +495,7 @@ class mapData(ranaModule):
           else:
             print "no more work, worker quiting"
             break
-          # try to retrieve size of a tile
+            # try to retrieve size of a tile
         size = 0
         try:
           size = self.getSizeForURL(item)
@@ -690,7 +690,7 @@ class mapData(ranaModule):
           failed = True
           # TODO: try to re-download failed tiles
           print "exception in get tiles thread:\n%s" % e
-        #          import traceback, sys
+          #          import traceback, sys
         #          traceback.print_exc(file=sys.stdout) # find what went wrong
         # increment the counter in a thread safe way
         with incrementLock:
@@ -969,7 +969,7 @@ class mapData(ranaModule):
         else:
           failedCountString = "%d downloads failed" % failedCount
         text = "<b>%s</b>: <b>%d</b> of <b>%d</b> tiles done\n<b>%1.2f MB</b> transferred, %s" % (
-        action, currentTileCount, totalTileCount, MBTotalTransferred, failedCountString)
+          action, currentTileCount, totalTileCount, MBTotalTransferred, failedCountString)
       elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
         if getFilesThread.getDownloadCount():
           # some downloads occurred
