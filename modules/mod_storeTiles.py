@@ -371,7 +371,7 @@ class storeTiles(ranaModule):
        if fromThread=False, a new connection is created and disconnected again
        NEW CLEANED UP VERSION"""
     layerInfo = self._mapTiles.mapLayers.get(layer, None)
-    if(layerInfo == None): # is the layer info valid ?
+    if layerInfo is None: # is the layer info valid ?
       print("storeTiles: invalid layer")
       return None
     storageType = self.get('tileStorageType', 'files')
@@ -379,7 +379,7 @@ class storeTiles(ranaModule):
     extension = layerInfo.get('type', 'png')
     if storageType == 'sqlite': # we are storing to the database
       dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
-      if dbFolderPath != None: # is the database accessible ?
+      if dbFolderPath is not None: # is the database accessible ?
         with self.lookupConnectionLock:
           """ just to make sure the access is sequential
           (due to sqlite in python 2.5 probably not liking concurrent access,
@@ -410,7 +410,7 @@ class storeTiles(ranaModule):
     storageType = self.get('tileStorageType', 'files')
     if storageType == 'sqlite': # we are storing to the database
       dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
-      if dbFolderPath != None: # is the database accessible ?
+      if dbFolderPath is not None: # is the database accessible ?
         with self.lookupConnectionLock:
           """ just to make sure the access is sequential
           (due to sqlite in python 2.5 probably not liking concurrent access,
@@ -501,8 +501,9 @@ class storeTiles(ranaModule):
       if not os.path.exists(folderPath): # does it exist ?
         try:
           os.makedirs(folderPath) # create the folder
-        except:
+        except Exception, e:
           print("mapTiles: can't create folder %s for %s" % (folderPath, filename))
+          print(e)
 
       f = open(filename, 'w') # write the tile to a file
       f.write(tile)
