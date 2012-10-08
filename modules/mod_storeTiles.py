@@ -135,46 +135,46 @@ class storeTiles(ranaModule):
     if self.get('storeDownloadedTiles', True):
       accessType = "store"
       dbFolderPath = self.initializeDb(folderPrefix, accessType)
-      if dbFolderPath != None:
+      if dbFolderPath is not None:
         lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
-      stores = self.layers[accessType][dbFolderPath]['stores'] # get a list of cached store connections
+        stores = self.layers[accessType][dbFolderPath]['stores'] # get a list of cached store connections
 
-      lookupCursor = lookupConn.cursor()
-      with self.lookupConnectionLock:
-        """ just to make sure the access is sequential
-        (due to sqlite in python 2.5 probably not liking concurrent access,
-        resulting in te database becoming unavailable)"""
-        result = lookupCursor.execute(
-          "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
-          (z, x, y, extension))
-        if not result.fetchone():
-          # store the tile as its not already in the database
+        lookupCursor = lookupConn.cursor()
+        with self.lookupConnectionLock:
+          """ just to make sure the access is sequential
+          (due to sqlite in python 2.5 probably not liking concurrent access,
+          resulting in te database becoming unavailable)"""
+          result = lookupCursor.execute(
+            "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
+            (z, x, y, extension))
+          if not result.fetchone():
+            # store the tile as its not already in the database
 
-          # get a store path
-          size = len(tile)
-          pathToStore = self.getAnAvailableStorePath(folderPrefix, size)
+            # get a store path
+            size = len(tile)
+            pathToStore = self.getAnAvailableStorePath(folderPrefix, size)
 
-          # connect to the store
-          storeConn = self.connectToStore(stores, pathToStore, dbFolderPath, accessType)
+            # connect to the store
+            storeConn = self.connectToStore(stores, pathToStore, dbFolderPath, accessType)
 
-          # store the tile
-          integerTimestamp = int(time.time())
-          try:
-            ## 1. write in the lookup db (its easier to remove pointers to nonexistent stuff than to remove orphaned store items)
-            storeFilename = os.path.basename(pathToStore)
-            lookupQuery = "insert into tiles (z, x, y, store_filename, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
-            lookupCursor = lookupConn.cursor()
-            lookupCursor.execute(lookupQuery, [z, x, y, storeFilename, extension, integerTimestamp])
+            # store the tile
+            integerTimestamp = int(time.time())
+            try:
+              ## 1. write in the lookup db (its easier to remove pointers to nonexistent stuff than to remove orphaned store items)
+              storeFilename = os.path.basename(pathToStore)
+              lookupQuery = "insert into tiles (z, x, y, store_filename, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
+              lookupCursor = lookupConn.cursor()
+              lookupCursor.execute(lookupQuery, [z, x, y, storeFilename, extension, integerTimestamp])
 
-            ## 2. write in the store
-            storeQuery = "insert into tiles (z, x, y, tile, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
-            storeCursor = storeConn.cursor()
-            storeCursor.execute(storeQuery, [z, x, y, sqlite3.Binary(tile), extension, integerTimestamp])
-            self.commitConnections([storeConn, lookupConn])
-          except Exception, e:
-            print("tile already present")
-            print(e)
-            pass #tile is already present, skip insert
+              ## 2. write in the store
+              storeQuery = "insert into tiles (z, x, y, tile, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
+              storeCursor = storeConn.cursor()
+              storeCursor.execute(storeQuery, [z, x, y, sqlite3.Binary(tile), extension, integerTimestamp])
+              self.commitConnections([storeConn, lookupConn])
+            except Exception, e:
+              print("tile already present")
+              print(e)
+              pass #tile is already present, skip insert
 
   def commitConnections(self, connections):
     """store connections and commit them once in a while"""
