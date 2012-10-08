@@ -332,30 +332,30 @@ class MapTiles(ranaModule):
               self.downloadRequestPool = cleanPool
         except Exception, e:
           print("exception in tile download manager thread:\n%s" % e)
-        #          traceback.print_exc()
+          #          traceback.print_exc()
 
-        #  def startTileLoadingThread(self):
-        #    """start the loading-request consumer thread"""
-        #    t = Thread(target=self.tileLoader, name='tile loading thread')
-        #    t.setDaemon(True) # we need that the worker dies with the program
-        #    t.start()
+          #  def startTileLoadingThread(self):
+          #    """start the loading-request consumer thread"""
+          #    t = Thread(target=self.tileLoader, name='tile loading thread')
+          #    t.setDaemon(True) # we need that the worker dies with the program
+          #    t.start()
 
-        #  def tileLoader(self):
-        #    """this is a tile loading request consumer thread"""
-        #    while True:
-        #      request = self.loadingNotifyQueue.get(block=True) # consume from this queue
-        #      if request == 'load':
-        #        # start processing loading requests from the stack
-        #        while(1):
-        #          (item,valid) = self.loadRequestCStack.popValid()
-        #          if valid:
-        #            (name, x, y, z, layer) = item
-        #            self.loadImage(name, x, y, z, layer)
-        #          else:
-        #            break # the stack is empty
-        #      elif request == 'shutdown':
-        #        print "\nmapTiles: tile loading thread shutting down"
-        #        break
+          #  def tileLoader(self):
+          #    """this is a tile loading request consumer thread"""
+          #    while True:
+          #      request = self.loadingNotifyQueue.get(block=True) # consume from this queue
+          #      if request == 'load':
+          #        # start processing loading requests from the stack
+          #        while(1):
+          #          (item,valid) = self.loadRequestCStack.popValid()
+          #          if valid:
+          #            (name, x, y, z, layer) = item
+          #            self.loadImage(name, x, y, z, layer)
+          #          else:
+          #            break # the stack is empty
+          #      elif request == 'shutdown':
+          #        print "\nmapTiles: tile loading thread shutting down"
+          #        break
 
   def _startIdleTileLoader(self):
     """add the tile loader as a gobject mainloop idle callback"""
@@ -397,33 +397,33 @@ class MapTiles(ranaModule):
       (name, path) = tile
       self.loadImageFromFile(path, name, type="special", dictIndex=1)
 
-    #  def _checkAutomaticTileDownloads(self):
-    #    """monitor if the automatic tile downloads finished and then remove them from the dictionary
-    #    (also automagically refreshes the screen once new tiles are available, even when not centered)"""
-    #
-    #
-    #    """seems that some added error handling in the download thread class can replace this,
-    #       but it left here for testing purposes"""
-    #    z = self.get('z', 15)
-    #    """when we change zoomlevel and the number of threads does not change,
-    #       we clear the threads set, this is useful, because:
-    #       * failed downloads don't accumulate and will be tried again when we visit this zoomlevel again
-    #       * tile downloads that don't actually exist (eq tiles from max+1 zoomlevel) don't accumulate
-    #       it is important to have the "self.threads" set empty when we are not downloading anything,
-    #       because otherwise we are wasting time on the "refresh on finished tile download" logic and also
-    #       the set could theoretically cause a memory leak if not periodically cleared from wrong items
-    #
-    #       this method was chosen instead of a timeout, because it would be hard to set a timeout,
-    #       that would work on GPRS and a fast connection
-    #    """
-    #    if self.oldZ != z:
-    ##      print "resetting z"
-    #      self.oldZ = z
-    #      if len(self.threads) == self.oldThreadCount:
-    #        print "clearing thread set"
-    #        self.threads = {}
-    #        self.oldThreadCount = len(self.threads)
-    #    self.oldThreadCount = len(self.threads)
+      #  def _checkAutomaticTileDownloads(self):
+      #    """monitor if the automatic tile downloads finished and then remove them from the dictionary
+      #    (also automagically refreshes the screen once new tiles are available, even when not centered)"""
+      #
+      #
+      #    """seems that some added error handling in the download thread class can replace this,
+      #       but it left here for testing purposes"""
+      #    z = self.get('z', 15)
+      #    """when we change zoomlevel and the number of threads does not change,
+      #       we clear the threads set, this is useful, because:
+      #       * failed downloads don't accumulate and will be tried again when we visit this zoomlevel again
+      #       * tile downloads that don't actually exist (eq tiles from max+1 zoomlevel) don't accumulate
+      #       it is important to have the "self.threads" set empty when we are not downloading anything,
+      #       because otherwise we are wasting time on the "refresh on finished tile download" logic and also
+      #       the set could theoretically cause a memory leak if not periodically cleared from wrong items
+      #
+      #       this method was chosen instead of a timeout, because it would be hard to set a timeout,
+      #       that would work on GPRS and a fast connection
+      #    """
+      #    if self.oldZ != z:
+      ##      print "resetting z"
+      #      self.oldZ = z
+      #      if len(self.threads) == self.oldThreadCount:
+      #        print "clearing thread set"
+      #        self.threads = {}
+      #        self.oldThreadCount = len(self.threads)
+      #    self.oldThreadCount = len(self.threads)
 
   def beforeDraw(self):
     """we need to synchronize centering with map redraw,
@@ -436,7 +436,7 @@ class MapTiles(ranaModule):
     if self.get('reportTileCacheStatus', False): # TODO: set to False by default
       print("** tile cache status report **")
       print("threads: %d, images: %d, special tiles: %d, downloadRequestPool:%d" % (
-      len(self.threads), len(self.images[0]), len(self.images[1]), len(self.downloadRequestPool)))
+        len(self.threads), len(self.images[0]), len(self.images[1]), len(self.downloadRequestPool)))
 
   def drawMap(self, cr):
     """Draw map tile images"""
@@ -449,9 +449,9 @@ class MapTiles(ranaModule):
           function in place of the default one"""
 
       singleGetName = self.getTileName
+      ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
+      (alphaOver, alphaBack) = (float(ratio[0]), float(ratio[1])) # convert it to floats
       if overlay:
-        ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
-        (alphaOver, alphaBack) = (float(ratio[0]), float(ratio[1])) # convert it to floats
         layer1 = self.get('layer', 'mapnik')
         layer2 = self.get('layer2', 'cycle')
         layerInfo = ((layer1, alphaBack), (layer2, alphaOver))
@@ -604,18 +604,18 @@ class MapTiles(ranaModule):
               if gui.getShowRedrawTime():
                 print "currently visible tiles: %d/%d" % (visibleCounter, wTiles * hTiles)
 
-              #            cr.set_source_rgba(0,1,0,0.5)
-              #            cr.move_to(*p1.as_tuple())
-              #            cr.line_to(*p2.as_tuple())
-              #            cr.line_to(*p4.as_tuple())
-              #            cr.line_to(*p3.as_tuple())
-              #            cr.line_to(*p1.as_tuple())
-              #            cr.close_path()
-              #            cr.fill()
-              #
-              #            cr.set_source_rgba(1,0,0,1)
-              #            cr.rectangle(scP.x-10,scP.y-10,20,20)
-              #            cr.fill()
+                #            cr.set_source_rgba(0,1,0,0.5)
+                #            cr.move_to(*p1.as_tuple())
+                #            cr.line_to(*p2.as_tuple())
+                #            cr.line_to(*p4.as_tuple())
+                #            cr.line_to(*p3.as_tuple())
+                #            cr.line_to(*p1.as_tuple())
+                #            cr.close_path()
+                #            cr.fill()
+                #
+                #            cr.set_source_rgba(1,0,0,1)
+                #            cr.rectangle(scP.x-10,scP.y-10,20,20)
+                #            cr.fill()
 
         else:
           # draw without rotation
@@ -691,10 +691,10 @@ class MapTiles(ranaModule):
         # try to start the idle tile loader
         self._startIdleTileLoader()
 
-      #    except Queue.Full:
-      #      """as we use the queue as a notification mechanism, we don't actually need to
-      #      process all the "load" notifications """
-      #      pass
+        #    except Queue.Full:
+        #      """as we use the queue as a notification mechanism, we don't actually need to
+        #      process all the "load" notifications """
+        #      pass
 
     except Exception, e:
       print("mapTiles: exception while drawing the map layer: %s" % e)
@@ -1022,7 +1022,7 @@ Therefore we use it as default."""
 
     def run(self):
       try:
-        self.downloadTile(\
+        self.downloadTile(
           self.name,
           self.x,
           self.y,
@@ -1079,7 +1079,7 @@ Therefore we use it as default."""
       url = self.callback.getTileUrl(self.x, self.y, self.z, self.layer)
       print("mapTiles: download thread reports error")
       print("** we were doing this, when an exception occurred:")
-      print("** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s, url: %s" % (\
+      print("** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s, url: %s" % (
         self.x,
         self.y,
         self.z,
@@ -1133,7 +1133,7 @@ Therefore we use it as default."""
 
 # modified from: http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/globalmaptiles.py (GPL)
 def quadTree(tx, ty, zoom ):
-  "Converts OSM type tile coordinates to Microsoft QuadTree"
+  """Converts OSM type tile coordinates to Microsoft QuadTree"""
 
   quadKey = ""
   #		ty = (2**zoom - 1) - ty
