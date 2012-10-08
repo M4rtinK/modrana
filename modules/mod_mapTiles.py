@@ -57,9 +57,9 @@ class MapTiles(ranaModule):
     self.images = [{}, {}] # the first dict contains normal image data, the second contains special tiles
     self.imagesLock = threading.RLock()
     self.threads = {}
-    self.threadlListCondition = threading.Condition(threading.Lock())
-    self.maxImagesInMemmory = 150 # to avoid a memory leak
-    self.imagesTrimmingAmmount = 30 # how many tiles to remove once the maximum is reached
+    self.threadListCondition = threading.Condition(threading.Lock())
+    self.maxImagesInMemory = 150 # to avoid a memory leak
+    self.imagesTrimmingAmount = 30 # how many tiles to remove once the maximum is reached
     self.loadRequestCStackSize = 10 # size for the circular loading request stack
     """so that trim does not run always run after adding a tile"""
     self.tileSide = 256 # by default, the tiles are squares, side=256
@@ -216,14 +216,14 @@ class MapTiles(ranaModule):
     if self.get('network', 'full') == 'full':
       filename = os.path.join(self._getTileFolderPath(), (self.getImagePath(x, y, z, layerPrefix, layerType)))
       # add tile download request
-      with self.threadlListCondition:
+      with self.threadListCondition:
         timestamp = time.time()
         request = (name, x, y, z, layer, layerPrefix, layerType, filename, timestamp)
 
         with self.downloadRequestPoolLock: # add a download request
           self.downloadRequestPool.append(request)
 
-        self.threadlListCondition.notifyAll() # wake up the download manager
+        self.threadListCondition.notifyAll() # wake up the download manager
 
   def tileInProgress(self, layer, z, x, y):
     """
@@ -276,12 +276,12 @@ class MapTiles(ranaModule):
   def tileDownloadManager(self):
     """this is a tile loading request consumer thread"""
     while True:
-      with self.threadlListCondition:
+      with self.threadListCondition:
         try:
           """
           wait for notification that there might be download requests or free download slots
           """
-          self.threadlListCondition.wait()
+          self.threadListCondition.wait()
           if self.shutdownAllThreads:
             print("\nmapTiles: automatic tile download management thread shutting down")
             break
@@ -771,7 +771,7 @@ class MapTiles(ranaModule):
     sprint("loading tile %s" % name)
 
     # first, is it already in the process of being downloaded?
-    with self.threadlListCondition:
+    with self.threadListCondition:
       if name in self.threads.keys():
         sprint("tile is being downloaded")
         if not self.threads[name].finished:
@@ -814,7 +814,7 @@ class MapTiles(ranaModule):
       # use threads
       """the thread list condition is used to signalize to the download manager,
       that here is a new download request"""
-      with self.threadlListCondition:
+      with self.threadListCondition:
         timestamp = time.time()
         request = (name, x, y, z, layer, layerPrefix, layerType, filename, timestamp)
 
@@ -826,7 +826,7 @@ class MapTiles(ranaModule):
         with self.downloadRequestPoolLock: # add a download request
           self.downloadRequestPool.append(request)
 
-        self.threadlListCondition.notifyAll() # wake back the download manager
+        self.threadListCondition.notifyAll() # wake back the download manager
     else:
       sprint("automatic tile download disabled - not starting download")
 
@@ -871,7 +871,7 @@ class MapTiles(ranaModule):
 
       """ check cache size,
       if there are too many images, delete them """
-      if len(self.images[0]) > self.maxImagesInMemmory:
+      if len(self.images[0]) > self.maxImagesInMemory:
         self.trimCache()
         # new tile available, make redraw request TODO: what overhead does this create ?
       self._tileLoadedNotify(type)
@@ -899,7 +899,7 @@ class MapTiles(ranaModule):
        as the special image cache (images[1]) is just created once and not updated dynamically
        NOTE: the storeInMemmory method already locked images, so we don't have to
        """
-    trimmingAmmount = self.imagesTrimmingAmmount
+    trimmingAmmount = self.imagesTrimmingAmount
     imagesLength = len(self.images[0])
     if trimmingAmmount >= imagesLength:
       """
@@ -939,7 +939,7 @@ Therefore we use it as default."""
   def imageName(self, x, y, z, layer):
     """Get a unique name for a tile image 
     (suitable for use as part of filenames, dictionary keys, etc)"""
-    return("%s_%d_%d_%d" % (layer, z, x, y))
+    return "%s_%d_%d_%d" % (layer, z, x, y)
 
   def getImagePath(self, x, y, z, prefix, extension):
     """Get a unique name for a tile image
@@ -957,7 +957,7 @@ Therefore we use it as default."""
     return self.mapFolderPath
 
   def imageY(self, z, extension):
-    return ('%d.%s') % (z, extension)
+    return '%d.%s' % (z, extension)
 
   def getTileUrl(self, x, y, z, layer):
     """Return url for given tile coordinates and layer"""
@@ -1000,8 +1000,8 @@ Therefore we use it as default."""
     #      """the tile loading thread is demonic, so it will be still killed in the end"""
     #      pass
     # notify the automatic tile download manager thread about the shutdown
-    with self.threadlListCondition:
-      self.threadlListCondition.notifyAll()
+    with self.threadListCondition:
+      self.threadListCondition.notifyAll()
 
   class TileDownloader(Thread):
     """Downloads an image (in a thread)"""
@@ -1032,7 +1032,7 @@ Therefore we use it as default."""
         self.finished = 1
 
       # something is wrong with the server or url
-      except urllib2.HTTPError, e:
+      except urllib2.HTTPError:
         if self.useImageSurface:
           tileDownloadFailedSurface = self.callback.images[1]['tileDownloadFailed'][0]
           expireTimestamp = time.time() + 10
