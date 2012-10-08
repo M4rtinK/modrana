@@ -130,15 +130,14 @@ class storeTiles(ranaModule):
         connection.commit()
       self.layers[accessType][dbFolderPath] = {'lookup': connection, 'stores': {}}
 
-
   def storeTile(self, tile, folderPrefix, z, x, y, extension):
+    """save a given tile to local storage"""
     if self.get('storeDownloadedTiles', True):
       accessType = "store"
       dbFolderPath = self.initializeDb(folderPrefix, accessType)
       if dbFolderPath is not None:
         lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
         stores = self.layers[accessType][dbFolderPath]['stores'] # get a list of cached store connections
-
         lookupCursor = lookupConn.cursor()
         with self.lookupConnectionLock:
           """ just to make sure the access is sequential
@@ -310,7 +309,7 @@ class storeTiles(ranaModule):
     if storageType == 'sqlite':
       accessType = "get"
       dbFolderPath = self.initializeDb(folderPrefix, accessType)
-      if dbFolderPath != None:
+      if dbFolderPath is not None:
         lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
         result = self.getTileFromDb(lookupConn, dbFolderPath, z, x, y, extension)
         if result: # is the result valid ?
