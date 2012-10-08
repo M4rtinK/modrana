@@ -24,12 +24,13 @@ import subprocess
 import re
 import threading
 
-def getModule(m,d,i):
-  return(voice(m,d,i))
+def getModule(m, d, i):
+  return(voice(m, d, i))
+
 
 class voice(ranaModule):
   """Handle text to speech."""
-  
+
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.espaekProcess = None
@@ -37,11 +38,9 @@ class voice(ranaModule):
     self.voiceLock = threading.Lock()
     # default espeak string for manual editing
     self.defaultStrings = {
-                          'espeak' : 'espeak -v %language% -s 120 -m %qmessage%'
-                          }
+      'espeak': 'espeak -v %language% -s 120 -a %volume% -m %qmessage%'
+    }
     self.defaultProvider = "espeak"
-
-
 
   def firstTime(self):
     es = self.get("voiceString", None)
@@ -68,36 +67,36 @@ class voice(ranaModule):
     elif message == "voiceTest":
       if self.get('soundEnabled', True):
         self.notify("Voice output test in progress", 3000)
-        self.say("test. test. Can you hear me now ? Good.","en")
+        self.say("test. test. Can you hear me now ? Good.", "en")
       else:
         self.notify("Sound output disabled, can't test", 2000)
 
   def espeakSay(self, plaintextMessage, distanceMeters, forceLanguageCode=False):
-      """say routing messages through espeak"""
-      if self._isEnabled():
-        units = self.m.get('units', None)
-        if units:
-          if distanceMeters == 0:
-            distString = ""
-          else:
-            distString = units.km2CurrentUnitString(distanceMeters/1000.0, 1, False)
-            distString = '<p xml:lang="en">in <emphasis level="strong">'+ distString + '</emphasis></p><br>'
-            # TODO: language specific distance strings
-          output = distString + plaintextMessage
+    """say routing messages through espeak"""
+    if self._isEnabled():
+      units = self.m.get('units', None)
+      if units:
+        if distanceMeters == 0:
+          distString = ""
+        else:
+          distString = units.km2CurrentUnitString(distanceMeters / 1000.0, 1, False)
+          distString = '<p xml:lang="en">in <emphasis level="strong">' + distString + '</emphasis></p><br>'
+          # TODO: language specific distance strings
+        output = distString + plaintextMessage
 
-          if self.get('debugPrintVoiceMessages', False):
-            # the message can contain unicode, this might cause an exception when printing it
-            # in some systems (SHR-u on Neo, for example)
-            try:
-              print("saying: %s" % output)
-            except UnicodeEncodeError:
-              print("voice: printing the current message to stdout failed do to unicode conversion error")
-          if forceLanguageCode:
-            espeakLanguageCode = forceLanguageCode
-          else:
-            # the espeak language code is the first part of this whitespace delimited string
-            espeakLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[0]
-          self._speak(espeakLanguageCode, output)
+        if self.get('debugPrintVoiceMessages', False):
+          # the message can contain unicode, this might cause an exception when printing it
+          # in some systems (SHR-u on Neo, for example)
+          try:
+            print("saying: %s" % output)
+          except UnicodeEncodeError:
+            print("voice: printing the current message to stdout failed do to unicode conversion error")
+        if forceLanguageCode:
+          espeakLanguageCode = forceLanguageCode
+        else:
+          # the espeak language code is the first part of this whitespace delimited string
+          espeakLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[0]
+        self._speak(espeakLanguageCode, output)
 
   def say(self, text, language='en'):
     """say a given text.  Return false if failed due to collision"""
@@ -107,8 +106,8 @@ class voice(ranaModule):
         if self.speaking():
           # we are already speaking
           if self.get('debugPrintVoiceMessages', False):
-            collisionString= "voice: message was not pronounced due to other message in progress"
-            collisionString+= "\nlanguage code: \n%s\nmessage text:\n%s" % (language,text)
+            collisionString = "voice: message was not pronounced due to other message in progress"
+            collisionString += "\nlanguage code: \n%s\nmessage text:\n%s" % (language, text)
             """ the message can contain unicode, this might cause an exception when printing it
             in some systems (SHR-u on Neo, for example)"""
             try:
@@ -123,22 +122,20 @@ class voice(ranaModule):
           return True
 
   def _speak(self, languageCode, message):
-
-
+    """say a message wth espeak"""
     mode = self.get('voiceParameters', None)
+    volume = self._getEspeakVolumeValue()
     if mode == "manual": # user editable voice string
       voiceString = self.get("voiceString", None)
       if voiceString is not None:
-
         # replace language and message variables with appropriate values (if present)
-        voiceString = re.sub("%language%", languageCode, voiceString)
+        voiceString = re.sub("%language%", languageCode, voiceString) # language code
+        voiceString = re.sub("%volume%", volume, voiceString) # volume
+        voiceString = re.sub("%message%", message, voiceString) # message
+        voiceString = re.sub("%qmessage%", '"%s"' % message, voiceString) # quoted message
 
-        voiceString = re.sub("%message%", message, voiceString)
-
-        voiceString = re.sub("%qmessage%", '"%s"' % message, voiceString)
-        
         """ the message can contain unicode, this might cause an exception when printing it
-        in some systems (SHR-u on Neo, for example)"""
+ in some systems (SHR-u on Neo, for example)"""
         try:
           print "voice: resulting custom voice string:\n%s" % voiceString
         except UnicodeEncodeError:
@@ -147,8 +144,23 @@ class voice(ranaModule):
         self.espaekProcess = self._startSubprocess(voiceString, shell=True)
     else:
       languageParam = '-v%s' % languageCode
-      args = ['espeak', languageParam ,'-s 120','-m','"%s"' % message]
+      args = ['espeak', languageParam, '-s 120', '-a', '%f' % volume, '-m', '"%s"' % message]
       self.espaekProcess = self._startSubprocess(args)
+
+  def _getEspeakVolumeValue(self):
+    """get espeak volume value
+    percentValue:
+    100% - default
+    200% - 2x default
+    50% - 1/2 default
+    The espeak value ranged from 0 to 200, with 100 being the default.
+    Therefore -> 100% = 100 espeak value.
+    """
+    voiceVolumePercent = int(self.get('voiceVolume', 100))
+    if voiceVolumePercent < 0:
+      return 0 # minimum value for Espeak
+    else:
+      return voiceVolumePercent
 
   def _startSubprocess(self, args, shell=False):
     """start the voice output using the subprocess module and check for exceptions"""

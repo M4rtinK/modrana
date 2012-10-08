@@ -160,6 +160,15 @@ class Options(ranaModule):
     return menuItems, itemDict
 
   def addItemsOption(self, title, variable, items, group, default=None, fakeMode=None, preAction=None):
+    """add an option, that opens and item selection menu"""
+
+    #NOTE: for the value - name mapping to work correctly, the value must be a string
+    # -> this is caused by the value being sent as a string once one of the items is clicked
+    # -> if the value, is not string, just the raw value voul be shown
+    # Example:
+    # (100, "100%") will show 100
+    # ('100', "100%") will show 100%
+
     # the back action returns back to the group
     backAction = "set:menu:options#%s" % group
     # create and add the menu
@@ -317,9 +326,9 @@ this is needed for the item tools menu to know where to return"""
 
     addOpt("Transparency ratio", "transpRatio",
       [("0.25,1", "overlay:25%"),
-        ("0.5,1", "overlay:50%"),
-        ("0.75,1", "overlay:75%"),
-        ("1,1", "overlay:100%")],
+       ("0.5,1", "overlay:50%"),
+       ("0.75,1", "overlay:75%"),
+       ("1,1", "overlay:100%")],
       group,
       "0.5,1")
 
@@ -331,8 +340,8 @@ this is needed for the item tools menu to know where to return"""
     group = addGroup("Scaling", "map_scaling", catMap, "generic")
     addOpt("Map scale", "mapScale",
       [(1, "1X"),
-        (2, "2X"),
-        (4, "4X")],
+       (2, "2X"),
+       (4, "4X")],
       group,
       1)
 
@@ -342,28 +351,28 @@ this is needed for the item tools menu to know where to return"""
 
     addOpt("Centering shift", "posShiftDirection",
       [("down", "shift down"),
-        ("up", "shift up"),
-        ("left", "shift left"),
-        ("right", "shift right"),
-        (False, "don't shift")],
+       ("up", "shift up"),
+       ("left", "shift left"),
+       ("right", "shift right"),
+       (False, "don't shift")],
       group,
       "down")
 
     addOpt("Centering shift amount", "posShiftAmount",
       [(0.25, "25%"),
-        (0.5, "50%"),
-        (0.75, "75%"),
-        (1.0, "edge of the screen")],
+       (0.5, "50%"),
+       (0.75, "75%"),
+       (1.0, "edge of the screen")],
       group,
       0.75)
 
     changedMsg = "mapView:centeringDisableThresholdChanged"
     addOpt("Disable by dragging", "centeringDisableThreshold",
       [(2048, "normal drag - <i>default</i>", changedMsg),
-        (15000, "long drag", changedMsg),
-        (40000, "really long drag", changedMsg),
-        (80000, "extremely long drag", changedMsg),
-        (False, self.off, changedMsg)],
+       (15000, "long drag", changedMsg),
+       (40000, "really long drag", changedMsg),
+       (80000, "extremely long drag", changedMsg),
+       (False, self.off, changedMsg)],
       group,
       2048)
 
@@ -377,7 +386,7 @@ this is needed for the item tools menu to know where to return"""
 
     addOpt("Map dragging", "mapDraggingMode",
       [("default", "full redraw - <i>default</i>", "mapView:dragModeChanged"),
-        ("staticMapDrag", "drag visible map - <i>fastest</i>", "mapView:dragModeChanged")],
+       ("staticMapDrag", "drag visible map - <i>fastest</i>", "mapView:dragModeChanged")],
       group,
       defaultMode)
 
@@ -385,7 +394,7 @@ this is needed for the item tools menu to know where to return"""
     group = addGroup("Tile storage", "tile_storage", catMap, "generic")
     addOpt("Tile storage", "tileStorageType",
       [('files', "files (default, more space used)"),
-        ('sqlite', "sqlite (new, less space used)")],
+       ('sqlite', "sqlite (new, less space used)")],
       group,
       'files')
     addBoolOpt("Store downloaded tiles", "storeDownloadedTiles", group, True)
@@ -397,19 +406,19 @@ this is needed for the item tools menu to know where to return"""
     group = addGroup("GUI", "gui", catView, "generic")
     addOpt("Hide main buttons", "hideDelay",
       [("never", "never hide buttons"),
-        ("5", "hide buttons after 5 seconds"),
-        ("10", "hide buttons after 10 seconds"),
-        ("15", "hide buttons after 15 seconds"),
-        ("30", "hide buttons after 30 seconds"),
-        ("60", "hide buttons after 1 minute"),
-        ("120", "hide buttons after 2 minutes")],
+       ("5", "hide buttons after 5 seconds"),
+       ("10", "hide buttons after 10 seconds"),
+       ("15", "hide buttons after 15 seconds"),
+       ("30", "hide buttons after 30 seconds"),
+       ("60", "hide buttons after 1 minute"),
+       ("120", "hide buttons after 2 minutes")],
       group,
       "10")
 
     addOpt("GUI Rotation", "rotationMode",
       [("auto", "automatic", "device:modeChanged"),
-        ("landscape", "landscape", "device:modeChanged"),
-        ("portrait", "portrait", "device:modeChanged")],
+       ("landscape", "landscape", "device:modeChanged"),
+       ("portrait", "portrait", "device:modeChanged")],
       group,
       "auto")
 
@@ -422,13 +431,13 @@ this is needed for the item tools menu to know where to return"""
         group = addGroup("Screen", "screen", catView, "generic")
         addOpt("Keep display ON", "screenBlankingMode",
           [("always", "always", "display:blankingModeChanged"),
-            ("centred", "while centred", "display:blankingModeChanged"),
-            ("moving", "while moving", "display:blankingModeChanged"),
-            ("movingInFullscreen", "while moving in fullscreen", "display:blankingModeChanged"),
-            ("fullscreen", "while in fullscreen", "display:blankingModeChanged"),
-            ("gpsFix", "while there is a GPS fix", "display:blankingModeChanged"),
-            #TODO: while there is actually a GPS lock
-            ("never", "never", "display:blankingModeChanged")],
+           ("centred", "while centred", "display:blankingModeChanged"),
+           ("moving", "while moving", "display:blankingModeChanged"),
+           ("movingInFullscreen", "while moving in fullscreen", "display:blankingModeChanged"),
+           ("fullscreen", "while in fullscreen", "display:blankingModeChanged"),
+           ("gpsFix", "while there is a GPS fix", "display:blankingModeChanged"),
+           #TODO: while there is actually a GPS lock
+           ("never", "never", "display:blankingModeChanged")],
           group,
           "always")
       if display.usesDashboard():
@@ -459,13 +468,13 @@ this is needed for the item tools menu to know where to return"""
     group = addGroup("formats#Units and", "units", catView, "generic")
     addOpt("Units", "unitType",
       [("km", "use kilometers"),
-        ("mile", "use miles")],
+       ("mile", "use miles")],
       group,
       "km")
 
     addOpt("Time format", "currentTimeFormat",
       [("24h", "24 hours"),
-        ("12h", "12 hours")],
+       ("12h", "12 hours")],
       group,
       "24h")
 
@@ -473,10 +482,10 @@ this is needed for the item tools menu to know where to return"""
     group = addGroup("Menus", "menus", catView, "generic")
     addOpt("Listable menu rows", "listableMenuRows",
       [(2, "2 rows"),
-        (3, "3 rows"),
-        (4, "4 rows"),
-        (5, "5 rows"),
-        (6, "6 rows")],
+       (3, "3 rows"),
+       (4, "4 rows"),
+       (5, "5 rows"),
+       (6, "6 rows")],
       group,
       4)
 
@@ -498,33 +507,33 @@ this is needed for the item tools menu to know where to return"""
 
     # in the first string: first one goes to espeak, the second part goes to Google
     directionsLanguages = [('ca ca', 'Catalan'),
-      ('zh-yue zh-TW', 'Chinese(Cantonese)'),
-      ('zh zh-CN', 'Chinese(Mandarin)'),
-      ('hr hr', 'Croatian'),
-      ('cs cs', 'Czech'),
-      ('nl nl', 'Dutch'),
-      ('en en', 'English'),
-      ('fi fi', 'Finnish'),
-      ('fr fr', 'French'),
-      ('de de', 'German'),
-      ('el el', 'Greek'),
-      ('hi hi', 'Hindi'),
-      ('hu hu', 'Hungarian'),
-      ('id id', 'Indonesian'),
-      ('it it', 'Italian'),
-      ('lv lv', 'Latvian'),
-      ('no no', 'Norwegian'),
-      ('pl pl', 'Polish'),
-      ('pt pt-BR', 'Portuguese(Brazil)'),
-      ('pt-pt pt-PT', 'Portuguese(European)'),
-      ('ro ro', 'Romanian'),
-      ('ru ru', 'Russian'),
-      ('sr sr', 'Serbian'),
-      ('sk sk', 'Slovak'),
-      ('es es', 'Spanish'),
-      ('ta ta', 'Tamil'),
-      ('tr tr', 'Turkish'),
-      ('vi vi', 'Vietnamese')]
+                           ('zh-yue zh-TW', 'Chinese(Cantonese)'),
+                           ('zh zh-CN', 'Chinese(Mandarin)'),
+                           ('hr hr', 'Croatian'),
+                           ('cs cs', 'Czech'),
+                           ('nl nl', 'Dutch'),
+                           ('en en', 'English'),
+                           ('fi fi', 'Finnish'),
+                           ('fr fr', 'French'),
+                           ('de de', 'German'),
+                           ('el el', 'Greek'),
+                           ('hi hi', 'Hindi'),
+                           ('hu hu', 'Hungarian'),
+                           ('id id', 'Indonesian'),
+                           ('it it', 'Italian'),
+                           ('lv lv', 'Latvian'),
+                           ('no no', 'Norwegian'),
+                           ('pl pl', 'Polish'),
+                           ('pt pt-BR', 'Portuguese(Brazil)'),
+                           ('pt-pt pt-PT', 'Portuguese(European)'),
+                           ('ro ro', 'Romanian'),
+                           ('ru ru', 'Russian'),
+                           ('sr sr', 'Serbian'),
+                           ('sk sk', 'Slovak'),
+                           ('es es', 'Spanish'),
+                           ('ta ta', 'Tamil'),
+                           ('tr tr', 'Turkish'),
+                           ('vi vi', 'Vietnamese')]
 
     addItems("Language for directions", 'directionsLanguage',
       directionsLanguages,
@@ -533,7 +542,7 @@ this is needed for the item tools menu to know where to return"""
 
     addOpt("read Cyrillic with", "voiceNavigationCyrillicVoice",
       [('ru', "Russian voice"),
-        (False, "current voice")],
+       (False, "current voice")],
       group,
       'ru')
 
@@ -542,7 +551,7 @@ this is needed for the item tools menu to know where to return"""
 
     addOpt("Routing provider", "routingProvider",
       [("GoogleDirections", "Google - <b>online</b>"),
-        ("Monav", "Monav - <b>on device</b>")],
+       ("Monav", "Monav - <b>on device</b>")],
       group,
       "GoogleDirections")
 
@@ -566,43 +575,43 @@ this is needed for the item tools menu to know where to return"""
 
     addOpt("Autostart navigation", "autostartNavigationDefaultOnAutoselectTurn",
       [('disabled', "OFF"),
-        ('enabled', "ON")],
+       ('enabled', "ON")],
       group,
       'enabled')
 
     addOpt("Make final turn announcement at", "pointReachedDistance",
       [(10, "10 m"),
-        (20, "20 m"),
-        (30, "30 m"),
-        (60, "60 m"),
-        (100, "100 m"),
-        (200, "200 m"),
-        (300, "300 m"),
-        (400, "400 m"),
-        (500, "500 m")],
+       (20, "20 m"),
+       (30, "30 m"),
+       (60, "60 m"),
+       (100, "100 m"),
+       (200, "200 m"),
+       (300, "300 m"),
+       (400, "400 m"),
+       (500, "500 m")],
       group,
       30)
 
     addOpt("Announce turns at least this far ahead", "minAnnounceDistance",
       [(10, "10 m"),
-        (20, "20 m"),
-        (30, "30 m"),
-        (60, "60 m"),
-        (100, "100 m"),
-        (200, "200 m"),
-        (300, "300 m"),
-        (500, "500 m")],
+       (20, "20 m"),
+       (30, "30 m"),
+       (60, "60 m"),
+       (100, "100 m"),
+       (200, "200 m"),
+       (300, "300 m"),
+       (500, "500 m")],
       group,
       100)
 
     addOpt("Announce turns at least this long ahead", "minAnnounceTime",
       [(5, "5 s"),
-        (10, "10 s"),
-        (20, "20 s"),
-        (30, "30 s"),
-        (45, "45 s"),
-        (60, "60 s"),
-        (90, "90 s")],
+       (10, "10 s"),
+       (20, "20 s"),
+       (30, "30 s"),
+       (45, "45 s"),
+       (60, "60 s"),
+       (90, "90 s")],
       group,
       10)
 
@@ -610,11 +619,11 @@ this is needed for the item tools menu to know where to return"""
     # store them as strings so lookup will work reliably.
     addOpt("Increase turn announcement time above", "minAnnounceSpeed",
       [("5.56", "20 km/h (12 mph)"),
-        ("8.33", "30 km/h (20 mph)"),
-        ("11.11", "40 km/h (25 mph)"),
-        ("13.89", "50 km/h (30 mph)"),
-        ("22.22", "80 km/h (50 mph)"),
-        ("27.78", "100 km/h (60 mph)")],
+       ("8.33", "30 km/h (20 mph)"),
+       ("11.11", "40 km/h (25 mph)"),
+       ("13.89", "50 km/h (30 mph)"),
+       ("22.22", "80 km/h (50 mph)"),
+       ("27.78", "100 km/h (60 mph)")],
       group,
       "13.89")
 
@@ -622,31 +631,31 @@ this is needed for the item tools menu to know where to return"""
     # store them as strings so lookup will work reliably.
     addOpt("Constant turn announcement time above", "maxAnnounceSpeed",
       [("13.89", "50 km/h (30 mph)"),
-        ("22.22", "80 km/h (50 mph)"),
-        ("27.78", "100 km/h (60 mph)"),
-        ("33.33", "120 km/h (75 mph)"),
-        ("44.44", "160 km/h (100 mph)")],
+       ("22.22", "80 km/h (50 mph)"),
+       ("27.78", "100 km/h (60 mph)"),
+       ("33.33", "120 km/h (75 mph)"),
+       ("44.44", "160 km/h (100 mph)")],
       group,
       "27.78")
 
     addOpt("Maximum turn announcement time", "maxAnnounceTime",
       [(20, "20 s"),
-        (30, "30 s"),
-        (45, "45 s"),
-        (60, "60 s"),
-        (90, "90 s"),
-        (120, "120 s")],
+       (30, "30 s"),
+       (45, "45 s"),
+       (60, "60 s"),
+       (90, "90 s"),
+       (120, "120 s")],
       group,
       60)
 
     # Note: these are exponents, stored as strings so lookup will work reliably.
     addOpt("Announcement time increase type", "announcePower",
       [("1.0", "Linear with speed"),
-        ("0.5", "Very quickly, then linear"),
-        ("0.75", "Quickly, then linear"),
-        ("1.5", "Slowly, then linear"),
-        ("2.0", "Quite slowly, then linear"),
-        ("4.0", "Very slowly, then quite fast")],
+       ("0.5", "Very quickly, then linear"),
+       ("0.75", "Quickly, then linear"),
+       ("1.5", "Slowly, then linear"),
+       ("2.0", "Quite slowly, then linear"),
+       ("4.0", "Very slowly, then quite fast")],
       group,
       "2.0")
 
@@ -654,16 +663,16 @@ this is needed for the item tools menu to know where to return"""
     group = addGroup("Rerouting", "rerouting", catNavigation, "generic")
     addItems("Rerouting trigger distance", "reroutingThreshold",
       [(None, "<b>disabled</b>"),
-        ("10", "10 m"),
-        ("20", "20 m"),
-        ("30", "30 m (default)"),
-        ("40", "40 m"),
-        ("50", "50 m"),
-        ("75", "75 m"),
-        ("100", "100 m"),
-        ("200", "200 m"),
-        ("500", "500 m"),
-        ("1000", "1000 m")],
+       ("10", "10 m"),
+       ("20", "20 m"),
+       ("30", "30 m (default)"),
+       ("40", "40 m"),
+       ("50", "50 m"),
+       ("75", "75 m"),
+       ("100", "100 m"),
+       ("200", "200 m"),
+       ("500", "500 m"),
+       ("1000", "1000 m")],
       group,
       "30")
     # for some reason, the items menu doesn't work correctly for
@@ -676,18 +685,18 @@ this is needed for the item tools menu to know where to return"""
     group = addGroup("Markers", "poi_markers", catPOI, "generic")
     addOpt("Show captions", "hideMarkerCaptionsBelowZl",
       [(-1, "always"),
-        (5, "below zoomlevel 5"),
-        (7, "below zoomlevel 7"),
-        (10, "below zoomlevel 10"),
-        (11, "below zoomlevel 11"),
-        (12, "below zoomlevel 12"),
-        (13, "below zoomlevel 13"),
-        (14, "below zoomlevel 14"),
-        (15, "below zoomlevel 15"),
-        (16, "below zoomlevel 16"),
-        (17, "below zoomlevel 17"),
-        (18, "below zoomlevel 18"),
-        (65535, "never"),
+       (5, "below zoomlevel 5"),
+       (7, "below zoomlevel 7"),
+       (10, "below zoomlevel 10"),
+       (11, "below zoomlevel 11"),
+       (12, "below zoomlevel 12"),
+       (13, "below zoomlevel 13"),
+       (14, "below zoomlevel 14"),
+       (15, "below zoomlevel 15"),
+       (16, "below zoomlevel 16"),
+       (17, "below zoomlevel 17"),
+       (18, "below zoomlevel 18"),
+       (65535, "never"),
       ],
       group,
       13)
@@ -696,7 +705,7 @@ this is needed for the item tools menu to know where to return"""
     group = addGroup("POI storage", "poi_storage", catPOI, "generic")
     addOpt("POI database", "POIDBFilename",
       [("poi.db", "shared with Mappero (EXPERIMENTAL)", "storePOI:reconnectToDb"),
-        ("modrana_poi.db", "modRana only (default)", "storePOI:reconnectToDb")],
+       ("modrana_poi.db", "modRana only (default)", "storePOI:reconnectToDb")],
       group,
       "modrana_poi.db")
 
@@ -704,7 +713,7 @@ this is needed for the item tools menu to know where to return"""
        we just need to send a dump message to storePOI"""
     addOpt("Export POI Database to CSV", "EportPOIDatabaseToCSV",
       [("dump", "click to export", "storePOI:dumpToCSV"),
-        ("dump", "click to export", "storePOI:dumpToCSV")],
+       ("dump", "click to export", "storePOI:dumpToCSV")],
       group,
       "dump")
 
@@ -712,21 +721,21 @@ this is needed for the item tools menu to know where to return"""
     group = addGroup("Online search", "poi_online", catPOI, "generic")
     addOpt("Google local search ordering", "GLSOrdering",
       [("default", "ordering from Google"),
-        ("distance", "order by distance")
+       ("distance", "order by distance")
       ],
       group,
       "default")
 
     addOpt("Google local search results", "GLSResults",
       [("8", "max 8 results"),
-        ("16", "max 16 results"),
-        ("32", "max 32 results")],
+       ("16", "max 16 results"),
+       ("32", "max 32 results")],
       group,
       "8")
 
     addOpt("Google local search captions", "drawGLSResultCaptions",
       [("True", "draw captions"),
-        ("False", "dont draw captions")],
+       ("False", "dont draw captions")],
       group,
       "True")
 
@@ -744,7 +753,7 @@ this is needed for the item tools menu to know where to return"""
         meters = "meters per second (new SHR)"
       addOpt("GPSD reports speed in", "gpsdSpeedUnit",
         [('knotsPerSecond', knots),
-          ('metersPerSecond', meters)],
+         ('metersPerSecond', meters)],
         group,
         'knotsPerSecond')
 
@@ -755,17 +764,17 @@ this is needed for the item tools menu to know where to return"""
     addOpt("Network", "network",
       #      [("off","No use of network"), #TODO: implement this :)
       [("minimal", "Don't Download Map Tiles"),
-        ("full", "Unlimited use of network")],
+       ("full", "Unlimited use of network")],
       group,
       "full")
 
     addOpt("Max nr. of threads for tile auto-download", "maxAutoDownloadThreads2",
       [(5, "5"),
-        (10, "10 (default)"),
-        (20, "20"),
-        (30, "30"),
-        (40, "40"),
-        (50, "50")],
+       (10, "10 (default)"),
+       (20, "20"),
+       (30, "30"),
+       (40, "40"),
+       (50, "50")],
       group,
       10)
 
@@ -781,13 +790,33 @@ this is needed for the item tools menu to know where to return"""
 
     addOpt("Test voice output", "voiceTest",
       [("test", "<b>press to start test</b>", "voice:voiceTest"),
-        ("test", "<b>press to start test</b>", "voice:voiceTest")],
+       ("test", "<b>press to start test</b>", "voice:voiceTest")],
       group,
       "test")
 
+    addItems("Voice volume", "voiceVolume",
+      [('0', "0% - silent"),
+       ('20', "20%"),
+       ('50', "50%"),
+       ('100', "100% (default)"),
+       ('200', "200%"),
+       ('300', "300%"),
+       ('400', "400%"),
+       ('500', "500%"),
+       ('600', "600%"),
+       ('700', "700%"),
+       ('1000', "1000%"),
+       ('1100', "1100%"),
+       ('1200', "1200%"),
+       ('1300', "1300% (might be distorted)"),
+       ('1400', "1400% (might be distorted)"),
+       ('1500', "1500% (might be distorted)")],
+      group,
+      100)
+
     addOpt("Voice parameters", "voiceParameters",
       [("auto", "<b>automatic</b>", "ms:options:espeakParams:auto"),
-        ("manual", "<b>manual</b>", "ms:options:espeakParams:manual")],
+       ("manual", "<b>manual</b>", "ms:options:espeakParams:manual")],
       group,
       "auto")
 
@@ -1116,7 +1145,7 @@ this is needed for the item tools menu to know where to return"""
             value = self.get(variable, default, mode=mode)
             # show label for the given value
             valueDescription, highlightId = choices['itemDict'].get(value, (value, None))
-            """if no description is found, just display the value"""
+            # if no description is found, just display the value
             valueDescription = "<tt><b>%s</b></tt>" % valueDescription
 
             preAction = ""
