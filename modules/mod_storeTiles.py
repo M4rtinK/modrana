@@ -33,16 +33,18 @@ from threading import Thread
 
 # only import GKT libs if GTK GUI is used
 from core import gs
+
 if gs.GUIString == "GTK":
   import gtk
 
-def getModule(m,d,i):
-  return(storeTiles(m,d,i))
+def getModule(m, d, i):
+  return(storeTiles(m, d, i))
+
 
 class storeTiles(ranaModule):
   """Single-file-fs tile storage"""
   #TODO: maybe run this in separate thread ?
-  
+
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     self.layers = {}
@@ -55,8 +57,8 @@ class storeTiles(ranaModule):
        the whole buffer will be processed at once (flushed) to avoid a potential memory leak
     """
     self.processPerUpdate = 1 #how many tiles will be processed per update (updates should happen every 100ms)
-    self.commmitInterval=5 # how often we commit to the database (only happens when there is something in the queue)
-    self.lastCommit=time.time()
+    self.commitInterval = 5 # how often we commit to the database (only happens when there is something in the queue)
+    self.lastCommit = time.time()
     self.dirty = set() # a set of connections, that have uncommitted data
     self.startLoadingThread()
     # locks
@@ -97,11 +99,11 @@ class storeTiles(ranaModule):
       if dbFolderPath in self.layers[accessType]:
         return dbFolderPath # return the lookup connection
       else:
-        self.initializeLookupDb(folderPrefix,accessType) # initialize the lookup db
+        self.initializeLookupDb(folderPrefix, accessType) # initialize the lookup db
         return dbFolderPath
     else:
-      self.layers[accessType]={} # create a new access type entry
-      self.initializeLookupDb(folderPrefix,accessType) # initialize the lookup db
+      self.layers[accessType] = {} # create a new access type entry
+      self.initializeLookupDb(folderPrefix, accessType) # initialize the lookup db
       return dbFolderPath
 
   def initializeLookupDb(self, folderPrefix, accessType):
@@ -121,19 +123,20 @@ class storeTiles(ranaModule):
         connection = sqlite3.connect(lookupDbPath)
         cursor = connection.cursor()
         print("sqlite tiles: creating lookup table")
-        cursor.execute("create table tiles (z integer, x integer, y integer, store_filename string, extension varchar(10), unix_epoch_timestamp integer, primary key (z, x, y, extension))")
+        cursor.execute(
+          "create table tiles (z integer, x integer, y integer, store_filename string, extension varchar(10), unix_epoch_timestamp integer, primary key (z, x, y, extension))")
         cursor.execute("create table version (v integer)")
         cursor.execute("insert into version values (?)", (self.currentStorageVersion,))
         connection.commit()
-      self.layers[accessType][dbFolderPath] = {'lookup':connection, 'stores':{}}
+      self.layers[accessType][dbFolderPath] = {'lookup': connection, 'stores': {}}
 
 
   def storeTile(self, tile, folderPrefix, z, x, y, extension):
     if self.get('storeDownloadedTiles', True):
       accessType = "store"
-      dbFolderPath = self.initializeDb(folderPrefix,accessType)
-      if dbFolderPath!=None:
-          lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
+      dbFolderPath = self.initializeDb(folderPrefix, accessType)
+      if dbFolderPath != None:
+        lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
       stores = self.layers[accessType][dbFolderPath]['stores'] # get a list of cached store connections
 
       lookupCursor = lookupConn.cursor()
@@ -141,7 +144,9 @@ class storeTiles(ranaModule):
         """ just to make sure the access is sequential
         (due to sqlite in python 2.5 probably not liking concurrent access,
         resulting in te database becoming unavailable)"""
-        result = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension))
+        result = lookupCursor.execute(
+          "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
+          (z, x, y, extension))
         if not result.fetchone():
           # store the tile as its not already in the database
 
@@ -157,21 +162,21 @@ class storeTiles(ranaModule):
           try:
             ## 1. write in the lookup db (its easier to remove pointers to nonexistent stuff than to remove orphaned store items)
             storeFilename = os.path.basename(pathToStore)
-            lookupQuery="insert into tiles (z, x, y, store_filename, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
+            lookupQuery = "insert into tiles (z, x, y, store_filename, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
             lookupCursor = lookupConn.cursor()
-            lookupCursor.execute(lookupQuery,[z,x,y,storeFilename, extension, integerTimestamp])
+            lookupCursor.execute(lookupQuery, [z, x, y, storeFilename, extension, integerTimestamp])
 
             ## 2. write in the store
-            storeQuery="insert into tiles (z, x, y, tile, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
+            storeQuery = "insert into tiles (z, x, y, tile, extension, unix_epoch_timestamp) values (?, ?, ?, ?, ?, ?)"
             storeCursor = storeConn.cursor()
-            storeCursor.execute(storeQuery,[z,x,y,sqlite3.Binary(tile), extension, integerTimestamp])
-            self.commitConnections([storeConn,lookupConn])
+            storeCursor.execute(storeQuery, [z, x, y, sqlite3.Binary(tile), extension, integerTimestamp])
+            self.commitConnections([storeConn, lookupConn])
           except Exception, e:
             print("tile already present")
             print(e)
             pass #tile is already present, skip insert
 
-  def commitConnections(self,connections):
+  def commitConnections(self, connections):
     """store connections and commit them once in a while"""
     for c in connections:
       self.dirty.add(c)
@@ -187,7 +192,6 @@ class storeTiles(ranaModule):
         conn = self.dirty.pop()
         conn.commit()
       print("storeTiles: sqlite commit OK")
-
 
 
   def connectToStore(self, stores, pathToStore, dbFolderPath, accessType):
@@ -211,7 +215,7 @@ class storeTiles(ranaModule):
     if storeList: # there are already some stores
       availableStores = []
       for storePath in storeList: # iterate over the available stores
-        cleanPath =  storePath.rstrip('-journal') # don't add sqlite journal files
+        cleanPath = storePath.rstrip('-journal') # don't add sqlite journal files
         if self.willItFitIn(cleanPath, size):# add all stores that can be used to store the current object
           availableStores.append(cleanPath)
 
@@ -228,7 +232,7 @@ class storeTiles(ranaModule):
 
   def listStores(self, folder):
     """search a folder for available store database files"""
-    return glob.glob(os.path.join(folder,"store.sqlite.*"))
+    return glob.glob(os.path.join(folder, "store.sqlite.*"))
 
 
   def willItFitIn(self, path, sizeBytes):
@@ -238,9 +242,9 @@ class storeTiles(ranaModule):
               always set the limit with a slight margin"""
 
     gibiByte = 1073741824
-    maximumSizeBytes = self.maxDbFileSizeGibiBytes*gibiByte
+    maximumSizeBytes = self.maxDbFileSizeGibiBytes * gibiByte
     pathSizeBytes = os.path.getsize(path)
-    if (pathSizeBytes+sizeBytes)<=maximumSizeBytes:
+    if (pathSizeBytes + sizeBytes) <= maximumSizeBytes:
       return True # the database will (probably) still smaller than the limit
     else:
       return False # the database will be larger
@@ -249,7 +253,7 @@ class storeTiles(ranaModule):
     """add a new store(find an ascending numbered name and create the db file with the corresponding tables)"""
     list = self.listStores(folder)
     if list:
-      numericList = map(lambda x: int(x.split('store.sqlite.')[1]),list)
+      numericList = map(lambda x: int(x.split('store.sqlite.')[1]), list)
       highestNumber = sorted(numericList)[-1]
       newHighestNumber = highestNumber + 1
     else:
@@ -265,7 +269,8 @@ class storeTiles(ranaModule):
     os.path.exists(path)
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
-    cursor.execute("create table tiles (z integer, x integer, y integer, tile blob, extension varchar(10), unix_epoch_timestamp integer, primary key (z, x, y, extension))")
+    cursor.execute(
+      "create table tiles (z integer, x integer, y integer, tile blob, extension varchar(10), unix_epoch_timestamp integer, primary key (z, x, y, extension))")
     cursor.execute("create table version (v integer)")
     cursor.execute("insert into version values (?)", (self.currentStorageVersion,))
     connection.commit()
@@ -305,7 +310,7 @@ class storeTiles(ranaModule):
     if storageType == 'sqlite':
       accessType = "get"
       dbFolderPath = self.initializeDb(folderPrefix, accessType)
-      if dbFolderPath!=None:
+      if dbFolderPath != None:
         lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
         result = self.getTileFromDb(lookupConn, dbFolderPath, z, x, y, extension)
         if result: # is the result valid ?
@@ -319,7 +324,7 @@ class storeTiles(ranaModule):
           return None # the tile is not stored
     else: # the only other storage method is currently classical files storage
       tileFolderPath = self._mapTiles._getTileFolderPath()
-      layerFolderAndTileFilename = self._mapTiles.getImagePath(x,y,z,folderPrefix, extension)
+      layerFolderAndTileFilename = self._mapTiles.getImagePath(x, y, z, folderPrefix, extension)
       tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
       if os.path.exists(tilePath):
         # load the file to pixbuf and return it
@@ -345,7 +350,9 @@ class storeTiles(ranaModule):
       (due to sqlite in python 2.5 probably not liking concurrent access,
       resulting in te database becoming unavailable)"""
       lookupCursor = lookupConn.cursor()
-      lookupResult = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension)).fetchone()
+      lookupResult = lookupCursor.execute(
+        "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
+        (z, x, y, extension)).fetchone()
       if lookupResult: # the tile was found in the lookup db
         # now search in the store
         storeFilename = lookupResult[0]
@@ -353,7 +360,9 @@ class storeTiles(ranaModule):
         stores = self.layers[accessType][dbFolderPath]['stores']
         connectionToStore = self.connectToStore(stores, pathToStore, dbFolderPath, accessType)
         storeCursor = connectionToStore.cursor()
-        result = storeCursor.execute("select tile, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension))
+        result = storeCursor.execute(
+          "select tile, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
+          (z, x, y, extension))
         return result
       else: # the tile was not found in the lookup table
         return None
@@ -367,11 +376,11 @@ class storeTiles(ranaModule):
       print("storeTiles: invalid layer")
       return None
     storageType = self.get('tileStorageType', 'files')
-    folderPrefix = layerInfo.get('folderPrefix','OpenStreetMap II')
-    extension = layerInfo.get('type','png')
+    folderPrefix = layerInfo.get('folderPrefix', 'OpenStreetMap II')
+    extension = layerInfo.get('type', 'png')
     if storageType == 'sqlite': # we are storing to the database
       dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
-      if dbFolderPath!=None: # is the database accessible ?
+      if dbFolderPath != None: # is the database accessible ?
         with self.lookupConnectionLock:
           """ just to make sure the access is sequential
           (due to sqlite in python 2.5 probably not liking concurrent access,
@@ -383,7 +392,7 @@ class storeTiles(ranaModule):
           else:
             lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
           query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
-          lookupResult = lookupConn.execute(query,(z, x, y, extension)).fetchone()
+          lookupResult = lookupConn.execute(query, (z, x, y, extension)).fetchone()
           if fromThread: # tidy up, just to be sure
             lookupConn.close()
           if lookupResult:
@@ -402,7 +411,7 @@ class storeTiles(ranaModule):
     storageType = self.get('tileStorageType', 'files')
     if storageType == 'sqlite': # we are storing to the database
       dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
-      if dbFolderPath!=None: # is the database accessible ?
+      if dbFolderPath != None: # is the database accessible ?
         with self.lookupConnectionLock:
           """ just to make sure the access is sequential
           (due to sqlite in python 2.5 probably not liking concurrent access,
@@ -414,13 +423,13 @@ class storeTiles(ranaModule):
           else:
             lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
           query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
-          lookupResult = lookupConn.execute(query,(z, x, y, extension)).fetchone()
+          lookupResult = lookupConn.execute(query, (z, x, y, extension)).fetchone()
           if fromThread: # tidy up, just to be sure
             lookupConn.close()
           if lookupResult:
             return True # the tile is in the db
           else:
-              return False # the tile is not in the db
+            return False # the tile is not in the db
       else:
         return None # we cant decide if a tile is ind the db or not
     else: # we are storing to the filesystem
@@ -442,42 +451,42 @@ class storeTiles(ranaModule):
   def worker(self):
     """this is run by a thread that stores sqlite tiles to a db"""
     while True:
-        try:
-          item = self.sqliteTileQueue.get(block=True)
-        except Exception, e:
-          """this usually occurs during interpreter shutdown
-             -> we simulate a shutdown order and try to exit cleanly
-             """
-          print "storage thread - probable shutdown"
-          print "exception: %s" % e
-          item = 'shutdown'
-
-        if item=='shutdown': # we put this to the queue to announce shutdown
-          print "\nshutdown imminent, committing all uncommitted tiles"
-          self.commitAll()
-          print "\nall tiles committed, breaking, goodbye :)"
-          break
+      try:
+        item = self.sqliteTileQueue.get(block=True)
+      except Exception, e:
+        """this usually occurs during interpreter shutdown
+        -> we simulate a shutdown order and try to exit cleanly
         """
-        the thread should not die due to an exception
-        or the queue fills up without anybody removing and processing the tiles
-        -> this would mean that all threads that need to store tiles
-           would wait forever for the queue to empty
-        """
-        #TODO: defensive programming - check if thread is alive when storing ?
-        try:
-          (tile, folderPrefix, z, x, y, extension, filename) = item # unpack the tuple
-          self.storeTile(tile, folderPrefix, z, x, y, extension) # store the tile
-          self.sqliteTileQueue.task_done()
-        except Exception, e:
-          print("sqlite storage worker : exception during tile storage:\n%s" % e)
+        print "storage thread - probable shutdown"
+        print "exception: %s" % e
+        item = 'shutdown'
 
-        dt = time.time() - self.lastCommit # check when the last commit was
-        if dt>self.commmitInterval:
-          try:
-            self.commitAll() # commit all "dirty" connections
-            self.lastCommit = time.time() # update the last commit timestamp
-          except Exception, e:
-            print("sqlite storage worker : exception during mass db commit:\n%s" % e)
+      if item == 'shutdown': # we put this to the queue to announce shutdown
+        print "\nshutdown imminent, committing all uncommitted tiles"
+        self.commitAll()
+        print "\nall tiles committed, breaking, goodbye :)"
+        break
+      """
+      the thread should not die due to an exception
+      or the queue fills up without anybody removing and processing the tiles
+      -> this would mean that all threads that need to store tiles
+         would wait forever for the queue to empty
+      """
+      #TODO: defensive programming - check if thread is alive when storing ?
+      try:
+        (tile, folderPrefix, z, x, y, extension, filename) = item # unpack the tuple
+        self.storeTile(tile, folderPrefix, z, x, y, extension) # store the tile
+        self.sqliteTileQueue.task_done()
+      except Exception, e:
+        print("sqlite storage worker : exception during tile storage:\n%s" % e)
+
+      dt = time.time() - self.lastCommit # check when the last commit was
+      if dt > self.commitInterval:
+        try:
+          self.commitAll() # commit all "dirty" connections
+          self.lastCommit = time.time() # update the last commit timestamp
+        except Exception, e:
+          print("sqlite storage worker : exception during mass db commit:\n%s" % e)
 
 
   def automaticStoreTile(self, tile, folderPrefix, z, x, y, extension, filename):
@@ -494,7 +503,7 @@ class storeTiles(ranaModule):
         try:
           os.makedirs(folderPath) # create the folder
         except:
-          print("mapTiles: can't create folder %s for %s" % (folderPath,filename))
+          print("mapTiles: can't create folder %s for %s" % (folderPath, filename))
 
       f = open(filename, 'w') # write the tile to a file
       f.write(tile)
@@ -502,7 +511,7 @@ class storeTiles(ranaModule):
 
   def shutdown(self):
     # try to commit possibly uncommitted tiles
-    self.sqliteTileQueue.put('shutdown',True)
+    self.sqliteTileQueue.put('shutdown', True)
 
 
 ## TESTING CODE
