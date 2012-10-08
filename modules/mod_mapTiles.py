@@ -587,7 +587,7 @@ class MapTiles(ranaModule):
                           self.removeImageFromMemmory(nameBack)
                           self.removeImageFromMemmory(nameOver)
                           # cache the combined image
-                          self.storeInMemmory(combinedImage, name, "composite")
+                          self.storeInMemory(combinedImage, name, "composite")
                           # draw the composite image
                           drawImage(cr, combinedImage, x1, y1, scale)
                         else:
@@ -665,7 +665,7 @@ class MapTiles(ranaModule):
                         self.removeImageFromMemmory(nameBack)
                         self.removeImageFromMemmory(nameOver)
                         # cache the combined image
-                        self.storeInMemmory(combinedImage, name, "composite")
+                        self.storeInMemory(combinedImage, name, "composite")
                         # draw the composite image
                         drawImage(cr, combinedImage, x1, y1, scale)
                       else: # on or more tiles not usable
@@ -797,7 +797,7 @@ class MapTiles(ranaModule):
        False means loading the tile from file to pixbuf failed"""
     if pixbuf:
       start2 = time.clock()
-      self.storeInMemmory(self.pixbufToCairoImageSurface(pixbuf), name)
+      self.storeInMemory(self.pixbufToCairoImageSurface(pixbuf), name)
       if debug:
         storageType = self.get('tileStorageType', 'files')
         sprint("tile loaded from local storage (%s) in %1.2f ms" % (storageType, (1000 * (time.clock() - start1))))
@@ -847,7 +847,7 @@ class MapTiles(ranaModule):
     ct2.set_source_pixbuf(pixbuf, 0, 0)
     ct2.paint()
     ''' surface now contains the image in a Cairo surface '''
-    self.storeInMemmory(surface, name, type, expireTimestamp, dictIndex)
+    self.storeInMemory(surface, name, type, expireTimestamp, dictIndex)
 
   def filePath2Pixbuf(self, filePath):
     """return a pixbuf for a given filePath"""
@@ -858,7 +858,7 @@ class MapTiles(ranaModule):
       print("the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e)
       return False
 
-  def storeInMemmory(self, surface, name, type="normal", expireTimestamp=None, dictIndex=0):
+  def storeInMemory(self, surface, name, type="normal", expireTimestamp=None, dictIndex=0):
     """store a given image surface in the memory image cache
        dictIndex = 0 -> normal map tiles + tile specific error tiles
        dictIndex = 1 -> special tiles that exist in only once in memory and are drawn directly
@@ -893,15 +893,15 @@ class MapTiles(ranaModule):
     """to avoid a memory leak, the maximum size of the image cache is fixed
        when we reach the maximum size, we start removing images,
        starting from the oldest ones
-       we an amount of images specified in imagesTrimmingAmmount,
+       we an amount of images specified in imagesTrimmingAmount,
        so that trim does not run every time an image is added to a full cache
        -> only the normal image cache needs trimming (images[0]),
        as the special image cache (images[1]) is just created once and not updated dynamically
-       NOTE: the storeInMemmory method already locked images, so we don't have to
+       NOTE: the storeInMemory method already locked images, so we don't have to
        """
-    trimmingAmmount = self.imagesTrimmingAmount
+    trimmingAmount = self.imagesTrimmingAmount
     imagesLength = len(self.images[0])
-    if trimmingAmmount >= imagesLength:
+    if trimmingAmount >= imagesLength:
       """
       this means that the trimming amount was set higher,
       than current length of the cache
@@ -911,7 +911,7 @@ class MapTiles(ranaModule):
       self.images[0] = {}
     else:
       oldestKeys = sorted(self.images[0], key=lambda image: self.images[0][image][1]['addedTimestamp'])[
-                   0:trimmingAmmount]
+                   0:trimmingAmount]
       for key in oldestKeys:
         del self.images[0][key]
 
@@ -1036,7 +1036,7 @@ Therefore we use it as default."""
         if self.useImageSurface:
           tileDownloadFailedSurface = self.callback.images[1]['tileDownloadFailed'][0]
           expireTimestamp = time.time() + 10
-          self.callback.storeInMemmory(tileDownloadFailedSurface, self.name, 'semiPermanentError', expireTimestamp)
+          self.callback.storeInMemory(tileDownloadFailedSurface, self.name, 'semiPermanentError', expireTimestamp)
           """
           like this, when tile download fails due to a http error,
           the error tile is loaded instead
@@ -1050,7 +1050,7 @@ Therefore we use it as default."""
         if self.useImageSurface:
           tileNetworkErrorSurface = self.callback.images[1]['tileNetworkError'][0]
           expireTimestamp = time.time() + 10
-          self.callback.storeInMemmory(tileNetworkErrorSurface, self.name, 'error',
+          self.callback.storeInMemory(tileNetworkErrorSurface, self.name, 'error',
             expireTimestamp) # retry after 10 seconds
           """ as not to DOS the system when we temporarily loose internet connection or other such error occurs,
                we load a temporary error tile with expiration timestamp instead of the tile image
@@ -1068,12 +1068,12 @@ Therefore we use it as default."""
         self.removeSelf()
 
     def removeSelf(self):
-      with self.callback.threadlListCondition:
+      with self.callback.threadListCondition:
         # try to remove its own instance from the thread list, so that the instance could be garbage collected
         if self.name in self.callback.threads.keys():
           del self.callback.threads[self.name]
           """notify the download manager that a download slot is now free"""
-          self.callback.threadlListCondition.notifyAll()
+          self.callback.threadListCondition.notifyAll()
 
     def printErrorMessage(self, e):
       url = self.callback.getTileUrl(self.x, self.y, self.z, self.layer)
@@ -1121,11 +1121,11 @@ Therefore we use it as default."""
         ct2.set_source_pixbuf(pl.get_pixbuf(), 0, 0)
         ct2.paint()
         ''' surface now contains the image in a Cairo surface '''
-        self.callback.storeInMemmory(surface, name)
+        self.callback.storeInMemory(surface, name)
         # like this, corrupted tiles should not get past the pixbuf loader and be stored
       else:
         # cache the raw data
-        self.callback.storeInMemmory(content, name)
+        self.callback.storeInMemory(content, name)
 
       m = self.callback._storeTiles
       if m:
