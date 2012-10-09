@@ -75,7 +75,7 @@ class Options(ranaModule):
     return "%s_opt_group_%s" % (parentId, id)
 
   def addGroup(self, name, id, parentId, icon, actionPrefix="",
-               actionSufix="", registerToMenu=True, backButtonAction=None):
+               actionSuffix="", registerToMenu=True, backButtonAction=None):
     """this method ads a new (empty) options group to category specified by
     catId, as a convenience feature, the id of the new group is returned"""
     catId = self._getCategoryID(parentId)
@@ -85,9 +85,9 @@ class Options(ranaModule):
     handled entirely by the pre and post actions
     """
     if not parentId:
-      action = "%s%s" % (actionPrefix, actionSufix)
+      action = "%s%s" % (actionPrefix, actionSuffix)
     else:
-      action = "%sset:menu:options#%s%s" % (actionPrefix, id, actionSufix)
+      action = "%sset:menu:options#%s%s" % (actionPrefix, id, actionSuffix)
 
     if registerToMenu: # add to options menu structure ?
       self.menuModule.addItem(catId, name, icon, action)
