@@ -19,14 +19,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_module import ranaModule
-import sys
-import os
-import socket
-from time import sleep
-import re
 
 def getModule(m, d, i):
-  return(messageModule(m, d, i))
+  return messageModule(m, d, i)
 
 
 class messageModule(ranaModule):
@@ -65,7 +60,7 @@ class messageModule(ranaModule):
         if m is not None:
           m.handleMessage(key, 'ms', string)
         else:
-          print "Message addressed to %s which isn't loaded" % module
+          print("Message addressed to %s which isn't loaded" % module)
 
       elif module == 'ml': # short for message + list of strings
         # Example:
@@ -79,7 +74,7 @@ class messageModule(ranaModule):
         if m is not None:
           m.handleMessage(key, 'ml', list)
         else:
-          print "Message addressed to %s which isn't loaded" % module
+          print("Message addressed to %s which isn't loaded" % module)
 
       elif module == 'md': # short for message + dictionary of string=string key:value pairs
         # Example:
@@ -98,7 +93,7 @@ class messageModule(ranaModule):
         if m is not None:
           m.handleMessage(mainKey, 'md', d)
         else:
-          print "Message addressed to %s which isn't loaded" % module
+          print("Message addressed to %s which isn't loaded" % module)
 
       elif module == "setWithMode":
         (mode, key, value) = text.split(":", 2)
@@ -120,4 +115,4 @@ class messageModule(ranaModule):
         if m is not None:
           m.handleMessage(text, None, None)
         else:
-          print "Message addressed to %s which isn't loaded" % module
+          print("Message addressed to %s which isn't loaded" % module)
