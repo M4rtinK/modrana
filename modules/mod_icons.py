@@ -26,7 +26,8 @@ import fnmatch
 on Fremantle and other everywhere (?) else"""
 try:
   from configobj.configobj import ConfigObj # everywhere
-except:
+except Exception, e:
+  print(e)
   print("icons: trying alternative configobj import method")
   from configobj import ConfigObj # Fremantle
 
@@ -39,9 +40,9 @@ if gs.GUIString == "GTK":
   from color import Color
 
 def getModule(m,d,i):
-  return(icons(m,d,i))
+  return Icons(m,d,i)
 
-class icons(ranaModule):
+class Icons(ranaModule):
   """Draw icons"""
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
@@ -145,48 +146,44 @@ class icons(ranaModule):
     # is there a filename with positional parameters ?
     if parameterPaths:
       result = None
-#      if fnmatch.filter(parameterPaths, "*%s-above_text.*" % name):
-      if True:
-#        aboveTextIconPath = fnmatch.filter(parameterPaths, "*%s-above_text.*" % name).pop()
-
-        aboveTextIconPath = fnmatch.filter(parameterPaths, "*%s.*" % name).pop()
-        pixbufInfo = gtk.gdk.pixbuf_get_file_info(aboveTextIconPath)
-        # it we get some info about the file, it means that the image is probably pixbufable
-        if pixbufInfo:
-          (iconInfo,iconW,iconH) = pixbufInfo
-          if iconH == 0:
-            iconH = 1
-          hwRatio = iconW/float(iconH)
-          border = min(w,h)*0.1
-          targetH = (h*0.55)
-          targetW = w - 2*border
-          """ try to fit the icon image above the text inside the icon outline,
-              with some space between, while respecting appect original aspect ratio"""
-          scaledW = targetW
-          scaledH = targetW/float(hwRatio)
-          if scaledH > targetH:
-            scaledH = targetH
-            scaledW = targetH * hwRatio
-          targetX = border + (targetW-scaledW)/2.0
-          targetY = border*(0.9) + ((targetH-scaledH)/2.0)
-          try:
-            # try to load the icon to pixbuf and get ist original width and height
-            pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(aboveTextIconPath,int(scaledW),int(scaledH))
-          except Exception, e:
-            print "icons: icon probably corrupted: %s" % aboveTextIconPath
-            print "%s" % e
-          if pixbuf:
-            compositeIcon = cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h)
-            ct = cairo.Context(compositeIcon)
-            ct2 = gtk.gdk.CairoContext(ct)
-            ct2.set_source_pixbuf(pixbuf,targetX,targetY)
-            ct2.paint()
-            return (compositeIcon,True) # this signalizes that a background might be needed
-          else:
-            return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor),False)
+      aboveTextIconPath = fnmatch.filter(parameterPaths, "*%s.*" % name).pop()
+      pixbufInfo = gtk.gdk.pixbuf_get_file_info(aboveTextIconPath)
+      # it we get some info about the file, it means that the image is probably pixbufable
+      if pixbufInfo:
+        (iconInfo,iconW,iconH) = pixbufInfo
+        if iconH == 0:
+          iconH = 1
+        hwRatio = iconW/float(iconH)
+        border = min(w,h)*0.1
+        targetH = (h*0.55)
+        targetW = w - 2*border
+        """ try to fit the icon image above the text inside the icon outline,
+            with some space between, while respecting appect original aspect ratio"""
+        scaledW = targetW
+        scaledH = targetW/float(hwRatio)
+        if scaledH > targetH:
+          scaledH = targetH
+          scaledW = targetH * hwRatio
+        targetX = border + (targetW-scaledW)/2.0
+        targetY = border*(0.9) + ((targetH-scaledH)/2.0)
+        try:
+          # try to load the icon to pixbuf and get ist original width and height
+          pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(aboveTextIconPath,int(scaledW),int(scaledH))
+        except Exception, e:
+          print "icons: icon probably corrupted: %s" % aboveTextIconPath
+          print "%s" % e
+        if pixbuf:
+          compositeIcon = cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h)
+          ct = cairo.Context(compositeIcon)
+          ct2 = gtk.gdk.CairoContext(ct)
+          ct2.set_source_pixbuf(pixbuf,targetX,targetY)
+          ct2.paint()
+          return compositeIcon,True # this signalizes that a background might be needed
+        else:
+          return self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor), False
 
       if result is None:
-        return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor),False)
+        return self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor), False
     # just use the classic icon
     elif simplePaths:
       iconPath = simplePaths.pop()
@@ -199,19 +196,17 @@ class icons(ranaModule):
     else:
       print "icons: %s not found" % name
       # we use the default button background if the tile is missing
-      return(self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor),False)
+      return self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor), False
 
     if not image: # loading the image probably failed
       return False
-    w = float(image.get_width())
-    h = float(image.get_height())
+#    w = float(image.get_width())
+#    h = float(image.get_height())
     return image,False
 
   def getImageSurface(self,path, w=None, h=None):
     """load a image given by path to pixbuf and paint it to an image surface,
        then return the image surface"""
-    image = None
-
     try:
       pixbuf = gtk.gdk.pixbuf_new_from_file(path)
       """
@@ -306,36 +301,36 @@ class icons(ranaModule):
 
     if fillColorString:
       fillColor = Color("fill", (fillColorString,fillAlpha))
-      fillColorRGBATupple = fillColor.getCairoColor()
+      fillColorRGBATuple = fillColor.getCairoColor()
     else:
-      fillColorRGBATupple = self.buttonFillColor
+      fillColorRGBATuple = self.buttonFillColor
 
 
     if outlineColorString:
       outlineColor = Color("outline", (outlineColorString,outlineAlpha))
-      outlineColorRGBATupple = outlineColor.getCairoColor()
+      outlineColorRGBATuple = outlineColor.getCairoColor()
     else:
-      outlineColorRGBATupple = self.buttonOutlineColor
+      outlineColorRGBATuple = self.buttonOutlineColor
 
     # apply the alpha values
     try:
-      (r,g,b,a) = fillColorRGBATupple
-      fillColorRGBATupple = (r,g,b,fillAlpha)
+      (r,g,b,a) = fillColorRGBATuple
+      fillColorRGBATuple = (r,g,b,fillAlpha)
     except Exception, e:
       print "** wrong fill color code or name: %s" % fillColorString
       print "** exception: %s" % e
-      fillColorRGBATupple = self.buttonFillColor
+      fillColorRGBATuple = self.buttonFillColor
 
     try:
-      (r,g,b,a) = outlineColorRGBATupple
-      outlineColorRGBATupple = (r,g,b,outlineAlpha)
+      (r,g,b,a) = outlineColorRGBATuple
+      outlineColorRGBATuple = (r,g,b,outlineAlpha)
     except Exception, e:
       print "** wrong outline color code or name: %s" % fillColorString
       print "** exception: %s" % e
-      outlineColorRGBATupple = self.buttonOutlineColor
+      outlineColorRGBATuple = self.buttonOutlineColor
 
     # create the icon
-    icon = self.roundedRectangle(w, h, fillColorRGBATupple, outlineColorRGBATupple, outlineWidth, cornerRadius)
+    icon = self.roundedRectangle(w, h, fillColorRGBATuple, outlineColorRGBATuple, outlineWidth, cornerRadius)
     return icon
 
 
@@ -356,7 +351,7 @@ class icons(ranaModule):
       parameterPaths = glob.glob(path+"%s-*.*" % name)
       if parameterPaths or simplePaths:
         break
-    return (simplePaths,parameterPaths)
+    return simplePaths, parameterPaths
 
   def flushIconCache(self):
     """flush the icon cache"""
@@ -516,7 +511,7 @@ class icons(ranaModule):
     if len(self.images) >= self.maxImages:
       # get the oldest image + remove it from the queue
       oldestImageName = self.imageOrderList.pop(0) # TODO: this might be slow
-#      print "trimming cache, %s, %d" % (oldestImageName, len(self.images))
+#      print("trimming cache, %s, %d" % (oldestImageName, len(self.images)))
       # remove it from the cache
       del self.images[oldestImageName]
     cacheRepresentation = {'image':image,'w':w,'h':h, 'name':name}
@@ -526,7 +521,7 @@ class icons(ranaModule):
 
   def handleMessage(self, message, type, args):
     if message == "themeChanged":
-      """handle theme switching"""
+      # handle theme switching
       currentTheme = self.get('currentTheme', self.defaultTheme)
       self.switchTheme(currentTheme)
       
@@ -539,7 +534,7 @@ class icons(ranaModule):
     if outlineWidth is None:
       outlineWidth = min(width,height)*0.05
     elif outlineWidth < 1.0: # add support for proportional outlines
-      outlineWidth = min(width,height)*outlineWidth
+      outlineWidth *= min(width, height)
 
     x = 0
     y = 0
@@ -576,7 +571,7 @@ class icons(ranaModule):
     cr.set_source_rgba(*outlineColor)
     cr.set_line_width(outlineWidth)
     cr.stroke()
-    return (image)
+    return image
 
   def updateThemeList(self):
     rawFolderContent = os.listdir(self.themesFolderPath)
