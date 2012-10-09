@@ -224,7 +224,7 @@ class mapData(ranaModule):
 
           self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
 
-      if location == "route":
+      if location == "track":
         loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
         GPXTracklog = loadTl.getActiveTracklog()
         """because we don't need all the information in the original list and
