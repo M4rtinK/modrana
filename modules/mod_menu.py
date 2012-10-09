@@ -113,13 +113,12 @@ class menus(ranaModule):
       self.hideMapScreenButtons = False
 
       # default main button coordinates
-      buttons = {}
-      buttons['menu'] = (x,y) # main menu button coordinates
-      buttons['zoom_in'] = (x,y+dx) # zoom in button coordinates
-      buttons['zoom_out'] = (x+dx,y) # zoom out button coordinates
-      buttons['fullscreen'] = (x, y+h-dy) # fullscreen button coordinates
-      buttons['centre'] = (x+w-dx, y) # centre button coordinates
-      buttons['scalebar'] = proj.screenPos(0.15, 0.97) # scalebar coordinates
+      buttons = {'menu': (x, y),
+                 'zoom_in': (x, y + dx),
+                 'zoom_out': (x + dx, y),
+                 'fullscreen': (x, y + h - dy),
+                 'centre': (x + w - dx, y),
+                 'scalebar': proj.screenPos(0.15, 0.97)}
       plusIcon = 'center:zoom_in;0.05'
       minusIcon = 'center:zoom_out;0.05'
 
@@ -436,7 +435,7 @@ class menus(ranaModule):
       # get highlight colors
       (spbHiFillColor,spbHiFillAlpha) = self.spButtonHiFillTup
       (spbHiOutlineColor,spbHiOutlineAlpha) = self.spButtonHiOutlineTup
-      highlighIconDescription = "generic:%s;%f;%s;%f;;" % (spbHiFillColor, spbHiFillAlpha, spbHiOutlineColor, spbHiOutlineAlpha)
+      highlightIconDescription = "generic:%s;%f;%s;%f;;" % (spbHiFillColor, spbHiFillAlpha, spbHiOutlineColor, spbHiOutlineAlpha)
 
     # Decide how to layout the menu
 
@@ -448,7 +447,7 @@ class menus(ranaModule):
       elif w < h: # portrait
         cols = 2
         rows = 7
-      elif w == h: # square
+      else: # w == h -> square
         cols = 2
         rows = 4
     # use roughly square buttons #
@@ -459,9 +458,10 @@ class menus(ranaModule):
       elif w < h: # portrait
         cols = 3
         rows = 4
-      elif w == h: # square
+      else: # w == h -> square
         cols = 4
         rows = 4
+
     dx = w / cols
     dy = h / rows
 
@@ -518,7 +518,7 @@ class menus(ranaModule):
         (text, icon, action, type, timedAction) = item
         if id == highlightId:
           # make the button highlighted
-          icon = "%s>>%s" % (highlighIconDescription, icon)
+          icon = "%s>>%s" % (highlightIconDescription, icon)
         self.drawButton(cr, x, y, dx, dy, text, icon, action, timedAction)
 #        (text, icon, action, type) = item
 #        self.drawButton(cr, x, y, dx, dy, text, icon, action)
@@ -532,7 +532,7 @@ class menus(ranaModule):
         icon = item[0][nextIndex][1]
         if id == highlightId:
           # make the button highlighted
-          icon = "%s>>%s" % (highlighIconDescription, icon)
+          icon = "%s>>%s" % (highlightIconDescription, icon)
         action = item[0][nextIndex][2]
 
         action+='|menu:toggle#%s#%s|set:needRedraw:True' % (menuName,id)
@@ -586,7 +586,6 @@ class menus(ranaModule):
     if not menu:
       menu = self.getInitializedMenu()
     itemCount = menu['metadata']['itemCount']
-    type = "simple"
     # add all items to the menu
     for item in items:
       (text, icon, action, type, timedAction) = item
@@ -701,7 +700,7 @@ class menus(ranaModule):
 
     self.drawItemizedMenu(cr, menu, "fooName")
 
-  def addPointListMenu(self, name, parrentAction, points=None, goto='detail'):
+  def addPointListMenu(self, name, parentAction, points=None, goto='detail'):
     if points:
       c = modrana_utils.SimpleListContainer(points)
     else:
@@ -716,7 +715,7 @@ class menus(ranaModule):
 
     def describePointGo2Detail(point, index, listName):
       mainText = point.getName()
-      secText = getDescription()
+      secText = point.getDescription()
       action = 'set:menu:menu#listDetail#%s#%d' % (name, index)
       return mainText,secText,action
 
@@ -725,7 +724,7 @@ class menus(ranaModule):
     else:
       descFunction = describePointGo2Map
 
-    newListableMenu = self.ListableMenu(name, self, c, parrentAction, descFunction=descFunction, displayedItems=4)
+    newListableMenu = self.ListableMenu(name, self, c, parentAction, descFunction=descFunction, displayedItems=4)
     newListableMenu.setDrawItemMenuMethod(self.drawPointDetailMenu)
     newListableMenu.setDrawItemToolsMenuMethod(self.drawPointToolsMenu)
     self.lists[name] = newListableMenu
@@ -894,7 +893,7 @@ class menus(ranaModule):
       # restore by callback once the menu is left
       self.menus.watch('menu', self._menuLeftCB, oldAction)
 
-    def _menuLeftCB(self,key,old,new, oldAction):
+    def _menuLeftCB(self, key, old, new, oldAction):
       # restore the original back action
       self.parentAction = oldAction
       # remove the watch by returning False
@@ -1132,9 +1131,7 @@ class menus(ranaModule):
     self.setupInfoMenu()
     self.clearMenu('options', "set:menu:main") # will be filled by mod_options
     self.lists['places'] = 'placenames'
-
     self.set('editBatchMenuActive', False) # at startup, the edit batch menu is inactive
-
 
   def drawTextToSquare(self, cr, x, y, w, h, text, wrap=False):
     """draw lines of text to a square text box, \n is used as a delimiter"""
@@ -1169,8 +1166,6 @@ class menus(ranaModule):
     self.drawButton(cr, x1, y1+2*dy, w, dy, '', third[1], third[2])
     self.drawTextToSquare(cr, x1, y1+2*dy, w, dy, third[0])
 
-
-
   def threePlusOneMenuCoords(self):
     """
     get element coordinates for a menu,
@@ -1178,7 +1173,6 @@ class menus(ranaModule):
     * because we want the big button/area to be cca square,
       we move the buttons to the upper part of the screen in portrait mode
       and to the left in landscape
-
     """
     (x1,y1,w1,h1) = self.get('viewport', None)
 
@@ -1188,7 +1182,7 @@ class menus(ranaModule):
     elif w1 < h1:
       cols = 3
       rows = 4
-    elif w1 == h1:
+    else: # w == h -> square
       cols = 4
       rows = 4
 
@@ -1200,17 +1194,14 @@ class menus(ranaModule):
       (elem2) = (x1, y1+1*dy)
       (elem3) = (x1, y1+2*dy)
       (elem4) = (x1+dx, y1)
-
-
-    elif w1<=h1: # portrait
+    else: # w1<=h1 -> portrait
       (elem1) = (x1, y1)
       (elem2) = (x1+dx, y1)
       (elem3) = (x1+2*dx, y1)
       (elem4) = (x1, y1+dy)
 
     alloc = (w1,h1,dx,dy)
-
-    return(elem1,elem2,elem3,elem4,alloc)
+    return elem1, elem2, elem3, elem4, alloc
 
   def listableMenuCoords(self):
     """listable menu is basically the same as the three plus one menu,
@@ -1334,20 +1325,19 @@ class menus(ranaModule):
     text = boxTextLines
     self.drawTextToSquare(cr, x4, y4+dy, w4, h4, text) # display the text in the box
 
-
-  def showTextOld(self,cr,text,x,y,widthLimit=None,fontsize=40):
+  def showTextOld(self,cr,text,x,y,widthLimit=None, fontSize=40):
     """DEPRECIATED show text function"""
     if text:
-      cr.set_font_size(fontsize)
+      cr.set_font_size(fontSize)
       stats = cr.text_extents(text)
-      (textwidth, textheight) = stats[2:4]
+      (textWidth, textHeight) = stats[2:4]
 
-      if widthLimit and (textwidth > widthLimit):
-        cr.set_font_size(fontsize * widthLimit / textwidth)
+      if widthLimit and (textWidth > widthLimit):
+        cr.set_font_size(fontSize * widthLimit / textWidth)
         stats = cr.text_extents(text)
-        (textwidth, textheight) = stats[2:4]
+        (textWidth, textHeight) = stats[2:4]
 
-      cr.move_to(x, y+textheight)
+      cr.move_to(x, y+textHeight)
       cr.show_text(text)
 
   def drawScalebar(self, cr, proj, x1, y1, w):
@@ -1368,7 +1358,7 @@ class menus(ranaModule):
       unitString = units.km2CurrentUnitString(dist, 2, True)
       text = unitString
     else:
-      text = "%1.1f km" % unit
+      text = "%1.1f km" % dist
 
     cr.set_source_rgb(0,0,0)
     cr.move_to(x1,y1)
