@@ -1088,6 +1088,7 @@ class menus(ranaModule):
     self.addItem('data', 'Around here', 'generic', 'set:downloadType:data|set:downloadArea:here|set:menu:%s' % nextMenu)
     notification = "ml:notification:m:Listing available tracklogs;2"
     self.addItem('data', 'Around track', 'generic', 'set:downloadType:data|set:downloadArea:track|set:menu:mapData#chooseRouteForDl|%s' % notification)
+    self.addItem('data', 'Around route', 'generic', 'set:downloadType:data|set:downloadArea:route|mapData:dlAroundRoute')
     self.addItem('data', 'Around view', 'generic', 'set:downloadType:data|set:downloadArea:view|set:menu:%s' % nextMenu)
     self.setupDataSubMenu()
     if self.get("batchMenuEntered", None) == True:

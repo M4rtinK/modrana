@@ -221,23 +221,27 @@ class mapData(ranaModule):
           tilesAroundHere = set(self.spiral(x, y, midZ, size)) # get tiles around our position as a set
           # now get the tiles from other zoomlevels as specified
           zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundHere, midZ, maxZ, minZ)
-
           self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-
-      if location == "track":
+      elif location == "track":
         loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
         GPXTracklog = loadTl.getActiveTracklog()
-        """because we don't need all the information in the original list and
-        also might need to add interpolated points, we make a local copy of
-        the original list"""
-        #latLonOnly = filter(lambda x: [x.latitude,x.longitude])
-        trackpointsListCopy = map(lambda x: {'latitude': x.latitude, 'longitude': x.longitude}, GPXTracklog.trackpointsList[0])[:]
+        # get all tracklog points
+        trackpointsListCopy = map(lambda x: (x.latitude, x.longitude, None), GPXTracklog.trackpointsList[0])[:]
         tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, midZ)
         zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
-
         self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-
-      if location == "view":
+      elif location == "route": # download around
+        routeModule = self.m.get('route', None) # get the tracklog module
+        if routeModule:
+          route = routeModule.getDirections()
+          if route:
+            tilesToDownload = self.getTilesForRoute(route.getPointsLLE(), size, midZ)
+            zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
+            self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
+          else:
+            self.set('menu','main')
+            self.notify("No active route", 3000)
+      elif location == "view":
         proj = self.m.get('projection', None)
         (screenCenterX, screenCenterY) = proj.screenPos(0.5, 0.5) # get pixel coordinates for the screen center
         (lat, lon) = proj.xy2ll(screenCenterX, screenCenterY) # convert to geographic coordinates
@@ -248,7 +252,7 @@ class mapData(ranaModule):
 
         self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
 
-    if message == "getSize":
+    elif message == "getSize":
       """will now ask the server and find the combined size if tiles in the batch"""
       self.set("sizeStatus", 'unknown') # first we set the size as unknown
       neededTiles = self.currentDownloadList
@@ -271,7 +275,7 @@ class mapData(ranaModule):
       sizeThread.start()
       self.sizeThread = sizeThread
 
-    if message == "download":
+    elif message == "download":
       """get tilelist and download the tiles using threads"""
       neededTiles = self.currentDownloadList
       layer = self.get('layer', None)
@@ -312,24 +316,40 @@ class mapData(ranaModule):
       getFilesThread.start()
       self.getFilesThread = getFilesThread
 
-    if message == "stopDownloadThreads":
+    elif message == "stopDownloadThreads":
       self.stopBatchDownloadThreads()
 
-    if message == 'stopSizeThreads':
+    elif message == 'stopSizeThreads':
       self.stopSizeThreads()
 
-    if message == "up":
+    elif message == "up":
       if self.scroll > 0:
         self.scroll -= 1
         self.set('needRedraw', True)
-    if message == "down":
+    elif message == "down":
       print "down"
       self.scroll += 1
       self.set('needRedraw', True)
-    if message == "reset":
+    elif message == "reset":
       self.scroll = 0
       self.set("needRedraw", True)
 
+    elif message == 'dlAroundRoute':
+      routeModule = self.m.get('route', None)
+      if routeModule:
+        route = routeModule.getDirections()
+        notification = "Using current route"
+        if route:
+          self.set('menu', 'data2')
+          mLength = route.getLength()
+          if mLength:
+            units = self.m.get('units', None)
+            if units:
+              lengthString = units.m2CurrentUnitString(mLength, dp=1, short=True)
+              notification = "%s (%s)" % (notification, lengthString)
+          self.notify(notification, 2000)
+        else:
+          self.notify("No active route", 3000)
 
   def addOtherZoomlevels(self, tiles, tilesZ, maxZ, minZ):
     """expand the tile coverage to other zoomlevels
@@ -786,10 +806,10 @@ class mapData(ranaModule):
     interpolatedPoints = []
     for point in route:
       if first: # the first point has no previous point
-        (lastLat, lastLon) = (point['latitude'], point['longitude'])
+        (lastLat, lastLon) = point[0], point[1]
         first = False
         continue
-      (thisLat, thisLon) = (point['latitude'], point['longitude'])
+      thisLat, thisLon = point[0], point[1]
       distBtwPoints = geo.distance(lastLat, lastLon, thisLat, thisLon)
       """if the distance between points was greater than the given radius for tiles,
       there would be no continuous coverage for the route"""
@@ -804,7 +824,7 @@ class mapData(ranaModule):
     start = clock()
     tilesToDownload = set()
     for point in route: #now we iterate over all points of the route
-      (lat, lon) = (point['latitude'], point['longitude'])
+      lat, lon = point[0], point[1]
       # be advised: the xy in this case are not screen coordinates but tile coordinates
       (x, y) = latlon2xy(lat, lon, z)
       # the spiral gives us tiles around coordinates for a given radius
@@ -831,7 +851,7 @@ class mapData(ranaModule):
       else:
         middleLat = (lat1 + lat2) / 2.0 # fin the midpoint between the two points
         middleLon = (lon1 + lon2) / 2.0
-        pointsBetween.extend([{'latitude': middleLat, 'longitude': middleLon}])
+        pointsBetween.append((middleLat, middleLon))
         # process the 2 new line segments
         localAddPointsToLine(lat1, lon1, middleLat, middleLon, maxDistance)
         localAddPointsToLine(middleLat, middleLon, lat2, lon2, maxDistance)
