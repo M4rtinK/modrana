@@ -4,7 +4,6 @@ from __future__ import with_statement # for python 2.5
 import csv
 import os
 import threading
-import threading
 import core.exceptions
 import core.paths
 from modules import geo
@@ -381,19 +380,19 @@ def _detectMonavTurns(result):
         if lastEdge.type_id != edgeId or lastName != name:
           # if route type or name changes, it might be a turn
           node = nodes[nodeId]
-          #          if nodeId <= maxNodeId:
-          #            prevNode = nodes[nodeId-1]
-          #            nextNode = nodes[nodeId+1]
-          #            # NOTE: if the turn consists
-          #            # from many segments, taking more points into
-          #            # account might be needed
-          #            first = prevNode.latitude, prevNode.longitude
-          #            middle = node.latitude, prevNode.longitude
-          #            last = nextNode.latitude, prevNode.longitude
-          #            angle = geo.turnAngle(first, middle, last)
-          #            name+="%1.0f degrees" % angle
-          #          else:
-          #            angle = None
+#          if nodeId <= maxNodeId:
+#            prevNode = nodes[nodeId-1]
+#            nextNode = nodes[nodeId+1]
+#            # NOTE: if the turn consists
+#            # from many segments, taking more points into
+#            # account might be needed
+#            first = prevNode.latitude, prevNode.longitude
+#            middle = node.latitude, prevNode.longitude
+#            last = nextNode.latitude, prevNode.longitude
+#            angle = geo.turnAngle(first, middle, last)
+#            name+="%1.0f degrees" % angle
+#          else:
+#            angle = None
 
           turnDescription = _getTurnDescription(None, name=name)
           print(turnDescription)

@@ -206,6 +206,11 @@ def turnAngle(first, middle, last):
   """
   compute turn angle for a turn described by three points
   """
+  #  print "TURN ANGLE"
+  #  print first
+  #  print middle
+  #  print last
+
   lat_x, lon_x = first
   lat_y, lon_y = middle
   lat_z, lon_z = last
