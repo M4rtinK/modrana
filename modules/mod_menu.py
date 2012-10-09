@@ -1014,11 +1014,11 @@ class menus(ranaModule):
     maxZ = z + zoomDown
 
     layer = self.get('layer', None)
-    maplayers = self.modrana.getMapLayers()
-    if maplayers == {}:
-      maxZoomLimit == 17
+    mapLayers = self.modrana.getMapLayers()
+    if mapLayers == {}:
+      maxZoomLimit = 17
     else:
-      maxZoomLimit = maplayers[layer]['maxZoom']
+      maxZoomLimit = mapLayers[layer]['maxZoom']
 
     if maxZ > maxZoomLimit:
       maxZ = 17
@@ -1352,7 +1352,6 @@ class menus(ranaModule):
 
     dist = geo.distance(lat1,lon1,lat2,lon2)
     # respect the current unit settings
-    unit = "km"
     units = self.m.get('units', None)
     if units:
       unitString = units.km2CurrentUnitString(dist, 2, True)
