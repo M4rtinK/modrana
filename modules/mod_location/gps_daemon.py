@@ -31,6 +31,7 @@ class GPSD(PositionSource):
 
   def start(self):
     """start the GPSD based location update method"""
+    self.connected = False
     try:
       self.GPSDConsumer = GPSDConsumer()
       self._checkVerbose() # check if verbose debugging is enabled
