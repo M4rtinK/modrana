@@ -32,6 +32,7 @@ class units(ranaModule):
   mileInFeet = 5280
   footInMeters = 0.3048
 
+
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
     """
@@ -41,16 +42,17 @@ class units(ranaModule):
     self.notMovingSpeed  = 2
     
   def m2km(self, m):
-    return (m / 1000.0) # m to km
+    return m / 1000.0 # m to km
 
   def km2m(self, km):
-    return (km * 1000) # km to m
+    return km * 1000 # km to m
 
   def km2Miles(self, km):
     return km / self.mileInKiloMeters  # km to miles
 
   def miles2Feet(self, miles):
     return miles*self.mileInFeet
+
 
 
   def m2CurrentUnit(self, m):
@@ -227,7 +229,7 @@ class units(ranaModule):
         return "feet"
 
   def currentSpeedUnitToMS(self, currentSpeedUnit):
-    "convert current speed unit to meters per second"
+    """convert current speed unit to meters per second"""
     unitType = self.get("unitType", "km")
     if unitType == 'km':
       return currentSpeedUnit * 0.277778
@@ -236,7 +238,7 @@ class units(ranaModule):
 
   def getCurrentTimeString(self, timeFormat=None):
     """return a string with current time, the format can be set or a system defined one is used"""
-    if timeFormat == None:
+    if timeFormat is None:
       timeFormat = self.get('currentTimeFormat', '24h')
     if timeFormat == "12h":
       return time.strftime("%I:%M %p")
@@ -256,9 +258,9 @@ class units(ranaModule):
        None if the current speed is unknown
        """
 
-    currentspeedKMH = self.get('speed', None)
-    if currentspeedKMH is not None:
-      return currentspeedKMH>self.notMovingSpeed
+    currentSpeedKMH = self.get('speed', None)
+    if currentSpeedKMH is not None:
+      return currentSpeedKMH>self.notMovingSpeed
     else:
       # signalise that we can't decide this
       return None
@@ -337,10 +339,4 @@ class units(ranaModule):
       long = unitDescription[1]
     else:
       long = unitDescription[2]
-    return (distanceString, unitDescription[0], long)
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()
+    return distanceString, unitDescription[0], long
