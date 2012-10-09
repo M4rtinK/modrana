@@ -27,8 +27,8 @@ import re
 import csv
 import traceback
 import unicodedata
-import way
-from time import clock
+import modules.way as way
+#from time import clock
 import time
 
 DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
@@ -546,6 +546,9 @@ class route(ranaModule):
 
     # save
     self.directions = directions
+
+  def getDirections(self):
+    return self.directions
 
   def filterDirections(self, directions):
     """
