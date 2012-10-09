@@ -30,7 +30,9 @@ class units(ranaModule):
   mileInMeters = 1609.344
   mileInKiloMeters = mileInMeters / 1000
   mileInFeet = 5280
+  mileInYards = 1760
   footInMeters = 0.3048
+  yardInMeters = 0.9144
 
 
   def __init__(self, m, d, i):
@@ -40,7 +42,17 @@ class units(ranaModule):
     (to filter out the standard GPS drift while not moving)
     """
     self.notMovingSpeed  = 2
-    
+    self._updateUnitTable()
+
+  def _updateUnitTable(self):
+    # TODO: unit localization support
+    # TODO: different global & routing unit localization support
+    self.unitTable = {
+      'km' : Unit(('m', 'meter', 'meters'), ('km', 'kilometer', 'kilometers'), type='km'),
+      'miles' : Unit(('yd', 'yard', 'yards'), ('mi', 'mile', 'miles'), type='miles'),
+      'milesFeet' : Unit(('ft', 'foot', 'feet'), ('mi', 'mile', 'miles'), type='miles', subType='feet'),
+    }
+
   def m2km(self, m):
     return m / 1000.0 # m to km
 
@@ -51,9 +63,10 @@ class units(ranaModule):
     return km / self.mileInKiloMeters  # km to miles
 
   def miles2Feet(self, miles):
-    return miles*self.mileInFeet
+    return miles * self.mileInFeet
 
-
+  def miles2Yards(self, miles):
+    return miles * self.mileInYards
 
   def m2CurrentUnit(self, m):
     return self.km2CurrentUnit(m*1000)
@@ -71,18 +84,23 @@ class units(ranaModule):
 
   def km2CurrentUnitString(self, km, dp=None, short=True):
     """return current unit in string with unit descriptor, rounded to two decimal places"""
-    unitType = self.get("unitType", "km")
+    # get current unit
+    unit = self.getCurrentUnit()
+
     small = False
-    if unitType == 'km':
+    if unit.type == 'km':
       if km <= 1: # we now count in meters
         dp = -1 # no need to count the odd meter with current GPS accuracy
-        distance = km*1000
+        distance = km * 1000
         small = True
       else:
         distance = km
     else: # just miles for now
-      if km<self.mileInKiloMeters / 10:
-        distance = self.km2Miles(km) * self.mileInFeet
+      if km < self.mileInKiloMeters / 10:
+        if unit.subType == 'feet':
+          distance = self.km2Miles(km) * self.mileInFeet
+        else:
+          distance = self.km2Miles(km) * self.mileInYards
         dp = -1 # no need to count the odd foot with current GPS accuracy
         small = True
       else:
@@ -91,7 +109,7 @@ class units(ranaModule):
     # rounding
     if dp is None:
       numberString = "%f" % distance
-    elif dp==0:
+    elif dp == 0:
       n = int(round(distance, 0))
       numberString = "%d" % n
     else:
@@ -103,33 +121,17 @@ class units(ranaModule):
     #is it a string float representation ?
     if '.' in numberString: # strip possible trailing zeroes
       numberString = numberString.rstrip('0').rstrip('.')
-      
-    # short/lon unit name
-    if unitType == 'km':
-      if short:
-        unitString = "km"
-        smallUnitString = "m"
-      else:
-        unitString = "kilometers"
-        smallUnitString = "meters"
 
+    if short:
       if small:
-        return "%s %s" % (numberString, smallUnitString)
+        return "%s %s" % (numberString, unit.smallShort)
       else:
-        return "%s %s" % (numberString, unitString)
-      
-    else: # miles
-      if short:
-        unitString = "mi"
-        smallUnitString = "ft"
-      else:
-        unitString = "miles"
-        smallUnitString = "feet"
-
+        return "%s %s" % (numberString, unit.normalShort)
+    else:
       if small:
-        return "%s %s" % (numberString, smallUnitString)
+        return "%s %s" % (numberString, unit.smallP)
       else:
-        return "%s %s" % (numberString, unitString)
+        return "%s %s" % (numberString, unit.normalP)
 
   def km2CurrentUnitStringFullName(self, km):
     """return current unit in string with unit descriptor, rounded to two decimal places"""
@@ -274,6 +276,7 @@ class units(ranaModule):
   meters = ('m', 'meter', 'meters', 1)
   kilometers = ('km', 'kilometer', 'kilometers', 1.0 / 1000)
   feet = ('ft', 'foot', 'feet', 1.0 / footInMeters)
+  yards = ('yd', 'yard', 'yards', 1.0 / yardInMeters)
   miles = ('mi', 'mile', 'miles', 1.0 / mileInMeters)
   #
   # Table of how to round.  There is one dictionary entry for each
@@ -340,3 +343,30 @@ class units(ranaModule):
     else:
       long = unitDescription[2]
     return distanceString, unitDescription[0], long
+
+  def getCurrentUnit(self, short = True):
+    """return a dict containing unit names corresponding to the current
+    unit configuration"""
+
+    #TODO: cache the result & watch for option changes ?
+    unitType = self.get("unitType", "km")
+    unitTypeImperialSmall = self.get("unitTypeImperialSmall", "yards")
+
+    if unitType == 'km':
+      return self.unitTable['km']
+    else: # imperial units
+      if unitTypeImperialSmall == 'feet':
+        return self.unitTable['milesFeet']
+      else: # default - yards
+        return self.unitTable['miles']
+
+class Unit:
+  """represents an unit of distance in several denominations and name types"""
+  def __init__(self, small, normal, type = None, subType = None):
+    # P = plural
+    self.smallShort, self.small, self.smallP = small
+    self.normalShort, self.normal, self.normalP = normal
+    self.type = type
+    self.subType = subType
+
+

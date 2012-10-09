@@ -212,7 +212,8 @@ class Options(ranaModule):
     """highlight currently active item in the item selection menu"""
     # test if the key was initialized
     if self.optionsKeyExists(variable):
-      text, icon, action, type, timedAction
+      pass
+#      text, icon, action, type, timedAction
     else: # not initialized, no need to highlight anything
       return menu
 
@@ -477,6 +478,12 @@ this is needed for the item tools menu to know where to return"""
        ("12h", "12 hours")],
       group,
       "24h")
+
+    addOpt("Small imperial units", "unitTypeImperialSmall",
+      [("yards", "yards"),
+       ("feet", "feet")],
+      group,
+      "yards")
 
     # ** menus
     group = addGroup("Menus", "menus", catView, "generic")
