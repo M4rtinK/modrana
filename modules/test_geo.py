@@ -6,9 +6,9 @@ def turnAngle(first, middle, last):
   """
   compute turn angle for a turn described by three points
   """
-  lat_x, lon_x = first
-  lat_y, lon_y = middle
-  lat_z, lon_z = last
+  lat_x, lon_x = radians(first[0]), radians(first[1])
+  lat_y, lon_y = radians(middle[0]), radians(middle[1])
+  lat_z, lon_z = radians(last[0]), radians(last[1])
   #  input: 3 points X, Y, Z defined by (lat, lon) tupples ( in the usual <0..180 range)
   #  1) plane conversion - cartesian coordinates with the pole in the middle:
   X_x = EARTH_RADIUS * cos(lon_x) * cos(lat_x)
