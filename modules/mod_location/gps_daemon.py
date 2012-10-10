@@ -167,7 +167,11 @@ class GPSDConsumer(threading.Thread):
       if self.stop == True:
         print "GPSDConsumer: breaking\n"
         break
-      self.session.next() # this function blocks until a new fix is available
+      try:
+        self.session.next() # this function blocks until a new fix is available
+      except Exception, e:
+        print("GPSD: error: GPS daemon not running")
+        print(e)
       sf = self.session.fix
       if sf.mode != gps.MODE_NO_FIX:
         with self.lock:
