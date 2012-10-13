@@ -88,6 +88,11 @@ class onlineServices(ranaModule):
         else:
           return []
     else: # use location description provided in where
+      # drop the possible geo prefix
+      # as Google Local Search seems not to like it
+      if where.startswith('geo:'):
+        where = where[4:]
+
       queryString = "%s loc:%s" % (term, where)
       local = self.googleLocalQuery(queryString, maxResults)
       if local:

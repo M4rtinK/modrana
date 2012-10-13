@@ -234,6 +234,13 @@ class Startup:
       print("startup: parsing coordinates for the --focus-on-coordinates option failed")
       print(e)
 
+  def _getLocalSearchLocation(self):
+    location = self.args.local_search_location
+    if location is not None:
+      return location.strip() # remove leading & trailing whitespace
+    else:
+      return location
+
   def _earlyLocalSearch(self):
     """handle CLI initiated local search that returns a static map URL"""
     """for local search, we need to know our position, so we need at least the
@@ -250,9 +257,9 @@ class Startup:
     # now check if a location for the local search was provided from CLI or if we need to find our location
     # using GPS or equivalent
 
-    if self.args.local_search_location is not None:
+    location = self._getLocalSearchLocation()
+    if location is not None:
       # we use the location provided from CLI, no need to load & start location
-      location = self.args.local_search_location
       if self._useLastKnownPos(location):
         pos = self._getCurrentPosition(loadLocationModule=True, useLastKnown=True)
         if pos is None:
