@@ -18,6 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+import traceback
+import sys
 from base_module import ranaModule
 import cPickle
 import os
@@ -393,7 +395,7 @@ class storePOI(ranaModule):
   def dumpToCSV(self):
     """dump the db content as a CSV file"""
     units = self.m.get('units', None)
-    POIFolderPath = self.dmod.getPOIFolderPath()
+    POIFolderPath = self.modrana.paths.getPOIFolderPath()
     self.sendMessage('ml:notification:m:POI export starting;5')
     if units and self.db:
       try:
@@ -423,6 +425,7 @@ class storePOI(ranaModule):
       except Exception, e:
         print("storePOI: CSV dump failed")
         print(e)
+        traceback.print_exc(file=sys.stdout)
         self.sendMessage('ml:notification:m:POI export failed;5')
 
   def shutdown(self):
