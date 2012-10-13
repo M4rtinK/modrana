@@ -144,7 +144,7 @@ class voice(ranaModule):
         self.espaekProcess = self._startSubprocess(voiceString, shell=True)
     else:
       languageParam = '-v%s' % languageCode
-      args = ['espeak', languageParam, '-s 120', '-a', '%f' % volume, '-m', '"%s"' % message]
+      args = ['espeak', languageParam, '-s 120', '-a', '%s' % volume, '-m', '"%s"' % message]
       self.espaekProcess = self._startSubprocess(args)
 
   def _getEspeakVolumeValue(self):
