@@ -481,7 +481,15 @@ class route(ranaModule):
 
       if returnCode == ROUTING_SUCCESS:
         self.duration = "" # TODO : correct predicted route duration
-        dirs = way.fromMonavResult(directions)
+
+        # provided a turn detection function to the way object
+        tbt = self.m.get("turnByTurn", None)
+        if tbt:
+          getTurns = tbt.getMonavTurns
+        else:
+          getTurns = None
+
+        dirs = way.fromMonavResult(directions, getTurns)
         self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
 
         # handle navigation autostart

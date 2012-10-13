@@ -308,7 +308,7 @@ def fromGoogleDirectionsResult(gResult):
   return way
 
 
-def fromMonavResult(result):
+def fromMonavResult(result, getTurns=None):
   # convert route nodes from the Monav routing result
   # to (lat, lon) tuples
   if result:
@@ -328,97 +328,15 @@ def fromMonavResult(result):
     way = Way(routePoints)
     way.setDuration(result.seconds)
     way._setLength(mLength)
-    # generate directions
-    messagePoints = _detectMonavTurns(result)
-    way.addMessagePoints(messagePoints)
+
+    # was a directions generation method provided ?
+    if getTurns:
+      # generate directions
+      messagePoints = getTurns(result)
+      way.addMessagePoints(messagePoints)
     return way
   else:
     return None
-
-
-def _detectMonavTurns(result):
-  """go through the edges and try to detect turns,
-  return a list of RoutingPoints for the turns
-  """
-
-  # How to get the corresponding nodes for edges
-  # -> edges are ordered and contain the n_segments property
-  # -> n_segments describes from how many segments the given edge consists
-  # -> by counting n_segments for subsequent edges, we get the node id
-  # EXAMPLE:
-  # a route with 2 edges, 3 segments each
-  # -> firs point has id 0
-  # -> the last point od the first edge has id 3
-  # -> the last point of the route has id 6
-
-  turns = []
-
-  edges = result.edges
-  nodes = result.nodes
-  names = result.edge_names
-  types = result.edge_types
-
-  # need at least two edges for any meaningful routing
-  if len(edges) >= 2:
-    maxId = len(edges) - 1
-    lastEdge = edges[0]
-
-    nodeId = 0
-    maxNodeId = len(nodes) - 1
-    edgeId = 1
-    for edge in edges[1:]:
-      nodeId += lastEdge.n_segments
-      edgeId = edge.type_id
-      nameId = edge.name_id
-      name = names[nameId]
-
-      #      if lastEdge.branching_possible:
-      if True: # looks like branching possible is not needed
-        # turn directions are actually needed only
-        # when there are some other roads to to turn to
-        lastName = names[lastEdge.name_id]
-        if lastEdge.type_id != edgeId or lastName != name:
-          # if route type or name changes, it might be a turn
-          node = nodes[nodeId]
-#          if nodeId <= maxNodeId:
-#            prevNode = nodes[nodeId-1]
-#            nextNode = nodes[nodeId+1]
-#            # NOTE: if the turn consists
-#            # from many segments, taking more points into
-#            # account might be needed
-#            first = prevNode.latitude, prevNode.longitude
-#            middle = node.latitude, prevNode.longitude
-#            last = nextNode.latitude, prevNode.longitude
-#            angle = geo.turnAngle(first, middle, last)
-#            name+="%1.0f degrees" % angle
-#          else:
-#            angle = None
-
-          turnDescription = _getTurnDescription(None, name=name)
-          print(turnDescription)
-          # get the corresponding node
-
-          turns.append(TurnByTurnPoint(node.latitude, node.longitude, message=turnDescription))
-
-      lastEdge = edge
-  return turns
-
-#    prevEdge = edges[0]
-#    thisEdge = edges[1]
-#
-#    # we stop one edge before maxId,
-#    # so we don't have to check if there
-#    # is a next edge
-#    for i in range(2, maxId):
-#      nextEdge =
-
-
-def _getTurnDescription(type, name=None):
-  message = "you might need to turn left or right"
-  if name:
-    message = "turn to %s" % name
-  return message
-
 
 def fromGPX(GPX):
   pass

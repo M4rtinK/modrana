@@ -23,6 +23,7 @@ from base_module import ranaModule
 import geo
 import math
 import time
+import instructions_generator
 
 REROUTE_CHECK_INTERVAL = 5000 # in ms
 #in m/s, about 46 km/h - if this speed is reached, the rerouting threshold is multiplied
@@ -438,8 +439,6 @@ class turnByTurn(ranaModule):
     # automatic rerouting needs to be disabled to prevent rerouting
     # once the destination was reached
 
-
-
   def _setCurrentStepIndex(self, index):
     self.currentStepIndex = index
     self._doNavigationUpdate()
@@ -798,6 +797,9 @@ class turnByTurn(ranaModule):
               print('TBTWorker: increasing divergence counter (%d)' % self.reroutingThresholdCrossedCounter)
       time.sleep(REROUTE_CHECK_INTERVAL/1000.0)
     print("TBTWorker: shutting down")
+
+  def getMonavTurns(self, monavResult):
+    return instructions_generator.detectMonavTurns(monavResult)
 
   def shutdown(self):
     # cleanup
