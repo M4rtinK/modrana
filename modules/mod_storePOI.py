@@ -26,7 +26,7 @@ import csv
 from point import Point
 
 def getModule(m,d,i):
-  return(storePOI(m,d,i))
+  return storePOI(m,d,i)
 
 class storePOI(ranaModule):
   """Store POI data."""
@@ -421,7 +421,8 @@ class storePOI(ranaModule):
 
         self.sendMessage('ml:notification:m:POI exported to: %s;5' % POIFolderPath)
       except Exception, e:
-        print "storePOI: CSV dump failed:\n%s" % e
+        print("storePOI: CSV dump failed")
+        print(e)
         self.sendMessage('ml:notification:m:POI export failed;5')
 
   def shutdown(self):
@@ -468,7 +469,7 @@ class storePOI(ranaModule):
       for addressLine in result['addressLines']:
         text += "\n%s" % addressLine
     except:
-      text += "\n%s" % "no adress found"
+      text += "\n%s" % "no address found"
 
     try: # it seems, that this entry is no guarantied
       for phoneNumber in result['phoneNumbers']:
@@ -505,10 +506,3 @@ class POI():
   def setDescription(self, description):
     self.description = description
 #    self.GLSResult = None # optional
-
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()
