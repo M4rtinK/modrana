@@ -25,10 +25,10 @@ import re
 import threading
 
 def getModule(m, d, i):
-  return(voice(m, d, i))
+  return Voice(m, d, i)
 
 
-class voice(ranaModule):
+class Voice(ranaModule):
   """Handle text to speech."""
 
   def __init__(self, m, d, i):
@@ -115,8 +115,6 @@ class voice(ranaModule):
             except UnicodeEncodeError:
               print("voice: printing the current message to stdout failed do to unicode conversion error")
           return False
-
-
         else:
           self._speak(language, text)
           return True
@@ -133,14 +131,12 @@ class voice(ranaModule):
         voiceString = re.sub("%volume%", volume, voiceString) # volume
         voiceString = re.sub("%message%", message, voiceString) # message
         voiceString = re.sub("%qmessage%", '"%s"' % message, voiceString) # quoted message
-
-        """ the message can contain unicode, this might cause an exception when printing it
- in some systems (SHR-u on Neo, for example)"""
+        # the message can contain unicode, this might cause an exception when printing it
+        #  in some systems (SHR-u on Neo FreeRunner, for example)"""
         try:
-          print "voice: resulting custom voice string:\n%s" % voiceString
+          print("voice: resulting custom voice string:\n%s" % voiceString)
         except UnicodeEncodeError:
-          print "voice: printing the current message to stdout failed do to unicode conversion error"
-
+          print("voice: printing the current message to stdout failed do to unicode conversion error")
         self.espaekProcess = self._startSubprocess(voiceString, shell=True)
     else:
       languageParam = '-v%s' % languageCode
@@ -186,9 +182,3 @@ class voice(ranaModule):
       return True
     else:
       return False
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()
