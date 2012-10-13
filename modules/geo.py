@@ -203,63 +203,72 @@ def timestampUTC():
 
 
 def turnAngle(first, middle, last):
-  """
-  compute turn angle for a turn described by three points
-  """
-  #  print "TURN ANGLE"
-  #  print first
-  #  print middle
-  #  print last
+  x1 = middle[0] - first[0] # a = (x1,y1)
+  y1 = middle[1] - first[1]
+  x2 = last[0] - middle[0] # b = (x2, y2 )
+  y2 = last[1] - middle[1]
+  direction = 0
+  # Counterclockwise angle
+  angle = ( atan2( y1, x1 ) - atan2( y2, x2 ) ) * 180 / pi + 720
+  angle %= 360
+  return angle
 
-  lat_x, lon_x = first
-  lat_y, lon_y = middle
-  lat_z, lon_z = last
-  #  input: 3 points X, Y, Z defined by (lat, lon) tupples ( in the usual <0..180 range)
-  #  1) plane conversion - cartesian coordinates with the pole in the middle:
-  X_x = EARTH_RADIUS * cos(lon_x) * cos(lat_x)
-  X_y = EARTH_RADIUS * cos(lon_y) * sin(lat_x)
+#def turnAngle(first, middle, last):
+#  """
+#  compute turn angle for a turn described by three points
+#  -> an alternative methods that unfortunately seems not to work
+#  """
+##  print "INPUT"
+##  print first
+##  print middle
+##  print last
+#
+#  lat_x, lon_x = radians(first[0]), radians(first[1])
+#  lat_y, lon_y = radians(middle[0]), radians(middle[1])
+#  lat_z, lon_z = radians(last[0]), radians(last[1])
+#
+#  #  input: 3 points X, Y, Z defined by (lat, lon) tupples ( in the usual <0..180 range)
+#  #  1) plane conversion - cartesian coordinates with the pole in the middle:
+#  X_x = EARTH_RADIUS * cos(lat_x) * cos(lon_x)
+#  X_y = EARTH_RADIUS * cos(lat_x) * sin(lon_x)
+#
+#  Y_x = EARTH_RADIUS * cos(lat_y) * cos(lon_y)
+#  Y_y = EARTH_RADIUS * cos(lat_y) * sin(lon_y)
+#
+#  Z_x = EARTH_RADIUS * cos(lat_z) * cos(lon_z)
+#  Z_y = EARTH_RADIUS * cos(lat_z) * sin(lon_z)
+#  #  2) determine the XYZ angle (=alpha):
+#  #  first for clarity the u, v vector (u cerrsponds the XY segment, v the YZ segment)
+#  u_x, u_y = (Y_x - X_x, Y_y - X_y)
+#  v_x, v_y = (Z_x - Y_x, Z_y - Y_y)
+#
+#  alpha = acos((u_x * v_x + u_y * v_y) / sqrt((u_x - v_x) ** 2 + (u_y - v_y) ** 2))
+#  alpha = degrees(alpha)
+#
+#  #  3) and finaly we determine the oreintation of the turn - left or right:
+#  test = u_x * v_y - v_x * u_y
+#
+#  #  test=0 - not really a turn - all three points would make a line
+#  #  test<0 - right turn
+#  #  test>0 - left turn
+#
+#  # Final turn angle:
+#  #
+#  # 135 180 225
+#  #    \ | /
+#  # 90 ----- 270
+#  #    / | \
+#  #  45  0 360
+#  #
+#  # initial direction direction of travel = 0 degrees
+#
+#  if test > 0:
+#    return alpha
+#  else:
+#    return alpha  + 180
 
-  Y_x = EARTH_RADIUS * cos(lon_y) * cos(lat_y)
-  Y_y = EARTH_RADIUS * cos(lon_y) * sin(lat_y)
-
-  Z_x = EARTH_RADIUS * cos(lon_z) * cos(lat_z)
-  Z_y = EARTH_RADIUS * cos(lon_z) * sin(lat_z)
-
-  #  2) determine the XYZ angle (=alpha):
-  #  first for clarity the u, v vector (u cerrsponds the XY segment, v the YZ segment)
-  u_x, u_y = (Y_x - X_x, Y_y - X_y)
-  v_x, v_y = (Z_x - Y_x, Z_y - Y_y)
-  alpha = acos((u_x * v_x + u_y * v_y) / sqrt((u_x - v_x) ** 2 + (u_y - v_y) ** 2))
-
-  #  3) and finaly we determine the oreintation of the turn - left or right:
-  test = u_x * v_y - v_x * u_y
-
-  #  test=0 - not really a turn - all three points would make a line
-  #  test<0 - right turn
-  #  test>0 - left turn
-
-  if test < 0:
-    return alpha
-  else:
-    return 180 + alpha
-
-    # Final turn angle:
-    #
-    # 135 180 225
-    #    \ | /
-    # 90 ----- 270
-    #    / | \
-    #  45  0 360
-    #
-    # initial direction direction of travel = 0 degrees
-
-
-
-
-    # found on:
-    # http://www.quanative.com/2010/01/01/server-side-marker-clustering-for-google-maps-with-python/
-
-
+# found on:
+# http://www.quanative.com/2010/01/01/server-side-marker-clustering-for-google-maps-with-python/
 def clusterTrackpoints(trackpointsList, cluster_distance):
   """
   Groups points that are less than cluster_distance pixels apart at
