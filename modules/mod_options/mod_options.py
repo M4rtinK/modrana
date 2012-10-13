@@ -1047,7 +1047,7 @@ this is needed for the item tools menu to know where to return"""
 
     if action == "add":
       groupId = self._getGroupId("sound", "voice_out")
-      description = "<b>Note:</b> <tt>%language%</tt> will be replaced by current language code, <tt>%message%</tt> will be replaced by the message and <tt>%qmessage%</tt> will be replaced by the message in quotes"
+      description = "<b>Note:</b> <tt>%language%</tt> will be replaced by current language code, <tt>%volume%</tt> with current voice volume, <tt>%message%</tt> with the message and <tt>%qmessage%</tt> will be replaced by the message in quotes"
 
       self.addEditOption("Edit voice string", "voiceString", groupId, "Edit voice string", description=description)
 
