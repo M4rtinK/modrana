@@ -124,7 +124,7 @@ class voice(ranaModule):
   def _speak(self, languageCode, message):
     """say a message wth espeak"""
     mode = self.get('voiceParameters', None)
-    volume = self._getEspeakVolumeValue()
+    volume = "%d" % self._getEspeakVolumeValue()
     if mode == "manual": # user editable voice string
       voiceString = self.get("voiceString", None)
       if voiceString is not None:
