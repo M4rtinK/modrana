@@ -36,6 +36,8 @@ TURN_RIGHT = 2
 TURN_SLIGHTLY_RIGHT = 1
 HEAD_STRAIGHTFORWARD = 0
 
+UNKNOWN_TURN_TYPE_MESSAGE = "you might need to turn left or right"
+
 turnTypes = {
   TURN_SLIGHTLY_LEFT : _("turn slightly left"),
   TURN_LEFT : _("turn left"),
@@ -47,6 +49,8 @@ turnTypes = {
   HEAD_STRAIGHTFORWARD : _("head straightforward")
 }
 
+def _getTurnMessage(turnType):
+  return turnTypes.get(turnType, UNKNOWN_TURN_TYPE_MESSAGE)
 
 def detectMonavTurns(result):
   """go through the edges and try to detect turns,
@@ -124,9 +128,28 @@ def detectMonavTurns(result):
 #    for i in range(2, maxId):
 #      nextEdge =
 
-
 def _getTurnDescription(angle, name=None):
-  message = "you might need to turn left or right"
+  """generate turn description based on the turn angle and
+  append street name, if known"""
+  if 8 < angle <= 45:
+    turnType = TURN_SLIGHTLY_LEFT
+  elif 45 < angle <= 135:
+    turnType = TURN_LEFT
+  elif 135 < angle <= 172:
+    turnType = TURN_SHARPLY_LEFT
+  elif 172 < angle <= 188:
+    turnType = MAKE_A_U_TURN
+  elif 188 < angle <= 225:
+    turnType = TURN_SHARPLY_RIGHT
+  elif 225 < angle <= 315:
+    turnType = TURN_RIGHT
+  elif 315 < angle <= 352:
+    turnType = TURN_SLIGHTLY_RIGHT
+  else: # 352 < angle <= 8
+    turnType = HEAD_STRAIGHTFORWARD
+  # get the basic turn message
+  message = _getTurnMessage(turnType)
   if name:
-    message = "turn to %s" % name
+    # append street name
+    message = "%s to %s" % (message, name)
   return message
