@@ -568,30 +568,36 @@ class route(ranaModule):
 
     for step in steps:
       originalMessage = "".join(step.getMessage())
-      message = step.getMessage() #TODO: make a method for this
-      message = re.sub(r'<div[^>]*?>', '\n<i>', message)
-      message = re.sub(r'</div[^>]*?>', '</i>', message)
-      message = re.sub(r'<wbr/>', ', ', message)
-      message = re.sub(r'<wbr>', ', ', message)
-      step.setMessage(message)
-      # special processing of the original message for Espeak
-      message = originalMessage
+      try:
+        message = step.getMessage() #TODO: make a method for this
+        message = re.sub(r'<div[^>]*?>', '\n<i>', message)
+        message = re.sub(r'</div[^>]*?>', '</i>', message)
+        message = re.sub(r'<wbr/>', ', ', message)
+        message = re.sub(r'<wbr>', ', ', message)
+        step.setMessage(message)
+        # special processing of the original message for Espeak
+        message = originalMessage
 
-      # check if cyrillic -> russian voice is enabled
-      cyrillicVoice = self.get('voiceNavigationCyrillicVoice', 'ru')
-      if cyrillicVoice:
-        message = self.processCyrillicString(message, cyrillicVoice)
+        # check if cyrillic -> russian voice is enabled
+        cyrillicVoice = self.get('voiceNavigationCyrillicVoice', 'ru')
+        if cyrillicVoice:
+          message = self.processCyrillicString(message, cyrillicVoice)
 
-      message = re.sub(r'<div[^>]*?>', '<br>', message)
-      message = re.sub(r'</div[^>]*?>', '', message)
-      message = re.sub(r'<b>', '<emphasis level="strong">', message)
-      message = re.sub(r'</b>', '</emphasis>', message)
+        message = re.sub(r'<div[^>]*?>', '<br>', message)
+        message = re.sub(r'</div[^>]*?>', '', message)
+        message = re.sub(r'<b>', '<emphasis level="strong">', message)
+        message = re.sub(r'</b>', '</emphasis>', message)
 
-      # apply external rules from a CSV file
-      for (regex, replacement) in self.directionsFilterRules:
-        # replace strings according to the csv file
-        message = regex.sub(replacement, message, re.UNICODE)
-      step.setSSMLMessage(message)
+        # apply external rules from a CSV file
+        for (regex, replacement) in self.directionsFilterRules:
+          # replace strings according to the csv file
+          message = regex.sub(replacement, message, re.UNICODE)
+        step.setSSMLMessage(message)
+      except Exception, e:
+        print("route: error during direction filtering")
+        print(e)
+        step.setSSMLMessage(message)
+
 
     # replace old message points with new ones
     directions.clearMessagePoints()
