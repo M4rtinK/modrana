@@ -163,7 +163,6 @@ def isTheStringAnImage(s):
   else: # probably not an image file
     return False
 
-
 def createFolderPath(newPath):
   """
   Create a path for a directory and all needed parent folders
