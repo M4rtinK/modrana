@@ -164,12 +164,11 @@ def isTheStringAnImage(s):
     return False
 
 def createFolderPath(newPath):
-  """
-  Create a path for a directory and all needed parent folders
+  """Create a path for a directory and all needed parent folders
   -> parent directories will be created
   -> if directory already exists, then do nothing
-  -> if there is another filesystem object (like a file) with the same name, raise an exception
-  """
+  -> if there is another filesystem object (like a file)
+  with the same name exists, raise an exception"""
   if not newPath:
     print("cannot create folder, wrong path: ", newPath)
     return False
