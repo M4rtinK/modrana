@@ -7,7 +7,7 @@ from cStringIO import StringIO
 #import time
 
 class Empty(Exception):
-  "Exception raised by the Synchronized circular stack"
+  """Exception raised by the Synchronized circular stack"""
   pass
 
 
