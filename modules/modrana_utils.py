@@ -168,7 +168,7 @@ def createFolderPath(newPath):
   -> parent directories will be created
   -> if directory already exists, then do nothing
   -> if there is another filesystem object (like a file)
-  with the same name exists, raise an exception"""
+  with the same name exists, return False"""
   if not newPath:
     print("cannot create folder, wrong path: ", newPath)
     return False
