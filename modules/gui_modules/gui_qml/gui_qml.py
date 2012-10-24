@@ -39,7 +39,7 @@ from PySide.QtDeclarative import *
 from PySide.QtNetwork import *
 
 # modRana imports
-from base_gui_module import GUIModule
+from modules.gui_modules.base_gui_module import GUIModule
 from datetime import datetime
 import time
 
@@ -224,15 +224,15 @@ class QMLGUI(GUIModule):
   def notify(self, text, msTimeout=5000, icon=""):
     """trigger a notification using the Qt Quick Components
     InfoBanner notification"""
-    return
 
-    # QML uses <br> instead of \n for linebreak
-    text = newlines2brs(text)
-    print("QML GUI notify:\n message: %s, timeout: %d" % (text, msTimeout))
-    if self.rootObject:
-      self.rootObject.notify(text, msTimeout)
-    else:
-      self._notificationQueue.append((text, msTimeout, icon))
+#    # QML uses <br> instead of \n for linebreak
+#    text = newlines2brs(text)
+#    print("QML GUI notify:\n message: %s, timeout: %d" % (text, msTimeout))
+#    if self.rootObject:
+#      self.rootObject.notify(text, msTimeout)
+#    else:
+#      self._notificationQueue.append((text, msTimeout, icon))
+    return
 
   def openUrl(self, url):
     QDesktopServices.openUrl(url)
@@ -385,7 +385,6 @@ class IconImageProvider(QDeclarativeImageProvider):
       print("QML GUI: icon image provider: loading icon failed", e)
       print iconPath
       print 'themes/%s' % (iconPath)
-
 
 class TileImageProvider(QDeclarativeImageProvider):
   """
@@ -589,11 +588,11 @@ class GPSDataWrapper(QtCore.QObject):
     self.gps_status = ''
     #self.astral = Astral()
 
-  @QtCore.Slot(bool, float, float, bool, float, bool, float, float, QtCore.QObject)
-  def positionChanged(self, valid, lat, lon, altvalid, alt, speedvalid, speed, error, timestamp):
-    if valid:
-      pos = (lat, lon)
-      self._on_good_fix(Fix(pos, alt, bearing, speed))
+#  @QtCore.Slot(bool, float, float, bool, float, bool, float, float, QtCore.QObject)
+#  def positionChanged(self, valid, lat, lon, altvalid, alt, speedvalid, speed, error, timestamp):
+#    if valid:
+#      pos = (lat, lon)
+#      self._on_good_fix(Fix(pos, alt, bearing, speed))
 
   def _posChangedCB(self, key, oldValue, newValue):
     """position changed callback"""
@@ -615,30 +614,11 @@ class GPSDataWrapper(QtCore.QObject):
     self.changed.emit()
 
   def _on_no_fix(self):
-    self.gps_data.update(gps_data)
+#    self.gps_data.update(gps_data)
     self.gps_has_fix = False
     self.gps_status = "unknown"
     self.changed_distance_bearing.emit()
     self.changed.emit()
-
-  def _on_target_changed(self, target, distance, bearing):
-    self._target_valid = (target != None)
-    self._target = CoordinateWrapper(target) if target != None else CoordinateWrapper(geo.Coordinate(0, 0))
-    self.gps_target_distance = distance
-    self.gps_target_bearing = bearing
-    self.changed_distance_bearing.emit()
-    self.changed_target.emit()
-    logger.debug("Target is now set to %r" % target)
-
-  #    def _sun_angle_valid(self):
-  #        return self.astral.get_sun_azimuth_from_fix(self.gps_last_good_fix) != None
-  #
-
-  def _target(self):
-    return self._target
-
-  def _target_valid(self):
-    return self._target_valid
 
   def _gps_data(self):
     return self.gps_data
@@ -649,19 +629,6 @@ class GPSDataWrapper(QtCore.QObject):
   def _gps_has_fix(self):
     return self.gps_has_fix
 
-  def _gps_target_distance_valid(self):
-    return self.gps_target_distance != None
-
-  def _gps_target_distance(self):
-    logger.debug("Target distance is %r" % self.gps_target_distance)
-    return float(self.gps_target_distance) if self._gps_target_distance_valid()  else 0
-
-  def _gps_target_bearing(self):
-    try:
-      return float(self.gps_target_bearing)
-    except TypeError:
-      return 0
-
   def _gps_status(self):
     return self.gps_status
 
@@ -669,11 +636,6 @@ class GPSDataWrapper(QtCore.QObject):
   data = QtCore.Property(QtCore.QObject, _gps_data, notify=changed)
   lastGoodFix = QtCore.Property(QtCore.QObject, _gps_last_good_fix, notify=changed)
   hasFix = QtCore.Property(bool, _gps_has_fix, notify=changed)
-  #  targetValid = QtCore.Property(bool, _target_valid, notify=changed_target)
-  #  target = QtCore.Property(QtCore.QObject, _target, notify=changed_target)
-  #  targetDistanceValid = QtCore.Property(bool, _gps_target_distance_valid, notify=changed_distance_bearing)
-  #  targetDistance = QtCore.Property(float, _gps_target_distance, notify=changed_distance_bearing)
-  #  targetBearing = QtCore.Property(float, _gps_target_bearing, notify=changed_distance_bearing)
   status = QtCore.Property(str, _gps_status, notify=changed)
 
 
