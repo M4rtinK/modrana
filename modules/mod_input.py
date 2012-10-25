@@ -21,17 +21,10 @@
 from base_module import ranaModule
 
 def getModule(m,d,i):
-  return(input(m,d,i))
+  return input(m,d,i)
 
 class input(ranaModule):
   """Handle input from keyboard, buttons, etc."""
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()
