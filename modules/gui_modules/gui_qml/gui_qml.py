@@ -20,16 +20,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-import SocketServer
-import random
 import sys
 import re
-import os
-from threading import Thread
 import traceback
 import cStringIO
-import urllib
-import urllib2
 
 # PySide
 from PySide import QtCore
