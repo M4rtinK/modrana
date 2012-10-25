@@ -24,19 +24,16 @@ import time
 # only import GKT libs if GTK GUI is used
 from core import gs
 if gs.GUIString == "GTK":
-  import cairo
   import gtk
-  import pycha.line
 
 def getModule(m,d,i):
-  return(display(m,d,i))
+  return display(m,d,i)
 
 class display(ranaModule):
   """A platform independent display device control module"""
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    gui = self.modrana.gui
 
     self.fullscreen = False
     """according to documentation on:
@@ -102,7 +99,7 @@ class display(ranaModule):
     else:
       self.enableRedraw(reason="window not hidden or minimised")
 
-  def visibilityChangedCallback(self,window, event):
+  def visibilityChangedCallback(self, window, event):
     if event.state == gtk.gdk.VISIBILITY_FULLY_OBSCURED:
       self.disableRedraw(reason="window is obscured")
     else:
@@ -285,9 +282,3 @@ class display(ranaModule):
         if self.checkMethod:
           self.checkMethod() # call the check method
         self.lastCheckConditions = currentTime
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()
