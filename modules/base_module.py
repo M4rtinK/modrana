@@ -19,7 +19,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 class ranaModule:
-  def __init__(self, modules={}, data={}, initInfo={}):
+  def __init__(self, modules=None, data=None, initInfo=None):
+    if not initInfo: initInfo = {}
+    if not data: data = {}
+    if not modules: modules = {}
     self.m = modules
     self.d = data
     self.status = ''
@@ -39,7 +42,7 @@ class ranaModule:
     
   def module_exists(self, module):
     """Test whether a named module is loaded"""
-    return(self.m.get(module, None) != None)
+    return self.m.get(module, None) is not None
 
   def notify(self, message, msTimeout=0, icon=""):
     notify = self.m.get('notification')
@@ -49,7 +52,7 @@ class ranaModule:
       notify.handleNotification(message, sTimeout, icon)
 
   def getStatus(self):
-    return(self.status)
+    return self.status
   
   # Following can be overridden
   def firstTime(self):
@@ -89,7 +92,7 @@ class ranaModule:
 
   def sendMessage(self,message):
     m = self.m.get("messages", None)
-    if(m != None):
+    if m is not None:
       print "Sending message: " + message
       m.routeMessage(message)
     else:

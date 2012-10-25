@@ -22,7 +22,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 
-from base_module import ranaModule
+from modules.base_module import ranaModule
 
 class GUIModule(ranaModule):
   def __init__(self, m, d, i):
@@ -133,7 +133,7 @@ class GUIModule(ranaModule):
     """handles notifications"""
     return False
 
-  def notify(self, message, msTimeout, icon=""):
+  def notify(self, message, msTimeout=0, icon=""):
     """handle a notification"""
     pass
 

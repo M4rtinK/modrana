@@ -501,7 +501,7 @@ class Fix():
     self.quality = quality
     self.error = error
     self.error_bearing = error_bearing
-    if timestamp == None:
+    if timestamp is None:
       self.timestamp = datetime.utcnow()
     else:
       self.timestamp = timestamp
@@ -520,34 +520,34 @@ class FixWrapper(QtCore.QObject):
     self.changed.emit()
 
   def _lat(self):
-    if self.data.position != None:
+    if self.data.position is not None:
       return self.data.position[0]
     else:
       return -1
 
   def _lon(self):
-    if self.data.position != None:
+    if self.data.position is not None:
       return self.data.position[1]
     else:
       return -1
 
   def _altitude(self):
-    return self.data.altitude if self.data.altitude != None else 0
+    return self.data.altitude if self.data.altitude is not None else 0
 
   def _speed(self):
-    return self.data.speed if self.data.speed != None else 0
+    return self.data.speed if self.data.speed is not None else 0
 
   def _bearing(self):
-    return self.data.bearing if self.data.bearing != None else 0
+    return self.data.bearing if self.data.bearing is not None else 0
 
   def _error(self):
     return float(self.data.error)
 
   def _valid(self):
-    return (self.data.position != None)
+    return self.data.position is not None
 
   def _altitude_valid(self):
-    return self.data.altitude != None
+    return self.data.altitude is not None
 
   def _speed_valid(self):
     return self.data.speed != None
