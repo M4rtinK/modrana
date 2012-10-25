@@ -37,9 +37,6 @@ from modules.gui_modules.base_gui_module import GUIModule
 from datetime import datetime
 import time
 
-import BaseHTTPServer
-import SimpleHTTPServer
-
 global globe
 
 def newlines2brs(text):
@@ -59,7 +56,7 @@ class Logger:
 logger = Logger(log=False)
 
 def getModule(m, d, i):
-  return(QMLGUI(m, d, i))
+  return QMLGUI(m, d, i)
 
 
 class QMLGUI(GUIModule):
@@ -544,7 +541,7 @@ class FixWrapper(QtCore.QObject):
     return self.data.altitude is not None
 
   def _speed_valid(self):
-    return self.data.speed != None
+    return self.data.speed is not None
 
   lat = QtCore.Property(float, _lat, notify=changed)
   lon = QtCore.Property(float, _lon, notify=changed)
