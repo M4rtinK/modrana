@@ -36,6 +36,7 @@ from PySide.QtNetwork import *
 from modules.gui_modules.base_gui_module import GUIModule
 from datetime import datetime
 import time
+from modules.gui_modules.gui_qml import drawing
 
 global globe
 
@@ -84,6 +85,14 @@ class QMLGUI(GUIModule):
         self.modrana.shutdown()
 
     self.app = QApplication(sys.argv)
+
+    # register custom modRana types
+    # NOTE: custom types need to be registered AFTER
+    # QApplication is created but BEFORE QDeclarativeView
+    # is instantiated, or else horrible breakage occurs :)
+    qmlRegisterType(drawing.PieChart, 'Charts', 1, 0, 'PieChart')
+    qmlRegisterType(drawing.PieSlice, "Charts", 1, 0, "PieSlice")
+
     self.view = ModifiedQDeclarativeView(self.modrana)
     self.window = QMainWindow()
     self.window.setWindowTitle("modRana")
