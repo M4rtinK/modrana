@@ -142,6 +142,27 @@ class Options(ranaModule):
     }
     self.addOption(title, variable, choices, group, None)
 
+  def _generateNestedItems(self, inputList, variable, backAction, fakeMode=None):
+    """generate item tuples for nested item menus"""
+    menuItems = [] # an ordered list of all the menu items
+    itemDict = {} # for easily assigning keys to labels
+    id = 1 # id 0 is the escape button
+
+    for value, name, icon, action in inputList:
+      if value == "groupIdentifier": # this item is a group
+        item = self.menuModule.generateItem("#%s" % name, "generic", action)
+      else: # this item is a button that sets a value
+        if fakeMode is None: # just use the current mode
+          item = self.menuModule.generateItem("#%s" % name, "generic",
+            "setWithCurrentMode:%s:%s|%s" % (variable, value, backAction))
+        else:# use a fake mode (used for per mode option state list)
+          item = self.menuModule.generateItem("#%s" % name, "generic",
+            "setWithMode:%s:%s:%s|%s" % (fakeMode, variable, value, backAction))
+      menuItems.append(item)
+      itemDict[value] = (name, id)
+      id += 1
+    return menuItems, itemDict
+
   def _generateItems(self, valueNameList, variable, backAction, fakeMode=None):
     menuItems = [] # an ordered list of all the menu items
     itemDict = {} # for easily assigning keys to labels
@@ -163,7 +184,7 @@ class Options(ranaModule):
 
     #NOTE: for the value - name mapping to work correctly, the value must be a string
     # -> this is caused by the value being sent as a string once one of the items is clicked
-    # -> if the value, is not string, just the raw value voul be shown
+    # -> if the value, is not string, just the raw value value be shown
     # Example:
     # (100, "100%") will show 100
     # ('100', "100%") will show 100%
@@ -198,6 +219,70 @@ class Options(ranaModule):
       choices['mode'] = fakeMode
       choices['noToolsIcon'] = True # disable the tools in the per mode state list
     self.addOption(title, variable, choices, group, default)
+
+  def addNestedItemsOption(self, title, variable, items, group, default=None, fakeMode=None, preAction=None):
+    """add an option, that opens and item selection menu with groups"""
+
+    #NOTE: for the value - name mapping to work correctly, the value must be a string
+    # -> this is caused by the value being sent as a string once one of the items is clicked
+    # -> if the value, is not string, just the raw value value be shown
+    # Example:
+    # (100, "100%") will show 100
+    # ('100', "100%") will show 100%
+
+    # the back action returns back to the group from which the menu was opened
+    backAction = "set:menu:options#%s" % group
+
+    # create submenus for the groups & a toplevel menu
+
+    """NOTE: for the returning back to the group to work correctly,
+    the menu is stored under a key combined from the variable and group names"""
+    storageKey = self._getItemsOptionStorageKey(group, variable, fakeMode=fakeMode)
+
+    groupIndex = 0
+    topLevel = []
+    for item in items:
+      value, name, icon, action = item["item"]
+      if item.get('group', None): # this is a group
+        subMenuItems = item.get('group', [])
+        # create per-group submenu
+        menuItems, itemDict = self._generateNestedItems(subMenuItems, variable, backAction, fakeMode=fakeMode)
+        groupStorageKey = "%s_%d" % (storageKey, groupIndex)
+        groupBackAction = "set:menu:%s" % storageKey
+        self._setItemsAsMenu(groupStorageKey, menuItems, groupBackAction)
+        # override the action for the toplevel group button
+        # to point to the group menu
+        action = "set:menu:%s" % groupStorageKey
+        groupIndex+=1
+      # add the toplevel button
+      topLevel.append((value, name, icon, action))
+    # add the toplevel menu
+    menuItems, itemDict = self._generateNestedItems(topLevel, variable, backAction, fakeMode=fakeMode)
+    self._setItemsAsMenu(storageKey, menuItems, backAction)
+
+    # also store in the local options structure
+    choices = {"type": "selectOneItem",
+               'label': "",
+               'description': "",
+               'default': default,
+               'items': items,
+               'itemDict': itemDict,
+               'storageKey': storageKey,
+               'preAction': preAction # send this message before entering the menu
+    }
+    # this means we are probably showing the option in the per mode state list
+    if fakeMode is not None:
+      choices['mode'] = fakeMode
+      choices['noToolsIcon'] = True # disable the tools in the per mode state list
+    self.addOption(title, variable, choices, group, default)
+
+  def _setItemsAsMenu(self, storageKey, menuItems, backAction, wideButtons=True):
+    """create a new item menu (or overwrite an existing one) and register it in the
+    menu Module"""
+    menu = self.menuModule.getClearedMenu(backAction)
+    menu = self.menuModule.addItemsToThisMenu(menu, menuItems)
+    self.menuModule.addItemMenu(storageKey, menu, wideButtons=wideButtons)
+
 
   def _getItemsOptionStorageKey(self, group, variable, fakeMode=None):
     """return menu name for the special item selection itemized menu
@@ -308,6 +393,31 @@ this is needed for the item tools menu to know where to return"""
 
     # ** map layers
     group = addGroup("Map layers", "map_layers", catMap, "generic")
+
+    layers = [
+      {"item":("value", "foo1", "generic", "set:menu:options")},
+      {"item":("groupIdentifier","group1", "generic", "set:menu:options"),
+       "group": [
+         ("value", "g11", "generic", "set:menu:options"),
+         ("value", "g12", "generic", "set:menu:options"),
+         ("value", "g13", "generic", "set:menu:options"),
+       ]
+      },
+      {"item":("groupIdentifier", "group2", "generic", "set:menu:options"),
+       "group": [
+         ("value", "g21", "generic", "set:menu:options"),
+         ("value", "g22", "generic", "set:menu:options"),
+         ("value", "g23", "generic", "set:menu:options"),
+         ]
+      },
+      {"item":("value", "foo2", "generic", "set:menu:options")},
+      {"item":("value", "foo3", "generic", "set:menu:options")},
+    ]
+
+    self.addNestedItemsOption("Layer test", "noLayer", layers, group, "nothing")
+
+
+
     layers = self.modrana.getMapLayers()
     layerNameKey = []
     for key in layers.keys():
