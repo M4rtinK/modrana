@@ -18,12 +18,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_module import ranaModule
-import marshal
-import modrana_utils
+from modules.base_module import ranaModule
+import modules.modrana_utils as modrana_utils
 
 def getModule(m, d, i):
-  return(Options(m, d, i))
+  return Options(m, d, i)
 
 
 class Options(ranaModule):
@@ -1262,7 +1261,3 @@ this is needed for the item tools menu to know where to return"""
           # in corner: row number
           indexX = x4 + w * 0.90 - smallButtonW
           self.menuModule.showText(cr, "%d/%d" % (index + 1, numItems), indexX, y + dy * 0.07, w * 0.10 - border, 20)
-
-if(__name__ == "__main__"):
-  a = options({}, {'viewport': (0, 0, 600, 800)})
-  a.firstTime()
