@@ -32,7 +32,7 @@ if gs.GUIString == "GTK":
   import pangocairo
 
 def getModule(m,d,i):
-  return(menus(m,d,i))
+  return menus(m,d,i)
 
 class menus(ranaModule):
   """Handle menus"""
@@ -1514,9 +1514,4 @@ class menus(ranaModule):
 
       self.set(uniqueName, newIndex)
       self.menus[menu][pos] = (textIconAction, newIndex, uniqueName, type)
-
-if(__name__ == "__main__"):
-  a = menus({},{'viewport':(0,0,600,800)})
-  #a.drawMapOverlay(None)
-  a.setupSearchMenus()
   
