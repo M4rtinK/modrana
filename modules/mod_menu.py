@@ -575,14 +575,15 @@ class menus(ranaModule):
     self.drawButton(cr, x, y, w, h, '', icon, parentAction, timedAction)
 
   def getClearedMenu(self, cancelButtonAction='set:menu:main'):
-    """clear a given itemized menu instance, add the ecape button and return it"""
+    """clear a given itemized menu instance, add the escape button and return it"""
     menu = self.getInitializedMenu()
     timedAction=(self.modrana.gui.msLongPress,"set:menu:None")
     item = self.generateItem("", "back", cancelButtonAction, "simple", timedAction)
     return self.addItemsToThisMenu(menu, [item])
 
-  def addItemsToThisMenu(self, menu, items=[]):
+  def addItemsToThisMenu(self, menu, items=None):
     """add items to a given itemized menu datastructure and return it"""
+    if not items: items = []
     if not menu:
       menu = self.getInitializedMenu()
     itemCount = menu['metadata']['itemCount']
