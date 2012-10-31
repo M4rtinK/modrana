@@ -242,17 +242,30 @@ class Options(ranaModule):
     the menu is stored under a key combined from the variable and group names"""
     storageKey = self._getItemsOptionStorageKey(group, variable, fakeMode=fakeMode)
 
-    groupIndex = 0
+    groupIndex = 1 # 0 is the back button
     topLevel = []
+    itemDict = {}
+    tempItemDict = {}
     for item in items:
       value, name, icon, action = item["item"]
       if item.get('group', None): # this is a group
         subMenuItems = item.get('group', [])
         # create per-group submenu
-        menuItems, itemDict = self._generateNestedItems(subMenuItems, variable, backAction, fakeMode=fakeMode)
+        menuItems, tempItemDict = self._generateNestedItems(subMenuItems, variable, backAction, fakeMode=fakeMode)
         groupStorageKey = "%s_%d" % (storageKey, groupIndex)
         groupBackAction = "set:menu:%s" % storageKey
         self._setItemsAsMenu(groupStorageKey, menuItems, groupBackAction)
+        # update value -> name mapping with correct group and subgroup IDs
+        for layerKey in tempItemDict.keys():
+          label = tempItemDict[layerKey][0]
+          subId = tempItemDict[layerKey][1]
+          # label, toplevel id, group id
+          # NOTE: group level highlighting is not yet implemented
+          tempItemDict[layerKey] = (label, groupIndex, subId)
+        # TODO: highlighting inside groups
+
+        itemDict.update(tempItemDict)
+
         # override the action for the toplevel group button
         # to point to the group menu
         action = "set:menu:%s" % groupStorageKey
@@ -260,8 +273,10 @@ class Options(ranaModule):
       # add the toplevel button
       topLevel.append((value, name, icon, action))
     # add the toplevel menu
-    menuItems, itemDict = self._generateNestedItems(topLevel, variable, backAction, fakeMode=fakeMode)
+    menuItems, tempItemDict = self._generateNestedItems(topLevel, variable, backAction, fakeMode=fakeMode)
     self._setItemsAsMenu(storageKey, menuItems, backAction)
+    # update value -> name mapping for tomplevel buttons
+    itemDict.update(tempItemDict)
 
     # also store in the local options structure
     choices = {"type": "selectOneItem",
@@ -1266,7 +1281,8 @@ this is needed for the item tools menu to know where to return"""
             default = choices['default']
             value = self.get(variable, default, mode=mode)
             # show label for the given value
-            valueDescription, highlightId = choices['itemDict'].get(value, (value, None))
+            highlight = choices['itemDict'].get(value, (value, None))
+            valueDescription, highlightId = highlight[0], highlight[1]
             # if no description is found, just display the value
             valueDescription = "<tt><b>%s</b></tt>" % valueDescription
 
