@@ -21,6 +21,9 @@
 from modules.base_module import ranaModule
 import modules.modrana_utils as modrana_utils
 
+# identifies item as a group
+GROUP_IDENTIFIER = "groupIdentifier"
+
 def getModule(m, d, i):
   return Options(m, d, i)
 
@@ -394,45 +397,48 @@ this is needed for the item tools menu to know where to return"""
     # ** map layers
     group = addGroup("Map layers", "map_layers", catMap, "generic")
 
-    layers = [
-      {"item":("value", "foo1", "generic", "set:menu:options")},
-      {"item":("groupIdentifier","group1", "generic", "set:menu:options"),
-       "group": [
-         ("value", "g11", "generic", "set:menu:options"),
-         ("value", "g12", "generic", "set:menu:options"),
-         ("value", "g13", "generic", "set:menu:options"),
-       ]
-      },
-      {"item":("groupIdentifier", "group2", "generic", "set:menu:options"),
-       "group": [
-         ("value", "g21", "generic", "set:menu:options"),
-         ("value", "g22", "generic", "set:menu:options"),
-         ("value", "g23", "generic", "set:menu:options"),
-         ]
-      },
-      {"item":("value", "foo2", "generic", "set:menu:options")},
-      {"item":("value", "foo3", "generic", "set:menu:options")},
-    ]
-
-    self.addNestedItemsOption("Layer test", "noLayer", layers, group, "nothing")
-
-
-
+    defaultBA = "set:menu:options" # default back action
     layers = self.modrana.getMapLayers()
-    layerNameKey = []
-    for key in layers.keys():
-      name = layers[key]['label']
-      layerNameKey.append((key, name))
-    layerNameKey.sort()
-    layerNameKey.append((None, "Empty layer"))
-    addItems("Main map", "layer", layerNameKey, group, "mapnik")
+    groups = self.modrana.configs.getMapGroups()
+    layerStructure= []
+
+    # assign layers to groups
+    for key in groups.keys():
+      layerGroup = groups[key]
+      name = layerGroup.get('label', "group")
+      icon = layerGroup.get('icon', "generic")
+      # list all layers for this group
+      groupLayers = filter(lambda x: layers[x].get("group", None) == key, layers.keys())
+      # layer keys to list of layers
+      groupLayers = map(lambda x:
+      (x, layers[x]['label'], layers[x]['icon'], defaultBA)
+        ,groupLayers)
+      # sort them alphabetically
+      groupLayers.sort()
+      # append their counter to the group name
+      name = "%s (%d)" % (name, len(groupLayers))
+
+      layerStructure.append({"item":(GROUP_IDENTIFIER, name, icon, defaultBA),
+                             "group":groupLayers})
+
+    # append layers without group right after groups in the list
+    nonGroupLayers = filter(lambda x: layers[x].get("group", None) is None, layers.keys())
+    nonGroupLayers = map(lambda x:
+    {'item':(x, layers[x]['label'], layers[x]['icon'], defaultBA)},
+      nonGroupLayers)
+    nonGroupLayers.sort()
+    layerStructure.extend(nonGroupLayers)
+    # add empty layer
+    layerStructure.append({'item':(None, "Empty layer", "generic", defaultBA)})
+    # add the option
+    self.addNestedItemsOption("Main map", "layer", layerStructure, group, "mapnik")
 
     # ** Overlay
     group = addGroup("Map overlay", "map_overlay", catMap, "generic")
     addBoolOpt("Map as overlay", "overlay", group, False)
 
-    addItems("Main map", "layer", layerNameKey, group, "mapnik")
-    addItems("Background map", "layer2", layerNameKey, group, "cycle")
+    self.addNestedItemsOption("Main map", "layer", layerStructure, group, "mapnik")
+    self.addNestedItemsOption("Background map", "layer2", layerStructure, group, "cycle")
 
     addOpt("Transparency ratio", "transpRatio",
       [("0.25,1", "overlay:25%"),

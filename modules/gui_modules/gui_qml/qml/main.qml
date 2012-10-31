@@ -1,6 +1,7 @@
 import QtQuick 1.1
 import com.nokia.meego 1.0
 import com.nokia.extras 1.0
+import Charts 1.0
 //import QtMobility.sensors 1.1
 //import QtMobility.location 1.1
 //import QtMobility.systeminfo 1.1
@@ -67,6 +68,18 @@ PageStackWindow {
         notification.show()
     }
 
+
+    /*
+    PieChart {
+        id: chart
+        anchors.centerIn: parent
+        width: 100; height: 100
+        pieSlice: PieSlice {
+            anchors.fill: parent
+            color: "red"
+        }
+    }
+    */
 
     InfoBanner {
         id: notification

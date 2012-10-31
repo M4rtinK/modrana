@@ -33,6 +33,7 @@ class Configs:
     self.userConfig = {}
     self.mapConfig = {}
     self.mapLayers = {}
+    self.mapGroups = {}
 
     # check if config files exist
     self.checkConfigFilesExist()
@@ -103,7 +104,6 @@ class Configs:
     self.loadMapConfig()
     self.loadUserConfig()
 
-
   def getUserConfig(self):
     return self.userConfig
 
@@ -129,6 +129,10 @@ class Configs:
     get the filtered & tweaked map layer info from the map config
     """
     return self.mapLayers
+
+  def getMapGroups(self):
+    """get the dictionary with map layer groups"""
+    return self.mapGroups
 
   def getMapConfig(self):
     """
@@ -176,11 +180,13 @@ class Configs:
 
     config = {}
     mapLayers = {}
+    mapGroups = {}
     try:
       config = ConfigObj(mapConfigPath)
       for layerID in config['layers'].keys():
         #layerID = str(layerID) # make hashable
         layer = config['layers'][layerID]
+        tempDict = {}
         if allNeededIn(configVariables.keys(), layer.keys()): # check if all needed keys are available
           tempDict = {}
           for var in configVariables:
@@ -188,10 +194,16 @@ class Configs:
             tempDict[configVariables[var]] = layer[var]
           tempDict['minZoom'] = int(tempDict['minZoom']) # convert strings to integers
           tempDict['maxZoom'] = int(tempDict['maxZoom'])
+          tempDict['group'] = layer.get('group', None)
+          tempDict['icon'] = layer.get('icon', "generic")
+
         else:
           print("modRana configs: layer %s is badly defined/formatted" % layerID)
 
         mapLayers[layerID] = tempDict
+
+      # load groups
+      mapGroups = config.get('groups', {})
 
     except Exception, e:
       print("modRana configs: loading map_config.conf failed: %s" % e)
@@ -199,4 +211,5 @@ class Configs:
 
     self.mapConfig = config
     self.mapLayers = mapLayers
+    self.mapGroups = mapGroups
     return True
