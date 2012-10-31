@@ -1334,7 +1334,7 @@ this is needed for the item tools menu to know where to return"""
             None,
             "generic", # background for a 3x1 icon
             "")
-          # due to the button on the righ, register a slightly smaller area
+          # due to the button on the right, register a slightly smaller area
           clickHandler.registerXYWH(x4, y, w - smallButtonW, dy, onClick)
 
           # draw mode specific combined toggle & indicator
