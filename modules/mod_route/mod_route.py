@@ -963,9 +963,9 @@ class route(ranaModule):
     x1 = (x + w) - dx
     y1 = (y - dy) + h
     menus.drawButton(cr, x1-dx, y1, dx, dy,
-      'edit', "generic:;0.5;;0.5;;", 'ms:route:setOSDState:%d' % OSD_EDIT)
+      'edit', "above:edit>generic:;0.5;;0.5;;", 'ms:route:setOSDState:%d' % OSD_EDIT)
     menus.drawButton(cr, x1, y1, dx, dy,
-      'info', "generic:;0.5;;0.5;;", 'set:menu:route#currentRouteBackToMap|ms:route:setOSDState:%d' % OSD_EDIT)
+      'info', "above:info>generic:;0.5;;0.5;;", 'set:menu:route#currentRouteBackToMap|ms:route:setOSDState:%d' % OSD_EDIT)
 
   def drawRoutePlaningMenu(self, cr):
     """draw the onscreen menu for route planing"""
