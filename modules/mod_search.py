@@ -80,7 +80,7 @@ class search(ranaModule):
     a = odict()
     a["police"] = {"name":"Police station", "search":"police"}
     a["fire_station"] = {"name":"Fire dpt.", "search":"fire"}
-    a["information"] = {"name":"Information", "search":"information"}
+    a["info"] = {"name":"Information", "search":"information"}
     a["hospital"] = {"name":"Hospital", "search":"hospital"}
     a["pharmacy"] = {"name":"Pharmacy", "search":"pharmacy"}
     a["ranger"] = {"name":"Ranger", "search":"ranger"}
