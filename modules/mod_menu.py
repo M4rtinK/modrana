@@ -173,7 +173,7 @@ class menus(ranaModule):
       (x1,y1) = buttons['fullscreen']
       self.drawButton(cr, x1, y1, dx, dy, "", icon, "ms:display:fullscreen:toggle")
 
-      # * draw the centering button
+      # draw the centering button
       (x1,y1) = buttons['centre']
       self.drawButton(cr, x1, y1, dx, dy, "", '', "toggle:centred")
 
@@ -245,13 +245,13 @@ class menus(ranaModule):
       cr.move_to(x,y)
       pg.show_layout(layout)
 
-  def showWrappedText(self,cr,text,x,y,widthLimit,fontsize=20):
+  def showWrappedText(self,cr,text,x,y,widthLimit,fontSize=20):
     pg = pangocairo.CairoContext(cr)
     # create a layout for your drawing area
     layout = pg.create_layout()
     layout.set_width(int(widthLimit*pango.SCALE))
     layout.set_wrap(pango.WRAP_WORD)
-    layout.set_font_description(pango.FontDescription("Sans Serif %d" % fontsize))
+    layout.set_font_description(pango.FontDescription("Sans Serif %d" % fontSize))
     layout.set_markup(text)
     cr.move_to(x,y)
     pg.show_layout(layout)
@@ -1102,6 +1102,7 @@ class menus(ranaModule):
      POISelectedAction2 = "showPOI:routeToActivePOI"
      self.addItem('route', 'Here to POI', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:menu#list#POICategories" % POISelectedAction2)
      self.addItem('route', 'to Address#Address', 'generic', 'set:menu:route#showAddressRoute')
+     self.addItem('route', 'Handmade', 'generic', 'set:menu:None|route:selectManyPoints')
      self.addItem('route', 'Clear', 'generic', 'route:clear|set:menu:None')
      self.addItem('route', 'route#Current', 'generic', 'set:menu:currentRoute')
 
