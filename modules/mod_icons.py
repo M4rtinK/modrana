@@ -118,16 +118,16 @@ class Icons(ranaModule):
           return icon
       else:
         # image is probably not loadable
-        print "icon: icon not loadable (by pixbuf loader): %s" % name
+        print("icon: icon not loadable (by pixbuf loader): %s" % name)
         return None
     else:
-      print "icons: no icon found with name: %s" % name
+      print("icons: no icon found with name: %s" % name)
       return None
 
 
 
 
-  def loadFromFile(self,name,w=None,h=None, scale=True):
+  def loadFromFile(self,name,w=None,h=None, scale=True, noBackground=False):
     """load icon image to cache or draw the icon with cairo
     TODO: draw all icons through this function ?"""
 
@@ -158,30 +158,30 @@ class Icons(ranaModule):
         targetH = (h*0.55)
         targetW = w - 2*border
         """ try to fit the icon image above the text inside the icon outline,
-            with some space between, while respecting appect original aspect ratio"""
+            with some space between, while respecting original aspect ratio"""
         scaledW = targetW
         scaledH = targetW/float(hwRatio)
         if scaledH > targetH:
           scaledH = targetH
           scaledW = targetH * hwRatio
         targetX = border + (targetW-scaledW)/2.0
-        targetY = border*(0.9) + ((targetH-scaledH)/2.0)
+        targetY = border* 0.9 + ((targetH-scaledH)/2.0)
+        pixbuf = None
         try:
-          # try to load the icon to pixbuf and get ist original width and height
+          # try to load the icon to pixbuf and get its original width and height
           pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(aboveTextIconPath,int(scaledW),int(scaledH))
         except Exception, e:
-          print "icons: icon probably corrupted: %s" % aboveTextIconPath
-          print "%s" % e
+          print("icons: icon probably corrupted: %s" % aboveTextIconPath)
+          print("%s" % e)
         if pixbuf:
           compositeIcon = cairo.ImageSurface(cairo.FORMAT_ARGB32,w,h)
           ct = cairo.Context(compositeIcon)
           ct2 = gtk.gdk.CairoContext(ct)
           ct2.set_source_pixbuf(pixbuf,targetX,targetY)
           ct2.paint()
-          return compositeIcon,True # this signalizes that a background might be needed
+          return compositeIcon, True # this signalizes that a background might be needed
         else:
           return self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor), False
-
       if result is None:
         return self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor), False
     # just use the classic icon
@@ -194,7 +194,7 @@ class Icons(ranaModule):
 
     # no icon found
     else:
-      print "icons: %s not found" % name
+      print("icons: %s not found" % name)
       # we use the default button background if the tile is missing
       return self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor), False
 
@@ -229,9 +229,9 @@ class Icons(ranaModule):
       ct2.paint()
       ''' surface now contains the image in a Cairo surface '''
     except Exception, e:
-      print "** loading image to pixbuf failed"
-      print "** filename: %s" % path
-      print "** exception: %s" % e
+      print("** loading image to pixbuf failed")
+      print("** filename: %s" % path)
+      print("** exception: %s" % e)
       return None
     return image
 
@@ -317,16 +317,16 @@ class Icons(ranaModule):
       (r,g,b,a) = fillColorRGBATuple
       fillColorRGBATuple = (r,g,b,fillAlpha)
     except Exception, e:
-      print "** wrong fill color code or name: %s" % fillColorString
-      print "** exception: %s" % e
+      print("** wrong fill color code or name: %s" % fillColorString)
+      print("** exception: %s" % e)
       fillColorRGBATuple = self.buttonFillColor
 
     try:
       (r,g,b,a) = outlineColorRGBATuple
       outlineColorRGBATuple = (r,g,b,outlineAlpha)
     except Exception, e:
-      print "** wrong outline color code or name: %s" % fillColorString
-      print "** exception: %s" % e
+      print("** wrong outline color code or name: %s" % fillColorString)
+      print("** exception: %s" % e)
       outlineColorRGBATuple = self.buttonOutlineColor
 
     # create the icon
@@ -336,7 +336,7 @@ class Icons(ranaModule):
 
   def findUsableIcon(self, name, themePathList):
     """due to compatibility reasons, there might be more icon
-    file versions for an icon in a them
+    file versions for an icon in a theme
     -> this function select one of them based on a given set of priorities
     priorities:
     * SVG icons are preferred over PNG
@@ -359,7 +359,7 @@ class Icons(ranaModule):
     self.cantLoad = []
     self.imageOrderList = []
 
-  def draw(self,cr,name,x,y,w,h):
+  def draw(self, cr, name, x, y, w, h):
     # is the icon already cached ?
     cacheName  = "%fx%f#%s" % (w,h,name)
 
@@ -376,6 +376,7 @@ class Icons(ranaModule):
       icon1 will be drawn over icon2
       """
       for currentName in reversed(name.split('>')): # we draw top down
+
         if currentName.split(':')[0] == 'generic':
           if currentName == "generic":
             # just the default cairo drawn icon
@@ -395,6 +396,17 @@ class Icons(ranaModule):
             needBackground = False
             parametricIcon = self.getCustomIcon(semicolonSepList,w,h)
             compositedIcon = self.combineTwoIcons(compositedIcon, parametricIcon)
+        elif currentName.split(':')[0] == 'above':
+          """ "above" means that we have an icon that we want to position above any text that
+          can be on the button"""
+          loadingResult = self.loadFromFile(currentName.split(':')[1], w, h)
+          if loadingResult == False:
+            self.cantLoad.append(currentName)
+          else:
+            (loadingResult,needBackground) = loadingResult
+            needBackground = False
+            compositedIcon = self.combineTwoIcons(compositedIcon, loadingResult)
+
         elif currentName.split(':')[0] == 'center':
           """ "center" means that we have an icon which we want to center inside the button
           there re two parameters - icon name and border width
@@ -601,7 +613,7 @@ class Icons(ranaModule):
     themeColors = self.loadColorsFromFile(os.path.join(self.getCurrentThemePath(),'theme.conf') )
     self.colors.update(themeColors) # then overwrite theme specific colors
     self.notifyColorSubscribers() # notify color info subscribers
-    print "icons: switched theme to: %s" % newTheme
+    print("icons: switched theme to: %s" % newTheme)
   
   def loadColorsFromFile(self,path):
     """load color definitions from file"""
