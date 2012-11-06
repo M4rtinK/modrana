@@ -214,20 +214,18 @@ class route(ranaModule):
       self.selectManyPoints = False
       self.osdMenuState = OSD_EDIT
 
-    elif message == "p2pRoute": # simple route, from here to selected point
+    elif message == "p2pRoute": # simple route, between two points
       toPos = self.get("endPos", None)
-      if toPos:
+      fromPos = self.get("startPos", None)
+      if toPos and fromPos:
         toLat, toLon = toPos
-
-        fromPos = self.get("startPos", None)
-        if fromPos:
-          fromLat, fromLon = fromPos
-
-          print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
-
-          # TODO: wait message (would it be needed when using internet routing ?)
-          self.doRoute(fromLat, fromLon, toLat, toLon)
-          self.set('needRedraw', True) # show the new route
+        fromLat, fromLon = fromPos
+        middlePoints = self.get('middlePos', [])
+        print("Routing %f,%f to %f,%f through %d waypoints"
+              % (fromLat, fromLon, toLat, toLon, len(middlePoints)))
+        # TODO: wait message (would it be needed when using internet routing ?)
+        self.doRoute(fromLat, fromLon, toLat, toLon, waypoints=middlePoints)
+        self.set('needRedraw', True) # show the new route
 
     elif message == "p2phmRoute": # simple route, from start to middle to end (handmade routing)
       fromPos = self.get("startPos", None)
@@ -256,10 +254,10 @@ class route(ranaModule):
       endPos = self.get('endPos', None)
       pos = self.get('pos', None)
       if pos is None: # well, we don't know where we are, so we don't know here to go :)
-        return
+        return None
 
       if startPos is None and endPos is None: # we know where we are, but we don't know where we should go :)
-        return
+        return None
 
       if startPos is not None: # we want a route from somewhere to our current position
         fromPos = startPos
@@ -272,13 +270,15 @@ class route(ranaModule):
       (toLat, toLon) = toPos
       (fromLat, fromLon) = fromPos
 
-      print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
+      middlePoints = self.get("middlePos", [])
+      print("Routing %f,%f to %f,%f through %d waypoints"
+            % (fromLat, fromLon, toLat, toLon, len(middlePoints)))
 
-      self.doRoute(fromLat, fromLon, toLat, toLon)
+      self.doRoute(fromLat, fromLon, toLat, toLon, waypoints=middlePoints)
       self.set('needRedraw', True) # show the new route
 
     elif message == "route": # find a route
-      if type == 'md': # message-list based routing
+      if type == 'md': # message-list based unpack requires a string argument of length 4 routing
         if args:
           type = args['type']
           go = False
@@ -423,8 +423,12 @@ class route(ranaModule):
       self.osdMenuState = int(args)
       self.set('needRedraw', True) # show the new menu
 
-  def doRoute(self, fromLat, fromLon, toLat, toLon):
+  def doRoute(self, fromLat, fromLon, toLat, toLon, waypoints=None):
     """Route from one point to another, and set that as the active route"""
+    if not waypoints: waypoints = []
+    # try to make sure waypoints are (lat, lon) tuples
+    waypoints = map(lambda x: (x[0],x[1]), waypoints)
+
     # clear old addresses
     self.startAddress = None
     self.destinationAddress = None
@@ -440,13 +444,17 @@ class route(ranaModule):
     if provider == "Monav":
       sentTimestamp = time.time()
       print('routing: using Monav as routing provider')
-      waypoints = [(fromLat, fromLon), (toLat, toLon)]
-      result = self.getMonavRoute(waypoints)
+      monavWaypoints = [(fromLat, fromLon), (toLat, toLon)] # start
+      # disable additional waypoint usage due to a protobuf serialization bug in monav-server,
+      # that prevents getting results from more than 2 waypoints
+#      monavWaypoints.extend(waypoints) # waypoints
+
+      result = self.getMonavRoute(monavWaypoints)
       #TODO: asynchronous processing & error notifications
       # as monav is VERY fast for routing, the routing might still get done
       # asynchronously, but the work-in-progress overlay might show up
       # only once the search takes longer than say 2 seconds
-      self._handleResults("MonavRoute", (result, waypoints[0], waypoints[-1], sentTimestamp))
+      self._handleResults("MonavRoute", (result, monavWaypoints[0], monavWaypoints[-1], sentTimestamp))
 
     else: # use Google Directions as fallback
       online = self.m.get('onlineServices', None)
@@ -966,7 +974,8 @@ class route(ranaModule):
       routingAction = 'route:p2phmRoute'
 
     menus.drawButton(cr, x1 - dx, y1, dx, dy, 'start', startIcon, "route:expectStart")
-    menus.drawButton(cr, x1-dx, y1-dy, dx, dy, 'middle', middleIcon, "route:expectMiddle") # handmade
+    if self.handmade:
+      menus.drawButton(cr, x1-dx, y1-dy, dx, dy, 'middle', middleIcon, "route:expectMiddle") # handmade
     menus.drawButton(cr, x1, y1 - dy, dx, dy, 'end', endIcon, "route:expectEnd")
     menus.drawButton(cr, x1, y1, dx, dy, 'route', "generic:;0.5;;0.5;;", routingAction)
 
