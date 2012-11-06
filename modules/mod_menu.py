@@ -1102,7 +1102,7 @@ class menus(ranaModule):
      POISelectedAction2 = "showPOI:routeToActivePOI"
      self.addItem('route', 'Here to POI', 'generic', "ml:showPOI:setupCategoryList:%s|set:menu:menu#list#POICategories" % POISelectedAction2)
      self.addItem('route', 'to Address#Address', 'generic', 'set:menu:route#showAddressRoute')
-     self.addItem('route', 'Handmade', 'generic', 'set:menu:None|route:selectManyPoints')
+     self.addItem('route', 'Handmade', 'generic', 'set:menu:None|route:handmade')
      self.addItem('route', 'Clear', 'generic', 'route:clear|set:menu:None')
      self.addItem('route', 'route#Current', 'generic', 'set:menu:currentRoute')
 
