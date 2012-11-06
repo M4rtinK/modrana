@@ -135,14 +135,27 @@ def get_route(data_directory, waypoints, lookup_radius=10000, lookup_edge_names=
     command.lookup_radius = lookup_radius
     command.lookup_edge_names = lookup_edge_names
 
-    if hasattr(waypoints[0], 'latitude'):
-        command.waypoints.extend(waypoints)
-    else:
-        for latlon in waypoints:
-            assert len(latlon) == 2
-            waypoint = command.waypoints.add(latitude=latlon[0], longitude=latlon[1])
+    wayP = []
+
+    for point in waypoints:
+      lat, lon = point
+      w = Waypoint()
+      w.latitude = lat
+      w.longitude = lon
+      wayP.append(w)
+
+    command.waypoints.extend(wayP)
+#    if hasattr(waypoints[0], 'latitude'):
+#        command.waypoints.extend(waypoints)
+#    else:
+#        for latlon in waypoints:
+#            assert len(latlon) == 2
+#            waypoint = command.waypoints.add(latitude=latlon[0], longitude=latlon[1])
 
     # Write the command.
+    print "COMMAND"
+    print command
+
     connection.write(command)
 
     # Read result.
