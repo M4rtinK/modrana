@@ -144,7 +144,7 @@ class route(ranaModule):
         lastClick = self.get('lastClickXY', None)
         (x, y) = lastClick
         """
-        x and y must be floats, otherwise strange rounding errors occur, whan converting to lat lon coridnates
+        x and y must be floats, otherwise strange rounding errors occur, when converting to lat lon coordinates
         """
         (lat, lon) = proj.xy2ll(x, y)
         middlePos=self.get('middlePos', [])
@@ -238,23 +238,25 @@ class route(ranaModule):
             mLength = 0 # in meters
             firstNode = route[0]
             prevLat, prevLon = firstNode[0],firstNode[1]
-      # there is one from first to first calculation on start,
-      # but as it should return 0, it should not be an issue
+            # there is one from first to first calculation on start,
+            # but as it should return 0, it should not be an issue
             directions={'Directions':{u'Distance':{u'meters' : int(self.get('minAnnounceDistance',100))}, 'Duration':{'html':"unknown"},'Routes':[{u'Distance':{u'meters' : int(self.get('minAnnounceDistance',100))},'Steps':[{'descriptionHtml':"start",u'Point':{'coordinates':[fromLon,fromLat,0]},u'Distance':{u'meters' : int(self.get('minAnnounceDistance',100))}}]}]}}
-            mDistanceFromStart=int(self.get('minAnnounceDistance',100))
+            mDistanceFromStart=geo.distance(prevLat, prevLon, middlePos[0][0], middlePos[0][1]) * 1000
             messagePoints = []
+            geostep=0
             for i in range (0,len(middlePos)):
               node=middlePos[i]
-              mLength += geo.distance(prevLat, prevLon, node[0], node[1]) * 1000
-              directions['Directions']['Routes'][0]['Steps'].append({'descriptionHtml':self.get('midText')[i],u'Point':{'coordinates':[node[1],node[0],0]},u'Distance':{u'meters' : int(self.get('minAnnounceDistance',100))}})
+              geostep = geo.distance(prevLat, prevLon, node[0], node[1]) * 1000
+              mLength += geostep
+              directions['Directions']['Routes'][0]['Steps'].append({'descriptionHtml':self.get('midText')[i],u'Point':{'coordinates':[node[1],node[0],0]},u'Distance':{u'meters' : int(geostep)}})
               point = way.TurnByTurnPoint(node[0], node[1], message=self.get('midText')[i])
               point.setDistanceFromStart(mDistanceFromStart)
               messagePoints.append(point)
-              mDistanceFromLast = 7
-              mDistanceFromStart = mDistanceFromStart + mDistanceFromLast
+              mDistanceFromLast = geostep
+              mDistanceFromStart += mDistanceFromLast
               prevLat, prevLon = node[0], node[1]
             route.append((toLat,toLon,None))
-####
+            ####
 
             war = way.Way(route)
             war.setDuration(0)
@@ -262,25 +264,25 @@ class route(ranaModule):
 
             war.addMessagePoints(messagePoints)
 
-#            """process and save routing results"""
-#            self.routeRequestSentTimestamp = time.time()
-#            proj = self.m.get('projection', None)
-#            if proj:
-#              self.pxpyRoute = [proj.ll2pxpyRel(x[0], x[1]) for x in route]
-#            self.processAndSaveDirections(directions)
-#            (fromLat, fromLon) = route[0]
-#            (toLat, toLon) = route[-1]
+            #            """process and save routing results"""
+            #            self.routeRequestSentTimestamp = time.time()
+            #            proj = self.m.get('projection', None)
+            #            if proj:
+            #              self.pxpyRoute = [proj.ll2pxpyRel(x[0], x[1]) for x in route]
+            #            self.processAndSaveDirections(directions)
+            #            (fromLat, fromLon) = route[0]
+            #            (toLat, toLon) = route[-1]
 
-#            """use coordinates for start dest or use first/last point from the route
-#            if start/dest coordinates are unknown (None)"""
-#            if self.start is None:
-#              self.start = (fromLat, fromLon)
-#            if self.destination is None:
-#              self.destination = (toLat, toLon)
+            #            """use coordinates for start dest or use first/last point from the route
+            #            if start/dest coordinates are unknown (None)"""
+            #            if self.start is None:
+            #              self.start = (fromLat, fromLon)
+            #            if self.destination is None:
+            #              self.destination = (toLat, toLon)
 
             self.processAndSaveResults(war, "start", "end", time.time())
             self.selectTwoPoints = False
-          # TODO: wait message (would it be needed when using internet routing ?)
+            # TODO: wait message (would it be needed when using internet routing ?)
             self.set('needRedraw', True) # show the new route
 
     elif message == "p2posRoute": # simple route, from here to selected point
@@ -595,7 +597,7 @@ class route(ranaModule):
           # create the directions Way object
           dirs = way.fromGoogleDirectionsResult(directions)
           self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
-        # handle navigation autostart
+          # handle navigation autostart
       autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
       if autostart == 'enabled':
         self.sendMessage('ms:turnByTurn:start:%s' % autostart)
@@ -770,7 +772,7 @@ class route(ranaModule):
         else: # no cyrillic string in progress
           # just store the current substring
           outputString = outputString + ' ' + substring
-      # cleanup
+          # cleanup
     if cyrillicStringTemp: #is there an "open" cyrillic string ?
       cyrillicStringTemp += '</p>' # close the string
       outputString += ' ' + cyrillicStringTemp
@@ -938,7 +940,7 @@ class route(ranaModule):
     if self.selectTwoPoints:
       self.drawPointSelectors(cr)
 
-    #    print("Redraw took %1.9f ms" % (1000 * (clock() - start1)))
+      #    print("Redraw took %1.9f ms" % (1000 * (clock() - start1)))
 
   def getCurrentDirections(self):
     """return the current route"""
