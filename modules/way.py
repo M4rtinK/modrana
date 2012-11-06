@@ -269,6 +269,7 @@ class Way:
 
 
 def fromGoogleDirectionsResult(gResult):
+  """convert Google Directions result to a way object """
   steps = gResult['Directions']['Routes'][0]['Steps']
   points = _decodePolyline(gResult['Directions']['Polyline']['points'])
   # length of the route can computed from its metadata
@@ -309,7 +310,7 @@ def fromGoogleDirectionsResult(gResult):
 
 
 def fromMonavResult(result, getTurns=None):
-  # convert route nodes from the Monav routing result
+  """convert route nodes from the Monav routing result"""
   # to (lat, lon) tuples
   if result:
     # route points
@@ -340,7 +341,6 @@ def fromMonavResult(result, getTurns=None):
 
 def fromGPX(GPX):
   pass
-
 
 def fromCSV(path, delimiter=',', fieldCount=None):
   """create a way object from a CSV file specified by path
@@ -435,8 +435,40 @@ def fromCSV(path, delimiter=',', fieldCount=None):
   return Way(points)
 
 
+def fromHandmade(start, middlePoints, destination):
+  """convert hand-made route data to a way """
+  if start and destination:
+    # route points & message points are generated at once
+    # * empty string as message => no message point, just route point
+    routePoints = [(start[0], start[1], None)]
+    messagePoints = []
+    mLength = 0 # in meters
+    lastLat, lastLon = start[0], start[1]
+    for point in middlePoints:
+      lat, lon, elevation, message = point
+      mLength+= geo.distance(lastLat, lastLon, lat, lon)
+      routePoints.append((lat, lon, None))
+      if message != "": # is it a message point ?
+        point = TurnByTurnPoint(lat, lon, elevation, message)
+        point.setDistanceFromStart(mLength)
+        messagePoints.append(point)
+      lastLat, lastLon = lat, lon
+    routePoints.append((destination[0], destination[1], None))
+    way = Way(routePoints)
+    way.addMessagePoints(messagePoints)
+    # huge guestimation (avg speed 60 km/h = 16.7 m/s)
+    seconds = mLength / 16.7
+    way.setDuration(seconds)
+    way._setLength(mLength)
+    # done, return the result
+    return way
+  else:
+    return None
+
+  #point.setDistanceFromStart(mDistanceFromStart)
+
 class AppendOnlyWay(Way):
-  """a way subclass that is optimized for efficient incremental storage file storage
+  """a way subclass that is optimized for efficient incremental file storage
   -> points can be only appended or completely replaced, no insert support at he moment
   -> only CSV storage is supported at the moment
   -> call openCSV(path) to start incremental file storage
