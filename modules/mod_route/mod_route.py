@@ -534,6 +534,7 @@ class route(ranaModule):
 
   def _handleResults(self, key, resultsTuple):
     """handle a routing result"""
+    routingSuccess = False
     if key in ("onlineRoute", "onlineRouteAddress2Address"):
       if key == "onlineRoute":
         (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
@@ -550,6 +551,7 @@ class route(ranaModule):
           #(needs seconds to human representation conversion)
           #self.duration = dirs.getDuration()
           self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
+          routingSuccess = True
       elif key == "onlineRouteAddress2Address":
         (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
         # remove any possible prev. route description, so new a new one for this route is created
@@ -562,11 +564,8 @@ class route(ranaModule):
 
           # create the directions Way object
           dirs = way.fromGoogleDirectionsResult(directions)
-          self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
-          # handle navigation autostart
-      autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
-      if autostart == 'enabled':
-        self.sendMessage('ms:turnByTurn:start:%s' % autostart)
+          routingSuccess = True
+          self.startNavigation()
       self.set('needRedraw', True)
     elif key == "MonavRoute":
       (result, start, destination, routeRequestSentTimestamp) = resultsTuple
@@ -585,6 +584,7 @@ class route(ranaModule):
         dirs = way.fromMonavResult(directions, getTurns)
         self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
 
+        routingSuccess = True
         # handle navigation autostart
         self.startNavigation()
         self.set('needRedraw', True)
@@ -608,8 +608,8 @@ class route(ranaModule):
       self.destinationAddress = resultsTuple
       self.text = None # clear route detail cache
 
-    # if a route was set, switch to the current route button display mode
-    if self.directions:
+    # if routing was successful switch to the current-route OSD menu
+    if routingSuccess:
       self.osdMenuState = OSD_CURRENT_ROUTE
 
   def startNavigation(self):
