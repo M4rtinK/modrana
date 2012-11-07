@@ -307,6 +307,7 @@ class ModRana:
       return module
     except Exception, e:
       print( "modRana: module: %s/%s failed to load" % (importName, modRanaName) )
+      print(e)
       traceback.print_exc(file=sys.stdout) # find what went wrong
       return None
 
