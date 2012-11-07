@@ -181,7 +181,7 @@ class GoogleMaps(object):
   """
 
   _GEOCODE_QUERY_URL = 'http://maps.google.com/maps/geo?'
-  _DIRECTIONS_QUERY_URL = 'http://maps.google.com/maps/nav?'
+  _DIRECTIONS_QUERY_URL = 'http://maps.googleapis.com/maps/api/directions/json?'
   _LOCAL_QUERY_URL = 'http://ajax.googleapis.com/ajax/services/search/local?'
   _LOCAL_RESULTS_PER_PAGE = 8
   MAX_LOCAL_RESULTS = 32
@@ -457,17 +457,20 @@ class GoogleMaps(object):
 
     """
     params = {
-      'q': 'from:%s to:%s' % (origin, destination),
+      'origin' : origin,
+      'destination' : destination,
       'output': 'js', #modRana:NOTE:modified to js to get polyline data
       'oe': 'utf8',
-      'key': self.api_key,
+#      'key': self.api_key, # TODO: API key
     }
     params.update(kwargs)
     params.update(dir) #modRana: add mode parameter
-
     url, response = fetch_json(self._DIRECTIONS_QUERY_URL, params=params)
-    status_code = response['Status']['code']
-    if status_code != STATUS_OK:
+    status_code = response['status']
+#    if status_code != STATUS_OK:
+    if status_code != "OK":
+      # TODO: update status codes for directions
+      #(https://developers.google.com/maps/documentation/directions/#StatusCodes)
       raise GoogleMapsError(status_code, url=url, response=response)
     return response
 

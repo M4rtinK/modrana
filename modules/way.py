@@ -270,6 +270,58 @@ class Way:
 
 def fromGoogleDirectionsResult(gResult):
   """convert Google Directions result to a way object """
+  leg = gResult['routes'][0]['legs'][0]
+  steps = leg['steps']
+#  points = leg['polyline']['points']
+
+
+  points = _decodePolyline(gResult['routes'][0]['overview_polyline']['points'])
+  # length of the route can computed from its metadata
+  if 'distance' in leg: # this field might not be present
+    mLength = leg['distance']['value']
+  else:
+    mLength = None
+#  mLength += gResult['Directions']['Routes'][0]['Steps'][-1]["Distance"]["meters"]
+  # the route also contains the expected duration in seconds
+  if 'duration' in leg: # this field might not be present
+    sDuration = leg['duration']['value']
+  else:
+    sDuration = None
+
+  way = Way(points)
+  way._setLength(mLength)
+  way.setDuration(sDuration)
+  messagePoints = []
+
+#  mDistanceFromStart = gResult['Directions']['Routes'][0]['Steps'][-1]["Distance"]["meters"]
+  mDistanceFromStart = 0
+  #          # add and compute the distance from start
+  #          step['mDistanceFromStart'] = mDistanceFromStart
+  #          mDistanceFromLast = step["Distance"]["meters"]
+  #          mDistanceFromStart = mDistanceFromStart + mDistanceFromLast
+
+  for step in steps:
+    # TODO: abbreviation filtering
+    message = step['html_instructions']
+    # as you can see, for some reason,
+    # the coordinates in Google Directions steps are reversed:
+    # (lon,lat,0)
+    lat = step['start_location']['lat']
+    lon = step['start_location']['lng']
+    #TODO: end location ?
+    point = TurnByTurnPoint(lat, lon, message=message)
+    point.setDistanceFromStart(mDistanceFromStart)
+    # store point to temporary list
+    messagePoints.append(point)
+    # update distance for next point
+    mDistanceFromLast = step["distance"]['value']
+    mDistanceFromStart = mDistanceFromStart + mDistanceFromLast
+
+  way.addMessagePoints(messagePoints)
+  return way
+
+def fromGoogleDirectionsResultOld(gResult):
+  """convert Google Directions result to a way object """
   steps = gResult['Directions']['Routes'][0]['Steps']
   points = _decodePolyline(gResult['Directions']['Polyline']['points'])
   # length of the route can computed from its metadata
@@ -307,7 +359,6 @@ def fromGoogleDirectionsResult(gResult):
 
   way.addMessagePoints(messagePoints)
   return way
-
 
 def fromMonavResult(result, getTurns=None):
   """convert route nodes from the Monav routing result"""

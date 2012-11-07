@@ -458,8 +458,12 @@ class route(ranaModule):
 
     else: # use Google Directions as fallback
       online = self.m.get('onlineServices', None)
+      # prepare waypoints for Google Directions as a list of strings
+      gdWaypoints = map(lambda x: "(%f, %f)" % (x[0],x[1]), waypoints)
+
       if online:
-        online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon), self._handleResults, "onlineRoute")
+        online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon),
+          self._handleResults, "onlineRoute", waypoints=gdWaypoints)
 
   def getMonavRoute(self, waypoints):
     mode = self.get('mode', 'car')
@@ -553,19 +557,20 @@ class route(ranaModule):
 
         if directions: # is there actually something in the directions ?
           # create the directions Way object
-          self.duration = directions['Directions']['Duration']['html']
+          self.duration = directions['routes'][0]['legs'][0]['duration']['text']
           dirs = way.fromGoogleDirectionsResult(directions)
           #TODO: use seconds from Way object directly
           #(needs seconds to human representation conversion)
           #self.duration = dirs.getDuration()
           self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
           routingSuccess = True
+          self.startNavigation()
       elif key == "onlineRouteAddress2Address":
         (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
         # remove any possible prev. route description, so new a new one for this route is created
         self.text = None
         if directions: # is there actually something in the directions ?
-          self.duration = directions['Directions']['Duration']['html']
+          self.duration = directions['routes'][0]['legs'][0]['duration']['text']
           #TODO: use seconds from Way object directly
           #(needs seconds to human representation conversion)
           #self.duration = dirs.getDuration()
@@ -974,7 +979,9 @@ class route(ranaModule):
       routingAction = 'route:p2phmRoute'
 
     menus.drawButton(cr, x1 - dx, y1, dx, dy, 'start', startIcon, "route:expectStart")
-    if self.handmade:
+    # Monav currently has a bug preventing waypoint routing
+    routingProvider = self.get('routingProvider', 'GoogleDirections')
+    if self.handmade or routingProvider == 'GoogleDirections':
       menus.drawButton(cr, x1-dx, y1-dy, dx, dy, 'middle', middleIcon, "route:expectMiddle") # handmade
     menus.drawButton(cr, x1, y1 - dy, dx, dy, 'end', endIcon, "route:expectEnd")
     menus.drawButton(cr, x1, y1, dx, dy, 'route', "generic:;0.5;;0.5;;", routingAction)
