@@ -23,8 +23,9 @@ def latlon2relativeXY(lat,lon):
   return x,y
 
 def latlon2xy(lat,lon,z):
-  n = numTiles(z)
-  x,y = latlon2relativeXY(lat,lon)
+  n = pow(2,z)
+  x = (lon + 180) / 360
+  y = (1 - log(tan(radians(lat)) + sec(radians(lat))) / pi) / 2
   return n*x, n*y
   
 def tileXY(lat, lon, z):
