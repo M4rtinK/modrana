@@ -163,6 +163,8 @@ class search(ranaModule):
     elif message == 'clearSearch':
       self.localSearchResults = None
       self.list = None
+      self.notify("search results cleared", 2000)
+      #TODO: also clear address & Wikipedia search results
     elif message == 'storePOI':
       store = self.m.get('storePOI', None)
       if store is None:

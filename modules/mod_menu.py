@@ -956,6 +956,7 @@ class menus(ranaModule):
     self.addItem('searchWhat', 'online#address', 'generic', 'search:searchAddress')
     self.addItem('searchWhat', 'online#wikipedia', 'generic', 'search:searchWikipedia')
     self.addItem('searchWhat', 'online#presets', 'generic', 'set:menu:searchWhere')
+    self.addItem('searchWhat', 'results#clear', 'generic', 'search:clearSearch|set:menu:None')
 
   def setupSearchMenus(self):
     """Create a load of menus that are just filters for OSM tags"""
