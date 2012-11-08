@@ -1107,6 +1107,11 @@ class menus(ranaModule):
      self.addItem('route', 'Clear', 'generic', 'route:clear|set:menu:None')
      self.addItem('route', 'route#Current', 'generic', 'set:menu:currentRoute')
 
+  def setupTracklogsMenu(self):
+    self.clearMenu('tracklogs')
+    self.addItem('tracklogs', 'categories', 'generic', 'set:menu:tracklogManagerCategories')
+    self.addItem('tracklogs', 'visible#clear', 'generic', 'showTracklogs:clearVisible|set:menu:None')
+
   def setupInfoMenu(self):
     self.clearMenu('info')
     self.addItem('info', 'About', 'generic', 'set:menu:info#infoAbout')
@@ -1122,8 +1127,8 @@ class menus(ranaModule):
     self.addItem('main', 'options', 'options', 'set:menu:options')
     self.addItem('main', 'download', 'download', 'set:menu:data')
     self.addItem('main', 'mode', 'mode', 'set:menu:modes')
-    self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogManagerCategories')
     self.addItem('main', 'log a track', 'log', 'set:menu:tracklog#tracklog')
+    self.addItem('main', 'tracklogs', 'tracklogs', 'set:menu:tracklogs')
     self.addItem('main', 'info', 'info', 'set:menu:info')
     self.setupModesMenu()
     self.setupSearchMenus()
@@ -1133,6 +1138,7 @@ class menus(ranaModule):
     self.setupPoiMenu()
     self.setupDataMenu()
     self.setupRouteMenu()
+    self.setupTracklogsMenu()
     self.setupInfoMenu()
     self.clearMenu('options', "set:menu:main") # will be filled by mod_options
     self.lists['places'] = 'placenames'

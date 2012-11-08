@@ -22,9 +22,9 @@ from base_module import ranaModule
 from upoints import gpx
 
 def getModule(m,d,i):
-  return(showGPX(m,d,i))
+  return ShowTracklogs(m,d,i)
 
-class showGPX(ranaModule):
+class ShowTracklogs(ranaModule):
   """draws a GPX track on the map"""
   
   def __init__(self, m, d, i):

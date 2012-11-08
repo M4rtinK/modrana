@@ -30,15 +30,15 @@ if gs.GUIString == "GTK":
   import gtk
 
 def getModule(m,d,i):
-  return(showGPX(m,d,i))
+  return ShowTracklogs(m,d,i)
 
-class showGPX(ranaModule):
+class ShowTracklogs(ranaModule):
   """draws a GPX track on the map"""
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
 
-    self.linewidth = 7 #with of the line denoting GPX tracks
+    self.lineWidth = 7 #with of the line denoting GPX tracks
     self.distinctColors=[
                         'black',
                         'blue',
@@ -248,7 +248,7 @@ class showGPX(ranaModule):
     (screenCentreX,screenCentreY,screenRadius) = proj.screenRadius()
 #    cr.set_source_rgb(0,0, 0.5)
     cr.set_source_color(gtk.gdk.color_parse(colorName))
-    cr.set_line_width(self.linewidth)
+    cr.set_line_width(self.lineWidth)
     numberOfClusters = len(GPXTracklog.clusters) # how many clusters do we have in this tracklog ?
     for cluster in GPXTracklog.clusters: # we draw all clusters in tracklog
 
@@ -309,9 +309,9 @@ class showGPX(ranaModule):
       return
     proj = self.m.get('projection', None)
     cr.set_source_rgb(0,0, 0.5)
-    cr.set_line_width(self.linewidth)
+    cr.set_line_width(self.lineWidth)
     first = True
-    last_x = 0
+    lastX = 0
     last_y = 0
 
     currentRouteInfo = GPXTracklog.routeInfo # we load dictionary with route info
@@ -328,20 +328,20 @@ class showGPX(ranaModule):
       #print("first point:%s m ,last point:%s m , max:%s m min:%s m") % (first_point.elevation, last_point.elevation, max_elev_point.elevation, min_elev_point.elevation)
       if first:
         #cr.move_to(x,y)
-        last_x = x
+        lastX = x
         lasty_y = y
         first = False
       else:
         #a single color thicker line under the colored line (to make it more readable)
         #TODO: optimize this
-        cr.set_line_width(self.linewidth + 5)
+        cr.set_line_width(self.lineWidth + 5)
         cr.set_source_rgb(0.7 , 0.7, 0.7)
-        cr.move_to(last_x,lasty_y)
+        cr.move_to(lastX,lasty_y)
         cr.line_to(x,y)
         cr.stroke()
         cr.fill()
 
-        cr.set_line_width(self.linewidth)
+        cr.set_line_width(self.lineWidth)
         current_elevation = float(point.elevation)
         """the maximum height is solid red, that is 1,0,0 in RGB,
         the mid-height is 0,0,1 and the minimum height is 0,1,0
@@ -353,11 +353,11 @@ class showGPX(ranaModule):
         # max color goes from 1 at min to 0 at the middle and after
         min_color = self.getNat(1 - (current_elevation - difference)/(min_elev/2))
         cr.set_source_rgb(max_color , min_color, middle_color)
-        cr.move_to(last_x,lasty_y)
+        cr.move_to(lastX,lasty_y)
         cr.line_to(x,y)
         cr.stroke()
         cr.fill()
-        last_x = x
+        lastX = x
         last_y = y
 
   def drawDebugCircles(self, cr, GPXTracklog):
@@ -431,7 +431,7 @@ class showGPX(ranaModule):
       self.set('visibleTracklogsDict', visibleTracklogs)
       self.set('showTracklog', 'simple')
       
-    elif message == 'inVisible':
+    elif message == 'clearVisible':
       self.set('visibleTracklogsDict', {})
       self.set('showTracklog', None)
 
@@ -440,11 +440,3 @@ class showGPX(ranaModule):
       # set the color from the color register
       colorName = self.get('distinctColorRegister', 'navy')
       self.setTrackColor(path, colorName)
-
-
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

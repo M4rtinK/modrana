@@ -127,7 +127,7 @@ class tracklog(ranaModule):
       self.pxpyIndex=[]
 
     elif message == 'setupColorMenu':
-      m = self.m.get('showGPX', None)
+      m = self.m.get('showTracklogs', None)
       if m:
         m.setupChooseDistColorMenu('tracklog', '|tracklog:colorFromRegister|set:menu:None')
 

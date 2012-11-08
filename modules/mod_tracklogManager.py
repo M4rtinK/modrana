@@ -105,9 +105,9 @@ class tracklogManager(ranaModule):
         self.LTModule.setTracklogPathCategory(path, currentCategory)
 
     elif message == 'setupColorMenu':
-      m = self.m.get('showGPX', None)
+      m = self.m.get('showTracklogs', None)
       if m:
-        m.setupChooseDistColorMenu('tracklogTools', '|showGPX:colorFromRegister|tracklogManager:setupToolsSubmenu|set:menu:tracklogTools')
+        m.setupChooseDistColorMenu('tracklogTools', '|showTracklogs:colorFromRegister|tracklogManager:setupToolsSubmenu|set:menu:tracklogTools')
 
     elif message == 'setupToolsSubmenu':
       self.setupToolsSubmenu()
@@ -248,7 +248,7 @@ class tracklogManager(ranaModule):
       if track.trackpointsList and track.trackpointsList[0]:
         firstPoint = track.trackpointsList[0][0]
         (lat,lon) = (firstPoint.latitude, firstPoint.longitude)
-        action3 = "mapView:recentre %f %f|set:showTrackFilename:%s|showGPX:makeVisible|set:menu:None" % (lat, lon, track.filename)
+        action3 = "mapView:recentre %f %f|set:showTrackFilename:%s|showTracklogs:makeVisible|set:menu:None" % (lat, lon, track.filename)
         menus.drawButton(cr, x3, y3, dx, dy, "show on map", "generic", action3)
       else:
         menus.drawButton(cr, x3, y3, dx, dy, "can't show on map#no points", "generic", 'set:menu:tracklogManager#tracklogInfo')
@@ -298,11 +298,11 @@ class tracklogManager(ranaModule):
     menus.addItem('tracklogTools', 'active#set', 'generic', 'set:currentTrack:%s|tracklogManager:loadTrackProfile|set:menu:None' % track.filename)
     menus.addItem('tracklogTools', 'inactive#set', 'generic', 'set:currentTrack:None|tracklogManager:unLoadTrackProfile|set:menu:None')
     if isVisible:
-      menus.addItem('tracklogTools', 'toggle#visible', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|tracklogManager:setupToolsSubmenu' % track.filename)
+      menus.addItem('tracklogTools', 'toggle#visible', 'generic', 'set:showTrackFilename:%s|showTracklogs:toggleVisible|tracklogManager:setupToolsSubmenu' % track.filename)
     else:
-      menus.addItem('tracklogTools', 'toggle#invisible', 'generic', 'set:showTrackFilename:%s|showGPX:toggleVisible|tracklogManager:setupToolsSubmenu' % track.filename)
-    menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showGPX:allVisible|set:menu:tracklogManager#tracklogInfo')
-    menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showGPX:inVisible|set:menu:tracklogManager#tracklogInfo')
+      menus.addItem('tracklogTools', 'toggle#invisible', 'generic', 'set:showTrackFilename:%s|showTracklogs:toggleVisible|tracklogManager:setupToolsSubmenu' % track.filename)
+    menus.addItem('tracklogTools', 'visible#all tracks', 'generic', 'showTracklogs:allVisible|set:menu:tracklogManager#tracklogInfo')
+    menus.addItem('tracklogTools', 'visible#no tracks', 'generic', 'showTracklogs:clearVisible|set:menu:tracklogManager#tracklogInfo')
 
     if isVisible:
       colorName = visibleTracklogs[currentPath]['colorName']
