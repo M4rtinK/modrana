@@ -175,7 +175,7 @@ class menus(ranaModule):
 
       # draw the centering button
       (x1,y1) = buttons['centre']
-      self.drawButton(cr, x1, y1, dx, dy, "", '', "toggle:centred")
+      self.drawButton(cr, x1, y1, dx, dy, "", 'generic:;0.5;;0.5;;', "toggle:centred")
 
       # the central circle
       cr.stroke()
