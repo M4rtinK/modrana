@@ -432,8 +432,18 @@ class ShowTracklogs(ranaModule):
       self.set('showTracklog', 'simple')
       
     elif message == 'clearVisible':
+      visibleCount = len(self.get('visibleTracklogsDict', {}))
       self.set('visibleTracklogsDict', {})
       self.set('showTracklog', None)
+      if visibleCount:
+        if visibleCount == 1:
+          message = "1 visible tracklog cleared"
+        else:
+          message = '%d visible tracklogs cleared' % visibleCount
+
+        self.notify(message, 2000)
+      else:
+        self.notify('no tracklogs are visible', 2000)
 
     elif message == 'colorFromRegister':
       path = self.getActiveTracklogPath()
