@@ -25,7 +25,7 @@ from math import *
 import math
 
 def getModule(m,d,i):
-  return(Projection(m,d,i))
+  return Projection(m,d,i)
 
 class Projection(ranaModule):
   """Projection code (lat/long to screen conversions)"""
@@ -34,14 +34,14 @@ class Projection(ranaModule):
   HOW DOES IT WORK:
   - there are basically two modes:
   * current position tracking
-   => set view + rencentre + 2*find edges
+   => set view + recentre + 2*find edges
   * map dragging
    => nudge + 1*find edges
 
   TODO:
   - why is find edges called twice for position tracking ?
   - don't redraw the whole map for a small nudge
-   -> currently even for a 1 pixel nudge, the whol screen is redrawn
+   -> currently even for a 1 pixel nudge, the whole screen is redrawn
   - use a mechanism similar to nudging for faster tracklog drawing
    -> show the trackpoints so no ll2xy would be needed
 
@@ -111,8 +111,8 @@ class Projection(ranaModule):
     return self.xyValid and self.llValid
   
   def setView(self, x, y, w, h):
-#    print "setting view xywh:%d,%d,%d,%d" % (x,y,w,h)
     """Setup the display"""
+    #    print "setting view xywh:%d,%d,%d,%d" % (x,y,w,h)
     self.w = w
     self.h = h
     self.xc = x + self.w
@@ -122,9 +122,9 @@ class Projection(ranaModule):
       self.findEdges()
     
   def recentre(self, lat, lon, zoom = None):
-#    print "recentering to: %f,%f" % (lat,lon)
     """Move the projection to a particular geographic location
     (with optional zoom level)"""
+    #    print "recentering to: %f,%f" % (lat,lon)
     self.lat = lat
     self.lon = lon
     if zoom is not None:
@@ -158,8 +158,8 @@ class Projection(ranaModule):
     self.set('needRedraw', True)
   
   def findEdges(self):
-#    print "find edges %f,%f" % (self.lat,self.lon)
     """Update the projection meta-info based on its fundamental parameters"""
+    #    print "find edges %f,%f" % (self.lat,self.lon)
     if not self.xyValid or not self.llValid:
       # If the display is not known yet, then we can't do anything, but we'll
       # mark it as something that needs doing as soon as the display
@@ -231,7 +231,7 @@ class Projection(ranaModule):
 
 #  def screenBBoxLL(self):
 #    """get lat,lon of upper left and lower right screen corners
-#       -> get the screen bounding box in geograhical units"""
+#       -> get the screen bounding box in geographical units"""
 #    (lat1,lon1) = self.xy2ll(0,0)
 #    (lat2,lon2) = self.xy2ll(self.w,self.h)
 #
