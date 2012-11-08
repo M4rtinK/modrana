@@ -215,7 +215,7 @@ class search(ranaModule):
           query = args[1]
           proj = self.m.get('projection', None)
           if proj:
-            centreLL = proj.getScreenCentrell()
+            centreLL = proj.getScreenCentreLL()
             if centreLL:
               (lat,lon) = centreLL
               online.googleLocalQueryLLAsync(query, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
@@ -265,7 +265,7 @@ class search(ranaModule):
           print "search:near view"
           proj = self.m.get('projection', None)
           if proj:
-            centreLL = proj.getScreenCentrell()
+            centreLL = proj.getScreenCentreLL()
             if centreLL:
               (lat,lon) = centreLL
             else:

@@ -263,7 +263,7 @@ class Projection(ranaModule):
     else:
       return None
 
-  def getScreenCentrell(self):
+  def getScreenCentreLL(self):
     if self.lat and self.lon:
       return self.lat,self.lon
     else:
