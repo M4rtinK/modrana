@@ -23,7 +23,7 @@ from base_module import ranaModule
 #import random
 import geo
 import math
-from time import clock
+#from time import clock
 # only import GKT libs if GTK GUI is used
 from core import gs
 if gs.GUIString == "GTK":
@@ -303,7 +303,7 @@ class ShowTracklogs(ranaModule):
 
 
   def drawColoredTracklog(self, cr, GPXTracklog):
-    # show color depending on height
+    """show color depending on height"""
     if GPXTracklog.elevation == False: # we cant draw colored tracklog without elevation data
       self.drawSimpleTrack(cr, GPXTracklog)
       return
@@ -312,7 +312,7 @@ class ShowTracklogs(ranaModule):
     cr.set_line_width(self.lineWidth)
     first = True
     lastX = 0
-    last_y = 0
+    lastY = 0
 
     currentRouteInfo = GPXTracklog.routeInfo # we load dictionary with route info
     max_elev = currentRouteInfo['maxElevation']
@@ -329,14 +329,14 @@ class ShowTracklogs(ranaModule):
       if first:
         #cr.move_to(x,y)
         lastX = x
-        lasty_y = y
+        lastY = y
         first = False
       else:
         #a single color thicker line under the colored line (to make it more readable)
         #TODO: optimize this
         cr.set_line_width(self.lineWidth + 5)
         cr.set_source_rgb(0.7 , 0.7, 0.7)
-        cr.move_to(lastX,lasty_y)
+        cr.move_to(lastX,lastY)
         cr.line_to(x,y)
         cr.stroke()
         cr.fill()
@@ -353,12 +353,12 @@ class ShowTracklogs(ranaModule):
         # max color goes from 1 at min to 0 at the middle and after
         min_color = self.getNat(1 - (current_elevation - difference)/(min_elev/2))
         cr.set_source_rgb(max_color , min_color, middle_color)
-        cr.move_to(lastX,lasty_y)
+        cr.move_to(lastX,lastY)
         cr.line_to(x,y)
         cr.stroke()
         cr.fill()
         lastX = x
-        last_y = y
+        lastY = y
 
   def drawDebugCircles(self, cr, GPXTracklog):
     proj = self.m.get('projection', None)
