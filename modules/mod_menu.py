@@ -693,7 +693,7 @@ class menus(ranaModule):
       items = [
       gi('here#route', 'generic', routing),
       gi('to POI#add', 'generic', 'ms:menu:handleToolsMenuPoint:store'), # TODO implement this
-      gi('clear all#results', 'generic', 'set:menu:None') # TODO implement this
+      gi('results#clear all', 'generic', 'set:menu:None') # TODO implement this
       ]
       # add the items to a menu
       menu = self.addItemsToThisMenu(menu, items)
