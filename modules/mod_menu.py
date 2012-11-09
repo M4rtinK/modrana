@@ -221,12 +221,12 @@ class menus(ranaModule):
     """convenience function for asking for redraw"""
     self.set('needRedraw', True)
 
-  def showText(self,cr,text,x,y,widthLimit=None,fontsize=40,colorString=None):
+  def showText(self,cr,text,x,y,widthLimit=None,fontSize=40,colorString=None):
     pg = pangocairo.CairoContext(cr)
     # create a layout for your drawing area
     layout = pg.create_layout()
     layout.set_markup(text)
-    layout.set_font_description(pango.FontDescription("Sans Serif %d" % fontsize))
+    layout.set_font_description(pango.FontDescription("Sans Serif %d" % fontSize))
     (lw,lh) = layout.get_size()
     if lw == 0 or lh == 0:
       return # no need to draw this + avoid a division by zero
