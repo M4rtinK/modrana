@@ -288,7 +288,7 @@ class Projection(ranaModule):
     x = (px - self.px1) * self.scale
     y = (py - self.py1) * self.scale
     return x,y
-  
+
   def ll2pxpy(self,lat,lon):
     """Convert geographic units to projection units"""
     px,py = latlon2xy(lat,lon,self.zoom)
