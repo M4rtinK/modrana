@@ -128,6 +128,10 @@ class Configs:
     """
     get the filtered & tweaked map layer info from the map config
     """
+#    print "MAP LAYERS"
+#    for value in self.mapLayers:
+#      print value
+#      print self.mapLayers[value]
     return self.mapLayers
 
   def getMapGroups(self):
