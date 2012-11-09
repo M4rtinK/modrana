@@ -410,9 +410,10 @@ class Icons(ranaModule):
         elif currentName.split(':')[0] == 'center':
           """ "center" means that we have an icon which we want to center inside the button
           there re two parameters - icon name and border width
-          EXAMPLE: center:more;0.1
+          EXAMPLE: center:more;0.1;0.5
           -> icon name: more
           -> border width: 10% of shortest icon side
+          -> 50% opacity
           """
           # parse the parameters
           semicolonSepList = currentName.split(':',1)[1].split(';')
@@ -437,7 +438,15 @@ class Icons(ranaModule):
             iw = icon.get_width()
             ih = icon.get_height()
             # get usable width and height
-            borderWidth = float(semicolonSepList[1])
+            if len(semicolonSepList) >= 2:
+              borderWidth = float(semicolonSepList[1])
+            else:
+              borderWidth = 0
+            # get opacity
+            if len(semicolonSepList) >= 3:
+              opacity = float(semicolonSepList[2])
+            else:
+              opacity = 1.0
             if borderWidth >= 1 or borderWidth <= 0:
               border = 0
             else:
@@ -473,7 +482,7 @@ class Icons(ranaModule):
               ctBack.set_source_pixbuf(icon, dx, dy)
 
               # paint the icon on image surface
-              ctBack.paint()
+              ctBack.paint_with_alpha(opacity)
               
               # composite the result with other layers
               compositedIcon = self.combineTwoIcons(compositedIcon, background)
