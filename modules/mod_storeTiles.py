@@ -173,7 +173,7 @@ class StoreTiles(ranaModule):
             except Exception, e:
               print("tile already present")
               print(e)
-              pass #tile is already present, skip insert
+              #tile is already present, skip insert
 
   def commitConnections(self, connections):
     """store connections and commit them once in a while"""
@@ -264,7 +264,7 @@ class StoreTiles(ranaModule):
 
   def createNewStore(self, path):
     """create a new store table and file"""
-    print "sqlite tiles: creating a new storage database in %s" % path
+    print("sqlite tiles: creating a new storage database in %s" % path)
     os.path.exists(path)
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
@@ -456,14 +456,14 @@ class StoreTiles(ranaModule):
         """this usually occurs during interpreter shutdown
         -> we simulate a shutdown order and try to exit cleanly
         """
-        print "storage thread - probable shutdown"
-        print "exception: %s" % e
+        print("storage thread - probable shutdown")
+        print("exception: %s" % e)
         item = 'shutdown'
 
       if item == 'shutdown': # we put this to the queue to announce shutdown
-        print "\nshutdown imminent, committing all uncommitted tiles"
+        print("\nshutdown imminent, committing all uncommitted tiles")
         self.commitAll()
-        print "\nall tiles committed, breaking, goodbye :)"
+        print("\nall tiles committed, breaking, goodbye :)")
         break
       """
       the thread should not die due to an exception
