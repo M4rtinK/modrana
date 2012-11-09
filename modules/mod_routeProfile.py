@@ -28,7 +28,7 @@ if gs.GUIString == "GTK":
   import pycha.color
 
 def getModule(m,d,i):
-  return(routeProfile(m,d,i))
+  return routeProfile(m,d,i)
 
 class routeProfile(ranaModule):
   """Creates a route profile (an elevation chart)"""
@@ -79,7 +79,7 @@ class routeProfile(ranaModule):
 
     # * draw current elevation/position indicator
     pos = self.get('pos', None)
-    if pos != None:
+    if pos is not None:
       (pLat,pLon) = pos
       l = [geo.distance(pLat,pLon,i[2],i[3]) for i in tracklog.perElevList]
       totalLength = len(tracklog.perElevList)
@@ -111,7 +111,7 @@ class routeProfile(ranaModule):
     elevList = tracklog.perElevList
 
     units = self.m.get('units', None)
-    if units == None:
+    if units is None:
       print("routeProfile, lineChart: Units module missing")
       return
 
@@ -206,9 +206,3 @@ class routeProfile(ranaModule):
     chart.render()
     cr.set_source_surface(surface, x, y)
     cr.paint()
-
-if(__name__ == "__main__"):
-  a = routeProfile({}, {})
-  a.update()
-  a.update()
-  a.update()
