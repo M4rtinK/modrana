@@ -881,7 +881,7 @@ class MapTiles(ranaModule):
        * redraw only when on map screen (menu == None)
        * redraw only on composite tiles when overlay is on"""
 
-    if self.get('tileLoadedRedraw', True) and self.get('menu', None) == None:
+    if self.get('tileLoadedRedraw', True) and self.get('menu', None) is None:
       overlay = self.get('overlay', False)
       if overlay: # only redraw when a composited tile is loaded with overlay on
         if type == "composite":
@@ -982,11 +982,25 @@ Therefore we use it as default."""
       url = '%s&x=%d&y=%d&z=%d&r=1' % ( # I have no idea what the r parameter is, r=0 or no r => grey square
                                         layerDetails['tiles'],
                                         x, y, z)
+#    elif coords == 'chartbundle': # chartbundle
+##      print "CHARTBUNDLE"
+#      y = ((2 ** (z - 1) - 1) - y)
+#      # TODO: fix projection so this is usable
+#      # NOTE: looks like with the y fix from Yahoo tilenames,
+#      # the map is drawn correctly, but current position is somewhere in Antarctica
+#      # -> thi probably means some projection lat lon -> x y errors for this layer
+#
+#      url = '%s%d/%d/%d.%s' % (
+#      layerDetails['tiles'],
+#      z, x, y,
+#      layerDetails.get('type', 'png'))
     else: # OSM, Open Cycle, T@H -> equivalent to coords == osm
       url = '%s%d/%d/%d.%s' % (
         layerDetails['tiles'],
         z, x, y,
         layerDetails.get('type', 'png'))
+
+#    print "__%s__" % coords
     return url
 
   def shutdown(self):
