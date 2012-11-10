@@ -147,9 +147,9 @@ class routeProfile(ranaModule):
       cuMinimum = units.m2CurrentUnitString(minimum, 3, short=True)
       cuMaximum = units.m2CurrentUnitString(maximum, 3, short=True)
       middle = minimum + (maximum - minimum)/2.0
-      print minimum
-      print middle
-      print maximum
+#      print minimum
+#      print middle
+#      print maximum
       cuMiddle = units.m2CurrentUnitString(middle, 3, short=True)
       yTicks = [{'label': cuMinimum, 'v': minimum-15},
                 {'label': cuMiddle, 'v': middle+15/2.0},
