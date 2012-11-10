@@ -22,7 +22,6 @@ import traceback
 import sys
 from modules.base_module import ranaModule
 import re
-import urllib
 import threading
 import time
 import geocoding
@@ -181,7 +180,7 @@ class onlineServices(ranaModule):
     return local
 
   def googleLocalQueryLL(self, term, lat, lon):
-    query = self.constructGoogleQueryLL(term, lat, lon)
+    query = self.constructGoogleQuery(term, "loc:%f,%f" % (lat, lon))
     local = self.googleLocalQuery(query)
     return local
 
