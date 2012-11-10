@@ -53,7 +53,7 @@ def _wikipediaResults2points(results):
   return points
 
 # from the googlemaps module
-def fetchJson(query_url, params={}, headers={}):
+def fetchJson(query_url, params=None, headers=None):
     """Retrieve a JSON object from a (parametrized) URL.
 
     :param query_url: The base URL to query
@@ -68,6 +68,8 @@ def fetchJson(query_url, params={}, headers={}):
     :rtype: (string, dict or array)
 
     """
+    if not headers: headers = {}
+    if not params: params = {}
     encoded_params = urllib.urlencode(params)
     url = query_url + encoded_params
     print url
