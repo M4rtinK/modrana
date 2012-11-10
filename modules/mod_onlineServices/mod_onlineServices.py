@@ -32,7 +32,7 @@ import local_search
 DEFAULT_GOOGLE_API_KEY = "ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw"
 
 def getModule(m, d, i):
-  return(onlineServices(m, d, i))
+  return onlineServices(m, d, i)
 
 
 class onlineServices(ranaModule):
@@ -167,7 +167,7 @@ class onlineServices(ranaModule):
     flags = {'net': True}
     self._addWorkerThread(Worker._elevFromGeonamesBatch, [latLonList, tracklog], outputHandler, key, flags)
 
-  def elevFromGeonamesBatch(self, latLonList, threadCB):
+  def elevFromGeonamesBatch(self, latLonList, threadCB=None):
     """ get elevation in meters for the specified latitude and longitude from
      geonames synchronously, it is possible to ask for up to 20 coordinates
      at once
@@ -176,9 +176,11 @@ class onlineServices(ranaModule):
     latLonElevList = []
     mL = len(latLonList)
     while len(latLonList) > 0:
+      print("elevation: %d of %d done" % (mL - len(latLonList), mL))
       if threadCB: # report progress to running thread
         threadCB._setWorkStatusText("%d of %d done" % (mL - len(latLonList), mL))
       tempList = latLonList[0:maxCoordinates]
+      latLonList = latLonList[maxCoordinates:]
       #      latLonList = latLonList[maxCoordinates:len(latLonList)]
 
       lats = ""
@@ -191,10 +193,12 @@ class onlineServices(ranaModule):
         #      url = 'http://ws.geonames.org/astergdem?lats=%s&lngs=%s' % (lats,lons)
       url = 'http://ws.geonames.org/srtm3?lats=%s&lngs=%s' % (lats, lons)
       query = None
+      results = []
       try:
         query = urllib.urlopen(url)
       except Exception, e:
         print("online: getting elevation from geonames returned an error")
+        print(e)
         results = "0"
         for i in range(1, len(tempList)):
           results += " 0"
@@ -204,6 +208,7 @@ class onlineServices(ranaModule):
           query.close()
       except Exception, e:
         print("online: elevation string from geonames has a wrong format")
+        print(e)
         results = "0"
         for i in range(1, len(tempList)):
           results += " 0"
