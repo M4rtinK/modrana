@@ -22,7 +22,7 @@ from base_module import ranaModule
 import os
 
 def getModule(m,d,i):
-  return(tracklogManager(m,d,i))
+  return tracklogManager(m,d,i)
 
 class tracklogManager(ranaModule):
   """Module for managing tracklogs"""
@@ -261,7 +261,6 @@ class tracklogManager(ranaModule):
       # * draw an info box
       menus.drawButton(cr, x4, y4+dy, w, h1-(y4+dy), "", "generic", "set:menu:tracklogManager#tracklogInfo")
 
-      pointCount = 0
       if track.trackpointsList:
         pointCount = len(track.trackpointsList[0])
       else:
@@ -344,11 +343,3 @@ class tracklogManager(ranaModule):
         index += 1
       originalTracklog.modified() # make the tracklog update
       originalTracklog.replaceFile() # replace the old tracklog file
-
-
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()
