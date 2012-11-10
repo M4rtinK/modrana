@@ -8,10 +8,11 @@ try:
   try:
     import json
   except ImportError:
-    import simplejson as json       # pylint: disable-msg=F0401
-except:
+    import simplejson as json
+except Exception, e:
   import sys
   sys.path.append("modules/local_simplejson")
+  print(e)
   print("onlineServices: using integrated non-binary simplejson, install proper simplejson package for better speed")
   import simplejson as json
 
