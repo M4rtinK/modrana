@@ -53,7 +53,6 @@ class tracklogManager(ranaModule):
           self.set("needRedraw", True)
       elif message == "down":
         if (scroll + 1) < self.currentNumItems:
-          print "down"
           scroll += 1
           self.set("needRedraw", True)
       elif message == "reset":
@@ -99,9 +98,9 @@ class tracklogManager(ranaModule):
       path = self.LTModule.getActiveTracklogPath()
       currentCategory = self.get('currentTracCat', None)
       if currentCategory:
-        print "changing category for:"
-        print "%s" % path
-        print "to: %s" % currentCategory
+        print("changing category for:")
+        print("%s" % path)
+        print("to: %s" % currentCategory)
         self.LTModule.setTracklogPathCategory(path, currentCategory)
 
     elif message == 'setupColorMenu':
@@ -120,7 +119,7 @@ class tracklogManager(ranaModule):
 
   def deleteTracklog(self, path):
     # delete a tracklog
-    print "deleting tracklog:%s" % path
+    print("deleting tracklog:%s" % path)
     # from cache
     self.LTModule.deleteTrackFromCache(path)
     # from loaded tracklogs
@@ -270,7 +269,7 @@ class tracklogManager(ranaModule):
       if track.elevation == True:
         units = self.m.get('units', None)
         if units:
-          print track.routeInfo['firstElevation']
+#          print track.routeInfo['firstElevation']
           maxString = units.m2CurrentUnitString(track.routeInfo['maxElevation'], 2, False)
           minString = units.m2CurrentUnitString(track.routeInfo['minElevation'], 2, False)
           text += "\nmaximum elevation: %s\nminimum elevation: %s" % (maxString, minString)
