@@ -544,7 +544,8 @@ class Worker(threading.Thread):
   def _elevFromGeonamesBatch(self, latLonList, tracklog):
     try:
       self._setWorkStatusText("online elevation lookup starting...")
-      results = geonames.elevBatchSRTM(latLonList, self._geonamesCallback)
+      userAgent = self.online.modrana.configs.getUserAgent()
+      results = geonames.elevBatchSRTM(latLonList, self._geonamesCallback, userAgent)
       self._setWorkStatusText("online elevation lookup done   ")
       return results, tracklog
     except Exception, e:

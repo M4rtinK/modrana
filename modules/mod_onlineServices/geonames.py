@@ -108,7 +108,7 @@ def elevSRTM(lat, lon):
     return 0
   return query.read()
 
-def elevBatchSRTM(latLonList, threadCB=None):
+def elevBatchSRTM(latLonList, threadCB=None, userAgent=None):
   """ get elevation in meters for the specified latitude and longitude from
    geonames synchronously, it is possible to ask for up to 20 coordinates
    at once
@@ -137,7 +137,12 @@ def elevBatchSRTM(latLonList, threadCB=None):
     query = None
     results = []
     try:
-      query = urllib.urlopen(url)
+      request = urllib2.Request(url)
+      opener = urllib2.build_opener()
+      if userAgent:
+        request.add_header('User-Agent', userAgent)
+      query = opener.open(request)
+
     except Exception, e:
       print("online: getting elevation from geonames returned an error")
       print(e)

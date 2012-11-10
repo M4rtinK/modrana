@@ -217,3 +217,10 @@ class Configs:
     self.mapLayers = mapLayers
     self.mapGroups = mapGroups
     return True
+
+  def getUserAgent(self):
+    """return the default modRana User-Agent"""
+    #debugging:
+    # return "Mozilla/5.0 (compatible; MSIE 5.5; Linux)"
+    #TODO: setting from configuration file, CLI & interface
+    return "modRana flexible GPS navigation system (compatible; Linux)"

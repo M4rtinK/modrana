@@ -50,10 +50,10 @@ returned by the server)"
 
 
 def getModule(m, d, i):
-  return(mapData(m, d, i))
+  return MapData(m, d, i)
 
 
-class mapData(ranaModule):
+class MapData(ranaModule):
   """Handle downloading of map data"""
 
   def __init__(self, m, d, i):
@@ -453,7 +453,8 @@ class mapData(ranaModule):
       """create the connection pool -> to facilitate socket reuse"""
       timeout = self.callback.onlineRequestTimeout
       #headers = { 'User-Agent' : "Mozilla/5.0 (compatible; MSIE 5.5; Linux)" }
-      headers = {'User-Agent': "modRana flexible GPS navigation system (compatible; Linux)"}
+      userAgent = self.callback.modrana.configs.getUserAgent()
+      headers = {'User-Agent': userAgent}
       connPool = urllib3.connection_from_url(url, headers=headers, timeout=timeout, maxsize=self.maxThreads,
         block=False)
       return connPool
