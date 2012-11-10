@@ -94,3 +94,70 @@ def wikipediaSearch(query):
     return []
 
 
+def elevSRTM(lat, lon):
+  """get elevation in meters for the specified latitude and longitude from geonames"""
+  url = 'http://ws.geonames.org/srtm3?lat=%f&lng=%f' % (lat, lon)
+  try:
+    query = urllib.urlopen(url)
+  except Exception, e:
+    print("onlineServices: getting elevation from geonames returned an error")
+    print(e)
+    return 0
+  return query.read()
+
+def elevBatchSRTM(latLonList, threadCB=None):
+  """ get elevation in meters for the specified latitude and longitude from
+   geonames synchronously, it is possible to ask for up to 20 coordinates
+   at once
+  """
+  maxCoordinates = 20 #geonames only allows 20 coordinates per query
+  latLonElevList = []
+  mL = len(latLonList)
+  while len(latLonList) > 0:
+#    print("elevation: %d of %d done" % (mL - len(latLonList), mL))
+    if threadCB: # report progress to the worker thread
+      progress = len(latLonList)/float(mL)
+      threadCB(progress)
+    tempList = latLonList[0:maxCoordinates]
+    latLonList = latLonList[maxCoordinates:]
+    #      latLonList = latLonList[maxCoordinates:len(latLonList)]
+
+    lats = ""
+    lons = ""
+    for point in tempList:
+      lats += "%f," % point[0]
+      lons += "%f," % point[1]
+
+      # TODO: maybe add switching ?
+      #      url = 'http://ws.geonames.org/astergdem?lats=%s&lngs=%s' % (lats,lons)
+    url = 'http://ws.geonames.org/srtm3?lats=%s&lngs=%s' % (lats, lons)
+    query = None
+    results = []
+    try:
+      query = urllib.urlopen(url)
+    except Exception, e:
+      print("online: getting elevation from geonames returned an error")
+      print(e)
+      results = "0"
+      for i in range(1, len(tempList)):
+        results += " 0"
+    try:
+      if query:
+        results = query.read().split('\r\n')
+        query.close()
+    except Exception, e:
+      print("online: elevation string from geonames has a wrong format")
+      print(e)
+      results = "0"
+      for i in range(1, len(tempList)):
+        results += " 0"
+
+    index = 0
+    for point in tempList: # add the results to the new list with elevation
+      latLonElevList.append((point[0], point[1], int(results[index])))
+      index += 1
+
+  return latLonElevList
+
+
+

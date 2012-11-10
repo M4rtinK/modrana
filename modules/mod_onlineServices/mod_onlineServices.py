@@ -153,72 +153,10 @@ class onlineServices(ranaModule):
 
   # ** Geonames **
 
-  def elevFromGeonames(self, lat, lon):
-    """get elevation in meters for the specified latitude and longitude from geonames"""
-    url = 'http://ws.geonames.org/srtm3?lat=%f&lng=%f' % (lat, lon)
-    try:
-      query = urllib.urlopen(url)
-    except Exception, e:
-      "onlineServices: getting elevation from geonames returned an error"
-      return 0
-    return query.read()
-
   def elevFromGeonamesBatchAsync(self, latLonList, outputHandler, key, tracklog=None):
     flags = {'net': True}
     self._addWorkerThread(Worker._elevFromGeonamesBatch, [latLonList, tracklog], outputHandler, key, flags)
 
-  def elevFromGeonamesBatch(self, latLonList, threadCB=None):
-    """ get elevation in meters for the specified latitude and longitude from
-     geonames synchronously, it is possible to ask for up to 20 coordinates
-     at once
-    """
-    maxCoordinates = 20 #geonames only allows 20 coordinates per query
-    latLonElevList = []
-    mL = len(latLonList)
-    while len(latLonList) > 0:
-      print("elevation: %d of %d done" % (mL - len(latLonList), mL))
-      if threadCB: # report progress to running thread
-        threadCB._setWorkStatusText("%d of %d done" % (mL - len(latLonList), mL))
-      tempList = latLonList[0:maxCoordinates]
-      latLonList = latLonList[maxCoordinates:]
-      #      latLonList = latLonList[maxCoordinates:len(latLonList)]
-
-      lats = ""
-      lons = ""
-      for point in tempList:
-        lats += "%f," % point[0]
-        lons += "%f," % point[1]
-
-        # TODO: maybe add switching ?
-        #      url = 'http://ws.geonames.org/astergdem?lats=%s&lngs=%s' % (lats,lons)
-      url = 'http://ws.geonames.org/srtm3?lats=%s&lngs=%s' % (lats, lons)
-      query = None
-      results = []
-      try:
-        query = urllib.urlopen(url)
-      except Exception, e:
-        print("online: getting elevation from geonames returned an error")
-        print(e)
-        results = "0"
-        for i in range(1, len(tempList)):
-          results += " 0"
-      try:
-        if query:
-          results = query.read().split('\r\n')
-          query.close()
-      except Exception, e:
-        print("online: elevation string from geonames has a wrong format")
-        print(e)
-        results = "0"
-        for i in range(1, len(tempList)):
-          results += " 0"
-
-      index = 0
-      for point in tempList: # add the results to the new list with elevation
-        latLonElevList.append((point[0], point[1], int(results[index])))
-        index += 1
-
-    return latLonElevList
 
   # ** Google Maps **
 
@@ -543,6 +481,14 @@ class Worker(threading.Thread):
     if notification:
       notification.setWorkInProgressOverlayText(text)
 
+  def _updateProgress(self, progress):
+    """progress is a floating point number indicating progress on the current task
+    0.0 -> 0%
+    0.5 -> 50%
+    1.0 -> 100%
+    """
+    self.progress = progress
+
   # Google
   def _onlineRouteLookup(self, query):
     """this method online route lookup and is called by the worker thread"""
@@ -599,12 +545,18 @@ class Worker(threading.Thread):
   def _elevFromGeonamesBatch(self, latLonList, tracklog):
     try:
       self._setWorkStatusText("online elevation lookup starting...")
-      results = self.online.elevFromGeonamesBatch(latLonList)
+      results = geonames.elevBatchSRTM(latLonList, self._geonamesCallback)
       self._setWorkStatusText("online elevation lookup done   ")
       return results, tracklog
     except Exception, e:
-      print('onlineServices: exception during elevation lookup:\n', e)
+      print('onlineServices: exception during elevation lookup')
+      print(e)
+      traceback.print_exc(file=sys.stdout) # find what went wrong
       return None, tracklog
+
+  def _geonamesCallback(self, progress):
+    percentDone = 100-int(100*progress)
+    self._setWorkStatusText("online elevation lookup %d %% done" % percentDone)
 
   def _onlineWikipediaSearch(self, query):
     self._setWorkStatusText("online Wikipedia search in progress...")
