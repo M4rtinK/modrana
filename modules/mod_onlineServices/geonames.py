@@ -89,7 +89,8 @@ def wikipediaSearch(query):
     return _wikipediaResults2points(results['geonames'])
   except Exception, e:
 #    traceback.print_exc(file=sys.stdout) # find what went wrong
-    print("wiki search exception:\n", e)
+    print("online: wiki search exception")
+    print(e)
     return []
 
 
