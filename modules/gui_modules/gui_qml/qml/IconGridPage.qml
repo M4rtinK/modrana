@@ -50,7 +50,8 @@ Page {
                     rWin.pageStack.push(targetPage)
                 } else {
                     // go back to the map page
-                    rWin.pageStack.clear()
+                    //rWin.pageStack.clear()
+                    //TODO: find out if the stack can overfill
                     rWin.pageStack.push(mapPage)
                 }
 
