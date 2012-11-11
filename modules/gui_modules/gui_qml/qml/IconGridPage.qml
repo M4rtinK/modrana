@@ -46,8 +46,10 @@ Page {
                 //rWin.pageStack.push(rWin.getPage(menu))
                 var targetPage = iconGP.getPage(menu)
                 if (targetPage != null) {
+                    // go to the page
                     rWin.pageStack.push(targetPage)
                 } else {
+                    // go back to the map page
                     rWin.pageStack.clear()
                     rWin.pageStack.push(mapPage)
                 }
