@@ -497,8 +497,8 @@ def fromHandmade(start, middlePoints, destination):
     lastLat, lastLon = start[0], start[1]
     for point in middlePoints:
       lat, lon, elevation, message = point
-      mLength+= geo.distance(lastLat, lastLon, lat, lon)
-      routePoints.append((lat, lon, None))
+      mLength+= geo.distance(lastLat, lastLon, lat, lon)*1000
+      routePoints.append((lat, lon, elevation))
       if message != "": # is it a message point ?
         point = TurnByTurnPoint(lat, lon, elevation, message)
         point.setDistanceFromStart(mLength)
