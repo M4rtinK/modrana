@@ -44,7 +44,14 @@ Page {
             margin : iconGP.iconMargin
             onClicked : {
                 //rWin.pageStack.push(rWin.getPage(menu))
-                rWin.pageStack.push(iconGP.getPage(menu))
+                var targetPage = iconGP.getPage(menu)
+                if (targetPage != null) {
+                    rWin.pageStack.push(targetPage)
+                } else {
+                    rWin.pageStack.clear()
+                    rWin.pageStack.push(mapPage)
+                }
+
             }
         }
         //insert the back arrow

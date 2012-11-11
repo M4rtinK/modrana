@@ -5,33 +5,42 @@ import com.nokia.meego 1.0
 
 
 IconGridPage {
-    isMockup : true
+
+    isMockup : false
+
+    function getPage(menu){
+        options.set('mode', menu)
+        return null
+    }
+
+
+    //TODO: get mode list from modRana core
     model : ListModel {
         id : testModel
         ListElement {
             caption : "Foot"
             icon : "walk.png"
-            menu : ""
+            menu : "walk"
         }
         ListElement {
             caption : "Car"
             icon : "car.png"
-            menu : ""
+            menu : "car"
         }
         ListElement {
             caption : "Cycle"
             icon : "cycle.png"
-            menu : ""
+            menu : "cycle"
         }
         ListElement {
             caption : "Bus"
             icon : "bus.png"
-            menu : ""
+            menu : "bus"
         }
         ListElement {
             caption : "Train"
             icon : "train.png"
-            menu : ""
+            menu : "train"
         }
     }
 }
