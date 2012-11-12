@@ -103,10 +103,10 @@ class Way:
   # traveling this route with this travel mode takes this seconds)
 
   def getDuration(self, sDuration):
-    self.duration = sDuration
+    return self.duration
 
   def setDuration(self, sDuration):
-    return self.duration
+    self.duration = sDuration
 
     # * message points
 
