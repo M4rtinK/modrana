@@ -16,7 +16,7 @@ class TurnByTurnPoint(Point):
     self.currentDistance = None # in meters
     self.distanceFromStart = None # in meters
     self.visited = False
-    self.SSMLMessage = None
+    self.SSMLMessage = SSMLMessage
 
   def getCurrentDistance(self):
     return self.currentDistance
@@ -53,7 +53,8 @@ class Way:
       points (similar to trackpoints vs waypoints in GPX)
   """
 
-  def __init__(self, points=[]):
+  def __init__(self, points=None):
+    if not points: points = []
     self.points = points # stored as LLE tuples
     self.pointsInRadians = None
     self.messagePoints = []
@@ -102,7 +103,7 @@ class Way:
   # to record this way) or from routing (it is expected that
   # traveling this route with this travel mode takes this seconds)
 
-  def getDuration(self, sDuration):
+  def getDuration(self):
     return self.duration
 
   def setDuration(self, sDuration):
@@ -393,6 +394,8 @@ def fromMonavResult(result, getTurns=None):
     return None
 
 def fromGPX(GPX):
+  """crete a way from a GPX file"""
+  #TODO: implement this
   pass
 
 def fromCSV(path, delimiter=',', fieldCount=None):
