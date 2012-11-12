@@ -409,6 +409,7 @@ def fromCSV(path, delimiter=',', fieldCount=None):
   TODO: some range checks ?
 
   """
+  f = None
   try:
     f = open(path, 'r')
   except IOError, e:
@@ -416,7 +417,8 @@ def fromCSV(path, delimiter=',', fieldCount=None):
       raise core.exceptions.FileNotFound
     elif e.errno == 13:
       raise core.exceptions.FileAccessPermissionDenied
-    f.close()
+    if f:
+      f.close()
 
   points = []
 
