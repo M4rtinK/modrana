@@ -212,6 +212,7 @@ class Way:
       if turns: # message points contain Turn-By-Turn directions
         routepoints = gpx.Routepoints()
         for mp in messagePoints:
+          name=""
           if turns:
             name = "Turn %d/%d" % (index, mpCount)
           lat, lon, elev, message = mp.getLLEM()
@@ -221,6 +222,7 @@ class Way:
       else:
         waypoints = []
         for mp in messagePoints:
+          name = ""
           if turns:
             name = "Turn %d/%d" % (index, mpCount)
           lat, lon, elev, message = mp.getLLEM()
@@ -421,6 +423,7 @@ def fromCSV(path, delimiter=',', fieldCount=None):
       f.close()
 
   points = []
+  parsingErrorCount = 0
 
   reader = csv.reader(f, delimiter=delimiter)
 
@@ -449,7 +452,7 @@ def fromCSV(path, delimiter=',', fieldCount=None):
       if item: # 0 would still be '0' -> nonempty string
         try:
           return float(item)
-        except Exception: # parsing error
+        except Exception, e: # parsing error
           print("way: parsing elevation failed, data: ", item)
           print(e)
           return None
@@ -541,7 +544,8 @@ class AppendOnlyWay(Way):
 
   """
 
-  def __init__(self, points=[]):
+  def __init__(self, points=None):
+    if not points: points = []
     Way.__init__(self)
 
     self.points = [] # stored as (lat, lon, elevation, timestamp) tuples
@@ -579,7 +583,7 @@ class AppendOnlyWay(Way):
       self.points.append((lat, lon, elevation, geo.timestampUTC()))
       self.increment.append((lat, lon, elevation, geo.timestampUTC()))
 
-  def addPointLLE(self, lat, lon, elevation):
+  def addPointLLE(self, lat, lon, elevation=None):
     with self.pointsLock:
       self.points.append((lat, lon, elevation, geo.timestampUTC()))
       self.increment.append((lat, lon, elevation, geo.timestampUTC()))
