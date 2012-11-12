@@ -39,15 +39,23 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "." 1.0
-import "../UIConstants.js" as UI
 
-Style {
-    // Background
-    property url background: "image://theme/meegotouch-toolbar-" +
-            ((screen.currentOrientation == Screen.Portrait || screen.currentOrientation == Screen.PortraitInverted) ? "portrait" : "landscape") +
-            __invertedString + "-background"
+Item {
+    id: root
+    width: parent.width
+    height: 0
 
-    property int visibilityTransitionDuration: 250
-    property int contentTransitionDuration: 400
+    objectName: "softwareInputPanel"
+
+    property bool active: false
+
+    states: State {
+        when: active
+        PropertyChanges { target: root; height: childrenRect.height; }
+    }
+
+    transitions: Transition {
+        reversible: true
+        NumberAnimation { properties: "opacity"; easing.type: Easing.InOutCubic; duration: 200 }
+    }
 }

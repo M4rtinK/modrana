@@ -40,8 +40,9 @@
 
 import QtQuick 1.1
 import "." 1.0
+import "./style"
 
-Window {
+Item {
     id: window
 
     property bool showStatusBar: true
@@ -59,22 +60,27 @@ Window {
 
     objectName: "pageStackWindow"
 
+    /*
     StatusBar {
         id: statusBar
         anchors.top: parent.top
         width: parent.width
         showStatusBar: window.showStatusBar
     }
+    */
 
+    /*
     onOrientationChangeStarted: {
         statusBar.orientation = screen.currentOrientation
     }
+    */
 
     Rectangle {
         id: background
         visible: platformStyle.background == ""
         color: platformStyle.backgroundColor
-        anchors { top: statusBar.bottom; left: parent.left; bottom: parent.bottom; right: parent.right; }
+        //anchors { top: statusBar.bottom; left: parent.left; bottom: parent.bottom; right: parent.right; }
+        anchors { top: parent.top; left: parent.left; bottom: parent.bottom; right: parent.right; }
     }
 
     Image {
@@ -82,13 +88,15 @@ Window {
         visible: platformStyle.background != ""
         source: window.inPortrait ? platformStyle.portraitBackground : platformStyle.landscapeBackground
         fillMode: platformStyle.backgroundFillMode
-        anchors { top: statusBar.bottom; left: parent.left; bottom: parent.bottom; right: parent.right; }
+        //anchors { top: statusBar.bottom; left: parent.left; bottom: parent.bottom; right: parent.right; }
+        anchors { top: parent.top; left: parent.left; bottom: parent.bottom; right: parent.right; }
     }
 
     Item {
         objectName: "appWindowContent"
         width: parent.width
-        anchors.top: statusBar.bottom
+        //anchors.top: statusBar.bottom
+        anchors.top: parent.top
         anchors.bottom: parent.bottom
 
         // content area
