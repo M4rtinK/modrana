@@ -44,6 +44,7 @@
 import QtQuick 1.1
 import "." 1.0
 import "UIConstants.js" as UI
+import mpBackend 1.0
 
 import "PageStatus.js" as PageStatus
 import "PageOrientation.js" as PageOrientation
