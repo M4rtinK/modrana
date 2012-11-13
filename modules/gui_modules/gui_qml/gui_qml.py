@@ -749,15 +749,20 @@ class Snapshot(QDeclarativeItem):
     return self.snapshotWidth
 
   def _setSnapshotWidth(self, value):
-    self.snapshotWidth = value
-    self.wChanged.emit()
+    pass
+
+# hotfix for recursive loop
+#    self.snapshotWidth = value
+#    self.wChanged.emit()
 
   def _getSnapshotHeight(self):
     return self.snapshotHeight
 
   def _setSnapshotHeight(self, value):
-    self.snapshotHeight = value
-    self.hChanged.emit()
+    pass
+# hotfix for recursive loop
+#    self.snapshotHeight = value
+#    self.hChanged.emit()
 
   snapshotWidth = QtCore.Property(int, _getSnapshotWidth, _setSnapshotWidth, notify=wChanged)
   snapshotHeight = QtCore.Property(int, _getSnapshotHeight, _setSnapshotHeight, notify=hChanged)

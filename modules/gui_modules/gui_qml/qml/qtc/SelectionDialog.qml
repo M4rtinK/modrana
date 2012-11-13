@@ -42,6 +42,7 @@ import QtQuick 1.1
 import "." 1.0
 import "./style"
 import "UIConstants.js" as UI
+import "./DialogStatus.js" as DialogStatus
 
 CommonDialog {
     id: root
