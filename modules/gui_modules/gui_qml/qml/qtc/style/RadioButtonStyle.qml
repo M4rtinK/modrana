@@ -43,9 +43,9 @@ import QtQuick 1.1
 Style {
     // Background
     property url background: "image://theme/meegotouch-button-radiobutton"+__invertedString+"-background"
-    property url backgroundSelected: "image://theme/" + __colorString + "meegotouch-button-radiobutton"+__invertedString+"-background-selected"
-    property url backgroundPressed: "image://theme/" + __colorString + "meegotouch-button-radiobutton"+__invertedString+"-background-pressed"
-    property url backgroundDisabled: "image://theme/" + __colorString + "meegotouch-button-radiobutton"+__invertedString+"-background-disabled"
+    property url backgroundSelected: "image://theme/meegotouch-button-radiobutton"+__invertedString+"-background-selected"
+    property url backgroundPressed: "image://theme/meegotouch-button-radiobutton"+__invertedString+"-background-pressed"
+    property url backgroundDisabled: "image://theme/meegotouch-button-radiobutton"+__invertedString+"-background-disabled"
 
     // Mouse area margins
     property int mouseMarginTop: 0

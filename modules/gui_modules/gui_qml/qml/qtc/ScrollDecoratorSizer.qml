@@ -39,26 +39,33 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "../UIConstants.js" as UI
 
-ButtonStyle {
-    buttonWidth: 186
-    buttonHeight: 42
+Item {
+    // relative (0..1) position of top and bottom
+    property real positionRatio
+    property real sizeRatio
     
-    // Font
-    fontPixelSize: 22
-    fontCapitalization: Font.MixedCase
-    fontWeight: Font.Bold
-    horizontalAlignment: Text.AlignHCenter
-
-    // Background
-    backgroundMarginRight: 15
-    backgroundMarginLeft: 15
-    backgroundMarginTop: 15
-    backgroundMarginBottom: 15
-    property bool backgroundVisible: true
+    // max position and min size
+    property real maxPosition
+    property real minSize
     
-    background: backgroundVisible ? "image://theme/meegotouch-button-navigationbar-button" + __invertedString + "-background" : ""
-    pressedBackground: backgroundVisible ? "image://theme/meegotouch-button-navigationbar-button" + __invertedString + "-background-pressed" : ""
-    disabledBackground: backgroundVisible ? "image://theme/meegotouch-button-navigationbar-button" + __invertedString + "-background-disabled" : ""
+    // size underflow
+    property real sizeUnderflow: (sizeRatio * maxPosition) < minSize ? minSize - (sizeRatio * maxPosition) : 0
+    
+    // raw start and end position considering minimum size
+    property real rawStartPos: positionRatio * (maxPosition - sizeUnderflow)
+    property real rawEndPos: (positionRatio + sizeRatio) * (maxPosition - sizeUnderflow) + sizeUnderflow
+    
+    // overshoot amount at start and end
+    property real overshootStart: rawStartPos < 0 ? -rawStartPos : 0
+    property real overshootEnd: rawEndPos > maxPosition ? rawEndPos - maxPosition : 0
+    
+    // overshoot adjusted start and end
+    property real adjStartPos: rawStartPos + overshootStart
+    property real adjEndPos: rawEndPos - overshootStart - overshootEnd
+    
+    // final position and size of thumb
+    property int position: 0.5 + (adjStartPos + minSize > maxPosition ? maxPosition - minSize : adjStartPos)
+    property int size: 0.5 + ((adjEndPos - position) < minSize ? minSize : (adjEndPos - position))
 }
+

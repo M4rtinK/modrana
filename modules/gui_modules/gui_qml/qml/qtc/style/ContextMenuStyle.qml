@@ -39,11 +39,11 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "UIConstants.js" as UI
+import "../UIConstants.js" as UI
 
 MenuStyle {
-     id: root
-     property string titleFontFamily: __fontFamily
+ id: root
+     property string titleFontFamily: UI.FONT_FAMILY
      property int titleFontPixelSize: UI.FONT_SMALL
      property int titleFontCapitalization: Font.MixedCase
      property color titleTextColor: "white"

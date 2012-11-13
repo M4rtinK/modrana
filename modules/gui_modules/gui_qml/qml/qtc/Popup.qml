@@ -39,21 +39,87 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "UIConstants.js" as UI
+import "." 1.0
 import "./style"
 
-Text {
+Item {
     id: root
 
-    // Styling for the Button
-    property Style platformStyle: LabelStyle{}
+    // api
+    property alias visualParent: fader.visualParent
 
-    //Deprecated, TODO Remove this on w13
-    property alias style: root.platformStyle
+    // possible states: Opening, Open, Closing, Closed
+    // Opening and Closing are used during animation (when the dialog fades/moves/pops/whatever in)
+    property int status: DialogStatus.Closed
 
-    font.family: platformStyle.fontFamily
-    font.pixelSize: platformStyle.fontPixelSize
-    color: platformStyle.textColor
+    // private api
+    property double __dim: 0.9
+    property int __fadeInDuration
+    property int __fadeOutDuration
+    property int __fadeInDelay
+    property int __fadeOutDelay
+    property int __fadeInEasingType
+    property int __fadeOutEasingType
+    property string __faderBackground
 
-    wrapMode: Text.Wrap
+    function open() {
+        if (status == DialogStatus.Closed)
+            status = DialogStatus.Opening;
+    }
+
+    function close() {
+        if (status == DialogStatus.Open)
+            status = DialogStatus.Closing;
+    }
+
+    signal privateClicked
+
+    //Deprecated, TODO Remove the following two lines on w13
+   signal clicked
+   onClicked: privateClicked()
+
+    QtObject {
+        id: parentCache
+        property QtObject oldParent: null
+    }
+
+    Component.onCompleted: {
+        parentCache.oldParent = parent;
+        fader.parent = parent;
+        parent = fader;
+    }
+
+    //if this is not given, application may crash in some cases
+    Component.onDestruction: {
+        if (parentCache.oldParent != null) {
+            parent = parentCache.oldParent
+            fader.parent = root
+        }
+    }
+
+    Fader {
+        id: fader
+        dim: root.__dim
+        fadeInDuration: root.__fadeInDuration
+        fadeOutDuration: root.__fadeOutDuration
+        fadeInDelay: root.__fadeInDelay
+        fadeOutDelay: root.__fadeOutDelay
+        fadeInEasingType: root.__fadeInEasingType
+        fadeOutEasingType: root.__fadeOutEasingType
+
+
+        background: root.__faderBackground
+        onPrivateClicked: root.privateClicked();
+
+        MouseArea {
+            anchors.fill: parent
+            enabled: root.status == DialogStatus.Opening || root.status == DialogStatus.Closing
+            z: Number.MAX_VALUE
+        }
+    }
+
+    function __fader() {
+        return fader;
+    }
+
 }

@@ -39,7 +39,7 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "UIConstants.js" as UI
+import "../UIConstants.js" as UI
 
 ButtonStyle {
     buttonWidth: 150
@@ -59,7 +59,7 @@ ButtonStyle {
     backgroundMarginTop: 21
     backgroundMarginBottom: 21
     
-    background: "image://theme/" + __colorString + "meegotouch-sheet-button-accent"+__invertedString+"-background"
-    pressedBackground: "image://theme/" + __colorString + "meegotouch-sheet-button-accent"+__invertedString+"-background-pressed"
-    disabledBackground: "image://theme/" + __colorString + "meegotouch-sheet-button-accent"+__invertedString+"-background-disabled"
+    background: "image://theme/meegotouch-sheet-button-accent"+__invertedString+"-background"
+    pressedBackground: "image://theme/meegotouch-sheet-button-accent"+__invertedString+"-background-pressed"
+    disabledBackground: "image://theme/meegotouch-sheet-button-accent"+__invertedString+"-background-disabled"
 }

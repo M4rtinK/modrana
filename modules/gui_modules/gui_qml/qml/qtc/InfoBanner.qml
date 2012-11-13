@@ -126,7 +126,7 @@ ImplicitSizeItem {
         visible: root.iconSource != ""
     }
 
-    Label {
+    Text {
         id: text
         width: internal.getTextWidth()
         anchors { left: (image.visible ? image.right : parent.left); leftMargin: (image.visible ? 14:16);
@@ -134,10 +134,10 @@ ImplicitSizeItem {
         color: "white"
         wrapMode: Text.Wrap
         verticalAlignment: Text.AlignHCenter
-        font.family: platformStyle.fontFamily
-        font.pixelSize: platformStyle.fontPixelSize
+        font.pixelSize: UI.FONT_DEFAULT_SIZE
+        font.family: UI.FONT_FAMILY
         font.letterSpacing: UI.INFO_BANNER_LETTER_SPACING
-        //maximumLineCount: 3
+        maximumLineCount: 3
         elide: Text.ElideRight
     }
 

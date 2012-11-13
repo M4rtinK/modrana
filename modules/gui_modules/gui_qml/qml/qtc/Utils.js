@@ -38,27 +38,70 @@
 **
 ****************************************************************************/
 
-import QtQuick 1.1
-import "../UIConstants.js" as UI
+.pragma library
 
-ButtonStyle {
-    buttonWidth: 186
-    buttonHeight: 42
-    
-    // Font
-    fontPixelSize: 22
-    fontCapitalization: Font.MixedCase
-    fontWeight: Font.Bold
-    horizontalAlignment: Text.AlignHCenter
+/*
+  Get the first flickable in hierarchy.
+*/
+function findFlickable(item)
+{
+    var next = item;
 
-    // Background
-    backgroundMarginRight: 15
-    backgroundMarginLeft: 15
-    backgroundMarginTop: 15
-    backgroundMarginBottom: 15
-    property bool backgroundVisible: true
+    while (next) {
+        if (next.flicking !== undefined && next.flickableDirection !== undefined)
+            return next;
+
+        next = next.parent;
+    }
+
+    return null;
+}
+
+/*
+  Get the root item given an element and root item's name.
+  If root item name is not given, default is 'windowContent'.
+*/
+function findRootItem(item, objectName)
+{
+    var next = item;
     
-    background: backgroundVisible ? "image://theme/meegotouch-button-navigationbar-button" + __invertedString + "-background" : ""
-    pressedBackground: backgroundVisible ? "image://theme/meegotouch-button-navigationbar-button" + __invertedString + "-background-pressed" : ""
-    disabledBackground: backgroundVisible ? "image://theme/meegotouch-button-navigationbar-button" + __invertedString + "-background-disabled" : ""
+    var rootItemName = "windowContent";
+    if (typeof(objectName) != 'undefined') {
+        rootItemName = objectName;
+    }
+
+    if (next) {
+        while (next.parent) {
+            next = next.parent;
+
+            if (rootItemName == next.objectName) {
+                break;
+            }
+        }
+    }
+
+    return next;
+}
+
+/*
+  Get the root item for Notification banner
+  It will return 'appWindowContent' or 'windowContent' element if found.
+*/
+function findRootItemNotificationBanner(item)
+{
+    var next = item;
+
+    if (next) {
+        while (next.parent) {
+            if (next.objectName == "appWindowContent")
+                break;
+
+            if (next.objectName == "windowContent")
+                break;
+
+            next = next.parent;
+        }
+    }
+
+    return next;
 }

@@ -38,12 +38,12 @@
 **
 ****************************************************************************/
 import QtQuick 1.1
-import "UIConstants.js" as UI
+import "../UIConstants.js" as UI
 
 Style {
 
     // Font
-    property int fontPixelSize: 100
+    property int fontPixelSize: UI.FONT_XXSMALL
     property bool fontBoldProperty: true
 
     // Color

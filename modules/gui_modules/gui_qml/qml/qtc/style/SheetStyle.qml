@@ -39,7 +39,7 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "UIConstants.js" as UI
+import "../UIConstants.js" as UI
 
 Style {
     property int acceptButtonRightMargin: 15

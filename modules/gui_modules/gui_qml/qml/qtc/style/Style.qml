@@ -39,26 +39,16 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "../UIConstants.js" as UI
 
 QtObject {
     id: styleClass
     // Settings
     property bool inverted: theme.inverted
     property string __invertedString: inverted? "-inverted" : ""
-    property string __colorString: theme.colorString
 
     // some style classes like SelectionDialogStyle are using nested elements (for example Text),
     // which isn't allowed by QtObject; this fix makes this possible
     default property alias children: styleClass.__defaultPropertyFix
     property list<QtObject> __defaultPropertyFix: [Item {}] //QML doesn't allow an empty list here
-
-    // styles must not set font families with referencing to UI.FONT_FAMILY
-    // as there may exist languages that request a different font;
-    // use __fontFamily and __fontFamilyLight instead.
-    //
-    // app developers should use the UiConstants context property
-    property string __fontFamily: (locale && locale.language == "fa") ? UI.FONT_FAMILY_FARSI : UI.FONT_FAMILY
-    property string __fontFamilyLight: (locale && locale.language == "fa") ? UI.FONT_FAMILY_LIGHT_FARSI : UI.FONT_FAMILY_LIGHT
 
 }

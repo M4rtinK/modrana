@@ -66,9 +66,9 @@ Style {
     property int fadeOutEasingType: Easing.InOutQuint
     property url faderBackground: "image://theme/meegotouch-menu-dimmer"
 
-    property int pressDelay: 0 // ms
+    property int pressDelay: 200 // ms
 
-    property url background: "image://theme/meegotouch-menu-background" + __invertedString
+    property url background: "image://theme/meegotouch-menu" + __invertedString + "-background"
 //    property url pressedBackground: "image://theme/meegotouch-menu" + __invertedString + "-background-pressed"
 //    property url disabledBackground: "image://theme/meegotouch-menu" + __invertedString + "-background-disabled"
 }

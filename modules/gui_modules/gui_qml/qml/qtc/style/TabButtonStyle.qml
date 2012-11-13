@@ -40,7 +40,7 @@
 
 import QtQuick 1.1
 import "." 1.0
-import "UIConstants.js" as UI
+import "../UIConstants.js" as UI
 
 ButtonStyle {
     /* The orientation of the button which can take one of the two values:

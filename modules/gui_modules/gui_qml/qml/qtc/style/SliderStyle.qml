@@ -39,11 +39,11 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "UIConstants.js" as UI
+import "../UIConstants.js" as UI
 
 Style {
     // Font
-    property string fontFamily: __fontFamily
+    property string fontFamily: UI.FONT_FAMILY
     property int fontPixelSize: UI.FONT_DEFAULT_SIZE
 
     // Color
@@ -58,7 +58,7 @@ Style {
     property url handleBackground: "image://theme/meegotouch-slider-handle"+__invertedString+"-background-horizontal"
     property url handleBackgroundPressed: "image://theme/meegotouch-slider-handle"+__invertedString+"-background-pressed-horizontal"
     property url grooveItemBackground: "image://theme/meegotouch-slider"+__invertedString+"-background-horizontal"
-    property url grooveItemElapsedBackground: "image://theme/" + __colorString + "meegotouch-slider-elapsed"+__invertedString+"-background-horizontal"
+    property url grooveItemElapsedBackground: "image://theme/meegotouch-slider-elapsed"+__invertedString+"-background-horizontal"
 
     // Mouse
     property real mouseMarginRight: 0.0
