@@ -46,6 +46,7 @@ import "." 1.0
 import "UIConstants.js" as UI
 
 import "PageStatus.js" as PageStatus
+import "PageOrientation.js" as PageOrientation
 
 Item {
     id: root

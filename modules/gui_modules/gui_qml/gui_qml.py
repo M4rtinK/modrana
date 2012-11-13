@@ -92,6 +92,11 @@ class QMLGUI(GUIModule):
     # is instantiated, or else horrible breakage occurs :)
     qmlRegisterType(drawing.PieChart, 'Charts', 1, 0, 'PieChart')
     qmlRegisterType(drawing.PieSlice, "Charts", 1, 0, "PieSlice")
+    qmlRegisterType(drawing.PieSlice, "Charts", 1, 0, "PieSlice")
+
+    # m-declarative stuff implemented in Python
+    qmlRegisterType(Screen, "mpBackend", 1, 0, "Screen")
+    qmlRegisterType(Snapshot, "mpBackend", 1, 0, "Snapshot")
 
     self.view = ModifiedQDeclarativeView(self.modrana)
     self.window = QMainWindow()
@@ -672,3 +677,89 @@ class Options(QtCore.QObject):
     print("SET")
     print(key, value)
     return self.modrana.set(key, value)
+
+
+class Item(QtCore.QObject):
+  """implement m-declarative-item"""
+  wChanged = QtCore.Signal()
+  hChanged = QtCore.Signal()
+  opacityChanged = QtCore.Signal()
+
+  def __init__(self):
+    QtCore.QObject.__init__(self)
+    self.width = 854
+    self.height = 480
+    self.opacity = 1.0
+
+  def _getWidth(self):
+    return self.width
+
+  def _setWidth(self, value):
+    self.width = value
+    self.wChanged.emit()
+
+  def _getHeight(self):
+    return self.height
+
+  def _setHeight(self, value):
+    self.height = value
+    self.hChanged.emit()
+
+  def _getOpacity(self):
+    return self.opacity
+
+  def _setOpacity(self, value):
+    self.opacity = value
+    self.opacityChanged.emit()
+
+  width = QtCore.Property(int, _getWidth, _setWidth, notify=wChanged)
+  height = QtCore.Property(int, _getHeight, _setHeight, notify=hChanged)
+  opacity = QtCore.Property(int, _getOpacity, _setOpacity, notify=hChanged)
+
+class Screen(QtCore.QObject):
+  """implement m-declarative-screen"""
+
+  def __init__(self):
+    QtCore.QObject.__init__(self)
+    self.width = 854
+    self.height = 480
+
+  def _width(self):
+    return self.width
+
+  def _height(self):
+    return self.height
+
+  wChanged= QtCore.Signal()
+  hChanged= QtCore.Signal()
+  displayWidth = QtCore.Property(int, _width, notify=wChanged)
+  displayHeight = QtCore.Property(int, _height, notify=hChanged)
+
+class Snapshot(QDeclarativeItem):
+  """implement m-declarative-snapshot"""
+  wChanged = QtCore.Signal()
+  hChanged = QtCore.Signal()
+
+  def __init__(self):
+    QDeclarativeItem.__init__(self)
+    self.snapshotWidth = 854
+    self.snapshotHeight = 480
+
+  def _getSnapshotWidth(self):
+    return self.snapshotWidth
+
+  def _setSnapshotWidth(self, value):
+    self.snapshotWidth = value
+    self.wChanged.emit()
+
+  def _getSnapshotHeight(self):
+    return self.snapshotHeight
+
+  def _setSnapshotHeight(self, value):
+    self.snapshotHeight = value
+    self.hChanged.emit()
+
+  snapshotWidth = QtCore.Property(int, _getSnapshotWidth, _setSnapshotWidth, notify=wChanged)
+  snapshotHeight = QtCore.Property(int, _getSnapshotHeight, _setSnapshotHeight, notify=hChanged)
+
+

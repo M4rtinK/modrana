@@ -41,6 +41,7 @@
 import QtQuick 1.1
 import "." 1.0
 import "./style"
+import "./DialogStatus.js" as DialogStatus
 
 Item {
     id: root
