@@ -1,7 +1,9 @@
 //BitcoinButton.qml
 
 import QtQuick 1.1
-import com.nokia.meego 1.0
+//import com.nokia.meego 1.0
+import "./qtc"
+import "./qtc/style"
 
 Rectangle {
     id : bitcoinButton
@@ -100,6 +102,7 @@ Rectangle {
                 anchors.horizontalCenter : parent.horizontalCenter
                 source : "image://icons/" + rWin.mTheme + "/qrcode_bitcoin.png"
             }
+            /*
             TextField {
                 id : urlField
                 anchors.top : bitcoinQrCode.bottom
@@ -114,7 +117,7 @@ Rectangle {
                 onTextChanged : {
                     selectAll()
                 }
-            }
+            }*/
             Button {
                 anchors.top : urlField.bottom
                 anchors.topMargin : 12

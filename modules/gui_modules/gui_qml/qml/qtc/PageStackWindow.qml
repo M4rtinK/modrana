@@ -50,13 +50,13 @@ Item {
     property variant initialPage
     property alias pageStack: stack
     property Style platformStyle: PageStackWindowStyle{}
-    property alias platformToolBarHeight: toolBar.height // read-only
 
     //Deprecated, TODO Remove this on w13
     property alias style: window.platformStyle
 
     //private api
-    property int __statusBarHeight: showStatusBar ? statusBar.height : 0
+    //property int __statusBarHeight: showStatusBar ? statusBar.height : 0
+    property int __statusBarHeight: 0
 
     objectName: "pageStackWindow"
 
@@ -66,21 +66,21 @@ Item {
         anchors.top: parent.top
         width: parent.width
         showStatusBar: window.showStatusBar
-    }
-    */
+    }*/
 
     /*
     onOrientationChangeStarted: {
         statusBar.orientation = screen.currentOrientation
-    }
-    */
+    }*/
 
     Rectangle {
         id: background
         visible: platformStyle.background == ""
         color: platformStyle.backgroundColor
-        //anchors { top: statusBar.bottom; left: parent.left; bottom: parent.bottom; right: parent.right; }
-        anchors { top: parent.top; left: parent.left; bottom: parent.bottom; right: parent.right; }
+        width: window.inPortrait ? screen.displayHeight : screen.displayWidth
+        height: window.inPortrait ? screen.displayWidth : screen.displayHeight
+        //anchors { top: statusBar.bottom; left: parent.left; }
+        anchors { top: parent.top; left: parent.left; }
     }
 
     Image {
@@ -88,8 +88,10 @@ Item {
         visible: platformStyle.background != ""
         source: window.inPortrait ? platformStyle.portraitBackground : platformStyle.landscapeBackground
         fillMode: platformStyle.backgroundFillMode
-        //anchors { top: statusBar.bottom; left: parent.left; bottom: parent.bottom; right: parent.right; }
-        anchors { top: parent.top; left: parent.left; bottom: parent.bottom; right: parent.right; }
+        width: window.inPortrait ? screen.displayHeight : screen.displayWidth
+        height: window.inPortrait ? screen.displayWidth : screen.displayHeight
+        //anchors { top: statusBar.bottom; left: parent.left; }
+        anchors { top: parent.top; left: parent.left; }
     }
 
     Item {
@@ -103,11 +105,12 @@ Item {
         Item {
             id: contentArea
             anchors { top: parent.top; left: parent.left; right: parent.right; bottom: parent.bottom; }
-            anchors.bottomMargin: toolBar.visible || (toolBar.opacity==1)? toolBar.height : 0
+            //anchors.bottomMargin: toolBar.visible || (toolBar.opacity==1)? toolBar.height : 0
+            anchors.bottomMargin: 0
             PageStack {
                 id: stack
                 anchors.fill: parent
-                toolBar: toolBar
+                //toolBar: toolBar
             }
         }
 
@@ -138,13 +141,14 @@ Item {
                 source: "image://theme/meegotouch-applicationwindow-corner-bottom-right"
             }
         }
-
+        /*
         ToolBar {
             id: toolBar
             anchors.bottom: parent.bottom            
             privateVisibility: (inputContext.softwareInputPanelVisible==true || inputContext.customSoftwareInputPanelVisible == true)
             ? ToolBarVisibility.HiddenImmediately : (window.showToolBar ? ToolBarVisibility.Visible : ToolBarVisibility.Hidden)
         }
+        */
     }
 
     // event preventer when page transition is active

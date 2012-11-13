@@ -39,7 +39,7 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "UIConstants.js" as UI
+import "../UIConstants.js" as UI
 
 Style {
     property int sizeButton: UI.SIZE_BUTTON
@@ -47,6 +47,6 @@ Style {
     // Images
     property url barBackground: "image://theme/meegotouch-progressindicator"+__invertedString+"-bar-background"
     property url barMask: "image://theme/meegotouch-progressindicator"+__invertedString+"-bar-mask"
-    property url unknownTexture: "image://theme/" + __colorString + "meegotouch-progressindicator"+__invertedString+"-bar-unknown-texture"
-    property url knownTexture: "image://theme/" + __colorString + "meegotouch-progressindicator"+__invertedString+"-bar-known-texture"
+    property url unknownTexture: "image://theme/meegotouch-progressindicator"+__invertedString+"-bar-unknown-texture"
+    property url knownTexture: "image://theme/meegotouch-progressindicator"+__invertedString+"-bar-known-texture"
 }

@@ -44,6 +44,7 @@
 import QtQuick 1.1
 import "." 1.0
 import "PageStack.js" as Engine
+import "PageStatus.js" as PageStatus
 
 Item {
     id: root

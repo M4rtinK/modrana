@@ -1,5 +1,6 @@
 import QtQuick 1.1
-import com.nokia.meego 1.0
+import "./qtc"
+//import com.nokia.meego 1.0
 import "functions.js" as F
 
 Page {
@@ -193,6 +194,7 @@ Page {
             }
         }
     }
+    /*
     ProgressBar {
         id: zoomBar
         anchors.top: pinchmap.top;
@@ -211,5 +213,5 @@ Page {
                 PropertyAction { target: zoomBar; property: "visible"; value: false }
             }
         }
-    }
+    }*/
 }

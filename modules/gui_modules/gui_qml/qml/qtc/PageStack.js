@@ -57,11 +57,6 @@ function push(page, properties, replace, immediate) {
         throw new Error("Cannot navigate so that the resulting page stack has two consecutive entries of the same page instance.");
     }
 
-    // if we're expected to transition, then ignore if there's an ongoing transition.
-    if(!immediate && __ongoingTransitionCount > 0) {
-        return;
-    }
-
     // figure out if more than one page is being pushed
     var pages;
     if (page instanceof Array) {
@@ -168,11 +163,6 @@ function initPage(page, properties) {
 
 // Pops a page off the stack.
 function pop(page, immediate) {
-    // if we're expected to transition, then ignore if there's an ongoing transition.
-    if(!immediate && __ongoingTransitionCount > 0) {
-        return;
-    }
-
     // make sure there are enough pages in the stack to pop
     if (pageStack.length > 1) {
         // pop the current container off the stack and get the next container
@@ -199,7 +189,7 @@ function pop(page, immediate) {
         if (toolBar) {
             toolBar.setTools(tools, immediate ? "set" : "pop");
         }
-        gc();
+
         return oldContainer.page;
     } else {
         return null;

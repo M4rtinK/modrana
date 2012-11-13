@@ -39,10 +39,10 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "UIConstants.js" as UI
+import "../UIConstants.js" as UI
 
 DialogStyle {
-    property string titleFontFamily: __fontFamily
+    property string titleFontFamily: UI.FONT_FAMILY
     property int titleFontPixelSize: UI.FONT_XLARGE
     property int titleFontCapitalization: Font.MixedCase
     property bool titleFontBold: true
@@ -62,7 +62,17 @@ DialogStyle {
     rightMargin: 33
     titleElideMode: Text.ElideNone
 
-    property string messageFontFamily: __fontFamily
+    property string messageFontFamily: UI.FONT_FAMILY
     property int messageFontPixelSize: UI.FONT_DEFAULT
     property color messageTextColor: "#ffffff"
+
+    // fader properties
+    property double dim: 0.9
+    property int fadeInDuration: 250 // ms
+    property int fadeOutDuration: 250 // ms
+
+    property int fadeInDelay: 0 // ms
+    property int fadeOutDelay: 100 // ms
+
+
 }

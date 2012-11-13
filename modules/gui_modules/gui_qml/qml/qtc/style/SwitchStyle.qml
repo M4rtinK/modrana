@@ -39,14 +39,14 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "UIConstants.js" as UI
+import "../UIConstants.js" as UI
 
 Style {
-    property int minKnobX: 6
-    property int maxKnobX: 30
+    property int minKnobX: 4
+    property int maxKnobX: 28
 
     // Slider
-    property url switchOn: "image://theme/" + __colorString + "meegotouch-switch-on"+__invertedString
+    property url switchOn: "image://theme/meegotouch-switch-on"+__invertedString
     property url switchOff: "image://theme/meegotouch-switch-off"+__invertedString
 
     // Knob
@@ -56,8 +56,8 @@ Style {
     property url shadow: "image://theme/meegotouch-switch-shadow"+__invertedString
 
     // Mouse
-    property real mouseMarginRight: -UI.MARGIN_XLARGE
-    property real mouseMarginLeft: -UI.MARGIN_XLARGE
-    property real mouseMarginTop: -UI.MARGIN_XLARGE
-    property real mouseMarginBottom: -UI.MARGIN_XLARGE
+    property real mouseMarginRight: 0.0
+    property real mouseMarginLeft: 0.0
+    property real mouseMarginTop: 0.0
+    property real mouseMarginBottom: 0.0
 }

@@ -39,7 +39,7 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "UIConstants.js" as UI
+import "../UIConstants.js" as UI
 
 DialogStyle {
     property alias titleBarFont: titleText.font
@@ -82,14 +82,14 @@ DialogStyle {
     property url itemBackground: ""
     property color itemBackgroundColor: "transparent"
     property color itemSelectedBackgroundColor: "#3D3D3D"
-    property url itemSelectedBackground: "" // "image://theme/" + __colorString + "meegotouch-list-fullwidth-background-selected"
-    property url itemPressedBackground: "image://theme/" + __colorString + "meegotouch-panel-inverted-background-pressed"
+    property url itemSelectedBackground: "" // "image://theme/meegotouch-list-fullwidth-background-selected"
+    property url itemPressedBackground: "image://theme/meegotouch-panel-inverted-background-pressed"
 
     property int buttonsTopMargin: 30 // ToDo: evaluate correct value
 
     Text {
         id: titleText
-        font.family: __fontFamily
+        font.family: UI.FONT_FAMILY
         font.pixelSize: UI.FONT_XLARGE
         font.capitalization: Font.MixedCase
         font.bold: false
@@ -97,7 +97,7 @@ DialogStyle {
 
     Text {
         id: itemText
-        font.family: __fontFamily
+        font.family: UI.FONT_FAMILY
         font.pixelSize: UI.FONT_DEFAULT_SIZE
         font.capitalization: Font.MixedCase
         font.bold: true

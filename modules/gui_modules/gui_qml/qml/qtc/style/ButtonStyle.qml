@@ -39,11 +39,11 @@
 ****************************************************************************/
 
 import QtQuick 1.1
-import "UIConstants.js" as UI
+import "../UIConstants.js" as UI
 
 Style {
     // Font
-    property string fontFamily: __fontFamily
+    property string fontFamily: UI.FONT_FAMILY
     property int fontPixelSize: UI.FONT_DEFAULT_SIZE
     property int fontCapitalization: Font.MixedCase
     property int fontWeight: Font.Bold
@@ -83,17 +83,11 @@ Style {
     property string position: ""
 
     property url background: "image://theme/meegotouch-button" + __invertedString + "-background" + (position ? "-" + position : "")
-    property url pressedBackground: "image://theme/" + __colorString + "meegotouch-button" + __invertedString + "-background-pressed" + (position ? "-" + position : "")
+    property url pressedBackground: "image://theme/meegotouch-button" + __invertedString + "-background-pressed" + (position ? "-" + position : "")
     property url disabledBackground: "image://theme/meegotouch-button" + __invertedString + "-background-disabled" + (position ? "-" + position : "")
-    property url checkedBackground: "image://theme/" + __colorString + "meegotouch-button" + __invertedString + "-background-selected" + (position ? "-" + position : "")
-    property url checkedDisabledBackground: "image://theme/" + __colorString + "meegotouch-button" + __invertedString + "-background-disabled-selected" + (position ? "-" + position : "")
-    
-    // Deprecated, user positive/negative dialog instead
+    property url checkedBackground: "image://theme/meegotouch-button" + __invertedString + "-background-selected" + (position ? "-" + position : "")
+    property url checkedDisabledBackground: "image://theme/meegotouch-button" + __invertedString + "-background-disabled-selected" + (position ? "-" + position : "")
     property url dialog: "image://theme/meegotouch-dialog-button-negative"
     property url pressedDialog:  "image://theme/meegotouch-dialog-button-negative-pressed"
 
-    property url positiveDialog: "image://theme/meegotouch-dialog-button-positive"
-    property url pressedPositiveDialog:  "image://theme/meegotouch-dialog-button-positive-pressed"
-    property url negativeDialog: "image://theme/meegotouch-dialog-button-negative"
-    property url pressedNegativeDialog:  "image://theme/meegotouch-dialog-button-negative-pressed"
 }
