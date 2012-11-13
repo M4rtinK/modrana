@@ -752,6 +752,7 @@ class Snapshot(QDeclarativeItem):
     pass
 
 # hotfix for recursive loop
+  # TODO: find what's causing it
 #    self.snapshotWidth = value
 #    self.wChanged.emit()
 
