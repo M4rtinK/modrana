@@ -42,7 +42,7 @@ import QtQuick 1.1
 import "." 1.0
 import "./style"
 
-Item {
+Window {
     id: window
 
     property bool showStatusBar: true
