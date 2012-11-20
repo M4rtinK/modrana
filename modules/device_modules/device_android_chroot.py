@@ -78,10 +78,3 @@ class AndroidChroot(deviceModule):
     """due to no window decoration, own quit button
     might be needed"""
     return True
-
-
-if(__name__ == "__main__"):
-  a = device_example({}, {})
-  a.update()
-  a.update()
-  a.update()

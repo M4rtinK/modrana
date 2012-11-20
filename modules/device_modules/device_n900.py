@@ -47,7 +47,7 @@ else:
 import time
 
 def getModule(m, d, i):
-  return(device_n900(m, d, i))
+  return device_n900(m, d, i)
 
 
 class device_n900(deviceModule):
@@ -581,9 +581,3 @@ class device_n900(deviceModule):
   def enableInternetConnectivity(self):
     """autoconnect to the Internet using DBUS"""
     subprocess.call(["sh", "modules/device_modules/n900_maemo5_autoconnect_dbus.sh"])
-
-if(__name__ == "__main__"):
-  a = n900({}, {})
-  a.update()
-  a.update()
-  a.update()

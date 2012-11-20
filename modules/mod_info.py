@@ -94,9 +94,3 @@ class info(ranaModule):
         text = "modRana version:\n\n%s\n\n\n\nFor questions or feedback,\n\ncontact the <b>modRana</b> project:\n\n%s\n\n%s\n\n" % (self.versionString,web,email)
         box = (text ,"ms:menu:openUrl:http://www.modrana.org")
         menus.drawThreePlusOneMenu(cr, 'infoAbout', 'set:menu:info', button1, button2, box)
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

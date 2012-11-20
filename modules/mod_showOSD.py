@@ -465,9 +465,3 @@ def hex2rgb(hexstring, digits=2):
     g = int(hexstring[digits+1:digits*2+1], 16)
     b = int(hexstring[digits*2+1:digits*3+1], 16)
     return r / top, g / top, b / top
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

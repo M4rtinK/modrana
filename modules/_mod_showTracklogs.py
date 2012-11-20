@@ -36,7 +36,7 @@ class ShowTracklogs(ranaModule):
     """load a GPX file to datastructure"""
     file = open(filename, 'r')
 
-    if(file):
+    if file:
       track = gpx.Trackpoints() # create new Trackpoints object
       track.import_locations(file) # load a gpx file into it
       self.tracks[filename] = track
@@ -45,11 +45,3 @@ class ShowTracklogs(ranaModule):
       print "No file"
   def drawMapOverlay(self, cr):
     pass
-
-      
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

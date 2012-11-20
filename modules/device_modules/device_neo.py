@@ -22,7 +22,7 @@
 from base_device_module import deviceModule
 
 def getModule(m,d,i):
-  return(device_neo(m,d,i))
+  return device_neo(m,d,i)
 
 class device_neo(deviceModule):
   """A Neo FreeRunner modRana device-specific module"""
@@ -73,9 +73,3 @@ class device_neo(deviceModule):
         if not display.getFullscreenEnabled():
           display.fullscreenToggle()
           self.tempUnfullscreen = False
-
-if(__name__ == "__main__"):
-  a = device_example({}, {})
-  a.update()
-  a.update()
-  a.update()

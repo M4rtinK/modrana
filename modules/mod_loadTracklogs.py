@@ -685,10 +685,3 @@ class clusterOfPoints():
     self.centreX = centreX
     self.centreY = centreY
     self.radius = radius #radius of the circle
-
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

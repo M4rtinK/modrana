@@ -22,7 +22,7 @@
 from base_device_module import deviceModule
 
 def getModule(m,d,i):
-  return(device_q7(m,d,i))
+  return device_q7(m,d,i)
 
 class device_q7(deviceModule):
   """A SmartQ 7 modRana device-specific module"""
@@ -47,9 +47,3 @@ class device_q7(deviceModule):
 
   def getSupportedGUIModuleIds(self):
     return ["GTK"]
-
-if(__name__ == "__main__"):
-  a = device_example({}, {})
-  a.update()
-  a.update()
-  a.update()

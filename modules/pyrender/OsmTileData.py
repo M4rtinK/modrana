@@ -26,15 +26,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from tilenames import *
+from core.tilenames import *
 from urllib import *
 from OsmMerge import OsmMerge
 import os
-import os.path
 
 def GetOsmTileData(z,x,y, AllowSplit = False):
   """Download OSM data for the region covering a slippy-map tile"""
-  if(x < 0 or y < 0 or z < 0 or z > 25):
+  if x < 0 or y < 0 or z < 0 or z > 25:
     print "Disallowed %d,%d at %d" % (x,y,z)
     return
   
@@ -44,38 +43,38 @@ def GetOsmTileData(z,x,y, AllowSplit = False):
   
   directory = 'cache/%d/%d' % (z,x)
   filename = '%s/%d.osm' % (directory,y)
-  if(not os.path.exists(directory)):
+  if not os.path.exists(directory):
     os.makedirs(directory)
   
-  if(z == DownloadLevel):
+  if z == DownloadLevel:
     # Download the data
     (S,W,N,E) = tileEdges(x,y,z)
     
     
     # Which API to use
-    if(1): 
+    if 1:
       URL = 'http://%s/api/0.5/map?bbox=%f,%f,%f,%f' % ('api.openstreetmap.org',W,S,E,N)
     else:
       URL = 'http://%s/api/0.5/*[bbox=%f,%f,%f,%f]' % ('www.informationfreeway.org',W,S,E,N)
     
-    if(not os.path.exists(filename)): # TODO: allow expiry of old data
+    if not os.path.exists(filename): # TODO: allow expiry of old data
       print "Downloading %s\n  from %s" % (filename, URL)
       try:
         urlretrieve(URL, filename)
         print "Done"
       except:
         print "Error downloading " + filename
-        unlink(filename)
+#        unlink(filename)
         return
     else:
       print "Using cached %s" % filename
-    return(filename)
+    return filename
     
-  elif(z < DownloadLevel - MergeLevels):
+  elif z < DownloadLevel - MergeLevels:
     print "Zoom %d not allowed" % z
     return
   
-  elif(z < DownloadLevel):  
+  elif z < DownloadLevel:
     # merge smaller tiles
     filenames = []
     for i in (0,1):
@@ -89,17 +88,17 @@ def GetOsmTileData(z,x,y, AllowSplit = False):
     # merge them together
     print "Merging tiles together"
     OsmMerge(filename, filenames)
-    return(filename)
+    return filename
     
   else: 
     # use larger tile
-    while(z > DownloadLevel):
-      z = z - 1
+    while z > DownloadLevel:
+      z -= 1
       x = int(x / 2)
       y = int(y / 2)
-    return(GetOsmTileData(z,x,y))
+    return GetOsmTileData(z,x,y)
 
-if(__name__ == "__main__"):
+if __name__ == "__main__":
   """test mode"""
   GetOsmTileData(14,7788,6360, True)
   

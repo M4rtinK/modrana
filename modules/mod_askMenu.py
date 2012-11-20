@@ -20,7 +20,7 @@
 from modules.base_module import ranaModule
 
 def getModule(m,d,i):
-  return(askMenu(m,d,i))
+  return askMenu(m,d,i)
 
 class askMenu(ranaModule):
   """A sample pyroute module"""
@@ -51,11 +51,3 @@ class askMenu(ranaModule):
     self.yesAction = yesAction
     self.noAction = noAction
     self.set('menu', 'askMenu#askYesNo')
-
-
-
-if(__name__ == "__main__"):
-  a = askMenu({}, {})
-  a.update()
-  a.update()
-  a.update()

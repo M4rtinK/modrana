@@ -214,9 +214,3 @@ class notification(ranaModule):
       cr.fill()
     else:
       self.draw = False # we are finished, disable drawing notifications
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

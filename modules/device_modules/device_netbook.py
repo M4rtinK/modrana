@@ -22,7 +22,7 @@
 from base_device_module import deviceModule
 
 def getModule(m,d,i):
-  return(device_netbook(m,d,i))
+  return device_netbook(m,d,i)
 
 class device_netbook(deviceModule):
   """A netbook modRana device-specific module"""
@@ -44,10 +44,3 @@ class device_netbook(deviceModule):
 
   def getSupportedGUIModuleIds(self):
     return ["GTK", "QML"]
-    
-
-if(__name__ == "__main__"):
-  a = device_example({}, {})
-  a.update()
-  a.update()
-  a.update()

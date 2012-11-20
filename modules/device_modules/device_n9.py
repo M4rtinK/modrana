@@ -27,7 +27,7 @@ from QtMobility.SystemInfo import QSystemScreenSaver
 # NOTE: use the device_ prefix when naming the module
 
 def getModule(m,d,i):
-  return(device_example(m,d,i))
+  return device_example(m,d,i)
 
 class device_example(deviceModule):
   """A Nokia N9 device module"""
@@ -45,7 +45,7 @@ class device_example(deviceModule):
 
   def getWinWH(self):
     """N9/N950 screen resolution"""
-    return (854,480)
+    return 854,480
 
   def startInFullscreen(self):
     """
@@ -116,9 +116,3 @@ class device_example(deviceModule):
   def needsQuitButton(self):
     """No need for a separate Quit button thanks to Swipe UI"""
     return False
-
-if(__name__ == "__main__"):
-  a = device_example({}, {})
-  a.update()
-  a.update()
-  a.update()

@@ -1,4 +1,3 @@
-import os
 from tiledata import GetOsmTileData
 from OsmMerge import OsmMerge
 
@@ -16,7 +15,7 @@ def test(z,x,y):
   # merge them together
   OsmMerge("merged.osm", z, filenames)
 
-if(__name__ == "__main__"):
+if __name__ == "__main__":
   #test(14,8009,5443) # swansea
   test(13,4070,2682) # leicester
   

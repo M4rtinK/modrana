@@ -805,9 +805,3 @@ class turnByTurn(ranaModule):
   def shutdown(self):
     # cleanup
     self.stopTBT()
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

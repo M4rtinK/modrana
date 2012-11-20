@@ -57,10 +57,3 @@ class keys(ranaModule):
       """zoom in"""
       self.sendMessage('mapView:zoomIn')
     print "unassigned key pressed: %s" % keyName
-    
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

@@ -545,12 +545,3 @@ def distanceBenchmark(LLE, sampleSize=None):
 # 20.000000000 ms Marble method on radians
 # 10.000000000 ms Marble approximate method on radians
 # # benchmark finished #
-
-
-
-
-
-
-if(__name__ == "__main__"):
-  print distance(51, -1, 52, 1)
-  print bearing(51, -1, 52, 1)

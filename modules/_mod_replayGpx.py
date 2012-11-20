@@ -18,15 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import ranaModule
-import re
-import sys
 from time import *
-#sys.path.append("upoints")
 
 from upoints import gpx
 
 def getModule(m,d,i):
-  return(replayGpx(m,d,i))
+  return replayGpx(m,d,i)
 
 class replayGpx(ranaModule):
   """Replay a GPX"""
@@ -70,18 +67,18 @@ class replayGpx(ranaModule):
 #      self.pos = int(self.get("replayStart",0) * self.numNodes)
 
     else:
-      print "No file"
+      print("No file")
 
   def dump(self):
-    print "%d nodes:"%len(self.nodes)
+    print("%d nodes:"%len(self.nodes))
     for n in self.nodes:
-      print "%1.4f, %1.4f" % (n[0], n[1])
+      print("%1.4f, %1.4f" % (n[0], n[1]))
 
   def scheduledUpdate(self):
-    if(self.numNodes < 1):
+    if self.numNodes < 1:
       return
     self.pos += 1
-    if(self.pos >= self.numNodes):
+    if self.pos >= self.numNodes:
       self.pos = 0
     (lat,lon) = self.nodes[self.pos]
     self.set('pos', (lat,lon))
@@ -92,17 +89,7 @@ class replayGpx(ranaModule):
     # Run scheduledUpdate every second
     t = time()
     dt = t - self.updateTime
-    if(dt > self.replayPeriod):
+    if dt > self.replayPeriod:
       self.updateTime = t
       self.scheduledUpdate()
-
-if(__name__ == "__main__"):
-  d = {}
-  a = replayGpx({}, d)
-  a.load('../../Waypoints/WaddingtonNG1/backhome.gpx')
-
-  while(1):
-    a.update()
-    (lat,lon) = d.get("pos")
-    print "%f, %f" % (lat,lon)
 

@@ -550,9 +550,3 @@ class StoreTiles(ranaModule):
 #    lookupCursor.close()
 #    lookupConn.close()
 #    print "connection reuse %f ms" % (1000 * (time.clock() - start))
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

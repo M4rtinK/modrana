@@ -34,14 +34,14 @@ def distancePointToLine(x,y,x1,y1,x2,y2):
   len_sq = C * C + D * D
   if len_sq==0:
      dist= A*A +B*B
-     return(dist)
+     return dist
 
   param = dot / len_sq
 
-  if(param < 0):
+  if param < 0:
     xx = x1
     yy = y1
-  elif(param > 1):
+  elif param > 1:
     xx = x2
     yy = y2
   else:
@@ -51,7 +51,7 @@ def distancePointToLine(x,y,x1,y1,x2,y2):
   dx = x - xx
   dy = y - yy
   dist = dx * dx + dy * dy
-  return(dist)
+  return dist
 
 def describe(lat,lon):
   """Find the way you're nearest to, and return a description of it"""
@@ -71,18 +71,18 @@ def describe(lat,lon):
     (lastx,lasty,lastvalid) = (0,0,False)
     for n in w['n']: # loop nodes in way
       (x,y) = (n['lon'], n['lat'])
-      if(lastvalid):
+      if lastvalid:
         distance =  distancePointToLine(sx,sy,lastx,lasty,x,y)
-        if(distance < mindist):
+        if distance < mindist:
           tempname = w['t'].get('name', w['t'].get('ref', None))
-          if(tempname != None):
+          if tempname is not None:
             mindist = distance
             name=tempname
       (lastx,lasty,lastvalid) = (x,y,True)
-  return(name)
+  return name
 
-if(__name__ == "__main__"):
-  if(len(sys.argv) >= 3):
+if __name__ == "__main__":
+  if len(sys.argv) >= 3:
     print describe(float(sys.argv[1]), float(sys.argv[2]))
   else:
     print "no position supplied, using default"

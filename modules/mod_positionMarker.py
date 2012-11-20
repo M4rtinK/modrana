@@ -176,10 +176,3 @@ class positionMarker(ranaModule):
     cr.close_path()
     cr.stroke()
     cr.restore()
-
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

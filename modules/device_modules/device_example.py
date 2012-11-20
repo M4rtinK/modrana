@@ -24,17 +24,10 @@ from base_device_module import deviceModule
 # NOTE: use the device_ prefix when naming the module
 
 def getModule(m,d,i):
-  return(device_example(m,d,i))
+  return device_example(m,d,i)
 
 class device_example(deviceModule):
   """A sample modRana device-specific module"""
   
   def __init__(self, m, d, i):
     deviceModule.__init__(self, m, d, i)
-    
-
-if(__name__ == "__main__"):
-  a = device_example({}, {})
-  a.update()
-  a.update()
-  a.update()

@@ -112,9 +112,3 @@ class textEntry(ranaModule):
        normal minimization events and losing focus due to the modal
        text entry box"""
     return self.entryBoxVisible
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

@@ -446,9 +446,3 @@ class showPOI(ranaModule):
       self.set('menu', 'menu#list#POICategoryChooser')
       self.sendMessage('ml:notification:m:Select a category for this POI;3')
       self.set('needRedraw', True)
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

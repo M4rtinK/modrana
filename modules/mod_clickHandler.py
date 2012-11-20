@@ -136,7 +136,3 @@ class clickHandler(ranaModule):
             m.dragEvent(startX,startY,dx,dy,x,y)
           else:
             print "Drag registered to nonexistent module %s" % module
-
-if(__name__ == "__main__"):
-  print "Testing rect"
-  a = clickHandler({},{})

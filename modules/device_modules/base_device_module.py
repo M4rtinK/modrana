@@ -229,11 +229,3 @@ class deviceModule(ranaModule):
 #
 #  def disableAutorotation(self):
 #    pass
-
-
-
-if(__name__ == "__main__"):
-  a = example({}, {})
-  a.update()
-  a.update()
-  a.update()

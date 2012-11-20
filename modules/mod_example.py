@@ -27,10 +27,3 @@ class Example(ranaModule):
   
   def __init__(self, m, d, i):
     ranaModule.__init__(self, m, d, i)
-    
-
-if(__name__ == "__main__"):
-  a = Example({}, {})
-  a.update()
-  a.update()
-  a.update()

@@ -17,16 +17,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-import sys
 import os
 import struct
-import tilenames
+from core import tilenames
 
 
-def getVmapBaseDir(options={}):
+def getVmapBaseDir(options=None):
+  if not options: options = {}
   return options.get("vmapTileDir", "data/tiledata")
 
-def getVmapBaseZoom(options={}):
+def getVmapBaseZoom(options=dict()):
   return 14
 
 def getVmapTileNum(x,y,z, options={}):
@@ -105,11 +105,3 @@ class vmapData:
         
     if optimise:
       self.optimise()
-      
-if(__name__ == "__main__"):
-
-  a = vmapData()
-  filename = "../../tiledata3/output//127_85/8185_5447.bin"
-  #print "Loading %d bytes" % os.path.getsize(filename)
-  a.load(filename)
-  print str(a.ways)

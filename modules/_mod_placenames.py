@@ -23,7 +23,7 @@ from datetime import *
 import math
 
 def getModule(m,d,i):
-  return(placenames(m,d,i))
+  return placenames(m,d,i)
 
 class placenames(poiModule):
   """Lookup nearest town or village"""
@@ -40,7 +40,7 @@ class placenames(poiModule):
       line = line.strip()
       (lat,lon,id,typeID,name) = line.split("\t")
       type = types.get(typeID, None)
-      if(type != None):
+      if type is not None:
         self.addItem(type, name, lat, lon)
     self.needUpdate = True # Request update of meta-info
         
@@ -61,27 +61,20 @@ class placenames(poiModule):
         dx = plon - lon
         dy = plat - lat
         dist = dx * dx + dy * dy
-        if(dist < limit):
-          if(nearestDist == None or dist < nearestDist):
+        if dist < limit:
+          if nearestDist is None or dist < nearestDist:
             nearestDist = dist
             nearest = place['name']
-    return(nearest)
+    return nearest
   
   def update(self):
     """If requested, lookup the nearest place name"""
     self.updatePoi()
-    if(self.get('lookup_place', False)):
+    if self.get('lookup_place', False):
       pos = self.get('pos', None)
-      if(pos != None):
-        if(pos != self.lastpos):
+      if pos is not None:
+        if pos != self.lastpos:
           place = self.lookup(pos[0], pos[1])
-          if(place):
+          if place:
             self.set('nearest_place', place)
           self.lastpos = pos
-
-
-      
-if(__name__ == "__main__"):
-  a = placenames({},{})
-  a.load("../places.txt")
-  print a.lookup(51.3,-0.5)

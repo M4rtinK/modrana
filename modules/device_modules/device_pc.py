@@ -22,7 +22,7 @@
 from base_device_module import deviceModule
 
 def getModule(m,d,i):
-  return(Device_PC(m,d,i))
+  return Device_PC(m,d,i)
 
 class Device_PC(deviceModule):
   """A modRana device-specific module for PC"""
@@ -37,7 +37,7 @@ class Device_PC(deviceModule):
     return "A generic Personal Computer"
 
   def getWinWH(self):
-    return (800,480)
+    return 800,480
 
   def simpleMapDragging(self):
     return False
@@ -47,10 +47,3 @@ class Device_PC(deviceModule):
 
   def getSupportedGUIModuleIds(self):
     return ["GTK", "QML"]
-
-
-if(__name__ == "__main__"):
-  a = device_example({}, {})
-  a.update()
-  a.update()
-  a.update()

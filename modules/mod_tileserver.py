@@ -146,9 +146,3 @@ class Server(SocketServer.TCPServer):
 
   def finish_request(self, request, client_address):
     self.Proxy(request, client_address)
-
-if(__name__ == "__main__"):
-  a = Example({}, {})
-  a.update()
-  a.update()
-  a.update()
