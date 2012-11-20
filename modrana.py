@@ -25,16 +25,10 @@ import subprocess
 import sys
 import time
 startTimestamp = time.time()
-import math
-# set current directory to the directory
-# of this file
-# like this, modRana can be run from an absolute path
-# eq.: ./opt/modrana/modrana.py -u QML -d n9
 import os
 import marshal
 import traceback
 import imp
-from math import radians
 # import core modules/classes
 from core import startup
 from core import paths
@@ -239,7 +233,7 @@ class ModRana:
     # add the GUI module folder to path
     GUIModulesPath = os.path.join(MAIN_MODULES_FOLDER, "gui_modules")
     sys.path.append(GUIModulesPath)
-
+    gui = None
     if self.GUIString == "GTK":
       gui = self._loadModule("gui_gtk", "gui")
     elif self.GUIString == "QML":
