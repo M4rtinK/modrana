@@ -26,7 +26,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------
-import sys
 import math 
 from loadOsm import *
 
@@ -40,11 +39,11 @@ class Router:
     lat2 = self.data.rnodes[n2][0]
     lon2 = self.data.rnodes[n2][1]
     # TODO: projection issues
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    dist2 = dlat * dlat + dlon * dlon
+    dLat = lat2 - lat1
+    dLon = lon2 - lon1
+    dist2 = dLat * dLat + dLon * dLon
     dist = math.sqrt(dist2)
-    return(dist)
+    return dist
   
   def doRoute(self,start,end):
     """Do the routing"""
@@ -77,7 +76,7 @@ class Router:
       if x == end:
         # Found the end node - success
         routeNodes = [int(i) for i in nextItem['nodes'].split(",")]
-        return('success', routeNodes)
+        return 'success', routeNodes
       closed.append(x)
       try:
         for i, weight in self.data.routing[x].items():
@@ -86,7 +85,7 @@ class Router:
       except KeyError:
         pass
     else:
-      return('gave_up',[])
+      return 'gave_up',[]
   
   def addToQueue(self,start,end, queueSoFar, weight = 1):
     """Add another potential route to the queue"""
@@ -104,13 +103,13 @@ class Router:
       if test['end'] == end:
         return
     distance = self.distance(start, end)
-    if(weight == 0):
+    if weight == 0:
       return
     distance = distance / weight
     
     # Create a hash for all the route's attributes
     distanceSoFar = queueSoFar['distance']
-    queueItem = { \
+    queueItem = {
       'distance': distanceSoFar + distance,
       'maxdistance': distanceSoFar + self.distance(end, self.searchEnd),
       'nodes': queueSoFar['nodes'] + "," + str(end),
@@ -144,7 +143,7 @@ if __name__ == "__main__":
 
     # list the lat/long
     for i in route:
-      node = data.rnodes[i]
+      node = data.rNodes[i]
       print "%d: %f,%f" % (i,node[0],node[1])
   else:
     print "Failed (%s)" % result

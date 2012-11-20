@@ -34,7 +34,7 @@ class LoadOsm:
   def __init__(self, transport):
     """Initialise an OSM-file parser"""
     self.routing = {}
-    self.rnodes = {}
+    self.rNodes = {}
     self.transport = transport
     self.tiles = {}
     self.weights = weights.RoutingWeights()
@@ -46,19 +46,19 @@ class LoadOsm:
     (x,y) = tilenames.tileXY(lat, lon, z)
 
     tileID = '%d,%d'%(x,y)
-    if(self.tiles.get(tileID,False)):
+    if self.tiles.get(tileID,False):
       #print "Already got %s" % tileID
       return
     self.tiles[tileID] = True
     
     filename = tiledata.GetOsmTileData(z,x,y)
     #print "Loading %d,%d at z%d from %s" % (x,y,z,filename)
-    return(self.loadOsm(filename))
+    return self.loadOsm(filename)
 
   def loadOsm(self, filename):
-    if(not os.path.exists(filename)):
+    if not os.path.exists(filename):
       print "No such data file %s" % filename
-      return(False)
+      return False
     fp = open(filename, "r")
     re_way = re.compile("<way id='(\d+)'>\s*$")
     re_nd = re.compile("\s+<nd id='(\d+)' x='(\d+)' y='(\d+)' />\s*$")
@@ -77,12 +77,12 @@ class LoadOsm:
         way_tags = {}
         way_nodes = []
         way_id = int(result_way.group(1))
-      elif(result_endway):
+      elif result_endway:
         in_way = False
         self.storeWay(way_id, way_tags, way_nodes)
-      elif(in_way):
+      elif in_way:
         result_nd = re_nd.match(line)
-        if(result_nd):
+        if result_nd:
           node_id = int(result_nd.group(1))
           x = float(result_nd.group(2))
           y = float(result_nd.group(3))
@@ -92,9 +92,9 @@ class LoadOsm:
           way_nodes.append([node_id,lat,lon])
         else:
           result_tag = re_tag.match(line)
-          if(result_tag):
+          if result_tag:
             way_tags[result_tag.group(1)] = result_tag.group(2)
-    return(True)
+    return True
   
   def storeWay(self, wayID, tags, nodes):
     highway = self.equivalent(tags.get('highway', ''))
@@ -114,13 +114,13 @@ class LoadOsm:
     # Store routing information
     last = [None,None,None]
 
-    if(wayID == 41 and 0):
+    if wayID == 41 and 0:
       print nodes
       sys.exit()
     for node in nodes:
       (node_id,x,y) = node
       if last[0]:
-        if(access[self.transport]):
+        if access[self.transport]:
           weight = self.weights.get(self.transport, highway)
           self.addLink(last[0], node_id, weight)
           self.makeNodeRouteable(last)
@@ -130,7 +130,7 @@ class LoadOsm:
       last = node
 
   def makeNodeRouteable(self,node):
-    self.rnodes[node[0]] = [node[1],node[2]]
+    self.rNodes[node[0]] = [node[1],node[2]]
     
   def addLink(self,fr,to, weight=1):
     """Add a routeable edge to the scenario"""
@@ -143,7 +143,7 @@ class LoadOsm:
 
   def equivalent(self,tag):
     """Simplifies a bunch of tags to nearly-equivalent ones"""
-    equivalent = { \
+    equivalent = {
       "primary_link":"primary",
       "trunk":"primary",
       "trunk_link":"primary",
@@ -174,11 +174,11 @@ class LoadOsm:
     maxDist = 1E+20
     nodeFound = None
     posFound = None
-    for (node_id,pos) in self.rnodes.items():
+    for (node_id,pos) in self.rNodes.items():
       dy = pos[0] - lat
       dx = pos[1] - lon
       dist = dx * dx + dy * dy
-      if(dist < maxDist):
+      if dist < maxDist:
         maxDist = dist
         nodeFound = node_id
         posFound = pos
@@ -187,13 +187,13 @@ class LoadOsm:
       
   def report(self):
     """Display some info about the loaded data"""
-    print "Loaded %d nodes" % len(self.rnodes.keys())
+    print "Loaded %d nodes" % len(self.rNodes.keys())
     print "Loaded %d %s routes" % (len(self.routing.keys()), self.transport)
 
 # Parse the supplied OSM file
 if __name__ == "__main__":
   data = LoadOsm("cycle")
-  if(not data.getArea(52.55291,-1.81824)):
+  if not data.getArea(52.55291,-1.81824):
     print "Failed to get data"
   data.getArea(52.55291,-1.81824)
   data.report()

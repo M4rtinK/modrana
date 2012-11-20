@@ -22,9 +22,9 @@ class RoutingWeights:
 
   def get(self, transport, wayType):
     try:
-      return(self.Weightings[wayType][transport])
+      return self.Weightings[wayType][transport]
     except KeyError:
       # Default: if no weighting is defined, then assume it can't be routed
-      return(0)
+      return 0
  
  

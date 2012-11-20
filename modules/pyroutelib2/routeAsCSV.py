@@ -33,16 +33,16 @@ def routeToCSV(lat1,lon1,lat2,lon2, transport):
   router = Router(data)
   result, route = router.doRoute(node1, node2)
   if result != 'success':
-    return("Fail")
+    return"Fail"
 
   output = ''
   for i in route:
-    node = data.rnodes[i]
-    output = output + "%d,%f,%f\n" % ( \
+    node = data.rNodes[i]
+    output += "%d,%f,%f\n" % (
       i,
       node[0],
       node[1])
-  return(output)
+  return output
 
 def routeToCSVFile(lat1,lon1,lat2,lon2, transport, filename):
   f = open(filename,'w')

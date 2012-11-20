@@ -38,40 +38,40 @@ def routeToGpx(lat1,lon1,lat2,lon2, transport, description="", style="track"):
     return
 
   output = ''
-  output = output + "<?xml version='1.0'?>\n";
-  
-  output = output + "<gpx version='1.1' creator='pyroute' xmlns='http://www.topografix.com/GPX/1/1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd'>\n"
-    
-  if(style == 'track'):
-    output = output + " <trk>\n"
-    output = output + "  <name>%s</name>\n" % description
-    output = output + "  <trkseg>\n"
-    count = 0;
-    for i in route:
-      node = data.rnodes[i]
-      output = output + "   <trkpt lat='%f' lon='%f'>\n" % ( \
-        node[0],
-        node[1])
-      output = output + "   </trkpt>\n"
-      count = count + 1
-    output = output + "  </trkseg>\n  </trk>\n</gpx>\n"
+  output += "<?xml version='1.0'?>\n"
 
-  elif(style == 'route'):
-    output = output + " <rte>\n"
-    output = output + "  <name>%s</name>\n" % description
+  output += "<gpx version='1.1' creator='pyroute' xmlns='http://www.topografix.com/GPX/1/1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd'>\n"
+    
+  if style == 'track':
+    output += " <trk>\n"
+    output += "  <name>%s</name>\n" % description
+    output += "  <trkseg>\n"
+    count = 0;
+    for i in route:
+      node = data.rNodes[i]
+      output += "   <trkpt lat='%f' lon='%f'>\n" % (\
+        node[0],
+        node[1])
+      output += "   </trkpt>\n"
+      count += 1
+    output += "  </trkseg>\n  </trk>\n</gpx>\n"
+
+  elif style == 'route':
+    output += " <rte>\n"
+    output += "  <name>%s</name>\n" % description
     
     count = 0;
     for i in route:
-      node = data.rnodes[i]
-      output = output + "   <rtept lat='%f' lon='%f'>\n" % ( \
+      node = data.rNodes[i]
+      output += "   <rtept lat='%f' lon='%f'>\n" % (\
         node[0],
         node[1])
-      output = output + "    <name>%d</name>\n" % count
-      output = output + "   </rtept>\n"
-      count = count + 1
-    output = output + " </rte>\n</gpx>\n"
+      output += "    <name>%d</name>\n" % count
+      output += "   </rtept>\n"
+      count += 1
+    output += " </rte>\n</gpx>\n"
   
-  return(output)
+  return output
 
 if __name__ == "__main__":
   
