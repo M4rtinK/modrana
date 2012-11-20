@@ -93,10 +93,10 @@ class ranaModule:
   def sendMessage(self,message):
     m = self.m.get("messages", None)
     if m is not None:
-      print "Sending message: " + message
+      print("Sending message: " + message)
       m.routeMessage(message)
     else:
-      print "No message handler, cant send message."
+      print("No message handler, cant send message.")
 
   def shutdown(self):
     """
