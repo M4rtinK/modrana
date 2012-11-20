@@ -70,7 +70,7 @@ def createFolderPath(newPath):
     print("creating path: %s" % newPath)
     head, tail = os.path.split(newPath)
     if head and not os.path.isdir(head):
-        os.mkdirs(head)
+        os.makedirs(head)
     if tail:
         os.mkdir(newPath)
     return True
