@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # A modRana module providing various kinds of information.

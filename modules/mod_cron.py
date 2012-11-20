@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # A timing and scheduling module for modRana.

@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #---------------------------------------------------------------------------
 # Controls the view being displayed on the map

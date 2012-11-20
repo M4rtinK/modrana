@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Log position as GPX, draw the track traveled

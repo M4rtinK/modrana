@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # A turn by turn navigation module.

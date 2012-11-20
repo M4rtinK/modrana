@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #---------------------------------------------------------------------------
 # Shares info using the pyroute share server

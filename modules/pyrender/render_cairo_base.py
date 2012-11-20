@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Python rendering engine for OpenStreetMap data
@@ -201,7 +200,7 @@ class OsmRenderBase:
     return cp
 
 
-if(__name__ == '__main__'):
+if __name__ == '__main__':
   # Test suite: render a tile in london, and save it to a file
   a = OsmRenderBase()
   a.RenderTile(15, 16372, 10895, "default", "sample2.png")
