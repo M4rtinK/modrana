@@ -20,12 +20,12 @@
 #---------------------------------------------------------------------------
 import traceback
 import sys
-from base_module import ranaModule
+from modules.base_module import ranaModule
 import cPickle
 import os
 import sqlite3
 import csv
-from point import Point
+from core.point import Point
 
 def getModule(m,d,i):
   return storePOI(m,d,i)

@@ -19,10 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_module import ranaModule
-import geo
+from modules.base_module import ranaModule
+from core import geo
 import math
-from odict import odict
+from modules.odict import odict
 
 def getModule(m,d,i):
   return search(m,d,i)

@@ -27,8 +27,8 @@ import re
 import csv
 import traceback
 import unicodedata
-import modules.way as way
-import modules.geo as geo
+import core.way as way
+import core.geo as geo
 #from time import clock
 import time
 

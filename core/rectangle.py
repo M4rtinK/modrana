@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #----------------------------------------------------------------------------
-class rect:
+class Rectangle:
   def __init__(self,x,y,dx,dy):
     self.x1 = x;
     self.y1 = y;
@@ -39,7 +39,7 @@ class rect:
     Specify coordinates where the limits of the parent rect are (0,0 - 1,1)"""
     x1 = self.xc(px1)
     y1 = self.yc(py1)
-    return(rect( \
+    return(Rectangle( \
       self.cr,
       x1,
       y1,
@@ -50,7 +50,7 @@ class rect:
   def copyAndExtendTo(self,otherRect):
     """Return a rectangle containing the area between (and including)
     this rectange and another one (think of it like colspan or rowspan)"""
-    return(rect( \
+    return(Rectangle( \
       self.cr,
       self.x1,
       self.y1,

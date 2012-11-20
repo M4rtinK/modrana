@@ -6,7 +6,7 @@ import os
 import threading
 import core.exceptions
 import core.paths
-from modules import geo
+import geo
 from modules.upoints import gpx
 from point import Point
 

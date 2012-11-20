@@ -18,10 +18,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_module import ranaModule
+from modules.base_module import ranaModule
 import math
-import geo
-from color import Color
+from core import geo
+from core.color import Color
 
 def getModule(m,d,i):
   return(Markers(m,d,i))

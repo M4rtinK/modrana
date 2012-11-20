@@ -18,11 +18,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from modules.base_module import ranaModule
+from core import geo
 from threading import Thread
-from base_module import ranaModule
-import geo
 import math
 import time
+
+
 import instructions_generator
 
 REROUTE_CHECK_INTERVAL = 5000 # in ms

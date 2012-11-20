@@ -18,8 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_module import ranaModule
-from rect import rect
+from modules.base_module import ranaModule
+from core.rectangle import Rectangle
 
 def getModule(m,d,i):
   return clickHandler(m,d,i)
@@ -46,13 +46,13 @@ class clickHandler(ranaModule):
   def registerXYWH(self, x1, y1, dx, dy, action, timedAction=None, layer=0):
     if timedAction: # at least one timed action
       self.timedActionInProgress = True
-    area = rect(x1, y1, dx, dy)
+    area = Rectangle(x1, y1, dx, dy)
     self.register(area, action, timedAction, layer)
 
   def registerXYXY(self, x1,y1,x2,y2, action, timedAction=None, layer=0):
     if timedAction: # at least one timed action
       self.timedActionInProgress = True
-    area = rect(x1, y1, x2-x1, y2-y1)
+    area = Rectangle(x1, y1, x2-x1, y2-y1)
     self.register(area, action, timedAction, layer)
 
   def handleClick(self, x, y, msDuration):
@@ -116,7 +116,7 @@ class clickHandler(ranaModule):
     return hit
 
   def registerDraggable(self, x1, y1, x2, y2, module):
-    self.dragAreas.append((rect(x1, y1, x2-x1, y2-y1), module))
+    self.dragAreas.append((Rectangle(x1, y1, x2-x1, y2-y1), module))
 
   def registerDraggableEntireScreen(self, module):
     print "Entire screen is draggable for %s " % module

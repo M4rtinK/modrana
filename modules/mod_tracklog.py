@@ -18,14 +18,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from modules.base_module import ranaModule
 import shutil
-from base_module import ranaModule
 import glob
 import time
 import os
 from collections import deque
-import geo
-import way
+from core import geo
+from core import way
 from core import gs
 
 if gs.GUIString == "GTK":

@@ -21,14 +21,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #----------------------------------------------------------------------------
-
-# module folder name
 import subprocess
-
-modulesFolder = 'modules'
 import sys
-# add module folder to path
-sys.path.append(modulesFolder)
 import time
 startTimestamp = time.time()
 import math
@@ -37,10 +31,9 @@ import math
 # like this, modRana can be run from an absolute path
 # eq.: ./opt/modrana/modrana.py -u QML -d n9
 import os
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
 import marshal
 import traceback
+import imp
 from math import radians
 # import core modules/classes
 from core import startup
@@ -50,6 +43,13 @@ from core import gs
 
 # record that imports-done timestamp
 importsDoneTimestamp = time.time()
+
+MAIN_MODULES_FOLDER = 'modules'
+ALL_MODULE_FOLDERS = [
+  MAIN_MODULES_FOLDER,
+  os.path.join(MAIN_MODULES_FOLDER, "device_modules"),
+  os.path.join(MAIN_MODULES_FOLDER, "gui_modules")
+]
 
 def createFolderPath(newPath):
   """
@@ -208,7 +208,7 @@ class ModRana:
 
     # NOTE: other modules need the device and GUI modules
     # during init
-    deviceModulesPath = os.path.join(modulesFolder, "device_modules")
+    deviceModulesPath = os.path.join(MAIN_MODULES_FOLDER, "device_modules")
     sys.path.append(deviceModulesPath)
     dmod = self._loadModule("device_%s" % device, "device")
     if dmod is None:
@@ -237,7 +237,7 @@ class ModRana:
     """load the GUI module"""
 
     # add the GUI module folder to path
-    GUIModulesPath = os.path.join(modulesFolder, "gui_modules")
+    GUIModulesPath = os.path.join(MAIN_MODULES_FOLDER, "gui_modules")
     sys.path.append(GUIModulesPath)
 
     if self.GUIString == "GTK":
@@ -259,7 +259,7 @@ class ModRana:
     loadModule = self._loadModule
 
     # get possible module names
-    moduleNames = self._getModuleNamesFromFolder(modulesFolder)
+    moduleNames = self._getModuleNamesFromFolder(MAIN_MODULES_FOLDER)
     # load if possible
     for moduleName in moduleNames:
         # filter out .py
@@ -296,20 +296,24 @@ class ModRana:
   def _loadModule(self, importName, modRanaName):
     """load a single module by name from path"""
     startM = time.clock()
+    fp = None
     try:
-      a = __import__(importName)
+      fp, pathName, description = imp.find_module(importName, ALL_MODULE_FOLDERS)
+      a = imp.load_module(importName, fp, pathName, description)
       initInfo = self.initInfo
-      name = modRanaName
-      initInfo['name'] = name
+      initInfo['name'] = modRanaName
       module = a.getModule(self.m, self.d, initInfo)
-      self.m[name] = module
-      print( " * %s: %s (%1.2f ms)" % (name, self.m[name].__doc__, (1000 * (time.clock() - startM))) )
+      self.m[modRanaName] = module
+      print( " * %s: %s (%1.2f ms)" % (modRanaName, self.m[modRanaName].__doc__, (1000 * (time.clock() - startM))) )
       return module
     except Exception, e:
       print( "modRana: module: %s/%s failed to load" % (importName, modRanaName) )
       print(e)
       traceback.print_exc(file=sys.stdout) # find what went wrong
       return None
+    finally:
+      if fp:
+        fp.close()
 
   def _modulesLoadedPreFirstTime(self):
     """this is run after all the modules have been loaded,
@@ -754,8 +758,15 @@ class ModRana:
 
 if __name__ == "__main__":
 
-  # check if reload has been requested
+  # change to folder where the main modRana file is located
+  # * this enables to run modRana with absolute path without adverse
+  # effect such as modRana not finding modules or
+  os.chdir(os.path.dirname(os.path.abspath(__file__)))
+  # add the modules folder to path, so that third-party modules (such as Upoints),
+  # that expect to be placed to path work correctly
+  sys.path.append('modules')
 
+  # check if reload has been requested
   reloadArg = "--reload"
   if len(sys.argv)>=3 and sys.argv[1] == reloadArg:
     # following argument is path to the modRana main class we want to reload to,

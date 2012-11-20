@@ -18,11 +18,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_module import ranaModule
+from modules.base_module import ranaModule
 import time
 import math
-import geo
-import modrana_utils
+from core import geo
+from core import modrana_utils
 
 # only import GKT libs if GTK GUI is used
 from core import gs

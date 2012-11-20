@@ -24,7 +24,7 @@ import random
 from threading import Thread
 import urllib2
 import cStringIO
-from base_module import ranaModule
+from modules.base_module import ranaModule
 import tileserver_callback_proxy
 
 def getModule(m,d,i):

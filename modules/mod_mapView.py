@@ -18,8 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_module import ranaModule
-from tilenames import *
+from modules.base_module import ranaModule
+from core.tilenames import *
 
 def getModule(m,d,i):
   return(mapView(m,d,i))

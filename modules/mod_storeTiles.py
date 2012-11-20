@@ -22,7 +22,7 @@ from __future__ import with_statement # for python 2.5
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 
-from base_module import ranaModule
+from modules.base_module import ranaModule
 import sqlite3
 import os
 import time

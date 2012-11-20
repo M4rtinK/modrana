@@ -18,12 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 
-from modules import geo
-from modules.way import TurnByTurnPoint
+from core import geo
+from core.way import TurnByTurnPoint
 
 import gettext
 import locale
-import modules.i18n as i18n
+import core.i18n as i18n
 _ = i18n.language.gettext
 
 

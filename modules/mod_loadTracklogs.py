@@ -20,14 +20,13 @@
 #---------------------------------------------------------------------------
 #from dbus.service import Object
 import math
-from base_module import ranaModule
-import geo
+from modules.base_module import ranaModule
+from core  import geo
 import os
-import modrana_utils
+from core import modrana_utils
 import glob
 import cPickle
 import shutil
-import modrana_utils
 from time import clock
 from time import gmtime, strftime
 

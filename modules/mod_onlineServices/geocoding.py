@@ -30,7 +30,7 @@ def _places2points(places):
   return points
 
 def geocode(address):
-  from geopy import geocoders
+  from modules.geopy import geocoders
   g = geocoders.Google()
   try:
     places = list(g.geocode(address, exactly_one=False))

@@ -18,9 +18,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from modules.base_module import ranaModule
 import traceback
 import sys
-from modules.base_module import ranaModule
 import re
 import threading
 import time

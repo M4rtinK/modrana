@@ -20,18 +20,18 @@
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
 import urllib
-from base_module import ranaModule
+from modules.base_module import ranaModule
 from threading import Thread
 import threading
 import os
 import traceback
 import urllib2
 import time
-import modrana_utils
+from core import modrana_utils
 from modules import urllib3
-import rectangles
+from core import rectangles
 
-from tilenames import *
+from core.tilenames import *
 
 import socket
 #timeout = 30 # this sets timeout for all sockets

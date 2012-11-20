@@ -20,7 +20,7 @@
 #---------------------------------------------------------------------------
 
 import os
-import modrana_utils
+import modules.modrana_utils as modrana_utils
 
 MONAV_DATA_FOLDER_NAME = "monav_data"
 

@@ -19,8 +19,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
-from base_module import ranaModule
-import geo
+from modules.base_module import ranaModule
+from core import geo
 import math
 import threading
 
