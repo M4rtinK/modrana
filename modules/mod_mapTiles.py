@@ -793,6 +793,21 @@ class MapTiles(ranaModule):
 
     start1 = time.clock()
     pixbuf = self._storeTiles.getTile(layerPrefix, z, x, y, layerType)
+    def negative_image(pb, *args):
+      pb = pb.add_alpha(False,0,0,0).copy()
+      dat = pb.get_pixels_array()
+      for x in range(0,pb.get_width()):
+        for y in range(0,pb.get_height()):
+          p = dat[y][x]
+          p[0] = 255 - p[0]
+          p[1] = 255 - p[1]
+          p[2] = 255 - p[2]
+      newpb = gtk.gdk.pixbuf_new_from_array(
+        dat, pb.get_colorspace(), pb.get_bits_per_sample())
+      return newpb
+
+    pixbuf = negative_image(pixbuf)
+    print("tile negative in %1.2f ms" % (1000 * (time.clock() - start1)))
     """None from getTiles means the tile was not found
        False means loading the tile from file to pixbuf failed"""
     if pixbuf:
