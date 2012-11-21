@@ -1,4 +1,0 @@
-#!/bin/sh
-
-cd /home/user/software/modrana
-python ./modrana.py -u QML -d n9
