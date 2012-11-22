@@ -520,6 +520,15 @@ this is needed for the item tools menu to know where to return"""
       group,
       defaultMode)
 
+    # ** map filtering
+    group = addGroup("Filters", "map_filtering", catMap, "generic")
+    addOpt("Negative", "invertMapTiles",
+      [(False, "disabled"),
+       (True, "enabled"),
+       ('withNightTheme', "with night theme")],
+      group,
+      False)
+
     # ** tile storage
     group = addGroup("Tile storage", "tile_storage", catMap, "generic")
     addOpt("Tile storage", "tileStorageType",

@@ -18,7 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
+import PIL.ImageOps
 import urllib
+import array
 from modules.base_module import ranaModule
 from threading import Thread
 import threading
@@ -29,6 +31,19 @@ import time
 from core import modrana_utils
 from modules import urllib3
 from core import rectangles
+
+# if image manipulation tools are available, import them
+# and otherwise disable tile image manipulation
+IMAGE_MANIPULATION_IMPORT_SUCCESS = False
+try:
+  import Image
+  import ImageOps
+  import numpy
+  IMAGE_MANIPULATION_IMPORT_SUCCESS = True
+except ImportError, e:
+  print('mapTiles: import of image manipulation tools unsuccessful'
+        ' - tile image manipulation disabled')
+  print(e)
 
 from core.tilenames import *
 
@@ -115,6 +130,13 @@ class MapTiles(ranaModule):
     self.modrana.watch('mapScale', self._updateScalingCB)
     self.modrana.watch('z', self._updateScalingCB)
     self._storeTiles = self.m.get('storeTiles', None) # get the tile storage module
+
+    # map tile filtering
+    self.modrana.watch('currentTheme', self._updateTileFilteringCB)
+    self.modrana.watch('invertMapTiles', self._updateTileFilteringCB)
+    # check if tile filtering should be enabled with current theme
+    theme = self.get('currentTheme', 'default')
+    self._updateTileFilteringCB(key="currentTheme", oldValue=None, newValue=theme)
 
   def getTile(self, layer, z, x, y):
     """
@@ -793,26 +815,12 @@ class MapTiles(ranaModule):
 
     start1 = time.clock()
     pixbuf = self._storeTiles.getTile(layerPrefix, z, x, y, layerType)
-    def negative_image(pb, *args):
-      pb = pb.add_alpha(False,0,0,0).copy()
-      dat = pb.get_pixels_array()
-      for x in range(0,pb.get_width()):
-        for y in range(0,pb.get_height()):
-          p = dat[y][x]
-          p[0] = 255 - p[0]
-          p[1] = 255 - p[1]
-          p[2] = 255 - p[2]
-      newpb = gtk.gdk.pixbuf_new_from_array(
-        dat, pb.get_colorspace(), pb.get_bits_per_sample())
-      return newpb
 
-    pixbuf = negative_image(pixbuf)
-    print("tile negative in %1.2f ms" % (1000 * (time.clock() - start1)))
     """None from getTiles means the tile was not found
        False means loading the tile from file to pixbuf failed"""
     if pixbuf:
       start2 = time.clock()
-      self.storeInMemory(self.pixbufToCairoImageSurface(pixbuf), name)
+      self.storeInMemory(self.pixbuf2cairoImageSurface(pixbuf), name)
       if debug:
         storageType = self.get('tileStorageType', 'files')
         sprint("tile loaded from local storage (%s) in %1.2f ms" % (storageType, (1000 * (time.clock() - start1))))
@@ -930,12 +938,20 @@ class MapTiles(ranaModule):
       for key in oldestKeys:
         del self.images[0][key]
 
-  def pixbufToCairoImageSurface(self, pixbuf):
+  def _clearTileCache(self):
+    """completely clear the in-memory image cache"""
+    print('mapTiles: clearing the in-memory tile cache')
+    self.images[0] = {}
+
+  def pixbuf2cairoImageSurface(self, pixbuf):
     # this solution has been found on:
     # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
 
     """Using pixbufs in place of surface_from_png seems to be MUCH faster for JPEGSs and PNGs alike.
 Therefore we use it as default."""
+
+    # do any filtering on the pixbuf
+    pixbuf = self._filterTile(pixbuf)
 
     # Tile images are mostly 256 by 256 px, we don't need to check the size
     x = 256
@@ -950,6 +966,76 @@ Therefore we use it as default."""
     ct2.set_source_pixbuf(pixbuf, 0, 0)
     ct2.paint()
     return surface
+
+  def _updateTileFilteringCB(self, key='mapScale', oldValue=1, newValue=1):
+    if key == 'invertMapTiles':
+      if newValue == True:
+        self._enableTileFiltering()
+      elif newValue == False:
+        self._disableTileFiltering()
+      elif newValue == "withNightTheme":
+        theme = self.get('currentTheme', 'default')
+        # TODO: get this from theme config
+        if theme == "night":
+          self._enableTileFiltering()
+        else:
+          self._disableTileFiltering()
+    elif key == "currentTheme":
+      invertMapTiles = self.get('invertMapTiles', False)
+      if invertMapTiles == "withNightTheme":
+        # if switching from night to other -> disable
+        if oldValue == "night" and newValue != "night":
+          self._disableTileFiltering()
+        # switching from other to night -> enable
+        elif oldValue != "night" and newValue == "night":
+          self._enableTileFiltering()
+        # else: switching form some other theme to another theme
+        # -> do nothing
+
+
+
+  def _enableTileFiltering(self):
+    """assign the real filtering method, if possible
+    and flush the cache afterwards"""
+    if IMAGE_MANIPULATION_IMPORT_SUCCESS:
+      self._filterTile = self._invertPixbuf
+      self._clearTileCache()
+
+  def _disableTileFiltering(self):
+    """assign the NOP filtering method
+    and flush the cache if needed"""
+    if IMAGE_MANIPULATION_IMPORT_SUCCESS:
+      self._filterTile = self._nop
+      # as image manipulation is possible,
+      # a cache flush is needed
+      self._clearTileCache()
+
+  def _filterTile(self, tilePb):
+    """function hook for image tile processing"""
+    return tilePb
+
+  def _nop(self, arg):
+    """a NOP function used for replacing functions that are not
+    currently used for some reason (such as for example _invertPixbuf)"""
+    return arg
+
+  def _invertPixbuf(self, pixbuf):
+    """do image inversion for the given pixbuf
+    - why PIL & Numpy -> combined, they give usable performance
+    (pure python implementation was about 100x times slower
+    10 vs 1000 ms per tile)"""
+
+#    start1 = time.clock()
+    def pixbuf2Image(pb):
+      return Image.fromstring("RGB",(256,256),pb.get_pixels() )
+
+    def image2pixbuf(im):
+      arr = numpy.array(im)
+      return gtk.gdk.pixbuf_new_from_array(arr, gtk.gdk.COLORSPACE_RGB, 8)
+    image = pixbuf2Image(pixbuf)
+    image = ImageOps.invert(image)
+    return image2pixbuf(image)
+#    print("tile negative in %1.2f ms" % (1000 * (time.clock() - start1)))
 
   def imageName(self, x, y, z, layer):
     """Get a unique name for a tile image 
@@ -1135,21 +1221,7 @@ Therefore we use it as default."""
 
         pl.close() # this  blocks until the image is completely loaded
         # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
-        #x = pixbuf.get_width()
-        #y = pixbuf.get_height()
-        # Google sat images are 256 by 256 px, we don't need to check the size
-        x = 256
-        y = 256
-        ''' create a new cairo surface to place the image on '''
-        surface = cairo.ImageSurface(0, x, y)
-        ''' create a context to the new surface '''
-        ct = cairo.Context(surface)
-        ''' create a GDK formatted Cairo context to the new Cairo native context '''
-        ct2 = gtk.gdk.CairoContext(ct)
-        ''' draw from the pixbuf to the new surface '''
-        ct2.set_source_pixbuf(pl.get_pixbuf(), 0, 0)
-        ct2.paint()
-        ''' surface now contains the image in a Cairo surface '''
+        surface = self.callback.pixbuf2cairoImageSurface(pl.get_pixbuf())
         self.callback.storeInMemory(surface, name)
         # like this, corrupted tiles should not get past the pixbuf loader and be stored
       else:
