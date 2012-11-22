@@ -19,8 +19,9 @@
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
 import PIL.ImageOps
+import StringIO
 import urllib
-import array
+#import array
 from modules.base_module import ranaModule
 from threading import Thread
 import threading
@@ -56,7 +57,6 @@ if gs.GUIString == "GTK":
   try:
     import Image
     import ImageOps
-    import numpy
     IMAGE_MANIPULATION_IMPORT_SUCCESS = True
   except ImportError, e:
     print('mapTiles: import of image manipulation tools unsuccessful'
@@ -1034,8 +1034,26 @@ Therefore we use it as default."""
       return Image.fromstring("RGB",(256,256),pb.get_pixels() )
 
     def image2pixbuf(im):
-      arr = numpy.array(im)
-      return gtk.gdk.pixbuf_new_from_array(arr, gtk.gdk.COLORSPACE_RGB, 8)
+      file1 = StringIO.StringIO()
+      im.save(file1, "ppm")
+      contents = file1.getvalue()
+      file1.close()
+      loader = gtk.gdk.PixbufLoader("pnm")
+      loader.write(contents, len(contents))
+      pixbuf = loader.get_pixbuf()
+      loader.close()
+      return pixbuf
+#      arr = numpy.array(im)
+#      return gtk.gdk.pixbuf_new_from_array(arr, gtk.gdk.COLORSPACE_RGB, 8)
+    # Why are we using StringIO here ?
+    #
+    # The above mentioned method works just fine with recent GTK2 on PC
+    # but doesn't work with the highly patched and old version of GTK on
+    # Maemo 5 fremantle.
+    # Other than that, even on the N900 StringIO seems to still be really fast
+    # so it is used even on desktop, eliminating the Numpy dependency.
+    # Also "premature optimization" and all that. :)
+
     image = pixbuf2Image(pixbuf)
     image = ImageOps.invert(image)
     return image2pixbuf(image)
