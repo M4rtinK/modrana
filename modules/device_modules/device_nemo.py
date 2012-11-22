@@ -76,8 +76,11 @@ class device_example(deviceModule):
   def getSupportedGUIModuleIds(self):
     return ["QML"]
 
-  def getLocationType(self):
-    return "qt_mobility"
+# as python-qtmobility currently segfaults
+# when asked for location info,
+# use the default (GPSD = no position) for now
+#  def getLocationType(self):
+#    return "qt_mobility"
 
   def hasButtons(self):
     # TODO: support for volume buttons
