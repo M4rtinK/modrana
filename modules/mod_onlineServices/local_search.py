@@ -1,11 +1,14 @@
 #local search result handling
 
-from modules.point import Point
+from core.point import Point
 
 class LocalSearchPoint(Point):
   """a local search result point"""
-  def __init__(self, lat, lon, name="",
-               description="", phoneNumbers=[], urls=[], addressLines=[], emails=[]):
+  def __init__(self, lat, lon, name="", description="", phoneNumbers=None, urls=None, addressLines=None, emails=None):
+    if not emails: emails = []
+    if not addressLines: addressLines = []
+    if not urls: urls = []
+    if not phoneNumbers: phoneNumbers = []
     Point.__init__(self, lat, lon, message=name)
     self.name = name
     self.description = description

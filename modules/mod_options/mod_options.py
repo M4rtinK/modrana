@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import ranaModule
-import modules.modrana_utils as modrana_utils
+import core.modrana_utils as modrana_utils
 
 # identifies item as a group
 GROUP_IDENTIFIER = "groupIdentifier"

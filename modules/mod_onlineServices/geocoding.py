@@ -1,5 +1,5 @@
 """multi source geocoding"""
-from point import Point
+from core.point import Point
 import re
 
 class GeoPyPoint(Point):

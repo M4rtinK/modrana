@@ -36,7 +36,7 @@ from core import gs
 if gs.GUIString == "GTK":
   import gtk
   import cairo
-  from color import Color
+  from core.color import Color
 
 def getModule(m,d,i):
   return Icons(m,d,i)

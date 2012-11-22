@@ -16,7 +16,7 @@ except Exception, e:
   print("onlineServices: using integrated non-binary simplejson, install proper simplejson package for better speed")
   import simplejson as json
 
-from point import Point
+from core.point import Point
 
 
 class GeonamesWikipediaPoint(Point):
