@@ -32,24 +32,16 @@ from core import modrana_utils
 from modules import urllib3
 from core import rectangles
 
-# if image manipulation tools are available, import them
-# and otherwise disable tile image manipulation
-IMAGE_MANIPULATION_IMPORT_SUCCESS = False
-try:
-  import Image
-  import ImageOps
-  import numpy
-  IMAGE_MANIPULATION_IMPORT_SUCCESS = True
-except ImportError, e:
-  print('mapTiles: import of image manipulation tools unsuccessful'
-        ' - tile image manipulation disabled')
-  print(e)
-
 from core.tilenames import *
 
 import socket
 #timeout = 30 # this sets timeout for all sockets
 #socket.setdefaulttimeout(timeout)
+
+
+# if image manipulation tools are available, import them
+# and otherwise disable tile image manipulation
+IMAGE_MANIPULATION_IMPORT_SUCCESS = False
 
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -58,6 +50,18 @@ if gs.GUIString == "GTK":
   import gtk
   import gobject
   import cairo
+
+  # as the image manipulation is dependent on GTK being
+  # used, only load it if using the GTK GUI
+  try:
+    import Image
+    import ImageOps
+    import numpy
+    IMAGE_MANIPULATION_IMPORT_SUCCESS = True
+  except ImportError, e:
+    print('mapTiles: import of image manipulation tools unsuccessful'
+          ' - tile image manipulation disabled')
+    print(e)
 
 def getModule(m, d, i):
   return(MapTiles(m, d, i))
