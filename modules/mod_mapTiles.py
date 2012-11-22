@@ -64,7 +64,7 @@ if gs.GUIString == "GTK":
     print(e)
 
 def getModule(m, d, i):
-  return(MapTiles(m, d, i))
+  return MapTiles(m, d, i)
 
 
 class MapTiles(ranaModule):
