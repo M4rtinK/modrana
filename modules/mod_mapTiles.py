@@ -138,7 +138,7 @@ class MapTiles(ranaModule):
     # map tile filtering
     self.modrana.watch('currentTheme', self._updateTileFilteringCB)
     self.modrana.watch('invertMapTiles', self._updateTileFilteringCB)
-    # check if tile filtering should be enabled with current theme
+    # check if tile filtering is enabled or should be enabled with current theme
     invert = self.get('invertMapTiles', False)
     theme = self.get('currentTheme', 'default')
     self._updateTileFilteringCB(key="invertMapTiles", oldValue=None, newValue=invert)
