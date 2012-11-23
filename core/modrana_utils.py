@@ -121,7 +121,6 @@ class SimpleListContainer(ListContainer):
   def getLength(self):
     return len(self.items)
 
-
 class PointListContainer(ListContainer):
   def __init__(self, points=None):
     if not points: points = []
@@ -136,7 +135,6 @@ class PointListContainer(ListContainer):
 
   def getLength(self):
     return len(self.points)
-
 
 def isTheStringAnImage(s):
   """test if the string contains an image
@@ -168,7 +166,7 @@ def createFolderPath(newPath):
   -> parent directories will be created
   -> if directory already exists, then do nothing
   -> if there is another filesystem object (like a file)
-  with the same name exists, raise an exception"""
+  with the same name, raise an exception"""
   if not newPath:
     print("cannot create folder, wrong path: ", newPath)
     return False
@@ -181,7 +179,7 @@ def createFolderPath(newPath):
     print("creating path: %s" % newPath)
     head, tail = os.path.split(newPath)
     if head and not os.path.isdir(head):
-      createFolderPath(head) # NOTE: recursion
+      os.makedirs(head)
     if tail:
       os.mkdir(newPath)
     return True

@@ -31,6 +31,7 @@ import traceback
 import imp
 # import core modules/classes
 from core import startup
+from core import modrana_utils
 from core import paths
 from core import configs
 from core import gs
@@ -46,30 +47,6 @@ ALL_MODULE_FOLDERS = [
   os.path.join(MAIN_MODULES_FOLDER, DEVICE_MODULES_FOLDER),
   os.path.join(MAIN_MODULES_FOLDER, GUI_MODULES_FOLDER)
 ]
-
-def createFolderPath(newPath):
-  """
-  Create a path for a directory and all needed parent folders
-  -> parent directories will be created
-  -> if directory already exists, then do nothing
-  -> if there is another filesystem object (like a file) with the same name, raise an exception
-  """
-  if not newPath:
-    print("cannot create folder, wrong path: ", newPath)
-    return False
-  if os.path.isdir(newPath):
-    return True
-  elif os.path.isfile(newPath):
-    print("cannot create directory, file already exists: '%s'" % newPath)
-    return False
-  else:
-    print("creating path: %s" % newPath)
-    head, tail = os.path.split(newPath)
-    if head and not os.path.isdir(head):
-        os.makedirs(head)
-    if tail:
-        os.mkdir(newPath)
-    return True
 
 class ModRana:
   """
@@ -706,7 +683,7 @@ class ModRana:
     userHomePath = os.getenv("HOME", "")
     profileFolderPath = os.path.join(userHomePath, modRanaProfileFolderName)
     # make sure it exists
-    createFolderPath(profileFolderPath)
+    modrana_utils.createFolderPath(profileFolderPath)
     # return it
     return profileFolderPath
 
