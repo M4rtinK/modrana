@@ -19,8 +19,6 @@ class SynchronizedCircularStack:
     starting by the oldest ones
   * thread safe using a mutex
   maxItems sets the maximum number of items, 0=infinite size
-
-
   """
 
   def __init__(self, maxItems=0):

@@ -31,7 +31,7 @@ import traceback
 import imp
 # import core modules/classes
 from core import startup
-from core import modrana_utils
+from core import utils
 from core import paths
 from core import configs
 from core import gs
@@ -683,7 +683,7 @@ class ModRana:
     userHomePath = os.getenv("HOME", "")
     profileFolderPath = os.path.join(userHomePath, modRanaProfileFolderName)
     # make sure it exists
-    modrana_utils.createFolderPath(profileFolderPath)
+    utils.createFolderPath(profileFolderPath)
     # return it
     return profileFolderPath
 

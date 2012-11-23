@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import ranaModule
-import core.modrana_utils as modrana_utils
+from core import utils
 
 # identifies item as a group
 GROUP_IDENTIFIER = "groupIdentifier"
@@ -39,7 +39,7 @@ class Options(ranaModule):
     # profile folder
     self.profileFolderPath = self.modrana.getProfilePath()
     # check the profile path and create the folders if necessary
-    modrana_utils.createFolderPath(self.profileFolderPath)
+    utils.createFolderPath(self.profileFolderPath)
 
     # load persistent options
     #    self.load()

@@ -27,7 +27,7 @@ from core import geo
 from threading import Thread
 import threading
 from modules import urllib3
-from core import modrana_utils
+from core import utils
 
 # socket timeout
 import socket
@@ -742,7 +742,7 @@ class MapData(ranaModule):
 
           TODO: does someone supply non-bitmap/SVG tiles ?
           """
-          if modrana_utils.isTheStringAnImage(content):
+          if utils.isTheStringAnImage(content):
             #its an image, save it
             m.automaticStoreTile(content, folderPrefix, z, x, y, layerType, filename)
           else:

@@ -19,7 +19,7 @@
 #---------------------------------------------------------------------------
 
 import os
-import modrana_utils as modrana_utils
+import utils
 
 MONAV_DATA_FOLDER_NAME = "monav_data"
 
@@ -42,7 +42,7 @@ class Paths:
     # profile folder
     self.profileFolderPath = self.modrana.getProfilePath()
     # check the profile path and create the folders if necessary
-    modrana_utils.createFolderPath(self.profileFolderPath)
+    utils.createFolderPath(self.profileFolderPath)
 
     # load version string
     self.versionString = None
@@ -54,7 +54,7 @@ class Paths:
   def getProfilePath(self):
     """return path to the profile folder"""
     # check if the path exists and create it if not
-    modrana_utils.createFolderPath(self.profileFolderPath)
+    utils.createFolderPath(self.profileFolderPath)
     return self.profileFolderPath
 
   def getOptionsFilePath(self):
@@ -187,5 +187,5 @@ class Paths:
   def _assurePath(self, path):
     """assure path exists and return it back"""
     # check if the path exists and create it if not
-    modrana_utils.createFolderPath(path)
+    utils.createFolderPath(path)
     return path

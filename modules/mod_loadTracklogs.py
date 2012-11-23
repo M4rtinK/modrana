@@ -22,7 +22,7 @@ import math
 from modules.base_module import ranaModule
 from core  import geo
 import os
-from core import modrana_utils
+from core import utils
 import glob
 import cPickle
 import shutil
@@ -92,7 +92,7 @@ class loadTracklogs(ranaModule):
       return None # tracklog folder path is unknown
     else:
       TFSubPath = os.path.join(tracklogFolderPath, subPath)
-      modrana_utils.createFolderPath(TFSubPath)
+      utils.createFolderPath(TFSubPath)
       return TFSubPath
 
   def _createBasicFolderStructure(self):
@@ -106,7 +106,7 @@ class loadTracklogs(ranaModule):
     tfp = self.modrana.paths.getTracklogsFolderPath()
     examplesDestinationPath = os.path.join(tfp,'examples')
     if not os.path.exists(examplesDestinationPath):
-      modrana_utils.createFolderPath(examplesDestinationPath)
+      utils.createFolderPath(examplesDestinationPath)
       print(' ** loadTracklogs: copying example tracklogs')
       examplesSourcePath = 'data/tracklog_examples'
        # copy all files from this folder
@@ -250,7 +250,7 @@ class loadTracklogs(ranaModule):
         filename = os.path.split(file)[1]
         lastModifiedEpochSecs = os.path.getmtime(path)
         lastModified = strftime("%d.%m.%Y %H:%M:%S",gmtime(lastModifiedEpochSecs))
-        size = modrana_utils.bytes2PrettyUnitString(os.path.getsize(path))
+        size = utils.bytes2PrettyUnitString(os.path.getsize(path))
         extension = os.path.splitext(path)[1]
         cat = folder
         item={'path':path,

@@ -29,7 +29,7 @@ import os
 import traceback
 import urllib2
 import time
-from core import modrana_utils
+from core import utils
 from modules import urllib3
 from core import rectangles
 
@@ -86,7 +86,7 @@ class MapTiles(ranaModule):
               platform dependent value,
               user configurable
     """
-    self.loadRequestCStack = modrana_utils.SynchronizedCircularStack(self.loadRequestCStackSize)
+    self.loadRequestCStack = utils.SynchronizedCircularStack(self.loadRequestCStackSize)
     #    self.loadingNotifyQueue = Queue.Queue(1)
     self.downloadRequestPool = []
     self.downloadRequestPoolLock = threading.Lock()
@@ -179,7 +179,7 @@ class MapTiles(ranaModule):
 
     if tileData:
       # check if the data is actually an image, and not an error page
-      if modrana_utils.isTheStringAnImage(tileData):
+      if utils.isTheStringAnImage(tileData):
         tileFolder = self.modrana.paths.getMapFolderPath()
         filePath = os.path.join(tileFolder, self.getImagePath(x, y, z, layerPrefix, layerType))
         self._storeTiles.automaticStoreTile(tileData, layerPrefix, z, x, y, layerType, filePath)

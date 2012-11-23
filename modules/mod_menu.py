@@ -21,7 +21,7 @@ from modules.base_module import ranaModule
 import time
 import math
 from core import geo
-from core import modrana_utils
+from core import utils
 
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -702,9 +702,9 @@ class menus(ranaModule):
 
   def addPointListMenu(self, name, parentAction, points=None, goto='detail'):
     if points:
-      c = modrana_utils.SimpleListContainer(points)
+      c = utils.SimpleListContainer(points)
     else:
-      c = modrana_utils.SimpleListContainer()
+      c = utils.SimpleListContainer()
 
     def describePointGo2Map(point, index, name):
       mainText = point.getName()
@@ -732,9 +732,9 @@ class menus(ranaModule):
 
   def addListMenu(self, name, parentAction, items=None, descFunction=None, drawFunction=None):
     if items:
-      c = modrana_utils.SimpleListContainer(items)
+      c = utils.SimpleListContainer(items)
     else:
-      c = modrana_utils.SimpleListContainer()
+      c = utils.SimpleListContainer()
     newListableMenu = self.ListableMenu(name, self, c, parentAction, descFunction, drawFunction,4)
 
     self.lists[name] = newListableMenu
