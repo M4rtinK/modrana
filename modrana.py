@@ -39,10 +39,12 @@ from core import gs
 importsDoneTimestamp = time.time()
 
 MAIN_MODULES_FOLDER = 'modules'
+DEVICE_MODULES_FOLDER = "device_modules"
+GUI_MODULES_FOLDER = "gui_modules"
 ALL_MODULE_FOLDERS = [
   MAIN_MODULES_FOLDER,
-  os.path.join(MAIN_MODULES_FOLDER, "device_modules"),
-  os.path.join(MAIN_MODULES_FOLDER, "gui_modules")
+  os.path.join(MAIN_MODULES_FOLDER, DEVICE_MODULES_FOLDER),
+  os.path.join(MAIN_MODULES_FOLDER, GUI_MODULES_FOLDER)
 ]
 
 def createFolderPath(newPath):
