@@ -18,11 +18,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 #from dbus.service import Object
-import math
 from modules.base_module import ranaModule
 from core  import geo
-import os
 from core import utils
+import math
+import os
 import glob
 import cPickle
 import shutil
@@ -30,7 +30,7 @@ from time import clock
 from time import gmtime, strftime
 
 def getModule(m,d,i):
-  return(loadTracklogs(m,d,i))
+  return loadTracklogs(m,d,i)
 
 class loadTracklogs(ranaModule):
   """A sample pyroute module"""
