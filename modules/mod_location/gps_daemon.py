@@ -24,20 +24,19 @@ from base_position_source import PositionSource, Fix
 
 class GPSD(PositionSource):
   def __init__(self,location):
-    self.connected = False
     PositionSource.__init__(self, location)
-#  def __init__(self, location):
-#    PositionSource.__init__(location)
-
+    self.connected = False
+    self.GPSDConsumer = None
+    self.status="not connected"
   def start(self):
     """start the GPSD based location update method"""
     self.connected = False
     try:
       self.GPSDConsumer = GPSDConsumer()
-      self._checkVerbose() # check if verbose debugging is enabled
       self.GPSDConsumer.daemon = True
       self.GPSDConsumer.start()
       self.connected = True
+      self.setGPSDDebug(self.debug) # check if verbose debugging is enabled
     except Exception, e:
       print("location GPSD: connecting to GPSD failed", e)
       self.status = "No GPSD running"
@@ -65,9 +64,11 @@ class GPSD(PositionSource):
                    speed )
         self.fix = fix
 
-  def _checkVerbose(self):
-    verbose = self.location.get('gpsdDebugVerbose', False)
-#    verbose = True
+  def setDebug(self, value):
+    self.debug = value
+    self.setGPSDDebug(value)
+
+  def setGPSDDebug(self, verbose):
     if self.GPSDConsumer:
       if verbose:
         self.GPSDConsumer.setVerbose(True)

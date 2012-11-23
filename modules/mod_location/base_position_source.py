@@ -25,6 +25,7 @@ class PositionSource:
   def __init__(self, location):
     self.location = location
     self.fix = Fix() # position fix
+    self.debug = False
 
   def start(self):
     """
@@ -60,6 +61,9 @@ class PositionSource:
     set update interval, return whether interval was successfully set
     """
     return False
+
+  def setDebug(self, value):
+    self.debug = value
 
 # from AGTL
 class Fix():

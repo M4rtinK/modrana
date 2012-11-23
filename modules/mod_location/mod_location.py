@@ -50,6 +50,9 @@ class Location(ranaModule):
         import gps_daemon
         self.provider = gps_daemon.GPSD(self)
 
+    # watch if debugging needs to be enabled
+    self.modrana.watch("gpsDebugEnabled", self._debugCB, runNow=True)
+
   def firstTime(self):
     # periodic screen redraw
     if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
@@ -95,6 +98,10 @@ class Location(ranaModule):
       sFromLastRequest = time() - self.modrana.gui.getLastFullRedrawRequest()
       if sFromLastRequest > 0.85:
         self.set('needRedraw', True)
+
+  def _debugCB(self, key, oldValue, newValue):
+    if self.provider:
+      self.provider.setDebug(newValue)
 
   def handleMessage(self, message, type, args):
     if message == "setPosLatLon" and type == "ml":
@@ -191,3 +198,7 @@ class Location(ranaModule):
       self.stopLocation()
     except Exception, e:
       print "location: stopping location failed", e
+
+  def _checkVerbose(self):
+    if self.provider:
+      self.provider._checkVerbose()
