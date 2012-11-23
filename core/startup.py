@@ -422,7 +422,7 @@ class Startup:
     main = gobject.MainLoop()
 
     # register fix CB
-    self.modrana.watch('fix', self._fixCB, time.time(), main)
+    self.modrana.watch('fix', self._fixCB, [time.time(), main])
 
     # do we need to load the location module ?
     # we usually need to if we handle an early task that happens before regular startup

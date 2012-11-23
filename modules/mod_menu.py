@@ -891,7 +891,7 @@ class menus(ranaModule):
       oldAction = self.parentAction # save the previous back action
       self.parentAction = action # replace with the given one
       # restore by callback once the menu is left
-      self.menus.watch('menu', self._menuLeftCB, oldAction)
+      self.menus.watch('menu', self._menuLeftCB, [oldAction])
 
     def _menuLeftCB(self, key, old, new, oldAction):
       # restore the original back action

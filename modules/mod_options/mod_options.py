@@ -1027,8 +1027,7 @@ this is needed for the item tools menu to know where to return"""
     locationType = self.dmod.getLocationType()
     if locationType == 'liblocation':
       addBoolOpt("Show N900 GPS-fix", "n900GPSDebug", group, False)
-    if locationType == 'gpsd':
-      addBoolOpt("Show gpsd debug output", "gpsdDebugVerbose", group, False, "location:gpsdCheckVerboseDebugEnabled")
+    addBoolOpt("GPS debug messages", "gpsDebugEnabled", group, False)
 
 
 

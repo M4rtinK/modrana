@@ -437,19 +437,26 @@ class ModRana:
     else:
       print("modrana: can't purge a not-present key: %s" % key)
 
-  def watch(self, key, callback, *args):
+  def watch(self, key, callback, args=None, runNow=False):
     """add a callback on an options key
     callback will get:
     key, newValue, oldValue, *args
 
     NOTE: watch ids should be >0, so that they evaluate as True
     """
+    if not args: args = []
     nrId = self.maxWatchId + 1
     id = "%d_%s" % (nrId,key)
     self.maxWatchId = nrId # TODO: recycle ids ? (alla PID)
     if key not in self.watches:
       self.watches[key] = [] # create the initial list
     self.watches[key].append((id,callback,args))
+    # should we now run the callback one ?
+    # -> this is useful for modules that configure
+    # themselves according to an options value at startup
+    if runNow:
+      currentValue = self.get(key, None)
+      callback(key, currentValue, currentValue, *args)
     return id
 
   def removeWatch(self, id):
