@@ -26,9 +26,9 @@ if gs.GUIString == "GTK":
 
 
 def getModule(m,d,i):
-  return(keys(m,d,i))
+  return Keys(m,d,i)
 
-class keys(ranaModule):
+class Keys(ranaModule):
   """A keyboard input handling module"""
   
   def __init__(self, m, d, i):
