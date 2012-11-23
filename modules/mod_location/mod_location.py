@@ -22,7 +22,7 @@ from time import *
 from core import gs
 
 def getModule(m,d,i):
-  return(Location(m,d,i))
+  return Location(m,d,i)
 
 class Location(ranaModule):
   """Supplies position info from a position source"""
