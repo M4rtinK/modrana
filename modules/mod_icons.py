@@ -24,7 +24,7 @@ import fnmatch
 """for some reason one import method works
 on Fremantle and other everywhere (?) else"""
 try:
-  from configobj.configobj import ConfigObj # everywhere
+  from modules.configobj.configobj import ConfigObj # everywhere
 except Exception, e:
   print(e)
   print("icons: trying alternative configobj import method")
