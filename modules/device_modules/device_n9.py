@@ -27,9 +27,9 @@ from QtMobility.SystemInfo import QSystemScreenSaver
 # NOTE: use the device_ prefix when naming the module
 
 def getModule(m,d,i):
-  return device_example(m,d,i)
+  return DeviceN9(m,d,i)
 
-class device_example(deviceModule):
+class DeviceN9(deviceModule):
   """A Nokia N9 device module"""
   
   def __init__(self, m, d, i):

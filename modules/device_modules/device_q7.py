@@ -22,9 +22,9 @@
 from base_device_module import deviceModule
 
 def getModule(m,d,i):
-  return device_q7(m,d,i)
+  return DeviceQ7(m,d,i)
 
-class device_q7(deviceModule):
+class DeviceQ7(deviceModule):
   """A SmartQ 7 modRana device-specific module"""
   
   def __init__(self, m, d, i):
@@ -37,7 +37,7 @@ class device_q7(deviceModule):
     return "Smart Devices SmartQ 7 MID"
 
   def getWinWH(self):
-    return (800,480)
+    return 800,480
 
   def simpleMapDragging(self):
     return True

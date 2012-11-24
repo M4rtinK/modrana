@@ -22,9 +22,9 @@
 from base_device_module import deviceModule
 
 def getModule(m,d,i):
-  return device_neo(m,d,i)
+  return DeviceNeo(m,d,i)
 
-class device_neo(deviceModule):
+class DeviceNeo(deviceModule):
   """A Neo FreeRunner modRana device-specific module"""
   
   def __init__(self, m, d, i):
@@ -38,7 +38,7 @@ class device_neo(deviceModule):
     return "OpenMoko Neo FreeRunner"
 
   def getWinWH(self):
-    return (480,600)
+    return 480,600
 
   def startInFullscreen(self):
     return True

@@ -22,9 +22,9 @@
 from base_device_module import deviceModule
 
 def getModule(m,d,i):
-  return Device_PC(m,d,i)
+  return DevicePC(m,d,i)
 
-class Device_PC(deviceModule):
+class DevicePC(deviceModule):
   """A modRana device-specific module for PC"""
   
   def __init__(self, m, d, i):

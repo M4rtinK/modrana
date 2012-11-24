@@ -22,9 +22,9 @@
 from base_device_module import deviceModule
 
 def getModule(m,d,i):
-  return device_netbook(m,d,i)
+  return DeviceNetbook(m,d,i)
 
-class device_netbook(deviceModule):
+class DeviceNetbook(deviceModule):
   """A netbook modRana device-specific module"""
   
   def __init__(self, m, d, i):

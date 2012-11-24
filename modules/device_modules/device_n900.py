@@ -19,7 +19,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-import os
 import subprocess
 from base_device_module import deviceModule
 #N900 specific:
@@ -47,10 +46,10 @@ else:
 import time
 
 def getModule(m, d, i):
-  return device_n900(m, d, i)
+  return DeviceN900(m, d, i)
 
 
-class device_n900(deviceModule):
+class DeviceN900(deviceModule):
   """A N900 modRana device-specific module"""
 
   def __init__(self, m, d, i):
@@ -429,38 +428,38 @@ class device_n900(deviceModule):
         self.lControl = location.GPSDControl.get_default()
         self.lDevice = location.GPSDevice()
       except Exception, e:
-        print "n900 - location: - cant create location objects: %s" % e
+        print("n900 - location: - cant create location objects: %s" % e)
 
       try:
         self.lControl.set_properties(preferred_method=location.METHOD_USER_SELECTED)
       except Exception, e:
-        print "n900 - location: - cant set preferred location method: %s" % e
+        print("n900 - location: - cant set preferred location method: %s" % e)
 
       try:
         self.lControl.set_properties(preferred_interval=location.INTERVAL_1S)
       except Exception, e:
-        print "n900 - location: - cant set preferred location interval: %s" % e
+        print("n900 - location: - cant set preferred location interval: %s" % e)
       try:
         self.lControl.start()
-        print "** n900 - location: - GPS successfully activated **"
+        print("** n900 - location: - GPS successfully activated **")
         self.connected = True
       except Exception, e:
-        print "n900 - location: - opening the GPS device failed: %s" % e
+        print("n900 - location: - opening the GPS device failed: %s" % e)
         self.status = "No GPSD running"
 
       # connect callbacks
       #self.lControl.connect("error-verbose", self._liblocationErrorCB)
       self.lDevice.connect("changed", self._libLocationUpdateCB)
-      print "n900 - location: activated"
-    except:
+      print("n900 - location: activated")
+    except Exception, e:
       self.status = "No GPSD running"
-      print "n900 - location: - importing location module failed, please install the python-location package"
+      print("n900 - location: - importing location module failed, please install the python-location package")
+      print(e)
       self.sendMessage('notification:install python-location package to enable GPS#7')
 
 
   def _libLocationStop(self):
     """stop the liblocation based location update method"""
-
     print('n900 - location: stopping')
     if self.lControl:
       self.lControl.stop()
@@ -468,7 +467,6 @@ class device_n900(deviceModule):
       self.lControl = None
       self.lDevice = None
       self.location = None
-
 
   def _liblocationErrorCB(self, control, error):
     if error == location.ERROR_USER_REJECTED_DIALOG:
@@ -483,8 +481,7 @@ class device_n900(deviceModule):
       print("System error")
 
   def _libLocationUpdateCB(self, device):
-    """
-    from:  http://wiki.maemo.org/PyMaemo/Using_Location_API
+    """from:  http://wiki.maemo.org/PyMaemo/Using_Location_API
     result tuple in order:
     * mode: The mode of the fix
     * fields: A bitfield representing which items of this tuple contain valid data
@@ -500,13 +497,10 @@ class device_n900(deviceModule):
     * speed: Current speed in km/h (location.GPS_DEVICE_SPEED_SET)
     * eps: Speed accuracy
     * climb: Current rate of climb in m/s (location.GPS_DEVICE_CLIMB_SET)
-    * epc: Climb accuracy
-
-      """
+    * epc: Climb accuracy"""
     try:
       if device.fix:
         fix = device.fix
-
         self.set('fix', fix[0])
         """from liblocation reference:
         0 =	The device has not seen a satellite yet.
@@ -542,19 +536,18 @@ class device_n900(deviceModule):
           print self.get('bearing', None)
           print self.get('speed', None)
           print "#############################"
-
-        """always set this key to current epoch once the location is updated
- so that modules can watch it and react"""
+        # always set this key to current epoch once the location is updated
+        # so that modules can watch it and react
         self.set('locationUpdated', time.time())
         #        print "updating location"
         self.set('needRedraw', True)
 
       else:
         self.status = "Unknown"
-        print "n900 - location: getting fix failed (on a regular update)"
+        print("n900 - location: getting fix failed (on a regular update)")
     except Exception, e:
       self.status = "Unknown"
-      print "n900 - location:getting fix failed (on a regular update + exception: %s)" % e
+      print("n900 - location:getting fix failed (on a regular update + exception: %s)" % e)
 
 
   # ** Internet connectivity **
