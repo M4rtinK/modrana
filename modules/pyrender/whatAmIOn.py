@@ -83,7 +83,7 @@ def describe(lat,lon):
 
 if __name__ == "__main__":
   if len(sys.argv) >= 3:
-    print describe(float(sys.argv[1]), float(sys.argv[2]))
+    print(describe(float(sys.argv[1]), float(sys.argv[2])))
   else:
-    print "no position supplied, using default"
-    print describe(51.678935, -0.826256)
+    print("no position supplied, using default")
+    print(describe(51.678935, -0.826256))

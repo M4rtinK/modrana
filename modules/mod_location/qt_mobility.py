@@ -18,9 +18,9 @@
 #---------------------------------------------------------------------------
 
 #from QtMobility.Location import QGeoPositionInfoSource
-print "importing Qt Mobility"
+print("importing Qt Mobility")
 from QtMobility.Location import QGeoPositionInfoSource
-print "Qt Mobility imported"
+print("Qt Mobility imported")
 
 from base_position_source import PositionSource, Fix
 

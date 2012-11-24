@@ -73,7 +73,7 @@ def fetchJson(query_url, params=None, headers=None):
     if not params: params = {}
     encoded_params = urllib.urlencode(params)
     url = query_url + encoded_params
-    print url
+    print(url)
     request = urllib2.Request(url, headers=headers)
     response = urllib2.urlopen(request)
     return url, json.load(response)

@@ -55,7 +55,7 @@
 #
 #    # If it doesn't already exist, then load it
 #    if not self.tiles.has_key(filename):
-#      #print "Loading %s" % (filename)
+#      #print("Loading %s" % (filename))
 #      self.tiles[filename] = vmap_load.vmapData(filename)
 #
 #    return self.tiles[filename]
@@ -82,10 +82,10 @@
 #      for line in f:
 #        k,v = line.rstrip().split("\t")
 #        k = int(k)
-#        #print "%d = '%s'" % (k,v)
+#        #print("%d = '%s'" % (k,v))
 #        self.enums[k] = v
 #    except IOError:
-#      print "Couldn't find vector map data. Expected enum file in %s" % filename
+#      print("Couldn't find vector map data. Expected enum file in %s" % filename)
 #      sys.exit(-1)
 #
 #
@@ -114,7 +114,7 @@
 #  def drawTile(self,cr,tx,ty,tz,proj,mapBounds):
 #    start = time()
 #    mapData = self.getTile(tx,ty,tz)
-#    #print " - Map data: %1.3fms" % ((time() - start) * 1000.0)
+#    #print(" - Map data: %1.3fms" % ((time() - start) * 1000.0))
 #
 #    cways = 0
 #    cdone = 0
@@ -122,10 +122,10 @@
 #    coob = 0
 #
 #    (minlat,maxlat,minlon,maxlon) = mapBounds
-#    #print " - Map: %1.3f to %1.3f, %1.3f to %1.3f"%(minlat,maxlat,minlon,maxlon)
+#    #print(" - Map: %1.3f to %1.3f, %1.3f to %1.3f"%(minlat,maxlat,minlon,maxlon))
 #
 #    if(mapData):
-#      #print mapData.ways
+#      #print(mapData.ways)
 #      for wayID, way in mapData.ways.items():
 #        if not self.waysDrawn.get(wayID, False): # if not drawn already as part of another tile
 #
@@ -136,7 +136,7 @@
 #            or lat2 < minlat
 #            or lat1 > maxlat)
 #
-#          #print "   - Way: %1.3f to %1.3f, %1.3f to   %1.3f - %s"%(lat1,lat2,lon1,lon2, text)
+#          #print("   - Way: %1.3f to %1.3f, %1.3f to   %1.3f - %s"%(lat1,lat2,lon1,lon2, text))
 #
 #          if offMap:
 #            coob += 1
@@ -164,10 +164,10 @@
 #        else:
 #          cdone += 1
 #    else:
-#      print "No map data"
+#      print("No map data")
 #
 #    #if(tx == 16342 and ty == 10803):
-#    #print " - %d,%d,%d: %d ways, %d done, %d oob, %d nd, %1.3fms" % (tx,ty,tz, cways, cdone, coob, cnodes, 1000.0 * (time() - start))
+#    #print(" - %d,%d,%d: %d ways, %d done, %d oob, %d nd, %1.3fms" % (tx,ty,tz, cways, cdone, coob, cnodes, 1000.0 * (time() - start)))
 #
 #  def drawMap(self, cr):
 #    (sx,sy,sw,sh) = self.get('viewport')
@@ -188,9 +188,9 @@
 #    #y1,x1 = proj.xy2ll(x1,y1)
 #    #x2,y2 = proj.pxpy2xy(proj.px2,proj.py1)
 #    #y2,x2 = proj.xy2ll(x2,y2)
-#    #print "%1.3f to %1.3f, %1.3f to %1.3f" % (x1,x2,y1,y2)
+#    #print("%1.3f to %1.3f, %1.3f to %1.3f" % (x1,x2,y1,y2))
 #    bounds = (proj.S,proj.N, proj.W,proj.E)
-#    #print "%1.3f to %1.3f, %1.3f to %1.3f" % bounds
+#    #print("%1.3f to %1.3f, %1.3f to %1.3f" % bounds)
 #
 #    # Render each 'tile' in view
 #    self.waysDrawn = {}
@@ -200,13 +200,13 @@
 #        count += 1
 #
 #    duration = time() - start
-#    #print "Z%d %d tiles, %f seconds" % (self.z, count, duration)
-#    #print "%f - %f" % (proj.px1, proj.px2)
+#    #print("Z%d %d tiles, %f seconds" % (self.z, count, duration))
+#    #print("%f - %f" % (proj.px1, proj.px2))
 #
 #    if self.get("benchmarkLines"):
-#      print "Style: %1.3fms, line %1.3fms" % (
+#      print("Style: %1.3fms, line %1.3fms" % (
 #        1000.0 * self.style_d / self.style_c,
-#        1000.0 * self.line_d / self.line_c)
+#        1000.0 * self.line_d / self.line_c))
 #
 #  def update(self):
 #    pass

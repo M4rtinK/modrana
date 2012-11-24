@@ -459,15 +459,15 @@ class Startup:
     #          # GPSD and liblocation need a nudge
     #          # to update the fix when the GUI mainloop is not running
     #          #self.modrana.dmod._libLocationUpdateCB()
-    #          print self.modrana.dmod.lDevice.online
-    #          print self.modrana.dmod.lDevice.status
-    #          print self.modrana.dmod.lDevice.satellites_in_view
-    #          print self.modrana.dmod.lDevice.fix
+    #          print(self.modrana.dmod.lDevice.online)
+    #          print(self.modrana.dmod.lDevice.status)
+    #          print(self.modrana.dmod.lDevice.satellites_in_view)
+    #          print(self.modrana.dmod.lDevice.fix)
     #        if l.provider:
     #          pos = l.provider.getFix().position
     #        else:
     #          pos = self.modrana.get('pos', None)
-    #        print pos
+    #        print(pos)
     #        if pos is not None:
     #          break
     #

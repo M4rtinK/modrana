@@ -148,7 +148,7 @@ class TestLoad:
                 if type_latch is None:
                     type_latch = ptype
                 if self.predump:
-                    print `packet`
+                    print(`packet`)
                 if not packet:
                     raise TestLoadError("zero-length packet from %s"%\
                                         logfp.name)                    

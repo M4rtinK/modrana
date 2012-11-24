@@ -359,7 +359,7 @@ class GoogleMaps(object):
     Sushi Groove
     >>> print result['streetAddress']
     1916 Hyde St
-    >>> print result['phoneNumbers'][0]['number']
+    >>> print(result['phoneNumbers'][0]['number'])
     (415) 440-1905
 
     For more information on the available data, see Google's documentation on
@@ -436,8 +436,8 @@ class GoogleMaps(object):
     >>> dist  = dirs['Directions']['Distance']['meters']
     >>> route = dirs['Directions']['Routes'][0]
     >>> for step in route['Steps']:
-    ...    print step['Point']['coordinates'][1], step['Point']['coordinates'][0]
-    ...    print step['descriptionHtml']
+    ...    print(step['Point']['coordinates'][1], step['Point']['coordinates'][0])
+    ...    print(step['descriptionHtml'])
     38.8921 -77.02604
     Head <b>east</b> on <b>Constitution Ave NW</b> toward <b>9th St NW</b>
     38.89208 -77.02191
@@ -492,7 +492,7 @@ if __name__ == "__main__":
     """
 
     if len(argv) < 2 or len(argv) > 4:
-      print main.__doc__
+      print(main.__doc__)
       sys.exit(1)
 
     query = argv[1]

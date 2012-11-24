@@ -500,9 +500,9 @@ class turnByTurn(RanaModule):
           pos2nextStep = geo.distance(lat,lon,nsLat,nsLon)*1000
           pos2currentStep = geo.distance(lat,lon,csLat,csLon)*1000
           currentStep2nextStep = geo.distance(csLat,csLon,nsLat,nsLon)*1000
-#          print "pos",(lat,lon)
-#          print "cs",(csLat,csLon)
-#          print "ns",(nsLat,nsLon)
+#          print("pos",(lat,lon))
+#          print("cs",(csLat,csLon))
+#          print("ns",(nsLat,nsLon))
           print("position to next turn: %f m" % pos2nextStep)
           print("position to current turn: %f m" % pos2currentStep)
           print("current turn to next turn: %f m" % currentStep2nextStep)
@@ -755,7 +755,7 @@ class turnByTurn(RanaModule):
       return minDistance*1000 < threshold
 
   def _startTBTWorker(self):
-    print "tbt: starting worker thread"
+    print("tbt: starting worker thread")
     startThread = True
     if not self.TBTWorker: # reuse previous thread or start new one
       self.TBTWorkerEnabled = True
@@ -764,7 +764,7 @@ class turnByTurn(RanaModule):
       t.start()
       self.TBTWorker = t
     else:
-      print "tbt: reusing worker thread"
+      print("tbt: reusing worker thread")
 
   def _stopTBTWorker(self):
     self.TBTWorkerEnabled = False

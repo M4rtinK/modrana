@@ -72,7 +72,7 @@ def OsmMerge(dest, z, sources):
 
   limit = pixelSize(z) * 2.0
   limitSq = limit * limit
-  #print "Using limit %e" % limitSq
+  #print("Using limit %e" % limitSq)
   
   # Detect 'junction' ways
   usage = {}
@@ -87,7 +87,7 @@ def OsmMerge(dest, z, sources):
         usage[nid] = 1
       countNodes = countNodes + 1
 
-  #print "%d nodes, %d junctions" % (countNodes, len(junctions.keys()))
+  #print("%d nodes, %d junctions" % (countNodes, len(junctions.keys())))
 
   countUsed = countNotUsed = 0
   # Write the ways
@@ -113,7 +113,7 @@ def OsmMerge(dest, z, sources):
         if(dd > limitSq):
           storeThisNode = True  # Store ever x pixels
           
-        #print "Dist2 = %f" % dd
+        #print("Dist2 = %f" % dd)
         
       if(storeThisNode):
         (lastx,lasty,count) = (lon,lat,count+1)
@@ -123,7 +123,7 @@ def OsmMerge(dest, z, sources):
       else:
         countNotUsed = countNotUsed + 1
     f.write("</way>\n")
-  #print "Used %d, skipped %d" % (countUsed, countNotUsed)
+  #print("Used %d, skipped %d" % (countUsed, countNotUsed))
   
   # TODO: Write the relations
 

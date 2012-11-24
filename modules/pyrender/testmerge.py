@@ -9,7 +9,7 @@ def test(z,x,y):
       lx = x * 2 + i
       ly = y * 2 + j
       lz = z + 1
-      #print "Downloading subtile %d,%d at %d" % (x,y,z)
+      #print("Downloading subtile %d,%d at %d" % (x,y,z))
       # download (or otherwise obtain) each subtile
       filenames.append(GetOsmTileData(lz,lx,ly))
   # merge them together

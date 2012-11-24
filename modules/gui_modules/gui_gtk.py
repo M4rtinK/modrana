@@ -438,7 +438,7 @@ class MainWidget(gtk.Widget):
 
     self.dragStartX = event.x
     self.dragStartY = event.y
-    #print "Pressed button %d at %1.0f, %1.0f" % (event.button, event.x, event.y)
+    #print("Pressed button %d at %1.0f, %1.0f" % (event.button, event.x, event.y))
 
     self.dragX = event.x
     self.dragY = event.y
@@ -494,7 +494,7 @@ class MainWidget(gtk.Widget):
     # but better be safe, than eat the whole battery if the timer is not terminated
     dt = (time.time() - pressStartTime) * 1000
     if dt > 60000:
-      print "long press timeout reached"
+      print("long press timeout reached")
       return False
 
     if pressStartEpoch == self.lastPressEpoch and self.pressInProgress:
@@ -554,7 +554,7 @@ class MainWidget(gtk.Widget):
     self.currentDrawMethod(cr, event)
     # enable redraw speed debugging
     if self.showRedrawTime:
-      print "Redraw took %1.2f ms" % (1000 * (time.clock() - start))
+      print("Redraw took %1.2f ms" % (1000 * (time.clock() - start)))
     self.lastFullRedraw = time.time()
 
   def getLastFullRedraw(self):
@@ -626,7 +626,7 @@ class MainWidget(gtk.Widget):
           for m in modules:
             m.drawMapOverlay(cr)
         except Exception, e:
-          print "modRana GTK main loop: an exception occurred"
+          print("modRana GTK main loop: an exception occurred")
           print(e)
           print('modRana GTK main loop: traceback:')
           traceback.print_exc(file=sys.stdout) # find what went wrong
@@ -764,7 +764,7 @@ class MainWidget(gtk.Widget):
     newW = allocation[2]
     newH = allocation[3]
 
-    print "GTK GUI: size allocation", allocation
+    print("GTK GUI: size allocation", allocation)
     # resize the backing pixmap
     self.initGCandBackingPixmap(self.allocation.width, self.allocation.height)
 
@@ -814,9 +814,9 @@ class MainWidget(gtk.Widget):
       #
       #
       ##      cr.paint()
-      ##      print cr.get_target()
-      ##      print cr.get_target().get_width()
-      ##      print cr.get_target().get_height()
+      ##      print(cr.get_target())
+      ##      print(cr.get_target().get_width())
+      ##      print(cr.get_target().get_height())
       #
       #    mapAndMapOverlayBuffer = self.getMapAndMapOverlayBuffer()
       #    if mapAndMapOverlayBuffer:
@@ -828,8 +828,8 @@ class MainWidget(gtk.Widget):
       #
       #    # enable redraw speed debugging
       #    if 'showRedrawTime' in self and self['showRedrawTime'] == True:
-      #      print "Redraw1 took %1.2f ms" % (1000 * (time.clock() - start))
-      #      print "Redraw2 took %1.2f ms" % (1000 * (time.clock() - start1))
+      #      print("Redraw1 took %1.2f ms" % (1000 * (time.clock() - start)))
+      #      print("Redraw2 took %1.2f ms" % (1000 * (time.clock() - start1)))
       #
       #  def getMapAndMapOverlayBuffer(self):
       #    if self.mapBuffer == None:
@@ -900,7 +900,7 @@ class MainWidget(gtk.Widget):
       #      for m in self.m.values():
       #        m.drawMapOverlay(cr1)
       #    except Exception, e:
-      #      print "modRana simple map: an exception occured:\n"
+      #      print("modRana simple map: an exception occured:\n")
       #      traceback.print_exc(file=sys.stdout) # find what went wrong
       #      self.stopSimpleMapDrag()
       #      return

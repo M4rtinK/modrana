@@ -97,11 +97,11 @@ class MapData(RanaModule):
     Get tiles that need to be downloaded and look if we don't already have some of these tiles,
     then generate a set of ('url','filename') tuples and send them to the threaded downloader
     """
-    print "Checking if there are duplicated tiles"
+    print("Checking if there are duplicated tiles")
     start = clock()
     tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
     if tileFolder is None:
-      print "mapData: tile folder path unknown or unusable"
+      print("mapData: tile folder path unknown or unusable")
       return []
     layer = self.get('layer', None) # TODO: manual layer setting
     mapLayers = self.modrana.getMapLayers() # a dictionary describing supported map layers
@@ -118,8 +118,8 @@ class MapData(RanaModule):
       if not os.path.exists(filePath): # we don't have this file
         neededTiles.append(tile)
 
-    print "Downloading %d new tiles." % len(neededTiles)
-    print "Removing already available tiles from dl took %1.2f ms" % (1000 * (clock() - start))
+    print("Downloading %d new tiles." % len(neededTiles))
+    print("Removing already available tiles from dl took %1.2f ms" % (1000 * (clock() - start)))
     return neededTiles
 
 
@@ -140,7 +140,7 @@ class MapData(RanaModule):
     """
 
     tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-    print "tiles for the batch will be downloaded to: %s" % tileFolder
+    print("tiles for the batch will be downloaded to: %s" % tileFolder)
 
     check = self.get('checkTiles', False)
     if check:
@@ -162,7 +162,7 @@ class MapData(RanaModule):
       size = int(self.get("downloadSize", 4))
       type = self.get("downloadType")
       if type != "data":
-        print "Error: mod_mapData can't download %s" % type
+        print("Error: mod_mapData can't download %s" % type)
         return
 
       # update the info when refreshing tilecount and and no dl/size estimation is active
@@ -208,7 +208,7 @@ class MapData(RanaModule):
         midZ = maxZ
       else:
         midZ = 15
-      print "max: %d, min: %d, diff: %d, middle:%d" % (maxZ, minZ, diffZ, midZ)
+      print("max: %d, min: %d, diff: %d, middle:%d" % (maxZ, minZ, diffZ, midZ))
 
       if location == "here":
         # Find which tile we're on
@@ -256,21 +256,21 @@ class MapData(RanaModule):
       self.set("sizeStatus", 'unknown') # first we set the size as unknown
       neededTiles = self.currentDownloadList
       layer = self.get('layer', None)
-      print "getting size"
+      print("getting size")
       if len(neededTiles) == 0:
-        print "cant get combined size, the list is empty"
+        print("cant get combined size, the list is empty")
         return
 
       if self.sizeThread is not None:
         if self.sizeThread.finished == False:
-          print "size check already in progress"
+          print("size check already in progress")
           return
 
       self.totalSize = 0
       maxThreads = self.get('maxSizeThreads', 5)
       sizeThread = self.GetSize(self, neededTiles, layer,
         maxThreads) # the second parameter is the max number of threads TODO: tweak this
-      print  "getSize received, starting sizeThread"
+      print( "getSize received, starting sizeThread")
       sizeThread.start()
       self.sizeThread = sizeThread
 
@@ -278,14 +278,14 @@ class MapData(RanaModule):
       """get tilelist and download the tiles using threads"""
       neededTiles = self.currentDownloadList
       layer = self.get('layer', None)
-      print "starting download"
+      print("starting download")
       if len(neededTiles) == 0:
-        print "cant download an empty list"
+        print("cant download an empty list")
         return
 
       if self.getFilesThread is not None:
         if self.getFilesThread.finished == False:
-          print "download already in progress"
+          print("download already in progress")
           return
 
       maxThreads = self.get('maxDlThreads', 5)
@@ -326,7 +326,7 @@ class MapData(RanaModule):
         self.scroll -= 1
         self.set('needRedraw', True)
     elif message == "down":
-      print "down"
+      print("down")
       self.scroll += 1
       self.set('needRedraw', True)
     elif message == "reset":
@@ -371,7 +371,7 @@ class MapData(RanaModule):
 
     """start of the tile splitting code"""
     previousZoomlevelTiles = None # we will split the tiles from the previous zoomlevel
-    print "splitting down"
+    print("splitting down")
     for z in range(tilesZ, maxZ): # to max zoom (fo each z we split one zoomlevel down)
       newTilesFromSplit = set() # tiles from the splitting go there
       if previousZoomlevelTiles is None: # this is the first iteration
@@ -395,12 +395,12 @@ class MapData(RanaModule):
         newTilesFromSplit.add(leftLowerTile)
         newTilesFromSplit.add(rightLowerTile)
       extendedTiles.update(newTilesFromSplit) # add the new tiles to the main set
-      print "we are at z=%d, %d new tiles from %d" % (z, len(newTilesFromSplit), (z + 1))
+      print("we are at z=%d, %d new tiles from %d" % (z, len(newTilesFromSplit), z + 1))
       previousZoomlevelTiles = newTilesFromSplit # set the new tiles s as prev. tiles for next iteration
 
     """start of the tile coordinates rounding code"""
     previousZoomlevelTiles = None # we will the tile coordinates to get tiles for the upper level
-    print "rounding up"
+    print("rounding up")
     r = range(minZ, tilesZ) # we go from the tile-z up, e.g. a sequence progressively smaller integers
     r.reverse()
     for z in r:
@@ -419,11 +419,11 @@ class MapData(RanaModule):
         upperTile = (upperTileX, upperTileY, z)
         newTilesFromRounding.add(upperTile)
       extendedTiles.update(newTilesFromRounding) # add the new tiles to the main set
-      print "we are at z=%d, %d new tiles" % (z, len(newTilesFromRounding))
+      print("we are at z=%d, %d new tiles" % (z, len(newTilesFromRounding)))
       previousZoomlevelTiles = newTilesFromRounding # set the new tiles s as prev. tiles for next iteration
 
-      print "nr of tiles after extend: %d" % len(extendedTiles)
-    print "Extend took %1.2f ms" % (1000 * (clock() - start))
+      print("nr of tiles after extend: %d" % len(extendedTiles))
+    print("Extend took %1.2f ms" % (1000 * (clock() - start)))
 
     del tiles
 
@@ -472,7 +472,7 @@ class MapData(RanaModule):
       return url
 
     def run(self):
-      print "**!! batch tile size estimation is starting !!**"
+      print("**!! batch tile size estimation is starting !!**")
       maxThreads = self.maxThreads
       shutdown = threading.Event()
       localDlListLock = threading.Lock()
@@ -484,19 +484,19 @@ class MapData(RanaModule):
         t.daemon = True
         t.start()
         threads.append(t)
-      print "Added %d URLS to check for size." % self.urlCount
+      print("Added %d URLS to check for size." % self.urlCount)
       while True:
         time.sleep(self.callback.batchInfoUpdateInterval) # this governs how often we check status of the worker threads
-        print "Batch size working...",
-        print "(threads: %i)," % (threading.activeCount() - 1, ),
+        print("Batch size working...")
+        print("(threads: %i)" % (threading.activeCount() - 1, ))
         print"pending: %d, done: %d" % (len(self.neededTiles), self.processed)
         if self.quit == True: # we were ordered to quit
-          print "***get size quiting"
+          print("***get size quiting")
           shutdown.set() # dismiss all workers
           self.finished = True
           break
         if not self.neededTiles: # we processed everything
-          print "***get size finished"
+          print("***get size finished")
           shutdown.set()
           self.finished = True
           break
@@ -505,21 +505,21 @@ class MapData(RanaModule):
       """a worker thread method for estimating tile size"""
       while 1:
         if shutdown.isSet():
-          print "file size estimation thread is shutting down"
+          print("file size estimation thread is shutting down")
           break
           # try to get some work
         with localDlListLock:
           if self.neededTiles:
             item = self.neededTiles.pop()
           else:
-            print "no more work, worker quiting"
+            print("no more work, worker quiting")
             break
             # try to retrieve size of a tile
         size = 0
         try:
           size = self.getSizeForURL(item)
         except Exception, e:
-          print "exception in a get size worker thread:\n%s" % e
+          print("exception in a get size worker thread:\n%s" % e)
 
         # increment the counter or remove an available tile in a thread safe way
         if size is None: #this signalizes that the tile is available
@@ -553,11 +553,11 @@ class MapData(RanaModule):
             request = self.connPool.urlopen('HEAD', url)
             size = int(request.getheaders()['content-length'])
       except IOError:
-        print "Could not open document: %s" % url
+        print("Could not open document: %s" % url)
         size = 0 # the url errored out, so we just say it  has zero size
       except Exception, e:
-        print "error, while checking size of a tile"
-        print e
+        print("error, while checking size of a tile")
+        print(e)
         size = 0
       return size
 
@@ -634,7 +634,7 @@ class MapData(RanaModule):
       return connPool
 
     def run(self):
-      print "**!! batch tile download is starting !!**"
+      print("**!! batch tile download is starting !!**")
       maxThreads = self.maxThreads
       shutdown = threading.Event()
       incrementLock = threading.Lock()
@@ -642,23 +642,23 @@ class MapData(RanaModule):
 
       threads = []
       for i in range(0, maxThreads): # start threads
-        """start download threads"""
+        # start download threads
         t = Thread(target=self.getTilesWorker, args=(shutdown, incrementLock))
         t.daemon = True
         t.start()
         threads.append(t)
       self.callback.notificateOnce = False
-      print "minipool initialized"
-      print "Added %d URLS to download." % self.urlCount
+      print("minipool initialized")
+      print("Added %d URLS to download." % self.urlCount)
       while True:
         time.sleep(self.callback.batchInfoUpdateInterval)
-        print "Batch tile dl working...",
-        print"(threads: %i)" % (threading.activeCount() - 1, ),
-        print"pending: %d, done: %d" % (len(self.neededTiles), self.processed)
+        print("Batch tile dl working...")
+        print("(threads: %i)" % (threading.activeCount() - 1, ))
+        print("pending: %d, done: %d" % (len(self.neededTiles), self.processed))
         # there is some downloading going on so a notification will be needed
         self.callback.notificateOnce = True
         if self.quit == True: # we were ordered to quit
-          print "***get tiles quiting"
+          print("***get tiles quiting")
           shutdown.set() # dismiss all workers
           self.finished = True
           break
@@ -677,7 +677,7 @@ class MapData(RanaModule):
             workFinished = True
 
         if workFinished: # check if we are done
-          print "***get tiles finished"
+          print("***get tiles finished")
           if self.callback.notificateOnce:
             self.callback.sendMessage('ml:notification:m:Batch download complete.;7')
             self.callback.notificateOnce = False
@@ -689,14 +689,14 @@ class MapData(RanaModule):
     def getTilesWorker(self, shutdown, incrementLock):
       while 1:
         if shutdown.isSet():
-          print "file download thread is shutting down"
+          print("file download thread is shutting down")
           break
           # try to get some work
         try:
           with self.callback.dlListLock:
             item = self.neededTiles.pop()
         except: # start the loop from beginning, so that shutdown can be checked and the thread can exit
-          print "waiting for more work"
+          print("waiting for more work")
           time.sleep(2)
           continue
 
@@ -708,7 +708,7 @@ class MapData(RanaModule):
         except Exception, e:
           failed = True
           # TODO: try to re-download failed tiles
-          print "exception in get tiles thread:\n%s" % e
+          print("exception in get tiles thread:\n%s" % e)
           #          import traceback, sys
         #          traceback.print_exc(file=sys.stdout) # find what went wrong
         # increment the counter in a thread safe way
@@ -834,8 +834,8 @@ class MapData(RanaModule):
       so we will save only unique tiles"""
       outputSet = set(map(lambda x: tuple(x), currentPointTiles))
       tilesToDownload.update(outputSet)
-    print "Listing tiles took %1.2f ms" % (1000 * (clock() - start))
-    print "unique tiles %d" % len(tilesToDownload)
+    print("Listing tiles took %1.2f ms" % (1000 * (clock() - start)))
+    print("unique tiles %d" % len(tilesToDownload))
     return tilesToDownload
 
   def addPointsToLine(self, lat1, lon1, lat2, lon2, maxDistance):
@@ -930,7 +930,7 @@ class MapData(RanaModule):
     if menuName == 'chooseRouteForDl':
       menus = self.m.get('menu', None)
       tracks = self.m.get('loadTracklogs', None).getTracklogList()
-      print tracks
+      print(tracks)
 
       def describeTracklog(index, category, tracks):
         """describe a tracklog list item"""

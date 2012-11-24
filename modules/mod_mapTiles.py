@@ -145,7 +145,7 @@ class MapTiles(RanaModule):
     name = self.getTileName(layer, z, x, y)
     cacheItem = self.images[0].get(name, None)
     if cacheItem:
-    #      print "got tile FROM memory CACHE"
+    #      print("got tile FROM memory CACHE")
       return cacheItem[0]
 
     # get layer info
@@ -302,7 +302,7 @@ class MapTiles(RanaModule):
                   request = self.downloadRequestPool.pop() # download most recent requests first
                   (name, x, y, z, layer, layerPrefix, layerType, filename, timestamp) = request
                   if name in self.threads.keys():
-                  #                    print "DISCARDED"
+                  #                    print("TILE DISCARDED")
                     continue
                     # start a new thread
                   self.threads[name] = self.TileDownloader(name, x, y, z, layer, layerPrefix, layerType, filename, self)
@@ -356,10 +356,10 @@ class MapTiles(RanaModule):
       if valid:
         (name, x, y, z, layer) = item
         self.loadImage(name, x, y, z, layer)
-        #        print "loaded"
+        #        print("loaded")
         return True # don't stop the idle handle
       else:
-      #        print "quiting"
+      #        print("quiting")
         self.idleLoaderActive = False
         return False # the stack is empty, remove this callback
     except Exception, e:
@@ -398,10 +398,10 @@ class MapTiles(RanaModule):
       #       that would work on GPRS and a fast connection
       #    """
       #    if self.oldZ != z:
-      ##      print "resetting z"
+      ##      print("resetting z")
       #      self.oldZ = z
       #      if len(self.threads) == self.oldThreadCount:
-      #        print "clearing thread set"
+      #        print("clearing thread set")
       #        self.threads = {}
       #        self.oldThreadCount = len(self.threads)
       #    self.oldThreadCount = len(self.threads)
@@ -579,7 +579,7 @@ class MapTiles(RanaModule):
             gui = self.modrana.gui
             if gui and gui.getIDString() == "GTK":
               if gui.getShowRedrawTime():
-                print "currently visible tiles: %d/%d" % (visibleCounter, wTiles * hTiles)
+                print("currently visible tiles: %d/%d" % (visibleCounter, wTiles * hTiles))
 
                 #            cr.set_source_rgba(0,1,0,0.5)
                 #            cr.move_to(*p1.as_tuple())
@@ -1051,7 +1051,7 @@ class MapTiles(RanaModule):
                                         layerDetails['tiles'],
                                         x, y, z)
 #    elif coords == 'chartbundle': # chartbundle
-##      print "CHARTBUNDLE"
+##      print("CHARTBUNDLE")
 #      y = ((2 ** (z - 1) - 1) - y)
 #      # TODO: fix projection so this is usable
 #      # NOTE: looks like with the y fix from Yahoo tilenames,
@@ -1068,7 +1068,7 @@ class MapTiles(RanaModule):
         z, x, y,
         layerDetails.get('type', 'png'))
 
-#    print "__%s__" % coords
+#    print("__%s__" % coords)
     return url
 
   def shutdown(self):

@@ -416,9 +416,9 @@ def perElevList(trackpointsList, numPoints=200):
         nextIndex += 1
       nextPoint = distanceList[nextIndex]
 
-      #      print prevPoint
-      #      print point
-      #      print nextPoint
+      #      print(prevPoint)
+      #      print(point)
+      #      print(nextPoint)
 
       prevElev = prevPoint[1]
       nextElev = nextPoint[1]
@@ -459,8 +459,8 @@ def perElevList(trackpointsList, numPoints=200):
       lat = (rest * lat1) + (actual * lat2)
       lon = (rest * lon1) + (actual * lon2)
 
-      #      print (d,dPart)
-      #      print (actual,rest)
+      #      print((d,dPart))
+      #      print((actual,rest))
 
       periodicElevationList.append((point[0], newElev, lat, lon))
 
@@ -485,21 +485,21 @@ def distanceBenchmark(LLE, sampleSize=None):
   l = map(lambda x: distanceOld(lat, lon, x[0], x[1]), LLE)
   print("%1.9f ms Classic modRana method" % (1000 * (time.clock() - start1)))
   if sampleSize:
-    print l[0:sampleSize - 1]
+    print(l[0:sampleSize - 1])
 
   # Marble method
   start1 = time.clock()
   l = map(lambda x: distance(lat, lon, x[0], x[1]), LLE)
   print("%1.9f ms Marble method" % (1000 * (time.clock() - start1)))
   if sampleSize:
-    print l[0:sampleSize - 1]
+    print(l[0:sampleSize - 1])
 
   # Marble approximate
   start1 = time.clock()
   l = map(lambda x: distanceApprox(lat, lon, x[0], x[1]), LLE)
   print("%1.9f ms Marble approximate method" % (1000 * (time.clock() - start1)))
   if sampleSize:
-    print l[0:sampleSize - 1]
+    print(l[0:sampleSize - 1])
 
   # lets check on precomputed coordinates in radians
   LLERadians = map(lambda x: (radians(x[0]), radians(x[1]), x[2]), LLE)
@@ -510,14 +510,14 @@ def distanceBenchmark(LLE, sampleSize=None):
   l = map(lambda x: distanceRadians(lat, lon, x[0], x[1]), LLERadians)
   print("%1.9f ms Marble method on radians" % (1000 * (time.clock() - start1)))
   if sampleSize:
-    print l[0:sampleSize - 1]
+    print(l[0:sampleSize - 1])
 
   # Marble approximate method on radians
   start1 = time.clock()
   l = map(lambda x: distanceApproxRadians(lat, lon, x[0], x[1]), LLERadians)
   print("%1.9f ms Marble approximate method on radians" % (1000 * (time.clock() - start1)))
   if sampleSize:
-    print l[0:sampleSize - 1]
+    print(l[0:sampleSize - 1])
 
   # done
   print("# benchmark finished #")

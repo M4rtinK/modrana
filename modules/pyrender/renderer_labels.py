@@ -35,7 +35,7 @@ class RenderClass(OsmRenderBase):
     file = open("places.txt","r")
     ctx = self.getCtx("mainlayer")
 
-    print self.proj.S, self.proj.dLat
+    print(self.proj.S, self.proj.dLat)
     #pLon = (lon - self.W) / self.dLon
     
     for line in file:
@@ -58,5 +58,5 @@ if(__name__ == '__main__'):
   filename = "sample_"+__file__+".png"
   a.RenderTile(8, 128, 84, 'default', filename) # norwch
   
-  print "------------------------------------"
-  print "Saved image to " + filename
+  print("------------------------------------")
+  print("Saved image to " + filename)

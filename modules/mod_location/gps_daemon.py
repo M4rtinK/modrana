@@ -72,10 +72,10 @@ class GPSD(PositionSource):
     if self.GPSDConsumer:
       if verbose:
         self.GPSDConsumer.setVerbose(True)
-        print "location: gpsd debugging output turned ON"
+        print("location: gpsd debugging output turned ON")
       else:
         self.GPSDConsumer.setVerbose(False)
-        print "location: gpsd debugging output turned OFF"
+        print("location: gpsd debugging output turned OFF")
     else:
       print("location: gpsd not used, so there is no debug output to enable")
 
@@ -86,22 +86,22 @@ class GPSD(PositionSource):
 #    try:
 #      self.s.send("%s\r\n" % cmd)
 #    except:
-#        print "something is wrong with the gps daemon"
+#        print("something is wrong with the gps daemon")
 #    result = self.s.recv(8192)
-#    #print "Reply: %s" % result
+#    #print("Reply: %s" % result)
 #    expect = 'GPSD,' + cmd.upper() + '='
 #    if(result[0:len(expect)] != expect):
-#      print "Fail: received %s after sending %s" % (result, cmd)
+#      print("Fail: received %s after sending %s" % (result, cmd))
 #      return(None)
 #    remainder = result[len(expect):]
 #    if(remainder[0:1] == '?'):
-#      print "Fail: Unknown data in " + cmd
+#      print("Fail: Unknown data in " + cmd)
 #      return(None)
 #    return(remainder)
 #
 #  def test_socket(self):
 #    for i in ('i','p','p','p','p'):
-#      print "%s = %s" % (i, self.socket_cmd(i))
+#      print("%s = %s" % (i, self.socket_cmd(i)))
 #      sleep(1)
 #
 #  def gpsStatus(self):
@@ -138,7 +138,7 @@ class GPSD(PositionSource):
 #    for i in range(count):
 #      (prn,el,az,db,used) = [int(a) for a in parts[i+1].split(' ')]
 #      self.set("gps_sat_%d"%i, (db,used,prn))
-#      #print "%d: %d, %d, %d, %d, %d" % (i,prn,el,az,db,used)
+#      #print("%d: %d, %d, %d, %d, %d" % (i,prn,el,az,db,used))
 #
 #  def quality(self):
 #    result = self.socket_cmd('q')
@@ -146,7 +146,7 @@ class GPSD(PositionSource):
 #      (count,dd,dx,dy) = result.split(' ')
 #      count = int(count)
 #      (dx,dy,dd) = [float(a) for a in (dx,dy,dd)]
-#      print "%d sats, quality %f, %f, %f" % (count,dd,dx,dy)
+#      print("%d sats, quality %f, %f, %f" % (count,dd,dx,dy))
 
 class GPSDConsumer(threading.Thread):
   """consume data as they come in from the GPSD and store last known fix"""
@@ -166,7 +166,7 @@ class GPSDConsumer(threading.Thread):
     print("GPSDConsumer: starting\n")
     while True:
       if self.stop == True:
-        print "GPSDConsumer: breaking\n"
+        print("GPSDConsumer: breaking\n")
         break
       try:
         self.session.next() # this function blocks until a new fix is available
@@ -179,7 +179,7 @@ class GPSDConsumer(threading.Thread):
           self.fix = (sf.latitude,sf.longitude,sf.altitude,sf.track,sf.speed, time())
           if self.verbose:
 #          if 1:
-            print self.fix
+            print(self.fix)
       else:
         if self.verbose:
           print("GPSDConsumer: NO FIX, will retry in 1 s")

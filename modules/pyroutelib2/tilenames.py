@@ -86,5 +86,5 @@ if __name__ == "__main__":
     x,y = tileXY(51.50610, -0.119888, z)
     
     s,w,n,e = tileEdges(x,y,z)
-    print "%d: %d,%d --> %1.3f :: %1.3f, %1.3f :: %1.3f" % (z,x,y,s,n,w,e)
-    #print "<img src='%s'><br>" % tileURL(x,y,z)
+    print("%d: %d,%d --> %1.3f :: %1.3f, %1.3f :: %1.3f" % (z,x,y,s,n,w,e))
+    #print("<img src='%s'><br>" % tileURL(x,y,z))

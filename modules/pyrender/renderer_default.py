@@ -210,7 +210,7 @@ class RenderClass(OsmRenderBase):
         for n in w['n']: 
           # project that into image coordinates
           xy.append(self.proj.project(float(n['lat']), float(n['lon'])))
-          #print "%f,%f -> %f, %f" % (n['lat'], n['lon'], x,y)
+          #print("%f,%f -> %f, %f" % (n['lat'], n['lon'], x,y))
 
         #return a list of 2*xy control points for bezier curving
         #set to None to disable bezier curving
@@ -268,5 +268,5 @@ if(__name__ == '__main__'):
   # a.RenderTile(15, 16372, 10895, filename) # london
   a.RenderTile(14, 8166, 5447, 'default', filename) # Z14
   
-  print "------------------------------------"
-  print "Saved image to " + filename
+  print("------------------------------------")
+  print("Saved image to " + filename)

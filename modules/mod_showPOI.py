@@ -155,7 +155,7 @@ class ShowPOI(RanaModule):
           elif type == 'ml':
             """if the message is a message list, execute a custom action instead of the default POI detail menu
                TODO: use this even for selecting the POIDetail menu ?"""
-            print args
+            print(args)
             catId=int(args[0])
             action = args[1]
           poiFromCategory = store.getAllPOIFromCategory(catId)
@@ -323,7 +323,7 @@ class ShowPOI(RanaModule):
     menus = self.m.get('menu', None)
     store = self.m.get('storePOI', None)
     cats = store.getCategories()
-    print cats
+    print(cats)
     i = 0
     for cat in cats:
       (label,desc,cat_id) = cat

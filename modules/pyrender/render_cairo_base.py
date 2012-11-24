@@ -119,7 +119,7 @@ class OsmRenderBase:
     outputFile - optional file to save to
     otherwise returns PNG image data"""
 
-    print "Rendering %d,%d@%d, %s to %s" % (x,y,z,mapLayer, outputFile)
+    print("Rendering %d,%d@%d, %s to %s" % (x,y,z,mapLayer, outputFile))
     self.layers = {}
     
     # Get some OSM data for the area, and return which file it's stored in

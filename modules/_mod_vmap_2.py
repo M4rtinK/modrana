@@ -85,7 +85,7 @@
 #        #print("%d = '%s'" % (k,v))
 #        self.enums[k] = v
 #    except IOError:
-#      print "Couldn't find vector map data. Expected enum file in %s" % filename
+#      print("Couldn't find vector map data. Expected enum file in %s" % filename)
 #      sys.exit(-1)
 #
 #
@@ -114,7 +114,7 @@
 #  def drawTile(self,cr,tx,ty,tz,proj,mapBounds):
 #    start = time()
 #    mapData = self.getTile(tx,ty,tz)
-#    #print " - Map data: %1.3fms" % ((time() - start) * 1000.0)
+#    #print(" - Map data: %1.3fms" % ((time() - start) * 1000.0))
 #
 #    cWays = 0
 #    cDone = 0
@@ -122,10 +122,10 @@
 #    cOob = 0
 #
 #    (minLat,maxLat,minLon,maxLon) = mapBounds
-#    #print " - Map: %1.3f to %1.3f, %1.3f to %1.3f"%(minLat,maxLat,minLon,maxLon)
+#    #print(" - Map: %1.3f to %1.3f, %1.3f to %1.3f"%(minLat,maxLat,minLon,maxLon))
 #
 #    if mapData:
-#      #print mapData.ways
+#      #print(mapData.ways)
 #      for wayID, way in mapData.ways.items():
 #        if not self.waysDrawn.get(wayID, False): # if not drawn already as part of another tile
 #
@@ -136,7 +136,7 @@
 #            or lat2 < minLat
 #            or lat1 > maxLat)
 #
-#          #print "   - Way: %1.3f to %1.3f, %1.3f to   %1.3f - %s"%(lat1,lat2,lon1,lon2, text)
+#          #print("   - Way: %1.3f to %1.3f, %1.3f to   %1.3f - %s"%(lat1,lat2,lon1,lon2, text))
 #
 #          if offMap:
 #            cOob += 1
@@ -164,10 +164,10 @@
 #        else:
 #          cDone += 1
 #    else:
-#      print "No map data"
+#      print("No map data")
 #
 #    #if(tx == 16342 and ty == 10803):
-#    #print " - %d,%d,%d: %d ways, %d done, %d oob, %d nd, %1.3fms" % (tx,ty,tz, cWays, cDone, cOob, cNodes, 1000.0 * (time() - start))
+#    #print(" - %d,%d,%d: %d ways, %d done, %d oob, %d nd, %1.3fms" % (tx,ty,tz, cWays, cDone, cOob, cNodes, 1000.0 * (time() - start)))
 #
 #  def drawMap(self, cr):
 #    (sx,sy,sw,sh) = self.get('viewport')

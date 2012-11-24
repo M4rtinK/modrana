@@ -132,19 +132,19 @@ if __name__ == "__main__":
   node1 = data.findNode(52.552394,-1.818763)
   node2 = data.findNode(52.563368,-1.818291)
 
-  print node1
-  print node2
+  print(node1)
+  print(node2)
 
   router = Router(data)
   result, route = router.doRoute(node1, node2)
   if result == 'success':
     # list the nodes
-    print route
+    print(route)
 
     # list the lat/long
     for i in route:
       node = data.rNodes[i]
-      print "%d: %f,%f" % (i,node[0],node[1])
+      print("%d: %f,%f" % (i,node[0],node[1]))
   else:
-    print "Failed (%s)" % result
+    print("Failed (%s)" % result)
 

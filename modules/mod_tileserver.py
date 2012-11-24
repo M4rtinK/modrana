@@ -120,8 +120,8 @@ class Server(SocketServer.TCPServer):
       z = int(split[2])
       x = int(split[3])
       y = int(split[4].split(".")[0])
-      print self.path
-      print tileserver_callback_proxy.cb._mapTiles
+      print(self.path)
+      print(tileserver_callback_proxy.cb._mapTiles)
       try:
         tileData = tileserver_callback_proxy.cb._mapTiles.getTile(layer, z, x, y)
         if tileData:

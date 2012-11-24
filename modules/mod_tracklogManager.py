@@ -268,7 +268,7 @@ class TracklogManager(RanaModule):
       if track.elevation == True:
         units = self.m.get('units', None)
         if units:
-#          print track.routeInfo['firstElevation']
+#          print(track.routeInfo['firstElevation'])
           maxString = units.m2CurrentUnitString(track.routeInfo['maxElevation'], 2, False)
           minString = units.m2CurrentUnitString(track.routeInfo['minElevation'], 2, False)
           text += "\nmaximum elevation: %s\nminimum elevation: %s" % (maxString, minString)

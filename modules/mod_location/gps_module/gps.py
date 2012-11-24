@@ -350,7 +350,7 @@ if __name__ == '__main__':
         if switch == '-v':
             verbose = True
     if len(arguments) > 2:
-        print 'Usage: gps.py [-v] [host [port]]'
+        print('Usage: gps.py [-v] [host [port]]')
         sys.exit(1)
 
     opts = { "verbose" : verbose }
@@ -363,9 +363,9 @@ if __name__ == '__main__':
     session.stream(WATCH_ENABLE)
     try:
         for report in session:
-            print report
+            print(report)
     except KeyboardInterrupt:
         # Avoid garble on ^C
-        print ""
+        print("")
 
 # gps.py ends here

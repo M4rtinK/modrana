@@ -330,7 +330,7 @@ this is needed for the item tools menu to know where to return"""
       self.options[group][2].append(newOption)
       self.keyDefault[variable] = default
     else:
-      print "options: group %s does not exist, call addGroup to create it first" % group
+      print("options: group %s does not exist, call addGroup to create it first" % group)
 
   def addRawOption(self, optionData):
     """add a raw option to options
@@ -352,7 +352,7 @@ this is needed for the item tools menu to know where to return"""
         self.options[group][2].append(optionData)
         self.keyDefault[variable] = default
       else:
-        print "options: group %s does not exist, can't add a raw option to it" % group
+        print("options: group %s does not exist, can't add a raw option to it" % group)
 
   def removeOption(self, categoryId, groupId, variable):
     """remove an option given by group and variable name"""
@@ -365,7 +365,7 @@ this is needed for the item tools menu to know where to return"""
       if variable in self.keyDefault:
         del self.keyDefault[variable]
     else:
-      print "options: group %s does not exist, so option with variable %s can not be removed" % (group, variable)
+      print("options: group %s does not exist, so option with variable %s can not be removed" % (group, variable))
 
   def getOption(self, groupID, index):
     """get a options item from a given group by its index"""
@@ -373,11 +373,11 @@ this is needed for the item tools menu to know where to return"""
       try:
         return self.options[groupID][2][index]
       except IndexError:
-        print "options: group %s has no index %d, so this option can not be returned" % (groupID, index)
+        print("options: group %s has no index %d, so this option can not be returned" % (groupID, index))
         return False
 
     else:
-      print "options: group %s does not exist, so option with index %d can not be returned" % (groupID, index)
+      print("options: group %s does not exist, so option with index %d can not be returned" % (groupID, index))
       return False
 
   def getKeyDefault(self, key, default=None):
@@ -1201,7 +1201,7 @@ this is needed for the item tools menu to know where to return"""
   def handleTextEntryResult(self, key, result):
     (type, variable) = key.split("_", 1)
     if type == "editVariable":
-      print "editing variable: %s with: %s" % (variable, result)
+      print("editing variable: %s with: %s" % (variable, result))
       self.set(variable, result)
 
   def drawMenu(self, cr, menuName, args=None):

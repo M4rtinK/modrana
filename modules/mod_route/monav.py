@@ -153,8 +153,8 @@ def get_route(data_directory, waypoints, lookup_radius=10000, lookup_edge_names=
 #            waypoint = command.waypoints.add(latitude=latlon[0], longitude=latlon[1])
 
     # Write the command.
-    print "COMMAND"
-    print command
+    print("COMMAND")
+    print(command)
 
     connection.write(command)
 

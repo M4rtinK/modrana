@@ -95,5 +95,5 @@ if(__name__ == '__main__'):
   a = RenderClass()
   filename = "sample_"+__file__+".png"
   a.RenderTile(17,65385,43658, filename)
-  print "------------------------------------"
-  print "Saved image to " + filename
+  print("------------------------------------")
+  print("Saved image to " + filename)

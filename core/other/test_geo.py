@@ -29,10 +29,10 @@ def turnAngle(first, middle, last):
   u_x, u_y = (Y_x - X_x, Y_y - X_y)
   v_x, v_y = (Z_x - Y_x, Z_y - Y_y)
 
-  #  print u_x * v_x + u_y * v_y
-  #  print (u_x - v_x) ** 2 + (u_y - v_y) ** 2
-  #  print sqrt((u_x - v_x) ** 2 + (u_y - v_y) ** 2)
-  #  print acos((u_x * v_x + u_y * v_y) / sqrt((u_x - v_x) ** 2 + (u_y - v_y) ** 2))
+  #  print(u_x * v_x + u_y * v_y)
+  #  print((u_x - v_x) ** 2 + (u_y - v_y) ** 2)
+  #  print(sqrt((u_x - v_x) ** 2 + (u_y - v_y) ** 2))
+  #  print(acos((u_x * v_x + u_y * v_y) / sqrt((u_x - v_x) ** 2 + (u_y - v_y) ** 2)))
   print("u_x, u_y, v_x, v_y")
   print(u_x, u_y, v_x, v_y)
 

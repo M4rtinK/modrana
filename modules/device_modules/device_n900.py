@@ -146,7 +146,7 @@ class DeviceN900(deviceModule):
       rotationMode = self.get('rotationMode', None)
       if rotationMode:
         self.setRotationMode(rotationMode)
-        print "rotation mode changed"
+        print("rotation mode changed")
     elif message == 'updateKeys':
       self._updateVolumeKeys()
 
@@ -360,7 +360,7 @@ class DeviceN900(deviceModule):
 
 
   def _toggle(self, toggleButton, key):
-    print "N900: key %s toggled" % key
+    print("N900: key %s toggled" % key)
     self.set(key, toggleButton.get_active())
 
   def _switchToMenu(self, toggleButton, menu):
@@ -369,7 +369,7 @@ class DeviceN900(deviceModule):
     self.set('needRedraw', True)
 
   def _updateAppMenu(self, key=None, value=None, oldValue=None):
-    print self.get("centred", True)
+    print(self.get("centred", True))
     if self.centeringToggleButton:
       self.centeringToggleButton.set_active(self.get("centred", True))
     if self.rotationToggleButton:
@@ -528,18 +528,18 @@ class DeviceN900(deviceModule):
 
         # TODO: remove when not needed
         if self.get('n900GPSDebug', False):
-          print "## N900 GPS debugging info ##"
-          print "fix tuple from the Location API:"
-          print fix
-          print "position,bearing,speed (in descending order):"
-          print self.get('pos', None)
-          print self.get('bearing', None)
-          print self.get('speed', None)
-          print "#############################"
+          print("## N900 GPS debugging info ##")
+          print("fix tuple from the Location API:")
+          print(fix)
+          print("position,bearing,speed (in descending order):")
+          print(self.get('pos', None))
+          print(self.get('bearing', None))
+          print(self.get('speed', None))
+          print("#############################")
         # always set this key to current epoch once the location is updated
         # so that modules can watch it and react
         self.set('locationUpdated', time.time())
-        #        print "updating location"
+        #        print("updating location")
         self.set('needRedraw', True)
 
       else:

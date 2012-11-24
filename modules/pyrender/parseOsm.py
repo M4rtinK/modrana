@@ -49,7 +49,7 @@ class parseOsm(handler.ContentHandler):
       parser.setContentHandler(self)
       parser.parse(filename)
     except xml.sax._exceptions.SAXParseException:
-      print "Error loading %s" % filename
+      print("Error loading %s" % filename)
     
 
   def startElement(self, name, attrs):

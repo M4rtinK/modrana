@@ -239,7 +239,7 @@ class ShowOSD(RanaModule):
     pos = self.get('pos', None)
     if pos is None:
       return False
-#    print profile
+#    print(profile)
 
 #    (sx,sy) = proj.screenPos(0.5, 0.5)
 #    (sLat,sLon) = proj.xy2ll(sx, sy)
@@ -268,7 +268,7 @@ class ShowOSD(RanaModule):
       return
 
 #    profile = self.routeProfileData
-#    print item
+#    print(item)
 
     proj = self.m.get('projection', None)
     (px,py) = float(item['px']), float(item['py'])
@@ -306,7 +306,7 @@ class ShowOSD(RanaModule):
 
     leftIndex = nearestIndex - nrPoints/2
     rightIndex = nearestIndex + nrPoints/2
-#    print leftAdd, leftIndex, nearestIndex, rightIndex, rightAdd
+#    print(leftAdd, leftIndex, nearestIndex, rightIndex, rightAdd)
     if leftIndex < 0:
       leftAdd = abs(leftIndex)
       leftIndex = 0
@@ -315,8 +315,8 @@ class ShowOSD(RanaModule):
       rightIndex = totalLength-1
 
 
-#    print totalLength
-#    print leftAdd, leftIndex, nearestIndex, rightIndex, rightAdd
+#    print(totalLength)
+#    print(leftAdd, leftIndex, nearestIndex, rightIndex, rightAdd)
 
     # build
 

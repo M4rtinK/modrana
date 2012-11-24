@@ -162,7 +162,7 @@ class onlineServices(RanaModule):
     """get a google maps wrapper instance"""
     key = self.get('googleAPIKey', DEFAULT_GOOGLE_API_KEY)
     if key is None:
-      print "onlineServices: a google API key is needed for using the google maps services"
+      print("onlineServices: a google API key is needed for using the google maps services")
       return None
       # only import when actually needed
     import googlemaps
@@ -171,7 +171,7 @@ class onlineServices(RanaModule):
     return gMap
 
   def googleLocalQuery(self, query, maxResults=0):
-    print "local search query: %s" % query
+    print("local search query: %s" % query)
     gMap = self.getGmapsInstance()
     if not maxResults:
       maxResults = int(self.get('GLSResults', 8))

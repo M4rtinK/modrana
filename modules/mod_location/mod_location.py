@@ -56,7 +56,7 @@ class Location(RanaModule):
   def firstTime(self):
     # periodic screen redraw
     if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
-      print "location: starting GPSD 1 second timer"
+      print("location: starting GPSD 1 second timer")
       # start screen update 1 per second screen update
       # TODO: event based redrawing
       cron = self.m.get('cron', None)
@@ -108,7 +108,7 @@ class Location(RanaModule):
       if args and len(args) == 2:
         lat = float(args[0])
         lon = float(args[1])
-        print "gps:setting current position to: %f,%f" % (lat,lon)
+        print("gps:setting current position to: %f,%f" % (lat,lon))
         self.set('pos',(lat,lon))
     elif message == "checkGPSEnabled":
         state = self.get('GPSEnabled', True)
@@ -175,7 +175,7 @@ class Location(RanaModule):
   def startLocation(self):
     """start location - device based or gpsd"""
     if not self.enabled:
-      print "location: enabling location"
+      print("location: enabling location")
       if self.modrana.dmod.handlesLocation():
         self.modrana.dmod.startLocation()
       else:
@@ -186,7 +186,7 @@ class Location(RanaModule):
 
   def stopLocation(self):
     """stop location - device based or gpsd"""
-    print "location: disabling location"
+    print("location: disabling location")
     if self.modrana.dmod.handlesLocation():
       self.modrana.dmod.stopLocation()
     else:
@@ -197,7 +197,7 @@ class Location(RanaModule):
     try:
       self.stopLocation()
     except Exception, e:
-      print "location: stopping location failed", e
+      print("location: stopping location failed", e)
 
   def _checkVerbose(self):
     if self.provider:

@@ -102,7 +102,7 @@ class ModRana:
     # add the paths handling core module
     self.paths = paths.Paths(self)
 
-    # print version string
+    # print(version string)
     version = self.paths.getVersionString()
     if version is None:
       version = "unknown version"

@@ -274,12 +274,12 @@ class Tracklog(RanaModule):
       self.log1.flush()
     except Exception, e:
       print('tracklog: saving primary temporary log failed')
-      print e
+      print(e)
     try:
       self.log2.flush()
     except Exception, e:
       print('tracklog: saving secondary temporary log failed')
-      print e
+      print(e)
 
   def generateLogName(self):
     """generate a unique name for a log"""
@@ -390,18 +390,18 @@ class Tracklog(RanaModule):
 #    # get only the points, that are currently visible
 #    proj = self.m.get('projection', None)
 #    if proj:
-#      print self.LatLonIndex
+#      print(self.LatLonIndex)
 #      (lat1,lon1,lat2,lon2) = proj.screenBBoxLL()
-#      print (lat1,lon1,lat2,lon2)
+#      print((lat1,lon1,lat2,lon2))
 #      print("filtering")
 #      # first get only point for available latitude range
 #      visiblePoints = filter(lambda x: lat1 >= x[0] >= lat2, self.LatLonIndex)
-#      print visiblePoints
+#      print(visiblePoints)
 #      visiblePoints = filter(lambda x: lon1 <= x[1] <= lon2, visiblePoints)
-#      print visiblePoints
+#      print(visiblePoints)
 #      # now sort the list of visible points according to the index
 #      visiblePoints = sorted(visiblePoints, key=lambda x: x[2])
-#      print visiblePoints
+#      print(visiblePoints)
 #      return visiblePoints
 
   def point(self, cr, x, y):
@@ -630,8 +630,8 @@ class Tracklog(RanaModule):
           
       # draw a track to current position (if known):
 
-#      print z, modulo
-#      print counter, drawCount
+#      print(z, modulo)
+#      print(counter, drawCount)
 
       cr.stroke()
       cr.fill()

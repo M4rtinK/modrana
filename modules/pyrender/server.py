@@ -81,7 +81,7 @@ class tileServer(BaseHTTPRequestHandler):
       y = int(y)
       
       # Render the tile
-      print 'z%d: %d,%d - %s' % (z,x,y,layer)
+      print('z%d: %d,%d - %s' % (z,x,y,layer))
 
       if(layer == 'labels'):
         renderer = RenderModule2.RenderClass()
@@ -90,7 +90,7 @@ class tileServer(BaseHTTPRequestHandler):
       pngData = renderer.RenderTile(z,x,y, layer)
       
       if(pngData == None):
-        print "Not found"
+        print("Not found")
         self.send_response(404)
         return
       if(pngData[0] == ':'):
@@ -108,7 +108,7 @@ class tileServer(BaseHTTPRequestHandler):
 
 try:
   server = HTTPServer(('',1280), tileServer)
-  print "Starting web server. Open http://localhost:1280 to access pyrender."
+  print("Starting web server. Open http://localhost:1280 to access pyrender.")
   server.serve_forever()
 except KeyboardInterrupt:
   server.socket.close()

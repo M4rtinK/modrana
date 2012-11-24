@@ -290,7 +290,7 @@ class Search(RanaModule):
 
 #        if local['responseStatus'] != 200:
 #          print("search: google returned %d return code" % local['responseStatus'])
-#        print ("search: local search returned %d results") % len(local['responseData']['results'])
+#        print(("search: local search returned %d results") % len(local['responseData']['results']))
 #        self.localSearchResults = local
 
     elif message == "customQuery":
@@ -338,8 +338,8 @@ class Search(RanaModule):
 
   def describeItem(self, index, category, list):
 #    longName = name = item.getTracklogName()
-#    print filter(lambda x: x.getTracklogName() == longName, loadedTracklogs)
-#    print loadedTracklogs.index(item)
+#    print(filter(lambda x: x.getTracklogName() == longName, loadedTracklogs))
+#    print(loadedTracklogs.index(item))
     action = "set:menu:search#searchResultsItem"
     action += "|set:searchResultsItemNr:%d" % list[index][2] # here we use the ABSOLUTE index, not the relative one
 #    action += "|set:menu:"
@@ -592,7 +592,7 @@ class Search(RanaModule):
       # draw caption with transparent background
       text = "%s" % point['titleNoFormatting'] # result caption
 
-#      print point['titleNoFormatting']
+#      print(point['titleNoFormatting'])
 
       cr.set_font_size(20)
       extents = cr.text_extents(text) # get the text extents

@@ -69,7 +69,7 @@ class ShareServer(poiModule):
         'G':group,
         'WP':group_write_pin,
         'N':nickname})
-      print result
+      print(result)
 
   def sendPos(self, group, lat, lon):
     """Transmits your position so that the specified group can see it"""
@@ -81,7 +81,7 @@ class ShareServer(poiModule):
       'WP':group_write_pin,
       'LAT':lat,
       'LON':lon})
-    print result
+    print(result)
 
   def getPos(self, group, group_read_pin):
     """Get positions of all users in a group"""
@@ -125,6 +125,6 @@ if __name__ == "__main__":
     a.sendPos(1, 53, 12)
   else:
     # To test downloading
-    print a.getPos(1, 1111)
+    print(a.getPos(1, 1111))
   
 

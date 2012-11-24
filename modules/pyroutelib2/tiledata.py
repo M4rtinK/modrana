@@ -30,7 +30,7 @@ def DownloadLevel():
 def GetOsmTileData(z,x,y):
   """Download OSM data for the region covering a slippy-map tile"""
   if x < 0 or y < 0 or z < 0 or z > 25:
-    print "Disallowed %d,%d at %d" % (x,y,z)
+    print("Disallowed %d,%d at %d" % (x,y,z))
     return
   
   directory = 'cache/%d/%d/%d' % (z,x,y)
@@ -57,4 +57,4 @@ def GetOsmTileData(z,x,y):
 
 if __name__ == "__main__":
   """test mode"""
-  print GetOsmTileData(15, 16218, 10741)
+  print(GetOsmTileData(15, 16218, 10741))

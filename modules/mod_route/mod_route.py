@@ -192,8 +192,8 @@ class route(RanaModule):
       self.selectManyPoints = True
       self.handmade = True
       self.osdMenuState = OSD_EDIT
-      print "HANDMADE"
-      print self.handmade
+      print("HANDMADE")
+      print(self.handmade)
 
     elif message == "selectTwoPoints":
       self.set('startPos', None)
@@ -239,8 +239,8 @@ class route(RanaModule):
         print(middlePoints)
         print(" to %f,%f" % (toLat, toLon))
         war = way.fromHandmade(fromPos, middlePoints, toPos)
-        print "NO WAI"
-        print war
+        print("NO WAI")
+        print(war)
         self.processAndSaveResults(war, "start", "end", time.time())
         # start TbT navigation (if enabled)
         self.startNavigation()

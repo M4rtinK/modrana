@@ -25,18 +25,18 @@
     f.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n")
     f.write("<svg\n   xmlns:svg=\"http://www.w3.org/2000/svg\"\n   xmlns=\"http://www.w3.org/2000/svg\"\n   version=\"1.0\"\n   width=\"1000\"\n   height=\"1000\"   id=\"svg2\">\n")
 
-    print "Creating SVG"
+    print("Creating SVG")
     f.write("  <g id=\"layer1\">\n")
     colours = ['red','#FF8000','yellow','green','blue','#808080','black']
     for tileset in tilesets:
       colour = colours.pop(0)
-      print " - tileset %s"% colour
+      print(" - tileset %s"% colour)
       self.tilesetSvgSnippet(f,tileset, colour)
     f.write("</g>\n")
 
     if(route):
       f.write("  <g id=\"route\">\n")
-      print " - route"
+      print(" - route")
       self.routeSvgSnippet(f, route)
       f.write("</g>\n")
 

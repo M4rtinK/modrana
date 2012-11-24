@@ -1455,7 +1455,7 @@ class menus(RanaModule):
           print("menu: no list %s available, can't set index" % listName)
       except Exception, e:
         print("menu: setting list index failed")
-        print e
+        print(e)
 
     elif type == "ms" and message == "openUrl":
       url = args

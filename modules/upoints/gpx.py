@@ -852,7 +852,7 @@ class Trackpoints(_SegWrap):
             try:
                 accepted_gpx = {gpx_version: GPX_VERSIONS[gpx_version]}
             except KeyError:
-#                print GPX_VERSIONS
+#                print(GPX_VERSIONS)
                 raise KeyError("Unknown GPX version `%s'" % gpx_version)
         else:
             accepted_gpx = GPX_VERSIONS
@@ -873,10 +873,10 @@ class Trackpoints(_SegWrap):
             # create a qualified name containing the namespace
             gpx_elem = lambda name: ET.QName(namespace, name).text
             metadata = data.find("//" + gpx_elem("metadata"))
-#            print namespace
-#            print data.getroot().tag
-#            print gpx_elem("metadata")
-#            print metadata
+#            print(namespace)
+#            print(data.getroot().tag)
+#            print(gpx_elem("metadata"))
+#            print(metadata)
             if metadata:
                 self.metadata.import_metadata(metadata)               
             segment_elem = "//" + gpx_elem("trkseg")
@@ -887,8 +887,8 @@ class Trackpoints(_SegWrap):
             time_elem = gpx_elem("time")
 
 
-#            print "segment?"
-#            print data.findall(segment_elem)
+#            print("segment?")
+#            print(data.findall(segment_elem))
 
             for segment in data.findall(segment_elem):
                 points = point.TimedPoints()

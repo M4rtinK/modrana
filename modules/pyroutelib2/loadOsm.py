@@ -47,17 +47,17 @@ class LoadOsm:
 
     tileID = '%d,%d'%(x,y)
     if self.tiles.get(tileID,False):
-      #print "Already got %s" % tileID
+      #print("Already got %s" % tileID)
       return
     self.tiles[tileID] = True
     
     filename = tiledata.GetOsmTileData(z,x,y)
-    #print "Loading %d,%d at z%d from %s" % (x,y,z,filename)
+    #print("Loading %d,%d at z%d from %s" % (x,y,z,filename))
     return self.loadOsm(filename)
 
   def loadOsm(self, filename):
     if not os.path.exists(filename):
-      print "No such data file %s" % filename
+      print("No such data file %s" % filename)
       return False
     fp = open(filename, "r")
     re_way = re.compile("<way id='(\d+)'>\s*$")
@@ -115,7 +115,7 @@ class LoadOsm:
     last = [None,None,None]
 
     if wayID == 41 and 0:
-      print nodes
+      print(nodes)
       sys.exit()
     for node in nodes:
       (node_id,x,y) = node
@@ -182,20 +182,20 @@ class LoadOsm:
         maxDist = dist
         nodeFound = node_id
         posFound = pos
-    #print "found at %s"%str(posFound)
+    #print("found at %s"%str(posFound))
     return(nodeFound)
       
   def report(self):
     """Display some info about the loaded data"""
-    print "Loaded %d nodes" % len(self.rNodes.keys())
-    print "Loaded %d %s routes" % (len(self.routing.keys()), self.transport)
+    print("Loaded %d nodes" % len(self.rNodes.keys()))
+    print("Loaded %d %s routes" % (len(self.routing.keys()), self.transport))
 
 # Parse the supplied OSM file
 if __name__ == "__main__":
   data = LoadOsm("cycle")
   if not data.getArea(52.55291,-1.81824):
-    print "Failed to get data"
+    print("Failed to get data")
   data.getArea(52.55291,-1.81824)
   data.report()
 
-  print "Searching for node: found " + str(data.findNode(52.55291,-1.81824))
+  print("Searching for node: found " + str(data.findNode(52.55291,-1.81824)))

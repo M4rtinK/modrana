@@ -181,7 +181,7 @@ class PointGroup():
       self.points[id][1] = True
     except Exception, e:
       print("markers: highlight index out of range: %r" % id)
-      print e
+      print(e)
 
   def unhighlightAll(self):
     for tuple in self.points:
