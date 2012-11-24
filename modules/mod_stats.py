@@ -17,17 +17,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from core import geo
 from time import *
 
 def getModule(m,d,i):
-  return(stats(m,d,i))
+  return Stats(m,d,i)
 
-class stats(ranaModule):
-  """Handles messages"""
+class Stats(RanaModule):
+  """Handles statistics"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.minimalSpeed = 2 #  in kmh, we don't update the avg speed if the current speed is like this
     self.lastT = None
     self.maxSpeed = 0
@@ -37,29 +37,26 @@ class stats(ranaModule):
   def update(self):
     # Run scheduledUpdate every second
     t = time()
-    if(self.lastT == None):
+    if self.lastT is None:
       self.scheduledUpdate(t, 1, True) # dt should not be 0 because we use it for division
       self.lastT = t
     else:
       dt = t - self.lastT
-      if(dt > 1):
+      if dt > 1:
         self.scheduledUpdate(t, dt)
         self.lastT = t
   
   def scheduledUpdate(self, t, dt, firstTime=False):
     """Called every dt seconds"""
     pos = self.get('pos', None)
-    if(pos == None):
+    if pos is None:
       return # TODO: zero stats
-
     speed = self.get('speed', None)
-    if speed == None or speed<=self.minimalSpeed:
-      """we have no data, or the speed is below the threshold (we are not moving)"""
+    if speed is None or speed<=self.minimalSpeed:
+      # we have no data, or the speed is below the threshold (we are not moving)
       return
-
     average = 0
-
-    if(speed > self.maxSpeed):
+    if speed > self.maxSpeed:
       self.maxSpeed = speed
     self.avg1 += speed
     self.avg2 += dt
@@ -67,13 +64,4 @@ class stats(ranaModule):
 
     self.set('maxSpeed', self.maxSpeed)
     self.set('avgSpeed', average)
-
-
-if(__name__ == '__main__'):
-  d = {'pos':[51, -1]}
-  a = stats({},d)
-  a.update()
-  d['pos'] = [52, 0]
-  a.update()
-  print d.get('speed')
   

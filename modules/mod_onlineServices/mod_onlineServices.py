@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import traceback
 import sys
 import re
@@ -33,11 +33,11 @@ def getModule(m, d, i):
   return onlineServices(m, d, i)
 
 
-class onlineServices(ranaModule):
+class onlineServices(RanaModule):
   """A module for talking to various online services"""
 
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.workerThreads = []
     self.drawOverlay = False
 

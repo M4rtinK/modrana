@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from core import utils
 
 # identifies item as a group
@@ -27,11 +27,11 @@ def getModule(m, d, i):
   return Options(m, d, i)
 
 
-class Options(ranaModule):
+class Options(RanaModule):
   """Handle options"""
 
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.options = {}
     """for fast searching defaults for corresponding keys"""
     self.keyDefault = {}

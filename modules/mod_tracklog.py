@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import shutil
 import glob
 import time
@@ -43,12 +43,12 @@ DONT_ADD_TO_TRACE_THRESHOLD = 1
 
 
 def getModule(m,d,i):
-  return(tracklog(m,d,i))
+  return Tracklog(m,d,i)
 
-class tracklog(ranaModule):
+class Tracklog(RanaModule):
   """Record tracklogs"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.loggingEnabled = False
     self.loggingPaused = False
     self.loggingStartTimestamp = None
@@ -97,7 +97,7 @@ class tracklog(ranaModule):
         self.initLog()
       # or resume an existing one
       elif self.loggingEnabled == True & self.loggingPaused == True:
-        print "tracklog: resuming the logging"
+        print("tracklog: resuming the logging")
         self.loggingPaused = False
       self.set('needRedraw', True)
 
@@ -393,7 +393,7 @@ class tracklog(ranaModule):
 #      print self.LatLonIndex
 #      (lat1,lon1,lat2,lon2) = proj.screenBBoxLL()
 #      print (lat1,lon1,lat2,lon2)
-#      print "filtering"
+#      print("filtering")
 #      # first get only point for available latitude range
 #      visiblePoints = filter(lambda x: lat1 >= x[0] >= lat2, self.LatLonIndex)
 #      print visiblePoints

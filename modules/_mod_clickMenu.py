@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import cairo
 from time import time
 from math import pi
@@ -25,10 +25,10 @@ from math import pi
 def getModule(m,d,i):
   return(clickMenu(m,d,i))
 
-class clickMenu(ranaModule):
+class clickMenu(RanaModule):
   """Overlay info on the map"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.lastWaypoint = "(none)"
     self.lastWaypointAddTime = 0
     self.messageLingerTime = 2

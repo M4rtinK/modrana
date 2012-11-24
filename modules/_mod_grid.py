@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import cairo
 import os
 import sys
@@ -26,10 +26,10 @@ from core import geo
 def getModule(m,d,i):
   return(grid(m,d,i))
   
-class grid(ranaModule):
+class grid(RanaModule):
   """Display map images"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
 #  def drawMapOverlay(self, cr):
 #    # Where is the map?

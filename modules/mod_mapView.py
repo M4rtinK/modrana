@@ -17,16 +17,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
-from core.tilenames import *
+from modules.base_module import RanaModule
 
 def getModule(m,d,i):
-  return(mapView(m,d,i))
+  return MapView(m,d,i)
 
-class mapView(ranaModule):
+class MapView(RanaModule):
   """Controls the view being displayed on the map"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
   def firstTime(self):
     self.checkMapDraggingMode() # check the map dragging mode on startup
@@ -35,14 +34,14 @@ class mapView(ranaModule):
     
   def handleMessage(self, message, type, args):
     z = self.get('z', 15)
-    if(message == 'zoomIn'):
+    if message == 'zoomIn':
       newZ = z + 1
       self.set('z', newZ)
       proj = self.m.get('projection', None)
       if proj:
         proj.setZoom(newZ)
       self.notify("zooming <b>in</b> to zl %d" % newZ)
-    elif(message == 'zoomOut'):
+    elif message == 'zoomOut':
       newZ = max(z - 1, 4)
       self.set('z', newZ)
       proj = self.m.get('projection', None)
@@ -54,7 +53,7 @@ class mapView(ranaModule):
         self.notify("minimum zoomlevel reached")
 
 
-    elif (message=='recentreToPos'):
+    elif message=='recentreToPos':
       pos = self.get('pos', None)
       proj = self.m.get('projection', None)
       if pos and proj:
@@ -67,7 +66,7 @@ class mapView(ranaModule):
     elif message=="centeringDisableThresholdChanged":
       self.checkCenteringDisableThreshold()
 
-    elif(message):
+    elif message:
       try:
         list = message.split(' ')
         lat = float(list[1])
@@ -79,11 +78,12 @@ class mapView(ranaModule):
         proj = self.m.get('projection', None)
         self.set("centred",False) # turn off centering before moving screen to the coordinates
         proj.recentre(lat, lon, zoom)
-      except:
-        print "mapView: cant recenter coordinates"
+      except Exception, e:
+        print("mapView: cant recenter coordinates")
+        print(e)
   
   def dragEvent(self,startX,startY,dx,dy,x,y):
-    # only drag the map if centering is disabled
+    """only drag the map if centering is disabled"""
     if not self.get("centred",False):
       proj = self.m.get('projection', None)
       if proj:
@@ -91,7 +91,7 @@ class mapView(ranaModule):
         self.set('needRedraw', True)
 
   def handleCentring(self):
-    # check if centring is on
+    """check if centring is on"""
     if self.get("centred",True):
       # get current position information
       pos = self.get('pos', None)
@@ -106,29 +106,28 @@ class mapView(ranaModule):
       self.set('map_centre', pos)
       z = int(self.get('z', 15))
       x,y = proj.ll2xy(lat,lon)
-      if(not self.d.has_key('viewport')):
-        return(False)
+      if not self.d.has_key('viewport'):
+        return False
       (sx,sy,sw,sh) = self.get('viewport')
-      """
-      the shift amount represents a percentage of the distance from screen center
-      to an edge:
-      center+---------->|edge
-      0 -> no shift
-      1 -> directly on the edge
-      0.5 -> shifted by half of this distance, eq. in 3/4 of the screen
-      """
+      # the shift amount represents a percentage of the distance from screen center
+      # to an edge:
+      # center+---------->|edge
+      # 0 -> no shift
+      # 1 -> directly on the edge
+      # 0.5 -> shifted by half of this distance, eq. in 3/4 of the screen
       newZoom = None
       if z != self.lastZ:
         newZoom = z
         self.lastZ = newZoom
       proj.recentre(lat,lon,newZoom)
-      return(True)
+      return True
 
-    # * map dragging mode control * #
+  # * map dragging mode control * #
+
   def checkMapDraggingMode(self):
     """check and set current redraw mode configuration"""
     draggingMode = self.get('mapDraggingMode', "default")
-    print "mapView: switching map drag mode to %s" % draggingMode
+    print("mapView: switching map drag mode to %s" % draggingMode)
     if draggingMode == 'default':
       self.modrana.gui.enableDefaultDrag()
     elif draggingMode == "staticMapDrag":
@@ -137,7 +136,7 @@ class mapView(ranaModule):
   def checkCenteringDisableThreshold(self):
     """check ans set current centering disable threshold"""
     centeringDisableThreshold = self.get('centeringDisableThreshold', 2048)
-    print "mapView: switching centering disable threshold to %s" % centeringDisableThreshold
+    print("mapView: switching centering disable threshold to %s" % centeringDisableThreshold)
     self.modrana.gui.setCDDragThreshold(int(centeringDisableThreshold))
 
   def jump2point(self, point):

@@ -17,8 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
-import time
+from modules.base_module import RanaModule
 from core import geo
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -28,13 +27,13 @@ if gs.GUIString == "GTK":
   import pycha.line
 
 def getModule(m,d,i):
-  return(showOSD(m,d,i))
+  return ShowOSD(m,d,i)
 
-class showOSD(ranaModule):
+class ShowOSD(RanaModule):
   """Draw OSD (On Screen Display)."""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.items = None
     self.routeProfileData = None
     self.nearestPoint = None
@@ -59,12 +58,12 @@ class showOSD(ranaModule):
 
 
   def drawScreenOverlay(self, cr):
-    """ draw currenty active information widgets TODO: just draw object from list"""
+    """ draw currently active information widgets TODO: just draw object from list"""
     if self.m.get('config', {}):
       config = self.modrana.configs.getUserConfig()
 
       mode = self.get('mode', None)
-      if mode == None:
+      if mode is None:
         return
 
       if mode not in config:
@@ -84,7 +83,7 @@ class showOSD(ranaModule):
     if type == 'speed':
       speed = self.get('speed', 0)
       units = self.m.get('units', None)
-      if speed == None:
+      if speed is None:
         speedString = "? %s" % units.currentUnitString()
       else:
         speedString = units.km2CurrentUnitPerHourString(speed)
@@ -96,7 +95,7 @@ class showOSD(ranaModule):
         self.drawMultilineTextWidget(cr, item, timeString)
     elif type == 'coordinates':
       pos = self.get('pos', None)
-      if pos == None:
+      if pos is None:
         return
       posString = "%f(lat)|%f(lon)" % pos
       self.drawMultilineTextWidget(cr, item, posString)
@@ -110,12 +109,12 @@ class showOSD(ranaModule):
     elif type == 'route_profile':
       self.drawRouteProfile(cr, item)
     elif type == 'time_to_start':
-      if self.routeProfileData == None:
+      if self.routeProfileData is None:
         text = "activate a track | to show time to start"
         self.drawMultilineTextWidget(cr, item, text)
         return
       else:
-        if self.distanceList == None: # was the neerest point already determined ?
+        if self.distanceList is None: # was the nearest point already determined ?
           if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
             return
       avgSpeed = self.get('avgSpeed', 0)
@@ -129,12 +128,12 @@ class showOSD(ranaModule):
       text = 'to start:|%s h:m' % timeString
       self.drawMultilineTextWidget(cr, item, text)
     elif type == 'time_to_destination':
-      if self.routeProfileData == None:
+      if self.routeProfileData is None:
         text = "activate a track | to show time to dest."
         self.drawMultilineTextWidget(cr, item, text)
         return
       else:
-        if self.distanceList == None: # was the nearest point already determined ?
+        if self.distanceList is None: # was the nearest point already determined ?
           if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
             return
       avgSpeed = self.get('avgSpeed', 0)
@@ -149,12 +148,12 @@ class showOSD(ranaModule):
       text = 'to destination|%s h:m' % timeString
       self.drawMultilineTextWidget(cr, item, text)
     elif type == 'route_remaining_length':
-      if self.routeProfileData == None:
+      if self.routeProfileData is None:
         text = "activate a track | to show rem. length"
         self.drawMultilineTextWidget(cr, item, text)
         return
       else:
-        if self.distanceList == None: # was the nearest point already determined ?
+        if self.distanceList is None: # was the nearest point already determined ?
           if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
             return
         currentLength = self.routeProfileData[self.nearestIndex][0]
@@ -200,7 +199,7 @@ class showOSD(ranaModule):
 
       if 'align' in item:
         if item['align'] == 'right':
-          x = x - w
+          x -= w
 
 
 
@@ -209,7 +208,7 @@ class showOSD(ranaModule):
       i = 0
       for line in lines:
         self.drawText(cr, x, yOffset[i], line)
-        i = i + 1
+        i += 1
 
   def drawBackground(self, cr, x, y, w, h, source=None):
     cr.set_line_width(2)
@@ -238,7 +237,7 @@ class showOSD(ranaModule):
   def findNearestPoint(self):
     """find the nearest point of the active tracklog(nearest to our position)"""
     pos = self.get('pos', None)
-    if pos == None:
+    if pos is None:
       return False
 #    print profile
 
@@ -262,7 +261,7 @@ class showOSD(ranaModule):
 
   def drawRouteProfile(self, cr, item):
     """draw a dynamic route profile as a part of the osd"""
-    if self.routeProfileData == None:
+    if self.routeProfileData is None:
       text = "activate a tracklog|to show route profile"
       item['font_size'] = 20
       self.drawMultilineTextWidget(cr, item, text)
@@ -285,7 +284,7 @@ class showOSD(ranaModule):
     if 'segment_length' in item:
       segmentLength = float(item['segment_length'])
 
-    if self.distanceList == None: # was the nearest point already determined ?
+    if self.distanceList is None: # was the nearest point already determined ?
       if self.findNearestPoint() == False: # False is returned if the nearest point can not be computed
         return
 

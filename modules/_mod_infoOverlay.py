@@ -17,19 +17,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import cairo
 from datetime import *
 
 def getModule(m,d,i):
-  return(infoOverlay(m,d,i))
+  return InfoOverlay(m,d,i)
 
-class infoOverlay(ranaModule):
+class InfoOverlay(RanaModule):
   """Overlay info on the map"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.lines = ['hello', 'world']
-    self.oldlines = ['','']
+    self.oldLines = ['','']
     self.mode = 0
     self.isGraphical = False
     self.modes = ['pos', 'gps', 'road', 'speed', 'maxSpeed', 'bearing', 'time']
@@ -40,7 +40,7 @@ class infoOverlay(ranaModule):
   
   def get_pos(self):
     pos = self.get('pos', None)
-    if(pos == None):
+    if pos is None:
       self.lines.append('No position')
     else:
       self.lines.append('%1.4f, %1.4f' % pos)
@@ -51,12 +51,12 @@ class infoOverlay(ranaModule):
     
   def get_road(self):
     text = self.get('nearest_road', None)
-    if(text != None):
+    if text is not None:
       self.lines.append(text)
     text = self.get('nearest_place', None)
-    if(text != None):
+    if text is not None:
       self.lines.append(text)
-    if(len(self.lines) == 0):
+    if len(self.lines) == 0:
       self.lines.append('No data')
 
   def get_speed(self):
@@ -72,10 +72,9 @@ class infoOverlay(ranaModule):
     now = datetime.now()
     self.lines.append(now.strftime("%Y-%m-%d (%a)"))
     self.lines.append(now.strftime("%H:%M:%S"))
-  
 
-  def update(self):
-    return #TODO: rewrite this
+  def _update(self):
+    #TODO: rewrite this
     # The get_xxx functions all fill-in the self.lines array with
     # text to display, where xxx is the selected mode
     self.lines = []
@@ -91,7 +90,7 @@ class infoOverlay(ranaModule):
 
     # Detect changes to the lines being displayed,
     # and ask for redraw if they change
-    if(len(self.lines) != len(self.oldlines) or self.isGraphical):
+    if len(self.lines) != len(self.oldlines) or self.isGraphical:
       self.set('needRedraw', True)
     else:
       for i in range(len(self.lines)):
@@ -104,16 +103,16 @@ class infoOverlay(ranaModule):
     self.set('lookup_place', self.modes[self.mode] == 'road')
 
   def handleMessage(self, message, type, args):
-    if(message == 'nextField'):
+    if message == 'nextField':
       self.mode += 1
-      if(self.mode >= len(self.modes)):
+      if self.mode >= len(self.modes):
         self.mode = 0
       self.onModeChange()
       
   def drawGPS(self, cr,x,y,w,h):
     num = self.get("gps_num_sats", 0)
-    #print "%d sats" % num
-    if(num < 1):
+    #print("%d sats" % num)
+    if num < 1:
       return
     
     max = 1.0
@@ -123,7 +122,7 @@ class infoOverlay(ranaModule):
 
       db = float(db)
       sats.append((db, used, id))
-      if(db > max):
+      if db > max:
         max = db
 
     max *= 1.1
@@ -133,10 +132,10 @@ class infoOverlay(ranaModule):
 
     for sat in sats:
       (db,used,id) = sat
-      #print "%d: %f" % (i, db)
+      #print("%d: %f" % (i, db))
       
       # Signal strength meter
-      if(used):
+      if used:
         cr.set_source_rgb(0,0.7,0.9)
       else:
         cr.set_source_rgb(0,0.3,0.5)
@@ -153,9 +152,9 @@ class infoOverlay(ranaModule):
       
       x += dx
       
-  def drawMapOverlay(self, cr):
-#    print "zoom from infoOverlay:%d" % int(self.get("z", 15))
-    return #TODO: rewrite this
+  def _drawMapOverlay(self, cr):
+#    print("zoom from infoOverlay:%d" % int(self.get("z", 15)))
+    #TODO: rewrite this
     """Draw an overlay on top of the map, showing various information
     about position etc."""
     (x,y,w,h) = self.get('viewport')
@@ -170,17 +169,17 @@ class infoOverlay(ranaModule):
 
     # Clicking on the rectangle should toggle which field we display
     m = self.m.get('clickHandler', None)
-    if(m != None):
+    if m is not None:
       m.registerXYWH(x1,y1,w,dy, "infoOverlay:nextField")
     # Draw a background
     cr.set_source_rgb(0,0,0)
     cr.rectangle(x1,y1,w,dy)
     cr.fill()
-    if(self.isGraphical == 'GPS'):
+    if self.isGraphical == 'GPS':
       self.drawGPS(cr,x,y2,w,-dy)
 
     numlines = len(self.lines)
-    if(numlines < 1):
+    if numlines < 1:
       return
     linespacing = (dy / numlines)
     fontsize = linespacing * 0.8
@@ -191,7 +190,7 @@ class infoOverlay(ranaModule):
     for text in self.lines:
       # Check that font size is small enough to display width of text
       fontx = w / len(text)
-      if(fontx < fontsize):
+      if fontx < fontsize:
         cr.set_font_size(fontx)
       else:
         cr.set_font_size(fontsize)

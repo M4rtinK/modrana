@@ -19,7 +19,7 @@
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
 import StringIO
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from threading import Thread
 import threading
 import os
@@ -64,11 +64,11 @@ def getModule(m, d, i):
   return MapTiles(m, d, i)
 
 
-class MapTiles(ranaModule):
+class MapTiles(RanaModule):
   """Display map images"""
 
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.images = [{}, {}] # the first dict contains normal image data, the second contains special tiles
     self.imagesLock = threading.RLock()
     self.threads = {}

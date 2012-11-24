@@ -17,18 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import sys
 import os
 
 def getModule(m,d,i):
-  return(log(m,d,i))
+  return Log(m,d,i)
 
-class log(ranaModule):
+class Log(RanaModule):
   """A modRana logging module"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.savedStdout = None
     self.fSock = None
     self.currentLogPath = ""
@@ -71,25 +71,25 @@ class log(ranaModule):
     try:
       self.savedStdout = sys.stdout
       if not self.fSock:
-        print "**log: opening stdout log file"
+        print("**log: opening stdout log file")
         self.fSock = open(self.getLogFilePath(), 'w')
-      print "**log: redirecting stdout to log file:\%s" % self.currentLogPath
+      print("**log: redirecting stdout to log file:\%s" % self.currentLogPath)
       sys.stdout = self.fSock
-      print "**log: stdout redirected to (this :) log file"
+      print("**log: stdout redirected to (this :) log file")
     except Exception, e:
-      print "debug log: redirecting stdout to file failed:\n%s" % e
+      print("debug log: redirecting stdout to file failed:\n%s" % e)
 
   def disableLogging(self):
     """disable logging"""
     #do whe have a usable saved stdout ?
     if self.savedStdout:
-      print "**log: redirecting stdout back"
+      print("**log: redirecting stdout back")
       sys.stdout = self.savedStdout
 
   def shutdown(self):
     """disable logging"""
     self.disableLogging()
-    """try to close the log file"""
+    # try to close the log file
     # is there actually something to close ?
     if self.fSock:
       try:

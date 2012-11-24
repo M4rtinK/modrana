@@ -23,17 +23,17 @@ import random
 from threading import Thread
 import urllib2
 import cStringIO
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import tileserver_callback_proxy
 
 def getModule(m,d,i):
   return(Tileserver(m,d,i))
 
-class Tileserver(ranaModule):
+class Tileserver(RanaModule):
   """A modRana built-in tileserver"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
     tileserver_callback_proxy.cb = self
 
@@ -50,7 +50,7 @@ class Tileserver(ranaModule):
 
 
   def runServer(self):
-    print "tile server: starting localhost tileserver"
+    print("tile server: starting localhost tileserver")
 
 
     self.port = 9009
@@ -65,6 +65,7 @@ class Tileserver(ranaModule):
       self.httpd = Server(("", self.tileserverPort), self)
     except Exception, e:
       print("tileserver: starting server on port %d failed" % self.port)
+      print(e)
       self.port = random.randint(9000,10000)
       print("tileserver: generating random port")
       print("tileserver: starting on port %d" % self.port)

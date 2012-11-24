@@ -18,7 +18,7 @@ from __future__ import with_statement # for python 2.5
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import subprocess
 import re
 import threading
@@ -27,11 +27,11 @@ def getModule(m, d, i):
   return Voice(m, d, i)
 
 
-class Voice(ranaModule):
+class Voice(RanaModule):
   """Handle text to speech."""
 
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.espaekProcess = None
     # this lock is used to make sure there is only one voice speaking at once
     self.voiceLock = threading.Lock()
@@ -162,7 +162,7 @@ class Voice(ranaModule):
     try:
       return subprocess.Popen(args, shell=shell)
     except TypeError:
-      print "voice: voice output failed - most probably due to the message containing unicode characters and your shell not properly supporting unicode"
+      print("voice: voice output failed - most probably due to the message containing unicode characters and your shell not properly supporting unicode")
       return None
 
 

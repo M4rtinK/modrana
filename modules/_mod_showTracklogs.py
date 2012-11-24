@@ -17,17 +17,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from upoints import gpx
 
 def getModule(m,d,i):
   return ShowTracklogs(m,d,i)
 
-class ShowTracklogs(ranaModule):
+class ShowTracklogs(RanaModule):
   """draws a GPX track on the map"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     
     self.tracks = {} #dictionary of tracklists TODO: support tracklists with same filenames
     #self.tracks_filelist = {} #dictionary in form of filename:key_in_tracks
@@ -42,6 +42,6 @@ class ShowTracklogs(ranaModule):
       self.tracks[filename] = track
       file.close()
     else:
-      print "No file"
+      print("No file")
   def drawMapOverlay(self, cr):
     pass

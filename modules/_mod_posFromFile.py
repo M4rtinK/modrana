@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import sys
 import os
 import socket
@@ -25,16 +25,16 @@ from time import sleep
 import re
 
 def getModule(m,d,i):
-  return(posFromFile(m,d,i))
+  return PosFromFile(m,d,i)
 
-class posFromFile(ranaModule):
+class PosFromFile(RanaModule):
   """Supplies position info from GPSD"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
  
   def update(self):
     filename = self.get('pos_filename', 'pos.txt')
-    if(not os.path.exists(filename)):
+    if not os.path.exists(filename):
       self.status = "File not available"
       return
     try:
@@ -48,14 +48,14 @@ class posFromFile(ranaModule):
       self.set('pos', (lat,lon))
       self.set('pos_source', 'file')
       self.status = "OK"
-      return({'valid':True, 'lat':lat, 'lon':lon, 'source':'textfile'})
+      return {'valid':True, 'lat':lat, 'lon':lon, 'source':'textfile'}
     except ValueError:
       self.status = "Invalid file"
 
 if __name__ == "__main__":
   d = {'pos_filename':'pos.txt'}
-  a = posFromFile({},d)
+  a = PosFromFile({},d)
   for i in range(5):
     a.update()
-    print "%s: %s" %(a.getStatus(), d.get('pos', None))
+    print("%s: %s" %(a.getStatus(), d.get('pos', None)))
     sleep(3)

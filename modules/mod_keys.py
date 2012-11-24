@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -28,11 +28,11 @@ if gs.GUIString == "GTK":
 def getModule(m,d,i):
   return Keys(m,d,i)
 
-class Keys(ranaModule):
+class Keys(RanaModule):
   """A keyboard input handling module"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
   def firstTime(self):
     # connect the key press handler
@@ -56,4 +56,4 @@ class Keys(ranaModule):
     elif keyName == 'F7':
       """zoom in"""
       self.sendMessage('mapView:zoomIn')
-    print "unassigned key pressed: %s" % keyName
+    print("unassigned key pressed: %s" % keyName)

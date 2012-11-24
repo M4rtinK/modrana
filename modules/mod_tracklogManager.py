@@ -17,17 +17,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import os
 
 def getModule(m,d,i):
-  return tracklogManager(m,d,i)
+  return TracklogManager(m,d,i)
 
-class tracklogManager(ranaModule):
+class TracklogManager(RanaModule):
   """Module for managing tracklogs"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.scrollDict = {}
     self.currentNumItems = 0
     self.LTModule = None

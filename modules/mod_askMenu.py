@@ -17,16 +17,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 
 def getModule(m,d,i):
-  return askMenu(m,d,i)
+  return AskMenu(m,d,i)
 
-class askMenu(ranaModule):
-  """A sample pyroute module"""
+class AskMenu(RanaModule):
+  """A module providing yes/no question dialogs"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.menus = None
     self.question = None
     self.yesAction = None

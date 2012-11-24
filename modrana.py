@@ -120,7 +120,7 @@ class ModRana:
       savedVersionString = self.get('modRanaVersionString', "")
       versionStringFromFile = self.paths.getVersionString()
       if savedVersionString != versionStringFromFile:
-        print "modRana: possible upgrade detected"
+        print("modRana: possible upgrade detected")
         self._postUpgradeCheck()
 
     # save current version string

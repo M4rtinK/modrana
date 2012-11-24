@@ -19,21 +19,20 @@
 #---------------------------------------------------------------------------
 import traceback
 import sys
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import cPickle
 import os
 import sqlite3
 import csv
-from core.point import Point
 
 def getModule(m,d,i):
   return storePOI(m,d,i)
 
-class storePOI(ranaModule):
+class storePOI(RanaModule):
   """Store POI data."""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.db = None
     self.tempOnlinePOI = None # temporary slot for an uncommitted POI from online search
     # to which menu to return after the POI is stored
@@ -158,8 +157,8 @@ class storePOI(ranaModule):
 
   class POI:
     """this class represents a POI"""
-    def __init__(self,callaback,label,description,lat,lon,catId,id=None):
-      self.callback = callaback
+    def __init__(self,callback,label,description,lat,lon,catId,id=None):
+      self.callback = callback
       self.id=id
       self.lat=lat
       self.lon=lon
@@ -329,16 +328,6 @@ class storePOI(ranaModule):
       print("storePOI: loading POI from file failed:\n%s" % e)
       return None
 
-#  def saveOld(self):
-#    """save all poi in the main list to file"""
-#    try:
-#      f = open(self.filename, 'w')
-#      cPickle.dump(self.points, f)
-#      f.close()
-#    except:
-#      print "storePoi: saving POI to file failed"
-
-
   def handleMessage(self, message, type, args):
     if type == 'ms' and message == 'deletePOI':
       """remove a poi with given id from database"""
@@ -444,8 +433,8 @@ class storePOI(ranaModule):
     newPOI.setLon(lon, commit=False)
     newPOI.setDescription(point.getDescription())
 
-    """ temporarily store the new POI to make it
-    available during filling its name, description, etc."""
+    # temporarily store the new POI to make it
+    # available during filling its name, description, etc.
     self.tempOnlinePOI = newPOI
     self.menuNameAfterStorageComplete = returnToMenu
 

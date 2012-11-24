@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # only import GKT libs if GTK GUI is used
-import sys
 from core import gs
-import traceback
 if gs.GUIString == "GTK":
   import gtk
 
@@ -26,29 +24,29 @@ class Color:
     self.colorStringAlphaTupple = None
     self.alpha = None
     if colorStringAlphaTupple:
-      self.setColorFromColorStringAlphaTupple(colorStringAlphaTupple)
+      self.setColorFromColorStringAlphaTuple(colorStringAlphaTupple)
 
   def __str__(self):
-    print "color name: %s" % self.name
-    print self.valid
-    print self.gtkColor
-    print self.cairoColor
-    print self.colorStringAlphaTupple
-    print self.alpha
+    print("color name: %s" % self.name)
+    print(self.valid)
+    print(self.gtkColor)
+    print(self.cairoColor)
+    print(self.colorStringAlphaTupple)
+    print(self.alpha)
 
   def isValid(self):
-    return valid
+    return self.valid
 
-  def setColorFromColorStringAlphaTupple(self, colorStringAlphaTupple):
+  def setColorFromColorStringAlphaTuple(self, colorStringAlphaTupple):
     if gs.GUIString == "GTK":
       try:
         import gtk
         (colorString,alpha) = colorStringAlphaTupple
         gtkColor = gtk.gdk.color_parse(colorString)
-        gtkcolorRange = float(2**16)
-        cairoR = gtkColor.red/gtkcolorRange
-        cairoG = gtkColor.green/gtkcolorRange
-        cairoB = gtkColor.blue/gtkcolorRange
+        gtkColorRange = float(2**16)
+        cairoR = gtkColor.red/gtkColorRange
+        cairoG = gtkColor.green/gtkColorRange
+        cairoB = gtkColor.blue/gtkColorRange
         self.setAlpha(alpha)
         self.setCairoColor(cairoR,cairoG,cairoB,alpha)
         self.gtkColor = gtkColor

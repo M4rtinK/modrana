@@ -18,19 +18,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from core import geo
 import math
 import threading
 
 def getModule(m,d,i):
-  return(showPOI(m,d,i))
+  return ShowPOI(m,d,i)
 
-class showPOI(ranaModule):
+class ShowPOI(RanaModule):
   """Show POI on the map and in the menu."""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.activePOI = None
     self.visiblePOI = []
     self.listMenusDirty = False
@@ -164,7 +164,7 @@ class showPOI(ranaModule):
           for item in poiFromCategory:
             (label,lat,lon,poi_id) = item
             subText = "lat: %f, lon: %f" % (lat,lon)
-            buttonAction = "ms:showPOI:setActivePOI:%d|%s" % (poi_id,action)
+            buttonAction = "ms:showPOI:setActivePOI:%d|%s" % (poi_id, action)
             poiFromCategory[i] = (label,subText,buttonAction)
             i += 1
           menus.addListMenu("POIList", 'set:menu:menu#list#POICategories', poiFromCategory)

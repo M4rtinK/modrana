@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import threading
 
 # only import GKT libs if GTK GUI is used
@@ -39,7 +39,7 @@ def getModule(m,d,i):
   else: # GTK for now
     return CronGTK(m,d,i)
 
-class Cron(ranaModule):
+class Cron(RanaModule):
   """A timing and scheduling module for modRana"""
 
   """
@@ -63,7 +63,7 @@ class Cron(ranaModule):
   """
 
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
   def addIdle(self, callback, args):
     """add a callback that is called once the main loop becomes idle"""
@@ -123,9 +123,10 @@ class CronGTK(Cron):
     """add a callback that is called once the main loop becomes idle"""
     gobject.idle_add(callback, *args)
 
-  def addTimeout(self, callback, timeout, caller, description, args=[]):
+  def addTimeout(self, callback, timeout, caller, description, args=None):
     """the callback will be called timeout + time needed to execute the callback
     and other events"""
+    if not args: args = []
     id = self._getID()
     realId = gobject.timeout_add(timeout, self._doTimeout, id, callback, args)
     timeoutTuple = (callback, args, timeout, caller, description, realId)
@@ -180,10 +181,11 @@ class CronQt(Cron):
     """add a callback that is called once the main loop becomes idle"""
     pass
 
-  def addTimeout(self, callback, timeout, caller, description, args=[]):
+  def addTimeout(self, callback, timeout, caller, description, args=None):
     """the callback will be called timeout + time needed to execute the callback
     and other events
     """
+    if not args: args = []
     # create and configure the timer
     timer = QtCore.QTimer()
 #    timer.setInterval(timeout)

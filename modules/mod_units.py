@@ -17,13 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import time
 
 def getModule(m,d,i):
-  return(units(m,d,i))
+  return Units(m,d,i)
 
-class units(ranaModule):
+class Units(RanaModule):
   """a unit handling module """
   
   mileInMeters = 1609.344
@@ -35,7 +35,7 @@ class units(ranaModule):
 
 
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     """
     # we consider 2km/h as as stationary 
     (to filter out the standard GPS drift while not moving)

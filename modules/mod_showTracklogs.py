@@ -17,9 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
-#from upoints import gpx
-#import random
+from modules.base_module import RanaModule
 from core import geo
 import math
 #from time import clock
@@ -31,11 +29,11 @@ if gs.GUIString == "GTK":
 def getModule(m,d,i):
   return ShowTracklogs(m,d,i)
 
-class ShowTracklogs(ranaModule):
+class ShowTracklogs(RanaModule):
   """draws a GPX track on the map"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
     self.lineWidth = 7 #with of the line denoting GPX tracks
     self.distinctColors=[
@@ -241,7 +239,7 @@ class ShowTracklogs(ranaModule):
     #are the projection and screen usable ?
     if proj is None or GPXTracklog is None:
       # we don't have WHAT to draw or HOW or BOTH :D
-      print "draw track: skipping one track (tracklog or projection == None)"
+      print("draw track: skipping one track (tracklog or projection == None)")
       return
 
     (screenCentreX,screenCentreY,screenRadius) = proj.screenRadius()
@@ -259,7 +257,7 @@ class ShowTracklogs(ranaModule):
       if (screenToClusterDistance - (screenRadius + clusterRadius)) >= 0:
         continue # we don't see this cluster se we skip it
       clusterNr = GPXTracklog.clusters.index(cluster)
-      #print "Cluster nr %d" % clusterNr
+      #print("Cluster nr %d" % clusterNr)
       """now we need to draw lines to connect neighboring clusters"""
       prevClusterNr = clusterNr - 1
       nextClusterNr = clusterNr + 1
@@ -297,8 +295,8 @@ class ShowTracklogs(ranaModule):
     cr.fill()
 
   #    if pointsDrawn > 0:
-  #    print "Nr of trackpoints drawn: %d" % pointsDrawn
-  #    print "Redraw took %1.2f ms" % (1000 * (clock() - start))
+  #    print("Nr of trackpoints drawn: %d" % pointsDrawn)
+  #    print("Redraw took %1.2f ms" % (1000 * (clock() - start)))
 
 
   def drawColoredTracklog(self, cr, GPXTracklog):

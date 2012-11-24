@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #----------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import os
 import glob
 import fnmatch
@@ -41,10 +41,10 @@ if gs.GUIString == "GTK":
 def getModule(m,d,i):
   return Icons(m,d,i)
 
-class Icons(ranaModule):
+class Icons(RanaModule):
   """Draw icons"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
     self.defaultTheme = 'default'
     self.themesFolderPath = 'themes/'

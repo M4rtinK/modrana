@@ -17,16 +17,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from core.rectangle import Rectangle
 
 def getModule(m,d,i):
-  return clickHandler(m,d,i)
+  return ClickHandler(m,d,i)
 
-class clickHandler(ranaModule):
+class ClickHandler(RanaModule):
   """handle mouse clicks"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.beforeDraw()
     self.ignoreNextClicks = 0
 
@@ -55,10 +55,10 @@ class clickHandler(ranaModule):
     self.register(area, action, timedAction, layer)
 
   def handleClick(self, x, y, msDuration):
-#    print "Clicked at %d,%d for %d" % (x,y,msDuration)
+#    print("Clicked at %d,%d for %d" % (x,y,msDuration))
     if self.ignoreNextClicks > 0:
       self.ignoreNextClicks -= 1
-#      print "ignoring click, %d remaining" % self.ignoreNextClicks
+#      print("ignoring click, %d remaining" % self.ignoreNextClicks)
     else:
       hit = False
       for area in self.layers[2]:
@@ -118,7 +118,7 @@ class clickHandler(ranaModule):
     self.dragAreas.append((Rectangle(x1, y1, x2-x1, y2-y1), module))
 
   def registerDraggableEntireScreen(self, module):
-    print "Entire screen is draggable for %s " % module
+    print("Entire screen is draggable for %s " % module)
     self.dragScreen = module
 
   def handleDrag(self, startX, startY, dx, dy, x, y, msDuration):
@@ -135,4 +135,4 @@ class clickHandler(ranaModule):
           if m is not None:
             m.dragEvent(startX,startY,dx,dy,x,y)
           else:
-            print "Drag registered to nonexistent module %s" % module
+            print("Drag registered to nonexistent module %s" % module)

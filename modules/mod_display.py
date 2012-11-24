@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import time
 
 # only import GKT libs if GTK GUI is used
@@ -26,13 +26,13 @@ if gs.GUIString == "GTK":
   import gtk
 
 def getModule(m,d,i):
-  return display(m,d,i)
+  return Display(m,d,i)
 
-class display(ranaModule):
+class Display(RanaModule):
   """A platform independent display device control module"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
     self.fullscreen = False
     """according to documentation on:
@@ -82,13 +82,13 @@ class display(ranaModule):
   def enableRedraw(self,reason="not given"):
     """enable window redrawing"""
     self.modrana.gui.setRedraw(True)
-    print "display: redraw ON (%s)" % reason
+    print("display: redraw ON (%s)" % reason)
     self.set('needRedraw',True) # make sure the screen is refreshed
 
   def disableRedraw(self,reason="not given"):
     """disable window redrawing"""
     self.modrana.gui.setRedraw(False)
-    print "display: redraw OFF (%s)" % reason
+    print("display: redraw OFF (%s)" % reason)
 
   def windowStateChangedCallback(self, window, event):
     if event.new_window_state == gtk.gdk.WINDOW_STATE_ICONIFIED:
@@ -110,12 +110,12 @@ class display(ranaModule):
           self.modrana.gui.setFullscreen(False)
           self.fullscreen = False
           self.menusSetFullscreen(self.fullscreen)
-          print "going out of fullscreen"
+          print("going out of fullscreen")
     else:
       self.modrana.gui.setFullscreen(True)
       self.fullscreen = True
       self.menusSetFullscreen(self.fullscreen)
-      print "going to fullscreen"
+      print("going to fullscreen")
 
   def menusSetFullscreen(self, value):
     """update the cached value in the menus module"""

@@ -175,8 +175,8 @@ class Paths:
         versionString = str(versionString)
         self.versionString = versionString
       except Exception, e:
-        print "modRana config: loading version info failed"
-        print e
+        print("modRana config: loading version info failed")
+        print(e)
 
   def _assurePathFolder(self, path, folder):
     """combine the given path and folder and make sure the path exists,

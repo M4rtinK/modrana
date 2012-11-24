@@ -17,13 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 
 def getModule(m,d,i):
-  return updateTiles(m,d,i)
+  return UpdateTiles(m,d,i)
 
-class updateTiles(ranaModule):
+class UpdateTiles(RanaModule):
   """Update stored map tiles."""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)

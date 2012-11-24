@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #----------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from core.tilenames import *
 from core import geo
 from math import *
@@ -26,7 +26,7 @@ import math
 def getModule(m,d,i):
   return Projection(m,d,i)
 
-class Projection(ranaModule):
+class Projection(RanaModule):
   """Projection code (lat/long to screen conversions)"""
 
   """
@@ -46,7 +46,7 @@ class Projection(ranaModule):
 
   """
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     
     self.xyValid = False
     self.llValid = False
@@ -111,7 +111,7 @@ class Projection(ranaModule):
   
   def setView(self, x, y, w, h):
     """Setup the display"""
-    #    print "setting view xywh:%d,%d,%d,%d" % (x,y,w,h)
+    #    print("setting view xywh:%d,%d,%d,%d" % (x,y,w,h))
     self.w = w
     self.h = h
     self.xc = x + self.w
@@ -123,7 +123,7 @@ class Projection(ranaModule):
   def recentre(self, lat, lon, zoom = None):
     """Move the projection to a particular geographic location
     (with optional zoom level)"""
-    #    print "recentering to: %f,%f" % (lat,lon)
+    #    print("recentering to: %f,%f" % (lat,lon))
     self.lat = lat
     self.lon = lon
     if zoom is not None:
@@ -158,7 +158,7 @@ class Projection(ranaModule):
   
   def findEdges(self):
     """Update the projection meta-info based on its fundamental parameters"""
-    #    print "find edges %f,%f" % (self.lat,self.lon)
+    #    print("find edges %f,%f" % (self.lat,self.lon))
     if not self.xyValid or not self.llValid:
       # If the display is not known yet, then we can't do anything, but we'll
       # mark it as something that needs doing as soon as the display
@@ -269,7 +269,7 @@ class Projection(ranaModule):
       return None
   
   def nudge(self,dx,dy):
-#    print "nudging by: %d,%d" % (dx,dy)
+#    print("nudging by: %d,%d" % (dx,dy))
     """Move the map by a number of pixels relative to its current position"""
     if dx == 0 and dy == 0:
       return

@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from core.tilenames import *
 from time import clock
 import time
@@ -52,11 +52,11 @@ def getModule(m, d, i):
   return MapData(m, d, i)
 
 
-class MapData(ranaModule):
+class MapData(RanaModule):
   """Handle downloading of map data"""
 
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.stopThreading = True
     self.dlListLock = threading.Lock() # well, its actually a set
     self.currentDownloadList = [] # list of files and urls for the current download batch

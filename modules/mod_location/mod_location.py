@@ -17,17 +17,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from time import *
 from core import gs
 
 def getModule(m,d,i):
   return Location(m,d,i)
 
-class Location(ranaModule):
+class Location(RanaModule):
   """Supplies position info from a position source"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.tt = 0
     self.connected = False
     self.set('speed', None)

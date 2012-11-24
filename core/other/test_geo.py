@@ -6,10 +6,10 @@ def turnAngle(first, middle, last):
   """
   compute turn angle for a turn described by three points
   """
-  print "INPUT"
-  print first
-  print middle
-  print last
+  print("INPUT")
+  print(first)
+  print(middle)
+  print(last)
 
   lat_x, lon_x = radians(first[0]), radians(first[1])
   lat_y, lon_y = radians(middle[0]), radians(middle[1])
@@ -29,36 +29,34 @@ def turnAngle(first, middle, last):
   u_x, u_y = (Y_x - X_x, Y_y - X_y)
   v_x, v_y = (Z_x - Y_x, Z_y - Y_y)
 
-
-  #  print "ASDAASDASD"
   #  print u_x * v_x + u_y * v_y
   #  print (u_x - v_x) ** 2 + (u_y - v_y) ** 2
   #  print sqrt((u_x - v_x) ** 2 + (u_y - v_y) ** 2)
   #  print acos((u_x * v_x + u_y * v_y) / sqrt((u_x - v_x) ** 2 + (u_y - v_y) ** 2))
-  print "u_x, u_y, v_x, v_y"
-  print u_x, u_y, v_x, v_y
+  print("u_x, u_y, v_x, v_y")
+  print(u_x, u_y, v_x, v_y)
 
 
   alpha = acos((u_x * v_x + u_y * v_y) / sqrt((u_x - v_x) ** 2 + (u_y - v_y) ** 2))
   alpha = degrees(alpha)
 
-  #  3) and finaly we determine the oreintation of the turn - left or right:
+  #  3) and finally we determine the orientation of the turn - left or right:
   test = u_x * v_y - v_x * u_y
 
   #  test=0 - not really a turn - all three points would make a line
   #  test<0 - right turn
   #  test>0 - left turn
 
-  print "TEST"
-  print test
+  print("TEST")
+  print(test)
 
-  print "ANGLE"
+  print("ANGLE")
   if test > 0:
-    print alpha
-    return alpha
+    print(alpha)
+    return(alpha)
   else:
-    print alpha + 180
-    return alpha + 180
+    print(alpha + 180)
+    return(alpha + 180)
 
     # Final turn angle:
     #

@@ -67,7 +67,7 @@ class DeviceN900(deviceModule):
     self.mceSignal = self.bus.get_object('com.nokia.mce', '/com/nokia/mce/signal')
     self.mceSignalInterface = dbus.Interface(self.mceSignal, 'com.nokia.mce.signal')
     self.mceSignalInterface.connect_to_signal("display_status_ind", self.screenStateChangedCallback)
-    print "N900: DBUS initialized"
+    print("N900: DBUS initialized")
 
     # Internet connectivity related
     self.connectivityStatus = False
@@ -87,7 +87,7 @@ class DeviceN900(deviceModule):
       print("N900 Qt screen saver controller created")
       self.qScreenSaver = QSystemScreenSaver()
 
-    print "N900 device specific module initialized"
+    print("N900 device specific module initialized")
 
   def _conicConnect(self):
     if self.conicConnection is None:
@@ -104,10 +104,10 @@ class DeviceN900(deviceModule):
       # load the rotation object
       rotationObject = self.startAutorotation()
       if rotationObject != False:
-        print "N900: rotation object loaded"
+        print("N900: rotation object loaded")
         self.rotationObject = rotationObject
       else:
-        print "N900: loading rotation object failed"
+        print("N900: loading rotation object failed")
 
       self.topWindow = gui.getGTKTopWindow()
 
@@ -116,7 +116,7 @@ class DeviceN900(deviceModule):
       self.rotationToggleButton = None
       self.soundToggleButton = None
       self._addHildonAppMenu()
-      print "N900: application menu added"
+      print("N900: application menu added")
 
       # window-active detection
       self.topWindow.connect('notify::is-active', self.windowIsActiveChangedCallback)
@@ -174,11 +174,11 @@ class DeviceN900(deviceModule):
       lastModeNumber = self.getRotationModeNumber(rotationMode) # get last used mode number
       rObject = n900_maemo5_portrait.FremantleRotation(self.ossoAppName, main_window=self.topWindow,
         mode=lastModeNumber)
-      print "N900 rotation object initialized"
+      print("N900 rotation object initialized")
       return rObject
     except Exception, e:
-      print e
-      print "initializing N900 rotation object failed"
+      print("initializing N900 rotation object failed")
+      print(e)
 
   def setRotationMode(self, rotationMode):
     rotationModeNumber = self.getRotationModeNumber(rotationMode)
@@ -235,7 +235,7 @@ class DeviceN900(deviceModule):
           # check if text entry is in progress
           textEntry = self.m.get('textEntry', None)
           if textEntry:
-            if textEntry.isEntryBoxvisible():
+            if textEntry.isEntryBoxVisible():
               # we redraw modRana behind text entry box
               return
           display.disableRedraw(reason="N900 window is not active")
@@ -268,7 +268,7 @@ class DeviceN900(deviceModule):
       if msTimeout:
         banner.set_timeout(msTimeout)
     else:
-      print "n900: the N900 device module currently handles only Hildon based notifications"
+      print("n900: the N900 device module currently handles only Hildon based notifications")
 
   def hasButtons(self):
     """the N900 has the volume keys (2 buttons), the camera trigger (2 states)

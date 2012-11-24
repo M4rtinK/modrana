@@ -17,17 +17,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import time
 
 def getModule(m,d,i):
-  return(notification(m,d,i))
+  return Notification(m,d,i)
 
-class notification(ranaModule):
+class Notification(RanaModule):
   """This module provides notification support."""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.notificationText = ""
     self.timeout = 5
     self.position = 'middle'
@@ -79,7 +79,7 @@ class notification(ranaModule):
             print(e)
         self.handleNotification(messageText, timeout)
       else:
-        print "notification: wrong message: %s" % message
+        print("notification: wrong message: %s" % message)
 
   def startWorkInProgressOverlay(self):
     """start background work notification and redraw the screen"""
@@ -108,15 +108,15 @@ class notification(ranaModule):
 
   def drawWorkInProgressOverlay(self,cr):
     proj = self.m.get('projection', None) # we also need the projection module
-    vport = self.get('viewport', None)
+    viewport = self.get('viewport', None)
     menus = self.m.get('menu', None)
-    if proj and vport and menus:
+    if proj and viewport and menus:
       # we need to have both the viewport and projection modules available
       # also the menu module for the text
       message = self.getWorkInProgressOverlayText()
       # background
       cr.set_source_rgba(0.5, 0.5, 1, 0.5)
-      (sx,sy,w,h) = vport
+      (sx,sy,w,h) = viewport
       (bx,by,bw,bh) = (0,0,w,h*0.2)
       cr.rectangle(bx,by,bw,bh)
       cr.fill()

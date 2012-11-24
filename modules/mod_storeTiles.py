@@ -21,7 +21,7 @@ from __future__ import with_statement # for python 2.5
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import sqlite3
 import os
 import time
@@ -37,15 +37,15 @@ if gs.GUIString == "GTK":
   import gtk
 
 def getModule(m, d, i):
-  return(StoreTiles(m, d, i))
+  return StoreTiles(m, d, i)
 
 
-class StoreTiles(ranaModule):
+class StoreTiles(RanaModule):
   """Single-file-fs tile storage"""
   #TODO: maybe run this in separate thread ?
 
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.layers = {}
     self.threadLayers = {}
     self.currentStorageVersion = 1
@@ -537,7 +537,7 @@ class StoreTiles(ranaModule):
 #      lookupCursor = lookupConn.cursor()
 #      lookupResult = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension)).fetchone()
 #      lookupConn.close()
-#    print "no connection reuse %f ms" % (1000 * (time.clock() - start))
+#    print("no connection reuse %f ms" % (1000 * (time.clock() - start)))
 #
 #    start = time.clock()
 #    lookupDbPath = self.getLookupDbPath(dbFolderPath)
@@ -549,4 +549,4 @@ class StoreTiles(ranaModule):
 #      print lookupResult
 #    lookupCursor.close()
 #    lookupConn.close()
-#    print "connection reuse %f ms" % (1000 * (time.clock() - start))
+#    print("connection reuse %f ms" % (1000 * (time.clock() - start)))

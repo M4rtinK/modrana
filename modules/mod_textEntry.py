@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -25,13 +25,13 @@ if gs.GUIString == "GTK":
   import gtk
 
 def getModule(m,d,i):
-  return(textEntry(m,d,i))
+  return TextEntry(m,d,i)
 
-class textEntry(ranaModule):
+class TextEntry(RanaModule):
   """A module for handling text entry."""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.entryBoxVisible = False
     
 
@@ -44,7 +44,7 @@ class textEntry(ranaModule):
       dialog.destroy()
 
   def respondToDialog(self, dialog, response_id,entry,instance,key, persistentKey): 
-      print "responding to dialog"
+      print("textEntry: responding to dialog")
       if response_id == gtk.RESPONSE_ACCEPT:
         print("** dialog accepted **")
         self.respond(entry.get_text(), instance,key, persistentKey)
@@ -106,7 +106,7 @@ class textEntry(ranaModule):
       self.entryBoxVisible = True
       dialog.show_all()
 
-  def isEntryBoxvisible(self):
+  def isEntryBoxVisible(self):
     """report if the current entry box is visible
        - so that for example the display module can distinguish
        normal minimization events and losing focus due to the modal

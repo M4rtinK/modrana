@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import time
 import math
 from core import geo
@@ -33,10 +33,10 @@ if gs.GUIString == "GTK":
 def getModule(m,d,i):
   return menus(m,d,i)
 
-class menus(ranaModule):
+class menus(RanaModule):
   """Handle menus"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.menus = {}
     self.lists = {}
     self.listOffset = 0
@@ -328,7 +328,7 @@ class menus(ranaModule):
         m.registerXYWH(x1,y1,w,h, action, timedAction)
 
   def resetMenu(self, menu=None):
-    print "Menu knows menu changed"
+    print("Menu knows menu changed")
     self.listOffset = 0
 
   def dragEvent(self,startX,startY,dx,dy,x,y):
@@ -338,7 +338,7 @@ class menus(ranaModule):
     list = self.lists.get(menuName, None)
     if list is not None:
       self.listOffset += dy
-      print "Drag in menu + %f = %f" % (dy,self.listOffset)
+      print("Drag in menu + %f = %f" % (dy,self.listOffset))
 
   def setItemMenuGrid(self, x1, y1, cols,rows,dx,dy):
     """generate an icon placement grid for a given number of
@@ -392,7 +392,7 @@ class menus(ranaModule):
         index = None
 
       if listName in self.lists.keys():
-#        print "drawing list: %s" % menuName
+#        print("drawing list: %s" % menuName)
         self.lists[listName].draw(cr, index) # draw the list
     elif menuName == 'listDetail':
       listName,index = args.split('#',1)
@@ -409,7 +409,7 @@ class menus(ranaModule):
     # Find the menu
     menu = self.menus.get(menuName, None)
     if menu is None:
-      print "Menu %s doesn't exist, returning to main screen" % menuName
+      print("Menu %s doesn't exist, returning to main screen" % menuName)
       self.set('menu', None)
       self.set('needRedraw', True)
       return
@@ -543,7 +543,7 @@ class menus(ranaModule):
     if type == 'list':
       self.lists[menu] = module
     else:
-      print "Can't register \"%s\" menu - unknown type" % type
+      print("Can't register \"%s\" menu - unknown type" % type)
 
   def initMenu(self,menu):
     """initialize menu a menu dictionary instance to default parameters"""

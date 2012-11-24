@@ -18,18 +18,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from core import geo
 import math
 from modules.odict import odict
 
 def getModule(m,d,i):
-  return search(m,d,i)
+  return Search(m,d,i)
 
-class search(ranaModule):
+class Search(RanaModule):
   """Search for POI"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.localSearchResults = None # GLS results from onlineServices
     self.scroll = 0
     self.list = None # processed results: (distance from pos, result, absolute index)
@@ -153,7 +153,7 @@ class search(ranaModule):
         self.scroll -= 1
         self.set("needRedraw", True)
     elif (message == "down") and self.scroll < self.maxIndex:
-      print "down"
+      print("down")
       self.scroll += 1
       self.set("needRedraw", True)
     elif message == "reset":
@@ -183,7 +183,7 @@ class search(ranaModule):
       if type == 'ml' and args:
         online = self.m.get('onlineServices', None)
         if not online:
-          print "search: online services module not present"
+          print("search: online services module not present")
           return
         lsType = args[0]
         if lsType == "coords": # search around coordinates
@@ -219,7 +219,7 @@ class search(ranaModule):
               (lat,lon) = centreLL
               online.googleLocalQueryLLAsync(query, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
             else:
-              print "search: screen center coordinates unknown"
+              print("search: screen center coordinates unknown")
 
     elif message == "search":
       if type == "ml" and args:
@@ -249,26 +249,26 @@ class search(ranaModule):
         searchTerm = args
         online = self.m.get('onlineServices', None)
         if online is None:
-          print "search: online services module not present"
+          print("search: online services module not present")
           return
 
         if self.where == 'position':
-          print "search:near position"
+          print("search:near position")
           pos = self.get('pos', None)
           if pos is None:
-            print "search: our position is not known"
+            print("search: our position is not known")
             return
           else:
             (lat,lon) = pos
         elif self.where == 'view':
-          print "search:near view"
+          print("search:near view")
           proj = self.m.get('projection', None)
           if proj:
             centreLL = proj.getScreenCentreLL()
             if centreLL:
               (lat,lon) = centreLL
             else:
-              print "search: screen center coordinates unknown"
+              print("search: screen center coordinates unknown")
               return
 
         online.googleLocalQueryLLAsync(searchTerm, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
@@ -283,13 +283,13 @@ class search(ranaModule):
 #          term = searchList[0] # we have a list, because an amenity can have theoretically more "providers"
 #
 #        except:
-#          print "search: key not present in the filter dictionary, using the key as search term"
+#          print("search: key not present in the filter dictionary, using the key as search term")
 #          term = searchTerm
 
         # initiate asynchronous search, that is running in a separate thread
 
 #        if local['responseStatus'] != 200:
-#          print "search: google returned %d return code" % local['responseStatus']
+#          print("search: google returned %d return code" % local['responseStatus'])
 #        print ("search: local search returned %d results") % len(local['responseData']['results'])
 #        self.localSearchResults = local
 
@@ -385,16 +385,16 @@ class search(ranaModule):
             (lat1,lon1) = position
             (lat2,lon2) = (float(item['lat']), float(item['lng']))
             distance = geo.distance(lat1,lon1,lat2,lon2)
-            tupple = (distance, item, index)
-            list.append(tupple) # we pack each result into a tupple with ist distance from us
+            tuple = (distance, item, index)
+            list.append(tuple) # we pack each result into a tuple with ist distance from us
           else:
-            tupple = (0, item, index) # in this case, we dont know our position, so we say the distance is 0
-            list.append(tupple)
+            tuple = (0, item, index) # in this case, we dont know our position, so we say the distance is 0
+            list.append(tuple)
           index += 1
         self.list = list
         return list
       else:
-        print "search: error -> distance update on empty results"
+        print("search: error -> distance update on empty results")
 
   def updateItemDistance(self):
       position = self.get("pos", None) # our lat lon coordinates
@@ -449,7 +449,7 @@ class search(ranaModule):
 
           (text1,text2,onClick) = self.describeItem(index, category, resultList)
 
-          y = y4 + (row) * dy
+          y = y4 + row * dy
           w = w1 - (x4-x1)
           h = h1 / 3.0
 
@@ -511,7 +511,7 @@ class search(ranaModule):
     if units:
       distanceString = units.km2CurrentUnitString(float(distance), dp=2)
     else:
-      print "search: warning, the units module uis missing"
+      print("search: warning, the units module uis missing")
       distanceString = "%1.2f km" % float(distance)
     # * draw "escape" button
     menus.drawButton(cr, x1, y1, dx, dy, "", "back", "search:reset|set:menu:search#searchResults")
@@ -725,7 +725,7 @@ class search(ranaModule):
 
   def handleSearchResult(self, key, results):
     if key == "localSearchResultGoogle":
-      print "search: GLS result received"
+      print("search: GLS result received")
       self.localSearchResults = results
       self.set('menu', 'search#searchResults')
     elif key == "address2LL":

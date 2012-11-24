@@ -17,13 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 
 def getModule(m,d,i):
-  return interfaceFeedback(m,d,i)
+  return InterfaceFeedback(m,d,i)
 
-class interfaceFeedback(ranaModule):
+class InterfaceFeedback(RanaModule):
   """A sample pyroute module"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)

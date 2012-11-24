@@ -67,14 +67,14 @@ class vmapData:
           x1 = lon
         if x2 is None or lon > x2:
           x2 = lon
-      #print "%1.3f to %1.3f, %1.3f to %1.3f" % (x1,x2,y1,y2)
+      #print("%1.3f to %1.3f, %1.3f to %1.3f" % (x1,x2,y1,y2))
       way['bounds'] = (x1,x2,y1,y2)
 
     
   def load(self, filename, optimise = True):
     """Load an OSM XML file into memory"""
     if not os.path.exists(filename):
-      print "File doesn't exist: '%s'" % filename
+      print("File doesn't exist: '%s'" % filename)
       return []
     f = file(filename, "rb")
 

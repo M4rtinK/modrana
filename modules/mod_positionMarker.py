@@ -17,25 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import math
 from math import radians
-from time import clock
-#from tilenames import *
-from core import gs
-
-if gs.GUIString == "GTK":
-  import gtk
-  import cairo
 
 def getModule(m,d,i):
-  return(positionMarker(m,d,i))
+  return PositionMarker(m,d,i)
 
-class positionMarker(ranaModule):
+class PositionMarker(RanaModule):
   """A sample pyroute module"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
   def drawMapOverlay(self, cr):
     """Draw an "own position" marker"""

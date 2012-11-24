@@ -19,16 +19,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
-import os
+from modules.base_module import RanaModule
 
 def getModule(m,d,i):
-  return(config(m,d,i))
+  return Config(m,d,i)
 
-class config(ranaModule):
+class Config(RanaModule):
   """Handle configuration, options, and setup"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
   def firstTime(self):
 

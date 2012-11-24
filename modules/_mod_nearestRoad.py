@@ -74,7 +74,7 @@
 #    filename = vmap_load.getVmapFilename(sx,sy,z,self.d)
 #
 #    if filename != self.dataFilename or self.data is None:
-#      #print "road loading %s" % (filename)
+#      #print("road loading %s" % (filename))
 #      self.data = vmap_load.vmapData(filename)
 #
 #    # look for nearest way
@@ -98,10 +98,10 @@
 #          if distance < mindist:
 #            mindist = distance
 #            name = wayName
-#            #print "Selecting %s at %d" % (name, mindist)
+#            #print("Selecting %s at %d" % (name, mindist))
 #
 #        (lastnlon,lastnlat,lastvalid) = (lon,lat,True)
-#    #print "Done"
+#    #print("Done")
 #    return name
 #
 #  def update(self):

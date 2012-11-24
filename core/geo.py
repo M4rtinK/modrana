@@ -217,10 +217,10 @@ def turnAngle(first, middle, last):
 #  compute turn angle for a turn described by three points
 #  -> an alternative methods that unfortunately seems not to work
 #  """
-##  print "INPUT"
-##  print first
-##  print middle
-##  print last
+##  print("INPUT")
+##  print(first)
+##  print(middle)
+##  print(last)
 #
 #  lat_x, lon_x = radians(first[0]), radians(first[1])
 #  lat_y, lon_y = radians(middle[0]), radians(middle[1])
@@ -391,7 +391,7 @@ def perElevList(trackpointsList, numPoints=200):
 
   periodicElevationList = [distanceList[0]]
   index = 0
-  #  print "length: %d" % len(distanceList)
+  #  print("length: %d" % len(distanceList))
 
   """when we find a point with unknown elevation, we:
      * find the first points with known elevation to the "left" and "right"

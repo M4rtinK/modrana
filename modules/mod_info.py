@@ -17,17 +17,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import os
 
 def getModule(m,d,i):
-  return(info(m,d,i))
+  return Info(m,d,i)
 
-class info(ranaModule):
+class Info(RanaModule):
   """A modRana information handling module"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.versionString = "unknown version"
     currentVersionString = self.modrana.paths.getVersionString()
     if currentVersionString is not None:
@@ -86,7 +86,6 @@ class info(ranaModule):
     if menuName == 'infoAbout':
       menus = self.m.get('menu', None)
       if menus:
-        nop = "set:menu:info#infoAbout"
         button1 = ('Discussion', 'generic', "ms:menu:openUrl:%s" % self.getDiscussionUrls()[0][0])
         button2 = ('Donate', 'generic', "ms:menu:openUrl:%s" % self.getPayPalUrl())
         web = " <u>www.modrana.org</u> "

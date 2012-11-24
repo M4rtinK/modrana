@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from core import geo
 from threading import Thread
 import math
@@ -49,11 +49,11 @@ if gs.GUIString == "GTK":
 def getModule(m,d,i):
   return turnByTurn(m,d,i)
 
-class turnByTurn(ranaModule):
+class turnByTurn(RanaModule):
   """A turn by turn navigation module."""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     gui = self.modrana.gui
     # initial colors
     self.navigationBoxBackground = (0,0,1,0.3) # very transparent blue

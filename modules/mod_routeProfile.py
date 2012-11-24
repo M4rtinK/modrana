@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from core import geo
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -29,11 +29,11 @@ if gs.GUIString == "GTK":
 def getModule(m,d,i):
   return routeProfile(m,d,i)
 
-class routeProfile(ranaModule):
+class routeProfile(RanaModule):
   """Creates a route profile (an elevation chart)"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
   def drawMenu(self, cr, menuName, args=None):
     # is this menu the correct menu ?

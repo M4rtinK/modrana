@@ -23,9 +23,9 @@ from random import *
 from urllib import *
 
 def getModule(m,d,i):
-  return(shareServer(m,d,i))
+  return ShareServer(m,d,i)
 
-class shareServer(poiModule):
+class ShareServer(poiModule):
   """Shares position info with groups"""
   def __init__(self, m, d, i):
     poiModule.__init__(self, m, d, i)
@@ -35,17 +35,17 @@ class shareServer(poiModule):
   
   def base(self):
     """Server name to use"""
-    return(self.get('shareServer','http://dev.openstreetmap.org/~ojw/pos/'))
+    return self.get('shareServer','http://dev.openstreetmap.org/~ojw/pos/')
   
   def register(self):
     """Create a new username on the share server"""
     pin = randint(10000, 10000000) # random PIN
     result = self.sendRequest('newusr',{'P':pin})
-    if(result[0:4] == "OK: "):
+    if result[0:4] == "OK: ":
       id = int(result[4:])
       self.set('shareServerPin', pin)
       self.set('shareServerID', id)
-      print "Username %d with PIN %d" % (id, pin)
+      print("Username %d with PIN %d" % (id, pin))
 
   def joinGroup(self, group, group_write_pin, nickname=None):
     """Join a group, allowing you to transmit positions to it"""
@@ -62,7 +62,7 @@ class shareServer(poiModule):
     self.set('shareServerGroupPin_%d' % group, group_write_pin)
     
     # Optionally set a nickname for ourselves in this group
-    if(nickname):
+    if nickname:
       result = self.sendRequest('nick', {
         'ID': self.get('shareServerID', 0),
         'P': self.get('shareServerPin', 0),
@@ -90,10 +90,10 @@ class shareServer(poiModule):
       'RP':group_read_pin})
     users = []
     for line in result.split("\n"):
-      if(line):
+      if line:
         (nickname,lat,lon) = line.split(",")
         users.append((nickname,lat,lon))
-    return(users)
+    return users
       
     
 
@@ -102,24 +102,27 @@ class shareServer(poiModule):
     fields['A'] = action
     URL = self.base() + "?" +  urlencode(fields)
     file = self.get("shareServerTempFile", "cache/temp.txt")
-    print "Sending " + URL
+    print("Sending " + URL)
     urlretrieve(URL, file)
     f = open(file)
     data = f.read()
     f.close()
     return(data)
-    
+
+  def get(self, param, param1):
+    pass
+
 
 if __name__ == "__main__":
   d = {'shareServer':'http://dev.openstreetmap.org/~ojw/pos/',
     'shareServerTempFile':'temp.txt'}
-  a = shareServer({},d)
+  a = ShareServer({},d)
 
-  if(0):
+  if 0:
     # To test uploading
-    a.register();
+    a.register()
     a.joinGroup(1,2222, "rana user")
-    a.sendPos(1, 53, 12);
+    a.sendPos(1, 53, 12)
   else:
     # To test downloading
     print a.getPos(1, 1111)

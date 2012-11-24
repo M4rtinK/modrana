@@ -117,20 +117,20 @@ class Configs:
           self.userConfig = config
 
     except Exception, e:
-      print "modRana configs: loading user_config.conf failed"
-      print "modRana configs: check the syntax"
-      print "modRana configs: and if the config file is present in the main directory"
-      print "modRana configs: this happened:\n%s\nconfig: that's all" % e
+      print("modRana configs: loading user_config.conf failed")
+      print("modRana configs: check the syntax")
+      print("modRana configs: and if the config file is present in the main directory")
+      print("modRana configs: this happened:\n%s\nconfig: that's all" % e)
 
 
   def getMapLayers(self):
     """
     get the filtered & tweaked map layer info from the map config
     """
-#    print "MAP LAYERS"
+#    print("MAP LAYERS")
 #    for value in self.mapLayers:
-#      print value
-#      print self.mapLayers[value]
+#      print(value)
+#      print(self.mapLayers[value])
     return self.mapLayers
 
   def getMapGroups(self):

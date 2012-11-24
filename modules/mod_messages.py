@@ -17,17 +17,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 
 def getModule(m, d, i):
-  return messageModule(m, d, i)
+  return MessageModule(m, d, i)
 
 
-class messageModule(ranaModule):
+class MessageModule(RanaModule):
   """Handles messages"""
 
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
 
   def routeMessage(self, messages):
     for message in messages.split('|'):

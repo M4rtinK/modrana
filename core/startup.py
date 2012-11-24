@@ -480,9 +480,9 @@ class Startup:
 
     if pos is None: # as a last resort, try last known position, if available
       if not useLastKnown:
-        print "startup: current position unknown"
+        print("startup: current position unknown")
       else:
-        print "startup: using last known position"
+        print("startup: using last known position")
         # we might need to load options "manually" if run early
         if not self.modrana.optLoadingOK:
           self._loadOptions()

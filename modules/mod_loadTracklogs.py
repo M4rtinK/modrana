@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 #from dbus.service import Object
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from core  import geo
 from core import utils
 import math
@@ -30,13 +30,13 @@ from time import clock
 from time import gmtime, strftime
 
 def getModule(m,d,i):
-  return loadTracklogs(m,d,i)
+  return LoadTracklogs(m,d,i)
 
-class loadTracklogs(ranaModule):
+class LoadTracklogs(RanaModule):
   """A sample pyroute module"""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.tracklogs = {} # dictionary of all loaded tracklogs, path is the key
     #self.set('tracklogs', self.tracklogs) # now we make the list easily acessible to other modules
     self.cache = {}
@@ -75,7 +75,7 @@ class loadTracklogs(ranaModule):
           print("** Assuring tracklog cache consistency")
           self.save()
           self.cleanCache()
-          print "** Tracklog cache consistency assured"
+          print("** Tracklog cache consistency assured")
 #    elif message == 'renameActiveTracklog':
 #      activeTracklog = self.getActiveTracklog()
 #      if activeTracklog:
@@ -122,23 +122,22 @@ class loadTracklogs(ranaModule):
 
   def loadCache(self):
     # unpickle the cache from file
-    print "** Loading tracklog cache"
+    print("** Loading tracklog cache")
     start = clock()
     try:
       f = open(self.getTracklogCachePath(), 'r')
       self.cache = cPickle.load(f)
       f.close()
-    except:
-      print "loadTracklogs: loading cache from file failed"
+    except Exception, e:
+      print("loadTracklogs: loading cache from file failed")
+      print(e)
       self.cache = {}
-    print "** Loading tracklog cache took %1.2f ms" % (1000 * (clock() - start))
+    print("** Loading tracklog cache took %1.2f ms" % (1000 * (clock() - start)))
 
   def cleanCache(self):
     """remove files that are not present from the cache"""
     paths = self.tracklogPathList
     garbage = filter(lambda x: x not in paths, self.cache)
-
-
     for g in garbage:
       del self.cache[g]
 
@@ -315,10 +314,10 @@ class loadTracklogs(ranaModule):
 #
 #      self.cache = cache
 #    except:
-#      print "loadTracklogs: loading cache from file failed"
+#      print("loadTracklogs: loading cache from file failed")
 #      self.cache = {}
 #
-#    print "Loading from cache took %1.2f ms" % (1000 * (clock() - start))
+#    print("Loading from cache took %1.2f ms" % (1000 * (clock() - start)))
 #
 #    files = []
 #    if os.path.exists(self.tracklogFolder):
@@ -326,8 +325,8 @@ class loadTracklogs(ranaModule):
 #      files = filter(lambda x: x != '.svn', files)
 #
 #
-#      print self.tracklogFolder
-#      print os.path.exists(self.tracklogFolder)
+#      print(self.tracklogFolder)
+#      print(os.path.exists(self.tracklogFolder))
 #      for file in files:
 #        try:
 #          self.loadTracklog(self.tracklogFolder + file)
@@ -336,16 +335,16 @@ class loadTracklogs(ranaModule):
 #
 #    self.cleanCache(files)
 #    self.save()
-#    print "Loading tracklogs took %1.2f ms" % (1000 * (clock() - start))
+#    print("Loading tracklogs took %1.2f ms" % (1000 * (clock() - start)))
 
   def save(self):
     try:
-      print self.getTracklogCachePath()
+      print(self.getTracklogCachePath())
       f = open(self.getTracklogCachePath(), 'w')
       cPickle.dump(self.cache, f)
       f.close()
     except Exception, e:
-      print "loadTracklogs: can't store tracklog data to cache, tracklogs will be loaded from files next time"
+      print("loadTracklogs: can't store tracklog data to cache, tracklogs will be loaded from files next time")
       print("exception: %r" % e)
 
   def setPathAsActiveTracklog(self, path):
@@ -662,7 +661,7 @@ class GPXTracklog(tracklog):
     f = open(self.filename, "w") # open the old file
     xmlTree = self.trackpointsList.export_gpx_file() # get the element tree
     xmlTree.write(f) # overwrite the old file with the new structure
-    print "%s has been replaced by the current in memory version" % self.filename
+    print("%s has been replaced by the current in memory version" % self.filename)
     del self.cache[self.filename] # the file has been modified, so it must be cached again
     self.save() # save the cache to disk
 

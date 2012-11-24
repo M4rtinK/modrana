@@ -17,19 +17,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 import math
 from core import geo
 from core.color import Color
 
 def getModule(m,d,i):
-  return(Markers(m,d,i))
+  return Markers(m,d,i)
 
-class Markers(ranaModule):
+class Markers(RanaModule):
   """A module handling markers on the map."""
   
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.groups = {} # marker groups
 
   def addGroup(self, name, points, menu=False):
@@ -155,7 +155,8 @@ class Markers(ranaModule):
     cr.stroke()
 
 class PointGroup():
-  def __init__(self, points=[], bgColor=Color("bg",("blue",0.45)),textColor=Color("bg",("white",0.95))):
+  def __init__(self, points=None, bgColor=Color("bg", ("blue", 0.45)), textColor=Color("bg", ("white", 0.95))):
+    if not points: points = []
     self.points = []
     for point in points:
       self.points.append((point,False))
@@ -165,7 +166,7 @@ class PointGroup():
     self.menuInstance = None
 
   def getBBox(self):
-    "report a bounding box for all points"
+    """report a bounding box for all points"""
     pass
 
   def getPoints(self):
@@ -179,7 +180,7 @@ class PointGroup():
     try:
       self.points[id][1] = True
     except Exception, e:
-      print "markers: highlight index out of range: %r" % id
+      print("markers: highlight index out of range: %r" % id)
       print e
 
   def unhighlightAll(self):

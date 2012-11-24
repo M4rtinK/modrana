@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from modules.base_module import ranaModule
+from modules.base_module import RanaModule
 from time import time
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -25,27 +25,27 @@ if gs.GUIString == "GTK":
   import cairo
 
 def getModule(m,d,i):
-  return(sketch(m,d,i))
+  return Sketch(m,d,i)
 
-class sketch(ranaModule):
+class Sketch(RanaModule):
   """Sketching functionality"""
   def __init__(self, m, d, i):
-    ranaModule.__init__(self, m, d, i)
+    RanaModule.__init__(self, m, d, i)
     self.points = []
 
-    if(0): # to test
+    if 0: # to test
       m = self.m.get("menu", None)
-      if(m):
+      if m:
         m.clearMenu('sketch', "set:menu:None")
         self.set("menu", "sketch")
     
   def drawMenu(self, cr, menuName, args=None):
-    if(self.get("menu", "") == "sketch"):
+    if self.get("menu", "") == "sketch":
       (x,y,w,h) = self.get('viewport')
       
       count = 0
       for p in self.points:
-        if(count == 0):
+        if count == 0:
           cr.move_to(p[0],p[1])
         else:
           cr.line_to(p[0],p[1])
@@ -53,7 +53,7 @@ class sketch(ranaModule):
       cr.stroke()
 
       mod = self.m.get("clickHandler", None)
-      if(mod):
+      if mod:
         mod.registerDraggableEntireScreen("sketch")
   
   def dragEvent(self, startX,startY,dx,dy,x,y):
