@@ -272,8 +272,8 @@ class ModRana:
     actually loaded from the .pyc or .pyo in the end.
     This is done so that dangling .pyc/.pyo file from a module
     that was removed are not loaded by mistake.
-    This situation shouldn't really happen if modRana is installed from a package
-    , as all .pyc files are purged during package upgrade and regenerated."""
+    This situation shouldn't really happen if modRana is installed from a package,
+    as all .pyc files are purged during package upgrade and regenerated."""
     return filter(lambda x: x[0:4]=="mod_" and x[-4:] not in ('.pyc','.pyo'),os.listdir(folder))
 
   def _loadModule(self, importName, modRanaName):
