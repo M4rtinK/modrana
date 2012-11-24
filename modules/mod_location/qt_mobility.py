@@ -30,7 +30,7 @@ class QtMobility(PositionSource):
 
     # connect to QT Mobility position source
     self.source = QGeoPositionInfoSource.createDefaultSource(None)
-    if self.source != None:
+    if self.source is not None:
       self.source.positionUpdated.connect(self._positionUpdateCB)
       print("location Qt Mobility: position source created")
     else:
@@ -73,21 +73,12 @@ class QtMobility(PositionSource):
                direction,
                speed
              )
-#    print "QTML POS DEBUG"
-#    print dir(update)
-#    print float(update.HorizontalAccuracy)
-#    print int(update.HorizontalAccuracy)
-#    print update.attribute(update.HorizontalAccuracy)
+    # print debug message if enabled
+    if self.debug:
+      print("Qt-Mobility POS DEBUG")
+      print ("%s, %s" % (update.coordinate().latitude(), update.coordinate().longitude()))
+      print(update)
 
     # trigger update in the location module
     self.location.updatePosition(fix)
     self.fix = fix
-
-
-
-
-
-
-#  def positionUpdated(self, update):
-#    print "position:"
-#    print "%s, %s" % (update.coordinate().latitude(), update.coordinate().longitude())
