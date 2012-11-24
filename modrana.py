@@ -40,12 +40,12 @@ from core import gs
 importsDoneTimestamp = time.time()
 
 MAIN_MODULES_FOLDER = 'modules'
-DEVICE_MODULES_FOLDER = "device_modules"
-GUI_MODULES_FOLDER = "gui_modules"
+DEVICE_MODULES_FOLDER = os.path.join(MAIN_MODULES_FOLDER, "device_modules")
+GUI_MODULES_FOLDER = os.path.join(MAIN_MODULES_FOLDER, "gui_modules")
 ALL_MODULE_FOLDERS = [
   MAIN_MODULES_FOLDER,
-  os.path.join(MAIN_MODULES_FOLDER, DEVICE_MODULES_FOLDER),
-  os.path.join(MAIN_MODULES_FOLDER, GUI_MODULES_FOLDER)
+  DEVICE_MODULES_FOLDER,
+  GUI_MODULES_FOLDER
 ]
 
 class ModRana:
@@ -275,6 +275,12 @@ class ModRana:
     This situation shouldn't really happen if modRana is installed from a package,
     as all .pyc files are purged during package upgrade and regenerated."""
     return filter(lambda x: x[0:4]=="mod_" and x[-4:] not in ('.pyc','.pyo'),os.listdir(folder))
+
+  def _listAvailableDeviceModules(self):
+    return self._getModuleNamesFromFolder(DEVICE_MODULES_FOLDER)
+
+  def _listAvailableGUIModules(self):
+    return self._getModuleNamesFromFolder(GUI_MODULES_FOLDER)
 
   def _loadModule(self, importName, modRanaName):
     """load a single module by name from path"""
