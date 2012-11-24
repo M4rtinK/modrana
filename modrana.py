@@ -262,7 +262,7 @@ class ModRana:
     # add last timing checkpoint
     self.addTime("all modules initialized")
 
-  def _getModuleNamesFromFolder(self,folder):
+  def _getModuleNamesFromFolder(self, folder):
     """list a given folder and find all possible module names
     Module names:
     Module names start with the "mod_" and don't end with .pyc or .pyo.
@@ -478,7 +478,6 @@ class ModRana:
   def removeWatch(self, id):
     """remove watch specified by the given watch id"""
     (nrId, key) = id.split('_')
-
     if key in self.watches:
       remove = lambda x:x[0]==id
       self.watches[key][:] = [x for x in self.watches[key] if not remove(x)]
@@ -536,7 +535,6 @@ class ModRana:
       if mode not in multiDict:
         # set for first time, copy value        
         self.set(key, self.d.get(key, defaultValue), mode=mode)
-
     # notify watchers
     self._notifyWatcher(key, oldValue)
 
@@ -544,13 +542,10 @@ class ModRana:
     """remove key modifier
     NOTE: currently this just makes the key independent
     on the current mode"""
-
-
     # if no mode is provided, use the current one
     if mode is None:
         mode = self.d.get('mode', 'car')
     if key in self.keyModifiers.keys():
-      
       # just remove the key modifier preserving the alternative values
       if mode in self.keyModifiers[key]['modes'].keys():
         # get the previous value
@@ -594,6 +589,7 @@ class ModRana:
       return False
 
   def getModes(self):
+    """return supported modes"""
     modes = {
       'cycle':'Cycle',
       'walk':'Foot',
@@ -647,6 +643,7 @@ class ModRana:
       return self.d
 
   def _saveOptions(self):
+    """save the persistent dictionary to file"""
     print("modRana: saving options")
     try:
       f = open(self.paths.getOptionsFilePath(), "w")
@@ -662,6 +659,7 @@ class ModRana:
       print("modRana: saving options failed:", e)
 
   def _loadOptions(self):
+    """load the persistent dictionary from file"""
     print("modRana: loading options")
     success = False
     try:
@@ -772,7 +770,6 @@ if __name__ == "__main__":
     callArgs = [reloadPath]
     callArgs.extend(sys.argv[3:])
     subprocess.call(callArgs)
-
   else:
     program = ModRana()
 
