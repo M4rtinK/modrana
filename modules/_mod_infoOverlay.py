@@ -94,7 +94,7 @@ class InfoOverlay(RanaModule):
       self.set('needRedraw', True)
     else:
       for i in range(len(self.lines)):
-        if(self.lines[i] != self.oldlines[i]):
+        if self.lines[i] != self.oldlines[i]:
           self.set('needRedraw', True)
     self.oldlines = self.lines
 
