@@ -263,8 +263,18 @@ class ModRana:
     self.addTime("all modules initialized")
 
   def _getModuleNamesFromFolder(self,folder):
-    """list a given folder and find all possible module names"""
-    return filter(lambda x: x[0:4]=="mod_" and x[-4:]!=".pyc",os.listdir(folder))
+    """list a given folder and find all possible module names
+    Module names:
+    Module names start with the "mod_" and don't end with .pyc or .pyo.
+    Consequences:
+    Valid modules need to have an existing .py file or be folder-modules
+    (don't name a folder module mod_foo.pyc :) ), even if they are
+    actually loaded from the .pyc or .pyo in the end.
+    This is done so that dangling .pyc/.pyo file from a module
+    that was removed are not loaded by mistake.
+    This situation shouldn't really happen if modRana is installed from a package
+    , as all .pyc files are purged during package upgrade and regenerated."""
+    return filter(lambda x: x[0:4]=="mod_" and x[-4:] not in ('.pyc','.pyo'),os.listdir(folder))
 
   def _loadModule(self, importName, modRanaName):
     """load a single module by name from path"""
