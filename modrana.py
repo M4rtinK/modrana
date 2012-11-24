@@ -262,7 +262,7 @@ class ModRana:
     # add last timing checkpoint
     self.addTime("all modules initialized")
 
-  def _getModuleNamesFromFolder(self, folder):
+  def _getModuleNamesFromFolder(self, folder, prefix='mod_'):
     """list a given folder and find all possible module names
     Module names:
     Module names start with the "mod_" and don't end with .pyc or .pyo.
@@ -274,12 +274,21 @@ class ModRana:
     that was removed are not loaded by mistake.
     This situation shouldn't really happen if modRana is installed from a package,
     as all .pyc files are purged during package upgrade and regenerated."""
-    return filter(lambda x: x[0:4]=="mod_" and x[-4:] not in ('.pyc','.pyo'),os.listdir(folder))
+    return filter(
+      lambda x:
+      x[0:len(prefix)]==prefix
+      and
+      (x[-4:] not in ('.pyc','.pyo')),os.listdir(folder)
+    )
 
-  def _listAvailableDeviceModules(self):
-    return self._getModuleNamesFromFolder(DEVICE_MODULES_FOLDER)
+  def _listAvailableDeviceModulesByID(self):
+    moduleNames = self._getModuleNamesFromFolder(DEVICE_MODULES_FOLDER, prefix='device_')
+    # remove the device_ prefix and return the results
+    # NOTE: .pyc & .pyo should be removed already in _getModuleNamesFromFolder()
+    # laos sort the module names alphabetically
+    return sorted(map(lambda x: x[7:].replace('.py',''), moduleNames))
 
-  def _listAvailableGUIModules(self):
+  def _listAvailableGUIModulesByID(self):
     return self._getModuleNamesFromFolder(GUI_MODULES_FOLDER)
 
   def _loadModule(self, importName, modRanaName):

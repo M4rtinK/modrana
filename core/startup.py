@@ -47,7 +47,7 @@ class Startup:
       '-d', metavar="device ID", type=str,
       help="specify device type",
       default=None, action="store",
-      choices=["neo", "pc", "n900", "n9", "q7", "android_chroot"]
+      choices= self.modrana._listAvailableDeviceModulesByID()
     )
     # GUI
     parser.add_argument(
