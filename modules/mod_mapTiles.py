@@ -136,13 +136,9 @@ class MapTiles(ranaModule):
     self._storeTiles = self.m.get('storeTiles', None) # get the tile storage module
 
     # map tile filtering
-    self.modrana.watch('currentTheme', self._updateTileFilteringCB)
-    self.modrana.watch('invertMapTiles', self._updateTileFilteringCB)
+    self.modrana.watch('currentTheme', self._updateTileFilteringCB, runNow=True)
+    self.modrana.watch('invertMapTiles', self._updateTileFilteringCB, runNow=True)
     # check if tile filtering is enabled or should be enabled with current theme
-    invert = self.get('invertMapTiles', False)
-    theme = self.get('currentTheme', 'default')
-    self._updateTileFilteringCB(key="invertMapTiles", oldValue=None, newValue=invert)
-    self._updateTileFilteringCB(key="currentTheme", oldValue=None, newValue=theme)
 
   def getTile(self, layer, z, x, y):
     """
