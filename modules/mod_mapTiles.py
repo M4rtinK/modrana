@@ -19,7 +19,6 @@
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
 import StringIO
-#import array
 from modules.base_module import ranaModule
 from threading import Thread
 import threading
@@ -139,11 +138,9 @@ class MapTiles(ranaModule):
     # check if tile filtering is enabled or should be enabled with current theme
 
   def getTile(self, layer, z, x, y):
-    """
-    return a tile specified by layerID, z, x & y
+    """return a tile specified by layerID, z, x & y
     * first look if such a tile is available from storage
-    * if not, download it
-    """
+    * if not, download it"""
     # check if the tile is in the recently-downloaded cache
     name = self.getTileName(layer, z, x, y)
     cacheItem = self.images[0].get(name, None)
@@ -188,10 +185,8 @@ class MapTiles(ranaModule):
       return None
 
   def _getConnPool(self, layer, url):
-    """
-    get a connection pool for the given layer
-    NOTE: connection pools reuse open connections
-    """
+    """get a connection pool for the given layer
+    NOTE: connection pools reuse open connections"""
     pool = self.connPools.get(layer, None)
     if pool:
       return pool
@@ -208,8 +203,7 @@ class MapTiles(ranaModule):
     """add a download request to the download manager queue
     the download manager will use its download thread pool to process the request
     NOTE: no checking if tile exists in local storage is done past this point,
-    you have to do this beforehand or you might download an already available tile :)
-    """
+    you have to do this beforehand or you might download an already available tile :)"""
 
     #    print("mapTiles: DOWNLOAD queued")
     name = self.getTileName(layer, z, x, y)
@@ -226,7 +220,6 @@ class MapTiles(ranaModule):
     it will probably be soon repeated (this is by design to flush the no longer relevant tiles from the
     download queue)
     """
-
     layerInfo = self.mapLayers.get(layer, None)
     if layerInfo is None: # is the layer info valid ?
       print("mapTiles: invalid layer")
@@ -241,37 +234,27 @@ class MapTiles(ranaModule):
       with self.threadListCondition:
         timestamp = time.time()
         request = (name, x, y, z, layer, layerPrefix, layerType, filename, timestamp)
-
         with self.downloadRequestPoolLock: # add a download request
           self.downloadRequestPool.append(request)
-
         self.threadListCondition.notifyAll() # wake up the download manager
 
   def tileInProgress(self, layer, z, x, y):
-    """
-    report if tile is being downloaded
-    """
+    """report if tile is being downloaded"""
     name = self.getTileName(layer, z, x, y)
     return name in self.threads
 
   def tileInMemory(self, layer, z, x, y):
-    """
-    report if tile is stored in memory cache
-    """
+    """report if tile is stored in memory cache"""
     name = self.getTileName(layer, z, x, y)
     return name in self.images[0]
 
   def tileInStorage(self, layer, z, x, y):
-    """
-    report if tile is available from storage
-    """
+    """report if tile is available from storage"""
     return self._storeTiles.tileExists2(layer, z, x, y)
 
   def _updateScalingCB(self, key='mapScale', oldValue=1, newValue=1):
-    """
-    as this only needs to be updated once on startup and then only
-    when scaling settings change this callback driven method is used
-    """
+    """as this only needs to be updated once on startup and then only
+    when scaling settings change this callback driven method is used"""
     if key == 'mapScale':
       scale = int(newValue)
     else:
@@ -332,7 +315,6 @@ class MapTiles(ranaModule):
                         self.images[0][name] = self.downloadingTile
             else:
               # ** all download slots are full **
-
               # remove old requests
               currentTime = time.time()
               cleanPool = []
@@ -346,38 +328,15 @@ class MapTiles(ranaModule):
                 if notOld(currentTime, request):
                   cleanPool.append(request)
                 else:
-                  """this request timed out,
-                     remove its "Waiting..." tile from image cache,
-                     so that is can be retried"""
+                  # this request timed out,
+                  # remove its "Waiting..." tile from image cache,
+                  # so that is can be retried
                   name = request[0]
-                  self.removeImageFromMemmory(name)
+                  self.removeImageFromMemory(name)
               self.downloadRequestPool = cleanPool
         except Exception, e:
           print("exception in tile download manager thread:\n%s" % e)
           #          traceback.print_exc()
-
-          #  def startTileLoadingThread(self):
-          #    """start the loading-request consumer thread"""
-          #    t = Thread(target=self.tileLoader, name='tile loading thread')
-          #    t.setDaemon(True) # we need that the worker dies with the program
-          #    t.start()
-
-          #  def tileLoader(self):
-          #    """this is a tile loading request consumer thread"""
-          #    while True:
-          #      request = self.loadingNotifyQueue.get(block=True) # consume from this queue
-          #      if request == 'load':
-          #        # start processing loading requests from the stack
-          #        while(1):
-          #          (item,valid) = self.loadRequestCStack.popValid()
-          #          if valid:
-          #            (name, x, y, z, layer) = item
-          #            self.loadImage(name, x, y, z, layer)
-          #          else:
-          #            break # the stack is empty
-          #      elif request == 'shutdown':
-          #        print "\nmapTiles: tile loading thread shutting down"
-          #        break
 
   def _startIdleTileLoader(self):
     """add the tile loader as a gobject mainloop idle callback"""
@@ -521,10 +480,6 @@ class MapTiles(ranaModule):
           angle = self.get('bearing', 0.0)
           if angle is None:
             angle = 0.0
-
-          radAngle = radians(angle)
-
-
           # get the rotation angle from the main class (for synchronization purposes)
           radAngle = radians(self.modrana.mapRotationAngle)
 
@@ -552,10 +507,10 @@ class MapTiles(ranaModule):
           v4 = rectangles.Vector(*p4.as_tuple())
           polygon = rectangles.Polygon((v1, v2, v3, v4))
 
-          v1 = rectangles.Vector(*p1.as_tuple())
-          v2 = rectangles.Vector(*p2.as_tuple())
-          v3 = rectangles.Vector(*p3.as_tuple())
-          v4 = rectangles.Vector(*p4.as_tuple())
+#          v1 = rectangles.Vector(*p1.as_tuple())
+#          v2 = rectangles.Vector(*p2.as_tuple())
+#          v3 = rectangles.Vector(*p3.as_tuple())
+#          v4 = rectangles.Vector(*p4.as_tuple())
 
           # enlarge the area of possibly visible tiles due to rotation
           add = self.modrana.gui.expandViewportTiles
@@ -606,8 +561,8 @@ class MapTiles(ranaModule):
                         if backImage[1]['type'] == "normal" and overImage[1]['type'] == "normal":
                           combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
                           # remove the separate images from cache
-                          self.removeImageFromMemmory(nameBack)
-                          self.removeImageFromMemmory(nameOver)
+                          self.removeImageFromMemory(nameBack)
+                          self.removeImageFromMemory(nameOver)
                           # cache the combined image
                           self.storeInMemory(combinedImage, name, "composite")
                           # draw the composite image
@@ -684,8 +639,8 @@ class MapTiles(ranaModule):
                         """
                         combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
                         # remove the separate images from cache
-                        self.removeImageFromMemmory(nameBack)
-                        self.removeImageFromMemmory(nameOver)
+                        self.removeImageFromMemory(nameBack)
+                        self.removeImageFromMemory(nameOver)
                         # cache the combined image
                         self.storeInMemory(combinedImage, name, "composite")
                         # draw the composite image
@@ -746,7 +701,7 @@ class MapTiles(ranaModule):
     ct2.paint_with_alpha(alphaOver)
     return backImage
 
-  def removeImageFromMemmory(self, name, dictIndex=0):
+  def removeImageFromMemory(self, name, dictIndex=0):
     # remove an image from memory
     if self.cacheImageSurfaces:
       with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
@@ -860,16 +815,16 @@ class MapTiles(ranaModule):
     # Google sat images are 256 by 256 px, we don't need to check the size
     x = 256
     y = 256
-    ''' create a new cairo surface to place the image on '''
+    # create a new cairo surface to place the image on
     surface = cairo.ImageSurface(0, x, y)
-    ''' create a context to the new surface '''
+    # create a context to the new surface
     ct = cairo.Context(surface)
-    ''' create a GDK formatted Cairo context to the new Cairo native context '''
+    # create a GDK formatted Cairo context to the new Cairo native context
     ct2 = gtk.gdk.CairoContext(ct)
-    ''' draw from the pixbuf to the new surface '''
+    # draw from the pixbuf to the new surface
     ct2.set_source_pixbuf(pixbuf, 0, 0)
     ct2.paint()
-    ''' surface now contains the image in a Cairo surface '''
+    # surface now contains the image in a Cairo surface
     self.storeInMemory(surface, name, type, expireTimestamp, dictIndex)
 
   def filePath2Pixbuf(self, filePath):
@@ -892,8 +847,8 @@ class MapTiles(ranaModule):
     with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
       self.images[dictIndex][name] = (surface, metadata) # store the image in memory
 
-      """ check cache size,
-      if there are too many images, delete them """
+      # check cache size,
+      # if there are too many images, delete them
       if len(self.images[0]) > self.maxImagesInMemory:
         self.trimCache()
         # new tile available, make redraw request TODO: what overhead does this create ?
@@ -903,7 +858,6 @@ class MapTiles(ranaModule):
     """redraw the screen when a new tile is available in the cache
        * redraw only when on map screen (menu == None)
        * redraw only on composite tiles when overlay is on"""
-
     if self.get('tileLoadedRedraw', True) and self.get('menu', None) is None:
       overlay = self.get('overlay', False)
       if overlay: # only redraw when a composited tile is loaded with overlay on
@@ -920,17 +874,14 @@ class MapTiles(ranaModule):
        so that trim does not run every time an image is added to a full cache
        -> only the normal image cache needs trimming (images[0]),
        as the special image cache (images[1]) is just created once and not updated dynamically
-       NOTE: the storeInMemory method already locked images, so we don't have to
-       """
+       NOTE: the storeInMemory method already locked images, so we don't have to"""
     trimmingAmount = self.imagesTrimmingAmount
     imagesLength = len(self.images[0])
     if trimmingAmount >= imagesLength:
-      """
-      this means that the trimming amount was set higher,
-      than current length of the cache
-      the result is basically flushing the cache every time it fills back
-      well, I don't have an idea why would someone want to do that
-      """
+      # this means that the trimming amount was set higher,
+      # than current length of the cache
+      # the result is basically flushing the cache every time it fills back
+      # well, I don't have an idea why would someone want to do that
       self.images[0] = {}
     else:
       oldestKeys = sorted(self.images[0], key=lambda image: self.images[0][image][1]['addedTimestamp'])[
@@ -947,8 +898,8 @@ class MapTiles(ranaModule):
     # this solution has been found on:
     # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
 
-    """Using pixbufs in place of surface_from_png seems to be MUCH faster for JPEGSs and PNGs alike.
-Therefore we use it as default."""
+    # NOTE: Using pixbufs in place of surface_from_png seems to be MUCH faster
+    # for JPEGSs and PNGs alike, therefore we use it as default
 
     # do any filtering on the pixbuf
     pixbuf = self._filterTile(pixbuf)
@@ -956,13 +907,13 @@ Therefore we use it as default."""
     # Tile images are mostly 256 by 256 px, we don't need to check the size
     x = 256
     y = 256
-    ''' create a new cairo surface to place the image on '''
+    # create a new cairo surface to place the image on '''
     surface = cairo.ImageSurface(0, x, y)
-    ''' create a context to the new surface '''
+    # create a context to the new surface
     ct = cairo.Context(surface)
-    ''' create a GDK formatted Cairo context to the new Cairo native context '''
+    # create a GDK formatted Cairo context to the new Cairo native context
     ct2 = gtk.gdk.CairoContext(ct)
-    ''' draw from the pixbuf to the new surface '''
+    # draw from the pixbuf to the new surface
     ct2.set_source_pixbuf(pixbuf, 0, 0)
     ct2.paint()
     return surface
@@ -991,8 +942,6 @@ Therefore we use it as default."""
           self._enableTileFiltering()
         # else: switching form some other theme to another theme
         # -> do nothing
-
-
 
   def _enableTileFiltering(self):
     """assign the real filtering method, if possible
@@ -1039,8 +988,8 @@ Therefore we use it as default."""
       pixbuf = loader.get_pixbuf()
       loader.close()
       return pixbuf
-#      arr = numpy.array(im)
-#      return gtk.gdk.pixbuf_new_from_array(arr, gtk.gdk.COLORSPACE_RGB, 8)
+    #  arr = numpy.array(im)
+    #  return gtk.gdk.pixbuf_new_from_array(arr, gtk.gdk.COLORSPACE_RGB, 8)
     # Why are we using StringIO here ?
     #
     # The above mentioned method works just fine with recent GTK2 on PC
@@ -1163,7 +1112,6 @@ Therefore we use it as default."""
           self.layer,
           self.filename)
         self.finished = 1
-
       # something is wrong with the server or url
       except urllib2.HTTPError:
         if self.useImageSurface:
@@ -1194,7 +1142,7 @@ Therefore we use it as default."""
       except Exception, e:
         self.printErrorMessage(e)
         # remove the status tile
-        self.callback.removeImageFromMemmory(self.name)
+        self.callback.removeImageFromMemory(self.name)
 
       finally: # make really sure we don't get any zombie threads
         self.finished = 1 # finished thread can be removed from the set and retried
@@ -1226,12 +1174,9 @@ Therefore we use it as default."""
     def downloadTile(self, name, x, y, z, layer, filename):
       """Downloads an image"""
       url = self.callback.getTileUrl(x, y, z, layer)
-
       request = urllib2.urlopen(url)
-      #      request = urllib.urlopen(url)
       content = request.read()
       request.close()
-
       if self.useImageSurface:
         pl = gtk.gdk.PixbufLoader()
 
@@ -1253,7 +1198,6 @@ Therefore we use it as default."""
 # modified from: http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/globalmaptiles.py (GPL)
 def quadTree(tx, ty, zoom ):
   """Converts OSM type tile coordinates to Microsoft QuadTree"""
-
   quadKey = ""
   #		ty = (2**zoom - 1) - ty
   for i in range(zoom, 0, -1):
@@ -1264,5 +1208,4 @@ def quadTree(tx, ty, zoom ):
     if (ty & mask) != 0:
       digit += 2
     quadKey += str(digit)
-
   return quadKey
