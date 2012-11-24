@@ -18,9 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
-import PIL.ImageOps
 import StringIO
-import urllib
 #import array
 from modules.base_module import ranaModule
 from threading import Thread
