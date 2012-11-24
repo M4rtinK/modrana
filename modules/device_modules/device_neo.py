@@ -19,16 +19,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_device_module import deviceModule
+from base_device_module import DeviceModule
 
 def getModule(m,d,i):
   return DeviceNeo(m,d,i)
 
-class DeviceNeo(deviceModule):
+class DeviceNeo(DeviceModule):
   """A Neo FreeRunner modRana device-specific module"""
   
   def __init__(self, m, d, i):
-    deviceModule.__init__(self, m, d, i)
+    DeviceModule.__init__(self, m, d, i)
     self.tempUnfullscreen = False
 
   def getDeviceIDString(self):

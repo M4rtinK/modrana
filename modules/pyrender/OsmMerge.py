@@ -44,7 +44,7 @@ def OsmMerge(dest, z, sources):
   
   # Trawl through the source files, putting everything into memory
   for source in sources:
-    osm = parseOsm(source)
+    osm = ParseOsm(source)
     
     for p in osm.poi:
       node_tags[p['id']] = p['t']

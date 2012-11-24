@@ -23,9 +23,9 @@ from time import time
 from math import pi
 
 def getModule(m,d,i):
-  return(clickMenu(m,d,i))
+  return ClickMenu(m,d,i)
 
-class clickMenu(RanaModule):
+class ClickMenu(RanaModule):
   """Overlay info on the map"""
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
@@ -34,9 +34,9 @@ class clickMenu(RanaModule):
     self.messageLingerTime = 2
 
   def handleMessage(self, message, type, args):
-    if(message == "addWaypoint"):
+    if message == "addWaypoint":
       m = self.m.get("waypoints", None)
-      if(m != None):
+      if m is not None:
         self.lastWaypoint = m.newWaypoint()
         self.lastWaypointAddTime = time()
     

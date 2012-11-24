@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from parseOsm import parseOsm
+from parseOsm import ParseOsm
 import tiledata 
 from tilenames import *
 import sys
@@ -63,7 +63,7 @@ def describe(lat,lon):
   filename = tiledata.GetOsmTileData(z,x,y)
 
   # load into memory
-  a = parseOsm(filename)
+  a = ParseOsm(filename)
 
   # look for nearest way
   (mindist, name) = (1E+10, "not found")

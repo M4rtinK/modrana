@@ -517,7 +517,7 @@ class LoadTracklogs(RanaModule):
 
 
 
-class tracklog():
+class Tracklog():
   """A basic class representing a tracklog."""
   def __init__(self, trackpointsList, filename, type):
     self.trackpointsList = trackpointsList # here will be the actual list of trackpoints
@@ -560,11 +560,11 @@ class tracklog():
     return None
 
 
-class GPXTracklog(tracklog):
+class GPXTracklog(Tracklog):
   """A class representing a GPX tracklog."""
   def __init__(self, trackpointsList, filename, type, cache, save):
-    tracklog.__init__(self, trackpointsList, filename, type)
-    tracklog.type = 'GPX'
+    Tracklog.__init__(self, trackpointsList, filename, type)
+    Tracklog.type = 'GPX'
     self.routeInfo = None # a dictionary for storing route information
     # TODO: set this automatically
 
@@ -600,7 +600,7 @@ class GPXTracklog(tracklog):
       rawClusters = geo.clusterTrackpoints(trackpointsList, clusterDistance) # we cluster the points
       for cluster in rawClusters: # now we find for each cluster a circle encompassing all points
         (centreX,centreY,radius) = geo.circleAroundPointCluster(cluster)
-        self.clusters.append(clusterOfPoints(cluster, centreX, centreY, radius))
+        self.clusters.append(ClusterOfPoints(cluster, centreX, centreY, radius))
 
       self.checkElevation()
 
@@ -676,7 +676,7 @@ class CacheItem():
     self.routeInfo = routeInfo
     self.perElevList = perElevList
 
-class clusterOfPoints():
+class ClusterOfPoints():
   """A basic class representing a cluster of nearby points."""
   def __init__(self, pointsList, centreX, centreY, radius):
     self.pointsList = pointsList # points in the cluster

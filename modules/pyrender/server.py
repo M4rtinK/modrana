@@ -31,7 +31,7 @@ import os
 import renderer_default as RenderModule1
 import renderer_labels as RenderModule2
 
-class tileServer(BaseHTTPRequestHandler):
+class TileServer(BaseHTTPRequestHandler):
   def __init__(self, request, client_address, server):
     self.re = re.compile('/(\w+)/(\d+)/(\d+)/(\d+)\.png')
     self.blankre = re.compile('/blank/(\w+)/')
@@ -43,7 +43,7 @@ class tileServer(BaseHTTPRequestHandler):
   def return_file(self, filename, contentType='text/HTML'):
     # Serve a real file from disk (for indexes etc.)
     f = open(filename, "r")
-    if(f):
+    if f:
       self.send_response(200)
       self.send_header('Content-type',contentType) # TODO: more headers
       self.end_headers()
@@ -65,16 +65,16 @@ class tileServer(BaseHTTPRequestHandler):
     # See if a tile was requested
     blankmatch = self.blankre.match(self.path)
     
-    if(blankmatch):
+    if blankmatch:
       (name) = blankmatch.groups()
       filename = "blank/%s.png" % name
-      if(not os.path.exists(filename)):
+      if not os.path.exists(filename):
         filename = "blank/white.png"
       self.return_file(filename, 'image/PNG')
       return
     
     tilematch = self.re.match(self.path)
-    if(tilematch):
+    if tilematch:
       (layer,z,x,y) = tilematch.groups()
       z = int(z)
       x = int(x)
@@ -83,17 +83,17 @@ class tileServer(BaseHTTPRequestHandler):
       # Render the tile
       print('z%d: %d,%d - %s' % (z,x,y,layer))
 
-      if(layer == 'labels'):
+      if layer == 'labels':
         renderer = RenderModule2.RenderClass()
       else:
         renderer = RenderModule1.RenderClass()
       pngData = renderer.RenderTile(z,x,y, layer)
       
-      if(pngData == None):
+      if pngData is None:
         print("Not found")
         self.send_response(404)
         return
-      if(pngData[0] == ':'):
+      if pngData[0] == ':':
         self.send_response(200)
         self.wfile.write(pngData)
         return
@@ -107,7 +107,7 @@ class tileServer(BaseHTTPRequestHandler):
       self.send_response(404)
 
 try:
-  server = HTTPServer(('',1280), tileServer)
+  server = HTTPServer(('',1280), TileServer)
   print("Starting web server. Open http://localhost:1280 to access pyrender.")
   server.serve_forever()
 except KeyboardInterrupt:

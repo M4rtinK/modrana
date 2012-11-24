@@ -20,9 +20,9 @@
 from modules.base_module import RanaModule
 
 def getModule(m,d,i):
-  return(watchlist(m,d,i))
+  return Watchlist(m,d,i)
 
-class watchlist(RanaModule):
+class Watchlist(RanaModule):
   """Allows notification of data-changes"""
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
@@ -31,19 +31,19 @@ class watchlist(RanaModule):
   def notify(self,name, value, oldValue=None):
 
     # Position seen for first time, centering
-    if(name == "pos" and oldValue == None):
+    if name == "pos" and oldValue is None:
       self.set("centreOnce", True)
 
     # zoom changed
-    if(name == "z"):
+    if name == "z":
       m = self.m.get("projection", None)
-      if(m):
+      if m:
         m.setZoom(value)
       
     # Menu changed, so redraw
-    if(name == "menu"):
+    if name == "menu":
       m = self.m.get("menu", None)
-      if(m):
+      if m:
         m.resetMenu(value)
       self.set("needRedraw", True)
 

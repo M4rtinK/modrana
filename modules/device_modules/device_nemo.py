@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_device_module import deviceModule
+from base_device_module import DeviceModule
 
 from QtMobility.SystemInfo import QSystemScreenSaver
 """ ^^ back-light control"""
@@ -29,11 +29,11 @@ from QtMobility.SystemInfo import QSystemScreenSaver
 def getModule(m,d,i):
   return DeviceNemo(m,d,i)
 
-class DeviceNemo(deviceModule):
+class DeviceNemo(DeviceModule):
   """A Nokia N9 device module"""
   
   def __init__(self, m, d, i):
-    deviceModule.__init__(self, m, d, i)
+    DeviceModule.__init__(self, m, d, i)
     # create the screen-saver controller
     self.qScreenSaver = QSystemScreenSaver()
 

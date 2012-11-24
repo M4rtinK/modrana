@@ -30,10 +30,10 @@ import local_search
 DEFAULT_GOOGLE_API_KEY = "ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw"
 
 def getModule(m, d, i):
-  return onlineServices(m, d, i)
+  return OnlineServices(m, d, i)
 
 
-class onlineServices(RanaModule):
+class OnlineServices(RanaModule):
   """A module for talking to various online services"""
 
   def __init__(self, m, d, i):

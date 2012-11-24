@@ -29,7 +29,7 @@ from OsmTileData import *
 from loadOsm import *
 from tilenames import *
 
-class proj:
+class Proj:
   """Simple projection class for geographic data.  Converts lat/long to pixel position"""
   def __init__(self, tx,ty,tz, to):
     """Setup a projection.  
@@ -75,7 +75,7 @@ class OsmRenderBase:
     """
     
     self.osm = LoadOsm(filename)  # get OSM data into memory
-    self.proj = proj(tx,ty,tz,im.size)  # create a projection for this tile
+    self.proj = Proj(tx,ty,tz,im.size)  # create a projection for this tile
     self.drawContext = ImageDraw.Draw(im)  # create a drawing context
     
     # Call the draw function

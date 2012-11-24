@@ -30,7 +30,7 @@ from tiledata import *
 from parseOsm import *
 from tilenames import *
 
-class proj:
+class Proj:
   """Simple projection class for geographic data.  Converts lat/long to pixel position"""
   def __init__(self, tx,ty,tz, to):
     """Setup a projection.  
@@ -99,8 +99,8 @@ class OsmRenderBase:
     self.mapLayer = layer
 
     if(filename):
-      self.osm = parseOsm(filename)  # get OSM data into memory
-    self.proj = proj(tx,ty,tz,(256,256))  # create a projection for this tile
+      self.osm = ParseOsm(filename)  # get OSM data into memory
+    self.proj = Proj(tx,ty,tz,(256,256))  # create a projection for this tile
 
     # Call the draw function
     self.draw()

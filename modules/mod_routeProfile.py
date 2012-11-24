@@ -27,9 +27,9 @@ if gs.GUIString == "GTK":
   import pycha.color
 
 def getModule(m,d,i):
-  return routeProfile(m,d,i)
+  return RouteProfile(m,d,i)
 
-class routeProfile(RanaModule):
+class RouteProfile(RanaModule):
   """Creates a route profile (an elevation chart)"""
   
   def __init__(self, m, d, i):

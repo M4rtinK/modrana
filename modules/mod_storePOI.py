@@ -26,9 +26,9 @@ import sqlite3
 import csv
 
 def getModule(m,d,i):
-  return storePOI(m,d,i)
+  return StorePOI(m,d,i)
 
-class storePOI(RanaModule):
+class StorePOI(RanaModule):
   """Store POI data."""
   
   def __init__(self, m, d, i):

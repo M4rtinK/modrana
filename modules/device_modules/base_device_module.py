@@ -22,7 +22,7 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 
-class deviceModule(RanaModule):
+class DeviceModule(RanaModule):
   """A modRana device module"""
   
   def __init__(self, m, d, i):

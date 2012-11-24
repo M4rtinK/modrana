@@ -47,7 +47,7 @@ def getVmapFilename(xi,yi,zi,options={}):
     filename = "%s/%d_%d/%d_%d.bin" % (getVmapBaseDir(options), xdir, ydir, x, y)
     return filename
 
-class vmapData:
+class MapData:
   def __init__(self, filename=None):
     """Load an OSM XML file into memory"""
     self.ways = {}

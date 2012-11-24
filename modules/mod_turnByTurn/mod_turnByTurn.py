@@ -47,9 +47,9 @@ if gs.GUIString == "GTK":
   import pangocairo
 
 def getModule(m,d,i):
-  return turnByTurn(m,d,i)
+  return TurnByTurn(m,d,i)
 
-class turnByTurn(RanaModule):
+class TurnByTurn(RanaModule):
   """A turn by turn navigation module."""
   
   def __init__(self, m, d, i):

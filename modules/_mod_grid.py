@@ -24,9 +24,9 @@ import sys
 from core import geo
 
 def getModule(m,d,i):
-  return(grid(m,d,i))
+  return Grid(m,d,i)
   
-class grid(RanaModule):
+class Grid(RanaModule):
   """Display map images"""
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)

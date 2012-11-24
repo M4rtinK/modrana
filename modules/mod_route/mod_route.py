@@ -46,10 +46,10 @@ OSD_CURRENT_ROUTE = 2 # a single button that triggers the options menu
 OSD_ROUTE_OPTIONS = 3 # buttons that go to the edit or info menus
 
 def getModule(m, d, i):
-  return route(m, d, i)
+  return Route(m, d, i)
 
 
-class route(RanaModule):
+class Route(RanaModule):
   """Routes"""
 
   def __init__(self, m, d, i):

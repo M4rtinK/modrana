@@ -23,9 +23,9 @@ from datetime import *
 import math
 
 def getModule(m,d,i):
-  return placenames(m,d,i)
+  return Placenames(m,d,i)
 
-class placenames(poiModule):
+class Placenames(poiModule):
   """Lookup nearest town or village"""
   def __init__(self, m, d, i):
     poiModule.__init__(self, m, d, i)

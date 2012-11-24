@@ -23,9 +23,9 @@ from time import *
 from upoints import gpx
 
 def getModule(m,d,i):
-  return replayGpx(m,d,i)
+  return ReplayGpx(m,d,i)
 
-class replayGpx(RanaModule):
+class ReplayGpx(RanaModule):
   """Replay a GPX"""
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
@@ -40,7 +40,7 @@ class replayGpx(RanaModule):
 
     file = open(filename, 'r')
     
-    if(file):
+    if file:
       track = gpx.Trackpoints() # create new Trackpoints object
       track.import_locations(file) # load a gpx file into it
       for point in track[0]: #iterate over the points, track[0] is list of all points in file

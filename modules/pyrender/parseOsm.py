@@ -30,19 +30,19 @@ import os
 from xml.sax import make_parser, handler
 import xml
 
-class parseOsm(handler.ContentHandler):
+class ParseOsm(handler.ContentHandler):
   def __init__(self, filename):
     """Load an OSM XML file into memory"""
     self.nodes = {}
     self.ways = {}
     self.poi = []
     self.divisor = float(2 ** 31)
-    if(filename != None):
+    if filename is not None:
       self.loadOsm(filename)
 
   def loadOsm(self, filename):
     """Load an OSM XML file into memory"""
-    if(not os.path.exists(filename)):
+    if not os.path.exists(filename):
       return
     try:
       parser = make_parser()
@@ -81,7 +81,7 @@ class parseOsm(handler.ContentHandler):
       
       # Test if a tag is interesting enough to make it worth
       # storing this node as a special "point of interest"
-      if not k in ('created_by'): # TODO: better list of useless tags
+      if not k in 'created_by': # TODO: better list of useless tags
         self.tags[k] = v
         self.isInteresting = True
   
@@ -89,6 +89,6 @@ class parseOsm(handler.ContentHandler):
     if name == 'way':
       self.ways[self.wayID] = ({'t':self.tags, 'n':self.waynodes})
     elif name == 'node':
-      if(self.isInteresting):
+      if self.isInteresting:
         self.poi.append({'t':self.tags, 'id':self.nodeID})
 

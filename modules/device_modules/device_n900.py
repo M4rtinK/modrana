@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 import subprocess
-from base_device_module import deviceModule
+from base_device_module import DeviceModule
 #N900 specific:
 import dbus.glib
 from core import gs
@@ -49,11 +49,11 @@ def getModule(m, d, i):
   return DeviceN900(m, d, i)
 
 
-class DeviceN900(deviceModule):
+class DeviceN900(DeviceModule):
   """A N900 modRana device-specific module"""
 
   def __init__(self, m, d, i):
-    deviceModule.__init__(self, m, d, i)
+    DeviceModule.__init__(self, m, d, i)
     self.rotationObject = None
     # start the N900 specific automatic GUI rotation support
     self.done = False
