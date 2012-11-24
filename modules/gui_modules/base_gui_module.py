@@ -43,7 +43,7 @@ class GUIModule(ranaModule):
     pass
 
   def getViewport(self):
-    """return a (x,y,w,h) tupple"""
+    """return a (x,y,w,h) tuple"""
     pass
 
   def setWindowTitle(self, title):
@@ -141,16 +141,12 @@ class GUIModule(ranaModule):
     return "It works!"
 
   def needsLocalhostTileserver(self):
-    """
-    report if the GUI module requires the localhost
-    tileserver to run
-    """
+    """report if the GUI module requires the localhost
+    tileserver to run"""
     return False
 
   def openUrl(self, url):
-    """
-    open a given URL asynchronously
-    """
+    """open a given URL asynchronously"""
     # the webbrowser module should be a good default
     import webbrowser
     webbrowser.open(url)

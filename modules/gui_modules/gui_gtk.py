@@ -321,7 +321,7 @@ class GTKGUI(GUIModule):
 
 
 class MainWidget(gtk.Widget):
-  __gsignals__ = {\
+  __gsignals__ = {
     'realize': 'override',
     'expose-event': 'override',
     'size-allocate': 'override',
@@ -351,7 +351,6 @@ class MainWidget(gtk.Widget):
     self.timer1 = gobject.timeout_add(100, self.update, self) #default 100
     self.timer3 = None # will be used for timing long press events
 
-    #    self.mapRotationAngle = 0 # in radians
     self.notMovingSpeed = 1 # in m/s
 
     self.topWindow = None
@@ -403,15 +402,11 @@ class MainWidget(gtk.Widget):
     self.modrana.update()
 
   def get(self, key, defaultValue):
-    """
-    local alias for the modRana persistent dictionary get function
-    """
+    """local alias for the modRana persistent dictionary get function"""
     self.modrana.get(key, defaultValue)
 
   def set(self, key, value):
-    """
-    local alias for the modRana persistent dictionary set function
-    """
+    """local alias for the modRana persistent dictionary set function"""
     self.modrana.set(key, value)
 
   def _checkForRedrawCB(self, key, oldValue, newValue):
@@ -423,8 +418,8 @@ class MainWidget(gtk.Widget):
     """Make the window trigger a draw event.
        TODO: consider replacing this if porting pyroute to another platform"""
     self.set('needRedraw', False)
-    """ alter directly, no need to notificate
-    about returning the key to default state"""
+    # alter directly, no need to notificate
+    # about returning the key to the default state
 
     # record timestamp
     self.lastFullRedrawRequest = time.time()
@@ -467,10 +462,8 @@ class MainWidget(gtk.Widget):
     self.dragY = event.y
 
   def released(self, w, event):
-    """
-    mouse button has been released or
-    the tapping object has been lifted up from the touchscreen
-    """
+    """mouse button has been released or
+    the tapping object has been lifted up from the touchscreen"""
     self.pressInProgress = False
     self.pressLengthTimer = None
     msDuration = event.time - self.lastPressEpoch
@@ -494,12 +487,11 @@ class MainWidget(gtk.Widget):
     duration
     start coordinates
     currentCoordinates
-    if no press is in progress or another press already started, shut down the timer
-    """
+    if no press is in progress or another press already started, shut down the timer"""
 
-    """just to be sure, time out after 60 seconds
-    - provided the released signal is always called, this timeout might not be necessary,
-    but better be safe, than eat the whole battery if the timer is not terminated"""
+    # just to be sure, time out after 60 seconds
+    # - provided the released signal is always called, this timeout might not be necessary,
+    # but better be safe, than eat the whole battery if the timer is not terminated
     dt = (time.time() - pressStartTime) * 1000
     if dt > 60000:
       print "long press timeout reached"
@@ -519,9 +511,7 @@ class MainWidget(gtk.Widget):
       self.update()
 
   def handleDrag(self, x, y, dx, dy, startX, startY, msDuration):
-    """
-    handle dragging on the screen
-    """
+    """handle dragging on the screen"""
     # check if centering is on
     if self.modrana.get("centred", True):
       fullDx = x - startX
@@ -568,16 +558,12 @@ class MainWidget(gtk.Widget):
     self.lastFullRedraw = time.time()
 
   def getLastFullRedraw(self):
-    """
-    return when the GUI was last redrawn
-    """
+    """return when the GUI was last redrawn"""
     return self.lastFullRedraw
 
   def fullDrawMethod(self, cr, event):
-    """
-    this is the default drawing method
-    draws all layers and should be used together with full screen redraw
-    """
+    """this is the default drawing method
+    draws all layers and should be used together with full screen redraw"""
 
     # get all modules
     modules = self.modrana.getModules().values()
@@ -625,7 +611,9 @@ class MainWidget(gtk.Widget):
           for m in modules:
             m.drawMapOverlay(cr)
         except Exception, e:
-          print "modRana GTK main loop: an exception occurred:\n"
+          print("modRana GTK main loop: an exception occurred")
+          print(e)
+          print('modRana GTK main loop: traceback:')
           traceback.print_exc(file=sys.stdout) # find what went wrong
         cr.restore()
         cr.translate(-x, -y)
@@ -638,7 +626,9 @@ class MainWidget(gtk.Widget):
           for m in modules:
             m.drawMapOverlay(cr)
         except Exception, e:
-          print "modRana GTK main loop: an exception occurred:\n"
+          print "modRana GTK main loop: an exception occurred"
+          print(e)
+          print('modRana GTK main loop: traceback:')
           traceback.print_exc(file=sys.stdout) # find what went wrong
         for m in modules:
           m.drawScreenOverlay(cr)
@@ -661,7 +651,6 @@ class MainWidget(gtk.Widget):
       self.currentDrawMethod = self.fullDrawMethod
     else:
       self.currentDrawMethod = method
-
 
   def defaultMethodBindings(self):
     """revert drag method bindings to default state"""
@@ -701,7 +690,7 @@ class MainWidget(gtk.Widget):
     try:
       (sx, sy, w, h) = self.modrana.get('viewport', None)
     except TypeError:
-      print "gtk gui: viewport not available"
+      print("gtk gui: viewport not available")
       return
 
     # store current screen content in backing pixmap
@@ -744,7 +733,7 @@ class MainWidget(gtk.Widget):
 
   def do_realize(self):
     self.set_flags(self.flags() | gtk.REALIZED)
-    self.window = gdk.Window(\
+    self.window = gdk.Window(
       self.get_parent_window(),
       width=self.allocation.width,
       height=self.allocation.height,

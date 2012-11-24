@@ -19,6 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+import os
 import sys
 import re
 import traceback
@@ -173,7 +174,7 @@ class QMLGUI(GUIModule):
   def startMainLoop(self):
     """start the main loop or its equivalent"""
 
-    #    print "QML start main loop"
+    #    print("QML starting main loop")
 
     if self.modrana.dmod.startInFullscreen():
       self.toggleFullscreen()
@@ -193,13 +194,11 @@ class QMLGUI(GUIModule):
     if self._notificationQueue:
       for item in self._notificationQueue:
         self.notify(*item)
-
-      #    print "loaded modules:"
-      #    print sys.modules.keys()
-
+      #    print("loaded modules:")
+      #    print(sys.modules.keys())
     self.app.exec_()
 
-  #    print "QML main loop started"
+  #    print("QML main loop started")
 
   def _qtWindowClosed(self, event):
     print('Qt window closing down')
@@ -372,18 +371,18 @@ class IconImageProvider(QDeclarativeImageProvider):
     try:
       #TODO: theme name caching ?
       f = open('themes/%s' % iconPath, 'r')
-      #      print "ICON"
-      #      print iconPath
-      #      print size
-      #      print requestedSize
+      #      print("ICON")
+      #      print(iconPath)
+      #      print(size)
+      #      print(requestedSize)
       img = QImage()
       img.loadFromData(f.read())
       f.close()
       return img
     except Exception, e:
-      print("QML GUI: icon image provider: loading icon failed", e)
-      print iconPath
-      print 'themes/%s' % (iconPath)
+      print("QML GUI: icon image provider: loading icon failed")
+      print(e)
+      print(os.path.join('themes', iconPath))
 
 class TileImageProvider(QDeclarativeImageProvider):
   """
@@ -405,8 +404,8 @@ class TileImageProvider(QDeclarativeImageProvider):
     the tile info should look like this:
     layerID/zl/x/y
     """
-    #    print "IMAGE REQUESTED"
-    #    print tileInfo
+    #    print("IMAGE REQUESTED")
+    #    print(tileInfo)
     try:
       # split the string provided by QML
       split = tileInfo.split("/")
@@ -428,12 +427,13 @@ class TileImageProvider(QDeclarativeImageProvider):
       img.loadFromData(f.read())
       # cleanup
       f.close()
-      #print "OK"
+      #print("OK")
       return img
 
     except Exception, e:
-      print("QML GUI: icon image provider: loading tile failed", e)
-      print tileInfo
+      print("QML GUI: icon image provider: loading tile failed")
+      print(e)
+      print(tileInfo)
       traceback.print_exc(file=sys.stdout)
 
 
@@ -457,17 +457,17 @@ class MapTiles(QtCore.QObject):
     True - tile already in storage or in memory
     False - tile download in progress, retry in a while
     """
-    #    print layer, z, x, y
+    #    print(layer, z, x, y)
     if self.gui._mapTiles.tileInMemory(layer, z, x, y):
-    #      print "available in memory"
+    #      print("available in memory")
       return True
     elif self.gui._mapTiles.tileInStorage(layer, z, x, y):
-    #      print "available in storage"
+    #      print("available in storage")
       return True
     else: # not in memory or storage
       # add a tile download request
       self.gui._mapTiles.addTileDownloadRequest(layer, z, x, y)
-      #      print "dling try later"
+      #      print("downloading, try later")
       return False
 
 # from AGTL
@@ -645,12 +645,12 @@ class Options(QtCore.QObject):
     QtCore.QObject.__init__(self)
     self.modrana = modrana
 
-  """ like this, the function can accept
- and return different types to and from QML
- (basically anything that matches some of the decorators)
- as per PySide developers, there should be no perfromance
- penalty for doing this and the order of the decorators
- doesn't mater"""
+  # like this, the function can accept
+  # and return different types to and from QML
+  # (basically anything that matches some of the decorators)
+  # as per PySide developers, there should be no performance
+  # penalty for doing this and the order of the decorators
+  # doesn't mater
 
   @QtCore.Slot(str, bool, result=bool)
   @QtCore.Slot(str, int, result=int)
