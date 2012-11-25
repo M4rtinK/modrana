@@ -529,6 +529,10 @@ this is needed for the item tools menu to know where to return"""
       group,
       False)
 
+    # ** map grid
+    group = addGroup("Grid", "map_filtering", catMap, "generic")
+    addBoolOpt("Show grid", "drawGrid", group, False)
+
     # ** tile storage
     group = addGroup("Tile storage", "tile_storage", catMap, "generic")
     addOpt("Tile storage", "tileStorageType",
