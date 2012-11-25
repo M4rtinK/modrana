@@ -205,7 +205,6 @@ class Projection(RanaModule):
     self.findEdges() # find edges for this new resolution
     self.set('needRedraw', True)
 
-
   def screenPos(self, px, py):
     """Given a position on screen (where 0,0 is top-left and 1,1 is bottom right) get the coordinates"""
     x = self.xc + ((px - 1) * self.w)
@@ -321,6 +320,16 @@ class Projection(RanaModule):
     py = self.py1 + y / self.scale
     lat,lon = xy2latlon(px, py, self.zoom)
     return lat,lon
+
+  def pxpy2ll(self, px, py):
+      """Convert projection units to geographic units"""
+      x = self.w * (px - self.px1) / self.pdx
+      y = self.h * (py - self.py1) / self.pdy
+      px = self.px1 + x / self.scale
+      py = self.py1 + y / self.scale
+      lat,lon = xy2latlon(px, py, self.zoom)
+      return lat,lon
+
 
   def onscreen(self, x, y):
     """Test if a position (in display units) is visible"""
