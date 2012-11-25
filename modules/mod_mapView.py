@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
+from core import color
 
 def getModule(m,d,i):
   return MapView(m,d,i)
@@ -29,11 +30,13 @@ class MapView(RanaModule):
 
   def firstTime(self):
     self.checkMapDraggingMode() # check the map dragging mode on startup
-    self.checkCenteringDisableThreshold() # check centering disable treshold on startup
+    self.checkCenteringDisableThreshold() # check centering disable threshold on startup
     self.lastZ = int(self.get('z', 15))
     # grid
     self.drawGrid = False
-    self.modrana.watch('drawGrid', self._drawGridEnabledCB, runNow=True)
+    self.gridColor = (1.0, 1.0, 1.0, 1.0) # white by default
+    self.modrana.watch('drawMapGrid', self._drawGridEnabledCB, runNow=True)
+    self.modrana.watch('mapGridColor', self._drawGridColorCB, runNow=True)
 
   def handleMessage(self, message, type, args):
     z = self.get('z', 15)
@@ -155,6 +158,15 @@ class MapView(RanaModule):
   def _drawGridEnabledCB(self, key, oldKey, newKey):
     self.drawGrid = newKey
 
+  def _drawGridColorCB(self, key, oldKey, newKey):
+    if newKey:
+      try:
+        c = color.Color(newKey, (newKey, 1.0))
+        self.gridColor = c.getCairoColor()
+      except Exception, e:
+        print('mapView: color parsing failed')
+        print(e)
+
   def _drawGrid(self, cr):
     proj = self.m.get('projection', None)
     viewport = self.get('viewport', None)
@@ -180,7 +192,7 @@ class MapView(RanaModule):
 
       if visibleParallels:
         for meridian in visibleMeridians:
-          cr.set_source_rgba(1.0, 1.0, 1.0)
+          cr.set_source_rgba(*self.gridColor)
           cr.set_line_width(2)
           meridian = float(meridian)
           cr.move_to(*proj.ll2xy(meridian, float(visibleParallels[0])))
@@ -189,7 +201,7 @@ class MapView(RanaModule):
           cr.fill()
       if visibleMeridians:
         for parallel in visibleParallels:
-          cr.set_source_rgba(1.0, 1.0, 1.0)
+          cr.set_source_rgba(*self.gridColor)
           cr.set_line_width(2)
           parallel = float(parallel)
           cr.move_to(*proj.ll2xy(float(visibleMeridians[0]), parallel))

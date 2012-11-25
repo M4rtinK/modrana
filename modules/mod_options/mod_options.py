@@ -530,8 +530,16 @@ this is needed for the item tools menu to know where to return"""
       False)
 
     # ** map grid
-    group = addGroup("Grid", "map_filtering", catMap, "generic")
-    addBoolOpt("Show grid", "drawGrid", group, False)
+    group = addGroup("Grid", "map_grid", catMap, "generic")
+    addBoolOpt("Show grid", "drawMapGrid", group, False)
+    addOpt("Grid color", "mapGridColor",
+      [("white", '<span color="white">white</span>'),
+       ("black", '<span color="black">black</span>'),
+       ("red", '<span color="red">red</span>'),
+       ("green", '<span color="green">green</span>'),
+       ("blue", '<span color="blue">blue</span>')],
+      group,
+      defaultMode)
 
     # ** tile storage
     group = addGroup("Tile storage", "tile_storage", catMap, "generic")
