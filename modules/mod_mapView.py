@@ -31,7 +31,10 @@ class MapView(RanaModule):
     self.checkMapDraggingMode() # check the map dragging mode on startup
     self.checkCenteringDisableThreshold() # check centering disable treshold on startup
     self.lastZ = int(self.get('z', 15))
-    
+    # grid
+    self.drawGrid = False
+    self.modrana.watch('drawGrid', self._drawGridEnabledCB, runNow=True)
+
   def handleMessage(self, message, type, args):
     z = self.get('z', 15)
     if message == 'zoomIn':
@@ -145,3 +148,47 @@ class MapView(RanaModule):
     lat, lon = point.getLL()
     self.sendMessage('mapView:recentre %f %f %d|set:menu:None|set:needRedraw:True' % (lat, lon, z))
 
+  def drawMapOverlay(self, cr):
+    if self.drawGrid:
+      self._drawGrid(cr)
+
+  def _drawGridEnabledCB(self, key, oldKey, newKey):
+    self.drawGrid = newKey
+
+  def _drawGrid(self, cr):
+    proj = self.m.get('projection', None)
+    viewport = self.get('viewport', None)
+    if proj and viewport: # fin all meridians and parallels in the viewport
+      x0,y0 = proj.screenPos(0,0)
+      x1, y1 = proj.screenPos(1,1)
+      lat0, lon0 = proj.xy2ll(x0-x1/2.0,y0-y1/2.0)
+      lat1, lon1 = proj.xy2ll(x1*1.5,y1*1.5)
+      # range only increments, so sort the coordinates in
+      # ascending order
+      lats = sorted((int(lat0), int(lat1)))
+      lons = sorted((int(lon0), int(lon1)))
+      visibleMeridians = range(lats[0]-2, lats[1]+2)
+      visibleParallels = range(lons[0]-2, lons[1]+2)
+      # TODO: like this, at least 4 lines are drawn even if
+      # no parallel or meridian is visible - this could be optimized
+      # -> probably should check if some meridian/parallel is visible and
+      # then the rest of the logic
+
+      if visibleParallels:
+        for meridian in visibleMeridians:
+          cr.set_source_rgba(1.0, 1.0, 1.0)
+          cr.set_line_width(2)
+          meridian = float(meridian)
+          cr.move_to(*proj.ll2xy(meridian, float(visibleParallels[0])))
+          cr.line_to(*proj.ll2xy(meridian, float(visibleParallels[-1])))
+          cr.stroke()
+          cr.fill()
+      if visibleMeridians:
+        for parallel in visibleParallels:
+          cr.set_source_rgba(1.0, 1.0, 1.0)
+          cr.set_line_width(2)
+          parallel = float(parallel)
+          cr.move_to(*proj.ll2xy(float(visibleMeridians[0]), parallel))
+          cr.line_to(*proj.ll2xy(float(visibleMeridians[-1]), parallel))
+          cr.stroke()
+          cr.fill()
