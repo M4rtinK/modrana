@@ -54,6 +54,10 @@ class Menus(RanaModule):
 
     # colors - fail-safe defaults
     self.mainTextColor = (0,0,0.3,1)
+    self.scalebarColor = (0,0,0,1)
+    self.scalebarTextColor = (0,0,0,1)
+    self.scalebarTextBgColor = (1,1,1,1)
+    self.mainFillColor = (1,1,1,1)
     self.centerButtonCircleColor = (0,0,1,0.45)
     self.spButtonFillTup = ("#ffec8b",1.0)
     self.spButtonOutlineTup = ("#8b814c",1.0)
@@ -1369,7 +1373,7 @@ class Menus(RanaModule):
     else:
       text = "%1.1f km" % dist
 
-    cr.set_source_rgb(0,0,0)
+    cr.set_source_rgba(*self.scalebarColor)
     cr.move_to(x1,y1)
     cr.line_to(x2,y2)
     cr.stroke()
@@ -1378,9 +1382,11 @@ class Menus(RanaModule):
 #    z = self.get('z', 15)
 #    text = text + " (zl%d)" % z
 
-    self.boxedText(cr, x1, y1-4, text, 12, 1)
+    self.boxedText(
+      cr, x1, y1-4, text, 12, 1, fg=self.scalebarTextColor, bg=self.scalebarTextBgColor
+    )
 
-  def boxedText(self, cr, x,y,text, size=12, align=1, border=2, fg=(0,0,0), bg=(1,1,1)):
+  def boxedText(self, cr, x,y,text, size=12, align=1, border=2, fg=(0,0,0,1), bg=(1,1,1,1)):
 
     cr.set_font_size(12)
     extents = cr.text_extents(text)
@@ -1398,17 +1404,21 @@ class Menus(RanaModule):
     elif align in (4,5,6):
       y1 += 0.5 * h
 
-    cr.set_source_rgb(bg[0],bg[1],bg[2])
+    cr.set_source_rgba(*bg)
     cr.rectangle(x1 - border, y1 + border, w +2*border, -(h+2*border))
     cr.fill()
 
-    cr.set_source_rgb(fg[0],fg[1],fg[2])
+    cr.set_source_rgba(*fg)
     cr.move_to(x1,y1)
     cr.show_text(text)
     cr.fill()
 
   def colorsChangedCallback(self,colors):
     self.mainTextColor = colors['main_text'].getCairoColor()
+    self.scalebarColor = colors['scalebar_color'].getCairoColor()
+    self.scalebarTextColor = colors['scalebar_text'].getCairoColor()
+    self.scalebarTextBgColor = colors['scalebar_text_bg'].getCairoColor()
+
     self.centerButtonCircleColor = colors['center_button_circle'].getCairoColor()
     # normal
     sbFill = colors['special_button_fill']
