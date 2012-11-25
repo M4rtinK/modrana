@@ -171,11 +171,15 @@ class MapView(RanaModule):
     proj = self.m.get('projection', None)
     viewport = self.get('viewport', None)
     if proj and viewport: # fin all meridians and parallels in the viewport
-      x0,y0 = proj.screenPos(0,0)
-      x1, y1 = proj.screenPos(1,1)
-      # this overlap is needed for low zoom
-      lat0, lon0 = proj.xy2ll(x0-x1/2.0,y0-y1/2.0)
-      lat1, lon1 = proj.xy2ll(x1*1.5,y1*1.5)
+      (px1, px2, py1, py2) = (proj.px1, proj.px2, proj.py1, proj.py2)
+      if self.get("rotateMap", False) and (self.get("centred", False)):
+        dx = abs(px1-px2)/2.0
+        dy = abs(py1-py2)/2.0
+        lat0, lon0 = proj.pxpy2ll(px1-dx, py1-dy)
+        lat1, lon1 = proj.pxpy2ll(px2+dx, py2+dy)
+      else:
+        lat0, lon0 = proj.pxpy2ll(px1, py1)
+        lat1, lon1 = proj.pxpy2ll(px2, py2)
       # range only increments, so sort the coordinates in
       # ascending order
       lats = sorted((int(lat0), int(lat1)))
@@ -183,6 +187,9 @@ class MapView(RanaModule):
       # and this overlap is needed for high zoom
       visibleMeridians = range(lats[0]-2, lats[1]+2)
       visibleParallels = range(lons[0]-2, lons[1]+2)
+      # debug - print visible meridians/parallels:
+      #print(visibleMeridians)
+      #print(visibleParallels)
       # TODO: like this, at least 4 lines are drawn even if
       # no parallel or meridian is visible - this could be optimized
       # -> probably should check if some meridian/parallel is visible and
