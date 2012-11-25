@@ -216,7 +216,7 @@ class MapData(RanaModule):
         if pos is not None:
           (lat, lon) = pos
           # be advised: the xy in this case are not screen coordinates but tile coordinates
-          (x, y) = latlon2xy(lat, lon, midZ)
+          (x, y) = ll2xy(lat, lon, midZ)
           tilesAroundHere = set(self.spiral(x, y, midZ, size)) # get tiles around our position as a set
           # now get the tiles from other zoomlevels as specified
           zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundHere, midZ, maxZ, minZ)
@@ -244,7 +244,7 @@ class MapData(RanaModule):
         proj = self.m.get('projection', None)
         (screenCenterX, screenCenterY) = proj.screenPos(0.5, 0.5) # get pixel coordinates for the screen center
         (lat, lon) = proj.xy2ll(screenCenterX, screenCenterY) # convert to geographic coordinates
-        (x, y) = latlon2xy(lat, lon, midZ) # convert to tile coordinates
+        (x, y) = ll2xy(lat, lon, midZ) # convert to tile coordinates
         tilesAroundView = set(self.spiral(x, y, midZ, size)) # get tiles around these coordinates
         # now get the tiles from other zoomlevels as specified
         zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundView, midZ, maxZ, minZ)
@@ -826,7 +826,7 @@ class MapData(RanaModule):
     for point in route: #now we iterate over all points of the route
       lat, lon = point[0], point[1]
       # be advised: the xy in this case are not screen coordinates but tile coordinates
-      (x, y) = latlon2xy(lat, lon, z)
+      (x, y) = ll2xy(lat, lon, z)
       # the spiral gives us tiles around coordinates for a given radius
       currentPointTiles = self.spiral(x, y, z, radius)
       """now we take the resulting list  and process it in such a way,
