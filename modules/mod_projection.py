@@ -167,7 +167,7 @@ class Projection(RanaModule):
       return
 
     # Find the map centre in projection units
-    self.px, self.py = latlon2xy(self.lat,self.lon,self.zoom)
+    self.px, self.py = ll2xy(self.lat,self.lon,self.zoom)
     # Find the map edges in projection units
     self.px1 = self.px - 0.5 * self.w / self.scale
     self.px2 = self.px + 0.5 * self.w / self.scale
@@ -180,8 +180,8 @@ class Projection(RanaModule):
 
     # Calculate the bounding box
     # ASSUMPTION: (that the projection is regular and north-up)
-    self.N,self.W = xy2latlon(self.px1, self.py1, self.zoom)
-    self.S,self.E = xy2latlon(self.px2, self.py2, self.zoom)
+    self.N,self.W = pxpy2ll(self.px1, self.py1, self.zoom)
+    self.S,self.E = pxpy2ll(self.px2, self.py2, self.zoom)
 
     # Mark the meta-info as valid
     self.needsEdgeFind = False
@@ -191,7 +191,7 @@ class Projection(RanaModule):
     tileSide = side * scale
 #    tileSide = 256
     # Find the map centre in projection units
-    px, py = latlon2xy(self.lat,self.lon,zl)
+    px, py = ll2xy(self.lat,self.lon,zl)
     # Find the map edges in projection units
     px1 = px - 0.5 * self.w / tileSide
     px2 = px + 0.5 * self.w / tileSide
@@ -277,19 +277,19 @@ class Projection(RanaModule):
 
     newXC = self.px - dx / self.scale
     newYC = self.py - dy / self.scale
-    self.lat,self.lon = xy2latlon(newXC,newYC, self.zoom)
+    self.lat,self.lon = pxpy2ll(newXC,newYC, self.zoom)
     self.findEdges()
 
   def ll2xy(self,lat,lon):
     """Convert geographic units to display units"""
-    px,py = latlon2xy(lat,lon,self.zoom)
+    px,py = ll2xy(lat,lon,self.zoom)
     x = (px - self.px1) * self.scale
     y = (py - self.py1) * self.scale
     return x,y
 
   def ll2pxpy(self,lat,lon):
     """Convert geographic units to projection units"""
-    px,py = latlon2xy(lat,lon,self.zoom)
+    px,py = ll2xy(lat,lon,self.zoom)
     return px,py
 
   def ll2pxpyRel(self, lat, lon):
@@ -313,22 +313,17 @@ class Projection(RanaModule):
     y = self.h * (py - self.py1) / self.pdy
     return x,y
 
-
   def xy2ll(self, x, y):
     """Convert display units to geographic units"""
     px = self.px1 + x / self.scale
     py = self.py1 + y / self.scale
-    lat,lon = xy2latlon(px, py, self.zoom)
+    lat,lon = pxpy2ll(px, py, self.zoom)
     return lat,lon
 
   def pxpy2ll(self, px, py):
       """Convert projection units to geographic units"""
-      x = self.w * (px - self.px1) / self.pdx
-      y = self.h * (py - self.py1) / self.pdy
-      px = self.px1 + x / self.scale
-      py = self.py1 + y / self.scale
-      lat,lon = xy2latlon(px, py, self.zoom)
-      return lat,lon
+      return pxpy2ll(px, py, self.zoom)
+
 
 
   def onscreen(self, x, y):

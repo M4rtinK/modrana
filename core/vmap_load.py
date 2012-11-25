@@ -87,7 +87,7 @@ class MapData:
       numNodes = struct.unpack("I", f.read(4))[0]
       for n in range(numNodes):
         (x,y,nid) = struct.unpack("III", f.read(3*4))
-        (lat,lon) = tilenames.xy2latlon(x,y,31)
+        (lat,lon) = tilenames.pxpy2ll(x,y,31)
         way['n'].append((lat,lon,nid))
       way['style'] = struct.unpack("I", f.read(4))[0]
       way['layer'] = struct.unpack("b", f.read(1))[0]

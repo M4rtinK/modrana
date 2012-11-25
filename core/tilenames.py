@@ -16,22 +16,22 @@ def numTiles(z):
 def sec(x):
   return 1/cos(x)
 
-def latlon2relativeXY(lat,lon):
+def ll2relativeXY(lat,lon):
   x = (lon + 180) / 360
   y = (1 - log(tan(radians(lat)) + sec(radians(lat))) / pi) / 2
   return x,y
 
-def latlon2xy(lat,lon,z):
+def ll2xy(lat,lon,z):
   n = pow(2,z)
   x = (lon + 180) / 360
   y = (1 - log(tan(radians(lat)) + sec(radians(lat))) / pi) / 2
   return n*x, n*y
   
 def tileXY(lat, lon, z):
-  x,y = latlon2xy(lat,lon,z)
+  x,y = ll2xy(lat,lon,z)
   return int(x),int(y)
 
-def xy2latlon(x,y,z):
+def pxpy2ll(x,y,z):
   n = numTiles(z)
   relY = y / n
   lat = mercatorToLat(pi * (1 - 2 * relY))
