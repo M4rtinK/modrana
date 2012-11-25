@@ -161,18 +161,22 @@ class MapView(RanaModule):
     if proj and viewport: # fin all meridians and parallels in the viewport
       x0,y0 = proj.screenPos(0,0)
       x1, y1 = proj.screenPos(1,1)
+      # this overlap is needed for low zoom
       lat0, lon0 = proj.xy2ll(x0-x1/2.0,y0-y1/2.0)
       lat1, lon1 = proj.xy2ll(x1*1.5,y1*1.5)
       # range only increments, so sort the coordinates in
       # ascending order
       lats = sorted((int(lat0), int(lat1)))
       lons = sorted((int(lon0), int(lon1)))
+      # and this overlap is needed for high zoom
       visibleMeridians = range(lats[0]-2, lats[1]+2)
       visibleParallels = range(lons[0]-2, lons[1]+2)
       # TODO: like this, at least 4 lines are drawn even if
       # no parallel or meridian is visible - this could be optimized
       # -> probably should check if some meridian/parallel is visible and
       # then the rest of the logic
+      # TODO 2: looks like the overlap is dependent on zoom
+      # -> zoom dependent dynamic overlap ?
 
       if visibleParallels:
         for meridian in visibleMeridians:
