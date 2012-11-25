@@ -35,8 +35,10 @@ class MapView(RanaModule):
     # grid
     self.drawGrid = False
     self.gridColor = (1.0, 1.0, 1.0, 1.0) # white by default
+    self.drawGridLabels = True
     self.modrana.watch('drawMapGrid', self._drawGridEnabledCB, runNow=True)
     self.modrana.watch('mapGridColor', self._drawGridColorCB, runNow=True)
+    self.modrana.watch('mapGridLabels', self._drawGridLabelsCB, runNow=True)
 
   def handleMessage(self, message, type, args):
     z = self.get('z', 15)
@@ -159,7 +161,7 @@ class MapView(RanaModule):
     self.drawGrid = newKey
 
   def _drawGridColorCB(self, key, oldKey, newKey):
-    if newKey:
+    if newKey is not None:
       try:
         c = color.Color(newKey, (newKey, 1.0))
         self.gridColor = c.getCairoColor()
@@ -167,12 +169,31 @@ class MapView(RanaModule):
         print('mapView: color parsing failed')
         print(e)
 
+  def _drawGridLabelsCB(self, key, oldKey, newKey):
+    if newKey is not None:
+      self.drawGridLabels = newKey
+
   def _drawGrid(self, cr):
     proj = self.m.get('projection', None)
     viewport = self.get('viewport', None)
-    if proj and viewport: # fin all meridians and parallels in the viewport
+    menus = self.m.get('menu', None)
+    z = self.get('z', 15)
+    mapRotated = self.get("rotateMap", False) and (self.get("centred", False))
+    mLabels = False
+    pLabels = False
+    if self.drawGridLabels and not mapRotated: # check zl for meridian and parallel labels
+      pLabels = z > 4
+      mLabels = z > 6
+      # Labels vs map rotation
+      # As with map rotation the the meridians and parallels are not
+      # perpendicular to screen edges, the current label drawing method
+      # wold not work and the labels would be displayed somewhere offscreen.
+      # Also the bbox is enlarged for map rotation, which would mean much more
+      # labels would be drawn - without being visible. :)
+
+    if proj and viewport and menus: # fin all meridians and parallels in the viewport
       (px1, px2, py1, py2) = (proj.px1, proj.px2, proj.py1, proj.py2)
-      if self.get("rotateMap", False) and (self.get("centred", False)):
+      if mapRotated:
         dx = abs(px1-px2)/2.0
         dy = abs(py1-py2)/2.0
         lat0, lon0 = proj.pxpy2ll(px1-dx, py1-dy)
@@ -205,6 +226,10 @@ class MapView(RanaModule):
           cr.move_to(*proj.ll2xy(meridian, float(visibleParallels[0])))
           cr.line_to(*proj.ll2xy(meridian, float(visibleParallels[-1])))
           cr.stroke()
+          if pLabels:
+            x,y = proj.ll2xy(meridian, lon1)
+            label = "%d°" % meridian
+            menus.drawText(cr, label, x-50, y-30, 50, 25)
           cr.fill()
       if visibleMeridians:
         for parallel in visibleParallels:
@@ -214,4 +239,8 @@ class MapView(RanaModule):
           cr.move_to(*proj.ll2xy(float(visibleMeridians[0]), parallel))
           cr.line_to(*proj.ll2xy(float(visibleMeridians[-1]), parallel))
           cr.stroke()
+          if mLabels:
+            x,y = proj.ll2xy(lat1, parallel)
+            label = "%d°" % parallel
+            menus.drawText(cr, label, x+5, y-30, 50, 25)
           cr.fill()
