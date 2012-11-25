@@ -43,7 +43,7 @@ def simplePythagoreanDistance(x1, y1, x2, y2):
 
 
 def getModule(m, d, i):
-  return(GTKGUI(m, d, i))
+  return GTKGUI(m, d, i)
 
 
 class GTKGUI(GUIModule):
@@ -449,14 +449,15 @@ class MainWidget(gtk.Widget):
   def moved(self, w, event):
     """Drag-handler"""
 
-    self.handleDrag(\
+    self.handleDrag(
       event.x,
       event.y,
       event.x - self.dragX,
       event.y - self.dragY,
       self.dragStartX,
       self.dragStartY,
-      event.time - self.lastPressEpoch)
+      event.time - self.lastPressEpoch
+    )
 
     self.dragX = event.x
     self.dragY = event.y
