@@ -35,6 +35,11 @@ from gtk import gdk
 
 from base_gui_module import GUIModule
 
+CLICK_DRAG_THRESHOLD = 1024
+# Adjust this to the length^2 of a
+# gerfingerpoken on your touchscreen
+# (1024 is for Freerunner, since it's very high resolution)
+
 def simplePythagoreanDistance(x1, y1, x2, y2):
   """convenience PyThagorean distance :)"""
   dx = x2 - x1
@@ -478,8 +483,7 @@ class MainWidget(gtk.Widget):
     dx = event.x - self.dragStartX
     dy = event.y - self.dragStartY
     distSq = dx * dx + dy * dy
-    # Adjust this to the length^2 of a gerfingerpoken on your touchscreen (1024 is for Freerunner, since it's very high resolution)
-    if distSq < 1024:
+    if distSq < CLICK_DRAG_THRESHOLD:
       self.click(event.x, event.y, msDuration)
 
   def checkStillPressed(self, pressStartEpoch, pressStartTime, startX, startY):
@@ -529,7 +533,14 @@ class MainWidget(gtk.Widget):
         # start simple map drag if its not already in progress
         menuName = self.modrana.get('menu', None)
         if menuName is None and not self.altMapDragInProgress:
-          self.altDragStart(x - startX, y - startY, dx, dy)
+          # don't start the alternative drag until
+          # the drag threshold value is reached
+          # otherwise, it would be almost impossible
+          # to click the on-screen buttons
+          totalDX, totalDY = startX-x, startY-y
+          distSq = totalDX * totalDX + totalDY * totalDY
+          if distSq > CLICK_DRAG_THRESHOLD:
+            self.altDragStart(x - startX, y - startY, dx, dy)
         elif self.altMapDragInProgress:
           self.altDragHandler(x - startX, y - startY, dx, dy)
       else:
