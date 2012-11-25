@@ -539,7 +539,7 @@ this is needed for the item tools menu to know where to return"""
        ("green", '<span color="green">green</span>'),
        ("blue", '<span color="blue">blue</span>')],
       group,
-      "white")
+      "blue")
     addBoolOpt("Labels", "mapGridLabels", group, True)
 
     # ** tile storage
