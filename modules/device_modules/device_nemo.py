@@ -20,8 +20,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_device_module import DeviceModule
-
-from QtMobility.SystemInfo import QSystemScreenSaver
+QTM_IMPORT_SUCCESS = False
+try:
+  from QtMobility.SystemInfo import QSystemScreenSaver
+  QTM_IMPORT_SUCCESS = True
+except Exception, e:
+  print('device_nemo: QtMobility import failed - do you have python-qtmobility installed ?')
+  print(e)
 """ ^^ back-light control"""
 
 # NOTE: use the device_ prefix when naming the module
@@ -65,7 +70,7 @@ class DeviceNemo(DeviceModule):
     """
     Screen blanking support is handled through Qt Mobility
     """
-    return True
+    return QTM_IMPORT_SUCCESS
 
   def pauseScreenBlanking(self):
     """
