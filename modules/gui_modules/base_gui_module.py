@@ -27,12 +27,25 @@ class GUIModule(RanaModule):
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
     self.msLongPress = 400
+    self.subtypeId = None
 
   def getIDString(self):
     """
     get a unique string identifier for a GUI module
     """
     return None
+
+  def getSubtypeId(self):
+    return self.subtypeId
+
+  def setSubtypeId(self, subtypeId):
+    """the subtype id hints to the GUI module, which GUI variant to use
+
+    The GUI module might not respect this, if it either does not support
+    the given variant or it might revert to the default if the given variant fails
+    to start.
+    """
+    self.subtypeId = subtypeId
 
   def resize(self, mrw, h):
     """resize the GUI to given width and height"""

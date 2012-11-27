@@ -73,7 +73,7 @@ class DeviceN9(DeviceModule):
     QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
 
   def getSupportedGUIModuleIds(self):
-    return ["QML"]
+    return ["QML:harmattan", "QML:indep"]
 
   def getLocationType(self):
     return "qt_mobility"

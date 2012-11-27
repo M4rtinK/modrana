@@ -74,7 +74,7 @@ class DeviceNemo(DeviceModule):
     QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
 
   def getSupportedGUIModuleIds(self):
-    return ["QML"]
+    return ["QML:harmattan", "QML:indep"]
 
 # as python-qtmobility currently segfaults
 # when asked for location info,

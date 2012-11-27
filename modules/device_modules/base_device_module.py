@@ -81,11 +81,28 @@ class DeviceModule(RanaModule):
     return False
 
   def getSupportedGUIModuleIds(self):
-    """
-    supported GUI module IDs, ordered by preference from left to right
-    (the most-preferred should be on the left)
+    """supported GUI module IDs, ordered by preference from left to right
+
+    THE ":" NOTATION
+    single GUI modules might support different subsets, the usability of
+    these subsets can vary based on the current platform
+    -> this functions enabled device modules to report which GUI subsets
+    are most suitable for the given platform
+    -> the string starts with the module id prefix, is separated by : and
+    continues with the subset id
+    EXAMPLE: ["QML:harmattan","QML:indep","GTK"]
+    -> QML GUI with Harmattan Qt Components is preferred,
+    QML GUI with platform independent Qt Components is less preferred
+    and the GTK GUI is set as a fallback if everything else fails
+    CURRENT USAGE
+    there are different incompatible native Qt Component sets
+    on various platforms (Harmattan QTC, Plasma Active QTC, Jolla QTC,...)
+    the QML GUI aims to support most of these components sets to provide
+    native look & feel and the subset id is used by the device module
+    to signal the GUI module which QTC component to use
     """
     return ["GTK", "QML"] # as default try GTK first and then QML
+
 
   def handlesLocation(self):
     """report whether the device module handles position updates by itself"""

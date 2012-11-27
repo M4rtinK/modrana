@@ -46,4 +46,4 @@ class DevicePC(DeviceModule):
     return False
 
   def getSupportedGUIModuleIds(self):
-    return ["GTK", "QML"]
+    return ["GTK", "QML:indep"]

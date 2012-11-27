@@ -213,12 +213,21 @@ class ModRana:
     GUIModulesPath = os.path.join(MAIN_MODULES_FOLDER, "gui_modules")
     sys.path.append(GUIModulesPath)
     gui = None
-    if self.GUIString == "GTK":
+    splitGUIString = self.GUIString.split(":")
+
+    GUIModuleId = splitGUIString[0]
+    if len(splitGUIString) > 1:
+      subtypeId = splitGUIString[1]
+    else:
+      subtypeId = None
+
+    if GUIModuleId == "GTK":
       gui = self._loadModule("gui_gtk", "gui")
-    elif self.GUIString == "QML":
+    elif GUIModuleId == "QML":
       gui = self._loadModule("gui_qml", "gui")
       # make device module available to the GUI module
     if gui:
+      gui.setSubTypeId = subtypeId
       gui.dmod = self.dmod
     self.gui = gui
 
