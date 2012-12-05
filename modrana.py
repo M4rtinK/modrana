@@ -443,9 +443,9 @@ class ModRana:
       self.d[name] = value
 
     self._notifyWatcher(name, oldValue)
-    """options are normally saved on shutdown,
-    but for some data we want to make sure they are stored and not
-    los for example because of power outage/empty battery, etc."""
+    # options are normally saved on shutdown,
+    # but for some data we want to make sure they are stored and not
+    # lost for example because of power outage/empty battery, etc.
     if save:
       options = self.m.get('options')
       if options:
@@ -464,8 +464,8 @@ class ModRana:
       # purge any key modifiers
       if key in self.keyModifiers.keys():
         del self.keyModifiers[key]
-        """also remove the possibly present
-        alternative states for different modes"""
+        # also remove the possibly present
+        # alternative states for different modes"""
         multiKey = "%s#multi" % key
         if multiKey in self.d:
           del self.d[multiKey]
@@ -549,8 +549,8 @@ class ModRana:
     multiDict = self.d.get(multiKey, {})
     self.d[multiKey] = multiDict
 
-    """if the modifier is set for the first time,
-    do we copy the value from the normal key or not ?"""
+    # if the modifier is set for the first time,
+    # do we copy the value from the normal key or not ?
     if copyInitialValue:
       # check if the key is unset for this mode
       if mode not in multiDict:
@@ -632,9 +632,10 @@ class ModRana:
     """handle mode change in regards to key modifiers and option key watchers"""
     # get keys that have both a key modifier and a watcher
     keys = filter(lambda x: x in self.keyModifiers.keys(), self.watches.keys())
-    """ filter out only those keys that have a modifier for the new mode or
-    had a modifier in the previous mode
-    otherwise their value would not change and thus triggering a watch is not necessary """
+    # filter out only those keys that have a modifier for the new mode
+    # or had a modifier in the previous mode
+    # otherwise their value would not change and thus
+    # triggering a watch is not necessary
     keys = filter(
       lambda x: newMode in self.keyModifiers[x]['modes'].keys() or oldMode in self.keyModifiers[x]['modes'].keys(),
       keys)
@@ -684,7 +685,6 @@ class ModRana:
   def _loadOptions(self):
     """load the persistent dictionary from file"""
     print("modRana: loading options")
-    success = False
     try:
       f = open(self.paths.getOptionsFilePath(), "r")
       newData = marshal.load(f)
@@ -732,8 +732,8 @@ class ModRana:
     return profileFolderPath
 
   ## MAP LAYERS ##
-  """map layer information is important and needed by many modules during their initialization,
-  so it is handled here"""
+  # map layer information is important and needed by many modules during their initialization,
+  # so it is handled here
 
   def getMapLayers(self):
     return self.configs.getMapLayers()
