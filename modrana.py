@@ -24,6 +24,7 @@
 import subprocess
 import sys
 import time
+
 startTimestamp = time.time()
 import os
 import marshal
@@ -52,9 +53,10 @@ class ModRana:
   """
   This is THE main modRana class.
   """
+
   def __init__(self):
     self.timing = []
-    self.addCustomTime("modRana start",startTimestamp)
+    self.addCustomTime("modRana start", startTimestamp)
     self.addCustomTime("imports done", importsDoneTimestamp)
 
     # constants & variable initialization
@@ -68,7 +70,7 @@ class ModRana:
     self.watches = {} # List of data change watches
     self.maxWatchId = 0
 
-    self.initInfo={
+    self.initInfo = {
       'modrana': self,
       'device': None, # TODO: do this directly
       'name': ""
@@ -112,7 +114,7 @@ class ModRana:
     self.configs = configs.Configs(self)
 
     # load persistent options
-    self.optLoadingOK= self._loadOptions()
+    self.optLoadingOK = self._loadOptions()
 
     # check if upgrade took place
 
@@ -161,6 +163,7 @@ class ModRana:
     else: # no device specified from CLI
       # try to auto-detect the current device
       from core import platform_detection
+
       device = platform_detection.getBestDeviceModuleId()
 
     device = device.lower() # convert to lowercase
@@ -200,11 +203,11 @@ class ModRana:
         self.GUIString = ids[0]
       else:
         self.GUIString = "GTK" # fallback
-      # export the GUI string
+        # export the GUI string
       gs.GUIString = self.GUIString
 
-    # TODO: if loading GUI module fails, retry other modules in
-    # order of preference as provided by the  device module
+      # TODO: if loading GUI module fails, retry other modules in
+      # order of preference as provided by the  device module
 
   def _loadGUIModule(self):
     """load the GUI module"""
@@ -244,9 +247,9 @@ class ModRana:
     moduleNames = self._getModuleNamesFromFolder(MAIN_MODULES_FOLDER)
     # load if possible
     for moduleName in moduleNames:
-        # filter out .py
-        moduleName = moduleName.split('.')[0]
-        loadModule(moduleName, moduleName[4:])
+      # filter out .py
+      moduleName = moduleName.split('.')[0]
+      loadModule(moduleName, moduleName[4:])
 
     print("Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start)))
     self.addTime("all modules loaded")
@@ -285,9 +288,9 @@ class ModRana:
     as all .pyc files are purged during package upgrade and regenerated."""
     return filter(
       lambda x:
-      x[0:len(prefix)]==prefix
+      x[0:len(prefix)] == prefix
       and
-      (x[-4:] not in ('.pyc','.pyo')),os.listdir(folder)
+      (x[-4:] not in ('.pyc', '.pyo')), os.listdir(folder)
     )
 
   def _listAvailableDeviceModulesByID(self):
@@ -295,7 +298,7 @@ class ModRana:
     # remove the device_ prefix and return the results
     # NOTE: .pyc & .pyo should be removed already in _getModuleNamesFromFolder()
     # laos sort the module names alphabetically
-    return sorted(map(lambda x: x[7:].replace('.py',''), moduleNames))
+    return sorted(map(lambda x: x[7:].replace('.py', ''), moduleNames))
 
   def _listAvailableGUIModulesByID(self):
     return self._getModuleNamesFromFolder(GUI_MODULES_FOLDER)
@@ -339,7 +342,7 @@ class ModRana:
   def _modulesLoadedPostFirstTime(self):
     """this is run after all the modules have been loaded,
     after before their first time is called"""
-    
+
     # check if redrawing time should be printed to terminal
     if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
       self.showRedrawTime = True
@@ -394,7 +397,7 @@ class ModRana:
     self._saveOptions()
     time.sleep(2) # leave some times for threads to shut down
     print("Shutdown complete")
-    
+
   ## OPTIONS SETTING AND WATCHING ##
 
   def get(self, name, default=None, mode=None):
@@ -407,9 +410,9 @@ class ModRana:
         mode = self.d.get('mode', 'car')
       if mode in self.keyModifiers[name]['modes'].keys():
         # get the dictionary with per mode values
-        multiDict = self.d.get('%s#multi' % name , {})
+        multiDict = self.d.get('%s#multi' % name, {})
         # return the value for current mode
-        return multiDict.get(mode,default)
+        return multiDict.get(mode, default)
       else:
         return self.d.get(name, default)
 
@@ -427,13 +430,13 @@ class ModRana:
       # get the current mode
       if mode is None:
         mode = self.d.get('mode', 'car')
-      # check if there is a modifier for the current mode
+        # check if there is a modifier for the current mode
       if mode in self.keyModifiers[name]['modes'].keys():
         # save it to the name + #multi key under the mode key
         try:
           self.d['%s#multi' % name][mode] = value
         except KeyError: # key not yet created
-          self.d['%s#multi' % name] = {mode : value}
+          self.d['%s#multi' % name] = {mode: value}
       else: # just save to the key as usual
         self.d[name] = value
     else: # just save to the key as usual
@@ -480,11 +483,11 @@ class ModRana:
     """
     if not args: args = []
     nrId = self.maxWatchId + 1
-    id = "%d_%s" % (nrId,key)
+    id = "%d_%s" % (nrId, key)
     self.maxWatchId = nrId # TODO: recycle ids ? (alla PID)
     if key not in self.watches:
       self.watches[key] = [] # create the initial list
-    self.watches[key].append((id,callback,args))
+    self.watches[key].append((id, callback, args))
     # should we now run the callback one ?
     # -> this is useful for modules that configure
     # themselves according to an options value at startup
@@ -497,7 +500,7 @@ class ModRana:
     """remove watch specified by the given watch id"""
     (nrId, key) = id.split('_')
     if key in self.watches:
-      remove = lambda x:x[0]==id
+      remove = lambda x: x[0] == id
       self.watches[key][:] = [x for x in self.watches[key] if not remove(x)]
     else:
       print("modRana: can't remove watch - key does not exist, watchId:", id)
@@ -512,11 +515,11 @@ class ModRana:
     callbacks = self.watches.get(key, None)
     if callbacks:
       for item in callbacks:
-        (id,callback,args) = item
+        (id, callback, args) = item
         # rather supply the old value than None
         newValue = self.get(key, oldValue)
         if callback:
-          if callback(key,oldValue, newValue, *args) == False:
+          if callback(key, oldValue, newValue, *args) == False:
             # remove watches that return False
             self.removeWatch(id)
         else:
@@ -533,17 +536,17 @@ class ModRana:
       defaultValue = options.getKeyDefault(key, None)
     else:
       defaultValue = None
-    oldValue = self.get(key,defaultValue)
+    oldValue = self.get(key, defaultValue)
     if mode is None:
       mode = self.d.get('mode', 'car')
     if key not in self.keyModifiers.keys(): # initialize
-      self.keyModifiers[key] = {'modes':{mode:modifier}}
+      self.keyModifiers[key] = {'modes': {mode: modifier}}
     else:
       self.keyModifiers[key]['modes'][mode] = modifier
 
     # make sure the multi mode dictionary exists
     multiKey = '%s#multi' % key
-    multiDict = self.d.get(multiKey , {})
+    multiDict = self.d.get(multiKey, {})
     self.d[multiKey] = multiDict
 
     """if the modifier is set for the first time,
@@ -553,7 +556,7 @@ class ModRana:
       if mode not in multiDict:
         # set for first time, copy value        
         self.set(key, self.d.get(key, defaultValue), mode=mode)
-    # notify watchers
+        # notify watchers
     self._notifyWatcher(key, oldValue)
 
   def removeKeyModifier(self, key, mode=None):
@@ -562,7 +565,7 @@ class ModRana:
     on the current mode"""
     # if no mode is provided, use the current one
     if mode is None:
-        mode = self.d.get('mode', 'car')
+      mode = self.d.get('mode', 'car')
     if key in self.keyModifiers.keys():
       # just remove the key modifier preserving the alternative values
       if mode in self.keyModifiers[key]['modes'].keys():
@@ -574,14 +577,14 @@ class ModRana:
           defaultValue = options.getKeyDefault(key, None)
         else:
           defaultValue = None
-        oldValue = self.get(key,defaultValue)
+        oldValue = self.get(key, defaultValue)
         del self.keyModifiers[key]['modes'][mode]
         # was this the last key ?
         if len(self.keyModifiers[key]['modes']) == 0:
           # no modes registered - unregister from modifiers
           # TODO: handle non-mode modifiers in the future
           del self.keyModifiers[key]
-        # notify watchers
+          # notify watchers
         self._notifyWatcher(key, oldValue)
         # done
         return True
@@ -609,11 +612,11 @@ class ModRana:
   def getModes(self):
     """return supported modes"""
     modes = {
-      'cycle':'Cycle',
-      'walk':'Foot',
-      'car':'Car',
-      'train':'Train',
-      'bus':'Bus',
+      'cycle': 'Cycle',
+      'walk': 'Foot',
+      'car': 'Car',
+      'train': 'Train',
+      'bus': 'Bus',
     }
     return modes
 
@@ -633,8 +636,8 @@ class ModRana:
     had a modifier in the previous mode
     otherwise their value would not change and thus triggering a watch is not necessary """
     keys = filter(
-                  lambda x: newMode in self.keyModifiers[x]['modes'].keys() or oldMode in self.keyModifiers[x]['modes'].keys(),
-                  keys )
+      lambda x: newMode in self.keyModifiers[x]['modes'].keys() or oldMode in self.keyModifiers[x]['modes'].keys(),
+      keys)
     for key in keys:
       # try to get some value if the old value is not available
       options = self.m.get('options', None)
@@ -657,7 +660,9 @@ class ModRana:
     try:
       return dict((k, v) for k, v in inputDict.iteritems() if k[0] != '#')
     except Exception, e:
-      print('options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n', e)
+      print(
+        'options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n',
+        e)
       return self.d
 
   def _saveOptions(self):
@@ -688,8 +693,8 @@ class ModRana:
       for key in purgeKeys:
         if key in newData:
           del newData[key]
-      for k,v in newData.items():
-        self.set(k,v)
+      for k, v in newData.items():
+        self.set(k, v)
       success = True
     except Exception, e:
       print("modRana: exception while loading saved options:\n%s" % e)
@@ -729,6 +734,7 @@ class ModRana:
   ## MAP LAYERS ##
   """map layer information is important and needed by many modules during their initialization,
   so it is handled here"""
+
   def getMapLayers(self):
     return self.configs.getMapLayers()
 
@@ -736,11 +742,11 @@ class ModRana:
 
   def addTime(self, message):
     timestamp = time.time()
-    self.timing.append((message,timestamp))
+    self.timing.append((message, timestamp))
     return timestamp
 
   def addCustomTime(self, message, timestamp):
-    self.timing.append((message,timestamp))
+    self.timing.append((message, timestamp))
     return timestamp
 
   def reportStartupTime(self):
@@ -769,7 +775,6 @@ class ModRana:
       print("* timing list empty *")
 
 if __name__ == "__main__":
-
   # change to folder where the main modRana file is located
   # * this enables to run modRana with absolute path without adverse
   # effect such as modRana not finding modules or
@@ -780,7 +785,7 @@ if __name__ == "__main__":
 
   # check if reload has been requested
   reloadArg = "--reload"
-  if len(sys.argv)>=3 and sys.argv[1] == reloadArg:
+  if len(sys.argv) >= 3 and sys.argv[1] == reloadArg:
     # following argument is path to the modRana main class we want to reload to,
     # optionally followed by any argument for the main class
     print(" == modRana Reloading == ")
