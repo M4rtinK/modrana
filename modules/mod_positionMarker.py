@@ -21,12 +21,14 @@ from modules.base_module import RanaModule
 import math
 from math import radians
 
-def getModule(m,d,i):
-  return PositionMarker(m,d,i)
+
+def getModule(m, d, i):
+  return PositionMarker(m, d, i)
+
 
 class PositionMarker(RanaModule):
   """A sample pyroute module"""
-  
+
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
 
@@ -37,7 +39,7 @@ class PositionMarker(RanaModule):
     pos = self.get('pos', None)
     if pos is None:
       return
-    (lat,lon) = pos
+    (lat, lon) = pos
 
     # Where is the map?
     proj = self.m.get('projection', None)
@@ -47,7 +49,7 @@ class PositionMarker(RanaModule):
       return
 
     # Where are we on the map?
-    x1,y1 = proj.ll2xy(lat,lon)
+    x1, y1 = proj.ll2xy(lat, lon)
 
     # What are we?
     angle = self.get('bearing', 0)
@@ -59,16 +61,15 @@ class PositionMarker(RanaModule):
       self.drawStandingCircle(cr, x1, y1) # draw TangoGPS style marker without bearing
     else:
       self.drawMovingCircle(cr, x1, y1, angle) # draw TangoGPS style marker with bearing
-#     Draw yellow/black triangle showing us
-#      self.drawArrow(cr, x1, y1, angle)
+      #     Draw yellow/black triangle showing us
+      #      self.drawArrow(cr, x1, y1, angle)
 
 
   def drawMovingCircle(self, cr, x1, y1, angle):
-
     cr.save()
 
     # rotate the marker according to our bearing
-    cr.translate(x1,y1) # we move the coordinates center to where we want the center of the marker
+    cr.translate(x1, y1) # we move the coordinates center to where we want the center of the marker
     cr.rotate(radians(angle))
 
     # circle
@@ -91,11 +92,11 @@ class PositionMarker(RanaModule):
     cr.set_source_rgb(0.0, 0.0, 0.0)
     cr.set_line_width(6)
     cr.arc(0, 0, 6, 0, 2.0 * math.pi) # we want round ends :)
-    cr.arc(0, 0-lineLength, 6, 0, 2.0 * math.pi)
+    cr.arc(0, 0 - lineLength, 6, 0, 2.0 * math.pi)
     cr.fill()
     cr.set_line_width(12)
-    cr.move_to(0,0)
-    cr.line_to(0, 0-lineLength)
+    cr.move_to(0, 0)
+    cr.line_to(0, 0 - lineLength)
     cr.stroke()
 
     cr.fill()
@@ -104,22 +105,21 @@ class PositionMarker(RanaModule):
     cr.set_source_rgb(1.0, 1.0, 0.0)
     cr.set_line_width(3)
     cr.arc(0, 0, 3, 0, 2.0 * math.pi)
-    cr.arc(0, 0-lineLength, 3, 0, 2.0 * math.pi)
+    cr.arc(0, 0 - lineLength, 3, 0, 2.0 * math.pi)
     cr.fill()
     cr.set_line_width(6)
-    cr.move_to(0,0)
-    cr.line_to(0, 0-lineLength)
+    cr.move_to(0, 0)
+    cr.line_to(0, 0 - lineLength)
     cr.stroke()
     cr.fill()
 
     cr.restore()
 
   def drawStandingCircle(self, cr, x1, y1):
-
     cr.save()
 
     # rotate the marker according to our bearing
-    cr.translate(x1,y1) # we move the coordinates center to where we want the center of the marker
+    cr.translate(x1, y1) # we move the coordinates center to where we want the center of the marker
 
     # circle
 
@@ -148,24 +148,22 @@ class PositionMarker(RanaModule):
 
     cr.fill()
 
-
-
     cr.restore()
 
   def drawArrow(self, cr, x1, y1, angle):
     cr.set_source_rgb(1.0, 1.0, 0.0)
     cr.save()
-    cr.translate(x1,y1)
+    cr.translate(x1, y1)
     cr.rotate(radians(angle))
     cr.move_to(-10, 15)
-    cr.line_to( 10, 15)
-    cr.line_to(  0, -15)
+    cr.line_to(10, 15)
+    cr.line_to(0, -15)
     cr.fill()
     cr.set_source_rgb(0.0, 0.0, 0.0)
     cr.set_line_width(3)
     cr.move_to(-10, 15)
-    cr.line_to( 10, 15)
-    cr.line_to(  0, -15)
+    cr.line_to(10, 15)
+    cr.line_to(0, -15)
     cr.close_path()
     cr.stroke()
     cr.restore()
