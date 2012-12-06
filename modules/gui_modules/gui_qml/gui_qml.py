@@ -40,6 +40,15 @@ from modules.gui_modules.gui_qml import drawing
 
 global globe
 
+# QML paths
+BASE_QML_FOLDER = "modules/gui_modules/gui_qml"
+QML_PLATFORM_INDEPENDENT = "qml"
+QML_HARMATTAN = "qml_harmattan"
+DEFAULT_QML_FOLDER = QML_HARMATTAN
+# TODO: use the independent GUI as default
+QML_MAIN_FILENAME = "main.qml"
+
+
 def newlines2brs(text):
   """ QML uses <br> instead of \n for linebreak """
   return re.sub('\n', '<br>', text)
@@ -185,7 +194,13 @@ class QMLGUI(GUIModule):
       self.toggleFullscreen()
 
     # Create an URL to the QML file
-    url = QUrl('modules/gui_modules/gui_qml/qml/main.qml')
+    QMLSubfolder = DEFAULT_QML_FOLDER
+    if self.subtypeId  == "indep":
+      QMLSubfolder = QML_PLATFORM_INDEPENDENT
+    elif self.subtypeId == "harmattan":
+      QMLSubfolder = QML_HARMATTAN
+
+    url = QUrl(os.path.join(BASE_QML_FOLDER, QMLSubfolder, QML_MAIN_FILENAME))
     # Set the QML file and show
     self.view.setSource(url)
     # get the root object
