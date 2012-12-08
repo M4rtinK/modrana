@@ -200,6 +200,8 @@ class QMLGUI(GUIModule):
     elif self.subtypeId == "harmattan":
       QMLSubfolder = QML_HARMATTAN
 
+    print('QML GUI subtype folder: %s' % QMLSubfolder)
+
     url = QUrl(os.path.join(BASE_QML_FOLDER, QMLSubfolder, QML_MAIN_FILENAME))
     # Set the QML file and show
     self.view.setSource(url)
