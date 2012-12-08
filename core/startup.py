@@ -54,8 +54,8 @@ class Startup:
       '-u', metavar="GUI ID", type=str,
       help='specify user interface type (GTK or QML)',
       default=None,
-      action="store",
-      choices=["GTK", "QML"]
+      action="store"
+#      choices=["GTK", "QML"]
     )
     # local search
     parser.add_argument(

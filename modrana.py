@@ -178,7 +178,6 @@ class ModRana:
       # at startup
       if device == "n900":
         self.GUIString = "GTK"
-    gs.GUIString = self.GUIString
 
     ## load the device specific module
 
@@ -204,7 +203,11 @@ class ModRana:
       else:
         self.GUIString = "GTK" # fallback
         # export the GUI string
-      gs.GUIString = self.GUIString
+  # set the pre-import visible GUI string and subtype
+    splitGUIString = self.GUIString.split(":")
+    gs.GUIString = splitGUIString[0]
+    if len(splitGUIString) >= 2:
+      gs.GUISubtypeString = splitGUIString[1]
 
       # TODO: if loading GUI module fails, retry other modules in
       # order of preference as provided by the  device module
