@@ -1,7 +1,6 @@
 //BitcoinButton.qml
 
 import QtQuick 1.1
-//import com.nokia.meego 1.0
 import "./qtc"
 import "./qtc/style"
 
@@ -13,7 +12,7 @@ Rectangle {
     height : 45
     property string url : ""
 
-    Label {
+    Text {
         anchors.horizontalCenter : parent.horizontalCenter
         anchors.verticalCenter : parent.verticalCenter
         font.family: "Arial"
@@ -52,7 +51,7 @@ Rectangle {
                     anchors.bottom:  parent.bottom
                     anchors.bottomMargin: bitcoinDialog.platformStyle.titleBarLineMargin
                     height: titleLabel.height
-                    Label {
+                    Text {
                         id: titleLabel
                         x: bitcoinDialog.platformStyle.titleBarIndent
                         width: parent.width - closeButton.width

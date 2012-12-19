@@ -1,6 +1,5 @@
 import QtQuick 1.1
 import "./qtc"
-//import com.nokia.meego 1.0
 import "functions.js" as F
 import "./qtc/PageStatus.js" as PageStatus
 
