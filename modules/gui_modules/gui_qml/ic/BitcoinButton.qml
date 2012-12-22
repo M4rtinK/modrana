@@ -12,7 +12,7 @@ Rectangle {
     height : 45
     property string url : ""
 
-    Text {
+    Label {
         anchors.horizontalCenter : parent.horizontalCenter
         anchors.verticalCenter : parent.verticalCenter
         font.family: "Arial"
@@ -51,7 +51,7 @@ Rectangle {
                     anchors.bottom:  parent.bottom
                     anchors.bottomMargin: bitcoinDialog.platformStyle.titleBarLineMargin
                     height: titleLabel.height
-                    Text {
+                    Label {
                         id: titleLabel
                         x: bitcoinDialog.platformStyle.titleBarIndent
                         width: parent.width - closeButton.width

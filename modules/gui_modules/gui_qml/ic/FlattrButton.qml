@@ -11,7 +11,7 @@ Rectangle {
     height : 45
     property string url : ""
 
-    Text {
+    Label {
         anchors.horizontalCenter : parent.horizontalCenter
         anchors.verticalCenter : parent.verticalCenter
         text : "<h3>Flattr this !</h3>"
