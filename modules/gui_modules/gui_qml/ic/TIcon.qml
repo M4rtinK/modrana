@@ -1,3 +1,5 @@
+//TIcon.qml
+
 /* an automatically themed icon */
 import QtQuick 1.1
 
