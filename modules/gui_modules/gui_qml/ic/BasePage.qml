@@ -69,7 +69,7 @@ Page {
             anchors.right : parent.right
         }
     }
-    Button {
+    IconButton {
         id : backButton
         width : headerHeight * 0.8
         height : headerHeight * 0.8
@@ -77,7 +77,8 @@ Page {
         anchors.left : parent.left
         anchors.topMargin : 8
         anchors.leftMargin : 16
-        iconSource : "image://icons/"+ rWin.mTheme +"/back_small.png"
+        iconName : "left_thin.png"
+        //iconSource : "image://icons/"+ rWin.mTheme +"/back_small.png"
         opacity : pageFlickable.atYBeginning ? 1.0 : 0.55
         onClicked : {
             rWin.pageStack.pop()
