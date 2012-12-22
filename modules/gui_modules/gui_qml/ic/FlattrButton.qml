@@ -1,7 +1,7 @@
 //FlattrButton.qml
 
 import QtQuick 1.1
-
+import "./qtc"
 
 Rectangle {
     id : flattrButton
