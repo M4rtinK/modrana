@@ -4,7 +4,7 @@ var prefix = 'import QtQuick 1.1; import "../ic";'
 
 function loadPage(pageName, parent) {
     var wrappedPage = prefix + pageName +"{}"
-    console.log("wrapping: " + wrappedPage)
+    //console.log("wrapping: " + wrappedPage)
     return Qt.createQmlObject(wrappedPage, parent)
 }
 
