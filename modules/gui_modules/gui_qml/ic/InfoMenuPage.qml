@@ -5,13 +5,13 @@ import QtQuick 1.1
 
 IconGridPage {
 
-    InfoPage {
-        id : infoPage
+    InfoAboutPage {
+        id : aboutPage
     }
 
     function getPage(menu){
-        if (menu == "infoPage") {
-            return infoPage
+        if (menu == "aboutPage") {
+            return aboutPage
         }
     }
 
@@ -28,13 +28,14 @@ IconGridPage {
         ListElement {
             caption : "About"
             icon : "info.png"
-            menu : "infoPage"
+            menu : "aboutPage"
         }
     }
-
+    /*
     Loader {
         id: infoPage1
-        source: "InfoPage.qml"
+        source: "InfoAboutPage.qml"
     }
+    */
 
 }
