@@ -1,11 +1,12 @@
 import QtQuick 1.1
+import "./qtc"
 
 BasePage {
     id: aboutPage
     headerText : "modRana"
     bottomPadding : 32
     content {
-        Text {
+        Label {
             anchors.top : parent.top
             anchors.topMargin : 16
             id : aboutTitle
@@ -20,7 +21,7 @@ BasePage {
             source : "image://icons/"+ rWin.mTheme +"/modrana.svg"
         }
 
-        Text {
+        Label {
             id : donateLabel
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.top : aboutModRanaIcon.bottom
@@ -58,7 +59,7 @@ BasePage {
             url : modules.getS("info", "getBitcoinAddress")
         }
 
-        Text {
+        Label {
             id : contactInfo
             anchors.top : bitcoinButton.bottom
             anchors.topMargin : 32

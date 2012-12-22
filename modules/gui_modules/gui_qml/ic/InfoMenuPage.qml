@@ -8,10 +8,15 @@ IconGridPage {
     InfoAboutPage {
         id : aboutPage
     }
+    InfoSpeedPage {
+        id : speedPage
+    }
 
     function getPage(menu){
         if (menu == "aboutPage") {
             return aboutPage
+        } else if (menu = "speedPage") {
+            return speedPage
         }
     }
 
@@ -25,6 +30,11 @@ IconGridPage {
             menu : ""
         }
         */
+        ListElement {
+            caption : "Speed"
+            icon : "info.png"
+            menu : "speedPage"
+        }
         ListElement {
             caption : "About"
             icon : "info.png"

@@ -20,6 +20,7 @@ Page {
     property alias headerText: headerLabel.text
     property int headerHeight : rWin.inPortrait ? height/7.0 : height/5.5
     property int bottomPadding : 0
+    property alias isFlickable :  pageFlickable.interactive
     ScrollDecorator {
          id: scrolldecorator
          flickableItem: pageFlickable
@@ -27,8 +28,9 @@ Page {
 
     Rectangle {
         id : background
-        color : "lightgrey"
+        color : "white"
         anchors.fill : parent
+        //visible : false
     }
 
     Flickable {
@@ -58,7 +60,7 @@ Page {
                 horizontalAlignment : _fitsIn ? Text.AlignHCenter : Text.AlignLeft
             }
         }
-        Rectangle {
+        Item {
             id : contentField
             anchors.top : header.bottom
             //height : childrenRect.height
@@ -81,5 +83,4 @@ Page {
             rWin.pageStack.pop()
         }
     }
-
 }

@@ -142,7 +142,7 @@ PageStackWindow {
 
 
     Component.onCompleted : {
-
+        //theme.inverted = true
         //pageStack.push(mPage)
     }
 
