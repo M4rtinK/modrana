@@ -33,8 +33,11 @@ class Stats(RanaModule):
     self.maxSpeed = 0
     self.avg1 = 0
     self.avg2 = 0
+    # update stats once new position info is available
+    self.modrana.watch('locationUpdated', self.updateStatsCB)
+
   
-  def update(self):
+  def updateStatsCB(self, *args):
     # Run scheduledUpdate every second
     t = time()
     if self.lastT is None:
@@ -64,4 +67,3 @@ class Stats(RanaModule):
 
     self.set('maxSpeed', self.maxSpeed)
     self.set('avgSpeed', average)
-  
