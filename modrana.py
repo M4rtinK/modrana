@@ -233,7 +233,7 @@ class ModRana:
       gui = self._loadModule("gui_qml", "gui")
       # make device module available to the GUI module
     if gui:
-      gui.setSubTypeId = subtypeId
+      gui.setSubtypeId(subtypeId)
       gui.dmod = self.dmod
     self.gui = gui
 
