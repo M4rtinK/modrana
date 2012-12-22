@@ -67,3 +67,40 @@ class Stats(RanaModule):
 
     self.set('maxSpeed', self.maxSpeed)
     self.set('avgSpeed', average)
+
+  def getCurrentSpeedString(self):
+    """return current speed as string with the current unit
+    EXAMPLE: "88 mph" or "1000 km/h" """
+    speedString = "speed unknown"
+    units = self.m.get('units', None)
+    metersPerSecSpeed = self.get('speed', None)
+    if units and metersPerSecSpeed is not None:
+      speedString = units.km2CurrentUnitPerHourString(metersPerSecSpeed)
+    elif units: # speed unknown, just return something like "? km/h"
+      speedString = "? %s" % units.currentUnitPerHourString()
+
+    print "SPEED STRING"
+    print speedString
+    return speedString
+
+  def getAverageSpeedString(self):
+    """return current average speed as string with the currently unit"""
+    speedString = "?"
+    units = self.m.get('units', None)
+    kmhAverageSpeed = self.get('metersPerSecSpeed', None)
+    if units and kmhAverageSpeed is not None:
+      speedString = units.km2CurrentUnitString(kmhAverageSpeed)
+    elif units: # speed unknown, just return something like "? km/h"
+      speedString = "? %s" % units.currentUnitPerHourString()
+    return speedString
+
+  def getMaxSpeedString(self):
+    """return current average speed as string with the currently unit"""
+    speedString = "?"
+    units = self.m.get('units', None)
+    kmhMaxSpeed = self.get('maxSpeed', None)
+    if units and kmhMaxSpeed is not None:
+      speedString = units.km2CurrentUnitString(kmhMaxSpeed)
+    elif units: # speed unknown, just return something like "? km/h"
+      speedString = "? %s" % units.currentUnitPerHourString()
+    return speedString

@@ -18,13 +18,21 @@ BasePage {
             //height : 96
         }
         Text {
+            id : currentSpeed
             anchors.verticalCenter : parent.verticalCenter
             //anchors.top : spacer1.bottom
             //anchors.topMargin : 96
             anchors.horizontalCenter : parent.horizontalCenter
-            id : currentSpeed
-            text: "" + 88 + "km"
+            text: modules.getS("stats", "getCurrentSpeedString")
             font.pixelSize : 96
+        }
+    }
+
+    Connections {
+        target: gps
+        onLastGoodFixChanged: {
+            console.log('SPEED UPDATE')
+            currentSpeed.text = modules.getS("stats", "getCurrentSpeedString")
         }
     }
 }
