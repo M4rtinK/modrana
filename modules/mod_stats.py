@@ -78,9 +78,6 @@ class Stats(RanaModule):
       speedString = units.km2CurrentUnitPerHourString(metersPerSecSpeed)
     elif units: # speed unknown, just return something like "? km/h"
       speedString = "? %s" % units.currentUnitPerHourString()
-
-    print "SPEED STRING"
-    print speedString
     return speedString
 
   def getAverageSpeedString(self):
