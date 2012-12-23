@@ -1,6 +1,7 @@
 //InfoSpeedPage.qml
 
 import QtQuick 1.1
+import "qtc/PageStatus.js" as PageStatus
 
 BasePage {
     id: speedPage
@@ -29,9 +30,9 @@ BasePage {
     }
 
     Connections {
-        target: gps
+        target: status == PageStatus.Inactive ? null : gps
         onLastGoodFixChanged: {
-            console.log('SPEED UPDATE')
+            //console.log('SPEED UPDATE')
             currentSpeed.text = modules.getS("stats", "getCurrentSpeedString")
         }
     }
