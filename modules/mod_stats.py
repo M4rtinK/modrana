@@ -86,7 +86,7 @@ class Stats(RanaModule):
     units = self.m.get('units', None)
     kmhAverageSpeed = self.get('metersPerSecSpeed', None)
     if units and kmhAverageSpeed is not None:
-      speedString = units.km2CurrentUnitString(kmhAverageSpeed)
+      speedString = units.km2CurrentUnitPerHourString(kmhAverageSpeed, dp=0)
     elif units: # speed unknown, just return something like "? km/h"
       speedString = "? %s" % units.currentUnitPerHourString()
     return speedString
@@ -97,7 +97,7 @@ class Stats(RanaModule):
     units = self.m.get('units', None)
     kmhMaxSpeed = self.get('maxSpeed', None)
     if units and kmhMaxSpeed is not None:
-      speedString = units.km2CurrentUnitString(kmhMaxSpeed)
+      speedString = units.km2CurrentUnitPerHourString(kmhMaxSpeed, dp=0)
     elif units: # speed unknown, just return something like "? km/h"
       speedString = "? %s" % units.currentUnitPerHourString()
     return speedString
