@@ -26,12 +26,14 @@ Page {
          flickableItem: pageFlickable
     }
 
+    /*
     Rectangle {
         id : background
         color : "white"
         anchors.fill : parent
         //visible : false
     }
+    */
 
     Flickable {
         id : pageFlickable

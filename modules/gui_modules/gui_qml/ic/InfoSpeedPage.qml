@@ -2,6 +2,7 @@
 
 import QtQuick 1.1
 import "qtc/PageStatus.js" as PageStatus
+import "./qtc"
 
 BasePage {
     id: speedPage
@@ -18,7 +19,7 @@ BasePage {
             //anchors.bottom : parent.bottom
             //height : 96
         }
-        Text {
+        Label {
             id : currentSpeed
             anchors.verticalCenter : parent.verticalCenter
             //anchors.top : spacer1.bottom
