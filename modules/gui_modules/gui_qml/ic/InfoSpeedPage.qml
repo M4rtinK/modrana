@@ -15,15 +15,6 @@ BasePage {
     property string otherSpeedsString : getOtherSpeeds()
 
     content {
-        /*
-        Item {
-            id : spacer1
-            anchors.fill : parent
-            height : speedPage.height
-            //anchors.top : parent.top
-            //anchors.bottom : parent.bottom
-            //height : 96
-        }*/
         Label {
             id : currentSpeed
             anchors.verticalCenter : parent.verticalCenter
