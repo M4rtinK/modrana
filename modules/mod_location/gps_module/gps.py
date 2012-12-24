@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # This file is Copyright (c) 2010 by the GPSD project
@@ -13,7 +14,6 @@
 # The JSON parts of this (which will be reused by any new interface)
 # now live in a different module.
 #
-import time
 from client import *
 from misc import isotime
 
@@ -124,7 +124,6 @@ class gpsdata:
         self.devices = []
 
         self.version = None
-        self.timings = None
 
     def __repr__(self):
         st = "Time:     %s (%s)\n" % (self.utc, self.fix.time)
@@ -147,7 +146,7 @@ class gpsdata:
               (self.satellites_used, self.pdop, self.hdop, self.vdop, self.tdop, self.gdop)
         st += "Y: %s satellites in view:\n" % len(self.satellites)
         for sat in self.satellites:
-          st += "    %r\n" % sat
+            st += "    %r\n" % sat
         return st
 
 class gps(gpsdata, gpsjson):
@@ -292,10 +291,6 @@ class gps(gpsdata, gpsjson):
                 if sat.used:
                     self.satellites_used += 1
             self.valid = ONLINE_SET | SATELLITE_SET
-        elif self.data.get("class") == "TIMING":
-            self.data["c_recv"] = self.received
-            self.data["c_decode"] = time.time()
-            self.timings = self.data
 
     def read(self):
         "Read and interpret data from the daemon."
@@ -342,7 +337,7 @@ class gps(gpsdata, gpsjson):
                 gpsjson.stream(self, flags, devpath)
 
 if __name__ == '__main__':
-    import readline, getopt, sys
+    import getopt, sys
     (options, arguments) = getopt.getopt(sys.argv[1:], "v")
     streaming = False
     verbose = False
@@ -350,7 +345,7 @@ if __name__ == '__main__':
         if switch == '-v':
             verbose = True
     if len(arguments) > 2:
-        print('Usage: gps.py [-v] [host [port]]')
+        print 'Usage: gps.py [-v] [host [port]]'
         sys.exit(1)
 
     opts = { "verbose" : verbose }
@@ -363,9 +358,9 @@ if __name__ == '__main__':
     session.stream(WATCH_ENABLE)
     try:
         for report in session:
-            print(report)
+            print report
     except KeyboardInterrupt:
         # Avoid garble on ^C
-        print("")
+        print ""
 
 # gps.py ends here

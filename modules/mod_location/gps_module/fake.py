@@ -102,7 +102,7 @@ class TestLoad:
     def __init__(self, logfp, predump=False):
         self.sentences = []	# This is the interesting part
         if type(logfp) == type(""):
-            logfp = open(logfp, "r");            
+            logfp = open(logfp, "r")            
         self.name = logfp.name
         self.logfp = logfp
         self.predump = predump
@@ -148,7 +148,7 @@ class TestLoad:
                 if type_latch is None:
                     type_latch = ptype
                 if self.predump:
-                    print(`packet`)
+                    print repr(packet)
                 if not packet:
                     raise TestLoadError("zero-length packet from %s"%\
                                         logfp.name)                    
@@ -187,7 +187,7 @@ class FakeGPS:
         # self.write has to be set by the derived class
         self.write(line)
         if self.progress:
-            self.progress("gpsfake: %s feeds %d=%s\n" % (self.testload.name, len(line), `line`))
+            self.progress("gpsfake: %s feeds %d=%s\n" % (self.testload.name, len(line), repr(line)))
         time.sleep(WRITE_PAD)
         self.index += 1
 
@@ -300,11 +300,12 @@ class DaemonInstance:
     def __init__(self, control_socket=None):
         self.sockfile = None
         self.pid = None
+        self.tmpdir = os.environ.get('TMPDIR', '/tmp')
         if control_socket:
             self.control_socket = control_socket
         else:
-            self.control_socket = "/tmp/gpsfake-%d.sock" % os.getpid()
-        self.pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
+            self.control_socket = "%s/gpsfake-%d.sock" % (self.tmpdir, os.getpid())
+        self.pidfile = "%s/gpsfake-%d.pid" % (self.tmpdir, os.getpid())
     def spawn(self, options, port, background=False, prefix=""):
         "Spawn a daemon instance."
         self.spawncmd = None
@@ -495,8 +496,6 @@ class TestSession:
         self.progress("gpsfake: gather(%d)\n" % seconds)
         #mark = time.time()
         time.sleep(seconds)
-        #if self.timings.c_recv_time <= mark:
-        #    TestSessionError("no sentences received\n")
     def cleanup(self):
         "We're done, kill the daemon."
         self.progress("gpsfake: cleanup()\n")

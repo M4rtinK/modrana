@@ -8,6 +8,7 @@ import time, calendar, math
 # some multipliers for interpreting GPS output
 METERS_TO_FEET	= 3.2808399	# Meters to U.S./British feet
 METERS_TO_MILES	= 0.00062137119	# Meters to miles
+METERS_TO_FATHOMS	= 0.54680665	# Meters to fathoms
 KNOTS_TO_MPH	= 1.1507794	# Knots to miles per hour
 KNOTS_TO_KPH	= 1.852		# Knots to kilometers per hour
 KNOTS_TO_MPS	= 0.51444444	# Knots to meters per second
@@ -83,8 +84,8 @@ def isotime(s):
         date = int(s)
         msec = s - date
         date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
-        return date + "." + `msec`[3:]
-    elif type(s) == type(""):
+        return date + "." + repr(msec)[3:]
+    elif type(s) == type("") or type(s) == type(u""):
         if s[-1] == "Z":
             s = s[:-1]
         if "." in s:

@@ -21,7 +21,8 @@ class gpscommon:
         self.sock = None        # in case we blow up in connect
         self.linebuffer = ""
         self.verbose = verbose
-        self.connect(host, port)
+        if host != None:
+            self.connect(host, port)
 
     def connect(self, host, port):
         """Connect to a host on a given port.
@@ -38,17 +39,17 @@ class gpscommon:
             except ValueError:
                 raise socket.error, "nonnumeric port"
         #if self.verbose > 0:
-        #    print('connect:', (host, port))
+        #    print 'connect:', (host, port)
         msg = "getaddrinfo returns an empty list"
         self.sock = None
         for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
             af, socktype, proto, canonname, sa = res
             try:
                 self.sock = socket.socket(af, socktype, proto)
-                #if self.debuglevel > 0: print('connect:', (host, port))
+                #if self.debuglevel > 0: print 'connect:', (host, port)
                 self.sock.connect(sa)
             except socket.error, msg:
-                #if self.debuglevel > 0: print('connect fail:', (host, port))
+                #if self.debuglevel > 0: print 'connect fail:', (host, port)
                 self.close()
                 continue
             break
@@ -142,7 +143,7 @@ class gpsjson(gpscommon):
         # Should be done for any other array-valued subobjects, too.
         # This particular logic can fire on SKY or RTCM2 objects.
         if hasattr(self.data, "satellites"):
-            self.data.satellites = map(lambda x: dictwrapper(x), self.data.satellites)
+            self.data.satellites = map(dictwrapper, self.data.satellites)
 
     def stream(self, flags=0, devpath=None):
         "Control streaming reports from the daemon,"
@@ -159,7 +160,7 @@ class gpsjson(gpscommon):
             if flags & WATCH_SCALED:
                 arg += ',"scaled":false'
             if flags & WATCH_TIMING:
-                arg += ',"scaled":false'
+                arg += ',"timing":false'
         else: # flags & WATCH_ENABLE:
             arg = '?WATCH={"enable":true'
             if flags & WATCH_JSON:
@@ -173,7 +174,7 @@ class gpsjson(gpscommon):
             if flags & WATCH_SCALED:
                 arg += ',"scaled":true'
             if flags & WATCH_TIMING:
-                arg += ',"scaled":true'
+                arg += ',"timing":true'
             if flags & WATCH_DEVICE:
                 arg += ',"device":"%s"' % devpath
         return self.send(arg + "}")
