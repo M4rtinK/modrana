@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from datetime import datetime
+from core.fix import Fix
 
 class PositionSource:
   """
@@ -64,38 +64,3 @@ class PositionSource:
 
   def setDebug(self, value):
     self.debug = value
-
-# from AGTL
-class Fix():
-  BEARING_HOLD_EPD = 90 # arbitrary, yet non-random value
-  last_bearing = 0
-  # tracking the minimum difference between a received fix time and
-  # our current internal time.
-  min_timediff = datetime.utcnow() - datetime.utcfromtimestamp(0)
-
-  def __init__(self,
-               position = None,
-               altitude = None,
-               bearing = None,
-               speed = None,
-               sats = 0,
-               sats_known = 0,
-               dgps = False,
-               quality = 0,
-               error = 0,
-               error_bearing = 0,
-               timestamp = None):
-    self.position = position
-    self.altitude = altitude
-    self.bearing = bearing
-    self.speed = speed
-    self.sats = sats
-    self.sats_known = sats_known
-    self.dgps = dgps
-    self.quality = quality
-    self.error = error
-    self.error_bearing = error_bearing
-    if timestamp is None:
-      self.timestamp = datetime.utcnow()
-    else:
-      self.timestamp = timestamp

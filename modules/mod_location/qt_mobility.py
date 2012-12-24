@@ -22,7 +22,8 @@ print("importing Qt Mobility")
 from QtMobility.Location import QGeoPositionInfoSource
 print("Qt Mobility imported")
 
-from base_position_source import PositionSource, Fix
+from base_position_source import PositionSource
+from core.fix import Fix
 
 class QtMobility(PositionSource):
   def __init__(self, location):
@@ -67,11 +68,15 @@ class QtMobility(PositionSource):
     if speed == -1.0:
       speed = 0
 
+
     fix = Fix( (update.coordinate().latitude(),
                 update.coordinate().longitude()),
                update.coordinate().altitude(),
                direction,
-               speed
+               speed,
+               magnetic_variation = update.attribute(update.MagneticVariation),
+               horizontal_accuracy=update.attribute(update.HorizontalAccuracy),
+               vertical_accuracy=update.attribute(update.VerticalAccuracy)
              )
     # print debug message if enabled
     if self.debug:

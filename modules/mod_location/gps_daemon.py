@@ -20,7 +20,8 @@ from __future__ import with_statement # for python 2.5
 import threading
 from time import sleep, time
 
-from base_position_source import PositionSource, Fix
+from base_position_source import PositionSource
+from core.fix import Fix
 
 class GPSD(PositionSource):
   def __init__(self,location):
@@ -57,11 +58,21 @@ class GPSD(PositionSource):
         tuple instead of a Fix object and only convert to the Fix object once the position data
         is actually requested
         """
-        (lat,lon,elevation,bearing,speed,timestamp) = fix
-        fix = Fix( (lat,lon),
-                   elevation,
-                   bearing,
-                   speed )
+#        (lat,lon,elevation,bearing,speed,timestamp) = fix
+        fix = Fix( (fix.latitude,fix.longitude),
+                   fix.altitude,
+                   fix.track,
+                   fix.speed,
+                   mode = fix.mode,
+                   climb = fix.climb,
+                   horizontal_accuracy = fix.epx*fix.epy,
+                   # TODO: separate x y accuracy support ?
+                   vertical_accuracy = fix.epv,
+                   speed_accuracy = fix.eps,
+                   climb_accuracy = fix.epc,
+                   time_accuracy = fix.ept,
+                   gps_time = fix.time
+                 )
         self.fix = fix
 
   def setDebug(self, value):
@@ -176,7 +187,8 @@ class GPSDConsumer(threading.Thread):
       sf = self.session.fix
       if sf.mode != gps.MODE_NO_FIX:
         with self.lock:
-          self.fix = (sf.latitude,sf.longitude,sf.altitude,sf.track,sf.speed, time())
+          self.fix = sf
+#          self.fix = (sf.latitude,sf.longitude,sf.altitude,sf.track,sf.speed, time())
           if self.verbose:
 #          if 1:
             print(self.fix)

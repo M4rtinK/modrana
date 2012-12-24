@@ -37,6 +37,7 @@ from modules.gui_modules.base_gui_module import GUIModule
 from datetime import datetime
 import time
 from modules.gui_modules.gui_qml import drawing
+from core.fix import Fix
 
 global globe
 
@@ -492,42 +493,6 @@ class MapTiles(QtCore.QObject):
       #      print("downloading, try later")
       return False
 
-# from AGTL
-class Fix():
-  BEARING_HOLD_EPD = 90 # arbitrary, yet non-random value
-  last_bearing = 0
-  # tracking the minimum difference between a received fix time and
-  # our current internal time.
-  min_timediff = datetime.utcnow() - datetime.utcfromtimestamp(0)
-
-  def __init__(self,
-               position=None,
-               altitude=None,
-               bearing=None,
-               speed=None,
-               sats=0,
-               sats_known=0,
-               dgps=False,
-               quality=0,
-               error=0,
-               error_bearing=0,
-               timestamp=None):
-    self.position = position
-    self.altitude = altitude
-    self.bearing = bearing
-    self.speed = speed
-    self.sats = sats
-    self.sats_known = sats_known
-    self.dgps = dgps
-    self.quality = quality
-    self.error = error
-    self.error_bearing = error_bearing
-    if timestamp is None:
-      self.timestamp = datetime.utcnow()
-    else:
-      self.timestamp = timestamp
-
-
 class FixWrapper(QtCore.QObject):
   def __init__(self, fix):
     QtCore.QObject.__init__(self)
@@ -572,6 +537,9 @@ class FixWrapper(QtCore.QObject):
 
   def _speed_valid(self):
     return self.data.speed is not None
+
+  def _speed_error(self):
+    return float(self.data.error)
 
   lat = QtCore.Property(float, _lat, notify=changed)
   lon = QtCore.Property(float, _lon, notify=changed)
