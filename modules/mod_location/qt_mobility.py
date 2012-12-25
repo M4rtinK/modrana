@@ -63,17 +63,20 @@ class QtMobility(PositionSource):
   def _positionUpdateCB(self, update):
     direction = update.attribute(update.Direction)
     speed = update.attribute(update.GroundSpeed)
+    mode = 3 # 3D fix
+    if update.coordinate().CoordinateType == update.coordinate().Coordinate2D :
+      mode = 2 # 2D fix
     if direction == -1.0:
       direction = 0
     if speed == -1.0:
       speed = 0
-
 
     fix = Fix( (update.coordinate().latitude(),
                 update.coordinate().longitude()),
                update.coordinate().altitude(),
                direction,
                speed,
+               mode = mode,
                magnetic_variation = update.attribute(update.MagneticVariation),
                horizontal_accuracy=update.attribute(update.HorizontalAccuracy),
                vertical_accuracy=update.attribute(update.VerticalAccuracy)
