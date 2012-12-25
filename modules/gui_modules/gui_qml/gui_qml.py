@@ -580,7 +580,7 @@ class FixWrapper(QtCore.QObject):
     return self.data.time_accuracy if self.data.time_accuracy is not None else -1
 
   def _gps_time(self):
-    return self.data.gps_time if self.data.gps_time is not None else -1
+    return self.data.gps_time if self.data.gps_time is not None else "not available"
 
   mode = QtCore.Property(int, _mode, notify=changed)
   lat = QtCore.Property(float, _lat, notify=changed)
