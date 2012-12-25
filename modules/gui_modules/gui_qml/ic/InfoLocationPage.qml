@@ -77,6 +77,13 @@ BasePage {
                     width : lGrid.cellWidth
                     font.pixelSize : 24
                 }
+                Label {
+                    anchors.topMargin : 24
+                    //anchors.horizontalCenter : parent.horizontalCenter
+                    text: "<b>GPS time:</b> " + gps.lastGoodFix.gpsTime
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
             }
         }
         Label {
