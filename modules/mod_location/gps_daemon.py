@@ -51,7 +51,7 @@ class GPSD(PositionSource):
   def _updateGPSD(self):
     # only update if connected to GPSD
     if self.connected:
-      fix = self.GPSDConsumer.getFix()
+      fix, sats = self.GPSDConsumer.getBoth()
       if fix:
         """
         as the GPSD consumer updates its values very often, it probably better to use a simple
@@ -59,12 +59,17 @@ class GPSD(PositionSource):
         is actually requested
         """
 #        (lat,lon,elevation,bearing,speed,timestamp) = fix
-        fix = Fix( (fix.latitude,fix.longitude),
+        satCount = len(sats)
+        inUseSatCount = len(filter(lambda x: x.used, sats))
+
+        modRanaFix = Fix( (fix.latitude,fix.longitude),
                    fix.altitude,
                    fix.track,
                    fix.speed,
                    mode = fix.mode,
                    climb = fix.climb,
+                   sats = satCount,
+                   sats_in_use= inUseSatCount,
                    horizontal_accuracy = fix.epx*fix.epy,
                    # TODO: separate x y accuracy support ?
                    vertical_accuracy = fix.epv,
@@ -73,7 +78,7 @@ class GPSD(PositionSource):
                    time_accuracy = fix.ept,
                    gps_time = fix.time
                  )
-        self.fix = fix
+        self.fix = modRanaFix
 
   def setDebug(self, value):
     self.debug = value
@@ -171,6 +176,7 @@ class GPSDConsumer(threading.Thread):
     self.verbose = False
     # vars
     self.fix = None
+    self.satellites = []
 
   def run(self):
     import gps_module as gps
@@ -188,6 +194,7 @@ class GPSDConsumer(threading.Thread):
       if sf.mode != gps.MODE_NO_FIX:
         with self.lock:
           self.fix = sf
+          self.satellites = self.session.satellites
 #          self.fix = (sf.latitude,sf.longitude,sf.altitude,sf.track,sf.speed, time())
           if self.verbose:
 #          if 1:
@@ -212,6 +219,14 @@ class GPSDConsumer(threading.Thread):
   def getFix(self):
     with self.lock:
       return self.fix
+
+  def getSatellites(self):
+    with self.lock:
+      return
+
+  def getBoth(self):
+    with self.lock:
+      return self.fix, self.satellites
 
   def setVerbose(self, value):
     with self.lock:

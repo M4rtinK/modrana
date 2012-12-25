@@ -543,8 +543,8 @@ class FixWrapper(QtCore.QObject):
   def _sats(self):
     return self.data.sats if self.data.sats is not None else -1
 
-  def _sats_known(self):
-    return self.data.sats_known if self.data.sats_known is not None else -1
+  def _sats_in_use(self):
+    return self.data.sats_in_use if self.data.sats_in_use is not None else -1
 
   def _error(self):
     return float(self.data.error)
@@ -592,7 +592,7 @@ class FixWrapper(QtCore.QObject):
   climb = QtCore.Property(float, _climb, notify=changed)
   magneticVariation = QtCore.Property(float, _magnetic_variation, notify=changed)
   sats = QtCore.Property(int, _sats, notify=changed)
-  satsKnown = QtCore.Property(int, _sats_known, notify=changed)
+  satsInUse = QtCore.Property(int, _sats_in_use, notify=changed)
   error = QtCore.Property(float, _error, notify=changed)
   valid = QtCore.Property(bool, _valid, notify=changed)
   speedValid = QtCore.Property(bool, _speed_valid, notify=changed)

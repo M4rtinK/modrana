@@ -18,7 +18,7 @@ class Fix():
                climb = None,
                magnetic_variation = None,
                sats = 0,
-               sats_known = 0,
+               sats_in_use = 0,
                dgps = False,
                mode = 0,
                error = 0,
@@ -37,7 +37,7 @@ class Fix():
     self.climb = climb
     self.magnetic_variation = magnetic_variation
     self.sats = sats
-    self.sats_known = sats_known
+    self.sats_in_use = sats_in_use
     self.dgps = dgps
     self.mode = mode
     self.error = error
