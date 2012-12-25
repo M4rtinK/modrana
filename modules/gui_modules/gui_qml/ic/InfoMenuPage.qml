@@ -8,20 +8,14 @@ IconGridPage {
     InfoAboutPage {
         id : aboutPage
     }
-    InfoSpeedPage {
-        id : speedPage
-    }
-    InfoLocationPage {
-        id : locationPage
-    }
 
     function getPage(menu){
         if (menu == "aboutPage") {
             return aboutPage
         } else if (menu == "speedPage") {
-            return speedPage
+            return Qt.createComponent("InfoSpeedPage.qml")
         } else if (menu == "locationPage") {
-            return locationPage
+            return Qt.createComponent("InfoLocationPage.qml")
         }
     }
 
