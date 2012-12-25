@@ -63,9 +63,13 @@ class QtMobility(PositionSource):
   def _positionUpdateCB(self, update):
     direction = update.attribute(update.Direction)
     speed = update.attribute(update.GroundSpeed)
-    mode = 3 # 3D fix
-    if update.coordinate().CoordinateType == update.coordinate().Coordinate2D :
-      mode = 2 # 2D fix
+    mode = 3 # 3d fix
+    if update.coordinate().isValid():
+      if update.coordinate().CoordinateType == update.coordinate().Coordinate2D :
+        mode = 2 # 2D fix
+    else:
+      mode = 0 # no fix
+
     if direction == -1.0:
       direction = 0
     if speed == -1.0:

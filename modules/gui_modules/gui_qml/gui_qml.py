@@ -550,7 +550,8 @@ class FixWrapper(QtCore.QObject):
     return float(self.data.error)
 
   def _valid(self):
-    return self.data.position is not None
+    # 0-1 = no fix, 2-3 = 2D/3D fix
+    return self.data.mode > 1
 
   def _altitude_valid(self):
     return self.data.altitude is not None
