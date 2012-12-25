@@ -80,12 +80,35 @@ BasePage {
                 Label {
                     anchors.topMargin : 24
                     //anchors.horizontalCenter : parent.horizontalCenter
+                    text: "<b>visible satellites:</b> " + checkPositiveNumber(gps.lastGoodFix.sats)
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    //anchors.horizontalCenter : parent.horizontalCenter
+                    text: "<b>satellites in use:</b> " + checkPositiveNumber(gps.lastGoodFix.satsInUse)
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    //anchors.horizontalCenter : parent.horizontalCenter
                     text: "<b>GPS time:</b> " + gps.lastGoodFix.gpsTime
                     width : lGrid.cellWidth
                     font.pixelSize : 24
                 }
             }
         }
+
+        function checkPositiveNumber(number) {
+            if (number < 0) {
+                return '<font color="red">unknown</font>'
+            } else {
+                return number
+            }
+        }
+
         Label {
             id : noFixLabel
             visible : !gps.hasFix
@@ -96,14 +119,6 @@ BasePage {
             color : "red"
             font.pixelSize : 64
             text : "NO FIX"
-        }
-    }
-
-    function validPosFloat(number) {
-        if (number > -1) {
-            return "?"
-        } else {
-            return number
         }
     }
 
