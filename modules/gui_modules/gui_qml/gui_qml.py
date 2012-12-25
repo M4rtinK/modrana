@@ -559,6 +559,9 @@ class FixWrapper(QtCore.QObject):
   def _speed_valid(self):
     return self.data.speed is not None
 
+  def _bearing_valid(self):
+    return self.data.bearing is not None
+
   def _climb_valid(self):
     return self.data.climb is not None
 
@@ -596,6 +599,7 @@ class FixWrapper(QtCore.QObject):
   error = QtCore.Property(float, _error, notify=changed)
   valid = QtCore.Property(bool, _valid, notify=changed)
   speedValid = QtCore.Property(bool, _speed_valid, notify=changed)
+  bearingValid = QtCore.Property(bool, _bearing_valid, notify=changed)
   altitudeValid = QtCore.Property(bool, _altitude_valid, notify=changed)
   climbValid = QtCore.Property(bool, _climb_valid, notify=changed)
   horizontalAccuracy = QtCore.Property(float, _horizontal_accuracy, notify=changed)
