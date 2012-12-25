@@ -92,13 +92,6 @@ BasePage {
                 }
                 Label {
                     anchors.topMargin : 24
-                    property string valueString : gps.lastGoodFix.magneticVariation != -1  ? gps.lastGoodFix.magneticVariation.toPrecision(3) + " ° ttn": '<font color="red">unknown</font>'
-                    text: "<b>magnetic variation:</b> " + valueString
-                    width : lGrid.cellWidth
-                    font.pixelSize : 24
-                }
-                Label {
-                    anchors.topMargin : 24
                     text: "<b>visible satellites:</b> " + checkPositiveNumber(gps.lastGoodFix.sats)
                     width : lGrid.cellWidth
                     font.pixelSize : 24
@@ -107,6 +100,13 @@ BasePage {
                     anchors.topMargin : 24
                     //anchors.horizontalCenter : parent.horizontalCenter
                     text: "<b>satellites in use:</b> " + checkPositiveNumber(gps.lastGoodFix.satsInUse)
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    property string valueString : gps.lastGoodFix.magneticVariation != -1  ? gps.lastGoodFix.magneticVariation.toPrecision(3) + " ° ttn": '<font color="red">unknown</font>'
+                    text: "<b>magnetic variation:</b> " + valueString
                     width : lGrid.cellWidth
                     font.pixelSize : 24
                 }
