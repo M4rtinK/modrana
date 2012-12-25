@@ -12,31 +12,72 @@ BasePage {
     //anchors.fill : parent
 
     content {
-        Label {
-            id : fixStatus
-            anchors.top : parent.top
-            anchors.topMargin : 24
-            anchors.horizontalCenter : parent.horizontalCenter
-            text: gps.mode == 3 ? "3D fix" : "2D fix"
-            color: gps.mode == 3 ? "green" : "yellow"
-            font.pixelSize : 32
+        Item {
+            id : fixWrapper
+            anchors.fill : parent
+
             visible : gps.hasFix
-        }
-        Grid {
-            anchors.top : fixStatus.bottom
-            anchors.left : parent.left
-            anchors.right : parent.right
-            anchors.topMargin : 24
-            visible : gps.hasFix
-            /*
             Label {
-                id : fixStatus1
+                id : fixStatus
+                anchors.top : parent.top
                 anchors.topMargin : 24
-                //anchors.horizontalCenter : parent.horizontalCenter
-                text: gps.mode == 3 ? "3D fix" : "2D fix"
-                color: gps.mode == 3 ? "green" : "yellow"
+                anchors.horizontalCenter : parent.horizontalCenter
+                text: gps.lastGoodFix.mode == 3 ? "3D fix" : "2D fix"
+                color: gps.lastGoodFix == 3 ? "limegreen" : "yellow"
                 font.pixelSize : 32
-            }*/
+            }
+            Button {
+                id : copyCoordinatesButton
+                anchors.topMargin : 24
+                anchors.top : fixStatus.bottom
+                anchors.horizontalCenter : parent.horizontalCenter
+                text: "copy coordinates"
+                width : 300
+            }
+            Grid {
+                id : lGrid
+                anchors.top : copyCoordinatesButton.bottom
+                anchors.left : parent.left
+                anchors.right : parent.right
+                anchors.topMargin : 24
+                anchors.leftMargin : 16
+                anchors.rightMargin : 16
+                property real cellWidth : width/columns
+                // 2 columns in landscape, 1 in portrait
+                columns : rWin.inPortrait ? 1 : 2
+                spacing : 16
+                Label {
+                    anchors.topMargin : 24
+                    property string valueString : gps.lastGoodFix.valid ? gps.lastGoodFix.lat : '<font color="red">unknown</font>'
+                    text: "<b>latitude:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+
+                }
+                Label {
+                    anchors.topMargin : 24
+                    property string valueString : gps.lastGoodFix.valid ? gps.lastGoodFix.lon : '<font color="red">unknown</font>'
+                    text: "<b>longitude:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    //anchors.horizontalCenter : parent.horizontalCenter
+                    property string valueString : gps.lastGoodFix.altitudeValid ? gps.lastGoodFix.altitude + " meters": '<font color="red">unknown</font>'
+                    text: "<b>altitude:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    //anchors.horizontalCenter : parent.horizontalCenter
+                    property string valueString : gps.lastGoodFix.speedValid ? gps.lastGoodFix.speed.toPrecision(3) + " meters/sec": '<font color="red">unknown</font>'
+                    text: "<b>speed:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+            }
         }
         Label {
             id : noFixLabel
@@ -50,4 +91,25 @@ BasePage {
             text : "NO FIX"
         }
     }
+
+    function validPosFloat(number) {
+        if (number > -1) {
+            return "?"
+        } else {
+            return number
+        }
+    }
+
+    Connections {
+        target: status == PageStatus.Inactive ? null : gps
+        onLastGoodFixChanged: {
+            console.log('LOCATION UPDATE')
+            console.log(modules.getS("stats", "getCurrentSpeedString"))
+            console.log(gps.lastGoodFix.mode)
+            //otherSpeedsString = getOtherSpeeds()
+        }
+    }
+
+
+
 }
