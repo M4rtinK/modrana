@@ -22,13 +22,13 @@ IconGridPage {
     isMockup: false
     model : ListModel {
         id : testModel
-        /*
+
         ListElement {
             caption : "Compass"
             icon : "windrose-simple.svg"
             menu : ""
         }
-        */
+
         ListElement {
             caption : "Speed"
             icon : "info.png"

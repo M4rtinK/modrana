@@ -71,7 +71,6 @@ BasePage {
                 }
                 Label {
                     anchors.topMargin : 24
-                    //anchors.horizontalCenter : parent.horizontalCenter
                     property string valueString : gps.lastGoodFix.speedValid ? gps.lastGoodFix.speed.toPrecision(3) + " meters/sec": '<font color="red">unknown</font>'
                     text: "<b>speed:</b> " + valueString
                     width : lGrid.cellWidth
@@ -79,7 +78,27 @@ BasePage {
                 }
                 Label {
                     anchors.topMargin : 24
-                    //anchors.horizontalCenter : parent.horizontalCenter
+                    property string valueString : gps.lastGoodFix.climbValid ? gps.lastGoodFix.climb + " meters/sec": '<font color="red">unknown</font>'
+                    text: "<b>climb:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    property string valueString : gps.lastGoodFix.bearingValid ? gps.lastGoodFix.bearing.toPrecision(3) + "° to true north": '<font color="red">unknown</font>'
+                    text: "<b>bearing:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    property string valueString : gps.lastGoodFix.magneticVariation != -1  ? gps.lastGoodFix.magneticVariation.toPrecision(3) + " ° ttn": '<font color="red">unknown</font>'
+                    text: "<b>magnetic variation:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
                     text: "<b>visible satellites:</b> " + checkPositiveNumber(gps.lastGoodFix.sats)
                     width : lGrid.cellWidth
                     font.pixelSize : 24
