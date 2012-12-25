@@ -505,6 +505,14 @@ class FixWrapper(QtCore.QObject):
     logger.debug("Fix updated with data from %r" % fix)
     self.changed.emit()
 
+  def _mode(self):
+    """GPS fix mode:
+    0 - no fix
+    2 - 2D fix
+    3 - 3D fix
+    """
+    return self.data.mode
+
   def _lat(self):
     if self.data.position is not None:
       return self.data.position[0]
@@ -520,11 +528,23 @@ class FixWrapper(QtCore.QObject):
   def _altitude(self):
     return self.data.altitude if self.data.altitude is not None else 0
 
+  def _bearing(self):
+    return self.data.bearing if self.data.bearing is not None else 0
+
   def _speed(self):
     return self.data.speed if self.data.speed is not None else 0
 
-  def _bearing(self):
-    return self.data.bearing if self.data.bearing is not None else 0
+  def _climb(self):
+    return self.data.climb if self.data.climb is not None else -1
+
+  def _magnetic_variation(self):
+    return self.data.magnetic_variation if self.data.magnetic_variation is not None else -1
+
+  def _sats(self):
+    return self.data.sats if self.data.sats is not None else -1
+
+  def _sats_known(self):
+    return self.data.sats_known if self.data.sats_known is not None else -1
 
   def _error(self):
     return float(self.data.error)
@@ -538,19 +558,51 @@ class FixWrapper(QtCore.QObject):
   def _speed_valid(self):
     return self.data.speed is not None
 
+  def _climb_valid(self):
+    return self.data.climb is not None
+
   def _speed_error(self):
     return float(self.data.error)
 
+  def _horizontal_accuracy(self):
+    return self.data.horizontal_accuracy if self.data.horizontal_accuracy is not None else -1
+
+  def _vertical_accuracy(self):
+    return self.data.vertical_accuracy if self.data.vertical_accuracy is not None else -1
+
+  def _speed_accuracy(self):
+    return self.data.speed_accuracy if self.data.speed_accuracy is not None else -1
+
+  def _climb_accuracy(self):
+    return self.data.climb_accuracy if self.data.climb_accuracy is not None else -1
+
+  def _time_accuracy(self):
+    return self.data.time_accuracy if self.data.time_accuracy is not None else -1
+
+  def _gps_time(self):
+    return self.data.gps_time if self.data.gps_time is not None else -1
+
+  mode = QtCore.Property(int, _mode, notify=changed)
   lat = QtCore.Property(float, _lat, notify=changed)
   lon = QtCore.Property(float, _lon, notify=changed)
   altitude = QtCore.Property(float, _altitude, notify=changed)
-  speed = QtCore.Property(float, _speed, notify=changed)
   bearing = QtCore.Property(float, _bearing, notify=changed)
+  speed = QtCore.Property(float, _speed, notify=changed)
+  climb = QtCore.Property(float, _climb, notify=changed)
+  magneticVariation = QtCore.Property(float, _magnetic_variation, notify=changed)
+  sats = QtCore.Property(int, _sats, notify=changed)
+  satsKnown = QtCore.Property(int, _sats_known, notify=changed)
   error = QtCore.Property(float, _error, notify=changed)
   valid = QtCore.Property(bool, _valid, notify=changed)
   speedValid = QtCore.Property(bool, _speed_valid, notify=changed)
   altitudeValid = QtCore.Property(bool, _altitude_valid, notify=changed)
-
+  climbValid = QtCore.Property(bool, _climb_valid, notify=changed)
+  horizontalAccuracy = QtCore.Property(float, _horizontal_accuracy, notify=changed)
+  verticalAccuracy = QtCore.Property(float, _vertical_accuracy, notify=changed)
+  speedAccuracy = QtCore.Property(float, _speed_accuracy, notify=changed)
+  climbAccuracy = QtCore.Property(float, _climb_accuracy, notify=changed)
+  timeAccuracy = QtCore.Property(float, _time_accuracy, notify=changed)
+  gpsTime = QtCore.Property(str, _gps_time, notify=changed)
 
 class GPSDataWrapper(QtCore.QObject):
   changed = QtCore.Signal()
