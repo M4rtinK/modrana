@@ -7,13 +7,16 @@ import "./qtc"
 BasePage {
     id: locationPage
     headerText : "Location"
-    bottomPadding : 0
+    bottomPadding : 32
     //anchors.fill : parent
 
     content {
         Item {
             id : fixWrapper
-            anchors.fill : parent
+            anchors.top : parent.top
+            anchors.left : parent.left
+            anchors.right : parent.right
+            height : lGrid.y - y + lGrid.height
 
             visible : gps.hasFix
             Label {
