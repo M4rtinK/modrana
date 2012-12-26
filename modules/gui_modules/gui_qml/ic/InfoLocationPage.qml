@@ -1,4 +1,6 @@
 //InfoSpeedPage.qml
+// Shows live raw location data
+
 
 import QtQuick 1.1
 import "qtc/PageStatus.js" as PageStatus
@@ -8,8 +10,6 @@ BasePage {
     id: locationPage
     headerText : "Location"
     bottomPadding : 32
-    //anchors.fill : parent
-
     content {
         Item {
             id : fixWrapper
@@ -17,7 +17,6 @@ BasePage {
             anchors.left : parent.left
             anchors.right : parent.right
             height : lGrid.y - y + lGrid.height
-
             visible : gps.hasFix
             Label {
                 id : fixStatus
@@ -65,7 +64,6 @@ BasePage {
                 }
                 Label {
                     anchors.topMargin : 24
-                    //anchors.horizontalCenter : parent.horizontalCenter
                     property string valueString : gps.lastGoodFix.altitudeValid ? gps.lastGoodFix.altitude + " m": '<font color="red">unknown</font>'
                     text: "<b>altitude:</b> " + valueString
                     width : lGrid.cellWidth
