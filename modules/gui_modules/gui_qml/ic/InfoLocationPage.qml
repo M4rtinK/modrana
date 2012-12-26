@@ -135,7 +135,7 @@ BasePage {
                 }
                 Label {
                     anchors.topMargin : 24
-                    property string valueString : gps.lastGoodFix.magneticVariation != -1  ? gps.lastGoodFix.magneticVariation.toPrecision(3) + " ° ttn": '<font color="red">unknown</font>'
+                    property string valueString : gps.lastGoodFix.magneticVariation != -1  ? gps.lastGoodFix.magneticVariation.toPrecision(3) + "° ttn": '<font color="red">unknown</font>'
                     text: "<b>magnetic variation:</b> " + valueString
                     width : lGrid.cellWidth
                     font.pixelSize : 24
