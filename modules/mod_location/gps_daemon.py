@@ -75,6 +75,7 @@ class GPSD(PositionSource):
                    vertical_accuracy = fix.epv,
                    speed_accuracy = fix.eps,
                    climb_accuracy = fix.epc,
+                   bearing_accuracy= fix.epd,
                    time_accuracy = fix.ept,
                    gps_time = fix.time
                  )

@@ -27,6 +27,7 @@ class Fix():
                vertical_accuracy = None, # in meters
                speed_accuracy = None, # in meters/sec
                climb_accuracy = None, # in meters/sec
+               bearing_accuracy = None, # in degrees
                time_accuracy = None, # in seconds
                gps_time = None,
                timestamp = None):
@@ -46,6 +47,7 @@ class Fix():
     self.vertical_accuracy = vertical_accuracy
     self.speed_accuracy = speed_accuracy
     self.climb_accuracy = climb_accuracy
+    self.bearing_accuracy = bearing_accuracy
     self.time_accuracy = time_accuracy
     self.gps_time = gps_time
     if timestamp is None:
