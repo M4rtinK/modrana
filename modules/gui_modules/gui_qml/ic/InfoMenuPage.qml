@@ -25,18 +25,18 @@ IconGridPage {
 
         ListElement {
             caption : "Compass"
-            icon : "windrose-simple.svg"
+            icon : "compass.png"
             menu : ""
         }
 
         ListElement {
             caption : "Speed"
-            icon : "info.png"
+            icon : "speedometer.png"
             menu : "speedPage"
         }
         ListElement {
             caption : "Location"
-            icon : "info.png"
+            icon : "satellite.png"
             menu : "locationPage"
         }
         ListElement {
