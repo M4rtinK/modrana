@@ -126,19 +126,21 @@ Item {
         spacing: 16
         Button {
             //iconSource: "image://theme/icon-m-input-add"
-            iconSource: "image://theme/icon-m-common-add"
+            //iconSource: "image://theme/icon-m-common-add"
             onClicked: {pinchmap.zoomIn() }
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             enabled : pinchmap.zoomLevel != pinchmap.maxZoomLevel
+            text : "<h1>+</h1>"
         }
         Button {
             //iconSource: "image://theme/icon-m-input-remove"
-            iconSource: "image://theme/icon-m-common-remove"
+            //iconSource: "image://theme/icon-m-common-remove"
             onClicked: {pinchmap.zoomOut() }
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             enabled : pinchmap.zoomLevel != pinchmap.minZoomLevel
+            text : "<h1>-</h1>"
         }
     }
     Column {
