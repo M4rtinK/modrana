@@ -1,7 +1,7 @@
 //PayPalButton.qml
 
 import QtQuick 1.1
-
+import "qtc/"
 
 Rectangle {
     id : ppButton
