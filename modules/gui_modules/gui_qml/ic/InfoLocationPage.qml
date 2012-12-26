@@ -8,7 +8,6 @@ BasePage {
     id: locationPage
     headerText : "Location"
     bottomPadding : 0
-    isFlickable : false
     //anchors.fill : parent
 
     content {
@@ -64,21 +63,21 @@ BasePage {
                 Label {
                     anchors.topMargin : 24
                     //anchors.horizontalCenter : parent.horizontalCenter
-                    property string valueString : gps.lastGoodFix.altitudeValid ? gps.lastGoodFix.altitude + " meters": '<font color="red">unknown</font>'
+                    property string valueString : gps.lastGoodFix.altitudeValid ? gps.lastGoodFix.altitude + " m": '<font color="red">unknown</font>'
                     text: "<b>altitude:</b> " + valueString
                     width : lGrid.cellWidth
                     font.pixelSize : 24
                 }
                 Label {
                     anchors.topMargin : 24
-                    property string valueString : gps.lastGoodFix.speedValid ? gps.lastGoodFix.speed.toPrecision(3) + " meters/sec": '<font color="red">unknown</font>'
+                    property string valueString : gps.lastGoodFix.speedValid ? gps.lastGoodFix.speed.toPrecision(3) + " m/s": '<font color="red">unknown</font>'
                     text: "<b>speed:</b> " + valueString
                     width : lGrid.cellWidth
                     font.pixelSize : 24
                 }
                 Label {
                     anchors.topMargin : 24
-                    property string valueString : gps.lastGoodFix.climbValid ? gps.lastGoodFix.climb + " meters/sec": '<font color="red">unknown</font>'
+                    property string valueString : gps.lastGoodFix.climbValid ? gps.lastGoodFix.climb + " m/s": '<font color="red">unknown</font>'
                     text: "<b>climb:</b> " + valueString
                     width : lGrid.cellWidth
                     font.pixelSize : 24
@@ -87,6 +86,34 @@ BasePage {
                     anchors.topMargin : 24
                     property string valueString : gps.lastGoodFix.bearingValid ? gps.lastGoodFix.bearing.toPrecision(3) + "° to true north": '<font color="red">unknown</font>'
                     text: "<b>bearing:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    property string valueString : gps.lastGoodFix.horizontalAccuracy != -1  ? gps.lastGoodFix.horizontalAccuracy.toPrecision(5) + " m": '<font color="red">unknown</font>'
+                    text: "<b>horizontal accuracy:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    property string valueString : gps.lastGoodFix.verticalAccuracy != -1  ? gps.lastGoodFix.verticalAccuracy.toPrecision(3) + " m": '<font color="red">unknown</font>'
+                    text: "<b>vertical accuracy:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    property string valueString : gps.lastGoodFix.speedAccuracy != -1  ? gps.lastGoodFix.speedAccuracy.toPrecision(3) + " m/s": '<font color="red">unknown</font>'
+                    text: "<b>speed accuracy:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    property string valueString : gps.lastGoodFix.climbAccuracy != -1  ? gps.lastGoodFix.climbAccuracy.toPrecision(3) + " m/s": '<font color="red">unknown</font>'
+                    text: "<b>climb accuracy:</b> " + valueString
                     width : lGrid.cellWidth
                     font.pixelSize : 24
                 }
@@ -107,6 +134,13 @@ BasePage {
                     anchors.topMargin : 24
                     property string valueString : gps.lastGoodFix.magneticVariation != -1  ? gps.lastGoodFix.magneticVariation.toPrecision(3) + " ° ttn": '<font color="red">unknown</font>'
                     text: "<b>magnetic variation:</b> " + valueString
+                    width : lGrid.cellWidth
+                    font.pixelSize : 24
+                }
+                Label {
+                    anchors.topMargin : 24
+                    property string valueString : gps.lastGoodFix.timeAccuracy != -1  ? gps.lastGoodFix.timeAccuracy.toString() + " s": '<font color="red">unknown</font>'
+                    text: "<b>GPS time accuracy:</b> " + valueString
                     width : lGrid.cellWidth
                     font.pixelSize : 24
                 }
@@ -140,7 +174,7 @@ BasePage {
             text : "NO FIX"
         }
     }
-
+    /*
     Connections {
         target: status == PageStatus.Inactive ? null : gps
         onLastGoodFixChanged: {
@@ -150,7 +184,5 @@ BasePage {
             //otherSpeedsString = getOtherSpeeds()
         }
     }
-
-
-
+    */
 }
