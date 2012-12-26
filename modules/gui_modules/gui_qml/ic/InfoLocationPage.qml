@@ -1,7 +1,6 @@
 //InfoSpeedPage.qml
 // Shows live raw location data
 
-
 import QtQuick 1.1
 import "qtc/PageStatus.js" as PageStatus
 import "./qtc"
@@ -53,7 +52,6 @@ BasePage {
                     text: "<b>latitude:</b> " + valueString
                     width : lGrid.cellWidth
                     font.pixelSize : 24
-
                 }
                 Label {
                     anchors.topMargin : 24
