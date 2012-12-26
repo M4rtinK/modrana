@@ -33,6 +33,7 @@ from PySide.QtDeclarative import *
 from PySide.QtNetwork import *
 
 # modRana imports
+import math
 from modules.gui_modules.base_gui_module import GUIModule
 from datetime import datetime
 import time
@@ -578,7 +579,11 @@ class FixWrapper(QtCore.QObject):
     return self.data.speed_accuracy if self.data.speed_accuracy is not None else -1
 
   def _climb_accuracy(self):
-    return self.data.climb_accuracy if self.data.climb_accuracy is not None else -1
+    climbAccuracy = self.data.climb_accuracy
+    if climbAccuracy is None or math.isnan(climbAccuracy):
+      return -1
+    else:
+      return climbAccuracy
 
   def _time_accuracy(self):
     return self.data.time_accuracy if self.data.time_accuracy is not None else -1
