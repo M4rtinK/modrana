@@ -125,22 +125,21 @@ Item {
         anchors.rightMargin: 16
         spacing: 16
         Button {
-            //iconSource: "image://theme/icon-m-input-add"
-            //iconSource: "image://theme/icon-m-common-add"
+            iconSource: "image://icons/" + rWin.mTheme + "/" + "plus_small.png"
             onClicked: {pinchmap.zoomIn() }
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             enabled : pinchmap.zoomLevel != pinchmap.maxZoomLevel
-            text : "<h1>+</h1>"
+            //text : "<h1>+</h1>"
         }
         Button {
-            //iconSource: "image://theme/icon-m-input-remove"
-            //iconSource: "image://theme/icon-m-common-remove"
+            iconSource: "image://icons/" + rWin.mTheme + "/" + "minus_small.png"
             onClicked: {pinchmap.zoomOut() }
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             enabled : pinchmap.zoomLevel != pinchmap.minZoomLevel
-            text : "<h1>-</h1>"
+
+            //text : "<h1>-</h1>"
         }
     }
     Column {
@@ -151,10 +150,7 @@ Item {
         anchors.leftMargin: 16
         spacing: 16
         Button {
-            //iconSource: "image://theme/icon-m-image-edit-resize"
-            //iconSource: "image://theme/icon-m-toolbar-tab-next"
-            iconSource: "image://theme/icon-m-transfer-download"
-            rotation : 180
+            iconSource: "image://icons/" + rWin.mTheme + "/" + "minimize_small.png"
             checkable : true
             visible: !platform.fullscreenOnly()
             onClicked: {
@@ -165,7 +161,7 @@ Item {
         }
         Button {
             id: followPositionButton
-            iconSource: "image://theme/icon-m-common-location"
+            iconSource: "image://icons/" + rWin.mTheme + "/" + "center_small.png"
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             checked : tabMap.center
@@ -188,7 +184,7 @@ Item {
         }
         Button {
             id: mainMenuButton
-            iconSource: "image://theme/icon-m-content-application"
+            iconSource: "image://icons/" + rWin.mTheme + "/" + "menu_small.png"
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             onClicked: {
