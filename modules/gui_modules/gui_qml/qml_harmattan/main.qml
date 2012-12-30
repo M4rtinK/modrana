@@ -13,7 +13,10 @@ PageStackWindow {
     property string mTheme : options.get("currentTheme", "default")
     id: rWin
     showStatusBar : false
-
+    // disable switch & close buttons on Fremantle
+    // -> has no effect on other platforms
+    property bool allowSwitch : false
+    property bool allowClose : false
 
     initialPage : mapPage
     //property variant mapPage : Pager.loadPage("MapPage", rWin)
@@ -142,7 +145,15 @@ PageStackWindow {
 
 
     Component.onCompleted : {
+        // invert the theme
         theme.inverted = true
+        /* as this GUI subtype is currently
+        also used on Fremantle, we disable the
+        upper left & ruight switch & close buttons
+        when running on Fremantle */
+
+
+
         //pageStack.push(mPage)
     }
 
