@@ -45,6 +45,7 @@ else:
 
 import time
 
+
 def getModule(m, d, i):
   return DeviceN900(m, d, i)
 
@@ -176,7 +177,7 @@ class DeviceN900(DeviceModule):
       rotationMode = self.get('rotationMode', "auto") # get last used mode
       lastModeNumber = self.getRotationModeNumber(rotationMode) # get last used mode number
       rObject = n900_maemo5_portrait.FremantleRotation(self.ossoAppName, main_window=self.topWindow,
-        mode=lastModeNumber)
+                                                       mode=lastModeNumber)
       print("N900 rotation object initialized")
       return rObject
     except Exception, e:
@@ -292,11 +293,11 @@ class DeviceN900(DeviceModule):
 
   def disableVolumeKeys(self):
     self.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"),
-      32, gtk.gdk.PROP_MODE_REPLACE, [0]);
+                                          32, gtk.gdk.PROP_MODE_REPLACE, [0]);
 
   def enable_volume_cb(self, window=None):
     self.topWindow.window.property_change(gtk.gdk.atom_intern("_HILDON_ZOOM_KEY_ATOM"), gtk.gdk.atom_intern("INTEGER"),
-      32, gtk.gdk.PROP_MODE_REPLACE, [1]);
+                                          32, gtk.gdk.PROP_MODE_REPLACE, [1]);
 
   def _updateVolumeKeys(self):
     """check if volume keys should be used or not"""
@@ -416,11 +417,12 @@ class DeviceN900(DeviceModule):
       # use Qt Mobility for Qt
       return "qt_mobility"
 
-  def startLocation(self, startMainloop=False):
+  def startLocation(self, startMainLoop=False):
     """this will called by mod_location automatically"""
     self._libLocationStart()
-    if startMainloop:
+    if startMainLoop:
       import gobject
+
       self.mainloop = gobject.MainLoop()
       print('N900: location: starting headless mainloop')
       self.mainloop.run()
@@ -547,7 +549,7 @@ class DeviceN900(DeviceModule):
           print(self.get('bearing', None))
           print(self.get('speed', None))
           print("#############################")
-        # always set this key to current epoch once the location is updated
+          # always set this key to current epoch once the location is updated
         # so that modules can watch it and react
         self.set('locationUpdated', time.time())
         #        print("updating location")
