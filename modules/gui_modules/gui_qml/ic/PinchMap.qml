@@ -1,6 +1,7 @@
 import QtQuick 1.1
 import "functions.js" as F
 import "./qtc/PageStatus.js" as PageStatus
+import "./qtc"
 
 Rectangle {
     id: pinchmap;
@@ -307,7 +308,7 @@ Rectangle {
                 }
                 */
 
-                Text {
+                Label {
                     visible : true
                     opacity: 0.3
                     anchors.left: parent.left
