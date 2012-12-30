@@ -17,9 +17,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 
-#from QtMobility.Location import QGeoPositionInfoSource
+# Why is QGeoSatelliteInfoSource commented out ?
+#
+# If you connect the in view or in use signal, the whole freezes
+# becomes stuck after the first callback. :)
+# If this is only a Harmattan specific behaviour, it might be possible
+# to check for Harmattan and enable it on other platforms.
+
 print("importing Qt Mobility")
 from QtMobility.Location import QGeoPositionInfoSource
+#from QtMobility.Location import QGeoSatelliteInfoSource
 print("Qt Mobility imported")
 
 from base_position_source import PositionSource
@@ -31,11 +38,20 @@ class QtMobility(PositionSource):
 
     # connect to QT Mobility position source
     self.source = QGeoPositionInfoSource.createDefaultSource(None)
+#    self.satelliteSource = QGeoSatelliteInfoSource.createDefaultSource(None)
+    self.satsInViewCount = None
+    self.satsInUseCount = None
     if self.source is not None:
       self.source.positionUpdated.connect(self._positionUpdateCB)
       print("location Qt Mobility: position source created")
     else:
       print("location Qt Mobility: source creation failed")
+#    if self.satelliteSource is not None:
+##      self.satelliteSource.satellitesInViewUpdated.connect(self._satsInViewUpdateCB)
+##      self.satelliteSource.satellitesInViewUpdated.connect(self._satsInUseUpdateCB)
+#      print("location Qt Mobility: satellite info source created")
+#    else:
+#      print("location Qt Mobility: satellite info source creation failed")
 
   def start(self):
     if self.source is not None:
@@ -43,12 +59,19 @@ class QtMobility(PositionSource):
       self.source.setUpdateInterval(1000)
       self.source.startUpdates()
       print("location qt mobility: started")
+#    if self.satelliteSource:
+#      print self.satelliteSource.availableSources()
+#      self.satelliteSource.startUpdates()
+#      print("location qt mobility: sat source started")
 
   def stop(self):
     print("location qt mobility: stopping")
     if self.source:
       self.source.stopUpdates()
       print("location qt mobility: stopped")
+#    if self.satelliteSource:
+#      self.satelliteSource.stopUpdates()
+#      print("location qt mobility: sat source stopped")
 
   def canSetUpdateInterval(self):
     return True
@@ -59,6 +82,17 @@ class QtMobility(PositionSource):
 
   def getFix(self):
     return self.fix
+
+#  def _satsInViewUpdateCB(self, satellites=None):
+#    """update the count of visible GPS satellites"""
+#    if satellites is not None:
+#      self.satsInViewCount = len(satellites)
+#
+#  def _satsInUseUpdateCB(self, satellites=None):
+#    """update the count of GPS satellites in use to
+#     determine the current position"""
+#    if satellites is not None:
+#      self.satsInUseCount = len(satellites)
 
   def _positionUpdateCB(self, update):
     direction = update.attribute(update.Direction)
@@ -82,6 +116,8 @@ class QtMobility(PositionSource):
                speed,
                mode = mode,
                magnetic_variation = update.attribute(update.MagneticVariation),
+               sats = self.satsInViewCount,
+               sats_in_use = self.satsInUseCount,
                horizontal_accuracy=update.attribute(update.HorizontalAccuracy),
                vertical_accuracy=update.attribute(update.VerticalAccuracy)
              )
