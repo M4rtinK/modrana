@@ -635,7 +635,7 @@ class GPSDataWrapper(QtCore.QObject):
     self.gps_data = FixWrapper(fix)
     self.gps_last_good_fix = FixWrapper(fix)
     self.gps_has_fix = False
-    self.gps_status = ''
+    self.gps_mode = ''
     #self.astral = Astral()
 
 #  @QtCore.Slot(bool, float, float, bool, float, bool, float, float, QtCore.QObject)
@@ -648,10 +648,17 @@ class GPSDataWrapper(QtCore.QObject):
     """position changed callback"""
 
     # check validity
-    pos = self.modrana.get('pos', None)
-    if pos:
-      if self.gui._location:
-        self._on_good_fix(self.gui._location.getFix())
+    fix = None
+    try:
+      fix = self.gui._location.getFix()
+    except Exception, e:
+      print("gui_qml: can't get fix object from location module")
+      print(e)
+    if fix:
+      if fix.mode > 1: # 2 -> 2D fix, 3 -> 3D fix, 0 & 1 -> no fix
+        self._on_good_fix(fix)
+      else:
+        self._on_no_fix()
     else:
       self._on_no_fix()
 
@@ -660,13 +667,14 @@ class GPSDataWrapper(QtCore.QObject):
     self.gps_data.update(fix)
     self.gps_last_good_fix.update(fix)
     self.gps_has_fix = True
+    self.gps_mode = fix.mode
     self.changed_distance_bearing.emit()
     self.changed.emit()
 
   def _on_no_fix(self):
 #    self.gps_data.update(gps_data)
     self.gps_has_fix = False
-    self.gps_status = "unknown"
+    self.gps_mode = 0
     self.changed_distance_bearing.emit()
     self.changed.emit()
 
@@ -679,14 +687,14 @@ class GPSDataWrapper(QtCore.QObject):
   def _gps_has_fix(self):
     return self.gps_has_fix
 
-  def _gps_status(self):
-    return self.gps_status
+  def _gps_mode(self):
+    return self.gps_mode
 
 
   data = QtCore.Property(QtCore.QObject, _gps_data, notify=changed)
   lastGoodFix = QtCore.Property(QtCore.QObject, _gps_last_good_fix, notify=changed)
   hasFix = QtCore.Property(bool, _gps_has_fix, notify=changed)
-  status = QtCore.Property(str, _gps_status, notify=changed)
+  mode = QtCore.Property(str, _gps_mode, notify=changed)
 
 
 class Options(QtCore.QObject):
