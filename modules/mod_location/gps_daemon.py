@@ -29,7 +29,8 @@ class GPSD(PositionSource):
     self.connected = False
     self.GPSDConsumer = None
     self.status="not connected"
-  def start(self):
+
+  def start(self, startMainLoop=False):
     """start the GPSD based location update method"""
     self.connected = False
     try:

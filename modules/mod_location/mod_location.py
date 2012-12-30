@@ -172,14 +172,14 @@ class Location(RanaModule):
   def getFix(self):
     return self.provider.getFix()
 
-  def startLocation(self):
+  def startLocation(self, startMainLoop=False):
     """start location - device based or gpsd"""
     if not self.enabled:
       print("location: enabling location")
       if self.modrana.dmod.handlesLocation():
-        self.modrana.dmod.startLocation()
+        self.modrana.dmod.startLocation(startMainLoop=startMainLoop)
       else:
-        self.provider.start()
+        self.provider.start(startMainLoop=startMainLoop)
       self.enabled = True
     else:
       print('location: location already enabled')

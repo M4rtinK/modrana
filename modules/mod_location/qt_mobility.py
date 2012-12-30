@@ -23,6 +23,7 @@
 # becomes stuck after the first callback. :)
 # If this is only a Harmattan specific behaviour, it might be possible
 # to check for Harmattan and enable it on other platforms.
+import sys
 
 print("importing Qt Mobility")
 from QtMobility.Location import QGeoPositionInfoSource
@@ -35,6 +36,8 @@ from core.fix import Fix
 class QtMobility(PositionSource):
   def __init__(self, location):
     PositionSource.__init__(self, location)
+
+    self.qtApplication = None # used for headless location support
 
     # connect to QT Mobility position source
     self.source = QGeoPositionInfoSource.createDefaultSource(None)
@@ -53,12 +56,17 @@ class QtMobility(PositionSource):
 #    else:
 #      print("location Qt Mobility: satellite info source creation failed")
 
-  def start(self):
+  def start(self, startMainLoop=False):
     if self.source is not None:
       # TODO: custom interval setting
       self.source.setUpdateInterval(1000)
       self.source.startUpdates()
       print("location qt mobility: started")
+    if startMainLoop:
+      from PySide.QtCore import QCoreApplication
+      self.qtApplication = QCoreApplication(sys.argv)
+      print("location qt mobility: starting headless mainloop")
+      self.qtApplication.exec_()
 #    if self.satelliteSource:
 #      print self.satelliteSource.availableSources()
 #      self.satelliteSource.startUpdates()
@@ -69,6 +77,9 @@ class QtMobility(PositionSource):
     if self.source:
       self.source.stopUpdates()
       print("location qt mobility: stopped")
+    if self.qtApplication:
+      print("location qt mobility: stopping headless mainloop")
+      self.qtApplication.exit()
 #    if self.satelliteSource:
 #      self.satelliteSource.stopUpdates()
 #      print("location qt mobility: sat source stopped")
@@ -95,6 +106,7 @@ class QtMobility(PositionSource):
 #      self.satsInUseCount = len(satellites)
 
   def _positionUpdateCB(self, update):
+    self.debug = True
     direction = update.attribute(update.Direction)
     speed = update.attribute(update.GroundSpeed)
     mode = 3 # 3d fix

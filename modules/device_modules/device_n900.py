@@ -73,6 +73,9 @@ class DeviceN900(DeviceModule):
     self.connectivityStatus = False
     self.conicConnection = None
 
+    # Mainloop for headless location support
+    self.mainloop = None
+
     if gs.GUIString == "GTK":
       # liblocation
       self.lControl = None
@@ -413,13 +416,21 @@ class DeviceN900(DeviceModule):
       # use Qt Mobility for Qt
       return "qt_mobility"
 
-  def startLocation(self):
+  def startLocation(self, startMainloop=False):
     """this will called by mod_location automatically"""
     self._libLocationStart()
+    if startMainloop:
+      import gobject
+      self.mainloop = gobject.MainLoop()
+      print('N900: location: starting headless mainloop')
+      self.mainloop.run()
 
   def stopLocation(self):
     """this will called by mod_location automatically"""
     self._libLocationStop()
+    if self.mainloop:
+      print('N900: location: stopping headless mainloop')
+      self.mainloop.quit()
 
   def _libLocationStart(self):
     """start the liblocation based location update method"""

@@ -175,7 +175,7 @@ class DeviceModule(RanaModule):
     widget/dialog"""
     return False
 
-  def startLocation(self):
+  def startLocation(self, startMainLoop=False):
     """start handling location - check handlesLocation if this is supported"""
     pass
 
