@@ -37,6 +37,7 @@ CURRENT_POSITION_UNKNOWN_ERROR = 7
 
 USE_LAST_KNOWN_POSITION_KEYWORD = "LAST_KNOWN_POSITION"
 
+
 class Startup:
   def __init__(self, modrana):
     self.modrana = modrana
@@ -47,7 +48,7 @@ class Startup:
       '-d', metavar="device ID", type=str,
       help="specify device type",
       default=None, action="store",
-      choices= self.modrana._listAvailableDeviceModulesByID()
+      choices=self.modrana._listAvailableDeviceModulesByID()
     )
     # GUI
     parser.add_argument(
@@ -55,7 +56,7 @@ class Startup:
       help='specify user interface type (GTK or QML)',
       default=None,
       action="store"
-#      choices=["GTK", "QML"]
+      #      choices=["GTK", "QML"]
     )
     # local search
     parser.add_argument(
@@ -72,7 +73,7 @@ class Startup:
            ' geographic coordinates with the geo: prefix are supported;'
            ' use "%s" to use last known position '
            'EXAMPLE: "London" or "geo:50.083333,14.416667" or "%s"' % (
-      USE_LAST_KNOWN_POSITION_KEYWORD, USE_LAST_KNOWN_POSITION_KEYWORD)
+             USE_LAST_KNOWN_POSITION_KEYWORD, USE_LAST_KNOWN_POSITION_KEYWORD)
       ,
       default=None,
       action="store"
@@ -401,7 +402,9 @@ class Startup:
     if m:
       m.sendMessage(message)
 
-  def _fixCB(self, key, newValue, oldValue, startTimestamp, main):
+  def _fixCB(self, key, newValue, oldValue, startTimestamp, location):
+    """checks for fix and terminates the location & mainloop once
+    either a valid fix is established or once the timeout is reached"""
     print('fix value: %d' % newValue)
     stop = False
     # wait for 3D lock for up to 30 seconds
@@ -410,38 +413,32 @@ class Startup:
     elif newValue == 3: # 3 = 3D lock
       stop = True
     if stop:
-      # quite the main loop so that _getCurrentPosition can finish
-      main.quit()
+    # quite the main loop so that _getCurrentPosition can finish
+    #      main.quit()
+      location.stopLocation()
 
   def _getCurrentPosition(self, loadLocationModule=False, useLastKnown=False):
     """get current position on a system in early startup state"""
 
-    # liblocation needs the main loop to work properly
-    import gobject
-
-    main = gobject.MainLoop()
-
-    # register fix CB
-    self.modrana.watch('fix', self._fixCB, [time.time(), main])
-
     # do we need to load the location module ?
-    # we usually need to if we handle an early task that happens before regular startup
+    # we usually need to load it if we handle an early task that happens before regular startup
     if loadLocationModule:
       # the location module might need the device module to handle location on some devices
       self.modrana._loadDeviceModule()
       # load the location module
       l = self.modrana._loadModule("mod_location", "location")
-      print('startup: N900 location module loaded')
+      # register fix CB
+      self.modrana.watch('fix', self._fixCB, [time.time(), l])
+      print('startup: location module loaded')
       # start location
-      l.startLocation()
-      print('startup: N900 location started')
+      l.startLocation(startMainLoop=True)
+      print('startup: location started')
     else:
       l = self.modrana.m.get("location", None)
 
-    # TODO: Qt support (blame the #mccXII) :)
-    # the fix watch will kill the main loop once a 3D fix is established
-    # or once it times out
-    main.run()
+    # the fix watch will kill the main loop once a 3D fix is
+    # established or once it times out,
+    # then the rest of the code in this function will be executed
 
     fix = self.modrana.get('fix', None)
     if fix in (2, 3):
