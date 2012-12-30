@@ -81,7 +81,7 @@ class Route(RanaModule):
     self.pxpyRoute = [] # route in screen coordinates
     self.directions = [] # directions object
     self.set('midText', [])
-    self.duration = None # in seconds
+    self.durationString = None # in seconds
     self.start = None
     self.destination = None
     self.startAddress = None
@@ -556,7 +556,7 @@ class Route(RanaModule):
 
         if directions: # is there actually something in the directions ?
           # create the directions Way object
-          self.duration = directions['routes'][0]['legs'][0]['duration']['text']
+          self.durationString = directions['routes'][0]['legs'][0]['duration']['text']
           dirs = way.fromGoogleDirectionsResult(directions)
           #TODO: use seconds from Way object directly
           #(needs seconds to human representation conversion)
@@ -569,13 +569,14 @@ class Route(RanaModule):
         # remove any possible prev. route description, so new a new one for this route is created
         self.text = None
         if directions: # is there actually something in the directions ?
-          self.duration = directions['routes'][0]['legs'][0]['duration']['text']
+          self.durationString = directions['routes'][0]['legs'][0]['duration']['text']
           #TODO: use seconds from Way object directly
           #(needs seconds to human representation conversion)
           #self.duration = dirs.getDuration()
 
           # create the directions Way object
           dirs = way.fromGoogleDirectionsResult(directions)
+          self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
           routingSuccess = True
           self.startNavigation()
       self.set('needRedraw', True)
@@ -584,7 +585,7 @@ class Route(RanaModule):
       directions, returnCode = result
 
       if returnCode == ROUTING_SUCCESS:
-        self.duration = "" # TODO : correct predicted route duration
+        self.durationString = "" # TODO : correct predicted route duration
 
         # provided a turn detection function to the way object
         tbt = self.m.get("turnByTurn", None)
@@ -1098,8 +1099,8 @@ class Route(RanaModule):
             self._geocodeStartAndDestination()
             self.routeDetailGeocodingTriggered = True
 
-        if self.duration:
-          duration = self.duration # a string describing the estimated time to finish the route
+        if self.durationString:
+          duration = self.durationString # a string describing the estimated time to finish the route
         else:
           duration = "? minutes"
         units = self.m.get('units', None) # get the correct units
