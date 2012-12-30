@@ -103,7 +103,6 @@ class QMLGUI(GUIModule):
     # is instantiated, or else horrible breakage occurs :)
     qmlRegisterType(drawing.PieChart, 'Charts', 1, 0, 'PieChart')
     qmlRegisterType(drawing.PieSlice, "Charts", 1, 0, "PieSlice")
-    qmlRegisterType(drawing.PieSlice, "Charts", 1, 0, "PieSlice")
 
     # m-declarative stuff implemented in Python
     qmlRegisterType(Screen, "mpBackend", 1, 0, "Screen")
