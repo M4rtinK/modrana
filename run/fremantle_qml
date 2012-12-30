@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd /opt/modrana
-PYTHONPATH=/opt/qtm12/lib/python2.5/site-packages:${PYTHONPATH} python modrana.py -u QML -d n900
+PYTHONPATH=/opt/qtm12/lib/python2.5/site-packages:${PYTHONPATH} python modrana.py -u QML:harmattan -d n900
