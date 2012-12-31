@@ -29,6 +29,7 @@ import local_search
 
 DEFAULT_GOOGLE_API_KEY = "ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw"
 
+
 def getModule(m, d, i):
   return OnlineServices(m, d, i)
 
@@ -179,7 +180,7 @@ class OnlineServices(RanaModule):
     return local
 
   def googleLocalQueryLL(self, term, lat, lon):
-    query = self.constructGoogleQuery(term, "loc:%f,%f" % (lat, lon))
+    query = self.constructGoogleQuery(term, "%f,%f" % (lat, lon))
     local = self.googleLocalQuery(query)
     return local
 
@@ -222,10 +223,10 @@ class OnlineServices(RanaModule):
       otherOptions += 't'
     waypointOption = None
     if waypoints: # waypoints are a list of strings
-      waypointOption="%s" % waypoints[0]
+      waypointOption = "%s" % waypoints[0]
       for waypoint in waypoints[1:]:
         waypointOption += "|%s" % waypoint
-    # respect travel mode
+      # respect travel mode
     mode = self.get('mode', None)
     if mode == 'cycle':
       type = "b"
@@ -270,7 +271,7 @@ class OnlineServices(RanaModule):
           print("onlineServices:GDirections:bad response to travel mode, trying default travel mode")
           self.set('needRedraw', True)
           directions = self.tryToGetDirections(start, destination, dir, travelMode="", otherOptions=otherOptions,
-            waypointOption=waypointOption, secondTime=True)
+                                               waypointOption=waypointOption, secondTime=True)
       else:
         print("onlineServices:GDirections:routing failed with exception googlemaps status code:%d" % e.status)
     except Exception, e:
@@ -554,7 +555,7 @@ class Worker(threading.Thread):
       return None, tracklog
 
   def _geonamesCallback(self, progress):
-    percentDone = 100-int(100*progress)
+    percentDone = 100 - int(100 * progress)
     self._setWorkStatusText("online elevation lookup %d %% done" % percentDone)
 
   def _onlineWikipediaSearch(self, query):
