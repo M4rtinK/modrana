@@ -49,6 +49,7 @@ ALL_MODULE_FOLDERS = [
   GUI_MODULES_FOLDER
 ]
 
+
 class ModRana:
   """
   This is THE main modRana class.
@@ -172,12 +173,20 @@ class ModRana:
 
     # get GUI ID from the CLI argument
     if self.args.u:
-      self.GUIString = self.args.u
+      try:
+        self.GUIString = self.args.u.split(":")[0]
+      except Exception, e:
+        print('modRana: splitting the GUI string failed')
+        print(e)
     else: # no ID specified
       # the N900 device module needs the GUIString
       # at startup
       if device == "n900":
         self.GUIString = "GTK"
+
+    # set the pre-import-visible GUIString
+    # for the device module
+    gs.GUIString = self.GUIString
 
     ## load the device specific module
 
@@ -203,7 +212,7 @@ class ModRana:
       else:
         self.GUIString = "GTK" # fallback
         # export the GUI string
-  # set the pre-import visible GUI string and subtype
+      # set the pre-import visible GUI string and subtype
     splitGUIString = self.GUIString.split(":")
     gs.GUIString = splitGUIString[0]
     if len(splitGUIString) >= 2:
@@ -776,6 +785,7 @@ class ModRana:
       print("** whole startup: %1.0f ms **" % totalTime)
     else:
       print("* timing list empty *")
+
 
 if __name__ == "__main__":
   # change to folder where the main modRana file is located
