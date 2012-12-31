@@ -26,7 +26,6 @@
 import sys
 
 print("importing Qt Mobility")
-from QtMobility.Location import QGeoPositionInfoSource
 #from QtMobility.Location import QGeoSatelliteInfoSource
 print("Qt Mobility imported")
 
@@ -41,15 +40,10 @@ class QtMobility(PositionSource):
     self.qtApplication = None # used for headless location support
 
     # connect to QT Mobility position source
-    self.source = QGeoPositionInfoSource.createDefaultSource(None)
+    self.source = None
     #    self.satelliteSource = QGeoSatelliteInfoSource.createDefaultSource(None)
     self.satsInViewCount = None
     self.satsInUseCount = None
-    if self.source is not None:
-      self.source.positionUpdated.connect(self._positionUpdateCB)
-      print("location Qt Mobility: position source created")
-    else:
-      print("location Qt Mobility: source creation failed")
     #    if self.satelliteSource is not None:
     ##      self.satelliteSource.satellitesInViewUpdated.connect(self._satsInViewUpdateCB)
     ##      self.satelliteSource.satellitesInViewUpdated.connect(self._satsInUseUpdateCB)
@@ -58,21 +52,40 @@ class QtMobility(PositionSource):
     #      print("location Qt Mobility: satellite info source creation failed")
 
   def start(self, startMainLoop=False):
-    if self.source is not None:
-      # TODO: custom interval setting
-      self.source.setUpdateInterval(1000)
-      self.source.startUpdates()
-      print("location qt mobility: started")
     if startMainLoop:
       from PySide.QtCore import QCoreApplication
 
       self.qtApplication = QCoreApplication(sys.argv)
-      print("location qt mobility: starting headless mainloop")
-      self.qtApplication.exec_()
-    #    if self.satelliteSource:
-    #      print self.satelliteSource.availableSources()
-    #      self.satelliteSource.startUpdates()
-    #      print("location qt mobility: sat source started")
+      # we import QGeoPositionInfoSource after the Qt Application is
+    # created to get rid of the:
+    # "
+    # QDBusConnection: system D-Bus connection created before QCoreApplication. Application may misbehave.
+    # QDBusConnection: session D-Bus connection created before QCoreApplication. Application may misbehave.
+    # "
+    # warnings
+    from QtMobility.Location import QGeoPositionInfoSource
+
+    self.source = QGeoPositionInfoSource.createDefaultSource(None)
+    if self.source is not None:
+      self.source.positionUpdated.connect(self._positionUpdateCB)
+      print("location Qt Mobility: position source created")
+      # TODO: custom interval setting
+      self.source.setUpdateInterval(1000)
+      self.source.startUpdates()
+      print("location qt mobility: started")
+
+      # only start the mainloop if the source was created successfully,
+      # otherwise it would never end as the signal provided by the source,
+      # that stops the main lopp, would never be triggered
+      if startMainLoop:
+        print("location qt mobility: starting headless mainloop")
+        self.qtApplication.exec_()
+    else:
+      print("location Qt Mobility: source creation failed")
+      #    if self.satelliteSource:
+      #      print self.satelliteSource.availableSources()
+      #      self.satelliteSource.startUpdates()
+      #      print("location qt mobility: sat source started")
 
   def stop(self):
     print("location qt mobility: stopping")
@@ -82,9 +95,9 @@ class QtMobility(PositionSource):
     if self.qtApplication:
       print("location qt mobility: stopping headless mainloop")
       self.qtApplication.exit()
-    #    if self.satelliteSource:
-    #      self.satelliteSource.stopUpdates()
-    #      print("location qt mobility: sat source stopped")
+      #    if self.satelliteSource:
+      #      self.satelliteSource.stopUpdates()
+      #      print("location qt mobility: sat source stopped")
 
   def canSetUpdateInterval(self):
     return True
@@ -135,6 +148,7 @@ class QtMobility(PositionSource):
               vertical_accuracy=update.attribute(update.VerticalAccuracy)
     )
     # print debug message if enabled
+    self.debug = True
     if self.debug:
       print("Qt-Mobility POS DEBUG")
       print ("%s, %s" % (update.coordinate().latitude(), update.coordinate().longitude()))
