@@ -148,7 +148,7 @@ class QtMobility(PositionSource):
               vertical_accuracy=update.attribute(update.VerticalAccuracy)
     )
     # print debug message if enabled
-    self.debug = True
+    #    self.debug = True
     if self.debug:
       print("Qt-Mobility POS DEBUG")
       print ("%s, %s" % (update.coordinate().latitude(), update.coordinate().longitude()))
