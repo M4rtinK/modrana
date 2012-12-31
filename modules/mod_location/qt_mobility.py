@@ -33,6 +33,7 @@ print("Qt Mobility imported")
 from base_position_source import PositionSource
 from core.fix import Fix
 
+
 class QtMobility(PositionSource):
   def __init__(self, location):
     PositionSource.__init__(self, location)
@@ -41,7 +42,7 @@ class QtMobility(PositionSource):
 
     # connect to QT Mobility position source
     self.source = QGeoPositionInfoSource.createDefaultSource(None)
-#    self.satelliteSource = QGeoSatelliteInfoSource.createDefaultSource(None)
+    #    self.satelliteSource = QGeoSatelliteInfoSource.createDefaultSource(None)
     self.satsInViewCount = None
     self.satsInUseCount = None
     if self.source is not None:
@@ -49,12 +50,12 @@ class QtMobility(PositionSource):
       print("location Qt Mobility: position source created")
     else:
       print("location Qt Mobility: source creation failed")
-#    if self.satelliteSource is not None:
-##      self.satelliteSource.satellitesInViewUpdated.connect(self._satsInViewUpdateCB)
-##      self.satelliteSource.satellitesInViewUpdated.connect(self._satsInUseUpdateCB)
-#      print("location Qt Mobility: satellite info source created")
-#    else:
-#      print("location Qt Mobility: satellite info source creation failed")
+    #    if self.satelliteSource is not None:
+    ##      self.satelliteSource.satellitesInViewUpdated.connect(self._satsInViewUpdateCB)
+    ##      self.satelliteSource.satellitesInViewUpdated.connect(self._satsInUseUpdateCB)
+    #      print("location Qt Mobility: satellite info source created")
+    #    else:
+    #      print("location Qt Mobility: satellite info source creation failed")
 
   def start(self, startMainLoop=False):
     if self.source is not None:
@@ -64,13 +65,14 @@ class QtMobility(PositionSource):
       print("location qt mobility: started")
     if startMainLoop:
       from PySide.QtCore import QCoreApplication
+
       self.qtApplication = QCoreApplication(sys.argv)
       print("location qt mobility: starting headless mainloop")
       self.qtApplication.exec_()
-#    if self.satelliteSource:
-#      print self.satelliteSource.availableSources()
-#      self.satelliteSource.startUpdates()
-#      print("location qt mobility: sat source started")
+    #    if self.satelliteSource:
+    #      print self.satelliteSource.availableSources()
+    #      self.satelliteSource.startUpdates()
+    #      print("location qt mobility: sat source started")
 
   def stop(self):
     print("location qt mobility: stopping")
@@ -80,9 +82,9 @@ class QtMobility(PositionSource):
     if self.qtApplication:
       print("location qt mobility: stopping headless mainloop")
       self.qtApplication.exit()
-#    if self.satelliteSource:
-#      self.satelliteSource.stopUpdates()
-#      print("location qt mobility: sat source stopped")
+    #    if self.satelliteSource:
+    #      self.satelliteSource.stopUpdates()
+    #      print("location qt mobility: sat source stopped")
 
   def canSetUpdateInterval(self):
     return True
@@ -94,24 +96,23 @@ class QtMobility(PositionSource):
   def getFix(self):
     return self.fix
 
-#  def _satsInViewUpdateCB(self, satellites=None):
-#    """update the count of visible GPS satellites"""
-#    if satellites is not None:
-#      self.satsInViewCount = len(satellites)
-#
-#  def _satsInUseUpdateCB(self, satellites=None):
-#    """update the count of GPS satellites in use to
-#     determine the current position"""
-#    if satellites is not None:
-#      self.satsInUseCount = len(satellites)
+  #  def _satsInViewUpdateCB(self, satellites=None):
+  #    """update the count of visible GPS satellites"""
+  #    if satellites is not None:
+  #      self.satsInViewCount = len(satellites)
+  #
+  #  def _satsInUseUpdateCB(self, satellites=None):
+  #    """update the count of GPS satellites in use to
+  #     determine the current position"""
+  #    if satellites is not None:
+  #      self.satsInUseCount = len(satellites)
 
   def _positionUpdateCB(self, update):
-    self.debug = True
     direction = update.attribute(update.Direction)
     speed = update.attribute(update.GroundSpeed)
     mode = 3 # 3d fix
     if update.coordinate().isValid():
-      if update.coordinate().CoordinateType == update.coordinate().Coordinate2D :
+      if update.coordinate().CoordinateType == update.coordinate().Coordinate2D:
         mode = 2 # 2D fix
     else:
       mode = 0 # no fix
@@ -121,18 +122,18 @@ class QtMobility(PositionSource):
     if speed == -1.0:
       speed = 0
 
-    fix = Fix( (update.coordinate().latitude(),
-                update.coordinate().longitude()),
-               update.coordinate().altitude(),
-               direction,
-               speed,
-               mode = mode,
-               magnetic_variation = update.attribute(update.MagneticVariation),
-               sats = self.satsInViewCount,
-               sats_in_use = self.satsInUseCount,
-               horizontal_accuracy=update.attribute(update.HorizontalAccuracy),
-               vertical_accuracy=update.attribute(update.VerticalAccuracy)
-             )
+    fix = Fix((update.coordinate().latitude(),
+               update.coordinate().longitude()),
+              update.coordinate().altitude(),
+              direction,
+              speed,
+              mode=mode,
+              magnetic_variation=update.attribute(update.MagneticVariation),
+              sats=self.satsInViewCount,
+              sats_in_use=self.satsInUseCount,
+              horizontal_accuracy=update.attribute(update.HorizontalAccuracy),
+              vertical_accuracy=update.attribute(update.VerticalAccuracy)
+    )
     # print debug message if enabled
     if self.debug:
       print("Qt-Mobility POS DEBUG")
