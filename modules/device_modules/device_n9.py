@@ -69,12 +69,12 @@ class DeviceN9(DeviceModule):
     """
     inhibit screen blanking
     """
-    if self.qScreenSaver:
-      from QtMobility.SystemInfo import QSystemScreenSaver
+    from QtMobility.SystemInfo import QSystemScreenSaver
 
-      self.qScreenSaver = QSystemScreenSaver()
-    else:
+    if self.qScreenSaver:
       QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
+    else:
+      self.qScreenSaver = QSystemScreenSaver()
 
   def getSupportedGUIModuleIds(self):
     return ["QML:harmattan", "QML:indep"]
