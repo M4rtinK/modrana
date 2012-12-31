@@ -7,8 +7,19 @@ import "./qtc"
 
 BasePage {
     id: locationPage
-    headerText : "Location"
+    headerText : getFixStatus(gps.lastGoodFix.mode)
     bottomPadding : 32
+
+    function getFixStatus(mode) {
+        if(mode == 3) {
+            return '3D fix'
+        } else if (mode == 2) {
+            return '2D fix'
+        } else {
+            return 'Location'
+        }
+    }
+
     content {
         Item {
             id : fixWrapper
@@ -17,26 +28,20 @@ BasePage {
             anchors.right : parent.right
             height : lGrid.y - y + lGrid.height
             visible : gps.hasFix
-            Label {
-                id : fixStatus
-                anchors.top : parent.top
-                anchors.topMargin : 24
-                anchors.horizontalCenter : parent.horizontalCenter
-                text: gps.lastGoodFix.mode == 3 ? "3D fix" : "2D fix"
-                color: gps.lastGoodFix == 3 ? "limegreen" : "yellow"
-                font.pixelSize : 32
-            }
+            /*
             Button {
                 id : copyCoordinatesButton
                 anchors.topMargin : 24
-                anchors.top : fixStatus.bottom
-                anchors.horizontalCenter : parent.horizontalCenter
+                anchors.top : parent.top
+                anchors.left : parent.left
                 text: "copy coordinates"
                 width : 300
             }
+            */
             Grid {
                 id : lGrid
-                anchors.top : copyCoordinatesButton.bottom
+                //anchors.top : copyCoordinatesButton.bottom
+                anchors.top : parent.top
                 anchors.left : parent.left
                 anchors.right : parent.right
                 anchors.topMargin : 24
@@ -170,7 +175,7 @@ BasePage {
             anchors.topMargin : 24
             color : "red"
             font.pixelSize : 64
-            text : "NO FIX"
+            text : (gps.lastGoodFix == 0 ) ? "NO FIX" : "fix in progress"
         }
     }
     /*
