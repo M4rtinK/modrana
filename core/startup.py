@@ -409,8 +409,10 @@ class Startup:
     stop = False
     # wait for 3D lock for up to 30 seconds
     if time.time() - startTimestamp > 30:
+      print('fix timed out')
       stop = True
     elif newValue == 3: # 3 = 3D lock
+      print("3D fix established")
       stop = True
     if stop:
     # quite the main loop so that _getCurrentPosition can finish
