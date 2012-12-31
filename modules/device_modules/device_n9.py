@@ -21,21 +21,20 @@
 #---------------------------------------------------------------------------
 from base_device_module import DeviceModule
 
-from QtMobility.SystemInfo import QSystemScreenSaver
-""" ^^ back-light control"""
 
 # NOTE: use the device_ prefix when naming the module
 
-def getModule(m,d,i):
-  return DeviceN9(m,d,i)
+def getModule(m, d, i):
+  return DeviceN9(m, d, i)
+
 
 class DeviceN9(DeviceModule):
   """A Nokia N9 device module"""
-  
+
   def __init__(self, m, d, i):
     DeviceModule.__init__(self, m, d, i)
     # create the screen-saver controller
-    self.qScreenSaver = QSystemScreenSaver()
+    self.qScreenSaver = None
 
   def getDeviceIDString(self):
     return "n9"
@@ -45,7 +44,7 @@ class DeviceN9(DeviceModule):
 
   def getWinWH(self):
     """N9/N950 screen resolution"""
-    return 854,480
+    return 854, 480
 
   def startInFullscreen(self):
     """
@@ -70,7 +69,12 @@ class DeviceN9(DeviceModule):
     """
     inhibit screen blanking
     """
-    QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
+    if self.qScreenSaver:
+      from QtMobility.SystemInfo import QSystemScreenSaver
+
+      self.qScreenSaver = QSystemScreenSaver()
+    else:
+      QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
 
   def getSupportedGUIModuleIds(self):
     return ["QML:harmattan", "QML:indep"]
