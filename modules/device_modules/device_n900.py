@@ -38,7 +38,7 @@ if gs.GUIString == "GTK":
   why dbus.glib ?
   if you import only "dbus", it can't find its mainloop for callbacks
   """
-else:
+elif gs.GUIString == "QML":
   from QtMobility.SystemInfo import QSystemScreenSaver
 
   """ ^^ back-light control"""
@@ -87,7 +87,7 @@ class DeviceN900(DeviceModule):
       # libconic
       self._conicConnect()
 
-    else:
+    elif gs.GUIString == "QML":
       print("N900 Qt screen saver controller created")
       self.qScreenSaver = QSystemScreenSaver()
 
@@ -208,7 +208,7 @@ class DeviceN900(DeviceModule):
     if gs.GUIString == "GTK":
     #      print("n900: pausing screen blanking in GTK GUI")
       self.mceRequest.req_display_blanking_pause()
-    else:
+    elif gs.GUIString == "QML":
     #      print("n900: pausing screen blanking in QML GUI")
       QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
 
@@ -438,6 +438,11 @@ class DeviceN900(DeviceModule):
     """start the liblocation based location update method"""
     try:
       try:
+        # as the location module drags inside gobject related modules
+        # that make the QML GUI segfault, we need to make sure they are not
+        # the module is not loaded when running the QML GUI
+        if gs.GUIString != "QML":
+          import location
         self.lControl = location.GPSDControl.get_default()
         self.lDevice = location.GPSDevice()
       except Exception, e:
@@ -513,6 +518,13 @@ class DeviceN900(DeviceModule):
     * epc: Climb accuracy"""
     try:
       if device.fix:
+        # make sure the location module is imported, but not with QML GUI
+        # as the location module drags inside gobject related modules
+        # that make the QML GUI segfault, we need to make sure they are not
+        # the module is not loaded when running the QML GUI
+        if gs.GUIString != "QML":
+          import location
+
         fix = device.fix
         self.set('fix', fix[0])
         """from liblocation reference:
