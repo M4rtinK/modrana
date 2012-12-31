@@ -18,6 +18,7 @@ Page {
     anchors.fill : parent
     property alias content: contentField.children
     property alias headerText: headerLabel.text
+    property alias headerTextColor: headerLabel.color
     property int headerHeight : rWin.inPortrait ? height/7.0 : height/5.5
     property int bottomPadding : 0
     property alias isFlickable :  pageFlickable.interactive
@@ -48,7 +49,7 @@ Page {
             anchors.left : parent.left
             anchors.right : parent.right
             height : headerHeight
-            Text {
+            Label {
                 id : headerLabel
                 property bool _fitsIn : (paintedWidth <= (parent.width-backButton.width+40))
                 anchors.verticalCenter : parent.verticalCenter
@@ -58,6 +59,8 @@ Page {
                 anchors.topMargin : 8
                 anchors.bottomMargin : 8
                 font.pixelSize : 48
+                textFormat : Text.StyledText
+                color : "black"
                 wrapMode : Text.NoWrap
                 horizontalAlignment : _fitsIn ? Text.AlignHCenter : Text.AlignLeft
             }
