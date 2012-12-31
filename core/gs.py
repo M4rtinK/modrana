@@ -1,3 +1,3 @@
 # a temporary GUI string reporting file
-GUIString = "foo"
-GUISubtypeString = "bar"
+GUIString = ""
+GUISubtypeString = ""
