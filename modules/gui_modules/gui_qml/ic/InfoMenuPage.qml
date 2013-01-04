@@ -16,6 +16,8 @@ IconGridPage {
             return Qt.createComponent("InfoSpeedPage.qml")
         } else if (menu == "locationPage") {
             return Qt.createComponent("InfoLocationPage.qml")
+        } else if (menu == "compassPage") {
+            return Qt.createComponent("InfoCompassPage.qml")
         }
     }
 
@@ -26,7 +28,7 @@ IconGridPage {
         ListElement {
             caption : "Compass"
             icon : "compass.png"
-            menu : ""
+            menu : "compassPage"
         }
 
         ListElement {
