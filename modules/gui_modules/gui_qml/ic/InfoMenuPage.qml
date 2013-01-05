@@ -4,11 +4,6 @@ import QtQuick 1.1
 
 
 IconGridPage {
-
-    InfoAboutPage {
-        id : aboutPage
-    }
-
     function getPage(menu){
         return Qt.createComponent("Info" + menu + ".qml")
     }
