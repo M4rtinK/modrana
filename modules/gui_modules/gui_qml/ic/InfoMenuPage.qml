@@ -47,11 +47,4 @@ IconGridPage {
             menu : "aboutPage"
         }
     }
-    /*
-    Loader {
-        id: infoPage1
-        source: "InfoAboutPage.qml"
-    }
-    */
-
 }
