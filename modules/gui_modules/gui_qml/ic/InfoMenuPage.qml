@@ -10,15 +10,7 @@ IconGridPage {
     }
 
     function getPage(menu){
-        if (menu == "aboutPage") {
-            return aboutPage
-        } else if (menu == "speedPage") {
-            return Qt.createComponent("InfoSpeedPage.qml")
-        } else if (menu == "locationPage") {
-            return Qt.createComponent("InfoLocationPage.qml")
-        } else if (menu == "compassPage") {
-            return Qt.createComponent("InfoCompassPage.qml")
-        }
+        return Qt.createComponent("Info" + menu + ".qml")
     }
 
     isMockup: false
@@ -28,23 +20,23 @@ IconGridPage {
         ListElement {
             caption : "Compass"
             icon : "compass.png"
-            menu : "compassPage"
+            menu : "CompassPage"
         }
 
         ListElement {
             caption : "Speed"
             icon : "speedometer.png"
-            menu : "speedPage"
+            menu : "SpeedPage"
         }
         ListElement {
             caption : "Location"
             icon : "satellite.png"
-            menu : "locationPage"
+            menu : "LocationPage"
         }
         ListElement {
             caption : "About"
             icon : "info.png"
-            menu : "aboutPage"
+            menu : "AboutPage"
         }
     }
 }
