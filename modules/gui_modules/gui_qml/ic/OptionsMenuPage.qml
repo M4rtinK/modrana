@@ -5,38 +5,43 @@ import QtQuick 1.1
 
 
 IconGridPage {
-    isMockup : true
+
+    function getPage(menu){
+        return Qt.createComponent("Options" + menu + ".qml")
+    }
+
+    isMockup : false
     model : ListModel {
         id : testModel
         ListElement {
             caption : "Map"
             icon : "map.png"
-            menu : ""
+            menu : "MapPage"
         }
         ListElement {
             caption : "UI"
             icon : "n900.png"
-            menu : ""
+            menu : "UIPage"
         }
         ListElement {
             caption : "POI"
             icon : "poi.png"
-            menu : ""
+            menu : "POIPage"
         }
         ListElement {
             caption : "Navigation"
             icon : "navigation.png"
-            menu : ""
+            menu : "NavigationPage"
         }
         ListElement {
             caption : "Network"
             icon : "network.png"
-            menu : ""
+            menu : "NetworkPage"
         }
         ListElement {
             caption : "Debug"
             icon : "debug.png"
-            menu : ""
+            menu : "DebugPage"
         }
     }
 }
