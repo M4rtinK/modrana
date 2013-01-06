@@ -4,6 +4,7 @@ import os
 DEFAULT_DEVICE_MODULE_ID = "pc"
 DEFAULT_GUI_MODULE_ID = "GTK"
 
+
 def getBestDeviceModuleId():
   print("** detecting current device **")
 
@@ -18,8 +19,10 @@ def getBestDeviceModuleId():
   print("** selected %s as device module ID **" % deviceModuleId)
   return deviceModuleId
 
+
 def getBestGUIModuleId():
   return DEFAULT_GUI_MODULE_ID
+
 
 def _check():
   """
@@ -27,7 +30,8 @@ def _check():
   """
   # check CPU architecture
   import subprocess
-  proc = subprocess.Popen(['uname', '-m',], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+  proc = subprocess.Popen(['uname', '-m', ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   return_code = proc.wait()
   arch = proc.stdout.read()
   if ("i686" in arch) or ("x86_64" in arch):
@@ -49,7 +53,9 @@ def _check():
     elif "Nokia RM-696" in cpuinfo: # N9
       print("* Nokia N9 detected")
       return "n9"
-
+    elif "GTA02" in cpuinfo: # N9
+      print("* Nokia N9 detected")
+      return "neo"
   return None
 
 
