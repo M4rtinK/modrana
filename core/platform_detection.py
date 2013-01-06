@@ -54,7 +54,7 @@ def _check():
       print("* Nokia N9 detected")
       return "n9"
     elif "GTA02" in cpuinfo: # N9
-      print("* Nokia N9 detected")
+      print("* Neo FreeRunner GTA02 detected")
       return "neo"
   return None
 
