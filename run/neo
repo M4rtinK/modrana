@@ -1,3 +1,4 @@
 #! /bin/sh
-cd /usr/share/modrana/
-python modrana.py neo
+#cd /usr/share/modrana/
+
+fsoraw -r CPU,Display,GPS 'python modrana.py'
