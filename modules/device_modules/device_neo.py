@@ -20,16 +20,35 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_device_module import DeviceModule
+import subprocess
 
-def getModule(m,d,i):
-  return DeviceNeo(m,d,i)
+
+def getModule(m, d, i):
+  return DeviceNeo(m, d, i)
+
 
 class DeviceNeo(DeviceModule):
   """A Neo FreeRunner modRana device-specific module"""
-  
+
   def __init__(self, m, d, i):
     DeviceModule.__init__(self, m, d, i)
     self.tempUnfullscreen = False
+    # connect to the location start & stop signals,
+    # so that the FreeRunners GPS can be started/stopped
+    l = self.m.get('location', None)
+    if l is not None:
+      l.startSignal.connect(self._startLocationCB)
+      l.stopSignal.connect(self._stopLocationCB)
+
+
+  def _startLocationCB(self):
+    """start the GPS hardware"""
+    print("HANDLE GPS STARTUP")
+
+  def _stopLocationCB(self):
+    """stop the GPS hardware"""
+    print("HANDLE GPS SHUTDOWN")
+
 
   def getDeviceIDString(self):
     return "neo"
@@ -38,7 +57,7 @@ class DeviceNeo(DeviceModule):
     return "OpenMoko Neo FreeRunner"
 
   def getWinWH(self):
-    return 480,600
+    return 480, 600
 
   def startInFullscreen(self):
     return True
@@ -73,3 +92,8 @@ class DeviceNeo(DeviceModule):
         if not display.getFullscreenEnabled():
           display.fullscreenToggle()
           self.tempUnfullscreen = False
+
+  def getLocationType(self):
+    """we use GPSD for location on the Neo FreeRunner
+    as it should be available on both the DH & QtMoko"""
+    return "gpsd"
