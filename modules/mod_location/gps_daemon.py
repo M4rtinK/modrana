@@ -23,12 +23,13 @@ from time import sleep, time
 from base_position_source import PositionSource
 from core.fix import Fix
 
+
 class GPSD(PositionSource):
-  def __init__(self,location):
+  def __init__(self, location):
     PositionSource.__init__(self, location)
     self.connected = False
     self.GPSDConsumer = None
-    self.status="not connected"
+    self.status = "not connected"
 
   def start(self, startMainLoop=False):
     """start the GPSD based location update method"""
@@ -59,27 +60,27 @@ class GPSD(PositionSource):
         tuple instead of a Fix object and only convert to the Fix object once the position data
         is actually requested
         """
-#        (lat,lon,elevation,bearing,speed,timestamp) = fix
+        #        (lat,lon,elevation,bearing,speed,timestamp) = fix
         satCount = len(sats)
         inUseSatCount = len(filter(lambda x: x.used, sats))
 
-        modRanaFix = Fix( (fix.latitude,fix.longitude),
-                   fix.altitude,
-                   fix.track,
-                   fix.speed,
-                   mode = fix.mode,
-                   climb = fix.climb,
-                   sats = satCount,
-                   sats_in_use= inUseSatCount,
-                   horizontal_accuracy = fix.epx*fix.epy,
-                   # TODO: separate x y accuracy support ?
-                   vertical_accuracy = fix.epv,
-                   speed_accuracy = fix.eps,
-                   climb_accuracy = fix.epc,
-                   bearing_accuracy= fix.epd,
-                   time_accuracy = fix.ept,
-                   gps_time = fix.time
-                 )
+        modRanaFix = Fix((fix.latitude, fix.longitude),
+                         fix.altitude,
+                         fix.track,
+                         fix.speed,
+                         mode=fix.mode,
+                         climb=fix.climb,
+                         sats=satCount,
+                         sats_in_use=inUseSatCount,
+                         horizontal_accuracy=fix.epx * fix.epy,
+                         # TODO: separate x y accuracy support ?
+                         vertical_accuracy=fix.epv,
+                         speed_accuracy=fix.eps,
+                         climb_accuracy=fix.epc,
+                         bearing_accuracy=fix.epd,
+                         time_accuracy=fix.ept,
+                         gps_time=fix.time
+        )
         self.fix = modRanaFix
 
   def setDebug(self, value):
@@ -168,11 +169,13 @@ class GPSD(PositionSource):
 
 class GPSDConsumer(threading.Thread):
   """consume data as they come in from the GPSD and store last known fix"""
+
   def __init__(self):
     threading.Thread.__init__(self)
     self.lock = threading.RLock()
     self.stop = False
     import gps_module as gps
+
     self.session = gps.gps(host="localhost", port="2947")
     self.session.stream(flags=gps.client.WATCH_JSON)
     self.verbose = False
@@ -182,6 +185,7 @@ class GPSDConsumer(threading.Thread):
 
   def run(self):
     import gps_module as gps
+
     print("GPSDConsumer: starting\n")
     while True:
       if self.stop == True:
@@ -193,14 +197,20 @@ class GPSDConsumer(threading.Thread):
         print("GPSD: error: GPS daemon not running")
         print(e)
       sf = self.session.fix
-      if sf.mode != gps.MODE_NO_FIX:
+      if sf.mode > 1: # 0 & 1 -> no fix
         with self.lock:
           self.fix = sf
           self.satellites = self.session.satellites
-#          self.fix = (sf.latitude,sf.longitude,sf.altitude,sf.track,sf.speed, time())
+          #          self.fix = (sf.latitude,sf.longitude,sf.altitude,sf.track,sf.speed, time())
           if self.verbose:
-#          if 1:
-            print(self.fix)
+          #          if 1:
+            try:
+              print('GPSD fix debug')
+              print(
+              'mode:' + str(sf.mode) + ' lat,lon:' + str((sf.latitude, sf.longitude)) + ' elev:' + str(sf.altitude))
+            except  Exception, e:
+              print('ERROR debugging GPSD fix')
+              print(e)
       else:
         if self.verbose:
           print("GPSDConsumer: NO FIX, will retry in 1 s")
