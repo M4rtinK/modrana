@@ -1,4 +1,9 @@
 #! /bin/sh
-#cd /usr/share/modrana/
+#
+# NOTE: How to run this script
+# run this script from a directory containing the modrana.py file
+# Example:
+# # cd modrana
+# # ./run/neo
 
 fsoraw -r CPU,Display,GPS 'python modrana.py'
