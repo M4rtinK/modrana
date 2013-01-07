@@ -20,12 +20,16 @@ from __future__ import with_statement # for python 2.5
 from modules.base_module import RanaModule
 from time import *
 from core import gs
+from core.signal import Signal
 
-def getModule(m,d,i):
-  return Location(m,d,i)
+
+def getModule(m, d, i):
+  return Location(m, d, i)
+
 
 class Location(RanaModule):
   """Supplies position info from a position source"""
+
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
     self.tt = 0
@@ -37,6 +41,8 @@ class Location(RanaModule):
     self.status = "Unknown"
     self.enabled = False
     self.provider = None
+    self.startSignal = Signal()
+    self.stopSignal = Signal()
 
     # check if the device handles location by itself
     if not self.modrana.dmod.handlesLocation():
@@ -44,10 +50,12 @@ class Location(RanaModule):
       if method == "qt_mobility":
         print(" @ location: using Qt Mobility")
         import qt_mobility
+
         self.provider = qt_mobility.QtMobility(self)
       else: # GPSD
         print(" @ location: using GPSD")
         import gps_daemon
+
         self.provider = gps_daemon.GPSD(self)
 
     # watch if debugging needs to be enabled
@@ -70,7 +78,7 @@ class Location(RanaModule):
   def _screenUpdateCB(self):
     """update the screen and also GPSD location if enabled
     TODO: more efficient screen updates"""
-#    print("location: screen update")
+    #    print("location: screen update")
 
     # only try to update position info if
     # location is enabled
@@ -108,14 +116,14 @@ class Location(RanaModule):
       if args and len(args) == 2:
         lat = float(args[0])
         lon = float(args[1])
-        print("gps:setting current position to: %f,%f" % (lat,lon))
-        self.set('pos',(lat,lon))
+        print("gps:setting current position to: %f,%f" % (lat, lon))
+        self.set('pos', (lat, lon))
     elif message == "checkGPSEnabled":
-        state = self.get('GPSEnabled', True)
-        if state == True:
-          self.startLocation()
-        elif state == False:
-          self.stopLocation()
+      state = self.get('GPSEnabled', True)
+      if state == True:
+        self.startLocation()
+      elif state == False:
+        self.stopLocation()
     elif message == "gpsdCheckVerboseDebugEnabled":
       self._checkVerbose()
 
@@ -128,21 +136,21 @@ class Location(RanaModule):
       self.set('fix', 0)
       # wait for valid data
       return
-    (lat,lon) = fix.position
+    (lat, lon) = fix.position
     fixClass = 2 # 2D data
 
     # position
-    self.set('pos', (lat,lon))
+    self.set('pos', (lat, lon))
     self.set('pos_source', 'GPSD')
     # bearing
     self.set('bearing', float(fix.bearing))
     # speed
-#    if speed != None:
-#      # normal gpsd reports speed in knots per second
-#      gpsdSpeed = self.get('gpsdSpeedUnit', 'knotsPerSecond')
-#      if gpsdSpeed == 'knotsPerSecond':
-#        # convert to meters per second
-#        speed = float(speed) * 0.514444444444444 # knots/sec to m/sec
+    #    if speed != None:
+    #      # normal gpsd reports speed in knots per second
+    #      gpsdSpeed = self.get('gpsdSpeedUnit', 'knotsPerSecond')
+    #      if gpsdSpeed == 'knotsPerSecond':
+    #        # convert to meters per second
+    #        speed = float(speed) * 0.514444444444444 # knots/sec to m/sec
     if fix.speed is not None:
       self.set('metersPerSecSpeed', fix.speed)
       self.set('speed', fix.speed * 3.6)
@@ -164,7 +172,6 @@ class Location(RanaModule):
     # 3 - 3D
     self.set("fix", fixClass)
 
-
     """always set this key to current epoch once the location is updated
     so that modules can watch it and react on position updates"""
     self.set('locationUpdated', time())
@@ -174,6 +181,8 @@ class Location(RanaModule):
 
   def startLocation(self, startMainLoop=False):
     """start location - device based or gpsd"""
+    # send the location start signal
+    self.startSignal()
     if not self.enabled:
       print("location: enabling location")
       if self.modrana.dmod.handlesLocation():
@@ -186,6 +195,8 @@ class Location(RanaModule):
 
   def stopLocation(self):
     """stop location - device based or gpsd"""
+    # send the location stop signal
+    self.stopSignal()
     print("location: disabling location")
     if self.modrana.dmod.handlesLocation():
       self.modrana.dmod.stopLocation()
