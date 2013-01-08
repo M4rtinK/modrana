@@ -56,3 +56,6 @@ class Fix():
       self.timestamp = datetime.utcnow()
     else:
       self.timestamp = timestamp
+
+  def __str__(self):
+    return 'mode:' + self.mode + 'lat,lon:' + self.position + 'elev:' + self.altitude
