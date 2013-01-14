@@ -7,4 +7,4 @@
 # # ./run/neo
 
 export DISPLAY=:0.0
-fsoraw -f -r CPU,Display,GPS 'python modrana.py'
+fsoraw -f -r CPU 'python modrana.py'
