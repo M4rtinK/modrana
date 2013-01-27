@@ -29,7 +29,7 @@
 import math 
 from loadOsm import *
 
-class Router:
+class Router(object):
   def __init__(self, data):
     self.data = data
   def distance(self,n1,n2):

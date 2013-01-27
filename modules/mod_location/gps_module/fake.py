@@ -97,7 +97,7 @@ class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
 
-class TestLoad:
+class TestLoad(object):
     "Digest a logfile into a list of sentences we can cycle through."
     def __init__(self, logfp, predump=False):
         self.sentences = []	# This is the interesting part
@@ -164,7 +164,7 @@ class PacketError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
 
-class FakeGPS:
+class FakeGPS(object):
     def __init__(self, testload, progress=None):
         self.testload = testload
         self.progress = progress
@@ -295,7 +295,7 @@ class DaemonError(exceptions.Exception):
     def __str__(self):
         return repr(self.msg)
 
-class DaemonInstance:
+class DaemonInstance(object):
     "Control a gpsd instance."
     def __init__(self, control_socket=None):
         self.sockfile = None
@@ -406,7 +406,7 @@ class TestSessionError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
 
-class TestSession:
+class TestSession(object):
     "Manage a session including a daemon with fake GPSes and clients."
     def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, udp=False):
         "Initialize the test session by launching the daemon."

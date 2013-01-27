@@ -23,7 +23,7 @@ import utils
 
 MONAV_DATA_FOLDER_NAME = "monav_data"
 
-class Paths:
+class Paths(object):
   """
   Handle paths to various folders:
   * main profile folder

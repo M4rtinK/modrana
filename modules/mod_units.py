@@ -359,7 +359,7 @@ class Units(RanaModule):
       else: # default - yards
         return self.unitTable['miles']
 
-class Unit:
+class Unit(object):
   """represents an unit of distance in several denominations and name types"""
   def __init__(self, small, normal, type = None, subType = None):
     # P = plural

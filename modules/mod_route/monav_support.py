@@ -39,7 +39,7 @@ from signals_pb2 import RoutingResult
 # Marble stores monav data like this on the N900:
 # /home/user/MyDocs/.local/share/marble/maps/earth/monav/motorcar/europe/czech_republic
 
-class Monav:
+class Monav(object):
   def __init__(self, monavBinaryPath):
     self.monavServer = None
     self.monavServerBinaryPath = monavBinaryPath

@@ -24,7 +24,7 @@ from modules.configobj.configobj import ConfigObj
 CONFIGS = ["map_config.conf", "user_config.conf"]
 
 
-class Configs:
+class Configs(object):
   def __init__(self, modrana):
     self.modrana = modrana
     self.paths = modrana.paths

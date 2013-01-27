@@ -3,7 +3,7 @@ import math
 
 """Polygon intersection classes - SOURCE: http://gpwiki.org/index.php/Physics:2D_Physics_Engine:Intersection_Detection"""
 
-class Vector:
+class Vector(object):
 	"""Basic vector implementation"""
 	def __init__(self, x, y):
 		self.x, self.y = x, y
@@ -32,7 +32,7 @@ class Vector:
 		"""Returns a vector perpendicular to self"""
 		return Vector(-self.y, self.x)
  
-class Projection:
+class Projection(object):
 	"""A projection (1d line segment)"""
 	def __init__(self, min, max):
 		self.min, self.max = min, max
@@ -40,7 +40,7 @@ class Projection:
 		"""returns whether or not self and other intersect"""
 		return self.max > other.min and other.max > self.min
  
-class Polygon:
+class Polygon(object):
 	def __init__(self, points):
 		"""points is a list of Vectors"""
 		self.points = points
@@ -90,7 +90,7 @@ Rect  -- two points, forming a rectangle
 SOURCE: http://wiki.python.org/moin/PointsAndRectangles
 """
 
-class Point:
+class Point(object):
 
     """A point identified by (x,y) coordinates.
 
@@ -215,7 +215,7 @@ class Point:
         return result
 
 
-class Rect:
+class Rect(object):
 
     """A rectangle identified by two points.
 

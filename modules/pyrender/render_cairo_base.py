@@ -30,7 +30,7 @@ from tiledata import *
 from parseOsm import *
 from tilenames import *
 
-class Proj:
+class Proj(object):
   """Simple projection class for geographic data.  Converts lat/long to pixel position"""
   def __init__(self, tx,ty,tz, to):
     """Setup a projection.  
@@ -60,7 +60,7 @@ class Proj:
     y = self.y2 - pLat * self.dy
     return(x,y)
 
-class OsmRenderBase:
+class OsmRenderBase(object):
   
   def imageBackgroundColour(self, mapLayer=None):
     return (0,0,0.5,0.5) # Override this function (r,g,b,a)

@@ -768,7 +768,7 @@ class MapData(RanaModule):
     """for now we are downloading just tiles,
     so I modified this to round the coordinates right after we get them"""
 
-    class spiraller:
+    class spiraller(object):
       def __init__(self, x, y, z):
         self.x = x
         self.y = y

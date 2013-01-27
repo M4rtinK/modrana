@@ -15,7 +15,7 @@ class json_error:
         self.data = data
         self.explanation = explanation
 
-class gpscommon:
+class gpscommon(object):
     "Isolate socket handling and buffering from the protcol interpretation."
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0):
         self.sock = None        # in case we blow up in connect
@@ -179,7 +179,7 @@ class gpsjson(gpscommon):
                 arg += ',"device":"%s"' % devpath
         return self.send(arg + "}")
 
-class dictwrapper:
+class dictwrapper(object):
     "Wrapper that yields both class and dictionary behavior,"
     def __init__(self, ddict):
         self.__dict__ = ddict

@@ -1,6 +1,6 @@
 """an universal class representing a point"""
 
-class Point:
+class Point(object):
   """a point"""
   def __init__(self, lat, lon, elevation=None, message=None):
     self.lat = lat

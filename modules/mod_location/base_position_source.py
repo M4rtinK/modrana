@@ -18,7 +18,7 @@
 #---------------------------------------------------------------------------
 from core.fix import Fix
 
-class PositionSource:
+class PositionSource(object):
   """
   An abstract position source class
   """

@@ -1,4 +1,4 @@
-class RoutingWeights:
+class RoutingWeights(object):
   def __init__(self):
     self.Weightings = {
       'motorway': {'car':10},

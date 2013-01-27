@@ -29,7 +29,7 @@ import tilenames
 import re
 import weights
 
-class LoadOsm:
+class LoadOsm(object):
   """Parse an OSM file looking for routing information, and do routing with it"""
   def __init__(self, transport):
     """Initialise an OSM-file parser"""

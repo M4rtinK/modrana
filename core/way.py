@@ -43,7 +43,7 @@ class TurnByTurnPoint(Point):
     self.SSMLMessage = message
 
 
-class Way:
+class Way(object):
   """a segment of the way
       * Points denote the way
       * Message points are currently mainly used for t-b-t routing announcements
@@ -711,7 +711,7 @@ def _decodePolyline(encoded):
   return array
 
 
-  #class Ways:
+  #class Ways(object):
   #  """a way consisting of one or more segments"""
   #  def __init__(self):
   #    self.segments = []

@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #----------------------------------------------------------------------------
-class Rectangle:
+class Rectangle(object):
   def __init__(self,x,y,dx,dy):
     self.x1 = x;
     self.y1 = y;

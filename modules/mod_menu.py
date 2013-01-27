@@ -744,7 +744,7 @@ class Menus(RanaModule):
     self.lists[name] = newListableMenu
     return newListableMenu
   
-  class ListableMenu:
+  class ListableMenu(object):
     """a listable menu object"""
     def __init__(self, name, menus, container, parentAction, descFunction=None, drawFunction=None, displayedItems=3):
       """use custom item and description drawing functions, or use the default ones"""

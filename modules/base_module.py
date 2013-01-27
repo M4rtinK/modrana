@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-class RanaModule:
+class RanaModule(object):
   def __init__(self, modules=None, data=None, initInfo=None):
     if not initInfo: initInfo = {}
     if not data: data = {}

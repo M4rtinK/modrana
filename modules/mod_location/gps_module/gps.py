@@ -64,7 +64,7 @@ SIGNAL_STRENGTH_UNKNOWN = NaN
 WATCH_NEWSTYLE	= 0x010000	# force JSON streaming
 WATCH_OLDSTYLE	= 0x020000	# force old-style streaming
 
-class gpsfix:
+class gpsfix(object):
     def __init__(self):
         self.mode = MODE_NO_FIX
         self.time = NaN
@@ -81,10 +81,10 @@ class gpsfix:
         self.eps = NaN
         self.epc = NaN
 
-class gpsdata:
+class gpsdata(object):
     "Position, track, velocity and status information returned by a GPS."
 
-    class satellite:
+    class satellite(object):
         def __init__(self, PRN, elevation, azimuth, ss, used=None):
             self.PRN = PRN
             self.elevation = elevation

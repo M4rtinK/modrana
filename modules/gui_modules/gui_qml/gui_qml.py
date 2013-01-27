@@ -56,7 +56,7 @@ def newlines2brs(text):
   return re.sub('\n', '<br>', text)
 
 
-class Logger:
+class Logger(object):
   def __init__(self, log=True):
     pass
     self.log = log

@@ -155,7 +155,7 @@ class StorePOI(RanaModule):
     else:
       return None
 
-  class POI:
+  class POI(object):
     """this class represents a POI"""
     def __init__(self,callback,label,description,lat,lon,catId,id=None):
       self.callback = callback

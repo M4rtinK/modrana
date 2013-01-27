@@ -38,7 +38,7 @@ CURRENT_POSITION_UNKNOWN_ERROR = 7
 USE_LAST_KNOWN_POSITION_KEYWORD = "LAST_KNOWN_POSITION"
 
 
-class Startup:
+class Startup(object):
   def __init__(self, modrana):
     self.modrana = modrana
     self.originalStdout = None

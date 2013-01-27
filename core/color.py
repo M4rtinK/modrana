@@ -5,7 +5,7 @@ from core import gs
 if gs.GUIString == "GTK":
   import gtk
 
-class Color:
+class Color(object):
   """an object representing a color
      provides:
      * hex color string

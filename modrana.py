@@ -50,7 +50,7 @@ ALL_MODULE_FOLDERS = [
 ]
 
 
-class ModRana:
+class ModRana(object):
   """
   This is THE main modRana class.
   """

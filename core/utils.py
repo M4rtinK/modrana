@@ -11,7 +11,7 @@ class Empty(Exception):
   pass
 
 
-class SynchronizedCircularStack:
+class SynchronizedCircularStack(object):
   """
   this should be a synchronized circular stack implementation
   * LIFO
@@ -84,7 +84,7 @@ class SynchronizedCircularStack:
 #    """non-synchronized version of item existence testing"""
 #    return item in self.list
 
-class ListContainer:
+class ListContainer(object):
   """a WIP efficient list container, that does not need to actually store the
   whole list in memory"""
 
