@@ -25,7 +25,7 @@ def getModule(m,d,i):
   return Log(m,d,i)
 
 class Log(RanaModule):
-  """A modRana logging module"""
+  """A modRana STDOUT logging module"""
   
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
@@ -50,7 +50,8 @@ class Log(RanaModule):
 
   def getLogFilePath(self):
     logFolderPath = self.modrana.paths.getLogFolderPath()
-    """modRana should make sure that the folder exists"""
+    # the paths module tires to make sure that the folder exists
+    # before returning the path
     units = self.m.get('units', None)
     if units:
       timeHashString = units.getTimeHashString()
