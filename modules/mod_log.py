@@ -40,14 +40,6 @@ class Log(RanaModule):
     if message == "checkLoggingStatus": # check if logging was enabled
       self.checkLoggingStatus()
 
-  def update(self):
-    if self.fSock:
-      try:
-        self.fSock.flush()
-      except Exception, e:
-        print("**log: flushing the log file failed")
-        print(e)
-
   def getLogFilePath(self):
     logFolderPath = self.modrana.paths.getLogFolderPath()
     # the paths module tires to make sure that the folder exists
@@ -73,7 +65,11 @@ class Log(RanaModule):
       self.savedStdout = sys.stdout
       if not self.fSock:
         print("**log: opening stdout log file")
-        self.fSock = open(self.getLogFilePath(), 'w')
+        # open a line-buffered socket (the "1" parameter in open() does that)
+        # -> like this, every write to stdout modRana does should be flashed to file
+        # -> so if it crashes for some reason, the output leading up to the crash should be already
+        # in storage
+        self.fSock = open(self.getLogFilePath(), 'w', 1)
       print("**log: redirecting stdout to log file:\%s" % self.currentLogPath)
       sys.stdout = self.fSock
       print("**log: stdout redirected to (this :) log file")
