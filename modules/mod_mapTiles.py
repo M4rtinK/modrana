@@ -771,8 +771,8 @@ class MapTiles(RanaModule):
     start1 = time.clock()
     pixbuf = self._storeTiles.getTile(layerPrefix, z, x, y, layerType)
 
-    """None from getTiles means the tile was not found
-       False means loading the tile from file to pixbuf failed"""
+    # None from getTiles means the tile was not found
+    # False means loading the tile from file to pixbuf failed
     if pixbuf:
       start2 = time.clock()
       self.storeInMemory(self.pixbuf2cairoImageSurface(pixbuf), name)
@@ -790,8 +790,9 @@ class MapTiles(RanaModule):
     if self.get('network', 'full') == 'full':
       sprint("automatic tile download enabled - starting download")
       # use threads
-      """the thread list condition is used to signalize to the download manager,
-      that here is a new download request"""
+
+      # the thread list condition is used to signalize to the download manager,
+      # that here is a new download request
       with self.threadListCondition:
         timestamp = time.time()
         request = (name, x, y, z, layer, layerPrefix, layerType, filename, timestamp)
