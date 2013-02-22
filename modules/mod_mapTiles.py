@@ -1062,6 +1062,8 @@ class MapTiles(RanaModule):
         layerDetails.get('type', 'png'))
 
 #    print("__%s__" % coords)
+#     print("TILE URL")
+#     print(url)
     return url
 
   def shutdown(self):
