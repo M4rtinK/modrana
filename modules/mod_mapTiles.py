@@ -210,16 +210,15 @@ class MapTiles(RanaModule):
     # check if the tile is being downloaded
     if name in self.threads or name in self.images[0]:
       return
-    """ as we check both in thread list and image cache (where download threads deposit tiles) we don't
-    use the corresponding image cache and thread list locks
-    - the window for collision is ver small
-    - possible collisions:
-    -> falsely discarding a request for a thread that actually just errored out
-    -> adding a request for a thread that actually just started (dl manager will kill such requests, np)
-    - so basically nothing serious, also even when ve falsely discard a loading request,
-    it will probably be soon repeated (this is by design to flush the no longer relevant tiles from the
-    download queue)
-    """
+    # as we check both in thread list and image cache (where download threads deposit tiles) we don't
+    # use the corresponding image cache and thread list locks
+    # - the window for collision is ver small
+    # - possible collisions:
+    # -> falsely discarding a request for a thread that actually just errored out
+    # -> adding a request for a thread that actually just started (dl manager will kill such requests, np)
+    # - so basically nothing serious, also even when ve falsely discard a loading request,
+    # it will probably be soon repeated (this is by design to flush the no longer relevant tiles from the
+    # download queue)
     layerInfo = self.mapLayers.get(layer, None)
     if layerInfo is None: # is the layer info valid ?
       print("mapTiles: invalid layer")
@@ -283,9 +282,7 @@ class MapTiles(RanaModule):
     while True:
       with self.threadListCondition:
         try:
-          """
-          wait for notification that there might be download requests or free download slots
-          """
+          # wait for notification that there might be download requests or free download slots
           self.threadListCondition.wait()
           if self.shutdownAllThreads:
             print("\nmapTiles: automatic tile download management thread shutting down")
@@ -363,10 +360,8 @@ class MapTiles(RanaModule):
         self.idleLoaderActive = False
         return False # the stack is empty, remove this callback
     except Exception, e:
-      """
-      on an error, we need to shut down or else idleLoaderActive might get stuck
-      and no loader will be started
-      """
+      # on an error, we need to shut down or else idleLoaderActive might get stuck
+      # and no loader will be started
       print("mapTiles: exception in idle loader\n", e)
       self.idleLoaderActive = False
       traceback.print_exc()
@@ -426,8 +421,8 @@ class MapTiles(RanaModule):
       proj = self.m.get('projection', None)
       drawImage = self.drawImage # method binding to speed back method lookup
       overlay = self.get('overlay', False)
-      """ if overlay is enabled, we use a special naming
-          function in place of the default one"""
+      # if overlay is enabled, we use a special naming
+      # function in place of the default one
 
       singleGetName = self.getTileName
       ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
@@ -490,8 +485,8 @@ class MapTiles(RanaModule):
           (centerX, centerY) = ((sw / 2.0), (sh / 2.0))
           scP = rectangles.Point(centerX, centerY)
 
-          """create a polygon representing the viewport and rotate around
-          current rotation center it to match the rotation and align with screen"""
+          # create a polygon representing the viewport and rotate around
+          # current rotation center it to match the rotation and align with screen
           p1 = rectangles.Point(sx, sy)
           p2 = rectangles.Point(sx + sw, sy)
           p3 = rectangles.Point(sx, sy + sh)
@@ -546,11 +541,10 @@ class MapTiles(RanaModule):
                     drawImage(cr, tileImage[0], x1, y1, scale)
                   else:
                     if overlay:
-                      """ check if the separate tiles are already cached
-                      and send loading request/-s if not
-                      if both tiles are in the cache, combine them, cache and display the result
-                      and remove the separate tiles from cache
-                      """
+                      # check if the separate tiles are already cached
+                      # and send loading request/-s if not
+                      # if both tiles are in the cache, combine them, cache and display the result
+                      # and remove the separate tiles from cache
                       layerBack = layerInfo[0][0]
                       layerOver = layerInfo[1][0]
                       nameBack = singleGetName(layer1, z, x, y)
@@ -620,11 +614,10 @@ class MapTiles(RanaModule):
                 else:
                   # tile not found im memory cache, do something else
                   if overlay:
-                    """ check if the separate tiles are already cached
-                    and send loading request/-s if not
-                    if both tiles are in the cache, combine them, cache and display the result
-                    and remove the separate tiles from cache
-                    """
+                    # check if the separate tiles are already cached
+                    # and send loading request/-s if not
+                    # if both tiles are in the cache, combine them, cache and display the result
+                    # and remove the separate tiles from cache
                     layerBack = layerInfo[0][0]
                     layerOver = layerInfo[1][0]
                     nameBack = singleGetName(layer1, z, x, y)
@@ -633,10 +626,8 @@ class MapTiles(RanaModule):
                     overImage = self.images[0].get(nameOver)
                     if backImage and overImage: # both images available
                       if backImage[1]['type'] == "normal" and overImage[1]['type'] == "normal":
-                        """
-                        we check the the metadata to filter out the "Downloading..."
-                        special tiles
-                        """
+                        # we check the the metadata to filter out the "Downloading..."
+                        # special tiles
                         combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
                         # remove the separate images from cache
                         self.removeImageFromMemory(nameBack)
@@ -658,11 +649,12 @@ class MapTiles(RanaModule):
 
       if requests:
         self.loadRequestCStack.batchPush(requests)
-        """can the loadRequestCStack get full ?
-           NO :)
-           it takes the list, reverses it, extends its old internal
-           list with it - from this list a slice conforming to
-           its size limit is taken and set as the new internal list"""
+        # can the loadRequestCStack get full ?
+        # NO :)
+        # it takes the list, reverses it, extends its old internal
+        # list with it - from this list a slice conforming to
+        # its size limit is taken and set as the new internal list
+
         # notify the loading thread using the notify Queue
         #        self.loadingNotifyQueue.put("load", block=False)
         # try to start the idle tile loader
@@ -1119,25 +1111,22 @@ class MapTiles(RanaModule):
           tileDownloadFailedSurface = self.callback.images[1]['tileDownloadFailed'][0]
           expireTimestamp = time.time() + 10
           self.callback.storeInMemory(tileDownloadFailedSurface, self.name, 'semiPermanentError', expireTimestamp)
-          """
-          like this, when tile download fails due to a http error,
-          the error tile is loaded instead
-          like this:
-           - modRana does not immediately try to download a tile that errors out
-           - the error tile is shown without modifying the pipeline too much
-           - modRana will eventually try to download the tile again,
-             after it is flushed with old tiles from the memory
-          """
+          # like this, when tile download fails due to a http error,
+          # the error tile is loaded instead
+          # like this:
+          #  - modRana does not immediately try to download a tile that errors out
+          #  - the error tile is shown without modifying the pipeline too much
+          #  - modRana will eventually try to download the tile again,
+          #    after it is flushed with old tiles from the memory
       except urllib2.URLError:
         if self.useImageSurface:
           tileNetworkErrorSurface = self.callback.images[1]['tileNetworkError'][0]
           expireTimestamp = time.time() + 10
           self.callback.storeInMemory(tileNetworkErrorSurface, self.name, 'error',
             expireTimestamp) # retry after 10 seconds
-          """ as not to DOS the system when we temporarily loose internet connection or other such error occurs,
-               we load a temporary error tile with expiration timestamp instead of the tile image
-               TODO: actually remove tiles according to expiration timestamp :)
-          """
+          # as not to DOS the system when we temporarily loose internet connection or other such error occurs,
+          # we load a temporary error tile with expiration timestamp instead of the tile image
+          # TODO: actually remove tiles according to expiration timestamp :)
 
       # something other is wrong (most probably a corrupted tile)
       except Exception, e:
@@ -1154,7 +1143,7 @@ class MapTiles(RanaModule):
         # try to remove its own instance from the thread list, so that the instance could be garbage collected
         if self.name in self.callback.threads.keys():
           del self.callback.threads[self.name]
-          """notify the download manager that a download slot is now free"""
+          # notify the download manager that a download slot is now free
           self.callback.threadListCondition.notifyAll()
 
     def printErrorMessage(self, e):
