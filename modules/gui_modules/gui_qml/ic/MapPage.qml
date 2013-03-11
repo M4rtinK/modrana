@@ -22,7 +22,12 @@ Item {
         id: pinchmap
         width: parent.width
         height: parent.height
-        zoomLevel: 11
+        zoomLevel: options.get("z", 11)
+
+        onZoomLevelChanged : {
+            // save zoom level
+            options.setI("z", parseInt(zoomLevel))
+        }
 
         Connections {
             target: gps
