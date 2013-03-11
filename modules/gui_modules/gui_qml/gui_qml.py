@@ -731,6 +731,23 @@ class Options(QtCore.QObject):
     print(key, value)
     return self.modrana.set(key, value)
 
+  # while the overloaded set function works just fine,
+  # it always stores a float, even if an integer is pasted
+  # from QML
+  # so if you want to make sure an int or a float is stored
+  # in options, use the following two functions
+
+  @QtCore.Slot(str, int)
+  def setI(self, key, value):
+    print("SET int")
+    print(key, value)
+    return self.modrana.set(key, int(value))
+
+  @QtCore.Slot(str, float)
+  def setF(self, key, value):
+    print("SET float")
+    print(key, value)
+    return self.modrana.set(key, float(value))
 
 class Item(QtCore.QObject):
   """implement m-declarative-item"""
