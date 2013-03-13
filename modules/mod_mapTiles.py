@@ -26,6 +26,7 @@ import os
 import traceback
 import urllib2
 import time
+import string
 from core import utils
 from modules import urllib3
 from core import rectangles
@@ -1030,6 +1031,9 @@ class MapTiles(RanaModule):
       url = '%s&x=%d&y=%d&z=%d' % (
         layerDetails['tiles'],
         x, y, z)
+    elif coords == 'web_mercator_substitution':
+      template = string.Template(layerDetails['tiles'])
+      url = str(template.substitute(z=z, x=x, y=y))
     elif coords == 'quadtree': # handle Virtual Earth maps and satellite
       quadKey = quadTree(x, y, z)
       url = '%s%s?g=452' % ( #  don't know what the g argument is, maybe revision ? but its not optional
