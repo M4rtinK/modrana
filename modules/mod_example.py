@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
-# Sample of a Rana module.
+# Sample of a modRana module.
 #----------------------------------------------------------------------------
 # Copyright 2007, Oliver White
 #
@@ -20,10 +20,10 @@
 from modules.base_module import RanaModule
 
 def getModule(m,d,i):
-  return(Example(m,d,i))
+  return Example(m,d,i)
 
 class Example(RanaModule):
-  """A sample pyroute module"""
+  """A sample modRana module"""
   
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
