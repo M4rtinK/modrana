@@ -158,13 +158,13 @@ class Configs(object):
       'coordinates':'coordinates',
       }
 
-    def allNeededIn(needed, dict):
+    def allNeededIn(needed, layerDict):
       """
       check if all required values are filled in
       """
       # TODO: optimize this ?
       for key in needed:
-        if key in dict:
+        if key in layerDict:
           continue
         else:
           return False
@@ -181,9 +181,9 @@ class Configs(object):
         print("modRana configs: map layer configuration file not available")
         return False
 
-    config = {}
+    #config = {}
     mapLayers = {}
-    mapGroups = {}
+    #mapGroups = {}
     try:
       config = ConfigObj(mapConfigPath)
       for layerID in config['layers'].keys():
