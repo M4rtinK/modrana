@@ -35,7 +35,13 @@ Rectangle {
     
     property alias angle: rot.angle
 
-    property string layer: rWin.layer
+    // use mapnik as the default map layer
+    property variant layers :  ListModel {
+        ListElement {
+            layerId: "mapnik"
+            layerOpacity: 1.0
+        }
+ }
 
     property int earthRadius: 6371000
 
@@ -172,6 +178,16 @@ Rectangle {
         return [length_pixels, length_meters]
     }
 
+    function setLayer(layerNumber, newLayerId) {
+        console.log("setting layer " + layerNumber + " name to " + newLayerId)
+        layers.setProperty(layerNumber, "layerId", newLayerId)
+    }
+
+    function setLayerOpacity(layerNumber, opacityValue) {
+        console.log("setting layer " + layerNumber + " opacity to " + opacityValue)
+        layers.setProperty(layerNumber, "layerOpacity", opacityValue)
+    }
+
     function getMetersPerPixel(lat) {
         return Math.cos(lat * Math.PI / 180.0) * 2.0 * Math.PI * earthRadius / (256 * (maxTileNo + 1))
     }
@@ -283,9 +299,13 @@ Rectangle {
             model: (pinchmap.numTilesX * pinchmap.numTilesY);
             Rectangle {
                 id: tile
-                property alias source: img.source;
+                property alias source: imgs.source;
                 property int tileX: cornerTileX + (index % numTilesX)
                 property int tileY: cornerTileY + Math.floor(index / numTilesX)
+
+                width: tileSize;
+                height: tileSize;
+                color: "#c0c0c0";
 
                 /*
                 Rectangle {
@@ -307,29 +327,33 @@ Rectangle {
                     }
                 }
                 */
-
-                Label {
-                    visible : true
-                    opacity: 0.3
-                    anchors.left: parent.left
-                    anchors.leftMargin: 16
-                    y: parent.height/2 - 32
-                    text: (img.status == Image.Ready ? "Ready" :
-                           img.status == Image.Null ? "Not Set" :
-                           img.status == Image.Error ? "Error" :
-                           "Loading...")
+                Repeater {
+                    id: imgs
+                    //property string source: tileUrl(model[0].layerId, tileX, tileY)
+                    property string source
+                    model: pinchmap.layers
+                    Item {
+                        Label {
+                            visible : true
+                            opacity: 0.3
+                            anchors.left: tile.left
+                            anchors.leftMargin: 16
+                            y: tile.height/2 - 32
+                            text: layerId + ": "+(img.status == Image.Ready ? "Ready" :
+                                   img.status == Image.Null ? "Not Set" :
+                                   img.status == Image.Error ? "Error" :
+                                   "Loading...")
+                        }
+                        Image {
+                            property int retryCount : 1
+                            id: img
+                            opacity: layerOpacity
+                            anchors.fill: tile;
+                            source : tileUrl(layerId, tileX, tileY)
+                            asynchronous : true
+                        }
+                    }
                 }
-                Image {
-                    property int retryCount : 1
-                    id: img
-                    anchors.fill: parent;
-                    source : tileUrl(pinchmap.layer, tileX, tileY)
-                    asynchronous : true
-                }
-
-                width: tileSize;
-                height: tileSize;
-                color: "#c0c0c0";
             }
 
         }
