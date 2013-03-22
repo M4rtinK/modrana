@@ -14,8 +14,14 @@ Item {
 
     property bool center : true
 
+    property variant pinchmap
+
     Component.onCompleted : {
         pinchmap.setCenterLatLon(gps.lastGoodFix.lat, gps.lastGoodFix.lon);
+    }
+
+    function getMap() {
+        return pinchmap
     }
 
     PinchMap {
@@ -76,7 +82,6 @@ Item {
         //TODO: switching between GPS bearing & compass azimuth
         currentPositionAzimuth: gps.lastGoodFix.bearing
         currentPositionError: gps.lastGoodFix.error
-
     }
 
     Image {

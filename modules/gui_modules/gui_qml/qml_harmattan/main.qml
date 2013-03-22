@@ -82,13 +82,7 @@ PageStackWindow {
         }
     }
 
-    property string layer: "mapnik"
-
     property string foo : "bar"
-
-    function setLayer(name) {
-        layer = name
-    }
 
     /** global notification handling **/
     function notify(text, msTimeout) {
