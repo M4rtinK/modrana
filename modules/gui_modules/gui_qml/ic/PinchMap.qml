@@ -270,6 +270,7 @@ Rectangle {
     }
 
     function tileUrl(layerID, tx, ty) {
+        //console.log("tileUrl" + tx + "/" + ty)
         if (ty < 0 || ty > maxTileNo) {
             return "image://icons/"+ rWin.mTheme +"/noimage.png"
         } else {
