@@ -362,7 +362,7 @@ Rectangle {
                         Label {
                             visible : img.status != Image.Ready
                             opacity: 0.7
-                            anchors.left: tile.left
+                            //anchors.left: tile.left
                             anchors.leftMargin: 16
                             y: tile.height/2 - 32
                             text: layerId + ":<br> "+(img.status == Image.Ready ? "Ready" :
@@ -374,7 +374,7 @@ Rectangle {
                             property int retryCount : 1
                             id: img
                             opacity: layerOpacity
-                            anchors.fill: tile;
+                            //anchors.fill: tile;
                             source : tileUrl(layerId, tileX, tileY)
                             asynchronous : true
                         }
