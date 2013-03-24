@@ -68,6 +68,9 @@ BasePage {
                         MouseArea {
                             anchors.fill : parent
                             onClicked : {
+                                // open the layer selection dialog
+                                // and tell it what is the number of the layer
+                                // to be set
                                 layerSelectD.layerIndex = index
                                 layerSelectD.open()
                             }
@@ -91,11 +94,13 @@ BasePage {
                     }
                 }
                 Grid {
+                    // this grid creates the two bottom
+                    // add/remove buttons
+                    id : actionGrid
                     anchors.top : lGrid.bottom
                     anchors.left : parent.left
                     anchors.right : parent.right
                     //height : isLastItem ? lGrid.height : 0
-                    id : actionGrid
                     columns : 2
                     property real cellWidth : width/columns
                     visible : isLastItem
