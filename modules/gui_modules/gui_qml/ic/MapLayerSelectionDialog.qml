@@ -50,12 +50,16 @@ SelectionDialog {
         ListElement { name: "Google satellite"; layerId: "gsat" }
         ListElement { name: "Google overlay"; layerId: "gover" }
         ListElement { name: "Google 8-bit"; layerId: "g8bit" }
+        ListElement { name: "Google Traffic"; layerId: "gtraffic_overlay" }
+        ListElement { name: "Google Weather °C"; layerId: "gweather_overlay_celsius" }
         ListElement { name: "Virtual Earth map"; layerId: "vmap" }
         ListElement { name: "Virtual Earth hybrid"; layerId: "vsat" }
-        ListElement { name: "Virtual Earth satellite"; layerId: "vear" }
+        ListElement { name: "Virtual Earth satellite"; layerId: "vaer" }
         ListElement { name: "Yahoo map"; layerId: "ymap" }
         ListElement { name: "Yahoo satellite"; layerId: "ysat" }
         ListElement { name: "Yahoo overlay"; layerId: "yover" }
         ListElement { name: "Czech mountain-bike map"; layerId: "cz_mtb" }
+        ListElement { name: "map1.eu"; layerId: "map1_eu" }
+        ListElement { name: "Watercolor"; layerId: "stamen_watercolor" }
     }
 }
