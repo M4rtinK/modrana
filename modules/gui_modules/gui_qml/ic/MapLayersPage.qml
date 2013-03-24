@@ -54,14 +54,27 @@ BasePage {
                     anchors.rightMargin : 16
                     columns : parent.inPortrait ? 1 : 2
                     property real cellWidth : width/columns
-                    Label {
+                    Item {
+                        id : layerLabelWrapper
                         width : lGrid.cellWidth
-                        anchors.verticalCenter : parent.verticalCenter
-                        property string label : layerId == "" ? "<i>not selected</i>" : "<b>" + layerName + "</b>"
-                        text : prefix + label
-                        property string prefix : index == 0 ? "map : " : index + " : "
+                        height : opacitySlider.height
+                        Label {
+                            width : parent.width
+                            anchors.verticalCenter : parent.verticalCenter
+                            property string label : layerId == "" ? "<i>not selected</i>" : "<b>" + layerName + "</b>"
+                            text : prefix + label
+                            property string prefix : index == 0 ? "map : " : index + " : "
+                        }
+                        MouseArea {
+                            anchors.fill : parent
+                            onClicked : {
+                                layerSelectD.layerIndex = index
+                                layerSelectD.open()
+                            }
+                        }
                     }
                     Slider {
+                        id : opacitySlider
                         width : lGrid.cellWidth
                         stepSize : 0.1
                         value : layerOpacity
@@ -132,6 +145,14 @@ BasePage {
                     }
                 }
             }
+        }
+    }
+    MapLayerSelectionDialog {
+        id : layerSelectD
+        property int layerIndex
+        onLayerSelected  : {
+            rWin.mapPage.getMap().setLayer(layerIndex, selectedLayer.layerId, selectedLayer.name)
+            accept()
         }
     }
 }
