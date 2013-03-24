@@ -20,16 +20,30 @@ BasePage {
             anchors.top : parent.top
             anchors.left : parent.left
             anchors.right : parent.right
-            anchors.bottom : parent.bottom
+            //anchors.bottom : parent.bottom
+            //height : 400
             id : layersLW
-            height : parent.availableHeight
-            delegate : BackgroundRectangle {
+            height : layersPage.availableHeight
+
+            contentWidth: parent.width
+            contentHeight: childrenRect.height
+
+            delegate : Item {
                 id : delegateWrapper
                 //anchors.fill : parent
                 anchors.left : parent.left
                 anchors.right : parent.right
-                //height : isLastItem ? lGrid.height + actionGrid.height : lGrid.height
-                height : lGrid.height
+                height : lGrid.height + actionGrid.height
+                BackgroundRectangle {
+                    id : delegateBackground
+                    anchors.left : parent.left
+                    anchors.right : parent.right
+                    // this background only covers the delegates,
+                    // the last-item buttons have their own
+                    height : lGrid.height
+                }
+
+
                 // is this item the last ?
                 property bool isLastItem : index == layersLW.model.count - 1
                 Grid {
@@ -67,13 +81,14 @@ BasePage {
                     anchors.top : lGrid.bottom
                     anchors.left : parent.left
                     anchors.right : parent.right
+                    //height : isLastItem ? lGrid.height : 0
                     id : actionGrid
                     columns : 2
                     property real cellWidth : width/columns
                     visible : isLastItem
                     BackgroundRectangle {
                         width : actionGrid.cellWidth
-                        height : lGrid.height
+                        height : isLastItem ? lGrid.height : 0
                         active : addArea.pressed
                         Label {
                             id : addText
@@ -81,19 +96,21 @@ BasePage {
                             width : parent.width
                             text : "<b>add</b>"
                             horizontalAlignment : Text.AlignHCenter
-                            MouseArea {
-                                id : addArea
-                                anchors.fill : parent
-                                onClicked : {
-                                    console.log("add layer")
-                                    rWin.mapPage.getMap().appendLayer("openptmap_overlay", 1.0)
-                                }
+                        }
+                        MouseArea {
+                            id : addArea
+                            anchors.fill : parent
+                            onClicked : {
+                                console.log("add layer")
+                                console.log(layersLW.height)
+                                console.log(layersLW.contentHeight)
+                                rWin.mapPage.getMap().appendLayer("openptmap_overlay", 1.0)
                             }
                         }
                     }
                     BackgroundRectangle {
                         width : actionGrid.cellWidth
-                        height : lGrid.height
+                        height : isLastItem ? lGrid.height : 0
                         active : removeArea.pressed
                         visible : layersLW.model.count > 1
                         Label {
@@ -102,14 +119,14 @@ BasePage {
                             width : parent.width
                             text : "<b>remove</b>"
                             horizontalAlignment : Text.AlignHCenter
-                            MouseArea {
-                                id : removeArea
-                                anchors.fill : parent
-                                onClicked : {
-                                    console.log("remove layer")
-                                    // remove the last layer
-                                    rWin.mapPage.getMap().removeLayer(layersLW.model.count - 1)
-                                }
+                        }
+                        MouseArea {
+                            id : removeArea
+                            anchors.fill : parent
+                            onClicked : {
+                                console.log("remove layer")
+                                // remove the last layer
+                                rWin.mapPage.getMap().removeLayer(layersLW.model.count - 1)
                             }
                         }
                     }
