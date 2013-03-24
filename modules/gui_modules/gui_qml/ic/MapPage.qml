@@ -16,6 +16,8 @@ Item {
 
     property variant pinchmap
 
+    property alias layers : pinchmap.layers
+
     Component.onCompleted : {
         pinchmap.setCenterLatLon(gps.lastGoodFix.lat, gps.lastGoodFix.lon);
     }
@@ -29,6 +31,13 @@ Item {
         width: parent.width
         height: parent.height
         zoomLevel: options.get("z", 11)
+
+        layers : ListModel {
+            ListElement {
+                layerId: "mapnik"
+                layerOpacity: 1.0
+            }
+        }
 
         onZoomLevelChanged : {
             // save zoom level
