@@ -364,8 +364,12 @@ Rectangle {
                             opacity: 0.7
                             //anchors.left: tile.left
                             anchors.leftMargin: 16
-                            y: tile.height/2 - 32
-                            text: layerId + ":<br> "+(img.status == Image.Ready ? "Ready" :
+                            font.pixelSize : 16
+                            elide : Text.ElideRight
+
+                            //y: tile.height/2 - 32
+                            y: 8 + index*16
+                            text: layerName + " "+(img.status == Image.Ready ? "Ready" :
                                    img.status == Image.Null ? "Not Set" :
                                    img.status == Image.Error ? "Error" :
                                    "Loading...")
