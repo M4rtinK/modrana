@@ -43,6 +43,14 @@ Page {
         contentWidth: parent.width
         contentHeight: (headerHeight + contentField.childrenRect.height + bottomPadding)
         //flickableDirection: Flickable.VerticalFlick
+        Item {
+            id : contentField
+            anchors.top : header.bottom
+            //height : childrenRect.height
+            anchors.bottom : parent.bottom
+            anchors.left : parent.left
+            anchors.right : parent.right
+        }
         Rectangle {
             id : header
             color : "#92aaf3"
@@ -65,14 +73,6 @@ Page {
                 wrapMode : Text.NoWrap
                 horizontalAlignment : _fitsIn ? Text.AlignHCenter : Text.AlignLeft
             }
-        }
-        Item {
-            id : contentField
-            anchors.top : header.bottom
-            //height : childrenRect.height
-            anchors.bottom : parent.bottom
-            anchors.left : parent.left
-            anchors.right : parent.right
         }
     }
     IconButton {
