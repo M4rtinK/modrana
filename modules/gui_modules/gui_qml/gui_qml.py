@@ -143,6 +143,10 @@ class QMLGUI(GUIModule):
     tiles = MapTiles(self)
     rc.setContextProperty("mapTiles", tiles)
 
+    # make constants accessible
+    self.constants = self.getConstants()
+    rc.setContextProperty("C", self.constants)
+
     self.window.closeEvent = self._qtWindowClosed
     #self.window.show()
 
@@ -268,6 +272,11 @@ class QMLGUI(GUIModule):
     else:
       return None
 
+
+  def getConstants(self):
+    C = {
+    }
+    return C
 
 class Platform(QtCore.QObject):
   """make current platform available to QML and integrable as a property"""
