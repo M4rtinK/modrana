@@ -41,6 +41,7 @@ BasePage {
                     // this background only covers the delegates,
                     // the last-item buttons have their own
                     height : lGrid.height
+                    active : labelMA.pressed
                 }
 
 
@@ -66,6 +67,7 @@ BasePage {
                             property string prefix : index == 0 ? "map : " : index + " : "
                         }
                         MouseArea {
+                            id : labelMA
                             anchors.fill : parent
                             onClicked : {
                                 // open the layer selection dialog
