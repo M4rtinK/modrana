@@ -45,6 +45,7 @@ SelectionDialog {
     model: ListModel {
         ListElement { name: "OSM Mapnik"; layerID: "mapnik" }
         ListElement { name: "OSM Cycle map"; layerID: "cycle" }
+        ListElement { name: "OSM Transit overlay"; layerID: "openptmap_overlay" }
         ListElement { name: "Google map"; layerID: "gmap" }
         ListElement { name: "Google satellite"; layerID: "gsat" }
         ListElement { name: "Google overlay"; layerID: "gover" }
