@@ -6,7 +6,7 @@ SelectionDialog {
     id: layerSelectD
     titleText: "Select map layer"
 
-    signal layerSelected (string selectedLayer)
+    signal layerSelected (variant selectedLayer)
 
     //selectedIndex: 1
 
@@ -38,24 +38,24 @@ SelectionDialog {
     }*/
 
     onSelectedIndexChanged : {
-        layerSelected(model.get(selectedIndex).layerID)
+        layerSelected(model.get(selectedIndex))
         accept()
     }
 
     model: ListModel {
-        ListElement { name: "OSM Mapnik"; layerID: "mapnik" }
-        ListElement { name: "OSM Cycle map"; layerID: "cycle" }
-        ListElement { name: "OSM Transit overlay"; layerID: "openptmap_overlay" }
-        ListElement { name: "Google map"; layerID: "gmap" }
-        ListElement { name: "Google satellite"; layerID: "gsat" }
-        ListElement { name: "Google overlay"; layerID: "gover" }
-        ListElement { name: "Google 8-bit"; layerID: "g8bit" }
-        ListElement { name: "Virtual Earth map"; layerID: "vmap" }
-        ListElement { name: "Virtual Earth hybrid"; layerID: "vsat" }
-        ListElement { name: "Virtual Earth satellite"; layerID: "vear" }
-        ListElement { name: "Yahoo map"; layerID: "ymap" }
-        ListElement { name: "Yahoo satellite"; layerID: "ysat" }
-        ListElement { name: "Yahoo overlay"; layerID: "yover" }
-        ListElement { name: "Czech mountain-bike map"; layerID: "cz_mtb" }
+        ListElement { name: "OSM Mapnik"; layerId: "mapnik" }
+        ListElement { name: "OSM Cycle map"; layerId: "cycle" }
+        ListElement { name: "OSM Transit overlay"; layerId: "openptmap_overlay" }
+        ListElement { name: "Google map"; layerId: "gmap" }
+        ListElement { name: "Google satellite"; layerId: "gsat" }
+        ListElement { name: "Google overlay"; layerId: "gover" }
+        ListElement { name: "Google 8-bit"; layerId: "g8bit" }
+        ListElement { name: "Virtual Earth map"; layerId: "vmap" }
+        ListElement { name: "Virtual Earth hybrid"; layerId: "vsat" }
+        ListElement { name: "Virtual Earth satellite"; layerId: "vear" }
+        ListElement { name: "Yahoo map"; layerId: "ymap" }
+        ListElement { name: "Yahoo satellite"; layerId: "ysat" }
+        ListElement { name: "Yahoo overlay"; layerId: "yover" }
+        ListElement { name: "Czech mountain-bike map"; layerId: "cz_mtb" }
     }
 }
