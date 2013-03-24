@@ -181,7 +181,7 @@ Rectangle {
 
     function setLayer(layerNumber, newLayerId, newLayerName) {
         // set layer ID and name
-        console.log("setting layer " + layerNumber + " name to " + newLayerId)
+        console.log("setting layer " + layerNumber + " to " + newLayerId + "/" + newLayerName)
         layers.setProperty(layerNumber, "layerId", newLayerId)
         layers.setProperty(layerNumber, "layerName", newLayerName)
     }
