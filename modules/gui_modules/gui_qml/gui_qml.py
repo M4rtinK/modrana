@@ -124,6 +124,9 @@ class QMLGUI(GUIModule):
     self.view.engine().addImageProvider("tiles", self.tilesProvider)
 
     rc = self.view.rootContext()
+    # make core modRana functionality accessible from QML
+    modRanaCore = ModRana(self.modrana)
+    rc.setContextProperty("modrana", modRanaCore)
     # make options accessible from QML
     options = Options(self.modrana)
     rc.setContextProperty("options", options)
@@ -696,6 +699,50 @@ class GPSDataWrapper(QtCore.QObject):
   hasFix = QtCore.Property(bool, _gps_has_fix, notify=changed)
   mode = QtCore.Property(str, _gps_mode, notify=changed)
 
+
+class ModRana(QtCore.QObject):
+  """
+  core modRana functionality
+  """
+
+  def __init__(self, modrana):
+    QtCore.QObject.__init__(self)
+    self.modrana = modrana
+    self.modrana.watch("mode", self._modeChangedCB)
+    self.modrana.watch("theme", self._themeChangedCB)
+
+  # mode
+
+  def _getMode(self):
+    return self.modrana.get('mode', "car")
+
+  def _setMode(self, mode):
+    self.modrana.set('mode', mode)
+
+  modeChanged = Signal()
+
+  def _modeChangedCB(self, *args):
+    """notify when the mode key changes in options"""
+    self.modeChanged.emit()
+
+  # theme
+
+  def _getTheme(self):
+    return self.modrana.get('theme', "default")
+
+  def _setTheme(self, newTheme):
+    return self.modrana.set('theme', newTheme)
+
+  themeChanged = Signal()
+
+  def _themeChangedCB(self, *args):
+    """notify when the mode key changes in options"""
+    self.themeChanged.emit()
+
+  # properties
+
+  mode = QtCore.Property(str, _getMode, _setMode, notify=modeChanged)
+  theme = QtCore.Property(str, _getTheme, _setTheme, notify=themeChanged)
 
 class Options(QtCore.QObject):
   """make options available to QML and integrable as a property"""

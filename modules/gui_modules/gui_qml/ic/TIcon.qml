@@ -8,7 +8,7 @@ Image {
     // TODO: proper slash,backslash,qUrl handling ?
 
     // handle place-holders
-    source : iconName == "" ? "" : "image://icons/" + rWin.mTheme + "/" + iconName
+    source : iconName == "" ? "" : "image://icons/" + modrana.theme + "/" + iconName
     fillMode : Image.PreserveAspectFit
     smooth : true
 }

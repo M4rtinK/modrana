@@ -8,7 +8,7 @@ IconGridPage {
     isMockup : false
 
     function getPage(menu){
-        options.set('mode', menu)
+        modrana.mode = menu
         rWin.push(null)
     }
 

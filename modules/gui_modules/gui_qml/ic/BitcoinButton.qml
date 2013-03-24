@@ -99,7 +99,7 @@ Rectangle {
                 anchors.top : dialogContent.top
                 anchors.topMargin : 8
                 anchors.horizontalCenter : parent.horizontalCenter
-                source : "image://icons/" + rWin.mTheme + "/qrcode_bitcoin.png"
+                source : "image://icons/" + modrana.theme + "/qrcode_bitcoin.png"
             }
             TextInput {
                 id : urlField

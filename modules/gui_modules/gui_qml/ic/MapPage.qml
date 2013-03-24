@@ -99,7 +99,7 @@ Item {
         /* TODO: investigate how to replace this by an image loader
          what about rendered size ?
          */
-        source: "../../../../themes/"+ rWin.mTheme +"/windrose-simple.svg"
+        source: "../../../../themes/"+ modrana.theme +"/windrose-simple.svg"
         transform: [Rotation {
                 id: azCompass
                 origin.x: compassImage.width/2
@@ -123,7 +123,7 @@ Item {
             /* TODO: investigate how to replace this by an image loader
              what about rendered size ?
              */
-            source: "../../../../themes/"+ rWin.mTheme +"/arrow_target.svg"
+            source: "../../../../themes/"+ modrana.theme +"/arrow_target.svg"
             width: (compassImage.paintedWidth / compassImage.sourceSize.width)*sourceSize.width
             fillMode: Image.PreserveAspectFit
             x: compassImage.width/2 - width/2
@@ -145,7 +145,7 @@ Item {
         anchors.rightMargin: 16
         spacing: 16
         Button {
-            iconSource: "image://icons/" + rWin.mTheme + "/" + "plus_small.png"
+            iconSource: "image://icons/" + modrana.theme + "/" + "plus_small.png"
             onClicked: {pinchmap.zoomIn() }
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
@@ -153,7 +153,7 @@ Item {
             //text : "<h1>+</h1>"
         }
         Button {
-            iconSource: "image://icons/" + rWin.mTheme + "/" + "minus_small.png"
+            iconSource: "image://icons/" + modrana.theme + "/" + "minus_small.png"
             onClicked: {pinchmap.zoomOut() }
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
@@ -170,7 +170,7 @@ Item {
         anchors.leftMargin: 16
         spacing: 16
         Button {
-            iconSource: "image://icons/" + rWin.mTheme + "/" + "minimize_small.png"
+            iconSource: "image://icons/" + modrana.theme + "/" + "minimize_small.png"
             checkable : true
             visible: !platform.fullscreenOnly()
             onClicked: {
@@ -181,7 +181,7 @@ Item {
         }
         Button {
             id: followPositionButton
-            iconSource: "image://icons/" + rWin.mTheme + "/" + "center_small.png"
+            iconSource: "image://icons/" + modrana.theme + "/" + "center_small.png"
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             checked : tabMap.center
@@ -204,7 +204,7 @@ Item {
         }
         Button {
             id: mainMenuButton
-            iconSource: "image://icons/" + rWin.mTheme + "/" + "menu_small.png"
+            iconSource: "image://icons/" + modrana.theme + "/" + "menu_small.png"
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             onClicked: {
