@@ -180,6 +180,7 @@ Rectangle {
     }
 
     function setLayer(layerNumber, newLayerId, newLayerName) {
+        // set layer ID and name
         console.log("setting layer " + layerNumber + " name to " + newLayerId)
         layers.setProperty(layerNumber, "layerId", newLayerId)
         layers.setProperty(layerNumber, "layerName", newLayerName)
@@ -191,10 +192,17 @@ Rectangle {
     }
 
     function appendLayer(layerId, layerName, opacityValue) {
+        // Add layer to the end of the layer list.
+        // The layer will be the top-most one,
+        // overlaying all other layers.
         layers.append({"layerId" : layerId, "layerName" : layerName, "layerOpacity" : opacityValue })
     }
 
     function removeLayer(layerNumber) {
+        // remove layer with given number
+        // NOTE: the bottom/background layer
+        // can't be removed
+
         // check if the layer number is larger than 0
         // (we don't allow to remove the background layer)
         // and also if it is not out of the model range
