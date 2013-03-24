@@ -21,6 +21,7 @@ Page {
     property alias headerTextColor: headerLabel.color
     property int headerHeight : rWin.inPortrait ? height/7.0 : height/5.5
     property int bottomPadding : 0
+    property real availableHeight : parent.height - bottomPadding - headerHeight
     property alias isFlickable :  pageFlickable.interactive
     ScrollDecorator {
          id: scrolldecorator
