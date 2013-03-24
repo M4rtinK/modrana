@@ -360,12 +360,12 @@ Rectangle {
                     model: pinchmap.layers
                     Item {
                         Label {
-                            visible : true
-                            opacity: 0.3
+                            visible : img.status != Image.Ready
+                            opacity: 0.7
                             anchors.left: tile.left
                             anchors.leftMargin: 16
                             y: tile.height/2 - 32
-                            text: layerId + ": "+(img.status == Image.Ready ? "Ready" :
+                            text: layerId + ":<br> "+(img.status == Image.Ready ? "Ready" :
                                    img.status == Image.Null ? "Not Set" :
                                    img.status == Image.Error ? "Error" :
                                    "Loading...")
