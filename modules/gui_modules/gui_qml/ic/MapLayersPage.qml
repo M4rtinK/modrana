@@ -85,6 +85,7 @@ BasePage {
                                 anchors.fill : parent
                                 onClicked : {
                                     console.log("add layer")
+                                    rWin.mapPage.getMap().appendLayer("openptmap_overlay", 1.0)
                                 }
                             }
                         }
@@ -104,6 +105,8 @@ BasePage {
                                 anchors.fill : parent
                                 onClicked : {
                                     console.log("remove layer")
+                                    // remove the last layer
+                                    rWin.mapPage.getMap().removeLayer(layersLW.model.count - 1)
                                 }
                             }
                         }

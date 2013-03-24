@@ -41,7 +41,7 @@ Rectangle {
             layerId: "mapnik"
             layerOpacity: 1.0
         }
- }
+    }
 
     property int earthRadius: 6371000
 
@@ -186,6 +186,21 @@ Rectangle {
     function setLayerOpacity(layerNumber, opacityValue) {
         console.log("setting layer " + layerNumber + " opacity to " + opacityValue)
         layers.setProperty(layerNumber, "layerOpacity", opacityValue)
+    }
+
+    function appendLayer(layerId, opacityValue) {
+        layers.append({"layerId" : layerId, "layerOpacity" : opacityValue })
+    }
+
+    function removeLayer(layerNumber) {
+        // check if the layer number is larger than 0
+        // (we don't allow to remove the background layer)
+        // and also if it is not out of the model range
+        if (layerNumber>0 && layerNumber<layers.count) {
+            layers.remove(layerNumber)
+        } else {
+            console.log("pinch map: can't remove layer - wrong number: " + layerNumber)
+        }
     }
 
     function getMetersPerPixel(lat) {
