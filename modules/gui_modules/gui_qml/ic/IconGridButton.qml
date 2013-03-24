@@ -11,6 +11,7 @@ Item {
     property alias sensitive : mouseArea.enabled
     property string text : ""
     signal clicked
+    signal pressAndHold
 
     //scale : mouseArea.pressed ? 0.9 : 1.0
 
@@ -64,6 +65,9 @@ Item {
         //onPressed: icgb.clicked()
         onPressedChanged: {
             pressed ? icgb.state = "PRESSED" : icgb.state = "RELEASED"
+        }
+        onPressAndHold : {
+            icgb.pressAndHold()
         }
         //onReleased: icgb.state = "RELEASED"
     }

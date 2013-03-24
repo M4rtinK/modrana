@@ -75,6 +75,9 @@ Page {
         onClicked : {
             rWin.pageStack.pop()
         }
+        onPressAndHold : {
+            rWin.pageStack.pop(null)
+        }
     }
 
     Rectangle {

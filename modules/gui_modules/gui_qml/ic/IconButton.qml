@@ -22,6 +22,7 @@ Rectangle {
     radius : 10
     smooth : true
     signal clicked
+    signal pressAndHold
     TIcon {
         id: themedIcon
         anchors.horizontalCenter : parent.horizontalCenter
@@ -38,6 +39,9 @@ Rectangle {
         onClicked: icb.clicked()
         onPressedChanged: {
             pressed ? icb.color = toggledColor : icb.color = normalColor
+        }
+        onPressAndHold : {
+            icb.pressAndHold()
         }
 
     }
