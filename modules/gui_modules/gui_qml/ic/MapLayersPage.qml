@@ -53,6 +53,13 @@ BasePage {
                         maximumValue : 1.0
                         minimumValue : 0.0
                         valueIndicatorText : (value * 10) + " %"
+                        onPressedChanged : {
+                            // set the value once users
+                            // stops interacting with the slider
+                            if (pressed == false) {
+                                rWin.mapPage.getMap().setLayerOpacity(index, value)
+                            }
+                        }
                     }
                 }
                 Grid {
