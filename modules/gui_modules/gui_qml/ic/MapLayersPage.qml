@@ -28,7 +28,8 @@ BasePage {
                 //anchors.fill : parent
                 anchors.left : parent.left
                 anchors.right : parent.right
-                height : isLastItem ? lGrid.height + actionGrid.height : lGrid.height
+                //height : isLastItem ? lGrid.height + actionGrid.height : lGrid.height
+                height : lGrid.height
                 // is this item the last ?
                 property bool isLastItem : index == layersLW.model.count - 1
                 Grid {
@@ -94,6 +95,7 @@ BasePage {
                         width : actionGrid.cellWidth
                         height : lGrid.height
                         active : removeArea.pressed
+                        visible : layersLW.model.count > 1
                         Label {
                             id : removeText
                             anchors.verticalCenter : parent.verticalCenter
