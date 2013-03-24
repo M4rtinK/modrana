@@ -34,6 +34,7 @@ Item {
 
         layers : ListModel {
             ListElement {
+                layerName : "OSM Mapnik"
                 layerId: "mapnik"
                 layerOpacity: 1.0
             }

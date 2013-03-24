@@ -57,9 +57,9 @@ BasePage {
                     Label {
                         width : lGrid.cellWidth
                         anchors.verticalCenter : parent.verticalCenter
-                        property string label : layerId == "" ? "<i>not selected</i>" : layerId
+                        property string label : layerId == "" ? "<i>not selected</i>" : "<b>" + layerName + "</b>"
                         text : prefix + label
-                        property string prefix : index == 0 ? "<b>main map</b> " : "<b>overlay " + index + "</b> "
+                        property string prefix : index == 0 ? "map : " : index + " : "
                     }
                     Slider {
                         width : lGrid.cellWidth
@@ -104,7 +104,7 @@ BasePage {
                                 console.log("add layer")
                                 console.log(layersLW.height)
                                 console.log(layersLW.contentHeight)
-                                rWin.mapPage.getMap().appendLayer("openptmap_overlay", 1.0)
+                                rWin.mapPage.getMap().appendLayer("openptmap_overlay", "OSM Transit Overlay", 1.0)
                             }
                         }
                     }

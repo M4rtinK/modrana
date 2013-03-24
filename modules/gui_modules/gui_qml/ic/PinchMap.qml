@@ -38,8 +38,9 @@ Rectangle {
     // use mapnik as the default map layer
     property variant layers :  ListModel {
         ListElement {
-            layerId: "mapnik"
-            layerOpacity: 1.0
+            layerName : "OSM Mapnik"
+            layerId : "mapnik"
+            layerOpacity : 1.0
         }
     }
 
@@ -178,9 +179,10 @@ Rectangle {
         return [length_pixels, length_meters]
     }
 
-    function setLayer(layerNumber, newLayerId) {
+    function setLayer(layerNumber, newLayerId, newLayerName) {
         console.log("setting layer " + layerNumber + " name to " + newLayerId)
         layers.setProperty(layerNumber, "layerId", newLayerId)
+        layers.setProperty(layerNumber, "layerName", newLayerName)
     }
 
     function setLayerOpacity(layerNumber, opacityValue) {
@@ -188,8 +190,8 @@ Rectangle {
         layers.setProperty(layerNumber, "layerOpacity", opacityValue)
     }
 
-    function appendLayer(layerId, opacityValue) {
-        layers.append({"layerId" : layerId, "layerOpacity" : opacityValue })
+    function appendLayer(layerId, layerName, opacityValue) {
+        layers.append({"layerId" : layerId, "layerName" : layerName, "layerOpacity" : opacityValue })
     }
 
     function removeLayer(layerNumber) {
