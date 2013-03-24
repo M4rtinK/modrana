@@ -1,7 +1,5 @@
 import QtQuick 1.1
-//import com.nokia.meego 1.0
 import "./qtc"
-
 
 // map, ui, POI, navigation, network, debug
 
@@ -13,20 +11,32 @@ IconGridPage {
         if (menu == "mapDialog") {
             console.log("OPEN MAP LAYER DIALOG")
             layerSelectD.open()
+        } else if (menu == "LayersPage") {
+            var component = Qt.createComponent("Map" + menu + ".qml");
+            if (component.status == Component.Ready) {
+                var component = Qt.createComponent("Map" + menu + ".qml")
+                var layersPage = component.createObject(rWin)
+                return layersPage
+             } else if (component.status == Component.Error) {
+                 // Error Handling
+                 console.log("Error loading component:", component.errorString());
+             }
+        } else {
+            return Qt.createComponent("Map" + menu + ".qml")
         }
     }
 
     model : ListModel {
         id : testModel
         ListElement {
-            caption : "Layer"
+            caption : "Main map"
             icon : "map_layers.png"
             menu : "mapDialog"
         }
         ListElement {
-            caption : "Layers"
+            caption : "Overlays"
             icon : "map_layers.png"
-            menu : "mapLayers"
+            menu : "LayersPage"
         }
         ListElement {
             caption : "Download"
