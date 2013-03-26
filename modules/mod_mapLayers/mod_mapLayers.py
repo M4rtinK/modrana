@@ -19,6 +19,25 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 
+# lists keys that need to be defined for a layer
+# in the map configuration file to be valid,
+# otherwise the layer will be rejected
+# defined for use in modRana
+
+MAP_LAYER_REQUIRED_KEYS = {
+  'label',
+  'url',
+  'max_zoom',
+  'min_zoom',
+  'type',
+  'folder_prefix',
+  'coordinates'
+}
+
+MAP_LAYER_GROUP_REQUIRED_KEYS = {
+  'label'
+}
+
 def getModule(m,d,i):
   return MapLayers(m,d,i)
 
@@ -27,6 +46,83 @@ class MapLayers(RanaModule):
   
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
+    self._layers = {}
+    self._groups = {}
+    # parse the config file
+    self._parseConfig()
+
+  def _getLayerById(self, layerId):
+    """Get layer by Id
+    :param layerId: map layer group ID
+    :return: MapLayer object instance
+    """
+    return self._layers.get(layerId, None)
+
+  def getMapLayerGroupById(self, groupId):
+    """Get group by Id
+    :param groupId: map layer group ID
+    :return: MapLayerGroup object instance
+    """
+    return self._groups.get(groupId, None)
+
+  def getMapLayerGroupList(self):
+    """Get a list off all known groups
+    :return: a list of all groups
+    """
+    return self._groups.values()
+
+  def _parseConfig(self):
+    # check if there is at least one valid layer
+    self._parseLayers()
+    self._parseGroups()
+
+  def _parseLayers(self):
+    """Parse all map layer definitions"""
+    # check if there is at least one valid layer
+
+    layerDefinitions = self.modrana.configs.mapConfig.get('layers', {})
+    for layerId, layerDefinition in layerDefinitions.iteritems():
+      if self._hasRequiredKeys(layerDefinition, MAP_LAYER_REQUIRED_KEYS):
+        self._layers[layerId] = MapLayer(layerId, layerDefinition)
+      else:
+        print('MapLAyers: layer %s definition is missing required keys')
+    if self._layers == {}:
+      print('MapLayers: map config has no valid layers,'
+            ' using Mapnik fallback layer')
+      self._layers['mapnik'] = self._getFallbackLayer()
+
+  def _parseGroups(self):
+    """Parse all map layer group definitions"""
+    # as groups are not strictly needed for modRana
+    # to show at least one map layer, we don't check if the
+    # configuration file has any
+    if self.modrana.configs.mapConfig:
+      groupsDict = self.modrana.configs.mapConfig.get('groups', {})
+      for groupId, groupDefinition in groupsDict.iteritems():
+        if self._hasRequiredKeys(groupDefinition, MAP_LAYER_GROUP_REQUIRED_KEYS):
+          self._groups[groupId] = MapLayerGroup(groupId, groupDefinition)
+
+  def _getFallbackLayer(self):
+    """In case that loading the map configuration
+    file fails, this Mapnik layer can be used as a fallback.
+    """
+    return MapLayer(
+      layerId="mapnik",
+      config = {
+        'label' :"OSM Mapnik",
+        'url' : "http://c.tile.openstreetmap.org",
+        'max_zoom' : 18,
+        'min_zoom' : 0,
+        'folder_prefix' : "OpenStreetMap I",
+        'coordinates' : "osm"
+      }
+    )
+
+  def _hasRequiredKeys(self, definition, requiredKeys):
+    """Check if the layerDefinition has all keys specified that
+    are required"""
+    defSet = set(definition.keys())
+    return requiredKeys <= defSet
 
 class MapLayer(object):
   """A map layer"""
