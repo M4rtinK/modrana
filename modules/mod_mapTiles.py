@@ -1034,6 +1034,11 @@ class MapTiles(RanaModule):
     elif coords == 'web_mercator_substitution':
       template = string.Template(layerDetails['tiles'])
       url = str(template.substitute(z=z, x=x, y=y))
+    elif coords == 'quadtree_substitution': # handle Virtual Earth with substitution
+      quadKey = quadTree(x, y, z)
+      template = string.Template(layerDetails['tiles'])
+      url = str(template.substitute(quadindex=quadKey))
+    # depreciated by the substitution method, drop this some time in the future
     elif coords == 'quadtree': # handle Virtual Earth maps and satellite
       quadKey = quadTree(x, y, z)
       url = '%s%s?g=452' % ( #  don't know what the g argument is, maybe revision ? but its not optional
