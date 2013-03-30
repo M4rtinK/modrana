@@ -371,7 +371,7 @@ class StoreTiles(RanaModule):
     """test if a tile exists
        if fromThread=False, a new connection is created and disconnected again
        NEW CLEANED UP VERSION"""
-    layer = self._mapLayers._getLayerById(layerId)
+    layer = self._mapLayers.getLayerById(layerId)
     if layer is None: # is the layer info valid ?
       print("storeTiles: layerId not found: %s" % layerId)
       return None

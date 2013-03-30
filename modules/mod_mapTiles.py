@@ -147,7 +147,7 @@ class MapTiles(RanaModule):
       return cacheItem[0]
 
     # get the layer object
-    layer = self._mapLayersModule.getLayerById(layerId)
+    layer = self._getLayerById(layerId)
     if layer is None:
       print("mapTiles: invalid layer")
       return
@@ -730,7 +730,7 @@ class MapTiles(RanaModule):
 
   def _getLayerById(self, layerId):
     """Get layer description from the mapLayers module"""
-    return self._mapLayersModule._getLayerById(layerId)
+    return self._mapLayersModule.getLayerById(layerId)
 
   def loadImage(self, name, x, y, z, layerId):
     """Check that an image is loaded, and try to load it if not"""

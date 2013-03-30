@@ -51,7 +51,7 @@ class MapLayers(RanaModule):
     # parse the config file
     self._parseConfig()
 
-  def _getLayerById(self, layerId):
+  def getLayerById(self, layerId):
     """Get layer by Id
     :param layerId: map layer group ID
     :return: MapLayer object instance
