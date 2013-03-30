@@ -55,48 +55,46 @@ class Options(RanaModule):
     # option content variables
     self.monavPackList = []
 
-  def _getCategoryID(self, id):
-    return "opt_cat_%s" % id # get a standardized id
+  def _getCategoryID(self, catId):
+    return "opt_cat_%s" % catId # get a standardized id
 
-  def addCategory(self, name, inId, icon, actionPrefix="", actionSufix=""):
+  def addCategory(self, name, inId, icon, actionPrefix="", actionSuffix=""):
     """this method should be run only after menu module instance
     is available in self.menuModule and the options menu is cleared,
     eq. has at least the escape button"""
     # first we add the category button to the options
-    id = self._getCategoryID(inId) # get a standardized id
-    action = "%sset:menu:%s%s" % (actionPrefix, id, actionSufix)
+    catId = self._getCategoryID(inId) # get a standardized id
+    action = "%sset:menu:%s%s" % (actionPrefix, catId, actionSuffix)
     self.menuModule.addItem('options', name, icon, action)
     # initialize menu for the new category menu
-    self.menuModule.clearMenu(id, "set:menu:options")
+    self.menuModule.clearMenu(catId, "set:menu:options")
     # as a convenience, return the id
     return inId
 
-  def _getGroupId(self, catId, id):
+  def _getGroupId(self, catId, groupId):
     parentId = self._getCategoryID(catId)
-    return "%s_opt_group_%s" % (parentId, id)
+    return "%s_opt_group_%s" % (parentId, groupId)
 
-  def addGroup(self, name, id, parentId, icon, actionPrefix="",
+  def addGroup(self, name, groupId, parentId, icon, actionPrefix="",
                actionSuffix="", registerToMenu=True, backButtonAction=None):
     """this method ads a new (empty) options group to category specified by
     catId, as a convenience feature, the id of the new group is returned"""
     catId = self._getCategoryID(parentId)
-    id = self._getGroupId(parentId, id) # get a standardized id
-    """
-    handle empty parent ids - such ids can be valid because the menu switching is handled
-    handled entirely by the pre and post actions
-    """
+    groupId = self._getGroupId(parentId, groupId) # get a standardized id
+    # handle empty parent ids - such ids can be valid because the menu switching is handled
+    # handled entirely by the pre and post actions
     if not parentId:
       action = "%s%s" % (actionPrefix, actionSuffix)
     else:
-      action = "%sset:menu:options#%s%s" % (actionPrefix, id, actionSuffix)
+      action = "%sset:menu:options#%s%s" % (actionPrefix, groupId, actionSuffix)
 
     if registerToMenu: # add to options menu structure ?
       self.menuModule.addItem(catId, name, icon, action)
     if backButtonAction is not None:
-      self.options[id] = [backButtonAction, 0, []]
+      self.options[groupId] = [backButtonAction, 0, []]
     else:
-      self.options[id] = ["set:menu:%s" % catId, 0, []]
-    return id
+      self.options[groupId] = ["set:menu:%s" % catId, 0, []]
+    return groupId
 
   def setGroupParent(self, groupID, parentID):
     """set the parent id of a given group id"""
@@ -148,7 +146,7 @@ class Options(RanaModule):
     """generate item tuples for nested item menus"""
     menuItems = [] # an ordered list of all the menu items
     itemDict = {} # for easily assigning keys to labels
-    id = 1 # id 0 is the escape button
+    index = 1 # id 0 is the escape button
 
     for value, name, icon, action in inputList:
       if value == "groupIdentifier": # this item is a group
@@ -161,14 +159,14 @@ class Options(RanaModule):
           item = self.menuModule.generateItem("#%s" % name, "generic",
             "setWithMode:%s:%s:%s|%s" % (fakeMode, variable, value, backAction))
       menuItems.append(item)
-      itemDict[value] = (name, id)
-      id += 1
+      itemDict[value] = (name, index)
+      index += 1
     return menuItems, itemDict
 
   def _generateItems(self, valueNameList, variable, backAction, fakeMode=None):
     menuItems = [] # an ordered list of all the menu items
     itemDict = {} # for easily assigning keys to labels
-    id = 1 # id 0 is the escape button
+    index = 1 # id 0 is the escape button
     for value, name in valueNameList:
       if fakeMode is None: # just use the current mode
         item = self.menuModule.generateItem("#%s" % name, "generic",
@@ -177,8 +175,8 @@ class Options(RanaModule):
         item = self.menuModule.generateItem("#%s" % name, "generic",
           "setWithMode:%s:%s:%s|%s" % (fakeMode, variable, value, backAction))
       menuItems.append(item)
-      itemDict[value] = (name, id)
-      id += 1
+      itemDict[value] = (name, index)
+      index += 1
     return menuItems, itemDict
 
   def addItemsOption(self, title, variable, items, group, default=None, fakeMode=None, preAction=None):
@@ -200,8 +198,8 @@ class Options(RanaModule):
     # load all items to the menu
     menu = self.menuModule.addItemsToThisMenu(menu, menuItems)
     # store the menu in the menu module
-    """NOTE: for the returning back to the group to work correctly,
-    the menu is stored under a key combined from the variable and group names"""
+    # NOTE: for the returning back to the group to work correctly,
+    # the menu is stored under a key combined from the variable and group names
     storageKey = self._getItemsOptionStorageKey(group, variable, fakeMode=fakeMode)
     # add the Item menu entry button
     self.menuModule.addItemMenu(storageKey, menu, wideButtons=True)
@@ -237,8 +235,8 @@ class Options(RanaModule):
 
     # create submenus for the groups & a toplevel menu
 
-    """NOTE: for the returning back to the group to work correctly,
-    the menu is stored under a key combined from the variable and group names"""
+    # NOTE: for the returning back to the group to work correctly,
+    # the menu is stored under a key combined from the variable and group names
     storageKey = self._getItemsOptionStorageKey(group, variable, fakeMode=fakeMode)
 
     groupIndex = 1 # 0 is the back button
@@ -321,8 +319,8 @@ class Options(RanaModule):
   def addOption(self, title, variable, choices, group, default=None):
     """add an option item"""
 
-    """ add group name to choices,
-this is needed for the item tools menu to know where to return"""
+    # add group name to choices,
+    # this is needed for the item tools menu to know where to return
     choices['groupName'] = group
 
     newOption = [title, variable, choices, group, default]
@@ -336,11 +334,11 @@ this is needed for the item tools menu to know where to return"""
     """add a raw option to options
     NOTE: the options contains its group ID"""
     (title, variable, choices, group, default) = optionData
-    """ as some options have have side effects when they are created,
-    we need to check option the type and replicate those effect as needed"""
-    type = choices['type']
+    # as some options have have side effects when they are created,
+    # we need to check option the type and replicate those effect as needed
+    optionType = choices['type']
     choices = dict(choices)
-    if type == 'selectOneItem':
+    if optionType == 'selectOneItem':
       if 'mode' in choices:
         fakeMode = choices['mode']
       else:
@@ -576,7 +574,7 @@ this is needed for the item tools menu to know where to return"""
 
 
     # ** screen
-    """only add if supported on device"""
+    # only add if supported on device
     display = self.m.get('display', None)
     if display:
       if display.screenBlankingControlSupported():
@@ -867,8 +865,8 @@ this is needed for the item tools menu to know where to return"""
       group,
       "modrana_poi.db")
 
-    """ExportPOIDatabaseToCSV is just a dummy value,
-       we just need to send a dump message to storePOI"""
+    # ExportPOIDatabaseToCSV is just a dummy value,
+    # we just need to send a dump message to storePOI
     addOpt("Export POI Database to CSV", "EportPOIDatabaseToCSV",
       [("dump", "click to export", "storePOI:dumpToCSV"),
        ("dump", "click to export", "storePOI:dumpToCSV")],
@@ -1078,7 +1076,7 @@ this is needed for the item tools menu to know where to return"""
 
     # clear the group
     self.clearGroup(self.keyStateListGroupID)
-    """ for each mode show the current key state"""
+    # for each mode show the current key state
     modes = self.modrana.getModes().keys()
     modes.sort()
 
@@ -1098,8 +1096,8 @@ this is needed for the item tools menu to know where to return"""
       optionD[3] = self.keyStateListGroupID # set the group to the state list
       self.addRawOption(optionD)
 
-  def handleMessage(self, message, type, args):
-    if type == "ml" and message == "scroll":
+  def handleMessage(self, message, messageType, args):
+    if messageType == "ml" and message == "scroll":
       (direction, menuName) = args
       index = self.options[menuName][1]
       maxIndex = len(self.options[menuName][2]) - 1
@@ -1112,7 +1110,7 @@ this is needed for the item tools menu to know where to return"""
     elif message == "save":
       self.modrana._saveOptions()
 
-    elif type == 'ml' and message == "go2ItemToolsMenu":
+    elif messageType == 'ml' and message == "go2ItemToolsMenu":
       (groupID, index, key) = args
       index = int(index)
       # reload the tools menu
@@ -1128,38 +1126,38 @@ this is needed for the item tools menu to know where to return"""
         )
         menus.addItem(menuName, 'default#reset to', 'generic', resetAction)
         self.set('menu', menuName)
-    elif type == 'ml' and message == "go2ItemStateListMenu":
+    elif messageType == 'ml' and message == "go2ItemStateListMenu":
       (groupID, index, key) = args
       index = int(index)
-      """reload the option key state list for the given key"""
+      # reload the option key state list for the given key
       self._reloadKeyStateList(groupID, index, key)
       # go to the menu
       self.set('menu', 'options#%s' % self.keyStateListGroupID)
 
-    elif type == 'ms' and message == 'resetKey':
-      """ reset a given options item to default, including any key modifiers"""
+    elif messageType == 'ms' and message == 'resetKey':
+      # reset a given options item to default, including any key modifiers
       key = args
       self.modrana.purgeKey(key)
       default = self.getKeyDefault(key)
       self.set(key, default)
 
-    elif type == 'ml' and message == 'addKeyModifier':
-      """make the value of a key mode specific"""
+    elif messageType == 'ml' and message == 'addKeyModifier':
+      # make the value of a key mode specific
       (key, mode) = args
       self.modrana.addKeyModifier(key, mode=mode)
-    elif type == 'ml' and message == 'removeKeyModifier':
+    elif messageType == 'ml' and message == 'removeKeyModifier':
       (key, mode) = args
-      """make the value of a key mode unspecific"""
+      # make the value of a key mode unspecific
       self.modrana.removeKeyModifier(key, mode=mode)
 
-    elif type == "ms" and message == "espeakParams":
+    elif messageType == "ms" and message == "espeakParams":
       # switch between espeak parameter modes
       if args == "manual":
         self._updateVoiceManual("remove")
       elif args == "auto":
         self._updateVoiceManual("add")
 
-    elif type == "ml" and message == "editVariable":
+    elif messageType == "ml" and message == "editVariable":
       (variable, label, description) = args
       initialText = self.get(variable, "")
       entry = self.m.get('textEntry', None)
@@ -1171,12 +1169,12 @@ this is needed for the item tools menu to know where to return"""
     #Mode specific keys:
     #this means that the options key can have a different value
     #depending on the current mode, thus enabling better customization"""
-    elif type == "ms" and message == "makeKeyModeSpecific":
+    elif messageType == "ms" and message == "makeKeyModeSpecific":
       self.modrana.addKeyModifier(args)
-    elif type == "ms" and message == "makeKeyModeUnSpecific":
+    elif messageType == "ms" and message == "makeKeyModeUnSpecific":
       self.modrana.removeKeyModifier(args)
 
-    elif type == 'ml' and message == 'update':
+    elif messageType == 'ml' and message == 'update':
       if len(args) >= 1:
         target = args[0]
         if target == 'packListMonav':
@@ -1212,8 +1210,8 @@ this is needed for the item tools menu to know where to return"""
       self.removeOption("sound", "voice_out", "placeholder")
 
   def handleTextEntryResult(self, key, result):
-    (type, variable) = key.split("_", 1)
-    if type == "editVariable":
+    (optionType, variable) = key.split("_", 1)
+    if optionType == "editVariable":
       print("editing variable: %s with: %s" % (variable, result))
       self.set(variable, result)
 
@@ -1257,8 +1255,8 @@ this is needed for the item tools menu to know where to return"""
             fakeMode = None
           value = self.get(variable, None, mode=mode)
 
-          """ if the key has a modifier in this mode,
-          append the mode label to the title"""
+          # if the key has a modifier in this mode,
+          # append the mode label to the title
 
           if 'mode' in choices:
             # this currently means we are in the option state list
@@ -1355,7 +1353,7 @@ this is needed for the item tools menu to know where to return"""
             dx = (x4 - x1)
             w = w1 - dx
           else: # portrait
-            dx = (x2)
+            dx = x2
             w = w1
 
           smallButtonW = dx / 2.0
