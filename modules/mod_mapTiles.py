@@ -108,12 +108,8 @@ class MapTiles(RanaModule):
       self.downloadingTile = self.images[1]['tileDownloading']
       self.waitingTile = self.images[1]['tileWaitingForDownloadSlot']
 
-    # local copy of the mapLayers dictionary
-    # TODO: don't forget to update this after implementing
-    #       map layer re/configuration at runtime
-    self.mapLayers = self.modrana.getMapLayers()
-
     self.mapViewModule = None
+    self._mapLayersModule = None
 
     # cache the map folder path
     self.mapFolderPath = self.modrana.paths.getMapFolderPath()
@@ -132,30 +128,34 @@ class MapTiles(RanaModule):
     self.modrana.watch('mapScale', self._updateScalingCB)
     self.modrana.watch('z', self._updateScalingCB)
     self._storeTiles = self.m.get('storeTiles', None) # get the tile storage module
+    self._mapLayersModule = self.m.get('mapLayers', None) # get the map layers module
 
     # map tile filtering
     self.modrana.watch('currentTheme', self._updateTileFilteringCB, runNow=True)
     self.modrana.watch('invertMapTiles', self._updateTileFilteringCB, runNow=True)
     # check if tile filtering is enabled or should be enabled with current theme
 
-  def getTile(self, layer, z, x, y):
+  def getTile(self, layerId, z, x, y):
     """return a tile specified by layerID, z, x & y
     * first look if such a tile is available from storage
     * if not, download it"""
     # check if the tile is in the recently-downloaded cache
-    name = self.getTileName(layer, z, x, y)
+    name = self.getTileName(layerId, z, x, y)
     cacheItem = self.images[0].get(name, None)
     if cacheItem:
     #      print("got tile FROM memory CACHE")
       return cacheItem[0]
 
-    # get layer info
-    layerInfo = self.mapLayers.get(layer, None)
-    if layerInfo is None: # is the layer info valid ?
+    # get the layer object
+    layer = self._mapLayersModule.getLayerById(layerId)
+    if layer is None:
       print("mapTiles: invalid layer")
       return
-    layerPrefix = layerInfo.get('folderPrefix', 'OpenStreetMap II')
-    layerType = layerInfo.get('type', 'png')
+    if layer is None: # is the layer info valid ?
+      print("mapTiles: error: layer with id: %s not found" % layerId)
+      return
+    layerPrefix = layer.folderName
+    layerType = layer.type
     tileData = self._storeTiles.getTileData(layerPrefix, z, x, y, layerType)
     if tileData:
     #      print("got tile FROM disk CACHE")
@@ -163,9 +163,9 @@ class MapTiles(RanaModule):
       return tileData
 
     #    print("download")
-    url = self.getTileUrl(x, y, z, layer)
+    tileUrl = self.getTileUrl(x, y, z, layerId)
     #    print(url)
-    response = self._getConnPool(layer, url).get_url(url)
+    response = self._getConnPool(layerId, tileUrl).get_url(tileUrl)
     #    print("RESPONSE")
     tileData = response.data
 
@@ -185,29 +185,32 @@ class MapTiles(RanaModule):
     else:
       return None
 
-  def _getConnPool(self, layer, url):
+  def _getConnPool(self, layerId, baseUrl):
     """get a connection pool for the given layer
-    NOTE: connection pools reuse open connections"""
-    pool = self.connPools.get(layer, None)
+    NOTE: connection pools reuse open connections
+
+    :param baseUrl a URL used to initialize the connection pool
+    (basically just the domain name needs to be correct)
+    """
+    pool = self.connPools.get(layerId, None)
     if pool:
       return pool
     else: # create pool
       #headers = { 'User-Agent' : "Mozilla/5.0 (compatible; MSIE 5.5; Linux)" }
       userAgent = self.modrana.configs.getUserAgent()
       headers = {'User-Agent': userAgent}
-      url = self.mapLayers.get(layer)["tiles"]
-      newPool = urllib3.connection_from_url(url=url, headers=headers, maxsize=10, timeout=10, block=False)
-      self.connPools[layer] = newPool
+      newPool = urllib3.connection_from_url(url=baseUrl, headers=headers, maxsize=10, timeout=10, block=False)
+      self.connPools[layerId] = newPool
       return newPool
 
-  def addTileDownloadRequest(self, layer, z, x, y):
+  def addTileDownloadRequest(self, layerId, z, x, y):
     """add a download request to the download manager queue
     the download manager will use its download thread pool to process the request
     NOTE: no checking if tile exists in local storage is done past this point,
     you have to do this beforehand or you might download an already available tile :)"""
 
     #    print("mapTiles: DOWNLOAD queued")
-    name = self.getTileName(layer, z, x, y)
+    name = self.getTileName(layerId, z, x, y)
     # check if the tile is being downloaded
     if name in self.threads or name in self.images[0]:
       return
@@ -220,12 +223,12 @@ class MapTiles(RanaModule):
     # - so basically nothing serious, also even when ve falsely discard a loading request,
     # it will probably be soon repeated (this is by design to flush the no longer relevant tiles from the
     # download queue)
-    layerInfo = self.mapLayers.get(layer, None)
-    if layerInfo is None: # is the layer info valid ?
-      print("mapTiles: invalid layer")
+    layer = self._getLayerById(layerId)
+    if layer is None: # is the layer info valid ?
+      print("mapTiles: can't add dl request - layerOd not found %s" % layerId)
       return
-    layerPrefix = layerInfo.get('folderPrefix', 'OpenStreetMap II')
-    layerType = layerInfo.get('type', 'png')
+    layerPrefix = layer.folderName
+    layerType = layer.type
     # Are we allowed to download it ? (network=='full')
     # -> no need to submit a download request if network access is disabled
     if self.get('network', 'full') == 'full':
@@ -233,24 +236,24 @@ class MapTiles(RanaModule):
       # add tile download request
       with self.threadListCondition:
         timestamp = time.time()
-        request = (name, x, y, z, layer, layerPrefix, layerType, filename, timestamp)
+        request = (name, x, y, z, layerId, layerPrefix, layerType, filename, timestamp)
         with self.downloadRequestPoolLock: # add a download request
           self.downloadRequestPool.append(request)
         self.threadListCondition.notifyAll() # wake up the download manager
 
-  def tileInProgress(self, layer, z, x, y):
+  def tileInProgress(self, layerId, z, x, y):
     """report if tile is being downloaded"""
-    name = self.getTileName(layer, z, x, y)
+    name = self.getTileName(layerId, z, x, y)
     return name in self.threads
 
-  def tileInMemory(self, layer, z, x, y):
+  def tileInMemory(self, layerId, z, x, y):
     """report if tile is stored in memory cache"""
-    name = self.getTileName(layer, z, x, y)
+    name = self.getTileName(layerId, z, x, y)
     return name in self.images[0]
 
-  def tileInStorage(self, layer, z, x, y):
+  def tileInStorage(self, layerId, z, x, y):
     """report if tile is available from storage"""
-    return self._storeTiles.tileExists2(layer, z, x, y)
+    return self._storeTiles.tileExists2(layerId, z, x, y)
 
   def _updateScalingCB(self, key='mapScale', oldValue=1, newValue=1):
     """as this only needs to be updated once on startup and then only
@@ -679,8 +682,8 @@ class MapTiles(RanaModule):
     cr.paint()
     cr.restore() # Return the cairo projection to what it was
 
-  def getTileName(self, layer, z, x, y):
-    return "%s_%d_%d_%d" % (layer, z, x, y)
+  def getTileName(self, layerId, z, x, y):
+    return "%s_%d_%d_%d" % (layerId, z, x, y)
 
   def getCompositeTileName(self, layers, z, x, y):
     (layer1, layer2) = layers
@@ -725,7 +728,11 @@ class MapTiles(RanaModule):
   def _realPrint(self, text):
     print(text)
 
-  def loadImage(self, name, x, y, z, layer):
+  def _getLayerById(self, layerId):
+    """Get layer description from the mapLayers module"""
+    return self._mapLayersModule._getLayerById(layerId)
+
+  def loadImage(self, name, x, y, z, layerId):
     """Check that an image is loaded, and try to load it if not"""
 
     # at this point, there is only a placeholder image in the memory cache
@@ -754,12 +761,12 @@ class MapTiles(RanaModule):
           return'OK'
 
     # second, is it in the disk cache?  (including ones recently-downloaded)
-    layerInfo = self.mapLayers.get(layer, None)
+    layerInfo = self._getLayerById(layerId)
     if layerInfo is None: # is the layer info valid
       return'NOK'
 
-    layerPrefix = layerInfo.get('folderPrefix', 'OSM')
-    layerType = layerInfo.get('type', 'png')
+    layerPrefix = layerInfo.folderName
+    layerType = layerInfo.type
 
     start1 = time.clock()
     pixbuf = self._storeTiles.getTile(layerPrefix, z, x, y, layerType)
@@ -788,7 +795,7 @@ class MapTiles(RanaModule):
       # that here is a new download request
       with self.threadListCondition:
         timestamp = time.time()
-        request = (name, x, y, z, layer, layerPrefix, layerType, filename, timestamp)
+        request = (name, x, y, z, layerId, layerPrefix, layerType, filename, timestamp)
 
         with self.imagesLock: # display the "Waiting for download slot..." status tile
           waitingTile = self.waitingTile
@@ -1021,37 +1028,35 @@ class MapTiles(RanaModule):
   def imageY(self, z, extension):
     return '%d.%s' % (z, extension)
 
-  def getTileUrl(self, x, y, z, layer):
+  def getTileUrl(self, x, y, z, layerId):
     """Return url for given tile coordinates and layer"""
-    layerDetails = self.mapLayers.get(layer, {})
-    if layerDetails == {}:
+    layer = self._getLayerById(layerId)
+    if layer is None:
       return None
-    coords = layerDetails['coordinates']
+    coords = layer.coordinates
     if coords == 'google':
       url = '%s&x=%d&y=%d&z=%d' % (
-        layerDetails['tiles'],
+        layer.url,
         x, y, z)
     elif coords == 'web_mercator_substitution':
-      template = string.Template(layerDetails['tiles'])
+      template = string.Template(layer.url)
       url = str(template.substitute(z=z, x=x, y=y))
     elif coords == 'quadtree_substitution': # handle Virtual Earth with substitution
       quadKey = quadTree(x, y, z)
-      template = string.Template(layerDetails['tiles'])
+      template = string.Template(layer.url)
       url = str(template.substitute(quadindex=quadKey))
-    # depreciated by the substitution method, drop this some time in the future
+
+    # the "quadtree" method is depreciated by quadtree_substitution
+    # , drop this some time in the future
     elif coords == 'quadtree': # handle Virtual Earth maps and satellite
       quadKey = quadTree(x, y, z)
-      url = '%s%s?g=452' % ( #  don't know what the g argument is, maybe revision ? but its not optional
-                             layerDetails['tiles'], # get the url
-                             quadKey # get the tile identificator
-                             #layerDetails['type'] # get the correct extension (also works with png for
-        )                    #  both maps and sat, but the original url is specific)
+      #  don't know what the g argument is, maybe revision ? but its not optional
+      url = '%s%s?g=452' % ( layer.url, quadKey )
     elif coords == 'yahoo': # handle Yahoo maps, sat, overlay
       y = ((2 ** (z - 1) - 1) - y)
       z += 1
-      url = '%s&x=%d&y=%d&z=%d&r=1' % ( # I have no idea what the r parameter is, r=0 or no r => grey square
-                                        layerDetails['tiles'],
-                                        x, y, z)
+      # I have no idea what the r parameter is, r=0 or no r => grey square
+      url = '%s&x=%d&y=%d&z=%d&r=1' % (layer.url, x, y, z)
 #    elif coords == 'chartbundle': # chartbundle
 ##      print("CHARTBUNDLE")
 #      y = ((2 ** (z - 1) - 1) - y)
@@ -1065,10 +1070,7 @@ class MapTiles(RanaModule):
 #      z, x, y,
 #      layerDetails.get('type', 'png'))
     else: # OSM, Open Cycle, T@H -> equivalent to coords == osm
-      url = '%s%d/%d/%d.%s' % (
-        layerDetails['tiles'],
-        z, x, y,
-        layerDetails.get('type', 'png'))
+      url = '%s%d/%d/%d.%s' % (layer.url, z, x, y, layer.type)
 
 #    print("__%s__" % coords)
 #     print("TILE URL: %s" % url)

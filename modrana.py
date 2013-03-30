@@ -80,9 +80,6 @@ class ModRana(object):
     self.mapRotationAngle = 0 # in radians
     self.notMovingSpeed = 1 # in m/s
 
-    # map layers
-    self.mapLayers = {}
-
     # per mode options
     # NOTE: this variable is automatically saved by the
     # options module

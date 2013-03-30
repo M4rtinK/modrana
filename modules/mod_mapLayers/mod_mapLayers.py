@@ -163,7 +163,7 @@ class MapLayer(object):
     return self.config['min_zoom']
 
   @property
-  def folderPrefix(self):
+  def folderName(self):
     return self.config['folder_prefix']
 
   @property

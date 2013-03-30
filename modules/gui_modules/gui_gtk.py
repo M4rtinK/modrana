@@ -374,8 +374,6 @@ class MainWidget(gtk.Widget):
     self.lastFullRedraw = time.time()
     self.lastFullRedrawRequest = time.time()
 
-    # map layers
-    self.mapLayers = {}
     self.notificationModule = None
 
     # per mode options

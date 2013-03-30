@@ -61,13 +61,14 @@ class StoreTiles(RanaModule):
     self.dirty = set() # a set of connections, that have uncommitted data
     self.startLoadingThread()
     # locks
-    """
-    TODO: this lock might not be needed for python2.6+,
-    as their sqlite version should be thread safe
-    """
+
+    # TODO: this lock might not be needed for python2.6+,
+    # as their sqlite version should be thread safe
+
     self.lookupConnectionLock = threading.RLock()
 
     self._mapTiles = None
+    self._mapLayers = None
 
   def firstTime(self):
     # the config folder should set the tile folder path by now
@@ -75,6 +76,7 @@ class StoreTiles(RanaModule):
     # testing:
     #self.test()
     self._mapTiles = self.m.get('mapTiles', None)
+    self._mapLayers = self.m.get('mapLayers', None)
 
   def getLayerDbFolderPath(self, folderPrefix):
     return os.path.join(self.tileFolder, folderPrefix)
@@ -365,24 +367,24 @@ class StoreTiles(RanaModule):
       else: # the tile was not found in the lookup table
         return None
 
-  def tileExists2(self, layer, z, x, y, fromThread=False):
+  def tileExists2(self, layerId, z, x, y, fromThread=False):
     """test if a tile exists
        if fromThread=False, a new connection is created and disconnected again
        NEW CLEANED UP VERSION"""
-    layerInfo = self._mapTiles.mapLayers.get(layer, None)
-    if layerInfo is None: # is the layer info valid ?
-      print("storeTiles: invalid layer")
+    layer = self._mapLayers._getLayerById(layerId)
+    if layer is None: # is the layer info valid ?
+      print("storeTiles: layerId not found: %s" % layerId)
       return None
     storageType = self.get('tileStorageType', 'files')
-    folderPrefix = layerInfo.get('folderPrefix', 'OpenStreetMap II')
-    extension = layerInfo.get('type', 'png')
+    folderPrefix = layer.folderName
+    extension = layer.type
     if storageType == 'sqlite': # we are storing to the database
       dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
       if dbFolderPath is not None: # is the database accessible ?
         with self.lookupConnectionLock:
-          """ just to make sure the access is sequential
-          (due to sqlite in python 2.5 probably not liking concurrent access,
-          resulting in te database becoming unavailable)"""
+          # just to make sure the access is sequential
+          # (due to sqlite in python 2.5 probably not liking concurrent access,
+          # resulting in te database becoming unavailable)
           if fromThread: # is this called from a thread ?
             # due to sqlite quirks, connections can't be shared between threads
             lookupDbPath = self.getLookupDbPath(dbFolderPath)
