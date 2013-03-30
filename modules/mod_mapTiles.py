@@ -33,7 +33,7 @@ from core import rectangles
 
 from core.tilenames import *
 
-import socket
+#import socket
 #timeout = 30 # this sets timeout for all sockets
 #socket.setdefaulttimeout(timeout)
 
@@ -372,7 +372,7 @@ class MapTiles(RanaModule):
     """load special tiles from files to the special tiles cache"""
     for tile in specialTiles:
       (name, path) = tile
-      self.loadImageFromFile(path, name, type="special", dictIndex=1)
+      self.loadImageFromFile(path, name, imageType="special", dictIndex=1)
 
       #  def _checkAutomaticTileDownloads(self):
       #    """monitor if the automatic tile downloads finished and then remove them from the dictionary
@@ -422,6 +422,7 @@ class MapTiles(RanaModule):
       proj = self.m.get('projection', None)
       drawImage = self.drawImage # method binding to speed back method lookup
       overlay = self.get('overlay', False)
+      requests = []
       # if overlay is enabled, we use a special naming
       # function in place of the default one
 
@@ -439,7 +440,6 @@ class MapTiles(RanaModule):
 
       if proj and proj.isValid():
         loadingTileImageSurface = self.loadingTile[0]
-        requests = []
         (sx, sy, sw, sh) = self.get('viewport') # get screen parameters
 
         # adjust left corner coordinates if centering shift is on
@@ -728,7 +728,7 @@ class MapTiles(RanaModule):
   def loadImage(self, name, x, y, z, layer):
     """Check that an image is loaded, and try to load it if not"""
 
-    """at this point, there is only a placeholder image in the memory cache"""
+    # at this point, there is only a placeholder image in the memory cache
 
     # check if tile loading debugging is on
     debug = self.get('tileLoadingDebug', False)
@@ -802,7 +802,7 @@ class MapTiles(RanaModule):
     else:
       sprint("automatic tile download disabled - not starting download")
 
-  def loadImageFromFile(self, path, name, type="normal", expireTimestamp=None, dictIndex=0):
+  def loadImageFromFile(self, path, name, imageType="normal", expireTimestamp=None, dictIndex=0):
     pixbuf = gtk.gdk.pixbuf_new_from_file(path)
     #x = pixbuf.get_width()
     #y = pixbuf.get_height()
@@ -819,7 +819,7 @@ class MapTiles(RanaModule):
     ct2.set_source_pixbuf(pixbuf, 0, 0)
     ct2.paint()
     # surface now contains the image in a Cairo surface
-    self.storeInMemory(surface, name, type, expireTimestamp, dictIndex)
+    self.storeInMemory(surface, name, imageType, expireTimestamp, dictIndex)
 
   def filePath2Pixbuf(self, filePath):
     """return a pixbuf for a given filePath"""
@@ -830,12 +830,12 @@ class MapTiles(RanaModule):
       print("the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e)
       return False
 
-  def storeInMemory(self, surface, name, type="normal", expireTimestamp=None, dictIndex=0):
+  def storeInMemory(self, surface, name, imageType="normal", expireTimestamp=None, dictIndex=0):
     """store a given image surface in the memory image cache
        dictIndex = 0 -> normal map tiles + tile specific error tiles
        dictIndex = 1 -> special tiles that exist in only once in memory and are drawn directly
        (like "Downloading...",Waiting for download slot..:", etc.) """
-    metadata = {'addedTimestamp': time.time(), 'type': type}
+    metadata = {'addedTimestamp': time.time(), 'type': imageType}
     if expireTimestamp:
       metadata['expireTimestamp'] = expireTimestamp
     with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
@@ -846,16 +846,16 @@ class MapTiles(RanaModule):
       if len(self.images[0]) > self.maxImagesInMemory:
         self.trimCache()
         # new tile available, make redraw request TODO: what overhead does this create ?
-      self._tileLoadedNotify(type)
+      self._tileLoadedNotify(imageType)
 
-  def _tileLoadedNotify(self, type):
+  def _tileLoadedNotify(self, imageType):
     """redraw the screen when a new tile is available in the cache
        * redraw only when on map screen (menu == None)
        * redraw only on composite tiles when overlay is on"""
     if self.get('tileLoadedRedraw', True) and self.get('menu', None) is None:
       overlay = self.get('overlay', False)
       if overlay: # only redraw when a composited tile is loaded with overlay on
-        if type == "composite":
+        if imageType == "composite":
           self.set('needRedraw', True)
       else: # redraw regardless of type with overlay off
         self.set('needRedraw', True)
