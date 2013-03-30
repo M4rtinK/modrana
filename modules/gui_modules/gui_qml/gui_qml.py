@@ -444,13 +444,13 @@ class TileImageProvider(QDeclarativeImageProvider):
     try:
       # split the string provided by QML
       split = tileInfo.split("/")
-      layer = split[0]
+      layerId = split[0]
       z = int(split[1])
       x = int(split[2])
       y = int(split[3])
 
       # get the tile from the tile module
-      tileData = self.gui._mapTiles.getTile(layer, z, x, y)
+      tileData = self.gui._mapTiles.getTile(layerId, z, x, y)
       if not tileData:
         return None
 
@@ -486,22 +486,22 @@ class MapTiles(QtCore.QObject):
       return 0
 
   @QtCore.Slot(str, int, int, int, result=bool)
-  def loadTile(self, layer, z, x, y):
+  def loadTile(self, layerId, z, x, y):
     """
     load a given tile from storage and/or from the network
     True - tile already in storage or in memory
     False - tile download in progress, retry in a while
     """
-    #    print(layer, z, x, y)
-    if self.gui._mapTiles.tileInMemory(layer, z, x, y):
+    #    print(layerId, z, x, y)
+    if self.gui._mapTiles.tileInMemory(layerId, z, x, y):
     #      print("available in memory")
       return True
-    elif self.gui._mapTiles.tileInStorage(layer, z, x, y):
+    elif self.gui._mapTiles.tileInStorage(layerId, z, x, y):
     #      print("available in storage")
       return True
     else: # not in memory or storage
       # add a tile download request
-      self.gui._mapTiles.addTileDownloadRequest(layer, z, x, y)
+      self.gui._mapTiles.addTileDownloadRequest(layerId, z, x, y)
       #      print("downloading, try later")
       return False
 
