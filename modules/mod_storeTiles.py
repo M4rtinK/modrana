@@ -141,9 +141,9 @@ class StoreTiles(RanaModule):
         stores = self.layers[accessType][dbFolderPath]['stores'] # get a list of cached store connections
         lookupCursor = lookupConn.cursor()
         with self.lookupConnectionLock:
-          """ just to make sure the access is sequential
-          (due to sqlite in python 2.5 probably not liking concurrent access,
-          resulting in te database becoming unavailable)"""
+          # just to make sure the access is sequential
+          # (due to sqlite in python 2.5 probably not liking concurrent access,
+          # resulting in te database becoming unavailable)
           result = lookupCursor.execute(
             "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
             (z, x, y, extension))
@@ -185,9 +185,9 @@ class StoreTiles(RanaModule):
   def commitAll(self):
     """commit all uncommitted"""
     with self.lookupConnectionLock:
-      """ just to make sure the access is sequential
-      (due to sqlite in python 2.5 probably not liking concurrent access,
-      resulting in te database becoming unavailable)"""
+      # just to make sure the access is sequential
+      # (due to sqlite in python 2.5 probably not liking concurrent access,
+      # resulting in te database becoming unavailable)
       while self.dirty:
         conn = self.dirty.pop()
         conn.commit()
@@ -201,9 +201,9 @@ class StoreTiles(RanaModule):
       return stores[pathToStore] # there is already a connection to the store, return it
     else: # create a new connection
       with self.lookupConnectionLock:
-        """ just to make sure the access is sequential
-        (due to sqlite in python 2.5 probably not liking concurrent access,
-        resulting in te database becoming unavailable)"""
+        # just to make sure the access is sequential
+        # (due to sqlite in python 2.5 probably not liking concurrent access,
+        # resulting in te database becoming unavailable)
         storeConn = sqlite3.connect(pathToStore) #TODO: add some error handling
         self.layers[accessType][dbFolderPath]['stores'][pathToStore] = storeConn # cache the connection
         return storeConn
@@ -251,9 +251,9 @@ class StoreTiles(RanaModule):
 
   def addStore(self, folder):
     """add a new store(find an ascending numbered name and create the db file with the corresponding tables)"""
-    list = self.listStores(folder)
-    if list:
-      numericList = map(lambda x: int(x.split('store.sqlite.')[1]), list)
+    storeList = self.listStores(folder)
+    if storeList:
+      numericList = map(lambda x: int(x.split('store.sqlite.')[1]), storeList)
       highestNumber = sorted(numericList)[-1]
       newHighestNumber = highestNumber + 1
     else:
@@ -346,9 +346,9 @@ class StoreTiles(RanaModule):
     #look in the lookup db
     #with self.lookupConnectionLock:
     if 1:
-      """ just to make sure the access is sequential
-      (due to sqlite in python 2.5 probably not liking concurrent access,
-      resulting in te database becoming unavailable)"""
+      # just to make sure the access is sequential
+      # (due to sqlite in python 2.5 probably not liking concurrent access,
+      # resulting in te database becoming unavailable)
       lookupCursor = lookupConn.cursor()
       lookupResult = lookupCursor.execute(
         "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
@@ -413,9 +413,9 @@ class StoreTiles(RanaModule):
       dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
       if dbFolderPath is not None: # is the database accessible ?
         with self.lookupConnectionLock:
-          """ just to make sure the access is sequential
-          (due to sqlite in python 2.5 probably not liking concurrent access,
-          resulting in te database becoming unavailable)"""
+          # just to make sure the access is sequential
+          # (due to sqlite in python 2.5 probably not liking concurrent access,
+          # resulting in te database becoming unavailable)"""
           if fromThread: # is this called from a thread ?
             # due to sqlite quirks, connections can't be shared between threads
             lookupDbPath = self.getLookupDbPath(dbFolderPath)
@@ -438,12 +438,11 @@ class StoreTiles(RanaModule):
   def startLoadingThread(self):
     """start the sqlite loading thread"""
     t = Thread(target=self.worker, name='sqlite tile storage thread')
-    """we need that the worker tidies up,
-       (commits all "dirty" connections)
-       so it should be not daemonic
-       -> but we also cant afford that modRana wont
-       terminate completely
-       """
+    # we need that the worker tidies up,
+    # (commits all "dirty" connections)
+    # so it should be not daemonic
+    # -> but we also cant afford that modRana wont
+    # terminate completely
     t.setDaemon(True)
     t.start()
 
@@ -454,9 +453,8 @@ class StoreTiles(RanaModule):
       try:
         item = self.sqliteTileQueue.get(block=True)
       except Exception, e:
-        """this usually occurs during interpreter shutdown
-        -> we simulate a shutdown order and try to exit cleanly
-        """
+        # this usually occurs during interpreter shutdown
+        # -> we simulate a shutdown order and try to exit cleanly
         print("storage thread - probable shutdown")
         print("exception: %s" % e)
         item = 'shutdown'
@@ -466,12 +464,10 @@ class StoreTiles(RanaModule):
         self.commitAll()
         print("\nall tiles committed, breaking, goodbye :)")
         break
-      """
-      the thread should not die due to an exception
-      or the queue fills up without anybody removing and processing the tiles
-      -> this would mean that all threads that need to store tiles
-         would wait forever for the queue to empty
-      """
+      # the thread should not die due to an exception
+      # or the queue fills up without anybody removing and processing the tiles
+      # -> this would mean that all threads that need to store tiles
+      #    would wait forever for the queue to empty
       #TODO: defensive programming - check if thread is alive when storing ?
       try:
         (tile, folderPrefix, z, x, y, extension, filename) = item # unpack the tuple
