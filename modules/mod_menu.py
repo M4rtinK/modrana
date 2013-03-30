@@ -73,18 +73,17 @@ class Menus(RanaModule):
     if (timestamp - self.lastHideCheckTimestamp) > 1:
       self.lastHideCheckTimestamp = timestamp
       if self.get('menu', None) is None:
-        """only check in the map view,
-        or else the user might return from menu to a screen wit no buttons,
-        which might be inconvenient"""
+        # only check in the map view,
+        # or else the user might return from menu to a screen wit no buttons,
+        # which might be inconvenient
         hideDelay = self.get('hideDelay', 'never')
         if hideDelay != 'never': # is button hiding enabled ?
           if (timestamp - self.lastActivity) > int(hideDelay): # have we reached the timeout ?
             self.hideMapScreenButtons = True
       else:
         self.lastActivity=timestamp
-        """reset lastActivity if not in map screen,
-        so that the hiding counter runs from the start when we come back to the map screen
-        """
+        # reset lastActivity if not in map screen,
+        # so that the hiding counter runs from the start when we come back to the map screen
 
   def buttonsHidingOn(self):
     """report whether button hiding is enabled"""
@@ -106,7 +105,7 @@ class Menus(RanaModule):
       m.registerDraggable(x,y,x+w,y+h, "mapView") # handler for dragging the map
       m.registerXYWH(x,y,x+w,y+h, "menu:screenClicked")
 
-    """check out if button hiding is on and behave accordingly"""
+    # check out if button hiding is on and behave accordingly
     if self.hideMapScreenButtons:
         (x1,y1) = proj.screenPos(0.6, -0.96)
         text = "tap screen to show menu"
@@ -309,8 +308,9 @@ class Menus(RanaModule):
     self.drawButton(cr, x1, y1, w, h, textIconAction[index][0], textIconAction[index][1], textIconAction[index][2])
         
   def drawButton(self, cr, x1, y1, w, h, text='', icon='generic', action='', timedAction=None):
-    """Draw a clickable button, with icon image and text"""
-    """NOTE: # delimits the different captions: text_down#text_middle#text_up
+    """Draw a clickable button, with icon image and text
+
+    NOTE: # delimits the different captions: text_down#text_middle#text_up
        text_up is NOT YET IMPLEMENTED"""
     # Draw icon
     self.icons.draw(cr,icon,x1,y1,w,h)
@@ -339,8 +339,8 @@ class Menus(RanaModule):
     menuName = self.get('menu', None)
     if menuName is None:
       return
-    list = self.lists.get(menuName, None)
-    if list is not None:
+    menuList = self.lists.get(menuName, None)
+    if menuList is not None:
       self.listOffset += dy
       print("Drag in menu + %f = %f" % (dy,self.listOffset))
 
@@ -356,9 +356,8 @@ class Menus(RanaModule):
   # menu drawing logic#
 
   def mainDrawMenu(self, cr, menuName, args=None):
-    """Draw menus"""
+    """Draw menus
 
-    """
     == Meaning of the menu persistent variable ==
     "foo" - the default menu module has to do something with foo
     "markers#" - the markers module has to draw the menu and gets "" as menu name
@@ -386,7 +385,7 @@ class Menus(RanaModule):
         print('menu: module %s that should handle menu drawing is missing' % moduleName)
 
   def drawMenu(self, cr, menuName, args=None):
-    """handles list menus"""
+    """Handles list menus"""
     if menuName == 'list':
       try:
         listName,index = args.split('#',1)
@@ -421,7 +420,7 @@ class Menus(RanaModule):
       self.drawItemizedMenu(cr, menu, menuName)
 
   def drawItemizedMenu(self, cr, menu, menuName):
-    """draw the item menu"""
+    """Draw the item menu"""
     vp = self.get('viewport', None)
     if not vp:
       print('menu: ERROR, no viewport found')
@@ -473,7 +472,7 @@ class Menus(RanaModule):
       self.setItemMenuGrid(x1, y1, cols, rows, dx, dy)
 
     # for each item in the menu
-    id = 0
+    itemId = 0
     itemSlots = cols*rows
     itemCount = menu['metadata']['itemCount']
     if itemCount > itemSlots: # does this menu have more items than available slots
@@ -489,13 +488,13 @@ class Menus(RanaModule):
         self.drawButton(cr, x, y, dx, dy, "more", "more>%s" % bgIconDescription, "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber+1))
         itemGrid = self.itemMenuGrid[1][0:-1]
       else:
-        id = pageNumber *(itemSlots-2)+1
-        if (itemCount-id-1) < (itemSlots-1):
+        itemId = pageNumber *(itemSlots-2)+1
+        if (itemCount-itemId-1) < (itemSlots-1):
           # this is the last page
           # draw only the "less" button
           (x,y) = self.itemMenuGrid[1][0]
           self.drawButton(cr, x, y, dx, dy, "less", "less>%s" % bgIconDescription, "ml:menu:setIMPage:%s;%d|set:needRedraw:True" % (menuName, pageNumber-1))
-          itemGrid = self.itemMenuGrid[1][1:(itemCount-id+1)]
+          itemGrid = self.itemMenuGrid[1][1:(itemCount-itemId+1)]
         else:
           # this is an intermediate page
           # draw the "less" and "more" buttons
@@ -510,22 +509,22 @@ class Menus(RanaModule):
       itemGrid = self.itemMenuGrid[1][0:itemCount]
 
     for xy in itemGrid:
-      item = menu.get(id, None)
+      item = menu.get(itemId, None)
       # Draw it
 
       # get coordinates
       (x,y) = xy
 
-      type = item[3]
-      if type == 'simple':
-        (text, icon, action, type, timedAction) = item
-        if id == highlightId:
+      itemType = item[3]
+      if itemType == 'simple':
+        (text, icon, action, itemType, timedAction) = item
+        if itemId == highlightId:
           # make the button highlighted
           icon = "%s>>%s" % (highlightIconDescription, icon)
         self.drawButton(cr, x, y, dx, dy, text, icon, action, timedAction)
-#        (text, icon, action, type) = item
+#        (text, icon, action, itemType) = item
 #        self.drawButton(cr, x, y, dx, dy, text, icon, action)
-      elif type == 'toggle':
+      elif itemType == 'toggle':
         index = item[1]
         toggleCount = len(item[0])
         nextIndex = (index + 1)%toggleCount
@@ -533,21 +532,21 @@ class Menus(RanaModule):
         # eq: "save every 3 s", "nice icon", "set:saveInterval:3s"
         text = item[0][index][0]
         icon = item[0][nextIndex][1]
-        if id == highlightId:
+        if itemId == highlightId:
           # make the button highlighted
           icon = "%s>>%s" % (highlightIconDescription, icon)
         action = item[0][nextIndex][2]
 
-        action+='|menu:toggle#%s#%s|set:needRedraw:True' % (menuName,id)
+        action+='|menu:toggle#%s#%s|set:needRedraw:True' % (menuName,itemId)
         self.drawButton(cr, x, y, dx, dy, text, icon, action)
-      id += 1
+      itemId += 1
 
-  def register(self, menu, type, module):
+  def register(self, menu, itemType, module):
     """Register a menu as being handled by some other module"""
-    if type == 'list':
+    if itemType == 'list':
       self.lists[menu] = module
     else:
-      print("Can't register \"%s\" menu - unknown type" % type)
+      print("Can't register \"%s\" menu - unknown type" % itemType)
 
   def initMenu(self,menu):
     """initialize menu a menu dictionary instance to default parameters"""
@@ -592,9 +591,9 @@ class Menus(RanaModule):
     itemCount = menu['metadata']['itemCount']
     # add all items to the menu
     for item in items:
-      (text, icon, action, type, timedAction) = item
-      """we are counting up from zero for the item indexes"""
-      menu[itemCount] = self.generateItem(text, icon, action, type, timedAction)
+      (text, icon, action, itemType, timedAction) = item
+      # we are counting up from zero for the item indexes
+      menu[itemCount] = self.generateItem(text, icon, action, itemType, timedAction)
       itemCount += 1
     menu['metadata']['itemCount'] = itemCount
     return menu
@@ -604,17 +603,17 @@ class Menus(RanaModule):
     item = self.generateItem(text, icon, action, "simple", timedAction)
     self.menus[menuName] = self.addItemsToThisMenu(self.menus.get(menuName, None), [item,])
 
-  def getItem(self,menuName,id,):
+  def getItem(self,menuName,itemId,):
     """get a given itemized menu item"""
-    return self.menus[menuName][id]
+    return self.menus[menuName][itemId]
 
-  def setItem(self,menuName,id, item):
+  def setItem(self,menuName,itemId, item):
     """set a given itemized menu item to a given value"""
-    self.menus[menuName][id] = item
+    self.menus[menuName][itemId] = item
 
-  def highlightItem(self,menuName,id):
+  def highlightItem(self,menuName,itemId):
     """highlight an item in a given itemized menu, replacing the previous highlighted"""
-    self.menus[menuName]['metadata']['highlightId'] = id
+    self.menus[menuName]['metadata']['highlightId'] = itemId
 
   def addItems(self, menuName, items):
     """add multiple items to the local menu structure"""
@@ -626,9 +625,9 @@ class Menus(RanaModule):
     menu['metadata']['wideButtons'] = wideButtons
     self.menus[menuName] = menu
 
-  def generateItem(self, text, icon, action, type='simple', timedAction=None):
+  def generateItem(self, text, icon, action, itemType='simple', timedAction=None):
     """generate an itemized menu item"""
-    return text, icon, action, type, timedAction
+    return text, icon, action, itemType, timedAction
 
   def addToggleItem(self, menu, textIconAction, index=0, pos=None, uniqueName=None):
     """
@@ -638,7 +637,7 @@ class Menus(RanaModule):
     if menu not in self.menus:
       self.initMenu(menu)
     itemCount = self.menus[menu]['metadata']['itemCount']
-    type = 'toggle'
+    menuType = 'toggle'
     if uniqueName:
       persist = self.get('persistentToggleButtons', None)
       if persist is None:
@@ -652,7 +651,7 @@ class Menus(RanaModule):
         self.set('persistentToggleButtons', persist)
 
     """we are counting up from zero for the item indexes"""
-    self.menus[menu][itemCount] = (textIconAction, index, uniqueName, type)
+    self.menus[menu][itemCount] = (textIconAction, index, uniqueName, menuType)
     self.menus[menu]['metadata']['itemCount'] = itemCount + 1
 
 #  def getToggleItem():
@@ -944,15 +943,13 @@ class Menus(RanaModule):
     self.clearMenu('searchWhere')
     self.addItem('searchWhere', 'view#near', 'generic', 'ms:search:setWhere:view|set:menu:search')
     self.addItem('searchWhere', 'position#near', 'generic', 'ms:search:setWhere:position|set:menu:search')
-    """
-    TODO:
-    * near tracklog
-     * start
-     * end
-     * AROUND (is this doable ? maybe use points from perElevList...)
-    * near address
-    * near POI (when POI rework is finished)
-    """
+    # TODO:
+    # * near tracklog
+    #  * start
+    #  * end
+    #  * AROUND (is this doable ? maybe use points from perElevList...)
+    # * near address
+    # * near POI (when POI rework is finished)
 
   def setupSearchWhatMenu(self):
     self.clearMenu('searchWhat')
@@ -975,7 +972,7 @@ class Menus(RanaModule):
       else:
         details = line.strip()
         if details and sectionID:
-          (name,filter) = details.split('|')
+          (name, tagFilter) = details.split('|')
           self.addItem(sectionID, name, name.lower(), '')
     f.close()
 
@@ -1046,9 +1043,9 @@ class Menus(RanaModule):
     """in this menu, we set the maximal zoom level UP from the current zoomlevel (eq less detail)"""
     self.clearMenu('zoomUp', "set:menu:%s" % prevMenu)
     if nextMenu == 'mapData#batchTileDl':
-      """if the next menu is the batch tile download menu (eq we are not called from the edit menu)
-           we also send a message to refresh the tilecount after pressing the button
-           (the edit menu sends the refresh message on exit so it would be redundant)"""
+      # if the next menu is the batch tile download menu (eq we are not called from the edit menu)
+      # we also send a message to refresh the tilecount after pressing the button
+      # (the edit menu sends the refresh message on exit so it would be redundant)
       nextMenu += '|mapData:refreshTilecount'
 
     self.addItem('zoomUp', '+ 0 up', 'generic', 'set:zoomUpSize:0|set:menu:%s' % nextMenu)
@@ -1236,7 +1233,7 @@ class Menus(RanaModule):
     # * scroll down
     self.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % scrollMenu)
 
-  def drawListableMenuItems(self, cr, list, scroll, describeItem):
+  def drawListableMenuItems(self, cr, itemList, scroll, describeItem):
     """draw the items for a listable menu"""
     (e1,e2,e3,e4,alloc) = self.listableMenuCoords()
     (x1,y1) = e1
@@ -1247,10 +1244,10 @@ class Menus(RanaModule):
 
     for row in (0,1,2): # TODO: dynamic adjustment (how to guess the screensize vs dpi ?)
       index = scroll + row
-      numItems = len(list)
+      numItems = len(itemList)
       if 0 <= index < numItems:
 
-        (text1,text2,onClick) = describeItem(index, category, list)
+        (text1,text2,onClick) = describeItem(index, category, itemList)
 
         y = y4 + row * dy
         w = w1 - (x4-x1)
@@ -1314,7 +1311,7 @@ class Menus(RanaModule):
 
 
 
-    """button: (index,[[text1,icon1,action1],..,[textN,iconN,actionN]])"""
+    # button: (index,[[text1,icon1,action1],..,[textN,iconN,actionN]])
 
     (boxTextLines, boxAction) = box
 
@@ -1437,16 +1434,16 @@ class Menus(RanaModule):
     if icons:
       icons.subscribeColorInfo(self,self.colorsChangedCallback)
 
-    """ get a local reference for the icons module
-        so we don't have to look it up for every icon"""
+    # get a local reference for the icons module
+    # so we don't have to look it up for every icon
     self.icons = icons
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     messageList = message.split('#')
     message = messageList[0]
     if message=='listMenu':
-      """manipulate a listable menu
-         argument number one is name of the listable menu to manipulate"""
+      # manipulate a listable menu
+      # argument number one is name of the listable menu to manipulate
       listMenuName = args[0]
       if listMenuName in self.lists.keys(): # do we have this menu ?
         if args[1]=="up":
@@ -1454,7 +1451,7 @@ class Menus(RanaModule):
         elif args[1]=="down":
           self.lists[listMenuName].scrollDown()
 
-    elif type == "ml" and message == "setListIndex":
+    elif messageType == "ml" and message == "setListIndex":
       # set listable menu index
       try:
         listName = args[0]
@@ -1467,7 +1464,7 @@ class Menus(RanaModule):
         print("menu: setting list index failed")
         print(e)
 
-    elif type == "ms" and message == "openUrl":
+    elif messageType == "ms" and message == "openUrl":
       url = args
       self.modrana.gui.openUrl(url)
 
@@ -1485,11 +1482,11 @@ class Menus(RanaModule):
       self.lastActivity = int(time.time())
       self.hideMapScreenButtons = False # show the buttons at once
       self.set('needRedraw', True)
-    elif type =='ml' and message=='highlightItem':
-      menuName, id = args
-      id = int(id)
-      self.highlightItem(menuName, id)
-    elif type == 'ms' and message == 'handleToolsMenuPoint':
+    elif messageType =='ml' and message=='highlightItem':
+      menuName, index = args
+      index = int(index)
+      self.highlightItem(menuName, index)
+    elif messageType == 'ms' and message == 'handleToolsMenuPoint':
       # store the currently selected point to the POI database
       if args == 'store':
         point = self.itemToolsMenuCache[0]
@@ -1517,7 +1514,7 @@ class Menus(RanaModule):
       # toggle a button
       menu = messageList[1]
       pos = int(messageList[2])
-      (textIconAction, currentIndex, uniqueName, type) = self.menus[menu][pos]
+      (textIconAction, currentIndex, uniqueName, messageType) = self.menus[menu][pos]
       maxIndex = len(textIconAction) # maxIndex => number of toggle values
       newIndex = (currentIndex + 1)%maxIndex # make the index overlap
       # create a new tuple with updated index
@@ -1530,5 +1527,5 @@ class Menus(RanaModule):
           self.set('persistentToggleButtons', persist)
 
       self.set(uniqueName, newIndex)
-      self.menus[menu][pos] = (textIconAction, newIndex, uniqueName, type)
+      self.menus[menu][pos] = (textIconAction, newIndex, uniqueName, messageType)
   
