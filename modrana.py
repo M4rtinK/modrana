@@ -740,13 +740,6 @@ class ModRana(object):
     # return it
     return profileFolderPath
 
-  ## MAP LAYERS ##
-  # map layer information is important and needed by many modules during their initialization,
-  # so it is handled here
-
-  def getMapLayers(self):
-    return self.configs.getMapLayers()
-
   ## STARTUP TIMING ##
 
   def addTime(self, message):

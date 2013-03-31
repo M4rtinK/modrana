@@ -916,16 +916,6 @@ class Menus(RanaModule):
     self.clearMenu('data2', "set:menu:main")
     self.setupDataSubMenu()
 
-  def setupMaplayerMenus(self):
-    self.clearMenu('layers')
-    layers = self.modrana.getMapLayers()
-    for (name, layer) in layers.items():
-      self.addItem(
-        'layers',
-        layer.get('label',name),
-        name,
-        'set:layer:'+name+'|set:menu:None')
-    
   def setupModesMenu(self):
     """Create menus for routing modes"""
     self.clearMenu('modes')
@@ -1134,7 +1124,6 @@ class Menus(RanaModule):
     self.setupSearchMenus()
     self.setupSearchWhatMenu()
     self.setupSearchWhereMenu()
-    self.setupMaplayerMenus()
     self.setupPoiMenu()
     self.setupDataMenu()
     self.setupRouteMenu()
