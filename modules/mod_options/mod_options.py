@@ -407,43 +407,57 @@ class Options(RanaModule):
     catMap = addCat("Map", "map", "map")
 
     # ** map layers
-    group = addGroup("Map layers", "map_layers", catMap, "generic")
+    optionGroup = addGroup("Map layers", "map_layers", catMap, "generic")
 
     defaultBA = "set:menu:options" # default back action
-    layers = self.modrana.getMapLayers()
-    groups = self.modrana.configs.getMapGroups()
-    layerStructure= []
+    mapLayers = self.m.get('mapLayers', None)
+    layerStructure = []
+    if mapLayers:
+      groups = mapLayers.getMapLayerGroupList()
 
-    # assign layers to groups
-    for key in groups.keys():
-      layerGroup = groups[key]
-      name = layerGroup.get('label', "group")
-      icon = layerGroup.get('icon', "generic")
-      # list all layers for this group
-      groupLayers = filter(lambda x: layers[x].get("group", None) == key, layers.keys())
-      # layer keys to list of layers
-      groupLayers = map(lambda x:
-      (x, layers[x]['label'], layers[x]['icon'], defaultBA)
-        ,groupLayers)
-      # sort them alphabetically
-      groupLayers.sort()
-      # append their counter to the group name
-      name = "%s (%d)" % (name, len(groupLayers))
+      # sort the groups in alphabetical order by label
+      groups.sort(key=lambda group: group.label)
 
-      layerStructure.append({"item":(GROUP_IDENTIFIER, name, icon, defaultBA),
-                             "group":groupLayers})
+      # assign layers to groups
+      for group in groups:
+        name = group.label
+        icon = group.icon
+        # if no icon is specified, use the generic icon
+        if icon is None:
+          icon = "generic"
+        # list all layers for this group
+        #groupLayers = filter(lambda x: layers[x].get("group", None) == key, layers.keys())
+        groupLayers = group.layers
+        # layer keys to list of layers
+        # groupLayers = map(lambda x:
+        # (x, layers[x]['label'], layers[x]['icon'], defaultBA)
+        #   ,groupLayers)
 
-    # append layers without group right after groups in the list
-    nonGroupLayers = filter(lambda x: layers[x].get("group", None) is None, layers.keys())
-    nonGroupLayers = map(lambda x:
-    {'item':(x, layers[x]['label'], layers[x]['icon'], defaultBA)},
-      nonGroupLayers)
-    nonGroupLayers.sort()
-    layerStructure.extend(nonGroupLayers)
-    # add empty layer
-    layerStructure.append({'item':(None, "Empty layer", "generic", defaultBA)})
-    # add the option
-    self.addNestedItemsOption("Main map", "layer", layerStructure, group, "mapnik")
+        # sort them alphabetically by label
+        groupLayers.sort(key=lambda layer: layer.label)
+
+        # create (layerId, label, icon) tuples,
+        # reuse the variable:
+        groupLayers = map(lambda x: (x.id, x.label, x.icon, defaultBA), groupLayers)
+
+        # append their counter to the group name
+        name = "%s (%d)" % (name, len(groupLayers))
+
+        layerStructure.append({"item":(GROUP_IDENTIFIER, name, icon, defaultBA),
+                               "group":groupLayers})
+
+      # append layers without group right after groups in the list
+      nonGroupLayers = mapLayers.getMapLayersWithoutGroup()
+      # sort the groups in alphabetical order by label
+      nonGroupLayers.sort(key=lambda group: group.label)
+      # convert to option format
+      nonGroupLayers = map(
+        lambda x: {'item':(x, x.label, x.icon, defaultBA)}, nonGroupLayers)
+      layerStructure.extend(nonGroupLayers)
+      # add empty layer
+      layerStructure.append({'item':(None, "Empty layer", "generic", defaultBA)})
+      # add the option
+      self.addNestedItemsOption("Main map", "layer", layerStructure, optionGroup, "mapnik")
 
     # ** Overlay
     group = addGroup("Map overlay", "map_overlay", catMap, "generic")
