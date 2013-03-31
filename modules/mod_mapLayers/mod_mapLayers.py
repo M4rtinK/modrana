@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
+from core.signal import Signal
 
 # lists keys that need to be defined for a layer
 # in the map configuration file to be valid,
@@ -48,6 +49,9 @@ class MapLayers(RanaModule):
     RanaModule.__init__(self, m, d, i)
     self._layers = {}
     self._groups = {}
+    # TODO: actually support runtime layer reconfiguration
+    # and use this signal
+    self.layersChanged = Signal()
     # parse the config file
     self._parseConfig()
 
@@ -57,6 +61,26 @@ class MapLayers(RanaModule):
     :return: MapLayer object instance
     """
     return self._layers.get(layerId, None)
+
+  def getLayersByIds(self, layerIds):
+    """Get layer by Id
+    :param layerIds: a list of map layer Ids
+    :return: a list of MapLayer object instances
+    """
+    return filter(lambda x: x.id in layerIds, self._layers.values())
+
+  def getLayersByGroupId(self, groupId):
+    """Get layer by Id
+    :param groupId: map layer group ID
+    :return: MapLayer object instance
+    """
+    return filter(lambda x: x.groupId == groupId, self._layers.values())
+
+  def getMapLayersWithoutGroup(self):
+    """Map layers without group have their group id set to None
+    :return: list o MapLayer instances that have no group set
+    """
+    return filter(lambda x: x.id is None, self._layers.values())
 
   def getMapLayerGroupById(self, groupId):
     """Get group by Id
@@ -100,7 +124,7 @@ class MapLayers(RanaModule):
       groupsDict = self.modrana.configs.mapConfig.get('groups', {})
       for groupId, groupDefinition in groupsDict.iteritems():
         if self._hasRequiredKeys(groupDefinition, MAP_LAYER_GROUP_REQUIRED_KEYS):
-          self._groups[groupId] = MapLayerGroup(groupId, groupDefinition)
+          self._groups[groupId] = MapLayerGroup(self, groupId, groupDefinition)
 
   def _getFallbackLayer(self):
     """In case that loading the map configuration
@@ -174,18 +198,32 @@ class MapLayer(object):
   def groupId(self):
     return self.config.get('group', None)
 
+  @property
+  def icon(self):
+    return self.config.get('icon', None)
+
 class MapLayerGroup(object):
   """A group of map layers"""
-  def __init__(self, groupId, config, layerIds=None):
+  def __init__(self, mapLayers, groupId, config, layerIds=None):
     """
+    :param mapLayers : the mapLayers module
     :param groupId: unique map layer group identifier
     :param config: a dictionary with map layer configuration
     :param layerIds: a list of map layer identifiers that are part of the group
     """
     if not layerIds: layerIds = []
-    self._layerIds = layerIds
+    self._mapLayers = mapLayers
+    self._layers = []
     self._groupId = groupId
     self._config = config
+    # load layers
+    self._reloadLayers()
+    # connect to the layer changed signal
+    self._mapLayers.layersChanged.connect(self._reloadLayers)
+
+  def _reloadLayers(self):
+    """Reload map layers for this group from the mapLayers module"""
+    self._layers = self._mapLayers.getLayersByGroupId(self.id)
 
   @property
   def id(self):
@@ -199,5 +237,13 @@ class MapLayerGroup(object):
     return self._config['label']
 
   @property
-  def mapLayerIds(self):
-    return self._layerIds
+  def icon(self):
+    return self._config.get('icon', None)
+
+  @property
+  def layers(self):
+    return self._layers
+
+  @property
+  def layerIds(self):
+    return map(lambda x: x.id, self._layers)
