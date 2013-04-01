@@ -413,7 +413,7 @@ class Options(RanaModule):
     mapLayers = self.m.get('mapLayers', None)
     layerStructure = []
     if mapLayers:
-      groups = mapLayers.getMapLayerGroupList()
+      groups = mapLayers.getGroupList()
 
       # sort the groups in alphabetical order by label
       groups.sort(key=lambda group: group.label)
@@ -447,7 +447,7 @@ class Options(RanaModule):
                                "group":groupLayers})
 
       # append layers without group right after groups in the list
-      nonGroupLayers = mapLayers.getMapLayersWithoutGroup()
+      nonGroupLayers = mapLayers.getLayersWithoutGroup()
       # sort the groups in alphabetical order by label
       nonGroupLayers.sort(key=lambda group: group.label)
       # convert to option format
