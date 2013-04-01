@@ -76,20 +76,20 @@ class MapLayers(RanaModule):
     """
     return filter(lambda x: x.groupId == groupId, self._layers.values())
 
-  def getMapLayersWithoutGroup(self):
+  def getLayersWithoutGroup(self):
     """Map layers without group have their group id set to None
     :return: list o MapLayer instances that have no group set
     """
     return filter(lambda x: x.id is None, self._layers.values())
 
-  def getMapLayerGroupById(self, groupId):
+  def getGroupById(self, groupId):
     """Get group by Id
     :param groupId: map layer group ID
     :return: MapLayerGroup object instance
     """
     return self._groups.get(groupId, None)
 
-  def getMapLayerGroupList(self):
+  def getGroupList(self):
     """Get a list off all known groups
     :return: a list of all groups
     """
