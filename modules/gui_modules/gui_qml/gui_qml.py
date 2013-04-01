@@ -24,6 +24,7 @@ import sys
 import re
 import traceback
 import cStringIO
+from pprint import pprint
 
 # PySide
 from PySide import QtCore
@@ -38,6 +39,8 @@ from modules.gui_modules.base_gui_module import GUIModule
 from datetime import datetime
 import time
 from modules.gui_modules.gui_qml import drawing
+from modules.gui_modules.gui_qml import wrappers
+from modules.gui_modules.gui_qml import list_models
 from core.fix import Fix
 
 global globe
@@ -142,11 +145,18 @@ class QMLGUI(GUIModule):
     # make tile loading accessible from QML
     tiles = MapTiles(self)
     rc.setContextProperty("mapTiles", tiles)
+    # make map layers accessible from QML
+    tiles = MapLayers(self)
+    rc.setContextProperty("mapLayers", tiles)
 
     # make constants accessible
     self.constants = self.getConstants()
     rc.setContextProperty("C", self.constants)
 
+    # #register list models
+    # self._registerListModels()
+
+    # connect to the close event
     self.window.closeEvent = self._qtWindowClosed
     #self.window.show()
 
@@ -160,6 +170,9 @@ class QMLGUI(GUIModule):
   def firstTime(self):
     self._location = self.m.get('location', None)
     self._mapTiles = self.m.get('mapTiles', None)
+
+    #register list models
+    self._registerListModels()
 
   def getIDString(self):
     return "QML"
@@ -237,9 +250,11 @@ class QMLGUI(GUIModule):
   def stopMainLoop(self):
     """stop the main loop or its equivalent"""
     # notify QML GUI first
-    """NOTE: due to calling Python properties
-    from onDestruction handlers causing
-    segfault, we need this"""
+
+    # NOTE: due to calling Python properties
+    # from onDestruction handlers causing
+    # segfault, we need this
+
     #self.rootObject.shutdown()
 
     # quit the application
@@ -277,6 +292,32 @@ class QMLGUI(GUIModule):
     C = {
     }
     return C
+
+  def _registerListModel(self, modelName, model):
+    """Register a list model to the QML context
+    :param modelName: a unique name of the model for the QML context
+    :param model: the list model instance
+    """
+    self.view.rootContext().setContextProperty(modelName, model)
+
+  def _registerListModels(self):
+    """Register all list models needed by modRana"""
+
+    # register the layer model
+    ml = self.m.get('mapLayers', None)
+    if ml:
+      # just to make sure that the garbage
+      # collector doesn't eat the list model
+      # we assign it as a class variable
+      wrappedGroupList = map(
+        lambda x: wrappers.MapLayerGroupWrapper(x), ml.getGroupList()
+      )
+      self.layersListModel = list_models.BaseListModel(wrappedGroupList)
+      self._registerListModel("mapLayersModel", self.layersListModel)
+
+  def _getLayerListModel(self):
+    pass
+
 
 class Platform(QtCore.QObject):
   """make current platform available to QML and integrable as a property"""
@@ -504,6 +545,11 @@ class MapTiles(QtCore.QObject):
       self.gui._mapTiles.addTileDownloadRequest(layerId, z, x, y)
       #      print("downloading, try later")
       return False
+
+class MapLayers(QtCore.QObject):
+  def __init__(self, gui):
+    QtCore.QObject.__init__(self)
+    self.gui = gui
 
 class FixWrapper(QtCore.QObject):
   def __init__(self, fix):
