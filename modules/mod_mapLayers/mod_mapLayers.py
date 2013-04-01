@@ -89,11 +89,15 @@ class MapLayers(RanaModule):
     """
     return self._groups.get(groupId, None)
 
-  def getGroupList(self):
+  def getGroupList(self, sort=False):
     """Get a list off all known groups
+    :param sort: if True, sort the groups by label alphabetically
     :return: a list of all groups
     """
-    return self._groups.values()
+    if sort:
+      return sorted(self._groups.values(), key=lambda x: x.label)
+    else:
+      return self._groups.values()
 
   def _parseConfig(self):
     # check if there is at least one valid layer
@@ -224,6 +228,9 @@ class MapLayerGroup(object):
   def _reloadLayers(self):
     """Reload map layers for this group from the mapLayers module"""
     self._layers = self._mapLayers.getLayersByGroupId(self.id)
+    # sort the layers by the label
+    # as that is what is usually needed when displaying them
+    self._layers.sort(key=lambda l: l.label)
 
   @property
   def id(self):

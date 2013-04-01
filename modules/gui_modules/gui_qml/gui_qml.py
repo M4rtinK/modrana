@@ -310,7 +310,7 @@ class QMLGUI(GUIModule):
       # collector doesn't eat the list model
       # we assign it as a class variable
       wrappedGroupList = map(
-        lambda x: wrappers.MapLayerGroupWrapper(x), ml.getGroupList()
+        lambda x: wrappers.MapLayerGroupWrapper(x), ml.getGroupList(sort=True)
       )
       self.layersListModel = list_models.BaseListModel(wrappedGroupList)
       self._registerListModel("mapLayersModel", self.layersListModel)
