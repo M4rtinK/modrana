@@ -90,7 +90,7 @@ class AutoQObject(QtCore.QObject):
       setProperty = locals()['_set_' + key] = _setProperty(key)
       getProperty = locals()['_get_' + key] = _getProperty(key)
 
-      locals()[key] = QtCore.Property(value, getProperty, setProperty, notify=nfy)
+      setattr(self, key, QtCore.Property(value, getProperty, setProperty, notify=nfy))
 
   def __repr__(self):
     values = ('%s=%r' % (key, self.__dict__['_' + key]) \
