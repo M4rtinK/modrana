@@ -17,13 +17,9 @@ HeaderDialog {
     content : ListView {
         id : layerView
         model : mapLayersModel
-        anchors.left : parent.left
-        anchors.right : parent.right
-        anchors.top :  parent.top
-        //width : layerSelectD.width
-        height : layerSelectD.availableHeight
+        anchors.fill : parent
+        clip : true
         currentIndex : -1
-
         delegate: Component {
             id: listDelegate
             Item {

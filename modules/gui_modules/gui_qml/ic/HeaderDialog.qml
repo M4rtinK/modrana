@@ -10,8 +10,7 @@ Dialog {
     property Style platformStyle: SelectionDialogStyle {}
     property string titleText : "Header dialog"
     property alias content: dialogContent.children
-    property int bottomPadding : 32
-    property real availableHeight : parent.height - bottomPadding - header.height
+    property real availableHeight : parent.height - header.height
 
     title: Item {
         id: header
@@ -67,7 +66,8 @@ Dialog {
     content:Item {
         id: dialogContent
         anchors.top : title.bottom
-        anchors.bottom : parent.bottom
+        //anchors.bottom : parent.bottom
+        height : availableHeight
         anchors.left : parent.left
         anchors.right : parent.right
     }
