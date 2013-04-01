@@ -36,83 +36,18 @@
 
 from PySide import QtCore
 from inspect import isfunction
+from pprint import pprint
 
-class AutoQObject(QtCore.QObject):
-  """
-  Automatic Python object -> QObject wrapper
-  based on:
-  http://qt-project.org/wiki/Auto-generating-QObject-from-template-in-PySide
-
-  Extended to be able to both define the properties of the class and also
-  set their initial values from the nested tuple.
-  Like this, wrapping python object instances from the modRana core
-  is very easy and concentrated to a single place.
-  """
-  def __init__(self, classDef, className=None):
-    QtCore.QObject.__init__(self)
-    # if no name is specified, use the name
-    # of the (sub)class
-    if className is None:
-      className = self._getClassName()
-    self._name = className
-    self._getClassName()
-    self._keys = []
-
-    for key, val, source in classDef:
-      # is the source method defined ?
-      if source:
-        # get value from the source method or save the value directly
-        if isfunction(source):
-          self.__dict__['_' + key] = source()
-        else:
-          self.__dict__['_' + key] = source
-          # use default value for the data type
-      else:
-        self.__dict__['_' + key] = val()
-      self._keys.append(key)
-
-    for key, value, source in classDef:
-      nfy = locals()['_nfy_' + key] = QtCore.Signal()
-
-      def _getProperty(key):
-        def f(self):
-          return self.__dict__['_' + key]
-
-        return f
-
-      def _setProperty(key):
-        def f(self, value):
-          self.__dict__['_' + key] = value
-          self.__dict__['_nfy_' + key].emit()
-
-        return f
-
-      setProperty = locals()['_set_' + key] = _setProperty(key)
-      getProperty = locals()['_get_' + key] = _getProperty(key)
-
-      setattr(self, key, QtCore.Property(value, getProperty, setProperty, notify=nfy))
-
-  def __repr__(self):
-    values = ('%s=%r' % (key, self.__dict__['_' + key]) \
-              for key in self._keys)
-    return '<%s (%s)>' % (self._name, ', '.join(values))
-
-  @classmethod
-  def _getClassName(cls):
-    return cls.__name__
-
-# return Object
-
-class NestedWrapper(AutoQObject):
+class NestedWrapper(QtCore.QObject):
   """NestedWrapped enables to include additional
   QObject based object instances inside this QObject
   The objects are accessed by a simple ListModel based API:
   count - this property county the children of this object
   get(index) - get child with the given index
   """
-  def __init__(self, classDef, className, children=None):
+  def __init__(self, children=None):
     if not children: children = []
-    AutoQObject.__init__(self, classDef, className)
+    QtCore.QObject.__init__(self)
     self._children = children
 
   childrenChanged = QtCore.Signal()
@@ -136,25 +71,91 @@ class NestedWrapper(AutoQObject):
 class MapLayerGroupWrapper(NestedWrapper):
   """Wrapper for MapLayerGroup objects"""
   def __init__(self, group):
+    self.wo = group
     classDef = (
       ("id", str, group.id),
       ("label", str, group.label),
       ("icon", str, group.icon)
     )
     wrappedLayers = map(lambda x : MapLayerWrapper(x), group.layers)
-    NestedWrapper.__init__(self, classDef, None, wrappedLayers)
+    NestedWrapper.__init__(self, wrappedLayers)
 
-class MapLayerWrapper(AutoQObject):
+  changed = QtCore.Signal()
+
+  def _getId(self):
+    return self.wo.id
+
+  id = QtCore.Property(str, _getId, notify=changed)
+
+  def _getLabel(self):
+    return self.wo.label
+
+  label = QtCore.Property(str, _getLabel, notify=changed)
+
+  def _getIcon(self):
+    return self.wo.icon
+
+  icon = QtCore.Property(str, _getIcon, notify=changed)
+
+
+class MapLayerWrapper(QtCore.QObject):
   """Wrapper for MapLayer objects"""
   def __init__(self, wrappedObject):
-    classDef = (
-      ("id", str, wrappedObject.id),
-      ("label", str, wrappedObject.label),
-      ("url", str, wrappedObject.url),
-      ("maxZoom", int, wrappedObject.maxZoom),
-      ("minZoom", int, wrappedObject.minZoom),
-      ("folderName", str, wrappedObject.folderName),
-      ("coordinates", str, wrappedObject.coordinates),
-      ("icon", str, wrappedObject.icon)
-    )
-    AutoQObject.__init__(self, classDef)
+    self.wo = wrappedObject
+    QtCore.QObject.__init__(self)
+
+  changed = QtCore.Signal()
+
+  def _getId(self):
+    return self.wo.id
+
+  id = QtCore.Property(str, _getId, notify=changed)
+
+  def _getLabel(self):
+    return self.wo.label
+
+  label = QtCore.Property(str, _getLabel, notify=changed)
+
+  def _getUrl(self):
+    return self.wo.url
+
+  url = QtCore.Property(str, _getUrl, notify=changed)
+
+  def _getMaxZoom(self):
+    return self.wo.maxZoom
+
+  maxZoom = QtCore.Property(int, _getMaxZoom, notify=changed)
+
+  def _getMinZoom(self):
+    return self.wo.minZoom
+
+  minZoom = QtCore.Property(int, _getMinZoom, notify=changed)
+
+  def _getFolderName(self):
+    return self.wo.folderName
+
+  folderName = QtCore.Property(str, _getFolderName, notify=changed)
+
+  def _getCoordinates(self):
+    return self.wo.coordinates
+
+  coordinates = QtCore.Property(str, _getCoordinates, notify=changed)
+
+  def _getIcon(self):
+    return self.wo.icon
+
+  icon = QtCore.Property(str, _getIcon, notify=changed)
+
+
+
+
+
+
+
+
+
+
+  # def _get(self):
+  #   return self.wo
+  #
+  #  = QtCore.Property(,)
