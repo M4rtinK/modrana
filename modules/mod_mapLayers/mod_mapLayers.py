@@ -25,7 +25,11 @@ from core.signal import Signal
 # otherwise the layer will be rejected
 # defined for use in modRana
 
-MAP_LAYER_REQUIRED_KEYS = {
+
+# due to Python 2.5 compatibility
+# we use the set([item,item,item]) syntax
+# instead of {item,item,item}
+MAP_LAYER_REQUIRED_KEYS = set([
   'label',
   'url',
   'max_zoom',
@@ -33,11 +37,12 @@ MAP_LAYER_REQUIRED_KEYS = {
   'type',
   'folder_prefix',
   'coordinates'
-}
+])
 
-MAP_LAYER_GROUP_REQUIRED_KEYS = {
+MAP_LAYER_GROUP_REQUIRED_KEYS = set([
   'label'
-}
+])
+
 
 def getModule(m,d,i):
   return MapLayers(m,d,i)
