@@ -2,64 +2,127 @@ import QtQuick 1.1
 //import com.nokia.meego 1.0
 import "./qtc"
 
-SelectionDialog {
+HeaderDialog {
     id: layerSelectD
     titleText: "Select map layer"
+
 
     signal layerSelected (variant selectedLayer)
 
     //selectedIndex: 1
 
-    /*delegate: Rectangle {
-        //width: parent.width
-        height: 80
-        color: index%2?"#eee":"#ddd"
-        Label {
-            id: title
-            elide: Text.ElideRight
-            //text: model.get(index).caption
-            text: "TEST"
-            color: "white"
-            font.bold: true
-            anchors.leftMargin: 10
-            anchors.fill: parent
-            verticalAlignment: Text.AlignVCenter
-        }
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                //rWin.setLayer(model.get(index).name)
-                rWin.setLayer(model.get(selectedIndex).name)
-                rWin.push(null)
-                accept()
+    content : ListView {
+        id : layerView
+        model : mapLayersModel
+        anchors.left : parent.left
+        anchors.right : parent.right
+        anchors.top :  parent.top
+        //width : layerSelectD.width
+        height : layerSelectD.availableHeight
+        currentIndex : -1
+
+
+        delegate: Component {
+            id: listDelegate
+            Item {
+                id : itemWrapper
+                anchors.left : parent.left
+                anchors.right : parent.right
+                height : groupWrapper.height + layersWrapper.height
+                Item {
+                    id : groupWrapper
+                    anchors.left : parent.left
+                    anchors.right : parent.right
+                    height : 50
+                    property bool toggled : false
+                    property int childrenCount : model.data.childrenCount
+                    function getLayer(index) {
+                        return model.data.get(index)
+                    }
+
+                    Rectangle {
+                        anchors.fill : parent
+                        color : groupWrapper.toggled ? "darkgray" : "black"
+                    }
+
+                    Label {
+                        anchors.verticalCenter : parent.verticalCenter
+                        anchors.left : parent.left
+                        anchors.leftMargin : 32
+                        text: groupWrapper.toggled ?
+                        model.data.label :
+                        model.data.label + " (" + model.data.childrenCount + ")"
+                        /*
+                        Component.onCompleted : {
+                            console.log("CC")
+                            console.log(model.data.id)
+                            console.log(model.data.label)
+                        }*/
+                    }
+                    MouseArea {
+                        id : groupMouseArea
+                        anchors.fill : parent
+                        onClicked : {
+                            console.log("group clicked")
+                            console.log(groupWrapper.toggled)
+                            groupWrapper.toggled = !groupWrapper.toggled
+                        }
+                    }
+                }
+                Item {
+                    id : layersWrapper
+                    anchors.left : parent.left
+                    anchors.right : parent.right
+                    anchors.top : groupWrapper.bottom
+                    height : groupWrapper.toggled ? layerRepeater.height : 0
+                    visible : groupWrapper.toggled
+                    Repeater {
+                        id : layerRepeater
+                        anchors.left : parent.left
+                        anchors.right : parent.right
+                        model : groupWrapper.childrenCount
+                        property int itemHeight : 50
+                        height : groupWrapper.childrenCount * itemHeight
+                        Item {
+                            id : layerWrapper
+                            anchors.left : parent.left
+                            anchors.right : parent.right
+                            height : layerRepeater.itemHeight
+                            y : index * layerRepeater.itemHeight
+                            Label {
+                                anchors.verticalCenter : parent.verticalCenter
+                                anchors.left : parent.left
+                                anchors.leftMargin : 64
+                                //text: "I'm item " + index
+                                text: groupWrapper.getLayer(index).label
+                            }
+                            MouseArea {
+                                anchors.fill : parent
+                                onClicked : {
+                                    console.log("layer clicked")
+                                }
+                            }
+
+                        }
+                    }
+                }
             }
         }
+    }
 
-    }*/
 
+    Component.onCompleted : {
+        console.log("Layer selection dialog completed")
+        console.log(layerView.height)
+        console.log(layerView.width)
+        console.log(layerView.count)
+        console.log(layerView.currentSection)
+
+    }
+
+    /*
     onSelectedIndexChanged : {
         layerSelected(model.get(selectedIndex))
         accept()
-    }
-
-    model: ListModel {
-        ListElement { name: "OSM Mapnik"; layerId: "mapnik" }
-        ListElement { name: "OSM Cycle map"; layerId: "cycle" }
-        ListElement { name: "OSM Transit overlay"; layerId: "openptmap_overlay" }
-        ListElement { name: "Google map"; layerId: "gmap" }
-        ListElement { name: "Google satellite"; layerId: "gsat" }
-        ListElement { name: "Google overlay"; layerId: "gover" }
-        ListElement { name: "Google 8-bit"; layerId: "g8bit" }
-        ListElement { name: "Google Traffic"; layerId: "gtraffic_overlay" }
-        ListElement { name: "Google Weather °C"; layerId: "gweather_overlay_celsius" }
-        ListElement { name: "Virtual Earth map"; layerId: "vmap" }
-        ListElement { name: "Virtual Earth hybrid"; layerId: "vsat" }
-        ListElement { name: "Virtual Earth satellite"; layerId: "vaer" }
-        ListElement { name: "Yahoo map"; layerId: "ymap" }
-        ListElement { name: "Yahoo satellite"; layerId: "ysat" }
-        ListElement { name: "Yahoo overlay"; layerId: "yover" }
-        ListElement { name: "Czech mountain-bike map"; layerId: "cz_mtb" }
-        ListElement { name: "map1.eu"; layerId: "map1_eu" }
-        ListElement { name: "Watercolor"; layerId: "stamen_watercolor" }
-    }
+    }*/
 }
