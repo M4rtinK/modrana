@@ -6,8 +6,11 @@ HeaderDialog {
     id: layerSelectD
     titleText: "Select map layer"
 
-
     signal layerSelected (variant selectedLayer)
+    // close the dialog once a layer is selected
+    onLayerSelected : {
+        accept()
+    }
 
     //selectedIndex: 1
 
@@ -20,7 +23,6 @@ HeaderDialog {
         //width : layerSelectD.width
         height : layerSelectD.availableHeight
         currentIndex : -1
-
 
         delegate: Component {
             id: listDelegate
@@ -63,8 +65,7 @@ HeaderDialog {
                         id : groupMouseArea
                         anchors.fill : parent
                         onClicked : {
-                            console.log("group clicked")
-                            console.log(groupWrapper.toggled)
+                            //console.log("group clicked")
                             groupWrapper.toggled = !groupWrapper.toggled
                         }
                     }
@@ -99,7 +100,8 @@ HeaderDialog {
                             MouseArea {
                                 anchors.fill : parent
                                 onClicked : {
-                                    console.log("layer clicked")
+                                    //console.log("layer clicked")
+                                    layerSelected(groupWrapper.getLayer(index))
                                 }
                             }
 
@@ -109,20 +111,4 @@ HeaderDialog {
             }
         }
     }
-
-
-    Component.onCompleted : {
-        console.log("Layer selection dialog completed")
-        console.log(layerView.height)
-        console.log(layerView.width)
-        console.log(layerView.count)
-        console.log(layerView.currentSection)
-
-    }
-
-    /*
-    onSelectedIndexChanged : {
-        layerSelected(model.get(selectedIndex))
-        accept()
-    }*/
 }
