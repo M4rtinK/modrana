@@ -177,19 +177,31 @@ class MapData(RanaModule):
 
       location = self.get("downloadArea", "here") # here or route
 
+      maxZoomLimit = 17
+      layerId = self.get('layer', None)
+      mapLayers = self.m.get('mapLayers', None)
+      if mapLayers:
+        layer = mapLayers.getLayerById(layerId)
+        if layer:
+          maxZoomLimit = layer.maxZoom
+
+
       z = self.get('z', 15) # this is the current zoomlevel as show on the map screen
       minZ = z - int(self.get('zoomUpSize', 0)) # how many zoomlevels up (from current zoomelevel) should we download ?
       if minZ < 0:
         minZ = 0
-      maxZ = z + int(
-        self.get('zoomDownSize', 0)) # how many zoomlevels down (from current zoomlevel) should we download ?
+      # how many zoomlevels down (from current zoomlevel) should we download ?
 
-      layer = self.get('layer', None)
-      mapLayers = self.modrana.getMapLayers()
-      if mapLayers == {}:
-        maxZoomLimit = 17
+      zoomDownSize = int(self.get('zoomDownSize', 0))
+      print "ZOOM DOWN SIZE"
+      print zoomDownSize
+      print zoomDownSize < 0
+      print "MAX ZOOM LIMIT"
+      print maxZoomLimit
+      if zoomDownSize < 0: # negative value means maximum zoom for the layer
+        maxZ = maxZoomLimit
       else:
-        maxZoomLimit = mapLayers[layer]['maxZoom']
+        maxZ = z + zoomDownSize
 
       if maxZ > maxZoomLimit:
         maxZ = 17 #TODO: make layer specific
@@ -255,7 +267,7 @@ class MapData(RanaModule):
       """will now ask the server and find the combined size if tiles in the batch"""
       self.set("sizeStatus", 'unknown') # first we set the size as unknown
       neededTiles = self.currentDownloadList
-      layer = self.get('layer', None)
+      layerId = self.get('layer', None)
       print("getting size")
       if len(neededTiles) == 0:
         print("cant get combined size, the list is empty")
@@ -268,7 +280,7 @@ class MapData(RanaModule):
 
       self.totalSize = 0
       maxThreads = self.get('maxSizeThreads', 5)
-      sizeThread = self.GetSize(self, neededTiles, layer,
+      sizeThread = self.GetSize(self, neededTiles, layerId,
         maxThreads) # the second parameter is the max number of threads TODO: tweak this
       print( "getSize received, starting sizeThread")
       sizeThread.start()
@@ -277,7 +289,7 @@ class MapData(RanaModule):
     elif message == "download":
       """get tilelist and download the tiles using threads"""
       neededTiles = self.currentDownloadList
-      layer = self.get('layer', None)
+      layerId = self.get('layer', None)
       print("starting download")
       if len(neededTiles) == 0:
         print("cant download an empty list")
@@ -311,7 +323,7 @@ class MapData(RanaModule):
       so all the threads (even when doing it with a single thread) hanged on the block
       it seems to be working alright + its pretty fast too
       """
-      getFilesThread = self.GetFiles(self, neededTiles, layer, maxThreads)
+      getFilesThread = self.GetFiles(self, neededTiles, layerId, maxThreads)
       getFilesThread.start()
       self.getFilesThread = getFilesThread
 

@@ -993,6 +993,14 @@ class Menus(RanaModule):
     self.clearMenu('editBatch', "mapData:refreshTilecount|set:menu:mapData#batchTileDl")
     # on exit from the edit-menu refresh the tilecount
 
+    maxZoomLimit = 17
+    layerId = self.get('layer', None)
+    mapLayers = self.m.get('mapLayers', None)
+    if mapLayers:
+      layer = mapLayers.getLayerById(layerId)
+      if layer:
+        maxZoomLimit = layer.maxZoom
+
     # we show the values of the settings
     location = self.get("downloadArea", "here")
     z = self.get('z', 15)
@@ -1003,14 +1011,12 @@ class Menus(RanaModule):
       minZ = 0
       zoomUp = z
 
-    maxZ = z + zoomDown
-
-    layer = self.get('layer', None)
-    mapLayers = self.modrana.getMapLayers()
-    if mapLayers == {}:
-      maxZoomLimit = 17
+    # -1 -> max zoom
+    if zoomDown < 0:
+      maxZ = maxZoomLimit
+      zoomDown = maxZ - z
     else:
-      maxZoomLimit = mapLayers[layer]['maxZoom']
+      maxZ = z + zoomDown
 
     if maxZ > maxZoomLimit:
       maxZ = 17
@@ -1055,7 +1061,7 @@ class Menus(RanaModule):
     self.addItem('zoomDown', '+ 3 down', 'generic', 'set:zoomDownSize:3|set:menu:%s' % nextMenu)
     self.addItem('zoomDown', '+ 5 down', 'generic', 'set:zoomDownSize:5|set:menu:%s' % nextMenu)
     self.addItem('zoomDown', '+ 8 down', 'generic', 'set:zoomDownSize:8|set:menu:%s' % nextMenu)
-    self.addItem('zoomDown', 'max down', 'generic', 'set:zoomDownSize:50|set:menu:%s' % nextMenu)
+    self.addItem('zoomDown', 'max down', 'generic', 'set:zoomDownSize:-1|set:menu:%s' % nextMenu)
     self.setupZoomUpMenu()
 
   def setupDataSubMenu(self, nextMenu='zoomDown', prevMenu='data'):
