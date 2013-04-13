@@ -72,14 +72,20 @@ class MapData(RanaModule):
     updated during batch, in seconds"""
     self.batchInfoUpdateInterval = 0.5
     self.mapFolderPath = None
+    self._mapLayersModule = None
 
   def firstTime(self):
     # cache the map folder path
     self.mapFolderPath = self.modrana.paths.getMapFolderPath()
+    self._mapLayersModule = self.m.get('mapLayers', None) # get the map layers module
 
   def _getTileFolderPath(self):
     """return path to the map folder"""
     return self.mapFolderPath
+
+  def _getLayerById(self, layerId):
+    """Get layer description from the mapLayers module"""
+    return self._mapLayersModule.getLayerById(layerId)
 
   def listTiles(self, route):
     """List all tiles touched by a polyline"""
@@ -103,10 +109,10 @@ class MapData(RanaModule):
     if tileFolder is None:
       print("mapData: tile folder path unknown or unusable")
       return []
-    layer = self.get('layer', None) # TODO: manual layer setting
-    mapLayers = self.modrana.getMapLayers() # a dictionary describing supported map layers
-    extension = mapLayers[layer]['type'] # what is the extension for the current layer ?
-    folderPrefix = mapLayers[layer]['folderPrefix'] # what is the extension for the current layer ?
+    layerId = self.get('layer', "mapnik") # TODO: manual layer setting
+    layer = self._getLayerById(layerId)
+    extension = layer.type # what is the extension for the current layer ?
+    folderName = layer.folderName # what is the extension for the current layer ?
 
     mapTiles = self.m.get('mapTiles', None)
 
@@ -114,7 +120,7 @@ class MapData(RanaModule):
 
     for tile in tilesToDownload: # check what tiles are already stored
       (z, x, y) = (tile[2], tile[0], tile[1])
-      filePath = tileFolder + mapTiles.getImagePath(x, y, z, folderPrefix, extension)
+      filePath = tileFolder + mapTiles.getImagePath(x, y, z, folderName, extension)
       if not os.path.exists(filePath): # we don't have this file
         neededTiles.append(tile)
 
@@ -123,16 +129,16 @@ class MapData(RanaModule):
     return neededTiles
 
 
-  def getTileUrlAndPath(self, x, y, z, layer):
+  def getTileUrlAndPath(self, x, y, z, layerId):
     mapTiles = self.m.get('mapTiles', None)
-    mapLayers = self.modrana.getMapLayers() # a dictionary describing supported map layers
-    extension = mapLayers[layer]['type'] # what is the extension for the current layer ?
-    folderPrefix = mapLayers[layer]['folderPrefix'] # what is the extension for the current layer ?
-    url = self.getTileUrl(x, y, z, layer) # generate url
+    layer = self._getLayerById(layerId)
+    extension = layer.type # what is the extension for the current layer ?
+    folderName = layer.folderName # what is the extension for the current layer ?
+    url = self.getTileUrl(x, y, z, layerId) # generate url
     tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-    filePath = os.path.join(tileFolder, mapTiles.getImagePath(x, y, z, folderPrefix, extension))
-    fileFolder = os.path.join(tileFolder, mapTiles.getImageFolder(x, z, folderPrefix))
-    return url, filePath, fileFolder, folderPrefix, extension
+    filePath = os.path.join(tileFolder, mapTiles.getImagePath(x, y, z, folderName, extension))
+    fileFolder = os.path.join(tileFolder, mapTiles.getImageFolder(x, z, folderName))
+    return url, filePath, fileFolder, folderName, extension
 
   def addToQueue(self, neededTiles):
     """load urls and filenames to download queue,
