@@ -199,11 +199,6 @@ class MapData(RanaModule):
       # how many zoomlevels down (from current zoomlevel) should we download ?
 
       zoomDownSize = int(self.get('zoomDownSize', 0))
-      print "ZOOM DOWN SIZE"
-      print zoomDownSize
-      print zoomDownSize < 0
-      print "MAX ZOOM LIMIT"
-      print maxZoomLimit
       if zoomDownSize < 0: # negative value means maximum zoom for the layer
         maxZ = maxZoomLimit
       else:
