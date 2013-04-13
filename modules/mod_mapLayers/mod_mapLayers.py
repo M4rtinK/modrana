@@ -189,11 +189,11 @@ class MapLayer(object):
 
   @property
   def maxZoom(self):
-    return self.config['max_zoom']
+    return int(self.config['max_zoom'])
 
   @property
   def minZoom(self):
-    return self.config['min_zoom']
+    return int(self.config['min_zoom'])
 
   @property
   def folderName(self):
