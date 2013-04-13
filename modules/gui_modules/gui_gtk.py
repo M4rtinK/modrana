@@ -214,7 +214,20 @@ class GTKGUI(GUIModule):
     self.mw.centeringDisableThreshold = threshold
 
   def startMainLoop(self):
-    """start the main loop or its equivalent"""
+    """Start the GTK loop & related stuff"""
+
+    # according to the documentation
+    # the these init functions
+    # need to be called, or else
+    # python threads will only runs
+    # when GTK events are handled
+    # * there were some issues with tile download being slower
+    #   if the screen is blanked and no red-drawing is going one,
+    #   before these init methods were called on startup
+    # * lets see if this improves the situation
+    gobject.threads_init()
+    gtk.gdk.threads_init()
+
     gtk.main()
 
   def stopMainLoop(self):
