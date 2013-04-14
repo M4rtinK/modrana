@@ -572,9 +572,6 @@ class MapLayers(QtCore.QObject):
 
   @QtCore.Slot(str, result=QtCore.QObject)
   def getLayerById(self, layerId):
-    print "GET MAP BY ID"
-    print layerId
-    print self.wrappedLayers
     return self.wrappedLayers.get(layerId, None)
 
 class FixWrapper(QtCore.QObject):
