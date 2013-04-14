@@ -35,10 +35,6 @@ HeaderDialog {
                     height : layerView.itemHeight
                     property bool toggled : false
                     property int childrenCount : model.data.childrenCount
-                    function getLayer(index) {
-                        return model.data.get(index)
-                    }
-
                     Rectangle {
                         anchors.fill : parent
                         color : groupWrapper.toggled ? "darkgray" : "black"
@@ -75,15 +71,22 @@ HeaderDialog {
                     anchors.top : groupWrapper.bottom
                     height : groupWrapper.toggled ? layerRepeater.height : 0
                     visible : groupWrapper.toggled
+                    function getLayerLabel(index) {
+                        return model.data.getLayerLabel(index)
+                    }
+                    function getLayerId(index) {
+                        return model.data.getLayerId(index)
+                    }
                     Repeater {
                         id : layerRepeater
                         anchors.left : parent.left
                         anchors.right : parent.right
-                        model : groupWrapper.childrenCount
+                        model : layersWrapper.visible ? groupWrapper.childrenCount : 0
                         property int itemHeight : layerView.itemHeight
                         height : groupWrapper.childrenCount * itemHeight
                         Item {
                             id : layerWrapper
+                            parent : layerRepeater
                             anchors.left : parent.left
                             anchors.right : parent.right
                             height : layerRepeater.itemHeight
@@ -97,7 +100,7 @@ HeaderDialog {
                                 anchors.left : parent.left
                                 anchors.leftMargin : 64
                                 //text: "I'm item " + index
-                                text: groupWrapper.getLayer(index).label
+                                text: layersWrapper.getLayerLabel(index)
                                 font.bold : true
                             }
                             MouseArea {
@@ -105,7 +108,8 @@ HeaderDialog {
                                 anchors.fill : parent
                                 onClicked : {
                                     //console.log("layer clicked")
-                                    layerSelected(groupWrapper.getLayer(index))
+                                    var layerId = layersWrapper.getLayerId(index)
+                                    layerSelected(mapLayers.getLayerById(layerId))
                                 }
                             }
 
