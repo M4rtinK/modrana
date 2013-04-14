@@ -87,6 +87,27 @@ class MapLayers(RanaModule):
     """
     return filter(lambda x: x.id is None, self._layers.values())
 
+  def getLayerIds(self):
+    """Get a list of all layer ids
+    :return: a list of all layer ids
+    :rtype: a list
+    """
+    return self._layers.keys()
+
+  def getLayerList(self):
+    """Get a list of all layers
+    :return: a list of all layers
+    :rtype: a list
+    """
+    return self._layers.values()
+
+  def getLayerDict(self):
+    """Get a dictionary of all layers
+    :return: a dict of all layers
+    :rtype: a dict
+    """
+    return self._layers
+
   def getGroupById(self, groupId):
     """Get group by Id
     :param groupId: map layer group ID
