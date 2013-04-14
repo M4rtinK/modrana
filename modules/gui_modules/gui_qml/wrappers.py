@@ -72,13 +72,21 @@ class MapLayerGroupWrapper(NestedWrapper):
   """Wrapper for MapLayerGroup objects"""
   def __init__(self, group):
     self.wo = group
-    classDef = (
-      ("id", str, group.id),
-      ("label", str, group.label),
-      ("icon", str, group.icon)
-    )
-    wrappedLayers = map(lambda x : MapLayerWrapper(x), group.layers)
-    NestedWrapper.__init__(self, wrappedLayers)
+    NestedWrapper.__init__(self, self.wo.layers)
+
+  @QtCore.Slot(int, result=str)
+  def getLayerId(self, index):
+    try:
+      return  self._children[index].id
+    except IndexError:
+      return None
+
+  @QtCore.Slot(int, result=str)
+  def getLayerLabel(self, index):
+    try:
+      return  self._children[index].label
+    except IndexError:
+      return None
 
   changed = QtCore.Signal()
 
