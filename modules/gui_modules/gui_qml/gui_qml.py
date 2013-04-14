@@ -164,12 +164,14 @@ class QMLGUI(GUIModule):
 
     self._location = None # location module
     self._mapTiles = None # map tiles module
+    self._mapLayers = None # map tiles module
 
     self._notificationQueue = []
 
   def firstTime(self):
     self._location = self.m.get('location', None)
     self._mapTiles = self.m.get('mapTiles', None)
+    self._mapLayers = self.m.get('mapLayers', None)
 
     #register list models
     self._registerListModels()
@@ -550,6 +552,30 @@ class MapLayers(QtCore.QObject):
   def __init__(self, gui):
     QtCore.QObject.__init__(self)
     self.gui = gui
+
+    self._wrappedLayers = None
+    # why are wee keeping our own dictionary of wrapped
+    # layers and not just returning a newly wrapped object on demand ?
+    # -> because PySide (1.1.1) segfaults if we don't hold any reference
+    # on the object returned :)
+
+  @property
+  def wrappedLayers(self):
+    # make sure the wrapped layer dict has benn initialized
+    # (we can't do that at init, as at that time the
+    # map layers module is not yet loaded)
+    if self._wrappedLayers is None:
+      self._wrappedLayers = {}
+      for layerId, layer in self.gui._mapLayers.getLayerDict().iteritems():
+        self.wrappedLayers[layerId] = wrappers.MapLayerWrapper(layer)
+    return self._wrappedLayers
+
+  @QtCore.Slot(str, result=QtCore.QObject)
+  def getLayerById(self, layerId):
+    print "GET MAP BY ID"
+    print layerId
+    print self.wrappedLayers
+    return self.wrappedLayers.get(layerId, None)
 
 class FixWrapper(QtCore.QObject):
   def __init__(self, fix):
