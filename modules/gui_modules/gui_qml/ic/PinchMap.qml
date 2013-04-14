@@ -186,6 +186,14 @@ Rectangle {
         layers.setProperty(layerNumber, "layerName", newLayerName)
     }
 
+    function setLayerById(layerNumber, newLayerId) {
+        // set layer ID and name
+        var newLayerName = mapLayers.getLayerName(newLayerId)
+        console.log("setting layer " + layerNumber + " to " + newLayerId + "/" + newLayerName)
+        layers.setProperty(layerNumber, "layerId", newLayerId)
+        layers.setProperty(layerNumber, "layerName", newLayerName)
+    }
+
     function setLayerOpacity(layerNumber, opacityValue) {
         console.log("setting layer " + layerNumber + " opacity to " + opacityValue)
         layers.setProperty(layerNumber, "layerOpacity", opacityValue)

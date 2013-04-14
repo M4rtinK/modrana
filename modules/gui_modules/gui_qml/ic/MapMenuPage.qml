@@ -52,7 +52,7 @@ IconGridPage {
     MapLayerSelectionDialog {
         id : layerSelectD
         onLayerSelected  : {
-            rWin.mapPage.getMap().setLayer(0, selectedLayer.id, selectedLayer.label)
+            rWin.mapPage.getMap().setLayerById(0, layerId)
             rWin.pageStack.pop(null)
             accept()
         }

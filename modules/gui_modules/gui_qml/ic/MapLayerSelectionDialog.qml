@@ -6,7 +6,7 @@ HeaderDialog {
     id: layerSelectD
     titleText: "Select map layer"
 
-    signal layerSelected (variant selectedLayer)
+    signal layerSelected (string layerId)
     // close the dialog once a layer is selected
     onLayerSelected : {
         accept()
@@ -109,7 +109,7 @@ HeaderDialog {
                                 onClicked : {
                                     //console.log("layer clicked")
                                     var layerId = layersWrapper.getLayerId(index)
-                                    layerSelected(mapLayers.getLayerById(layerId))
+                                    layerSelected(layerId)
                                 }
                             }
 

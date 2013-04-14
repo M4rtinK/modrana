@@ -158,7 +158,7 @@ BasePage {
         id : layerSelectD
         property int layerIndex
         onLayerSelected  : {
-            rWin.mapPage.getMap().setLayer(layerIndex, selectedLayer.id, selectedLayer.label)
+            rWin.mapPage.getMap().setLayerById(layerIndex, layerId)
             accept()
         }
     }
