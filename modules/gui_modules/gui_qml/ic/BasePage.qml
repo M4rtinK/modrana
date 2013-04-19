@@ -84,7 +84,7 @@ Page {
         anchors.topMargin : 8
         anchors.leftMargin : 16
         iconName : "left_thin.png"
-        //iconSource : "image://icons/"+ modrana.theme +"/back_small.png"
+        //iconSource : "image://icons/"+ modrana.theme_id +"/back_small.png"
         opacity : pageFlickable.atYBeginning ? 1.0 : 0.55
         onClicked : {
             rWin.pageStack.pop()

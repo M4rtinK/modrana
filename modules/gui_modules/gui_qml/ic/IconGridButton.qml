@@ -6,8 +6,8 @@ Item {
     property real margin : 0
     property real iconSize : 100
     property alias iconName : themedIcon.iconName
-    property color normalColor : "#92aaf3"
-    property color toggledColor : "#c6d1f3"
+    property color normalColor : modrana.theme.color.main_fill
+    property color toggledColor : modrana.theme.color.icon_grid_toggled
     property alias sensitive : mouseArea.enabled
     property string text : ""
     signal clicked

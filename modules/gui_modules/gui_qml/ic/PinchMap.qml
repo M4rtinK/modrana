@@ -305,7 +305,7 @@ Rectangle {
     function tileUrl(layerID, tx, ty) {
         //console.log("tileUrl" + tx + "/" + ty)
         if (ty < 0 || ty > maxTileNo) {
-            return "image://icons/"+ modrana.theme +"/noimage.png"
+            return "image://icons/"+ modrana.theme_id +"/noimage.png"
         } else {
             if (tileserverPort != 0) {
                 return "http://127.0.0.1:"+tileserverPort+"/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty+".png"
@@ -425,7 +425,7 @@ Rectangle {
     }
     Image {
         id: targetIndicator
-        source: "image://icons/"+ modrana.theme +"/target-indicator-cross.png"
+        source: "image://icons/"+ modrana.theme_id +"/target-indicator-cross.png"
         property variant t: getMappointFromCoord(showTargetAtLat, showTargetAtLon)
         x: map.x + t[0] - width/2
         y: map.y + t[1] - height/2
@@ -456,8 +456,8 @@ Rectangle {
         id: positionIndicator
 
         source: currentPositionValid ?
-                "image://icons/"+ modrana.theme +"/position-indicator.png" :
-                "image://icons/"+ modrana.theme +"/position-indicator-red.png"
+                "image://icons/"+ modrana.theme_id +"/position-indicator.png" :
+                "image://icons/"+ modrana.theme_id +"/position-indicator-red.png"
         property variant t: getMappointFromCoord(currentPositionLat, currentPositionLon)
         x: map.x + t[0] - width/2
         y: map.y + t[1] - height + positionIndicator.width/2

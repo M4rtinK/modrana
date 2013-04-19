@@ -11,8 +11,8 @@ Rectangle {
     property real iconSize : 80
     property real margin : 8
     property alias iconName : themedIcon.iconName
-    property color normalColor : "#c6d1f3"
-    property color toggledColor : "#3c60fa"
+    property color normalColor : modrana.theme.color.icon_button_normal
+    property color toggledColor : modrana.theme.color.icon_button_toggled
 
     // "#c6d1f3" QML toggled
     // modRana theme:

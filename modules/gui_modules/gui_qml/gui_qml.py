@@ -42,6 +42,7 @@ from modules.gui_modules.gui_qml import drawing
 from modules.gui_modules.gui_qml import wrappers
 from modules.gui_modules.gui_qml import list_models
 from core.fix import Fix
+from core import signal
 
 global globe
 
@@ -83,6 +84,7 @@ class QMLGUI(GUIModule):
     # some constants
     self.msLongPress = 400
     self.centeringDisableThreshold = 2048
+    self.firstTimeSignal = signal.Signal()
     size = (800, 480) # initial window size
 
     # window state
@@ -128,7 +130,7 @@ class QMLGUI(GUIModule):
 
     rc = self.view.rootContext()
     # make core modRana functionality accessible from QML
-    modRanaCore = ModRana(self.modrana)
+    modRanaCore = ModRana(self.modrana, self)
     rc.setContextProperty("modrana", modRanaCore)
     # make options accessible from QML
     options = Options(self.modrana)
@@ -146,8 +148,8 @@ class QMLGUI(GUIModule):
     tiles = MapTiles(self)
     rc.setContextProperty("mapTiles", tiles)
     # make map layers accessible from QML
-    tiles = MapLayers(self)
-    rc.setContextProperty("mapLayers", tiles)
+    layers = MapLayers(self)
+    rc.setContextProperty("mapLayers", layers)
 
     # make constants accessible
     self.constants = self.getConstants()
@@ -175,6 +177,9 @@ class QMLGUI(GUIModule):
 
     #register list models
     self._registerListModels()
+
+    # trigger the first time signal
+    self.firstTimeSignal()
 
   def getIDString(self):
     return "QML"
@@ -780,7 +785,6 @@ class GPSDataWrapper(QtCore.QObject):
   def _gps_mode(self):
     return self.gps_mode
 
-
   data = QtCore.Property(QtCore.QObject, _gps_data, notify=changed)
   lastGoodFix = QtCore.Property(QtCore.QObject, _gps_last_good_fix, notify=changed)
   hasFix = QtCore.Property(bool, _gps_has_fix, notify=changed)
@@ -792,11 +796,13 @@ class ModRana(QtCore.QObject):
   core modRana functionality
   """
 
-  def __init__(self, modrana):
+  def __init__(self, modrana, gui):
     QtCore.QObject.__init__(self)
     self.modrana = modrana
+    self.gui = gui
     self.modrana.watch("mode", self._modeChangedCB)
     self.modrana.watch("theme", self._themeChangedCB)
+    self._theme = Theme(gui)
 
   # mode
 
@@ -814,11 +820,14 @@ class ModRana(QtCore.QObject):
 
   # theme
 
-  def _getTheme(self):
+  def _getThemeId(self):
     return self.modrana.get('theme', "default")
 
-  def _setTheme(self, newTheme):
+  def _setThemeId(self, newTheme):
     return self.modrana.set('theme', newTheme)
+
+  def _getTheme(self):
+    return self._theme
 
   themeChanged = Signal()
 
@@ -829,7 +838,84 @@ class ModRana(QtCore.QObject):
   # properties
 
   mode = QtCore.Property(str, _getMode, _setMode, notify=modeChanged)
-  theme = QtCore.Property(str, _getTheme, _setTheme, notify=themeChanged)
+  theme_id = QtCore.Property(str, _getThemeId, _setThemeId, notify=themeChanged)
+  theme = QtCore.Property(QtCore.QObject, _getTheme, notify=themeChanged)
+
+class Theme(QtCore.QObject):
+  """modRana themes"""
+  def __init__(self, gui):
+    QtCore.QObject.__init__(self)
+    self.gui = gui
+    # connect to the first time signal
+    self.gui.firstTimeSignal.connect(self._firstTimeCB)
+
+  themeChanged = Signal()
+
+  def _firstTimeCB(self):
+    # we need the them module
+    self.themeModule = self.gui.m.get('theme')
+    self.theme = self.themeModule.theme
+    self.colors = ColorsWrapper(self.theme)
+    # connect to the theme changed signal
+    self.themeModule.themeChanged.connect(self._themeChangedCB)
+
+  def _themeChangedCB(self, newTheme):
+    self.theme = newTheme
+    self.colors.reloadTheme(self.theme)
+    self.themeChanged.emit()
+
+  def _getThemeId(self):
+    return self.theme.id
+
+  def _setThemeId(self, newTheme):
+    return self.modrana.set('theme', newTheme)
+
+  def _getThemeName(self):
+    return self.theme.name
+
+  def _getColor(self):
+    return self.colors
+
+  id = QtCore.Property(str, _getThemeId, _setThemeId, notify=themeChanged)
+  name = QtCore.Property(str, _getThemeName, notify=themeChanged)
+  color = QtCore.Property(QtCore.QObject, _getColor, notify=themeChanged)
+
+class ColorsWrapper(QtCore.QObject):
+  """Wrapper for modRana theme colors"""
+  def __init__(self, theme):
+    QtCore.QObject.__init__(self)
+    self.t = theme
+
+  colorsChanged = Signal()
+
+  def reloadTheme(self, theme):
+    """Replace the current theme with a new one
+    and emit the changed signal"""
+    self.t = theme
+    self.colorsChanged.emit()
+
+  def _main_fill(self):
+    return self.t.getColor("main_fill", "#92aaf3")
+
+  def _icon_grid_toggled(self):
+    return self.t.getColor("icon_grid_toggled", "#c6d1f3")
+
+  def _icon_button_normal(self):
+    return self.t.getColor("icon_button_normal", "#c6d1f3")
+
+  def _icon_button_toggled(self):
+    return self.t.getColor("icon_button_toggled", "#3c60fa")
+
+  def _page_background(self):
+    return self.t.getColor("page_background", "black")
+
+  main_fill = QtCore.Property(str, _main_fill, notify=colorsChanged)
+  icon_grid_toggled = QtCore.Property(str, _icon_grid_toggled, notify=colorsChanged)
+  icon_button_normal = QtCore.Property(str, _icon_button_normal, notify=colorsChanged)
+  icon_button_toggled = QtCore.Property(str, _icon_button_toggled, notify=colorsChanged)
+  page_background = QtCore.Property(str, _page_background, notify=colorsChanged)
+
+
 
 class Options(QtCore.QObject):
   """make options available to QML and integrable as a property"""

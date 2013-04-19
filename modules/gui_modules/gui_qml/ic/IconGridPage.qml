@@ -15,7 +15,7 @@ Page {
     // page background
     Rectangle {
         anchors.fill : parent
-        color : "black"
+        color : modrana.theme.color.page_background
     }
 
     function getPage(menu) {
