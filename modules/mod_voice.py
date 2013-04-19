@@ -107,8 +107,8 @@ class Voice(RanaModule):
           if self.get('debugPrintVoiceMessages', False):
             collisionString = "voice: message was not pronounced due to other message in progress"
             collisionString += "\nlanguage code: \n%s\nmessage text:\n%s" % (language, text)
-            """ the message can contain unicode, this might cause an exception when printing it
-            in some systems (SHR-u on Neo, for example)"""
+            # the message can contain unicode, this might cause an exception when printing it
+            # in some systems (SHR-u on Neo, for example)"""
             try:
               print(collisionString)
             except UnicodeEncodeError:

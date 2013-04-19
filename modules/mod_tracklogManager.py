@@ -187,16 +187,16 @@ class TracklogManager(RanaModule):
 
       # get current category
       cat = self.get('currentTracCat', '')
-      list = self.LTModule.getTracPathsInCat(cat)
+      tracksInCatList = self.LTModule.getTracPathsInCat(cat)
 
       # One option per row
       for row in (0,1,2):
         index = self.getScroll() + row
-        numItems = len(list)
+        numItems = len(tracksInCatList)
         self.currentNumItems = numItems
         if 0 <= index < numItems:
 
-          (text1,text2,onClick) = self.describeTracklog(list[index], cat)
+          (text1,text2,onClick) = self.describeTracklog(tracksInCatList[index], cat)
 
           y = y4 + row * dy
           w = w1 - (x4-x1)
@@ -229,10 +229,9 @@ class TracklogManager(RanaModule):
       track = self.LTModule.getActiveTracklog()
       # is there an active tracklog ?
       if track is None:
-        """ there is no active tracklog,
-           so we don't draw the rest of the menu
-           we also don't setup the tools sub menu
-           """
+        # there is no active tracklog,
+        # so we don't draw the rest of the menu
+        # we also don't setup the tools sub menu
         return
       profile = self.m.get('routeProfile', None)
 

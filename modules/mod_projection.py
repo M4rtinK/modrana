@@ -27,9 +27,8 @@ def getModule(m,d,i):
   return Projection(m,d,i)
 
 class Projection(RanaModule):
-  """Projection code (lat/long to screen conversions)"""
+  """Projection code (lat/long to screen conversions)
 
-  """
   HOW DOES IT WORK:
   - there are basically two modes:
   * current position tracking
@@ -340,7 +339,7 @@ class Projection(RanaModule):
     C = 2*pi*R # circumference of Earth
     degreesPerKm = 360/C # how many degrees is a kilometre
     degreesPerPixel = ((self.N - self.S)/self.h) # how many degrees is a pixel (with current zoom)
-    """we get degrees equivalent from kilometers and then convert it to pixels"""
+    # we get degrees equivalent from kilometers and then convert it to pixels
     return (distanceInKm * degreesPerKm)/degreesPerPixel
 
 # doesnt seem to work correctly
@@ -362,7 +361,7 @@ class Projection(RanaModule):
     (cornerX,cornerY) = self.xy2ll(cornerXpixel, cornerYpixel) # we convert them to projection coordinates
     (anotherCornerXpixel,anotherCornerYpixel) = self.screenPos(1, 1) # we take the coordinates of another corner of the screen
     (anotherCornerX,anotherCornerY) = self.xy2ll(anotherCornerXpixel, anotherCornerYpixel) # we convert them to projection coordinates
-    """radius = diagonal/2"""
+    # radius = diagonal/2
     radius = geo.distance(anotherCornerX, anotherCornerY, cornerX , cornerY)/2.0
     return centreX, centreY, radius # we return the centre coordinates and the radius
 

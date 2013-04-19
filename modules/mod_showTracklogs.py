@@ -249,7 +249,7 @@ class ShowTracklogs(RanaModule):
     numberOfClusters = len(GPXTracklog.clusters) # how many clusters do we have in this tracklog ?
     for cluster in GPXTracklog.clusters: # we draw all clusters in tracklog
 
-      """do we see this cluster ?"""
+      # do we see this cluster ?
       clusterCentreX = cluster.centreX
       clusterCentreY = cluster.centreY
       clusterRadius = cluster.radius
@@ -258,7 +258,7 @@ class ShowTracklogs(RanaModule):
         continue # we don't see this cluster se we skip it
       clusterNr = GPXTracklog.clusters.index(cluster)
       #print("Cluster nr %d" % clusterNr)
-      """now we need to draw lines to connect neighboring clusters"""
+      # now we need to draw lines to connect neighboring clusters
       prevClusterNr = clusterNr - 1
       nextClusterNr = clusterNr + 1
       if prevClusterNr >=0: # the 0th cluster has no previous cluster
@@ -340,9 +340,9 @@ class ShowTracklogs(RanaModule):
 
         cr.set_line_width(self.lineWidth)
         current_elevation = float(point.elevation)
-        """the maximum height is solid red, that is 1,0,0 in RGB,
-        the mid-height is 0,0,1 and the minimum height is 0,1,0
-        we use the following functions to get appropriate numbers for coloring"""
+        # the maximum height is solid red, that is 1,0,0 in RGB,
+        # the mid-height is 0,0,1 and the minimum height is 0,1,0
+        # we use the following functions to get appropriate numbers for coloring
         # max color goes from 1 at max to 0 at the middle and after
         max_color = self.getNat(((current_elevation - difference)/(min_elev/2)) - 1)
         # is 1 in the middle, goes to 0 both to max and min
@@ -403,10 +403,8 @@ class ShowTracklogs(RanaModule):
         self.makeTrackVisible(path)
 
     elif message == 'makeVisible':
-      """
-      make a tracklog visible
-      do nothing when the tracklog is already visible
-      """
+      # make a tracklog visible
+      # do nothing when the tracklog is already visible
       path = self.getActiveTracklogPath()
       self.makeTrackVisible(path)
 

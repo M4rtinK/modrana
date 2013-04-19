@@ -103,9 +103,9 @@ class StorePOI(RanaModule):
       self.db.execute(query,values)
       self.db.commit()
 
-  def deletePOI(self,id):
+  def deletePOI(self,poiId):
     """delete a poi with given ID from the database"""
-    self.db.execute('delete from poi where poi_id=?', [id])
+    self.db.execute('delete from poi where poi_id=?', [poiId])
     self.db.commit()
 
   def getCategories(self):
@@ -156,10 +156,10 @@ class StorePOI(RanaModule):
       return None
 
   class POI(object):
-    """this class represents a POI"""
-    def __init__(self,callback,label,description,lat,lon,catId,id=None):
+    """This class represents a POI"""
+    def __init__(self,callback,label,description,lat,lon,catId,poiId=None):
       self.callback = callback
-      self.id=id
+      self.id=poiId
       self.lat=lat
       self.lon=lon
       self.label= u'%s' % label
@@ -230,11 +230,11 @@ class StorePOI(RanaModule):
         menus.addItem('POIDetailTools', 'longitude#edit', 'generic', 'ms:showPOI:editActivePOI:lon')
         menus.addItem('POIDetailTools', 'category#change', 'generic', 'ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit|set:menu:menu#list#POICategoryChooser')
         menus.addItem('POIDetailTools', 'position#set as', 'generic', 'showPOI:centerOnActivePOI|ml:location:setPosLatLon:%f;%f' % (self.lat,self.lon))
-        """just after the point is stored and and its detail menu shows up for the first time,
-        it cant be deleted from the database, because we don't know which index it got :D
-        TODO: find a free index and then store the point on it
-        (make sure no one writes to the database between getting the free index and writing the poi to it)
-        then we would be able to delete even newly created points"""
+        # just after the point is stored and and its detail menu shows up for the first time,
+        # it cant be deleted from the database, because we don't know which index it got :D
+        # TODO: find a free index and then store the point on it
+        # (make sure no one writes to the database between getting the free index and writing the poi to it)
+        # then we would be able to delete even newly created points
         if self.getId():
           menus.addItem('POIDetailTools', 'POI#delete', 'generic', 'showPOI:askDeleteActivePOI')
 
@@ -330,15 +330,15 @@ class StorePOI(RanaModule):
 
   def handleMessage(self, message, messageType, args):
     if messageType == 'ms' and message == 'deletePOI':
-      """remove a poi with given id from database"""
+      # remove a poi with given id from database
       if args:
-        id = int(args)
-        self.deletePOI(id) # remove the poi from database
+        poiId = int(args)
+        self.deletePOI(poiId) # remove the poi from database
         # notify the showPOI module, that it might need to rebuild its menus
         self.sendMessage('showPOI:listMenusDirty')
     elif messageType == 'ms' and message == 'setCatAndCommit':
-      """set category and as this is the last needed input,
-         commit the new POI to db"""
+      # set category and as this is the last needed input,
+      # commit the new POI to db"""
       catId = int(args)
       # set the category to the one the user just selected
       self.tempOnlinePOI.setCategory(catId, commit=False)
@@ -349,9 +349,7 @@ class StorePOI(RanaModule):
       catInfo = self.getCategoryForId(catId)
       catName = catInfo[1]
       POIName = self.tempOnlinePOI.getName()
-      """
-      NOTE: False means the the variable is unset, as None means the map screen
-      """
+      # NOTE: False means the the variable is unset, as None means the map screen
       if self.menuNameAfterStorageComplete == False:
         self.set('menu', 'search#searchResultsItem')
       else:
@@ -360,21 +358,21 @@ class StorePOI(RanaModule):
       self.sendMessage('ml:notification:m:%s has been saved to %s;5' % (POIName, catName))
 
     elif message == "reconnectToDb":
-      """this means, that we need to reconnect the database connection
-         * this is used for example as a notification,
-          that the user changed the default POI db path"""
+      # this means, that we need to reconnect the database connection
+      # * this is used for example as a notification,
+      # that the user changed the default POI db path"""
       self.disconnectFromDb()
       self.connectToDb()
 
     elif message == "dumpToCSV":
-      """dump db to CSV file"""
+      # dump db to CSV file
       self.set('menu', None)
       self.dumpToCSV()
 
   def handleTextEntryResult(self, key, result):
     if key == 'onlineResultName':
-      """like this, the user can edit the name of the
-         result before saving it to POI"""
+      # like this, the user can edit the name of the
+      # result before saving it to POI
       self.tempOnlinePOI.setName(result, commit=False)
       self.sendMessage('ml:notification:m:Select a category for the new POI;3')
       self.sendMessage('ml:showPOI:setupPOICategoryChooser:storePOI;setCatAndCommit')
@@ -464,10 +462,10 @@ class StorePOI(RanaModule):
 
     try: # it seems, that this entry is no guarantied
       for phoneNumber in result['phoneNumbers']:
-        type = ""
+        numberType = ""
         if phoneNumber['type'] != "":
-          type = " (%s)" % phoneNumber['type']
-        text += "\n%s%s" % (phoneNumber['number'], type)
+          numberType = " (%s)" % phoneNumber['type']
+        text += "\n%s%s" % (phoneNumber['number'], numberType)
     except:
       text += "\n%s" % "no phone numbers found"
 

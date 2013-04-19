@@ -101,8 +101,8 @@ class LoadTracklogs(RanaModule):
     self._getTFSubPath("logs")
     self._getTFSubPath("online")
     self._getTFSubPath("misc")
-    """if there is no example folder, create it
-    and copy example tracklogs into it"""
+    # if there is no example folder, create it
+    # and copy example tracklogs into it
     tfp = self.modrana.paths.getTracklogsFolderPath()
     examplesDestinationPath = os.path.join(tfp,'examples')
     if not os.path.exists(examplesDestinationPath):
@@ -141,10 +141,10 @@ class LoadTracklogs(RanaModule):
     for g in garbage:
       del self.cache[g]
 
-  def deleteTrackFromCache(self, file):
+  def deleteTrackFromCache(self, tracklogFile):
     # self explanatory
-    if file in self.cache:
-      del self.cache[file]
+    if tracklogFile in self.cache:
+      del self.cache[tracklogFile]
 
 #  def renameTracklog(track, newName=None):
 #    """rename a given tracklog file"""
@@ -523,12 +523,10 @@ class Tracklog():
     self.trackpointsList = trackpointsList # here will be the actual list of trackpoints
     self.filename = filename # the filename as used when loading the list from file
     self.type = type
-    """
-  tracklog types: (for now)
-  'gpx'= a GPX tracklog
-  'kml'= a KML tracklog
-  'nmea' = a NMEA log file
-  """
+    # tracklog types: (for now)
+    # 'gpx'= a GPX tracklog
+    # 'kml'= a KML tracklog
+    # 'nmea' = a NMEA log file
     self.tracklogName = filename # custom name for the tracklog, by default the filename
     self.tracklogDescription = "" # description of the tracklog
 
@@ -638,8 +636,8 @@ class GPXTracklog(Tracklog):
       middle = minElevation + (difference/2)
       firstElevation = float(firstPoint.elevation)
       lastElevation = float(lastPoint.elevation)
-      """because there are many possible statistics about a given route with elevation,
-      we will store them in a dictionary, so new ones can be quickly added as needed"""
+      # because there are many possible statistics about a given route with elevation,
+      # we will store them in a dictionary, so new ones can be quickly added as needed
 #      self.routeInfo['firstPoint'] = firstPoint
 #      self.routeInfo['lastPoint'] = lastPoint
 #      self.routeInfo['maxElevationPoint'] = maxElevationPoint

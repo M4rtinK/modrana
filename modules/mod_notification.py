@@ -50,7 +50,7 @@ class Notification(RanaModule):
        """
 
     if messageType=='ml' and message=='m':
-      """advanced message list based notification"""
+      # advanced message list based notification
       if args:
         timeout = self.timeout
         if len(args) >= 2:
@@ -66,14 +66,14 @@ class Notification(RanaModule):
           self.stopWorkInProgressOverlay()
           
     else:
-      list = message.split('#')
-      if len(list) >= 2:
-        messageText = list[0]
+      parameterList = message.split('#')
+      if len(parameterList) >= 2:
+        messageText = parameterList[0]
         timeout = self.timeout
         self.handleNotification(messageText, timeout)
-        if len(list) == 2:
+        if len(parameterList) == 2:
           try:
-            timeout = int(list[1]) # override the default timeout
+            timeout = int(parameterList[1]) # override the default timeout
           except Exception ,e:
             print("notification: wrong timeout, using default 5 seconds")
             print(e)
@@ -94,8 +94,8 @@ class Notification(RanaModule):
     
   def setWorkInProgressOverlayText(self, text):
     self.workInProgressOverlayText = text
-    """ if the overlay is enabled, 
-    trigger screen redraw if the text changes"""
+    # if the overlay is enabled,
+    # trigger screen redraw if the text changes
     if self.workInProgressOverlay:
       self.set('needRedraw', True)
 
@@ -150,8 +150,8 @@ class Notification(RanaModule):
         dy = dx
         x1 = (x+w)-dx
         y1 = y
-      """ the cancel button sends a cancel message to onlineServices
-      to disable currently running operation"""
+      # the cancel button sends a cancel message to onlineServices
+      # to disable currently running operation
       menus.drawButton(cr, x1, y1, dx, dy, '#<span foreground="red">cancel</span>', "generic:;0.5;;0.5;;", '')
       click.registerXYWH(x1, y1, dx, dy, "onlineServices:cancelOperation", layer=2)
 

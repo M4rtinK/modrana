@@ -50,8 +50,8 @@ class TextEntry(RanaModule):
         self.respond(entry.get_text(), instance,key, persistentKey)
       else:
         print("** dialog rejected **")
-        """the dialog was rejected so we don't
-        report the input that could have been entered"""
+        # the dialog was rejected so we don't
+        # report the input that could have been entered
       dialog.destroy()
 
   def respond(self, result, instance, key, persistentKey=None):

@@ -83,8 +83,8 @@ class Markers(RanaModule):
         index = 0
         for point, highlight in group.getPoints(): # draw all points in group
           if menu:
-            """key contains the point group name, it should be the same
-            as the corresponding listable menu name"""
+            # key contains the point group name, it should be the same
+            # as the corresponding listable menu name
             action="set:menu:menu#listDetail#%s#%d" % (key, index)
           else:
             action=""
@@ -144,7 +144,7 @@ class Markers(RanaModule):
     # register clickable area
     click = self.m.get('clickHandler', None)
     if click:
-      """ make the POI caption clickable"""
+      # make the POI caption clickable
       click.registerXYWH(rx,ry-(-rh),rw,-rh, action)
     cr.fill()
 
@@ -176,16 +176,16 @@ class PointGroup():
   def getColors(self):
     return self.bgColor, self.textColor
 
-  def highlightPoint(self, id):
+  def highlightPoint(self, pointId):
     try:
-      self.points[id][1] = True
+      self.points[pointId][1] = True
     except Exception, e:
-      print("markers: highlight index out of range: %r" % id)
+      print("markers: highlight index out of range: %r" % pointId)
       print(e)
 
   def unhighlightAll(self):
-    for tuple in self.points:
-      tuple[1] = False
+    for pointTuple in self.points:
+      pointTuple[1] = False
 
   def setMenuEnabled(self, value):
     self.menu = value

@@ -373,12 +373,12 @@ class ShowOSD(RanaModule):
     h = int(h)
 
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
-    list = profile
+    profileList = profile
 
 #    minimum = min(map(lambda x: x[4], list))
 #    maximum = max(map(lambda x: x[4], list))
 
-    lines = tuple(map(lambda x: (x[3], x[4]), list))
+    lines = tuple(map(lambda x: (x[3], x[4]), profileList))
 
     dataSet = (
         ('lines', [(i, l[1]) for i, l in enumerate(lines)]),
@@ -444,7 +444,7 @@ class ShowOSD(RanaModule):
 
 
 
-def parseColour(self, inputString):
+def parseColour(inputString):
   color = gtk.gdk.color_parse(inputString)
   return color
 

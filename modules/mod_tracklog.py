@@ -139,7 +139,7 @@ class Tracklog(RanaModule):
     if key == 'logNameEntry':
       self.set('logNameEntry', result)
 
-  def initLog(self,type='gpx',name=None):
+  def initLog(self, logType='gpx',name=None):
     """start a new log, zero the appropriate variables, etc."""
     self.loggingStartTimestamp = int(time.time())
     self.maxSpeed = 0
@@ -156,9 +156,9 @@ class Tracklog(RanaModule):
 
     self.logName = name
 
-    if type=='gpx':
-      """ importing the GPX module can be time consuming so import it
-      when it is really needed"""
+    if logType=='gpx':
+      # importing the GPX module can be time consuming so import it
+      # when it is really needed
       from upoints import gpx
       self.currentLogGPX = gpx.Trackpoints()
       # set tracklog metadata
@@ -493,15 +493,10 @@ class Tracklog(RanaModule):
         self.initToolsMenu()
         self.toolsMenuDone = True
 
-
-
       parentAction = 'set:menu:main'
-
-      """this is a a list of button parameters, all buttons can be toggleable
-      it is in this form:
-      [list of string-lists for toggling, index of string-list to show]
-      """
-
+      # this is a a list of button parameters, all buttons can be toggleable
+      # it is in this form:
+      # [list of string-lists for toggling, index of string-list to show]
       units = self.m.get('units', None)
 
       # main status text
@@ -587,14 +582,10 @@ class Tracklog(RanaModule):
     if proj and self.pxpyIndex:
       cr.set_source_color(gtk.gdk.color_parse(self.traceColor))
       cr.set_line_width(10)
-
-      """
-      log trace drawing algorithm
-      adapted from TangoGPS source (tracks.c)
-      works surprisingly good :)
-      TODO: use the modulo method for drawing stored tracklogs
-      """
-
+      # log trace drawing algorithm
+      # adapted from TangoGPS source (tracks.c)
+      # works surprisingly good :)
+      # TODO: use the modulo method for drawing stored tracklogs
       posXY = proj.getCurrentPosXY()
       if posXY and self.loggingEnabled and not self.loggingPaused:
         cr.move_to(*posXY) # start drawing from current position
@@ -687,7 +678,7 @@ class Tracklog(RanaModule):
             shutil.move(logPath, failedPath)
             print("tracklog: renaming successful")
           except Exception, e:
-            ('tracklog: renaming %s to %s failed' % (logPath, failedPath))
+            print('tracklog: renaming %s to %s failed' % (logPath, failedPath))
             print(e)
 
 
@@ -728,7 +719,7 @@ class Tracklog(RanaModule):
             shutil.move(logPath, failedPath)
             print("tracklog: renaming successful")
           except Exception, e:
-            ('tracklog: renaming %s to %s failed' % (logPath, failedPath))
+            print('tracklog: renaming %s to %s failed' % (logPath, failedPath))
             print(e)
     
   def shutdown(self):
