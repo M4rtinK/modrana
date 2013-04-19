@@ -46,7 +46,7 @@ class OnlineServices(RanaModule):
   #  def firstTime(self):
   #    self._enableOverlay()
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     if message == "cancelOperation":
       """this message is sent when the user presses the "cancel search" button
          it should:

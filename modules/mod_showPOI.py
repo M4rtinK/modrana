@@ -125,13 +125,13 @@ class ShowPOI(RanaModule):
             cr.show_text(text) # show the transparent result caption
             cr.stroke()
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     # messages that need the store and/or menus go here
     store = self.m.get('storePOI', None)
     menus = self.m.get('menu', None)
     if store and menus:
       if message == "setupCategoryList":
-        if type=='ml':
+        if messageType=='ml':
           """this is used for executing something special instead of going to the POIDetail menu
              after a POI is selected"""
           POISelectedAction = args[0]
@@ -149,10 +149,10 @@ class ShowPOI(RanaModule):
         menus.addListMenu('POICategories', "set:menu:poi", usedCategories)
       elif message=='setupPOIList':
         if args:
-          if type == 'ms':
+          if messageType == 'ms':
             catId = int(args)
             action = 'set:menu:showPOI#POIDetail' # use the default action
-          elif type == 'ml':
+          elif messageType == 'ml':
             """if the message is a message list, execute a custom action instead of the default POI detail menu
                TODO: use this even for selecting the POIDetail menu ?"""
             print(args)
@@ -168,11 +168,11 @@ class ShowPOI(RanaModule):
             poiFromCategory[i] = (label,subText,buttonAction)
             i += 1
           menus.addListMenu("POIList", 'set:menu:menu#list#POICategories', poiFromCategory)
-      elif type == 'ms' and message=='setActivePOI':
+      elif messageType == 'ms' and message=='setActivePOI':
         if args:
           POIId = int(args)
           self.activePOI = store.getPOI(POIId)
-      elif type == 'ms' and message=='storePOI':
+      elif messageType == 'ms' and message=='storePOI':
         if args == "manualEntry":
           """add all POI info manually"""
           entry = self.m.get('textEntry', None)
@@ -216,7 +216,7 @@ class ShowPOI(RanaModule):
                 """we misuse the current position chain"""
                 entry.entryBox(self,'newCurrentPositionName','POI name',"")
 
-      elif type == 'ms' and message == 'editActivePOI':
+      elif messageType == 'ms' and message == 'editActivePOI':
         entry = self.m.get('textEntry', None)
         if args:
           if entry:
@@ -233,13 +233,13 @@ class ShowPOI(RanaModule):
               lon = str(self.activePOI.getLon())
               entry.entryBox(self,'lon','POI Longitude',lon)
 
-      elif type == 'ml' and message == 'setupPOICategoryChooser':
+      elif messageType == 'ml' and message == 'setupPOICategoryChooser':
         """setup a category chooser menu"""
         if args:
           (menu,key) = args
           self._setupPOICategoryChooser(menu, key)
         
-      elif type == 'ms' and message == 'setCatAndCommit':
+      elif messageType == 'ms' and message == 'setCatAndCommit':
         """selecting the category is the final stage of adding a POI"""
         if args:
           # set the category

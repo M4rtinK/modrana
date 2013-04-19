@@ -144,7 +144,7 @@ class Search(RanaModule):
 
     self.filters = filters
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     # without this if, we would search also for the commands that move the listable menu
     # lets hope no one needs to search for reset, up or down :)
     
@@ -176,11 +176,11 @@ class Search(RanaModule):
       store.storeGLSResult(result)
 
     elif message == 'setWhere': # set the search region
-      if type == 'ms' and args:
+      if messageType == 'ms' and args:
         self.where = args
 
     elif message == 'localSearch':
-      if type == 'ml' and args:
+      if messageType == 'ml' and args:
         online = self.m.get('onlineServices', None)
         if not online:
           print("search: online services module not present")
@@ -222,7 +222,7 @@ class Search(RanaModule):
               print("search: screen center coordinates unknown")
 
     elif message == "search":
-      if type == "ml" and args:
+      if messageType == "ml" and args:
         sType = args[0]
         if sType == "address":
           print("search: address search")
@@ -245,7 +245,7 @@ class Search(RanaModule):
 
     # DEPRECIATED ?, use the localSearch method
     elif message == 'searchThis': # search for a term in the message string
-      if type == 'ms' and args:
+      if messageType == 'ms' and args:
         searchTerm = args
         online = self.m.get('onlineServices', None)
         if online is None:

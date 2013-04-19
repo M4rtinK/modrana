@@ -87,7 +87,7 @@ class Tracklog(RanaModule):
     # eq, due to modRana or device crashing
     self._rescueLogs()
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     if message == "startLogging":
       print("tracklog: starting to log")
       # start a new log

@@ -60,8 +60,8 @@ class Voice(RanaModule):
     else:
       return ""
 
-  def handleMessage(self, message, type, args):
-    if type == "ms" and message == "resetStringToDefault" and "args":
+  def handleMessage(self, message, messageType, args):
+    if messageType == "ms" and message == "resetStringToDefault" and "args":
       self.resetStringToDefault(args)
     elif message == "voiceTest":
       if self.get('soundEnabled', True):

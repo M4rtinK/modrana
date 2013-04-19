@@ -394,7 +394,7 @@ class ShowTracklogs(RanaModule):
       return x
 
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     if message == "toggleVisible":
       path = self.getActiveTracklogPath()
       if self.isVisible(path):

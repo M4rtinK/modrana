@@ -33,7 +33,7 @@ class ClickMenu(RanaModule):
     self.lastWaypointAddTime = 0
     self.messageLingerTime = 2
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     if message == "addWaypoint":
       m = self.m.get("waypoints", None)
       if m is not None:

@@ -67,8 +67,8 @@ class Display(RanaModule):
       self._updateDisplayControlCB
       cron.addTimeout(self._updateDisplayControlCB, self.msScreenBlankPauseIntervalMs, self, "screen blanking update")
 
-  def handleMessage(self, message, type, args):
-    if message == "fullscreen" and type == "ms":
+  def handleMessage(self, message, messageType, args):
+    if message == "fullscreen" and messageType == "ms":
       if args == "toggle":
         self.fullscreenToggle()
     elif message == "blankingModeChanged":

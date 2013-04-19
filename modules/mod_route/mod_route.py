@@ -106,7 +106,7 @@ class Route(RanaModule):
     self.monav = None
     self.monavDataFolder = None
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     if message == "clear":
       self._goToInitialState()
       self.set('startPos', None)
@@ -277,15 +277,15 @@ class Route(RanaModule):
       self.set('needRedraw', True) # show the new route
 
     elif message == "route": # find a route
-      if type == 'md': # message-list based unpack requires a string argument of length 4 routing
+      if messageType == 'md': # message-list based unpack requires a string argument of length 4 routing
         if args:
-          type = args['type']
+          messageType = args['type']
           go = False
-          if type == 'll2ll':
+          if messageType == 'll2ll':
             (fromLat, fromLon) = (float(args['fromLat']), float(args['fromLon']))
             (toLat, toLon) = (float(args['toLat']), float(args['toLon']))
             go = True
-          elif type == 'pos2ll':
+          elif messageType == 'pos2ll':
             pos = self.get('pos', None)
             if pos:
               (fromLat, fromLon) = pos
@@ -396,7 +396,7 @@ class Route(RanaModule):
         self.set('destinationAddress', posString) # also store in the persistent dictionary
 
     elif message == 'reroute':
-      if type == 'ms' and args == "fromPosToDest" and self.selectManyPoints == False: # handmade
+      if messageType == 'ms' and args == "fromPosToDest" and self.selectManyPoints == False: # handmade
         """reroute from current position to destination"""
         # is there a destination and valid position ?
         print("route: rerouting from current position to last destination")
@@ -407,7 +407,7 @@ class Route(RanaModule):
           self.doRoute(pLat, pLon, dLat, dLon)
           self.start = None
 
-    elif type == 'ms' and message == 'addressRouteMenu':
+    elif messageType == 'ms' and message == 'addressRouteMenu':
       if args == 'swap':
         # get current values
         start = self.get('startAddress', None)
@@ -418,7 +418,7 @@ class Route(RanaModule):
         # redraw the screen to show the change
         self.set('needRedraw', True)
 
-    elif type == "ms" and message == "setOSDState":
+    elif messageType == "ms" and message == "setOSDState":
       self.osdMenuState = int(args)
       self.set('needRedraw', True) # show the new menu
 

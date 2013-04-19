@@ -38,7 +38,7 @@ class TracklogManager(RanaModule):
     # but we don't need that to setup the categories menu
     self.setupCategoriesMenu()
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     if message in ["up","down","reset"]:
       currentCat = self.get('currentTracCat', '')
       # is scrolling index for this category set ?

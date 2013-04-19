@@ -47,7 +47,7 @@ class LoadTracklogs(RanaModule):
   def firstTime(self):
     self._createBasicFolderStructure()
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     if message == 'loadActive':
       # load the active tracklog
       path = self.get('activeTracklogPath', None)

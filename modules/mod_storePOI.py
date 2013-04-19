@@ -328,15 +328,15 @@ class StorePOI(RanaModule):
       print("storePOI: loading POI from file failed:\n%s" % e)
       return None
 
-  def handleMessage(self, message, type, args):
-    if type == 'ms' and message == 'deletePOI':
+  def handleMessage(self, message, messageType, args):
+    if messageType == 'ms' and message == 'deletePOI':
       """remove a poi with given id from database"""
       if args:
         id = int(args)
         self.deletePOI(id) # remove the poi from database
         # notify the showPOI module, that it might need to rebuild its menus
         self.sendMessage('showPOI:listMenusDirty')
-    elif type == 'ms' and message == 'setCatAndCommit':
+    elif messageType == 'ms' and message == 'setCatAndCommit':
       """set category and as this is the last needed input,
          commit the new POI to db"""
       catId = int(args)

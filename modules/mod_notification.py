@@ -39,7 +39,7 @@ class Notification(RanaModule):
     self.workInProgressOverlayText = ""
     """this indicates if the notification about background processing should be shown"""
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     """the first part is the message, that will be displayed,
        there can also by some parameters, delimited by #
        NEW: you can also use a message list for the notification
@@ -49,7 +49,7 @@ class Notification(RanaModule):
        EXAMPLE: ml:notification:m:Hello world!;5
        """
 
-    if type=='ml' and message=='m':
+    if messageType=='ml' and message=='m':
       """advanced message list based notification"""
       if args:
         timeout = self.timeout
@@ -58,7 +58,7 @@ class Notification(RanaModule):
         messageText = args[0]
         self.handleNotification(messageText, timeout)
 
-    elif type=='ml' and message=='workInProgressOverlay':
+    elif messageType=='ml' and message=='workInProgressOverlay':
       if args:
         if args[0] == "enable":
           self.startWorkInProgressOverlay()

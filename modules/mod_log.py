@@ -36,7 +36,7 @@ class Log(RanaModule):
   def firstTime(self):
     self.checkLoggingStatus()
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     if message == "checkLoggingStatus": # check if logging was enabled
       self.checkLoggingStatus()
 

@@ -40,7 +40,7 @@ class MapView(RanaModule):
     self.modrana.watch('mapGridColor', self._drawGridColorCB, runNow=True)
     self.modrana.watch('mapGridLabels', self._drawGridLabelsCB, runNow=True)
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     z = self.get('z', 15)
     if message == 'zoomIn':
       newZ = z + 1

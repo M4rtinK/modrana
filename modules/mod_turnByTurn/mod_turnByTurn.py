@@ -94,9 +94,9 @@ class TurnByTurn(RanaModule):
     self.navigationBoxBackground = colors['navigation_box_background'].getCairoColor()
     self.navigationBoxText = colors['navigation_box_text'].getCairoColor()
     
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     if message == 'start':
-      if type == 'ms':
+      if messageType == 'ms':
         fromWhere = args
         self.startTBT(fromWhere)
     elif message == 'stop':

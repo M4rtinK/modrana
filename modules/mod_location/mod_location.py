@@ -111,8 +111,8 @@ class Location(RanaModule):
     if self.provider:
       self.provider.setDebug(newValue)
 
-  def handleMessage(self, message, type, args):
-    if message == "setPosLatLon" and type == "ml":
+  def handleMessage(self, message, messageType, args):
+    if message == "setPosLatLon" and messageType == "ml":
       if args and len(args) == 2:
         lat = float(args[0])
         lon = float(args[1])

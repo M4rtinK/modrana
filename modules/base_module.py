@@ -75,7 +75,7 @@ class RanaModule(object):
   def drawScreenOverlay(self, cr):
     """Draw overlay that's on top of all maps"""
     pass
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     """Handles a message from another module, or in response to user action"""
     pass
   def dragEvent(self,startX,startY,dx,dy,x,y):
