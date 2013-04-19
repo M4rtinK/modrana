@@ -171,8 +171,8 @@ class Search(RanaModule):
       resultNr = self.get('searchResultsItemNr', None)
       if resultNr is None:
         return
-      tuple = filter(lambda x: x[2] == int(resultNr), self.list).pop()
-      result = tuple[1]
+      resultTuple = filter(lambda x: x[2] == int(resultNr), self.list).pop()
+      result = resultTuple[1]
       store.storeGLSResult(result)
 
     elif message == 'setWhere': # set the search region
@@ -313,9 +313,9 @@ class Search(RanaModule):
         entry.entryBox(self, 'wikipedia',description='Wikipedia search query', persistentKey="lastWikipediaSearchInput")
 
     elif message == "routeToActiveResult":
-      """get a route from current position to active search result
-         * center on the current position
-         -> we want to actually got to there :)"""
+      # get a route from current position to active search result
+      # * center on the current position
+      # -> we want to actually got to there :)
       activeResultTuple = self.getActiveResultTupple()
       activeResult = activeResultTuple[1]
       lat = float(activeResult['lat'])
@@ -331,17 +331,17 @@ class Search(RanaModule):
     resultNumber = int(self.get('searchResultsItemNr', 0))
     return self.getResult(resultNumber)
 
-  def getResult(self, resultNumber, list=None):
-    if list is None:
-      list = self.updateDistance()
-    return filter(lambda x: x[2] == resultNumber, list).pop() # get the result for the ABSOLUTE key
+  def getResult(self, resultNumber, resultList=None):
+    if resultList is None:
+      resultList = self.updateDistance()
+    return filter(lambda x: x[2] == resultNumber, resultList).pop() # get the result for the ABSOLUTE key
 
-  def describeItem(self, index, category, list):
+  def describeItem(self, index, category, itemList):
 #    longName = name = item.getTracklogName()
 #    print(filter(lambda x: x.getTracklogName() == longName, loadedTracklogs))
 #    print(loadedTracklogs.index(item))
     action = "set:menu:search#searchResultsItem"
-    action += "|set:searchResultsItemNr:%d" % list[index][2] # here we use the ABSOLUTE index, not the relative one
+    action += "|set:searchResultsItemNr:%d" % itemList[index][2] # here we use the ABSOLUTE index, not the relative one
 #    action += "|set:menu:"
 #    name = item.getTracklogName().split('/').pop()
 
@@ -349,10 +349,10 @@ class Search(RanaModule):
 #    lon = list[index][1]['lng']
 #    action += "|set:searchResultShowLatLon:%s,%s" % (lat,lon)
 
-    name = "%s" % list[index][1]['titleNoFormatting']
+    name = "%s" % itemList[index][1]['titleNoFormatting']
 
     units = self.m.get('units', None)
-    distanceString = units.km2CurrentUnitString(list[index][0], dp=2) # use correct units
+    distanceString = units.km2CurrentUnitString(itemList[index][0], dp=2) # use correct units
 
     description = "%s" % distanceString
 
@@ -365,34 +365,34 @@ class Search(RanaModule):
     if text:
       cr.set_font_size(fontsize)
       stats = cr.text_extents(text)
-      (textwidth, textheight) = stats[2:4]
+      (textWidth, textHeight) = stats[2:4]
 
-      if(widthLimit and textwidth > widthLimit):
-        cr.set_font_size(fontsize * widthLimit / textwidth)
+      if widthLimit and textWidth > widthLimit:
+        cr.set_font_size(fontsize * widthLimit / textWidth)
         stats = cr.text_extents(text)
-        (textwidth, textheight) = stats[2:4]
+        (textWidth, textHeight) = stats[2:4]
 
-      cr.move_to(x, y+textheight)
+      cr.move_to(x, y+textHeight)
       cr.show_text(text)
 
   def updateDistance(self):
       if self.localSearchResults:
         position = self.get("pos", None) # our lat lon coordinates
-        list = []
+        resultList = []
         index = 0
         for item in self.localSearchResults['responseData']['results']: # we iterate over the local search results
           if position is not None:
             (lat1,lon1) = position
             (lat2,lon2) = (float(item['lat']), float(item['lng']))
             distance = geo.distance(lat1,lon1,lat2,lon2)
-            tuple = (distance, item, index)
-            list.append(tuple) # we pack each result into a tuple with ist distance from us
+            resultTuple = (distance, item, index)
+            resultList.append(resultTuple) # we pack each result into a tuple with ist distance from us
           else:
-            tuple = (0, item, index) # in this case, we dont know our position, so we say the distance is 0
-            list.append(tuple)
+            resultTuple = (0, item, index) # in this case, we dont know our position, so we say the distance is 0
+            resultList.append(resultTuple)
           index += 1
-        self.list = list
-        return list
+        self.list = resultList
+        return resultList
       else:
         print("search: error -> distance update on empty results")
 
@@ -473,19 +473,16 @@ class Search(RanaModule):
           menus.drawText(cr, "%d/%d" % (index+1, numItems), x4+0.85*w, y + 0.7 * dy, w * 0.15, 0.2 * dy, 0.05)
 
     elif menuName == 'searchResultsItem':
-      """draw the menu describing a single GLS result"""
+      # draw the menu describing a single GLS result
       resultList = self.updateDistance()
 
       if self.get('GLSOrdering', 'default') == 'distance': # if ordering by distance is turned on, sort the list
         resultList.sort()
 
       resultNumber = int(self.get('searchResultsItemNr', 0))
-
-      """
-         because the results can be ordered in different manners, we use the absolute index,
-         which is created from the initial ordering
-         without this,(with distance sort) we would get different results for a key, if we moved fast enough :)
-      """
+      # because the results can be ordered in different manners, we use the absolute index,
+      # which is created from the initial ordering
+      # without this,(with distance sort) we would get different results for a key, if we moved fast enough :)
       result = self.getResult(resultNumber, resultList)
       self.drawGLSResultMenu(cr, result)
 
@@ -538,10 +535,10 @@ class Search(RanaModule):
 
     try: # it seems, that this entry is no guarantied
       for phoneNumber in result['phoneNumbers']:
-        type = ""
+        numberType = ""
         if phoneNumber['type'] != "":
-          type = " (%s)" % phoneNumber['type']
-        text += "\n%s%s" % (phoneNumber['number'], type)
+          numberType = " (%s)" % phoneNumber['type']
+        text += "\n%s%s" % (phoneNumber['number'], numberType)
     except:
       text += "\n%s" % "no phone numbers found"
 
@@ -571,8 +568,8 @@ class Search(RanaModule):
     if not self.list:
       # there is nothing to draw
       return
-    for tupple in self.list:
-      (distance, point, index) = tupple
+    for itemTuple in self.list:
+      (distance, point, index) = itemTuple
       if index == highlightNr: # the highlighted result is draw in the end
         # skip it this time
         continue
@@ -606,7 +603,7 @@ class Search(RanaModule):
       cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
       m = self.m.get('clickHandler', None)
       # register clickable area
-      if(m != None):
+      if m is not None:
         m.registerXYWH(rx,ry-(-rh),rw,-rh, "search:reset|set:searchResultsItemNr:%d|set:menu:search#searchResultsItem" % index)
       cr.fill()
       # draw the actual text
@@ -616,8 +613,8 @@ class Search(RanaModule):
       cr.stroke()
 
     if highlightNr != -1: # is there some search result to highlight ?
-      tupple = filter(lambda x: x[2] == int(highlightNr), self.list).pop()
-      result = tupple[1]
+      itemTuple = filter(lambda x: x[2] == int(highlightNr), self.list).pop()
+      result = itemTuple[1]
       lat = float(result['lat'])
       lon = float(result['lng'])
       (x,y) = proj.ll2xy(lat, lon)
@@ -677,13 +674,13 @@ class Search(RanaModule):
       for category, items in self.filters.items():
         m.clearMenu("search_%s" % category, 'set:menu:search')
         m.addItem('search', category, category.lower(), 'set:menu:search_'+category)
-        for id,data in items.items():
+        for iconId, data in items.items():
           searchString = data["search"]
           name = data["name"]
           if "icon" in data: # check if there is icon name included
             icon = data["icon"] # use icon name
           else:
-            icon = id # use id as icon name
+            icon = iconId # use id as icon name
           m.addItem('search_%s' % category, name, icon, "ms:search:searchThis:%s" % searchString)
       m.addItem('search', 'query#custom', 'generic', 'search:customQuery')
 
@@ -753,7 +750,6 @@ class Search(RanaModule):
         print("wikipedia search done - something found")
         name = 'wikipediaResults'
         markers = self.m.get('markers', None)
-        menu = None
         if markers:
           g = markers.addGroup(name, results, menu=True)
           menu = g.getMenuInstance()
