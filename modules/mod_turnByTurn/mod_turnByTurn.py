@@ -54,7 +54,6 @@ class TurnByTurn(RanaModule):
   
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
-    gui = self.modrana.gui
     # initial colors
     self.navigationBoxBackground = (0,0,1,0.3) # very transparent blue
     self.navigationBoxText = (1,1,1,1) # non-transparent white
@@ -260,8 +259,8 @@ class TurnByTurn(RanaModule):
             clipHeight = 0
             # find last completely visible line
             cut = False
-            for id in range(0,layout.get_line_count()-1):
-              lineHeight = layout.get_line(id).get_pixel_extents()[1][3]
+            for index in range(0,layout.get_line_count()-1):
+              lineHeight = layout.get_line(index).get_pixel_extents()[1][3]
               if clipHeight + lineHeight <= usableHeight:
                 clipHeight = clipHeight + lineHeight
               else:
@@ -271,8 +270,9 @@ class TurnByTurn(RanaModule):
             textEndY = by+border+clipHeight+buttonStripOffset
 
             if cut:
-              """ notify the user that a part of the text was cut,
-                          by drawing a red line and a scissors icon"""
+              # notify the user that a part of the text was cut,
+              # by drawing a red line and a scissors icon
+
               # draw the red line
               cr.set_source_rgb(1,0,0)
               cr.set_line_width(bh*0.01)
@@ -390,8 +390,8 @@ class TurnByTurn(RanaModule):
 
   def setStepAsCurrent(self, step):
     """set a given step as current step"""
-    id = self.route.getMessagePointID(step)
-    self._setCurrentStepIndex(id)
+    mpId = self.route.getMessagePointID(step)
+    self._setCurrentStepIndex(mpId)
 
   def getCurrentStep(self):
     """return current step"""
@@ -457,7 +457,7 @@ class TurnByTurn(RanaModule):
     # clean up any possible previous navigation data
     self.goToInitialState()
 
-    """NOTE: turn and step are used interchangeably in the documentation"""
+    # NOTE: turn and step are used interchangeably in the documentation
     m = self.m.get('route', None)
     if m:
       (route,routeRequestSentTimestamp) = m.getCurrentDirections()
@@ -480,12 +480,12 @@ class TurnByTurn(RanaModule):
         if dt and metersPerSecSpeed:
           dm = dt * metersPerSecSpeed
           print("distance traveled during lookup: %f m" % dm)
-        """the duration of the road lookup and other variables are currently not used
-        in the heuristics but might be added later to make the heuristics more robust"""
+        # the duration of the road lookup and other variables are currently not used
+        # in the heuristics but might be added later to make the heuristics more robust
 
 
-        """now we decide if we use the closest turn, or the next one,
-        as we might be already past it and on our way to the next turn"""
+        # now we decide if we use the closest turn, or the next one,
+        # as we might be already past it and on our way to the next turn
         cs = self.getClosestStep() # get geographically closest step
         pos = self.get('pos', None) # get current position
         pReachedDist = int(self.get('pointReachedDistance', 30)) # get the trigger distance
@@ -517,10 +517,10 @@ class TurnByTurn(RanaModule):
               # so we switch to the next step at once
               print("tbt: already past closest turn, switching to next turn")
               self.setStepAsCurrent(nextStep)
-              """we play the message for the next step,
-              with current distance to this step,
-              to assure there is some voice output immediately after
-              getting a new route or rerouting"""
+              # we play the message for the next step,
+              # with current distance to this step,
+              # to assure there is some voice output immediately after
+              # getting a new route or rerouting"""
               plaintextMessage = nextStep.getSSMLMessage()
               self.sayTurn(plaintextMessage, pos2nextStep)
             else:
@@ -530,17 +530,17 @@ class TurnByTurn(RanaModule):
               self.setStepAsCurrent(cs)
 
           else:
-            """we are inside the  "capture circle" of the closest step,
-            this means the navigation will trigger the voice message by itself
-            and correctly switch to next step
-            -> no need to switch to next step from here"""
+            # we are inside the  "capture circle" of the closest step,
+            # this means the navigation will trigger the voice message by itself
+            # and correctly switch to next step
+            # -> no need to switch to next step from here
             print("tbt: inside reach distance of closest turn")
             self.setStepAsCurrent(cs)
 
         else:
-          """we dont have some of the data, that is needed to decide
-          if we start the navigation from the closest step of from the step that is after it
-          -> we just start from the closest step"""
+          # we dont have some of the data, that is needed to decide
+          # if we start the navigation from the closest step of from the step that is after it
+          # -> we just start from the closest step
           print("tbt: not enough data to decide, using closest turn")
           self.setStepAsCurrent(cs)
     self._doNavigationUpdate() # run a first time navigation update
@@ -666,7 +666,7 @@ class TurnByTurn(RanaModule):
           print("optional (20 s) trigger distance: %1.2f" % (20.0*metersPerSecSpeed))
 
       if currentDistance <= pointReachedDistance:
-        """this means we reached the point"""
+        # this means we reached the point"""
         if self.espeakSecondTrigger == False:
           print("triggering espeak nr. 2")
           # say the message without distance
@@ -679,7 +679,7 @@ class TurnByTurn(RanaModule):
         self.switchToNextStep() # switch to next step
       else:
         if currentDistance <= distance:
-          """this means we reached an optimal distance for saying the message"""
+          # this means we reached an optimal distance for saying the message"""
           if self.espeakFirstTrigger == False:
             print("triggering espeak nr. 1")
             plaintextMessage = currentStep.getSSMLMessage()
@@ -687,9 +687,8 @@ class TurnByTurn(RanaModule):
               self.espeakFirstTrigger = True # first message done
         if self.espeakFirstAndHalfTrigger == False and warnTime > 30:
           if currentDistance <= (20.0*metersPerSecSpeed):
-            """in case that the warning time gets too big, add an intermediate warning at 20 seconds
-            NOTE: this means it is said after the first trigger
-            """
+            # in case that the warning time gets too big, add an intermediate warning at 20 seconds
+            # NOTE: this means it is said after the first trigger
             plaintextMessage = currentStep.getSSMLMessage()
             if self.sayTurn(plaintextMessage, currentDistance):
               self.espeakFirstAndHalfTrigger = True # intermediate message done
