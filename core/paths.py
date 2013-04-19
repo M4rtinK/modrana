@@ -21,7 +21,19 @@
 import os
 import utils
 
+# paths
+THEMES_FOLDER_PATH = "themes"
+# folder names
 MONAV_DATA_FOLDER_NAME = "monav_data"
+CACHE_FOLDER_NAME = "cache"
+TRACKLOG_FOLDER_NAME = "tracklogs"
+MAPS_FOLDER_NAME = "maps"
+POI_FOLDER_NAME = "poi"
+DEBUG_LOGS_FOLDER_NAME = "debug_logs"
+# file names
+OPTIONS_FILENAME = "options.bin"
+POI_DB_FILENAME = "modrana_poi.db"
+VERSION_INFO_FILENAME = "version.txt"
 
 class Paths(object):
   """
@@ -59,11 +71,11 @@ class Paths(object):
 
   def getOptionsFilePath(self):
     """return path to the options store filename"""
-    return os.path.join(self.getProfilePath(),"options.bin")
+    return os.path.join(self.getProfilePath(), OPTIONS_FILENAME)
 
   def getCacheFolderPath(self):
     """return path to a folder used for various cache data"""
-    return self._assurePathFolder(self.getProfilePath(), "cache")
+    return self._assurePathFolder(self.getProfilePath(), CACHE_FOLDER_NAME)
 
   def getTracklogsFolderPath(self):
     """return path to a folder for storing tracklogs"""
@@ -79,7 +91,7 @@ class Paths(object):
 
     if path is None: # this means there is no config or device path
       # use default path & assure it exists
-      return self._assurePathFolder(self.getProfilePath(), "tracklogs")
+      return self._assurePathFolder(self.getProfilePath(), TRACKLOG_FOLDER_NAME)
     else:
       return self._assurePath(path)
 
@@ -97,7 +109,7 @@ class Paths(object):
 
     if path is None: # this means there is no config or device path
       # use default path & assure it exists
-      return self._assurePathFolder(self.getProfilePath(), "maps")
+      return self._assurePathFolder(self.getProfilePath(), MAPS_FOLDER_NAME)
     else:
       return self._assurePath(path)
 
@@ -108,13 +120,13 @@ class Paths(object):
       if path is not None: # None means there is no device dependent path
         return self._assurePath(path)
       else:
-        return self._assurePathFolder(self.getProfilePath(), "poi")
+        return self._assurePathFolder(self.getProfilePath(), POI_FOLDER_NAME)
     else:
-      return self._assurePathFolder(self.getProfilePath(), "poi")
+      return self._assurePathFolder(self.getProfilePath(), POI_FOLDER_NAME)
 
   def getPOIDatabasePath(self):
     """return path to the POI database file"""
-    POIDBFilename = self.modrana.get('POIDBFilename', 'modrana_poi.db')
+    POIDBFilename = self.modrana.get('POIDBFilename', POI_DB_FILENAME)
     POIFolderPath = self.getPOIFolderPath()
     return os.path.join(POIFolderPath,POIDBFilename)
 
@@ -125,10 +137,14 @@ class Paths(object):
       if path is not None: # None means there is no device dependent path
         return self._assurePath(path)
       else:
-        return self._assurePathFolder(self.getProfilePath(), "debug_logs")
+        return self._assurePathFolder(self.getProfilePath(), DEBUG_LOGS_FOLDER_NAME)
     else:
-      return self._assurePathFolder(self.getProfilePath(), "debug_logs")
+      return self._assurePathFolder(self.getProfilePath(), DEBUG_LOGS_FOLDER_NAME)
 
+
+  def getThemesFolderPath(self):
+    """Return path to the themes folder"""
+    return THEMES_FOLDER_PATH
 
   ## Monav ##
 
@@ -164,7 +180,7 @@ class Paths(object):
     load version string from file
     """
     self.versionString = None
-    versionFilePath = 'version.txt'
+    versionFilePath = VERSION_INFO_FILENAME
     # try read the version file
     if os.path.exists(versionFilePath):
       try:
