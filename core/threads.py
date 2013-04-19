@@ -23,7 +23,7 @@
 #
 # modified for use with modRana by: Martin Kolman
 import logging
-log = logging.getLogger("anaconda")
+log = logging.getLogger("modRana")
 
 import threading
 
@@ -119,7 +119,7 @@ class ThreadManager(object):
         cur_thread = threading.current_thread()
         return cur_thread is self._main_thread
 
-class AnacondaThread(threading.Thread):
+class ModRanaThread(threading.Thread):
     """A threading.Thread subclass that exists only for a couple purposes:
 
        (1) Make exceptions that happen in a thread invoke our exception handling
@@ -157,8 +157,12 @@ def initThreading():
        an event is triggered in the GTK main loop. And IT HAS TO BE CALLED IN
        THE MAIN THREAD.
     """
-    from gi.repository import GObject
-    GObject.threads_init()
+    # from gi.repository import GObject
+    # GObject.threads_init()
+
+    # modRana:
+    # corresponding code was moved to the GTK module
+    # as modRana needs to work with non-GTK GUIs
 
     global threadMgr
     threadMgr = ThreadManager()
