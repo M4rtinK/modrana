@@ -21,8 +21,8 @@ from modules.base_module import RanaModule
 import os
 import glob
 import fnmatch
-"""for some reason one import method works
-on Fremantle and other everywhere (?) else"""
+# for some reason one import method works
+# on Fremantle and other everywhere (?) else"""
 try:
   from modules.configobj.configobj import ConfigObj # everywhere
 except Exception, e:
@@ -156,8 +156,8 @@ class Icons(RanaModule):
         border = min(w,h)*0.1
         targetH = (h*0.55)
         targetW = w - 2*border
-        """ try to fit the icon image above the text inside the icon outline,
-            with some space between, while respecting original aspect ratio"""
+        # try to fit the icon image above the text inside the icon outline,
+        # with some space between, while respecting original aspect ratio"""
         scaledW = targetW
         scaledH = targetW/float(hwRatio)
         if scaledH > targetH:
@@ -208,25 +208,23 @@ class Icons(RanaModule):
        then return the image surface"""
     try:
       pixbuf = gtk.gdk.pixbuf_new_from_file(path)
-      """
-      if width or height are not set, we take them from the pixbuf
-      if both are not set, we disable scaling
-      """
+      #if width or height are not set, we take them from the pixbuf
+      #if both are not set, we disable scaling
 
       (w,h,scale) = self._getValidParams(w, h, pixbuf)
 
-      ''' create a new cairo surface to place the image on '''
+      # create a new cairo surface to place the image on
       image = cairo.ImageSurface(0,w,h)
-      ''' create a context to the new surface '''
+      # create a context to the new surface
       ct = cairo.Context(image)
-      ''' create a GDK formatted Cairo context to the new Cairo native context '''
+      # create a GDK formatted Cairo context to the new Cairo native context
       ct2 = gtk.gdk.CairoContext(ct)
-      ''' draw from the pixbuf to the new surface '''
+      # draw from the pixbuf to the new surface
       if scale:
         pixbuf = pixbuf.scale_simple(w,h,gtk.gdk.INTERP_HYPER)
       ct2.set_source_pixbuf(pixbuf,0,0)
       ct2.paint()
-      ''' surface now contains the image in a Cairo surface '''
+      # surface now contains the image in a Cairo surface
     except Exception, e:
       print("** loading image to pixbuf failed")
       print("** filename: %s" % path)
@@ -368,12 +366,11 @@ class Icons(RanaModule):
       # run through possible "layers", which are separated by >
       compositedIcon = None
       needBackground = False
-      """icon specifications are separated by >,
-      which should be seen as a pointing arrow in this context
-      we composite top -> down,
-      for example: "icon1>icon2"
-      icon1 will be drawn over icon2
-      """
+      # icon specifications are separated by >,
+      # which should be seen as a pointing arrow in this context
+      # we composite top -> down,
+      # for example: "icon1>icon2"
+      # icon1 will be drawn over icon2
       for currentName in reversed(name.split('>')): # we draw top down
 
         if currentName.split(':')[0] == 'generic':
@@ -385,19 +382,17 @@ class Icons(RanaModule):
           else:
             # the icon name contains custom positional parameters
             semicolonSepList = currentName.split(':',1)[1].split(';')
-            """
-            there are five positional parameters:
-            fill color,fill opacity, outline color, outline opacity,
-            outline width (default 8) and corner radius (default 22)
-            to use default value, just don't fill in the positional parameter
-            ( len(parameter) == 0
-            """
+            # there are five positional parameters:
+            # fill color,fill opacity, outline color, outline opacity,
+            # outline width (default 8) and corner radius (default 22)
+            # to use default value, just don't fill in the positional parameter
+            # ( len(parameter) == 0
             needBackground = False
             parametricIcon = self.getCustomIcon(semicolonSepList,w,h)
             compositedIcon = self.combineTwoIcons(compositedIcon, parametricIcon)
         elif currentName.split(':')[0] == 'above':
-          """ "above" means that we have an icon that we want to position above any text that
-          can be on the button"""
+          # "above" means that we have an icon that we want to position above any text that
+          # can be on the button
           loadingResult = self.loadFromFile(currentName.split(':')[1], w, h)
           if loadingResult == False:
             self.cantLoad.append(currentName)
@@ -407,13 +402,13 @@ class Icons(RanaModule):
             compositedIcon = self.combineTwoIcons(compositedIcon, loadingResult)
 
         elif currentName.split(':')[0] == 'center':
-          """ "center" means that we have an icon which we want to center inside the button
-          there re two parameters - icon name and border width
-          EXAMPLE: center:more;0.1;0.5
-          -> icon name: more
-          -> border width: 10% of shortest icon side
-          -> 50% opacity
-          """
+          # "center" means that we have an icon which we want to center inside the button
+          # there re two parameters - icon name and border width
+          # EXAMPLE: center:more;0.1;0.5
+          # -> icon name: more
+          # -> border width: 10% of shortest icon side
+          # -> 50% opacity
+
           # parse the parameters
           semicolonSepList = currentName.split(':',1)[1].split(';')
           iconName = semicolonSepList[0]
@@ -539,7 +534,7 @@ class Icons(RanaModule):
     self.imageOrderList.append(name)
     return cacheRepresentation
 
-  def handleMessage(self, message, type, args):
+  def handleMessage(self, message, messageType, args):
     if message == "themeChanged":
       # handle theme switching
       currentTheme = self.get('currentTheme', self.defaultTheme)
