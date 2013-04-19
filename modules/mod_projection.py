@@ -27,23 +27,22 @@ def getModule(m,d,i):
   return Projection(m,d,i)
 
 class Projection(RanaModule):
-  """Projection code (lat/long to screen conversions)
+  """Projection code (lat/long to screen conversions)"""
 
-  HOW DOES IT WORK:
-  - there are basically two modes:
-  * current position tracking
-   => set view + recentre + 2*find edges
-  * map dragging
-   => nudge + 1*find edges
+  # HOW DOES IT WORK:
+  # - there are basically two modes:
+  # * current position tracking
+  #  => set view + recentre + 2*find edges
+  # * map dragging
+  #  => nudge + 1*find edges
 
-  TODO:
-  - why is find edges called twice for position tracking ?
-  - don't redraw the whole map for a small nudge
-   -> currently even for a 1 pixel nudge, the whole screen is redrawn
-  - use a mechanism similar to nudging for faster tracklog drawing
-   -> show the trackpoints so no ll2xy would be needed
+  # TODO:
+  # - why is find edges called twice for position tracking ?
+  # - don't redraw the whole map for a small nudge
+  #  -> currently even for a 1 pixel nudge, the whole screen is redrawn
+  # - use a mechanism similar to nudging for faster tracklog drawing
+  #  -> show the trackpoints so no ll2xy would be needed
 
-  """
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
     
