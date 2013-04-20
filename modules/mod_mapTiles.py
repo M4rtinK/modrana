@@ -23,7 +23,12 @@ from threading import Thread
 import threading
 import os
 import traceback
-import urllib2
+try:  # Python 2
+  from urllib2 import urlopen, HTTPError, URLError
+except ImportError:  # Python 3
+  from urllib.request import urlopen
+  from urllib.error import HTTPError, URLError
+
 import time
 import string
 import sys
@@ -1128,7 +1133,7 @@ class MapTiles(RanaModule):
           self.filename)
         self.finished = 1
       # something is wrong with the server or url
-      except urllib2.HTTPError:
+      except HTTPError:
         if self.useImageSurface:
           tileDownloadFailedSurface = self.callback.images[1]['tileDownloadFailed'][0]
           expireTimestamp = time.time() + 10
@@ -1140,7 +1145,7 @@ class MapTiles(RanaModule):
           #  - the error tile is shown without modifying the pipeline too much
           #  - modRana will eventually try to download the tile again,
           #    after it is flushed with old tiles from the memory
-      except urllib2.URLError:
+      except URLError:
         if self.useImageSurface:
           tileNetworkErrorSurface = self.callback.images[1]['tileNetworkError'][0]
           expireTimestamp = time.time() + 10
@@ -1187,7 +1192,7 @@ class MapTiles(RanaModule):
     def downloadTile(self, name, x, y, z, layer, filename):
       """Downloads an image"""
       url = self.callback.getTileUrl(x, y, z, layer)
-      request = urllib2.urlopen(url)
+      request = urlopen(url)
       content = request.read()
       request.close()
       if self.useImageSurface:
