@@ -48,11 +48,9 @@ class SynchronizedCircularStack(object):
   def batchPush(self, itemList):
     """batch push items in a smart way"""
     with self.listLock:
-      """
-      reverse the input list to simulate stack pushes
-      then combine the old list and the new one
-      and finally slice it to fit to the size limit
-      """
+      # reverse the input list to simulate stack pushes
+      # then combine the old list and the new one
+      # and finally slice it to fit to the size limit
       itemList.reverse()
       self.list.extend(itemList)
       self.list = self.list[-self.maxItems:]
