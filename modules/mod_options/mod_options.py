@@ -325,7 +325,7 @@ class Options(RanaModule):
     choices['groupName'] = group
 
     newOption = [title, variable, choices, group, default]
-    if self.options.has_key(group):
+    if group in self.options:
       self.options[group][2].append(newOption)
       self.keyDefault[variable] = default
     else:
@@ -417,7 +417,7 @@ class Options(RanaModule):
       groups = mapLayers.getGroupList()
 
       # sort the groups in alphabetical order by label
-      groups.sort(key=lambda group: group.label)
+      groups = sorted(groups, key=lambda group: group.label)
 
       # assign layers to groups
       for group in groups:
@@ -439,7 +439,7 @@ class Options(RanaModule):
 
         # create (layerId, label, icon) tuples,
         # reuse the variable:
-        groupLayers = map(lambda x: (x.id, x.label, x.icon, defaultBA), groupLayers)
+        groupLayers = list(map(lambda x: (x.id, x.label, x.icon, defaultBA), groupLayers))
 
         # append their counter to the group name
         name = "%s (%d)" % (name, len(groupLayers))
@@ -450,7 +450,7 @@ class Options(RanaModule):
       # append layers without group right after groups in the list
       nonGroupLayers = mapLayers.getLayersWithoutGroup()
       # sort the groups in alphabetical order by label
-      nonGroupLayers.sort(key=lambda group: group.label)
+      nonGroupLayers = sorted(nonGroupLayers, key=lambda group: group.label)
       # convert to option format
       nonGroupLayers = map(
         lambda x: {'item':(x, x.label, x.icon, defaultBA)}, nonGroupLayers)
@@ -1070,7 +1070,7 @@ class Options(RanaModule):
       for option in options[2]:
         (title, variable, choices, category, default) = option
         if default is not None:
-          if not self.d.has_key(variable):
+          if not variable in self.d:
             self.set(variable, default)
 
   def _removeNonPersistent(self, inputDict):
