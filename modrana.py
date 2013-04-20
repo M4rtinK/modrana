@@ -682,7 +682,7 @@ class ModRana(object):
     """save the persistent dictionary to file"""
     print("modRana: saving options")
     try:
-      f = open(self.paths.getOptionsFilePath(), "w")
+      f = open(self.paths.getOptionsFilePath(), "wb")
       # remove keys marked as nonpersistent
       self.d['keyModifiers'] = self.keyModifiers
       d = self._removeNonPersistentOptions(self.d)
@@ -699,7 +699,7 @@ class ModRana(object):
     """load the persistent dictionary from file"""
     print("modRana: loading options")
     try:
-      f = open(self.paths.getOptionsFilePath(), "r")
+      f = open(self.paths.getOptionsFilePath(), "rb")
       newData = marshal.load(f)
       f.close()
       purgeKeys = ["fix"]
