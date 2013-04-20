@@ -8,7 +8,7 @@ import core.exceptions
 import core.paths
 from core import geo
 from modules.upoints import gpx
-from point import Point
+from core.point import Point
 
 class TurnByTurnPoint(Point):
   def __init__(self, lat, lon, elevation=None, message=None, SSMLMessage=None):
