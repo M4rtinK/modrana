@@ -744,7 +744,7 @@ class MapData(RanaModule):
         # does the the file exist ?
         # TODO: maybe make something like tile objects so we don't have to pass so many parameters ?
         if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread=True): # if the file does not exist
-          request = self.connPool.get_url(url)
+          request = self.connPool.request('get', url)
           size = int(request.getheaders()['content-length'])
           content = request.data
           # The tileserver sometimes returns a HTML error page
