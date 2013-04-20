@@ -1,13 +1,11 @@
 # urllib3/request.py
-# Copyright 2008-2012 Andrey Petrov and contributors (see CONTRIBUTORS.txt)
+# Copyright 2008-2011 Andrey Petrov and contributors (see CONTRIBUTORS.txt)
 #
 # This module is part of urllib3 and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
+
+from urllib import urlencode
 
 from .filepost import encode_multipart_formdata
 
@@ -36,23 +34,15 @@ class RequestMethods(object):
     :meth:`.request` is for making any kind of request, it will look up the
     appropriate encoding format and use one of the above two methods to make
     the request.
-
-    Initializer parameters:
-
-    :param headers:
-        Headers to include with all requests, unless other headers are given
-        explicitly.
     """
 
     _encode_url_methods = set(['DELETE', 'GET', 'HEAD', 'OPTIONS'])
-    _encode_body_methods = set(['PATCH', 'POST', 'PUT', 'TRACE'])
 
-    def __init__(self, headers=None):
-        self.headers = headers or {}
+    _encode_body_methods = set(['PATCH', 'POST', 'PUT', 'TRACE'])
 
     def urlopen(self, method, url, body=None, headers=None,
                 encode_multipart=True, multipart_boundary=None,
-                **kw): # Abstract
+                **kw):
         raise NotImplemented("Classes extending RequestMethods must implement "
                              "their own ``urlopen`` method.")
 
@@ -105,16 +95,13 @@ class RequestMethods(object):
         such as with OAuth.
 
         Supports an optional ``fields`` parameter of key/value strings AND
-        key/filetuple. A filetuple is a (filename, data, MIME type) tuple where
-        the MIME type is optional. For example: ::
+        key/filetuple. A filetuple is a (filename, data) tuple. For example: ::
 
             fields = {
                 'foo': 'bar',
                 'fakefile': ('foofile.txt', 'contents of foofile'),
                 'realfile': ('barfile.txt', open('realfile').read()),
-                'typedfile': ('bazfile.bin', open('bazfile').read(),
-                              'image/jpeg'),
-                'nonamefile': 'contents of nonamefile field',
+                'nonamefile': ('contents of nonamefile field'),
             }
 
         When uploading a file, providing a filename (the first parameter of the
@@ -132,11 +119,27 @@ class RequestMethods(object):
             body, content_type = (urlencode(fields or {}),
                                     'application/x-www-form-urlencoded')
 
-        if headers is None:
-            headers = self.headers
+        headers = headers or {}
+        headers.update({'Content-Type': content_type})
 
-        headers_ = {'Content-Type': content_type}
-        headers_.update(headers)
-
-        return self.urlopen(method, url, body=body, headers=headers_,
+        return self.urlopen(method, url, body=body, headers=headers,
                             **urlopen_kw)
+
+    # Deprecated:
+
+    def get_url(self, url, fields=None, **urlopen_kw):
+        """
+        .. deprecated:: 1.0
+           Use :meth:`request` instead.
+        """
+        return self.request_encode_url('GET', url, fields=fields,
+                                       **urlopen_kw)
+
+    def post_url(self, url, fields=None, headers=None, **urlopen_kw):
+        """
+        .. deprecated:: 1.0
+           Use :meth:`request` instead.
+        """
+        return self.request_encode_body('POST', url, fields=fields,
+                                        headers=headers,
+                                        **urlopen_kw)
