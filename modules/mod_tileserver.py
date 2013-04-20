@@ -17,17 +17,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-import SimpleHTTPServer
-import SocketServer
 import random
+import sys
 from threading import Thread
-import urllib2
-import cStringIO
+from core.backports import six
+SimpleHTTPServer = six.moves.SimpleHTTPServer
+SocketServer = six.moves.socketserver
+
+try:  # Python 2
+  from urllib2 import HTTPError
+except ImportError:  # Python 3
+  from urllib.error import HTTPError
+try:
+  from  cStringIO import StringIO # python 2
+except ImportError:
+  from io import StringIO # python 3
+
 from modules.base_module import RanaModule
 import tileserver_callback_proxy
 
 def getModule(m,d,i):
-  return(Tileserver(m,d,i))
+  return Tileserver(m,d,i)
 
 class Tileserver(RanaModule):
   """A modRana built-in tileserver"""
@@ -138,12 +148,13 @@ class Server(SocketServer.TCPServer):
 
           print("GET returning file")
 
-          self.wfile.write(cStringIO.StringIO(tileData).read())
+          self.wfile.write(StringIO(tileData).read())
           return True
         else:
           print("GET tile not found")
           return False
-      except urllib2.HTTPError, e:
+      except HTTPError:
+        e = sys.exc_info()[1]
         # forward the error code
         self.send_response(e.code)
 
