@@ -167,8 +167,8 @@ class StorePOI(RanaModule):
       self.id=poiId
       self.lat=lat
       self.lon=lon
-      self.label= u'%s' % label
-      self.description= u'%s' % description
+      self.label= u('%s') % label
+      self.description= u('%s') % description
       self.categoryId=catId
 
     def __str__(self):
@@ -247,12 +247,12 @@ class StorePOI(RanaModule):
       return [self.id,self.lat,self.lon,self.label,self.description,self.categoryId]
 
     def setName(self, newLabel, commit=True):
-      self.label = u'%s' % newLabel
+      self.label = u('%s') % newLabel
       if commit:
         self.storeToDb()
 
     def setDescription(self, newDescription, commit=True):
-      self.description = u'%s' % newDescription
+      self.description = u('%s') % newDescription
       if commit:
         self.storeToDb()
 
