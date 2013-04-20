@@ -169,15 +169,30 @@ class MapTiles(RanaModule):
     layerType = layer.type
     tileData = self._storeTiles.getTileData(layerPrefix, z, x, y, layerType)
     if tileData:
-    #      print("got tile FROM disk CACHE")
+      #print("got tile FROM disk CACHE")
       # tile was available from storage
       return tileData
+    else: # download
+      #print("download")
+      self.downloadTile(layerId, z, x, y)
 
-    #    print("download")
+  def downloadTile(self, layerId, z, x, y):
+    # get the layer object
+    layer = self._getLayerById(layerId)
+    if layer is None:
+      print("mapTiles: invalid layer")
+      return
+    if layer is None: # is the layer info valid ?
+      print("mapTiles: error: layer with id: %s not found" % layerId)
+      return
+    layerPrefix = layer.folderName
+    layerType = layer.type
     tileUrl = self.getTileUrl(x, y, z, layerId)
-    #    print(url)
-    response = self._getConnPool(layerId, tileUrl).get_url(tileUrl)
-    #    print("RESPONSE")
+    # print("GET TILE")
+    # print(tileUrl)
+    response = self._getConnPool(layerId, tileUrl).request('GET', tileUrl)
+    # print("RESPONSE")
+    # print response
     tileData = response.data
 
     if tileData:
@@ -1108,13 +1123,13 @@ class MapTiles(RanaModule):
   class TileDownloader(Thread):
     """Downloads an image (in a thread)"""
 
-    def __init__(self, name, x, y, z, layer, layerName, layerType, filename, callback):
+    def __init__(self, name, x, y, z, layerId, layerName, layerType, filename, callback):
       Thread.__init__(self)
       self.name = name
       self.x = x
       self.y = y
       self.z = z
-      self.layer = layer
+      self.layerId = layerId
       self.layerName = layerName
       self.layerType = layerType
       self.finished = 0
@@ -1129,11 +1144,11 @@ class MapTiles(RanaModule):
           self.x,
           self.y,
           self.z,
-          self.layer,
+          self.layerId,
           self.filename)
         self.finished = 1
       # something is wrong with the server or url
-      except HTTPError:
+      except urllib3.exceptions.HTTPError:
         if self.useImageSurface:
           tileDownloadFailedSurface = self.callback.images[1]['tileDownloadFailed'][0]
           expireTimestamp = time.time() + 10
@@ -1175,26 +1190,25 @@ class MapTiles(RanaModule):
           self.callback.threadListCondition.notifyAll()
 
     def printErrorMessage(self, e):
-      url = self.callback.getTileUrl(self.x, self.y, self.z, self.layer)
+      url = self.callback.getTileUrl(self.x, self.y, self.z, self.layerId)
       print("mapTiles: download thread reports error")
       print("** we were doing this, when an exception occurred:")
       print("** downloading tile: x:%d,y:%d,z:%d, layer:%s, filename:%s, url: %s" % (
         self.x,
         self.y,
         self.z,
-        self.layer,
+        self.layerId,
         self.filename,
         url))
       print("** this exception occurred: %s\n" % e)
       print("** traceback:\n")
       traceback.print_exc()
 
-    def downloadTile(self, name, x, y, z, layer, filename):
+    def downloadTile(self, name, x, y, z, layerId, filename):
       """Downloads an image"""
-      url = self.callback.getTileUrl(x, y, z, layer)
-      request = urlopen(url)
-      content = request.read()
-      request.close()
+      content = self.callback.downloadTile(layerId, z, x, y)
+      if content is None:
+        raise urllib3.exceptions.HTTPError
       if self.useImageSurface:
         pl = gtk.gdk.PixbufLoader()
 
