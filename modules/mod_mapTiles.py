@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
-import StringIO
 from modules.base_module import RanaModule
 from threading import Thread
 import threading
@@ -28,6 +27,11 @@ import urllib2
 import time
 import string
 import sys
+try:
+  from cStringIO import StringIO # python 2
+except ImportError:
+  from io import StringIO # python 3
+
 from core import utils
 from modules import urllib3
 from core import rectangles
