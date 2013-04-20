@@ -161,10 +161,10 @@ class MapTiles(RanaModule):
     layer = self._getLayerById(layerId)
     if layer is None:
       print("mapTiles: invalid layer")
-      return
+      return None
     if layer is None: # is the layer info valid ?
       print("mapTiles: error: layer with id: %s not found" % layerId)
-      return
+      return None
     layerPrefix = layer.folderName
     layerType = layer.type
     tileData = self._storeTiles.getTileData(layerPrefix, z, x, y, layerType)
@@ -174,7 +174,7 @@ class MapTiles(RanaModule):
       return tileData
     else: # download
       #print("download")
-      self.downloadTile(layerId, z, x, y)
+      return self.downloadTile(layerId, z, x, y)
 
   def downloadTile(self, layerId, z, x, y):
     # get the layer object
@@ -194,7 +194,6 @@ class MapTiles(RanaModule):
     # print("RESPONSE")
     # print(response)
     tileData = response.data
-
     if tileData:
       # check if the data is actually an image, and not an error page
       if utils.isTheStringAnImage(tileData):
