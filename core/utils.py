@@ -5,13 +5,12 @@ import threading
 import os
 import sys
 
-try:
-  from cStringIO import StringIO # python 2
-except ImportError:
-  from io import StringIO # python 3
+from core.backports.six import b
+from core.backports import six
+StringIO = six.moves.cStringIO
 
 PYTHON3 = sys.version_info[0] > 2
-from core.backports.six import b
+
 
 #import time
 
