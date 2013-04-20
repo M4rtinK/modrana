@@ -23,7 +23,7 @@
 import sys
 import time
 
-import core.argparse as argparse
+import core.backports.argparse as argparse
 
 LOCAL_SEARCH_LOCATION_TIMEOUT = 30 # in seconds
 
