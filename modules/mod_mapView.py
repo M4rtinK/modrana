@@ -86,7 +86,9 @@ class MapView(RanaModule):
         proj = self.m.get('projection', None)
         self.set("centred",False) # turn off centering before moving screen to the coordinates
         proj.recentre(lat, lon, zoom)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("mapView: cant recenter coordinates")
         print(e)
   
@@ -165,7 +167,9 @@ class MapView(RanaModule):
       try:
         c = color.Color(newKey, (newKey, 1.0))
         self.gridColor = c.getCairoColor()
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print('mapView: color parsing failed')
         print(e)
 

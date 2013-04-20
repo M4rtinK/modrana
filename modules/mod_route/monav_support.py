@@ -54,7 +54,9 @@ class Monav(object):
       try:
         monav.TcpConnection()
         print('monav_support: server already running')
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print('monav_support: starting monav server in:')
         print(self.monavServerBinaryPath)
 
@@ -84,7 +86,9 @@ class Monav(object):
           elapsed = time.time() - startTimestamp
         started = True
         # TODO: use other port than 8040 ?, check out tileserver code
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print('monav_support: starting Monav server failed')
       print(e)
     if started:
@@ -101,7 +105,9 @@ class Monav(object):
         stopped = True
       else:
         print('monav_support: no Monav server process found')
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print('monav_support: stopping Monav server failed')
       print(e)
     self.monavServer = None
@@ -128,7 +134,9 @@ class Monav(object):
       try:
         result = monav.get_route(dataDirectory, waypoints)
         break
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print('monav_support: routing failed')
         print(e)
         traceback.print_exc(file=sys.stdout) # find what went wrong

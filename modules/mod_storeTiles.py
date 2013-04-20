@@ -171,7 +171,9 @@ class StoreTiles(RanaModule):
               storeCursor = storeConn.cursor()
               storeCursor.execute(storeQuery, [z, x, y, sqlite3.Binary(tile), extension, integerTimestamp])
               self.commitConnections([storeConn, lookupConn])
-            except Exception, e:
+            except Exception:
+              import sys
+              e = sys.exc_info()[1]
               print("tile already present")
               print(e)
               #tile is already present, skip insert
@@ -293,7 +295,9 @@ class StoreTiles(RanaModule):
         pl.close()
         pixbuf = pl.get_pixbuf()
         return pixbuf # return pixbuf containing the tile image
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("storeTiles: loading tile image to pixbuf failed")
         print(e)
         return None
@@ -333,7 +337,9 @@ class StoreTiles(RanaModule):
           data = f.read()
           f.close()
           return data
-        except Exception, e:
+        except Exception:
+          import sys
+          e = sys.exc_info()[1]
           print("storeTiles: loading tile from file failed")
           print(e)
           return None
@@ -452,7 +458,9 @@ class StoreTiles(RanaModule):
     while True:
       try:
         item = self.sqliteTileQueue.get(block=True)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         # this usually occurs during interpreter shutdown
         # -> we simulate a shutdown order and try to exit cleanly
         print("storage thread - probable shutdown")
@@ -473,7 +481,9 @@ class StoreTiles(RanaModule):
         (tile, folderPrefix, z, x, y, extension, filename) = item # unpack the tuple
         self.storeTile(tile, folderPrefix, z, x, y, extension) # store the tile
         self.sqliteTileQueue.task_done()
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("sqlite storage worker : exception during tile storage:\n%s" % e)
 
       dt = time.time() - self.lastCommit # check when the last commit was
@@ -481,7 +491,9 @@ class StoreTiles(RanaModule):
         try:
           self.commitAll() # commit all "dirty" connections
           self.lastCommit = time.time() # update the last commit timestamp
-        except Exception, e:
+        except Exception:
+          import sys
+          e = sys.exc_info()[1]
           print("sqlite storage worker : exception during mass db commit:\n%s" % e)
 
 
@@ -498,7 +510,9 @@ class StoreTiles(RanaModule):
       if not os.path.exists(folderPath): # does it exist ?
         try:
           os.makedirs(folderPath) # create the folder
-        except Exception, e:
+        except Exception:
+          import sys
+          e = sys.exc_info()[1]
           # errno 17 - folder already exists
           # this is most probably cased by another thread creating the folder between
           # the check & our os.makedirs() call

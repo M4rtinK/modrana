@@ -9,7 +9,9 @@ try:
     import json
   except ImportError:
     import simplejson as json
-except Exception, e:
+except Exception:
+  import sys
+  e = sys.exc_info()[1]
   import sys
   sys.path.append("modules/local_simplejson")
   print(e)
@@ -90,7 +92,9 @@ def wikipediaSearch(query):
   try:
     url, results = fetchJson(url, params)
     return _wikipediaResults2points(results['geonames'])
-  except Exception, e:
+  except Exception:
+    import sys
+    e = sys.exc_info()[1]
 #    traceback.print_exc(file=sys.stdout) # find what went wrong
     print("online: wiki search exception")
     print(e)
@@ -102,7 +106,9 @@ def elevSRTM(lat, lon):
   url = 'http://ws.geonames.org/srtm3?lat=%f&lng=%f' % (lat, lon)
   try:
     query = urllib.urlopen(url)
-  except Exception, e:
+  except Exception:
+    import sys
+    e = sys.exc_info()[1]
     print("onlineServices: getting elevation from geonames returned an error")
     print(e)
     return 0
@@ -143,7 +149,11 @@ def elevBatchSRTM(latLonList, threadCB=None, userAgent=None):
         request.add_header('User-Agent', userAgent)
       query = opener.open(request)
 
-    except Exception, e:
+    except Exception:
+
+      import sys
+
+      e = sys.exc_info()[1]
       print("online: getting elevation from geonames returned an error")
       print(e)
       results = "0"
@@ -153,7 +163,9 @@ def elevBatchSRTM(latLonList, threadCB=None, userAgent=None):
       if query:
         results = query.read().split('\r\n')
         query.close()
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("online: elevation string from geonames has a wrong format")
       print(e)
       results = "0"

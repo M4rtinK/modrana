@@ -230,7 +230,9 @@ class Startup(object):
 
       # make sure centering is disabled
       self.modrana.set("centred", False)
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("startup: parsing coordinates for the --focus-on-coordinates option failed")
       print(e)
 

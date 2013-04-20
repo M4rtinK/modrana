@@ -190,7 +190,9 @@ class Paths(object):
         # is it really string ?
         versionString = str(versionString)
         self.versionString = versionString
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("modRana config: loading version info failed")
         print(e)
 

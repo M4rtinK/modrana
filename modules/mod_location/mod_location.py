@@ -207,7 +207,9 @@ class Location(RanaModule):
   def shutdown(self):
     try:
       self.stopLocation()
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("location: stopping location failed", e)
 
   def _checkVerbose(self):

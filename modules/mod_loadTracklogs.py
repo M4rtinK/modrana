@@ -66,7 +66,9 @@ class LoadTracklogs(RanaModule):
           try:
             self.loadTracklog(path)
             print("tracklog successfully loaded")
-          except Exception, e:
+          except Exception:
+            import sys
+            e = sys.exc_info()[1]
             print("loading tracklog failed")
             print("path: %s" % path)
             print(e)
@@ -128,7 +130,9 @@ class LoadTracklogs(RanaModule):
       f = open(self.getTracklogCachePath(), 'r')
       self.cache = cPickle.load(f)
       f.close()
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("loadTracklogs: loading cache from file failed")
       print(e)
       self.cache = {}
@@ -343,7 +347,9 @@ class LoadTracklogs(RanaModule):
       f = open(self.getTracklogCachePath(), 'w')
       cPickle.dump(self.cache, f)
       f.close()
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("loadTracklogs: can't store tracklog data to cache, tracklogs will be loaded from files next time")
       print("exception: %r" % e)
 
@@ -386,7 +392,9 @@ class LoadTracklogs(RanaModule):
 
     try:
       file = open(path, 'r')
-    except Exception ,e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("loading tracklog failed: %s" % path)
       print(e)
 
@@ -400,7 +408,9 @@ class LoadTracklogs(RanaModule):
       # lets assume we have only GPX 1.1 files TODO: 1.1 and 1.0
       try:
         track.import_locations(file, "1.1") # load a gpx file into it
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("loading tracklog failed:\n%s" % e)
         if notify:
           self.sendMessage('notification:loading tracklog failed#2')
@@ -461,7 +471,9 @@ class LoadTracklogs(RanaModule):
         f = open(os.path.join(path,filename), 'w')
         xmlTree.write(f)
         f.close()
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("loadTracklogs: saving tracklog failed")
         print("exception: %s" % e)
         self.sendMessage('notification:Error: saving tracklog failed#3')

@@ -73,7 +73,9 @@ class Log(RanaModule):
       print("**log: redirecting stdout to log file:\%s" % self.currentLogPath)
       sys.stdout = self.fSock
       print("**log: stdout redirected to (this :) log file")
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("debug log: redirecting stdout to file failed:\n%s" % e)
 
   def disableLogging(self):
@@ -91,6 +93,8 @@ class Log(RanaModule):
     if self.fSock:
       try:
         self.fSock.close()
-      except Exception ,e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("**log: closing log file failed")
         print(e)

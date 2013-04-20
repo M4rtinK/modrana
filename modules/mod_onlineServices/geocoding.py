@@ -35,7 +35,9 @@ def geocode(address):
   try:
     places = list(g.geocode(address, exactly_one=False))
     return _places2points(places)
-  except Exception, e:
+  except Exception:
+    import sys
+    e = sys.exc_info()[1]
     print("geocoding exception:\n", e)
     return []
 
@@ -50,7 +52,7 @@ def geocode(address):
 ##  try:
 ##    places = list(wiki.geocode(query))
 ##    return _places2points(places)
-##  except Exception, e:
+##  except Exception:    import sys    e = sys.exc_info()[1]
 ##    print("wiki search exception:\n", e)
 ##    return []
 

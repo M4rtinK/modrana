@@ -180,7 +180,9 @@ class DeviceN900(DeviceModule):
                                                        mode=lastModeNumber)
       print("N900 rotation object initialized")
       return rObject
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("initializing N900 rotation object failed")
       print(e)
 
@@ -445,23 +447,31 @@ class DeviceN900(DeviceModule):
           import location
         self.lControl = location.GPSDControl.get_default()
         self.lDevice = location.GPSDevice()
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("n900 - location: - cant create location objects: %s" % e)
 
       try:
         self.lControl.set_properties(preferred_method=location.METHOD_USER_SELECTED)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("n900 - location: - cant set preferred location method: %s" % e)
 
       try:
         self.lControl.set_properties(preferred_interval=location.INTERVAL_1S)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("n900 - location: - cant set preferred location interval: %s" % e)
       try:
         self.lControl.start()
         print("** n900 - location: - GPS successfully activated **")
         self.connected = True
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("n900 - location: - opening the GPS device failed: %s" % e)
         self.status = "No GPSD running"
 
@@ -469,7 +479,9 @@ class DeviceN900(DeviceModule):
       #self.lControl.connect("error-verbose", self._liblocationErrorCB)
       self.lDevice.connect("changed", self._libLocationUpdateCB)
       print("n900 - location: activated")
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       self.status = "No GPSD running"
       print("n900 - location: - importing location module failed, please install the python-location package")
       print(e)
@@ -570,7 +582,9 @@ class DeviceN900(DeviceModule):
       else:
         self.status = "Unknown"
         print("n900 - location: getting fix failed (on a regular update)")
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       self.status = "Unknown"
       print("n900 - location:getting fix failed (on a regular update + exception: %s)" % e)
 

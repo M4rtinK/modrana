@@ -527,7 +527,9 @@ class MapData(RanaModule):
         size = 0
         try:
           size = self.getSizeForURL(item)
-        except Exception, e:
+        except Exception:
+          import sys
+          e = sys.exc_info()[1]
           print("exception in a get size worker thread:\n%s" % e)
 
         # increment the counter or remove an available tile in a thread safe way
@@ -564,7 +566,9 @@ class MapData(RanaModule):
       except IOError:
         print("Could not open document: %s" % url)
         size = 0 # the url errored out, so we just say it  has zero size
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("error, while checking size of a tile")
         print(e)
         size = 0
@@ -714,7 +718,9 @@ class MapData(RanaModule):
         dl = False
         try:
           dlSize = self.saveTileForURL(item)
-        except Exception, e:
+        except Exception:
+          import sys
+          e = sys.exc_info()[1]
           failed = True
           # TODO: try to re-download failed tiles
           print("exception in get tiles thread:\n%s" % e)
@@ -1041,7 +1047,9 @@ class MapData(RanaModule):
     if self.sizeThread:
       try:
         self.sizeThread.quit = True
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("error while shutting down size thread")
         print(e)
 
@@ -1052,7 +1060,9 @@ class MapData(RanaModule):
     if self.getFilesThread:
       try:
         self.getFilesThread.quit = True
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("error while shutting down files thread")
         print(e)
 

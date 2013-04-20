@@ -272,12 +272,16 @@ class Tracklog(RanaModule):
     """save current log increment to storage"""
     try:
       self.log1.flush()
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print('tracklog: saving primary temporary log failed')
       print(e)
     try:
       self.log2.flush()
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print('tracklog: saving secondary temporary log failed')
       print(e)
 
@@ -669,7 +673,11 @@ class Tracklog(RanaModule):
             os.remove(secondaryPath)
             print('tracklog: temporary file %s deleted' % secondaryPath)
 
-        except Exception, e:
+        except Exception:
+
+          import sys
+
+          e = sys.exc_info()[1]
           print('tracklog: exporting unsaved primary log file failed')
           print(e)
           failedPath = "%s_1.csv" % os.path.splitext(logPath)[0]
@@ -677,7 +685,9 @@ class Tracklog(RanaModule):
           try:
             shutil.move(logPath, failedPath)
             print("tracklog: renaming successful")
-          except Exception, e:
+          except Exception:
+            import sys
+            e = sys.exc_info()[1]
             print('tracklog: renaming %s to %s failed' % (logPath, failedPath))
             print(e)
 
@@ -711,14 +721,20 @@ class Tracklog(RanaModule):
           os.remove(logPath)
           print('tracklog: temporary file %s deleted' % logPath)
 
-        except Exception, e:
+        except Exception:
+
+          import sys
+
+          e = sys.exc_info()[1]
           print('tracklog: exporting unsaved secondary log file failed')
           failedPath = "%s_2.csv" % os.path.splitext(logPath)[0]
           print('tracklog: renaming to %s instead' % failedPath)
           try:
             shutil.move(logPath, failedPath)
             print("tracklog: renaming successful")
-          except Exception, e:
+          except Exception:
+            import sys
+            e = sys.exc_info()[1]
             print('tracklog: renaming %s to %s failed' % (logPath, failedPath))
             print(e)
     

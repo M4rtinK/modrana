@@ -434,7 +434,9 @@ class Modules(QtCore.QObject):
         function = getattr(m, functionName)
         result = function()
         return result
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("QML GUI: calling function %s on module %s failed" % (functionName, moduleName))
         print(e)
         return None
@@ -462,7 +464,9 @@ class IconImageProvider(QDeclarativeImageProvider):
       img.loadFromData(f.read())
       f.close()
       return img
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("QML GUI: icon image provider: loading icon failed")
       print(e)
       print(os.path.join('themes', iconPath))
@@ -513,7 +517,11 @@ class TileImageProvider(QDeclarativeImageProvider):
       #print("OK")
       return img
 
-    except Exception, e:
+    except Exception:
+
+      import sys
+
+      e = sys.exc_info()[1]
       print("QML GUI: icon image provider: loading tile failed")
       print(e)
       print(tileInfo)
@@ -746,7 +754,9 @@ class GPSDataWrapper(QtCore.QObject):
     fix = None
     try:
       fix = self.gui._location.getFix()
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("gui_qml: can't get fix object from location module")
       print(e)
     if fix:

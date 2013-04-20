@@ -26,7 +26,9 @@ from core.signal import Signal
 # on Fremantle and other everywhere (?) else"""
 try:
   from modules.configobj.configobj import ConfigObj # everywhere
-except Exception, e:
+except Exception:
+  import sys
+  e = sys.exc_info()[1]
   print(e)
   print("theme: trying alternative configobj import method")
   from configobj import ConfigObj # Fremantle

@@ -24,7 +24,9 @@ print("(%s)" % google)
 try:
   urllib.urlretrieve(google, path+"urllib_"+filename1)
   print("OK: Google logo + urllib")
-except Exception, e:
+except Exception:
+  import sys
+  e = sys.exc_info()[1]
   print("error while downloading Google logo using urllib: %s" % e)
 
 
@@ -33,7 +35,9 @@ print("(%s)" % osm)
 try:
   urllib.urlretrieve(osm, path+"urllib_"+filename2)
   print("OK: OSM tile + urllib")
-except Exception, e:
+except Exception:
+  import sys
+  e = sys.exc_info()[1]
   print("error while downloading an OSM tile using urllib: %s" % e)
 
 
@@ -47,7 +51,9 @@ try:
   file1.write(reply1.read())
   file1.close()
   print("OK: Google logo + urllib2")
-except Exception, e:
+except Exception:
+  import sys
+  e = sys.exc_info()[1]
   print("error while downloading Google logo using urllib2: %s" % e)
 
 print("\n4. trying to download an OSM tile to /tmp/ using urllib2")
@@ -60,7 +66,9 @@ try:
   file2.write(reply2.read())
   file2.close()
   print("OK: OSM tile + urllib2")
-except Exception, e:
+except Exception:
+  import sys
+  e = sys.exc_info()[1]
   print("error while downloading an OSM tile using urllib2: %s" % e)
 
 
@@ -93,7 +101,9 @@ try:
   file3.write(data)
   file3.close()
   print("OK: OSM tile + proxy")
-except Exception, e:
+except Exception:
+  import sys
+  e = sys.exc_info()[1]
   print("error while downloading an OSM tile using proxy: %s" % e)
 
 print("\n######################")

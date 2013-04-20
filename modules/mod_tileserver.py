@@ -63,7 +63,9 @@ class Tileserver(RanaModule):
     try:
       print("tileserver: starting on port %d" % self.port)
       self.httpd = Server(("", self.tileserverPort), self)
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("tileserver: starting server on port %d failed" % self.port)
       print(e)
       self.port = random.randint(9000,10000)

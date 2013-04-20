@@ -40,7 +40,9 @@ class GPSD(PositionSource):
       self.GPSDConsumer.start()
       self.connected = True
       self.setGPSDDebug(self.debug) # check if verbose debugging is enabled
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("location GPSD: connecting to GPSD failed", e)
       self.status = "No GPSD running"
 
@@ -193,7 +195,9 @@ class GPSDConsumer(threading.Thread):
         break
       try:
         self.session.next() # this function blocks until a new fix is available
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("GPSD: error: GPS daemon not running")
         print(e)
       sf = self.session.fix
@@ -208,7 +212,9 @@ class GPSDConsumer(threading.Thread):
               print('GPSD fix debug')
               print(
               'mode:' + str(sf.mode) + ' lat,lon:' + str((sf.latitude, sf.longitude)) + ' elev:' + str(sf.altitude))
-            except  Exception, e:
+            except Exception:
+              import sys
+              e = sys.exc_info()[1]
               print('ERROR debugging GPSD fix')
               print(e)
       else:
@@ -221,7 +227,7 @@ class GPSDConsumer(threading.Thread):
   #        with self.lock:
   #          try:
   #            self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
-  #          except Exception, e:
+  #          except Exception:            import sys            e = sys.exc_info()[1]
   #            print("GPSDConsumer: error reading data", e)
 
   def shutdown(self):

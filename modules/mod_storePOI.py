@@ -52,12 +52,16 @@ class StorePOI(RanaModule):
       try:
         self.db = sqlite3.connect(DBPath)
         print(" @ storePOI: connection to POI db established")
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print(" @ storePOI: connecting to POI database failed:\n%s" % e)
     else: # create new db
       try:
         self.db = self.createDatabase(DBPath)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print(" @ storePOI: creating POI database failed:\n%s" % e)
 
   def disconnectFromDb(self):
@@ -312,7 +316,9 @@ class StorePOI(RanaModule):
           os.rename(oldPOIPath,renamedOldPOIPath)
           print("storePOI: old POI file moved to: %s" % renamedOldPOIPath)
           self.sendMessage('ml:notification:m:%d old POI imported to category "Other";10' % len(points))
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("storePOI: import of old POI failed:\n%s" % e)
 
 
@@ -324,7 +330,9 @@ class StorePOI(RanaModule):
       points = cPickle.load(f)
       f.close()
       return points
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("storePOI: loading POI from file failed:\n%s" % e)
       return None
 
@@ -408,7 +416,9 @@ class StorePOI(RanaModule):
         CSVDump(path, rows)
 
         self.sendMessage('ml:notification:m:POI exported to: %s;5' % POIFolderPath)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("storePOI: CSV dump failed")
         print(e)
         traceback.print_exc(file=sys.stdout)

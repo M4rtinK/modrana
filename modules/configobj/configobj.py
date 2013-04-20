@@ -1641,7 +1641,9 @@ class ConfigObj(Section):
                             comment = ''
                             try:
                                 value = unrepr(value)
-                            except Exception, e:
+                            except Exception:
+                                import sys
+                                e = sys.exc_info()[1]
                                 if type(e) == UnknownType:
                                     msg = 'Unknown name or type in value at line %s.'
                                 else:
@@ -1654,7 +1656,9 @@ class ConfigObj(Section):
                         comment = ''
                         try:
                             value = unrepr(value)
-                        except Exception, e:
+                        except Exception:
+                            import sys
+                            e = sys.exc_info()[1]
                             if isinstance(e, UnknownType):
                                 msg = 'Unknown name or type in value at line %s.'
                             else:

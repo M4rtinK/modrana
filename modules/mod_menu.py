@@ -1455,7 +1455,9 @@ class Menus(RanaModule):
           l.setIndex(int(args[1]))
         else:
           print("menu: no list %s available, can't set index" % listName)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("menu: setting list index failed")
         print(e)
 

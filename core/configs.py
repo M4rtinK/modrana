@@ -52,7 +52,9 @@ class Configs(object):
           print(" ** to: %s" % configPath)
           shutil.copy(source, configPath)
           print(" ** DONE")
-        except Exception, e:
+        except Exception:
+          import sys
+          e = sys.exc_info()[1]
           print("config: copying default configuration file to profile folder failed", e)
 
   def upgradeConfigFiles(self):
@@ -86,7 +88,9 @@ class Configs(object):
 
           # update upgrade counter
           upgradeCount+=1
-      except Exception ,e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("modRana configs: upgrading config file: %s failed" % config)
         print(e)
     if upgradeCount:
@@ -114,7 +118,11 @@ class Configs(object):
         if config['enabled'] == 'True':
           self.userConfig = config
 
-    except Exception, e:
+    except Exception:
+
+      import sys
+
+      e = sys.exc_info()[1]
       print("modRana configs: loading user_config.conf failed")
       print("modRana configs: check the syntax")
       print("modRana configs: and if the config file is present in the main directory")
@@ -165,7 +173,9 @@ class Configs(object):
         return False
     try:
       self.mapConfig = ConfigObj(mapConfigPath)
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("modRana configs: loading map_config.conf failed: %s" % e)
       return False
     return True

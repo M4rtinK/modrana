@@ -172,7 +172,8 @@ class ModRana(object):
     if self.args.u:
       try:
         self.GUIString = self.args.u.split(":")[0]
-      except Exception, e:
+      except Exception:
+        e = sys.exc_info()[1]
         print('modRana: splitting the GUI string failed')
         print(e)
     else: # no ID specified
@@ -325,7 +326,8 @@ class ModRana(object):
       self.m[modRanaName] = module
       print( " * %s: %s (%1.2f ms)" % (modRanaName, self.m[modRanaName].__doc__, (1000 * (time.clock() - startM))) )
       return module
-    except Exception, e:
+    except Exception:
+      e = sys.exc_info()[1]
       print( "modRana: module: %s/%s failed to load" % (importName, modRanaName) )
       print(e)
       traceback.print_exc(file=sys.stdout) # find what went wrong
@@ -669,7 +671,8 @@ class ModRana(object):
     ASSUMPTION: keys are strings of length>=1"""
     try:
       return dict((k, v) for k, v in inputDict.iteritems() if k[0] != '#')
-    except Exception, e:
+    except Exception:
+      e = sys.exc_info()[1]
       print(
         'options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n',
         e)
@@ -688,7 +691,8 @@ class ModRana(object):
       print("modRana: options successfully saved")
     except IOError:
       print("modRana: Can't save options")
-    except Exception, e:
+    except Exception:
+      e = sys.exc_info()[1]
       print("modRana: saving options failed:", e)
 
   def _loadOptions(self):
@@ -705,7 +709,8 @@ class ModRana(object):
       for k, v in newData.items():
         self.set(k, v)
       success = True
-    except Exception, e:
+    except Exception:
+      e = sys.exc_info()[1]
       print("modRana: exception while loading saved options:\n%s" % e)
       #TODO: a yes/no dialog for clearing (renaming with timestamp :) the corrupted options file (options.bin)
       success = False

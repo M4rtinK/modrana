@@ -274,7 +274,9 @@ class OnlineServices(RanaModule):
                                                waypointOption=waypointOption, secondTime=True)
       else:
         print("onlineServices:GDirections:routing failed with exception googlemaps status code:%d" % e.status)
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("onlineServices:GDirections:routing failed with non-googlemaps exception")
       print(e)
       traceback.print_exc(file=sys.stdout) # find what went wrong
@@ -548,7 +550,9 @@ class Worker(threading.Thread):
       results = geonames.elevBatchSRTM(latLonList, self._geonamesCallback, userAgent)
       self._setWorkStatusText("online elevation lookup done   ")
       return results, tracklog
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print('onlineServices: exception during elevation lookup')
       print(e)
       traceback.print_exc(file=sys.stdout) # find what went wrong

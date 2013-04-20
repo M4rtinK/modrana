@@ -74,7 +74,9 @@ class Notification(RanaModule):
         if len(parameterList) == 2:
           try:
             timeout = int(parameterList[1]) # override the default timeout
-          except Exception ,e:
+          except Exception:
+            import sys
+            e = sys.exc_info()[1]
             print("notification: wrong timeout, using default 5 seconds")
             print(e)
         self.handleNotification(messageText, timeout)

@@ -238,7 +238,9 @@ class Way(object):
       # close the file
       f.close()
       return True
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print('way: saving to GPX format failed')
       print(e)
       return False
@@ -260,7 +262,9 @@ class Way(object):
       f.close()
       print('way: %d points saved to %s as CSV' % (path, len(points)))
       return True
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print('way: saving to CSV failed')
       print(e)
       return False
@@ -441,7 +445,9 @@ def fromCSV(path, delimiter=',', fieldCount=None):
       else:
         print("Way: wrong field count - use 2, 3 or 4")
         raise ValueError
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print('Way: parsing CSV file at path: %s failed')
       print(e)
       f.close()
@@ -455,7 +461,9 @@ def fromCSV(path, delimiter=',', fieldCount=None):
       if item: # 0 would still be '0' -> nonempty string
         try:
           return float(item)
-        except Exception, e: # parsing error
+        except Exception:
+          import sys
+          e = sys.exc_info()[1] # parsing error
           print("way: parsing elevation failed, data: ", item)
           print(e)
           return None
@@ -482,7 +490,9 @@ def fromCSV(path, delimiter=',', fieldCount=None):
         else:
           print('Way: error, line %d has 1 or 0 fields, needs at least 2 (lat, lon):\n%r' % (reader.line_no, r))
           parsingErrorCount += 1
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print('Way: parsing CSV line %d failed' % lineNumber)
         print(e)
         parsingErrorCount += 1
@@ -607,7 +617,9 @@ class AppendOnlyWay(Way):
       # flush any pending points
       self.flush()
       print('AOWay: started writing to: %s' % path)
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print('AOWay: opening CSV file for writing failed, path: %s' % path)
       print(e)
       self._cleanup() # revert to initial state
@@ -643,7 +655,9 @@ class AppendOnlyWay(Way):
       try:
         self.close() # close it
         os.remove(path) # and delete it
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print('AOWay: deleting currently open file failed')
         print(e)
     else:

@@ -24,7 +24,9 @@ QTM_IMPORT_SUCCESS = False
 try:
   from QtMobility.SystemInfo import QSystemScreenSaver
   QTM_IMPORT_SUCCESS = True
-except Exception, e:
+except Exception:
+  import sys
+  e = sys.exc_info()[1]
   print('device_nemo: QtMobility import failed - do you have python-qtmobility installed ?')
   print(e)
 """ ^^ back-light control"""

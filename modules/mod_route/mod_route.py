@@ -296,7 +296,9 @@ class Route(RanaModule):
             print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
             try:
               self.doRoute(fromLat, fromLon, toLat, toLon)
-            except Exception, e:
+            except Exception:
+              import sys
+              e = sys.exc_info()[1]
               self.sendMessage('ml:notification:m:No route found;3')
               self.set('needRedraw', True)
               print(e)
@@ -500,7 +502,9 @@ class Route(RanaModule):
           self.monav = monav_support.Monav(self.modrana.paths.getMonavServerBinaryPath())
           self.monav.startServer()
         result = self.monav.monavDirections(monavDataFolder, waypoints)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print('route: Monav route lookup failed')
         print(e)
         traceback.print_exc(file=sys.stdout) # find what went wrong
@@ -529,7 +533,9 @@ class Route(RanaModule):
       dataPacks = os.listdir(mainMonavFolder)
       dataPacks = filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks)
       return sorted(dataPacks)
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print('route: listing the Monav data packs failed')
       print(e)
       return []
@@ -708,7 +714,9 @@ class Route(RanaModule):
           # replace strings according to the csv file
           message = regex.sub(replacement, message, re.UNICODE)
         step.setSSMLMessage(message)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("route: error during direction filtering")
         print(e)
         step.setSSMLMessage(message)
@@ -736,7 +744,9 @@ class Route(RanaModule):
           if unicodeName.find('CYRILLIC') != -1:
             cyrillicCharFound = True
             break
-        except Exception, e:
+        except Exception:
+          import sys
+          e = sys.exc_info()[1]
           """just skip this as the character is  most probably unknown"""
           pass
       if cyrillicCharFound: # the substring contains at least one cyrillic character

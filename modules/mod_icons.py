@@ -25,7 +25,9 @@ import fnmatch
 # on Fremantle and other everywhere (?) else"""
 try:
   from modules.configobj.configobj import ConfigObj # everywhere
-except Exception, e:
+except Exception:
+  import sys
+  e = sys.exc_info()[1]
   print(e)
   print("icons: trying alternative configobj import method")
   from configobj import ConfigObj # Fremantle
@@ -169,7 +171,9 @@ class Icons(RanaModule):
         try:
           # try to load the icon to pixbuf and get its original width and height
           pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(aboveTextIconPath,int(scaledW),int(scaledH))
-        except Exception, e:
+        except Exception:
+          import sys
+          e = sys.exc_info()[1]
           print("icons: icon probably corrupted: %s" % aboveTextIconPath)
           print("%s" % e)
         if pixbuf:
@@ -225,7 +229,9 @@ class Icons(RanaModule):
       ct2.set_source_pixbuf(pixbuf,0,0)
       ct2.paint()
       # surface now contains the image in a Cairo surface
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("** loading image to pixbuf failed")
       print("** filename: %s" % path)
       print("** exception: %s" % e)
@@ -313,7 +319,9 @@ class Icons(RanaModule):
     try:
       (r,g,b,a) = fillColorRGBATuple
       fillColorRGBATuple = (r,g,b,fillAlpha)
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("** wrong fill color code or name: %s" % fillColorString)
       print("** exception: %s" % e)
       fillColorRGBATuple = self.buttonFillColor
@@ -321,7 +329,9 @@ class Icons(RanaModule):
     try:
       (r,g,b,a) = outlineColorRGBATuple
       outlineColorRGBATuple = (r,g,b,outlineAlpha)
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("** wrong outline color code or name: %s" % fillColorString)
       print("** exception: %s" % e)
       outlineColorRGBATuple = self.buttonOutlineColor

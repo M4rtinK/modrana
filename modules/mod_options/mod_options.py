@@ -1079,7 +1079,9 @@ class Options(RanaModule):
     ASSUMPTION: keys are strings of length>=1"""
     try:
       return dict((k, v) for k, v in inputDict.iteritems() if k[0] != '#')
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print(
         'options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n'
         , e)

@@ -335,7 +335,9 @@ class MapTiles(RanaModule):
                   name = request[0]
                   self.removeImageFromMemory(name)
               self.downloadRequestPool = cleanPool
-        except Exception, e:
+        except Exception:
+          import sys
+          e = sys.exc_info()[1]
           print("exception in tile download manager thread:\n%s" % e)
           #          traceback.print_exc()
 
@@ -363,7 +365,9 @@ class MapTiles(RanaModule):
       #        print("quiting")
         self.idleLoaderActive = False
         return False # the stack is empty, remove this callback
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       # on an error, we need to shut down or else idleLoaderActive might get stuck
       # and no loader will be started
       print("mapTiles: exception in idle loader\n", e)
@@ -669,7 +673,11 @@ class MapTiles(RanaModule):
         #      process all the "load" notifications """
         #      pass
 
-    except Exception, e:
+    except Exception:
+
+      import sys
+
+      e = sys.exc_info()[1]
       print("mapTiles: exception while drawing the map layer: %s" % e)
       traceback.print_exc()
 
@@ -833,7 +841,9 @@ class MapTiles(RanaModule):
     try:
       pixbuf = gtk.gdk.pixbuf_new_from_file(filePath)
       return pixbuf
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e)
       return False
 
@@ -1141,7 +1151,9 @@ class MapTiles(RanaModule):
           # TODO: actually remove tiles according to expiration timestamp :)
 
       # something other is wrong (most probably a corrupted tile)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         self.printErrorMessage(e)
         # remove the status tile
         self.callback.removeImageFromMemory(self.name)

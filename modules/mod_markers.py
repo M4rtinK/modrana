@@ -179,7 +179,9 @@ class PointGroup():
   def highlightPoint(self, pointId):
     try:
       self.points[pointId][1] = True
-    except Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("markers: highlight index out of range: %r" % pointId)
       print(e)
 

@@ -81,7 +81,9 @@ class GTKGUI(GUIModule):
         import hildon
 
         win = hildon.StackableWindow()
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("creating hildon stackable window failed")
         print(e)
         win = gtk.Window()
@@ -141,7 +143,9 @@ class GTKGUI(GUIModule):
     else:
       try:
         gtk.show_uri(None, url, gtk.gdk.CURRENT_TIME)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("GTK GUI: calling gtk.show_uri() failed, probably due to old GTK version")
         print(e)
         print("using the webbrowser module as fallback")
@@ -281,7 +285,9 @@ class GTKGUI(GUIModule):
     # initial update
     try:
       self._updateCenteringShiftCB()
-    except  Exception, e:
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
       print("GTK GUI: initial centering shift update failed")
       print(e)
 
@@ -443,7 +449,9 @@ class MainWidget(gtk.Widget):
     if self.redraw:
       try:
         self.window.invalidate_rect((0, 0, self.rect.width, self.rect.height), False)
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("error in screen invalidating function"
               "exception: %s" % e)
 
@@ -633,7 +641,9 @@ class MainWidget(gtk.Widget):
             m.drawMap(cr)
           for m in modules:
             m.drawMapOverlay(cr)
-        except Exception, e:
+        except Exception:
+          import sys
+          e = sys.exc_info()[1]
           print("modRana GTK main loop: an exception occurred")
           print(e)
           print('modRana GTK main loop: traceback:')
@@ -648,7 +658,9 @@ class MainWidget(gtk.Widget):
             m.drawMap(cr)
           for m in modules:
             m.drawMapOverlay(cr)
-        except Exception, e:
+        except Exception:
+          import sys
+          e = sys.exc_info()[1]
           print("modRana GTK main loop: an exception occurred")
           print(e)
           print('modRana GTK main loop: traceback:')
@@ -922,7 +934,7 @@ class MainWidget(gtk.Widget):
       #        m.drawMap(cr1)
       #      for m in self.m.values():
       #        m.drawMapOverlay(cr1)
-      #    except Exception, e:
+      #    except Exception:      import sys      e = sys.exc_info()[1]
       #      print("modRana simple map: an exception occured:\n")
       #      traceback.print_exc(file=sys.stdout) # find what went wrong
       #      self.stopSimpleMapDrag()

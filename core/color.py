@@ -51,7 +51,9 @@ class Color(object):
         self.setCairoColor(cairoR,cairoG,cairoB,alpha)
         self.gtkColor = gtkColor
         self.valid = True
-      except Exception, e:
+      except Exception:
+        import sys
+        e = sys.exc_info()[1]
         print("** color string parsing failed **")
         print("** input that caused this:", colorStringAlphaTupple)
         print("** exception: %s" % e)
