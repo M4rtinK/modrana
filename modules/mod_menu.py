@@ -919,7 +919,7 @@ class Menus(RanaModule):
   def setupModesMenu(self):
     """Create menus for routing modes"""
     self.clearMenu('modes')
-    modes = self.modrana.getModes().items()
+    modes = list(self.modrana.getModes().items())
     modes.sort()
     for(mode, label) in modes:
       self.addItem(
