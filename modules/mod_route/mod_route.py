@@ -72,7 +72,7 @@ class Route(RanaModule):
     for row in CSVReader:
       if row[0] != '#' and len(row) >= 2:
         regex = re.compile(u(row[0]))
-        self.directionsFilterRules.append((regex, row[1].decode("utf-8")))
+        self.directionsFilterRules.append((regex, u(row[1])))
     file.close()
 
   def _goToInitialState(self):
