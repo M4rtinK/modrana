@@ -330,6 +330,7 @@ class ModRana(object):
       e = sys.exc_info()[1]
       print( "modRana: module: %s/%s failed to load" % (importName, modRanaName) )
       print(e)
+      print("traceback:")
       traceback.print_exc(file=sys.stdout) # find what went wrong
       return None
     finally:
