@@ -1,1 +1,1 @@
-from gui_qml import *
+from .gui_qml import *
