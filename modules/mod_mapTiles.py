@@ -27,6 +27,7 @@ import traceback
 import urllib2
 import time
 import string
+import sys
 from core import utils
 from modules import urllib3
 from core import rectangles
@@ -56,7 +57,8 @@ if gs.GUIString == "GTK":
     import Image
     import ImageOps
     IMAGE_MANIPULATION_IMPORT_SUCCESS = True
-  except ImportError, e:
+  except ImportError:
+    e = sys.exc_info()[1]
     print('mapTiles: import of image manipulation tools unsuccessful'
           ' - tile image manipulation disabled')
     print(e)
@@ -336,7 +338,6 @@ class MapTiles(RanaModule):
                   self.removeImageFromMemory(name)
               self.downloadRequestPool = cleanPool
         except Exception:
-          import sys
           e = sys.exc_info()[1]
           print("exception in tile download manager thread:\n%s" % e)
           #          traceback.print_exc()
@@ -366,7 +367,6 @@ class MapTiles(RanaModule):
         self.idleLoaderActive = False
         return False # the stack is empty, remove this callback
     except Exception:
-      import sys
       e = sys.exc_info()[1]
       # on an error, we need to shut down or else idleLoaderActive might get stuck
       # and no loader will be started
@@ -674,9 +674,6 @@ class MapTiles(RanaModule):
         #      pass
 
     except Exception:
-
-      import sys
-
       e = sys.exc_info()[1]
       print("mapTiles: exception while drawing the map layer: %s" % e)
       traceback.print_exc()
@@ -842,7 +839,6 @@ class MapTiles(RanaModule):
       pixbuf = gtk.gdk.pixbuf_new_from_file(filePath)
       return pixbuf
     except Exception:
-      import sys
       e = sys.exc_info()[1]
       print("the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e)
       return False
@@ -1152,7 +1148,6 @@ class MapTiles(RanaModule):
 
       # something other is wrong (most probably a corrupted tile)
       except Exception:
-        import sys
         e = sys.exc_info()[1]
         self.printErrorMessage(e)
         # remove the status tile
