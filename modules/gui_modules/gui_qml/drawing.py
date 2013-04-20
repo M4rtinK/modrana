@@ -36,7 +36,7 @@ class PieChart (QDeclarativeItem):
   def setName(self, value):
     self._name = value
 
-  name = Property(unicode, getName, setName)
+  name = Property(str, getName, setName)
 
   def getPieSlice(self):
     return self._pieSlice
