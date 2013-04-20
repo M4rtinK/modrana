@@ -15,6 +15,7 @@ except ImportError:
     except ImportError:
         from django.utils import simplejson as json
 
+from core.backports.six import string_types as basestring
 
 class Yahoo(Geocoder):
 

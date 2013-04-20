@@ -9,6 +9,8 @@ from geopy import Point, Location
 from geopy.parsers import Parser
 from geopy.util import reversed
 
+from core.backports.six import string_types as basestring
+
 class GeoVocabulary(Parser):
     GEO_NS = "http://www.w3.org/2003/01/geo/wgs84_pos#"
     POINT_CLASS = 'Point'

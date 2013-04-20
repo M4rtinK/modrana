@@ -30,6 +30,8 @@ import logging
 import math
 import re
 
+from core.backports.six import string_types as basestring
+
 from xml.etree import ElementTree
 try:
     from xml.etree import cElementTree as ET

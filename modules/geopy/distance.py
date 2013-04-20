@@ -2,6 +2,7 @@ from math import atan, tan, sin, cos, pi, sqrt, atan2, acos, asin
 from geopy.units import radians
 from geopy import units, util
 from geopy.point import Point
+from core.backports.six import string_types as basestring
 
 # Average great-circle radius in kilometers, from Wikipedia.
 # Using a sphere with this radius results in an error of up to about 0.5%.

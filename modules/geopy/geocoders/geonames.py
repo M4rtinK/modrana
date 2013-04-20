@@ -2,6 +2,7 @@ import xml.dom.minidom
 from urllib import urlencode
 from urllib2 import urlopen
 from geopy import util
+from core.backports.six import string_types as basestring
 
 try:
     import json

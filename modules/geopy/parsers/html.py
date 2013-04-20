@@ -3,6 +3,7 @@ from BeautifulSoup import BeautifulSoup, SoupStrainer
 from geopy import Point, Location
 from geopy.parsers import Parser
 from geopy.util import unescape
+from core.backports.six import string_types as basestring
 
 FLOAT_RE = re.compile(r'([+-]?\d*\.?\d+)$')
 

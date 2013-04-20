@@ -4,6 +4,7 @@ from geopy.parsers.iso8601 import parse_iso8601
 import sys, re
 from xml.etree import ElementTree
 from core.backports import six
+from core.backports.six import string_types as basestring
 
 class VersionError(Exception):
     pass

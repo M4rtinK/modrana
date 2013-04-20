@@ -11,6 +11,7 @@ from urllib2 import urlopen
 
 from geopy.geocoders.base import Geocoder
 from geopy.util import logger, decode_page, join_filter
+from core.backports.six import string_types as basestring
 
 class Bing(Geocoder):
     """Geocoder using the Bing Maps API."""

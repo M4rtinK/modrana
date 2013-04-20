@@ -17,6 +17,8 @@ from xml.parsers.expat import ExpatError
 from geopy.geocoders.base import Geocoder,GeocoderError,GeocoderResultError
 from geopy import Point, Location, util
 
+from core.backports.six import string_types as basestring
+
 class Google(Geocoder):
     """Geocoder using the Google Maps API."""
     

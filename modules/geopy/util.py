@@ -4,6 +4,7 @@ import logging
 import htmlentitydefs
 import xml.dom.minidom
 from xml.parsers.expat import ExpatError
+from core.backports.six import string_types as basestring
 
 try:
     from decimal import Decimal

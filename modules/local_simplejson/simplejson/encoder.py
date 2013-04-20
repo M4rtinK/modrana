@@ -311,6 +311,7 @@ class JSONEncoderForHTML(JSONEncoder):
             chunk = chunk.replace('>', '\\u003e')
             yield chunk
 
+from core.backports.six import string_types as basestring
 
 def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
         _key_separator, _item_separator, _sort_keys, _skipkeys, _one_shot,

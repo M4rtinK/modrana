@@ -1,6 +1,7 @@
 import re
 from itertools import islice
 from geopy import util, units, format
+from core.backports.six import string_types as basestring
 
 class Point(object):
     """

@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
-
+from core.backports.six import string_types as basestring
 # only import GKT libs if GTK GUI is used
 from core import gs
 if gs.GUIString == "GTK":

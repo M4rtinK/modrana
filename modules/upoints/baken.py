@@ -25,6 +25,7 @@ import re
 from operator import attrgetter
 
 from upoints import (point, utils)
+from core.backports.six import string_types as basestring
 
 class Baken(point.Point):
     """Class for representing location from baken_ data files

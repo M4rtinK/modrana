@@ -165,7 +165,7 @@ __all__ = (
 
 
 import re
-
+from core.backports.six import string_types as basestring
 
 _list_arg = re.compile(r'''
     (?:

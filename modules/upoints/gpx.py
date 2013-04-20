@@ -25,6 +25,8 @@ from functools import partial
 from operator import attrgetter
 from xml.etree import ElementTree
 
+from core.backports.six import string_types as basestring
+
 try:
     from xml.etree import cElementTree as ET
 except ImportError:
