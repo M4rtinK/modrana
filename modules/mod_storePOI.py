@@ -20,7 +20,6 @@
 import traceback
 import sys
 from modules.base_module import RanaModule
-import cPickle
 import os
 import sqlite3
 import csv
@@ -328,7 +327,8 @@ class StorePOI(RanaModule):
     """load POI from file - depreciated, used sqlite for POI storage"""
     try:
       f = open(path, 'r')
-      points = cPickle.load(f)
+      import pickle
+      points = pickle.load(f)
       f.close()
       return points
     except Exception:
