@@ -723,7 +723,7 @@ def _is_num_param(names, values, to_float=False):
         elif isinstance(val, (int, int, float, str)):
             try:
                 out_params.append(fun(val))
-            except ValueError as e:
+            except ValueError:
                 raise VdtParamError(name, val)
         else:
             raise VdtParamError(name, val)
@@ -1263,7 +1263,8 @@ def is_mixed_list(value, *args):
         raise VdtValueTooLongError(value)
     try:
         return [fun_dict[arg](val) for arg, val in zip(args, value)]
-    except KeyError as e:
+    except KeyError:
+        e = sys.exc_info()[1]
         raise VdtParamError('mixed_list', e)
 
 

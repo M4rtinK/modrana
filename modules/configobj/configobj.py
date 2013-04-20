@@ -23,7 +23,12 @@ import sys
 
 from codecs import BOM_UTF8, BOM_UTF16, BOM_UTF16_BE, BOM_UTF16_LE
 
-from ast import parse
+try:
+  from ast import parse
+except ImportError:
+  from core.backports.ast import parse
+
+from core.backports.six import binary_type as bytes
 
 # A dictionary mapping BOM to
 # the encoding to decode with, and what to set the
@@ -1612,7 +1617,8 @@ class ConfigObj(Section):
                             comment = ''
                             try:
                                 value = unrepr(value)
-                            except Exception as e:
+                            except Exception:
+                                e = sys.exc_info()[1]
                                 if type(e) == UnknownType:
                                     msg = 'Unknown name or type in value at line %s.'
                                 else:
@@ -1625,7 +1631,8 @@ class ConfigObj(Section):
                         comment = ''
                         try:
                             value = unrepr(value)
-                        except Exception as e:
+                        except Exception:
+                            e = sys.exc_info()[1]
                             if isinstance(e, UnknownType):
                                 msg = 'Unknown name or type in value at line %s.'
                             else:
@@ -1891,11 +1898,13 @@ class ConfigObj(Section):
                                        raise_errors=True,
                                        file_error=True,
                                        _inspec=True)
-            except ConfigObjError as e:
+            except ConfigObjError:
+                e = sys.exc_info()[1]
                 # FIXME: Should these errors have a reference
                 #        to the already parsed ConfigObj ?
                 raise ConfigspecError('Parsing configspec failed: %s' % e)
-            except IOError as e:
+            except IOError:
+                e = sys.exc_info()[1]
                 raise IOError('Reading configspec failed: %s' % e)
 
         self.configspec = configspec
@@ -2147,7 +2156,8 @@ class ConfigObj(Section):
                                         val,
                                         missing=missing
                                         )
-            except validator.baseErrorClass as e:
+            except validator.baseErrorClass:
+                e = sys.exc_info()[1]
                 if not preserve_errors or isinstance(e, self._vdtMissingValue):
                     out[entry] = False
                 else:
