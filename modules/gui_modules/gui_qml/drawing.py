@@ -27,7 +27,7 @@ class PieChart (QDeclarativeItem):
 
   def __init__(self, parent = None):
     QDeclarativeItem.__init__(self, parent)
-    self._name = u''
+    self._name = ''
     self._pieSlice = None
 
   def getName(self):
