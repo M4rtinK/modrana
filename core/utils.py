@@ -3,7 +3,12 @@
 from __future__ import with_statement # for python 2.5
 import threading
 import os
-from cStringIO import StringIO
+try:
+  from cStringIO import StringIO # python 2
+except ImportError:
+  from io import StringIO # python 3
+
+
 #import time
 
 class Empty(Exception):

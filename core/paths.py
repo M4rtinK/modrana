@@ -19,7 +19,7 @@
 #---------------------------------------------------------------------------
 
 import os
-import utils
+from core import utils
 
 # paths
 THEMES_FOLDER_PATH = "themes"

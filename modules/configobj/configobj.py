@@ -1933,11 +1933,13 @@ class ConfigObj(Section):
                                        raise_errors=True,
                                        file_error=True,
                                        _inspec=True)
-            except ConfigObjError, e:
+            except ConfigObjError:
+                e = sys.exc_info()[1]
                 # FIXME: Should these errors have a reference
                 #        to the already parsed ConfigObj ?
                 raise ConfigspecError('Parsing configspec failed: %s' % e)
-            except IOError, e:
+            except IOError:
+                e = sys.exc_info()[1]
                 raise IOError('Reading configspec failed: %s' % e)
         
         self.configspec = configspec
@@ -2193,7 +2195,8 @@ class ConfigObj(Section):
                                         val,
                                         missing=missing
                                         )
-            except validator.baseErrorClass, e:
+            except validator.baseErrorClass:
+                e = sys.exc_info()[1]
                 if not preserve_errors or isinstance(e, self._vdtMissingValue):
                     out[entry] = False
                 else:
