@@ -22,26 +22,23 @@ from modules.base_module import RanaModule
 from threading import Thread
 import threading
 import os
+import time
+import string
+import sys
 import traceback
+
 try:  # Python 2
   from urllib2 import urlopen, HTTPError, URLError
 except ImportError:  # Python 3
   from urllib.request import urlopen
   from urllib.error import HTTPError, URLError
 
-import time
-import string
-import sys
-try:
-  from StringIO import StringIO # python 2
-except ImportError:
-  from io import StringIO # python 3
-
-from core import utils
 from modules import urllib3
+from core import utils
 from core import rectangles
-
 from core.tilenames import *
+from core.backports import six
+StringIO = six.moves.cStringIO
 
 #import socket
 #timeout = 30 # this sets timeout for all sockets
@@ -1009,7 +1006,7 @@ class MapTiles(RanaModule):
       return Image.fromstring("RGB",(256,256),pb.get_pixels() )
 
     def image2pixbuf(im):
-      file1 = StringIO.StringIO()
+      file1 = StringIO()
       im.save(file1, "ppm")
       contents = file1.getvalue()
       file1.close()
