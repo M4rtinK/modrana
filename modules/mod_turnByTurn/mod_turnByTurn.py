@@ -23,8 +23,7 @@ from threading import Thread
 import math
 import time
 
-
-import instructions_generator
+from . import instructions_generator
 
 REROUTE_CHECK_INTERVAL = 5000 # in ms
 #in m/s, about 46 km/h - if this speed is reached, the rerouting threshold is multiplied

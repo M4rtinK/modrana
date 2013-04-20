@@ -20,7 +20,7 @@ from __future__ import with_statement # for python 2.5
 import threading
 from time import sleep, time
 
-from base_position_source import PositionSource
+from .base_position_source import PositionSource
 from core.fix import Fix
 
 

@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
-import tile
+from . import tile
 
 def getModule(m,d,i):
   return AnimatedMapView(m,d,i)
