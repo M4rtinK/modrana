@@ -76,13 +76,13 @@ def routeToGpx(lat1,lon1,lat2,lon2, transport, description="", style="track"):
 if __name__ == "__main__":
   
   try:
-    print routeToGpx(
+    print(routeToGpx(
       float(sys.argv[1]),
       float(sys.argv[2]),
       float(sys.argv[3]),
       float(sys.argv[4]),
       sys.argv[5],
       "Route",
-      "track")
+      "track"))
   except IndexError:
     sys.stderr.write("Usage: routeAsGpx.py lat1 lon1 lat2 lon2 transport\n")

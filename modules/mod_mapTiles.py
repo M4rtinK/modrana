@@ -192,7 +192,7 @@ class MapTiles(RanaModule):
     # print(tileUrl)
     response = self._getConnPool(layerId, tileUrl).request('GET', tileUrl)
     # print("RESPONSE")
-    # print response
+    # print(response)
     tileData = response.data
 
     if tileData:

@@ -1338,7 +1338,7 @@ def _test(value, *args, **keywargs):
     ...    ]
     >>> v = Validator({'test': _test})
     >>> for entry in checks:
-    ...     print v.check(('test(%s)' % entry), 3)
+    ...     print(v.check(('test(%s)' % entry), 3))
     (3, ('3', '6'), {'test': ['a', 'b', 'c'], 'max': '3', 'min': '1'})
     (3, ('3',), {})
     (3, ('3', '6'), {})

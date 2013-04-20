@@ -83,7 +83,7 @@ class QtMobility(PositionSource):
     else:
       print("location Qt Mobility: source creation failed")
       #    if self.satelliteSource:
-      #      print self.satelliteSource.availableSources()
+      #      print(self.satelliteSource.availableSources())
       #      self.satelliteSource.startUpdates()
       #      print("location qt mobility: sat source started")
 
@@ -151,7 +151,7 @@ class QtMobility(PositionSource):
     #    self.debug = True
     if self.debug:
       print("Qt-Mobility POS DEBUG")
-      print ("%s, %s" % (update.coordinate().latitude(), update.coordinate().longitude()))
+      print("%s, %s" % (update.coordinate().latitude(), update.coordinate().longitude()))
       print(update)
 
     # trigger update in the location module

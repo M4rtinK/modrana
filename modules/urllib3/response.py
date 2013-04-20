@@ -3,13 +3,13 @@
 #
 # This module is part of urllib3 and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
-
+from __future__ import absolute_import
 
 import logging
 import zlib
 
-from exceptions import DecodeError
-from packages.six import string_types as basestring, binary_type
+from .exceptions import DecodeError
+from .packages.six import string_types as basestring, binary_type
 
 
 log = logging.getLogger(__name__)

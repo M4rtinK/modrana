@@ -498,7 +498,7 @@ class MapData(RanaModule):
         time.sleep(self.callback.batchInfoUpdateInterval) # this governs how often we check status of the worker threads
         print("Batch size working...")
         print("(threads: %i)" % (threading.activeCount() - 1, ))
-        print"pending: %d, done: %d" % (len(self.neededTiles), self.processed)
+        print("pending: %d, done: %d" % (len(self.neededTiles), self.processed))
         if self.quit == True: # we were ordered to quit
           print("***get size quiting")
           shutdown.set() # dismiss all workers

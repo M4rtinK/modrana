@@ -51,9 +51,9 @@ def routeToCSVFile(lat1,lon1,lat2,lon2, transport, filename):
 
 
 if __name__ == "__main__":
-  print routeToCSV(
+  print(routeToCSV(
     52.2181,
     0.1162,
     52.2184,
     0.1427,
-    "cycle")
+    "cycle"))
