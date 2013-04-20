@@ -1,8 +1,13 @@
 """multi source geocoding"""
 import sys
 #import traceback
-import urllib
-import urllib2
+try:  # Python 2
+  from urllib import urlencode
+  from urllib2 import urlopen, Request, build_opener, HTTPError, URLError
+except ImportError:  # Python 3
+  from urllib.request import urlopen, Request, build_opener
+  from urllib.parse import urlencode
+  from urllib.error import HTTPError, URLError
 # handle simplejson import
 try:
   try:
@@ -73,11 +78,11 @@ def fetchJson(query_url, params=None, headers=None):
     """
     if not headers: headers = {}
     if not params: params = {}
-    encoded_params = urllib.urlencode(params)
+    encoded_params = urlencode(params)
     url = query_url + encoded_params
     print(url)
-    request = urllib2.Request(url, headers=headers)
-    response = urllib2.urlopen(request)
+    request = Request(url, headers=headers)
+    response = urlopen(request)
     return url, json.load(response)
   
 def wikipediaSearch(query):
@@ -105,7 +110,7 @@ def elevSRTM(lat, lon):
   """get elevation in meters for the specified latitude and longitude from geonames"""
   url = 'http://ws.geonames.org/srtm3?lat=%f&lng=%f' % (lat, lon)
   try:
-    query = urllib.urlopen(url)
+    query = urlopen(url)
   except Exception:
     import sys
     e = sys.exc_info()[1]
@@ -143,8 +148,8 @@ def elevBatchSRTM(latLonList, threadCB=None, userAgent=None):
     query = None
     results = []
     try:
-      request = urllib2.Request(url)
-      opener = urllib2.build_opener()
+      request = Request(url)
+      opener = build_opener()
       if userAgent:
         request.add_header('User-Agent', userAgent)
       query = opener.open(request)
