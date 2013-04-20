@@ -28,7 +28,7 @@ import time
 import string
 import sys
 try:
-  from cStringIO import StringIO # python 2
+  from StringIO import StringIO # python 2
 except ImportError:
   from io import StringIO # python 3
 
