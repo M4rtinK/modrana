@@ -26,7 +26,10 @@ import sqlite3
 import os
 import time
 import glob
-import Queue
+try:
+  import Queue
+except ImportError:
+  import queue as Queue
 import threading
 from threading import Thread
 
@@ -333,7 +336,7 @@ class StoreTiles(RanaModule):
       if os.path.exists(tilePath):
         # load the file to pixbuf and return it
         try:
-          f = open(tilePath, "r")
+          f = open(tilePath, "rb")
           data = f.read()
           f.close()
           return data
@@ -522,7 +525,7 @@ class StoreTiles(RanaModule):
             print("storeTiles: can't create folder %s for %s" % (folderPath, filename))
             print(e)
 
-      f = open(filename, 'w') # write the tile to a file
+      f = open(filename, 'wb') # write the tile to a file
       f.write(tile)
       f.close()
 
