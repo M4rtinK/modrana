@@ -31,6 +31,10 @@ import math
 import re
 
 from core.backports.six import string_types as basestring
+try:
+  from functools import reduce
+except ImportError:
+  pass # running on Python <3, use built-in reduce
 
 from xml.etree import ElementTree
 try:
@@ -294,11 +298,9 @@ def to_dms(angle, style="dms"):
     minutes, seconds = divmod(angle, 60)
     degrees, minutes = divmod(minutes, 60)
     if style == "dms":
-        return tuple([sign * abs(i) for i in int(degrees), int(minutes),
-                                             seconds])
+        return tuple([sign * abs(i) for i in (int(degrees), int(minutes), seconds)])
     elif style == "dm":
-        return tuple([sign * abs(i) for i in int(degrees),
-                                             (minutes + seconds / 60)])
+        return tuple([sign * abs(i) for i in (int(degrees), (minutes + seconds / 60))])
     else:
         raise ValueError("Unknown style type `%s'" % style)
 
@@ -322,7 +324,7 @@ def to_dd(degrees, minutes, seconds=0):
     :return: Angle converted to decimal degrees
 
     """
-    sign = -1 if any([i < 0 for i in degrees, minutes, seconds]) else 1
+    sign = -1 if any([i < 0 for i in (degrees, minutes, seconds)]) else 1
     return sign * (abs(degrees) + abs(minutes) / 60 + abs(seconds) / 3600)
 
 def __chunk(segment, abbr=False):
