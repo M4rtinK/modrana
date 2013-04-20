@@ -403,7 +403,7 @@ class Profile(Object):
             for member in cycle.functions:
                 member[outevent] = outevent.null()
 
-            for callee, call_ratio in callees.iteritems():
+            for callee, call_ratio in callees.items():
                 ranks = {}
                 call_ratios = {}
                 partials = {}
@@ -537,7 +537,7 @@ class Profile(Object):
                 sys.stderr.write('  Function %s\n' % (function.name,))
 
     def _dump_events(self, events):
-        for event, value in events.iteritems():
+        for event, value in events.items():
             sys.stderr.write('    %s: %s\n' % (event.name, event.format(value)))
 
 
@@ -801,7 +801,7 @@ class GprofParser(Parser):
         """Extract a structure from a match object, while translating the types in the process."""
         attrs = {}
         groupdict = mo.groupdict()
-        for name, value in groupdict.iteritems():
+        for name, value in groupdict.items():
             if value is None:
                 value = None
             elif self._int_re.match(value):
@@ -1548,7 +1548,7 @@ class SysprofParser(XmlParser):
         profile = Profile()
         
         profile[SAMPLES] = 0
-        for id, object in objects.iteritems():
+        for id, object in objects.items():
             # Ignore fake objects (process names, modules, "Everything", "kernel", etc.)
             if object['self'] == 0:
                 continue
@@ -1558,7 +1558,7 @@ class SysprofParser(XmlParser):
             profile.add_function(function)
             profile[SAMPLES] += function[SAMPLES]
 
-        for id, node in nodes.iteritems():
+        for id, node in nodes.items():
             # Ignore fake calls
             if node['self'] == 0:
                 continue
@@ -1986,14 +1986,14 @@ class PstatsParser:
     def parse(self):
         self.profile[TIME] = 0.0
         self.profile[TOTAL_TIME] = self.stats.total_tt
-        for fn, (cc, nc, tt, ct, callers) in self.stats.stats.iteritems():
+        for fn, (cc, nc, tt, ct, callers) in self.stats.stats.items():
             callee = self.get_function(fn)
             callee.called = nc
             callee[TOTAL_TIME] = ct
             callee[TIME] = tt
             self.profile[TIME] += tt
             self.profile[TOTAL_TIME] = max(self.profile[TOTAL_TIME], ct)
-            for fn, value in callers.iteritems():
+            for fn, value in callers.items():
                 caller = self.get_function(fn)
                 call = Call(callee.id)
                 if isinstance(value, tuple):
@@ -2278,7 +2278,7 @@ class DotWriter:
             return
         self.write(' [')
         first = True
-        for name, value in attrs.iteritems():
+        for name, value in attrs.items():
             if first:
                 first = False
             else:

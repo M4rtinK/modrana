@@ -21,6 +21,7 @@ import os
 from modules.base_module import RanaModule
 
 from core.signal import Signal
+from core.backports import six
 
 # for some reason one import method works
 # on Fremantle and other everywhere (?) else"""
@@ -131,7 +132,7 @@ class Theme(object):
     if 'colors' in config:
       colors = config['colors']
       colorObjects = {}
-      for key, color in colors.iteritems():
+      for key, color in six.iteritems(colors):
         if len(color) == 2: # hex color/color name and alpha as float 0-1
           colorString = color[0]
           colorObjects[key] = colorString

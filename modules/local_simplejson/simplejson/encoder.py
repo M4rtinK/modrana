@@ -2,6 +2,7 @@
 """
 import re
 from decimal import Decimal
+from core.backports import six
 
 def _import_speedups():
     try:
@@ -409,7 +410,7 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
             items = dct.items()
             items.sort(key=lambda kv: kv[0])
         else:
-            items = dct.iteritems()
+            items = six.iteritems(dct)
         for key, value in items:
             if isinstance(key, basestring):
                 pass

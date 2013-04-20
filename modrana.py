@@ -36,7 +36,7 @@ from core import utils
 from core import paths
 from core import configs
 from core import gs
-
+from core.backports import six
 # record that imports-done timestamp
 importsDoneTimestamp = time.time()
 
@@ -670,7 +670,7 @@ class ModRana(object):
     reloaded on startup)
     ASSUMPTION: keys are strings of length>=1"""
     try:
-      return dict((k, v) for k, v in inputDict.iteritems() if k[0] != '#')
+      return dict((k, v) for k, v in six.iteritems(inputDict) if k[0] != '#')
     except Exception:
       e = sys.exc_info()[1]
       print(

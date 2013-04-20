@@ -43,6 +43,7 @@ from modules.gui_modules.gui_qml import wrappers
 from modules.gui_modules.gui_qml import list_models
 from core.fix import Fix
 from core import signal
+from core.backports import six
 
 global globe
 
@@ -579,7 +580,7 @@ class MapLayers(QtCore.QObject):
     # map layers module is not yet loaded)
     if self._wrappedLayers is None:
       self._wrappedLayers = {}
-      for layerId, layer in self.gui._mapLayers.getLayerDict().iteritems():
+      for layerId, layer in six.iteritems(self.gui._mapLayers.getLayerDict):
         self.wrappedLayers[layerId] = wrappers.MapLayerWrapper(layer)
     return self._wrappedLayers
 

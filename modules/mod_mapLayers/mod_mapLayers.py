@@ -19,6 +19,7 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 from core.signal import Signal
+from core.backports import six
 
 # lists keys that need to be defined for a layer
 # in the map configuration file to be valid,
@@ -135,7 +136,7 @@ class MapLayers(RanaModule):
     # check if there is at least one valid layer
 
     layerDefinitions = self.modrana.configs.mapConfig.get('layers', {})
-    for layerId, layerDefinition in layerDefinitions.iteritems():
+    for layerId, layerDefinition in six.iteritems(layerDefinitions):
       if self._hasRequiredKeys(layerDefinition, MAP_LAYER_REQUIRED_KEYS):
         self._layers[layerId] = MapLayer(layerId, layerDefinition)
       else:
@@ -152,7 +153,7 @@ class MapLayers(RanaModule):
     # configuration file has any
     if self.modrana.configs.mapConfig:
       groupsDict = self.modrana.configs.mapConfig.get('groups', {})
-      for groupId, groupDefinition in groupsDict.iteritems():
+      for groupId, groupDefinition in six.iteritems(groupsDict):
         if self._hasRequiredKeys(groupDefinition, MAP_LAYER_GROUP_REQUIRED_KEYS):
           self._groups[groupId] = MapLayerGroup(self, groupId, groupDefinition)
 

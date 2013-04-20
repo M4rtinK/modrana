@@ -21,7 +21,10 @@
 from modules.base_module import RanaModule
 from core import geo
 import math
-from modules.odict import odict
+try:  # Python 2.7+
+  from collections import OrderedDict as odict
+except ImportError:
+  from modules.odict import odict  # Python <2.7
 
 def getModule(m,d,i):
   return Search(m,d,i)

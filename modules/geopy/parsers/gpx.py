@@ -3,6 +3,7 @@ from geopy.parsers.iso8601 import parse_iso8601
 
 import sys, re
 from xml.etree import ElementTree
+from core.backports import six
 
 class VersionError(Exception):
     pass
@@ -254,11 +255,11 @@ class GPX(object):
         attr_types, child_types = type_def
         attrs = {}
         children = {}
-        for attr, handler in attr_types.iteritems():
+        for attr, handler in six.iteritems(attr_types):
             value = element.get(attr)
             type_func = self.type_handlers[handler]
             attrs[attr] = type_func(_Attr(value))
-        for tag, handler in child_types.iteritems():
+        for tag, handler in six.iteritems(child_types):
             values = []
             all = False
             if isinstance(handler, list):

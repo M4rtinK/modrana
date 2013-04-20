@@ -19,6 +19,7 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 from core import utils
+from core.backports import six
 
 # identifies item as a group
 GROUP_IDENTIFIER = "groupIdentifier"
@@ -1078,7 +1079,7 @@ class Options(RanaModule):
     reloaded on startup)
     ASSUMPTION: keys are strings of length>=1"""
     try:
-      return dict((k, v) for k, v in inputDict.iteritems() if k[0] != '#')
+      return dict((k, v) for k, v in six.iteritems(inputDict) if k[0] != '#')
     except Exception:
       import sys
       e = sys.exc_info()[1]

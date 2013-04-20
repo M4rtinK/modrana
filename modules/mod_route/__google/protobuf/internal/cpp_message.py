@@ -37,6 +37,7 @@ __author__ = 'petar@google.com (Petar Petrov)'
 import operator
 from google.protobuf.internal import _net_proto2___python
 from google.protobuf import message
+from core.backports import six
 
 
 _LABEL_REPEATED = _net_proto2___python.LABEL_REPEATED
@@ -405,7 +406,7 @@ def _AddEnumValues(message_descriptor, dictionary):
 def _AddClassAttributesForNestedExtensions(message_descriptor, dictionary):
   """Adds class attributes for the nested extensions."""
   extension_dict = message_descriptor.extensions_by_name
-  for extension_name, extension_field in extension_dict.iteritems():
+  for extension_name, extension_field in six.iteritems(extension_dict):
     assert extension_name not in dictionary
     dictionary[extension_name] = extension_field
 
@@ -453,7 +454,7 @@ def _AddInitMethod(message_descriptor, cls):
     self.Extensions = ExtensionDict(self)
     self._composite_fields = {}
 
-    for field_name, field_value in kwargs.iteritems():
+    for field_name, field_value in six.iteritems(kwargs):
       field_cdescriptor = self.__descriptors.get(field_name, None)
       if field_cdescriptor is None:
         raise ValueError('Protocol message has no "%s" field.' % field_name)
@@ -584,7 +585,7 @@ def _AddMessageMethods(message_descriptor, cls):
     return text_format.MessageToString(self, as_utf8=True).decode('utf-8')
 
   # Attach the local methods to the message class.
-  for key, value in locals().copy().iteritems():
+  for key, value in six.iteritems(locals().copy()):
     if key not in ('key', 'value', '__builtins__', '__name__', '__doc__'):
       setattr(cls, key, value)
 
@@ -611,6 +612,6 @@ def _AddMessageMethods(message_descriptor, cls):
 def _AddPropertiesForExtensions(message_descriptor, cls):
   """Adds properties for all fields in this protocol message type."""
   extension_dict = message_descriptor.extensions_by_name
-  for extension_name, extension_field in extension_dict.iteritems():
+  for extension_name, extension_field in six.iteritems(extension_dict):
     constant_name = extension_name.upper() + '_FIELD_NUMBER'
     setattr(cls, constant_name, extension_field.number)
