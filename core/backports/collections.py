@@ -2,6 +2,7 @@
 from operator import itemgetter as _itemgetter
 from keyword import iskeyword as _iskeyword
 import sys as _sys
+from core.backports.six import string_types as basestring
 
 def namedtuple(typename, field_names, verbose=False, rename=False):
     """Returns a new subclass of tuple with named fields.
@@ -96,8 +97,9 @@ def namedtuple(typename, field_names, verbose=False, rename=False):
     namespace = dict(_itemgetter=_itemgetter, __name__='namedtuple_%s' % typename,
                      _property=property, _tuple=tuple)
     try:
-        exec template in namespace
-    except SyntaxError, e:
+        exec(template, namespace)
+    except SyntaxError:
+        e = _sys.exc_info()[1]
         raise SyntaxError(e.message + ':\n' + template)
     result = namespace[typename]
 
