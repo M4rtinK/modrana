@@ -18,13 +18,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import ConfigParser
+try:
+  import ConfigParser
+except ImportError:
+  import configparser as ConfigParser
+
 import logging
 import re
 
 from operator import attrgetter
 
-from upoints import (point, utils)
+from . import point, utils
 from core.backports.six import string_types as basestring
 
 class Baken(point.Point):
