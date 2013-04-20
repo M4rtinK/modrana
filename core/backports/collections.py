@@ -90,7 +90,7 @@ def namedtuple(typename, field_names, verbose=False, rename=False):
     for i, name in enumerate(field_names):
         template += '        %s = _property(_itemgetter(%d))\n' % (name, i)
     if verbose:
-        print template
+        print(template)
 
     # Execute the template string in a temporary namespace
     namespace = dict(_itemgetter=_itemgetter, __name__='namedtuple_%s' % typename,
@@ -133,7 +133,7 @@ if __name__ == '__main__':
             return 'Point: x=%6.3f y=%6.3f hypot=%6.3f' % (self.x, self.y, self.hypot)
 
     for p in Point(3,4), Point(14,5), Point(9./7,6):
-        print p
+        print(p)
 
     class Point(namedtuple('Point', 'x y')):
         'Point class with optimized _make() and _replace() without error-checking'
@@ -141,9 +141,9 @@ if __name__ == '__main__':
         def _replace(self, _map=map, **kwds):
             return self._make(_map(kwds.get, ('x', 'y'), self))
 
-    print Point(11, 22)._replace(x=100)
+    print(Point(11, 22)._replace(x=100))
 
     import doctest
     TestResults = namedtuple('TestResults', 'failed attempted')
-    print TestResults(*doctest.testmod())
+    print(TestResults(*doctest.testmod()))
 ## end of http://code.activestate.com/recipes/500261/ }}}
