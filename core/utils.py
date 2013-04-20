@@ -3,11 +3,15 @@
 from __future__ import with_statement # for python 2.5
 import threading
 import os
+import sys
+
 try:
   from cStringIO import StringIO # python 2
 except ImportError:
   from io import StringIO # python 3
 
+PYTHON3 = sys.version_info[0] > 2
+from core.backports.six import b
 
 #import time
 
@@ -143,23 +147,26 @@ def isTheStringAnImage(s):
   """test if the string contains an image
   by reading its magic number"""
 
-  # create a file-like object
-  f = StringIO(s)
-  # read the header from it
-  h = f.read(32)
-  # cleanup
-  f.close()
+  if PYTHON3: # in Python 3 we directly get bytes
+    h = s
+  else: # in Python <3 we get a string
+    # create a file-like object
+    f = StringIO(s)
+    # read the header from it
+    h = f.read(32)
+    # cleanup
+    f.close()
 
   # NOTE: magic numbers taken from imghdr source code
 
   # as most tiles are PNGs, check for PNG first
-  if h[:8] == "\211PNG\r\n\032\n":
+  if h[:8] == b("\211PNG\r\n\032\n"):
     return True
-  elif h[6:10] in ('JFIF', 'Exif'): # JPEG in JFIF or Exif format
+  elif h[6:10] in (b('JFIF'), b('Exif')): # JPEG in JFIF or Exif format
     return True
-  elif h[:6] in ('GIF87a', 'GIF89a'): # GIF ('87 and '89 variants)
+  elif h[:6] in (b('GIF87a'), b('GIF89a')): # GIF ('87 and '89 variants)
     return True
-  elif h[:2] in ('MM', 'II', 'BM'): # tiff or BMP
+  elif h[:2] in (b('MM'), b('II'), b('BM')): # tiff or BMP
     return True
   else: # probably not an image file
     return False
