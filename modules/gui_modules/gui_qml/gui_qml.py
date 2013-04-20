@@ -323,6 +323,7 @@ class QMLGUI(GUIModule):
       wrappedGroupList = map(
         lambda x: wrappers.MapLayerGroupWrapper(x), ml.getGroupList(sort=True)
       )
+      wrappedGroupList = list(wrappedGroupList)
       self.layersListModel = list_models.BaseListModel(wrappedGroupList)
       self._registerListModel("mapLayersModel", self.layersListModel)
 
@@ -474,6 +475,7 @@ class IconImageProvider(QDeclarativeImageProvider):
       print("QML GUI: icon image provider: loading icon failed")
       print(e)
       print(os.path.join('themes', iconPath))
+      traceback.print_exc(file=sys.stdout) # find what went wrong
 
 class TileImageProvider(QDeclarativeImageProvider):
   """
@@ -495,8 +497,8 @@ class TileImageProvider(QDeclarativeImageProvider):
     the tile info should look like this:
     layerID/zl/x/y
     """
-    #    print("IMAGE REQUESTED")
-    #    print(tileInfo)
+    #print("IMAGE REQUESTED")
+    #print(tileInfo)
     try:
       # split the string provided by QML
       split = tileInfo.split("/")
@@ -508,23 +510,22 @@ class TileImageProvider(QDeclarativeImageProvider):
       # get the tile from the tile module
       tileData = self.gui._mapTiles.getTile(layerId, z, x, y)
       if not tileData:
+        # print("NO TILEDATA")
         return None
 
       # create a file-like object
-      f = StringIO(tileData)
+      # f = StringIO(tileData)
       # create image object
       img = QImage()
       # lod the image from in memory buffer
-      img.loadFromData(f.read())
+      # img.loadFromData(f.read())
+      img.loadFromData(tileData)
       # cleanup
-      f.close()
+      # f.close()
       #print("OK")
       return img
-
     except Exception:
-
       import sys
-
       e = sys.exc_info()[1]
       print("QML GUI: icon image provider: loading tile failed")
       print(e)
@@ -583,7 +584,7 @@ class MapLayers(QtCore.QObject):
     # map layers module is not yet loaded)
     if self._wrappedLayers is None:
       self._wrappedLayers = {}
-      for layerId, layer in six.iteritems(self.gui._mapLayers.getLayerDict):
+      for layerId, layer in six.iteritems(self.gui._mapLayers.getLayerDict()):
         self.wrappedLayers[layerId] = wrappers.MapLayerWrapper(layer)
     return self._wrappedLayers
 
