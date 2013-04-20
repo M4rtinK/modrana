@@ -3,8 +3,14 @@
 #
 # This module is part of urllib3 and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
+from __future__ import with_statement # for python 2.5
 
-from collections import MutableMapping
+try:
+    # from _abcoll import MutableMapping
+    from collections import MutableMapping
+except ImportError:  # Python 2.5
+    from UserDict import DictMixin as MutableMapping
+
 from threading import Lock
 
 try: # Python 2.7+

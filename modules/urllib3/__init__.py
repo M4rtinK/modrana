@@ -7,6 +7,7 @@
 """
 urllib3 - Thread-safe connection pooling and re-using.
 """
+from __future__ import absolute_import
 
 __author__ = 'Andrey Petrov (andrey.petrov@shazow.net)'
 __license__ = 'MIT'
@@ -19,7 +20,6 @@ from .connectionpool import (
     connection_from_url
 )
 
-from . import exceptions
 from .filepost import encode_multipart_formdata
 from .poolmanager import PoolManager, ProxyManager, proxy_from_url
 from .response import HTTPResponse

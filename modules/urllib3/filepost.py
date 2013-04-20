@@ -8,7 +8,11 @@ import codecs
 import mimetypes
 
 from uuid import uuid4
-from io import BytesIO
+try:
+    from io import BytesIO
+except ImportError:
+    # Python 2.5
+    from StringIO import StringIO as BytesIO
 
 from .packages import six
 from .packages.six import b
@@ -79,7 +83,8 @@ def encode_multipart_formdata(fields, boundary=None):
             data = value
             writer(body).write('Content-Disposition: form-data; name="%s"\r\n'
                                % (fieldname))
-            body.write(b'\r\n')
+            #body.write(b'\r\n')
+            body.write('\r\n')
 
         if isinstance(data, int):
             data = str(data)  # Backwards compatibility
@@ -89,7 +94,8 @@ def encode_multipart_formdata(fields, boundary=None):
         else:
             body.write(data)
 
-        body.write(b'\r\n')
+        #body.write('\r\n')
+        body.write('\r\n')
 
     body.write(b('--%s--\r\n' % (boundary)))
 

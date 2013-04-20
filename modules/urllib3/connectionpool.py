@@ -9,6 +9,7 @@ import socket
 import errno
 
 from socket import error as SocketError, timeout as SocketTimeout
+import sys
 from .util import resolve_cert_reqs, resolve_ssl_version, assert_fingerprint
 
 try: # Python 3
@@ -18,10 +19,24 @@ except ImportError:
     from httplib import HTTPConnection, HTTPException
     from httplib import HTTP_PORT, HTTPS_PORT
 
-try: # Python 3
-    from queue import LifoQueue, Empty, Full
+try:
+    try:
+        from Queue import LifoQueue, Empty, Full # Python 2.6+
+    except ImportError:
+        from queue import LifoQueue, Empty, Full # Python 3
 except ImportError:
-    from Queue import LifoQueue, Empty, Full
+    from Queue import Queue
+    class LifoQueue(Queue):  # Python 2.5
+        """Variant of Queue that retrieves most recently added entries first."""
+        def _init(self, maxsize):
+            self.queue = []
+            self.maxsize = maxsize
+        def _qsize(self, len=len):
+            return len(self.queue)
+        def _put(self, item):
+            self.queue.append(item)
+        def _get(self):
+            return self.queue.pop()
 
 
 try: # Compiled with SSL?
@@ -444,25 +459,28 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
             #     ``response.release_conn()`` is called (implicitly by
             #     ``response.read()``)
 
-        except Empty as e:
+        except Empty:
             # Timed out by queue
             raise TimeoutError(self, "Request timed out. (pool_timeout=%s)" %
                                pool_timeout)
 
-        except SocketTimeout as e:
+        except SocketTimeout:
             # Timed out by socket
             raise TimeoutError(self, "Request timed out. (timeout=%s)" %
                                timeout)
 
-        except BaseSSLError as e:
+        except BaseSSLError:
+            e = sys.exc_info()[1]
             # SSL certificate error
             raise SSLError(e)
 
-        except CertificateError as e:
+        except CertificateError:
+            e = sys.exc_info()[1]
             # Name mismatch
             raise SSLError(e)
 
-        except (HTTPException, SocketError) as e:
+        except (HTTPException, SocketError):
+            e = sys.exc_info()[1]
             # Connection broken, discard. It will be replaced next _get_conn().
             conn = None
             # This is necessary so we can access e below

@@ -3,13 +3,16 @@
 #
 # This module is part of urllib3 and is released under
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
-
+from __future__ import absolute_import
 
 from base64 import b64encode
-from collections import namedtuple
 from socket import error as SocketError
 from hashlib import md5, sha1
 from binascii import hexlify, unhexlify
+import sys
+
+from core.backports.collections import namedtuple
+
 
 try:
     from select import poll, POLLIN
@@ -360,7 +363,8 @@ if SSLContext is not None:  # Python 3.2+
                 context.load_verify_locations(ca_certs)
             # Py32 raises IOError
             # Py33 raises FileNotFoundError
-            except Exception as e:  # Reraise as SSLError
+            except Exception:  # Reraise as SSLError
+                e = sys.exc_info()[1]
                 raise SSLError(e)
         if certfile:
             # FIXME: This block needs a test.

@@ -8,8 +8,8 @@
 import logging
 import zlib
 
-from .exceptions import DecodeError
-from .packages.six import string_types as basestring, binary_type
+from exceptions import DecodeError
+from packages.six import string_types as basestring, binary_type
 
 
 log = logging.getLogger(__name__)

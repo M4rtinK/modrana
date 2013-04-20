@@ -30,6 +30,7 @@ import ssl
 
 from .. import connectionpool
 from .. import util
+import sys
 
 __all__ = ['inject_into_urllib3', 'extract_from_urllib3']
 
@@ -153,7 +154,8 @@ def ssl_wrap_socket(sock, keyfile=None, certfile=None, cert_reqs=None,
     if ca_certs:
         try:
             ctx.load_verify_locations(ca_certs, None)
-        except OpenSSL.SSL.Error as e:
+        except OpenSSL.SSL.Error:
+            e = sys.exc_info()[1]
             raise ssl.SSLError('bad ca_certs: %r' % ca_certs, e)
 
     cnx = OpenSSL.SSL.Connection(ctx, sock)
@@ -161,7 +163,8 @@ def ssl_wrap_socket(sock, keyfile=None, certfile=None, cert_reqs=None,
     cnx.set_connect_state()
     try:
         cnx.do_handshake()
-    except OpenSSL.SSL.Error as e:
+    except OpenSSL.SSL.Error:
+        e = sys.exc_info()[1]
         raise ssl.SSLError('bad handshake', e)
 
     return WrappedSocket(cnx, sock)
