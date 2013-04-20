@@ -28,6 +28,7 @@ import traceback
 import unicodedata
 import core.way as way
 import core.geo as geo
+from core.backports.six import u
 #from time import clock
 import time
 
@@ -65,12 +66,12 @@ class Route(RanaModule):
     self.set('startPos', None)
     self.set('endPos', None)
 
-    file = open(DIRECTIONS_FILTER_CSV_PATH, 'rb')
+    file = open(DIRECTIONS_FILTER_CSV_PATH, 'r')
     CSVReader = csv.reader(file, delimiter=';', quotechar='|') #use an iterator
     self.directionsFilterRules = []
     for row in CSVReader:
       if row[0] != '#' and len(row) >= 2:
-        regex = re.compile(unicode(row[0].decode("utf-8")))
+        regex = re.compile(u(row[0]))
         self.directionsFilterRules.append((regex, row[1].decode("utf-8")))
     file.close()
 
