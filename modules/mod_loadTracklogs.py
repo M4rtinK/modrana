@@ -24,7 +24,10 @@ from core import utils
 import math
 import os
 import glob
-import cPickle
+try:
+  import cPickle as pickle # Python 2
+except ImportError:
+  import pickle # Python 3
 import shutil
 from time import clock
 from time import gmtime, strftime
@@ -128,7 +131,7 @@ class LoadTracklogs(RanaModule):
     start = clock()
     try:
       f = open(self.getTracklogCachePath(), 'r')
-      self.cache = cPickle.load(f)
+      self.cache = pickle.load(f)
       f.close()
     except Exception:
       import sys
@@ -345,7 +348,7 @@ class LoadTracklogs(RanaModule):
     try:
       print(self.getTracklogCachePath())
       f = open(self.getTracklogCachePath(), 'w')
-      cPickle.dump(self.cache, f)
+      pickle.dump(self.cache, f)
       f.close()
     except Exception:
       import sys
