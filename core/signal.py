@@ -6,6 +6,9 @@
 
 from weakref import WeakValueDictionary
 
+import sys
+PYTHON3 = sys.version_info[0] > 2
+
 class Signal(object):
   def __init__(self):
     self.__slots = WeakValueDictionary()
@@ -16,13 +19,22 @@ class Signal(object):
       func(self.__slots[key], *args, **kargs)
 
   def connect(self, slot):
-    key = (slot.im_func, id(slot.im_self))
-    self.__slots[key] = slot.im_self
+    if PYTHON3:
+      key = (slot.__func__, id(slot.__self__))
+      self.__slots[key] = slot.__self__
+    else:
+      key = (slot.im_func, id(slot.im_self))
+      self.__slots[key] = slot.im_self
 
   def disconnect(self, slot):
-    key = (slot.im_func, id(slot.im_self))
-    if key in self.__slots:
-      self.__slots.pop(key)
+    if PYTHON3:
+      key = (slot.__func__, id(slot.__self__))
+      if key in self.__slots:
+        self.__slots.pop(key)
+    else:
+      key = (slot.im_func, id(slot.im_self))
+      if key in self.__slots:
+        self.__slots.pop(key)
 
   def clear(self):
     self.__slots.clear()
