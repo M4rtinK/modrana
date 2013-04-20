@@ -23,7 +23,10 @@ import os
 import sys
 import re
 import traceback
-import cStringIO
+try:
+  from StringIO import StringIO # python 2
+except ImportError:
+  from io import StringIO # python 3
 from pprint import pprint
 
 # PySide
@@ -456,7 +459,7 @@ class IconImageProvider(QDeclarativeImageProvider):
   def requestImage(self, iconPath, size, requestedSize):
     try:
       #TODO: theme name caching ?
-      f = open('themes/%s' % iconPath, 'r')
+      f = open('themes/%s' % iconPath, 'rb')
       #      print("ICON")
       #      print(iconPath)
       #      print(size)
@@ -508,7 +511,7 @@ class TileImageProvider(QDeclarativeImageProvider):
         return None
 
       # create a file-like object
-      f = cStringIO.StringIO(tileData)
+      f = StringIO(tileData)
       # create image object
       img = QImage()
       # lod the image from in memory buffer
