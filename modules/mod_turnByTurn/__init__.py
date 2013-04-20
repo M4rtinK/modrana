@@ -1,1 +1,1 @@
-from .mod_turnByTurn import *
+from .mod_turnByTurn import getModule

@@ -1,1 +1,1 @@
-from .mod_onlineServices import *
+from .mod_onlineServices import getModule

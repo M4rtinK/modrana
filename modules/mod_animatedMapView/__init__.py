@@ -1,1 +1,1 @@
-from .mod_animatedMapView import *
+from .mod_animatedMapView import getModule

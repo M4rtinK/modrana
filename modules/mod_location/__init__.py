@@ -1,1 +1,1 @@
-from .mod_location import *
+from .mod_location import getModule

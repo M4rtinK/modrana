@@ -1,1 +1,1 @@
-from .mod_route import *
+from .mod_route import getModule

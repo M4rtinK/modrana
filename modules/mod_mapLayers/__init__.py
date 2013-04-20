@@ -1,1 +1,1 @@
-from .mod_mapLayers import *
+from .mod_mapLayers import getModule
