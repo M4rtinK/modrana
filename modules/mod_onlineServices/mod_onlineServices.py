@@ -23,9 +23,9 @@ import sys
 import re
 import threading
 import time
-import geocoding
-import geonames
-import local_search
+from . import geocoding
+from . import geonames
+from . import local_search
 
 DEFAULT_GOOGLE_API_KEY = "ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw"
 
@@ -259,7 +259,8 @@ class OnlineServices(RanaModule):
 
     try:
       directions = gMap.directions(start, destination, dir)
-    except googlemaps.GoogleMapsError, e:
+    except googlemaps.GoogleMapsError:
+      e = sys.exc_info()[1]
       if e.status == 602:
         print("onlineServices:GDirections:routing failed -> address not found" % e)
         self.sendMessage("ml:notification:m:Address(es) not found;5")
