@@ -21,10 +21,15 @@
 from core import geo
 from core.way import TurnByTurnPoint
 
-import gettext
-import locale
-import core.i18n as i18n
-_ = i18n.language.gettext
+# import gettext
+# import locale
+# import core.i18n as i18n
+# _ = i18n.language.gettext
+def foo(bar):
+  pass
+_ = foo
+#TODO: actually use i18n and make it
+# work on both Python 2.5 and 3
 
 
 TURN_SLIGHTLY_LEFT = 7
