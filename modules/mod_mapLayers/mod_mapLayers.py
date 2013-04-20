@@ -257,7 +257,7 @@ class MapLayerGroup(object):
     self._layers = self._mapLayers.getLayersByGroupId(self.id)
     # sort the layers by the label
     # as that is what is usually needed when displaying them
-    self._layers.sort(key=lambda l: l.label)
+    self._layers = sorted(self._layers, key=lambda l: l.label)
 
   @property
   def id(self):
