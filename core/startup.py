@@ -219,7 +219,6 @@ class Startup(object):
           # send the map focusing message
           message = "mapView:recentre %f %f" % (lat, lon)
           self._sendMessage(message)
-          self.m.get("messages")
         else:
           print("startup: parsing coordinates for the --focus-on-coordinates option failed")
           print("unknown coordinate format: %s" % split1[1])
@@ -245,9 +244,9 @@ class Startup(object):
 
   def _earlyLocalSearch(self):
     """handle CLI initiated local search that returns a static map URL"""
-    """for local search, we need to know our position, so we need at least the
-    location module and of also of course the online services module to do the search
-    """
+    # for local search, we need to know our position, so we need at least the
+    # location module and of also of course the online services module to do the search
+
     self._disableStdout()
 
     # load the online services module
