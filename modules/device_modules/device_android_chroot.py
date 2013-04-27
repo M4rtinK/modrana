@@ -38,7 +38,7 @@ class AndroidChroot(DeviceModule):
     return "Android chroot"
 
   def getWinWH(self):
-    return (480,600)
+    return 480,600
 
   def startInFullscreen(self):
     return False

@@ -33,15 +33,11 @@ if gs.GUIString == "GTK":
   # therefore, it is important it is loaded only with fort the GTK GUI
   #  import dbus.glib
   import gtk
-
-  """
-  why dbus.glib ?
-  if you import only "dbus", it can't find its mainloop for callbacks
-  """
+  # why dbus.glib ?
+  # if you import only "dbus", it can't find its mainloop for callbacks
 elif gs.GUIString == "QML":
   from QtMobility.SystemInfo import QSystemScreenSaver
-
-  """ ^^ back-light control"""
+  # ^^ back-light control for QML GUI
 
 import time
 
@@ -124,12 +120,10 @@ class DeviceN900(DeviceModule):
 
       # window-active detection
       self.topWindow.connect('notify::is-active', self.windowIsActiveChangedCallback)
-      """
-      on the Maemo 5@N900, is-active == True signalizes that the modRana window is
-      the current active window (there is always only one active window)
-      is-active == False signalizes that the window is either minimized on the
-      dashboard or the screen is blanked
-      """
+      # on Maemo 5@N900, is-active == True signalizes that the modRana window is
+      # the current active window (there is always only one active window)
+      # is-active == False signalizes that the window is either minimized on the
+      # dashboard or the screen is blanked
       # enable volume keys usage
       if self.get('useVolumeKeys', True):
         self._updateVolumeKeys()
@@ -224,13 +218,11 @@ class DeviceN900(DeviceModule):
     - no focus -> the window is switched to dashboard or the another window is active or
     the screen is blanked"""
     redrawOnDashboard = self.get('redrawOnDashboard', False)
-    """
-    NOTE: this updates the snapshot in task switcher,
-    but also UPDATES WHEN MINIMISED AND NOT VISIBLE
-    so use with caution
-    blanking overrides this so when the screen is blanked it does not redraw
-    TODO: see if hildon signalizes that a the task switcher is visible or not
-    """
+    # NOTE: this updates the snapshot in task switcher,
+    # but also UPDATES WHEN MINIMISED AND NOT VISIBLE
+    # so use with caution
+    # blanking overrides this so when the screen is blanked it does not redraw
+    # TODO: see if hildon signalizes that a the task switcher is visible or not
 
     if not redrawOnDashboard: # we don't redraw on dashboard by default
       display = self.m.get('display', None)
@@ -539,13 +531,11 @@ class DeviceN900(DeviceModule):
 
         fix = device.fix
         self.set('fix', fix[0])
-        """from liblocation reference:
-        0 =	The device has not seen a satellite yet.
-        1 =	The device has no fix.
-        2 =	The device has latitude and longitude fix.
-        3 =	The device has latitude, longitude, and altitude.
-        """
-
+        # from liblocation reference:
+        # 0 =	The device has not seen a satellite yet.
+        # 1 =	The device has no fix.
+        # 2 =	The device has latitude and longitude fix.
+        # 3 =	The device has latitude, longitude, and altitude.
         if fix[1] & location.GPS_DEVICE_LATLONG_SET:
           (lat, lon) = fix[4:6]
           self.set('pos', (lat, lon))
@@ -563,7 +553,6 @@ class DeviceN900(DeviceModule):
           elev = fix[7]
           self.set('elevation', elev)
 
-        # TODO: remove when not needed
         if self.get('n900GPSDebug', False):
           print("## N900 GPS debugging info ##")
           print("fix tuple from the Location API:")

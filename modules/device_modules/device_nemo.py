@@ -29,7 +29,7 @@ except Exception:
   e = sys.exc_info()[1]
   print('device_nemo: QtMobility import failed - do you have python-qtmobility installed ?')
   print(e)
-""" ^^ back-light control"""
+# ^^ back-light control for QML GUI
 
 # NOTE: use the device_ prefix when naming the module
 

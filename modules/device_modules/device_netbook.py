@@ -37,7 +37,7 @@ class DeviceNetbook(DeviceModule):
     return "A generic netbook"
 
   def getWinWH(self):
-    return (1024,600)
+    return 1024,600
 
   def startInFullscreen(self):
     return False
