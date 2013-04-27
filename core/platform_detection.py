@@ -30,10 +30,8 @@ def _check():
   """
   # check CPU architecture
   import subprocess
-
   proc = subprocess.Popen(['uname', '-m', ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  return_code = proc.wait()
-  arch = proc.stdout.read()
+  arch = str(proc.communicate()[0])
   if ("i686" in arch) or ("x86_64" in arch):
     print("* PC detected")
     return "pc" # we are most probably on a PC
