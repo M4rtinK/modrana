@@ -197,7 +197,7 @@ class DeviceModule(RanaModule):
 
   def getLogFolderPath(self):
     """default path is handled through the options module"""
-    None
+    return None
 
   def needsQuitButton(self):
     """On some platforms (Android chroot) applications
