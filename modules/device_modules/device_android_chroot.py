@@ -22,7 +22,7 @@
 from base_device_module import DeviceModule
 
 def getModule(m,d,i):
-  return(AndroidChrot(m,d,i))
+  return AndroidChroot(m,d,i)
 
 class AndroidChroot(DeviceModule):
   """A modRana device-specific module for Android chroot"""
