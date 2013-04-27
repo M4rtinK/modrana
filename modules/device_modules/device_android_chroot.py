@@ -56,7 +56,7 @@ class AndroidChroot(DeviceModule):
     return 2
 
   def textEntryIminent(self):
-    """in SHR on Neo, we need to temporary disable fullscreen
+    """In SHR on Neo, we need to temporary disable fullscreen
     (if we are in fullscreen),
     or else the text entry box won't show up"""
     display = self.m.get('display', None)
@@ -66,7 +66,7 @@ class AndroidChroot(DeviceModule):
         self.tempUnfullscreen = True
 
   def textEntryDone(self):
-    """restore fullscreen if needed"""
+    """Restore fullscreen if needed"""
     if self.tempUnfullscreen:
       display = self.m.get('display', None)
       if display:
@@ -75,6 +75,6 @@ class AndroidChroot(DeviceModule):
           self.tempUnfullscreen = False
 
   def needsQuitButton(self):
-    """due to no window decoration, own quit button
+    """Due to missing window decoration, own quit button
     might be needed"""
     return True
