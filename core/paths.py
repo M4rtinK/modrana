@@ -153,7 +153,11 @@ class Paths(object):
     this path can be used both for manipulating the data (add,delete, update) &
     using the data for routing)
     """
-    return self._assurePathFolder(self.getMapFolderPath(), MONAV_DATA_FOLDER_NAME)
+    path = self.modrana.dmod.getRoutingDataFolderPath()
+    if path is not None:
+      return self._assurePathFolder(path, MONAV_DATA_FOLDER_NAME)
+    else:
+      return self._assurePathFolder(self.getMapFolderPath(), MONAV_DATA_FOLDER_NAME)
 
   def getMonavServerBinaryPath(self):
     deviceID = self.modrana.dmod.getDeviceIDString()

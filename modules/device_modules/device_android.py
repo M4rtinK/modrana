@@ -22,6 +22,7 @@
 from base_device_module import DeviceModule
 
 MAP_FOLDER_PATH = "/sdcard/modrana/maps"
+ROUTING_DATA_FOLDER_PATH = "/sdcard/modrana/routing_data"
 
 def getModule(m,d,i):
   return Android(m,d,i)
@@ -75,3 +76,6 @@ class Android(DeviceModule):
 
   def getMapFolderPath(self):
     return MAP_FOLDER_PATH
+
+  def getRoutingDataFolderPath(self):
+    return ROUTING_DATA_FOLDER_PATH

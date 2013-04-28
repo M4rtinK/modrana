@@ -191,6 +191,10 @@ class DeviceModule(RanaModule):
     """return device specific map folder or None if default should be used"""
     return None
 
+  def getRoutingDataFolderPath(self):
+    """return device specific map folder or None if default should be used"""
+    return None
+
   def getPOIFolderPath(self):
     """return device specific POI folder or None if default should be used"""
     return None
