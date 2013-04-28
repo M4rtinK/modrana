@@ -49,8 +49,9 @@ class Android(DeviceModule):
   def getSupportedGUIModuleIds(self):
     return ["QML:harmattan", "QML:indep"]
 
-  # def getLocationType(self):
-  #   return "qt_mobility"
+  def getLocationType(self):
+    # TODO: get to location data on Android
+    return None
 
   def screenBlankingControlSupported(self):
     """
