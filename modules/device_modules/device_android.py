@@ -46,25 +46,25 @@ class Android(DeviceModule):
   def getSupportedGUIModuleIds(self):
     return ["QML:harmattan", "QML:indep"]
 
-  def getLocationType(self):
-    return "qt_mobility"
+  # def getLocationType(self):
+  #   return "qt_mobility"
 
   def screenBlankingControlSupported(self):
     """
     Screen blanking support is handled through Qt Mobility
     """
-    return True
+    return False
 
-  def pauseScreenBlanking(self):
-    """
-    inhibit screen blanking
-    """
-    from QtMobility.SystemInfo import QSystemScreenSaver
-
-    if self.qScreenSaver:
-      QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
-    else:
-      self.qScreenSaver = QSystemScreenSaver()
+  # def pauseScreenBlanking(self):
+  #   """
+  #   inhibit screen blanking
+  #   """
+  #   from QtMobility.SystemInfo import QSystemScreenSaver
+  #
+  #   if self.qScreenSaver:
+  #     QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
+  #   else:
+  #     self.qScreenSaver = QSystemScreenSaver()
 
   def needsQuitButton(self):
     """due to no window decoration, own quit button
