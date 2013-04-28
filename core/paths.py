@@ -29,6 +29,7 @@ CACHE_FOLDER_NAME = "cache"
 TRACKLOG_FOLDER_NAME = "tracklogs"
 MAPS_FOLDER_NAME = "maps"
 POI_FOLDER_NAME = "poi"
+ROUTING_DATA_FOLDER_NAME = "routing_data"
 DEBUG_LOGS_FOLDER_NAME = "debug_logs"
 # file names
 OPTIONS_FILENAME = "options.bin"
@@ -146,6 +147,14 @@ class Paths(object):
     """Return path to the themes folder"""
     return THEMES_FOLDER_PATH
 
+  def getRoutingDataFolderPath(self):
+    """Return path to the routing data folder"""
+    path = self.modrana.dmod.getRoutingDataFolderPath()
+    if path is not None:
+      return self._assurePathFolder(path, ROUTING_DATA_FOLDER_NAME)
+    else:
+      return self._assurePath(os.path.join(self.getProfilePath(), ROUTING_DATA_FOLDER_NAME))
+
   ## Monav ##
 
   def getMonavDataPath(self):
@@ -153,11 +162,8 @@ class Paths(object):
     this path can be used both for manipulating the data (add,delete, update) &
     using the data for routing)
     """
-    path = self.modrana.dmod.getRoutingDataFolderPath()
-    if path is not None:
-      return self._assurePathFolder(path, MONAV_DATA_FOLDER_NAME)
-    else:
-      return self._assurePathFolder(self.getMapFolderPath(), MONAV_DATA_FOLDER_NAME)
+    path = os.path.join(self.getRoutingDataFolderPath(), MONAV_DATA_FOLDER_NAME)
+    return self._assurePath(path)
 
   def getMonavServerBinaryPath(self):
     deviceID = self.modrana.dmod.getDeviceIDString()
