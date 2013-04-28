@@ -21,6 +21,8 @@
 #---------------------------------------------------------------------------
 from base_device_module import DeviceModule
 
+MAP_FOLDER_PATH = "/sdcard/modrana/maps"
+
 def getModule(m,d,i):
   return Android(m,d,i)
 
@@ -70,3 +72,6 @@ class Android(DeviceModule):
     """due to no window decoration, own quit button
     might be needed"""
     return True
+
+  def getMapFolderPath(self):
+    return MAP_FOLDER_PATH
