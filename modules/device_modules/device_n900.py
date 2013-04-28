@@ -20,9 +20,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 import subprocess
+import time
 from base_device_module import DeviceModule
 #N900 specific:
 import dbus.glib
+
 from core import gs
 # only import GTK, Hildon & Liblocation when using GTK GUI
 if gs.GUIString == "GTK":
@@ -39,8 +41,11 @@ elif gs.GUIString == "QML":
   from QtMobility.SystemInfo import QSystemScreenSaver
   # ^^ back-light control for QML GUI
 
-import time
-
+TRACKLOGS_PATH = "/home/user/MyDocs/tracklogs"
+MAP_FOLDER_PATH = "/home/user/MyDocs/.maps/"
+POI_FOLDER_PATH = "/home/user/MyDocs/.maps"
+ROUTING_DATA_FOLDER_PATH = "/home/user/MyDocs/.maps"
+DEBUG_LOG_FOLDER_PATH = "/home/user/MyDocs/modrana_debug_logs/"
 
 def getModule(m, d, i):
   return DeviceN900(m, d, i)
@@ -381,16 +386,20 @@ class DeviceN900(DeviceModule):
   # ** PATHS **
 
   def getTracklogFolderPath(self):
-    return "/home/user/MyDocs/tracklogs"
+    return TRACKLOGS_PATH
 
   def getMapFolderPath(self):
-    return "/home/user/MyDocs/.maps/"
+    return MAP_FOLDER_PATH
 
   def getPOIFolderPath(self):
-    return "/home/user/MyDocs/.maps"
+    return POI_FOLDER_PATH
 
   def getLogFolderPath(self):
-    return "/home/user/MyDocs/modrana_debug_logs/" #N900 specific log folder
+    # N900 specific log folder
+    return DEBUG_LOG_FOLDER_PATH
+
+  def getRoutingDataFolderPath(self):
+    return ROUTING_DATA_FOLDER_PATH
 
   # ** LOCATION **
 
