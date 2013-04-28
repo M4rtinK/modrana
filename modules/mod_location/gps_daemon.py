@@ -57,11 +57,9 @@ class GPSD(PositionSource):
     if self.connected:
       fix, sats = self.GPSDConsumer.getBoth()
       if fix:
-        """
-        as the GPSD consumer updates its values very often, it probably better to use a simple
-        tuple instead of a Fix object and only convert to the Fix object once the position data
-        is actually requested
-        """
+        # as the GPSD consumer updates its values very often, it probably better to use a simple
+        # tuple instead of a Fix object and only convert to the Fix object once the position data
+        # is actually requested
         #        (lat,lon,elevation,bearing,speed,timestamp) = fix
         satCount = len(sats)
         inUseSatCount = len(filter(lambda x: x.used, sats))

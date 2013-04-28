@@ -50,12 +50,10 @@ class Location(RanaModule):
       if method == "qt_mobility":
         print(" @ location: using Qt Mobility")
         from . import qt_mobility
-
         self.provider = qt_mobility.QtMobility(self)
-      else: # GPSD
+      elif method == "gpsd": # GPSD
         print(" @ location: using GPSD")
         from . import gps_daemon
-
         self.provider = gps_daemon.GPSD(self)
 
     # watch if debugging needs to be enabled
@@ -93,14 +91,13 @@ class Location(RanaModule):
         print(fix)
 
       # forced screen update is only needed by the GTK GUI
-      """
-      the location update method which might run asynchronously in the
-      device module also sends redraw requests
-      -> no need to send a new one if there is already one pending
-      --> there would not be a change position anyway until next the fix
-      -> surplus redraw requests are actually harmful with map rotation enabled
-      NOTE: this currently applies only to the GTK GUI
-      """
+
+      # the location update method which might run asynchronously in the
+      # device module also sends redraw requests
+      # -> no need to send a new one if there is already one pending
+      # --> there would not be a change position anyway until next the fix
+      # -> surplus redraw requests are actually harmful with map rotation enabled
+      # NOTE: this currently applies only to the GTK GUI
     if gs.GUIString == "GTK":
       # make sure the screen is updated at least once per second
       sFromLastRequest = time() - self.modrana.gui.getLastFullRedrawRequest()
@@ -171,9 +168,8 @@ class Location(RanaModule):
     # 2 - 2D
     # 3 - 3D
     self.set("fix", fixClass)
-
-    """always set this key to current epoch once the location is updated
-    so that modules can watch it and react on position updates"""
+    # always set this key to current epoch once the location is updated
+    # so that modules can watch it and react on position updates
     self.set('locationUpdated', time())
 
   def getFix(self):
@@ -187,7 +183,7 @@ class Location(RanaModule):
       print("location: enabling location")
       if self.modrana.dmod.handlesLocation():
         self.modrana.dmod.startLocation(startMainLoop=startMainLoop)
-      else:
+      elif self.provider:
         self.provider.start(startMainLoop=startMainLoop)
       self.enabled = True
     else:
