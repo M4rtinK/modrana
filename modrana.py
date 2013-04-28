@@ -296,19 +296,22 @@ class ModRana(object):
     that was removed are not loaded by mistake.
     This situation shouldn't really happen if modRana is installed from a package,
     as all .pyc files are purged during package upgrade and regenerated."""
-    return filter(
-      lambda x:
-      x[0:len(prefix)] == prefix
-      and
-      (x[-4:] not in ('.pyc', '.pyo')), os.listdir(folder)
+    moduleNames = filter(
+      lambda x: x[0:len(prefix)] == prefix, os.listdir(folder)
     )
+    # remove the extension
+    moduleNames = map(lambda x: os.path.splitext(x)[0], moduleNames)
+    # return a set of unique module names
+    # * like this, two module names will not be returned if there are
+    # both py and pyc files
+    return set(moduleNames)
 
   def _listAvailableDeviceModulesByID(self):
     moduleNames = self._getModuleNamesFromFolder(DEVICE_MODULES_FOLDER, prefix='device_')
     # remove the device_ prefix and return the results
-    # NOTE: .pyc & .pyo should be removed already in _getModuleNamesFromFolder()
-    # laos sort the module names alphabetically
-    return sorted(map(lambda x: x[7:].replace('.py', ''), moduleNames))
+    # NOTE: .py, .pyc & .pyo should be removed already in _getModuleNamesFromFolder()
+    # also sort the module names alphabetically
+    return sorted(map(lambda x: x[7:], moduleNames))
 
   def _listAvailableGUIModulesByID(self):
     return self._getModuleNamesFromFolder(GUI_MODULES_FOLDER)
