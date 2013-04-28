@@ -34,7 +34,7 @@ except ImportError:
   from io import StringIO # python 3
 
 from modules.base_module import RanaModule
-import tileserver_callback_proxy
+from modules import tileserver_callback_proxy
 
 def getModule(m,d,i):
   return Tileserver(m,d,i)
