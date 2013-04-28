@@ -39,7 +39,7 @@ if not ET.__name__ == "xml.etree.cElementTree":
                     "ElementTree code.  Slowdown can be in excess of five "
                     "times.")
 
-from upoints import (point, trigpoints, utils)
+from . import (point, trigpoints, utils)
 
 #: Supported KML namespace version to URI mapping
 KML_VERSIONS = {

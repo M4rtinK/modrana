@@ -23,7 +23,7 @@ import logging
 
 from operator import xor
 
-from upoints import (point, utils)
+from . import (point, utils)
 
 def calc_checksum(sentence):
     """Calculate a NMEA 0183 checksum for the given sentence

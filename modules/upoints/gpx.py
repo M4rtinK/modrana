@@ -43,7 +43,7 @@ if not ET.__name__ == "xml.etree.cElementTree":
                     "ElementTree code.  Slowdown can be in excess of five "
                     "times.")
 
-from upoints import (point, utils)
+from . import (point, utils)
 
 #: Supported GPX namespace version to URI mapping
 

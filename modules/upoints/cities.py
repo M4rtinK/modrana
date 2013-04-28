@@ -27,7 +27,7 @@ __doc__ += """.
 import logging
 import time
 
-from upoints import (point, trigpoints, utils)
+from . import (point, trigpoints, utils)
 
 from core.backports.six import string_types as basestring
 

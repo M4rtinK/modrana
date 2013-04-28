@@ -29,7 +29,7 @@ __doc__ += """.
 import datetime
 import math
 
-from upoints import utils
+from . import utils
 
 def _manage_location(attr):
     """Build managed property interface

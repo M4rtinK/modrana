@@ -27,7 +27,7 @@ __doc__ += """.
 
 import logging
 
-from upoints import (point, trigpoints, utils)
+from . import (point, trigpoints, utils)
 
 class Station(trigpoints.Trigpoint):
     """Class for representing a weather station from a NOAA data file

@@ -23,7 +23,7 @@ import logging
 
 from operator import attrgetter
 
-from upoints import (point, utils)
+from . import (point, utils)
 
 class Cell(point.Point):
     """Class for representing a cellular cite from OpenCellID.org_

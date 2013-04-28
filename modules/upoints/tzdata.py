@@ -20,7 +20,7 @@
 
 from operator import attrgetter
 
-from upoints import (point, utils)
+from . import (point, utils)
 
 class Zone(point.Point):
     """Class for representing timezone descriptions from zoneinfo data

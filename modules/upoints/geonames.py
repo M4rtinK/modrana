@@ -27,7 +27,7 @@ except ImportError:
     tz = None
 from operator import attrgetter
 
-from upoints import (point, trigpoints, utils)
+from . import (point, trigpoints, utils)
 
 class Location(trigpoints.Trigpoint):
     """

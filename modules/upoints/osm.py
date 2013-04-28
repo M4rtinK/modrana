@@ -34,7 +34,7 @@ except ImportError:
         logging.info("cElementTree is unavailable XML processing will be much"
                      "slower with ElementTree")
 
-from upoints import (__version__, point, utils)
+from . import (__version__, point, utils)
 
 def _parse_flags(element):
     """Parse OSM XML element for generic data

@@ -26,7 +26,7 @@ __doc__ += """.
 
 from functools import partial
 
-from upoints import (point, utils)
+from . import (point, utils)
 
 class Trigpoint(point.Point):
     """
