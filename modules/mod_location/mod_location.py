@@ -196,7 +196,9 @@ class Location(RanaModule):
     print("location: disabling location")
     if self.modrana.dmod.handlesLocation():
       self.modrana.dmod.stopLocation()
-    else:
+    # check if location provider is available,
+    # if it is available, stop location
+    elif self.provider:
       self.provider.stop()
     self.enabled = False
 
