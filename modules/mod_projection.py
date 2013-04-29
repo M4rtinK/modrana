@@ -20,8 +20,10 @@
 from modules.base_module import RanaModule
 from core.tilenames import *
 from core import geo
+from core.constants import DEFAULT_COORDINATES
 from math import *
 import math
+
 
 def getModule(m,d,i):
   return Projection(m,d,i)
@@ -67,8 +69,8 @@ class Projection(RanaModule):
     if pos:
       (lat,lon) = pos # use position from last time
     else: # use default position
-      self.set("pos", defaultPosition) # Brno
-      (lat,lon) = defaultPosition
+      self.set("pos", DEFAULT_COORDINATES) # Brno
+      (lat,lon) = DEFAULT_COORDINATES
 
     self.recentre(lat, lon)
 
