@@ -47,6 +47,7 @@ from modules.gui_modules.gui_qml import list_models
 from core.fix import Fix
 from core import signal
 from core.backports import six
+from core import constants
 
 global globe
 
@@ -735,7 +736,7 @@ class GPSDataWrapper(QtCore.QObject):
     #    self.modrana.connect('target-changed', self._on_target_changed)
     self.modrana.watch('locationUpdated', self._posChangedCB)
 
-    pos = self.modrana.get('pos', None)
+    pos = self.modrana.get('pos', constants.DEFAULT_COORDINATES)
     speed = self.modrana.get('speed', 0)
     bearing = self.modrana.get('bearing', 0)
     elevation = self.modrana.get('elevation', 0)
