@@ -46,6 +46,9 @@ class Android(DeviceModule):
   def startInFullscreen(self):
     return True
 
+  def fullscreenOnly(self):
+    return True
+
   def getSupportedGUIModuleIds(self):
     return ["QML:harmattan", "QML:indep"]
 
