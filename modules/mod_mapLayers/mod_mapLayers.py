@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
-# Sample of a modRana module.
+# A modRana module for map layer handling
 #----------------------------------------------------------------------------
-# Copyright 2007, Oliver White
+# Copyright 2013, Martin Kolman
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ def getModule(m,d,i):
   return MapLayers(m,d,i)
 
 class MapLayers(RanaModule):
-  """A sample modRana module"""
+  """Map layer handling"""
   
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
