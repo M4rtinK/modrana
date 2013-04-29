@@ -128,9 +128,8 @@ class Route(RanaModule):
       if proj and self.expectStart:
         lastClick = self.get('lastClickXY', None)
         (x, y) = lastClick
-        """
-        x and y must be floats, otherwise strange rounding errors occur, when converting to lat lon coordinates
-        """
+        # x and y must be floats, otherwise strange rounding errors
+        # occur when converting to lat lon coordinates
         (lat, lon) = proj.xy2ll(x, y)
         self.set('startPos', (lat, lon))
         self.start = (lat, lon)
@@ -148,9 +147,8 @@ class Route(RanaModule):
       if proj and self.expectMiddle:
         lastClick = self.get('lastClickXY', None)
         (x, y) = lastClick
-        """
-        x and y must be floats, otherwise strange rounding errors occur, when converting to lat lon coordinates
-        """
+        # x and y must be floats, otherwise strange rounding errors
+        # occur when converting to lat lon coordinates
         (lat, lon) = proj.xy2ll(x, y)
         middlePos=self.get('middlePos', [])
         middlePos.append((lat,lon,None, ""))
@@ -173,9 +171,8 @@ class Route(RanaModule):
       if proj and self.expectEnd:
         lastClick = self.get('lastClickXY', None)
         (x, y) = lastClick
-        """
-        x and y must be floats, otherwise strange rounding errors occur, when converting to lat lon coordinates
-        """
+        # x and y must be floats, otherwise strange rounding errors
+        # occur when converting to lat lon coordinates
         (lat, lon) = proj.xy2ll(x, y)
         self.set('endPos', (lat, lon))
         self.destination = (lat, lon)
@@ -305,7 +302,7 @@ class Route(RanaModule):
               print(e)
               traceback.print_exc(file=sys.stdout)
             if "show" in args:
-              """switch to map view and go to start/destination, if requested"""
+              # switch to map view and go to start/destination, if requested
               where = args['show']
               if where == 'start':
                 (cLat, cLon) = (fromLat, fromLon)
@@ -400,7 +397,8 @@ class Route(RanaModule):
 
     elif message == 'reroute':
       if messageType == 'ms' and args == "fromPosToDest" and self.selectManyPoints == False: # handmade
-        """reroute from current position to destination"""
+        # reroute from current position to destination
+
         # is there a destination and valid position ?
         print("route: rerouting from current position to last destination")
         pos = self.get('pos', None)
@@ -650,8 +648,8 @@ class Route(RanaModule):
     (fromLat, fromLon) = directionsWay.getPointByID(0).getLL()
     (toLat, toLon) = directionsWay.getPointByID(-1).getLL()
 
-    """use coordinates for start dest or use first/last point from the route
-       if start/dest coordinates are unknown (None)"""
+    # use coordinates for start dest or use first/last point from the route
+    # if start/dest coordinates are unknown (None)
     if self.start is None:
       self.start = (fromLat, fromLon)
     if self.destination is None:
@@ -748,14 +746,14 @@ class Route(RanaModule):
         except Exception:
           import sys
           e = sys.exc_info()[1]
-          """just skip this as the character is  most probably unknown"""
+          # just skip this as the character is  most probably unknown
           pass
       if cyrillicCharFound: # the substring contains at least one cyrillic character
         if cyrillicStringTemp: # append to the already "open" cyrillic string
           cyrillicStringTemp += ' ' + substring
         else: # create a new cyrillic string
-          """make espeak say this word in russian (or other voiceCode),
-          based on Cyrillic being detected in it"""
+          # make espeak say this word in russian (or other voiceCode),
+          # based on Cyrillic being detected in it
           cyrillicStringTemp = '<p xml:lang="%s">%s' % (voiceCode, substring)
 
       else: # no cyrillic found in this substring
