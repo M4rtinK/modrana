@@ -39,6 +39,7 @@ if gs.GUIString == "GTK":
   import gtk
   import cairo
   from core.color import Color
+from core import constants
 
 def getModule(m,d,i):
   return Icons(m,d,i)
@@ -48,7 +49,7 @@ class Icons(RanaModule):
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
 
-    self.defaultTheme = 'default'
+    self.defaultTheme = constants.DEFAULT_THEME_ID
     self.cantLoad = []
     self.imageOrderList = [] # for cache trimming
     self.maxImages = 200 # default 200
@@ -60,8 +61,11 @@ class Icons(RanaModule):
     # structure -> color_key:color_object
     self.defaultColors = {} # default color set
     self.colors = {} # main combined color set
-    defaultThemeConfig = os.path.join(self.modrana.paths.getThemesFolderPath(), self.defaultTheme, 'theme.conf')
-    self.updateThemeList()
+    defaultThemeConfig = os.path.join(
+      self.modrana.paths.getThemesFolderPath(),
+      self.defaultTheme,
+      'theme.conf'
+    )
     # TODO: make themes GUI toolkit independent
     if gs.GUIString == "GTK":
       # load the default set of colors
@@ -596,20 +600,6 @@ class Icons(RanaModule):
     cr.set_line_width(outlineWidth)
     cr.stroke()
     return image
-
-  def updateThemeList(self):
-    rawFolderContent = os.listdir(self.modrana.paths.getThemesFolderPath())
-    # append the full path and filter out all dot-folders, such as .svn, .git & co
-    themesFolderPath = self.modrana.paths.getThemesFolderPath()
-    self.availableThemes = filter(
-      lambda x: os.path.isdir(
-        os.path.join(themesFolderPath, x)) and not x.startswith('.'),
-        rawFolderContent
-    )
-
-  def getThemeList(self):
-    """return a a list of currently available themes (list of folders in the themes folder)"""
-    return self.availableThemes
 
   def getCurrentThemePath(self):
     """returns path to currently active theme"""

@@ -20,6 +20,7 @@
 from modules.base_module import RanaModule
 from core import utils
 from core.backports import six
+from core import constants
 
 # identifies item as a group
 GROUP_IDENTIFIER = "groupIdentifier"
@@ -609,15 +610,17 @@ class Options(RanaModule):
         addBoolOpt("Redraw when on dashboard", "redrawOnDashboard", group, False)
 
       # ** themes
-      icons = self.m.get('icons', None)
-      if icons:
+      theme = self.m.get('theme', None)
+      if theme:
         group = addGroup("Themes", "themes", catView, "generic")
-        defaultTheme = icons.defaultTheme
-        themeList = icons.getThemeList()
-        # check if current theme exists
+        defaultTheme = constants.DEFAULT_THEME_ID
+        themeList = theme.getAvailableThemeIds()
+        # check if current theme as set in options exists
         currentTheme = self.get('currentTheme', None)
         if currentTheme is not None:
           if currentTheme not in themeList:
+            print("options: theme with id %s is not available,\n"
+                  "switching back to default theme" % currentTheme)
             self.set('currentTheme', defaultTheme) # theme not valid, reset to default
 
         themeChangedMessage = "icons:themeChanged"
@@ -626,8 +629,8 @@ class Options(RanaModule):
         addOpt("Current theme", "currentTheme",
           nameValueList,
           group,
-          defaultTheme)
-
+          defaultTheme
+        )
 
     # ** units
     group = addGroup("formats#Units and", "units", catView, "generic")

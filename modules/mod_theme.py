@@ -76,6 +76,20 @@ class ThemeModule(RanaModule):
       self._theme = Theme(newValue, self._getThemesPath())
       self._themeChanged(self._theme)  # fire the theme changed signal
 
+  def getAvailableThemeIds(self):
+    """Return a a list of currently available themes (list of folders in the themes folder)
+    :returns: a list of available theme ids
+    :rtype: a list of strings
+    """
+    rawFolderContent = os.listdir(self.modrana.paths.getThemesFolderPath())
+    # append the full path and filter out all dot-folders, such as .svn, .git & co
+    themesFolderPath = self.modrana.paths.getThemesFolderPath()
+    return filter(
+      lambda x: os.path.isdir(
+        os.path.join(themesFolderPath, x)) and not x.startswith('.'),
+        rawFolderContent
+    )
+
 class Theme(object):
   """A modRana theme"""
 
