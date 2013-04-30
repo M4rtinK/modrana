@@ -49,7 +49,6 @@ class Icons(RanaModule):
     RanaModule.__init__(self, m, d, i)
 
     self.defaultTheme = 'default'
-    self.themesFolderPath = 'themes/'
     self.cantLoad = []
     self.imageOrderList = [] # for cache trimming
     self.maxImages = 200 # default 200
@@ -61,7 +60,7 @@ class Icons(RanaModule):
     # structure -> color_key:color_object
     self.defaultColors = {} # default color set
     self.colors = {} # main combined color set
-    defaultThemeConfig = os.path.join(self.themesFolderPath, self.defaultTheme, 'theme.conf')
+    defaultThemeConfig = os.path.join(self.modrana.paths.getThemesFolderPath(), self.defaultTheme, 'theme.conf')
     self.updateThemeList()
     # TODO: make themes GUI toolkit independent
     if gs.GUIString == "GTK":
@@ -96,7 +95,7 @@ class Icons(RanaModule):
     iconPathDefault = self.getDefaultThemePath()
     simplePaths = None
     for path in (iconPathThemed, iconPathDefault):
-      simplePaths = glob.glob(path+"%s.*" % name)
+      simplePaths = glob.glob(os.path.join(path, "%s.*" % name))
       if simplePaths:
         break
     if simplePaths:
@@ -354,8 +353,8 @@ class Icons(RanaModule):
     parameterPaths = None
     # list the theme directory
     for path in themePathList:
-      simplePaths = glob.glob(path+"%s.*" % name)
-      parameterPaths = glob.glob(path+"%s-*.*" % name)
+      simplePaths = glob.glob(os.path.join(path,"%s.*") % name)
+      parameterPaths = glob.glob(os.path.join(path,"%s-*.*" % name))
       if parameterPaths or simplePaths:
         break
     return simplePaths, parameterPaths
@@ -476,8 +475,8 @@ class Icons(RanaModule):
                   newW = iw*(newH/ih)
 
               # shift to center
-              dx = border+(uw - newW)/2.0
-              dy = border+(uh - newH)/2.0
+              dx = border + (uw - newW)/2.0
+              dy = border + (uh - newH)/2.0
               
               # crete contexts
               ct = cairo.Context(background)
@@ -599,8 +598,14 @@ class Icons(RanaModule):
     return image
 
   def updateThemeList(self):
-    rawFolderContent = os.listdir(self.themesFolderPath)
-    self.availableThemes = filter(lambda x: os.path.isdir(os.path.join(self.themesFolderPath, x)) and not x=='.svn',rawFolderContent)
+    rawFolderContent = os.listdir(self.modrana.paths.getThemesFolderPath())
+    # append the full path and filter out all dot-folders, such as .svn, .git & co
+    themesFolderPath = self.modrana.paths.getThemesFolderPath()
+    self.availableThemes = filter(
+      lambda x: os.path.isdir(
+        os.path.join(themesFolderPath, x)) and not x.startswith('.'),
+        rawFolderContent
+    )
 
   def getThemeList(self):
     """return a a list of currently available themes (list of folders in the themes folder)"""
@@ -608,11 +613,11 @@ class Icons(RanaModule):
 
   def getCurrentThemePath(self):
     """returns path to currently active theme"""
-    return self.themesFolderPath + '/' + self.currentTheme + '/'
+    return os.path.join(self.modrana.paths.getThemesFolderPath(), self.currentTheme)
 
   def getDefaultThemePath(self):
     """returns path to currently active theme"""
-    return self.themesFolderPath + '/' + self.defaultTheme + '/'
+    return os.path.join(self.modrana.paths.getThemesFolderPath(), self.defaultTheme)
 
   def switchTheme(self, newTheme):
     """switch the current theme to another one"""
