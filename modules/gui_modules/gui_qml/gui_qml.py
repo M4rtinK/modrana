@@ -127,7 +127,7 @@ class QMLGUI(GUIModule):
     #    self.view.setResizeMode(QDeclarativeView.SizeViewToRootObject)
 
     # add image providers
-    self.iconProvider = IconImageProvider()
+    self.iconProvider = IconImageProvider(self)
     self.view.engine().addImageProvider("icons", self.iconProvider)
     # add tiles provider
     self.tilesProvider = TileImageProvider(self)
@@ -455,13 +455,31 @@ class IconImageProvider(QDeclarativeImageProvider):
   """the IconImageProvider class provides icon images to the QML layer as
   QML does not seem to handle .. in the url very well"""
 
-  def __init__(self):
+  def __init__(self, gui):
     QDeclarativeImageProvider.__init__(self, QDeclarativeImageProvider.ImageType.Image)
+    self.gui = gui
 
   def requestImage(self, iconPath, size, requestedSize):
     try:
+
       #TODO: theme name caching ?
-      f = open('themes/%s' % iconPath, 'rb')
+      themeFolder = self.gui.modrana.paths.getThemesFolderPath()
+      fullIconPath = os.path.join(themeFolder, iconPath)
+
+      # the path is constructed like this in QML
+      # so we can safely just split it like this
+      splitPath = iconPath.split("/")
+      if not os.path.exists(fullIconPath):
+        if splitPath[0] == constants.DEFAULT_THEME_ID:
+          # already on default theme and icon path does not exist
+          return None
+        else:  # try to get the icon from default theme
+          splitPath[0] = constants.DEFAULT_THEME_ID
+          fullIconPath = os.path.join(themeFolder, *splitPath)
+          if not os.path.exists(fullIconPath):
+            # icon not found even in the default theme
+            return None
+      f = open(fullIconPath, 'rb')
       #      print("ICON")
       #      print(iconPath)
       #      print(size)
@@ -476,6 +494,7 @@ class IconImageProvider(QDeclarativeImageProvider):
       print("QML GUI: icon image provider: loading icon failed")
       print(e)
       print(os.path.join('themes', iconPath))
+      print("Traceback:")
       traceback.print_exc(file=sys.stdout) # find what went wrong
 
 class TileImageProvider(QDeclarativeImageProvider):
