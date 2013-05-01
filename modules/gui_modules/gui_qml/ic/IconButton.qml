@@ -14,6 +14,8 @@ Rectangle {
     property color normalColor : modrana.theme.color.icon_button_normal
     property color toggledColor : modrana.theme.color.icon_button_toggled
 
+    color : normalColor
+
     // "#c6d1f3" QML toggled
     // modRana theme:
     // #3c60fa outline
