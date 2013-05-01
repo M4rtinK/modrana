@@ -30,7 +30,7 @@ IconGridPage {
         id : testModel
         ListElement {
             caption : "Main map"
-            icon : "map_layers.png"
+            icon : "map.png"
             menu : "mapDialog"
         }
         ListElement {
