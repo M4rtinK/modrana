@@ -11,26 +11,32 @@ BasePage {
 
     content {
         Column {
+            anchors.top : parent.top
+            anchors.topMargin : 8
             spacing : 30
             width : parent.width
-            LineText {
-                width : parent.width
-                text : qsTr("Theme")
-            }
-            // once more themes are available,
-            // use a picker button ?
-            ButtonRow {
-                Button {
-                    text : "default"
-                    onClicked : modrana.theme_id = "default"
-
+            Column {
+                spacing : 10
+                Label {
+                    text : qsTr("Theme")
                 }
-                Button {
-                    text : "night"
-                    onClicked : modrana.theme_id = "night"
+                // once more themes are available,
+                // use a picker button ?
+                ButtonRow {
+                    checkedButton : modrana.theme_id == "default" ? defaultButton : nightButton
+                    Button {
+                        id : defaultButton
+                        text : "default"
+                        onClicked : modrana.theme_id = "default"
+
+                    }
+                    Button {
+                        id : nightButton
+                        text : "night"
+                        onClicked : modrana.theme_id = "night"
+                    }
                 }
             }
-
         }
     }
 }
