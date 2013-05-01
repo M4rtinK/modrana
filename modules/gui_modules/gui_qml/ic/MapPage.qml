@@ -13,6 +13,7 @@ Item {
     }
 
     property bool center : true
+    property bool showModeOnMenuButton : options.get("showModeOnMenuButton", false)
 
     property variant pinchmap
 
@@ -206,7 +207,9 @@ Item {
         }
         Button {
             id: mainMenuButton
-            iconSource: "image://icons/" + modrana.theme_id + "/" + "menu_small.png"
+            iconSource: showModeOnMenuButton ?
+                "image://icons/" + modrana.theme_id + "/" + modrana.mode  + "_small.png"
+                :"image://icons/" + modrana.theme_id + "/" + "menu_small.png"
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             onClicked: {

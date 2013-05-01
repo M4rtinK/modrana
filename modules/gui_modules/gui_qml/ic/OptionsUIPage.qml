@@ -12,7 +12,11 @@ BasePage {
     content {
         Column {
             anchors.top : parent.top
+            anchors.left : parent.left
+            anchors.right : parent.right
             anchors.topMargin : 8
+            anchors.leftMargin : 8
+            anchors.rightMargin : 8
             spacing : 30
             width : parent.width
             Column {
@@ -35,6 +39,14 @@ BasePage {
                         text : "night"
                         onClicked : modrana.theme_id = "night"
                     }
+                }
+            }
+            SwitchWithText {
+                text : qsTr("Show mode on menu button")
+                checked : rWin.mapPage.showModeOnMenuButton
+                onCheckedChanged : {
+                     rWin.mapPage.showModeOnMenuButton = checked
+                     options.set("showModeOnMenuButton", checked)
                 }
             }
         }
