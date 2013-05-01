@@ -50,6 +50,7 @@ Item {
             smooth : true
             id : iconLabel
             text : icgb.text
+            color : modrana.theme.color.icon_button_text
             font.pixelSize : rWin.inPortrait ? 42 : 36
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.bottom : parent.bottom
