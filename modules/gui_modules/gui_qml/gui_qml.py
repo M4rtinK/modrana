@@ -941,13 +941,21 @@ class ColorsWrapper(QtCore.QObject):
   def _icon_button_toggled(self):
     return self.t.getColor("icon_button_toggled", "#3c60fa")
 
+  def _icon_button_text(self):
+    return self.t.getColor("icon_button_text", "black")
+
   def _page_background(self):
     return self.t.getColor("page_background", "black")
+
+  def _page_header_text(self):
+    return self.t.getColor("page_header_text", "black")
 
   main_fill = QtCore.Property(str, _main_fill, notify=colorsChanged)
   icon_grid_toggled = QtCore.Property(str, _icon_grid_toggled, notify=colorsChanged)
   icon_button_normal = QtCore.Property(str, _icon_button_normal, notify=colorsChanged)
   icon_button_toggled = QtCore.Property(str, _icon_button_toggled, notify=colorsChanged)
+  icon_button_text = QtCore.Property(str, _icon_button_text, notify=colorsChanged)
+  page_header_text = QtCore.Property(str, _page_header_text, notify=colorsChanged)
   page_background = QtCore.Property(str, _page_background, notify=colorsChanged)
 
 
