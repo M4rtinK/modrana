@@ -76,11 +76,11 @@ class MapView(RanaModule):
 
     elif message:
       try:
-        list = message.split(' ')
-        lat = float(list[1])
-        lon = float(list[2])
-        if len(list) == 4:
-          zoom = int(list[3])
+        cList = message.split(' ')
+        lat = float(cList[1])
+        lon = float(cList[2])
+        if len(cList) == 4:
+          zoom = int(cList[3])
         else:
           zoom = z
         proj = self.m.get('projection', None)
@@ -115,10 +115,8 @@ class MapView(RanaModule):
       (lat,lon) = pos
       self.set('map_centre', pos)
       z = int(self.get('z', 15))
-      x,y = proj.ll2xy(lat,lon)
       if not self.d.has_key('viewport'):
         return False
-      (sx,sy,sw,sh) = self.get('viewport')
       # the shift amount represents a percentage of the distance from screen center
       # to an edge:
       # center+---------->|edge
