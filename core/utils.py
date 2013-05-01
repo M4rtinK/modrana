@@ -191,6 +191,17 @@ def createFolderPath(newPath):
       os.mkdir(newPath)
     return True
 
+#from
+# http://stackoverflow.com/questions/3167154/
+# how-to-split-a-dos-path-into-its-components-in-python
+def SplitPath( split_path ):
+  pathSplit_lst   = []
+  while os.path.basename(split_path):
+      pathSplit_lst.append( os.path.basename(split_path) )
+      split_path = os.path.dirname(split_path)
+  pathSplit_lst.reverse()
+  return pathSplit_lst
+
 # from:
 # http://www.5dollarwhitebox.org/drupal/node/84
 def bytes2PrettyUnitString(bytes):
