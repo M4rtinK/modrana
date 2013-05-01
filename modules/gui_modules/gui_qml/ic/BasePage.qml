@@ -53,7 +53,7 @@ Page {
         }
         Rectangle {
             id : header
-            color : "#92aaf3"
+            color : modrana.theme.color.main_fill
             anchors.top : parent.top
             anchors.left : parent.left
             anchors.right : parent.right
@@ -69,7 +69,7 @@ Page {
                 anchors.bottomMargin : 8
                 font.pixelSize : 48
                 textFormat : Text.StyledText
-                color : "black"
+                color : modrana.theme.color.page_header_text
                 wrapMode : Text.NoWrap
                 horizontalAlignment : _fitsIn ? Text.AlignHCenter : Text.AlignLeft
             }
