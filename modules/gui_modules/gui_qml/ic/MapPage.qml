@@ -63,8 +63,6 @@ Item {
         onDrag : {
             // disable map centering once drag is detected
             tabMap.center = false
-            console.log("DRAG DRAG")
-            console.log(theme)
         }
 
         Timer {
