@@ -46,7 +46,7 @@ Item {
             height : parent.height-icgb.margin*1.5
         }
         // caption
-        Text {
+        Label {
             smooth : true
             id : iconLabel
             text : icgb.text
