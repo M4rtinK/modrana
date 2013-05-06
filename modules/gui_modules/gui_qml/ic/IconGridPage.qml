@@ -49,7 +49,7 @@ Page {
                 var targetPage = iconGP.getPage(menu)
                 if (targetPage) {
                     // go to the page
-                    rWin.pageStack.push(targetPage)
+                    rWin.pageStack.push(targetPage, undefined, !rWin.animate)
                 }
             }
         }
@@ -73,10 +73,10 @@ Page {
         text : "back"
         opacity : gridView.atYBeginning ? 1.0 : 0.55
         onClicked : {
-            rWin.pageStack.pop()
+            rWin.pageStack.pop(undefined,!rWin.animate)
         }
         onPressAndHold : {
-            rWin.pageStack.pop(null)
+            rWin.pageStack.pop(null,!rWin.animate)
         }
     }
 

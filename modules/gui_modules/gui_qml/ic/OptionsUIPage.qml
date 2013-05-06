@@ -49,6 +49,14 @@ BasePage {
                      options.set("showModeOnMenuButton", checked)
                 }
             }
+            SwitchWithText {
+                text : qsTr("Animations")
+                checked : rWin.animate
+                onCheckedChanged : {
+                     rWin.animate = checked
+                     options.set("QMLAnimate", checked)
+                }
+            }
         }
     }
 }

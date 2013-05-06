@@ -91,14 +91,14 @@ Item {
          Transition {
              from: "PRESSED"
              to: "RELEASED"
-             ColorAnimation { target: background; duration: 100 }
-             NumberAnimation { properties : "scale"; easing.type : Easing.InOutQuad; duration : 100 }
+             ColorAnimation { target: background; duration: 100*rWin.animate }
+             NumberAnimation { properties : "scale"; easing.type : Easing.InOutQuad; duration : 100*rWin.animate }
          },
          Transition {
              from: "RELEASED"
              to: "PRESSED"
-             ColorAnimation { target: background; duration: 100 }
-             NumberAnimation { properties : "scale"; easing.type : Easing.InOutQuad; duration : 100 }
+             ColorAnimation { target: background; duration: 100*rWin.animate }
+             NumberAnimation { properties : "scale"; easing.type : Easing.InOutQuad; duration : 100*rWin.animate }
          }
      ]
 }

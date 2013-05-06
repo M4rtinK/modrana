@@ -87,7 +87,7 @@ Page {
         //iconSource : "image://icons/"+ modrana.theme_id +"/back_small.png"
         opacity : pageFlickable.atYBeginning ? 1.0 : 0.55
         onClicked : {
-            rWin.pageStack.pop()
+            rWin.pageStack.pop(undefined,!rWin.animate)
         }
 
         onPressAndHold : {

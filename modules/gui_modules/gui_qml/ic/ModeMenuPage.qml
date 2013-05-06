@@ -9,7 +9,7 @@ IconGridPage {
 
     function getPage(menu){
         modrana.mode = menu
-        rWin.push(null)
+        rWin.push(null, undefined, !rWin.animate)
     }
 
 

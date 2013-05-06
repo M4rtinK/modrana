@@ -18,6 +18,9 @@ PageStackWindow {
     property bool allowSwitch : false
     property bool allowClose : false
 
+    // various other properties
+    property int animate : options.get("QMLAnimate", true) ? 1 : 0
+
     initialPage : mapPage
     //property variant mapPage : Pager.loadPage("MapPage", rWin)
     property variant mapPage : loadPage("MapPage")
@@ -75,10 +78,10 @@ PageStackWindow {
         if (pageName == null) { // null -> back to map
             //TODO: check if the stack can over-fil
             //console.log("BACK TO MAP")
-            rWin.pageStack.push(mapPage)
+            rWin.pageStack.pop(null,!animate)
         } else {
             console.log("PUSH " + pageName)
-            rWin.pageStack.push(getPage(pageName))
+            rWin.pageStack.push(getPage(pageName),null,!rWin.animate)
         }
     }
 
