@@ -151,7 +151,7 @@ class Paths(object):
     """Return path to the routing data folder"""
     path = self.modrana.dmod.getRoutingDataFolderPath()
     if path is not None:
-      return self._assurePathFolder(path, ROUTING_DATA_FOLDER_NAME)
+      return self._assurePath(path)
     else:
       return self._assurePath(os.path.join(self.getProfilePath(), ROUTING_DATA_FOLDER_NAME))
 
