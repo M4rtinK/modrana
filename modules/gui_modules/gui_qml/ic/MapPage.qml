@@ -211,7 +211,7 @@ Item {
             width: parent.parent.buttonSize
             height: parent.parent.buttonSize
             onClicked: {
-                rWin.push("Menu")
+                rWin.push("Menu", undefined, !rWin.animate)
             }
         }
     }

@@ -87,11 +87,11 @@ Page {
         //iconSource : "image://icons/"+ modrana.theme_id +"/back_small.png"
         opacity : pageFlickable.atYBeginning ? 1.0 : 0.55
         onClicked : {
-            rWin.pageStack.pop(undefined,!rWin.animate)
+            rWin.pageStack.pop(undefined, !rWin.animate)
         }
 
         onPressAndHold : {
-            rWin.pageStack.pop(null)
+            rWin.pageStack.pop(null, !rWin.animate)
         }
     }
 }

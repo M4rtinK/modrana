@@ -53,7 +53,7 @@ IconGridPage {
         id : layerSelectD
         onLayerSelected  : {
             rWin.mapPage.getMap().setLayerById(0, layerId)
-            rWin.pageStack.pop(null)
+            rWin.pageStack.pop(null, !rWin.animate)
             accept()
         }
     }
