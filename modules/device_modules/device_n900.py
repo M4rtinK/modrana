@@ -44,7 +44,6 @@ elif gs.GUIString == "QML":
 TRACKLOGS_PATH = "/home/user/MyDocs/tracklogs"
 MAP_FOLDER_PATH = "/home/user/MyDocs/.maps/"
 POI_FOLDER_PATH = "/home/user/MyDocs/.maps"
-ROUTING_DATA_FOLDER_PATH = "/home/user/MyDocs/.maps"
 DEBUG_LOG_FOLDER_PATH = "/home/user/MyDocs/modrana_debug_logs/"
 
 def getModule(m, d, i):
@@ -399,7 +398,12 @@ class DeviceN900(DeviceModule):
     return DEBUG_LOG_FOLDER_PATH
 
   def getRoutingDataFolderPath(self):
-    return ROUTING_DATA_FOLDER_PATH
+    # routing data is on the N900 traditionally stored
+    # directly in the map folder, by using the path from
+    # the paths module, if the map folder is redirected
+    # by a configuration file value, path to the
+    # routing data folder will also be redirected
+    return self.modrana.paths.getMapFolderPath()
 
   # ** LOCATION **
 
