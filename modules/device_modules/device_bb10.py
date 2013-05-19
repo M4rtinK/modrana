@@ -47,13 +47,13 @@ class BB10(DeviceModule):
     return ["QML:harmattan", "QML:indep"]
 
   def getLocationType(self):
-    return "qt_mobility"
+    return None
 
   def screenBlankingControlSupported(self):
     """
     Screen blanking support is handled through Qt Mobility
     """
-    return True
+    return False
 
   def pauseScreenBlanking(self):
     """

@@ -1,5 +1,6 @@
 # modRana current-platform detection
 import os
+import sys
 
 DEFAULT_DEVICE_MODULE_ID = "pc"
 DEFAULT_GUI_MODULE_ID = "GTK"
@@ -35,6 +36,9 @@ def _check():
   if ("i686" in arch) or ("x86_64" in arch):
     print("* PC detected")
     return "pc" # we are most probably on a PC
+  if sys.platform == "qnx6":
+    print("* BlackBerry 10 device detected")
+    return "bb10"
 
   # check procFS
   if os.path.exists("/proc/cpuinfo"):
