@@ -790,10 +790,11 @@ if __name__ == "__main__":
   # change to folder where the main modRana file is located
   # * this enables to run modRana with absolute path without adverse
   # effect such as modRana not finding modules or
-  os.chdir(os.path.dirname(os.path.abspath(__file__)))
+  currentAbsolutePath = os.path.dirname(os.path.abspath(__file__))
+  os.chdir(currentAbsolutePath)
   # add the modules folder to path, so that third-party modules (such as Upoints),
   # that expect to be placed to path work correctly
-  sys.path.append('modules')
+  sys.path.append(os.path.join(currentAbsolutePath, 'modules'))
 
   # check if reload has been requested
   reloadArg = "--reload"
