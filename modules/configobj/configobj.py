@@ -15,7 +15,7 @@
 # ConfigObj mailing list:
 # http://lists.sourceforge.net/lists/listinfo/configobj-develop
 # Comments, suggestions and bug reports welcome.
-import pdb
+#import pdb
 
 import os
 import re
