@@ -1,1 +1,1 @@
-
+from .configobj import ConfigObj
