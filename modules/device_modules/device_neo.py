@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_device_module import DeviceModule
+from base_device_module import DeviceModule, DEVICE_SMARTPHONE
 import subprocess
 
 
@@ -97,3 +97,6 @@ class DeviceNeo(DeviceModule):
     """we use GPSD for location on the Neo FreeRunner
     as it should be available on both the DH & QtMoko"""
     return "gpsd"
+
+  def getDeviceType(self):
+    return DEVICE_SMARTPHONE

@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_device_module import DeviceModule
+from base_device_module import DeviceModule, DEVICE_DESKTOP
 
 def getModule(m,d,i):
   return DevicePC(m,d,i)
@@ -47,3 +47,6 @@ class DevicePC(DeviceModule):
 
   def getSupportedGUIModuleIds(self):
     return ["GTK", "QML:indep"]
+
+  def getDeviceType(self):
+    return DEVICE_DESKTOP

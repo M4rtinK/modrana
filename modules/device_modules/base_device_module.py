@@ -22,6 +22,10 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 
+DEVICE_DESKTOP = 1
+DEVICE_SMARTPHONE = 2
+DEVICE_TABLET = 3
+
 class DeviceModule(RanaModule):
   """A modRana device module"""
   
@@ -241,6 +245,25 @@ class DeviceModule(RanaModule):
     """
     return None
 
+  def getDeviceType(self):
+    """Returns type of the current device
+
+    The device can currently be either a PC
+    (desktop or laptop/notebook),
+    smartphone or a tablet.
+    This is currently used mainly for rough
+    DPI estimation.
+    Example:
+    * high resolution & PC -> low DPI
+    * high resolution & smartphone -> high DPI
+    * high resolution & smartphone -> low DPI
+
+    This could also be used in the future to
+    use different PC/smartphone/tablet GUI styles.
+
+    By default, the device type is unknown.
+    """
+    return None
 
 #  def getAutorotationSupported(self):
 #    return False

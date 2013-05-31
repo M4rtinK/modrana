@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_device_module import DeviceModule
+from base_device_module import DeviceModule, DEVICE_SMARTPHONE
 QTM_IMPORT_SUCCESS = False
 try:
   from QtMobility.SystemInfo import QSystemScreenSaver
@@ -115,3 +115,7 @@ class DeviceNemo(DeviceModule):
   def needsQuitButton(self):
     """No need for a separate Quit button thanks to the Nemo UI"""
     return False
+
+  def getDeviceType(self):
+    # TODO: amend once some Nemo tablets show up
+    return DEVICE_SMARTPHONE

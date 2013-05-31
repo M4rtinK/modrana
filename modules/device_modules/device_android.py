@@ -83,3 +83,7 @@ class Android(DeviceModule):
 
   def getRoutingDataFolderPath(self):
     return ROUTING_DATA_FOLDER_PATH
+
+  def getDeviceType(self):
+    # TODO: device type detection
+    return None
