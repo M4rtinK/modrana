@@ -234,6 +234,12 @@ class DeviceModule(RanaModule):
     # TODO: respect the modRana internet connectivity state
     pass
 
+  def getStartDragDistance(self):
+    """Distance in pixel for discerning drag from a click
+    A correct start drag distance is important on high DPI screens
+    as the default values don't work correctly on them.
+    """
+    return None
 
 
 #  def getAutorotationSupported(self):
