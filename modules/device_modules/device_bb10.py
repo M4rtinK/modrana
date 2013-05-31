@@ -20,6 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_device_module import DeviceModule
+import bbpy
 
 def getModule(m,d,i):
   return BB10(m,d,i)
@@ -65,3 +66,14 @@ class BB10(DeviceModule):
       QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
     else:
       self.qScreenSaver = QSystemScreenSaver()
+
+  def needsQuitButton(self):
+    return False
+
+  def usesDashboard(self):
+    return False
+
+  def getStartDragDistance(self):
+    """BB10 devices have a high DPI screen and need a higher value than
+    the default in Qt."""
+    return 32
