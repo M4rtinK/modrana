@@ -106,6 +106,9 @@ class QMLGUI(GUIModule):
         self.modrana.shutdown()
 
     self.app = QApplication(sys.argv)
+    startDragDistance = self.modrana.dmod.getStartDragDistance()
+    if startDragDistance:
+      self.app.setStartDragDistance(startDragDistance)
 
     # register custom modRana types
     # NOTE: custom types need to be registered AFTER
