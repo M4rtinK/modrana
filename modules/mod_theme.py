@@ -26,7 +26,7 @@ from core.backports import six
 # for some reason one import method works
 # on Fremantle and other everywhere (?) else"""
 try:
-  from modules.configobj.configobj import ConfigObj # everywhere
+  from modules.configobj import ConfigObj # everywhere
 except Exception:
   import sys
   e = sys.exc_info()[1]
