@@ -312,6 +312,7 @@ class QMLGUI(GUIModule):
 
   def getConstants(self):
     C = {
+      "style" : self._getStyleConstants()
     }
     return C
 
@@ -341,6 +342,22 @@ class QMLGUI(GUIModule):
   def _getLayerListModel(self):
     pass
 
+  def _getStyleConstants(self, highDPI=False):
+    # as True == 1 and False == 0,
+    # we use the highDPI boolean as a tuple index
+    # * highDpi == False -> first value is used
+    # * highDpi == True -> second value is used
+    i = highDPI
+    style = {
+      "map": {
+        "button": {
+          "size": (72, 108)[i],
+          "margin": (16, 24)[i],
+          "spacing": (16, 24)[i],
+        }
+      }
+    }
+    return style
 
 class Platform(QtCore.QObject):
   """make current platform available to QML and integrable as a property"""
