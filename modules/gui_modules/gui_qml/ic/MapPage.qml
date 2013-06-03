@@ -141,23 +141,23 @@ Item {
     Row {
         id: buttonsRight
         anchors.bottom: pinchmap.bottom
-        anchors.bottomMargin: 16
+        anchors.bottomMargin: C.style.map.button.margin
         anchors.right: pinchmap.right
-        anchors.rightMargin: 16
-        spacing: 16
+        anchors.rightMargin: C.style.map.button.margin
+        spacing: C.style.map.button.spacing
         Button {
             iconSource: "image://icons/" + modrana.theme_id + "/" + "plus_small.png"
             onClicked: {pinchmap.zoomIn() }
-            width: parent.parent.buttonSize
-            height: parent.parent.buttonSize
+            width: C.style.map.button.size
+            height: C.style.map.button.size
             enabled : pinchmap.zoomLevel != pinchmap.maxZoomLevel
             //text : "<h1>+</h1>"
         }
         Button {
             iconSource: "image://icons/" + modrana.theme_id + "/" + "minus_small.png"
             onClicked: {pinchmap.zoomOut() }
-            width: parent.parent.buttonSize
-            height: parent.parent.buttonSize
+            width: C.style.map.button.size
+            height: C.style.map.button.size
             enabled : pinchmap.zoomLevel != pinchmap.minZoomLevel
 
             //text : "<h1>-</h1>"
@@ -166,10 +166,10 @@ Item {
     Column {
         id: buttonsLeft
         anchors.bottom: pinchmap.bottom
-        anchors.bottomMargin: 16
+        anchors.bottomMargin: C.style.map.button.margin
         anchors.left: pinchmap.left
-        anchors.leftMargin: 16
-        spacing: 16
+        anchors.leftMargin: C.style.map.button.margin
+        spacing: C.style.map.button.spacing
         Button {
             iconSource: "image://icons/" + modrana.theme_id + "/" + "minimize_small.png"
             checkable : true
@@ -177,14 +177,14 @@ Item {
             onClicked: {
                 platform.toggleFullscreen()
             }
-            width: parent.parent.buttonSize
-            height: parent.parent.buttonSize
+            width: C.style.map.button.size
+            height: C.style.map.button.size
         }
         Button {
             id: followPositionButton
             iconSource: "image://icons/" + modrana.theme_id + "/" + "center_small.png"
-            width: parent.parent.buttonSize
-            height: parent.parent.buttonSize
+            width: C.style.map.button.size
+            height: C.style.map.button.size
             checked : tabMap.center
             /*
             checked is bound to tabMap.center, no need to toggle
@@ -208,8 +208,8 @@ Item {
             iconSource: showModeOnMenuButton ?
                 "image://icons/" + modrana.theme_id + "/" + modrana.mode  + "_small.png"
                 :"image://icons/" + modrana.theme_id + "/" + "menu_small.png"
-            width: parent.parent.buttonSize
-            height: parent.parent.buttonSize
+            width: C.style.map.button.size
+            height: C.style.map.button.size
             onClicked: {
                 rWin.push("Menu", undefined, !rWin.animate)
             }
