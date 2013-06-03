@@ -110,6 +110,13 @@ class QMLGUI(GUIModule):
     if startDragDistance:
       self.app.setStartDragDistance(startDragDistance)
 
+    # get screen resolution
+    screenRectangle = self.app.desktop().screenGeometry()
+    width = screenRectangle.width()
+    height = screenRectangle.height()
+    print(" @ screen size: %dx%d" % (width, height))
+    # NOTE: what about multi-display devices ? :)
+
     # register custom modRana types
     # NOTE: custom types need to be registered AFTER
     # QApplication is created but BEFORE QDeclarativeView
