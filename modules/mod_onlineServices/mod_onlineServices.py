@@ -242,7 +242,7 @@ class OnlineServices(RanaModule):
     flagDir = {}
     # the google language code is the second part of this whitespace delimited string
     googleLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[1]
-    flagDir['hl'] = googleLanguageCode
+    flagDir['language'] = googleLanguageCode
     directions = self.tryToGetDirections(start, destination, flagDir, directionsType, otherOptions, waypointOption)
 
     return directions
