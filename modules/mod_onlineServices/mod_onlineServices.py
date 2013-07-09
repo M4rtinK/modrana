@@ -41,6 +41,7 @@ class OnlineServices(RanaModule):
     RanaModule.__init__(self, m, d, i)
     self.workerThreads = []
     self.drawOverlay = False
+    self.workStartTimestamp = None
 
   #  # testing
   #  def firstTime(self):
@@ -48,10 +49,10 @@ class OnlineServices(RanaModule):
 
   def handleMessage(self, message, messageType, args):
     if message == "cancelOperation":
-      """this message is sent when the user presses the "cancel search" button
-         it should:
-         * make sure there are no results returned after the button is pressed
-         * remove the cancel button and the "working" overlay """
+      # this message is sent when the user presses the "cancel search" button
+      # it should:
+      # * make sure there are no results returned after the button is pressed
+      # * remove the cancel button and the "working" overlay
       self.stop()
 
   def _disableOverlay(self):
@@ -229,49 +230,52 @@ class OnlineServices(RanaModule):
       # respect travel mode
     mode = self.get('mode', None)
     if mode == 'cycle':
-      type = "b"
+      directionsType = "b"
     elif mode == 'walk':
-      type = "w"
+      directionsType = "w"
     elif mode == 'train' or mode == 'bus':
-      type = 'r'
+      directionsType = 'r'
     else:
-      type = ""
+      directionsType = ""
 
       # combine type and other parameters
-    dir = {}
+    flagDir = {}
     # the google language code is the second part of this whitespace delimited string
     googleLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[1]
-    dir['hl'] = googleLanguageCode
-    directions = self.tryToGetDirections(start, destination, dir, type, otherOptions, waypointOption)
+    flagDir['hl'] = googleLanguageCode
+    directions = self.tryToGetDirections(start, destination, flagDir, directionsType, otherOptions, waypointOption)
 
     return directions
 
-  def tryToGetDirections(self, start, destination, dir, travelMode, otherOptions, waypointOption, secondTime=False):
+  def tryToGetDirections(self, start, destination, flagDir, travelMode, otherOptions, waypointOption, secondTime=False):
     gMap = self.getGmapsInstance()
     parameters = travelMode + otherOptions
-    dir['dirflg'] = parameters
+    flagDir['dirflg'] = parameters
     if waypointOption:
-      dir['waypoints'] = waypointOption
-    dir['sensor'] = 'false'
+      flagDir['waypoints'] = waypointOption
+    flagDir['sensor'] = 'false'
     directions = ""
     # only import when actually needed
     import googlemaps
 
     try:
-      directions = gMap.directions(start, destination, dir)
+      directions = gMap.directions(start, destination, flagDir)
     except googlemaps.GoogleMapsError:
+      import sys
       e = sys.exc_info()[1]
       if e.status == 602:
-        print("onlineServices:GDirections:routing failed -> address not found" % e)
+        print("onlineServices:GDirections:routing failed -> address not found")
+        print(e)
         self.sendMessage("ml:notification:m:Address(es) not found;5")
       elif e.status == 604:
-        print("onlineServices:GDirections:routing failed -> no route found" % e)
+        print("onlineServices:GDirections:routing failed -> no route found")
+        print(e)
         self.sendMessage("ml:notification:m:No route found;5")
       elif e.status == 400:
         if not secondTime: # guard against potential infinite loop for consequent 400 errors
           print("onlineServices:GDirections:bad response to travel mode, trying default travel mode")
           self.set('needRedraw', True)
-          directions = self.tryToGetDirections(start, destination, dir, travelMode="", otherOptions=otherOptions,
+          directions = self.tryToGetDirections(start, destination, flagDir, travelMode="", otherOptions=otherOptions,
                                                waypointOption=waypointOption, secondTime=True)
       else:
         print("onlineServices:GDirections:routing failed with exception googlemaps status code:%d" % e.status)
@@ -381,6 +385,7 @@ class Worker(threading.Thread):
     self.flags = flags
     self.statusMessage = ""
     self.returnResult = True
+    self.progress = 0.0
 
   def run(self):
     print("onlineServices: worker starting")
@@ -519,7 +524,7 @@ class Worker(threading.Thread):
     # Local Search doesn't like the geo: prefix so we remove it
     query = re.sub("loc:.*geo:", "loc:", query)
 
-    """this method performs Google Local online-search and is called in the worker thread"""
+    # this method performs Google Local online-search and is called in the worker thread
     print("onlineServices: performing GLS")
     self._setWorkStatusText("online POI search in progress...")
     result = self.online.googleLocalQuery(query)
