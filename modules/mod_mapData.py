@@ -68,11 +68,16 @@ class MapData(RanaModule):
     self.notificateOnce = True
     self.scroll = 0
     self.onlineRequestTimeout = 30
-    """ how often should be the download info
-    updated during batch, in seconds"""
+    # how often should the download info be
+    # updated during batch download, in seconds
     self.batchInfoUpdateInterval = 0.5
     self.mapFolderPath = None
     self._mapLayersModule = None
+
+    self.x = None
+    self.y = None
+    self.z = None
+    self.tiles = []
 
   def firstTime(self):
     # cache the map folder path
