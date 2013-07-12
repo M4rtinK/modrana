@@ -35,7 +35,7 @@ class Options(RanaModule):
   def __init__(self, m, d, i):
     RanaModule.__init__(self, m, d, i)
     self.options = {}
-    """for fast searching defaults for corresponding keys"""
+    # for fast searching defaults for corresponding keys
     self.keyDefault = {}
 
     # profile folder
