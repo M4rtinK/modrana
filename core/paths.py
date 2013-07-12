@@ -166,18 +166,34 @@ class Paths(object):
     return self._assurePath(path)
 
   def getMonavServerBinaryPath(self):
+    arch = None
     deviceID = self.modrana.dmod.getDeviceIDString()
     if deviceID == 'n900':
       arch = 'armv7'
     elif deviceID == 'pc':
-      arch = 'amd64'
+      # use the platform module to check if the PC is
+      # 32bit or 64bit
+      import platform
+      binaryArch = platform.architecture()[0]
+      if binaryArch == "32bit":
+        arch = 'i386'
+      elif binaryArch == "64bit":
+        arch = 'amd64'
       # this is mostly for development testing and should
       # be superseded by properly packaged up-to-date Monav
       # with working Python bindings support & Unicode handling
+    if arch:
+      folder = "monav_%s" % arch
+      monavBinaryPath = os.path.join('modules/mod_route/', folder, 'monav-server')
+      if os.path.exists(monavBinaryPath):
+        return monavBinaryPath
+      else:
+        print("routing: monav routing server binary missing")
+        print("(%s does not exist)" % monavBinaryPath)
+        return None
     else:
-      return None # no known path to Monav binaries
-    folder = "monav_%s" % arch
-    return os.path.join('modules/mod_route/', folder, 'monav-server')
+      # no known path to Monav binaries for this architecture
+      return None
 
   def getVersionString(self):
     """

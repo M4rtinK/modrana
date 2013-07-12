@@ -56,8 +56,10 @@ class Monav(object):
         print('monav_support: server already running')
       except Exception:
         import sys
-        e = sys.exc_info()[1]
-        print('monav_support: starting monav server in:')
+        if not self.monavServerBinaryPath:
+          print("route: can't start monav server - binary missing")
+          return
+        print('monav_support: using monav server binary in:')
         print(self.monavServerBinaryPath)
 
         def _startServer(self):
