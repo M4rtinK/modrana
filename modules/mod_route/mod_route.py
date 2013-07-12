@@ -687,7 +687,7 @@ class Route(RanaModule):
     steps = directions.getMessagePoints()
 
     for step in steps:
-      originalMessage = "".join(step.getMessage())
+      originalMessage = "".join(str(step.getMessage()))
       try:
         message = step.getMessage() #TODO: make a method for this
         message = re.sub(r'<div[^>]*?>', '\n<i>', message)
