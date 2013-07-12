@@ -66,14 +66,12 @@ class Route(RanaModule):
     self.set('startPos', None)
     self.set('endPos', None)
 
-    file = open(DIRECTIONS_FILTER_CSV_PATH, 'r')
-    CSVReader = csv.reader(file, delimiter=';', quotechar='|') #use an iterator
-    self.directionsFilterRules = []
-    for row in CSVReader:
-      if row[0] != '#' and len(row) >= 2:
-        regex = re.compile(u(row[0]))
-        self.directionsFilterRules.append((regex, u(row[1])))
-    file.close()
+    self._directionsFilterRules = []
+    self._directionsFilterRulesLoaded = False
+
+    # Monav
+    self.monav = None
+    self.monavDataFolder = None
 
   def _goToInitialState(self):
     """restorer initial routing state
@@ -103,9 +101,30 @@ class Route(RanaModule):
 
     self.routeDetailGeocodingTriggered = False
 
-    # Monav
-    self.monav = None
-    self.monavDataFolder = None
+  @property
+  def directionsFilterRules(self):
+    if not self._directionsFilterRulesLoaded:
+      self._loadDirectionsFilter()
+    # why not just check if _directionsFilterRules
+    # is nonempty ?
+    # -> the file might be empty or its loading might fail,
+    # so if we checked just the rules list in such a case,
+    # we would needlessly open the file over and over again
+    return self._directionsFilterRules
+
+  def _loadDirectionsFilter(self):
+    """Load direction filters from their CSV file"""
+    start = time.time()
+    f = open(DIRECTIONS_FILTER_CSV_PATH, 'r')
+    CSVReader = csv.reader(f, delimiter=';', quotechar='|') #use an iterator
+    self._directionsFilterRules = []
+    for row in CSVReader:
+      if row[0] != '#' and len(row) >= 2:
+        regex = re.compile(u(row[0]))
+        self._directionsFilterRules.append((regex, u(row[1])))
+    f.close()
+    self._directionsFilterRulesLoaded = True
+    print("route: directions filter loaded in %1.2f ms" % ((time.time()-start)*1000))
 
   def handleMessage(self, message, messageType, args):
     if message == "clear":
@@ -769,7 +788,6 @@ class Route(RanaModule):
     if cyrillicStringTemp: #is there an "open" cyrillic string ?
       cyrillicStringTemp += '</p>' # close the string
       outputString += ' ' + cyrillicStringTemp
-      cyrillicStringTemp = ""
     return outputString
 
   def drawScreenOverlay(self, cr):
