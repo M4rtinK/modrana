@@ -80,7 +80,9 @@ class _odict(object):
         dict_impl = self._dict_impl()
         try:
             dict_impl.__getitem__(self, key)[1] = val
-        except KeyError, e:
+        except KeyError:
+            import sys
+            e = sys.exc_info()[1]
             new = [dict_impl.__getattribute__(self, 'lt'), val, _nil]
             dict_impl.__setitem__(self, key, new)
             if dict_impl.__getattribute__(self, 'lt') == _nil:
