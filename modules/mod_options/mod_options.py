@@ -43,9 +43,6 @@ class Options(RanaModule):
     # check the profile path and create the folders if necessary
     utils.createFolderPath(self.profileFolderPath)
 
-    # load persistent options
-    #    self.load()
-
     # items menu cache
     self.itemMenus = {}
 
