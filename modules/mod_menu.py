@@ -20,7 +20,7 @@
 from modules.base_module import RanaModule
 import time
 import math
-from core import geo
+from core import geo, constants
 from core import utils
 
 # only import GKT libs if GTK GUI is used
@@ -1030,7 +1030,18 @@ class Menus(RanaModule):
     self.addItem('editBatch', 'Zoom down#now: %d + %d = %d' % (z,zoomDown,maxZ), 'generic', 'set:menu:zoomDown')
     self.addItem('editBatch', 'Zoom up#now: %d - %d = %d' % (z,zoomUp,minZ), 'generic', 'set:menu:zoomUp')
 
-    # on exit from submenu, we need to refresh the editBacht menu, so we also send setupEditBatchMenu
+    # redownload toggle button
+    baseAction = '|tracklog:setNewLoggingInterval'
+    textIconAction = [
+      ('OFF#redownload', '', 'set:batchRedownloadAvailableTiles:False'+baseAction),
+      (constants.PANGO_ON + '#redownload', '', 'set:batchRedownloadAvailableTiles:True'+baseAction)
+    ]
+    index = self.get('batchRedownloadAvailableTiles', False)
+    # True -> second state will be used (ON)
+    # False -> first state will be used (OFF)
+    self.addToggleItem('editBatch', textIconAction, index, None, 'batchRedownloadAvailableTiles')
+
+    # on exit from submenu, we need to refresh the editBatch menu, so we also send setupEditBatchMenu
     self.setupDataMenu('editBatch|menu:setupEditBatchMenu', 'editBatch')
     self.setupDataSubMenu('editBatch|menu:setupEditBatchMenu', 'editBatch')
     self.setupZoomDownMenu('editBatch|menu:setupEditBatchMenu', 'editBatch')

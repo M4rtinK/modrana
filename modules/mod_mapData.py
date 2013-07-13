@@ -747,8 +747,10 @@ class MapData(RanaModule):
       m = self.callback.m.get('storeTiles', None) # get the tile storage module
       if m:
         # does the the file exist ?
+        tileExists = m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread=True)
+        redownload = self.callback.get('batchRedownloadAvailableTiles', False)
         # TODO: maybe make something like tile objects so we don't have to pass so many parameters ?
-        if not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread=True): # if the file does not exist
+        if redownload or not tileExists : # if the file does not exist
           request = self.connPool.request('get', url)
           size = int(request.getheaders()['content-length'])
           content = request.data
