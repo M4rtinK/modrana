@@ -45,8 +45,6 @@ class Options(RanaModule):
 
     # load persistent options
     #    self.load()
-    self.on = '<span color="green">ON</span>'
-    self.off = '<span color="red">OFF</span>'
 
     # items menu cache
     self.itemMenus = {}
@@ -120,8 +118,8 @@ class Options(RanaModule):
 
 
   def addBoolOption(self, title, variable, group, default=None, action=None):
-    on = self.on
-    off = self.off
+    on = constants.PANGO_ON
+    off = constants.PANGO_OFF
 
     if action:
       states = ((False, off, action), (True, on, action))
@@ -748,8 +746,8 @@ class Options(RanaModule):
     group = addGroup("Turn by turn", "turn_by_turn", catNavigation, "generic")
 
     addOpt("Autostart navigation", "autostartNavigationDefaultOnAutoselectTurn",
-      [('disabled', "OFF"),
-       ('enabled', "ON")],
+      [('disabled', constants.PANGO_OFF),
+       ('enabled', constants.PANGO_ON)],
       group,
       'enabled')
 
@@ -1393,7 +1391,7 @@ class Options(RanaModule):
 
           # draw mode specific combined toggle & indicator
           if self.modrana.hasKeyModifierInMode(variable, mode):
-            toggleText = '<span color="green">ON</span>#per Mode'
+            toggleText = constants.PANGO_ON + '#per Mode'
             modeSpecToggleAction = "ml:options:removeKeyModifier:%s;%s" % (variable, mode)
           else:
             toggleText = "OFF#per Mode"
