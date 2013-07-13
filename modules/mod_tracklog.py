@@ -59,6 +59,7 @@ class Tracklog(RanaModule):
     self.logName = None #name of the current log
     self.logFilename = None #name of the current log
     self.logPath = None #path to the current log
+    self.currentTempLog = []
     # primary and secondary AOWay objects for
     # persistent log storage during logging
     self.log1 = None
@@ -722,11 +723,10 @@ class Tracklog(RanaModule):
           print('tracklog: temporary file %s deleted' % logPath)
 
         except Exception:
-
           import sys
-
           e = sys.exc_info()[1]
           print('tracklog: exporting unsaved secondary log file failed')
+          print(e)
           failedPath = "%s_2.csv" % os.path.splitext(logPath)[0]
           print('tracklog: renaming to %s instead' % failedPath)
           try:
