@@ -48,6 +48,7 @@ class Menus(RanaModule):
     self.hideMapScreenButtons = False
     self.lastHideCheckTimestamp = time.time()
     self.itemMenuGrid = (None,[])
+    self.icons = None
 
     # tools menu
     self.itemToolsMenuCache = (None, None)
@@ -650,7 +651,7 @@ class Menus(RanaModule):
         persist[uniqueName] = index
         self.set('persistentToggleButtons', persist)
 
-    """we are counting up from zero for the item indexes"""
+    # we are counting up from zero for the item indexes
     self.menus[menu][itemCount] = (textIconAction, index, uniqueName, menuType)
     self.menus[menu]['metadata']['itemCount'] = itemCount + 1
 
