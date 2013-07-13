@@ -1034,8 +1034,14 @@ class Menus(RanaModule):
     baseAction = '|tracklog:setNewLoggingInterval'
     textIconAction = [
       ('OFF#redownload', '', 'set:batchRedownloadAvailableTiles:False'+baseAction),
-      (constants.PANGO_ON + '#redownload', '', 'set:batchRedownloadAvailableTiles:True'+baseAction)
+      (constants.PANGO_ON + '#redownload', '', 'set:batchRedownloadAvailableTiles:True'+baseAction),
+      ('update#redownload', '', 'set:batchRedownloadAvailableTiles:2'+baseAction)
     ]
+    # batchRedownloadAvailableTiles meanings:
+    # False/0 -> download only tiles that aren't locally available
+    # True/1 -> download all tiles
+    # 2 -> download only tiles that are locally available (update all tiles in area)
+
     index = self.get('batchRedownloadAvailableTiles', False)
     # True -> second state will be used (ON)
     # False -> first state will be used (OFF)
