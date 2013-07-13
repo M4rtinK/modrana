@@ -22,3 +22,7 @@ DEFAULT_COORDINATES = 49.2, 16.616667  # Brno
 #(49.233056, 17.666944) is Zlin
 
 DEFAULT_THEME_ID = "default"
+
+#GTK GUI
+PANGO_ON = '<span color="green">ON</span>'
+PANGO_OFF = '<span color="red">OFF</span>'
