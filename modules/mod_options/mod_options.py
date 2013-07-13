@@ -514,7 +514,7 @@ class Options(RanaModule):
        (15000, "long drag", changedMsg),
        (40000, "really long drag", changedMsg),
        (80000, "extremely long drag", changedMsg),
-       (False, self.off, changedMsg)],
+       (False, constants.PANGO_OFF, changedMsg)],
       group,
       2048)
 
