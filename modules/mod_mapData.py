@@ -78,6 +78,7 @@ class MapData(RanaModule):
     self.y = None
     self.z = None
     self.tiles = []
+    self.totalSize = 0
 
   def firstTime(self):
     # cache the map folder path
@@ -720,7 +721,6 @@ class MapData(RanaModule):
 
         # try to retrieve and store the tile
         failed = False
-        dl = False
         try:
           dlSize = self.saveTileForURL(item)
         except Exception:
