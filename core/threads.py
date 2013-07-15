@@ -22,8 +22,22 @@
 # Author(s):  Chris Lumens <clumens@redhat.com>
 #
 # modified for use with modRana by: Martin Kolman
-import logging
-log = logging.getLogger("modRana")
+#import logging
+#log = logging.getLogger("modRana")
+# until modRana has a proper logging structure,
+# use a fake stdout log
+
+class FakeLog(object):
+  def info(self, message):
+    print("INFO:" + message)
+
+  def debug(self, message):
+    print("DEBUG:" + message)
+
+  def error(self, message):
+    print("ERROR:" + message)
+
+log = FakeLog()
 
 import threading
 

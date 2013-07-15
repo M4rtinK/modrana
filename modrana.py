@@ -35,6 +35,7 @@ from core import startup
 from core import utils
 from core import paths
 from core import configs
+from core import threads
 from core import gs
 from core.backports import six
 # record that imports-done timestamp
@@ -84,6 +85,9 @@ class ModRana(object):
     # NOTE: this variable is automatically saved by the
     # options module
     self.keyModifiers = {}
+
+    # initialize threading
+    threads.initThreading()
 
     # start timing modRana launch
     self.addTime("GUI creation")
