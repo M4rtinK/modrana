@@ -422,6 +422,7 @@ def fromCSV(path, delimiter=',', fieldCount=None):
   try:
     f = open(path, 'r')
   except IOError:
+    import sys
     e = sys.exc_info()[1]
     if e.errno == 2:
       raise core.exceptions.FileNotFound
