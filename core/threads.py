@@ -148,6 +148,29 @@ class ModRanaThread(threading.Thread):
     def __init__(self, *args, **kwargs):
         threading.Thread.__init__(self, *args, **kwargs)
         self.daemon = True
+        self._status = None  # string describing current state of the thread
+        self._progress = None  # floating point value from 0.1 to 1.0
+        self._stateLock = threading.Lock()
+
+    @property
+    def status(self):
+        with self._stateLock:
+          return self._status
+
+    @status.setter
+    def status(self, value):
+        with self._stateLock:
+          self._status = value
+
+    @property
+    def progress(self):
+      with self._stateLock:
+        return self._progress
+
+    @progress.setter
+    def progress(self, value):
+      with self._stateLock:
+        self._progress = value
 
     def run(self, *args, **kwargs):
         # http://bugs.python.org/issue1230540#msg25696
