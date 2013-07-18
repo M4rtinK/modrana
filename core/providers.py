@@ -35,18 +35,24 @@ class POIProvider(object):
     :param around: optional location bias
     :type around: Point instance
     """
-    thread = threads.ModRanaThread()
-    thread.name = constants.THREAD_POI_SEARCH
     # lambda is used to pass all needed arguments to the search function
     # and passing the result to the callback,
     # but not actually executing it until the thread is started
-    thread.run = lambda: callback(
-      self.search(
-        term=term,
-        around=around,
-        controller=thread
+    thread = threads.ModRanaThread(
+      name=constants.THREAD_POI_SEARCH,
+      target=lambda: callback(
+        self.search(
+          term=term,
+          around=around,
+          controller=thread
+        )
       )
     )
+    # and yet, this really works :)
+    # - we need to set the target, and it seems this can only be done in init
+    # - passing the thread itself as controller seems to work or at least does
+    # not raise any outright exception
+
     # register the thread by the thread manager
     # (this also starts the thread)
     threads.threadMgr.add(thread)
