@@ -712,7 +712,7 @@ class Menus(RanaModule):
 
     def describePointGo2Map(point, index, name):
       mainText = point.name
-      secText, (lat, lon) = point.description, point.getLL()
+      secText, (lat, lon) = point.summary, point.getLL()
       z = self.get('z', 15)
       action = 'mapView:recentre %f %f %d|set:menu:None' % (lat, lon, z)
       return mainText,secText,action
