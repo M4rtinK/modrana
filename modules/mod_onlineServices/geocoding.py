@@ -12,11 +12,11 @@ class GeoPyPoint(Point):
   """
   def __init__(self, lat, lon, placeText):
     Point.__init__(self, lat, lon, message=placeText)
-    self.name=placeText.split(',')[0]
+    self._name=placeText.split(',')[0]
     self.description=re.sub(',','\n',placeText) # replace separators with newlines
 
   def getName(self):
-    return self.name
+    return self._name
 
   def getDescription(self):
     return self.description
