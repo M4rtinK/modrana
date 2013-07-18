@@ -233,7 +233,7 @@ class Search(RanaModule):
           online = self.m.get('onlineServices', None)
           if online:
             # geocode the text input asynchronously
-            online.geocodeAsync(query, self.handleSearchResult, "address2LL")
+            online.geocodeAsync(query, self)
           else:
             print("search: online services module missing")
         elif sType == "wikipedia":
@@ -710,7 +710,7 @@ class Search(RanaModule):
       textInput = result
       if online:
         # geocode the text input asynchronously
-        online.geocodeAsync(textInput, self.handleSearchResult, "address2LL")
+        online.geocodeAsync(textInput, self._address2llCB)
       else:
         print("search: online services module missing")
 
@@ -723,31 +723,33 @@ class Search(RanaModule):
       else:
         print("search: online services module missing")
 
+  def _address2llCB(self, points):
+    if points:
+      print("geocoding done - something found")
+      markers = self.m.get('markers', None)
+      name = 'addressResults'
+      if markers:
+        g = markers.addGroup(name, points, menu=True)
+        menu = g.getMenuInstance()
+        if len(points) == 1: # if only one result is found, center on it righ away
+          point = points[0]
+          self._jumpToPoint(point)
+        else:
+          self.sendMessage('set:menu:menu#list#%s' % name)
+        menu.setOnceBackAction('set:menu:searchWhat')
+      else: # just jump to the first result
+        point = points[0]
+        self._jumpToPoint(point)
+    else:
+      print("geocoding done - nothing found")
+      self.sendMessage('ml:notification:m:No results found for this address.;5')
+
+
   def handleSearchResult(self, key, results):
     if key == "localSearchResultGoogle":
       print("search: GLS result received")
       self.localSearchResults = results
       self.set('menu', 'search#searchResults')
-    elif key == "address2LL":
-      if results:
-        print("geocoding done - something found")
-        markers = self.m.get('markers', None)
-        name = 'addressResults'
-        if markers:
-          g = markers.addGroup(name, results, menu=True)
-          menu = g.getMenuInstance()
-          if len(results) == 1: # if only one result is found, center on it righ away
-            point = results[0]
-            self._jumpToPoint(point)
-          else:
-            self.sendMessage('set:menu:menu#list#%s' % name)
-          menu.setOnceBackAction('set:menu:searchWhat')
-        else: # just jump to the first result
-          point = results[0]
-          self._jumpToPoint(point)
-      else:
-        print("geocoding done - nothing found")
-        self.sendMessage('ml:notification:m:No results found for this address.;5')
     elif key == "wikipedia":
       if results:
         print("wikipedia search done - something found")
