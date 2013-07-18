@@ -105,7 +105,7 @@ class Markers(RanaModule):
     else:
       distanceString=""
 
-    text = "%s%s" % (point.getName(), distanceString)
+    text = "%s%s" % (point.name, distanceString)
 
     (x,y) = proj.ll2xy(lat, lon)
     # get colors
