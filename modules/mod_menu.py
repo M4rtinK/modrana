@@ -675,7 +675,7 @@ class Menus(RanaModule):
       boxAction = ""
     button1 = ('on map#show', 'generic', 'mapView:recentre %f %f %d|set:menu:None' % (lat, lon, z))
     button2 = ('Tools', 'tools', 'set:menu:menu#listDetailTools#%s#%d' % (menuName, index))
-    box = ('<b>%s</b>\n%s%s' % (point.getName(),point.getDescription(), suffix), boxAction)
+    box = ('<b>%s</b>\n%s%s' % (point.name, point.description, suffix), boxAction)
 
     self.drawThreePlusOneMenu(cr, 'pointDetail', backAction, button1, button2, box, wrap=True)
 
@@ -711,8 +711,8 @@ class Menus(RanaModule):
       c = utils.SimpleListContainer()
 
     def describePointGo2Map(point, index, name):
-      mainText = point.getName()
-      secText, (lat, lon) = point.getAbstract(), point.getLL()
+      mainText = point.name
+      secText, (lat, lon) = point.description, point.getLL()
       z = self.get('z', 15)
       action = 'mapView:recentre %f %f %d|set:menu:None' % (lat, lon, z)
       return mainText,secText,action
