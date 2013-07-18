@@ -10,16 +10,16 @@ class LocalSearchPoint(Point):
     if not urls: urls = []
     if not phoneNumbers: phoneNumbers = []
     Point.__init__(self, lat, lon, message=name)
-    self.name = name
+    self._name = name
     self.description = description
-    self.message=None
+    self._message=None
     self.phoneNumbers = phoneNumbers
     self.urls = urls
     self.addressLines = addressLines
     self.emails = emails
 
   def getName(self):
-    return self.name
+    return self._name
 
   def getDescription(self):
     return self.description
@@ -27,16 +27,16 @@ class LocalSearchPoint(Point):
   def getMessage(self):
     # lazy message generation
     # = only generate the message once it is requested for the first time
-    if self.message is None:
+    if self._message is None:
       self.updateMessage()
-      return self.message
+      return self._message
     else:
-      return self.message
+      return self._message
 
   def updateMessage(self):
     """call this if you change the properties of an existing point"""
     message = ""
-    message+="%s\n\n" % self.name
+    message+="%s\n\n" % self._name
     if self.description != "":
       message+="%s\n" % self.description
     for item in self.addressLines:

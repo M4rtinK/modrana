@@ -26,6 +26,7 @@ import time
 from . import geocoding
 from . import geonames
 from . import local_search
+from . import online_providers
 
 DEFAULT_GOOGLE_API_KEY = "ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw"
 
@@ -62,12 +63,14 @@ class OnlineServices(RanaModule):
 
   def geocode(self, address):
     """synchronous geocoding"""
-    return geocoding.geocode(address)
+    # TODO: provider switching
+    return online_providers.GeocodingNominatim().search(term=address)
 
-  def geocodeAsync(self, address, outputHandler, key):
+  def geocodeAsync(self, address, callback):
     """asynchronous geocoding"""
-    flags = {'net': True}
-    self._addWorkerThread(Worker._onlineGeocoding, [address], outputHandler, key, flags)
+    print("GEOCODE ASYNC")
+    online_providers.GeocodingNominatim().searchAsync(callback, term=address)
+
 
   def localSearch(self, term, where=None, maxResults=8):
     """Synchronous generic local search query

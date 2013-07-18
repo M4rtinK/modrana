@@ -23,6 +23,9 @@ DEFAULT_COORDINATES = 49.2, 16.616667  # Brno
 
 DEFAULT_THEME_ID = "default"
 
-#GTK GUI
+# GTK GUI
 PANGO_ON = '<span color="green">ON</span>'
 PANGO_OFF = '<span color="red">OFF</span>'
+
+# threads
+THREAD_POI_SEARCH = "modRanaPOISearch"

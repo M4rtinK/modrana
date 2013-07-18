@@ -1,0 +1,78 @@
+# -*- coding: utf-8 -*-
+# Online geodata providers
+import json
+
+from core.providers import POIProvider, DummyController
+from core.point import Point
+
+try:  # Python 2
+  #from urllib import urlencode
+  from urllib2 import urlopen, Request, HTTPError, URLError
+except ImportError:  # Python 3
+  from urllib.request import urlopen, Request
+  #from urllib.parse import urlencode
+  from urllib.error import HTTPError, URLError
+
+NOMINATIM_GEOCODING_URL = API_URL = "http://nominatim.openstreetmap.org/search?q=%s&format=json&addressdetails=0"
+
+class GoogleAddressSearch(POIProvider):
+  def __init__(self):
+    POIProvider.__init__(self)
+
+  def search(self, term=None, around=None, controller=DummyController()):
+    """Search for an address using Google geocoding API"""
+    if term is None:
+      print("online_services: GoogleAddressSearch: term is None")
+      return []
+    controller.status = "starting online address search"
+    controller.status = "online address search done"
+
+
+class GeocodingNominatim(POIProvider):
+
+  def __init__(self):
+    POIProvider.__init__(self)
+
+  def search(self, term=None, around=None, controller=DummyController()):
+    """Search for an address using Google geocoding API"""
+    print("SEARCH")
+    if term is None:
+      print("online_services: NominatimAddressSearch: term is None")
+      return []
+    results = []
+    controller.status = "starting online address search"
+    try:
+      queryUrl = NOMINATIM_GEOCODING_URL % term
+      reply = urlopen(queryUrl)
+      if reply:
+        jsonReply = json.load(reply)
+        for result in jsonReply:
+          # split a prefix from the display name
+          description = result.get("display_name")
+          # get the first three elements
+          name = description.split(", ")[0:3]
+          # recombined back to ", " delimited string
+          name = ", ".join(name)
+          lat = float(result["lat"])
+          lon = float(result["lon"])
+          # create Point object instance
+          point = Point(lat, lon, name=name, message=description)
+          print(point)
+          results.append(point)
+    except Exception:
+      import sys
+      e = sys.exc_info()[1]
+      print("online_services: NominatimAddressSearch: failed with exception\n%s" % e)
+
+    controller.status = "online address search done"
+    return results
+
+
+
+
+
+
+
+
+
+
