@@ -2,11 +2,12 @@
 
 class Point(object):
   """a point"""
-  def __init__(self, lat, lon, elevation=None, name=None, message=None):
+  def __init__(self, lat, lon, elevation=None, name=None, summary=None, message=None):
     self.lat = lat
     self.lon = lon
     self.elevation = elevation # should be in meters
     self._name = name
+    self._summary = summary
     self._message = message
 
   def __unicode__(self):
@@ -15,14 +16,14 @@ class Point(object):
     else:
       elev = "%f m" % self.getElevation()
 
-    return '%f,%f elev: %s "%s:%s"' % (self.lat, self.lon, elev, self.name, self.message)
+    return '%f,%f elev: %s "%s:%s"' % (self.lat, self.lon, elev, self.name, self.summary)
 
   def __str__(self):
     return unicode(self).encode('utf-8')
 
   @property
   def name(self):
-    if self._name:
+    if self._name is not None:
       return self._name
     elif self._message:
       return self._message.split('\n',1)[0]
@@ -31,19 +32,27 @@ class Point(object):
 
   @name.setter
   def name(self, value):
+    """A very short name of the point"""
     self._name = value
 
   @property
-  def message(self):
-    return self._message
+  def summary(self):
+    """A short one-line summary describing the point"""
+    if self._summary is not None:
+      return self._summary
+    elif self._message:
+      return self._message.split('\n',1)[0]
+    else:
+      return ""
 
-  @message.setter
-  def message(self, value):
-    self._message = value
+  @summary.setter
+  def summary(self, value):
+    self._summary = value
 
   @property
   def description(self):
-    return self._name
+    """Long, long-line & multiline point description"""
+    return self._message
 
   @description.setter
   def description(self, value):
