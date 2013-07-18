@@ -49,14 +49,17 @@ class GeocodingNominatim(POIProvider):
         for result in jsonReply:
           # split a prefix from the display name
           description = result.get("display_name")
-          # get the first three elements
-          name = description.split(", ")[0:3]
+          # get the first element for name
+          name = description.split(", ")[0]
+          # and first three elements for summary
+          summary = description.split(", ")[0:3]
           # recombined back to ", " delimited string
-          name = ", ".join(name)
+          summary = ", ".join(summary)
           lat = float(result["lat"])
           lon = float(result["lon"])
           # create Point object instance
-          point = Point(lat, lon, name=name, message=description)
+          point = Point(lat, lon,
+                        name=name, summary=summary, message=description)
           print(point)
           results.append(point)
     except Exception:
