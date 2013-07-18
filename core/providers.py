@@ -40,7 +40,7 @@ class POIProvider(object):
     # lambda is used to pass all needed arguments to the search function
     # and passing the result to the callback,
     # but not actually executing it until the thread is started
-    thread.target = lambda: callback(
+    thread.run = lambda: callback(
       self.search(
         term=term,
         around=around,
