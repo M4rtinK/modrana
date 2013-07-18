@@ -6,14 +6,14 @@ from core.providers import POIProvider, DummyController
 from core.point import Point
 
 try:  # Python 2
-  #from urllib import urlencode
+  from urllib import urlencode
   from urllib2 import urlopen, Request, HTTPError, URLError
 except ImportError:  # Python 3
   from urllib.request import urlopen, Request
-  #from urllib.parse import urlencode
+  from urllib.parse import urlencode
   from urllib.error import HTTPError, URLError
 
-NOMINATIM_GEOCODING_URL = API_URL = "http://nominatim.openstreetmap.org/search?q=%s&format=json&addressdetails=0"
+NOMINATIM_GEOCODING_URL = API_URL = "http://nominatim.openstreetmap.org/search?"
 
 class GoogleAddressSearch(POIProvider):
   def __init__(self):
@@ -42,9 +42,15 @@ class GeocodingNominatim(POIProvider):
     results = []
     controller.status = "starting online address search"
     try:
-      queryUrl = NOMINATIM_GEOCODING_URL % term
+      params = {
+        'q' : term,
+        'format': 'json',
+        'addressdetails' : 0
+      }
+      queryUrl = NOMINATIM_GEOCODING_URL + urlencode(params)
       reply = urlopen(queryUrl)
       if reply:
+        print dir(reply)
         jsonReply = json.load(reply)
         for result in jsonReply:
           # split a prefix from the display name
@@ -65,6 +71,9 @@ class GeocodingNominatim(POIProvider):
     except Exception:
       import sys
       e = sys.exc_info()[1]
+      import traceback
+      traceback.print_exc(file=sys.stdout)
+
       print("online_services: NominatimAddressSearch: failed with exception\n%s" % e)
 
     controller.status = "online address search done"
