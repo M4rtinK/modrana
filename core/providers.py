@@ -21,6 +21,8 @@ class POIProvider(object):
     :param around: optional location bias
     :type around: Point instance
     :param controller: task controller
+    :returns: a list of points, None if search failed
+    :rtype: list
     """
     pass
 
