@@ -35,7 +35,6 @@ class GeocodingNominatim(POIProvider):
 
   def search(self, term=None, around=None, controller=DummyController()):
     """Search for an address using Google geocoding API"""
-    print("SEARCH")
     if term is None:
       print("online_services: NominatimAddressSearch: term is None")
       return []
@@ -50,7 +49,6 @@ class GeocodingNominatim(POIProvider):
       queryUrl = NOMINATIM_GEOCODING_URL + urlencode(params)
       reply = urlopen(queryUrl)
       if reply:
-        print dir(reply)
         jsonReply = json.load(reply)
         for result in jsonReply:
           # split a prefix from the display name
@@ -66,7 +64,6 @@ class GeocodingNominatim(POIProvider):
           # create Point object instance
           point = Point(lat, lon,
                         name=name, summary=summary, message=description)
-          print(point)
           results.append(point)
     except Exception:
       import sys
