@@ -161,6 +161,13 @@ class ModRanaThread(threading.Thread):
         self._status = None  # string describing current state of the thread
         self._progress = None  # floating point value from 0.1 to 1.0
         self._stateLock = threading.Lock()
+        self._callback = self._nop()
+        self.target = self._nop()  # payload goes here
+
+    def _nop(self, *args, **kwargs):
+      """A placeholder method that consumes any arguments
+      and notifies about being used"""
+      pass
 
     @property
     def status(self):
@@ -190,6 +197,21 @@ class ModRanaThread(threading.Thread):
       # wants to access the property
       threadMgr.threadProgressChanged(self.name, value)
 
+    @property
+    def callback(self):
+      """The callback property contains the optional
+      callback handler for this threads target/payload.
+      Even if a callback is already set, if it is set
+      to None or False during processing, the callback will
+      not be called.
+      Using this, a request running in a thread can
+      be cancelled or redirected to another callback."""
+      return self._callback
+
+    @callback.setter
+    def callback(self, value):
+      self._callback = value
+
     def run(self, *args, **kwargs):
         # http://bugs.python.org/issue1230540#msg25696
         import sys
@@ -197,6 +219,7 @@ class ModRanaThread(threading.Thread):
         log.info("Running Thread: %s (%s)" % (self.name, self.ident))
         try:
             threading.Thread.run(self, *args, **kwargs)
+            self._conditionalCallback(self.target())
         except KeyboardInterrupt:
             raise
         except:
@@ -205,6 +228,15 @@ class ModRanaThread(threading.Thread):
         finally:
             threadMgr.remove(self.name)
             log.info("Thread Done: %s (%s)" % (self.name, self.ident))
+
+    def _conditionalCallback(self, *args, **kwargs):
+      """Used as a "wrapper" for the real callback.
+      Enables cancelling the calling of the callback while the task is not yet done"""
+      print("COND CALLBACK")
+      print(self.callback)
+      print(self._callback)
+      if self.callback:
+        self.callback(*args, **kwargs)
 
 def initThreading():
     """Set up threading for anaconda's use. This method must be called before

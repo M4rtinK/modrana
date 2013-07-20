@@ -38,16 +38,14 @@ class POIProvider(object):
     # lambda is used to pass all needed arguments to the search function
     # and passing the result to the callback,
     # but not actually executing it until the thread is started
-    thread = threads.ModRanaThread(
-      name=constants.THREAD_POI_SEARCH,
-      target=lambda: callback(
-        self.search(
-          term=term,
-          around=around,
-          controller=thread
-        )
-      )
+    thread = threads.ModRanaThread(name=constants.THREAD_POI_SEARCH)
+    thread.target = lambda: self.search(
+      term=term,
+      around=around,
+      controller=thread
     )
+    thread.callback = callback
+
     # and yet, this really works :)
     # - we need to set the target, and it seems this can only be done in init
     # - passing the thread itself as controller seems to work or at least does
