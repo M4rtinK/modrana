@@ -1,3 +1,6 @@
+*.pyc
+*.pyo
 .idea/
 nbproject/
+
 !.gitignore
