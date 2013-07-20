@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Online geodata providers
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from core.providers import POIProvider, DummyController
 from core.point import Point
