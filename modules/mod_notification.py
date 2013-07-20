@@ -20,6 +20,10 @@
 from modules.base_module import RanaModule
 import time
 
+from core.signal import Signal
+from core.threads import threadMgr
+from core import gs
+
 def getModule(m,d,i):
   return Notification(m,d,i)
 
@@ -34,10 +38,30 @@ class Notification(RanaModule):
     self.expirationTimestamp = time.time()
     self.draw = False
     self.redrawn = None
+    self.wipOverlayEnabled = Signal()
     self.workInProgressOverlay = 0
     self.workStartTimestamp = None
-    self.workInProgressOverlayText = ""
-    """this indicates if the notification about background processing should be shown"""
+    self._wipOverlayText = ""
+    # this indicates if the notification about
+    # background processing should be shown
+    self._tasks = {}
+    # key is an unique task name (unique for each instance of a task)
+    # and value is a (status, progress) tuple
+    self.tasksChanged = Signal()
+
+    # connect thread manager signals to task status changes
+    threadMgr.threadStatusChanged.connect(self.setTaskStatus)
+    threadMgr.threadProgressChanged.connect(self.setTaskProgress)
+    threadMgr.threadRemoved.connect(self.removeTask)
+
+    # also with GTK GUI, assure screen is redrawn properly
+    # when WiP overlay changes
+    if gs.GUIString == "GTK":
+      self.wipOverlayEnabled.connect(self._doRefresh)
+      self.tasksChanged.connect(self._doRefresh)
+
+  def _doRefresh(self, ignore):
+    self.set('needRedraw', True)
 
   def handleMessage(self, message, messageType, args):
     """the first part is the message, that will be displayed,
@@ -61,9 +85,9 @@ class Notification(RanaModule):
     elif messageType=='ml' and message=='workInProgressOverlay':
       if args:
         if args[0] == "enable":
-          self.startWorkInProgressOverlay()
+          self._startWorkInProgressOverlay()
         if args[0] == "disable":
-          self.stopWorkInProgressOverlay()
+          self._stopWorkInProgressOverlay()
           
     else:
       parameterList = message.split('#')
@@ -83,39 +107,61 @@ class Notification(RanaModule):
       else:
         print("notification: wrong message: %s" % message)
 
-  def startWorkInProgressOverlay(self):
-    """start background work notification and redraw the screen"""
-    self.workInProgressOverlay = True
-    self.workStartTimestamp = time.time()
-    self.set('needRedraw', True)
+  def setTaskStatus(self, taskName, status):
+    print "SET TASK STATUS"
+    oldStatus, progress = self._tasks.get(taskName, (None, None))
+    # replace the task with updated one
+    self._tasks[taskName] = (status, progress)
+    self.tasksChanged(self._tasks)
+    if status:
+      self._startWorkInProgressOverlay()
 
-  def stopWorkInProgressOverlay(self):
-    """stop background work notification and redraw the screen"""
+  def setTaskProgress(self, taskName, progress):
+    status, oldProgress = self._tasks.get(taskName, (None, None))
+    # replace the task with updated one
+    self._tasks[taskName] = (status, progress)
+    self.tasksChanged(self._tasks)
+    if progress is not None:
+      self._startWorkInProgressOverlay()
+
+  def removeTask(self, taskName):
+    try:
+      del self._tasks[taskName]
+      self.tasksChanged(self._tasks)
+    except KeyError:
+      print("notification: error, can't remove unknown task: %s" % taskName)
+    if self._tasks == {}:
+      self._stopWorkInProgressOverlay()
+
+  def _startWorkInProgressOverlay(self):
+    """start background work notification"""
+    print "STARTING OVERLAY"
+    if not self.workInProgressOverlay:
+      self.workInProgressOverlay = True
+      self.workStartTimestamp = time.time()
+      self.wipOverlayEnabled(True)
+
+  def _stopWorkInProgressOverlay(self):
+    """stop background work notification"""
+    print "STOPPING OVERLAY"
     self.workInProgressOverlay = False
-    self.set('needRedraw', True)
-    
-  def setWorkInProgressOverlayText(self, text):
-    self.workInProgressOverlayText = text
-    # if the overlay is enabled,
-    # trigger screen redraw if the text changes
-    if self.workInProgressOverlay:
-      self.set('needRedraw', True)
+    self.wipOverlayEnabled(False)
 
-  def getWorkInProgressOverlayText(self):
-    elapsedSeconds = int(time.time() - self.workStartTimestamp)
-    if elapsedSeconds: # 0s doesnt look very good :)
-      return "%s %d s" % (self.workInProgressOverlayText, elapsedSeconds)
-    else:
-      return self.workInProgressOverlayText
+  #def getWorkInProgressOverlayText(self):
+  #  elapsedSeconds = int(time.time() - self.workStartTimestamp)
+  #  if elapsedSeconds: # 0s doesnt look very good :)
+  #    return "%s %d s" % (self.wipOverlayText, elapsedSeconds)
+  #  else:
+  #    return self.wipOverlayText
 
   def drawWorkInProgressOverlay(self,cr):
     proj = self.m.get('projection', None) # we also need the projection module
     viewport = self.get('viewport', None)
     menus = self.m.get('menu', None)
-    if proj and viewport and menus:
+    if self._tasks and proj and viewport and menus:
       # we need to have both the viewport and projection modules available
       # also the menu module for the text
-      message = self.getWorkInProgressOverlayText()
+
       # background
       cr.set_source_rgba(0.5, 0.5, 1, 0.5)
       (sx,sy,w,h) = viewport
@@ -132,10 +178,13 @@ class Notification(RanaModule):
       # cancel button
       self.drawCancelButton(cr,(cbx1,cby1,cbdx,cbdy))
 
+      # generate the text
+      key = sorted(self._tasks.keys()).pop()
+      status, progress = self._tasks.get(key, ("", None))
+
       # draw the text
       border = min(w/20.0,h/20.0)
-      menus.showText(cr, message, bx+border, by+border, bw-2*border-cbdx,30, "white")
-        
+      menus.showText(cr, status, bx+border, by+border, bw-2*border-cbdx,30, "white")
 
   def drawCancelButton(self,cr,coords=None):
     """draw the cancel button

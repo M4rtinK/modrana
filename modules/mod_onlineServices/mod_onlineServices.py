@@ -340,11 +340,6 @@ class OnlineServices(RanaModule):
 
   # ** Background processing **
 
-  def _enableOverlay(self):
-    """enable the "working" overlay + set timestamp"""
-    self.sendMessage('ml:notification:workInProgressOverlay:enable')
-    self.workStartTimestamp = time.time()
-
   def _addWorkerThread(self, *args):
     """start the worker thread and provide it the specified arguments"""
     w = Worker(self, *args)
@@ -392,10 +387,8 @@ class Worker(threading.Thread):
 
   def run(self):
     print("onlineServices: worker starting")
-    # enable the overlay
-    self.online._enableOverlay()
     # check for flags that the method might need
-    # before it can bwe started
+    # before it can be started
     start = True
 
     if self.flags.get('GPS', False):
@@ -489,7 +482,12 @@ class Worker(threading.Thread):
     self.statusMessage = text
     notification = self.online.m.get('notification', None)
     if notification:
-      notification.setWorkInProgressOverlayText(text)
+      notification.setTaskStatus(self.name, text)
+
+  def _workDone(self):
+    notification = self.online.m.get('notification', None)
+    if notification:
+      notification.removeTask(self.name)
 
   def _updateProgress(self, progress):
     """progress is a floating point number indicating progress on the current task
@@ -508,6 +506,7 @@ class Worker(threading.Thread):
     # get the route
     directions = self.online.googleDirections(start, destination, waypoints)
     self._setWorkStatusText("online routing done   ")
+    self._workDone()
     # return result to the thread to handle
     return directions, start, destination, routeRequestSentTimestamp
 
