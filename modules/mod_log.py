@@ -62,6 +62,7 @@ class Log(RanaModule):
 
   def enableLogging(self):
     try:
+      import sys
       self.savedStdout = sys.stdout
       if not self.fSock:
         print("**log: opening stdout log file")
