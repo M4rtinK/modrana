@@ -89,15 +89,25 @@ class Point(object):
     self._message = message
 
   def getName(self):
-    return self._message
+    if self.name:
+      return  self.name
+    else:
+      return self._message
 
   def getDescription(self):
-    return self._message
+    if self.description:
+      return self.description
+    else:
+      return self._message
 
   def getAbstract(self):
     """a short single line point description"""
-    if self._message:
+    if self.summary:
+      return self.summary
+    elif self._message:
       return self._message.split('\n',1)[0]
+    else:
+      return "no abstract"
 
   def getUrls(self):
     """get a list of (Url, Url description) tuples corresponding to the point"""
