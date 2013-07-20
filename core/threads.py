@@ -26,6 +26,7 @@
 #log = logging.getLogger("modRana")
 # until modRana has a proper logging structure,
 # use a fake stdout log
+from __future__ import with_statement # for python 2.5
 
 class FakeLog(object):
   def info(self, message):
@@ -56,7 +57,7 @@ class ThreadManager(object):
     def __init__(self):
         self._objs = {}
         self._errors = {}
-        self._main_thread = threading.current_thread()
+        self._main_thread = threading.currentThread()
 
     def __call__(self):
         return self
@@ -130,7 +131,7 @@ class ThreadManager(object):
     def in_main_thread(self):
         """Return True if it is run in the main thread."""
 
-        cur_thread = threading.current_thread()
+        cur_thread = threading.currentThread()
         return cur_thread is self._main_thread
 
 class ModRanaThread(threading.Thread):
