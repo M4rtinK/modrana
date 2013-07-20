@@ -63,6 +63,8 @@ class ClickHandler(RanaModule):
       hit = False
       for area in self.layers[2]:
         hit = self._processClickArea(area, x, y)
+        if hit:
+          break
       if not hit: # no hit in upper layer, continue to lower layer
         for area in self.layers[0]:
           self._processClickArea(area, x, y)
