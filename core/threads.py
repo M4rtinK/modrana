@@ -27,6 +27,7 @@
 # until modRana has a proper logging structure,
 # use a fake stdout log
 from __future__ import with_statement # for python 2.5
+import sys
 
 class FakeLog(object):
   def info(self, message):
@@ -152,6 +153,14 @@ class ModRanaThread(threading.Thread):
         self._status = None  # string describing current state of the thread
         self._progress = None  # floating point value from 0.1 to 1.0
         self._stateLock = threading.Lock()
+
+        # Python 2.5 is missing the name and ident properties
+        if sys.version_info[:2] <= (2, 5):
+          import thread
+          # Threads in Python 2.5 dont have identity ! :)
+          self.ident = thread.get_ident()
+          # Threads in Python 2.5 don't have name, yay ! :D
+          self.name = self.getName()
 
     @property
     def status(self):
