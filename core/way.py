@@ -12,7 +12,7 @@ from core.point import Point
 
 class TurnByTurnPoint(Point):
   def __init__(self, lat, lon, elevation=None, message=None, SSMLMessage=None):
-    Point.__init__(self, lat, lon, elevation, message)
+    Point.__init__(self, lat, lon, elevation=elevation, message=message)
     self.currentDistance = None # in meters
     self.distanceFromStart = None # in meters
     self.visited = False

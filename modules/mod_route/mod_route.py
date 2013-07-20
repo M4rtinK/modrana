@@ -708,7 +708,7 @@ class Route(RanaModule):
     for step in steps:
       originalMessage = "".join(str(step.getMessage()))
       try:
-        message = step.getMessage() #TODO: make a method for this
+        message = step.description #TODO: make a method for this
         message = re.sub(r'<div[^>]*?>', '\n<i>', message)
         message = re.sub(r'</div[^>]*?>', '</i>', message)
         message = re.sub(r'<wbr/>', ', ', message)
@@ -737,6 +737,8 @@ class Route(RanaModule):
         e = sys.exc_info()[1]
         print("route: error during direction filtering")
         print(e)
+        import traceback
+        traceback.print_exc(file=sys.stdout)
         step.setSSMLMessage(message)
 
 
