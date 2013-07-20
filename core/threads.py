@@ -42,6 +42,7 @@ class FakeLog(object):
 log = FakeLog()
 
 import threading
+from core.signal import Signal
 
 class ThreadManager(object):
     """A singleton class for managing threads and processes.
@@ -58,7 +59,12 @@ class ThreadManager(object):
     def __init__(self):
         self._objs = {}
         self._errors = {}
-        self._main_thread = threading.currentThread()
+        self._main_thread = threading.current_thread()
+        # signals
+        self.threadStatusChanged = Signal()
+        self.threadProgressChanged = Signal()
+        self.threadRemoved = Signal()
+
 
     def __call__(self):
         return self
@@ -80,6 +86,8 @@ class ThreadManager(object):
            handle on it.
         """
         self._objs.pop(name)
+        # trigger the threadRemoved signal
+        self.threadRemoved(name)
 
     def exists(self, name):
         """Determine if a thread or process exists with the given name."""
@@ -132,7 +140,7 @@ class ThreadManager(object):
     def in_main_thread(self):
         """Return True if it is run in the main thread."""
 
-        cur_thread = threading.currentThread()
+        cur_thread = threading.current_thread()
         return cur_thread is self._main_thread
 
 class ModRanaThread(threading.Thread):
@@ -154,14 +162,6 @@ class ModRanaThread(threading.Thread):
         self._progress = None  # floating point value from 0.1 to 1.0
         self._stateLock = threading.Lock()
 
-        # Python 2.5 is missing the name and ident properties
-        if sys.version_info[:2] <= (2, 5):
-          import thread
-          # Threads in Python 2.5 dont have identity ! :)
-          self.ident = thread.get_ident()
-          # Threads in Python 2.5 don't have name, yay ! :D
-          self.name = self.getName()
-
     @property
     def status(self):
         with self._stateLock:
@@ -171,6 +171,10 @@ class ModRanaThread(threading.Thread):
     def status(self, value):
         with self._stateLock:
           self._status = value
+        # needs to be outside of the lock
+        # to prevent deadlocks when signal handler
+        # wants to access the property
+        threadMgr.threadStatusChanged(self.name, value)
 
     @property
     def progress(self):
@@ -181,6 +185,10 @@ class ModRanaThread(threading.Thread):
     def progress(self, value):
       with self._stateLock:
         self._progress = value
+      # needs to be outside of the lock
+      # to prevent deadlocks when signal handler
+      # wants to access the property
+      threadMgr.threadProgressChanged(self.name, value)
 
     def run(self, *args, **kwargs):
         # http://bugs.python.org/issue1230540#msg25696
