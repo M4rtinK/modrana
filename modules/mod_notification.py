@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from core.backports import six
 from modules.base_module import RanaModule
 import time
 
@@ -45,6 +46,11 @@ class Notification(RanaModule):
     # this indicates if the notification about
     # background processing should be shown
     self._tasks = {}
+    #self._tasks = {
+    #  "foo" : ("foo", None),
+    #  "bar" : ("bar", None)
+    #}
+
     # key is an unique task name (unique for each instance of a task)
     # and value is a (status, progress) tuple
     self.tasksChanged = Signal()
@@ -162,31 +168,36 @@ class Notification(RanaModule):
       # we need to have both the viewport and projection modules available
       # also the menu module for the text
 
+      taskCount = len(self._tasks)
+
       # background
       cr.set_source_rgba(0.5, 0.5, 1, 0.5)
       (sx,sy,w,h) = viewport
-      (bx,by,bw,bh) = (0,0,w,h*0.2)
+      itemHeight = h*0.2
+      (bx,by,bw,bh) = (0,0,w,itemHeight*taskCount)
       cr.rectangle(bx,by,bw,bh)
       cr.fill()
 
-      # cancel button coordinates
-      cbdx = min(w,h) / 5.0
-      cbdy = cbdx
-      cbx1 = (sx+w)-cbdx
-      cby1 = sy
+      taskIndex = 0
+      for taskName, taskState in six.iteritems(self._tasks):
+        # cancel button coordinates
+        cbdx = min(w,h) / 5.0
+        cbdy = cbdx
+        cbx1 = (sx+w)-cbdx
+        cby1 = sy+cbdy*taskIndex
 
-      # cancel button
-      self.drawCancelButton(cr,(cbx1,cby1,cbdx,cbdy))
+        # cancel button
+        self.drawCancelButton(cr,coords=(cbx1,cby1,cbdx,cbdy), taskName=taskName)
 
-      # generate the text
-      key = sorted(self._tasks.keys()).pop()
-      status, progress = self._tasks.get(key, ("", None))
+        status, progress = taskState
 
-      # draw the text
-      border = min(w/20.0,h/20.0)
-      menus.showText(cr, status, bx+border, by+border, bw-2*border-cbdx,30, "white")
+        # draw the text
+        border = min(w/20.0,h/20.0)
+        menus.showText(cr, status, bx+border, by+border+itemHeight*taskIndex,
+                       bw-2*border-cbdx, 30, "white")
+        taskIndex+=1
 
-  def drawCancelButton(self,cr,coords=None):
+  def drawCancelButton(self,cr,coords=None, taskName=None):
     """draw the cancel button
     TODO: this and the other context buttons should be moved to a separate module,
     named contextMenu or something in the same style"""
@@ -204,7 +215,12 @@ class Notification(RanaModule):
       # the cancel button sends a cancel message to onlineServices
       # to disable currently running operation
       menus.drawButton(cr, x1, y1, dx, dy, '#<span foreground="red">cancel</span>', "generic:;0.5;;0.5;;", '')
-      click.registerXYWH(x1, y1, dx, dy, "onlineServices:cancelOperation", layer=2)
+      if taskName:
+        message = "ms:notification:cancelTask:%s" % taskName
+        click.registerXYWH(x1, y1, dx, dy, message, layer=2)
+      else:
+        click.registerXYWH(x1, y1, dx, dy, "onlineServices:cancelOperation", layer=2)
+
 
   def handleNotification(self, message, timeout=None, icon=""):
     # TODO: icon support
