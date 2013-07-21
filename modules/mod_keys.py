@@ -21,39 +21,41 @@ from modules.base_module import RanaModule
 
 # only import GKT libs if GTK GUI is used
 from core import gs
+
 if gs.GUIString == "GTK":
-  import gtk
+    import gtk
 
 
-def getModule(m,d,i):
-  return Keys(m,d,i)
+def getModule(m, d, i):
+    return Keys(m, d, i)
+
 
 class Keys(RanaModule):
-  """A keyboard input handling module"""
-  
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
+    """A keyboard input handling module"""
 
-  def firstTime(self):
-    # connect the key press handler
-    # TODO: make this toolkit independent
-    gui = self.modrana.gui
-    if gui:
-      if gui.getIDString() == "GTK":
-        gui.topWindow.connect('key-press-event', self.on_key_press_event)
-      elif gui.getIDString() == "QML":
-        pass
-      else:
-        print("keys: WARNING, unhandled GUI toolkit, most key shortcuts would not work")
-    else:
-      print("keys: GUI module not available")
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
 
-  def on_key_press_event(self, widget, event):
-    keyName = gtk.gdk.keyval_name(event.keyval)
-    if keyName == 'F8':
-      # zoom out
-      self.sendMessage('mapView:zoomOut')
-    elif keyName == 'F7':
-      # zoom in
-      self.sendMessage('mapView:zoomIn')
-    print("unassigned key pressed: %s" % keyName)
+    def firstTime(self):
+        # connect the key press handler
+        # TODO: make this toolkit independent
+        gui = self.modrana.gui
+        if gui:
+            if gui.getIDString() == "GTK":
+                gui.topWindow.connect('key-press-event', self.on_key_press_event)
+            elif gui.getIDString() == "QML":
+                pass
+            else:
+                print("keys: WARNING, unhandled GUI toolkit, most key shortcuts would not work")
+        else:
+            print("keys: GUI module not available")
+
+    def on_key_press_event(self, widget, event):
+        keyName = gtk.gdk.keyval_name(event.keyval)
+        if keyName == 'F8':
+            # zoom out
+            self.sendMessage('mapView:zoomOut')
+        elif keyName == 'F7':
+            # zoom in
+            self.sendMessage('mapView:zoomIn')
+        print("unassigned key pressed: %s" % keyName)

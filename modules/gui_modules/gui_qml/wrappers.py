@@ -38,124 +38,126 @@ from PySide import QtCore
 from inspect import isfunction
 from pprint import pprint
 
+
 class NestedWrapper(QtCore.QObject):
-  """NestedWrapped enables to include additional
-  QObject based object instances inside this QObject
-  The objects are accessed by a simple ListModel based API:
-  count - this property county the children of this object
-  get(index) - get child with the given index
-  """
-  def __init__(self, children=None):
-    if not children: children = []
-    QtCore.QObject.__init__(self)
-    self._children = children
+    """NestedWrapped enables to include additional
+    QObject based object instances inside this QObject
+    The objects are accessed by a simple ListModel based API:
+    count - this property county the children of this object
+    get(index) - get child with the given index
+    """
 
-  childrenChanged = QtCore.Signal()
+    def __init__(self, children=None):
+        if not children: children = []
+        QtCore.QObject.__init__(self)
+        self._children = children
 
-  def _get(self):
-    return self._data
+    childrenChanged = QtCore.Signal()
 
-  def _getCount(self):
-    return len(self._children)
+    def _get(self):
+        return self._data
 
-  @QtCore.Slot(int, result=QtCore.QObject)
-  def get(self, index):
-    try:
-      return self._children[index]
-    except IndexError:
-      # index out of bounds
-      return None
+    def _getCount(self):
+        return len(self._children)
 
-  childrenCount = QtCore.Property(int, _getCount, notify=childrenChanged)
+    @QtCore.Slot(int, result=QtCore.QObject)
+    def get(self, index):
+        try:
+            return self._children[index]
+        except IndexError:
+            # index out of bounds
+            return None
+
+    childrenCount = QtCore.Property(int, _getCount, notify=childrenChanged)
+
 
 class MapLayerGroupWrapper(NestedWrapper):
-  """Wrapper for MapLayerGroup objects"""
-  def __init__(self, group):
-    self.wo = group
-    NestedWrapper.__init__(self, self.wo.layers)
+    """Wrapper for MapLayerGroup objects"""
 
-  @QtCore.Slot(int, result=str)
-  def getLayerId(self, index):
-    try:
-      return  self._children[index].id
-    except IndexError:
-      return None
+    def __init__(self, group):
+        self.wo = group
+        NestedWrapper.__init__(self, self.wo.layers)
 
-  @QtCore.Slot(int, result=str)
-  def getLayerLabel(self, index):
-    try:
-      return  self._children[index].label
-    except IndexError:
-      return None
+    @QtCore.Slot(int, result=str)
+    def getLayerId(self, index):
+        try:
+            return self._children[index].id
+        except IndexError:
+            return None
 
-  changed = QtCore.Signal()
+    @QtCore.Slot(int, result=str)
+    def getLayerLabel(self, index):
+        try:
+            return self._children[index].label
+        except IndexError:
+            return None
 
-  def _getId(self):
-    return self.wo.id
+    changed = QtCore.Signal()
 
-  id = QtCore.Property(str, _getId, notify=changed)
+    def _getId(self):
+        return self.wo.id
 
-  def _getLabel(self):
-    return self.wo.label
+    id = QtCore.Property(str, _getId, notify=changed)
 
-  label = QtCore.Property(str, _getLabel, notify=changed)
+    def _getLabel(self):
+        return self.wo.label
 
-  def _getIcon(self):
-    return self.wo.icon
+    label = QtCore.Property(str, _getLabel, notify=changed)
 
-  icon = QtCore.Property(str, _getIcon, notify=changed)
+    def _getIcon(self):
+        return self.wo.icon
+
+    icon = QtCore.Property(str, _getIcon, notify=changed)
 
 
 class MapLayerWrapper(QtCore.QObject):
-  """Wrapper for MapLayer objects"""
-  def __init__(self, wrappedObject):
-    self.wo = wrappedObject
-    QtCore.QObject.__init__(self)
+    """Wrapper for MapLayer objects"""
 
-  changed = QtCore.Signal()
+    def __init__(self, wrappedObject):
+        self.wo = wrappedObject
+        QtCore.QObject.__init__(self)
 
-  def _getId(self):
-    return self.wo.id
+    changed = QtCore.Signal()
 
-  id = QtCore.Property(str, _getId, notify=changed)
+    def _getId(self):
+        return self.wo.id
 
-  def _getLabel(self):
-    return self.wo.label
+    id = QtCore.Property(str, _getId, notify=changed)
 
-  label = QtCore.Property(str, _getLabel, notify=changed)
+    def _getLabel(self):
+        return self.wo.label
 
-  def _getUrl(self):
-    return self.wo.url
+    label = QtCore.Property(str, _getLabel, notify=changed)
 
-  url = QtCore.Property(str, _getUrl, notify=changed)
+    def _getUrl(self):
+        return self.wo.url
 
-  def _getMaxZoom(self):
-    return self.wo.maxZoom
+    url = QtCore.Property(str, _getUrl, notify=changed)
 
-  maxZoom = QtCore.Property(int, _getMaxZoom, notify=changed)
+    def _getMaxZoom(self):
+        return self.wo.maxZoom
 
-  def _getMinZoom(self):
-    return self.wo.minZoom
+    maxZoom = QtCore.Property(int, _getMaxZoom, notify=changed)
 
-  minZoom = QtCore.Property(int, _getMinZoom, notify=changed)
+    def _getMinZoom(self):
+        return self.wo.minZoom
 
-  def _getFolderName(self):
-    return self.wo.folderName
+    minZoom = QtCore.Property(int, _getMinZoom, notify=changed)
 
-  folderName = QtCore.Property(str, _getFolderName, notify=changed)
+    def _getFolderName(self):
+        return self.wo.folderName
 
-  def _getCoordinates(self):
-    return self.wo.coordinates
+    folderName = QtCore.Property(str, _getFolderName, notify=changed)
 
-  coordinates = QtCore.Property(str, _getCoordinates, notify=changed)
+    def _getCoordinates(self):
+        return self.wo.coordinates
 
-  def _getIcon(self):
-    return self.wo.icon
+    coordinates = QtCore.Property(str, _getCoordinates, notify=changed)
 
-  icon = QtCore.Property(str, _getIcon, notify=changed)
+    def _getIcon(self):
+        return self.wo.icon
 
-
-
+    icon = QtCore.Property(str, _getIcon, notify=changed)
 
 
 
@@ -163,7 +165,10 @@ class MapLayerWrapper(QtCore.QObject):
 
 
 
-  # def _get(self):
-  #   return self.wo
-  #
-  #  = QtCore.Property(,)
+
+
+
+    # def _get(self):
+    #   return self.wo
+    #
+    #  = QtCore.Property(,)

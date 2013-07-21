@@ -40,120 +40,124 @@ from signals_pb2 import RoutingResult
 # /home/user/MyDocs/.local/share/marble/maps/earth/monav/motorcar/europe/czech_republic
 
 class Monav(object):
-  def __init__(self, monavBinaryPath):
-    self.monavServer = None
-    self.monavServerBinaryPath = monavBinaryPath
-    # make return codes easily accessible
-    self.returnCodes = RoutingResult
+    def __init__(self, monavBinaryPath):
+        self.monavServer = None
+        self.monavServerBinaryPath = monavBinaryPath
+        # make return codes easily accessible
+        self.returnCodes = RoutingResult
 
-  def startServer(self, port=None):
-    print('monav_support: starting Monav server')
-    started = False
-    try:
-      # first check if monav server is already running
-      try:
-        monav.TcpConnection()
-        print('monav_support: server already running')
-      except Exception:
-        import sys
-        if not self.monavServerBinaryPath:
-          print("route: can't start monav server - binary missing")
-          return
-        print('monav_support: using monav server binary in:')
-        print(self.monavServerBinaryPath)
-
-        def _startServer(self):
-          self.monavServer = subprocess.Popen(
-            "%s" % self.monavServerBinaryPath
-          )
-
-        t = Thread(target=_startServer, args=[self], name='asynchronous monav-server start')
-        t.setDaemon(True) # we need that the thread dies with the program
-        t.start()
-        timeout = 5 # in s
-        sleepTime = 0.1 # in s
-        startTimestamp = time.time()
-        elapsed = 0
-        # wait up to timeout seconds for the server to start
-        # and then return
-        while elapsed < timeout:
-          if self.monavServer:
+    def startServer(self, port=None):
+        print('monav_support: starting Monav server')
+        started = False
+        try:
+            # first check if monav server is already running
             try:
-              # test if the server is up and accepting connections
-              monav.TcpConnection()
-              break
+                monav.TcpConnection()
+                print('monav_support: server already running')
             except Exception:
-              pass # not yet fully started
-          time.sleep(sleepTime)
-          elapsed = time.time() - startTimestamp
-        started = True
-        # TODO: use other port than 8040 ?, check out tileserver code
-    except Exception:
-      import sys
-      e = sys.exc_info()[1]
-      print('monav_support: starting Monav server failed')
-      print(e)
-    if started:
-      print('monav_support: Monav server started')
+                import sys
 
-  def stopServer(self):
-    print('monav_support: stopping Monav server')
-    stopped = False
-    try:
-      if self.monavServer:
-        # Python 2.5 doesn't have POpen.terminate(),
-        # so we use this
-        os.kill(self.monavServer.pid, signal.SIGKILL)
-        stopped = True
-      else:
-        print('monav_support: no Monav server process found')
-    except Exception:
-      import sys
-      e = sys.exc_info()[1]
-      print('monav_support: stopping Monav server failed')
-      print(e)
-    self.monavServer = None
-    if stopped:
-      print('monav_support: Monav server stopped')
+                if not self.monavServerBinaryPath:
+                    print("route: can't start monav server - binary missing")
+                    return
+                print('monav_support: using monav server binary in:')
+                print(self.monavServerBinaryPath)
 
-  def serverRunning(self):
-    if self.monavServer:
-      return True
-    else:
-      return False
+                def _startServer(self):
+                    self.monavServer = subprocess.Popen(
+                        "%s" % self.monavServerBinaryPath
+                    )
 
-  def monavDirections(self, dataDirectory, waypoints):
-    """search ll2ll route using Monav"""
-    # check if Monav server is running
-    if not self.serverRunning():
-      self.startServer() # start the server
-    print('monav: starting route search')
-    start = time.clock()
-    tryNr = 0
-    result = None
-    while tryNr < RETRY_COUNT:
-      tryNr+=1
-      try:
-        result = monav.get_route(dataDirectory, waypoints)
-        break
-      except Exception:
-        import sys
-        e = sys.exc_info()[1]
-        print('monav_support: routing failed')
-        print(e)
-        traceback.print_exc(file=sys.stdout) # find what went wrong
+                t = Thread(target=_startServer, args=[self], name='asynchronous monav-server start')
+                t.setDaemon(True) # we need that the thread dies with the program
+                t.start()
+                timeout = 5 # in s
+                sleepTime = 0.1 # in s
+                startTimestamp = time.time()
+                elapsed = 0
+                # wait up to timeout seconds for the server to start
+                # and then return
+                while elapsed < timeout:
+                    if self.monavServer:
+                        try:
+                            # test if the server is up and accepting connections
+                            monav.TcpConnection()
+                            break
+                        except Exception:
+                            pass # not yet fully started
+                    time.sleep(sleepTime)
+                    elapsed = time.time() - startTimestamp
+                started = True
+                # TODO: use other port than 8040 ?, check out tileserver code
+        except Exception:
+            import sys
+
+            e = sys.exc_info()[1]
+            print('monav_support: starting Monav server failed')
+            print(e)
+        if started:
+            print('monav_support: Monav server started')
+
+    def stopServer(self):
+        print('monav_support: stopping Monav server')
+        stopped = False
+        try:
+            if self.monavServer:
+                # Python 2.5 doesn't have POpen.terminate(),
+                # so we use this
+                os.kill(self.monavServer.pid, signal.SIGKILL)
+                stopped = True
+            else:
+                print('monav_support: no Monav server process found')
+        except Exception:
+            import sys
+
+            e = sys.exc_info()[1]
+            print('monav_support: stopping Monav server failed')
+            print(e)
+        self.monavServer = None
+        if stopped:
+            print('monav_support: Monav server stopped')
+
+    def serverRunning(self):
+        if self.monavServer:
+            return True
+        else:
+            return False
+
+    def monavDirections(self, dataDirectory, waypoints):
+        """search ll2ll route using Monav"""
+        # check if Monav server is running
+        if not self.serverRunning():
+            self.startServer() # start the server
+        print('monav: starting route search')
+        start = time.clock()
+        tryNr = 0
+        result = None
+        while tryNr < RETRY_COUNT:
+            tryNr += 1
+            try:
+                result = monav.get_route(dataDirectory, waypoints)
+                break
+            except Exception:
+                import sys
+
+                e = sys.exc_info()[1]
+                print('monav_support: routing failed')
+                print(e)
+                traceback.print_exc(file=sys.stdout) # find what went wrong
+                if tryNr < RETRY_COUNT:
+                    print('monav_support: retrying')
         if tryNr < RETRY_COUNT:
-          print('monav_support: retrying')
-    if tryNr < RETRY_COUNT:
-      print('monav: search finished in %1.2f ms and %d tries'  % (1000 * (time.clock() - start), tryNr))
-      return result
-    else:
-      print('monav: search failed after %d retries' % tryNr)
-      return None
+            print('monav: search finished in %1.2f ms and %d tries' % (1000 * (time.clock() - start), tryNr))
+            return result
+        else:
+            print('monav: search failed after %d retries' % tryNr)
+            return None
 
-  def monavDirectionsAsync(self, start, destination, callback, key):
-    """search ll2ll route asynchronously using Monav"""
-    pass
+    def monavDirectionsAsync(self, start, destination, callback, key):
+        """search ll2ll route asynchronously using Monav"""
+        pass
 
 
 

@@ -22,74 +22,77 @@ from time import *
 
 from upoints import gpx
 
-def getModule(m,d,i):
-  return ReplayGpx(m,d,i)
+
+def getModule(m, d, i):
+    return ReplayGpx(m, d, i)
+
 
 class ReplayGpx(RanaModule):
-  """Replay a GPX"""
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
-    self.nodes = []
-    self.pos = 0
-    self.numNodes = 0
-    self.updateTime = 0
-    self.replayPeriod = 1 # second
+    """Replay a GPX"""
 
-  def load(self, filename):
-    self.nodes = []
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
+        self.nodes = []
+        self.pos = 0
+        self.numNodes = 0
+        self.updateTime = 0
+        self.replayPeriod = 1 # second
 
-    file = open(filename, 'r')
-    
-    if file:
-      track = gpx.Trackpoints() # create new Trackpoints object
-      track.import_locations(file) # load a gpx file into it
-      for point in track[0]: #iterate over the points, track[0] is list of all points in file
-        lat = point.latitude
-        lon = point.longitude
-        self.nodes.append([lat,lon])
-      file.close()
-      self.numNodes = len(self.nodes)
-      self.set("centreOnce", True)
-      self.pos = int(self.get("replayStart",0) * self.numNodes)
+    def load(self, filename):
+        self.nodes = []
+
+        file = open(filename, 'r')
+
+        if file:
+            track = gpx.Trackpoints() # create new Trackpoints object
+            track.import_locations(file) # load a gpx file into it
+            for point in track[0]: #iterate over the points, track[0] is list of all points in file
+                lat = point.latitude
+                lon = point.longitude
+                self.nodes.append([lat, lon])
+            file.close()
+            self.numNodes = len(self.nodes)
+            self.set("centreOnce", True)
+            self.pos = int(self.get("replayStart", 0) * self.numNodes)
 
 
-#this seems to work only with GPX 1.0
-#      regexp = re.compile("<trkpt lat=['\"](.*?)['\"] lon=['\"](.*?)['\"]")
-#      for text in file:
-#        matches = regexp.match(text)
-#        if(matches):
-#          lat = float(matches.group(1))
-#          lon = float(matches.group(2))
-#          self.nodes.append([lat,lon])
-#      file.close()
-#      self.numNodes = len(self.nodes)
-#      self.set("centreOnce", True)
-#      self.pos = int(self.get("replayStart",0) * self.numNodes)
+        #this seems to work only with GPX 1.0
+        #      regexp = re.compile("<trkpt lat=['\"](.*?)['\"] lon=['\"](.*?)['\"]")
+        #      for text in file:
+        #        matches = regexp.match(text)
+        #        if(matches):
+        #          lat = float(matches.group(1))
+        #          lon = float(matches.group(2))
+        #          self.nodes.append([lat,lon])
+        #      file.close()
+        #      self.numNodes = len(self.nodes)
+        #      self.set("centreOnce", True)
+        #      self.pos = int(self.get("replayStart",0) * self.numNodes)
 
-    else:
-      print("No file")
+        else:
+            print("No file")
 
-  def dump(self):
-    print("%d nodes:"%len(self.nodes))
-    for n in self.nodes:
-      print("%1.4f, %1.4f" % (n[0], n[1]))
+    def dump(self):
+        print("%d nodes:" % len(self.nodes))
+        for n in self.nodes:
+            print("%1.4f, %1.4f" % (n[0], n[1]))
 
-  def scheduledUpdate(self):
-    if self.numNodes < 1:
-      return
-    self.pos += 1
-    if self.pos >= self.numNodes:
-      self.pos = 0
-    (lat,lon) = self.nodes[self.pos]
-    self.set('pos', (lat,lon))
-    self.set('pos_source', 'replay')
-    self.set('needsRedraw', True)
-  
-  def update(self):
-    # Run scheduledUpdate every second
-    t = time()
-    dt = t - self.updateTime
-    if dt > self.replayPeriod:
-      self.updateTime = t
-      self.scheduledUpdate()
+    def scheduledUpdate(self):
+        if self.numNodes < 1:
+            return
+        self.pos += 1
+        if self.pos >= self.numNodes:
+            self.pos = 0
+        (lat, lon) = self.nodes[self.pos]
+        self.set('pos', (lat, lon))
+        self.set('pos_source', 'replay')
+        self.set('needsRedraw', True)
+
+    def update(self):
+        # Run scheduledUpdate every second
+        t = time()
+        dt = t - self.updateTime
+        if dt > self.replayPeriod:
+            self.updateTime = t
+            self.scheduledUpdate()
 

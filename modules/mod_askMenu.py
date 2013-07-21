@@ -19,35 +19,37 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 
-def getModule(m,d,i):
-  return AskMenu(m,d,i)
+
+def getModule(m, d, i):
+    return AskMenu(m, d, i)
+
 
 class AskMenu(RanaModule):
-  """A module providing yes/no question dialogs"""
-  
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
-    self.menus = None
-    self.question = None
-    self.yesAction = None
-    self.noAction = None
-    
-  def firstTime(self):
-    self.menus = self.m.get('menu', None)
+    """A module providing yes/no question dialogs"""
+
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
+        self.menus = None
+        self.question = None
+        self.yesAction = None
+        self.noAction = None
+
+    def firstTime(self):
+        self.menus = self.m.get('menu', None)
 
 
-  def drawMenu(self, cr, menuName, args=None):
-    if menuName == 'askYesNo':
-      self.drawAskYesNo(cr, self.question, self.yesAction, self.noAction)
+    def drawMenu(self, cr, menuName, args=None):
+        if menuName == 'askYesNo':
+            self.drawAskYesNo(cr, self.question, self.yesAction, self.noAction)
 
-  def drawAskYesNo(self,cr,question,yesAction,noAction):
-    first = (question,'generic','')
-    second = ('YES','yeslong',yesAction)
-    third = ('NO','nolong',noAction)
-    self.menus.drawThreeItemHorizontalMenu(cr, first, second, third)
+    def drawAskYesNo(self, cr, question, yesAction, noAction):
+        first = (question, 'generic', '')
+        second = ('YES', 'yeslong', yesAction)
+        third = ('NO', 'nolong', noAction)
+        self.menus.drawThreeItemHorizontalMenu(cr, first, second, third)
 
-  def setupAskYesNo(self,question,yesAction,noAction):
-    self.question = question
-    self.yesAction = yesAction
-    self.noAction = noAction
-    self.set('menu', 'askMenu#askYesNo')
+    def setupAskYesNo(self, question, yesAction, noAction):
+        self.question = question
+        self.yesAction = yesAction
+        self.noAction = noAction
+        self.set('menu', 'askMenu#askYesNo')

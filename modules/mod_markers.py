@@ -22,187 +22,191 @@ import math
 from core import geo
 from core.color import Color
 
-def getModule(m,d,i):
-  return Markers(m,d,i)
+
+def getModule(m, d, i):
+    return Markers(m, d, i)
+
 
 class Markers(RanaModule):
-  """A module handling markers on the map."""
-  
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
-    self.groups = {} # marker groups
+    """A module handling markers on the map."""
 
-  def addGroup(self, name, points, menu=False):
-    """the name must be unique,
-    if it isn't the previous similarly named group is overwritten
-    points is a list of point objects"""
-    g = PointGroup(points)
-    if menu:
-      g.setMenuEnabled(menu)
-      menus = self.m.get('menu', None)
-      if menus:
-        menu = menus.addPointListMenu(name, "set:menu:None", points, goto="map")
-        g.setMenuInstance(menu)
-    self.groups[name] = g
-    return g
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
+        self.groups = {} # marker groups
 
-  def removeGroup(self,name):
-    """remove a group by name
-    return True if a group was removed and False if it wasn't due to
-    not being found"""
-    if name in self.groups.keys():
-      del self.groups[name]
-      return True
-    else:
-      return False
+    def addGroup(self, name, points, menu=False):
+        """the name must be unique,
+        if it isn't the previous similarly named group is overwritten
+        points is a list of point objects"""
+        g = PointGroup(points)
+        if menu:
+            g.setMenuEnabled(menu)
+            menus = self.m.get('menu', None)
+            if menus:
+                menu = menus.addPointListMenu(name, "set:menu:None", points, goto="map")
+                g.setMenuInstance(menu)
+        self.groups[name] = g
+        return g
 
-  def getGroup(self,name):
-    if name in self.groups.keys():
-      return self.groups[name]
-    else:
-      return None
+    def removeGroup(self, name):
+        """remove a group by name
+        return True if a group was removed and False if it wasn't due to
+        not being found"""
+        if name in self.groups.keys():
+            del self.groups[name]
+            return True
+        else:
+            return False
 
-  def groupExists(self, name):
-    """return if a group with a given name exists"""
-    return name in self.groups.keys()
+    def getGroup(self, name):
+        if name in self.groups.keys():
+            return self.groups[name]
+        else:
+            return None
 
-  def clearAll(self):
-    self.groups = {}
+    def groupExists(self, name):
+        """return if a group with a given name exists"""
+        return name in self.groups.keys()
 
-  def drawMapOverlay(self, cr):
-    if self.groups:
-      pos = self.get('pos', None)
-      units = self.m.get('units', None)
-      proj = self.m.get('projection', None)
-      crPosUnitsProj = (cr, pos, units, proj)
-      for key in self.groups.keys(): # draw all groups
-        group = self.groups[key]
-        menu = group.getMenuEnabled()
-        colors = group.getColors()
+    def clearAll(self):
+        self.groups = {}
 
-        index = 0
-        for point, highlight in group.getPoints(): # draw all points in group
-          if menu:
-            # key contains the point group name, it should be the same
-            # as the corresponding listable menu name
-            action="set:menu:menu#listDetail#%s#%d" % (key, index)
-          else:
-            action=""
-          if highlight:
-            self._drawPoint(crPosUnitsProj, point, colors, action=action, highlight=True)
-          else:
-            self._drawPoint(crPosUnitsProj, point, colors, action=action)
-          index+=1
+    def drawMapOverlay(self, cr):
+        if self.groups:
+            pos = self.get('pos', None)
+            units = self.m.get('units', None)
+            proj = self.m.get('projection', None)
+            crPosUnitsProj = (cr, pos, units, proj)
+            for key in self.groups.keys(): # draw all groups
+                group = self.groups[key]
+                menu = group.getMenuEnabled()
+                colors = group.getColors()
 
-  def _drawPoint(self, crPosUnitsProj, point, colors, distance=True, action="", highlight=False):
-    (cr, pos, units, proj) = crPosUnitsProj
-    (lat,lon) = point.getLL() #TODO use getLLE for 3D distance
-    (lat1,lon1) = pos # current position coordinates
-    kiloMetricDistance = geo.distance(lat,lon,lat1,lon1)
-    unitString = units.km2CurrentUnitString(kiloMetricDistance, 0, True)
-    if distance and pos and units:
-      distanceString = " (%s)" % unitString
-    else:
-      distanceString=""
+                index = 0
+                for point, highlight in group.getPoints(): # draw all points in group
+                    if menu:
+                        # key contains the point group name, it should be the same
+                        # as the corresponding listable menu name
+                        action = "set:menu:menu#listDetail#%s#%d" % (key, index)
+                    else:
+                        action = ""
+                    if highlight:
+                        self._drawPoint(crPosUnitsProj, point, colors, action=action, highlight=True)
+                    else:
+                        self._drawPoint(crPosUnitsProj, point, colors, action=action)
+                    index += 1
 
-    text = "%s%s" % (point.name, distanceString)
+    def _drawPoint(self, crPosUnitsProj, point, colors, distance=True, action="", highlight=False):
+        (cr, pos, units, proj) = crPosUnitsProj
+        (lat, lon) = point.getLL() #TODO use getLLE for 3D distance
+        (lat1, lon1) = pos # current position coordinates
+        kiloMetricDistance = geo.distance(lat, lon, lat1, lon1)
+        unitString = units.km2CurrentUnitString(kiloMetricDistance, 0, True)
+        if distance and pos and units:
+            distanceString = " (%s)" % unitString
+        else:
+            distanceString = ""
 
-    (x,y) = proj.ll2xy(lat, lon)
-    # get colors
-    (bgColor,textColor) = colors
+        text = "%s%s" % (point.name, distanceString)
 
-    if highlight:
-      # draw the highlighting circle
-      cr.set_line_width(8)
-      cr.set_source_rgba(*bgColor.getCairoColor()) # highlight circle color
-      cr.arc(x, y, 15, 0, 2.0 * math.pi)
-      cr.stroke()
-      cr.fill()
+        (x, y) = proj.ll2xy(lat, lon)
+        # get colors
+        (bgColor, textColor) = colors
 
-    # draw the point
-    cr.set_source_rgb(0.0, 0.0, 0.0)
-    cr.set_line_width(10)
-    cr.arc(x, y, 3, 0, 2.0 * math.pi)
-    cr.stroke()
-    cr.set_source_rgb(0.0, 0.0, 1.0)
-    cr.set_line_width(8)
-    cr.arc(x, y, 2, 0, 2.0 * math.pi)
-    cr.stroke()
+        if highlight:
+            # draw the highlighting circle
+            cr.set_line_width(8)
+            cr.set_source_rgba(*bgColor.getCairoColor()) # highlight circle color
+            cr.arc(x, y, 15, 0, 2.0 * math.pi)
+            cr.stroke()
+            cr.fill()
 
-    # draw a caption with transparent background
-    cr.set_font_size(25)
-    extents = cr.text_extents(text) # get the text extents
-    (w,h) = (extents[2], extents[3])
-    border = 2
-    cr.set_line_width(2)
+        # draw the point
+        cr.set_source_rgb(0.0, 0.0, 0.0)
+        cr.set_line_width(10)
+        cr.arc(x, y, 3, 0, 2.0 * math.pi)
+        cr.stroke()
+        cr.set_source_rgb(0.0, 0.0, 1.0)
+        cr.set_line_width(8)
+        cr.arc(x, y, 2, 0, 2.0 * math.pi)
+        cr.stroke()
 
-    cr.set_source_rgba(*bgColor.getCairoColor()) # trasparent blue
-    (rx,ry,rw,rh) = (x - border+12, y + border+h*0.2 + 6, w + 4*border, -(h*1.4))
-    cr.rectangle(rx,ry,rw,rh) # create the transparent background rectangle
-    cr.fill()
+        # draw a caption with transparent background
+        cr.set_font_size(25)
+        extents = cr.text_extents(text) # get the text extents
+        (w, h) = (extents[2], extents[3])
+        border = 2
+        cr.set_line_width(2)
 
-    # register clickable area
-    click = self.m.get('clickHandler', None)
-    if click:
-      # make the POI caption clickable
-      click.registerXYWH(rx,ry-(-rh),rw,-rh, action)
-    cr.fill()
+        cr.set_source_rgba(*bgColor.getCairoColor()) # trasparent blue
+        (rx, ry, rw, rh) = (x - border + 12, y + border + h * 0.2 + 6, w + 4 * border, -(h * 1.4))
+        cr.rectangle(rx, ry, rw, rh) # create the transparent background rectangle
+        cr.fill()
 
-    # draw the actual text
-    cr.set_source_rgba(*textColor.getCairoColor()) # slightly transparent white
-    cr.move_to(x+15,y+7)
-    cr.show_text(text) # show the transparent result caption
-    cr.stroke()
+        # register clickable area
+        click = self.m.get('clickHandler', None)
+        if click:
+            # make the POI caption clickable
+            click.registerXYWH(rx, ry - (-rh), rw, -rh, action)
+        cr.fill()
+
+        # draw the actual text
+        cr.set_source_rgba(*textColor.getCairoColor()) # slightly transparent white
+        cr.move_to(x + 15, y + 7)
+        cr.show_text(text) # show the transparent result caption
+        cr.stroke()
+
 
 class PointGroup():
-  def __init__(self, points=None, bgColor=Color("bg", ("blue", 0.45)), textColor=Color("bg", ("white", 0.95))):
-    if not points: points = []
-    self.points = []
-    for point in points:
-      self.points.append((point,False))
-    self.bgColor = bgColor
-    self.textColor = textColor
-    self.menu=False
-    self.menuInstance = None
+    def __init__(self, points=None, bgColor=Color("bg", ("blue", 0.45)), textColor=Color("bg", ("white", 0.95))):
+        if not points: points = []
+        self.points = []
+        for point in points:
+            self.points.append((point, False))
+        self.bgColor = bgColor
+        self.textColor = textColor
+        self.menu = False
+        self.menuInstance = None
 
-  def getBBox(self):
-    """report a bounding box for all points"""
-    pass
+    def getBBox(self):
+        """report a bounding box for all points"""
+        pass
 
-  def getPoints(self):
-    """return a list of included points"""
-    return self.points
+    def getPoints(self):
+        """return a list of included points"""
+        return self.points
 
-  def getColors(self):
-    return self.bgColor, self.textColor
+    def getColors(self):
+        return self.bgColor, self.textColor
 
-  def highlightPoint(self, pointId):
-    try:
-      self.points[pointId][1] = True
-    except Exception:
-      import sys
-      e = sys.exc_info()[1]
-      print("markers: highlight index out of range: %r" % pointId)
-      print(e)
+    def highlightPoint(self, pointId):
+        try:
+            self.points[pointId][1] = True
+        except Exception:
+            import sys
 
-  def unhighlightAll(self):
-    for pointTuple in self.points:
-      pointTuple[1] = False
+            e = sys.exc_info()[1]
+            print("markers: highlight index out of range: %r" % pointId)
+            print(e)
 
-  def setMenuEnabled(self, value):
-    self.menu = value
+    def unhighlightAll(self):
+        for pointTuple in self.points:
+            pointTuple[1] = False
 
-  def getMenuEnabled(self):
-    """is menu for this point group enabled or disabled"""
-    return self.menu
+    def setMenuEnabled(self, value):
+        self.menu = value
 
-  def setMenuInstance(self, menu):
-    self.menuInstance = menu
+    def getMenuEnabled(self):
+        """is menu for this point group enabled or disabled"""
+        return self.menu
 
-  def getMenuInstance(self):
-    return self.menuInstance
+    def setMenuInstance(self, menu):
+        self.menuInstance = menu
 
-  def setInitialBackAction(self, action):
+    def getMenuInstance(self):
+        return self.menuInstance
+
+    def setInitialBackAction(self, action):
         """this action will be used if the corresponding marker group menu is
     entered for the first time without selecting any items,
     once an item is selected, the back action reverts to "set:menu:None",

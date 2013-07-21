@@ -24,38 +24,42 @@ import socket
 from time import sleep
 import re
 
-def getModule(m,d,i):
-  return PosFromFile(m,d,i)
+
+def getModule(m, d, i):
+    return PosFromFile(m, d, i)
+
 
 class PosFromFile(RanaModule):
-  """Supplies position info from GPSD"""
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
- 
-  def update(self):
-    filename = self.get('pos_filename', 'pos.txt')
-    if not os.path.exists(filename):
-      self.status = "File not available"
-      return
-    try:
-      file = open(filename, 'r')
-    except IOError:
-      self.status = "Can't open file"
-    text = file.readline(50)
-    file.close()
-    try:
-      lat,lon = [float(i) for i in text.rstrip().split(",")]
-      self.set('pos', (lat,lon))
-      self.set('pos_source', 'file')
-      self.status = "OK"
-      return {'valid':True, 'lat':lat, 'lon':lon, 'source':'textfile'}
-    except ValueError:
-      self.status = "Invalid file"
+    """Supplies position info from GPSD"""
+
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
+
+    def update(self):
+        filename = self.get('pos_filename', 'pos.txt')
+        if not os.path.exists(filename):
+            self.status = "File not available"
+            return
+        try:
+            file = open(filename, 'r')
+        except IOError:
+            self.status = "Can't open file"
+        text = file.readline(50)
+        file.close()
+        try:
+            lat, lon = [float(i) for i in text.rstrip().split(",")]
+            self.set('pos', (lat, lon))
+            self.set('pos_source', 'file')
+            self.status = "OK"
+            return {'valid': True, 'lat': lat, 'lon': lon, 'source': 'textfile'}
+        except ValueError:
+            self.status = "Invalid file"
+
 
 if __name__ == "__main__":
-  d = {'pos_filename':'pos.txt'}
-  a = PosFromFile({},d)
-  for i in range(5):
-    a.update()
-    print("%s: %s" %(a.getStatus(), d.get('pos', None)))
-    sleep(3)
+    d = {'pos_filename': 'pos.txt'}
+    a = PosFromFile({}, d)
+    for i in range(5):
+        a.update()
+        print("%s: %s" % (a.getStatus(), d.get('pos', None)))
+        sleep(3)

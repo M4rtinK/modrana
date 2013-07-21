@@ -18,49 +18,51 @@
 #---------------------------------------------------------------------------
 from core.fix import Fix
 
+
 class PositionSource(object):
-  """
-  An abstract position source class
-  """
-  def __init__(self, location):
-    self.location = location
-    self.fix = Fix() # position fix
-    self.debug = False
-
-  def start(self):
     """
-    start positioning
-    """
-    pass
-
-  def stop(self):
-    """
-    stop positioning
+    An abstract position source class
     """
 
-  def isRunning(self):
-    """
-    report is positioning is running
-    """
-    return False
+    def __init__(self, location):
+        self.location = location
+        self.fix = Fix() # position fix
+        self.debug = False
 
-  def getFix(self):
-    """
-    return the Fix object instance
-    """
-    return self.fix
+    def start(self):
+        """
+        start positioning
+        """
+        pass
 
-  def canSetUpdateInterval(self):
-    """
-    report whether the position source can set update interval
-    """
-    return False
+    def stop(self):
+        """
+        stop positioning
+        """
 
-  def setUpdateInterval(self, interval):
-    """
-    set update interval, return whether interval was successfully set
-    """
-    return False
+    def isRunning(self):
+        """
+        report is positioning is running
+        """
+        return False
 
-  def setDebug(self, value):
-    self.debug = value
+    def getFix(self):
+        """
+        return the Fix object instance
+        """
+        return self.fix
+
+    def canSetUpdateInterval(self):
+        """
+        report whether the position source can set update interval
+        """
+        return False
+
+    def setUpdateInterval(self, interval):
+        """
+        set update interval, return whether interval was successfully set
+        """
+        return False
+
+    def setDebug(self, value):
+        self.debug = value

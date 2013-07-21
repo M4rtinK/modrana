@@ -30,65 +30,66 @@ import os
 from xml.sax import make_parser, handler
 import xml
 
+
 class ParseOsm(handler.ContentHandler):
-  def __init__(self, filename):
-    """Load an OSM XML file into memory"""
-    self.nodes = {}
-    self.ways = {}
-    self.poi = []
-    self.divisor = float(2 ** 31)
-    if filename is not None:
-      self.loadOsm(filename)
+    def __init__(self, filename):
+        """Load an OSM XML file into memory"""
+        self.nodes = {}
+        self.ways = {}
+        self.poi = []
+        self.divisor = float(2 ** 31)
+        if filename is not None:
+            self.loadOsm(filename)
 
-  def loadOsm(self, filename):
-    """Load an OSM XML file into memory"""
-    if not os.path.exists(filename):
-      return
-    try:
-      parser = make_parser()
-      parser.setContentHandler(self)
-      parser.parse(filename)
-    except xml.sax._exceptions.SAXParseException:
-      print("Error loading %s" % filename)
-    
+    def loadOsm(self, filename):
+        """Load an OSM XML file into memory"""
+        if not os.path.exists(filename):
+            return
+        try:
+            parser = make_parser()
+            parser.setContentHandler(self)
+            parser.parse(filename)
+        except xml.sax._exceptions.SAXParseException:
+            print("Error loading %s" % filename)
 
-  def startElement(self, name, attrs):
-    """Handle XML elements"""
-    if name in('node','way','relation'):
-      self.tags = {}
-      self.isInteresting = False
-      self.waynodes = []
-      if name == 'node':
-        """Nodes need to be stored"""
-        id = int(attrs.get('id'))
-        self.nodeID = id
-        lat = float(attrs.get('lat'))
-        lon = float(attrs.get('lon'))
-        self.nodes[id] = (lat,lon)
-      elif name == 'way':
-        id = int(attrs.get('id'))
-        self.wayID = id
-    elif name == 'nd':
-      """Nodes within a way -- add them to a list"""
-      node = {
-        'id': int(attrs.get('id')),
-        'lat': float(attrs.get('y')) / self.divisor, 
-        'lon': float(attrs.get('x')) / self.divisor}
-      self.waynodes.append(node)
-    elif name == 'tag':
-      """Tags - store them in a hash"""
-      k,v = (attrs.get('k'), attrs.get('v'))
-      
-      # Test if a tag is interesting enough to make it worth
-      # storing this node as a special "point of interest"
-      if not k in 'created_by': # TODO: better list of useless tags
-        self.tags[k] = v
-        self.isInteresting = True
-  
-  def endElement(self, name):
-    if name == 'way':
-      self.ways[self.wayID] = ({'t':self.tags, 'n':self.waynodes})
-    elif name == 'node':
-      if self.isInteresting:
-        self.poi.append({'t':self.tags, 'id':self.nodeID})
+
+    def startElement(self, name, attrs):
+        """Handle XML elements"""
+        if name in ('node', 'way', 'relation'):
+            self.tags = {}
+            self.isInteresting = False
+            self.waynodes = []
+            if name == 'node':
+                """Nodes need to be stored"""
+                id = int(attrs.get('id'))
+                self.nodeID = id
+                lat = float(attrs.get('lat'))
+                lon = float(attrs.get('lon'))
+                self.nodes[id] = (lat, lon)
+            elif name == 'way':
+                id = int(attrs.get('id'))
+                self.wayID = id
+        elif name == 'nd':
+            """Nodes within a way -- add them to a list"""
+            node = {
+                'id': int(attrs.get('id')),
+                'lat': float(attrs.get('y')) / self.divisor,
+                'lon': float(attrs.get('x')) / self.divisor}
+            self.waynodes.append(node)
+        elif name == 'tag':
+            """Tags - store them in a hash"""
+            k, v = (attrs.get('k'), attrs.get('v'))
+
+            # Test if a tag is interesting enough to make it worth
+            # storing this node as a special "point of interest"
+            if not k in 'created_by': # TODO: better list of useless tags
+                self.tags[k] = v
+                self.isInteresting = True
+
+    def endElement(self, name):
+        if name == 'way':
+            self.ways[self.wayID] = ({'t': self.tags, 'n': self.waynodes})
+        elif name == 'node':
+            if self.isInteresting:
+                self.poi.append({'t': self.tags, 'id': self.nodeID})
 

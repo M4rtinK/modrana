@@ -20,28 +20,31 @@
 from modules.base_module import RanaModule
 from upoints import gpx
 
-def getModule(m,d,i):
-  return ShowTracklogs(m,d,i)
+
+def getModule(m, d, i):
+    return ShowTracklogs(m, d, i)
+
 
 class ShowTracklogs(RanaModule):
-  """draws a GPX track on the map"""
-  
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
-    
-    self.tracks = {} #dictionary of tracklists TODO: support tracklists with same filenames
-    #self.tracks_filelist = {} #dictionary in form of filename:key_in_tracks
-    
-  def load(self, filename):
-    """load a GPX file to datastructure"""
-    file = open(filename, 'r')
+    """draws a GPX track on the map"""
 
-    if file:
-      track = gpx.Trackpoints() # create new Trackpoints object
-      track.import_locations(file) # load a gpx file into it
-      self.tracks[filename] = track
-      file.close()
-    else:
-      print("No file")
-  def drawMapOverlay(self, cr):
-    pass
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
+
+        self.tracks = {} #dictionary of tracklists TODO: support tracklists with same filenames
+        #self.tracks_filelist = {} #dictionary in form of filename:key_in_tracks
+
+    def load(self, filename):
+        """load a GPX file to datastructure"""
+        file = open(filename, 'r')
+
+        if file:
+            track = gpx.Trackpoints() # create new Trackpoints object
+            track.import_locations(file) # load a gpx file into it
+            self.tracks[filename] = track
+            file.close()
+        else:
+            print("No file")
+
+    def drawMapOverlay(self, cr):
+        pass
