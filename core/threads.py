@@ -59,7 +59,7 @@ class ThreadManager(object):
     def __init__(self):
         self._objs = {}
         self._errors = {}
-        self._main_thread = threading.current_thread()
+        self._main_thread = threading.currentThread()
         # signals
         self.threadStatusChanged = Signal()
         self.threadProgressChanged = Signal()
@@ -85,9 +85,17 @@ class ThreadManager(object):
            be called when a thread exits, or there will be no way to get a
            handle on it.
         """
-        self._objs.pop(name)
-        # trigger the threadRemoved signal
-        self.threadRemoved(name)
+        thread = self._objs.pop(name)
+        threadHasCallback = False
+        try:
+          threadHasCallback = thread.callback
+        except Exception:
+          # not a thread ?
+          log.debug("threads: no callback or not a thread ?")
+
+        if threadHasCallback:
+          # trigger the threadRemoved signal
+          self.threadRemoved(name)
 
     def exists(self, name):
         """Determine if a thread or process exists with the given name."""
@@ -139,8 +147,7 @@ class ThreadManager(object):
 
     def in_main_thread(self):
         """Return True if it is run in the main thread."""
-
-        cur_thread = threading.current_thread()
+        cur_thread = threading.currentThread()
         return cur_thread is self._main_thread
 
 class ModRanaThread(threading.Thread):
@@ -181,7 +188,8 @@ class ModRanaThread(threading.Thread):
         # needs to be outside of the lock
         # to prevent deadlocks when signal handler
         # wants to access the property
-        threadMgr.threadStatusChanged(self.name, value)
+        if self.callback:
+          threadMgr.threadStatusChanged(self.name, value)
 
     @property
     def progress(self):
@@ -195,7 +203,8 @@ class ModRanaThread(threading.Thread):
       # needs to be outside of the lock
       # to prevent deadlocks when signal handler
       # wants to access the property
-      threadMgr.threadProgressChanged(self.name, value)
+      if self.callback:
+        threadMgr.threadProgressChanged(self.name, value)
 
     @property
     def callback(self):
@@ -232,9 +241,6 @@ class ModRanaThread(threading.Thread):
     def _conditionalCallback(self, *args, **kwargs):
       """Used as a "wrapper" for the real callback.
       Enables cancelling the calling of the callback while the task is not yet done"""
-      print("COND CALLBACK")
-      print(self.callback)
-      print(self._callback)
       if self.callback:
         self.callback(*args, **kwargs)
 
