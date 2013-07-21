@@ -21,41 +21,45 @@ from modules.base_module import RanaModule
 from time import time
 # only import GKT libs if GTK GUI is used
 from core import gs
-if gs.GUIString == "GTK":
-  import cairo
 
-def getModule(m,d,i):
-  return Sketch(m,d,i)
+if gs.GUIString == "GTK":
+    import cairo
+
+
+def getModule(m, d, i):
+    return Sketch(m, d, i)
+
 
 class Sketch(RanaModule):
-  """Sketching functionality"""
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
-    self.points = []
+    """Sketching functionality"""
 
-    if 0: # to test
-      m = self.m.get("menu", None)
-      if m:
-        m.clearMenu('sketch', "set:menu:None")
-        self.set("menu", "sketch")
-    
-  def drawMenu(self, cr, menuName, args=None):
-    if self.get("menu", "") == "sketch":
-      (x,y,w,h) = self.get('viewport')
-      
-      count = 0
-      for p in self.points:
-        if count == 0:
-          cr.move_to(p[0],p[1])
-        else:
-          cr.line_to(p[0],p[1])
-        count += 1
-      cr.stroke()
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
+        self.points = []
 
-      mod = self.m.get("clickHandler", None)
-      if mod:
-        mod.registerDraggableEntireScreen("sketch")
-  
-  def dragEvent(self, startX,startY,dx,dy,x,y):
-    self.points.append((x,y))
+        if 0: # to test
+            m = self.m.get("menu", None)
+            if m:
+                m.clearMenu('sketch', "set:menu:None")
+                self.set("menu", "sketch")
+
+    def drawMenu(self, cr, menuName, args=None):
+        if self.get("menu", "") == "sketch":
+            (x, y, w, h) = self.get('viewport')
+
+            count = 0
+            for p in self.points:
+                if count == 0:
+                    cr.move_to(p[0], p[1])
+                else:
+                    cr.line_to(p[0], p[1])
+                count += 1
+            cr.stroke()
+
+            mod = self.m.get("clickHandler", None)
+            if mod:
+                mod.registerDraggableEntireScreen("sketch")
+
+    def dragEvent(self, startX, startY, dx, dy, x, y):
+        self.points.append((x, y))
   

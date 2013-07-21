@@ -4,8 +4,10 @@ import re
 
 __version__ = '3.2.2'
 
+
 class CertificateError(ValueError):
     pass
+
 
 def _dnsname_to_pat(dn):
     pats = []
@@ -19,6 +21,7 @@ def _dnsname_to_pat(dn):
             frag = re.escape(frag)
             pats.append(frag.replace(r'\*', '[^.]*'))
     return re.compile(r'\A' + r'\.'.join(pats) + r'\Z', re.IGNORECASE)
+
 
 def match_hostname(cert, hostname):
     """Verify that *cert* (in decoded format as returned by
@@ -50,12 +53,12 @@ def match_hostname(cert, hostname):
                     dnsnames.append(value)
     if len(dnsnames) > 1:
         raise CertificateError("hostname %r "
-            "doesn't match either of %s"
-            % (hostname, ', '.join(map(repr, dnsnames))))
+                               "doesn't match either of %s"
+                               % (hostname, ', '.join(map(repr, dnsnames))))
     elif len(dnsnames) == 1:
         raise CertificateError("hostname %r "
-            "doesn't match %r"
-            % (hostname, dnsnames[0]))
+                               "doesn't match %r"
+                               % (hostname, dnsnames[0]))
     else:
         raise CertificateError("no appropriate commonName or "
-            "subjectAltName fields were found")
+                               "subjectAltName fields were found")

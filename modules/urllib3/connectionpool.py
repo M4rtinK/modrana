@@ -26,18 +26,22 @@ try:
         from queue import LifoQueue, Empty, Full # Python 3
 except ImportError:
     from Queue import Queue
+
     class LifoQueue(Queue):  # Python 2.5
         """Variant of Queue that retrieves most recently added entries first."""
+
         def _init(self, maxsize):
             self.queue = []
             self.maxsize = maxsize
+
         def _qsize(self, len=len):
             return len(self.queue)
+
         def _put(self, item):
             self.queue.append(item)
+
         def _get(self):
             return self.queue.pop()
-
 
 try: # Compiled with SSL?
     HTTPSConnection = object
@@ -50,11 +54,11 @@ try: # Compiled with SSL?
         from httplib import HTTPSConnection
 
     import ssl
+
     BaseSSLError = ssl.SSLError
 
 except (ImportError, AttributeError): # Platform-specific: No SSL.
     pass
-
 
 from .request import RequestMethods
 from .response import HTTPResponse
@@ -66,7 +70,7 @@ from .exceptions import (
     MaxRetryError,
     SSLError,
     TimeoutError,
-)
+    )
 
 from .packages.ssl_match_hostname import match_hostname, CertificateError
 from .packages import six
@@ -462,12 +466,12 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
         except Empty:
             # Timed out by queue
             raise TimeoutError(self, "Request timed out. (pool_timeout=%s)" %
-                               pool_timeout)
+                                     pool_timeout)
 
         except SocketTimeout:
             # Timed out by socket
             raise TimeoutError(self, "Request timed out. (timeout=%s)" %
-                               timeout)
+                                     timeout)
 
         except BaseSSLError:
             e = sys.exc_info()[1]

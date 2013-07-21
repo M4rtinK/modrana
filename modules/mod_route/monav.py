@@ -32,6 +32,7 @@ class TcpConnection(object):
     """Wrapper for socket.socket() with Google protocol buffers.
 
     """
+
     def __init__(self, host='localhost', port=8040):
         """Open a Tcp socket to host.
 
@@ -55,7 +56,7 @@ class TcpConnection(object):
         serialized = message.SerializeToString()
         self._socket.sendall(struct.pack("I", len(serialized)))
         self._socket.sendall(serialized)
-    
+
     def read(self, message):
         """Read and parse a Google protocol buffer message from the socket.
 
@@ -138,19 +139,19 @@ def get_route(data_directory, waypoints, lookup_radius=10000, lookup_edge_names=
     wayP = []
 
     for point in waypoints:
-      lat, lon = point
-      w = Waypoint()
-      w.latitude = lat
-      w.longitude = lon
-      wayP.append(w)
+        lat, lon = point
+        w = Waypoint()
+        w.latitude = lat
+        w.longitude = lon
+        wayP.append(w)
 
     command.waypoints.extend(wayP)
-#    if hasattr(waypoints[0], 'latitude'):
-#        command.waypoints.extend(waypoints)
-#    else:
-#        for latlon in waypoints:
-#            assert len(latlon) == 2
-#            waypoint = command.waypoints.add(latitude=latlon[0], longitude=latlon[1])
+    #    if hasattr(waypoints[0], 'latitude'):
+    #        command.waypoints.extend(waypoints)
+    #    else:
+    #        for latlon in waypoints:
+    #            assert len(latlon) == 2
+    #            waypoint = command.waypoints.add(latitude=latlon[0], longitude=latlon[1])
 
     # Write the command.
     print("COMMAND")

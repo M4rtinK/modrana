@@ -19,11 +19,13 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 
-def getModule(m,d,i):
-  return UpdateTiles(m,d,i)
+
+def getModule(m, d, i):
+    return UpdateTiles(m, d, i)
+
 
 class UpdateTiles(RanaModule):
-  """Update stored map tiles."""
-  
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
+    """Update stored map tiles."""
+
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)

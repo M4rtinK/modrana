@@ -26,6 +26,7 @@ __doc__ += """.
 
 from . import (point, utils)
 
+
 class Xearth(point.Point):
     """Class for representing a location from a Xearth marker
 

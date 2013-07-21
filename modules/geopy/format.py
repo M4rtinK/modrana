@@ -29,6 +29,7 @@ HTML_SYMBOLS = {'deg': HTML_DEGREE, 'arcmin': HTML_PRIME, 'arcsec': HTML_DOUBLE_
 XML_SYMBOLS = {'deg': XML_DECIMAL_DEGREE, 'arcmin': XML_DECIMAL_PRIME, 'arcsec': XML_DECIMAL_DOUBLE_PRIME}
 ABBR_SYMBOLS = {'deg': ABBR_DEGREE, 'arcmin': ABBR_ARCMIN, 'arcsec': ABBR_ARCSEC}
 
+
 def format_degrees(degrees, format=DEGREES_FORMAT, symbols=ASCII_SYMBOLS):
     arcminutes = units.arcminutes(degrees=degrees - int(degrees))
     arcseconds = units.arcseconds(arcminutes=arcminutes - int(arcminutes))
@@ -40,6 +41,7 @@ def format_degrees(degrees, format=DEGREES_FORMAT, symbols=ASCII_SYMBOLS):
     )
     return format % format_dict
 
+
 DISTANCE_FORMAT = "%(magnitude)s%(unit)s"
 DISTANCE_UNITS = {
     'km': lambda d: d,
@@ -49,9 +51,12 @@ DISTANCE_UNITS = {
     'nm': lambda d: units.nautical(kilometers=d),
     'nmi': lambda d: units.nautical(kilometers=d)
 }
+
+
 def format_distance(kilometers, format=DISTANCE_FORMAT, unit='km'):
     magnitude = DISTANCE_UNITS[unit](kilometers)
     return format % {'magnitude': magnitude, 'unit': unit}
+
 
 _DIRECTIONS = [
     ('north', 'N'),
@@ -72,6 +77,7 @@ _DIRECTIONS = [
 DIRECTIONS, DIRECTIONS_ABBR = zip(*_DIRECTIONS)
 ANGLE_DIRECTIONS = dict((n * 11.25, d) for n, d in enumerate(DIRECTIONS))
 ANGLE_DIRECTIONS_ABBR = dict((n * 11.25, d) for n, d in enumerate(DIRECTIONS_ABBR))
+
 
 def format_direction(degrees):
     pass

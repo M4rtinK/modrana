@@ -24,10 +24,10 @@ __doc__ += """.
 .. versionadded:: 0.2.0
 """
 
-
 import logging
 
 from . import (point, trigpoints, utils)
+
 
 class Station(trigpoints.Trigpoint):
     """Class for representing a weather station from a NOAA data file
@@ -262,7 +262,7 @@ class Stations(point.KeyedPoints):
                 if not i:
                     point_data.append(None)
                     continue
-                # Some entries in nsd_cccc.txt are of the format "DD-MM-
+                    # Some entries in nsd_cccc.txt are of the format "DD-MM-
                 # N", so we just take the spaces to mean 0 seconds.
                 if " " in i:
                     logging.debug("Fixing unpadded location data in `%s' entry"

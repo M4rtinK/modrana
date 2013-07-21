@@ -23,146 +23,149 @@
 
 from modules.base_module import RanaModule
 
+
 class GUIModule(RanaModule):
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
-    self.msLongPress = 400
-    self.subtypeId = None
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
+        self.msLongPress = 400
+        self.subtypeId = None
 
-  def getIDString(self):
-    """
-    get a unique string identifier for a GUI module
-    """
-    return None
+    def getIDString(self):
+        """
+        get a unique string identifier for a GUI module
+        """
+        return None
 
-  def getSubtypeId(self):
-    return self.subtypeId
+    def getSubtypeId(self):
+        return self.subtypeId
 
-  def setSubtypeId(self, subtypeId):
-    """the subtype id hints to the GUI module, which GUI variant to use
+    def setSubtypeId(self, subtypeId):
+        """the subtype id hints to the GUI module, which GUI variant to use
 
-    The GUI module might not respect this, if it either does not support
-    the given variant or it might revert to the default if the given variant fails
-    to start.
-    """
-    self.subtypeId = subtypeId
+        The GUI module might not respect this, if it either does not support
+        the given variant or it might revert to the default if the given variant fails
+        to start.
+        """
+        self.subtypeId = subtypeId
 
-  def resize(self, mrw, h):
-    """resize the GUI to given width and height"""
+    def resize(self, mrw, h):
+        """resize the GUI to given width and height"""
+        pass
+
+    def getWindow(self):
+        """return the main window"""
+        pass
+
+    def getViewport(self):
+        """return a (x,y,w,h) tuple"""
+        pass
+
+    def setWindowTitle(self, title):
+        """set the window title to a given string"""
+        pass
+
+    def getToolkit(self):
+        """report which toolkit the current GUI uses"""
+        return
+
+    def getAccel(self):
+        """report if current GUI supports acceleration"""
+        pass
+
+    def isFullscreen(self):
+        """report if the application is in fullscreen mode"""
+        pass
+
+    def toggleFullscreen(self):
+        """
+        toggle fullscreen state
+        """
+        pass
+
+    def setFullscreen(self, value):
+        """
+        set fullscreen state
+        * True - go to fullscreen
+        * False - unfullscreen
+        """
+        pass
+
+    def enableDefaultDrag(self):
+        """
+        use the default map dragging implementation
+        """
+
     pass
 
-  def getWindow(self):
-    """return the main window"""
-    pass
+    def enableStaticMapDrag(self):
+        """
+        enable static map dragging
+        eq. while dragging the map, only the area that is visible is dragged
+        and the rest is not updated until the drag is finished
+        (can lead to better dragging performance on slower devices at the cost of
+        some eyecandy)
+        """
+        pass
 
-  def getViewport(self):
-    """return a (x,y,w,h) tuple"""
-    pass
+    def setCDDragThreshold(self, threshold):
+        """set the threshold which needs to be reached to disable centering while dragging
+        basically, larger threshold = longer drag is needed to disable centering
+        default value = 2048
+        """
+        pass
 
-  def setWindowTitle(self, title):
-    """set the window title to a given string"""
-    pass
+    def lockDrag(self):
+        """
+        lock map dragging
+        """
+        pass
 
-  def getToolkit(self):
-    """report which toolkit the current GUI uses"""
-    return
+    def unlockDrag(self):
+        """
+        unlock map dragging
+        """
+        pass
 
-  def getAccel(self):
-    """report if current GUI supports acceleration"""
-    pass
+    def setRedraw(self, value):
+        """
+        set redrawing mode
+        * True - redraw as usual
+        * False - don't redraw application window
+        * "minimized" - the application window is now minimized
+        """
+        pass
 
-  def isFullscreen(self):
-    """report if the application is in fullscreen mode"""
-    pass
+    def startMainLoop(self):
+        """start the main loop or its equivalent"""
+        pass
 
-  def toggleFullscreen(self):
-    """
-    toggle fullscreen state
-    """
-    pass
+    def stopMainLoop(self):
+        """stop the main loop or its equivalent"""
+        pass
 
-  def setFullscreen(self, value):
-    """
-    set fullscreen state
-    * True - go to fullscreen
-    * False - unfullscreen
-    """
-    pass
+    def hasNotificationSupport(self):
+        """handles notifications"""
+        return False
 
-  def enableDefaultDrag(self):
-    """
-    use the default map dragging implementation
-    """
-  pass
+    def notify(self, message, msTimeout=0, icon=""):
+        """handle a notification"""
+        pass
 
-  def enableStaticMapDrag(self):
-    """
-    enable static map dragging
-    eq. while dragging the map, only the area that is visible is dragged
-    and the rest is not updated until the drag is finished
-    (can lead to better dragging performance on slower devices at the cost of
-    some eyecandy)
-    """
-    pass
+    def statusReport(self):
+        """report current status of the gui"""
+        return "It works!"
 
-  def setCDDragThreshold(self, threshold):
-    """set the threshold which needs to be reached to disable centering while dragging
-    basically, larger threshold = longer drag is needed to disable centering
-    default value = 2048
-    """
-    pass
+    def needsLocalhostTileserver(self):
+        """report if the GUI module requires the localhost
+        tileserver to run"""
+        return False
 
-  def lockDrag(self):
-    """
-    lock map dragging
-    """
-    pass
+    def openUrl(self, url):
+        """open a given URL asynchronously"""
+        # the webbrowser module should be a good default
+        import webbrowser
 
-  def unlockDrag(self):
-    """
-    unlock map dragging
-    """
-    pass
-
-  def setRedraw(self, value):
-    """
-    set redrawing mode
-    * True - redraw as usual
-    * False - don't redraw application window
-    * "minimized" - the application window is now minimized
-    """
-    pass
-
-  def startMainLoop(self):
-    """start the main loop or its equivalent"""
-    pass
-
-  def stopMainLoop(self):
-    """stop the main loop or its equivalent"""
-    pass
-
-  def hasNotificationSupport(self):
-    """handles notifications"""
-    return False
-
-  def notify(self, message, msTimeout=0, icon=""):
-    """handle a notification"""
-    pass
-
-  def statusReport(self):
-    """report current status of the gui"""
-    return "It works!"
-
-  def needsLocalhostTileserver(self):
-    """report if the GUI module requires the localhost
-    tileserver to run"""
-    return False
-
-  def openUrl(self, url):
-    """open a given URL asynchronously"""
-    # the webbrowser module should be a good default
-    import webbrowser
-    webbrowser.open(url)
+        webbrowser.open(url)
 
 
 

@@ -19,10 +19,12 @@ ISO8601_RE = re.compile(r"""
     """, re.X
 )
 
+
 def to_int(str_or_none, default=0):
     if str_or_none is not None:
         return int(str_or_none)
     return default
+
 
 def parse_iso8601(string):
     match = ISO8601_RE.match(string)
@@ -55,16 +57,17 @@ def parse_iso8601(string):
             timestamp += timedelta(hours=fraction)
     return timestamp
 
+
 class TimeZone(tzinfo):
     def __init__(self, name, offset=timedelta(0)):
         self.__name = name
         self.__offset = offset
-    
+
     def utcoffset(self, dt):
         return self.__offset
-    
+
     def tzname(self, dt):
         return self.__name
-    
+
     def dst(self, dt):
         return timedelta(0)

@@ -31,86 +31,88 @@ import os
 import renderer_default as RenderModule1
 import renderer_labels as RenderModule2
 
+
 class TileServer(BaseHTTPRequestHandler):
-  def __init__(self, request, client_address, server):
-    self.re = re.compile('/(\w+)/(\d+)/(\d+)/(\d+)\.png')
-    self.blankre = re.compile('/blank/(\w+)/')
-    BaseHTTPRequestHandler.__init__(self, request, client_address, server)
+    def __init__(self, request, client_address, server):
+        self.re = re.compile('/(\w+)/(\d+)/(\d+)/(\d+)\.png')
+        self.blankre = re.compile('/blank/(\w+)/')
+        BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 
-  def log_message(self, format, *args):
-    pass  # Kill logging to stderr
-  
-  def return_file(self, filename, contentType='text/HTML'):
-    # Serve a real file from disk (for indexes etc.)
-    f = open(filename, "r")
-    if f:
-      self.send_response(200)
-      self.send_header('Content-type',contentType) # TODO: more headers
-      self.end_headers()
-      self.wfile.write(f.read())
-      f.close()
-    else:
-      self.send_response(404)
-      
-  def do_GET(self):
-    # split query strings off and store separately
-    if self.path.find('?') != -1: 
-      (self.path, self.query_string) = self.path.split('?', 1)
+    def log_message(self, format, *args):
+        pass  # Kill logging to stderr
 
-    # Specific files to serve:
-    if self.path=='/':
-      self.return_file('slippy.html')
-      return
+    def return_file(self, filename, contentType='text/HTML'):
+        # Serve a real file from disk (for indexes etc.)
+        f = open(filename, "r")
+        if f:
+            self.send_response(200)
+            self.send_header('Content-type', contentType) # TODO: more headers
+            self.end_headers()
+            self.wfile.write(f.read())
+            f.close()
+        else:
+            self.send_response(404)
 
-    # See if a tile was requested
-    blankmatch = self.blankre.match(self.path)
-    
-    if blankmatch:
-      (name) = blankmatch.groups()
-      filename = "blank/%s.png" % name
-      if not os.path.exists(filename):
-        filename = "blank/white.png"
-      self.return_file(filename, 'image/PNG')
-      return
-    
-    tilematch = self.re.match(self.path)
-    if tilematch:
-      (layer,z,x,y) = tilematch.groups()
-      z = int(z)
-      x = int(x)
-      y = int(y)
-      
-      # Render the tile
-      print('z%d: %d,%d - %s' % (z,x,y,layer))
+    def do_GET(self):
+        # split query strings off and store separately
+        if self.path.find('?') != -1:
+            (self.path, self.query_string) = self.path.split('?', 1)
 
-      if layer == 'labels':
-        renderer = RenderModule2.RenderClass()
-      else:
-        renderer = RenderModule1.RenderClass()
-      pngData = renderer.RenderTile(z,x,y, layer)
-      
-      if pngData is None:
-        print("Not found")
-        self.send_response(404)
-        return
-      if pngData[0] == ':':
-        self.send_response(200)
-        self.wfile.write(pngData)
-        return
-      
-      # Return the tile as a PNG
-      self.send_response(200)
-      self.send_header('Content-type','image/PNG')
-      self.end_headers()
-      self.wfile.write(pngData)
-    else:
-      self.send_response(404)
+        # Specific files to serve:
+        if self.path == '/':
+            self.return_file('slippy.html')
+            return
+
+        # See if a tile was requested
+        blankmatch = self.blankre.match(self.path)
+
+        if blankmatch:
+            (name) = blankmatch.groups()
+            filename = "blank/%s.png" % name
+            if not os.path.exists(filename):
+                filename = "blank/white.png"
+            self.return_file(filename, 'image/PNG')
+            return
+
+        tilematch = self.re.match(self.path)
+        if tilematch:
+            (layer, z, x, y) = tilematch.groups()
+            z = int(z)
+            x = int(x)
+            y = int(y)
+
+            # Render the tile
+            print('z%d: %d,%d - %s' % (z, x, y, layer))
+
+            if layer == 'labels':
+                renderer = RenderModule2.RenderClass()
+            else:
+                renderer = RenderModule1.RenderClass()
+            pngData = renderer.RenderTile(z, x, y, layer)
+
+            if pngData is None:
+                print("Not found")
+                self.send_response(404)
+                return
+            if pngData[0] == ':':
+                self.send_response(200)
+                self.wfile.write(pngData)
+                return
+
+            # Return the tile as a PNG
+            self.send_response(200)
+            self.send_header('Content-type', 'image/PNG')
+            self.end_headers()
+            self.wfile.write(pngData)
+        else:
+            self.send_response(404)
+
 
 try:
-  server = HTTPServer(('',1280), TileServer)
-  print("Starting web server. Open http://localhost:1280 to access pyrender.")
-  server.serve_forever()
+    server = HTTPServer(('', 1280), TileServer)
+    print("Starting web server. Open http://localhost:1280 to access pyrender.")
+    server.serve_forever()
 except KeyboardInterrupt:
-  server.socket.close()
-  sys.exit()
+    server.socket.close()
+    sys.exit()
 

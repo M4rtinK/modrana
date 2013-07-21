@@ -130,7 +130,6 @@
 
 __version__ = '1.0.1'
 
-
 __all__ = (
     '__version__',
     'dottedQuadToNum',
@@ -162,8 +161,6 @@ __all__ = (
     'is_option',
     '__docformat__',
 )
-
-
 
 import re
 
@@ -245,6 +242,7 @@ _paramstring = r'''
 
 _matchstring = '^%s*' % _paramstring
 
+
 def dottedQuadToNum(ip):
     """
     Convert decimal dotted quad string to long integer
@@ -263,13 +261,13 @@ def dottedQuadToNum(ip):
     Traceback (most recent call last):
     ValueError: Not a good dotted-quad IP: 255.255.255.256
     """
-    
+
     # import here to avoid it when ip_addr values are not used
     import socket, struct
-    
+
     try:
         return struct.unpack('!L',
-            socket.inet_aton(ip.strip()))[0]
+                             socket.inet_aton(ip.strip()))[0]
     except socket.error:
         # bug in inet_aton, corrected in Python 2.4
         if ip.strip() == '255.255.255.255':
@@ -277,6 +275,7 @@ def dottedQuadToNum(ip):
         else:
             raise ValueError('Not a good dotted-quad IP: %s' % ip)
     return
+
 
 def numToDottedQuad(num):
     """
@@ -299,10 +298,10 @@ def numToDottedQuad(num):
     Traceback (most recent call last):
     ValueError: Not a good numeric IP: 4294967296
     """
-    
+
     # import here to avoid it when ip_addr values are not used
     import socket, struct
-    
+
     # no need to intercept here, 4294967295L is fine
     if num > 4294967295 or num < 0:
         raise ValueError('Not a good numeric IP: %s' % num)
@@ -311,6 +310,7 @@ def numToDottedQuad(num):
             struct.pack('!L', int(num)))
     except (socket.error, struct.error, OverflowError):
         raise ValueError('Not a good numeric IP: %s' % num)
+
 
 class ValidateError(Exception):
     """
@@ -324,6 +324,7 @@ class ValidateError(Exception):
     Traceback (most recent call last):
     ValidateError
     """
+
 
 class VdtMissingValue(ValidateError):
     """No value was supplied to a check that needed one."""
@@ -367,7 +368,7 @@ class VdtTypeError(ValidateError):
 
 class VdtValueError(ValidateError):
     """The value supplied was of the correct type, but was not an allowed value."""
-    
+
     def __init__(self, value):
         """
         >>> raise VdtValueError('jedi')
@@ -425,6 +426,7 @@ class VdtValueTooLongError(VdtValueError):
         VdtValueTooLongError: the value "jedie" is too long.
         """
         ValidateError.__init__(self, 'the value "%s" is too long.' % (value,))
+
 
 class Validator(object):
     """
@@ -502,7 +504,7 @@ class Validator(object):
     _func_re = re.compile(r'(.+?)\((.*)\)', re.DOTALL)
 
     # this regex takes apart keyword arguments
-    _key_arg = re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)$',  re.DOTALL)
+    _key_arg = re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)$', re.DOTALL)
 
 
     # this regex finds keyword=list(....) type values
@@ -542,7 +544,7 @@ class Validator(object):
         }
         if functions is not None:
             self.functions.update(functions)
-        # tekNico: for use by ConfigObj
+            # tekNico: for use by ConfigObj
         self.baseErrorClass = ValidateError
         self._cache = {}
 
@@ -569,16 +571,16 @@ class Validator(object):
         ''
         """
         fun_name, fun_args, fun_kwargs, default = self._parse_with_caching(check)
-            
+
         if missing:
             if default is None:
                 # no information needed here - to be handled by caller
                 raise VdtMissingValue()
             value = self._handle_none(default)
-        
+
         if value is None:
             return None
-        
+
         return self._check_value(value, fun_name, fun_args, fun_kwargs)
 
 
@@ -603,8 +605,8 @@ class Validator(object):
             fun_kwargs = dict([(str(key), value) for (key, value) in list(fun_kwargs.items())])
             self._cache[check] = fun_name, list(fun_args), dict(fun_kwargs), default
         return fun_name, fun_args, fun_kwargs, default
-        
-        
+
+
     def _check_value(self, value, fun_name, fun_args, fun_kwargs):
         try:
             fun = self.functions[fun_name]
@@ -642,7 +644,7 @@ class Validator(object):
                         val = self._unquote(val)
                     fun_kwargs[keymatch.group(1)] = val
                     continue
-                
+
                 fun_args.append(self._unquote(arg))
         else:
             # allows for function names without (args)
@@ -681,8 +683,8 @@ class Validator(object):
         '0'
         """
         return value
-    
-    
+
+
     def get_default_value(self, check):
         """
         Given a check, return the default value for the check
@@ -698,6 +700,7 @@ class Validator(object):
         if value is None:
             return value
         return self._check_value(value, fun_name, fun_args, fun_kwargs)
+
 
 def _is_num_param(names, values, to_float=False):
     """
@@ -790,6 +793,7 @@ def is_integer(value, min=None, max=None):
         raise VdtValueTooBigError(value)
     return value
 
+
 def is_float(value, min=None, max=None):
     """
     A check that tests that a given value is a float
@@ -841,10 +845,12 @@ def is_float(value, min=None, max=None):
         raise VdtValueTooBigError(value)
     return value
 
+
 bool_dict = {
-    True: True, 'on': True, '1': True, 'true': True, 'yes': True, 
+    True: True, 'on': True, '1': True, 'true': True, 'yes': True,
     False: False, 'off': False, '0': False, 'false': False, 'no': False,
 }
+
 
 def is_boolean(value):
     """
@@ -895,7 +901,7 @@ def is_boolean(value):
             return bool_dict[value.lower()]
         except KeyError:
             raise VdtTypeError(value)
-    # we do an equality test rather than an identity test
+        # we do an equality test rather than an identity test
     # this ensures Python 2.2 compatibilty
     # and allows 0 and 1 to represent True and False
     if value == False:
@@ -904,6 +910,7 @@ def is_boolean(value):
         return True
     else:
         raise VdtTypeError(value)
+
 
 def is_ip_addr(value):
     """
@@ -940,7 +947,8 @@ def is_ip_addr(value):
     except ValueError:
         raise VdtValueError(value)
     return value
-    
+
+
 def is_list(value, min=None, max=None):
     """
     Check that the value is a list of values.
@@ -985,6 +993,7 @@ def is_list(value, min=None, max=None):
         raise VdtValueTooLongError(value)
     return list(value)
 
+
 def is_tuple(value, min=None, max=None):
     """
     Check that the value is a tuple of values.
@@ -1017,7 +1026,8 @@ def is_tuple(value, min=None, max=None):
     VdtTypeError: the value "12" is of the wrong type.
     """
     return tuple(is_list(value, min, max))
-    
+
+
 def is_string(value, min=None, max=None):
     """
     Check that the supplied value is a string.
@@ -1124,6 +1134,7 @@ def is_float_list(value, min=None, max=None):
     """
     return [is_float(mem) for mem in is_list(value, min, max)]
 
+
 def is_string_list(value, min=None, max=None):
     """
     Check that the value is a list of strings.
@@ -1149,6 +1160,7 @@ def is_string_list(value, min=None, max=None):
         raise VdtTypeError(value)
     return [is_string(mem) for mem in is_list(value, min, max)]
 
+
 def is_ip_addr_list(value, min=None, max=None):
     """
     Check that the value is a list of IP addresses.
@@ -1168,6 +1180,7 @@ def is_ip_addr_list(value, min=None, max=None):
     VdtValueError: the value "a" is unacceptable.
     """
     return [is_ip_addr(mem) for mem in is_list(value, min, max)]
+
 
 def force_list(value, min=None, max=None):
     """
@@ -1189,6 +1202,7 @@ def force_list(value, min=None, max=None):
     if not isinstance(value, (list, tuple)):
         value = [value]
     return is_list(value, min, max)
+
 
 fun_dict = {
     'integer': is_integer,
@@ -1287,6 +1301,7 @@ def is_option(value, *options):
         raise VdtValueError(value)
     return value
 
+
 def _test(value, *args, **keywargs):
     """
     A function that exists for test purposes.
@@ -1381,6 +1396,7 @@ def _test2():
     3
     """
 
+
 def _test3():
     r"""
     >>> vtor.check('string(default="")', '', missing=True)
@@ -1408,10 +1424,12 @@ def _test3():
     ['\n']
     """
 
+
 if __name__ == '__main__':
     # run the code tests in doctest format
     import sys
     import doctest
+
     m = sys.modules.get('__main__')
     globs = m.__dict__.copy()
     globs.update({

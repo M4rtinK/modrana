@@ -47,130 +47,138 @@
 from PySide import QtCore
 from inspect import isfunction
 
+
 class AutoQObject(QtCore.QObject):
-  """
-  Automatic Python object -> QObject wrapper
-  based on:
-  http://qt-project.org/wiki/Auto-generating-QObject-from-template-in-PySide
+    """
+    Automatic Python object -> QObject wrapper
+    based on:
+    http://qt-project.org/wiki/Auto-generating-QObject-from-template-in-PySide
 
-  Extended to be able to both define the properties of the class and also
-  set their initial values from the nested tuple.
-  Like this, wrapping python object instances from the modRana core
-  is very easy and concentrated to a single place.
-  """
-  def __init__(self, classDef, className=None):
-    QtCore.QObject.__init__(self)
-    # if no name is specified, use the name
-    # of the (sub)class
-    if className is None:
-      className = self._getClassName()
-    self._name = className
-    self._getClassName()
-    self._keys = []
+    Extended to be able to both define the properties of the class and also
+    set their initial values from the nested tuple.
+    Like this, wrapping python object instances from the modRana core
+    is very easy and concentrated to a single place.
+    """
 
-    for key, val, source in classDef:
-      # is the source method defined ?
-      if source:
-        # get value from the source method or save the value directly
-        if isfunction(source):
-          setattr(self, '_' + key, source())
-        else:
-          setattr(self, '_' + key, source)
-          # use default value for the data type
-      else:
-        setattr(self, '_' + key, val())
-      self._keys.append(key)
+    def __init__(self, classDef, className=None):
+        QtCore.QObject.__init__(self)
+        # if no name is specified, use the name
+        # of the (sub)class
+        if className is None:
+            className = self._getClassName()
+        self._name = className
+        self._getClassName()
+        self._keys = []
 
-    for key, value, source in classDef:
-      setattr(self, '_nfy_' + key, QtCore.Signal())
-      nfy = getattr(self, '_nfy_' + key)
+        for key, val, source in classDef:
+            # is the source method defined ?
+            if source:
+                # get value from the source method or save the value directly
+                if isfunction(source):
+                    setattr(self, '_' + key, source())
+                else:
+                    setattr(self, '_' + key, source)
+                    # use default value for the data type
+            else:
+                setattr(self, '_' + key, val())
+            self._keys.append(key)
 
-      def _getProperty(key):
-        def f(self):
-          return getattr(self, '_' + key)
-        return f
+        for key, value, source in classDef:
+            setattr(self, '_nfy_' + key, QtCore.Signal())
+            nfy = getattr(self, '_nfy_' + key)
 
-      def _setProperty(key):
-        def f(self, value):
-          setattr(self, '_' + key, value)
-          getattr(self, '_nfy_' + key).emit()
+            def _getProperty(key):
+                def f(self):
+                    return getattr(self, '_' + key)
 
-        return f
+                return f
 
-      setattr(self,'_set_' + key, _setProperty(key))
-      setProperty = getattr(self, '_set_' + key)
-      setattr(self, '_get_' + key,_getProperty(key))
-      getProperty = getattr(self, '_get_' + key)
+            def _setProperty(key):
+                def f(self, value):
+                    setattr(self, '_' + key, value)
+                    getattr(self, '_nfy_' + key).emit()
 
-      setattr(self, key, QtCore.Property(value, getProperty, setProperty, notify=nfy))
+                return f
+
+            setattr(self, '_set_' + key, _setProperty(key))
+            setProperty = getattr(self, '_set_' + key)
+            setattr(self, '_get_' + key, _getProperty(key))
+            getProperty = getattr(self, '_get_' + key)
+
+            setattr(self, key, QtCore.Property(value, getProperty, setProperty, notify=nfy))
 
 
-  def __repr__(self):
-    values = ('%s=%r' % (key, self.__dict__['_' + key]) \
-              for key in self._keys)
-    return '<%s (%s)>' % (self._name, ', '.join(values))
+    def __repr__(self):
+        values = ('%s=%r' % (key, self.__dict__['_' + key]) \
+                  for key in self._keys)
+        return '<%s (%s)>' % (self._name, ', '.join(values))
 
-  def _getAttr(self, key):
-    return getattr(self, key)
+    def _getAttr(self, key):
+        return getattr(self, key)
 
-  @classmethod
-  def _getClassName(cls):
-    return cls.__name__
+    @classmethod
+    def _getClassName(cls):
+        return cls.__name__
 
 # return Object
 
 class NestedWrapper(AutoQObject):
-  """NestedWrapped enables to include additional
-  QObject based object instances inside this QObject
-  The objects are accessed by a simple ListModel based API:
-  count - this property county the children of this object
-  get(index) - get child with the given index
-  """
-  def __init__(self, classDef, className, children=None):
-    if not children: children = []
-    AutoQObject.__init__(self, classDef, className)
-    self._children = children
+    """NestedWrapped enables to include additional
+    QObject based object instances inside this QObject
+    The objects are accessed by a simple ListModel based API:
+    count - this property county the children of this object
+    get(index) - get child with the given index
+    """
 
-  childrenChanged = QtCore.Signal()
+    def __init__(self, classDef, className, children=None):
+        if not children: children = []
+        AutoQObject.__init__(self, classDef, className)
+        self._children = children
 
-  def _get(self):
-    return self._data
+    childrenChanged = QtCore.Signal()
 
-  def _getCount(self):
-    return len(self._children)
+    def _get(self):
+        return self._data
 
-  @QtCore.Slot(int, result=QtCore.QObject)
-  def get(self, index):
-    try:
-      return self._children[index]
-    except IndexError:
-      # index out of bounds
-      return None
+    def _getCount(self):
+        return len(self._children)
 
-  childrenCount = QtCore.Property(int, _getCount, notify=childrenChanged)
+    @QtCore.Slot(int, result=QtCore.QObject)
+    def get(self, index):
+        try:
+            return self._children[index]
+        except IndexError:
+            # index out of bounds
+            return None
+
+    childrenCount = QtCore.Property(int, _getCount, notify=childrenChanged)
+
 
 class MapLayerGroupWrapper(NestedWrapper):
-  """Wrapper for MapLayerGroup objects"""
-  def __init__(self, group):
-    classDef = (
-      ("id", str, group.id),
-      ("label", str, group.label),
-      ("icon", str, group.icon)
-    )
-    wrappedLayers = map(lambda x : MapLayerWrapper(x), group.layers)
-    NestedWrapper.__init__(self, classDef, None, wrappedLayers)
+    """Wrapper for MapLayerGroup objects"""
+
+    def __init__(self, group):
+        classDef = (
+            ("id", str, group.id),
+            ("label", str, group.label),
+            ("icon", str, group.icon)
+        )
+        wrappedLayers = map(lambda x: MapLayerWrapper(x), group.layers)
+        NestedWrapper.__init__(self, classDef, None, wrappedLayers)
+
 
 class MapLayerWrapper(AutoQObject):
-  """Wrapper for MapLayer objects"""
-  def __init__(self, wrappedObject):
-    classDef = (
-      ("id", str, wrappedObject.id),
-      ("label", str, wrappedObject.label),
-      ("url", str, wrappedObject.url),
-      ("maxZoom", int, wrappedObject.maxZoom),
-      ("minZoom", int, wrappedObject.minZoom),
-      ("folderName", str, wrappedObject.folderName),
-      ("coordinates", str, wrappedObject.coordinates),
-      ("icon", str, wrappedObject.icon)
-    )
-    AutoQObject.__init__(self, classDef)
+    """Wrapper for MapLayer objects"""
+
+    def __init__(self, wrappedObject):
+        classDef = (
+            ("id", str, wrappedObject.id),
+            ("label", str, wrappedObject.label),
+            ("url", str, wrappedObject.url),
+            ("maxZoom", int, wrappedObject.maxZoom),
+            ("minZoom", int, wrappedObject.minZoom),
+            ("folderName", str, wrappedObject.folderName),
+            ("coordinates", str, wrappedObject.coordinates),
+            ("icon", str, wrappedObject.icon)
+        )
+        AutoQObject.__init__(self, classDef)

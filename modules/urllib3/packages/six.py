@@ -53,6 +53,7 @@ else:
         class X(object):
             def __len__(self):
                 return 1 << 31
+
         try:
             len(X())
         except OverflowError:
@@ -76,7 +77,6 @@ def _import_module(name):
 
 
 class _LazyDescr(object):
-
     def __init__(self, name):
         self.name = name
 
@@ -89,7 +89,6 @@ class _LazyDescr(object):
 
 
 class MovedModule(_LazyDescr):
-
     def __init__(self, name, old, new=None):
         super(MovedModule, self).__init__(name)
         if PY3:
@@ -104,7 +103,6 @@ class MovedModule(_LazyDescr):
 
 
 class MovedAttribute(_LazyDescr):
-
     def __init__(self, name, old_mod, new_mod, old_attr=None, new_attr=None):
         super(MovedAttribute, self).__init__(name)
         if PY3:
@@ -126,7 +124,6 @@ class MovedAttribute(_LazyDescr):
     def _resolve(self):
         module = _import_module(self.mod)
         return getattr(module, self.attr)
-
 
 
 class _MovedItems(types.ModuleType):
@@ -223,14 +220,12 @@ else:
     _itervalues = "itervalues"
     _iteritems = "iteritems"
 
-
 try:
     advance_iterator = next
 except NameError:
     def advance_iterator(it):
         return it.next()
 next = advance_iterator
-
 
 if PY3:
     def get_unbound_function(unbound):
@@ -253,7 +248,6 @@ else:
 _add_doc(get_unbound_function,
          """Get the function out of a possibly unbound function""")
 
-
 get_method_function = operator.attrgetter(_meth_func)
 get_method_self = operator.attrgetter(_meth_self)
 get_function_code = operator.attrgetter(_func_code)
@@ -264,9 +258,11 @@ def iterkeys(d):
     """Return an iterator over the keys of a dictionary."""
     return iter(getattr(d, _iterkeys)())
 
+
 def itervalues(d):
     """Return an iterator over the values of a dictionary."""
     return iter(getattr(d, _itervalues)())
+
 
 def iteritems(d):
     """Return an iterator over the (key, value) pairs of a dictionary."""
@@ -276,8 +272,10 @@ def iteritems(d):
 if PY3:
     def b(s):
         return s.encode("latin-1")
+
     def u(s):
         return s
+
     if sys.version_info[1] <= 1:
         def int2byte(i):
             return bytes((i,))
@@ -285,22 +283,26 @@ if PY3:
         # This is about 2x faster than the implementation above on 3.2+
         int2byte = operator.methodcaller("to_bytes", 1, "big")
     import io
+
     StringIO = io.StringIO
     BytesIO = io.BytesIO
 else:
     def b(s):
         return s
+
     def u(s):
         return unicode(s, "unicode_escape")
+
     int2byte = chr
     import StringIO
+
     StringIO = BytesIO = StringIO.StringIO
 _add_doc(b, """Byte literal""")
 _add_doc(u, """Text literal""")
 
-
 if PY3:
     import builtins
+
     exec_ = getattr(builtins, "exec")
 
 
@@ -324,7 +326,7 @@ else:
             del frame
         elif locs is None:
             locs = globs
-        exec("""exec code in globs, locs""")
+        exec ("""exec code in globs, locs""")
 
 
     exec_("""def reraise(tp, value, tb=None):
@@ -337,10 +339,12 @@ else:
         fp = kwargs.pop("file", sys.stdout)
         if fp is None:
             return
+
         def write(data):
             if not isinstance(data, basestring):
                 data = str(data)
             fp.write(data)
+
         want_unicode = False
         sep = kwargs.pop("sep", None)
         if sep is not None:

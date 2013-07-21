@@ -49,6 +49,7 @@ def literal_eval(node_or_string):
         node_or_string = parse(node_or_string, mode='eval')
     if isinstance(node_or_string, Expression):
         node_or_string = node_or_string.body
+
     def _convert(node):
         if isinstance(node, Str):
             return node.s
@@ -65,11 +66,11 @@ def literal_eval(node_or_string):
             if node.id in _safe_names:
                 return _safe_names[node.id]
         elif isinstance(node, BinOp) and \
-             isinstance(node.op, (Add, Sub)) and \
-             isinstance(node.right, Num) and \
-             isinstance(node.right.n, complex) and \
-             isinstance(node.left, Num) and \
-             isinstance(node.left.n, (int, long, float)):
+                isinstance(node.op, (Add, Sub)) and \
+                isinstance(node.right, Num) and \
+                isinstance(node.right.n, complex) and \
+                isinstance(node.left, Num) and \
+                isinstance(node.left.n, (int, long, float)):
             left = node.left.n
             right = node.right.n
             if isinstance(node.op, Add):
@@ -77,6 +78,7 @@ def literal_eval(node_or_string):
             else:
                 return left - right
         raise ValueError('malformed string')
+
     return _convert(node_or_string)
 
 
@@ -89,6 +91,7 @@ def dump(node, annotate_fields=True, include_attributes=False):
     numbers and column offsets are not dumped by default.  If this is wanted,
     *include_attributes* can be set to True.
     """
+
     def _format(node):
         if isinstance(node, AST):
             fields = [(a, _format(b)) for a, b in iter_fields(node)]
@@ -105,6 +108,7 @@ def dump(node, annotate_fields=True, include_attributes=False):
         elif isinstance(node, list):
             return '[%s]' % ', '.join(_format(x) for x in node)
         return repr(node)
+
     if not isinstance(node, AST):
         raise TypeError('expected AST, got %r' % node.__class__.__name__)
     return _format(node)
@@ -117,7 +121,7 @@ def copy_location(new_node, old_node):
     """
     for attr in 'lineno', 'col_offset':
         if attr in old_node._attributes and attr in new_node._attributes \
-           and hasattr(old_node, attr):
+            and hasattr(old_node, attr):
             setattr(new_node, attr, getattr(old_node, attr))
     return new_node
 
@@ -130,6 +134,7 @@ def fix_missing_locations(node):
     recursively where not already set, by setting them to the values of the
     parent node.  It works recursively starting at *node*.
     """
+
     def _fix(node, lineno, col_offset):
         if 'lineno' in node._attributes:
             if not hasattr(node, 'lineno'):
@@ -143,6 +148,7 @@ def fix_missing_locations(node):
                 col_offset = node.col_offset
         for child in iter_child_nodes(node):
             _fix(child, lineno, col_offset)
+
     _fix(node, 1, 0)
     return node
 
@@ -193,9 +199,10 @@ def get_docstring(node, clean=True):
     if not isinstance(node, (FunctionDef, ClassDef, Module)):
         raise TypeError("%r can't have docstrings" % node.__class__.__name__)
     if node.body and isinstance(node.body[0], Expr) and \
-       isinstance(node.body[0].value, Str):
+            isinstance(node.body[0].value, Str):
         if clean:
             import inspect
+
             return inspect.cleandoc(node.body[0].value.s)
         return node.body[0].value.s
 
@@ -207,6 +214,7 @@ def walk(node):
     only want to modify nodes in place and don't care about the context.
     """
     from collections import deque
+
     todo = deque([node])
     while todo:
         node = todo.popleft()

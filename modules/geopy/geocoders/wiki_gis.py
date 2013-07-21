@@ -3,8 +3,9 @@ from urllib2 import urlopen
 import xml
 from xml.parsers.expat import ExpatError
 
-from geopy.geocoders.base import Geocoder,GeocoderError,GeocoderResultError
+from geopy.geocoders.base import Geocoder, GeocoderError, GeocoderResultError
 from geopy import Point, Location, util
+
 
 class MediaWiki(Geocoder):
     def __init__(self, format_url, transform_string=None):
@@ -39,7 +40,7 @@ class MediaWiki(Geocoder):
         util.logger.debug("Fetching %s..." % url)
         page = urlopen(url)
         name, (latitude, longitude) = self.parse_xhtml(page)
-        return (name, (latitude, longitude))        
+        return (name, (latitude, longitude))
 
     def parse_xhtml(self, page):
         soup = isinstance(page, BeautifulSoup) and page or BeautifulSoup(page)

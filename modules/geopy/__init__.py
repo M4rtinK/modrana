@@ -4,6 +4,7 @@ from geopy import geocoders
 
 VERSION = (0, 95, 0, "pre")
 
+
 def get_version():
     version = '%s.%s' % (VERSION[0], VERSION[1])
     if VERSION[2]:

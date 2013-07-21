@@ -13,20 +13,25 @@ except ImportError:
 else:
     NUMBER_TYPES = (int, long, float, Decimal)
 
+
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
 
+
 logger = logging.getLogger('geopy')
 logger.addHandler(NullHandler())
+
 
 def pairwise(seq):
     for i in range(0, len(seq) - 1):
         yield (seq[i], seq[i + 1])
 
+
 def join_filter(sep, seq, pred=bool):
     return sep.join([unicode(i) for i in seq if pred(i)])
- 
+
+
 def get_encoding(page, contents=None):
     # TODO: clean up Py3k support
     if version_info < (3, 0):
@@ -42,6 +47,7 @@ def get_encoding(page, contents=None):
         except ExpatError:
             pass
 
+
 def decode_page(page):
     contents = page.read()
     # HTTP 1.1 defines iso-8859-1 as the 'implied' encoding if none is given
@@ -52,9 +58,10 @@ def decode_page(page):
     else:
         return str(contents, encoding=encoding)
 
+
 def get_first_text(node, tag_names, strip=None):
     if isinstance(tag_names, basestring):
-            tag_names = [tag_names]
+        tag_names = [tag_names]
     if node:
         while tag_names:
             nodes = node.getElementsByTagName(tag_names.pop(0))
@@ -62,16 +69,19 @@ def get_first_text(node, tag_names, strip=None):
                 child = nodes[0].firstChild
                 return child and child.nodeValue.strip(strip)
 
+
 def join_filter(sep, seq, pred=bool):
     return sep.join([unicode(i) for i in seq if pred(i)])
 
     import re, htmlentitydefs
+
 
 def unescape(text):
     """
     Removes HTML or XML character references and entities from a text string.
     
     """
+
     def fixup(m):
         text = m.group(0)
         if text[:2] == "&#":
@@ -90,7 +100,9 @@ def unescape(text):
             except KeyError:
                 pass
         return text # leave as is
+
     return re.sub("&#?\w+;", fixup, text)
+
 
 try:
     reversed

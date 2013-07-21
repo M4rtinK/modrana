@@ -26,135 +26,138 @@ from core.backports import six
 # for some reason one import method works
 # on Fremantle and other everywhere (?) else"""
 try:
-  from modules.configobj import ConfigObj # everywhere
+    from modules.configobj import ConfigObj # everywhere
 except Exception:
-  import sys
-  e = sys.exc_info()[1]
-  print(e)
-  print("theme: trying alternative configobj import method")
-  from configobj import ConfigObj # Fremantle
+    import sys
+
+    e = sys.exc_info()[1]
+    print(e)
+    print("theme: trying alternative configobj import method")
+    from configobj import ConfigObj # Fremantle
 
 THEME_CONFIG_FILENAME = "theme.conf"
 DEFAULT_THEME_ID = "default"
 DEFAULT_THEME_NAME = "Default"
 
+
 def getModule(m, d, i):
-  return ThemeModule(m, d, i)
+    return ThemeModule(m, d, i)
 
 
 class ThemeModule(RanaModule):
-  """ModRana theming module"""
+    """ModRana theming module"""
 
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
-    self._themeChanged = Signal()
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
+        self._themeChanged = Signal()
 
-    self.modrana.watch('theme', self._themeChangedCB, runNow=True)
+        self.modrana.watch('theme', self._themeChangedCB, runNow=True)
 
-  @property
-  def themeChanged(self):
-    """Theme changed signal
-    :returns: instance of the theme changed signal"""
-    return self._themeChanged
+    @property
+    def themeChanged(self):
+        """Theme changed signal
+        :returns: instance of the theme changed signal"""
+        return self._themeChanged
 
-  @property
-  def theme(self):
-    """Current theme
-    :returns: current theme
-    :rtype: Theme
-    """
-    return self._theme
+    @property
+    def theme(self):
+        """Current theme
+        :returns: current theme
+        :rtype: Theme
+        """
+        return self._theme
 
-  def _getThemesPath(self):
-    return self.modrana.paths.getThemesFolderPath()
+    def _getThemesPath(self):
+        return self.modrana.paths.getThemesFolderPath()
 
-  def _themeChangedCB(self, key, oldValue, newValue):
-    """Triggered by theme change"""
-    if newValue is None: # default theme
-      self._theme = Theme(DEFAULT_THEME_ID, self._getThemesPath(), DEFAULT_THEME_NAME)
-    else: # set the new theme
-      self._theme = Theme(newValue, self._getThemesPath())
-      self._themeChanged(self._theme)  # fire the theme changed signal
+    def _themeChangedCB(self, key, oldValue, newValue):
+        """Triggered by theme change"""
+        if newValue is None: # default theme
+            self._theme = Theme(DEFAULT_THEME_ID, self._getThemesPath(), DEFAULT_THEME_NAME)
+        else: # set the new theme
+            self._theme = Theme(newValue, self._getThemesPath())
+            self._themeChanged(self._theme)  # fire the theme changed signal
 
-  def getAvailableThemeIds(self):
-    """Return a a list of currently available themes (list of folders in the themes folder)
-    :returns: a list of available theme ids
-    :rtype: a list of strings
-    """
-    rawFolderContent = os.listdir(self.modrana.paths.getThemesFolderPath())
-    # append the full path and filter out all dot-folders, such as .svn, .git & co
-    themesFolderPath = self.modrana.paths.getThemesFolderPath()
-    return filter(
-      lambda x: os.path.isdir(
-        os.path.join(themesFolderPath, x)) and not x.startswith('.'),
-        rawFolderContent
-    )
+    def getAvailableThemeIds(self):
+        """Return a a list of currently available themes (list of folders in the themes folder)
+        :returns: a list of available theme ids
+        :rtype: a list of strings
+        """
+        rawFolderContent = os.listdir(self.modrana.paths.getThemesFolderPath())
+        # append the full path and filter out all dot-folders, such as .svn, .git & co
+        themesFolderPath = self.modrana.paths.getThemesFolderPath()
+        return filter(
+            lambda x: os.path.isdir(
+                os.path.join(themesFolderPath, x)) and not x.startswith('.'),
+            rawFolderContent
+        )
+
 
 class Theme(object):
-  """A modRana theme"""
+    """A modRana theme"""
 
-  def __init__(self, themeId, themesPath, name=None):
-    self._id = themeId
-    if name is None:
-      name = themeId
+    def __init__(self, themeId, themesPath, name=None):
+        self._id = themeId
+        if name is None:
+            name = themeId
 
-    self._name = name
-    # for now just color_name : color_string
-    self._colors = {}
-
-    # load the theme config file
-    path = os.path.join(themesPath, themeId, THEME_CONFIG_FILENAME)
-    self._loadConfigFile(path)
-
-
-  def __repr__(self):
-    return "id: %s, name: %s, %d colors" % (self._id, self._name, len(self._colors))
-
-  @property
-  def id(self):
-    """
-    :returns: unique theme id
-    :rtype: string
-    """
-    return self._id
-
-  @property
-  def name(self):
-    """
-    :returns: name of the theme
-    :rtype: string
-    """
-    return self._name
-
-  def getColor(self, key, default):
-    return self._colors.get(key, default)
-
-  def _loadConfigFile(self, path):
-    """load color definitions from file"""
-
-    config = ConfigObj(path)
-
-    # try to get theme name from the config
-    try:
-      name = config['theme']['name']
-      if name:
         self._name = name
-    except KeyError:
-      pass
+        # for now just color_name : color_string
+        self._colors = {}
 
-    # load color definitions
-    if 'colors' in config:
-      colors = config['colors']
-      colorObjects = {}
-      for key, color in six.iteritems(colors):
-        if len(color) == 2: # hex color/color name and alpha as float 0-1
-          colorString = color[0]
-          colorObjects[key] = colorString
-          # TODO: alpha support, other formats
-          # TODO: use the Color object
-      self._colors = colorObjects
-    else:
-      self._colors = {}
+        # load the theme config file
+        path = os.path.join(themesPath, themeId, THEME_CONFIG_FILENAME)
+        self._loadConfigFile(path)
+
+
+    def __repr__(self):
+        return "id: %s, name: %s, %d colors" % (self._id, self._name, len(self._colors))
+
+    @property
+    def id(self):
+        """
+        :returns: unique theme id
+        :rtype: string
+        """
+        return self._id
+
+    @property
+    def name(self):
+        """
+        :returns: name of the theme
+        :rtype: string
+        """
+        return self._name
+
+    def getColor(self, key, default):
+        return self._colors.get(key, default)
+
+    def _loadConfigFile(self, path):
+        """load color definitions from file"""
+
+        config = ConfigObj(path)
+
+        # try to get theme name from the config
+        try:
+            name = config['theme']['name']
+            if name:
+                self._name = name
+        except KeyError:
+            pass
+
+        # load color definitions
+        if 'colors' in config:
+            colors = config['colors']
+            colorObjects = {}
+            for key, color in six.iteritems(colors):
+                if len(color) == 2: # hex color/color name and alpha as float 0-1
+                    colorString = color[0]
+                    colorObjects[key] = colorString
+                    # TODO: alpha support, other formats
+                    # TODO: use the Color object
+            self._colors = colorObjects
+        else:
+            self._colors = {}
 
 
 

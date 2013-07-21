@@ -25,6 +25,7 @@ from operator import xor
 
 from . import (point, utils)
 
+
 def calc_checksum(sentence):
     """Calculate a NMEA 0183 checksum for the given sentence
 
@@ -49,6 +50,7 @@ def calc_checksum(sentence):
     sentence = sentence.split("*")[0]
     return reduce(xor, map(ord, sentence))
 
+
 def nmea_latitude(latitude):
     """Generate a NMEA-formatted latitude pair
 
@@ -64,6 +66,7 @@ def nmea_latitude(latitude):
     return ("%02i%07.4f" % utils.to_dms(abs(latitude), "dm"),
             "N" if latitude >= 0 else "S")
 
+
 def nmea_longitude(longitude):
     """Generate a NMEA-formatted longitude pair
 
@@ -78,6 +81,7 @@ def nmea_longitude(longitude):
     """
     return ("%03i%07.4f" % utils.to_dms(abs(longitude), "dm"),
             "E" if longitude >= 0 else "W")
+
 
 def parse_latitude(latitude, hemisphere):
     """Parse a NMEA-formatted latitude pair
@@ -99,6 +103,7 @@ def parse_latitude(latitude, hemisphere):
     elif not hemisphere == "N":
         raise ValueError("Incorrect North/South value `%s'" % hemisphere)
     return latitude
+
 
 def parse_longitude(longitude, hemisphere):
     """Parse a NMEA-formatted longitude pair
@@ -130,6 +135,7 @@ MODE_INDICATOR = {
     "S": "Simulated",
     "N": "Invalid",
 }
+
 
 class LoranPosition(point.Point):
     """Class for representing a GPS NMEA-formatted Loran-C position"""
@@ -187,7 +193,7 @@ class LoranPosition(point.Point):
         data.extend(nmea_latitude(self.latitude))
         data.extend(nmea_longitude(self.longitude))
         data.append("%s.%02i" % (self.time.strftime("%H%M%S"),
-                                self.time.microsecond/1000000))
+                                 self.time.microsecond / 1000000))
         data.append("A" if self.status else "V")
         if self.mode:
             data.append(self.mode)
@@ -226,11 +232,11 @@ class LoranPosition(point.Point):
         """
         if not len(elements) in (6, 7):
             raise ValueError("Invalid GLL position data")
-        # Latitude and longitude are checked for validity during Fix
+            # Latitude and longitude are checked for validity during Fix
         # instantiation
         latitude = parse_latitude(elements[0], elements[1])
         longitude = parse_longitude(elements[2], elements[3])
-        hour, minute, second = [int(elements[4][i:i+2]) for i in range(0, 6, 2)]
+        hour, minute, second = [int(elements[4][i:i + 2]) for i in range(0, 6, 2)]
         usecond = int(elements[4][6:8]) * 10000
         time = datetime.time(hour, minute, second, usecond)
         active = True if elements[5] == "A" else False
@@ -357,7 +363,7 @@ class Position(point.Point):
         """
         if not len(elements) in (11, 12):
             raise ValueError("Invalid RMC position data")
-        time = datetime.time(*[int(elements[0][i:i+2]) for i in range(0, 6, 2)])
+        time = datetime.time(*[int(elements[0][i:i + 2]) for i in range(0, 6, 2)])
         active = True if elements[1] == "A" else False
         # Latitude and longitude are checked for validity during Fix
         # instantiation
@@ -365,7 +371,7 @@ class Position(point.Point):
         longitude = parse_longitude(elements[4], elements[5])
         speed = float(elements[6])
         track = float(elements[7])
-        date = datetime.date(2000+int(elements[8][4:6]), int(elements[8][2:4]),
+        date = datetime.date(2000 + int(elements[8][4:6]), int(elements[8][2:4]),
                              int(elements[8][:2]))
         variation = float(elements[9]) if not elements[9] == "" else None
         if elements[10] == "W":
@@ -514,7 +520,7 @@ class Fix(point.Point):
         """
         if not len(elements) in (14, 15):
             raise ValueError("Invalid GGA fix data")
-        time = datetime.time(*[int(elements[0][i:i+2]) for i in range(0, 6, 2)])
+        time = datetime.time(*[int(elements[0][i:i + 2]) for i in range(0, 6, 2)])
         # Latitude and longitude are checked for validity during Fix
         # instantiation
         latitude = parse_latitude(elements[1], elements[2])
@@ -612,7 +618,7 @@ class Waypoint(point.Point):
         """
         if not len(elements) == 5:
             raise ValueError("Invalid WPL waypoint data")
-        # Latitude and longitude are checked for validity during Fix
+            # Latitude and longitude are checked for validity during Fix
         # instantiation
         latitude = parse_latitude(elements[0], elements[1])
         longitude = parse_longitude(elements[2], elements[3])
@@ -713,8 +719,8 @@ class Locations(point.Points):
 
         if not checksum:
             logging.warning("Disabling the checksum tests should only be used"
-                           "when the device is incapable of emitting the "
-                           "correct values!")
+                            "when the device is incapable of emitting the "
+                            "correct values!")
         for line in data:
             # The standard tells us lines should end in \r\n even though some
             # devices break this, but Python's standard file object solves this

@@ -42,18 +42,17 @@ import os
 _implementation_type = os.getenv('PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION',
                                  'python')
 
-
 if _implementation_type != 'python':
-  # For now, by default use the pure-Python implementation.
-  # The code below checks if the C extension is available and
-  # uses it if it is available.
-  _implementation_type = 'cpp'
-  ## Determine automatically which implementation to use.
-  #try:
-  #  from google.protobuf.internal import cpp_message
-  #  _implementation_type = 'cpp'
-  #except ImportError, e:
-  #  _implementation_type = 'python'
+    # For now, by default use the pure-Python implementation.
+    # The code below checks if the C extension is available and
+    # uses it if it is available.
+    _implementation_type = 'cpp'
+    ## Determine automatically which implementation to use.
+    #try:
+    #  from google.protobuf.internal import cpp_message
+    #  _implementation_type = 'cpp'
+    #except ImportError, e:
+    #  _implementation_type = 'python'
 
 
 # Usage of this function is discouraged. Clients shouldn't care which
@@ -61,4 +60,4 @@ if _implementation_type != 'python':
 # that differences between APIs will be maintained.
 # Please don't use this function if possible.
 def Type():
-  return _implementation_type
+    return _implementation_type

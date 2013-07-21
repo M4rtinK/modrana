@@ -24,79 +24,79 @@ import subprocess
 
 
 def getModule(m, d, i):
-  return DeviceNeo(m, d, i)
+    return DeviceNeo(m, d, i)
 
 
 class DeviceNeo(DeviceModule):
-  """A Neo FreeRunner modRana device-specific module"""
+    """A Neo FreeRunner modRana device-specific module"""
 
-  def __init__(self, m, d, i):
-    DeviceModule.__init__(self, m, d, i)
-    self.tempUnfullscreen = False
-    # connect to the location start & stop signals,
-    # so that the FreeRunners GPS can be started/stopped
-    l = self.m.get('location', None)
-    if l is not None:
-      l.startSignal.connect(self._startLocationCB)
-      l.stopSignal.connect(self._stopLocationCB)
-
-
-  def _startLocationCB(self):
-    """start the GPS hardware"""
-    print("HANDLE GPS STARTUP")
-
-  def _stopLocationCB(self):
-    """stop the GPS hardware"""
-    print("HANDLE GPS SHUTDOWN")
+    def __init__(self, m, d, i):
+        DeviceModule.__init__(self, m, d, i)
+        self.tempUnfullscreen = False
+        # connect to the location start & stop signals,
+        # so that the FreeRunners GPS can be started/stopped
+        l = self.m.get('location', None)
+        if l is not None:
+            l.startSignal.connect(self._startLocationCB)
+            l.stopSignal.connect(self._stopLocationCB)
 
 
-  def getDeviceIDString(self):
-    return "neo"
+    def _startLocationCB(self):
+        """start the GPS hardware"""
+        print("HANDLE GPS STARTUP")
 
-  def getDeviceName(self):
-    return "OpenMoko Neo FreeRunner"
+    def _stopLocationCB(self):
+        """stop the GPS hardware"""
+        print("HANDLE GPS SHUTDOWN")
 
-  def getWinWH(self):
-    return 480, 600
 
-  def startInFullscreen(self):
-    return True
+    def getDeviceIDString(self):
+        return "neo"
 
-  def simpleMapDragging(self):
-    return True
+    def getDeviceName(self):
+        return "OpenMoko Neo FreeRunner"
 
-  def getSupportedGUIModuleIds(self):
-    return ["GTK"]
+    def getWinWH(self):
+        return 480, 600
 
-  def lpSkipCount(self):
-    """SHR on Neo fires two clicks after a long press, so we need to skip
-    both of them, to avoid clicking some new button that
-    shows up after the screen redraws"""
-    return 2
+    def startInFullscreen(self):
+        return True
 
-  def textEntryIminent(self):
-    """in SHR on Neo, we need to temporarily disable fullscreen
-    (if we are in fullscreen),
-    or else the text entry box won't show up"""
-    display = self.m.get('display', None)
-    if display:
-      if display.getFullscreenEnabled():
-        display.fullscreenToggle()
-        self.tempUnfullscreen = True
+    def simpleMapDragging(self):
+        return True
 
-  def textEntryDone(self):
-    """restore fullscreen if needed"""
-    if self.tempUnfullscreen:
-      display = self.m.get('display', None)
-      if display:
-        if not display.getFullscreenEnabled():
-          display.fullscreenToggle()
-          self.tempUnfullscreen = False
+    def getSupportedGUIModuleIds(self):
+        return ["GTK"]
 
-  def getLocationType(self):
-    """we use GPSD for location on the Neo FreeRunner
-    as it should be available on both the DH & QtMoko"""
-    return "gpsd"
+    def lpSkipCount(self):
+        """SHR on Neo fires two clicks after a long press, so we need to skip
+        both of them, to avoid clicking some new button that
+        shows up after the screen redraws"""
+        return 2
 
-  def getDeviceType(self):
-    return DEVICE_SMARTPHONE
+    def textEntryIminent(self):
+        """in SHR on Neo, we need to temporarily disable fullscreen
+        (if we are in fullscreen),
+        or else the text entry box won't show up"""
+        display = self.m.get('display', None)
+        if display:
+            if display.getFullscreenEnabled():
+                display.fullscreenToggle()
+                self.tempUnfullscreen = True
+
+    def textEntryDone(self):
+        """restore fullscreen if needed"""
+        if self.tempUnfullscreen:
+            display = self.m.get('display', None)
+            if display:
+                if not display.getFullscreenEnabled():
+                    display.fullscreenToggle()
+                    self.tempUnfullscreen = False
+
+    def getLocationType(self):
+        """we use GPSD for location on the Neo FreeRunner
+        as it should be available on both the DH & QtMoko"""
+        return "gpsd"
+
+    def getDeviceType(self):
+        return DEVICE_SMARTPHONE

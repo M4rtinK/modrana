@@ -15,7 +15,6 @@ from .util import parse_url
 
 __all__ = ['PoolManager', 'ProxyManager', 'proxy_from_url']
 
-
 pool_classes_by_scheme = {
     'http': HTTPConnectionPool,
     'https': HTTPSConnectionPool,

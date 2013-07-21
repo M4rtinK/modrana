@@ -13,12 +13,11 @@ __author__ = 'Andrey Petrov (andrey.petrov@shazow.net)'
 __license__ = 'MIT'
 __version__ = 'dev'
 
-
 from .connectionpool import (
     HTTPConnectionPool,
     HTTPSConnectionPool,
     connection_from_url
-)
+    )
 
 from .filepost import encode_multipart_formdata
 from .poolmanager import PoolManager, ProxyManager, proxy_from_url
@@ -28,6 +27,7 @@ from .util import make_headers, get_host
 
 # Set default logging handler to avoid "No handler found" warnings.
 import logging
+
 try:  # Python 2.7+
     from logging import NullHandler
 except ImportError:
@@ -36,6 +36,7 @@ except ImportError:
             pass
 
 logging.getLogger(__name__).addHandler(NullHandler())
+
 
 def add_stderr_logger(level=logging.DEBUG):
     """

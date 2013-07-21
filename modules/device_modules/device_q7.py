@@ -21,32 +21,34 @@
 #---------------------------------------------------------------------------
 from base_device_module import DeviceModule, DEVICE_TABLET
 
-def getModule(m,d,i):
-  return DeviceQ7(m,d,i)
+
+def getModule(m, d, i):
+    return DeviceQ7(m, d, i)
+
 
 class DeviceQ7(DeviceModule):
-  """A SmartQ 7 modRana device-specific module"""
-  
-  def __init__(self, m, d, i):
-    DeviceModule.__init__(self, m, d, i)
+    """A SmartQ 7 modRana device-specific module"""
 
-  def getDeviceIDString(self):
-    return "q7"
+    def __init__(self, m, d, i):
+        DeviceModule.__init__(self, m, d, i)
 
-  def getDeviceName(self):
-    return "Smart Devices SmartQ 7 MID"
+    def getDeviceIDString(self):
+        return "q7"
 
-  def getWinWH(self):
-    return 800,480
+    def getDeviceName(self):
+        return "Smart Devices SmartQ 7 MID"
 
-  def simpleMapDragging(self):
-    return True
+    def getWinWH(self):
+        return 800, 480
 
-  def startInFullscreen(self):
-    return True
+    def simpleMapDragging(self):
+        return True
 
-  def getSupportedGUIModuleIds(self):
-    return ["GTK"]
+    def startInFullscreen(self):
+        return True
 
-  def getDeviceType(self):
-    return DEVICE_TABLET
+    def getSupportedGUIModuleIds(self):
+        return ["GTK"]
+
+    def getDeviceType(self):
+        return DEVICE_TABLET

@@ -4,19 +4,22 @@
 import time, socket, sys, select
 
 if sys.hexversion >= 0x2060000:
-    import json			# For Python 2.6
+    import json            # For Python 2.6
 else:
-    import simplejson as json	# For Python 2.4 and 2.5
+    import simplejson as json    # For Python 2.4 and 2.5
 
-GPSD_PORT="2947"
+GPSD_PORT = "2947"
+
 
 class json_error:
     def __init__(self, data, explanation):
         self.data = data
         self.explanation = explanation
 
+
 class gpscommon(object):
     "Isolate socket handling and buffering from the protcol interpretation."
+
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0):
         self.sock = None        # in case we blow up in connect
         self.linebuffer = ""
@@ -34,11 +37,12 @@ class gpscommon(object):
         if not port and (host.find(':') == host.rfind(':')):
             i = host.rfind(':')
             if i >= 0:
-                host, port = host[:i], host[i+1:]
-            try: port = int(port)
+                host, port = host[:i], host[i + 1:]
+            try:
+                port = int(port)
             except ValueError:
                 raise socket.error, "nonnumeric port"
-        #if self.verbose > 0:
+            #if self.verbose > 0:
         #    print 'connect:', (host, port)
         msg = "getaddrinfo returns an empty list"
         self.sock = None
@@ -84,13 +88,13 @@ class gpscommon(object):
             if not self.linebuffer:
                 if self.verbose > 1:
                     sys.stderr.write("poll: returning -1.\n")
-                # Read failed
+                    # Read failed
                 return -1
             eol = self.linebuffer.find('\n')
             if eol == -1:
                 if self.verbose > 1:
                     sys.stderr.write("poll: returning 0.\n")
-                # Read succeeded, but only got a fragment
+                    # Read succeeded, but only got a fragment
                 return 0
         else:
             if self.verbose > 1:
@@ -120,18 +124,21 @@ class gpscommon(object):
             commands += "\n"
         self.sock.send(commands)
 
-WATCH_ENABLE	= 0x000001	# enable streaming
-WATCH_DISABLE	= 0x000002	# disable watching
-WATCH_JSON	= 0x000010	# JSON output
-WATCH_NMEA	= 0x000020	# output in NMEA
-WATCH_RARE	= 0x000040	# output of packets in hex
-WATCH_RAW	= 0x000080	# output of raw packets
-WATCH_SCALED	= 0x000100	# scale output to floats 
-WATCH_TIMING	= 0x000200	# timing information
-WATCH_DEVICE	= 0x000800	# watch specific device
+
+WATCH_ENABLE = 0x000001    # enable streaming
+WATCH_DISABLE = 0x000002    # disable watching
+WATCH_JSON = 0x000010    # JSON output
+WATCH_NMEA = 0x000020    # output in NMEA
+WATCH_RARE = 0x000040    # output of packets in hex
+WATCH_RAW = 0x000080    # output of raw packets
+WATCH_SCALED = 0x000100    # scale output to floats
+WATCH_TIMING = 0x000200    # timing information
+WATCH_DEVICE = 0x000800    # watch specific device
+
 
 class gpsjson(gpscommon):
     "Basic JSON decoding."
+
     def __iter__(self):
         return self
 
@@ -140,7 +147,7 @@ class gpsjson(gpscommon):
             self.data = dictwrapper(json.loads(buf.strip(), encoding="ascii"))
         except ValueError, e:
             raise json_error(buf, e.args[0])
-        # Should be done for any other array-valued subobjects, too.
+            # Should be done for any other array-valued subobjects, too.
         # This particular logic can fire on SKY or RTCM2 objects.
         if hasattr(self.data, "satellites"):
             self.data.satellites = map(dictwrapper, self.data.satellites)
@@ -179,24 +186,33 @@ class gpsjson(gpscommon):
                 arg += ',"device":"%s"' % devpath
         return self.send(arg + "}")
 
+
 class dictwrapper(object):
     "Wrapper that yields both class and dictionary behavior,"
+
     def __init__(self, ddict):
         self.__dict__ = ddict
+
     def get(self, k, d=None):
         return self.__dict__.get(k, d)
+
     def keys(self):
         return self.__dict__.keys()
+
     def __getitem__(self, key):
         "Emulate dictionary, for new-style interface."
         return self.__dict__[key]
+
     def __setitem__(self, key, val):
         "Emulate dictionary, for new-style interface."
         self.__dict__[key] = val
+
     def __contains__(self, key):
         return key in self.__dict__
+
     def __str__(self):
         return "<dictwrapper: " + str(self.__dict__) + ">"
+
     __repr__ = __str__
 
 #
