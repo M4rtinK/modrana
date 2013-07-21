@@ -25,101 +25,101 @@ from base_device_module import DeviceModule, DEVICE_SMARTPHONE
 # NOTE: use the device_ prefix when naming the module
 
 def getModule(m, d, i):
-  return DeviceN9(m, d, i)
+    return DeviceN9(m, d, i)
 
 
 class DeviceN9(DeviceModule):
-  """A Nokia N9 device module"""
+    """A Nokia N9 device module"""
 
-  def __init__(self, m, d, i):
-    DeviceModule.__init__(self, m, d, i)
-    # create the screen-saver controller
-    self.qScreenSaver = None
+    def __init__(self, m, d, i):
+        DeviceModule.__init__(self, m, d, i)
+        # create the screen-saver controller
+        self.qScreenSaver = None
 
-  def getDeviceIDString(self):
-    return "n9"
+    def getDeviceIDString(self):
+        return "n9"
 
-  def getDeviceName(self):
-    return "Nokia N9 or N950"
+    def getDeviceName(self):
+        return "Nokia N9 or N950"
 
-  def getWinWH(self):
-    """N9/N950 screen resolution"""
-    return 854, 480
+    def getWinWH(self):
+        """N9/N950 screen resolution"""
+        return 854, 480
 
-  def startInFullscreen(self):
-    """
-    non-fullscreen mode just draw some weird toolbar & status-bar
-    on Harmattan
-    """
-    return True
+    def startInFullscreen(self):
+        """
+        non-fullscreen mode just draw some weird toolbar & status-bar
+        on Harmattan
+        """
+        return True
 
-  def fullscreenOnly(self):
-    """
-    basically no need to
-    """
-    return True
+    def fullscreenOnly(self):
+        """
+        basically no need to
+        """
+        return True
 
-  def screenBlankingControlSupported(self):
-    """
-    Screen blanking support is handled through Qt Mobility
-    """
-    return True
+    def screenBlankingControlSupported(self):
+        """
+        Screen blanking support is handled through Qt Mobility
+        """
+        return True
 
-  def pauseScreenBlanking(self):
-    """
-    inhibit screen blanking
-    """
-    from QtMobility.SystemInfo import QSystemScreenSaver
+    def pauseScreenBlanking(self):
+        """
+        inhibit screen blanking
+        """
+        from QtMobility.SystemInfo import QSystemScreenSaver
 
-    if self.qScreenSaver:
-      QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
-    else:
-      self.qScreenSaver = QSystemScreenSaver()
+        if self.qScreenSaver:
+            QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
+        else:
+            self.qScreenSaver = QSystemScreenSaver()
 
-  def getSupportedGUIModuleIds(self):
-    return ["QML:harmattan", "QML:indep"]
+    def getSupportedGUIModuleIds(self):
+        return ["QML:harmattan", "QML:indep"]
 
-  def getLocationType(self):
-    return "qt_mobility"
+    def getLocationType(self):
+        return "qt_mobility"
 
-  def hasButtons(self):
-    # TODO: support for volume buttons
-    return False
-
-
-  # ** LOCATION **
-
-  def handlesLocation(self):
-    """using Qt Mobility"""
-    return False
-
-  def startLocation(self):
-    pass
-
-  def stopLocation(self):
-    pass
+    def hasButtons(self):
+        # TODO: support for volume buttons
+        return False
 
 
-  # ** PATHS **
+    # ** LOCATION **
 
-  # NOTE: basically the same as on
-  # maemo 5 on the N900
+    def handlesLocation(self):
+        """using Qt Mobility"""
+        return False
 
-  def getTracklogFolderPath(self):
-    return "/home/user/MyDocs/tracklogs"
+    def startLocation(self):
+        pass
 
-  def getMapFolderPath(self):
-    return "/home/user/MyDocs/.maps/"
+    def stopLocation(self):
+        pass
 
-  def getPOIFolderPath(self):
-    return "/home/user/MyDocs/.maps"
 
-  def getLogFolderPath(self):
-    return "/home/user/MyDocs/modrana_debug_logs/"
+    # ** PATHS **
 
-  def needsQuitButton(self):
-    """No need for a separate Quit button thanks to Swipe UI"""
-    return False
+    # NOTE: basically the same as on
+    # maemo 5 on the N900
 
-  def getDeviceType(self):
-    return DEVICE_SMARTPHONE
+    def getTracklogFolderPath(self):
+        return "/home/user/MyDocs/tracklogs"
+
+    def getMapFolderPath(self):
+        return "/home/user/MyDocs/.maps/"
+
+    def getPOIFolderPath(self):
+        return "/home/user/MyDocs/.maps"
+
+    def getLogFolderPath(self):
+        return "/home/user/MyDocs/modrana_debug_logs/"
+
+    def needsQuitButton(self):
+        """No need for a separate Quit button thanks to Swipe UI"""
+        return False
+
+    def getDeviceType(self):
+        return DEVICE_SMARTPHONE

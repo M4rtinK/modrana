@@ -28,6 +28,7 @@ from functools import partial
 
 from . import (point, utils)
 
+
 class Trigpoint(point.Point):
     """
     Class for representing a location from a trigpoint marker file

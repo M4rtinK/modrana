@@ -21,29 +21,31 @@
 #---------------------------------------------------------------------------
 from base_device_module import DeviceModule, DEVICE_DESKTOP
 
-def getModule(m,d,i):
-  return DeviceNetbook(m,d,i)
+
+def getModule(m, d, i):
+    return DeviceNetbook(m, d, i)
+
 
 class DeviceNetbook(DeviceModule):
-  """A netbook modRana device-specific module"""
-  
-  def __init__(self, m, d, i):
-    DeviceModule.__init__(self, m, d, i)
+    """A netbook modRana device-specific module"""
 
-  def getDeviceIDString(self):
-    return "netbook"
+    def __init__(self, m, d, i):
+        DeviceModule.__init__(self, m, d, i)
 
-  def getDeviceName(self):
-    return "A generic netbook"
+    def getDeviceIDString(self):
+        return "netbook"
 
-  def getWinWH(self):
-    return 1024,600
+    def getDeviceName(self):
+        return "A generic netbook"
 
-  def startInFullscreen(self):
-    return False
+    def getWinWH(self):
+        return 1024, 600
 
-  def getSupportedGUIModuleIds(self):
-    return ["GTK", "QML"]
+    def startInFullscreen(self):
+        return False
 
-  def getDeviceType(self):
-    return DEVICE_DESKTOP
+    def getSupportedGUIModuleIds(self):
+        return ["GTK", "QML"]
+
+    def getDeviceType(self):
+        return DEVICE_DESKTOP

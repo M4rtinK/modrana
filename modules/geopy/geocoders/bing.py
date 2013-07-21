@@ -13,6 +13,7 @@ from geopy.geocoders.base import Geocoder
 from geopy.util import logger, decode_page, join_filter
 from core.backports.six import string_types as basestring
 
+
 class Bing(Geocoder):
     """Geocoder using the Bing Maps API."""
 
@@ -30,9 +31,10 @@ class Bing(Geocoder):
         """
         if output_format != None:
             from warnings import warn
-            warn('geopy.geocoders.bing.Bing: The `output_format` parameter is deprecated '+
+
+            warn('geopy.geocoders.bing.Bing: The `output_format` parameter is deprecated ' +
                  'and ignored.', DeprecationWarning)
-        
+
         self.api_key = api_key
         self.format_string = format_string
         self.url = "http://dev.virtualearth.net/REST/v1/Locations?%s"
@@ -40,7 +42,7 @@ class Bing(Geocoder):
     def geocode(self, string, exactly_one=True):
         params = {'query': self.format_string % string,
                   'key': self.api_key
-                  }
+        }
         url = self.url % urlencode(params)
         return self.geocode_url(url, exactly_one)
 
@@ -64,23 +66,23 @@ class Bing(Geocoder):
         def parse_resource(resource):
             stripchars = ", \n"
             a = resource['address']
-            
+
             address = a.get('addressLine', '').strip(stripchars)
             city = a.get('locality', '').strip(stripchars)
             state = a.get('adminDistrict', '').strip(stripchars)
             zipcode = a.get('postalCode', '').strip(stripchars)
             country = a.get('countryRegion', '').strip(stripchars)
-            
+
             city_state = join_filter(", ", [city, state])
             place = join_filter(" ", [city_state, zipcode])
             location = join_filter(", ", [address, place, country])
-            
+
             latitude = resource['point']['coordinates'][0] or None
             longitude = resource['point']['coordinates'][1] or None
             if latitude and longitude:
                 latitude = float(latitude)
                 longitude = float(longitude)
-            
+
             return (location, (latitude, longitude))
 
         if exactly_one:

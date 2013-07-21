@@ -34,7 +34,6 @@ try:  # Test for SSL features
 except ImportError:
     pass
 
-
 from .packages import six
 from .exceptions import LocationParseError, SSLError
 
@@ -95,7 +94,7 @@ def split_first(s, delims):
     if min_idx is None or min_idx < 0:
         return s, '', None
 
-    return s[:min_idx], s[min_idx+1:], min_delim
+    return s[:min_idx], s[min_idx + 1:], min_delim
 
 
 def parse_url(url):
@@ -232,7 +231,7 @@ def make_headers(keep_alive=None, accept_encoding=None, user_agent=None,
 
     if basic_auth:
         headers['authorization'] = 'Basic ' + \
-            b64encode(six.b(basic_auth)).decode('utf-8')
+                                   b64encode(six.b(basic_auth)).decode('utf-8')
 
     return headers
 
@@ -341,8 +340,8 @@ def assert_fingerprint(cert, fingerprint):
 
     if not cert_digest == fingerprint_bytes:
         raise SSLError('Fingerprints did not match. Expected "{0}", got "{1}".'
-                       .format(hexlify(fingerprint_bytes),
-                               hexlify(cert_digest)))
+        .format(hexlify(fingerprint_bytes),
+                hexlify(cert_digest)))
 
 
 if SSLContext is not None:  # Python 3.2+

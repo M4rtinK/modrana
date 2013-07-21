@@ -29,19 +29,22 @@
 from __future__ import with_statement # for python 2.5
 import sys
 
+
 class FakeLog(object):
-  def info(self, message):
-    print("INFO:" + message)
+    def info(self, message):
+        print("INFO:" + message)
 
-  def debug(self, message):
-    print("DEBUG:" + message)
+    def debug(self, message):
+        print("DEBUG:" + message)
 
-  def error(self, message):
-    print("ERROR:" + message)
+    def error(self, message):
+        print("ERROR:" + message)
+
 
 log = FakeLog()
 
 import threading
+
 
 class ThreadManager(object):
     """A singleton class for managing threads and processes.
@@ -55,6 +58,7 @@ class ThreadManager(object):
        to make given that anaconda is only ever going to have a handful of
        special purpose threads.
     """
+
     def __init__(self):
         self._objs = {}
         self._errors = {}
@@ -135,6 +139,7 @@ class ThreadManager(object):
         cur_thread = threading.currentThread()
         return cur_thread is self._main_thread
 
+
 class ModRanaThread(threading.Thread):
     """A threading.Thread subclass that exists only for a couple purposes:
 
@@ -147,6 +152,7 @@ class ModRanaThread(threading.Thread):
        (3) All created threads are made daemonic, which means anaconda will quit
            when the main process is killed.
     """
+
     def __init__(self, *args, **kwargs):
         threading.Thread.__init__(self, *args, **kwargs)
         self.daemon = True
@@ -156,31 +162,31 @@ class ModRanaThread(threading.Thread):
 
         # Python 2.5 is missing the name and ident properties
         if sys.version_info[:2] <= (2, 5):
-          import thread
-          # Threads in Python 2.5 dont have identity ! :)
-          self.ident = thread.get_ident()
-          # Threads in Python 2.5 don't have name, yay ! :D
-          self.name = self.getName()
+            import thread
+            # Threads in Python 2.5 dont have identity ! :)
+            self.ident = thread.get_ident()
+            # Threads in Python 2.5 don't have name, yay ! :D
+            self.name = self.getName()
 
     @property
     def status(self):
         with self._stateLock:
-          return self._status
+            return self._status
 
     @status.setter
     def status(self, value):
         with self._stateLock:
-          self._status = value
+            self._status = value
 
     @property
     def progress(self):
-      with self._stateLock:
-        return self._progress
+        with self._stateLock:
+            return self._progress
 
     @progress.setter
     def progress(self, value):
-      with self._stateLock:
-        self._progress = value
+        with self._stateLock:
+            self._progress = value
 
     def run(self, *args, **kwargs):
         # http://bugs.python.org/issue1230540#msg25696
@@ -198,6 +204,7 @@ class ModRanaThread(threading.Thread):
             threadMgr.remove(self.name)
             log.info("Thread Done: %s (%s)" % (self.name, self.ident))
 
+
 def initThreading():
     """Set up threading for anaconda's use. This method must be called before
        any GTK or threading code is called, or else threads will only run when
@@ -213,5 +220,6 @@ def initThreading():
 
     global threadMgr
     threadMgr = ThreadManager()
+
 
 threadMgr = None

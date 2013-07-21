@@ -24,7 +24,6 @@ from pycha.color import hex2rgb
 
 
 class PieChart(Chart):
-
     def __init__(self, surface=None, options={}):
         super(PieChart, self).__init__(surface, options)
         self.slices = []
@@ -132,7 +131,6 @@ class PieChart(Chart):
         self.xlabels = []
         lookup = dict([(slice.xval, slice) for slice in self.slices])
 
-
         cx.select_font_face(self.options.axis.tickFont,
                             cairo.FONT_SLANT_NORMAL,
                             cairo.FONT_WEIGHT_NORMAL)
@@ -175,7 +173,6 @@ class PieChart(Chart):
 
 
 class Slice(object):
-
     def __init__(self, name, fraction, xval, yval, angle):
         self.name = name
         self.fraction = fraction
@@ -195,8 +192,8 @@ class Slice(object):
         cx.new_path()
         cx.move_to(centerx, centery)
         cx.arc(centerx, centery, radius,
-               self.startAngle - math.pi/2,
-               self.endAngle - math.pi/2)
+               self.startAngle - math.pi / 2,
+               self.endAngle - math.pi / 2)
         cx.line_to(centerx, centery)
         cx.close_path()
 

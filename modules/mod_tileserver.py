@@ -21,98 +21,101 @@ import random
 import sys
 from threading import Thread
 from core.backports import six
+
 SimpleHTTPServer = six.moves.SimpleHTTPServer
 SocketServer = six.moves.socketserver
 
 try:  # Python 2
-  from urllib2 import HTTPError
+    from urllib2 import HTTPError
 except ImportError:  # Python 3
-  from urllib.error import HTTPError
+    from urllib.error import HTTPError
 try:
-  from  cStringIO import StringIO # python 2
+    from  cStringIO import StringIO # python 2
 except ImportError:
-  from io import StringIO # python 3
+    from io import StringIO # python 3
 
 from modules.base_module import RanaModule
 from modules import tileserver_callback_proxy
 
-def getModule(m,d,i):
-  return Tileserver(m,d,i)
+
+def getModule(m, d, i):
+    return Tileserver(m, d, i)
+
 
 class Tileserver(RanaModule):
-  """A modRana built-in tileserver"""
-  
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
+    """A modRana built-in tileserver"""
 
-    tileserver_callback_proxy.cb = self
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
 
-    self.port = None
-    self.server = None
-    self.serverThread = None
-    self._mapTiles = None
+        tileserver_callback_proxy.cb = self
 
-    if self.modrana.gui.needsLocalhostTileserver():
-      self.startServer(9009)
+        self.port = None
+        self.server = None
+        self.serverThread = None
+        self._mapTiles = None
 
-  def firstTime(self):
-    self._mapTiles = self.m.get('mapTiles', None) # mapTiles module shortcut
+        if self.modrana.gui.needsLocalhostTileserver():
+            self.startServer(9009)
 
-
-  def runServer(self):
-    print("tile server: starting localhost tileserver")
+    def firstTime(self):
+        self._mapTiles = self.m.get('mapTiles', None) # mapTiles module shortcut
 
 
-    self.port = 9009
-    #    self.tileserverPort = random.randint(8000,9000)
+    def runServer(self):
+        print("tile server: starting localhost tileserver")
+
+        self.port = 9009
+        #    self.tileserverPort = random.randint(8000,9000)
 
 
-    #    Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+        #    Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
 
 
-    try:
-      print("tileserver: starting on port %d" % self.port)
-      self.httpd = Server(("", self.tileserverPort), self)
-    except Exception:
-      import sys
-      e = sys.exc_info()[1]
-      print("tileserver: starting server on port %d failed" % self.port)
-      print(e)
-      self.port = random.randint(9000,10000)
-      print("tileserver: generating random port")
-      print("tileserver: starting on port %d" % self.port)
-      self.server = Server(("", self.port), self)
+        try:
+            print("tileserver: starting on port %d" % self.port)
+            self.httpd = Server(("", self.tileserverPort), self)
+        except Exception:
+            import sys
 
-    print("tile server: serving at port: %d" % self.port)
-    self.server.serve_forever()
+            e = sys.exc_info()[1]
+            print("tileserver: starting server on port %d failed" % self.port)
+            print(e)
+            self.port = random.randint(9000, 10000)
+            print("tileserver: generating random port")
+            print("tileserver: starting on port %d" % self.port)
+            self.server = Server(("", self.port), self)
+
+        print("tile server: serving at port: %d" % self.port)
+        self.server.serve_forever()
 
 
-  def startServer(self, port):
-    """
-    start the tileserver
-    """
-    print("tileserver: starting localhost tileserver")
-    t = Thread(target=self.runServer)
-    t.daemon=True
-    t.start()
-    self.serverThread = t
+    def startServer(self, port):
+        """
+        start the tileserver
+        """
+        print("tileserver: starting localhost tileserver")
+        t = Thread(target=self.runServer)
+        t.daemon = True
+        t.start()
+        self.serverThread = t
 
-  def stopServer(self):
-    """
-    stop the tileserver
-    """
-    if self.server:
-      self.server.socket.close()
-      self.serverThread = None
+    def stopServer(self):
+        """
+        stop the tileserver
+        """
+        if self.server:
+            self.server.socket.close()
+            self.serverThread = None
 
-  def getServerPort(self):
-    """
-    return the port that the tile server is currently using
-    """
-    return self.port
+    def getServerPort(self):
+        """
+        return the port that the tile server is currently using
+        """
+        return self.port
 
-  def shutdown(self):
-    self.stopServer()
+    def shutdown(self):
+        self.stopServer()
 
 
 class Server(SocketServer.TCPServer):
@@ -120,43 +123,44 @@ class Server(SocketServer.TCPServer):
 #        SocketServer.TCPServer.init(tuple, "")
 #        self.callback = callback
 
-  class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
-    def __init__(self, request, client_address):
-      try:
-        SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
-      except:
-        SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
-    def do_GET(self):
-      split = self.path.split("/")
-      layer = split[1]
-      z = int(split[2])
-      x = int(split[3])
-      y = int(split[4].split(".")[0])
-      print(self.path)
-      print(tileserver_callback_proxy.cb._mapTiles)
-      try:
-        tileData = tileserver_callback_proxy.cb._mapTiles.getTile(layer, z, x, y)
-        if tileData:
+    class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
+        def __init__(self, request, client_address):
+            try:
+                SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
+            except:
+                SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
 
-          self.send_response(200)
-          self.send_header("Content-type", "image/png")
-          #self.send_header("Content-type", "application/octet-stream")
-          self.send_header("Content-Length", len(tileData))
-          #              self.send_header('Server', self.version_string())
-          #              self.send_header('Date', self.date_time_string())
-          self.end_headers()
+        def do_GET(self):
+            split = self.path.split("/")
+            layer = split[1]
+            z = int(split[2])
+            x = int(split[3])
+            y = int(split[4].split(".")[0])
+            print(self.path)
+            print(tileserver_callback_proxy.cb._mapTiles)
+            try:
+                tileData = tileserver_callback_proxy.cb._mapTiles.getTile(layer, z, x, y)
+                if tileData:
 
-          print("GET returning file")
+                    self.send_response(200)
+                    self.send_header("Content-type", "image/png")
+                    #self.send_header("Content-type", "application/octet-stream")
+                    self.send_header("Content-Length", len(tileData))
+                    #              self.send_header('Server', self.version_string())
+                    #              self.send_header('Date', self.date_time_string())
+                    self.end_headers()
 
-          self.wfile.write(StringIO(tileData).read())
-          return True
-        else:
-          print("GET tile not found")
-          return False
-      except HTTPError:
-        e = sys.exc_info()[1]
-        # forward the error code
-        self.send_response(e.code)
+                    print("GET returning file")
 
-  def finish_request(self, request, client_address):
-    self.Proxy(request, client_address)
+                    self.wfile.write(StringIO(tileData).read())
+                    return True
+                else:
+                    print("GET tile not found")
+                    return False
+            except HTTPError:
+                e = sys.exc_info()[1]
+                # forward the error code
+                self.send_response(e.code)
+
+    def finish_request(self, request, client_address):
+        self.Proxy(request, client_address)

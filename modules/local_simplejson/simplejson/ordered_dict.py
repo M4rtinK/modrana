@@ -16,8 +16,8 @@ except NameError:
                 return False
         return True
 
-class OrderedDict(dict, DictMixin):
 
+class OrderedDict(dict, DictMixin):
     def __init__(self, *args, **kwds):
         if len(args) > 1:
             raise TypeError('expected at most 1 arguments, got %d' % len(args))
@@ -63,7 +63,7 @@ class OrderedDict(dict, DictMixin):
     def popitem(self, last=True):
         if not self:
             raise KeyError('dictionary is empty')
-        # Modified from original to support Python 2.4, see
+            # Modified from original to support Python 2.4, see
         # http://code.google.com/p/simplejson/issues/detail?id=53
         if last:
             key = reversed(self).next()
@@ -111,8 +111,8 @@ class OrderedDict(dict, DictMixin):
 
     def __eq__(self, other):
         if isinstance(other, OrderedDict):
-            return len(self)==len(other) and \
-                   all(p==q for p, q in  zip(self.items(), other.items()))
+            return len(self) == len(other) and \
+                   all(p == q for p, q in zip(self.items(), other.items()))
         return dict.__eq__(self, other)
 
     def __ne__(self, other):

@@ -1,5 +1,6 @@
 from geopy import Point
 
+
 class Geohash(object):
     ENCODE_MAP = '0123456789bcdefghjkmnpqrstuvwxyz'
     DECODE_MAP = dict([(char, i) for i, char in enumerate(ENCODE_MAP)])
@@ -34,7 +35,7 @@ class Geohash(object):
                         long_max = longitude
                     longitude = (long_min + long_max) / 2.
                 odd_bit = not odd_bit
-            bytes.append(byte) 
+            bytes.append(byte)
         return ''.join([self.ENCODE_MAP[byte] for byte in bytes])
 
     def decode(self, string):

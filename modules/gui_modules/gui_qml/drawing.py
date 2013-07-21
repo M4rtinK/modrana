@@ -2,47 +2,48 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtDeclarative import *
 
-class PieSlice (QDeclarativeItem):
-  def __init__(self, parent = None):
-    QDeclarativeItem.__init__(self, parent)
-    # need to disable this flag to draw inside a QDeclarativeItem
-    self.setFlag(QGraphicsItem.ItemHasNoContents, False)
-    self._color = QColor()
 
-  def getColor(self):
-    return self._color
+class PieSlice(QDeclarativeItem):
+    def __init__(self, parent=None):
+        QDeclarativeItem.__init__(self, parent)
+        # need to disable this flag to draw inside a QDeclarativeItem
+        self.setFlag(QGraphicsItem.ItemHasNoContents, False)
+        self._color = QColor()
 
-  def setColor(self, value):
-    self._color = value
+    def getColor(self):
+        return self._color
 
-  color = Property(QColor, getColor, setColor)
+    def setColor(self, value):
+        self._color = value
 
-  def paint(self, painter, options, widget):
-    pen = QPen(self._color, 2)
-    painter.setPen(pen);
-    painter.setRenderHints(QPainter.Antialiasing, True);
-    painter.drawPie(self.boundingRect(), 90 * 16, 290 * 16);
+    color = Property(QColor, getColor, setColor)
 
-class PieChart (QDeclarativeItem):
+    def paint(self, painter, options, widget):
+        pen = QPen(self._color, 2)
+        painter.setPen(pen);
+        painter.setRenderHints(QPainter.Antialiasing, True);
+        painter.drawPie(self.boundingRect(), 90 * 16, 290 * 16);
 
-  def __init__(self, parent = None):
-    QDeclarativeItem.__init__(self, parent)
-    self._name = ''
-    self._pieSlice = None
 
-  def getName(self):
-    return self._name
+class PieChart(QDeclarativeItem):
+    def __init__(self, parent=None):
+        QDeclarativeItem.__init__(self, parent)
+        self._name = ''
+        self._pieSlice = None
 
-  def setName(self, value):
-    self._name = value
+    def getName(self):
+        return self._name
 
-  name = Property(str, getName, setName)
+    def setName(self, value):
+        self._name = value
 
-  def getPieSlice(self):
-    return self._pieSlice
+    name = Property(str, getName, setName)
 
-  def setPieSlice(self, value):
-    self._pieSlice = value
-    self._pieSlice.setParentItem(self)
+    def getPieSlice(self):
+        return self._pieSlice
 
-  pieSlice = Property(PieSlice, getPieSlice, setPieSlice)
+    def setPieSlice(self, value):
+        self._pieSlice = value
+        self._pieSlice.setParentItem(self)
+
+    pieSlice = Property(PieSlice, getPieSlice, setPieSlice)

@@ -22,64 +22,66 @@
 from base_device_module import DeviceModule, DEVICE_SMARTPHONE
 import bbpy
 
-def getModule(m,d,i):
-  return BB10(m,d,i)
+
+def getModule(m, d, i):
+    return BB10(m, d, i)
+
 
 class BB10(DeviceModule):
-  """A modRana device-specific module for Android chroot"""
-  
-  def __init__(self, m, d, i):
-    DeviceModule.__init__(self, m, d, i)
-    self.tempUnfullscreen = False
+    """A modRana device-specific module for Android chroot"""
 
-  def getDeviceIDString(self):
-    return "bb10"
+    def __init__(self, m, d, i):
+        DeviceModule.__init__(self, m, d, i)
+        self.tempUnfullscreen = False
 
-  def getDeviceName(self):
-    return "BlackBerry 10 device"
+    def getDeviceIDString(self):
+        return "bb10"
 
-  def getWinWH(self):
-    return 720,1280
+    def getDeviceName(self):
+        return "BlackBerry 10 device"
 
-  def startInFullscreen(self):
-    return True
+    def getWinWH(self):
+        return 720, 1280
 
-  def getSupportedGUIModuleIds(self):
-    return ["QML:harmattan", "QML:indep"]
+    def startInFullscreen(self):
+        return True
 
-  def getLocationType(self):
-    return None
+    def getSupportedGUIModuleIds(self):
+        return ["QML:harmattan", "QML:indep"]
 
-  def screenBlankingControlSupported(self):
-    """
-    Screen blanking support is handled through Qt Mobility
-    """
-    return False
+    def getLocationType(self):
+        return None
 
-  def pauseScreenBlanking(self):
-    """
-    inhibit screen blanking
-    """
-    from QtMobility.SystemInfo import QSystemScreenSaver
+    def screenBlankingControlSupported(self):
+        """
+        Screen blanking support is handled through Qt Mobility
+        """
+        return False
 
-    if self.qScreenSaver:
-      QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
-    else:
-      self.qScreenSaver = QSystemScreenSaver()
+    def pauseScreenBlanking(self):
+        """
+        inhibit screen blanking
+        """
+        from QtMobility.SystemInfo import QSystemScreenSaver
 
-  def needsQuitButton(self):
-    return False
+        if self.qScreenSaver:
+            QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
+        else:
+            self.qScreenSaver = QSystemScreenSaver()
 
-  def usesDashboard(self):
-    return False
+    def needsQuitButton(self):
+        return False
 
-  def getStartDragDistance(self):
-    """BB10 devices have a high DPI screen and need a higher value than
-    the default in Qt."""
-    return 32
+    def usesDashboard(self):
+        return False
 
-  def getDeviceType(self):
-    """For now, BB10 runs only on smart phones,
-    once a tablet shows up we might need to detect that
-    and report it correctly."""
-    return DEVICE_SMARTPHONE
+    def getStartDragDistance(self):
+        """BB10 devices have a high DPI screen and need a higher value than
+        the default in Qt."""
+        return 32
+
+    def getDeviceType(self):
+        """For now, BB10 runs only on smart phones,
+        once a tablet shows up we might need to detect that
+        and report it correctly."""
+        return DEVICE_SMARTPHONE

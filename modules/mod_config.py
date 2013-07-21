@@ -21,36 +21,39 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 
-def getModule(m,d,i):
-  return Config(m,d,i)
+
+def getModule(m, d, i):
+    return Config(m, d, i)
+
 
 class Config(RanaModule):
-  """Handle configuration, options, and setup"""
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
+    """Handle configuration, options, and setup"""
 
-  def firstTime(self):
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
 
-    # *** Various hardcoded persistent variables ***
+    def firstTime(self):
+        # *** Various hardcoded persistent variables ***
 
-    # Option: Number of threads for batch-downloading tiles
-    self.set('maxBatchThreads', 5)
+        # Option: Number of threads for batch-downloading tiles
+        self.set('maxBatchThreads', 5)
 
-    # Option: Bath tile download threads
-    # this sets the number of threads for bach tile download
-    # even values of 10 can lead to 3000+ open sockets on a fast internet connection
-    # handle with care :)
-    # UPDATE: modRana now reuses open sockets so it might not be that bad any more
-    self.set('maxDlThreads', 5)
-    # Option: Batch size estimation threads
-    # this sets the number of threads used for determining the size of the batch (from http headers)
-    # NOTE: even though we are downloading only the headers,
-    # for a few thousand tiles this can be an un-trivial amount of data
-    # (so use this with caution on metered connections)
-    self.set('maxSizeThreads', 20)
+        # Option: Bath tile download threads
+        # this sets the number of threads for bach tile download
+        # even values of 10 can lead to 3000+ open sockets on a fast internet connection
+        # handle with care :)
+        # UPDATE: modRana now reuses open sockets so it might not be that bad any more
+        self.set('maxDlThreads', 5)
+        # Option: Batch size estimation threads
+        # this sets the number of threads used for determining the size of the batch (from http headers)
+        # NOTE: even though we are downloading only the headers,
+        # for a few thousand tiles this can be an un-trivial amount of data
+        # (so use this with caution on metered connections)
+        self.set('maxSizeThreads', 20)
 
-    # Google API key for modRana
-    self.set('googleAPIKey', 'ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw')
+        # Google API key for modRana
+        self.set('googleAPIKey',
+                 'ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw')
 
-    # Option: set your start position
-    #self.set("pos", (49.2, 16.616667)) # Brno
+        # Option: set your start position
+        #self.set("pos", (49.2, 16.616667)) # Brno

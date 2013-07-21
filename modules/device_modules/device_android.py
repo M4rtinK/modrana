@@ -24,66 +24,68 @@ from base_device_module import DeviceModule
 MAP_FOLDER_PATH = "/sdcard/modrana/maps"
 ROUTING_DATA_FOLDER_PATH = "/sdcard/modrana/routing_data"
 
-def getModule(m,d,i):
-  return Android(m,d,i)
+
+def getModule(m, d, i):
+    return Android(m, d, i)
+
 
 class Android(DeviceModule):
-  """A modRana device-specific module for Android"""
-  
-  def __init__(self, m, d, i):
-    DeviceModule.__init__(self, m, d, i)
-    self.tempUnfullscreen = False
+    """A modRana device-specific module for Android"""
 
-  def getDeviceIDString(self):
-    return "android"
+    def __init__(self, m, d, i):
+        DeviceModule.__init__(self, m, d, i)
+        self.tempUnfullscreen = False
 
-  def getDeviceName(self):
-    return "Android device"
+    def getDeviceIDString(self):
+        return "android"
 
-  def getWinWH(self):
-    return 480,800
+    def getDeviceName(self):
+        return "Android device"
 
-  def startInFullscreen(self):
-    return True
+    def getWinWH(self):
+        return 480, 800
 
-  def fullscreenOnly(self):
-    return True
+    def startInFullscreen(self):
+        return True
 
-  def getSupportedGUIModuleIds(self):
-    return ["QML:harmattan", "QML:indep"]
+    def fullscreenOnly(self):
+        return True
 
-  def getLocationType(self):
-    # TODO: get to location data on Android
-    return None
+    def getSupportedGUIModuleIds(self):
+        return ["QML:harmattan", "QML:indep"]
 
-  def screenBlankingControlSupported(self):
-    """
-    Screen blanking support is handled through Qt Mobility
-    """
-    return False
+    def getLocationType(self):
+        # TODO: get to location data on Android
+        return None
 
-  # def pauseScreenBlanking(self):
-  #   """
-  #   inhibit screen blanking
-  #   """
-  #   from QtMobility.SystemInfo import QSystemScreenSaver
-  #
-  #   if self.qScreenSaver:
-  #     QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
-  #   else:
-  #     self.qScreenSaver = QSystemScreenSaver()
+    def screenBlankingControlSupported(self):
+        """
+        Screen blanking support is handled through Qt Mobility
+        """
+        return False
 
-  def needsQuitButton(self):
-    """due to no window decoration, own quit button
-    might be needed"""
-    return True
+    # def pauseScreenBlanking(self):
+    #   """
+    #   inhibit screen blanking
+    #   """
+    #   from QtMobility.SystemInfo import QSystemScreenSaver
+    #
+    #   if self.qScreenSaver:
+    #     QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
+    #   else:
+    #     self.qScreenSaver = QSystemScreenSaver()
 
-  def getMapFolderPath(self):
-    return MAP_FOLDER_PATH
+    def needsQuitButton(self):
+        """due to no window decoration, own quit button
+        might be needed"""
+        return True
 
-  def getRoutingDataFolderPath(self):
-    return ROUTING_DATA_FOLDER_PATH
+    def getMapFolderPath(self):
+        return MAP_FOLDER_PATH
 
-  def getDeviceType(self):
-    # TODO: device type detection
-    return None
+    def getRoutingDataFolderPath(self):
+        return ROUTING_DATA_FOLDER_PATH
+
+    def getDeviceType(self):
+        # TODO: device type detection
+        return None

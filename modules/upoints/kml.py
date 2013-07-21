@@ -43,14 +43,15 @@ from . import (point, trigpoints, utils)
 
 #: Supported KML namespace version to URI mapping
 KML_VERSIONS = {
-  "2.0": "http://earth.google.com/kml/2.0",
-  "2.1": "http://earth.google.com/kml/2.1",
-  "2.2": "http://earth.google.com/kml/2.2",
+    "2.0": "http://earth.google.com/kml/2.0",
+    "2.1": "http://earth.google.com/kml/2.1",
+    "2.2": "http://earth.google.com/kml/2.2",
 }
 
 #: Default KML version to output
 # Changing this will cause tests to fail.
 DEF_KML_VERSION = "2.2"
+
 
 def create_elem(tag, attr=None, text=None, kml_version=DEF_KML_VERSION,
                 human_namespace=False):
@@ -85,6 +86,7 @@ def create_elem(tag, attr=None, text=None, kml_version=DEF_KML_VERSION,
     if text:
         element.text = text
     return element
+
 
 class Placemark(trigpoints.Trigpoint):
     """Class for representing a Placemark element from KML data files

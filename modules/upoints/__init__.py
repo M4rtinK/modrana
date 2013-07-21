@@ -66,5 +66,5 @@ datetime.time(20, 24)
 #% parseaddr(__author__)
 
 from . import (baken, cellid, cities, geonames, gpx, kml, nmea, osm,
-                     point, trigpoints, tzdata, utils, weather_stations, xearth)
+               point, trigpoints, tzdata, utils, weather_stations, xearth)
 

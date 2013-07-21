@@ -2,63 +2,67 @@
 import sys
 #import traceback
 try:  # Python 2
-  from urllib import urlencode
-  from urllib2 import urlopen, Request, build_opener, HTTPError, URLError
+    from urllib import urlencode
+    from urllib2 import urlopen, Request, build_opener, HTTPError, URLError
 except ImportError:  # Python 3
-  from urllib.request import urlopen, Request, build_opener
-  from urllib.parse import urlencode
-  from urllib.error import HTTPError, URLError
+    from urllib.request import urlopen, Request, build_opener
+    from urllib.parse import urlencode
+    from urllib.error import HTTPError, URLError
 # handle simplejson import
 try:
-  try:
-    import json
-  except ImportError:
-    import simplejson as json
+    try:
+        import json
+    except ImportError:
+        import simplejson as json
 except Exception:
-  import sys
-  e = sys.exc_info()[1]
-  import sys
-  sys.path.append("modules/local_simplejson")
-  print(e)
-  print("onlineServices: using integrated non-binary simplejson, install proper simplejson package for better speed")
-  import simplejson as json
+    import sys
+
+    e = sys.exc_info()[1]
+    import sys
+
+    sys.path.append("modules/local_simplejson")
+    print(e)
+    print("onlineServices: using integrated non-binary simplejson, install proper simplejson package for better speed")
+    import simplejson as json
 
 from core.point import Point
 
 
 class GeonamesWikipediaPoint(Point):
-  """
-  * a Point subclass suitable for representing the search result from
-  a Geonames wikipedia search
-  """
-  def __init__(self, gnWikipediaResult):
-    lat = gnWikipediaResult['lat']
-    lon = gnWikipediaResult['lng']
-    # for storage, we remember both name and summary in the message variable
-    message = "%s\n%s" % (gnWikipediaResult['title'],gnWikipediaResult['summary'])
-    Point.__init__(self, lat, lon, gnWikipediaResult.get('elevation', None), message)
-    self.abstract="%s..." % gnWikipediaResult['summary'][0:50] # chop a part of the summary
-    self.result = gnWikipediaResult
+    """
+    * a Point subclass suitable for representing the search result from
+    a Geonames wikipedia search
+    """
 
-  def getName(self):
-    return self.result['title']
+    def __init__(self, gnWikipediaResult):
+        lat = gnWikipediaResult['lat']
+        lon = gnWikipediaResult['lng']
+        # for storage, we remember both name and summary in the message variable
+        message = "%s\n%s" % (gnWikipediaResult['title'], gnWikipediaResult['summary'])
+        Point.__init__(self, lat, lon, gnWikipediaResult.get('elevation', None), message)
+        self.abstract = "%s..." % gnWikipediaResult['summary'][0:50] # chop a part of the summary
+        self.result = gnWikipediaResult
 
-  def getDescription(self):
-    return self.result['summary']
+    def getName(self):
+        return self.result['title']
 
-  def getAbstract(self):
-    return self.abstract
+    def getDescription(self):
+        return self.result['summary']
 
-  def getUrls(self):
-    fullUrl = "http://%s" % self.result['wikipediaUrl']
-    return [(fullUrl, "full article")]
+    def getAbstract(self):
+        return self.abstract
+
+    def getUrls(self):
+        fullUrl = "http://%s" % self.result['wikipediaUrl']
+        return [(fullUrl, "full article")]
+
 
 def _wikipediaResults2points(results):
-  """convert wikipedia search results from Geonames to modRana points"""
-  points = []
-  for result in results:
-    points.append(GeonamesWikipediaPoint(result))
-  return points
+    """convert wikipedia search results from Geonames to modRana points"""
+    points = []
+    for result in results:
+        points.append(GeonamesWikipediaPoint(result))
+    return points
 
 # from the googlemaps module
 def fetchJson(query_url, params=None, headers=None):
@@ -84,105 +88,110 @@ def fetchJson(query_url, params=None, headers=None):
     request = Request(url, headers=headers)
     response = urlopen(request)
     return url, json.load(response)
-  
+
+
 def wikipediaSearch(query):
-  url = 'http://ws.geonames.org/wikipediaSearchJSON?'
-#  params = {'q':query,
-#            'maxRows':10,
-#            'lang':'en'
-#           }
-  params = {'lang':'en',
-            'q':query
-           }
-  try:
-    url, results = fetchJson(url, params)
-    return _wikipediaResults2points(results['geonames'])
-  except Exception:
-    import sys
-    e = sys.exc_info()[1]
-#    traceback.print_exc(file=sys.stdout) # find what went wrong
-    print("online: wiki search exception")
-    print(e)
-    return []
+    url = 'http://ws.geonames.org/wikipediaSearchJSON?'
+    #  params = {'q':query,
+    #            'maxRows':10,
+    #            'lang':'en'
+    #           }
+    params = {'lang': 'en',
+              'q': query
+    }
+    try:
+        url, results = fetchJson(url, params)
+        return _wikipediaResults2points(results['geonames'])
+    except Exception:
+        import sys
+
+        e = sys.exc_info()[1]
+        #    traceback.print_exc(file=sys.stdout) # find what went wrong
+        print("online: wiki search exception")
+        print(e)
+        return []
 
 
 def elevSRTM(lat, lon):
-  """get elevation in meters for the specified latitude and longitude from geonames"""
-  url = 'http://ws.geonames.org/srtm3?lat=%f&lng=%f' % (lat, lon)
-  try:
-    query = urlopen(url)
-  except Exception:
-    import sys
-    e = sys.exc_info()[1]
-    print("onlineServices: getting elevation from geonames returned an error")
-    print(e)
-    return 0
-  return query.read()
+    """get elevation in meters for the specified latitude and longitude from geonames"""
+    url = 'http://ws.geonames.org/srtm3?lat=%f&lng=%f' % (lat, lon)
+    try:
+        query = urlopen(url)
+    except Exception:
+        import sys
+
+        e = sys.exc_info()[1]
+        print("onlineServices: getting elevation from geonames returned an error")
+        print(e)
+        return 0
+    return query.read()
+
 
 def elevBatchSRTM(latLonList, threadCB=None, userAgent=None):
-  """ get elevation in meters for the specified latitude and longitude from
-   geonames synchronously, it is possible to ask for up to 20 coordinates
-   at once
-  """
-  maxCoordinates = 20 #geonames only allows 20 coordinates per query
-  latLonElevList = []
-  mL = len(latLonList)
-  while len(latLonList) > 0:
-#    print("elevation: %d of %d done" % (mL - len(latLonList), mL))
-    if threadCB: # report progress to the worker thread
-      progress = len(latLonList)/float(mL)
-      threadCB(progress)
-    tempList = latLonList[0:maxCoordinates]
-    latLonList = latLonList[maxCoordinates:]
-    #      latLonList = latLonList[maxCoordinates:len(latLonList)]
+    """ get elevation in meters for the specified latitude and longitude from
+     geonames synchronously, it is possible to ask for up to 20 coordinates
+     at once
+    """
+    maxCoordinates = 20 #geonames only allows 20 coordinates per query
+    latLonElevList = []
+    mL = len(latLonList)
+    while len(latLonList) > 0:
+    #    print("elevation: %d of %d done" % (mL - len(latLonList), mL))
+        if threadCB: # report progress to the worker thread
+            progress = len(latLonList) / float(mL)
+            threadCB(progress)
+        tempList = latLonList[0:maxCoordinates]
+        latLonList = latLonList[maxCoordinates:]
+        #      latLonList = latLonList[maxCoordinates:len(latLonList)]
 
-    lats = ""
-    lons = ""
-    for point in tempList:
-      lats += "%f," % point[0]
-      lons += "%f," % point[1]
+        lats = ""
+        lons = ""
+        for point in tempList:
+            lats += "%f," % point[0]
+            lons += "%f," % point[1]
 
-      # TODO: maybe add switching ?
-      #      url = 'http://ws.geonames.org/astergdem?lats=%s&lngs=%s' % (lats,lons)
-    url = 'http://ws.geonames.org/srtm3?lats=%s&lngs=%s' % (lats, lons)
-    query = None
-    results = []
-    try:
-      request = Request(url)
-      opener = build_opener()
-      if userAgent:
-        request.add_header('User-Agent', userAgent)
-      query = opener.open(request)
+            # TODO: maybe add switching ?
+            #      url = 'http://ws.geonames.org/astergdem?lats=%s&lngs=%s' % (lats,lons)
+        url = 'http://ws.geonames.org/srtm3?lats=%s&lngs=%s' % (lats, lons)
+        query = None
+        results = []
+        try:
+            request = Request(url)
+            opener = build_opener()
+            if userAgent:
+                request.add_header('User-Agent', userAgent)
+            query = opener.open(request)
 
-    except Exception:
+        except Exception:
 
-      import sys
+            import sys
 
-      e = sys.exc_info()[1]
-      print("online: getting elevation from geonames returned an error")
-      print(e)
-      results = "0"
-      for i in range(1, len(tempList)):
-        results += " 0"
-    try:
-      if query:
-        results = query.read().split('\r\n')
-        query.close()
-    except Exception:
-      import sys
-      e = sys.exc_info()[1]
-      print("online: elevation string from geonames has a wrong format")
-      print(e)
-      results = "0"
-      for i in range(1, len(tempList)):
-        results += " 0"
+            e = sys.exc_info()[1]
+            print("online: getting elevation from geonames returned an error")
+            print(e)
+            results = "0"
+            for i in range(1, len(tempList)):
+                results += " 0"
+        try:
+            if query:
+                results = query.read().split('\r\n')
+                query.close()
+        except Exception:
+            import sys
 
-    index = 0
-    for point in tempList: # add the results to the new list with elevation
-      latLonElevList.append((point[0], point[1], int(results[index])))
-      index += 1
+            e = sys.exc_info()[1]
+            print("online: elevation string from geonames has a wrong format")
+            print(e)
+            results = "0"
+            for i in range(1, len(tempList)):
+                results += " 0"
 
-  return latLonElevList
+        index = 0
+        for point in tempList: # add the results to the new list with elevation
+            latLonElevList.append((point[0], point[1], int(results[index])))
+            index += 1
+
+    return latLonElevList
 
 
 

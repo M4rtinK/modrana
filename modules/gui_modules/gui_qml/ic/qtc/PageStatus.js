@@ -3,6 +3,6 @@ var Activating = 1
 var Active = 2
 var Deactivating = 3
 var foo = ".harmattan/"
-function bar(){
+function bar() {
     return ".harmattan/"
 }

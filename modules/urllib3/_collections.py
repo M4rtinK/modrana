@@ -18,9 +18,7 @@ try: # Python 2.7+
 except ImportError:
     from .packages.ordered_dict import OrderedDict
 
-
 __all__ = ['RecentlyUsedContainer']
-
 
 _Null = object()
 

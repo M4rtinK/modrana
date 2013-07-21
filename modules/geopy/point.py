@@ -3,6 +3,7 @@ from itertools import islice
 from geopy import util, units, format
 from core.backports.six import string_types as basestring
 
+
 class Point(object):
     """
     A geodetic point with latitude, longitude, and altitude.
@@ -78,7 +79,7 @@ class Point(object):
             (?P<altitude_units>km|m|mi|ft|nm|nmi)))?
         \s*$
     """ % UTIL_PATTERNS, re.X)
-    
+
     def __new__(cls, latitude=None, longitude=None, altitude=None):
         single_arg = longitude is None and altitude is None
         if single_arg and not isinstance(latitude, util.NUMBER_TYPES):
@@ -98,7 +99,7 @@ class Point(object):
                     )
                 else:
                     return cls.from_sequence(seq)
-        
+
         latitude = float(latitude or 0)
         if abs(latitude) > 90:
             latitude = ((latitude + 90) % 180) - 90
@@ -106,103 +107,105 @@ class Point(object):
         longitude = float(longitude or 0)
         if abs(longitude) > 180:
             longitude = ((longitude + 180) % 360) - 180
-        
+
         altitude = float(altitude or 0)
-        
+
         self = super(Point, cls).__new__(cls)
         self.latitude = latitude
         self.longitude = longitude
         self.altitude = altitude
         return self
-    
+
     def __getitem__(self, index):
         return (self.latitude, self.longitude, self.altitude)[index]
-    
+
     def __setitem__(self, index, value):
         point = [self.latitude, self.longitude, self.altitude]
         point[index] = value
         self.latitude, self.longitude, self.altitude = point
-    
+
     def __iter__(self):
         return iter((self.latitude, self.longitude, self.altitude))
-    
+
     def __repr__(self):
         return "Point(%r, %r, %r)" % (
             self.latitude, self.longitude, self.altitude
         )
-    
+
     def format(self, altitude=None, deg_char='', min_char='m', sec_char='s'):
         latitude = "%s %s" % (
-            format.format_degrees(abs(self.latitude), symbols = {'deg': deg_char, 'arcmin': min_char, 'arcsec': sec_char}),
+            format.format_degrees(abs(self.latitude),
+                                  symbols={'deg': deg_char, 'arcmin': min_char, 'arcsec': sec_char}),
             self.latitude >= 0 and 'N' or 'S'
         )
         longitude = "%s %s" % (
-            format.format_degrees(abs(self.longitude), symbols = {'deg': deg_char, 'arcmin': min_char, 'arcsec': sec_char}),
+            format.format_degrees(abs(self.longitude),
+                                  symbols={'deg': deg_char, 'arcmin': min_char, 'arcsec': sec_char}),
             self.longitude >= 0 and 'E' or 'W'
         )
         coordinates = [latitude, longitude]
-        
+
         if altitude is None:
             altitude = bool(self.altitude)
         if altitude:
             if not isinstance(altitude, basestring):
                 altitude = 'km'
             coordinates.append(self.format_altitude(altitude))
-        
+
         return ", ".join(coordinates)
-    
+
     def format_decimal(self, altitude=None):
         latitude = "%s" % self.latitude
         longitude = "%s" % self.longitude
         coordinates = [latitude, longitude]
-        
+
         if altitude is None:
             altitude = bool(self.altitude)
         if altitude:
             if not isinstance(altitude, basestring):
                 altitude = 'km'
             coordinates.append(self.format_altitude(altitude))
-        
+
         return ", ".join(coordinates)
-    
+
     def format_altitude(self, unit='km'):
         return format.distance(self.altitude, unit)
-    
+
     def __str__(self):
         return self.format()
-    
+
     def __unicode__(self):
         return self.format(
             None, format.DEGREE, format.PRIME, format.DOUBLE_PRIME
         )
-    
+
     def __eq__(self, other):
         return tuple(self) == tuple(other)
-    
+
     def __ne__(self, other):
         return tuple(self) != tuple(other)
-    
+
     @classmethod
     def parse_degrees(cls, degrees, arcminutes, arcseconds, direction=None):
         negative = degrees < 0 or degrees.startswith('-')
         degrees = float(degrees or 0)
         arcminutes = float(arcminutes or 0)
         arcseconds = float(arcseconds or 0)
-        
+
         if arcminutes or arcseconds:
             more = units.degrees(arcminutes=arcminutes, arcseconds=arcseconds)
             if negative:
                 degrees -= more
             else:
                 degrees += more
-        
+
         if direction in [None, 'N', 'E']:
             return degrees
         elif direction in ['S', 'W']:
             return -degrees
         else:
             raise ValueError("Invalid direction! Should be one of [NSEW].")
-    
+
     @classmethod
     def parse_altitude(cls, distance, unit):
         if distance is not None:
@@ -218,7 +221,7 @@ class Point(object):
             return CONVERTERS[unit](distance)
         else:
             return distance
-    
+
     @classmethod
     def from_string(cls, string):
         """
@@ -280,7 +283,7 @@ class Point(object):
             raise ValueError(
                 "Failed to create Point instance from string: unknown format."
             )
-    
+
     @classmethod
     def from_sequence(cls, seq):
         """
@@ -291,7 +294,7 @@ class Point(object):
         """
         args = tuple(islice(seq, 4))
         return cls(*args)
-    
+
     @classmethod
     def from_point(cls, point):
         """

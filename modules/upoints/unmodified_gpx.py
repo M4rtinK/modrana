@@ -37,12 +37,13 @@ from upoints import (point, utils)
 
 # Supported GPX versions
 GPX_VERSIONS = {
-  "1.0": "http://www.topografix.com/GPX/1/0",
-  "1.1": "http://www.topografix.com/GPX/1/1",
+    "1.0": "http://www.topografix.com/GPX/1/0",
+    "1.1": "http://www.topografix.com/GPX/1/1",
 } #: Supported GPX namespace version to URI mapping
 
 # Changing this will cause tests to fail.
 DEF_GPX_VERSION = "1.1" #: Default GPX version to output
+
 
 def create_elem(tag, attr=None, gpx_version=DEF_GPX_VERSION,
                 human_namespace=False):
@@ -79,6 +80,7 @@ def create_elem(tag, attr=None, gpx_version=DEF_GPX_VERSION,
         return ElementTree.Element("{%s}%s" % (gpx_ns, tag), attr)
     else:
         return ET.Element("{%s}%s" % (gpx_ns, tag), attr)
+
 
 class _GpxElem(point.Point):
     """Abstract class for representing an element from GPX data files
@@ -327,6 +329,7 @@ class Waypoints(point.Points):
             gpx.append(place.togpx(gpx_version, human_namespace))
 
         return ET.ElementTree(gpx)
+
 
 class Trackpoint(_GpxElem):
     """Class for representing a waypoint element from GPX data files

@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 
 
 class DeflateDecoder(object):
-
     def __init__(self):
         self._first_try = True
         self._data = binary_type()

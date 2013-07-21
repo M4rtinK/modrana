@@ -8,6 +8,7 @@ import codecs
 import mimetypes
 
 from uuid import uuid4
+
 try:
     from io import BytesIO
 except ImportError:
@@ -78,7 +79,7 @@ def encode_multipart_formdata(fields, boundary=None):
             writer(body).write('Content-Disposition: form-data; name="%s"; '
                                'filename="%s"\r\n' % (fieldname, filename))
             body.write(b('Content-Type: %s\r\n\r\n' %
-                       (content_type,)))
+                         (content_type,)))
         else:
             data = value
             writer(body).write('Content-Disposition: form-data; name="%s"\r\n'

@@ -27,8 +27,10 @@ class Geocoder(object):
             return result
         return None
 
+
 class GeocoderError(Exception):
     pass
+
 
 class GeocoderResultError(GeocoderError):
     pass

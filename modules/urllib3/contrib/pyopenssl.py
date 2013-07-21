@@ -50,7 +50,6 @@ _openssl_verify = {
                        + OpenSSL.SSL.VERIFY_FAIL_IF_NO_PEER_CERT,
 }
 
-
 orig_util_HAS_SNI = util.HAS_SNI
 orig_connectionpool_ssl_wrap_socket = connectionpool.ssl_wrap_socket
 

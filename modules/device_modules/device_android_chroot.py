@@ -21,60 +21,62 @@
 #---------------------------------------------------------------------------
 from base_device_module import DeviceModule
 
-def getModule(m,d,i):
-  return AndroidChroot(m,d,i)
+
+def getModule(m, d, i):
+    return AndroidChroot(m, d, i)
+
 
 class AndroidChroot(DeviceModule):
-  """A modRana device-specific module for Android chroot"""
-  
-  def __init__(self, m, d, i):
-    DeviceModule.__init__(self, m, d, i)
-    self.tempUnfullscreen = False
+    """A modRana device-specific module for Android chroot"""
 
-  def getDeviceIDString(self):
-    return "android_chroot"
+    def __init__(self, m, d, i):
+        DeviceModule.__init__(self, m, d, i)
+        self.tempUnfullscreen = False
 
-  def getDeviceName(self):
-    return "Android chroot"
+    def getDeviceIDString(self):
+        return "android_chroot"
 
-  def getWinWH(self):
-    return 480,600
+    def getDeviceName(self):
+        return "Android chroot"
 
-  def startInFullscreen(self):
-    return False
+    def getWinWH(self):
+        return 480, 600
 
-  def simpleMapDragging(self):
-    return True
+    def startInFullscreen(self):
+        return False
 
-  def getSupportedGUIModuleIds(self):
-    return ["GTK"]
+    def simpleMapDragging(self):
+        return True
 
-  def lpSkipCount(self):
-    """SHR on Neo fires two clicks after a long press, so we need to skip
-    both of them, to avoid clicking some new button that
-    shows up after the screen redraws"""
-    return 2
+    def getSupportedGUIModuleIds(self):
+        return ["GTK"]
 
-  def textEntryIminent(self):
-    """In SHR on Neo, we need to temporary disable fullscreen
-    (if we are in fullscreen),
-    or else the text entry box won't show up"""
-    display = self.m.get('display', None)
-    if display:
-      if display.getFullscreenEnabled():
-        display.fullscreenToggle()
-        self.tempUnfullscreen = True
+    def lpSkipCount(self):
+        """SHR on Neo fires two clicks after a long press, so we need to skip
+        both of them, to avoid clicking some new button that
+        shows up after the screen redraws"""
+        return 2
 
-  def textEntryDone(self):
-    """Restore fullscreen if needed"""
-    if self.tempUnfullscreen:
-      display = self.m.get('display', None)
-      if display:
-        if not display.getFullscreenEnabled():
-          display.fullscreenToggle()
-          self.tempUnfullscreen = False
+    def textEntryIminent(self):
+        """In SHR on Neo, we need to temporary disable fullscreen
+        (if we are in fullscreen),
+        or else the text entry box won't show up"""
+        display = self.m.get('display', None)
+        if display:
+            if display.getFullscreenEnabled():
+                display.fullscreenToggle()
+                self.tempUnfullscreen = True
 
-  def needsQuitButton(self):
-    """Due to missing window decoration, own quit button
-    might be needed"""
-    return True
+    def textEntryDone(self):
+        """Restore fullscreen if needed"""
+        if self.tempUnfullscreen:
+            display = self.m.get('display', None)
+            if display:
+                if not display.getFullscreenEnabled():
+                    display.fullscreenToggle()
+                    self.tempUnfullscreen = False
+
+    def needsQuitButton(self):
+        """Due to missing window decoration, own quit button
+        might be needed"""
+        return True

@@ -20,102 +20,106 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from base_device_module import DeviceModule, DEVICE_SMARTPHONE
+
 QTM_IMPORT_SUCCESS = False
 try:
-  from QtMobility.SystemInfo import QSystemScreenSaver
-  QTM_IMPORT_SUCCESS = True
+    from QtMobility.SystemInfo import QSystemScreenSaver
+
+    QTM_IMPORT_SUCCESS = True
 except Exception:
-  import sys
-  e = sys.exc_info()[1]
-  print('device_nemo: QtMobility import failed - do you have python-qtmobility installed ?')
-  print(e)
+    import sys
+
+    e = sys.exc_info()[1]
+    print('device_nemo: QtMobility import failed - do you have python-qtmobility installed ?')
+    print(e)
 # ^^ back-light control for QML GUI
 
 # NOTE: use the device_ prefix when naming the module
 
-def getModule(m,d,i):
-  return DeviceNemo(m,d,i)
+def getModule(m, d, i):
+    return DeviceNemo(m, d, i)
+
 
 class DeviceNemo(DeviceModule):
-  """A Nokia N9 device module"""
-  
-  def __init__(self, m, d, i):
-    DeviceModule.__init__(self, m, d, i)
-    # create the screen-saver controller
-    self.qScreenSaver = QSystemScreenSaver()
+    """A Nokia N9 device module"""
 
-  def getDeviceIDString(self):
-    return "nemo"
+    def __init__(self, m, d, i):
+        DeviceModule.__init__(self, m, d, i)
+        # create the screen-saver controller
+        self.qScreenSaver = QSystemScreenSaver()
 
-  def getDeviceName(self):
-    return "Nemo Mobile device"
+    def getDeviceIDString(self):
+        return "nemo"
 
-  def getWinWH(self):
-    """N9/N950 screen resolution"""
-    #TODO: handle different Nemo devices ?
-    return 854,480
+    def getDeviceName(self):
+        return "Nemo Mobile device"
 
-  def startInFullscreen(self):
-    """
-    non-fullscreen mode just draw some weird toolbar & status-bar
-    on Harmattan
-    """
-    return True
+    def getWinWH(self):
+        """N9/N950 screen resolution"""
+        #TODO: handle different Nemo devices ?
+        return 854, 480
 
-  def fullscreenOnly(self):
-    """
-    basically no need to
-    """
-    return True
+    def startInFullscreen(self):
+        """
+        non-fullscreen mode just draw some weird toolbar & status-bar
+        on Harmattan
+        """
+        return True
 
-  def screenBlankingControlSupported(self):
-    """
-    Screen blanking support is handled through Qt Mobility
-    """
-    return QTM_IMPORT_SUCCESS
+    def fullscreenOnly(self):
+        """
+        basically no need to
+        """
+        return True
 
-  def pauseScreenBlanking(self):
-    """
-    inhibit screen blanking
-    """
-    QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
+    def screenBlankingControlSupported(self):
+        """
+        Screen blanking support is handled through Qt Mobility
+        """
+        return QTM_IMPORT_SUCCESS
 
-  def getSupportedGUIModuleIds(self):
-    return ["QML:harmattan", "QML:indep"]
+    def pauseScreenBlanking(self):
+        """
+        inhibit screen blanking
+        """
+        QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
 
-# as python-qtmobility currently segfaults
-# when asked for location info,
-# use the default (GPSD = no position) for now
-#  def getLocationType(self):
-#    return "qt_mobility"
+    def getSupportedGUIModuleIds(self):
+        return ["QML:harmattan", "QML:indep"]
 
-  def hasButtons(self):
-    # TODO: support for volume buttons
-    return False
+    # as python-qtmobility currently segfaults
+    # when asked for location info,
+    # use the default (GPSD = no position) for now
+    #  def getLocationType(self):
+    #    return "qt_mobility"
 
-
-  # ** LOCATION **
-
-  def handlesLocation(self):
-    """using Qt Mobility"""
-    return False
-
-  def startLocation(self):
-    pass
-
-  def stopLocation(self):
-    pass
+    def hasButtons(self):
+        # TODO: support for volume buttons
+        return False
 
 
-  # ** PATHS **
+    # ** LOCATION **
 
-  # as nemo currently doesn't have a MyDocs partition or
-  # equivalent, just use the default paths in ~/.modrana
+    def handlesLocation(self):
+        """using Qt Mobility"""
+        return False
 
-  def needsQuitButton(self):
-    """No need for a separate Quit button thanks to the Nemo UI"""
-    return False
+    def startLocation(self):
+        pass
 
-  def getDeviceType(self):
-    # TODO: amend once some Nemo tablets show up
-    return DEVICE_SMARTPHONE
+    def stopLocation(self):
+        pass
+
+
+    # ** PATHS **
+
+    # as nemo currently doesn't have a MyDocs partition or
+    # equivalent, just use the default paths in ~/.modrana
+
+    def needsQuitButton(self):
+        """No need for a separate Quit button thanks to the Nemo UI"""
+        return False
+
+    def getDeviceType(self):
+        # TODO: amend once some Nemo tablets show up
+        return DEVICE_SMARTPHONE

@@ -21,32 +21,34 @@
 #---------------------------------------------------------------------------
 from base_device_module import DeviceModule, DEVICE_DESKTOP
 
-def getModule(m,d,i):
-  return DevicePC(m,d,i)
+
+def getModule(m, d, i):
+    return DevicePC(m, d, i)
+
 
 class DevicePC(DeviceModule):
-  """A modRana device-specific module for PC"""
-  
-  def __init__(self, m, d, i):
-    DeviceModule.__init__(self, m, d, i)
+    """A modRana device-specific module for PC"""
 
-  def getDeviceIDString(self):
-    return "pc"
+    def __init__(self, m, d, i):
+        DeviceModule.__init__(self, m, d, i)
 
-  def getDeviceName(self):
-    return "A generic Personal Computer"
+    def getDeviceIDString(self):
+        return "pc"
 
-  def getWinWH(self):
-    return 800,480
+    def getDeviceName(self):
+        return "A generic Personal Computer"
 
-  def simpleMapDragging(self):
-    return False
+    def getWinWH(self):
+        return 800, 480
 
-  def startInFullscreen(self):
-    return False
+    def simpleMapDragging(self):
+        return False
 
-  def getSupportedGUIModuleIds(self):
-    return ["GTK", "QML:indep"]
+    def startInFullscreen(self):
+        return False
 
-  def getDeviceType(self):
-    return DEVICE_DESKTOP
+    def getSupportedGUIModuleIds(self):
+        return ["GTK", "QML:indep"]
+
+    def getDeviceType(self):
+        return DEVICE_DESKTOP

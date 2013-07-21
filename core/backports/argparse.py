@@ -81,7 +81,6 @@ __all__ = [
     'ZERO_OR_MORE',
 ]
 
-
 import copy as _copy
 import os as _os
 import re as _re
@@ -587,6 +586,7 @@ class HelpFormatter(object):
                 return result
             else:
                 return (result, ) * tuple_size
+
         return format
 
     def _format_args(self, action, default_metavar):
@@ -639,7 +639,7 @@ class HelpFormatter(object):
     def _fill_text(self, text, width, indent):
         text = self._whitespace_matcher.sub(' ', text).strip()
         return _textwrap.fill(text, width, initial_indent=indent,
-                                           subsequent_indent=indent)
+                              subsequent_indent=indent)
 
     def _get_help_string(self, action):
         return action.help
@@ -692,7 +692,7 @@ def _get_action_name(argument):
     if argument is None:
         return None
     elif argument.option_strings:
-        return  '/'.join(argument.option_strings)
+        return '/'.join(argument.option_strings)
     elif argument.metavar not in (None, SUPPRESS):
         return argument.metavar
     elif argument.dest not in (None, SUPPRESS):
@@ -822,7 +822,6 @@ class Action(_AttributeHolder):
 
 
 class _StoreAction(Action):
-
     def __init__(self,
                  option_strings,
                  dest,
@@ -857,7 +856,6 @@ class _StoreAction(Action):
 
 
 class _StoreConstAction(Action):
-
     def __init__(self,
                  option_strings,
                  dest,
@@ -880,7 +878,6 @@ class _StoreConstAction(Action):
 
 
 class _StoreTrueAction(_StoreConstAction):
-
     def __init__(self,
                  option_strings,
                  dest,
@@ -897,7 +894,6 @@ class _StoreTrueAction(_StoreConstAction):
 
 
 class _StoreFalseAction(_StoreConstAction):
-
     def __init__(self,
                  option_strings,
                  dest,
@@ -914,7 +910,6 @@ class _StoreFalseAction(_StoreConstAction):
 
 
 class _AppendAction(Action):
-
     def __init__(self,
                  option_strings,
                  dest,
@@ -951,7 +946,6 @@ class _AppendAction(Action):
 
 
 class _AppendConstAction(Action):
-
     def __init__(self,
                  option_strings,
                  dest,
@@ -977,7 +971,6 @@ class _AppendConstAction(Action):
 
 
 class _CountAction(Action):
-
     def __init__(self,
                  option_strings,
                  dest,
@@ -998,7 +991,6 @@ class _CountAction(Action):
 
 
 class _HelpAction(Action):
-
     def __init__(self,
                  option_strings,
                  dest=SUPPRESS,
@@ -1017,7 +1009,6 @@ class _HelpAction(Action):
 
 
 class _VersionAction(Action):
-
     def __init__(self,
                  option_strings,
                  version=None,
@@ -1042,7 +1033,6 @@ class _VersionAction(Action):
 
 
 class _SubParsersAction(Action):
-
     class _ChoicesPseudoAction(Action):
 
         def __init__(self, name, help):
@@ -1185,7 +1175,6 @@ class Namespace(_AttributeHolder):
 
 
 class _ActionsContainer(object):
-
     def __init__(self,
                  description,
                  prefix_chars,
@@ -1482,7 +1471,6 @@ class _ActionsContainer(object):
 
 
 class _ArgumentGroup(_ActionsContainer):
-
     def __init__(self, container, title=None, description=None, **kwargs):
         # add any missing keyword arguments by checking the container
         update = kwargs.setdefault
@@ -1515,7 +1503,6 @@ class _ArgumentGroup(_ActionsContainer):
 
 
 class _MutuallyExclusiveGroup(_ArgumentGroup):
-
     def __init__(self, container, required=False):
         super(_MutuallyExclusiveGroup, self).__init__(container)
         self.required = required
@@ -1568,6 +1555,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
 
         if version is not None:
             import warnings
+
             warnings.warn(
                 """The "version" argument to ArgumentParser is deprecated. """
                 """Please use """
@@ -1600,6 +1588,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
         # register types
         def identity(string):
             return string
+
         self.register('type', None, identity)
 
         # add help and version arguments if necessary
@@ -1610,12 +1599,12 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
             default_prefix = prefix_chars[0]
         if self.add_help:
             self.add_argument(
-                default_prefix+'h', default_prefix*2+'help',
+                default_prefix + 'h', default_prefix * 2 + 'help',
                 action='help', default=SUPPRESS,
                 help=_('show this help message and exit'))
         if self.version:
             self.add_argument(
-                default_prefix+'v', default_prefix*2+'version',
+                default_prefix + 'v', default_prefix * 2 + 'version',
                 action='version', default=SUPPRESS,
                 version=self.version,
                 help=_("show program's version number and exit"))
@@ -2075,7 +2064,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
         # if multiple actions match, the option string was ambiguous
         if len(option_tuples) > 1:
             options = ', '.join([option_string
-                for action, option_string, explicit_arg in option_tuples])
+                                 for action, option_string, explicit_arg in option_tuples])
             tup = arg_string, options
             self.error(_('ambiguous option: %s could match %s') % tup)
 
@@ -2206,7 +2195,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
         # when nargs='*' on a positional, if there were no command-line
         # args, use the default if it is anything other than None
         elif (not arg_strings and action.nargs == ZERO_OR_MORE and
-              not action.option_strings):
+                  not action.option_strings):
             if action.default is not None:
                 value = action.default
             else:
@@ -2303,6 +2292,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
 
     def format_version(self):
         import warnings
+
         warnings.warn(
             'The format_version method is deprecated -- the "version" '
             'argument to ArgumentParser is no longer supported.',
@@ -2329,6 +2319,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
 
     def print_version(self, file=None):
         import warnings
+
         warnings.warn(
             'The print_version method is deprecated -- the "version" '
             'argument to ArgumentParser is no longer supported.',

@@ -19,11 +19,13 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 
-def getModule(m,d,i):
-  return Example(m,d,i)
+
+def getModule(m, d, i):
+    return Example(m, d, i)
+
 
 class Example(RanaModule):
-  """A sample modRana module"""
-  
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
+    """A sample modRana module"""
+
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)

@@ -6,8 +6,10 @@ from xml.etree import ElementTree
 from core.backports import six
 from core.backports.six import string_types as basestring
 
+
 class VersionError(Exception):
     pass
+
 
 class Waypoint(Point):
     '''
@@ -53,20 +55,23 @@ class Waypoint(Point):
             w.dgpsid = children['dgpsid']
         return w
 
+
 class _Attr(object):
     '''
     Value wrapper for allowing interfaces to access attribute values with
     `obj.text`
     '''
+
     def __init__(self, value):
         self.text = value
+
 
 class GPX(object):
     GPX_NS = "http://www.topografix.com/GPX/1/1"
     FILE_EXT = '.gpx'
     MIME_TYPE = 'application/gpx+xml'
     VERSION = '1.1'
-    FIX_TYPES =  set(('none', '2d', '3d', 'dgps', 'pps'))
+    FIX_TYPES = set(('none', '2d', '3d', 'dgps', 'pps'))
     DECIMAL_RE = re.compile(r'([+-]?\d*\.?\d+)$')
 
     # Each "type tuple" is a tuple of two items:
@@ -78,10 +83,10 @@ class GPX(object):
         'trk': ['track'], 'extensions': 'extensions'
     })
     METADATA_TYPE = ({}, {
-        'name': 'string', 'desc': 'string', 'author': 'person',
-        'copyright': 'copyright', 'link': ['link'], 'time': 'datetime',
-        'keywords': 'string', 'bounds': 'bounds', 'extensions': 'extensions'
-    })
+                             'name': 'string', 'desc': 'string', 'author': 'person',
+                             'copyright': 'copyright', 'link': ['link'], 'time': 'datetime',
+                             'keywords': 'string', 'bounds': 'bounds', 'extensions': 'extensions'
+                         })
     WAYPOINT_TYPE = ({'lat': 'decimal', 'lon': 'decimal'}, {
         'ele': 'decimal', 'time': 'datetime', 'magvar': 'degrees',
         'geoidheight': 'decimal', 'name': 'string', 'cmt': 'string',
@@ -91,17 +96,17 @@ class GPX(object):
         'dgpsid': 'dgpsid', 'extensions': 'extensions'
     })
     ROUTE_TYPE = ({}, {
-        'name': 'string', 'cmt': 'string', 'desc': 'string', 'src': 'string',
-        'link': ['link'], 'number': 'unsigned', 'type': 'string',
-        'extensions': 'extensions', 'rtept': ['waypoint']
-    })
+                          'name': 'string', 'cmt': 'string', 'desc': 'string', 'src': 'string',
+                          'link': ['link'], 'number': 'unsigned', 'type': 'string',
+                          'extensions': 'extensions', 'rtept': ['waypoint']
+                      })
     TRACK_TYPE = ({}, {
-        'name': 'string', 'cmt': 'string', 'desc': 'string', 'src': 'string',
-        'link': ['link'], 'number': 'unsigned', 'type': 'string',
-        'extensions': 'extensions', 'trkseg': ['segment']
-    })
+                          'name': 'string', 'cmt': 'string', 'desc': 'string', 'src': 'string',
+                          'link': ['link'], 'number': 'unsigned', 'type': 'string',
+                          'extensions': 'extensions', 'trkseg': ['segment']
+                      })
     TRACK_SEGMENT_TYPE = ({},
-        {'trkpt': ['waypoint'], 'extensions': 'extensions'}
+                          {'trkpt': ['waypoint'], 'extensions': 'extensions'}
     )
     COPYRIGHT_TYPE = (
         {'author': 'string'}, {'year': 'year', 'license': 'uri'}
@@ -110,13 +115,13 @@ class GPX(object):
     EMAIL_TYPE = ({'id': 'string', 'domain': 'string'}, {})
     PERSON_TYPE = ({}, {'name': 'string', 'email': 'email', 'link': 'link'})
     POINT_TYPE = ({'lat': 'longitude', 'lon': 'longitude'},
-        {'ele': 'decimal', 'time': 'datetime'}
+                  {'ele': 'decimal', 'time': 'datetime'}
     )
     POINT_SEGMENT_TYPE = ({}, {'pt': ['point']})
     BOUNDS_TYPE = ({
-        'minlat': 'latitude', 'minlon': 'longitude',
-        'maxlat': 'latitude', 'maxlon': 'longitude'
-    }, {})
+                       'minlat': 'latitude', 'minlon': 'longitude',
+                       'maxlat': 'latitude', 'maxlon': 'longitude'
+                   }, {})
 
     def __init__(self, document=None, cache=True):
         self.cache = cache
