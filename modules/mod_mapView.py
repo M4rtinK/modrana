@@ -20,229 +20,234 @@
 from modules.base_module import RanaModule
 from core import color
 
-def getModule(m,d,i):
-  return MapView(m,d,i)
+
+def getModule(m, d, i):
+    return MapView(m, d, i)
+
 
 class MapView(RanaModule):
-  """Controls the view being displayed on the map"""
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
+    """Controls the view being displayed on the map"""
 
-  def firstTime(self):
-    self.checkMapDraggingMode() # check the map dragging mode on startup
-    self.checkCenteringDisableThreshold() # check centering disable threshold on startup
-    self.lastZ = int(self.get('z', 15))
-    # grid
-    self.drawGrid = False
-    self.gridColor = (1.0, 1.0, 1.0, 1.0) # white by default
-    self.drawGridLabels = True
-    self.modrana.watch('drawMapGrid', self._drawGridEnabledCB, runNow=True)
-    self.modrana.watch('mapGridColor', self._drawGridColorCB, runNow=True)
-    self.modrana.watch('mapGridLabels', self._drawGridLabelsCB, runNow=True)
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
 
-  def handleMessage(self, message, messageType, args):
-    z = self.get('z', 15)
-    if message == 'zoomIn':
-      newZ = z + 1
-      self.set('z', newZ)
-      proj = self.m.get('projection', None)
-      if proj:
-        proj.setZoom(newZ)
-      self.notify("zooming <b>in</b> to zl %d" % newZ)
-    elif message == 'zoomOut':
-      newZ = max(z - 1, 4)
-      self.set('z', newZ)
-      proj = self.m.get('projection', None)
-      if proj:
-        proj.setZoom(newZ)
-      if newZ != z:
-        self.notify("zooming <b>out</b> to zl %d" % newZ)
-      else:
-        self.notify("minimum zoomlevel reached")
+    def firstTime(self):
+        self.checkMapDraggingMode() # check the map dragging mode on startup
+        self.checkCenteringDisableThreshold() # check centering disable threshold on startup
+        self.lastZ = int(self.get('z', 15))
+        # grid
+        self.drawGrid = False
+        self.gridColor = (1.0, 1.0, 1.0, 1.0) # white by default
+        self.drawGridLabels = True
+        self.modrana.watch('drawMapGrid', self._drawGridEnabledCB, runNow=True)
+        self.modrana.watch('mapGridColor', self._drawGridColorCB, runNow=True)
+        self.modrana.watch('mapGridLabels', self._drawGridLabelsCB, runNow=True)
+
+    def handleMessage(self, message, messageType, args):
+        z = self.get('z', 15)
+        if message == 'zoomIn':
+            newZ = z + 1
+            self.set('z', newZ)
+            proj = self.m.get('projection', None)
+            if proj:
+                proj.setZoom(newZ)
+            self.notify("zooming <b>in</b> to zl %d" % newZ)
+        elif message == 'zoomOut':
+            newZ = max(z - 1, 4)
+            self.set('z', newZ)
+            proj = self.m.get('projection', None)
+            if proj:
+                proj.setZoom(newZ)
+            if newZ != z:
+                self.notify("zooming <b>out</b> to zl %d" % newZ)
+            else:
+                self.notify("minimum zoomlevel reached")
 
 
-    elif message=='recentreToPos':
-      pos = self.get('pos', None)
-      proj = self.m.get('projection', None)
-      if pos and proj:
-        (lat,lon) = pos
-        proj.recentre(lat, lon, z)
+        elif message == 'recentreToPos':
+            pos = self.get('pos', None)
+            proj = self.m.get('projection', None)
+            if pos and proj:
+                (lat, lon) = pos
+                proj.recentre(lat, lon, z)
 
-    elif message=="dragModeChanged":
-      self.checkMapDraggingMode()
+        elif message == "dragModeChanged":
+            self.checkMapDraggingMode()
 
-    elif message=="centeringDisableThresholdChanged":
-      self.checkCenteringDisableThreshold()
+        elif message == "centeringDisableThresholdChanged":
+            self.checkCenteringDisableThreshold()
 
-    elif message:
-      try:
-        cList = message.split(' ')
-        lat = float(cList[1])
-        lon = float(cList[2])
-        if len(cList) == 4:
-          zoom = int(cList[3])
-        else:
-          zoom = z
+        elif message:
+            try:
+                cList = message.split(' ')
+                lat = float(cList[1])
+                lon = float(cList[2])
+                if len(cList) == 4:
+                    zoom = int(cList[3])
+                else:
+                    zoom = z
+                proj = self.m.get('projection', None)
+                self.set("centred", False) # turn off centering before moving screen to the coordinates
+                proj.recentre(lat, lon, zoom)
+            except Exception:
+                import sys
+
+                e = sys.exc_info()[1]
+                print("mapView: cant recenter coordinates")
+                print(e)
+
+    def dragEvent(self, startX, startY, dx, dy, x, y):
+        """only drag the map if centering is disabled"""
+        if not self.get("centred", False):
+            proj = self.m.get('projection', None)
+            if proj:
+                proj.nudge(dx, dy)
+                self.set('needRedraw', True)
+
+    def handleCentring(self):
+        """check if centring is on"""
+        if self.get("centred", True):
+            # get current position information
+            pos = self.get('pos', None)
+            # check if the position changed from last time
+            self.setCentre(pos)
+
+    def setCentre(self, pos):
+        """takes care for centering the map on current position"""
         proj = self.m.get('projection', None)
-        self.set("centred",False) # turn off centering before moving screen to the coordinates
-        proj.recentre(lat, lon, zoom)
-      except Exception:
-        import sys
-        e = sys.exc_info()[1]
-        print("mapView: cant recenter coordinates")
-        print(e)
-  
-  def dragEvent(self,startX,startY,dx,dy,x,y):
-    """only drag the map if centering is disabled"""
-    if not self.get("centred",False):
-      proj = self.m.get('projection', None)
-      if proj:
-        proj.nudge(dx,dy)
-        self.set('needRedraw', True)
+        if proj and pos:
+            (lat, lon) = pos
+            self.set('map_centre', pos)
+            z = int(self.get('z', 15))
+            if not self.d.has_key('viewport'):
+                return False
+                # the shift amount represents a percentage of the distance from screen center
+            # to an edge:
+            # center+---------->|edge
+            # 0 -> no shift
+            # 1 -> directly on the edge
+            # 0.5 -> shifted by half of this distance, eq. in 3/4 of the screen
+            newZoom = None
+            if z != self.lastZ:
+                newZoom = z
+                self.lastZ = newZoom
+            proj.recentre(lat, lon, newZoom)
+            return True
 
-  def handleCentring(self):
-    """check if centring is on"""
-    if self.get("centred",True):
-      # get current position information
-      pos = self.get('pos', None)
-      # check if the position changed from last time
-      self.setCentre(pos)     
-      
-  def setCentre(self,pos):
-    """takes care for centering the map on current position"""
-    proj = self.m.get('projection', None)
-    if proj and pos:
-      (lat,lon) = pos
-      self.set('map_centre', pos)
-      z = int(self.get('z', 15))
-      if not self.d.has_key('viewport'):
-        return False
-      # the shift amount represents a percentage of the distance from screen center
-      # to an edge:
-      # center+---------->|edge
-      # 0 -> no shift
-      # 1 -> directly on the edge
-      # 0.5 -> shifted by half of this distance, eq. in 3/4 of the screen
-      newZoom = None
-      if z != self.lastZ:
-        newZoom = z
-        self.lastZ = newZoom
-      proj.recentre(lat,lon,newZoom)
-      return True
+    # * map dragging mode control * #
 
-  # * map dragging mode control * #
+    def checkMapDraggingMode(self):
+        """check and set current redraw mode configuration"""
+        draggingMode = self.get('mapDraggingMode', "default")
+        print("mapView: switching map drag mode to %s" % draggingMode)
+        if draggingMode == 'default':
+            self.modrana.gui.enableDefaultDrag()
+        elif draggingMode == "staticMapDrag":
+            self.modrana.gui.enableStaticMapDrag()
 
-  def checkMapDraggingMode(self):
-    """check and set current redraw mode configuration"""
-    draggingMode = self.get('mapDraggingMode', "default")
-    print("mapView: switching map drag mode to %s" % draggingMode)
-    if draggingMode == 'default':
-      self.modrana.gui.enableDefaultDrag()
-    elif draggingMode == "staticMapDrag":
-      self.modrana.gui.enableStaticMapDrag()
+    def checkCenteringDisableThreshold(self):
+        """check ans set current centering disable threshold"""
+        centeringDisableThreshold = self.get('centeringDisableThreshold', 2048)
+        print("mapView: switching centering disable threshold to %s" % centeringDisableThreshold)
+        self.modrana.gui.setCDDragThreshold(int(centeringDisableThreshold))
 
-  def checkCenteringDisableThreshold(self):
-    """check ans set current centering disable threshold"""
-    centeringDisableThreshold = self.get('centeringDisableThreshold', 2048)
-    print("mapView: switching centering disable threshold to %s" % centeringDisableThreshold)
-    self.modrana.gui.setCDDragThreshold(int(centeringDisableThreshold))
+    def jump2point(self, point):
+        """recenter on a given point"""
+        z = self.get('z', 15)
+        lat, lon = point.getLL()
+        self.sendMessage('mapView:recentre %f %f %d|set:menu:None|set:needRedraw:True' % (lat, lon, z))
 
-  def jump2point(self, point):
-    """recenter on a given point"""
-    z = self.get('z', 15)
-    lat, lon = point.getLL()
-    self.sendMessage('mapView:recentre %f %f %d|set:menu:None|set:needRedraw:True' % (lat, lon, z))
+    def drawMapOverlay(self, cr):
+        if self.drawGrid:
+            self._drawGrid(cr)
 
-  def drawMapOverlay(self, cr):
-    if self.drawGrid:
-      self._drawGrid(cr)
+    def _drawGridEnabledCB(self, key, oldKey, newKey):
+        self.drawGrid = newKey
 
-  def _drawGridEnabledCB(self, key, oldKey, newKey):
-    self.drawGrid = newKey
+    def _drawGridColorCB(self, key, oldKey, newKey):
+        if newKey is not None:
+            try:
+                c = color.Color(newKey, (newKey, 1.0))
+                self.gridColor = c.getCairoColor()
+            except Exception:
+                import sys
 
-  def _drawGridColorCB(self, key, oldKey, newKey):
-    if newKey is not None:
-      try:
-        c = color.Color(newKey, (newKey, 1.0))
-        self.gridColor = c.getCairoColor()
-      except Exception:
-        import sys
-        e = sys.exc_info()[1]
-        print('mapView: color parsing failed')
-        print(e)
+                e = sys.exc_info()[1]
+                print('mapView: color parsing failed')
+                print(e)
 
-  def _drawGridLabelsCB(self, key, oldKey, newKey):
-    if newKey is not None:
-      self.drawGridLabels = newKey
+    def _drawGridLabelsCB(self, key, oldKey, newKey):
+        if newKey is not None:
+            self.drawGridLabels = newKey
 
-  def _drawGrid(self, cr):
-    proj = self.m.get('projection', None)
-    viewport = self.get('viewport', None)
-    menus = self.m.get('menu', None)
-    z = self.get('z', 15)
-    mapRotated = self.get("rotateMap", False) and (self.get("centred", False))
-    mLabels = False
-    pLabels = False
-    if self.drawGridLabels and not mapRotated: # check zl for meridian and parallel labels
-      pLabels = z > 4
-      mLabels = z > 6
-      # Labels vs map rotation
-      # As with map rotation the the meridians and parallels are not
-      # perpendicular to screen edges, the current label drawing method
-      # wold not work and the labels would be displayed somewhere offscreen.
-      # Also the bbox is enlarged for map rotation, which would mean much more
-      # labels would be drawn - without being visible. :)
+    def _drawGrid(self, cr):
+        proj = self.m.get('projection', None)
+        viewport = self.get('viewport', None)
+        menus = self.m.get('menu', None)
+        z = self.get('z', 15)
+        mapRotated = self.get("rotateMap", False) and (self.get("centred", False))
+        mLabels = False
+        pLabels = False
+        if self.drawGridLabels and not mapRotated: # check zl for meridian and parallel labels
+            pLabels = z > 4
+            mLabels = z > 6
+            # Labels vs map rotation
+            # As with map rotation the the meridians and parallels are not
+            # perpendicular to screen edges, the current label drawing method
+            # wold not work and the labels would be displayed somewhere offscreen.
+            # Also the bbox is enlarged for map rotation, which would mean much more
+            # labels would be drawn - without being visible. :)
 
-    if proj and viewport and menus: # fin all meridians and parallels in the viewport
-      (px1, px2, py1, py2) = (proj.px1, proj.px2, proj.py1, proj.py2)
-      if mapRotated:
-        dx = abs(px1-px2)/2.0
-        dy = abs(py1-py2)/2.0
-        lat0, lon0 = proj.pxpy2ll(px1-dx, py1-dy)
-        lat1, lon1 = proj.pxpy2ll(px2+dx, py2+dy)
-      else:
-        lat0, lon0 = proj.pxpy2ll(px1, py1)
-        lat1, lon1 = proj.pxpy2ll(px2, py2)
-      # range only increments, so sort the coordinates in
-      # ascending order
-      lats = sorted((int(lat0), int(lat1)))
-      lons = sorted((int(lon0), int(lon1)))
-      # and this overlap is needed for high zoom
-      visibleMeridians = range(lats[0]-2, lats[1]+2)
-      visibleParallels = range(lons[0]-2, lons[1]+2)
-      # debug - print visible meridians/parallels:
-      #print(visibleMeridians)
-      #print(visibleParallels)
-      # TODO: like this, at least 4 lines are drawn even if
-      # no parallel or meridian is visible - this could be optimized
-      # -> probably should check if some meridian/parallel is visible and
-      # then the rest of the logic
-      # TODO 2: looks like the overlap is dependent on zoom
-      # -> zoom dependent dynamic overlap ?
+        if proj and viewport and menus: # fin all meridians and parallels in the viewport
+            (px1, px2, py1, py2) = (proj.px1, proj.px2, proj.py1, proj.py2)
+            if mapRotated:
+                dx = abs(px1 - px2) / 2.0
+                dy = abs(py1 - py2) / 2.0
+                lat0, lon0 = proj.pxpy2ll(px1 - dx, py1 - dy)
+                lat1, lon1 = proj.pxpy2ll(px2 + dx, py2 + dy)
+            else:
+                lat0, lon0 = proj.pxpy2ll(px1, py1)
+                lat1, lon1 = proj.pxpy2ll(px2, py2)
+                # range only increments, so sort the coordinates in
+            # ascending order
+            lats = sorted((int(lat0), int(lat1)))
+            lons = sorted((int(lon0), int(lon1)))
+            # and this overlap is needed for high zoom
+            visibleMeridians = range(lats[0] - 2, lats[1] + 2)
+            visibleParallels = range(lons[0] - 2, lons[1] + 2)
+            # debug - print visible meridians/parallels:
+            #print(visibleMeridians)
+            #print(visibleParallels)
+            # TODO: like this, at least 4 lines are drawn even if
+            # no parallel or meridian is visible - this could be optimized
+            # -> probably should check if some meridian/parallel is visible and
+            # then the rest of the logic
+            # TODO 2: looks like the overlap is dependent on zoom
+            # -> zoom dependent dynamic overlap ?
 
-      if visibleParallels:
-        for meridian in visibleMeridians:
-          cr.set_source_rgba(*self.gridColor)
-          cr.set_line_width(2)
-          meridian = float(meridian)
-          cr.move_to(*proj.ll2xy(meridian, float(visibleParallels[0])))
-          cr.line_to(*proj.ll2xy(meridian, float(visibleParallels[-1])))
-          cr.stroke()
-          if pLabels:
-            x,y = proj.ll2xy(meridian, lon1)
-            label = "%d°" % meridian
-            menus.drawText(cr, label, x-50, y-30, 50, 25)
-          cr.fill()
-      if visibleMeridians:
-        for parallel in visibleParallels:
-          cr.set_source_rgba(*self.gridColor)
-          cr.set_line_width(2)
-          parallel = float(parallel)
-          cr.move_to(*proj.ll2xy(float(visibleMeridians[0]), parallel))
-          cr.line_to(*proj.ll2xy(float(visibleMeridians[-1]), parallel))
-          cr.stroke()
-          if mLabels:
-            x,y = proj.ll2xy(lat1, parallel)
-            label = "%d°" % parallel
-            menus.drawText(cr, label, x+5, y-30, 50, 25)
-          cr.fill()
+            if visibleParallels:
+                for meridian in visibleMeridians:
+                    cr.set_source_rgba(*self.gridColor)
+                    cr.set_line_width(2)
+                    meridian = float(meridian)
+                    cr.move_to(*proj.ll2xy(meridian, float(visibleParallels[0])))
+                    cr.line_to(*proj.ll2xy(meridian, float(visibleParallels[-1])))
+                    cr.stroke()
+                    if pLabels:
+                        x, y = proj.ll2xy(meridian, lon1)
+                        label = "%d°" % meridian
+                        menus.drawText(cr, label, x - 50, y - 30, 50, 25)
+                    cr.fill()
+            if visibleMeridians:
+                for parallel in visibleParallels:
+                    cr.set_source_rgba(*self.gridColor)
+                    cr.set_line_width(2)
+                    parallel = float(parallel)
+                    cr.move_to(*proj.ll2xy(float(visibleMeridians[0]), parallel))
+                    cr.line_to(*proj.ll2xy(float(visibleMeridians[-1]), parallel))
+                    cr.stroke()
+                    if mLabels:
+                        x, y = proj.ll2xy(lat1, parallel)
+                        label = "%d°" % parallel
+                        menus.drawText(cr, label, x + 5, y - 30, 50, 25)
+                    cr.fill()

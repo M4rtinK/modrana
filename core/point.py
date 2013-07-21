@@ -1,114 +1,116 @@
 """an universal class representing a point"""
 
+
 class Point(object):
-  """a point"""
-  def __init__(self, lat, lon, elevation=None, name=None, summary=None, message=None):
-    self.lat = lat
-    self.lon = lon
-    self.elevation = elevation # should be in meters
-    self._name = name
-    self._summary = summary
-    self._message = message
+    """a point"""
 
-  def __unicode__(self):
-    if self.getElevation() is None:
-      elev = "unknown"
-    else:
-      elev = "%f m" % self.getElevation()
+    def __init__(self, lat, lon, elevation=None, name=None, summary=None, message=None):
+        self.lat = lat
+        self.lon = lon
+        self.elevation = elevation # should be in meters
+        self._name = name
+        self._summary = summary
+        self._message = message
 
-    return '%f,%f elev: %s "%s:%s"' % (self.lat, self.lon, elev, self.name, self.summary)
+    def __unicode__(self):
+        if self.getElevation() is None:
+            elev = "unknown"
+        else:
+            elev = "%f m" % self.getElevation()
 
-  def __str__(self):
-    return unicode(self).encode('utf-8')
+        return '%f,%f elev: %s "%s:%s"' % (self.lat, self.lon, elev, self.name, self.summary)
 
-  @property
-  def name(self):
-    if self._name is not None:
-      return self._name
-    elif self._message:
-      return self._message.split('\n',1)[0]
-    else:
-      return None
+    def __str__(self):
+        return unicode(self).encode('utf-8')
 
-  @name.setter
-  def name(self, value):
-    """A very short name of the point"""
-    self._name = value
+    @property
+    def name(self):
+        if self._name is not None:
+            return self._name
+        elif self._message:
+            return self._message.split('\n', 1)[0]
+        else:
+            return None
 
-  @property
-  def summary(self):
-    """A short one-line summary describing the point"""
-    if self._summary is not None:
-      return self._summary
-    elif self._message:
-      return self._message.split('\n',1)[0]
-    else:
-      return ""
+    @name.setter
+    def name(self, value):
+        """A very short name of the point"""
+        self._name = value
 
-  @summary.setter
-  def summary(self, value):
-    self._summary = value
+    @property
+    def summary(self):
+        """A short one-line summary describing the point"""
+        if self._summary is not None:
+            return self._summary
+        elif self._message:
+            return self._message.split('\n', 1)[0]
+        else:
+            return ""
 
-  @property
-  def description(self):
-    """Long, long-line & multiline point description"""
-    return self._message
+    @summary.setter
+    def summary(self, value):
+        self._summary = value
 
-  @description.setter
-  def description(self, value):
-    self._message = value
+    @property
+    def description(self):
+        """Long, long-line & multiline point description"""
+        return self._message
 
-  def getLL(self):
-    return self.lat,self.lon
+    @description.setter
+    def description(self, value):
+        self._message = value
 
-  def setLL(self, lat, lon):
-    self.lat = lat
-    self.lon = lon
+    def getLL(self):
+        return self.lat, self.lon
 
-  def getLLE(self):
-    return self.lat, self.lon, self.elevation
+    def setLL(self, lat, lon):
+        self.lat = lat
+        self.lon = lon
 
-  def setLLE(self, lat, lon, elevation):
-    self.lat = lat
-    self.lon = lon
-    self.elevation = elevation
+    def getLLE(self):
+        return self.lat, self.lon, self.elevation
 
-  def getLLEM(self):
-    return self.lat,self.lon, self.elevation, self._message
+    def setLLE(self, lat, lon, elevation):
+        self.lat = lat
+        self.lon = lon
+        self.elevation = elevation
 
-  def getElevation(self):
-    return self.elevation
+    def getLLEM(self):
+        return self.lat, self.lon, self.elevation, self._message
 
-  def setElevation(self, elevation):
-    self.elevation = elevation
+    def getElevation(self):
+        return self.elevation
 
-  def getMessage(self):
-    return self._message
+    def setElevation(self, elevation):
+        self.elevation = elevation
 
-  def setMessage(self, message):
-    self._message = message
+    def getMessage(self):
+        return self._message
 
-  def getName(self):
-    if self.name:
-      return  self.name
-    else:
-      return self._message
+    def setMessage(self, message):
+        self._message = message
 
-  def getDescription(self):
-    if self.description:
-      return self.description
-    else:
-      return self._message
+    def getName(self):
+        if self.name:
+            return self.name
+        else:
+            return self._message
 
-  def getAbstract(self):
-    """a short single line point description"""
-    if self.summary:
-      return self.summary
-    elif self._message:
-      return self._message.split('\n',1)[0]
-    else:
-      return "no abstract"
+    def getDescription(self):
+        if self.description:
+            return self.description
+        else:
+            return self._message
 
-  def getUrls(self):
-    """get a list of (Url, Url description) tuples corresponding to the point"""
-    return []
+    def getAbstract(self):
+        """a short single line point description"""
+        if self.summary:
+            return self.summary
+        elif self._message:
+            return self._message.split('\n', 1)[0]
+        else:
+            return "no abstract"
+
+    def getUrls(self):
+        """get a list of (Url, Url description) tuples corresponding to the point"""
+        return []

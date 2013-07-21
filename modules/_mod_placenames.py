@@ -22,59 +22,62 @@ import cairo
 from datetime import *
 import math
 
-def getModule(m,d,i):
-  return Placenames(m,d,i)
+
+def getModule(m, d, i):
+    return Placenames(m, d, i)
+
 
 class Placenames(poiModule):
-  """Lookup nearest town or village"""
-  def __init__(self, m, d, i):
-    poiModule.__init__(self, m, d, i)
-    self.poi = {'villages':[],'cities':[],'towns':[]} # village, city, town
-    self.load("places.txt")
-    self.lastpos = (None, None)
+    """Lookup nearest town or village"""
 
-  def load(self, filename):
-    file = open(filename,"r")
-    types = {'v':'villages','c':'cities','t':'towns'}
-    for line in file:
-      line = line.strip()
-      (lat,lon,id,typeID,name) = line.split("\t")
-      type = types.get(typeID, None)
-      if type is not None:
-        self.addItem(type, name, lat, lon)
-    self.needUpdate = True # Request update of meta-info
-        
-  def lookup(self, lat, lon):
-    limits = {'villages':10.0, 'towns': 30.0, 'cities': 150.0}
-    kmToDeg = 360.0 / 40041.0
-    
-    nearest = None
-    nearestDist = None
+    def __init__(self, m, d, i):
+        poiModule.__init__(self, m, d, i)
+        self.poi = {'villages': [], 'cities': [], 'towns': []} # village, city, town
+        self.load("places.txt")
+        self.lastpos = (None, None)
 
-    for type,places in self.poi.items():
-      limit = limits.get(type,0) *  kmToDeg
-      limit *= limit
+    def load(self, filename):
+        file = open(filename, "r")
+        types = {'v': 'villages', 'c': 'cities', 't': 'towns'}
+        for line in file:
+            line = line.strip()
+            (lat, lon, id, typeID, name) = line.split("\t")
+            type = types.get(typeID, None)
+            if type is not None:
+                self.addItem(type, name, lat, lon)
+        self.needUpdate = True # Request update of meta-info
 
-      for place in places:
-        plat = place['lat']
-        plon = place['lon']
-        dx = plon - lon
-        dy = plat - lat
-        dist = dx * dx + dy * dy
-        if dist < limit:
-          if nearestDist is None or dist < nearestDist:
-            nearestDist = dist
-            nearest = place['name']
-    return nearest
-  
-  def update(self):
-    """If requested, lookup the nearest place name"""
-    self.updatePoi()
-    if self.get('lookup_place', False):
-      pos = self.get('pos', None)
-      if pos is not None:
-        if pos != self.lastpos:
-          place = self.lookup(pos[0], pos[1])
-          if place:
-            self.set('nearest_place', place)
-          self.lastpos = pos
+    def lookup(self, lat, lon):
+        limits = {'villages': 10.0, 'towns': 30.0, 'cities': 150.0}
+        kmToDeg = 360.0 / 40041.0
+
+        nearest = None
+        nearestDist = None
+
+        for type, places in self.poi.items():
+            limit = limits.get(type, 0) * kmToDeg
+            limit *= limit
+
+            for place in places:
+                plat = place['lat']
+                plon = place['lon']
+                dx = plon - lon
+                dy = plat - lat
+                dist = dx * dx + dy * dy
+                if dist < limit:
+                    if nearestDist is None or dist < nearestDist:
+                        nearestDist = dist
+                        nearest = place['name']
+        return nearest
+
+    def update(self):
+        """If requested, lookup the nearest place name"""
+        self.updatePoi()
+        if self.get('lookup_place', False):
+            pos = self.get('pos', None)
+            if pos is not None:
+                if pos != self.lastpos:
+                    place = self.lookup(pos[0], pos[1])
+                    if place:
+                        self.set('nearest_place', place)
+                    self.lastpos = pos

@@ -29,20 +29,23 @@
 from __future__ import with_statement # for python 2.5
 import sys
 
+
 class FakeLog(object):
-  def info(self, message):
-    print("INFO:" + message)
+    def info(self, message):
+        print("INFO:" + message)
 
-  def debug(self, message):
-    print("DEBUG:" + message)
+    def debug(self, message):
+        print("DEBUG:" + message)
 
-  def error(self, message):
-    print("ERROR:" + message)
+    def error(self, message):
+        print("ERROR:" + message)
+
 
 log = FakeLog()
 
 import threading
 from core.signal import Signal
+
 
 class ThreadManager(object):
     """A singleton class for managing threads and processes.
@@ -56,6 +59,7 @@ class ThreadManager(object):
        to make given that anaconda is only ever going to have a handful of
        special purpose threads.
     """
+
     def __init__(self):
         self._objs = {}
         self._errors = {}
@@ -88,14 +92,14 @@ class ThreadManager(object):
         thread = self._objs.pop(name)
         threadHasCallback = False
         try:
-          threadHasCallback = thread.callback
+            threadHasCallback = thread.callback
         except Exception:
-          # not a thread ?
-          log.debug("threads: no callback or not a thread ?")
+            # not a thread ?
+            log.debug("threads: no callback or not a thread ?")
 
         if threadHasCallback:
-          # trigger the threadRemoved signal
-          self.threadRemoved(name)
+            # trigger the threadRemoved signal
+            self.threadRemoved(name)
 
     def exists(self, name):
         """Determine if a thread or process exists with the given name."""
@@ -150,6 +154,7 @@ class ThreadManager(object):
         cur_thread = threading.currentThread()
         return cur_thread is self._main_thread
 
+
 class ModRanaThread(threading.Thread):
     """A threading.Thread subclass that exists only for a couple purposes:
 
@@ -162,6 +167,7 @@ class ModRanaThread(threading.Thread):
        (3) All created threads are made daemonic, which means anaconda will quit
            when the main process is killed.
     """
+
     def __init__(self, *args, **kwargs):
         threading.Thread.__init__(self, *args, **kwargs)
         self.daemon = True
@@ -172,54 +178,54 @@ class ModRanaThread(threading.Thread):
         self.target = self._nop()  # payload goes here
 
     def _nop(self, *args, **kwargs):
-      """A placeholder method that consumes any arguments
-      and notifies about being used"""
-      pass
+        """A placeholder method that consumes any arguments
+        and notifies about being used"""
+        pass
 
     @property
     def status(self):
         with self._stateLock:
-          return self._status
+            return self._status
 
     @status.setter
     def status(self, value):
         with self._stateLock:
-          self._status = value
-        # needs to be outside of the lock
+            self._status = value
+            # needs to be outside of the lock
         # to prevent deadlocks when signal handler
         # wants to access the property
         if self.callback:
-          threadMgr.threadStatusChanged(self.name, value)
+            threadMgr.threadStatusChanged(self.name, value)
 
     @property
     def progress(self):
-      with self._stateLock:
-        return self._progress
+        with self._stateLock:
+            return self._progress
 
     @progress.setter
     def progress(self, value):
-      with self._stateLock:
-        self._progress = value
-      # needs to be outside of the lock
-      # to prevent deadlocks when signal handler
-      # wants to access the property
-      if self.callback:
-        threadMgr.threadProgressChanged(self.name, value)
+        with self._stateLock:
+            self._progress = value
+            # needs to be outside of the lock
+        # to prevent deadlocks when signal handler
+        # wants to access the property
+        if self.callback:
+            threadMgr.threadProgressChanged(self.name, value)
 
     @property
     def callback(self):
-      """The callback property contains the optional
-      callback handler for this threads target/payload.
-      Even if a callback is already set, if it is set
-      to None or False during processing, the callback will
-      not be called.
-      Using this, a request running in a thread can
-      be cancelled or redirected to another callback."""
-      return self._callback
+        """The callback property contains the optional
+        callback handler for this threads target/payload.
+        Even if a callback is already set, if it is set
+        to None or False during processing, the callback will
+        not be called.
+        Using this, a request running in a thread can
+        be cancelled or redirected to another callback."""
+        return self._callback
 
     @callback.setter
     def callback(self, value):
-      self._callback = value
+        self._callback = value
 
     def run(self, *args, **kwargs):
         # http://bugs.python.org/issue1230540#msg25696
@@ -239,10 +245,11 @@ class ModRanaThread(threading.Thread):
             log.info("Thread Done: %s (%s)" % (self.name, self.ident))
 
     def _conditionalCallback(self, *args, **kwargs):
-      """Used as a "wrapper" for the real callback.
-      Enables cancelling the calling of the callback while the task is not yet done"""
-      if self.callback:
-        self.callback(*args, **kwargs)
+        """Used as a "wrapper" for the real callback.
+        Enables cancelling the calling of the callback while the task is not yet done"""
+        if self.callback:
+            self.callback(*args, **kwargs)
+
 
 def initThreading():
     """Set up threading for anaconda's use. This method must be called before
@@ -259,5 +266,6 @@ def initThreading():
 
     global threadMgr
     threadMgr = ThreadManager()
+
 
 threadMgr = None

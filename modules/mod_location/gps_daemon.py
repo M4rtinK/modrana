@@ -25,78 +25,79 @@ from core.fix import Fix
 
 
 class GPSD(PositionSource):
-  def __init__(self, location):
-    PositionSource.__init__(self, location)
-    self.connected = False
-    self.GPSDConsumer = None
-    self.status = "not connected"
+    def __init__(self, location):
+        PositionSource.__init__(self, location)
+        self.connected = False
+        self.GPSDConsumer = None
+        self.status = "not connected"
 
-  def start(self, startMainLoop=False):
-    """start the GPSD based location update method"""
-    self.connected = False
-    try:
-      self.GPSDConsumer = GPSDConsumer()
-      self.GPSDConsumer.daemon = True
-      self.GPSDConsumer.start()
-      self.connected = True
-      self.setGPSDDebug(self.debug) # check if verbose debugging is enabled
-    except Exception:
-      import sys
-      e = sys.exc_info()[1]
-      print("location GPSD: connecting to GPSD failed", e)
-      self.status = "No GPSD running"
+    def start(self, startMainLoop=False):
+        """start the GPSD based location update method"""
+        self.connected = False
+        try:
+            self.GPSDConsumer = GPSDConsumer()
+            self.GPSDConsumer.daemon = True
+            self.GPSDConsumer.start()
+            self.connected = True
+            self.setGPSDDebug(self.debug) # check if verbose debugging is enabled
+        except Exception:
+            import sys
 
-  def stop(self):
-    """stop the GPSD based location update method"""
-    self.GPSDConsumer.shutdown()
-    self.connected = False
-    self.status = "No GPSD running"
+            e = sys.exc_info()[1]
+            print("location GPSD: connecting to GPSD failed", e)
+            self.status = "No GPSD running"
 
-  def _updateGPSD(self):
-    # only update if connected to GPSD
-    if self.connected:
-      fix, sats = self.GPSDConsumer.getBoth()
-      if fix:
-        # as the GPSD consumer updates its values very often, it probably better to use a simple
-        # tuple instead of a Fix object and only convert to the Fix object once the position data
-        # is actually requested
-        #        (lat,lon,elevation,bearing,speed,timestamp) = fix
-        satCount = len(sats)
-        inUseSatCount = len(filter(lambda x: x.used, sats))
+    def stop(self):
+        """stop the GPSD based location update method"""
+        self.GPSDConsumer.shutdown()
+        self.connected = False
+        self.status = "No GPSD running"
 
-        modRanaFix = Fix((fix.latitude, fix.longitude),
-                         fix.altitude,
-                         fix.track,
-                         fix.speed,
-                         mode=fix.mode,
-                         climb=fix.climb,
-                         sats=satCount,
-                         sats_in_use=inUseSatCount,
-                         horizontal_accuracy=fix.epx * fix.epy,
-                         # TODO: separate x y accuracy support ?
-                         vertical_accuracy=fix.epv,
-                         speed_accuracy=fix.eps,
-                         climb_accuracy=fix.epc,
-                         bearing_accuracy=fix.epd,
-                         time_accuracy=fix.ept,
-                         gps_time=fix.time
-        )
-        self.fix = modRanaFix
+    def _updateGPSD(self):
+        # only update if connected to GPSD
+        if self.connected:
+            fix, sats = self.GPSDConsumer.getBoth()
+            if fix:
+                # as the GPSD consumer updates its values very often, it probably better to use a simple
+                # tuple instead of a Fix object and only convert to the Fix object once the position data
+                # is actually requested
+                #        (lat,lon,elevation,bearing,speed,timestamp) = fix
+                satCount = len(sats)
+                inUseSatCount = len(filter(lambda x: x.used, sats))
 
-  def setDebug(self, value):
-    self.debug = value
-    self.setGPSDDebug(value)
+                modRanaFix = Fix((fix.latitude, fix.longitude),
+                                 fix.altitude,
+                                 fix.track,
+                                 fix.speed,
+                                 mode=fix.mode,
+                                 climb=fix.climb,
+                                 sats=satCount,
+                                 sats_in_use=inUseSatCount,
+                                 horizontal_accuracy=fix.epx * fix.epy,
+                                 # TODO: separate x y accuracy support ?
+                                 vertical_accuracy=fix.epv,
+                                 speed_accuracy=fix.eps,
+                                 climb_accuracy=fix.epc,
+                                 bearing_accuracy=fix.epd,
+                                 time_accuracy=fix.ept,
+                                 gps_time=fix.time
+                )
+                self.fix = modRanaFix
 
-  def setGPSDDebug(self, verbose):
-    if self.GPSDConsumer:
-      if verbose:
-        self.GPSDConsumer.setVerbose(True)
-        print("location: gpsd debugging output turned ON")
-      else:
-        self.GPSDConsumer.setVerbose(False)
-        print("location: gpsd debugging output turned OFF")
-    else:
-      print("location: gpsd not used, so there is no debug output to enable")
+    def setDebug(self, value):
+        self.debug = value
+        self.setGPSDDebug(value)
+
+    def setGPSDDebug(self, verbose):
+        if self.GPSDConsumer:
+            if verbose:
+                self.GPSDConsumer.setVerbose(True)
+                print("location: gpsd debugging output turned ON")
+            else:
+                self.GPSDConsumer.setVerbose(False)
+                print("location: gpsd debugging output turned OFF")
+        else:
+            print("location: gpsd not used, so there is no debug output to enable")
 
 
 ### Old commands for direct socket access to GPSD
@@ -168,82 +169,85 @@ class GPSD(PositionSource):
 #      print("%d sats, quality %f, %f, %f" % (count,dd,dx,dy))
 
 class GPSDConsumer(threading.Thread):
-  """consume data as they come in from the GPSD and store last known fix"""
+    """consume data as they come in from the GPSD and store last known fix"""
 
-  def __init__(self):
-    threading.Thread.__init__(self)
-    self.lock = threading.RLock()
-    self.stop = False
-    import gps_module as gps
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.lock = threading.RLock()
+        self.stop = False
+        import gps_module as gps
 
-    self.session = gps.gps(host="localhost", port="2947")
-    self.session.stream(flags=gps.client.WATCH_JSON)
-    self.verbose = False
-    # vars
-    self.fix = None
-    self.satellites = []
+        self.session = gps.gps(host="localhost", port="2947")
+        self.session.stream(flags=gps.client.WATCH_JSON)
+        self.verbose = False
+        # vars
+        self.fix = None
+        self.satellites = []
 
-  def run(self):
-    import gps_module as gps
+    def run(self):
+        import gps_module as gps
 
-    print("GPSDConsumer: starting\n")
-    while True:
-      if self.stop == True:
-        print("GPSDConsumer: breaking\n")
-        break
-      try:
-        self.session.next() # this function blocks until a new fix is available
-      except Exception:
-        import sys
-        e = sys.exc_info()[1]
-        print("GPSD: error: GPS daemon not running")
-        print(e)
-      sf = self.session.fix
-      if sf.mode > 1: # 0 & 1 -> no fix
-        with self.lock:
-          self.fix = sf
-          self.satellites = self.session.satellites
-          #          self.fix = (sf.latitude,sf.longitude,sf.altitude,sf.track,sf.speed, time())
-          if self.verbose:
-          #          if 1:
+        print("GPSDConsumer: starting\n")
+        while True:
+            if self.stop == True:
+                print("GPSDConsumer: breaking\n")
+                break
             try:
-              print('GPSD fix debug')
-              print(
-              'mode:' + str(sf.mode) + ' lat,lon:' + str((sf.latitude, sf.longitude)) + ' elev:' + str(sf.altitude))
+                self.session.next() # this function blocks until a new fix is available
             except Exception:
-              import sys
-              e = sys.exc_info()[1]
-              print('ERROR debugging GPSD fix')
-              print(e)
-      else:
-        if self.verbose:
-          print("GPSDConsumer: NO FIX, will retry in 1 s")
-        sleep(1)
-    print("GPSDConsumer: stopped\n")
+                import sys
 
-  #      if r["class"] == "TPV":
-  #        with self.lock:
-  #          try:
-  #            self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
-  #          except Exception:            import sys            e = sys.exc_info()[1]
-  #            print("GPSDConsumer: error reading data", e)
+                e = sys.exc_info()[1]
+                print("GPSD: error: GPS daemon not running")
+                print(e)
+            sf = self.session.fix
+            if sf.mode > 1: # 0 & 1 -> no fix
+                with self.lock:
+                    self.fix = sf
+                    self.satellites = self.session.satellites
+                    #          self.fix = (sf.latitude,sf.longitude,sf.altitude,sf.track,sf.speed, time())
+                    if self.verbose:
+                    #          if 1:
+                        try:
+                            print('GPSD fix debug')
+                            print(
+                                'mode:' + str(sf.mode) + ' lat,lon:' + str(
+                                    (sf.latitude, sf.longitude)) + ' elev:' + str(sf.altitude))
+                        except Exception:
+                            import sys
 
-  def shutdown(self):
-    print("GPSDConsumer: stopping")
-    self.stop = True
+                            e = sys.exc_info()[1]
+                            print('ERROR debugging GPSD fix')
+                            print(e)
+            else:
+                if self.verbose:
+                    print("GPSDConsumer: NO FIX, will retry in 1 s")
+                sleep(1)
+        print("GPSDConsumer: stopped\n")
 
-  def getFix(self):
-    with self.lock:
-      return self.fix
+    #      if r["class"] == "TPV":
+    #        with self.lock:
+    #          try:
+    #            self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
+    #          except Exception:            import sys            e = sys.exc_info()[1]
+    #            print("GPSDConsumer: error reading data", e)
 
-  def getSatellites(self):
-    with self.lock:
-      return
+    def shutdown(self):
+        print("GPSDConsumer: stopping")
+        self.stop = True
 
-  def getBoth(self):
-    with self.lock:
-      return self.fix, self.satellites
+    def getFix(self):
+        with self.lock:
+            return self.fix
 
-  def setVerbose(self, value):
-    with self.lock:
-      self.verbose = value
+    def getSatellites(self):
+        with self.lock:
+            return
+
+    def getBoth(self):
+        with self.lock:
+            return self.fix, self.satellites
+
+    def setVerbose(self, value):
+        with self.lock:
+            self.verbose = value

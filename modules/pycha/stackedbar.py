@@ -20,7 +20,6 @@ from pycha.chart import uniqueIndices
 
 
 class StackedBarChart(BarChart):
-
     def __init__(self, surface=None, options={}):
         super(StackedBarChart, self).__init__(surface, options)
         self.barWidth = 0.0
@@ -35,11 +34,11 @@ class StackedBarChart(BarChart):
             # Fix the yscale as we accumulate the y values
             stores = self._getDatasetsValues()
             n_stores = len(stores)
-            flat_y = [pair[1] for pair in reduce(lambda a, b: a+b, stores)]
+            flat_y = [pair[1] for pair in reduce(lambda a, b: a + b, stores)]
             store_size = len(flat_y) / n_stores
-            accum = [sum(flat_y[j]for j in xrange(i,
-                                                  i + store_size * n_stores,
-                                                  store_size))
+            accum = [sum(flat_y[j] for j in xrange(i,
+                                                   i + store_size * n_stores,
+                                                   store_size))
                      for i in range(len(flat_y) / n_stores)]
             self.yrange = float(max(accum))
             if self.yrange == 0:
@@ -55,7 +54,7 @@ class StackedBarChart(BarChart):
         if len(uniqx) == 1:
             self.minxdelta = 1.0
         else:
-            self.minxdelta = min([abs(uniqx[j] - uniqx[j-1])
+            self.minxdelta = min([abs(uniqx[j] - uniqx[j - 1])
                                   for j in range(1, len(uniqx))])
 
         k = self.minxdelta * self.xscale
@@ -66,7 +65,6 @@ class StackedBarChart(BarChart):
 
 
 class StackedVerticalBarChart(StackedBarChart, VerticalBarChart):
-
     def _updateChart(self):
         """Evaluates measures for vertical bars"""
         super(StackedVerticalBarChart, self)._updateChart()
@@ -94,7 +92,6 @@ class StackedVerticalBarChart(StackedBarChart, VerticalBarChart):
 
 
 class StackedHorizontalBarChart(StackedBarChart, HorizontalBarChart):
-
     def _updateChart(self):
         """Evaluates measures for horizontal bars"""
         super(StackedHorizontalBarChart, self)._updateChart()

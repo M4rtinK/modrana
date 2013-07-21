@@ -21,113 +21,115 @@ import codecs
 from parseOsm import *
 from xml.sax.saxutils import quoteattr
 
+
 def pixelSize(z):
-  """length of x/y change that represents 1 pixel at a given zoom level"""
-  return(1.0 / float(256 * pow(2,z)))
+    """length of x/y change that represents 1 pixel at a given zoom level"""
+    return (1.0 / float(256 * pow(2, z)))
+
 
 def OsmMerge(dest, z, sources):
-  """Merge multiple OSM files together
-  
-  Usage: 
-    OsmMerge('output_filename.osm', 
-      ['input_file_1.osm', 
-       'input_file_2.osm',
-       'input_file_3.osm'])
-  """
-  
-  ways = {}
-  poi = []
-  node_tags = {}
-  nodes = {}
-  
-  divisor = float(2 ** 31)
-  
-  # Trawl through the source files, putting everything into memory
-  for source in sources:
-    osm = ParseOsm(source)
-    
-    for p in osm.poi:
-      node_tags[p['id']] = p['t']
+    """Merge multiple OSM files together
 
-    for id,n in osm.nodes.items():
-      nodes[id] = n
-    for id,w in osm.ways.items():
-      ways[id] = w
+    Usage:
+      OsmMerge('output_filename.osm',
+        ['input_file_1.osm',
+         'input_file_2.osm',
+         'input_file_3.osm'])
+    """
 
-  # Store the result as an OSM XML file
-  f=codecs.open(dest, mode='w', encoding='utf-8')
-  f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-  f.write('<osm version="0.5" generator="OsmMerge">\n')
-  
-  # TODO: Write the nodes
-  if(0):
-	  for n,data in nodes.items():
-	    (lat,lon) = nodes[n]
-	    f.write('<node id="%d" lat="%f" lon="%f">' % (n,lat,lon))
-	    tags = node_tags.get(n, None)
-	    if(tags):
-	      for k,v in tags.items():
-	        f.write('\n<tag k=%s v=%s/>' % (quoteattr(k),quoteattr(v)))
-	    f.write("</node>\n")
+    ways = {}
+    poi = []
+    node_tags = {}
+    nodes = {}
 
-  limit = pixelSize(z) * 2.0
-  limitSq = limit * limit
-  #print("Using limit %e" % limitSq)
-  
-  # Detect 'junction' ways
-  usage = {}
-  junctions = {}
-  countNodes = 0
-  for wid,way in ways.items():
-    for n in way['n']:
-      nid = n['id']
-      if(usage.get(nid,0) != 0):
-        junctions[nid] = 1
-      else:
-        usage[nid] = 1
-      countNodes = countNodes + 1
+    divisor = float(2 ** 31)
 
-  #print("%d nodes, %d junctions" % (countNodes, len(junctions.keys())))
+    # Trawl through the source files, putting everything into memory
+    for source in sources:
+        osm = ParseOsm(source)
 
-  countUsed = countNotUsed = 0
-  # Write the ways
-  for id,way in ways.items():
-    f.write('<way id="%d">' % id)
-    for k,v in way['t'].items():
-      f.write('\n<tag k=%s v=%s/>' % (quoteattr(k),quoteattr(v)))
+        for p in osm.poi:
+            node_tags[p['id']] = p['t']
 
-    (lastx,lasty,count) = (0,0,False)
-    for n in way['n']:
-      lat = n['lat']
-      lon = n['lon']
-      
-      storeThisNode = False
-      if(count == 0):
-        storeThisNode = True  # Store 1st node
-      elif(junctions.get(n['id'], 0) == 1):
-        storeThisNode = True  # Store junction nodes
-      else:
-        dx = lon - lastx
-        dy = lat - lasty
-        dd = dx * dx + dy * dy
-        if(dd > limitSq):
-          storeThisNode = True  # Store ever x pixels
-          
-        #print("Dist2 = %f" % dd)
-        
-      if(storeThisNode):
-        (lastx,lasty,count) = (lon,lat,count+1)
-      
-        f.write("\n<nd id='%d' x='%1.0f' y='%1.0f'/>" % (n['id'], lon * divisor, lat * divisor))
-        countUsed = countUsed + 1
-      else:
-        countNotUsed = countNotUsed + 1
-    f.write("</way>\n")
-  #print("Used %d, skipped %d" % (countUsed, countNotUsed))
-  
-  # TODO: Write the relations
+        for id, n in osm.nodes.items():
+            nodes[id] = n
+        for id, w in osm.ways.items():
+            ways[id] = w
 
-  
-  f.write("</osm>\n")
-  f.close()
+    # Store the result as an OSM XML file
+    f = codecs.open(dest, mode='w', encoding='utf-8')
+    f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+    f.write('<osm version="0.5" generator="OsmMerge">\n')
+
+    # TODO: Write the nodes
+    if (0):
+        for n, data in nodes.items():
+            (lat, lon) = nodes[n]
+            f.write('<node id="%d" lat="%f" lon="%f">' % (n, lat, lon))
+            tags = node_tags.get(n, None)
+            if (tags):
+                for k, v in tags.items():
+                    f.write('\n<tag k=%s v=%s/>' % (quoteattr(k), quoteattr(v)))
+            f.write("</node>\n")
+
+    limit = pixelSize(z) * 2.0
+    limitSq = limit * limit
+    #print("Using limit %e" % limitSq)
+
+    # Detect 'junction' ways
+    usage = {}
+    junctions = {}
+    countNodes = 0
+    for wid, way in ways.items():
+        for n in way['n']:
+            nid = n['id']
+            if (usage.get(nid, 0) != 0):
+                junctions[nid] = 1
+            else:
+                usage[nid] = 1
+            countNodes = countNodes + 1
+
+    #print("%d nodes, %d junctions" % (countNodes, len(junctions.keys())))
+
+    countUsed = countNotUsed = 0
+    # Write the ways
+    for id, way in ways.items():
+        f.write('<way id="%d">' % id)
+        for k, v in way['t'].items():
+            f.write('\n<tag k=%s v=%s/>' % (quoteattr(k), quoteattr(v)))
+
+        (lastx, lasty, count) = (0, 0, False)
+        for n in way['n']:
+            lat = n['lat']
+            lon = n['lon']
+
+            storeThisNode = False
+            if (count == 0):
+                storeThisNode = True  # Store 1st node
+            elif (junctions.get(n['id'], 0) == 1):
+                storeThisNode = True  # Store junction nodes
+            else:
+                dx = lon - lastx
+                dy = lat - lasty
+                dd = dx * dx + dy * dy
+                if (dd > limitSq):
+                    storeThisNode = True  # Store ever x pixels
+
+                    #print("Dist2 = %f" % dd)
+
+            if (storeThisNode):
+                (lastx, lasty, count) = (lon, lat, count + 1)
+
+                f.write("\n<nd id='%d' x='%1.0f' y='%1.0f'/>" % (n['id'], lon * divisor, lat * divisor))
+                countUsed = countUsed + 1
+            else:
+                countNotUsed = countNotUsed + 1
+        f.write("</way>\n")
+        #print("Used %d, skipped %d" % (countUsed, countNotUsed))
+
+    # TODO: Write the relations
+
+
+    f.write("</osm>\n")
+    f.close()
 

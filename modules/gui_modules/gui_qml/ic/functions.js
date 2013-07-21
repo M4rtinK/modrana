@@ -4,7 +4,7 @@
 var foo = "bar"
 
 function formatDistance(d) {
-    if (! d) {
+    if (!d) {
         return "0"
     }
 
@@ -38,7 +38,7 @@ function getDM(l) {
 }
 
 function getValueFromDM(sign, deg, min) {
-    return sign*(deg + (min/60))
+    return sign * (deg + (min / 60))
 }
 
 function getLat(lat, settings) {
@@ -72,26 +72,26 @@ function getMapTile(url, x, y, zoom) {
 }
 
 function getBearingTo(lat, lon, tlat, tlon) {
-    var lat1 = lat * (Math.PI/180.0);
-    var lat2 = tlat * (Math.PI/180.0);
+    var lat1 = lat * (Math.PI / 180.0);
+    var lat2 = tlat * (Math.PI / 180.0);
 
-    var dlon = (tlon - lon) * (Math.PI/180.0);
+    var dlon = (tlon - lon) * (Math.PI / 180.0);
     var y = Math.sin(dlon) * Math.cos(lat2);
     var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dlon);
-    return (360 + (Math.atan2(y, x)) * (180.0/Math.PI)) % 360;
+    return (360 + (Math.atan2(y, x)) * (180.0 / Math.PI)) % 360;
 }
 
 function getDistanceTo(lat, lon, tlat, tlon) {
-    var dlat = Math.pow(Math.sin((tlat-lat) * (Math.PI/180.0) / 2), 2)
-    var dlon = Math.pow(Math.sin((tlon-lon) * (Math.PI/180.0) / 2), 2)
-    var a = dlat + Math.cos(lat * (Math.PI/180.0)) * Math.cos(tlat * (Math.PI/180.0)) * dlon;
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var dlat = Math.pow(Math.sin((tlat - lat) * (Math.PI / 180.0) / 2), 2)
+    var dlon = Math.pow(Math.sin((tlon - lon) * (Math.PI / 180.0) / 2), 2)
+    var a = dlat + Math.cos(lat * (Math.PI / 180.0)) * Math.cos(tlat * (Math.PI / 180.0)) * dlon;
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return 6371000.0 * c;
 }
 String.prototype.trunc =
-     function(n,useWordBoundary){
-         var toLong = this.length>n,
-             s_ = toLong ? this.substr(0,n-1) : this;
-         s_ = useWordBoundary && toLong ? s_.substr(0,s_.lastIndexOf(' ')) : s_;
-         return  toLong ? s_ +'...' : s_;
-      };
+    function (n, useWordBoundary) {
+        var toLong = this.length > n,
+            s_ = toLong ? this.substr(0, n - 1) : this;
+        s_ = useWordBoundary && toLong ? s_.substr(0, s_.lastIndexOf(' ')) : s_;
+        return  toLong ? s_ + '...' : s_;
+    };

@@ -19,17 +19,16 @@ from pycha.line import LineChart
 
 
 class ScatterplotChart(LineChart):
-
     def _renderChart(self, cx):
         """Renders a scatterplot"""
 
         def drawSymbol(point, size=2):
             ox = point.x * self.area.w + self.area.x
             oy = point.y * self.area.h + self.area.y
-            cx.move_to(ox-size, oy)
-            cx.line_to(ox+size, oy)
-            cx.move_to(ox, oy-size)
-            cx.line_to(ox, oy+size)
+            cx.move_to(ox - size, oy)
+            cx.line_to(ox + size, oy)
+            cx.move_to(ox, oy - size)
+            cx.line_to(ox, oy + size)
 
         def preparePath(storeName, size=2):
             cx.new_path()

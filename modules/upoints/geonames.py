@@ -29,6 +29,7 @@ from operator import attrgetter
 
 from . import (point, trigpoints, utils)
 
+
 class Location(trigpoints.Trigpoint):
     """
     Class for representing a location from a geonames.org_ data file

@@ -36,6 +36,7 @@ except ImportError:
 
 from . import (__version__, point, utils)
 
+
 def _parse_flags(element):
     """Parse OSM XML element for generic data
 
@@ -58,6 +59,7 @@ def _parse_flags(element):
 
     return visible, user, timestamp, tags
 
+
 def _get_flags(osm_obj):
     """Create element independent flags output
 
@@ -78,6 +80,7 @@ def _get_flags(osm_obj):
         flags.append(", ".join("%s: %s" % (k, v)
                                for k, v in osm_obj.tags.items()))
     return flags
+
 
 def get_area_url(location, distance):
     """Generate URL for downloading OSM data within a region

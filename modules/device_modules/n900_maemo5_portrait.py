@@ -80,22 +80,21 @@ class FremantleRotation(object):
         program.connect('notify::is-topmost', self._on_topmost_changed)
         system_bus = dbus.Bus.get_system()
         system_bus.add_signal_receiver(self._on_orientation_signal,
-          signal_name='sig_device_orientation_ind',
-          dbus_interface='com.nokia.mce.signal',
-          path='/com/nokia/mce/signal')
-
+                                       signal_name='sig_device_orientation_ind',
+                                       dbus_interface='com.nokia.mce.signal',
+                                       path='/com/nokia/mce/signal')
 
         system_bus.add_signal_receiver(self._on_keyboard_signal,
-          signal_name='Condition',
-          dbus_interface='org.freedesktop.Hal.Device',
-          path='/org/freedesktop/Hal/devices/platform_slide')
+                                       signal_name='Condition',
+                                       dbus_interface='org.freedesktop.Hal.Device',
+                                       path='/org/freedesktop/Hal/devices/platform_slide')
         self.set_mode(mode)
 
         # check for current orientation - the first signal comes after and orientation change,
         # so if the device is already in portrait when the app is launched, it won't
         # rotate to the correct orientation before being oriented to landscape and back
 
-        mceRequest = system_bus.get_object('com.nokia.mce','/com/nokia/mce/request')
+        mceRequest = system_bus.get_object('com.nokia.mce', '/com/nokia/mce/request')
         dir(mceRequest)
         orientationInfo = mceRequest.get_device_orientation()
         # send a fake CB with current orientation info
@@ -127,7 +126,7 @@ class FremantleRotation(object):
             if new_mode == self.NEVER:
                 self._orientation_changed(self._LANDSCAPE)
             elif new_mode == self.ALWAYS and \
-                    self._keyboard_state != self._KBD_OPEN:
+                            self._keyboard_state != self._KBD_OPEN:
                 self._orientation_changed(self._PORTRAIT)
             elif new_mode == self.AUTOMATIC:
                 # Restore the last-known "automatic" orientation
@@ -140,10 +139,10 @@ class FremantleRotation(object):
     def _send_mce_request(self, request):
         rpc = osso.Rpc(self._osso_context)
         rpc.rpc_run(self._MCE_SERVICE,
-          self._MCE_REQUEST_PATH,
-          self._MCE_REQUEST_IF,
-          request,
-          use_system_bus=True)
+                    self._MCE_REQUEST_PATH,
+                    self._MCE_REQUEST_IF,
+                    request,
+                    use_system_bus=True)
 
     def _on_topmost_changed(self, program, property_spec):
         # XXX: This seems to never get called on Fremantle(?)
@@ -214,7 +213,7 @@ class FremantleRotation(object):
     def _on_orientation_signal(self, orientation, stand, face, x, y, z):
         if orientation in (self._PORTRAIT, self._LANDSCAPE):
             if self._mode == self.AUTOMATIC and \
-                    self._keyboard_state != self._KBD_OPEN:
+                            self._keyboard_state != self._KBD_OPEN:
                 # Automatically set the rotation based on hardware orientation
                 self._orientation_changed(orientation)
 

@@ -32,64 +32,63 @@
 #---------------------------------------------------------------------------
 from render_base import OsmRenderBase
 
-class RenderClass(OsmRenderBase):
-  
-  # Specify the background for new tiles
-  def imageBackgroundColour(self):
-    return("white")
-    
-  # Draw a tile
-  def draw(self):
-    # Certain things have already been created for you at this point:
-    #
-    #  * self.osm contains the OpenStreetMap data for your tile
-    #     - w is a list of ways
-    #     - poi is a list of points-of-interest
-    #     - nodes is a hash of lat/long values for nodes
-    #
-    #  * self.drawContext is a PIL object (Python Imageing library)
-    #     - Documentation is available at:
-    #       http://www.pythonware.com/library/pil/handbook/imagedraw.htm
-    #
-    #  * self.proj is a projection module, which you can pass lat/long
-    #    values and get image coordinates back, like:
-    #    (x,y) = self.proj.project(lat,lon)
-    
-    # Example of parsing through all the ways
-    for w in self.osm.ways.values():
-      last = (0,0,False)
-     
-      # way['n'] contains the list of its nodes
-      for n in w['n']: 
-        
-        # need to lookup that node's lat/long from the osm.nodes dictionary
-        (lat,lon) = self.osm.nodes[n]
-        
-        # project that into image coordinates
-        (x,y) = self.proj.project(lat,lon)
-        
-        # draw lines on the image
-        if(last[2]):
-          self.drawContext.line((last[0], last[1], x, y), fill='black')
-        last = (x,y,True)
-    
-    # Similar code for points of interest 
-    # (they have just one node, as ['id'])
-    for poi in self.osm.poi:
-      n = poi['id']
-      (lat,lon) = self.osm.nodes[n]
-      (x,y) = self.proj.project(lat,lon)
-      s = 1
-      self.drawContext.rectangle((x-s,y-s,x+s,y+s),fill='blue')
 
+class RenderClass(OsmRenderBase):
+    # Specify the background for new tiles
+    def imageBackgroundColour(self):
+        return ("white")
+
+    # Draw a tile
+    def draw(self):
+        # Certain things have already been created for you at this point:
+        #
+        #  * self.osm contains the OpenStreetMap data for your tile
+        #     - w is a list of ways
+        #     - poi is a list of points-of-interest
+        #     - nodes is a hash of lat/long values for nodes
+        #
+        #  * self.drawContext is a PIL object (Python Imageing library)
+        #     - Documentation is available at:
+        #       http://www.pythonware.com/library/pil/handbook/imagedraw.htm
+        #
+        #  * self.proj is a projection module, which you can pass lat/long
+        #    values and get image coordinates back, like:
+        #    (x,y) = self.proj.project(lat,lon)
+
+        # Example of parsing through all the ways
+        for w in self.osm.ways.values():
+            last = (0, 0, False)
+
+            # way['n'] contains the list of its nodes
+            for n in w['n']:
+
+            # need to lookup that node's lat/long from the osm.nodes dictionary
+                (lat, lon) = self.osm.nodes[n]
+
+                # project that into image coordinates
+                (x, y) = self.proj.project(lat, lon)
+
+                # draw lines on the image
+                if (last[2]):
+                    self.drawContext.line((last[0], last[1], x, y), fill='black')
+                last = (x, y, True)
+
+        # Similar code for points of interest
+        # (they have just one node, as ['id'])
+        for poi in self.osm.poi:
+            n = poi['id']
+            (lat, lon) = self.osm.nodes[n]
+            (x, y) = self.proj.project(lat, lon)
+            s = 1
+            self.drawContext.rectangle((x - s, y - s, x + s, y + s), fill='blue')
 
 
 #-----------------------------------------------------------------
 # Test suite - call this file from the command-line to generate a
 # sample image
-if(__name__ == '__main__'):
-  a = RenderClass()
-  filename = "sample_"+__file__+".png"
-  a.RenderTile(17,65385,43658, filename)
-  print("------------------------------------")
-  print("Saved image to " + filename)
+if (__name__ == '__main__'):
+    a = RenderClass()
+    filename = "sample_" + __file__ + ".png"
+    a.RenderTile(17, 65385, 43658, filename)
+    print("------------------------------------")
+    print("Saved image to " + filename)

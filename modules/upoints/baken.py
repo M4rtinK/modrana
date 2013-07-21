@@ -19,9 +19,9 @@
 #
 
 try:
-  import ConfigParser
+    import ConfigParser
 except ImportError:
-  import configparser as ConfigParser
+    import configparser as ConfigParser
 
 import logging
 import re
@@ -30,6 +30,7 @@ from operator import attrgetter
 
 from . import point, utils
 from core.backports.six import string_types as basestring
+
 
 class Baken(point.Point):
     """Class for representing location from baken_ data files
@@ -121,6 +122,7 @@ class Baken(point.Point):
         """
         self._locator = value
         self._latitude, self._longitude = utils.from_grid_locator(value)
+
     locator = property(attrgetter("_locator"),
                        lambda self, value: self._set_locator(value),
                        doc="Property to handle locator to latitude/longitude")
@@ -247,7 +249,7 @@ class Bakens(point.KeyedPoints):
                 else:
                     elements[item] = None
             if elements["latitude"] is None \
-               and not valid_locator.match(elements["locator"]):
+                and not valid_locator.match(elements["locator"]):
                 logging.info("Skipping `%s' entry, as it contains no location "
                              "data" % name)
                 continue

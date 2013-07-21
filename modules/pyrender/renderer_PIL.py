@@ -22,70 +22,69 @@
 from render_base import OsmRenderBase
 
 roadColours = {
-  'highway=motorway':'blue:9',
-  'highway=primary':'red:4',
-  'highway=secondary':'orange:4',
-  'highway=residential':'black:2',
-  'highway=unclassified':'black:2',
-  'railway=rail':'black:1',
-  'waterway=river':'blue:3'
-  }
+    'highway=motorway': 'blue:9',
+    'highway=primary': 'red:4',
+    'highway=secondary': 'orange:4',
+    'highway=residential': 'black:2',
+    'highway=unclassified': 'black:2',
+    'railway=rail': 'black:1',
+    'waterway=river': 'blue:3'
+}
+
 
 def wayStyle(tags):
-  for (ident, style) in roadColours.items():
-    (tag,value) = ident.split('=')
-    if(tags.get(tag,'default') == value):
-      return(style)
-  return(None)  
+    for (ident, style) in roadColours.items():
+        (tag, value) = ident.split('=')
+        if (tags.get(tag, 'default') == value):
+            return (style)
+    return (None)
 
 
 class RenderClass(OsmRenderBase):
-  
-  # Specify the background for new tiles
-  def imageBackgroundColour(self):
-    return("white")
-  
-  # Draw a tile
-  def draw(self):
-    # Ways
-    for w in self.osm.ways.values():
-      style = wayStyle(w['t'])
-      
-      if(style != None):
-        
-        (colour, width) = style.split(":")
-        width = int(width)
-        
-        last = (0,0,False)
-        for n in w['n']: 
-          # need to lookup that node's lat/long from the osm.nodes dictionary
-          (lat,lon) = self.osm.nodes[n]
-          
-          # project that into image coordinates
-          (x,y) = self.proj.project(lat,lon)
-          
-          # draw lines on the image
-          if(last[2]):
-            self.drawContext.line((last[0], last[1], x, y), fill=colour, width=width)
-          last = (x,y,True)
-    
-    # POIs
-    if(0):
-      for poi in self.osm.poi:
-        n = poi['id']
-        (lat,lon) = self.osm.nodes[n]
-        (x,y) = self.proj.project(lat,lon)
-        s = 1
-        self.drawContext.rectangle((x-s,y-s,x+s,y+s),fill='blue')
+    # Specify the background for new tiles
+    def imageBackgroundColour(self):
+        return ("white")
 
+    # Draw a tile
+    def draw(self):
+        # Ways
+        for w in self.osm.ways.values():
+            style = wayStyle(w['t'])
+
+            if (style != None):
+
+                (colour, width) = style.split(":")
+                width = int(width)
+
+                last = (0, 0, False)
+                for n in w['n']:
+                # need to lookup that node's lat/long from the osm.nodes dictionary
+                    (lat, lon) = self.osm.nodes[n]
+
+                    # project that into image coordinates
+                    (x, y) = self.proj.project(lat, lon)
+
+                    # draw lines on the image
+                    if (last[2]):
+                        self.drawContext.line((last[0], last[1], x, y), fill=colour, width=width)
+                    last = (x, y, True)
+
+        # POIs
+        if (0):
+            for poi in self.osm.poi:
+                n = poi['id']
+                (lat, lon) = self.osm.nodes[n]
+                (x, y) = self.proj.project(lat, lon)
+                s = 1
+                self.drawContext.rectangle((x - s, y - s, x + s, y + s), fill='blue')
 
 
 #-----------------------------------------------------------------
 # Test suite - call this file from the command-line to generate a
 # sample image
-if(__name__ == '__main__'):
-  a = RenderClass()
-  filename = "sample_"+__file__+".png"
-  a.RenderTile(17,65385,43658, filename)
-  print("------------------------------------")
-  print("Saved image to " + filename)
+if (__name__ == '__main__'):
+    a = RenderClass()
+    filename = "sample_" + __file__ + ".png"
+    a.RenderTile(17, 65385, 43658, filename)
+    print("------------------------------------")
+    print("Saved image to " + filename)

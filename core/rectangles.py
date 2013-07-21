@@ -1,83 +1,100 @@
-
 import math
 
 """Polygon intersection classes - SOURCE: http://gpwiki.org/index.php/Physics:2D_Physics_Engine:Intersection_Detection"""
 
+
 class Vector(object):
-	"""Basic vector implementation"""
-	def __init__(self, x, y):
-		self.x, self.y = x, y
-	def dot(self, other):
-		"""Returns the dot product of self and other (Vector)"""
-		return self.x*other.x + self.y*other.y
-	def __add__(self, other): # overloads vec1+vec2
-		return Vector(self.x+other.x, self.y+other.y)
-	def __neg__(self): # overloads -vec
-		return Vector(-self.x, -self.y)
-	def __sub__(self, other): # overloads vec1-vec2
-		return -other + self
-	def __mul__(self, scalar): # overloads vec*scalar
-		return Vector(self.x*scalar, self.y*scalar)
-	__rmul__ = __mul__ # overloads scalar*vec
-	def __div__(self, scalar): # overloads vec/scalar
-		return 1.0/scalar * self
-	def magnitude(self):
-		return math.sqrt(self.x*self.x + self.y*self.y)
-	def normalize(self):
-		"""Returns this vector's unit vector (vector of 
-		magnitude 1 in the same direction)"""
-		inverse_magnitude = 1.0/self.magnitude()
-		return Vector(self.x*inverse_magnitude, self.y*inverse_magnitude)
-	def perpendicular(self):
-		"""Returns a vector perpendicular to self"""
-		return Vector(-self.y, self.x)
- 
+    """Basic vector implementation"""
+
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+
+    def dot(self, other):
+        """Returns the dot product of self and other (Vector)"""
+        return self.x * other.x + self.y * other.y
+
+    def __add__(self, other): # overloads vec1+vec2
+        return Vector(self.x + other.x, self.y + other.y)
+
+    def __neg__(self): # overloads -vec
+        return Vector(-self.x, -self.y)
+
+    def __sub__(self, other): # overloads vec1-vec2
+        return -other + self
+
+    def __mul__(self, scalar): # overloads vec*scalar
+        return Vector(self.x * scalar, self.y * scalar)
+
+    __rmul__ = __mul__ # overloads scalar*vec
+
+    def __div__(self, scalar): # overloads vec/scalar
+        return 1.0 / scalar * self
+
+    def magnitude(self):
+        return math.sqrt(self.x * self.x + self.y * self.y)
+
+    def normalize(self):
+        """Returns this vector's unit vector (vector of
+        magnitude 1 in the same direction)"""
+        inverse_magnitude = 1.0 / self.magnitude()
+        return Vector(self.x * inverse_magnitude, self.y * inverse_magnitude)
+
+    def perpendicular(self):
+        """Returns a vector perpendicular to self"""
+        return Vector(-self.y, self.x)
+
+
 class Projection(object):
-	"""A projection (1d line segment)"""
-	def __init__(self, min, max):
-		self.min, self.max = min, max
-	def intersects(self, other):
-		"""returns whether or not self and other intersect"""
-		return self.max > other.min and other.max > self.min
- 
+    """A projection (1d line segment)"""
+
+    def __init__(self, min, max):
+        self.min, self.max = min, max
+
+    def intersects(self, other):
+        """returns whether or not self and other intersect"""
+        return self.max > other.min and other.max > self.min
+
+
 class Polygon(object):
-	def __init__(self, points):
-		"""points is a list of Vectors"""
-		self.points = points
- 
-		# Build a list of the edge vectors
-		self.edges = []
-		for i in range(len(points)): # equal to Java's for(int i=0; i<points.length; i++)
-			point = points[i]
-			next_point = points[(i+1)%len(points)]
-			self.edges.append(next_point - point)
-	def project_to_axis(self, axis):
-		"""axis is the unit vector (vector of magnitude 1) to project the polygon onto"""
-		projected_points = []
-		for point in self.points:
-			# Project point onto axis using the dot operator
-			projected_points.append(point.dot(axis))
-		return Projection(min(projected_points), max(projected_points))
-	def intersects(self, other):
-		"""returns whether or not two polygons intersect"""
-		# Create a list of both polygons' edges
-		edges = []
-		edges.extend(self.edges)
-		edges.extend(other.edges)
- 
-		for edge in edges:
-			axis = edge.normalize().perpendicular() # Create the separating axis (see diagrams)
- 
-			# Project each to the axis
-			self_projection = self.project_to_axis(axis)
-			other_projection = other.project_to_axis(axis)
- 
-			# If the projections don't intersect, the polygons don't intersect
-			if not self_projection.intersects(other_projection):
-				return False
- 
-		# The projections intersect on all axes, so the polygons are intersecting
-		return True
+    def __init__(self, points):
+        """points is a list of Vectors"""
+        self.points = points
+
+        # Build a list of the edge vectors
+        self.edges = []
+        for i in range(len(points)): # equal to Java's for(int i=0; i<points.length; i++)
+            point = points[i]
+            next_point = points[(i + 1) % len(points)]
+            self.edges.append(next_point - point)
+
+    def project_to_axis(self, axis):
+        """axis is the unit vector (vector of magnitude 1) to project the polygon onto"""
+        projected_points = []
+        for point in self.points:
+            # Project point onto axis using the dot operator
+            projected_points.append(point.dot(axis))
+        return Projection(min(projected_points), max(projected_points))
+
+    def intersects(self, other):
+        """returns whether or not two polygons intersect"""
+        # Create a list of both polygons' edges
+        edges = []
+        edges.extend(self.edges)
+        edges.extend(other.edges)
+
+        for edge in edges:
+            axis = edge.normalize().perpendicular() # Create the separating axis (see diagrams)
+
+            # Project each to the axis
+            self_projection = self.project_to_axis(axis)
+            other_projection = other.project_to_axis(axis)
+
+            # If the projections don't intersect, the polygons don't intersect
+            if not self_projection.intersects(other_projection):
+                return False
+
+        # The projections intersect on all axes, so the polygons are intersecting
+        return True
 
 
 """Point and Rectangle classes.
@@ -90,8 +107,8 @@ Rect  -- two points, forming a rectangle
 SOURCE: http://wiki.python.org/moin/PointsAndRectangles
 """
 
-class Point(object):
 
+class Point(object):
     """A point identified by (x,y) coordinates.
 
     supports: +, -, *, /, str, repr
@@ -115,19 +132,19 @@ class Point(object):
 
     def __add__(self, p):
         """Point(x1+x2, y1+y2)"""
-        return Point(self.x+p.x, self.y+p.y)
+        return Point(self.x + p.x, self.y + p.y)
 
     def __sub__(self, p):
         """Point(x1-x2, y1-y2)"""
-        return Point(self.x-p.x, self.y-p.y)
+        return Point(self.x - p.x, self.y - p.y)
 
-    def __mul__( self, scalar ):
+    def __mul__(self, scalar):
         """Point(x1*x2, y1*y2)"""
-        return Point(self.x*scalar, self.y*scalar)
+        return Point(self.x * scalar, self.y * scalar)
 
     def __div__(self, scalar):
         """Point(x1/x2, y1/y2)"""
-        return Point(self.x/scalar, self.y/scalar)
+        return Point(self.x / scalar, self.y / scalar)
 
     def __str__(self):
         return "(%s, %s)" % (self.x, self.y)
@@ -136,7 +153,7 @@ class Point(object):
         return "%s(%r, %r)" % (self.__class__.__name__, self.x, self.y)
 
     def length(self):
-        return math.sqrt(self.x**2 + self.y**2)
+        return math.sqrt(self.x ** 2 + self.y ** 2)
 
     def distance_to(self, p):
         """Calculate the distance between two points."""
@@ -195,8 +212,8 @@ class Point(object):
         The new position is returned as a new Point.
         """
         s, c = [f(rad) for f in (math.sin, math.cos)]
-        x, y = (c*self.x - s*self.y, s*self.x + c*self.y)
-#        return Point(x,y)
+        x, y = (c * self.x - s * self.y, s * self.x + c * self.y)
+        #        return Point(x,y)
         self.x = x
         self.y = y
         return self
@@ -216,7 +233,6 @@ class Point(object):
 
 
 class Rect(object):
-
     """A rectangle identified by two points.
 
     The rectangle stores left, top, right, and bottom values.
@@ -252,7 +268,7 @@ class Rect(object):
 
     def contains(self, pt):
         """Return true if a point is inside the rectangle."""
-        x,y = pt.as_tuple()
+        x, y = pt.as_tuple()
         return (self.left <= x <= self.right and
                 self.top <= y <= self.bottom)
 
@@ -275,58 +291,56 @@ class Rect(object):
         Create a new rectangle that is wider and taller than the
         immediate one. All sides are extended by "n" points.
         """
-        p1 = Point(self.left-n, self.top-n)
-        p2 = Point(self.right+n, self.bottom+n)
+        p1 = Point(self.left - n, self.top - n)
+        p2 = Point(self.right + n, self.bottom + n)
         return Rect(p1, p2)
 
     def rotate(self, rad):
-      """rotate around rectangle center"""
-      # get center point
-      w = self.right - self.right
-      h = self.top - self.bottom
-      centreX = w/2.0
-      centreY = h/2.0
-      # rotate
-      self.rotate_around_xy(centreX, centreY, rad)
+        """rotate around rectangle center"""
+        # get center point
+        w = self.right - self.right
+        h = self.top - self.bottom
+        centreX = w / 2.0
+        centreY = h / 2.0
+        # rotate
+        self.rotate_around_xy(centreX, centreY, rad)
 
     def rotate_around(self, p, rad):
-      """rotate around a point"""
-      (x,y) = (p.x,p.y)
-      self.rotate_around_xy(x, y, rad)
+        """rotate around a point"""
+        (x, y) = (p.x, p.y)
+        self.rotate_around_xy(x, y, rad)
 
     def rotate_around_xy(self, x, y, rad):
-      """rotate around x,y coordinates"""
-      (x1,y1) = (self.left, self.top)
-      (x2,y2) = (self.right, self.bottom)
-      # rottate the points
-      (x1,y1) = self._rotate_point_around(x1, y1, x, y, rad)
-      (x2,y2) = self._rotate_point_around(x2, y2, x, y, rad)
-      # update coordinates
-      pt1 = Point(x1,y1)
-      pt2 = Point(x2,y2)
-      self.set_points(pt1, pt2)
+        """rotate around x,y coordinates"""
+        (x1, y1) = (self.left, self.top)
+        (x2, y2) = (self.right, self.bottom)
+        # rottate the points
+        (x1, y1) = self._rotate_point_around(x1, y1, x, y, rad)
+        (x2, y2) = self._rotate_point_around(x2, y2, x, y, rad)
+        # update coordinates
+        pt1 = Point(x1, y1)
+        pt2 = Point(x2, y2)
+        self.set_points(pt1, pt2)
 
     def _rotate_point_around(self, x, y, centerX, centerY, rad):
-      # get coordinates relative to center
-      dx = x - centerX
-      dy = y - centerY
-      # calculate angle and distance
-      a = math.atan2(dy, dx)
-      dist = math.sqrt(dx * dx + dy * dy)
-      # calculate new angle
-      a2 = a + rad
-      # calculate new coordinates
-      dx2 = math.cos(a2) * dist
-      dy2 = math.sin(a2) * dist
-      # return coordinates relative to top left corner
-      return (dx2 + centerX, dy2 + centerY)
+        # get coordinates relative to center
+        dx = x - centerX
+        dy = y - centerY
+        # calculate angle and distance
+        a = math.atan2(dy, dx)
+        dist = math.sqrt(dx * dx + dy * dy)
+        # calculate new angle
+        a2 = a + rad
+        # calculate new coordinates
+        dx2 = math.cos(a2) * dist
+        dy2 = math.sin(a2) * dist
+        # return coordinates relative to top left corner
+        return (dx2 + centerX, dy2 + centerY)
 
 
-
-
-    def __str__( self ):
-        return "<Rect (%s,%s)-(%s,%s)>" % (self.left,self.top,
-                                           self.right,self.bottom)
+    def __str__(self):
+        return "<Rect (%s,%s)-(%s,%s)>" % (self.left, self.top,
+                                           self.right, self.bottom)
 
     def __repr__(self):
         return "%s(%r, %r)" % (self.__class__.__name__,

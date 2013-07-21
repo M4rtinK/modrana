@@ -20,9 +20,10 @@
 #---------------------------------------------------------------------------
 
 class FileNotFound(BaseException):
-  """file was not found on specified path - this relates mainly
-  to file reading operations"""
-  pass
+    """file was not found on specified path - this relates mainly
+    to file reading operations"""
+    pass
+
 
 class FileAccessPermissionDenied(BaseException):
-  pass
+    pass

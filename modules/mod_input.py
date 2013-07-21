@@ -19,11 +19,13 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 
-def getModule(m,d,i):
-  return Input(m,d,i)
+
+def getModule(m, d, i):
+    return Input(m, d, i)
+
 
 class Input(RanaModule):
-  """Handle input from keyboard, buttons, etc."""
-  
-  def __init__(self, m, d, i):
-    RanaModule.__init__(self, m, d, i)
+    """Handle input from keyboard, buttons, etc."""
+
+    def __init__(self, m, d, i):
+        RanaModule.__init__(self, m, d, i)
