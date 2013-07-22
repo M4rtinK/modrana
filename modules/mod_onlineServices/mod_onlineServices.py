@@ -68,9 +68,8 @@ class OnlineServices(RanaModule):
 
     def geocodeAsync(self, address, callback):
         """asynchronous geocoding"""
-        print("GEOCODE ASYNC")
+        #online_providers.TestingProvider().searchAsync(callback, term=address)
         online_providers.GeocodingNominatim().searchAsync(callback, term=address)
-
 
     def localSearch(self, term, where=None, maxResults=8):
         """Synchronous generic local search query
