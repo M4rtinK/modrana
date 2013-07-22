@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Online geodata providers
+import time
+
 try:
     import json
 except ImportError:
@@ -80,6 +82,25 @@ class GeocodingNominatim(POIProvider):
 
         controller.status = "online address search done"
         return results
+
+class TestingProvider(POIProvider):
+    def __init__(self):
+        POIProvider.__init__(self)
+
+    def search(self, term=None, around=None, controller=DummyController()):
+        controller.status  = "starting provider test"
+        print("starting provider test")
+        for i in range(1,7,1):
+            controller.status = "waiting %d seconds" % i
+            print("waiting %d seconds" % i)
+            time.sleep(1)
+        controller.status = "provider test done"
+        print("provider test done")
+        return None
+
+def _callbackTest(self, value):
+    print("Callback test got got:")
+    print(value)
 
 
 
