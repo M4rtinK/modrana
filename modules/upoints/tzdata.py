@@ -22,6 +22,7 @@ from operator import attrgetter
 
 from . import (point, utils)
 
+
 class Zone(point.Point):
     """Class for representing timezone descriptions from zoneinfo data
 

@@ -25,7 +25,6 @@ from pycha.color import ColorScheme, hex2rgb, DEFAULT_COLOR
 
 
 class Chart(object):
-
     def __init__(self, surface, options={}):
         # this flag is useful to reuse this chart for drawing different data
         # or use different options
@@ -156,7 +155,7 @@ class Chart(object):
         if x_range_is_defined:
             self.minxval, self.maxxval = self.options.axis.x.range
         else:
-            xdata = [pair[0] for pair in reduce(lambda a, b: a+b, stores)]
+            xdata = [pair[0] for pair in reduce(lambda a, b: a + b, stores)]
             self.minxval = float(min(xdata))
             self.maxxval = float(max(xdata))
             if self.minxval * self.maxxval > 0 and self.minxval > 0:
@@ -172,7 +171,7 @@ class Chart(object):
         if y_range_is_defined:
             self.minyval, self.maxyval = self.options.axis.y.range
         else:
-            ydata = [pair[1] for pair in reduce(lambda a, b: a+b, stores)]
+            ydata = [pair[1] for pair in reduce(lambda a, b: a + b, stores)]
             self.minyval = float(min(ydata))
             self.maxyval = float(max(ydata))
             if self.minyval * self.maxyval > 0 and self.minyval > 0:
@@ -616,7 +615,7 @@ class Area(object):
 
     def __str__(self):
         msg = "<pycha.chart.Area@(%.2f, %.2f) %.2f x %.2f Origin: %.2f>"
-        return  msg % (self.x, self.y, self.w, self.h, self.origin)
+        return msg % (self.x, self.y, self.w, self.h, self.origin)
 
 
 class Option(dict):
@@ -710,7 +709,7 @@ DEFAULT_OPTIONS = Option(
         args=Option(
             initialColor=DEFAULT_COLOR,
             colors=None,
-            ),
+        ),
     ),
     title=None,
     titleFont='Tahoma',

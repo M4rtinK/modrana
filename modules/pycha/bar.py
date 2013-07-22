@@ -20,7 +20,6 @@ from pycha.color import hex2rgb
 
 
 class BarChart(Chart):
-
     def __init__(self, surface=None, options={}):
         super(BarChart, self).__init__(surface, options)
         self.bars = []
@@ -42,7 +41,7 @@ class BarChart(Chart):
         if len(uniqx) == 1:
             self.minxdelta = 1.0
         else:
-            self.minxdelta = min([abs(uniqx[j] - uniqx[j-1])
+            self.minxdelta = min([abs(uniqx[j] - uniqx[j - 1])
                                   for j in range(1, len(uniqx))])
 
         k = self.minxdelta * self.xscale
@@ -114,7 +113,6 @@ class BarChart(Chart):
 
 
 class VerticalBarChart(BarChart):
-
     def _updateChart(self):
         """Evaluates measures for vertical bars"""
         super(VerticalBarChart, self)._updateChart()
@@ -122,7 +120,7 @@ class VerticalBarChart(BarChart):
             for item in store:
                 xval, yval = item
                 x = (((xval - self.minxval) * self.xscale)
-                    + self.barMargin + (i * self.barWidthForSet))
+                     + self.barMargin + (i * self.barWidthForSet))
                 w = self.barWidthForSet
                 h = abs(yval) * self.yscale
                 if yval > 0:
@@ -141,7 +139,7 @@ class VerticalBarChart(BarChart):
         self.xticks = [(tick[0] + offset, tick[1]) for tick in self.xticks]
 
     def _getShadowRectangle(self, x, y, w, h):
-        return (x-2, y-2, w+4, h+2)
+        return (x - 2, y - 2, w + 4, h + 2)
 
     def _renderYVal(self, cx, label, labelW, labelH, barX, barY, barW, barH):
         x = barX + (barW / 2.0) - (labelW / 2.0)
@@ -159,7 +157,6 @@ class VerticalBarChart(BarChart):
 
 
 class HorizontalBarChart(BarChart):
-
     def _updateChart(self):
         """Evaluates measures for horizontal bars"""
         super(HorizontalBarChart, self)._updateChart()
@@ -195,7 +192,7 @@ class HorizontalBarChart(BarChart):
             self._renderLine(cx, tick, True)
 
     def _getShadowRectangle(self, x, y, w, h):
-        return (x, y-2, w+2, h+4)
+        return (x, y - 2, w + 2, h + 4)
 
     def _renderXAxis(self, cx):
         """Draws the horizontal line representing the X axis"""
@@ -231,7 +228,6 @@ class HorizontalBarChart(BarChart):
 
 
 class Rect(object):
-
     def __init__(self, x, y, w, h, xval, yval, name):
         self.x, self.y, self.w, self.h = x, y, w, h
         self.xval, self.yval = xval, yval

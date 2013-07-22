@@ -25,6 +25,7 @@ from operator import attrgetter
 
 from . import (point, utils)
 
+
 class Cell(point.Point):
     """Class for representing a cellular cite from OpenCellID.org_
 
@@ -102,10 +103,10 @@ class Cell(point.Point):
 
         """
         return "%i,%.13f,%.13f,%i,%i,%i,%i,%i,%i,%s,%s" \
-            % (self.ident, self.latitude, self.longitude, self.mcc, self.mnc,
-               self.lac, self.cellid, self.crange, self.samples,
-               self.created.strftime("%Y-%m-%d %H:%M:%S"),
-               self.updated.strftime("%Y-%m-%d %H:%M:%S"))
+               % (self.ident, self.latitude, self.longitude, self.mcc, self.mnc,
+                  self.lac, self.cellid, self.crange, self.samples,
+                  self.created.strftime("%Y-%m-%d %H:%M:%S"),
+                  self.updated.strftime("%Y-%m-%d %H:%M:%S"))
 
 
 class Cells(point.KeyedPoints):

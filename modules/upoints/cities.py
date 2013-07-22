@@ -47,6 +47,7 @@ Location    : %s
 Date        : %s
 Entered-By  : %s"""
 
+
 class City(trigpoints.Trigpoint):
     """Class for representing an entry from the `GNU miscfiles`_ cities data file
 

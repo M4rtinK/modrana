@@ -20,7 +20,6 @@ from pycha.color import hex2rgb
 
 
 class LineChart(Chart):
-
     def __init__(self, surface=None, options={}):
         super(LineChart, self).__init__(surface, options)
         self.points = []
@@ -113,7 +112,6 @@ class LineChart(Chart):
 
 
 class Point(object):
-
     def __init__(self, x, y, xval, yval, name):
         self.x, self.y = x, y
         self.xval, self.yval = xval, yval

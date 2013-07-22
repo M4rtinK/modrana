@@ -52,19 +52,20 @@ from . import (point, utils)
    othervise the resulting GPX files dont validate
 """
 GPX_VERSIONS = {
-  "1.0": {'xsi:schemaLocation':"http://www.topografix.com/GPX/1/0"}, #TODO: make also a GPX1.0 header ?
-#  "1.1": "http://www.topografix.com/GPX/1/1",
-  "1.1": {
-          'version':"1.1", 
-          'creator':"modRana - http://www.modrana.org",
-          'xmlns:xsi':"http://www.w3.org/2001/XMLSchema-instance", 
-          'xmlns':"http://www.topografix.com/GPX/1/1", 
-          'xsi:schemaLocation':"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"
-          }
-              }
+    "1.0": {'xsi:schemaLocation': "http://www.topografix.com/GPX/1/0"}, #TODO: make also a GPX1.0 header ?
+    #  "1.1": "http://www.topografix.com/GPX/1/1",
+    "1.1": {
+        'version': "1.1",
+        'creator': "modRana - http://www.modrana.org",
+        'xmlns:xsi': "http://www.w3.org/2001/XMLSchema-instance",
+        'xmlns': "http://www.topografix.com/GPX/1/1",
+        'xsi:schemaLocation': "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"
+    }
+}
 #: Default GPX version to output
 # Changing this will cause tests to fail.
 DEF_GPX_VERSION = "1.1"
+
 
 def create_elem(tag, attr=None, text=None, gpx_version=DEF_GPX_VERSION,
                 human_namespace=False):
@@ -89,8 +90,8 @@ def create_elem(tag, attr=None, text=None, gpx_version=DEF_GPX_VERSION,
     """modrana:
        add the header to the gpx tag
     """
-    if tag=='gpx':
-      attr = GPX_VERSIONS[gpx_version]
+    if tag == 'gpx':
+        attr = GPX_VERSIONS[gpx_version]
 
     if not attr:
         attr = {}
@@ -102,7 +103,7 @@ def create_elem(tag, attr=None, text=None, gpx_version=DEF_GPX_VERSION,
         ElementTree._namespace_map[gpx_ns] = "gpx"
         element = ElementTree.Element("{%s}%s" % (gpx_ns, tag), attr)
     else:
-#        element = ET.Element("{%s}%s" % (gpx_ns, tag), attr)
+    #        element = ET.Element("{%s}%s" % (gpx_ns, tag), attr)
         # modrana:
         # this fixes the resulting GPX not being valid becuase of unknown
         # namespace prefixes
@@ -110,6 +111,7 @@ def create_elem(tag, attr=None, text=None, gpx_version=DEF_GPX_VERSION,
     if text:
         element.text = text
     return element
+
 
 class _GpxElem(point.TimedPoint):
     """Abstract class for representing an element from GPX data files
@@ -175,7 +177,7 @@ class _GpxElem(point.TimedPoint):
             location += " @ %sm" % self.elevation
         if self.time:
             location += " on %s" % self.time # modified for modRana
-#            location += " on %s" % self.time.isoformat()
+        #            location += " on %s" % self.time.isoformat()
         if self.name:
             text = ["%s (%s)" % (self.name, location), ]
         else:
@@ -220,13 +222,13 @@ class _GpxElem(point.TimedPoint):
         if self.elevation:
             element.append(elementise("ele", None, str(self.elevation)))
         if self.time:
-#            element.append(elementise("time", None, self.time.isoformat()))
+        #            element.append(elementise("time", None, self.time.isoformat()))
             """modrana:
                the previous format was using current time type sufix
                this was changed just to "Z", as demanded by the specification
                the time should be just UTC, not local time
             """
-#            element.append(elementise("time", None, time.strftime("%Y-%m-%dT%H:%M:%SZ")))
+            #            element.append(elementise("time", None, time.strftime("%Y-%m-%dT%H:%M:%SZ")))
             # add Z on the end
             correctTime = "%sZ" % self.time
             element.append(elementise("time", None, correctTime))
@@ -354,6 +356,7 @@ class _SegWrap(list):
 
         """
         return (segment.destination(bearing, distance) for segment in self)
+
     forward = destination
 
     def sunrise(self, date=None, zenith=None):
@@ -527,11 +530,13 @@ class _GpxMeta(object):
                 metadata.append(element)
         element = elementise("time", None)
         if isinstance(self.time, (time.struct_time, tuple)):
-            element.text = time.strftime("%Y-%m-%dT%H:%M:%SZ", self.time) # GPX documentation states, the Z on the end should be capital
+            element.text = time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                         self.time) # GPX documentation states, the Z on the end should be capital
         elif isinstance(self.time, utils.Timestamp):
             element.text = self.time.isoformat()
         else:
-            element.text = time.strftime("%Y-%m-%dT%H:%M:%SZ") # GPX documentation states, the Z on the end should be capital
+            element.text = time.strftime(
+                "%Y-%m-%dT%H:%M:%SZ") # GPX documentation states, the Z on the end should be capital
         metadata.append(element)
         if self.keywords:
             metadata.append(elementise("keywords", None, self.keywords))
@@ -612,6 +617,7 @@ class _GpxMeta(object):
                         "text": child.findtext(metadata_elem("text")),
                     }
                     self.link.append(link)
+
 
 class Waypoint(_GpxElem):
     """Class for representing a waypoint element from GPX data files
@@ -854,7 +860,7 @@ class Trackpoints(_SegWrap):
             try:
                 accepted_gpx = {gpx_version: GPX_VERSIONS[gpx_version]}
             except KeyError:
-#                print(GPX_VERSIONS)
+            #                print(GPX_VERSIONS)
                 raise KeyError("Unknown GPX version `%s'" % gpx_version)
         else:
             accepted_gpx = GPX_VERSIONS
@@ -875,12 +881,12 @@ class Trackpoints(_SegWrap):
             # create a qualified name containing the namespace
             gpx_elem = lambda name: ET.QName(namespace, name).text
             metadata = data.find("//" + gpx_elem("metadata"))
-#            print(namespace)
-#            print(data.getroot().tag)
-#            print(gpx_elem("metadata"))
-#            print(metadata)
+            #            print(namespace)
+            #            print(data.getroot().tag)
+            #            print(gpx_elem("metadata"))
+            #            print(metadata)
             if metadata:
-                self.metadata.import_metadata(metadata)               
+                self.metadata.import_metadata(metadata)
             segment_elem = "//" + gpx_elem("trkseg")
             trackpoint_elem = gpx_elem("trkpt")
             name_elem = gpx_elem("name")
@@ -889,8 +895,8 @@ class Trackpoints(_SegWrap):
             time_elem = gpx_elem("time")
 
 
-#            print("segment?")
-#            print(data.findall(segment_elem))
+            #            print("segment?")
+            #            print(data.findall(segment_elem))
 
             for segment in data.findall(segment_elem):
                 points = point.TimedPoints()

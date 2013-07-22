@@ -31,12 +31,14 @@ import math
 import re
 
 from core.backports.six import string_types as basestring
+
 try:
-  from functools import reduce
+    from functools import reduce
 except ImportError:
-  pass # running on Python <3, use built-in reduce
+    pass # running on Python <3, use built-in reduce
 
 from xml.etree import ElementTree
+
 try:
     from xml.etree import cElementTree as ET
 except ImportError:
@@ -92,6 +94,7 @@ LATITUDE_SUBSQUARE = LATITUDE_SQUARE / 24
 LONGITUDE_EXTSQUARE = LONGITUDE_SUBSQUARE / 10
 LATITUDE_EXTSQUARE = LATITUDE_SUBSQUARE / 10
 
+
 class FileFormatError(ValueError):
     """Error object for data parsing error
 
@@ -108,6 +111,7 @@ class FileFormatError(ValueError):
     .. versionadded:: 0.3.0
 
     """
+
     def __init__(self, site=None):
         """Initialise a new ``FileFormatError`` object
 
@@ -150,6 +154,7 @@ def value_or_empty(value):
     """
     return value if value else ""
 
+
 def repr_assist(obj, remap=None):
     """Helper function to simplify ``__repr__`` methods
 
@@ -178,6 +183,7 @@ def repr_assist(obj, remap=None):
         else:
             data.append(str(value))
     return obj.__class__.__name__ + '(' + ", ".join(data) + ')'
+
 
 def prepare_read(data, method="readlines", mode="r"):
     """Prepare various input types for parsing
@@ -212,6 +218,7 @@ def prepare_read(data, method="readlines", mode="r"):
         raise TypeError("Unable to handle data of type `%s`" % type(data))
     return data
 
+
 def prepare_csv_read(data, field_names, *args, **kwargs):
     """Prepare various input types for CSV parsing
 
@@ -238,6 +245,7 @@ def prepare_csv_read(data, field_names, *args, **kwargs):
     else:
         raise TypeError("Unable to handle data of type `%s'" % type(data))
     return csv.DictReader(data, field_names, *args, **kwargs)
+
 
 def prepare_xml_read(data):
     """Prepare various input types for XML parsing
@@ -304,6 +312,7 @@ def to_dms(angle, style="dms"):
     else:
         raise ValueError("Unknown style type `%s'" % style)
 
+
 def to_dd(degrees, minutes, seconds=0):
     """Convert degrees, minutes and optionally seconds to decimal angle
 
@@ -327,6 +336,7 @@ def to_dd(degrees, minutes, seconds=0):
     sign = -1 if any([i < 0 for i in (degrees, minutes, seconds)]) else 1
     return sign * (abs(degrees) + abs(minutes) / 60 + abs(seconds) / 3600)
 
+
 def __chunk(segment, abbr=False):
     """Generate a ``tuple`` of compass direction names
 
@@ -347,19 +357,22 @@ def __chunk(segment, abbr=False):
     if segment % 2 == 0:
         return (names[segment].capitalize(),
                 sjoin.join((names[segment].capitalize(), names[segment],
-                            names[segment+1])),
-                sjoin.join((names[segment].capitalize(), names[segment+1])),
-                sjoin.join((names[segment+1].capitalize(), names[segment],
-                            names[segment+1])))
+                            names[segment + 1])),
+                sjoin.join((names[segment].capitalize(), names[segment + 1])),
+                sjoin.join((names[segment + 1].capitalize(), names[segment],
+                            names[segment + 1])))
     else:
         return (names[segment].capitalize(),
-                sjoin.join((names[segment].capitalize(), names[segment+1],
+                sjoin.join((names[segment].capitalize(), names[segment + 1],
                             names[segment])),
-                sjoin.join((names[segment+1].capitalize(), names[segment])),
-                sjoin.join((names[segment+1].capitalize(), names[segment+1],
-                           names[segment])))
+                sjoin.join((names[segment + 1].capitalize(), names[segment])),
+                sjoin.join((names[segment + 1].capitalize(), names[segment + 1],
+                            names[segment])))
+
+
 COMPASS_NAMES = reduce(add, map(__chunk, range(4)))
 COMPASS_NAMES_ABBR = reduce(add, [__chunk(x, True) for x in range(4)])
+
 
 def angle_to_name(angle, segments=8, abbr=False):
     """Convert angle in to direction name
@@ -476,7 +489,7 @@ class TzOffset(datetime.tzinfo):
 
         """
         offset = self.utcoffset()
-        hours, minutes = divmod(offset.seconds/60, 60)
+        hours, minutes = divmod(offset.seconds / 60, 60)
         if offset.days == -1:
             hours = -24 + hours
 
@@ -541,9 +554,10 @@ class Timestamp(datetime.datetime):
         elif len(timestamp) == 25:
             zone = TzOffset(timestamp[-6:])
             timestamp = timestamp[:-6]
-        elif len(timestamp) == 29: # fix for some obscure timestamp from a gpx file from wikilocation: 2009-07-12T05:56:36.000-07:00
-          zone = TzOffset(timestamp[-5:])
-          timestamp = timestamp[:-10]
+        elif len(
+                timestamp) == 29: # fix for some obscure timestamp from a gpx file from wikilocation: 2009-07-12T05:56:36.000-07:00
+            zone = TzOffset(timestamp[-5:])
+            timestamp = timestamp[:-10]
 
         timestamp = Timestamp.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
 
@@ -555,6 +569,8 @@ class Timestamp(datetime.datetime):
 #{ Coordinate conversion utilities
 
 iso6709_matcher = re.compile(r'^([-+][\d.]+)([-+][\d.]+)([+-][\d.]+)?/$')
+
+
 def from_iso6709(coordinates):
     """Parse ISO 6709 coordinate strings
 
@@ -664,6 +680,7 @@ def from_iso6709(coordinates):
         altitude = float(altitude)
     return latitude, longitude, altitude
 
+
 def to_iso6709(latitude, longitude, altitude=None, format="dd", precision=4):
     """Produce ISO 6709 coordinate strings
 
@@ -771,6 +788,7 @@ def to_iso6709(latitude, longitude, altitude=None, format="dd", precision=4):
     text.append("/")
     return "".join(text)
 
+
 def angle_to_distance(angle, units="metric"):
     """Convert angle in to distance along a great circle
 
@@ -805,6 +823,7 @@ def angle_to_distance(angle, units="metric"):
     else:
         raise ValueError("Unknown units type `%s'" % units)
 
+
 def distance_to_angle(distance, units="metric"):
     """Convert a distance in to an angle along a great circle
 
@@ -834,6 +853,7 @@ def distance_to_angle(distance, units="metric"):
         raise ValueError("Unknown units type `%s'" % units)
 
     return math.degrees(distance / BODY_RADIUS)
+
 
 def from_grid_locator(locator):
     """Calculate geodesic latitude/longitude from Maidenhead locator
@@ -883,21 +903,21 @@ def from_grid_locator(locator):
     # Check field values within 'A'(0) to 'R'(17), and square values are within
     # 0 to 9
     if not 0 <= locator[0] <= 17 \
-       or not 0 <= locator[1] <= 17 \
-       or not 0 <= locator[2] <= 9 \
-       or not 0 <= locator[3] <= 9:
+        or not 0 <= locator[1] <= 17 \
+        or not 0 <= locator[2] <= 9 \
+        or not 0 <= locator[3] <= 9:
         raise ValueError("Invalid values in locator `%s'" % locator)
 
     # Check subsquare values are within 'a'(0) to 'x'(23)
     if len(locator) >= 6:
         if not 0 <= locator[4] <= 23 \
-           or not 0 <= locator[5] <= 23:
+            or not 0 <= locator[5] <= 23:
             raise ValueError("Invalid values in locator `%s'" % locator)
 
     # Extended square values must be within 0 to 9
     if len(locator) == 8:
         if not 0 <= locator[6] <= 9 \
-           or not 0 <= locator[7] <= 9:
+            or not 0 <= locator[7] <= 9:
             raise ValueError("Invalid values in locator `%s'" % locator)
 
     longitude = LONGITUDE_FIELD * locator[0] \
@@ -911,16 +931,17 @@ def from_grid_locator(locator):
 
     if len(locator) == 8:
         longitude += LONGITUDE_EXTSQUARE * locator[6] + LONGITUDE_EXTSQUARE / 2
-        latitude  += LATITUDE_EXTSQUARE * locator[7] + LATITUDE_EXTSQUARE / 2
+        latitude += LATITUDE_EXTSQUARE * locator[7] + LATITUDE_EXTSQUARE / 2
     else:
         longitude += LONGITUDE_EXTSQUARE * 5
-        latitude  += LATITUDE_EXTSQUARE * 5
+        latitude += LATITUDE_EXTSQUARE * 5
 
     # Rebase longitude and latitude to normal geodesic
     longitude -= 180
     latitude -= 90
 
     return latitude, longitude
+
 
 def to_grid_locator(latitude, longitude, precision="square"):
     """Calculate Maidenhead locator from latitude and longitude
@@ -952,7 +973,7 @@ def to_grid_locator(latitude, longitude, precision="square"):
     if not -180 <= longitude <= 180:
         raise ValueError("Invalid longitude value `%f'" % longitude)
 
-    latitude  += 90.0
+    latitude += 90.0
     longitude += 180.0
 
     locator = []
@@ -990,6 +1011,7 @@ def to_grid_locator(latitude, longitude, precision="square"):
         locator.append(str(extsquare))
 
     return "".join(locator)
+
 
 def parse_location(location):
     """Parse latitude and longitude from string location
@@ -1070,6 +1092,7 @@ def parse_location(location):
                 if chunks[3] == "W":
                     longitude = -1 * longitude
             return latitude, longitude
+
 #}
 
 #{ Solar event utilities
@@ -1086,7 +1109,7 @@ ZENITH = {
     # We're totally ignoring how temperature and pressure change the amount of
     # atmospheric refraction, because their effects are drowned out by rounding
     # errors in the equation.
-    None: -50/60,
+    None: -50 / 60,
 
     # Twilight definitions specify the angle in degrees of the Sun below the
     # horizon
@@ -1094,6 +1117,7 @@ ZENITH = {
     "nautical": -12,
     "astronomical": -18,
 }
+
 
 def sun_rise_set(latitude, longitude, date, mode="rise", timezone=0,
                  zenith=None):
@@ -1152,7 +1176,7 @@ def sun_rise_set(latitude, longitude, date, mode="rise", timezone=0,
 
     # First calculate the day of the year
     # Thanks, datetime this would have been ugly without you!!!
-    n = (date - datetime.date(date.year-1, 12, 31)).days
+    n = (date - datetime.date(date.year - 1, 12, 31)).days
 
     # Convert the longitude to hour value and calculate an approximate time
     lngHour = longitude / 15
@@ -1213,7 +1237,7 @@ def sun_rise_set(latitude, longitude, date, mode="rise", timezone=0,
     UT = T - lngHour
 
     # Convert UT value to local time zone of latitude/longitude
-    localT = UT + timezone/60
+    localT = UT + timezone / 60
     if localT < 0:
         localT += 24
     elif localT > 23:
@@ -1227,6 +1251,7 @@ def sun_rise_set(latitude, longitude, date, mode="rise", timezone=0,
     if minute < 0:
         minute += 60
     return datetime.time(hour, minute)
+
 
 def sun_events(latitude, longitude, date, timezone=0, zenith=None):
     """Convenience function for calculating sunrise and sunset
@@ -1416,8 +1441,9 @@ def dump_xearth_markers(markers, name="identifier"):
         else:
             line.append('"%s"' % identifier)
         output.append("".join(line))
-    # Return the list sorted on the marker name
+        # Return the list sorted on the marker name
     return sorted(output, key=lambda x: x.split()[2])
+
 
 def calc_radius(latitude, ellipsoid="WGS84"):
     """Calculate earth radius for a given latitude
@@ -1471,8 +1497,8 @@ def calc_radius(latitude, ellipsoid="WGS84"):
     # Equatorial radius, polar radius
     major, minor = ellipsoids[ellipsoid]
     # eccentricity of the ellipsoid
-    eccentricity = 1 - (minor**2 / major**2)
+    eccentricity = 1 - (minor ** 2 / major ** 2)
 
     sl = math.sin(math.radians(latitude))
-    return (major * (1 - eccentricity)) / (1 - eccentricity * sl**2) ** 1.5
+    return (major * (1 - eccentricity)) / (1 - eccentricity * sl ** 2) ** 1.5
 
