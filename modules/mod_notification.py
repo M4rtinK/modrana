@@ -42,15 +42,18 @@ class Notification(RanaModule):
         self.draw = False
         self.redrawn = None
         self.wipOverlayEnabled = Signal()
-        self.workInProgressOverlay = 0
+        self._showWorkInProgressOverlay = False
         self.workStartTimestamp = None
         self._wipOverlayText = ""
         # this indicates if the notification about
         # background processing should be shown
         self._tasks = {}
+
+        ## for WiP overlay testing
         #self._tasks = {
         #  "foo" : ("foo", None),
-        #  "bar" : ("bar", None)
+        #  "bar" : ("bar", None),
+        #  "baz" : ("baz", None)
         #}
 
         # key is an unique task name (unique for each instance of a task)
@@ -97,6 +100,10 @@ class Notification(RanaModule):
                 if args[0] == "disable":
                     self._stopWorkInProgressOverlay()
 
+        elif messageType and message == "cancelTask":
+            if args:
+                self.cancelTask(args)
+
         else:
             parameterList = message.split('#')
             if len(parameterList) >= 2:
@@ -117,7 +124,14 @@ class Notification(RanaModule):
                 print("notification: wrong message: %s" % message)
 
     def setTaskStatus(self, taskName, status):
-        print "SET TASK STATUS"
+        """Set textual status of the given WiP task
+
+        :param taskName: task to modify
+        :type taskName: str
+        :param status: textual task status
+        :type status: str
+        """
+
         oldStatus, progress = self._tasks.get(taskName, (None, None))
         # replace the task with updated one
         self._tasks[taskName] = (status, progress)
@@ -126,6 +140,13 @@ class Notification(RanaModule):
             self._startWorkInProgressOverlay()
 
     def setTaskProgress(self, taskName, progress):
+        """Set numeric progress of the given WiP task
+
+        :param taskName: task to modify
+        :type taskName: str
+        :param progress: numeric task progress in the range of 0.0 to 1.0
+        :type progress: float
+        """
         status, oldProgress = self._tasks.get(taskName, (None, None))
         # replace the task with updated one
         self._tasks[taskName] = (status, progress)
@@ -134,6 +155,11 @@ class Notification(RanaModule):
             self._startWorkInProgressOverlay()
 
     def removeTask(self, taskName):
+        """Remove given task from WiP tracking
+
+        :param taskName: name of the task to cancel
+        :type taskName: str
+        """
         try:
             del self._tasks[taskName]
             self.tasksChanged(self._tasks)
@@ -142,18 +168,39 @@ class Notification(RanaModule):
         if self._tasks == {}:
             self._stopWorkInProgressOverlay()
 
+    def cancelTask(self, taskName):
+        """Cancel a task - this both cancels the callback for the thread
+        handling the task and removes the task from tracking
+
+        :param taskName: task to cancel
+        :type taskName: str
+        """
+        try:
+            # get thread for the given task
+            thread = threadMgr.get(taskName)
+            if thread:
+                # cancel its callback
+                thread.callback = None
+        except Exception:
+            import sys
+            print("notification: exception canceling thread"
+                  " callback for %s" % taskName)
+            e = sys.exc_info()[1]
+            print(e)
+        # and finally stop tracking the task
+        self.removeTask(taskName)
+        print("notification: task %s has been cancelled" % taskName)
+
     def _startWorkInProgressOverlay(self):
         """start background work notification"""
-        print "STARTING OVERLAY"
-        if not self.workInProgressOverlay:
-            self.workInProgressOverlay = True
+        if not self._showWorkInProgressOverlay:
+            self._showWorkInProgressOverlay = True
             self.workStartTimestamp = time.time()
             self.wipOverlayEnabled(True)
 
     def _stopWorkInProgressOverlay(self):
         """stop background work notification"""
-        print "STOPPING OVERLAY"
-        self.workInProgressOverlay = False
+        self._showWorkInProgressOverlay = False
         self.wipOverlayEnabled(False)
 
     #def getWorkInProgressOverlayText(self):
@@ -257,7 +304,7 @@ class Notification(RanaModule):
         """this function is called by the menu module, both in map mode and menu mode
         -> its bit of a hack, but we can """
         self.drawNotification(cr)
-        if self.workInProgressOverlay:
+        if self._showWorkInProgressOverlay:
             self.drawWorkInProgressOverlay(cr)
 
     def drawNotification(self, cr):
