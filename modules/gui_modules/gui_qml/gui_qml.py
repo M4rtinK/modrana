@@ -65,6 +65,16 @@ def newlines2brs(text):
     """ QML uses <br> instead of \n for linebreak """
     return re.sub('\n', '<br>', text)
 
+def wrapList(objects, wrapper):
+    """Wrap all objects in the list and
+    return a list of wrapped objects
+
+    :param objects: objects to be wrapped
+    :type objects: iterable of objects to be wrapped
+    :param wrapper: QObject based wrapper
+    :type wrapper: wrapper object constructor
+    """
+    return map(lambda  x: wrapper(x), objects)
 
 class Logger(object):
     def __init__(self, log=True):
@@ -168,13 +178,13 @@ class QMLGUI(GUIModule):
         # make map layers accessible from QML
         layers = MapLayers(self)
         rc.setContextProperty("mapLayers", layers)
+        # make search accessible from QML
+        search = Search(self)
+        rc.setContextProperty("search", search)
 
         # make constants accessible
         self.constants = self.getConstants()
         rc.setContextProperty("C", self.constants)
-
-        # #register list models
-        # self._registerListModels()
 
         # connect to the close event
         self.window.closeEvent = self._qtWindowClosed
@@ -187,6 +197,10 @@ class QMLGUI(GUIModule):
         self._mapLayers = None # map tiles module
 
         self._notificationQueue = []
+
+        # list models
+        self._addressSearchListModel = None
+        self._layersListModel = None
 
     def firstTime(self):
         self._location = self.m.get('location', None)
@@ -339,8 +353,12 @@ class QMLGUI(GUIModule):
                 lambda x: wrappers.MapLayerGroupWrapper(x), ml.getGroupList(sort=True)
             )
             wrappedGroupList = list(wrappedGroupList)
-            self.layersListModel = list_models.BaseListModel(wrappedGroupList)
-            self._registerListModel("mapLayersModel", self.layersListModel)
+            self._layersListModel = list_models.BaseListModel(wrappedGroupList)
+            self._registerListModel("mapLayersModel", self._layersListModel)
+
+        # register an initial empty list model for address search results
+        self._addressSearchListModel = list_models.BaseListModel()
+        self._registerListModel("addressSearchModel", self._addressSearchListModel)
 
     def _getLayerListModel(self):
         pass
@@ -655,6 +673,44 @@ class MapLayers(QtCore.QObject):
             return layer.wo.label
         else:
             return "label for %s unknown" % layerId
+
+class Search(QtCore.QObject):
+    def __init__(self, gui):
+        QtCore.QObject.__init__(self)
+        self.gui = gui
+
+        self._addressSearchResults = None
+        self._localSearchResults = None
+        self._wikipediaSearchResults = None
+        self._routeSearchResults = None
+        self._POIDBSearchResults = None
+        # why are wee keeping our own dictionary of wrapped
+        # objects and not just returning a newly wrapped object on demand ?
+        # -> because PySide (1.1.1) segfaults if we don't hold any reference
+        # on the object returned :)
+
+
+    @QtCore.Slot(str)
+    def address(self, address):
+        """Trigger an asynchronous address search for the given term
+
+        :param address: address search query
+        :type address: str
+        """
+        online = self.gui.m.get("onlineServices", None)
+        if online:
+            online.geocodeAsync(address, self._addressSearchCB)
+
+    def _addressSearchCB(self, results):
+        """Replace old address search results (if any) with
+        new (wrapped) results
+
+        :param results: address search results
+        :type results: list
+        """
+        self._addressSearchResults.set_objects(
+            wrapList(results, wrappers.PointWrapper)
+        )
 
 
 class FixWrapper(QtCore.QObject):

@@ -119,53 +119,33 @@ class MapLayerWrapper(QtCore.QObject):
 
     changed = QtCore.Signal()
 
-    def _getId(self):
-        return self.wo.id
+    id = QtCore.Property(str, lambda x: x.wo.id, notify=changed)
+    label = QtCore.Property(str, lambda x: x.wo.label, notify=changed)
+    url = QtCore.Property(str, lambda x: x.wo.url, notify=changed)
+    maxZoom = QtCore.Property(int, lambda x: x.wo.maxZoom, notify=changed)
+    minZoom = QtCore.Property(int, lambda x: x.wo.minZoom, notify=changed)
+    folderName = QtCore.Property(str, lambda x: x.wo.folderName, notify=changed)
+    coordinates = QtCore.Property(str, lambda x: x.wo.coordinates, notify=changed)
+    icon = QtCore.Property(str, lambda x: x.wo.icon, notify=changed)
 
-    id = QtCore.Property(str, _getId, notify=changed)
+class PointWrapper(QtCore.QObject):
+    """Wrapper for Point objects"""
 
-    def _getLabel(self):
-        return self.wo.label
+    def __init__(self, wrappedObject):
+        self.wo = wrappedObject
+        QtCore.QObject.__init__(self)
 
-    label = QtCore.Property(str, _getLabel, notify=changed)
+    changed = QtCore.Signal()
 
-    def _getUrl(self):
-        return self.wo.url
+    def _getName(self):
+        return self.wo.name
 
-    url = QtCore.Property(str, _getUrl, notify=changed)
-
-    def _getMaxZoom(self):
-        return self.wo.maxZoom
-
-    maxZoom = QtCore.Property(int, _getMaxZoom, notify=changed)
-
-    def _getMinZoom(self):
-        return self.wo.minZoom
-
-    minZoom = QtCore.Property(int, _getMinZoom, notify=changed)
-
-    def _getFolderName(self):
-        return self.wo.folderName
-
-    folderName = QtCore.Property(str, _getFolderName, notify=changed)
-
-    def _getCoordinates(self):
-        return self.wo.coordinates
-
-    coordinates = QtCore.Property(str, _getCoordinates, notify=changed)
-
-    def _getIcon(self):
-        return self.wo.icon
-
-    icon = QtCore.Property(str, _getIcon, notify=changed)
-
-
-
-
-
-
-
-
+    name = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
+    summary = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
+    description = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
+    lat = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
+    lon = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
+    elevation = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
 
 
     # def _get(self):
