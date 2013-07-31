@@ -675,11 +675,17 @@ class MapLayers(QtCore.QObject):
             return "label for %s unknown" % layerId
 
 class Search(QtCore.QObject):
+    _addressSignal = QtCore.Signal()
+
+    changed = QtCore.Signal()
+
+    test = QtCore.Signal()
+
     def __init__(self, gui):
         QtCore.QObject.__init__(self)
         self.gui = gui
-
         self._addressSearchResults = None
+        self._addressSearchInProgress = False
         self._localSearchResults = None
         self._wikipediaSearchResults = None
         self._routeSearchResults = None
@@ -700,6 +706,8 @@ class Search(QtCore.QObject):
         online = self.gui.m.get("onlineServices", None)
         if online:
             online.geocodeAsync(address, self._addressSearchCB)
+        self._addressSearchInProgress = True
+        self._addressSignal.emit()
 
     def _addressSearchCB(self, results):
         """Replace old address search results (if any) with
@@ -708,9 +716,15 @@ class Search(QtCore.QObject):
         :param results: address search results
         :type results: list
         """
-        self._addressSearchResults.set_objects(
+        self.gui._addressSearchListModel.set_objects(
             wrapList(results, wrappers.PointWrapper)
         )
+
+        self._addressSearchInProgress = False
+        self._addressSignal.emit()
+
+    addressRunning = QtCore.Property(bool,
+        lambda x: x._addressSearchInProgress, notify=_addressSignal)
 
 
 class FixWrapper(QtCore.QObject):
