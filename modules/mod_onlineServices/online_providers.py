@@ -46,6 +46,7 @@ class GeocodingNominatim(POIProvider):
         results = []
         controller.status = "starting online address search"
         try:
+            term = term.encode("utf-8")
             params = {
                 'q': term,
                 'format': 'json',
