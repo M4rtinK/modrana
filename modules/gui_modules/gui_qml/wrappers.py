@@ -137,15 +137,12 @@ class PointWrapper(QtCore.QObject):
 
     changed = QtCore.Signal()
 
-    def _getName(self):
-        return self.wo.name
-
-    name = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
-    summary = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
-    description = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
-    lat = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
-    lon = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
-    elevation = QtCore.Property(str, lambda x: x.wo.name, notify=changed)
+    name = QtCore.Property(unicode, lambda x: x.wo.name, notify=changed)
+    summary = QtCore.Property(unicode, lambda x: x.wo.summary, notify=changed)
+    description = QtCore.Property(unicode, lambda x: x.wo.description, notify=changed)
+    lat = QtCore.Property(float, lambda x: x.wo.lat, notify=changed)
+    lon = QtCore.Property(float, lambda x: x.wo.lon, notify=changed)
+    elevation = QtCore.Property(float, lambda x: x.wo.elevation, notify=changed)
 
 
     # def _get(self):
