@@ -54,6 +54,7 @@ Rectangle {
     property int tileserverPort : mapTiles.tileserverPort()
     property int status: PageStatus.Active
     signal drag // signals that map-drag has been detected
+    signal centerSet // signals that the map has been moved
     property bool needsUpdate: false
     transform: Rotation {
         angle: 0
@@ -256,10 +257,12 @@ Rectangle {
 
     function setCenterLatLon(lat, lon) {
         setLatLon(lat, lon, pinchmap.width/2, pinchmap.height/2);
+        centerSet();
     }
 
     function setCenterCoord(c) {
         setCenterLatLon(c[0], c[1]);
+        centerSet();
     }
 
     function getCoordFromScreenpoint(x, y) {
