@@ -3,13 +3,14 @@ import "functions.js" as F
 import "./qtc"
 
 Item {
-
     id: tabMap
     property int buttonSize: 72
     anchors.fill : parent
     function showOnMap(lat, lon) {
         pinchmap.setCenterLatLon(lat, lon);
-        tabGroup.currentTab = tabMap
+        // show on map moves map center and
+        // and thus disables centering
+        center = false
     }
 
     property bool center : true

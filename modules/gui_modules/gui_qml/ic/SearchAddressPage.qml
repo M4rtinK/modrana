@@ -22,12 +22,12 @@ BasePage {
             anchors.bottomMargin : 8
             height : parent.height - 16
             //focus : true
-            Keys.onEnterPressed:{
-                console.log("address search for: " + text)
-                search.address(text)
-                console.log("GET")
-                console.log(addressSearchModel)
-                console.log("GOT?")
+            Keys.onPressed : {
+                if (event.key == Qt.Key_Return || event.key == Qt.Key_Enter){
+                    console.log("address search for: " + text)
+                    search.address(text)
+                    console.log(addressSearchModel)
+                }
             }
             text : ""
             placeholderText : "address search"
@@ -86,7 +86,7 @@ BasePage {
                         console.log(model.data.name + " clicked")
                         var lat = model.data.lat
                         var lon = model.data.lon
-                        rWin.mapPage.getMap().setCenterLatLon(lat, lon)
+                        rWin.mapPage.showOnMap(lat, lon)
                         rWin.pageStack.pop(null, !rWin.animate)
                     }
 
