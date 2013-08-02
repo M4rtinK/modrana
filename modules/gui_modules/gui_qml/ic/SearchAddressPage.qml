@@ -74,8 +74,10 @@ BasePage {
                         font.bold : true
                     }
                     Label {
-                        text : model.data.summary
-                        elide : Text.ElideRight
+                        //text : model.data.summary
+                        text : model.data.description
+                        //elide : Text.ElideRight
+                        wrapMode : Text.WordWrap
                         width : resultDelegate.width - 32
                     }
                 }
