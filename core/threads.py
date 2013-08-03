@@ -28,6 +28,7 @@
 # use a fake stdout log
 from __future__ import with_statement # for python 2.5
 import sys
+import thread
 
 
 class FakeLog(object):
@@ -250,6 +251,19 @@ class ModRanaThread(threading.Thread):
         if self.callback:
             self.callback(*args, **kwargs)
 
+    # Python 2.5 on Maemo 5 is missing the name and ident properties
+    # TODO: check if this works properly in Python 3.2/3.3
+    @property
+    def name(self):
+        return self.getName()
+
+    @name.setter
+    def name(self, value):
+        self.setName(value)
+
+    @property
+    def ident(self):
+        return thread.get_ident()
 
 def initThreading():
     """Set up threading for anaconda's use. This method must be called before
