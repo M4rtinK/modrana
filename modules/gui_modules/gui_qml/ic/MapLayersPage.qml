@@ -18,12 +18,14 @@ BasePage {
         ListView {
             model : rWin.mapPage.layers
             anchors.top : parent.top
+            anchors.topMargin : C.style.listView.spacing
             anchors.left : parent.left
             anchors.right : parent.right
             //anchors.bottom : parent.bottom
             //height : 400
             id : layersLW
             height : layersPage.availableHeight
+            spacing : C.style.listView.spacing
 
             contentWidth: parent.width
             contentHeight: childrenRect.height
@@ -100,11 +102,13 @@ BasePage {
                     // add/remove buttons
                     id : actionGrid
                     anchors.top : lGrid.bottom
+                    anchors.topMargin : C.style.listView.spacing
                     anchors.left : parent.left
                     anchors.right : parent.right
                     //height : isLastItem ? lGrid.height : 0
                     columns : 2
-                    property real cellWidth : width/columns
+                    spacing : C.style.listView.spacing
+                    property real cellWidth : width/columns - spacing/columns
                     visible : isLastItem
                     BackgroundRectangle {
                         width : actionGrid.cellWidth
