@@ -177,6 +177,10 @@ class ModRanaThread(threading.Thread):
         self._stateLock = threading.Lock()
         self._callback = self._nop()
         self.target = self._nop()  # payload goes here
+        # Python 2.5 on Maemo 5 is missing the name and ident properties
+        if sys.version_info[:2] <= (2, 5):
+            self.name = self.getName()
+            self.ident = thread.get_ident()
 
     def _nop(self, *args, **kwargs):
         """A placeholder method that consumes any arguments
@@ -250,20 +254,6 @@ class ModRanaThread(threading.Thread):
         Enables cancelling the calling of the callback while the task is not yet done"""
         if self.callback:
             self.callback(*args, **kwargs)
-
-    # Python 2.5 on Maemo 5 is missing the name and ident properties
-    # TODO: check if this works properly in Python 3.2/3.3
-    @property
-    def name(self):
-        return self.getName()
-
-    @name.setter
-    def name(self, value):
-        self.setName(value)
-
-    @property
-    def ident(self):
-        return thread.get_ident()
 
 def initThreading():
     """Set up threading for anaconda's use. This method must be called before
