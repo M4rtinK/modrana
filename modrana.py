@@ -719,6 +719,11 @@ class ModRana(object):
             for k, v in newData.items():
                 self.set(k, v)
             success = True
+            #print("Options content")
+            #for key, value in newData.iteritems():
+            #    print(key, value)
+
+
         except Exception:
             e = sys.exc_info()[1]
             print("modRana: exception while loading saved options:\n%s" % e)
