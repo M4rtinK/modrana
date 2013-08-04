@@ -376,6 +376,11 @@ class QMLGUI(GUIModule):
                     "margin": (16, 24)[i],
                     "spacing": (16, 24)[i],
                 }
+            },
+            "listView" : {
+                "spacing" : (8, 16)[i],
+                "cornerRadius" : (8, 16)[i],
+                "itemBorder" : (20, 40)[i],
             }
         }
         return style

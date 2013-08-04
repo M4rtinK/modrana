@@ -49,15 +49,17 @@ BasePage {
     content {
         ListView {
             anchors.top : parent.top
+            anchors.topMargin : C.style.listView.spacing
             anchors.left : parent.left
             anchors.right : parent.right
             height : addressSearchPage.availableHeight
+            spacing : C.style.listView.spacing
             model : addressSearchModel
             delegate : BackgroundRectangle {
                 id : resultDelegate
                 anchors.left : parent.left
                 anchors.right : parent.right
-                height : contentC.height + 20
+                height : contentC.height + C.style.listView.itemBorder
                 active : resultMA.pressed
                 Column {
                     id : contentC

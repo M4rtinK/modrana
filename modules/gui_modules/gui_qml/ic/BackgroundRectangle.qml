@@ -3,9 +3,7 @@
 import QtQuick 1.1
 
 Rectangle {
-    // border width == 1 causes rendering artifacts
-    border.width : 2
-    border.color : "white"
     property bool active : false
-    color : active ? "darkblue" : "black"
+    color : active ? "darkblue" : modrana.theme.color.main_fill
+    radius : C.style.listView.cornerRadius
 }
