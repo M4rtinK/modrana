@@ -21,15 +21,18 @@ BasePage {
             anchors.bottom : parent.bottom
             anchors.bottomMargin : 8
             height : parent.height - 16
-            //focus : true
+            Component.onCompleted : {
+                selectAll()
+            }
             Keys.onPressed : {
                 if (event.key == Qt.Key_Return || event.key == Qt.Key_Enter){
                     console.log("address search for: " + text)
+                    options.set("lastAddressSearchInput", text)
                     search.address(text)
                     console.log(addressSearchModel)
                 }
             }
-            text : ""
+            text : options.get("lastAddressSearchInput", "")
             placeholderText : "address search"
         }
         /*
