@@ -8,8 +8,8 @@ Rectangle {
     id : icb
     height : iconSize
     width : iconSize
-    property real iconSize : 80
-    property real margin : 8
+    property real iconSize : C.style.button.icon.size
+    property real margin : C.style.main.spacing
     property alias iconName : themedIcon.iconName
     property color normalColor : modrana.theme.color.icon_button_normal
     property color toggledColor : modrana.theme.color.icon_button_toggled

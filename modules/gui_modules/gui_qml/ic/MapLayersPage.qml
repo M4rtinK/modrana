@@ -7,7 +7,7 @@ import com.nokia.meego 1.0
 BasePage {
     id: layersPage
     headerText : "Overlays"
-    bottomPadding : 32
+    bottomPadding : C.style.main.spacingBig * 2
     isFlickable : false
     property variant model
 
@@ -53,8 +53,8 @@ BasePage {
                     id : lGrid
                     anchors.left : parent.left
                     anchors.right : parent.right
-                    anchors.leftMargin : 16
-                    anchors.rightMargin : 16
+                    anchors.leftMargin : C.style.main.spacingBig
+                    anchors.rightMargin : C.style.main.spacingBig
                     columns : parent.inPortrait ? 1 : 2
                     property real cellWidth : width/columns
                     Item {

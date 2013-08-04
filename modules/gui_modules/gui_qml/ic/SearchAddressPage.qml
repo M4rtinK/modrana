@@ -13,14 +13,14 @@ BasePage {
         TextField {
             id : searchInput
             anchors.left : parent.left
-            anchors.leftMargin : 8
+            anchors.leftMargin : C.style.main.spacing
             anchors.right : parent.right
-            anchors.rightMargin : 8
+            anchors.rightMargin : C.style.main.spacingBig
             anchors.top : parent.top
-            anchors.topMargin : 8
+            anchors.topMargin : C.style.main.spacingBig
             anchors.bottom : parent.bottom
-            anchors.bottomMargin : 8
-            height : parent.height - 16
+            anchors.bottomMargin : C.style.main.spacingBig
+            height : parent.height - C.style.main.spacingBig*2
             Component.onCompleted : {
                 selectAll()
             }
@@ -66,14 +66,10 @@ BasePage {
                 active : resultMA.pressed
                 Column {
                     id : contentC
-                    /*
-                    anchors.top : parent.top
-                    anchors.topMargin : 10
-                    */
                     anchors.left : parent.left
-                    anchors.leftMargin : 10
+                    anchors.leftMargin : C.style.main.spacing
                     anchors.verticalCenter : parent.verticalCenter
-                    spacing : 8
+                    spacing : C.style.main.spacing
                     Label {
                         text : model.data.name
                         font.bold : true
@@ -83,7 +79,7 @@ BasePage {
                         text : model.data.description
                         //elide : Text.ElideRight
                         wrapMode : Text.WordWrap
-                        width : resultDelegate.width - 32
+                        width : resultDelegate.width - C.style.main.spacingBig*2
                     }
                 }
                 MouseArea {

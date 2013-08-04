@@ -90,7 +90,7 @@ Page {
         Text {
             anchors.verticalCenter : parent.verticalCenter
             anchors.horizontalCenter : parent.horizontalCenter
-            font.pixelSize : 64
+            font.pixelSize : 64 * C.style.m
             text : "MOCKUP"
             color:"white"
         }

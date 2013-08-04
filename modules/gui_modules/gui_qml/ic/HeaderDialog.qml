@@ -59,7 +59,7 @@ Dialog {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom:  header.bottom
-            height: 1
+            height: 1 * C.style.m
             color: "#4D4D4D"
         }
     }

@@ -17,7 +17,7 @@ Item {
             top: parent.top
             left: parent.left
             right: switcher.left
-            rightMargin: 16
+            rightMargin: C.style.main.spacingBig
         }
     }
 

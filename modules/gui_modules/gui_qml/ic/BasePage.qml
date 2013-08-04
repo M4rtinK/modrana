@@ -23,12 +23,12 @@ HeaderPage {
             id : headerLabel
             property bool _fitsIn : (paintedWidth <= (parent.width-backButtonWidth+40))
             anchors.verticalCenter : parent.verticalCenter
-            x: _fitsIn ? 0 : backButtonWidth + 24
+            x: _fitsIn ? 0 : backButtonWidth + 24 * C.style.m
             width : _fitsIn ? headerWidth : headerWidth - backButtonWidth - 40
             anchors.right : parent.right
-            anchors.topMargin : 8
-            anchors.bottomMargin : 8
-            font.pixelSize : 48
+            anchors.topMargin : C.style.main.spacing
+            anchors.bottomMargin : C.style.main.spacing
+            font.pixelSize : 48 * C.style.m
             textFormat : Text.StyledText
             color : modrana.theme.color.page_header_text
             wrapMode : Text.NoWrap

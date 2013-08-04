@@ -14,13 +14,13 @@ BasePage {
             anchors.top : parent.top
             anchors.left : parent.left
             anchors.right : parent.right
-            anchors.topMargin : 8
-            anchors.leftMargin : 8
-            anchors.rightMargin : 8
-            spacing : 30
+            anchors.topMargin : C.style.main.spacing
+            anchors.leftMargin : C.style.main.spacing
+            anchors.rightMargin : C.style.main.spacing
+            spacing : C.style.main.spacingBig * 2
             width : parent.width
             Column {
-                spacing : 10
+                spacing : C.style.main.spacing
                 Label {
                     text : qsTr("Theme")
                 }

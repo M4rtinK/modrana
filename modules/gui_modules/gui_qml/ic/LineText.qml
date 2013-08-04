@@ -28,7 +28,7 @@ Item {
             top: parent.top
             //left: parent.left
             right: parent.right
-            leftMargin: 16
+            leftMargin: C.style.main.spacing
         }
     }
 }

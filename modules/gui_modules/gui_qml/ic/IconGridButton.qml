@@ -4,7 +4,7 @@ import "./qtc"
 Item {
     id : icgb
     property real margin : 0
-    property real iconSize : 100
+    property real iconSize : C.style.button.iconGrid.size
     property alias iconName : themedIcon.iconName
     property color normalColor : modrana.theme.color.main_fill
     property color toggledColor : modrana.theme.color.icon_grid_toggled
@@ -31,7 +31,7 @@ Item {
         // TODO: slightly darker (themable ?) pressed color ?
         //property real darking : mouseArea.pressed ? 1.5 : 1.0
         //color : Qt.darker("#92aaf3", darking)
-        radius : 10
+        radius : C.style.button.iconGrid.radius
         smooth : true
         // icon
         TIcon {
@@ -51,7 +51,7 @@ Item {
             id : iconLabel
             text : icgb.text
             color : modrana.theme.color.icon_button_text
-            font.pixelSize : rWin.inPortrait ? 42 : 36
+            font.pixelSize : rWin.inPortrait ? 42 * C.style.m : 36 * C.style.m
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.bottom : parent.bottom
             anchors.bottomMargin : icgb.margin/2

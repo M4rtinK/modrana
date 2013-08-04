@@ -7,8 +7,8 @@ Rectangle {
     id : ppButton
     color : ppMA.pressed ? "yellow" : "gold"
     radius : 30
-    width : 210
-    height : 60
+    width : 210 * C.style.m
+    height : C.style.button.generic.height
     property string url : ""
 
     Label {

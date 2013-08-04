@@ -8,15 +8,17 @@ Rectangle {
     id : bitcoinButton
     color : bitcoinMA.pressed ? "silver" : "black"
     radius : 25
-    width : 210
-    height : 45
+    border.width : 2
+    border.color : "white"
+    width : 210 * C.style.m
+    height : C.style.button.generic.height * 0.75
     property string url : ""
 
     Label {
         anchors.horizontalCenter : parent.horizontalCenter
         anchors.verticalCenter : parent.verticalCenter
         font.family: "Arial"
-        font.pixelSize : 24
+        font.pixelSize : 24 * C.style.m
         text : "<h3>Bitcoin</h3>"
         color : bitcoinMA.pressed ? "black" : "white"
     }
@@ -31,7 +33,7 @@ Rectangle {
 
     Dialog {
         id : bitcoinDialog
-        width : parent.width - 30
+        width : parent.width - 30 * C.style.m
         property Style platformStyle: SelectionDialogStyle {}
         property string titleText: "Bitcoin address"
         title: Item {
@@ -93,23 +95,23 @@ Rectangle {
         content:Item {
             id: dialogContent
             width : parent.width
-            height : bitcoinQrCode.height + urlField.height + 32
+            height : bitcoinQrCode.height + urlField.height + C.style.main.spacingBig * 2
             Image {
                 id : bitcoinQrCode
                 anchors.top : dialogContent.top
-                anchors.topMargin : 8
+                anchors.topMargin : C.style.main.spacing
                 anchors.horizontalCenter : parent.horizontalCenter
                 source : "image://icons/" + modrana.theme_id + "/qrcode_bitcoin.png"
             }
             TextInput {
                 id : urlField
                 anchors.top : bitcoinQrCode.bottom
-                anchors.topMargin : 8
+                anchors.topMargin : C.style.main.spacing
                 anchors.left : parent.left
                 anchors.right : parent.right
                 //anchors.horizontalCenter : parent.horizontalCenter
-                font.pointSize : 20
-                height : 48
+                font.pointSize : 20 * C.style.m
+                height : 48 * C.style.m
                 text : bitcoinButton.url
                 //color : "white"
                 onTextChanged : {
@@ -118,7 +120,7 @@ Rectangle {
             }
             Button {
                 anchors.top : urlField.bottom
-                anchors.topMargin : 12
+                anchors.topMargin : 12 * C.style.m
                 anchors.horizontalCenter : parent.horizontalCenter
                 text: "Copy address"
                 iconSource : "image://theme/icon-m-toolbar-cut-paste"

@@ -19,19 +19,19 @@ BasePage {
             id : currentSpeed
             anchors.verticalCenter : parent.verticalCenter
             //anchors.top : spacer1.bottom
-            //anchors.topMargin : 96
+            //anchors.topMargin : 96 * C.style.main.multiplier
             anchors.horizontalCenter : parent.horizontalCenter
             text: currentSpeedString
-            font.pixelSize : 96
+            font.pixelSize : 96 * C.style.main.multiplier
         }
         Label {
             id : otherSpeed
             anchors.top : currentSpeed.bottom
             //anchors.top : spacer1.bottom
-            anchors.topMargin : 96
+            anchors.topMargin : 96 * C.style.main.multiplier
             anchors.horizontalCenter : parent.horizontalCenter
             text: otherSpeedsString
-            font.pixelSize : 32
+            font.pixelSize : 32 * C.style.main.multiplier
         }
     }
 

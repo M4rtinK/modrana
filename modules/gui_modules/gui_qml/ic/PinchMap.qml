@@ -477,14 +477,14 @@ Rectangle {
     Rectangle {
         id: scaleBar
         anchors.right: parent.right
-        anchors.rightMargin: 16
-        anchors.topMargin: 16
+        anchors.rightMargin: C.style.main.spacingBig
+        anchors.topMargin: C.style.main.spacingBig
         anchors.top: parent.top
         color: "black"
-        border.width: 2
+        border.width: C.style.map.scaleBar.border
         border.color: "white"
         smooth: false
-        height: 4
+        height: C.style.map.scaleBar.height
         width: scaleBarLength[0]
     }
 
@@ -492,10 +492,10 @@ Rectangle {
         text: F.formatDistance(scaleBarLength[1])
         anchors.horizontalCenter: scaleBar.horizontalCenter
         anchors.top: scaleBar.bottom
-        anchors.topMargin: 8
+        anchors.topMargin: C.style.main.spacing
         style: Text.Outline
         styleColor: "white"
-        font.pixelSize: 24
+        font.pixelSize: C.style.map.scaleBar.fontSize
     }
 
     PinchArea {

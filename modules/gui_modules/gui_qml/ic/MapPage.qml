@@ -109,9 +109,9 @@ Item {
                 //angle: -compass.azimuth
             }]
         anchors.left: tabMap.left
-        anchors.leftMargin: 16
+        anchors.leftMargin: C.style.main.spacingBig
         anchors.top: tabMap.top
-        anchors.topMargin: 16
+        anchors.topMargin: C.style.main.spacingBig
         smooth: true
         width: Math.min(tabMap.width/4, tabMap.height/4)
         fillMode: Image.PreserveAspectFit

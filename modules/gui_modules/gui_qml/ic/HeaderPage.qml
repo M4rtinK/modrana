@@ -61,7 +61,7 @@ Page {
             height : headerHeight
             Item {
                 id : hContent
-                width : headerWidth - backButton.width - 16
+                width : headerWidth - backButton.width - C.style.main.spacingBig
                 anchors.right : parent.right
                 anchors.top : parent.top
                 height : headerHeight
@@ -74,8 +74,8 @@ Page {
         height : headerHeight * 0.8
         anchors.top : parent.top
         anchors.left : parent.left
-        anchors.topMargin : 8
-        anchors.leftMargin : 16
+        anchors.topMargin : C.style.main.spacing
+        anchors.leftMargin : C.style.main.spacingBig
         iconName : "left_thin.png"
         //iconSource : "image://icons/"+ modrana.theme_id +"/back_small.png"
         opacity : pageFlickable.atYBeginning ? 1.0 : 0.55

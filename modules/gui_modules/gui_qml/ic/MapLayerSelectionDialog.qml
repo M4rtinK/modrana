@@ -20,7 +20,7 @@ HeaderDialog {
         anchors.fill : parent
         clip : true
         currentIndex : -1
-        property int itemHeight : 80
+        property int itemHeight : C.style.dialog.item.height
         delegate: Component {
             id: listDelegate
             Item {
@@ -43,7 +43,7 @@ HeaderDialog {
                     Label {
                         anchors.verticalCenter : parent.verticalCenter
                         anchors.left : parent.left
-                        anchors.leftMargin : 32
+                        anchors.leftMargin : C.style.main.spacingBig * 2
                         text: groupWrapper.toggled ?
                         model.data.label :
                         model.data.label + " (" + model.data.childrenCount + ")"
@@ -98,7 +98,7 @@ HeaderDialog {
                             Label {
                                 anchors.verticalCenter : parent.verticalCenter
                                 anchors.left : parent.left
-                                anchors.leftMargin : 64
+                                anchors.leftMargin : C.style.main.spacingBig * 4
                                 //text: "I'm item " + index
                                 text: layersWrapper.getLayerLabel(index)
                                 font.bold : true

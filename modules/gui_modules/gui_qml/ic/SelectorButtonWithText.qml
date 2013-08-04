@@ -21,14 +21,15 @@ Item {
             top: parent.top
             left: parent.left
             right: pfsButton.left
-            rightMargin: 16
+            rightMargin: C.style.main.spacingBig
         }
     }
 
     Button {
         id : pfsButton
         iconSource : "image://theme/icon-m-common-combobox-arrow"
-        width : 200
+        width : C.style.button.selector.width
+        height : C.style.button.selector.height
         anchors {
             right: parent.right
             verticalCenter: parent.verticalCenter

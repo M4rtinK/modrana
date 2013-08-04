@@ -4,11 +4,11 @@ import "./qtc"
 BasePage {
     id: aboutPage
     headerText : "modRana"
-    bottomPadding : 32
+    bottomPadding : C.style.main.spacingBig*2
     content {
         Label {
             anchors.top : parent.top
-            anchors.topMargin : 16
+            anchors.topMargin : C.style.main.spacingBig
             id : aboutTitle
             anchors.horizontalCenter : parent.horizontalCenter
             text: "<h4>version: " + platform.modRanaVersion() + "</h4>"
@@ -16,7 +16,7 @@ BasePage {
         Image {
             id : aboutModRanaIcon
             anchors.horizontalCenter : parent.horizontalCenter
-            anchors.topMargin : 16
+            anchors.topMargin : C.style.main.spacingBig
             anchors.top : aboutTitle.bottom
             source : "image://icons/"+ modrana.theme_id +"/modrana.svg"
         }
@@ -25,7 +25,7 @@ BasePage {
             id : donateLabel
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.top : aboutModRanaIcon.bottom
-            anchors.topMargin : 16
+            anchors.topMargin : C.style.main.spacingBig
             text : "<h3>Dou you like modRana ? <b>Donate !</b></h3>"
         }
 
@@ -33,13 +33,13 @@ BasePage {
             id : ppFlattrRow
             anchors.top : donateLabel.bottom
             anchors.horizontalCenter : parent.horizontalCenter
-            anchors.topMargin : 32
-            spacing : 32
+            anchors.topMargin : C.style.main.spacingBig*2
+            spacing : C.style.main.spacingBig*2
             PayPalButton {
                 id : ppButton
                 //anchors.top : donateLabel.bottom
                 anchors.verticalCenter : parent.verticalCenter
-                //anchors.topMargin : 32
+                //anchors.topMargin : C.style.main.spacingBig*2
                 url : modules.getS("info", "getPayPalUrl")
             }
 
@@ -54,7 +54,7 @@ BasePage {
         BitcoinButton {
             id : bitcoinButton
             anchors.top : ppFlattrRow.bottom
-            anchors.topMargin : 32
+            anchors.topMargin : C.style.main.spacingBig*2
             anchors.horizontalCenter : parent.horizontalCenter
             url : modules.getS("info", "getBitcoinAddress")
         }
@@ -62,8 +62,8 @@ BasePage {
         Label {
             id : contactInfo
             anchors.top : bitcoinButton.bottom
-            anchors.topMargin : 32
-            height : paintedHeight + 31
+            anchors.topMargin : C.style.main.spacingBig*2
+            height : paintedHeight + C.style.main.spacingBig*2 - 1
             anchors.horizontalCenter : parent.horizontalCenter
             text: "<style type='text/css'>p { margin-bottom:15px; margin-top:0px; }</style>" + modules.getS("info", "getAboutText")
             wrapMode : Text.WordWrap
