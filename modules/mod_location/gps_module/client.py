@@ -16,12 +16,12 @@ class json_error:
         self.explanation = explanation
 
 class gpscommon(object):
-    "Isolate socket handling and buffering from the protcol interpretation."
+    """Isolate socket handling and buffering from the protocol interpretation."""
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0):
         self.sock = None        # in case we blow up in connect
         self.linebuffer = ""
         self.verbose = verbose
-        if host != None:
+        if host is not None:
             self.connect(host, port)
 
     def connect(self, host, port):
@@ -37,7 +37,7 @@ class gpscommon(object):
                 host, port = host[:i], host[i+1:]
             try: port = int(port)
             except ValueError:
-                raise socket.error, "nonnumeric port"
+                raise socket.error("nonnumeric port")
         #if self.verbose > 0:
         #    print 'connect:', (host, port)
         msg = "getaddrinfo returns an empty list"
@@ -48,13 +48,15 @@ class gpscommon(object):
                 self.sock = socket.socket(af, socktype, proto)
                 #if self.debuglevel > 0: print 'connect:', (host, port)
                 self.sock.connect(sa)
-            except socket.error, msg:
+            except socket.error:
+                import sys
+                msg = sys.exc_info()[1]
                 #if self.debuglevel > 0: print 'connect fail:', (host, port)
                 self.close()
                 continue
             break
         if not self.sock:
-            raise socket.error, msg
+            raise socket.error(msg)
 
     def close(self):
         if self.sock:
@@ -138,7 +140,9 @@ class gpsjson(gpscommon):
     def unpack(self, buf):
         try:
             self.data = dictwrapper(json.loads(buf.strip(), encoding="ascii"))
-        except ValueError, e:
+        except ValueError:
+            import sys
+            e = sys.exc_info()[1]
             raise json_error(buf, e.args[0])
         # Should be done for any other array-valued subobjects, too.
         # This particular logic can fire on SKY or RTCM2 objects.
@@ -200,7 +204,7 @@ class dictwrapper(object):
     __repr__ = __str__
 
 #
-# Someday a cleaner Python iterface using this machinery will live here
+# Someday a cleaner Python interface using this machinery will live here
 #
 
 # End

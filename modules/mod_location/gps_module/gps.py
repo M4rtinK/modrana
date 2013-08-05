@@ -14,8 +14,8 @@
 # The JSON parts of this (which will be reused by any new interface)
 # now live in a different module.
 #
-from client import *
-from misc import isotime
+from .client import *
+from .misc import isotime
 
 NaN = float('nan')
 def isnan(x): return str(x) == 'nan'
@@ -82,7 +82,7 @@ class gpsfix(object):
         self.epc = NaN
 
 class gpsdata(object):
-    "Position, track, velocity and status information returned by a GPS."
+    """Position, track, velocity and status information returned by a GPS."""
 
     class satellite(object):
         def __init__(self, PRN, elevation, azimuth, ss, used=None):
@@ -131,15 +131,15 @@ class gpsdata(object):
         if isnan(self.fix.altitude):
             st += "Altitude: ?\n"
         else:
-            st += "Altitude: %f\n" % (self.fix.altitude)
+            st += "Altitude: %f\n" % self.fix.altitude
         if isnan(self.fix.speed):
             st += "Speed:    ?\n"
         else:
-            st += "Speed:    %f\n" % (self.fix.speed)
+            st += "Speed:    %f\n" % self.fix.speed
         if isnan(self.fix.track):
             st += "Track:    ?\n"
         else:
-            st += "Track:    %f\n" % (self.fix.track)
+            st += "Track:    %f\n" % self.fix.track
         st += "Status:   STATUS_%s\n" % ("NO_FIX", "FIX", "DGPS_FIX")[self.status]
         st += "Mode:     MODE_%s\n" % ("ZERO", "NO_FIX", "2D", "3D")[self.fix.mode]
         st += "Quality:  %d p=%2.2f h=%2.2f v=%2.2f t=%2.2f g=%2.2f\n" % \
@@ -150,7 +150,7 @@ class gpsdata(object):
         return st
 
 class gps(gpsdata, gpsjson):
-    "Client interface to a running gpsd instance."
+    """Client interface to a running gpsd instance."""
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0):
         gpscommon.__init__(self, host, port, verbose)
         gpsdata.__init__(self)
@@ -293,7 +293,7 @@ class gps(gpsdata, gpsjson):
             self.valid = ONLINE_SET | SATELLITE_SET
 
     def read(self):
-        "Read and interpret data from the daemon."
+        """Read and interpret data from the daemon."""
         status = gpscommon.read(self)
         if status <= 0:
             return status
@@ -316,7 +316,7 @@ class gps(gpsdata, gpsjson):
             return self.response
 
     def stream(self, flags=0, devpath=None):
-        "Ask gpsd to stream reports at your client."
+        """Ask gpsd to stream reports at your client."""
         if (flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW)) == 0:
             flags |= WATCH_JSON
         if flags & WATCH_DISABLE:
@@ -330,7 +330,7 @@ class gps(gpsdata, gpsjson):
         else: # flags & WATCH_ENABLE:
             if flags & WATCH_OLDSTYLE:
                 arg = 'w+'
-                if (flags & WATCH_NMEA):
+                if flags & WATCH_NMEA:
                     arg += 'r+'
                     return self.send(arg)
             else:

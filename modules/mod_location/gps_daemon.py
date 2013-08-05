@@ -19,6 +19,7 @@
 from __future__ import with_statement # for python 2.5
 import threading
 from time import sleep, time
+import traceback
 
 from .base_position_source import PositionSource
 from core.fix import Fix
@@ -42,9 +43,9 @@ class GPSD(PositionSource):
             self.setGPSDDebug(self.debug) # check if verbose debugging is enabled
         except Exception:
             import sys
-
             e = sys.exc_info()[1]
             print("location GPSD: connecting to GPSD failed", e)
+            traceback.print_exc(file=sys.stdout)
             self.status = "No GPSD running"
 
     def stop(self):
@@ -175,14 +176,20 @@ class GPSDConsumer(threading.Thread):
         threading.Thread.__init__(self)
         self.lock = threading.RLock()
         self.stop = False
-        import gps_module as gps
 
-        self.session = gps.gps(host="localhost", port="2947")
-        self.session.stream(flags=gps.client.WATCH_JSON)
+        from .gps_module import gps
+        from .gps_module import client
+
+        self.session = gps(host="localhost", port="2947")
+        self.session.stream(flags=client.WATCH_JSON)
         self.verbose = False
         # vars
         self.fix = None
         self.satellites = []
+
+        print("ASASDA")
+        print(self.session)
+        print(self.session.stream)
 
     def run(self):
         import gps_module as gps
