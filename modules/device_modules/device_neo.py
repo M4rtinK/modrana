@@ -19,7 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_device_module import DeviceModule, DEVICE_SMARTPHONE
+from modules.device_modules.base_device_module import DeviceModule
+from core.constants import DEVICE_TYPE_SMARTPHONE
 import subprocess
 
 
@@ -99,4 +100,4 @@ class DeviceNeo(DeviceModule):
         return "gpsd"
 
     def getDeviceType(self):
-        return DEVICE_SMARTPHONE
+        return DEVICE_TYPE_SMARTPHONE

@@ -19,7 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_device_module import DeviceModule, DEVICE_SMARTPHONE
+from modules.device_modules.base_device_module import DeviceModule
+from core.constants import DEVICE_TYPE_SMARTPHONE
 
 QTM_IMPORT_SUCCESS = False
 try:
@@ -120,6 +121,7 @@ class DeviceNemo(DeviceModule):
         """No need for a separate Quit button thanks to the Nemo UI"""
         return False
 
+    @property
     def getDeviceType(self):
         # TODO: amend once some Nemo tablets show up
-        return DEVICE_SMARTPHONE
+        return DEVICE_TYPE_SMARTPHONE

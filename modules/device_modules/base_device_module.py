@@ -22,11 +22,6 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 
-DEVICE_DESKTOP = 1
-DEVICE_SMARTPHONE = 2
-DEVICE_TABLET = 3
-
-
 class DeviceModule(RanaModule):
     """A modRana device module"""
 

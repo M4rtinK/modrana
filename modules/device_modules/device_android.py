@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_device_module import DeviceModule
+from modules.device_modules.base_device_module import DeviceModule
 
 MAP_FOLDER_PATH = "/sdcard/modrana/maps"
 ROUTING_DATA_FOLDER_PATH = "/sdcard/modrana/routing_data"

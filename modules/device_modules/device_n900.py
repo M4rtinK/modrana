@@ -21,7 +21,8 @@
 #---------------------------------------------------------------------------
 import subprocess
 import time
-from base_device_module import DeviceModule, DEVICE_SMARTPHONE
+from modules.device_modules.base_device_module import DeviceModule
+from core.constants import DEVICE_TYPE_SMARTPHONE
 #N900 specific:
 import dbus.glib
 
@@ -627,4 +628,4 @@ class DeviceN900(DeviceModule):
         subprocess.call(["sh", "modules/device_modules/n900_maemo5_autoconnect_dbus.sh"])
 
     def getDeviceType(self):
-        return DEVICE_SMARTPHONE
+        return DEVICE_TYPE_SMARTPHONE

@@ -29,3 +29,8 @@ PANGO_OFF = '<span color="red">OFF</span>'
 
 # threads
 THREAD_POI_SEARCH = "modRanaPOISearch"
+
+# device types
+DEVICE_TYPE_DESKTOP = 1
+DEVICE_TYPE_SMARTPHONE = 2
+DEVICE_TYPE_TABLET = 3

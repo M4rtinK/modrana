@@ -19,7 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from base_device_module import DeviceModule, DEVICE_TABLET
+from modules.device_modules.base_device_module import DeviceModule
+from core.constants import DEVICE_TYPE_TABLET
 
 
 def getModule(m, d, i):
@@ -51,4 +52,4 @@ class DeviceQ7(DeviceModule):
         return ["GTK"]
 
     def getDeviceType(self):
-        return DEVICE_TABLET
+        return DEVICE_TYPE_TABLET
