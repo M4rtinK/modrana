@@ -1,5 +1,4 @@
 import sys
-import __builtin__
 
 # based on: http://blog.yjl.im/2009/02/propery-setter-and-deleter-in-python-25.html
 # For Python 2.5-, this will enable the similar property mechanism as in
@@ -8,6 +7,7 @@ import __builtin__
 if sys.version_info[:2] <= (2, 5):
     # If you need to access original built-in property(), uncomment the next line.
     # __builtin__._property = property
+    import __builtin__
     class property(property):
 
         def __init__(self, fget, *args, **kwargs):

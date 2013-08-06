@@ -74,7 +74,10 @@ def wrapList(objects, wrapper):
     :param wrapper: QObject based wrapper
     :type wrapper: wrapper object constructor
     """
-    return map(lambda  x: wrapper(x), objects)
+    # as map returns something like a transient view in
+    # Python 3, we need to make sure we return a list,
+    # as the object would not be really assigned otherwise
+    return list(map(lambda  x: wrapper(x), objects))
 
 class Logger(object):
     def __init__(self, log=True):

@@ -28,8 +28,6 @@
 # use a fake stdout log
 from __future__ import with_statement # for python 2.5
 import sys
-import thread
-
 
 class FakeLog(object):
     def info(self, message):
@@ -148,7 +146,7 @@ class ThreadManager(object):
            thread.
         """
         if self._errors.get(name):
-            raise self._errors[name][0], self._errors[name][1], self._errors[name][2]
+            raise self._errors[name][0](self._errors[name][1]).with_traceback(self._errors[name][2])
 
     def in_main_thread(self):
         """Return True if it is run in the main thread."""
@@ -180,6 +178,9 @@ class ModRanaThread(threading.Thread):
         # Python 2.5 on Maemo 5 is missing the name and ident properties
         if sys.version_info[:2] <= (2, 5):
             self.name = self.getName()
+            import thread  # not needed outside of Python 2.5
+            # (also not valid outside of Python 2.5,
+            # thread has been renamed to _thread in Python 3)
             self.ident = thread.get_ident()
 
     def _nop(self, *args, **kwargs):

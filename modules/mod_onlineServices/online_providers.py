@@ -55,7 +55,9 @@ class GeocodingNominatim(POIProvider):
             queryUrl = NOMINATIM_GEOCODING_URL + urlencode(params)
             reply = urlopen(queryUrl)
             if reply:
-                jsonReply = json.load(reply)
+                # json in Python 3 really needs it encoded like this
+                replyData = reply.read().decode("utf-8")
+                jsonReply = json.loads(replyData)
                 for result in jsonReply:
                     # split a prefix from the display name
                     description = result.get("display_name")

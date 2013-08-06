@@ -31,6 +31,7 @@ import urllib2
 #
 # although it should work without an in-OS-installed simplejson package,
 # proper package has binary speedups, so it is preferred to install it if possible
+from core.backports import six
 
 try:
     try:
@@ -126,7 +127,7 @@ class GoogleMapsError(Exception):
 
     def __unicode__(self):
         """Return a unicode representation of this :exc:`GoogleMapsError`."""
-        return unicode(self.__str__())
+        return six.unicode(self.__str__())
 
 
 STATUS_OK = GoogleMapsError.G_GEO_SUCCESS
@@ -499,15 +500,18 @@ if __name__ == "__main__":
         if len(argv) == 3:
             api_key = argv[2]
         else:
-            api_key = raw_input("Google Maps API key: ")
+            api_key = six.input("Google Maps API key: ")
 
         gmap = GoogleMaps(api_key)
         try:
             result = gmap.geocode(query)
-        except GoogleMapsError, err:
+        except GoogleMapsError:
+            import sys
+            err = sys.exc_info()[1]
             sys.stderr.write('%s\n%s\nResponse:\n' % (err.url, err))
             json.dump(err.response, sys.stderr, indent=4)
             sys.exit(1)
+        import sys
         json.dump(result, sys.stdout, indent=4)
         sys.stdout.write('\n')
 

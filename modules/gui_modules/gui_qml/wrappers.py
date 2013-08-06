@@ -37,6 +37,7 @@
 from PySide import QtCore
 from inspect import isfunction
 from pprint import pprint
+from core.backports import six
 
 
 class NestedWrapper(QtCore.QObject):
@@ -137,9 +138,9 @@ class PointWrapper(QtCore.QObject):
 
     changed = QtCore.Signal()
 
-    name = QtCore.Property(unicode, lambda x: x.wo.name, notify=changed)
-    summary = QtCore.Property(unicode, lambda x: x.wo.summary, notify=changed)
-    description = QtCore.Property(unicode, lambda x: x.wo.description, notify=changed)
+    name = QtCore.Property(six.text_type, lambda x: x.wo.name, notify=changed)
+    summary = QtCore.Property(six.text_type, lambda x: x.wo.summary, notify=changed)
+    description = QtCore.Property(six.text_type, lambda x: x.wo.description, notify=changed)
     lat = QtCore.Property(float, lambda x: x.wo.lat, notify=changed)
     lon = QtCore.Property(float, lambda x: x.wo.lon, notify=changed)
     elevation = QtCore.Property(float, lambda x: x.wo.elevation, notify=changed)
