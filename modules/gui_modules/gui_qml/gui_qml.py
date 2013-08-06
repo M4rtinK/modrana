@@ -127,10 +127,13 @@ class QMLGUI(GUIModule):
             self.app.setStartDragDistance(startDragDistance)
 
         # get screen resolution
-        screenRectangle = self.app.desktop().screenGeometry()
-        width = screenRectangle.width()
-        height = screenRectangle.height()
-        print(" @ screen size: %dx%d" % (width, height))
+        screenWH = self.getScreenWH()
+        print(" @ screen size: %dx%d" % screenWH)
+        if self.highDPI:
+            print(" @ high DPI")
+        else:
+            print(" @ normal DPI")
+
         # NOTE: what about multi-display devices ? :)
 
         # register custom modRana types
@@ -329,6 +332,11 @@ class QMLGUI(GUIModule):
         else:
             return None
 
+    def getScreenWH(self):
+        screenRectangle = self.app.desktop().screenGeometry()
+        width = screenRectangle.width()
+        height = screenRectangle.height()
+        return width, height
 
     def getConstants(self):
         C = {
@@ -366,12 +374,13 @@ class QMLGUI(GUIModule):
     def _getLayerListModel(self):
         pass
 
-    def _getStyleConstants(self, highDPI=False):
+    def _getStyleConstants(self):
         # as True == 1 and False == 0,
         # we use the highDPI boolean as a tuple index
         # * highDpi == False -> first value is used
         # * highDpi == True -> second value is used
-        i = highDPI
+        i = self.highDPI
+
         style = {
             "m" : (1, 2)[i], # approximate size multiplier
             "main" : {
@@ -420,7 +429,6 @@ class QMLGUI(GUIModule):
                 "itemBorder" : (20, 40)[i],
                 }
         }
-        i = highDPI
         return style
 
 

@@ -20,6 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from core import constants
 
 from modules.base_module import RanaModule
 
@@ -166,6 +167,34 @@ class GUIModule(RanaModule):
         import webbrowser
 
         webbrowser.open(url)
+
+    def getScreenWH(self):
+        """In some cases, the GUI module might be able
+        to get screen resolution"""
+        return None
+
+    @property
+    def highDPI(self):
+        """Try to guess if to show the high DPI GUI or not"""
+        screenWH = self.getScreenWH()
+        if screenWH:
+            size = max(screenWH)
+            deviceType = self.modrana.dmod.getDeviceType()
+            if size > 848 and deviceType == constants.DEVICE_TYPE_SMARTPHONE:
+                # high DPI smartphone
+                return True
+            elif size > 1024 and deviceType == constants.DEVICE_TYPE_TABLET:
+                # high DPI tablet
+                return True
+            elif size > 1920 and deviceType == constants.DEVICE_TYPE_DESKTOP:
+                # high DPI desktop
+                return True
+            else:
+                return False
+
+
+
+
 
 
 
