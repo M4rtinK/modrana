@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
-# A Neo FreeRunner modRana device-specific module.
+# A BB10 modRana device-specific module.
 # It is a basic modRana module, that has some special features
-# and is loaded only on the correpsponding device.
+# and is loaded only on the corresponding device.
 #----------------------------------------------------------------------------
 # Copyright 2010, Martin Kolman
 #
@@ -29,7 +29,7 @@ def getModule(m, d, i):
 
 
 class BB10(DeviceModule):
-    """A modRana device-specific module for Android chroot"""
+    """A modRana device-specific module for BB10 devices"""
 
     def __init__(self, m, d, i):
         DeviceModule.__init__(self, m, d, i)
