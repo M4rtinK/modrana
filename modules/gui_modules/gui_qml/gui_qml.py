@@ -49,6 +49,7 @@ from core.fix import Fix
 from core import signal
 from core.backports import six
 from core import constants
+from core.threads import threadMgr
 
 global globe
 
@@ -736,7 +737,9 @@ class Search(QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.gui = gui
         self._addressSearchResults = None
+        self._addressSearchStatus = "Searching..."
         self._addressSearchInProgress = False
+        self._addressSearchThreadName = None
         self._localSearchResults = None
         self._wikipediaSearchResults = None
         self._routeSearchResults = None
@@ -745,6 +748,15 @@ class Search(QtCore.QObject):
         # objects and not just returning a newly wrapped object on demand ?
         # -> because PySide (1.1.1) segfaults if we don't hold any reference
         # on the object returned :)
+
+        # register the thread status changed callback
+        threadMgr.threadStatusChanged.connect(self._threadStatusCB)
+
+    def _threadStatusCB(self, threadName, threadStatus):
+        if threadName == self._addressSearchThreadName:
+        #if threadName == constants.THREAD_ADDRESS_SEARCH:
+            self._addressSearchStatus = threadStatus
+            self._addressSignal.emit()
 
 
     @QtCore.Slot(str)
@@ -756,9 +768,21 @@ class Search(QtCore.QObject):
         """
         online = self.gui.m.get("onlineServices", None)
         if online:
-            online.geocodeAsync(address, self._addressSearchCB)
+            self._addressSearchThreadName = online.geocodeAsync(
+                address, self._addressSearchCB
+            )
         self._addressSearchInProgress = True
         self._addressSignal.emit()
+
+    @QtCore.Slot()
+    def addressCancel(self):
+        """Cancel the asynchronous address search"""
+        threadMgr.cancel_thread(self._addressSearchThreadName)
+        self._addressSearchInProgress = False
+        self._addressSearchStatus = "Searching..."
+        self._addressSignal.emit()
+
+
 
     def _addressSearchCB(self, results):
         """Replace old address search results (if any) with
@@ -774,7 +798,10 @@ class Search(QtCore.QObject):
         self._addressSearchInProgress = False
         self._addressSignal.emit()
 
-    addressRunning = QtCore.Property(bool,
+    addressStatus = QtCore.Property(six.text_type,
+        lambda x: x._addressSearchStatus, notify=_addressSignal)
+
+    addressInProgress = QtCore.Property(bool,
         lambda x: x._addressSearchInProgress, notify=_addressSignal)
 
 

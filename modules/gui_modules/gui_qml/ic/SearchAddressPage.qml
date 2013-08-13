@@ -50,18 +50,87 @@ BasePage {
         }*/
     }
     content {
+        Item {
+            id : progressInfo
+            //anchors.top : parent.top
+            //anchors.topMargin : C.style.main.spacing
+            anchors.left : parent.left
+            anchors.right : parent.right
+            property real progressH : C.style.button.generic.height
+            //height : search.addressInProgress ? progressH : 0
+            //visible : search.addressInProgress
+            state : "OFF"
+            height : progressH
+            y : -progressH
+            Row {
+                spacing : C.style.main.spacing
+                TextButton {
+                    text : search.addressStatus
+                    height : progressInfo.height
+                    width : progressInfo.width * 3/4
+                }
+                TextButton {
+                    text : "Cancel"
+                    height : progressInfo.height
+                    width : progressInfo.width * 1/4 - C.style.main.spacing
+                    onClicked : {
+                        console.log("Cancel pressed")
+                        search.addressCancel()
+                    }
+                }
+            }
+
+             Connections {
+                 target: search
+                 onAddressInProgressChanged: {
+                    progressInfo.state = search.addressInProgress ? "ON" : "OFF"
+                 }
+             }
+
+
+            onStateChanged : {
+                console.log("STATE CHANGED: " + state)
+            }
+
+            states: [
+                     State {
+                         name: "ON"
+                     },
+                     State {
+                         name: "OFF"
+                     }
+                 ]
+
+                 transitions: [
+                     Transition {
+                         from: "OFF"
+                         to: "ON"
+                         NumberAnimation { target: progressInfo; property: "y"; to: C.style.main.spacing; duration: 200*rWin.animate}
+                     },
+                     Transition {
+                         from: "ON"
+                         to: "OFF"
+                         NumberAnimation { target: progressInfo; property: "y"; to: -progressInfo.progressH; duration: 200*rWin.animate}
+                     }
+                 ]
+
+
+        }
         ListView {
-            anchors.top : parent.top
+            id : pointLW
+            anchors.top : progressInfo.bottom
             anchors.topMargin : C.style.listView.spacing
             anchors.left : parent.left
             anchors.right : parent.right
             height : addressSearchPage.availableHeight
             spacing : C.style.listView.spacing
             model : addressSearchModel
+            clip : true
             delegate : BackgroundRectangle {
                 id : resultDelegate
-                anchors.left : parent.left
-                anchors.right : parent.right
+                width : pointLW.width
+                //anchors.left : pointLW.left
+                //anchors.right : pointLW.right
                 height : contentC.height + C.style.listView.itemBorder
                 active : resultMA.pressed
                 Column {
