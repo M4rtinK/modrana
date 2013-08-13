@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Online geodata providers
 import time
+from core import constants
 
 try:
     import json
@@ -23,7 +24,7 @@ NOMINATIM_GEOCODING_URL = API_URL = "http://nominatim.openstreetmap.org/search?"
 
 class GoogleAddressSearch(POIProvider):
     def __init__(self):
-        POIProvider.__init__(self)
+        POIProvider.__init__(self, threadName=constants.THREAD_ADDRESS_SEARCH)
 
     def search(self, term=None, around=None, controller=DummyController()):
         """Search for an address using Google geocoding API"""
@@ -36,7 +37,7 @@ class GoogleAddressSearch(POIProvider):
 
 class GeocodingNominatim(POIProvider):
     def __init__(self):
-        POIProvider.__init__(self)
+        POIProvider.__init__(self, threadName=constants.THREAD_ADDRESS_SEARCH)
 
     def search(self, term=None, around=None, controller=DummyController()):
         """Search for an address using Google geocoding API"""
@@ -88,7 +89,7 @@ class GeocodingNominatim(POIProvider):
 
 class TestingProvider(POIProvider):
     def __init__(self):
-        POIProvider.__init__(self)
+        POIProvider.__init__(self, threadName=constants.THREAD_TESTING_PROVIDER)
 
     def search(self, term=None, around=None, controller=DummyController()):
         controller.status  = "starting provider test"
