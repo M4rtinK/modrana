@@ -180,7 +180,7 @@ class GUIModule(RanaModule):
         if screenWH:
             size = max(screenWH)
             deviceType = self.modrana.dmod.getDeviceType()
-            if size > 848 and deviceType == constants.DEVICE_TYPE_SMARTPHONE:
+            if size > 854 and deviceType == constants.DEVICE_TYPE_SMARTPHONE:
                 # high DPI smartphone
                 return True
             elif size > 1024 and deviceType == constants.DEVICE_TYPE_TABLET:
