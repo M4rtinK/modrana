@@ -57,3 +57,8 @@ class POIProvider(object):
         # register the thread by the thread manager
         # (this also starts the thread)
         threads.threadMgr.add(thread)
+
+    @property
+    def threadName(self):
+        """Return name of the thread used for asynchronous search"""
+        return self._threadName
