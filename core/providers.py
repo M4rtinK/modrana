@@ -14,8 +14,8 @@ class DummyController(object):
 
 
 class POIProvider(object):
-    def __init__(self):
-        pass
+    def __init__(self, threadName=constants.THREAD_POI_SEARCH):
+        self._threadName = threadName
 
     def search(self, term=None, around=None, controller=DummyController()):
         """Search for POI using a textual search query
@@ -41,7 +41,7 @@ class POIProvider(object):
         # lambda is used to pass all needed arguments to the search function
         # and passing the result to the callback,
         # but not actually executing it until the thread is started
-        thread = threads.ModRanaThread(name=constants.THREAD_POI_SEARCH)
+        thread = threads.ModRanaThread(name=self._threadName)
         thread.target = lambda: self.search(
             term=term,
             around=around,
