@@ -175,18 +175,7 @@ class Notification(RanaModule):
         :param taskName: task to cancel
         :type taskName: str
         """
-        try:
-            # get thread for the given task
-            thread = threadMgr.get(taskName)
-            if thread:
-                # cancel its callback
-                thread.callback = None
-        except Exception:
-            import sys
-            print("notification: exception canceling thread"
-                  " callback for %s" % taskName)
-            e = sys.exc_info()[1]
-            print(e)
+        threadMgr.cancel_thread(taskName)
         # and finally stop tracking the task
         self.removeTask(taskName)
         print("notification: task %s has been cancelled" % taskName)

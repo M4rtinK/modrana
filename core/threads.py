@@ -124,6 +124,29 @@ class ThreadManager(object):
 
         self.raise_error(name)
 
+
+    def cancel_thread(self, thread_name):
+        """Cancel a a thread - cancel callback for given thread
+
+        :param thread_name: thread to cancel
+        :type thread_name: str
+        """
+        try:
+            # get thread for the given task
+            thread_instance = self.get(thread_name)
+            if thread_instance:
+                # cancel its callback
+                thread_instance.callback = None
+                print("threads: thread %s cancelled" % thread_name)
+        except Exception:
+            import sys
+            print("notification: exception canceling thread"
+                  " callback for %s" % thread_name)
+            e = sys.exc_info()[1]
+            print(e)
+
+
+
     def set_error(self, name, *exc_info):
         """Set the error data for a thread
 
