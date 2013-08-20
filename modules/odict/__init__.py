@@ -1,1 +1,1 @@
-from pyodict import odict
+from .pyodict import odict
