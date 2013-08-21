@@ -51,9 +51,5 @@ class Config(RanaModule):
         # (so use this with caution on metered connections)
         self.set('maxSizeThreads', 20)
 
-        # Google API key for modRana
-        self.set('googleAPIKey',
-                 'ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw')
-
         # Option: set your start position
         #self.set("pos", (49.2, 16.616667)) # Brno

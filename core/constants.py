@@ -31,6 +31,8 @@ PANGO_OFF = '<span color="red">OFF</span>'
 THREAD_POI_SEARCH = "modRanaPOISearch"
 THREAD_ADDRESS_SEARCH = "modRanaAddressSearch"
 THREAD_TESTING_PROVIDER = "modRanaTestingProvider"
+THREAD_ROUTING_ONLINE_GOOGLE = "modRanaRoutingOnlineGoogle"
+THREAD_ROUTING_OFFLINE_MONAV = "modRanaRoutingOfflineMonav"
 
 # device types
 DEVICE_TYPE_DESKTOP = 1
@@ -44,3 +46,6 @@ ROUTE_DEFAULT_LANGUAGE = "en"
 ROUTE_PEDESTRIAN = 1
 ROUTE_BIKE = 2
 ROUTE_CAR = 3
+
+# API access
+GOOGLE_API_KEY = 'ABQIAAAAv84YYgTIjdezewgb8xl5_xTKlax5G-CAZlpGqFgXfh-jq3S0yRS6XLrXE9CkHPS6KDCig4gHvHK3lw'

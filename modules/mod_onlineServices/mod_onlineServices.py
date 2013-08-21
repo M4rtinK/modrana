@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from core import constants
 from modules.base_module import RanaModule
 import traceback
 import sys
@@ -167,13 +168,12 @@ class OnlineServices(RanaModule):
 
     def getGmapsInstance(self):
         """get a google maps wrapper instance"""
-        key = self.get('googleAPIKey', DEFAULT_GOOGLE_API_KEY)
-        if key is None:
+        key = constants.GOOGLE_API_KEY
+        if not key:
             print("onlineServices: a google API key is needed for using the google maps services")
             return None
             # only import when actually needed
-        import googlemaps
-
+        from modules import googlemaps
         gMap = googlemaps.GoogleMaps(key)
         return gMap
 
@@ -194,115 +194,6 @@ class OnlineServices(RanaModule):
         """get a correctly formatted GLS query"""
         query = "%s loc:%s" % (term, location)
         return query
-
-    def googleDirectionsAsync(self, start, destination, outputHandler, key, waypoints=None):
-        """a background running google directions query
-           -> verbatim start and destination will be used in route description, no geocoding
-           outputHandler will be provided with the results + the specified key string"""
-        if not waypoints: waypoints = []
-        routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
-
-        args = [(start, destination, routeRequestSentTimestamp, waypoints)]
-        flags = {'net': True}
-        self._addWorkerThread(Worker._onlineRouteLookup, args, outputHandler, key, flags)
-
-    def googleDirectionsLLAsync(self, start, destination, outputHandler, key, waypoints=None):
-        """a background running Google Directions query
-        - Lat Lon pairs version -> for geocoding the start/destination points (NOT first/last route points)
-           outputHandler will be provided with the results + the specified key string"""
-        if not waypoints: waypoints = []
-        routeRequestSentTimestamp = time.time() # used for measuring how long the route lookup took
-        args = [(start, destination, routeRequestSentTimestamp, waypoints)]
-        flags = {'net': True}
-        self._addWorkerThread(Worker._onlineRouteLookup, args, outputHandler, key, flags)
-
-    def googleDirections(self, start, destination, waypoints=None):
-        """ Get driving directions from Google.
-        start and directions can be either coordinates tuples or address strings
-        """
-        if not waypoints: waypoints = []
-
-        otherOptions = ""
-        if self.get('routingAvoidHighways', False): # optionally avoid highways
-            otherOptions += 'h'
-        if self.get('routingAvoidToll', False): # optionally avoid toll roads
-            otherOptions += 't'
-        waypointOption = None
-        if waypoints: # waypoints are a list of strings
-            waypointOption = "%s" % waypoints[0]
-            for waypoint in waypoints[1:]:
-                waypointOption += "|%s" % waypoint
-                # respect travel mode
-        mode = self.get('mode', None)
-        if mode == 'cycle':
-            directionsType = "b"
-        elif mode == 'walk':
-            directionsType = "w"
-        elif mode == 'train' or mode == 'bus':
-            directionsType = 'r'
-        else:
-            directionsType = ""
-
-            # combine type and other parameters
-        flagDir = {}
-        # the google language code is the second part of this whitespace delimited string
-        googleLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[1]
-        flagDir['language'] = googleLanguageCode
-        directions = self.tryToGetDirections(start, destination, flagDir, directionsType, otherOptions, waypointOption)
-
-        return directions
-
-    def tryToGetDirections(self, start, destination, flagDir, travelMode, otherOptions, waypointOption,
-                           secondTime=False):
-        gMap = self.getGmapsInstance()
-        parameters = travelMode + otherOptions
-        flagDir['dirflg'] = parameters
-        if waypointOption:
-            flagDir['waypoints'] = waypointOption
-        flagDir['sensor'] = 'false'
-        directions = ""
-        # only import when actually needed
-        import googlemaps
-
-        try:
-            directions = gMap.directions(start, destination, flagDir)
-        except googlemaps.GoogleMapsError:
-            import sys
-
-            e = sys.exc_info()[1]
-            if e.status == 602:
-                print("onlineServices:GDirections:routing failed -> address not found")
-                print(e)
-                self.sendMessage("ml:notification:m:Address(es) not found;5")
-            elif e.status == 604:
-                print("onlineServices:GDirections:routing failed -> no route found")
-                print(e)
-                self.sendMessage("ml:notification:m:No route found;5")
-            elif e.status == 400:
-                if not secondTime: # guard against potential infinite loop for consequent 400 errors
-                    print("onlineServices:GDirections:bad response to travel mode, trying default travel mode")
-                    self.set('needRedraw', True)
-                    directions = self.tryToGetDirections(start, destination, flagDir, travelMode="",
-                                                         otherOptions=otherOptions,
-                                                         waypointOption=waypointOption, secondTime=True)
-            else:
-                print("onlineServices:GDirections:routing failed with exception googlemaps status code:%d" % e.status)
-        except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("onlineServices:GDirections:routing failed with non-googlemaps exception")
-            print(e)
-            traceback.print_exc(file=sys.stdout) # find what went wrong
-
-        self.set('needRedraw', True)
-        return directions
-
-    def googleDirectionsLL(self, lat1, lon1, lat2, lon2, waypoints=None):
-        if not waypoints: waypoints = []
-        start = (lat1, lon1)
-        destination = (lat2, lon2)
-        return self.googleDirections(start, destination, waypoints)
 
     def _googleReverseGeocode(self, lat, lon):
         gMap = self.getGmapsInstance()
@@ -502,19 +393,6 @@ class Worker(threading.Thread):
         1.0 -> 100%
         """
         self.progress = progress
-
-    # Google
-    def _onlineRouteLookup(self, query):
-        """this method online route lookup and is called by the worker thread"""
-        (start, destination, routeRequestSentTimestamp, waypoints) = query
-        print("worker: routing from %s to %s" % (start, destination))
-        self._setWorkStatusText("online routing in progress...")
-        # get the route
-        directions = self.online.googleDirections(start, destination, waypoints)
-        self._setWorkStatusText("online routing done   ")
-        self._workDone()
-        # return result to the thread to handle
-        return directions, start, destination, routeRequestSentTimestamp
 
     def _localGoogleSearch(self, term, location=None):
         if location:

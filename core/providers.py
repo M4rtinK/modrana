@@ -126,11 +126,13 @@ class RouteParameters(object):
                  avoidTollRoads=False,
                  avoidHighways=False,
                  routeMode=constants.ROUTE_CAR,
-                 language=constants.ROUTE_DEFAULT_LANGUAGE ):
+                 language=constants.ROUTE_DEFAULT_LANGUAGE,
+                 addressRoute=False):
         self._avoidTollRoads = avoidTollRoads
         self._avoidHighways = avoidHighways
         self._routeMode = routeMode
         self._language = language
+        self._addressRoute = addressRoute
 
     @property
     def avoidTollRoads(self):
@@ -148,3 +150,16 @@ class RouteParameters(object):
     def language(self):
         return self._language
 
+    @property
+    def language(self):
+        return self._language
+
+    @property
+    def addressRoute(self):
+        """When addressRoute is True, the start and destination of the route
+        is described using textual point descriptions
+        Example: start=London, destination=Berlin
+
+        Additional waypoints can be either textual descriptions or ordinary Point objects
+        """
+        return self._addressRoute

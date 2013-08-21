@@ -26,11 +26,12 @@ import re
 import csv
 import traceback
 import unicodedata
-import core.way as way
-import core.geo as geo
-from core.backports.six import u
-#from time import clock
 import time
+from core.point import Point
+import core.way as way
+from core.backports.six import u
+from . import routing_providers
+
 
 DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
 
@@ -51,13 +52,15 @@ def getModule(m, d, i):
     return Route(m, d, i)
 
 
+#noinspection PyAttributeOutsideInit
 class Route(RanaModule):
     """Routes"""
 
     def __init__(self, m, d, i):
         RanaModule.__init__(self, m, d, i)
         self._goToInitialState()
-        self.routeRequestSentTimestamp = None
+        # how long the last routing lookup took in seconds
+        self.routeLookupDuration = 0
         self.once = True
         self.entry = None
 
@@ -77,7 +80,6 @@ class Route(RanaModule):
     def _goToInitialState(self):
         """restorer initial routing state
         -> used in init and when rerouting"""
-        self.routeRequestSentTimestamp = None
         self.pxpyRoute = [] # route in screen coordinates
         self.directions = [] # directions object
         self.set('midText', [])
@@ -152,7 +154,7 @@ class Route(RanaModule):
                 # occur when converting to lat lon coordinates
                 (lat, lon) = proj.xy2ll(x, y)
                 self.set('startPos', (lat, lon))
-                self.start = (lat, lon)
+                self.start = Point(lat, lon)
                 self.destination = None # clear destination
 
             self.expectStart = False
@@ -195,7 +197,7 @@ class Route(RanaModule):
                 # occur when converting to lat lon coordinates
                 (lat, lon) = proj.xy2ll(x, y)
                 self.set('endPos', (lat, lon))
-                self.destination = (lat, lon)
+                self.destination = Point(lat, lon)
                 self.start = None # clear start
 
             self.expectEnd = False
@@ -210,7 +212,7 @@ class Route(RanaModule):
             self.selectManyPoints = True
             self.handmade = True
             self.osdMenuState = OSD_EDIT
-            print("HANDMADE")
+            print("Handmade routing")
             print(self.handmade)
 
         elif message == "selectTwoPoints":
@@ -219,7 +221,7 @@ class Route(RanaModule):
             self.set('middlePos', [])
             self.selectOnePoint = False
             self.selectTwoPoints = True
-            self.selectManyPoints = True
+            self.selectManyPoints = False
             self.osdMenuState = OSD_EDIT
 
         elif message == "selectOnePoint":
@@ -232,44 +234,34 @@ class Route(RanaModule):
             self.osdMenuState = OSD_EDIT
 
         elif message == "p2pRoute": # simple route, between two points
-            toPos = self.get("endPos", None)
-            fromPos = self.get("startPos", None)
-            if toPos and fromPos:
-                toLat, toLon = toPos
-                fromLat, fromLon = fromPos
+            destination = self.get("endPos", None)
+            start = self.get("startPos", None)
+            if destination and start:
                 middlePoints = self.get('middlePos', [])
-                print("Routing %f,%f to %f,%f through %d waypoints"
-                      % (fromLat, fromLon, toLat, toLon, len(middlePoints)))
-                # TODO: wait message (would it be needed when using internet routing ?)
-                self.doRoute(fromLat, fromLon, toLat, toLon, waypoints=middlePoints)
-                self.set('needRedraw', True) # show the new route
+                self.llRoute(start, destination, middlePoints)
+                self.set('needRedraw', True)
 
         elif message == "p2phmRoute": # simple route, from start to middle to end (handmade routing)
-            fromPos = self.get("startPos", None)
-            toPos = self.get("endPos", None)
-            if fromPos and toPos:
-                toLat, toLon = toPos
-                fromLat, fromLon = fromPos
+            start = self.get("startPos", None)
+            destination = self.get("endPos", None)
+            if start and destination:
+                toLat, toLon = destination
+                fromLat, fromLon = start
                 middlePoints = self.get("middlePos", [])
                 print("Handmade route ")
-                print(fromLat, fromLon)
+                print("%f,%f" % (fromLat, fromLon))
                 print(" through ")
                 print(middlePoints)
                 print(" to %f,%f" % (toLat, toLon))
-                war = way.fromHandmade(fromPos, middlePoints, toPos)
-                print("NO WAI")
-                print(war)
-                self.processAndSaveResults(war, "start", "end", time.time())
-                # start TbT navigation (if enabled)
-                self.startNavigation()
-                # switch to the route options OSD menu
-                self.osdMenuState = OSD_CURRENT_ROUTE
-                self.set('needRedraw', True) # show the new route
+                handmadeRoute = way.fromHandmade(start, middlePoints, destination)
+                self._handleRoutingResultCB((handmadeRoute, "", 0))
 
         elif message == "p2posRoute": # simple route, from here to selected point
             startPos = self.get('startPos', None)
             endPos = self.get('endPos', None)
             pos = self.get('pos', None)
+            start = None
+            destination = None
             if pos is None: # well, we don't know where we are, so we don't know here to go :)
                 return None
 
@@ -277,46 +269,38 @@ class Route(RanaModule):
                 return None
 
             if startPos is not None: # we want a route from somewhere to our current position
-                fromPos = startPos
-                toPos = pos
+                start = startPos
+                destination = pos
 
             if endPos is not None: # we go from here to somewhere
-                fromPos = pos
-                toPos = endPos
-
-            (toLat, toLon) = toPos
-            (fromLat, fromLon) = fromPos
+                start = pos
+                destination = endPos
 
             middlePoints = self.get("middlePos", [])
-            print("Routing %f,%f to %f,%f through %d waypoints"
-                  % (fromLat, fromLon, toLat, toLon, len(middlePoints)))
-
-            self.doRoute(fromLat, fromLon, toLat, toLon, waypoints=middlePoints)
-            self.set('needRedraw', True) # show the new route
+            if start and destination:
+                self.llRoute(start, destination, middlePoints)
+                self.set('needRedraw', True) # show the new route
 
         elif message == "route": # find a route
             if messageType == 'md': # message-list based unpack requires a string argument of length 4 routing
                 if args:
                     messageType = args['type']
-                    go = False
+                    start = None
+                    destination = None
                     if messageType == 'll2ll':
-                        (fromLat, fromLon) = (float(args['fromLat']), float(args['fromLon']))
-                        (toLat, toLon) = (float(args['toLat']), float(args['toLon']))
-                        go = True
+                        start = (float(args['fromLat']), float(args['fromLon']))
+                        destination = (float(args['toLat']), float(args['toLon']))
                     elif messageType == 'pos2ll':
                         pos = self.get('pos', None)
                         if pos:
-                            (fromLat, fromLon) = pos
-                            (toLat, toLon) = (float(args['toLat']), float(args['toLon']))
-                            go = True
+                            start = pos
+                            destination = (float(args['toLat']), float(args['toLon']))
 
-                    if go: # are we GO for routing ?
-                        print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
+                    if start and destination: # are we GO for routing ?
                         try:
-                            self.doRoute(fromLat, fromLon, toLat, toLon)
+                            self.llRoute(start, destination)
                         except Exception:
                             import sys
-
                             e = sys.exc_info()[1]
                             self.sendMessage('ml:notification:m:No route found;3')
                             self.set('needRedraw', True)
@@ -326,28 +310,23 @@ class Route(RanaModule):
                             # switch to map view and go to start/destination, if requested
                             where = args['show']
                             if where == 'start':
-                                (cLat, cLon) = (fromLat, fromLon)
+                                self.sendMessage('mapView:recentre %f %f|set:menu:None' % start)
                             elif where == "destination":
-                                (cLat, cLon) = (toLat, toLon)
-                            self.sendMessage('mapView:recentre %f %f|set:menu:None' % (cLat, cLon))
+                                self.sendMessage('mapView:recentre %f %f|set:menu:None' % destination)
 
-                        self.set('needRedraw', True) # show the new route
+                        self.set('needRedraw', True)
             else: # simple route, from here to selected point
                 # disable the point selection GUIs
                 self.selectManyPoints = False # handmade
                 self.selectTwoPoints = False
                 self.selectOnePoint = False
                 self.osdMenuState = OSD_CURRENT_ROUTE
-                toPos = self.get("selectedPos", None)
-                if toPos:
-                    toLat, toLon = [float(a) for a in toPos.split(",")]
-                    fromPos = self.get("pos", None)
-                    if fromPos:
-                        (fromLat, fromLon) = fromPos
-                        print("Routing %f,%f to %f,%f" % (fromLat, fromLon, toLat, toLon))
-                        # TODO: wait message (would it be needed when using internet routing ?)
-                        self.doRoute(fromLat, fromLon, toLat, toLon)
-                        self.set('needRedraw', True) # show the new route
+                start = self.get("pos", None)
+                destination = self.get("selectedPos", None)
+                destination = [float(a) for a in destination.split(",")]
+                if start and destination:
+                    self.llRoute(start, destination)
+                    self.set('needRedraw', True)
 
         elif message == 'storeRoute':
             loadTracklogs = self.m.get('loadTracklogs', None)
@@ -424,10 +403,10 @@ class Route(RanaModule):
                 print("route: rerouting from current position to last destination")
                 pos = self.get('pos', None)
                 if self.destination and pos:
-                    (pLat, pLon) = pos
-                    (dLat, dLon) = (self.destination[0], self.destination[1])
-                    self.doRoute(pLat, pLon, dLat, dLon)
+                    start = Point(*pos)
+                    self.doRoute([start, self.destination])
                     self.start = None
+                    self.set('needRedraw', True)
 
         elif messageType == 'ms' and message == 'addressRouteMenu':
             if args == 'swap':
@@ -444,11 +423,46 @@ class Route(RanaModule):
             self.osdMenuState = int(args)
             self.set('needRedraw', True) # show the new menu
 
-    def doRoute(self, fromLat, fromLon, toLat, toLon, waypoints=None):
-        """Route from one point to another, and set that as the active route"""
-        if not waypoints: waypoints = []
-        # try to make sure waypoints are (lat, lon) tuples
-        waypoints = map(lambda x: (x[0], x[1]), waypoints)
+    def routeAsync(self, callback, waypoints, routeParams=None):
+        """Asynchronous routing
+
+        :param callback: routing result handler
+        :type callback: a callable
+        :param waypoints: a list of 2 or more waypoints defining the route
+        :type waypoints: a list of Point objects
+        :param routeParams: parameters for the route search
+        :type routeParams: RouteParameters object instance or None for defaults
+        """
+        # TODO: provider switching
+
+        provider = routing_providers.GoogleRouting()
+        provider.searchAsync(
+            callback,
+            waypoints,
+            routeParams=routeParams
+        )
+
+    def llRoute(self, start, destination, middlePoints=None):
+        if not middlePoints: middlePoints = []
+
+        # tuples -> Points
+        start = Point(*start)
+        destination = Point(*destination)
+
+        # list of tuples -> list of Points
+        #middlePoints = list(map(lambda x: Point(x[0], x[1]), middlePoints))
+        waypoints = [start]
+        for lat, lon in middlePoints:
+            waypoints.append(Point(lat, lon))
+        waypoints.append(destination)
+        print("Routing %s to %s through %d waypoints"
+              % (start, destination, len(middlePoints)))
+        # TODO: wait message (would it be needed when using internet routing ?)
+        self.doRoute(waypoints)
+
+
+    def doRoute(self, waypoints):
+        """Route from one point to another"""
 
         # clear old addresses
         self.startAddress = None
@@ -478,13 +492,36 @@ class Route(RanaModule):
             self._handleResults("MonavRoute", (result, monavWaypoints[0], monavWaypoints[-1], sentTimestamp))
 
         else: # use Google Directions as fallback
-            online = self.m.get('onlineServices', None)
-            # prepare waypoints for Google Directions as a list of strings
-            gdWaypoints = map(lambda x: "(%f, %f)" % (x[0], x[1]), waypoints)
+            self.routeAsync(self._handleRoutingResultCB, waypoints)
 
-            if online:
-                online.googleDirectionsLLAsync((fromLat, fromLon), (toLat, toLon),
-                                               self._handleResults, "onlineRoute", waypoints=gdWaypoints)
+    def _handleRoutingResultCB(self, result):
+        # remove any previous route description
+        route, errorMessage, dt = result
+        self.text = None
+        print("route: routing ended with error:\n%s" % errorMessage)
+        if route:
+            # process and save routing results
+            self.routeLookupDuration = dt
+
+            # save a copy of the route in projection units for faster drawing
+            proj = self.m.get('projection', None)
+            if proj:
+                self.pxpyRoute = [proj.ll2pxpyRel(x[0], x[1]) for x in route.getPointsLLE()]
+            self.processAndSaveDirections(route)
+
+            # set start and destination
+            start = route.getPointByID(0)
+            destination = route.getPointByID(-1)
+            # use coordinates for start dest or use first/last point from the route
+            # if start/dest coordinates are unknown (None)
+            if self.start is None:
+                self.start = start
+            if self.destination is None:
+                self.destination = destination
+
+            self.osdMenuState = OSD_CURRENT_ROUTE
+            self.startNavigation()
+
 
     def getMonavRoute(self, waypoints):
         mode = self.get('mode', 'car')
@@ -575,25 +612,8 @@ class Route(RanaModule):
         """handle a routing result"""
         routingSuccess = False
         if key in ("onlineRoute", "onlineRouteAddress2Address"):
-            if key == "onlineRoute":
-                (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
-                # remove any possible prev. route description, so new a new one for this route is created
-                self.text = None
-
-                # TODO: support other providers than Google & offline routing
-
-                if directions: # is there actually something in the directions ?
-                    # create the directions Way object
-                    self.durationString = directions['routes'][0]['legs'][0]['duration']['text']
-                    dirs = way.fromGoogleDirectionsResult(directions)
-                    #TODO: use seconds from Way object directly
-                    #(needs seconds to human representation conversion)
-                    #self.duration = dirs.getDuration()
-                    self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
-                    routingSuccess = True
-                    self.startNavigation()
-            elif key == "onlineRouteAddress2Address":
-                (directions, start, destination, routeRequestSentTimestamp) = resultsTuple
+            if key == "onlineRouteAddress2Address":
+                (directions, start, destination) = resultsTuple
                 # remove any possible prev. route description, so new a new one for this route is created
                 self.text = None
                 if directions: # is there actually something in the directions ?
@@ -604,12 +624,12 @@ class Route(RanaModule):
 
                     # create the directions Way object
                     dirs = way.fromGoogleDirectionsResult(directions)
-                    self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
+                    self.processAndSaveResults(dirs, start, destination)
                     routingSuccess = True
                     self.startNavigation()
             self.set('needRedraw', True)
         elif key == "MonavRoute":
-            (result, start, destination, routeRequestSentTimestamp) = resultsTuple
+            (result, start, destination) = resultsTuple
             directions, returnCode = result
 
             if returnCode == ROUTING_SUCCESS:
@@ -623,7 +643,7 @@ class Route(RanaModule):
                     getTurns = None
 
                 dirs = way.fromMonavResult(directions, getTurns)
-                self.processAndSaveResults(dirs, start, destination, routeRequestSentTimestamp)
+                self.processAndSaveResults(dirs, start, destination)
 
                 routingSuccess = True
                 # handle navigation autostart
@@ -660,43 +680,25 @@ class Route(RanaModule):
             self.sendMessage('ms:turnByTurn:start:%s' % autostart)
 
 
-    def processAndSaveResults(self, directionsWay, start, destination, routeRequestSentTimestamp):
-        """process and save routing results"""
-        self.routeRequestSentTimestamp = routeRequestSentTimestamp
-        proj = self.m.get('projection', None)
-        if proj:
-            self.pxpyRoute = [proj.ll2pxpyRel(x[0], x[1]) for x in directionsWay.getPointsLLE()]
-        self.processAndSaveDirections(directionsWay)
-
-        (fromLat, fromLon) = directionsWay.getPointByID(0).getLL()
-        (toLat, toLon) = directionsWay.getPointByID(-1).getLL()
-
-        # use coordinates for start dest or use first/last point from the route
-        # if start/dest coordinates are unknown (None)
-        if self.start is None:
-            self.start = (fromLat, fromLon)
-        if self.destination is None:
-            self.destination = (toLat, toLon)
-
-    def processAndSaveDirections(self, directions):
+    def processAndSaveDirections(self, route):
         """process and save directions"""
 
         # apply filters
-        directions = self.filterDirections(directions)
+        route = self.filterDirections(route)
 
         # add a fake destination step, so there is a "destination reached" message
-        if directions.getPointCount() > 0:
-            (lat, lon) = directions.getPointByID(-1).getLL()
+        if route.getPointCount() > 0:
+            (lat, lon) = route.getPointByID(-1).getLL()
             destStep = way.TurnByTurnPoint(lat, lon)
             destStep.setSSMLMessage('<p xml:lang="en">you <b>should</b> be near the destination</p>')
             destStep.setMessage('you <b>should</b> be near the destination')
-            destStep.setDistanceFromStart(directions.getLength())
+            destStep.setDistanceFromStart(route.getLength())
             # TODO: make this multilingual
             # add it to the end of the message point list
-            directions.addMessagePoint(destStep)
+            route.addMessagePoint(destStep)
 
         # save
-        self.directions = directions
+        self.directions = route
 
     def getDirections(self):
         return self.directions
@@ -766,7 +768,7 @@ class Route(RanaModule):
             # test if the word has any cyrillic characters (a single one is enough)
             for character in substring:
                 try: # there are probably some characters that dont have a known name
-                    unicodeName = unicodedata.name(unicode(character))
+                    unicodeName = unicodedata.name(u(character))
                     if unicodeName.find('CYRILLIC') != -1:
                         cyrillicCharFound = True
                         break
@@ -851,7 +853,7 @@ class Route(RanaModule):
             steps = map(lambda x: (proj.ll2xy(x[0], x[1])), steps)
 
             if self.start:
-                start = proj.ll2xy(self.start[0], self.start[1])
+                start = proj.ll2xy(self.start.lat, self.start.lon)
                 # line from starting point to start of the route
                 (x, y) = start
                 (px1, py1) = self.pxpyRoute[0]
@@ -863,7 +865,7 @@ class Route(RanaModule):
                 cr.stroke()
 
             if self.destination:
-                destination = proj.ll2xy(self.destination[0], self.destination[1])
+                destination = proj.ll2xy(self.destination.lat, self.destination.lon)
                 # line from the destination point to end of the route
                 (x, y) = destination
                 (px1, py1) = self.pxpyRoute[-1]
@@ -964,7 +966,7 @@ class Route(RanaModule):
 
     def getCurrentDirections(self):
         """return the current route"""
-        return self.directions, self.routeRequestSentTimestamp
+        return self.directions
 
     def drawCurrentRouteButton(self, cr):
         """draw the info button for the current route on the map screen"""
@@ -1167,8 +1169,8 @@ class Route(RanaModule):
                 text += "%s" % destination
                 text += "\n\n%s in about %s and %s steps" % (distance, duration, steps)
                 if self.start and self.destination:
-                    (lat1, lon1) = (self.start[0], self.start[1])
-                    (lat2, lon2) = (self.destination[0], self.destination[1])
+                    (lat1, lon1) = self.start.getLL()
+                    (lat2, lon2) = self.destination.getLL()
                     text += "\n(%f,%f)->(%f,%f)" % (lat1, lon1, lat2, lon2)
 
                 self.text = text
@@ -1247,7 +1249,7 @@ class Route(RanaModule):
         if online:
             # start coordinates
             if self.start:
-                (sLat, sLon) = self.start
+                (sLat, sLon) = self.start.getLL()
             else:
                 (sLat, sLon) = self.directions.getPointByID(0).getLL()
                 # geocode start
@@ -1255,7 +1257,7 @@ class Route(RanaModule):
 
             # destination coordinates
             if self.destination:
-                (dLat, dLon) = self.destination
+                (dLat, dLon) = self.destination.getLL()
             else:
                 (dLat, dLon) = self.directions.getPointByID(-1).getLL()
             online.reverseGeocodeAsync(dLat, dLon, self._handleResults, "destinationAddress", "Geocoding destination")
