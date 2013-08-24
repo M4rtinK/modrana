@@ -371,7 +371,7 @@ class Route(RanaModule):
             if startAddress and destinationAddress:
                 print("route: address routing")
                 self.set('menu', None) # go to the map screen
-                self.doAddressRoute(startAddress, destinationAddress)
+                self.addressRoute(startAddress, destinationAddress)
             else: # notify the user about insufficient input and remain in the menu
                 print("route: can't route, start or destination (or both) not set")
                 if startAddress is None and destinationAddress is None:
@@ -460,6 +460,23 @@ class Route(RanaModule):
         # TODO: wait message (would it be needed when using internet routing ?)
         self.doRoute(waypoints)
 
+    def addressRoute(self, start, destination):
+        """Route from one address to another, and set the result as the active route
+        NOTE: both address string and plaintext geographic coordinates can be used
+
+        :param start: starting address
+        :type start: str
+        :param destination: destination address
+        :type destination: str
+        """
+        # cleanup any possible previous routes
+        self._goToInitialState()
+        print("Address-routing from %s to %s" % (start, destination))
+        waypoints = [start, destination]
+        # specify that this route lookup should expect start and destination
+        # specified as address strings
+        params = routing_providers.RouteParameters(addressRoute=True)
+        self.routeAsync(self._handleRoutingResultCB, waypoints, routeParams=params)
 
     def doRoute(self, waypoints):
         """Route from one point to another"""
@@ -598,15 +615,6 @@ class Route(RanaModule):
             print('route: listing the Monav data packs failed')
             print(e)
             return []
-
-    def doAddressRoute(self, start, destination):
-        """Route from one point to another, and set that as the active route"""
-        # cleanup any possible previous routes
-        self._goToInitialState()
-        online = self.m.get('onlineServices', None)
-        if online:
-            print("route: routing from %s to %s" % (start, destination))
-            online.googleDirectionsAsync(start, destination, self._handleResults, "onlineRouteAddress2Address")
 
     def _handleResults(self, key, resultsTuple):
         """handle a routing result"""
