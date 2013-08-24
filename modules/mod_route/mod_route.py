@@ -452,8 +452,8 @@ class Route(RanaModule):
         # list of tuples -> list of Points
         #middlePoints = list(map(lambda x: Point(x[0], x[1]), middlePoints))
         waypoints = [start]
-        for lat, lon in middlePoints:
-            waypoints.append(Point(lat, lon))
+        for mpTuple in middlePoints:
+            waypoints.append(Point(mpTuple[0], mpTuple[1]))
         waypoints.append(destination)
         print("Routing %s to %s through %d waypoints"
               % (start, destination, len(middlePoints)))
