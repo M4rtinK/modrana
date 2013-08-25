@@ -329,8 +329,10 @@ class Route(RanaModule):
             if not self.directions:
                 print("route: the route is empty, so it will not be stored")
                 return
-            loadTracklogs.storeRouteAndSetActive(self.directions.getPointsLLE(), '',
-                                                 'online') # TODO: rewrite this when we support more routing providers
+            # TODO: rewrite this when we support more routing providers
+            loadTracklogs.storeRouteAndSetActive(self.directions.getPointsLLE(),
+                                                 '',
+                                                 'online')
 
         elif message == "clearRoute":
             self._goToInitialState()
@@ -614,75 +616,13 @@ class Route(RanaModule):
 
     def _handleResults(self, key, resultsTuple):
         """handle a routing result"""
-        routingSuccess = False
-        if key in ("onlineRoute", "onlineRouteAddress2Address"):
-            if key == "onlineRouteAddress2Address":
-                (directions, start, destination) = resultsTuple
-                # remove any possible prev. route description, so new a new one for this route is created
-                self.text = None
-                if directions: # is there actually something in the directions ?
-                    self.durationString = directions['routes'][0]['legs'][0]['duration']['text']
-                    #TODO: use seconds from Way object directly
-                    #(needs seconds to human representation conversion)
-                    #self.duration = dirs.getDuration()
-
-                    # create the directions Way object
-                    dirs = way.fromGoogleDirectionsResult(directions)
-                    self.processAndSaveResults(dirs, start, destination)
-                    routingSuccess = True
-                    self.startNavigation()
-            self.set('needRedraw', True)
-        elif key == "MonavRoute":
-            (result, start, destination) = resultsTuple
-            directions, returnCode = result
-
-            if returnCode == constants.ROUTING_SUCCESS:
-                self.durationString = "" # TODO : correct predicted route duration
-
-                # provided a turn detection function to the way object
-                tbt = self.m.get("turnByTurn", None)
-                if tbt:
-                    getTurns = tbt.getMonavTurns
-                else:
-                    getTurns = None
-
-                dirs = way.fromMonavResult(directions, getTurns)
-                self.processAndSaveResults(dirs, start, destination)
-
-                routingSuccess = True
-                # handle navigation autostart
-                self.startNavigation()
-                self.set('needRedraw', True)
-
-            else: # routing failed
-                # show what & why failed
-                if returnCode == constants.ROUTING_LOOKUP_FAILED:
-                    self.notify('no ways near start or destination', 3000)
-                elif returnCode == constants.ROUTING_NO_DATA:
-                    self.notify('no routing data available', 3000)
-                elif returnCode == constants.ROUTING_LOAD_FAILED:
-                    self.notify('failed to load routing data', 3000)
-                elif returnCode == constants.ROUTING_ROUTE_FAILED:
-                    self.notify('failed to compute route', 3000)
-                else:
-                    self.notify('offline routing failed', 5000)
-        elif key == "startAddress":
-            self.startAddress = resultsTuple
-            self.text = None # clear route detail cache
-        elif key == "destinationAddress":
-            self.destinationAddress = resultsTuple
-            self.text = None # clear route detail cache
-
-        # if routing was successful switch to the current-route OSD menu
-        if routingSuccess:
-            self.osdMenuState = OSD_CURRENT_ROUTE
+        pass
 
     def startNavigation(self):
         """handle navigation autostart"""
         autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
         if autostart == 'enabled':
             self.sendMessage('ms:turnByTurn:start:%s' % autostart)
-
 
     def processAndSaveDirections(self, route):
         """process and save directions"""
@@ -717,6 +657,7 @@ class Route(RanaModule):
 
         for step in steps:
             originalMessage = "".join(str(step.getMessage()))
+            message = ""
             try:
                 message = step.description #TODO: make a method for this
                 message = re.sub(r'<div[^>]*?>', '\n<i>', message)
@@ -778,8 +719,6 @@ class Route(RanaModule):
                         break
                 except Exception:
                     import sys
-
-                    e = sys.exc_info()[1]
                     # just skip this as the character is  most probably unknown
                     pass
             if cyrillicCharFound: # the substring contains at least one cyrillic character
