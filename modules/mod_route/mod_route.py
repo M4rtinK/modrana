@@ -27,6 +27,7 @@ import csv
 import traceback
 import unicodedata
 import time
+from core import constants
 from core.point import Point
 import core.way as way
 from core.backports.six import u
@@ -34,13 +35,6 @@ from . import routing_providers
 
 
 DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
-
-# routing error codes
-ROUTING_SUCCESS = 0
-ROUTING_NO_DATA = 1 # failed to load routing data
-ROUTING_LOAD_FAILED = 2 # failed to load routing data
-ROUTING_LOOKUP_FAILED = 3 # failed to locate nearest way/edge
-ROUTING_ROUTE_FAILED = 4 # failed to compute route
 
 # OSD menu states
 OSD_EDIT = 1 # route editing buttons
@@ -75,7 +69,6 @@ class Route(RanaModule):
 
         # Monav
         self.monav = None
-        self.monavDataFolder = None
 
     def _goToInitialState(self):
         """restorer initial routing state
@@ -426,6 +419,8 @@ class Route(RanaModule):
     def routeAsync(self, callback, waypoints, routeParams=None):
         """Asynchronous routing
 
+        NOTE: online/offline routing provider is selected automatically
+
         :param callback: routing result handler
         :type callback: a callable
         :param waypoints: a list of 2 or more waypoints defining the route
@@ -433,14 +428,42 @@ class Route(RanaModule):
         :param routeParams: parameters for the route search
         :type routeParams: RouteParameters object instance or None for defaults
         """
-        # TODO: provider switching
+        providerID = self.get('routingProvider', "GoogleDirections")
+        if providerID == "Monav":
+            # is Monav initialized ? (lazy initialization)
+            if self.monav is None:
+                # start Monav server #
+                # only import Monav & company when actually needed
+                # -> the protobuf modules are quite large
+                from . import monav_support
+                self.monav = monav_support.Monav(
+                    self.modrana.paths.getMonavServerBinaryPath()
+                )
+                # set the instruction generator method
+                tbt = self.m.get("turnByTurn", None)
+                if tbt:
+                    getTurns = tbt.getMonavTurns
+                else:
+                    getTurns = None
+                self.monav.result2turns = getTurns
 
-        provider = routing_providers.GoogleRouting()
-        provider.searchAsync(
-            callback,
-            waypoints,
-            routeParams=routeParams
-        )
+            # update the path to the Monav data folder
+            # in the Monav wrapper in case in changed since last search
+            self.monav.dataPath = self._getMonavDataPath()
+
+            provider = routing_providers.MonavRouting(self.monav)
+            provider.searchAsync(
+                callback,
+                waypoints,
+                routeParams=routeParams
+            )
+        else:
+            provider = routing_providers.GoogleRouting()
+            provider.searchAsync(
+                callback,
+                waypoints,
+                routeParams=routeParams
+            )
 
     def llRoute(self, start, destination, middlePoints=None):
         if not middlePoints: middlePoints = []
@@ -489,46 +512,26 @@ class Route(RanaModule):
 
         #TODO: respect offline mode and automatically
         # use offline routing methods
-
         # TODO: notify user if no offline routing data is available for the current area
 
-        provider = self.get('routingProvider', "GoogleDirections")
-        if provider == "Monav":
-            sentTimestamp = time.time()
-            print('routing: using Monav as routing provider')
-            monavWaypoints = [(fromLat, fromLon), (toLat, toLon)] # start
-            # disable additional waypoint usage due to a protobuf serialization bug in monav-server,
-            # that prevents getting results from more than 2 waypoints
-            #      monavWaypoints.extend(waypoints) # waypoints
-
-            result = self.getMonavRoute(monavWaypoints)
-            #TODO: asynchronous processing & error notifications
-            # as monav is VERY fast for routing, the routing might still get done
-            # asynchronously, but the work-in-progress overlay might show up
-            # only once the search takes longer than say 2 seconds
-            self._handleResults("MonavRoute", (result, monavWaypoints[0], monavWaypoints[-1], sentTimestamp))
-
-        else: # use Google Directions as fallback
-            self.routeAsync(self._handleRoutingResultCB, waypoints)
+        self.routeAsync(self._handleRoutingResultCB, waypoints)
 
     def _handleRoutingResultCB(self, result):
         # remove any previous route description
-        route, errorMessage, dt = result
         self.text = None
-        print("route: routing ended with error:\n%s" % errorMessage)
-        if route:
+        if result.route and result.returnCode == constants.ROUTING_SUCCESS:
             # process and save routing results
-            self.routeLookupDuration = dt
+            self.routeLookupDuration = result.lookupDuration
 
             # save a copy of the route in projection units for faster drawing
             proj = self.m.get('projection', None)
             if proj:
-                self.pxpyRoute = [proj.ll2pxpyRel(x[0], x[1]) for x in route.getPointsLLE()]
-            self.processAndSaveDirections(route)
+                self.pxpyRoute = [proj.ll2pxpyRel(x[0], x[1]) for x in result.route.getPointsLLE()]
+            self.processAndSaveDirections(result.route)
 
             # set start and destination
-            start = route.getPointByID(0)
-            destination = route.getPointByID(-1)
+            start = result.route.getPointByID(0)
+            destination = result.route.getPointByID(-1)
             # use coordinates for start dest or use first/last point from the route
             # if start/dest coordinates are unknown (None)
             if self.start is None:
@@ -539,10 +542,47 @@ class Route(RanaModule):
             self.osdMenuState = OSD_CURRENT_ROUTE
             self.startNavigation()
 
+        else: # routing failed
+            print("route: routing ended with error")
+            if result.errorMessage:
+                print("route error message: " % result.errorMessage)
+            # show what & why failed
+            if result.returnCode == constants.ROUTING_LOOKUP_FAILED:
+                self.notify('no ways near start or destination', 3000)
+            elif result.returnCode == constants.ROUTING_NO_DATA:
+                self.notify('no routing data available', 3000)
+            elif result.returnCode == constants.ROUTING_LOAD_FAILED:
+                self.notify('failed to load routing data', 3000)
+            elif result.returnCode == constants.ROUTING_ROUTE_FAILED:
+                self.notify('failed to compute route', 3000)
+            elif result.returnCode == constants.ROUTING_ADDRESS_NOT_FOUND:
+                self.notify('start or destination address not found', 3000)
+            else:
+                self.notify('offline routing failed', 5000)
 
-    def getMonavRoute(self, waypoints):
-        mode = self.get('mode', 'car')
-        # get mode based sub-folder
+    def getAvailableMonavDataPacks(self):
+            """Return all available Monav data packs in the main monav data folder
+
+            :return: list of all packs in Monav data folder
+            :rtype: a list of strings
+            """
+            # basically just list all directories in the Monav data folder
+            try:
+                mainMonavFolder = self.modrana.paths.getMonavDataPath()
+                dataPacks = os.listdir(mainMonavFolder)
+                dataPacks = filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks)
+                return sorted(dataPacks)
+            except Exception:
+                import sys
+
+                e = sys.exc_info()[1]
+                print('route: listing the Monav data packs failed')
+                print(e)
+                return []
+
+    def _getMonavDataPath(self):
+        """Get path to the correct Monav data path based on current settings
+        """
         # TODO: handle not all mode folders being available
         # (eq. user only downloading routing data for cars)
         modeFolders = {
@@ -550,9 +590,9 @@ class Route(RanaModule):
             'walk': 'routing_pedestrian',
             'car': 'routing_car'
         }
+        mode = self.get('mode', 'car')
         subFolder = modeFolders.get(mode, 'routing_car')
         dataPacks = self.getAvailableMonavDataPacks()
-
         if dataPacks:
             # TODO: bounding box based pack selection
             preferredPack = self.get('preferredMonavDataPack', None)
@@ -561,60 +601,16 @@ class Route(RanaModule):
             else:
                 # just take the first (and possibly only) pack
                 packName = sorted(dataPacks)[0]
+                print("route: monav: no preferred pack set, "
+                      "using first available:\n%s" % preferredPack)
             mainMonavFolder = self.modrana.paths.getMonavDataPath()
             monavDataFolder = os.path.abspath(os.path.join(mainMonavFolder, packName, subFolder))
             print('Monav data folder:\n%s' % monavDataFolder)
             print(os.path.exists(monavDataFolder))
-            try:
-                # is Monav initialized ?
-                if self.monav is None:
-                    # start Monav #
-                    # only import Monav & company when actually needed
-                    # -> the protobuf modules are quite large
-                    import monav_support
-
-                    self.monav = monav_support.Monav(self.modrana.paths.getMonavServerBinaryPath())
-                    self.monav.startServer()
-                result = self.monav.monavDirections(monavDataFolder, waypoints)
-            except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print('route: Monav route lookup failed')
-                print(e)
-                traceback.print_exc(file=sys.stdout) # find what went wrong
-                return None, None
-            if result is None:
-                return result, None
-            elif result.type == result.SUCCESS:
-                return result, ROUTING_SUCCESS
-            elif result.type == result.LOAD_FAILED:
-                return result, ROUTING_LOAD_FAILED
-            elif result.type == result.LOOKUP_FAILED:
-                return result, ROUTING_LOOKUP_FAILED
-            elif result.type == result.ROUTE_FAILED:
-                return result, ROUTING_ROUTE_FAILED
-            else:
-                return result, None
+            return monavDataFolder
         else:
-            print("route: no Monav routing data - can't route")
-            return None, ROUTING_NO_DATA
+            return None
 
-    def getAvailableMonavDataPacks(self):
-        """return all available Monav data packs in the main monav data folder"""
-        # basically just list all directories in the Monav data folder
-        try:
-            mainMonavFolder = self.modrana.paths.getMonavDataPath()
-            dataPacks = os.listdir(mainMonavFolder)
-            dataPacks = filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks)
-            return sorted(dataPacks)
-        except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print('route: listing the Monav data packs failed')
-            print(e)
-            return []
 
     def _handleResults(self, key, resultsTuple):
         """handle a routing result"""
@@ -640,7 +636,7 @@ class Route(RanaModule):
             (result, start, destination) = resultsTuple
             directions, returnCode = result
 
-            if returnCode == ROUTING_SUCCESS:
+            if returnCode == constants.ROUTING_SUCCESS:
                 self.durationString = "" # TODO : correct predicted route duration
 
                 # provided a turn detection function to the way object
@@ -660,13 +656,13 @@ class Route(RanaModule):
 
             else: # routing failed
                 # show what & why failed
-                if returnCode == ROUTING_LOOKUP_FAILED:
+                if returnCode == constants.ROUTING_LOOKUP_FAILED:
                     self.notify('no ways near start or destination', 3000)
-                elif returnCode == ROUTING_NO_DATA:
+                elif returnCode == constants.ROUTING_NO_DATA:
                     self.notify('no routing data available', 3000)
-                elif returnCode == ROUTING_LOAD_FAILED:
+                elif returnCode == constants.ROUTING_LOAD_FAILED:
                     self.notify('failed to load routing data', 3000)
-                elif returnCode == ROUTING_ROUTE_FAILED:
+                elif returnCode == constants.ROUTING_ROUTE_FAILED:
                     self.notify('failed to compute route', 3000)
                 else:
                     self.notify('offline routing failed', 5000)

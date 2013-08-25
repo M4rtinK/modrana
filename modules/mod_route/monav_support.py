@@ -24,7 +24,7 @@ import subprocess
 import traceback
 import sys
 import signal
-import monav
+from . import monav
 
 RETRY_COUNT = 3 # if routing fails, try RETRY_COUNT more times
 # there might be some situations where the Monav server might fail
@@ -34,7 +34,7 @@ RETRY_COUNT = 3 # if routing fails, try RETRY_COUNT more times
 #
 # Monav routing is also very fast, so doing more tries is not a problem
 
-from signals_pb2 import RoutingResult
+from .signals_pb2 import RoutingResult
 
 # Marble stores monav data like this on the N900:
 # /home/user/MyDocs/.local/share/marble/maps/earth/monav/motorcar/europe/czech_republic
@@ -45,6 +45,19 @@ class Monav(object):
         self.monavServerBinaryPath = monavBinaryPath
         # make return codes easily accessible
         self.returnCodes = RoutingResult
+        self._dataPath = None
+
+        self.result2turns = None
+        # a method "slot" to be replaced by concrete
+        # implementation after the object is instantiated
+
+    @property
+    def dataPath(self):
+        return self._dataPath
+
+    @dataPath.setter
+    def dataPath(self, value):
+        self._dataPath = value
 
     def startServer(self, port=None):
         print('monav_support: starting Monav server')
@@ -125,11 +138,21 @@ class Monav(object):
         else:
             return False
 
-    def monavDirections(self, dataDirectory, waypoints):
+    def monavDirections(self, waypoints):
         """search ll2ll route using Monav"""
         # check if Monav server is running
+
+        if self.dataPath is None:
+            print("monav: error, dataPath not set (is None)")
+            return None
         if not self.serverRunning():
             self.startServer() # start the server
+
+        # Monav works with (lat, lon) tuples so we
+        # need to convert the waypoints to a list of
+        # (lat,lon) tuples
+        waypoints = [x.getLL() for x in waypoints]
+
         print('monav: starting route search')
         start = time.clock()
         tryNr = 0
@@ -137,11 +160,10 @@ class Monav(object):
         while tryNr < RETRY_COUNT:
             tryNr += 1
             try:
-                result = monav.get_route(dataDirectory, waypoints)
+                result = monav.get_route(self.dataPath, waypoints)
                 break
             except Exception:
                 import sys
-
                 e = sys.exc_info()[1]
                 print('monav_support: routing failed')
                 print(e)
@@ -154,11 +176,3 @@ class Monav(object):
         else:
             print('monav: search failed after %d retries' % tryNr)
             return None
-
-    def monavDirectionsAsync(self, start, destination, callback, key):
-        """search ll2ll route asynchronously using Monav"""
-        pass
-
-
-
-

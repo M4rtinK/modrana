@@ -1,24 +1,68 @@
 # -*- coding: utf-8 -*-
 # Offline routing providers
+import os
 import time
+import traceback
 from core import constants
 from core import way
 from core.backports import six
+from . import monav_support
 
 try:
     import json
 except ImportError:
     import simplejson as json
 
-from core.providers import RoutingProvider, DummyController, RouteParameters
+from core.providers import RoutingProvider, DummyController, RouteParameters, RoutingResult
 
 class MonavRouting(RoutingProvider):
     """An online provider that does online
     point to point routing using Google API"""
-    def __init__(self):
+    def __init__(self, monav):
         threadName = constants.THREAD_ROUTING_ONLINE_GOOGLE
         RoutingProvider.__init__(self, threadName=threadName)
+        self.monav = monav
 
+    def search(self, waypoints, routeParams=None, controller=DummyController()):
+        # get mode based sub-folder
+        routingStart = time.time()
+        if self.monav.dataPath is not None:
+            result = None
+            try:
+                if self.monav.monavServer is None:
+                    controller.status = "starting Monav routing server"
+                    self.monav.startServer()
+                controller.status = "Monav offline routing in progress"
+                result = self.monav.monavDirections(waypoints)
+                controller.status = "Monav offline routing done"
+            except Exception:
+                import sys
+                e = sys.exc_info()[1]
+                print('route: Monav route lookup failed')
+                print(e)
+                traceback.print_exc(file=sys.stdout) # find what went wrong
+            if result is None: # routing failed for unknown reasons
+                return RoutingResult(None, RouteParameters)
+            if result.type == result.SUCCESS:
+                # convert the Monav result to a Way object usable
+                # for turn-by-turn navigation using the instruction
+                # generator set in the Monav wrapper
+                route = way.fromMonavResult(result, self.monav.result2turns)
+                return RoutingResult(route,
+                                     routeParams,
+                                     constants.ROUTING_SUCCESS,
+                                     lookupDuration=time.time() - routingStart)
+            elif result.type == result.LOAD_FAILED:
+                return RoutingResult(None, routeParams, constants.ROUTING_LOAD_FAILED)
+            elif result.type == result.LOOKUP_FAILED:
+                return RoutingResult(None, routeParams, constants.ROUTING_LOOKUP_FAILED)
+            elif result.type == result.ROUTE_FAILED:
+                RoutingResult(None, routeParams, constants.ROUTING_ROUTE_FAILED)
+            else:
+                return RoutingResult(None, RouteParameters)
+        else:
+            print("route: no Monav routing data - can't route")
+            RoutingResult(None, routeParams, constants.ROUTING_NO_DATA)
 
 class GoogleRouting(RoutingProvider):
     """An online provider that does online
@@ -32,7 +76,7 @@ class GoogleRouting(RoutingProvider):
         routingStart = time.time()
         if len(waypoints) < 2:
             print("GoogleRouting provider: ERROR, need at least 2 points for routing")
-            return None
+            return RoutingResult(None, routeParams)
         start = waypoints[0]
         destination = waypoints[-1]
         inBetweenPoints = waypoints[1:-1]
@@ -40,10 +84,14 @@ class GoogleRouting(RoutingProvider):
             routeParams = RouteParameters()
         print("GoogleRouting: routing from %s to %s" % (start, destination))
         controller.status = "online routing in progress"
-        route, errorMessage = _googleDirections(start, destination, inBetweenPoints, routeParams)
+        route, returnCode, errorMessage = _googleDirections(start, destination, inBetweenPoints, routeParams)
         controller.status = "online routing done"
-        # return the route, errorMessage and elapsed time in seconds
-        return route, errorMessage, time.time() - routingStart
+        # return the data from the routing function and add elapsed time in ms
+        return RoutingResult(route,
+                             routeParams,
+                             returnCode=returnCode,
+                             errorMessage=errorMessage,
+                             lookupDuration=time.time() - routingStart)
 
 def _getGmapsInstance():
     """get a google maps wrapper instance"""
@@ -114,10 +162,11 @@ def _googleDirections(start, destination, waypoints, params):
         if waypointOption:
             flagDir['waypoints'] = waypointOption
         flagDir['sensor'] = 'false'
-        directions = ""
         # only import the googlemaps module when actually needed
         from modules import googlemaps
 
+        directions = None
+        returnCode = None
         errorMessage = ""
 
         try:
@@ -125,15 +174,16 @@ def _googleDirections(start, destination, waypoints, params):
         except googlemaps.GoogleMapsError:
             import sys
             e = sys.exc_info()[1]
-
             if e.status == 602:
                 print("online providers: Google routing failed -> address not found")
                 print(e)
                 errorMessage = "Address(es) not found"
+                returnCode = constants.ROUTING_ADDRESS_NOT_FOUND
             elif e.status == 604:
                 print("online providers: Google routing failed -> no route found")
                 print(e)
                 errorMessage = "No route found"
+                returnCode = constants.ROUTING_ROUTE_FAILED
             elif e.status == 400:
                 print("online providers: Google routing failed with googlemaps exception,"
                       " googlemaps status code:%d" % e.status)
@@ -147,8 +197,12 @@ def _googleDirections(start, destination, waypoints, params):
 
         # convert the directions datastructure returned by Google
         # to modRana Way object
-        route = way.fromGoogleDirectionsResult(directions)
-        return route, errorMessage
+        if directions is not None:
+            returnCode = constants.ROUTING_SUCCESS
+            route = way.fromGoogleDirectionsResult(directions)
+        else:
+            route = None
+        return route, returnCode, errorMessage
 
 
 

@@ -42,6 +42,14 @@ DEVICE_TYPE_TABLET = 3
 # routing
 ROUTE_DEFAULT_LANGUAGE = "en"
 
+# Monav routing return codes
+ROUTING_SUCCESS = 0
+ROUTING_NO_DATA = 1 # failed to load routing data
+ROUTING_LOAD_FAILED = 2 # failed to load routing data
+ROUTING_LOOKUP_FAILED = 3 # failed to locate nearest way/edge
+ROUTING_ROUTE_FAILED = 4 # failed to compute route
+ROUTING_ADDRESS_NOT_FOUND = 5 # start or destination address not found
+
 # route types
 ROUTE_PEDESTRIAN = 1
 ROUTE_BIKE = 2
