@@ -934,7 +934,7 @@ class Route(RanaModule):
                          'edit', "above:edit>generic:;0.5;;0.5;;", 'ms:route:setOSDState:%d' % OSD_EDIT)
         menus.drawButton(cr, x1, y1, dx, dy,
                          'info', "above:info>generic:;0.5;;0.5;;",
-                         'set:menu:route#currentRouteBackToMap|ms:route:setOSDState:%d' % OSD_EDIT)
+                         'set:menu:route#currentRouteBackToMap|ms:route:setOSDState:%d' % OSD_CURRENT_ROUTE)
 
     def drawRoutePlaningMenu(self, cr):
         """draw the onscreen menu for route planing"""
