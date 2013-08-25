@@ -163,3 +163,48 @@ class RouteParameters(object):
         Additional waypoints can be either textual descriptions or ordinary Point objects
         """
         return self._addressRoute
+
+class RoutingResult(object):
+    """This class acts as a wrapper for the results of a routing lookup,
+    the main "payload" is the route object, but it also wraps other
+    fields mainly used for error reporting in case that the route lookup is
+    not successful
+    """
+
+    def __init__(self, route, routeParameters, returnCode=None,
+                 errorMessage=None, lookupDuration=0):
+        """
+        :param route: The route for the road lookup
+        :type route: a Way instance or None
+        :param routeParameters: routing parameters for the rout lookup
+        :type routeParameters: RouteParameters instance
+        :param returnCode: return code for the road lookup
+        :param errorMessage: an error message string (if any)
+        :type errorMessage: a string or None
+        """
+        self._route = route
+        self._routeParameters = routeParameters
+        self._returnCode = returnCode
+        self._errorMessage = errorMessage
+        self._lookupDuration = lookupDuration # in milliseconds
+
+    @property
+    def route(self):
+        return self._route
+
+    @property
+    def routeParameters(self):
+        return self._routeParameters
+
+    @property
+    def returnCode(self):
+        return self._returnCode
+
+    @property
+    def errorMessage(self):
+        return self._errorMessage
+
+    @property
+    def lookupDuration(self):
+        return self._lookupDuration
+
