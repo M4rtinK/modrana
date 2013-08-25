@@ -262,6 +262,25 @@ class Notification(RanaModule):
 
 
     def handleNotification(self, message, timeout=None, icon=""):
+        """Handle a notification request
+
+        As on some platforms, such as on Maemo 5 Fremantle, system
+        notifications should only be triggered from the main thread,
+        we pass the notification request to the main loop, to be
+        dispatched once the main GUI thread becomes idle
+        """
+
+        cron = self.m.get("cron", None)
+        if cron:
+            cron.addIdle(self._dispatchNotification, [message, timeout, icon])
+
+    def _dispatchNotification(self, message, timeout, icon):
+        """Dispatch a notification using the most optimal method for the
+        current device & platform combination
+
+        NOTE: This method should be run from the main thread as there might be
+        issues otherwise (such as the "Xlib: unexpected async reply" errors).
+        """
         # TODO: icon support
         if timeout is None:
             timeout = self.timeout
