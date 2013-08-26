@@ -38,6 +38,8 @@ except ImportError:
         def _get(self):
             return self.queue.pop()
 
+    from Queue import Empty, Full
+
 
 try: # Compiled with SSL?
     HTTPSConnection = object
