@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+import threading
 from core.backports import six
 from modules.base_module import RanaModule
 import time
@@ -48,6 +49,7 @@ class Notification(RanaModule):
         # this indicates if the notification about
         # background processing should be shown
         self._tasks = {}
+        self._tasksLock = threading.RLock()
 
         ## for WiP overlay testing
         #self._tasks = {
@@ -131,10 +133,10 @@ class Notification(RanaModule):
         :param status: textual task status
         :type status: str
         """
-
-        oldStatus, progress = self._tasks.get(taskName, (None, None))
-        # replace the task with updated one
-        self._tasks[taskName] = (status, progress)
+        with self._tasksLock:
+            oldStatus, progress = self._tasks.get(taskName, (None, None))
+            # replace the task with updated one
+            self._tasks[taskName] = (status, progress)
         self.tasksChanged(self._tasks)
         if status:
             self._startWorkInProgressOverlay()
@@ -147,9 +149,10 @@ class Notification(RanaModule):
         :param progress: numeric task progress in the range of 0.0 to 1.0
         :type progress: float
         """
-        status, oldProgress = self._tasks.get(taskName, (None, None))
-        # replace the task with updated one
-        self._tasks[taskName] = (status, progress)
+        with self._tasksLock:
+            status, oldProgress = self._tasks.get(taskName, (None, None))
+            # replace the task with updated one
+            self._tasks[taskName] = (status, progress)
         self.tasksChanged(self._tasks)
         if progress is not None:
             self._startWorkInProgressOverlay()
@@ -160,11 +163,12 @@ class Notification(RanaModule):
         :param taskName: name of the task to cancel
         :type taskName: str
         """
-        try:
-            del self._tasks[taskName]
-            self.tasksChanged(self._tasks)
-        except KeyError:
-            print("notification: error, can't remove unknown task: %s" % taskName)
+        with self._tasksLock:
+            try:
+                del self._tasks[taskName]
+                self.tasksChanged(self._tasks)
+            except KeyError:
+                print("notification: error, can't remove unknown task: %s" % taskName)
         if self._tasks == {}:
             self._stopWorkInProgressOverlay()
 
@@ -203,38 +207,39 @@ class Notification(RanaModule):
         proj = self.m.get('projection', None) # we also need the projection module
         viewport = self.get('viewport', None)
         menus = self.m.get('menu', None)
-        if self._tasks and proj and viewport and menus:
-            # we need to have both the viewport and projection modules available
-            # also the menu module for the text
+        with self._tasksLock:
+            if self._tasks and proj and viewport and menus:
+                # we need to have both the viewport and projection modules available
+                # also the menu module for the text
 
-            taskCount = len(self._tasks)
+                taskCount = len(self._tasks)
 
-            # background
-            cr.set_source_rgba(0.5, 0.5, 1, 0.5)
-            (sx, sy, w, h) = viewport
-            itemHeight = h * 0.2
-            (bx, by, bw, bh) = (0, 0, w, itemHeight * taskCount)
-            cr.rectangle(bx, by, bw, bh)
-            cr.fill()
+                # background
+                cr.set_source_rgba(0.5, 0.5, 1, 0.5)
+                (sx, sy, w, h) = viewport
+                itemHeight = h * 0.2
+                (bx, by, bw, bh) = (0, 0, w, itemHeight * taskCount)
+                cr.rectangle(bx, by, bw, bh)
+                cr.fill()
 
-            taskIndex = 0
-            for taskName, taskState in six.iteritems(self._tasks):
-                # cancel button coordinates
-                cbdx = min(w, h) / 5.0
-                cbdy = cbdx
-                cbx1 = (sx + w) - cbdx
-                cby1 = sy + cbdy * taskIndex
+                taskIndex = 0
+                for taskName, taskState in six.iteritems(self._tasks):
+                    # cancel button coordinates
+                    cbdx = min(w, h) / 5.0
+                    cbdy = cbdx
+                    cbx1 = (sx + w) - cbdx
+                    cby1 = sy + cbdy * taskIndex
 
-                # cancel button
-                self.drawCancelButton(cr, coords=(cbx1, cby1, cbdx, cbdy), taskName=taskName)
+                    # cancel button
+                    self.drawCancelButton(cr, coords=(cbx1, cby1, cbdx, cbdy), taskName=taskName)
 
-                status, progress = taskState
+                    status, progress = taskState
 
-                # draw the text
-                border = min(w / 20.0, h / 20.0)
-                menus.showText(cr, status, bx + border, by + border + itemHeight * taskIndex,
-                               bw - 2 * border - cbdx, 30, "white")
-                taskIndex += 1
+                    # draw the text
+                    border = min(w / 20.0, h / 20.0)
+                    menus.showText(cr, status, bx + border, by + border + itemHeight * taskIndex,
+                                   bw - 2 * border - cbdx, 30, "white")
+                    taskIndex += 1
 
     def drawCancelButton(self, cr, coords=None, taskName=None):
         """draw the cancel button
