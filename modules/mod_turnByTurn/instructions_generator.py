@@ -26,7 +26,7 @@ from core.way import TurnByTurnPoint
 # import core.i18n as i18n
 # _ = i18n.language.gettext
 def foo(bar):
-    pass
+    return bar
 
 
 _ = foo
