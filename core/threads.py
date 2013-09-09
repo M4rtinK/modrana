@@ -61,6 +61,7 @@ class ThreadManager(object):
 
     def __init__(self):
         self._objs = {}
+        self._globalIndex = 0
         self._errors = {}
         self._main_thread = threading.currentThread()
         # signals
@@ -72,12 +73,31 @@ class ThreadManager(object):
     def __call__(self):
         return self
 
+    def _getDuplicateName(self, name):
+        """Get a not yet used index for the given duplicate thread
+        name, going from 1 up, if there are OVER 9000 THREADS
+        with the same base name, give up and use a global index
+        """
+        index = 1
+        while index < 9000:
+            threadName = "%s_%d" % (name, index)
+            if threadName in self._objs:
+                index+=1
+            else:
+                return threadName
+        # this situation should be very unlikely
+        log.debug("thread manager: over 9000 threads with the same base name, seriously ?")
+        log.debug("thread manager: using global index...")
+        index = self._globalIndex
+        self._globalIndex+=1
+        return "%s_global_index_%d" % (name, index)
+
     def add(self, obj):
         """Given a Thread or Process object, add it to the list of known objects
            and start it.  It is assumed that obj.name is unique and descriptive.
         """
         if obj.name in self._objs:
-            raise KeyError
+            obj.name = self._getDuplicateName(obj.name)
 
         self._objs[obj.name] = obj
         self._errors[obj.name] = None
