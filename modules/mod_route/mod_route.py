@@ -618,6 +618,11 @@ class Route(RanaModule):
         else:
             return None
 
+
+    def _handleResults(self, key, resultsTuple):
+        """handle a routing result"""
+        pass
+
     def startNavigation(self):
         """handle navigation autostart"""
         autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
@@ -1075,6 +1080,7 @@ class Route(RanaModule):
                 text = "There is currently no active route."
             elif self.text is None: # the new text for the info-box only once
                 # check for online status
+                online = (self.modrana.dmod.getInternetConnectivityStatus() in (True, None))
                 # check if start and destination geocoding is needed
                 if self.destinationAddress is None or self.startAddress is None:
                     with self._addressLookupLock:
