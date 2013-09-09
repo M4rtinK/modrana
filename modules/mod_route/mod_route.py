@@ -27,6 +27,7 @@ import csv
 import traceback
 import unicodedata
 import time
+import threading
 from core import constants
 from core.point import Point
 import core.way as way
@@ -66,6 +67,10 @@ class Route(RanaModule):
 
         self._directionsFilterRules = []
         self._directionsFilterRulesLoaded = False
+
+        self._addressLookupLock = threading.Lock()
+        self._startLookup = False
+        self._destinationLookup = False
 
         # Monav
         self.monav = None
@@ -613,11 +618,6 @@ class Route(RanaModule):
         else:
             return None
 
-
-    def _handleResults(self, key, resultsTuple):
-        """handle a routing result"""
-        pass
-
     def startNavigation(self):
         """handle navigation autostart"""
         autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
@@ -1075,12 +1075,11 @@ class Route(RanaModule):
                 text = "There is currently no active route."
             elif self.text is None: # the new text for the info-box only once
                 # check for online status
-                online = (self.modrana.dmod.getInternetConnectivityStatus() in (True, None))
                 # check if start and destination geocoding is needed
-                if not self.routeDetailGeocodingTriggered:
-                    if online:
-                        self._geocodeStartAndDestination()
-                        self.routeDetailGeocodingTriggered = True
+                if self.destinationAddress is None or self.startAddress is None:
+                    with self._addressLookupLock:
+                        if not self._startLookup and not self._destinationLookup:
+                            self._geocodeStartAndDestination()
 
                 if self.durationString:
                     duration = self.durationString # a string describing the estimated time to finish the route
@@ -1094,17 +1093,32 @@ class Route(RanaModule):
                     distance = "? km"
                 steps = self.directions.getMessagePointCount() # number of steps
 
+                # TODO: do this cleaner with autowrap
+
                 if self.startAddress:
                     start = ""
+                    index = 1
                     for item in self.startAddress.split(','):
-                        start += "%s\n" % item
+                        if index%4: # add newline after every second item
+                            start += " %s," % item
+                        else:
+                            start += "\n%s," % item
+                        index+=1
+                    start = start[1:-1]
                 else:
                     start = "start address unknown"
 
                 if self.destinationAddress:
-                    destination = ""
+                    destination = " \n\n"
+                    index = 1
                     for item in self.destinationAddress.split(','):
-                        destination += "\n%s" % item
+                        if index%4: # add newline after every second item
+                            destination += " %s," % item
+                        else:
+                            destination += "\n%s," % item
+                        index+=1
+                    # drop trailing ,
+                    destination = destination[1:-1]
                 else:
                     destination = "\ndestination address unknown"
 
@@ -1188,22 +1202,59 @@ class Route(RanaModule):
 
     def _geocodeStartAndDestination(self):
         """get the address of start and destination coordinates by using geocoding"""
-        online = self.m.get('onlineServices', None)
-        if online:
+        onlineModule = self.m.get('onlineServices', None)
+        connectivity = (self.modrana.dmod.getInternetConnectivityStatus() in (True, None))
+        if connectivity and onlineModule:
+            # set that address lookups are in progress
+            # (this function should be called from "inside" theaddress lookup lock)
+            self._startLookup = True
+            self._destinationLookup = True
+
             # start coordinates
             if self.start:
-                (sLat, sLon) = self.start.getLL()
+                start = self.start
             else:
-                (sLat, sLon) = self.directions.getPointByID(0).getLL()
+                start = self.directions.getPointByID(0)
                 # geocode start
-            online.reverseGeocodeAsync(sLat, sLon, self._handleResults, "startAddress", "Geocoding start")
+            onlineModule.reverseGeocodeAsync(start, self._setStartAddressCB)
 
             # destination coordinates
             if self.destination:
-                (dLat, dLon) = self.destination.getLL()
+                destination = self.destination
             else:
-                (dLat, dLon) = self.directions.getPointByID(-1).getLL()
-            online.reverseGeocodeAsync(dLat, dLon, self._handleResults, "destinationAddress", "Geocoding destination")
+                destination = self.directions.getPointByID(-1)
+            onlineModule.reverseGeocodeAsync(destination, self._setDestinationAddressCB)
+
+    def _setStartAddressCB(self, results):
+        """Set start address based on result from reverse geocoding
+
+        :param results: list of results from reverse encoding
+        :type results: a list of Point instances
+        """
+        if results:
+            self.startAddress = results[0].description
+        with self._addressLookupLock:
+            self._startLookup = False
+        # trigger route text update
+        self.text = None
+        self.set('needRedraw', True)
+
+    def _setDestinationAddressCB(self, results):
+        """Set destination address based on result from reverse geocoding
+
+        :param results: list of results from reverse encoding
+        :type results: a list of Point instances
+        """
+        if results:
+            self.destinationAddress = results[0].description
+        with self._addressLookupLock:
+            self._destinationLookup = False
+        # trigger route text update
+        self.text = None
+        self.set('needRedraw', True)
+
+
+
 
     def shutdown(self):
         # stop the Monav server, if running
