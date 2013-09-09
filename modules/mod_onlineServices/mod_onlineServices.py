@@ -63,17 +63,26 @@ class OnlineServices(RanaModule):
         self.workStartTimestamp = None
 
     def geocode(self, address):
-        """synchronous geocoding"""
+        """Synchronous geocoding"""
         # TODO: provider switching
         return online_providers.GeocodingNominatim().search(term=address)
 
     def geocodeAsync(self, address, callback):
-        """asynchronous geocoding"""
+        """Asynchronous geocoding"""
         provider = online_providers.GeocodingNominatim()
         #provider = online_providers.TestingProvider()
 
         provider.searchAsync(callback, term=address)
         return provider.threadName
+
+    def reverseGeocoding(self, searchPoint, callback):
+        """Synchronous reverse geocoding"""
+        return online_providers.ReverseGeocodingNominatim().search(term=searchPoint)
+
+    def reverseGeocodeAsync(self, searchPoint, callback):
+        """Asynchronous reverse geocoding"""
+        provider = online_providers.ReverseGeocodingNominatim()
+        provider.searchAsync(callback, term=searchPoint)
 
     def localSearch(self, term, where=None, maxResults=8):
         """Synchronous generic local search query
@@ -199,11 +208,6 @@ class OnlineServices(RanaModule):
         gMap = self.getGmapsInstance()
         address = gMap.latlng_to_address(lat, lon)
         return address
-
-    def reverseGeocodeAsync(self, lat, lon, outputHandler, key, message="geocoding"):
-        """asynchronous reverse geocoding"""
-        flags = {'net': True}
-        self._addWorkerThread(Worker._reverseGeocode, [lat, lon, message], outputHandler, key, flags)
 
     def googleLocalQueryLLAsync(self, term, lat, lon, outputHandler, key):
         """asynchronous Google Local Search query for explicit lat, lon coordinates"""
@@ -417,21 +421,6 @@ class Worker(threading.Thread):
         self._setWorkStatusText("online POI search done   ")
         return result
 
-    def _onlineGeocoding(self, address):
-        self._setWorkStatusText("online geocoding in progress...")
-        result = self.online.geocode(address)
-        self._setWorkStatusText("online geocoding done   ")
-        return result
-
-    def _reverseGeocode(self, lat, lon, message):
-        """do blocking reverse geocoding using one of the available methods
-        -> this method is run from the worker thread"""
-        print("onlineServices: reverse geocoding")
-        self._setWorkStatusText("%s..." % message)
-        #TODO: support other reverse geocoding methods than Google
-        address = self.online._googleReverseGeocode(lat, lon)
-        self._setWorkStatusText("geocoding done.")
-        return address
 
     # Geonames
 
