@@ -1143,7 +1143,7 @@ class Menus(RanaModule):
 
     def setupInfoMenu(self):
         self.clearMenu('info')
-        self.addItem('info', 'to point#Direction', 'generic', 'set:menu:info#infoDirection')
+        #self.addItem('info', 'to point#Direction', 'generic', 'set:menu:info#infoDirection')
         self.addItem('info', 'About', 'generic', 'set:menu:info#infoAbout')
 
     def setupAboutMenu(self):
