@@ -318,7 +318,7 @@ class GTKGUI(GUIModule):
         x = 0
         y = 0
         floatShiftAmount = float(shiftAmount)
-        """this value might show up as string, so we convert it to float, just to be sure"""
+        # this value might show up as string, so we convert it to float, just to be sure
 
         if shiftDirection:
             if shiftDirection == "down":
@@ -329,8 +329,8 @@ class GTKGUI(GUIModule):
                 x = - sw * 0.5 * floatShiftAmount
             elif shiftDirection == "right":
                 x = + sw * 0.5 * floatShiftAmount
-            """ we don't need to do anything if direction is set to don't shift (False)
-            - 0,0 will be used """
+            # we don't need to do anything if direction is set to don't shift (False)
+            # - 0,0 will be used
         self.centerShift = (x, y)
 
         # update the viewport expansion variable
@@ -626,13 +626,10 @@ class MainWidget(gtk.Widget):
                 # get the speed and angle
                 speed = self.modrana.get('speed', 0)
                 angle = self.modrana.get('bearing', 0)
-
-                """
-                only if current direction angle and speed are known,
-                submit a new angle
-                like this, the map does not revert back to default orientation
-                on short GPS errors
-                """
+                # only if current direction angle and speed are known,
+                # submit a new angle
+                # like this, the map does not revert back to default orientation
+                # on short GPS errors
                 if angle and speed:
                     if speed > self.notMovingSpeed: # do we look like we are moving ?
                         self.modrana.mapRotationAngle = angle
@@ -845,11 +842,6 @@ class MainWidget(gtk.Widget):
     def drawMasterOverlay(self, cr):
         if self.notificationModule:
             self.notificationModule.drawMasterOverlay(cr)
-
-
-
-
-
             # TODO: get this to work or clean it up
             #  def draw2(self, cr1):
             #    start = time.clock()
