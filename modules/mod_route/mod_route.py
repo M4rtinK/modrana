@@ -618,11 +618,6 @@ class Route(RanaModule):
         else:
             return None
 
-
-    def _handleResults(self, key, resultsTuple):
-        """handle a routing result"""
-        pass
-
     def startNavigation(self):
         """handle navigation autostart"""
         autostart = self.get('autostartNavigationDefaultOnAutoselectTurn', 'enabled')
@@ -1080,7 +1075,6 @@ class Route(RanaModule):
                 text = "There is currently no active route."
             elif self.text is None: # the new text for the info-box only once
                 # check for online status
-                online = (self.modrana.dmod.getInternetConnectivityStatus() in (True, None))
                 # check if start and destination geocoding is needed
                 if self.destinationAddress is None or self.startAddress is None:
                     with self._addressLookupLock:
@@ -1099,7 +1093,7 @@ class Route(RanaModule):
                     distance = "? km"
                 steps = self.directions.getMessagePointCount() # number of steps
 
-                # TODO: do this cleaner with autowrap
+                # TODO: do this cleaner with autowrap and elide
 
                 if self.startAddress:
                     start = ""
@@ -1156,7 +1150,6 @@ class Route(RanaModule):
                     menus.addItem('currentRouteTools', 'navigation#stop', 'generic', 'turnByTurn:stop|set:menu:None')
                     menus.addItem('currentRouteTools', 'navigation#restart', 'generic',
                                   'turnByTurn:stop|ms:turnByTurn:start:closest|set:menu:None')
-                    self.set('needRedraw', True) # refresh the screen to show the changed button
                 else:
                     menus.addItem('currentRouteTools', 'navigation#start', 'generic',
                                   'ms:turnByTurn:start:enabled|set:menu:None')
