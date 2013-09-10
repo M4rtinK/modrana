@@ -202,16 +202,10 @@ class GUIModule(RanaModule):
         :returns: True if in portrait, False otherwise
         :rtype: bool
         """
-
-        print("PORTRAIT!!!")
-
-
         w = h = 0
         screenWH = self.getScreenWH()
         if screenWH:
             w, h = screenWH
-        print(w, h)
-        print(w < h)
         return w < h
 
     @property
