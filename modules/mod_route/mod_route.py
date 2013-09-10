@@ -88,6 +88,7 @@ class Route(RanaModule):
         self.startAddress = None
         self.destinationAddress = None
         self.text = None
+        self.textPortrait = None
         self.selectManyPoints = False
         # disable OSD menu
         self.osdMenuState = None
@@ -1072,10 +1073,17 @@ class Route(RanaModule):
             button1 = ("map#show on", "generic", action)
             button2 = ("tools", "tools", "set:menu:currentRouteTools")
 
+            # re-render text if viewport aspect ratio changed
+            if self.textPortrait is not self.modrana.gui.portrait:
+                self.text = None
+
             if not self.directions:
                 text = "There is currently no active route."
             elif self.text is None: # the new text for the info-box only once
-                # check for online status
+                # record viewport type during text caching
+                self.textPortrait = self.modrana.gui.portrait
+
+
                 # check if start and destination geocoding is needed
                 if self.destinationAddress is None or self.startAddress is None:
                     with self._addressLookupLock:
@@ -1096,14 +1104,19 @@ class Route(RanaModule):
 
                 # TODO: do this cleaner with autowrap and elide
 
+                if self.modrana.gui.portrait:
+                    itemsPerLine = 2
+                else:
+                    itemsPerLine = 3
+
                 if self.startAddress:
                     start = ""
                     index = 1
                     for item in self.startAddress.split(','):
-                        if index%4: # add newline after every second item
+                        if index%itemsPerLine: # add newline after every second item
                             start += " %s," % item
                         else:
-                            start += "\n%s," % item
+                            start += "%s\n" % item
                         index+=1
                     start = start[1:-1]
                 else:
@@ -1113,10 +1126,10 @@ class Route(RanaModule):
                     destination = " \n\n\n"
                     index = 1
                     for item in self.destinationAddress.split(','):
-                        if index%4: # add newline after every second item
+                        if index%itemsPerLine: # add newline after every second item
                             destination += " %s," % item
                         else:
-                            destination += "\n%s," % item
+                            destination += "%s\n" % item
                         index+=1
                     # drop trailing ,
                     destination = destination[1:-1]
