@@ -192,6 +192,43 @@ class GUIModule(RanaModule):
             else:
                 return False
 
+    @property
+    def portrait(self):
+        """Report if viewport is currently in portrait
+        orientation
+
+        NOTE: square screen is considered landscape
+
+        :returns: True if in portrait, False otherwise
+        :rtype: bool
+        """
+
+        print("PORTRAIT!!!")
+
+
+        w = h = 0
+        screenWH = self.getScreenWH()
+        if screenWH:
+            w, h = screenWH
+        print(w, h)
+        print(w < h)
+        return w < h
+
+    @property
+    def square(self):
+        """Report if viewport is a square
+
+        NOTE: square screen is considered landscape
+
+        :returns: True if viewport is square, False otherwise
+        :rtype: bool
+        """
+        w = 1
+        h = 0
+        screenWH = self.getScreenWH()
+        if screenWH:
+            w, h = screenWH
+        return w == h
 
 
 

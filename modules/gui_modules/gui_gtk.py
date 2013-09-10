@@ -33,7 +33,7 @@ import gobject
 import gtk
 from gtk import gdk
 
-from base_gui_module import GUIModule
+from modules.gui_modules.base_gui_module import GUIModule
 
 CLICK_DRAG_THRESHOLD = 1024
 # Adjust this to the length^2 of a
@@ -66,6 +66,9 @@ class GTKGUI(GUIModule):
         # map center shifting variables
         self.centerShift = (0, 0)
         self.expandViewportTiles = 0.0
+
+        # viewport
+        self.viewportWH = (0,0)
 
         """
         NOTE: we are calling the device module through the main class
@@ -106,7 +109,7 @@ class GTKGUI(GUIModule):
         win.connect('delete-event', gtk.main_quit)
 
         ## Instantiate the main widget ##
-        self.mw = MainWidget(self.modrana)
+        self.mw = MainWidget(self)
         self.mw.topWindow = win
         # make the main window accessible from modules
         self.topWindow = win
@@ -276,6 +279,9 @@ class GTKGUI(GUIModule):
         """report current status of the gui"""
         return "It works!"
 
+    def getScreenWH(self):
+        return self.viewportWH
+
     def _registerCenteringShiftCallbacks(self):
         """we only update values needed for map drawing when something changes
         * window is resized
@@ -355,11 +361,12 @@ class MainWidget(gtk.Widget):
         'size-request': 'override',
     }
 
-    def __init__(self, modrana):
+    def __init__(self, gui):
         gtk.Widget.__init__(self)
-        self.modrana = modrana
+        self.gui = gui
+        self.modrana = gui.modrana
         self.draw_gc = None
-        self.dmod = modrana.dmod # device specific module
+        self.dmod = gui.modrana.dmod # device specific module
         self.currentDrawMethod = self.fullDrawMethod
 
         self.centeringDisableThreshold = 2048
@@ -815,6 +822,7 @@ class MainWidget(gtk.Widget):
 
     def _updateViewport(self):
         """update the current viewport in the global persistent dictionary"""
+        self.gui.viewportWH = (self.rect.width, self.rect.height)
         self.modrana.set('viewport', (self.rect.x, self.rect.y, self.rect.width, self.rect.height))
 
     def _expose_cairo(self, event, cr):
