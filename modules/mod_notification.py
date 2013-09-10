@@ -1,3 +1,4 @@
+from __future__ import with_statement # for python 2.5
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # This module provides notification support.
