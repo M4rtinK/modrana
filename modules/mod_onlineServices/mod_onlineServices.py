@@ -381,9 +381,9 @@ class Worker(threading.Thread):
 
     def _setWorkStatusText(self, text):
         self.statusMessage = text
-        notification = self.online.m.get('notification', None)
-        if notification:
-            notification.setTaskStatus(self.name, text)
+        #notification = self.online.m.get('notification', None)
+        #if notification:
+        #    notification.setTaskStatus(self.name, text)
 
     def _workDone(self):
         notification = self.online.m.get('notification', None)
