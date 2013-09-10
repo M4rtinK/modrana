@@ -1109,7 +1109,7 @@ class Route(RanaModule):
                     start = "start address unknown"
 
                 if self.destinationAddress:
-                    destination = " \n\n"
+                    destination = " \n\n\n"
                     index = 1
                     for item in self.destinationAddress.split(','):
                         if index%4: # add newline after every second item
