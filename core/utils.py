@@ -188,12 +188,19 @@ def createFolderPath(newPath):
         return False
     else:
         print("creating path: %s" % newPath)
-        head, tail = os.path.split(newPath)
-        if head and not os.path.isdir(head):
-            os.makedirs(head)
-        if tail:
-            os.mkdir(newPath)
-        return True
+        try:
+            head, tail = os.path.split(newPath)
+            if head and not os.path.isdir(head):
+                os.makedirs(head)
+            if tail:
+                os.mkdir(newPath)
+            return True
+        except Exception:
+            print("path creation failed")
+            import sys
+            e = sys.exc_info()[1]
+            print(e)
+            return False
 
 #from
 # http://stackoverflow.com/questions/3167154/
