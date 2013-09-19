@@ -42,7 +42,7 @@ class MonavRouting(RoutingProvider):
                 print(e)
                 traceback.print_exc(file=sys.stdout) # find what went wrong
             if result is None: # routing failed for unknown reasons
-                return RoutingResult(None, RouteParameters)
+                return RoutingResult(None, routeParams)
             if result.type == result.SUCCESS:
                 # convert the Monav result to a Way object usable
                 # for turn-by-turn navigation using the instruction
@@ -59,7 +59,7 @@ class MonavRouting(RoutingProvider):
             elif result.type == result.ROUTE_FAILED:
                 RoutingResult(None, routeParams, constants.ROUTING_ROUTE_FAILED)
             else:
-                return RoutingResult(None, RouteParameters)
+                return RoutingResult(None, routeParams)
         else:
             print("route: no Monav routing data - can't route")
             RoutingResult(None, routeParams, constants.ROUTING_NO_DATA)
@@ -71,7 +71,7 @@ class GoogleRouting(RoutingProvider):
         threadName = constants.THREAD_ROUTING_ONLINE_GOOGLE
         RoutingProvider.__init__(self, threadName=threadName)
 
-    def search(self, waypoints, routeParams=None, controller=DummyController()):
+    def search(self, waypoints, routeParams=RouteParameters(), controller=DummyController()):
         # check if we have at least 2 points
         routingStart = time.time()
         if len(waypoints) < 2:
@@ -80,8 +80,6 @@ class GoogleRouting(RoutingProvider):
         start = waypoints[0]
         destination = waypoints[-1]
         inBetweenPoints = waypoints[1:-1]
-        if routeParams is None:
-            routeParams = RouteParameters()
         print("GoogleRouting: routing from %s to %s" % (start, destination))
         controller.status = "online routing in progress"
         route, returnCode, errorMessage = _googleDirections(start, destination, inBetweenPoints, routeParams)
@@ -127,11 +125,17 @@ def _googleDirections(start, destination, waypoints, params):
 
         if not waypoints: waypoints = []
 
-        otherOptions = ""
-        if params.avoidHighways: # optionally avoid highways
-            otherOptions += 'h'
-        if params.avoidTollRoads: # optionally avoid toll roads
-            otherOptions += 't'
+        flagDir = {'language': params.language}
+
+        # toll and highway avoidance options
+        if params.avoidHighways and params.avoidTollRoads:
+            flagDir['avoid'] = 'tolls|highways'
+        elif params.avoidHighways: # optionally avoid highways
+            flagDir['avoid'] = 'highways'
+        elif params.avoidTollRoads: # optionally avoid toll roads
+            flagDir['avoid'] = 'tolls'
+
+        # waypoints
         waypointOption = None
         if waypoints: # waypoints are a list of Point objects
             firstWayPoint = waypoints[0]
@@ -140,25 +144,23 @@ def _googleDirections(start, destination, waypoints, params):
                 waypointOption += "|%f,%f" % (waypoint.lat, waypoint.lon)
 
         # respect travel mode
-        directionsType = ""
+        routeMode = "driving" # car directions are the default
         if params.routeMode == constants.ROUTE_BIKE:
-            directionsType = "b"
+            routeMode = "bicycling "
         elif params.routeMode == constants.ROUTE_PEDESTRIAN:
-            directionsType = "w"
+            routeMode = "walking"
+        flagDir['mode'] = routeMode
+
         # TODO: check if/how public transport routing works
         #elif mode == 'train' or mode == 'bus':
         #    directionsType = 'r'
         #else:
         #    directionsType = ""
 
-        # combine mode and other parameters
-        flagDir = {'language': params.language}
         # the google language code is the second part of this whitespace delimited string
         #googleLanguageCode = self.get('directionsLanguage', 'en en').split(" ")[1]
 
         gMap = _getGmapsInstance()
-        parameters = directionsType + otherOptions
-        flagDir['dirflg'] = parameters
         if waypointOption:
             flagDir['waypoints'] = waypointOption
         flagDir['sensor'] = 'false'
