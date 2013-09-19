@@ -95,7 +95,6 @@ class RoutingProvider(object):
         :returns: a list of routes (Way objects), None if search failed
         :rtype: list
         """
-        pass
         # lambda is used to pass all needed arguments to the search function
         # and passing the result to the callback,
         # but not actually executing it until the thread is started
