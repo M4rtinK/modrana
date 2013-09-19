@@ -437,6 +437,13 @@ class Route(RanaModule):
         :param routeParams: parameters for the route search
         :type routeParams: RouteParameters object instance or None for defaults
         """
+
+        if routeParams is None:
+            routeParams = self._getDefaultRouteParameters()
+            # no custom route parameters provided, build default ones
+            # based on current settings
+
+
         providerID = self.get('routingProvider', "GoogleDirections")
         if providerID == "Monav":
             # is Monav initialized ? (lazy initialization)
@@ -474,6 +481,26 @@ class Route(RanaModule):
                 routeParams=routeParams
             )
 
+
+    def _getDefaultRouteParameters(self):
+        mode = self.get("mode", "car")
+        routeMode = constants.ROUTE_CAR
+        langCode = self.get("directionsLanguage", "en en")
+        # the (Google) language code is the second part of
+        # this whitespace delimited string
+        langCode = langCode.split(" ")[1]
+        if mode == "walk":
+            routeMode = constants.ROUTE_PEDESTRIAN
+        elif mode == "cycle":
+            routeMode = constants.ROUTE_BIKE
+        routeParams = routing_providers.RouteParameters(
+            routeMode=routeMode,
+            avoidTollRoads=self.get("routingAvoidToll", False),
+            avoidHighways=self.get("routingAvoidHighways", False),
+            language = langCode
+        )
+        return routeParams
+
     def llRoute(self, start, destination, middlePoints=None):
         if not middlePoints: middlePoints = []
 
@@ -507,7 +534,8 @@ class Route(RanaModule):
         waypoints = [start, destination]
         # specify that this route lookup should expect start and destination
         # specified as address strings
-        params = routing_providers.RouteParameters(addressRoute=True)
+        params = self._getDefaultRouteParameters()
+        params.addressRoute = True
         self.routeAsync(self._handleRoutingResultCB, waypoints, routeParams=params)
 
     def doRoute(self, waypoints):
