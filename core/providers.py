@@ -122,9 +122,9 @@ class RoutingProvider(object):
 
 class RouteParameters(object):
     def __init__(self,
+                 routeMode=constants.ROUTE_CAR,
                  avoidTollRoads=False,
                  avoidHighways=False,
-                 routeMode=constants.ROUTE_CAR,
                  language=constants.ROUTE_DEFAULT_LANGUAGE,
                  addressRoute=False):
         self._avoidTollRoads = avoidTollRoads
@@ -162,6 +162,10 @@ class RouteParameters(object):
         Additional waypoints can be either textual descriptions or ordinary Point objects
         """
         return self._addressRoute
+
+    @addressRoute.setter
+    def addressRoute(self, value):
+        self._addressRoute = value
 
 class RoutingResult(object):
     """This class acts as a wrapper for the results of a routing lookup,
