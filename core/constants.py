@@ -30,10 +30,11 @@ PANGO_OFF = '<span color="red">OFF</span>'
 # threads
 THREAD_POI_SEARCH = "modRanaPOISearch"
 THREAD_ADDRESS_SEARCH = "modRanaAddressSearch"
+THREAD_WIKIPEDIA_SEARCH_NOMINATIM = "modRanaWikipediaSearchNominatim"
 THREAD_REVERSE_GEOCODING = "modRanaReverseGeocoding"
-THREAD_TESTING_PROVIDER = "modRanaTestingProvider"
 THREAD_ROUTING_ONLINE_GOOGLE = "modRanaRoutingOnlineGoogle"
 THREAD_ROUTING_OFFLINE_MONAV = "modRanaRoutingOfflineMonav"
+THREAD_TESTING_PROVIDER = "modRanaTestingProvider"
 
 # device types
 DEVICE_TYPE_DESKTOP = 1

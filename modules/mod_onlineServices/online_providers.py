@@ -2,6 +2,7 @@
 # Online geodata providers
 import time
 from core import constants
+from modules.mod_onlineServices import geonames
 
 try:
     import json
@@ -138,6 +139,23 @@ class ReverseGeocodingNominatim(POIProvider):
             print("online_services: Nominatim reverse geocoding:\nfailed with exception\n%s" % e)
 
         controller.status = "online reverse geocoding done"
+        return results
+
+
+class WikipediaSearchNominatim(POIProvider):
+    def __init__(self):
+        POIProvider.__init__(self,
+            threadName=constants.THREAD_WIKIPEDIA_SEARCH_NOMINATIM
+        )
+
+    def search(self, term=None, around=None, controller=DummyController()):
+        """Search for Wikipedia articles around the given location"""
+        if term is None:
+            print("online_services: Nominatim Wikipedia search: term not set")
+            return []
+        controller.status = "online Wikipedia search"
+        results = geonames.wikipediaSearch(term)
+        controller.status = "online Wikipedia search done"
         return results
 
 

@@ -246,7 +246,7 @@ class Search(RanaModule):
                     online = self.m.get('onlineServices', None)
                     if online:
                         # search Wikipedia asynchronously
-                        online.wikipediaSearchAsync(query, self.handleSearchResult, "wikipedia")
+                        online.wikipediaSearchAsync(query, self._handleWikipediaResultsCB)
                     else:
                         print("search: online services module missing")
 
@@ -728,7 +728,7 @@ class Search(RanaModule):
             textInput = result
             if online:
                 # search Wikipedia asynchronously
-                online.wikipediaSearchAsync(textInput, self.handleSearchResult, "wikipedia")
+                online.wikipediaSearchAsync(textInput, self._handleWikipediaResultsCB)
             else:
                 print("search: online services module missing")
 
@@ -759,26 +759,28 @@ class Search(RanaModule):
             print("search: GLS result received")
             self.localSearchResults = results
             self.set('menu', 'search#searchResults')
-        elif key == "wikipedia":
-            if results:
-                print("wikipedia search done - something found")
-                name = 'wikipediaResults'
-                markers = self.m.get('markers', None)
-                if markers:
-                    g = markers.addGroup(name, results, menu=True)
-                    menu = g.getMenuInstance()
-                    if len(results) == 1: # if only one result is found, center on it righ away
-                        point = results[0]
-                        self._jumpToPoint(point)
-                    else:
-                        self.sendMessage('set:menu:menu#list#%s' % name)
-                    menu.setOnceBackAction('set:menu:searchWhat')
-                else: # just jump to the first result
+
+    def _handleWikipediaResultsCB(self, results):
+        """Handle results from the asynchronous Wikipedia search"""
+        if results:
+            print("wikipedia search done - something found")
+            name = 'wikipediaResults'
+            markers = self.m.get('markers', None)
+            if markers:
+                g = markers.addGroup(name, results, menu=True)
+                menu = g.getMenuInstance()
+                if len(results) == 1: # if only one result is found, center on it righ away
                     point = results[0]
                     self._jumpToPoint(point)
-            else:
-                print("wikipedia search done - nothing found")
-                self.sendMessage('ml:notification:m:No results found for this query.;5')
+                else:
+                    self.sendMessage('set:menu:menu#list#%s' % name)
+                menu.setOnceBackAction('set:menu:searchWhat')
+            else: # just jump to the first result
+                point = results[0]
+                self._jumpToPoint(point)
+        else:
+            print("wikipedia search done - nothing found")
+            self.sendMessage('ml:notification:m:No results found for this query.;5')
 
     def _jumpToPoint(self, point):
         mw = self.m.get('mapView', None)

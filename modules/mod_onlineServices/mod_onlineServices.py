@@ -233,11 +233,27 @@ class OnlineServices(RanaModule):
     # ** Wikipedia search (through  Geonames) **
 
     def wikipediaSearch(self, query):
-        return geonames.wikipediaSearch(query)
+        """Synchronous Wikipedia search - search for georeferenced Wikipedia
+        articles for the given query
 
-    def wikipediaSearchAsync(self, query, outputHandler, key):
-        flags = {'net': True}
-        self._addWorkerThread(Worker._onlineWikipediaSearch, [query], outputHandler, key, flags)
+        :param query: Wikipedia search query
+        :type query: str
+        :return: a list of Point instances
+        :rtype: list
+        """
+        return online_providers.WikipediaSearchNominatim().search(term=query)
+
+    def wikipediaSearchAsync(self, query, callback):
+        """Asynchronous Wikipedia search - search for georeferenced Wikipedia
+        articles for the given query
+
+        :param query: Wikipedia search query
+        :type query: str
+        :return: a list of Point instances
+        :rtype: list
+        """
+        provider = online_providers.WikipediaSearchNominatim()
+        provider.searchAsync(callback, term=query)
 
     # ** Background processing **
 
@@ -443,9 +459,3 @@ class Worker(threading.Thread):
     def _geonamesCallback(self, progress):
         percentDone = 100 - int(100 * progress)
         self._setWorkStatusText("online elevation lookup %d %% done" % percentDone)
-
-    def _onlineWikipediaSearch(self, query):
-        self._setWorkStatusText("online Wikipedia search in progress...")
-        result = self.online.wikipediaSearch(query)
-        self._setWorkStatusText("online Wikipedia search done   ")
-        return result
