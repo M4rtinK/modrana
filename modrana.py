@@ -37,6 +37,7 @@ from core import paths
 from core import configs
 from core import threads
 from core import gs
+from core import singleton
 from core.backports import six
 # record that imports-done timestamp
 importsDoneTimestamp = time.time()
@@ -57,6 +58,8 @@ class ModRana(object):
     """
 
     def __init__(self):
+        singleton.modrana = self
+
         self.timing = []
         self.addCustomTime("modRana start", startTimestamp)
         self.addCustomTime("imports done", importsDoneTimestamp)
@@ -138,6 +141,10 @@ class ModRana(object):
         # device module first
         self._loadDeviceModule()
 
+        # handle tasks that require the device
+        # module but not GUI
+        self.startup.handleNonGUITasks()
+
         # then the GUI module
         self._loadGUIModule()
 
@@ -157,6 +164,8 @@ class ModRana(object):
 
     def _loadDeviceModule(self):
         """Load the device module"""
+        if self.dmod: # don't reload the module
+            return
 
         # get the device module string
         # (a unique device module string identificator)
@@ -628,6 +637,13 @@ class ModRana(object):
             return mode in self.keyModifiers[key]['modes'].keys()
         else:
             return False
+
+    def notify(self, message, msTimeout=0, icon=""):
+        notify = self.m.get('notification')
+        if notify:
+            # the notification module counts timeout in seconds
+            sTimeout = msTimeout / 1000.0
+            notify.handleNotification(message, sTimeout, icon)
 
     def getModes(self):
         """return supported modes"""
