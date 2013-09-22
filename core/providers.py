@@ -3,7 +3,6 @@
 
 from core import threads, constants
 
-
 class DummyController(object):
     """A default dummy object that implements the
     task controller interface that modRanaThreads have"""
@@ -11,13 +10,14 @@ class DummyController(object):
     def __init__(self):
         self.status = None
         self.progress = None
+        self.callback = None
 
 
 class POIProvider(object):
     def __init__(self, threadName=constants.THREAD_POI_SEARCH):
         self._threadName = threadName
 
-    def search(self, term=None, around=None, controller=DummyController()):
+    def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for POI using a textual search query
         :param term: search term
         :type term: str
@@ -29,7 +29,7 @@ class POIProvider(object):
         """
         pass
 
-    def searchAsync(self, callback, term=None, around=None):
+    def searchAsync(self, callback, term=None, around=None, **kwargs):
         """Perform asynchronous search
         :param callback: result handler
         :type term: a callable
@@ -45,7 +45,8 @@ class POIProvider(object):
         thread.target = lambda: self.search(
             term=term,
             around=around,
-            controller=thread
+            controller=thread,
+            **kwargs
         )
         thread.callback = callback
 
@@ -210,4 +211,5 @@ class RoutingResult(object):
     @property
     def lookupDuration(self):
         return self._lookupDuration
+
 
