@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from core.point import Point
 from modules.base_module import RanaModule
 from core import geo
 import math
@@ -186,6 +187,8 @@ class Search(RanaModule):
 
         elif message == 'localSearch':
             if messageType == 'ml' and args:
+                query = None
+                location = None
                 online = self.m.get('onlineServices', None)
                 if not online:
                     print("search: online services module not present")
@@ -196,26 +199,24 @@ class Search(RanaModule):
                     # parse coordinates
                     lat = float(args[1])
                     lon = float(args[2])
+                    location = Point(lat, lon)
                     query = args[3]
-                    online.googleLocalQueryLLAsync(query, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
                 elif lsType == "location":
                     # search around a location (address, coordinates, etc. ),
                     # modRana just forwards the location to the search engine
                     location = args[1]
-                    term = args[2]
-                    online.googleLocalQueryAsync(term, location, self.handleSearchResult, "localSearchResultGoogle")
+                    query = args[2]
                 elif lsType == "position": # search around current position
                     query = args[1]
                     fix = self.get('fix', 0)
                     pos = self.get('pos', None)
-
                     if fix > 1 and pos:
                         lat, lon = pos
-                        online.googleLocalQueryLLAsync(query, lat, lon, self.handleSearchResult,
-                                                       "localSearchResultGoogle")
+                        location = Point(lat, lon)
                     else:
                         print("search: position unknown - trying to get GPS lock")
-                        online.googleLocalQueryPosAsync(query, self.handleSearchResult, "localSearchResultGoogle")
+                        # location = None will trigger GPS fix attempt (provided GPS is enabled in Options)
+                        location = None
                 elif lsType == "view": #search around current map center
                     query = args[1]
                     proj = self.m.get('projection', None)
@@ -223,10 +224,14 @@ class Search(RanaModule):
                         centreLL = proj.getScreenCentreLL()
                         if centreLL:
                             (lat, lon) = centreLL
-                            online.googleLocalQueryLLAsync(query, lat, lon, self.handleSearchResult,
-                                                           "localSearchResultGoogle")
+                            location = Point(lat, lon)
                         else:
                             print("search: screen center coordinates unknown")
+                            return
+
+                if query:
+                    online.localSearchAsync(query, self._handleLocalSearchResultsCB,
+                                            around=location)
 
         elif message == "search":
             if messageType == "ml" and args:
@@ -251,9 +256,12 @@ class Search(RanaModule):
                         print("search: online services module missing")
 
         # DEPRECIATED ?, use the localSearch method
+        # TODO: depreciate this
         elif message == 'searchThis': # search for a term in the message string
             if messageType == 'ms' and args:
                 searchTerm = args
+                lat = None
+                lon = None
                 online = self.m.get('onlineServices', None)
                 if online is None:
                     print("search: online services module not present")
@@ -277,8 +285,10 @@ class Search(RanaModule):
                         else:
                             print("search: screen center coordinates unknown")
                             return
-
-                online.googleLocalQueryLLAsync(searchTerm, lat, lon, self.handleSearchResult, "localSearchResultGoogle")
+                if lat and lon:
+                    location = Point(lat, lon)
+                    online.localSearchAsync(searchTerm, self._handleLocalSearchResultsCB,
+                                            around=location)
 
             #        try:
             #          searchList = []
@@ -359,7 +369,8 @@ class Search(RanaModule):
         #    lon = list[index][1]['lng']
         #    action += "|set:searchResultShowLatLon:%s,%s" % (lat,lon)
 
-        name = "%s" % itemList[index][1]['titleNoFormatting']
+        point = itemList[index][1]
+        name = "%s" % point.name
 
         units = self.m.get('units', None)
         distanceString = units.km2CurrentUnitString(itemList[index][0], dp=2) # use correct units
@@ -390,32 +401,22 @@ class Search(RanaModule):
             position = self.get("pos", None) # our lat lon coordinates
             resultList = []
             index = 0
-            for item in self.localSearchResults['responseData']['results']: # we iterate over the local search results
+            for point in self.localSearchResults: # we iterate over the local search results
                 if position is not None:
                     (lat1, lon1) = position
-                    (lat2, lon2) = (float(item['lat']), float(item['lng']))
+                    (lat2, lon2) = point.getLL()
                     distance = geo.distance(lat1, lon1, lat2, lon2)
-                    resultTuple = (distance, item, index)
+                    resultTuple = (distance, point, index)
                     resultList.append(resultTuple) # we pack each result into a tuple with ist distance from us
                 else:
                     resultTuple = (
-                    0, item, index) # in this case, we dont know our position, so we say the distance is 0
+                    0, point, index) # in this case, we dont know our position, so we say the distance is 0
                     resultList.append(resultTuple)
                 index += 1
             self.list = resultList
             return resultList
         else:
             print("search: error -> distance update on empty results")
-
-    def updateItemDistance(self):
-        position = self.get("pos", None) # our lat lon coordinates
-        if position is not None:
-            (lat1, lon1) = position
-            (lat2, lon2) = (float(item['lat']), float(item['lng']))
-            distance = geo.distance(lat1, lon1, lat2, lon2)
-        else:
-            distance = 0 # in this case, we don't know our position, so we say the distance is 0
-        return distance
 
     def drawMenu(self, cr, menuName, args=None):
         if menuName == 'searchResults':
@@ -499,7 +500,7 @@ class Search(RanaModule):
         elif menuName == 'searchCustomQuery':
             self.drawSearchCustomQueryMenu(cr)
 
-    def drawGLSResultMenu(self, cr, resultTupple):
+    def drawGLSResultMenu(self, cr, resultTuple):
         """draw an info screen for a Google local search result"""
 
         # get coordinate allocation for the menu elements
@@ -511,9 +512,8 @@ class Search(RanaModule):
         (x4, y4) = e4
         (w, h, dx, dy) = alloc
 
-        (distance, result, index) = resultTupple
-        lat = float(result['lat'])
-        lon = float(result['lng'])
+        (distance, result, index) = resultTuple
+        lat, lon = result.getLL()
         units = self.m.get('units', None)
         if units:
             distanceString = units.km2CurrentUnitString(float(distance), dp=2)
@@ -535,21 +535,22 @@ class Search(RanaModule):
         menus.drawButton(cr, x4, y4, w4, h4, "", "generic", "set:menu:None")
 
         # * draw details from the search result
-        text = "\n%s (%s)" % (result['titleNoFormatting'], distanceString)
+        text = "\n%s (%s)" % (result.name, distanceString)
 
         try: # the address can be unknown
-            for addressLine in result['addressLines']:
+            for addressLine in result.addressLines:
                 text += "\n%s" % addressLine
         except:
             text += "\n%s" % "no address found"
 
-        try: # it seems, that this entry is no guarantied
-            for phoneNumber in result['phoneNumbers']:
-                numberType = ""
-                if phoneNumber['type'] != "":
-                    numberType = " (%s)" % phoneNumber['type']
-                text += "\n%s%s" % (phoneNumber['number'], numberType)
-        except:
+        # it seems, that this entry is not guarantied
+        if result.phoneNumbers:
+            for numberType, phoneNumber in result.phoneNumbers:
+                numberTypeString = ""
+                if numberType != "":
+                    numberTypeString = " (%s)" % numberType
+                text += "\n%s%s" % (phoneNumber, numberTypeString)
+        else:
             text += "\n%s" % "no phone numbers found"
 
         text += "\ncoordinates: %f, %f" % (lat, lon)
@@ -583,7 +584,7 @@ class Search(RanaModule):
             if index == highlightNr: # the highlighted result is draw in the end
                 # skip it this time
                 continue
-            (lat, lon) = (float(point['lat']), float(point['lng']))
+            (lat, lon) = point.getLL()
             (x, y) = proj.ll2xy(lat, lon)
             cr.set_source_rgb(0.0, 0.0, 0.0)
             cr.set_line_width(10)
@@ -597,9 +598,7 @@ class Search(RanaModule):
             if captions == False:
                 continue
                 # draw caption with transparent background
-            text = "%s" % point['titleNoFormatting'] # result caption
-
-            #      print(point['titleNoFormatting'])
+            text = "%s" % point.name # result caption
 
             cr.set_font_size(20)
             extents = cr.text_extents(text) # get the text extents
@@ -625,9 +624,8 @@ class Search(RanaModule):
 
         if highlightNr != -1: # is there some search result to highlight ?
             itemTuple = filter(lambda x: x[2] == int(highlightNr), self.list).pop()
-            result = itemTuple[1]
-            lat = float(result['lat'])
-            lon = float(result['lng'])
+            point = itemTuple[1]
+            lat, lon = point.getLL()
             (x, y) = proj.ll2xy(lat, lon)
 
             # draw the highlighting circle
@@ -648,7 +646,7 @@ class Search(RanaModule):
             cr.stroke()
 
             # draw a caption with transparent background
-            text = "%s" % result['titleNoFormatting'] # result caption
+            text = "%s" % point.name # result caption
             cr.set_font_size(20)
             extents = cr.text_extents(text) # get the text extents
             (w, h) = (extents[2] * 1.5, extents[3] * 1.5)
@@ -754,9 +752,10 @@ class Search(RanaModule):
             self.sendMessage('ml:notification:m:No results found for this address.;5')
 
 
-    def handleSearchResult(self, key, results):
-        if key == "localSearchResultGoogle":
-            print("search: GLS result received")
+    def _handleLocalSearchResultsCB(self, results):
+        print("search: local search result received")
+        # only show the results list if there are some results
+        if results:
             self.localSearchResults = results
             self.set('menu', 'search#searchResults')
 

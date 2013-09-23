@@ -23,6 +23,15 @@ DEFAULT_COORDINATES = 49.2, 16.616667  # Brno
 
 DEFAULT_THEME_ID = "default"
 
+LOCATION_TIMEOUT = 30 # in seconds
+INTERNET_CONNECTIVITY_TIMEOUT = 30 # in seconds
+
+ONLINE = True
+OFFLINE = False
+CONNECTIVITY_UNKNOWN = None
+
+
+
 # GTK GUI
 PANGO_ON = '<span color="green">ON</span>'
 PANGO_OFF = '<span color="red">OFF</span>'
@@ -32,8 +41,13 @@ THREAD_POI_SEARCH = "modRanaPOISearch"
 THREAD_ADDRESS_SEARCH = "modRanaAddressSearch"
 THREAD_WIKIPEDIA_SEARCH_NOMINATIM = "modRanaWikipediaSearchNominatim"
 THREAD_REVERSE_GEOCODING = "modRanaReverseGeocoding"
+THREAD_LOCAL_SEARCH_GOOGLE = "modRanaLocalSearchGoogle"
 THREAD_ROUTING_ONLINE_GOOGLE = "modRanaRoutingOnlineGoogle"
 THREAD_ROUTING_OFFLINE_MONAV = "modRanaRoutingOfflineMonav"
+
+THREAD_CONNECTIVITY_CHECK = "modRanaConnectivityCheck"
+THREAD_LOCATION_CHECK = "modRanaCurrentPositionCheck"
+
 THREAD_TESTING_PROVIDER = "modRanaTestingProvider"
 
 # device types

@@ -151,8 +151,25 @@ class Startup(object):
         return self.args
 
     def handleEarlyTasks(self):
+        """Handle CLI arguments that can be handled before the general modRana startup
+        -> this usually means some "simple" tasks that return some results to
+            standard output and then shut-down modRana
+        EX.: do an address search, return static map URL and quit
         """
-        handle CLI arguments that can be handled before the general modRana startup
+        # if any of those argument combinations are specified,
+        # we need to disable stdout, or else regular modRana
+        # startup will spam the CLI output
+        if self.args.return_static_map_url:
+            if self.args.local_search or \
+            self.args.address_search is not None or \
+            self.args.wikipedia_search is not None:
+                self._disableStdout()
+        elif self.args.return_current_coordinates:
+            self._disableStdout()
+
+    def handleNonGUITasks(self):
+        """Handle CLI arguments that can be handled before the general modRana startup,
+        but require a loaded device module
         -> this usually means some "simple" tasks that return some results to
             standard output and then shut-down modRana
         EX.: do an address search, return static map URL and quit
@@ -167,6 +184,7 @@ class Startup(object):
                 self._earlyWikipediaSearch()
         elif self.args.return_current_coordinates:
             self._earlyReturnCoordinates()
+
 
 
     def handlePostFirstTimeTasks(self):
@@ -259,10 +277,13 @@ class Startup(object):
         # now check if a location for the local search was provided from CLI or if we need to find our location
         # using GPS or equivalent
 
+        from core.point import Point
+
         location = self._getLocalSearchLocation()
         if location is not None:
             # we use the location provided from CLI, no need to load & start location
             if self._useLastKnownPos(location):
+                # get last known position (if any)
                 pos = self._getCurrentPosition(loadLocationModule=True, useLastKnown=True)
                 if pos is None:
                     self._enableStdout()
@@ -271,19 +292,20 @@ class Startup(object):
                     self._exit(LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR)
                 else:
                     lat, lon = pos
-                    points = online.localSearchLL(query, lat, lon)
-            else:
-                points = online.localSearch(query, location)
-
+                    # replace the use-last-known flag with the actual location
+                    location = Point(lat, lon)
         else:
             # we need to determine our current location - the location module needs to be loaded & used
             pos = self._getCurrentPosition(loadLocationModule=True)
             if pos is not None:
                 lat, lon = pos
-                points = online.localSearchLL(query, lat, lon)
+                location = Point(lat, lon)
             else:
                 # done - no position found
                 self._exit(LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR)
+
+        # do the search
+        points = online.localSearch(query, location)
 
         # local search results processing
         self._returnStaticMapUrl(points, online)
@@ -497,16 +519,18 @@ class Startup(object):
 
     def _enableStdout(self):
         """enable stdout output"""
-        sys.stdout = self.originalStdout
-        self.originalStdout = None
+        if self.originalStdout:
+            sys.stdout = self.originalStdout
+            self.originalStdout = None
 
     def _disableStdout(self):
         """disable stdout output
         -> this is mainly used for CLI processing so that modRanas status messages don't get into the output
         that will be parsed by outside programs or scripts
         """
-        self.originalStdout = sys.stdout
-        sys.stdout = self
+        if self.originalStdout is None:
+            self.originalStdout = sys.stdout
+            sys.stdout = self
 
     def write(self, s):
         """a write function that does nothing for stdout redirection"""

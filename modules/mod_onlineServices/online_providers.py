@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # Online geodata providers
 import time
+import re
 from core import constants
+from core.point import Point
+from core import requirements
 from modules.mod_onlineServices import geonames
 
 try:
@@ -10,7 +13,6 @@ except ImportError:
     import simplejson as json
 
 from core.providers import POIProvider, DummyController
-from core.point import Point
 
 try:  # Python 2
     from urllib import urlencode
@@ -23,11 +25,94 @@ except ImportError:  # Python 3
 NOMINATIM_GEOCODING_URL = "http://nominatim.openstreetmap.org/search?"
 NOMINATIM_REVERSE_GEOCODING_URL = "http://nominatim.openstreetmap.org/reverse?"
 
+
+#local search result handling
+
+class LocalSearchPoint(Point):
+    """a local search result point"""
+
+    def __init__(self, lat, lon, name="", description="", phoneNumbers=None, urls=None, addressLines=None, emails=None):
+        if not emails: emails = []
+        if not addressLines: addressLines = []
+        if not urls: urls = []
+        if not phoneNumbers: phoneNumbers = []
+        Point.__init__(self, lat, lon, message=name)
+        self._name = name
+        self.description = description
+        self._message = None
+        self._phoneNumbers = phoneNumbers
+        self.urls = urls
+        self._addressLines = addressLines
+        self.emails = emails
+
+    @property
+    def addressLines(self):
+        return self._addressLines
+
+    @property
+    def phoneNumbers(self):
+        return self._phoneNumbers
+
+    def getDescription(self):
+        return self.description
+
+    def getMessage(self):
+        # lazy message generation
+        # = only generate the message once it is requested for the first time
+        if self._message is None:
+            self.updateMessage()
+            return self._message
+        else:
+            return self._message
+
+    def updateMessage(self):
+        """call this if you change the properties of an existing point"""
+        message = ""
+        message += "%s\n\n" % self._name
+        if self.description != "":
+            message += "%s\n" % self.description
+        for item in self._addressLines:
+            message += "%s\n" % item
+        for item in self.phoneNumbers:
+            message += "%s\n" % item[1]
+        for item in self.emails:
+            message += "%s\n" % item
+        for item in self.urls:
+            message += "%s\n" % item
+        self.setMessage(message)
+
+    def __unicode__(self):
+        return self.getMessage()
+
+
+class GoogleLocalSearchPoint(LocalSearchPoint):
+    def __init__(self, GLSResult):
+        # dig the data out of the GLS result
+        # and load it to the LSPoint object
+        addressLine = "%s, %s, %s" % (GLSResult['streetAddress'], GLSResult['city'], GLSResult['country'])
+        phoneNumbers = []
+
+        for number in GLSResult.get('phoneNumbers', []):
+            # number types
+            # "" -> normal phone number
+            # "FAX" -> FAX phone number
+            phoneNumbers.append((number['type'], number['number']))
+
+        LocalSearchPoint.__init__(
+            self,
+            lat=float(GLSResult['lat']),
+            lon=float(GLSResult['lng']),
+            name=GLSResult['titleNoFormatting'],
+            addressLines=[addressLine],
+            phoneNumbers=phoneNumbers
+        )
+
+
 class GoogleAddressSearch(POIProvider):
     def __init__(self):
         POIProvider.__init__(self, threadName=constants.THREAD_ADDRESS_SEARCH)
 
-    def search(self, term=None, around=None, controller=DummyController()):
+    def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for an address using Google geocoding API"""
         if term is None:
             print("online_services: GoogleAddressSearch: term is None")
@@ -36,11 +121,85 @@ class GoogleAddressSearch(POIProvider):
         controller.status = "online address search done"
 
 
+class GoogleLocalSearch(POIProvider):
+    def __init__(self):
+        POIProvider.__init__(self, threadName=constants.THREAD_LOCAL_SEARCH_GOOGLE)
+
+
+    def _constructGLSQuery(self, term, location):
+        """get a correctly formatted GLS query"""
+        # check if the location is a Point or a string
+        if not isinstance(location, str):
+            # convert a Point object to lat,lon string
+            location = "%f,%f" % (location.lat, location.lon)
+
+        query = "%s loc:%s" % (term, location)
+
+        # Local Search doesn't like the geo: prefix so we remove it
+        query = re.sub("loc:.*geo:", "loc:", query)
+
+        return query
+
+    def _processGLSResponse(self, response):
+        """load GLS results to LocalSearchPoint objects"""
+        results = response['responseData']['results']
+        points = []
+        for result in results:
+            point = GoogleLocalSearchPoint(result)
+            points.append(point)
+        return points
+
+    # local search might need a GPS fix and Internet access,
+    # also check if around is provided and enable GPS if not
+    @requirements.needsAround
+    @requirements.gps
+    @requirements.internet
+    def search(self, term=None, around=None,
+               controller=DummyController(), maxResults=8 ,**kwargs):
+        """Search for POI using Google local search API"""
+        if term is None and around is None:
+            print("online_services: Google local search: term and location not set")
+            return []
+        elif term is None:
+            print("online_services: Google local search: term not set")
+            return []
+        elif around is None:
+            print("online_services: Google local search: location not set")
+            return []
+        controller.status = "online POI search"
+
+        query = self._constructGLSQuery(term, around)
+
+        print("local search query: %s" % query)
+        gMap = _getGmapsInstance()
+        if gMap:
+            result = gMap.local_search(query, maxResults)
+            controller.status = "processing POI from search"
+            points = self._processGLSResponse(result)
+            controller.status = "online POI search done"
+            return points
+        else:
+            print("Google local search: no Google maps instance")
+
+
+def _getGmapsInstance():
+    """get a google maps wrapper instance"""
+    key = constants.GOOGLE_API_KEY
+    if key is None:
+        print("online_providers:"
+              " a google API key is needed for using the Google maps services")
+        return None
+        # only import when actually needed
+    from modules import googlemaps
+    gMap = googlemaps.GoogleMaps(key)
+    return gMap
+
+
 class GeocodingNominatim(POIProvider):
     def __init__(self):
         POIProvider.__init__(self, threadName=constants.THREAD_ADDRESS_SEARCH)
 
-    def search(self, term=None, around=None, controller=DummyController()):
+    def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for an address using the Nominatim geocoding API"""
         if term is None:
             print("online_services: NominatimAddressSearch: term is None")
@@ -93,7 +252,7 @@ class ReverseGeocodingNominatim(POIProvider):
     def __init__(self):
         POIProvider.__init__(self, threadName=constants.THREAD_REVERSE_GEOCODING)
 
-    def search(self, term=None, around=None, controller=DummyController()):
+    def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for an address for coordinates using the Nominatim
         reverse geocoding API
         """
@@ -148,7 +307,7 @@ class WikipediaSearchNominatim(POIProvider):
             threadName=constants.THREAD_WIKIPEDIA_SEARCH_NOMINATIM
         )
 
-    def search(self, term=None, around=None, controller=DummyController()):
+    def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for Wikipedia articles around the given location"""
         if term is None:
             print("online_services: Nominatim Wikipedia search: term not set")
@@ -163,7 +322,7 @@ class TestingProvider(POIProvider):
     def __init__(self):
         POIProvider.__init__(self, threadName=constants.THREAD_TESTING_PROVIDER)
 
-    def search(self, term=None, around=None, controller=DummyController()):
+    def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         controller.status  = "starting provider test"
         print("starting provider test")
         for i in range(1,7,1):
