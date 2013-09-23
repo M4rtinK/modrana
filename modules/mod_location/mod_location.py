@@ -39,7 +39,7 @@ class Location(RanaModule):
         self.set('bearing', None)
         self.set('elevation', None)
         self.status = "Unknown"
-        self.enabled = False
+        self._enabled = False
         self.provider = None
         self.startSignal = Signal()
         self.stopSignal = Signal()
@@ -82,7 +82,7 @@ class Location(RanaModule):
 
         # only try to update position info if
         # location is enabled
-        if self.enabled and self.provider:
+        if self._enabled and self.provider:
             self.provider._updateGPSD()
 
             fix = self.provider.getFix()
@@ -181,13 +181,13 @@ class Location(RanaModule):
         """start location - device based or gpsd"""
         # send the location start signal
         self.startSignal()
-        if not self.enabled:
+        if not self._enabled:
             print("location: enabling location")
             if self.modrana.dmod.handlesLocation():
                 self.modrana.dmod.startLocation(startMainLoop=startMainLoop)
             elif self.provider:
                 self.provider.start(startMainLoop=startMainLoop)
-            self.enabled = True
+            self._enabled = True
         else:
             print('location: location already enabled')
 
@@ -202,7 +202,12 @@ class Location(RanaModule):
         # if it is available, stop location
         elif self.provider:
             self.provider.stop()
-        self.enabled = False
+        self._enabled = False
+
+    @property
+    def enabled(self):
+        """Report if location is enabled"""
+        return self._enabled
 
     def shutdown(self):
         try:
