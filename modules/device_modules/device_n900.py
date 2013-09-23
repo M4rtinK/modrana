@@ -339,7 +339,7 @@ class DeviceN900(DeviceModule):
         optionsButton = gtk.Button("Options")
         optionsButton.connect('clicked', self._switchToMenu, 'options')
         searchButton = gtk.Button("Search")
-        searchButton.connect('clicked', self._switchToMenu, 'search')
+        searchButton.connect('clicked', self._switchToMenu, 'searchWhat')
         routeButton = gtk.Button("Route")
         routeButton.connect('clicked', self._switchToMenu, 'route')
 
