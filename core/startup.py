@@ -142,6 +142,13 @@ class Startup(object):
             default=None,
             action="store"
         )
+        # startup debugging - don't disable stdout
+        parser.add_argument(
+            '--debug-startup',
+            help="startup debugging - don't disable stdout",
+            default=None,
+            action="store_true"
+        )
 
         self.args = parser.parse_args()
 
@@ -528,6 +535,10 @@ class Startup(object):
         -> this is mainly used for CLI processing so that modRanas status messages don't get into the output
         that will be parsed by outside programs or scripts
         """
+        # if startup debugging is enabled, don't disable stdout
+        if self.args.debug_startup:
+            return
+
         if self.originalStdout is None:
             self.originalStdout = sys.stdout
             sys.stdout = self
