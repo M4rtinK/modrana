@@ -30,6 +30,7 @@ import os
 import marshal
 import traceback
 import imp
+import platform
 # import core modules/classes
 from core import startup
 from core import utils
@@ -114,6 +115,7 @@ class ModRana(object):
         if version is None:
             version = "unknown version"
         print("  %s" % version)
+        print("  Python %s" % platform.python_version())
 
         # add the configs handling core module
         self.configs = configs.Configs(self)
