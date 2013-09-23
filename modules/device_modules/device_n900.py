@@ -26,7 +26,7 @@ from core.constants import DEVICE_TYPE_SMARTPHONE
 #N900 specific:
 import dbus.glib
 
-from core import gs
+from core import gs, constants
 # only import GTK, Hildon & Liblocation when using GTK GUI
 if gs.GUIString == "GTK":
     import hildon
@@ -616,12 +616,16 @@ class DeviceN900(DeviceModule):
         iap_id = event.get_iap_id()
         bearer = event.get_bearer_type()
 
+        status = constants.CONNECTIVITY_UNKNOWN
         if status == conic.STATUS_CONNECTED:
-            self.connectivityStatus = True
+            status = constants.ONLINE
         elif status == conic.STATUS_DISCONNECTED:
-            self.connectivityStatus = False
+            status = constants.OFFLINE
         elif status == conic.STATUS_DISCONNECTING:
-            self.connectivityStatus = False
+            status = constants.OFFLINE
+        self.connectivityStatus = status
+        # trigger the connectivity status changed signal
+        self.internetConnectivityChanged(status)
 
     def enableInternetConnectivity(self):
         """autoconnect to the Internet using DBUS"""
