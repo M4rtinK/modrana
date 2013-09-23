@@ -112,6 +112,7 @@ class GoogleAddressSearch(POIProvider):
     def __init__(self):
         POIProvider.__init__(self, threadName=constants.THREAD_ADDRESS_SEARCH)
 
+    @requirements.internet
     def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for an address using Google geocoding API"""
         if term is None:
@@ -199,6 +200,8 @@ class GeocodingNominatim(POIProvider):
     def __init__(self):
         POIProvider.__init__(self, threadName=constants.THREAD_ADDRESS_SEARCH)
 
+    # online geocoding needs internet access
+    @requirements.internet
     def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for an address using the Nominatim geocoding API"""
         if term is None:
@@ -252,6 +255,8 @@ class ReverseGeocodingNominatim(POIProvider):
     def __init__(self):
         POIProvider.__init__(self, threadName=constants.THREAD_REVERSE_GEOCODING)
 
+    # online geocoding needs internet access
+    @requirements.internet
     def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for an address for coordinates using the Nominatim
         reverse geocoding API
@@ -307,6 +312,8 @@ class WikipediaSearchNominatim(POIProvider):
             threadName=constants.THREAD_WIKIPEDIA_SEARCH_NOMINATIM
         )
 
+    # online Wikipedia search needs Internet access
+    @requirements.internet
     def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for Wikipedia articles around the given location"""
         if term is None:
