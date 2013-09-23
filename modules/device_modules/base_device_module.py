@@ -21,12 +21,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
+from core.signal import Signal
 
 class DeviceModule(RanaModule):
     """A modRana device module"""
 
     def __init__(self, m, d, i):
         RanaModule.__init__(self, m, d, i)
+        self.internetConnectivityChanged = Signal()
 
     def getDeviceIDString(self):
         """
