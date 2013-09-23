@@ -141,7 +141,8 @@ def internet(function):
         if status is constants.OFFLINE:
             # requirements not fulfilled,
             # just run a no-op function and don't call the callback
-            controller.callback = None
+            if controller:
+                controller.callback = None
             return _nop()
 
         # requirement fulfilled,
