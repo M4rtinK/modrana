@@ -401,7 +401,6 @@ class Startup(object):
         # -> Internet is needed for a quick fix & the search itself
         # -> if the device is offline, it might need this "nudge"
         # to reconnect
-        self.modrana.dmod.enableInternetConnectivity()
 
         print("startup: searching where is the CLI-provided address")
         query = self.args.address_search
@@ -414,7 +413,6 @@ class Startup(object):
         # -> Internet is needed for a quick fix & the search itself
         # -> if the device is offline, it might need this "nudge"
         # to reconnect
-        self.modrana.dmod.enableInternetConnectivity()
 
         print("startup: searching Wikipedia for CLI-provided query")
         query = self.args.wikipedia_search
@@ -449,8 +447,6 @@ class Startup(object):
         # do we need to load the location module ?
         # we usually need to load it if we handle an early task that happens before regular startup
         if loadLocationModule:
-            # the location module might need the device module to handle location on some devices
-            self.modrana._loadDeviceModule()
             # load the location module
             l = self.modrana._loadModule("mod_location", "location")
             # register fix CB
@@ -462,6 +458,10 @@ class Startup(object):
         else:
             l = self.modrana.m.get("location", None)
 
+        # calling l.startLocation(startMainLoop=True) will start the
+        # main loop and block the execution of this function until the
+        # main look is killed by the fix watch
+        #
         # the fix watch will kill the main loop once a 3D fix is
         # established or once it times out,
         # then the rest of the code in this function will be executed
