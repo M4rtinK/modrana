@@ -32,15 +32,25 @@ def locateCurrentPosition(controller=None):
     sleepTime = 0.5 # in seconds
     pos = modrana.get('pos', None)
     fix = modrana.get('fix', 1)
-    if modrana.get('GPSEnabled') == False:
+    # check if GPS usage is explicitly disabled in modRana
+    gpsEnabled = modrana.get('GPSEnabled')
+    if gpsEnabled == False:
         if pos:
             modrana.notify("GPS OFF, using last known position", 5000)
             return Point(*pos)
         else:
             modrana.notify("GPS OFF, no last known position", 5000)
             return None
+
     if fix > 1 and pos:
         return Point(*pos)  # fix found, return it at once
+
+    # check if GPS hardware has been enabled
+    location = modrana.m.get("location")
+    if not location.enabled:
+        # location usage has not be disabled but location
+        # has not been started, so start location
+        location.startLocation()
 
     # wait for the fix
     startTimestamp = time.time()
@@ -108,7 +118,7 @@ def gps(function):
             del kwargs["gps"]
             pos = locateCurrentPosition(controller=controller)
             if pos:
-                kwargs["location"] = pos  # feed the position as the location argument
+                kwargs["around"] = pos  # feed the position as the around argument
             else:
                 # requirements not fulfilled,
                 # just run a no-op function and don't call the callback
@@ -124,6 +134,9 @@ def internet(function):
     def wrapper(*args, **kwargs):
         # check if GPS is needed
         controller=kwargs.get("controller")
+        # tell the device module we need Internet connectivity
+        modrana.dmod.enableInternetConnectivity()
+        # check if it is available
         status = checkConnectivity(controller=controller)
         if status is constants.OFFLINE:
             # requirements not fulfilled,
