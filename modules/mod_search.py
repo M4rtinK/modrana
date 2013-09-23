@@ -242,7 +242,7 @@ class Search(RanaModule):
                     online = self.m.get('onlineServices', None)
                     if online:
                         # geocode the text input asynchronously
-                        online.geocodeAsync(query, self)
+                        online.geocodeAsync(query, self._address2llCB)
                     else:
                         print("search: online services module missing")
                 elif sType == "wikipedia":
