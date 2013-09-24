@@ -91,17 +91,23 @@ def checkConnectivity(controller=None):
             controller.status = "waiting for Internet connectivity"
         while elapsed < constants.INTERNET_CONNECTIVITY_TIMEOUT:
             status = modrana.dmod.getInternetConnectivityStatus()
-            print('online: waiting for internet connectivity')
+            print('requirements: waiting for internet connectivity')
             print(status)
             if status == True or status is None:
+                break
+            # check if the thread was cancelled
+            if controller and controller.callback is None:
+                # the thread was cancelled
+                print("requirements: connectivity status check cancelled")
+                status = constants.CONNECTIVITY_UNKNOWN
                 break
             time.sleep(1)
             elapsed = time.time() - startTimestamp
         if status is constants.OFFLINE:
-            modrana.notify("failed to connect to the Internet")
+            modrana.notify("requirements: failed to connect to the Internet")
         return status
     else:
-        print('online: warning, unknown connection status:')
+        print('requirements: warning, unknown connection status:')
         print(status)
         return status
 
