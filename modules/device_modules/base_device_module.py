@@ -1,3 +1,4 @@
+from __future__ import with_statement  # for Python 2.5
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Base class for Rana device-specific modules
@@ -20,6 +21,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from core import constants
 from modules.base_module import RanaModule
 from core.signal import Signal
 
@@ -230,6 +232,22 @@ class DeviceModule(RanaModule):
         True - connected to the Internet
         False - disconnected from the Internet
         """
+        connected = constants.OFFLINE
+        # open the /proc/net/route file
+        with open('/proc/net/route', 'rc') as f:
+            for line in f:
+                # the line is delimited by tabulators
+                lineSplit = line.split('\t')
+                # check if the length is valid
+                if len(lineSplit) >= 11:
+                    if lineSplit[1] == '00000000' and lineSplit[7] == '00000000':
+                        # if destination and mask are 00000000,
+                        # it is probably an Internet connection
+                        connected = constants.ONLINE
+                        break
+        return connected
+
+
 
     def enableInternetConnectivity(self):
         """try to make sure that the device connects to the internet"""

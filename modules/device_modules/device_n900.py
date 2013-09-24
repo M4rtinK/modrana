@@ -73,7 +73,9 @@ class DeviceN900(DeviceModule):
         print("N900: DBUS initialized")
 
         # Internet connectivity related
-        self.connectivityStatus = False
+
+        # status from the Internet Connectivity Daemon
+        self._connectivityStatusICD = constants.OFFLINE
         self.conicConnection = None
 
         # Mainloop for headless location support
@@ -604,10 +606,6 @@ class DeviceN900(DeviceModule):
 
     # ** Internet connectivity **
 
-    def getInternetConnectivityStatus(self):
-        """report Internet connectivity status based on data from libconic"""
-        return self.connectivityStatus
-
     def _connectionStateCB(self, connection, event):
         """handle Internet connectivity state changes"""
         #    print("connection_cb(%s, %s)" % (connection, event))
@@ -623,12 +621,17 @@ class DeviceN900(DeviceModule):
             status = constants.OFFLINE
         elif status == conic.STATUS_DISCONNECTING:
             status = constants.OFFLINE
-        self.connectivityStatus = status
+        self._connectivityStatusICD = status
         # trigger the connectivity status changed signal
         self.internetConnectivityChanged(status)
 
     def enableInternetConnectivity(self):
-        """autoconnect to the Internet using DBUS"""
+        """Autoconnect to the Internet using DBUS"""
+        # as we are starting Internet connectivity, let set the connectivity status
+        # to OFFLINE, the callback will set it to ONLINE once connected
+        # (or again to OFFLINE if connectivity can't be established)
+        self._connectivityStatusICD = constants.OFFLINE
+
         subprocess.call(["sh", "modules/device_modules/n900_maemo5_autoconnect_dbus.sh"])
 
     def getDeviceType(self):
