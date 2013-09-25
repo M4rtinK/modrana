@@ -275,6 +275,11 @@ class Startup(object):
 
         self._disableStdout()
 
+        # local search need Internet connectivity, trigger
+        # Internet initialization now, the search function decorator
+        # will wait for it to finish
+        self.modrana.dmod.enableInternetConnectivity()
+
         # load the online services module
         online = self.modrana._loadModule("mod_onlineServices", "onlineServices")
 
