@@ -19,12 +19,10 @@
 #---------------------------------------------------------------------------
 
 import time
+import functools
 from core import constants
 from core.point import Point
 from core.singleton import modrana
-
-def _nop():
-    return []
 
 def locateCurrentPosition(controller=None):
     """Try to locate current position and return it when done or time out"""
@@ -111,61 +109,114 @@ def checkConnectivity(controller=None):
         print(status)
         return status
 
+def gps(conditional=False):
+    """The given function requires GPS,
+    start it and wait for a fix or timeout
 
-# Decorators
-
-def gps(function):
-    """Check if the given function requires GPS and try to provide it"""
-    def wrapper(*args, **kwargs):
-        # check if GPS is needed
-        controller=kwargs.get("controller")
-        needsGPS = kwargs.get("gps")
-        if needsGPS:
-            del kwargs["gps"]
-            pos = locateCurrentPosition(controller=controller)
-            if pos:
-                kwargs["around"] = pos  # feed the position as the around argument
-            else:
-                # requirements not fulfilled,
-                # just run a no-op function and don't call the callback
-                controller.callback = None
-                return _nop()
-        # requirement fulfilled,
-        # call the wrapped function
-        return function(*args, **kwargs)
-    return wrapper
+    :param kwargTrigger: if the key specified is in kwargs of the
+    wrapped function and it's value evaluates to true, then start GPS
+    :type kwargTrigger: hashable type other than None
+    """
+    def decorator(function):
+        @functools.wraps(function)
+        def wrapper(*args, **kwargs):
+            # check if GPS is needed
+            controller=kwargs.get("controller")
+            needsGPS = True
+            if conditional:
+                needsGPS = kwargs.get("gps")
+            if needsGPS:
+                del kwargs["gps"]  # not needed by the wrapped function
+                pos = locateCurrentPosition(controller=controller)
+                if pos:
+                    kwargs["around"] = pos  # feed the position as the around argument
+                else:
+                    # requirements not fulfilled,
+                    # disable the callback and return an empty list
+                    if controller:
+                        controller.callback = None
+                    return []
+            # requirement fulfilled,
+            # call the wrapped function
+            return function(*args, **kwargs)
+        return wrapper
+    return decorator
 
 def internet(function):
-    """Check if the given function requires Internet and try to provide it"""
+    """The given function requires Internet, start it
+    and wait for it to connect or timeout
+    """
+    @functools.wraps(function)
     def wrapper(*args, **kwargs):
-        # check if GPS is needed
         controller=kwargs.get("controller")
         # tell the device module we need Internet connectivity
         modrana.dmod.enableInternetConnectivity()
         # check if it is available
         status = checkConnectivity(controller=controller)
         if status is constants.OFFLINE:
-            # requirements not fulfilled,
-            # just run a no-op function and don't call the callback
+            # requirement not fulfilled (we are offline),
+            # disable the callback and return an empty list
             if controller:
                 controller.callback = None
-            return _nop()
-
+            return []
         # requirement fulfilled,
         # call the wrapped function
         return function(*args, **kwargs)
     return wrapper
 
+
+def startGPS(conditional=False):
+    """Start GPS
+
+    :param conditional: if true, check for the "gps"
+    key in the kwargs of the wrapped function,
+    if the value evaluates as True, start GPS
+    :type conditional: bool
+    """
+    def decorate(function):
+        @functools.wraps(function)
+        def wrapper(*args, **kwargs):
+            start = True
+            # check if the kwargs trigger is enabled
+            if conditional:
+                start = kwargs.get("gps")
+            # check if GPS usage is enabled in modRana
+            gpsEnabled = modrana.get('GPSEnabled')
+            if start and gpsEnabled:
+                location = modrana.m.get('location')
+                if location:
+                    location.startLocation()
+
+            return function(*args, **kwargs)
+        return wrapper
+    return decorate
+
+def startInternet(function):
+    """Start Internet"""
+
+    @functools.wraps(function)
+    def wrapper(*args, **kwargs):
+        # tell the device module we need Internet connectivity
+        modrana.dmod.enableInternetConnectivity()
+
+        return function(*args, **kwargs)
+    return wrapper
+
+
 def needsAround(function):
     """If there is no "around" location in kwargs,
     enable the GPS requirement, as the current position
     is needed to be set to the around variable"""
+
+    @functools.wraps(function)
     def wrapper(*args, **kwargs):
         # check if Around is provided and not None
 
         around = kwargs.get("around")
         if not around:
             kwargs["gps"] = True
+        else:
+            kwargs["gps"] = False
 
         # requirement fulfilled,
         # call the wrapped function
