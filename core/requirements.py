@@ -79,7 +79,7 @@ def checkConnectivity(controller=None):
     """Check for Internet connectivity - if no Internet connectivity is available,
     wait for up to 30 seconds and then fail (this is used to handle cases where
     the device was offline and the Internet connection is just being established)"""
-    status = modrana.dmod.getInternetConnectivityStatus()
+    status = modrana.dmod.connectivityStatus
     if status is constants.CONNECTIVITY_UNKNOWN: # Connectivity status monitoring not supported
         return status # skip
     elif status is constants.ONLINE:
@@ -90,7 +90,7 @@ def checkConnectivity(controller=None):
         if controller:
             controller.status = "waiting for Internet connectivity"
         while elapsed < constants.INTERNET_CONNECTIVITY_TIMEOUT:
-            status = modrana.dmod.getInternetConnectivityStatus()
+            status = modrana.dmod.connectivityStatus
             print('requirements: waiting for internet connectivity')
             print(status)
             if status == True or status is None:

@@ -226,7 +226,8 @@ class DeviceModule(RanaModule):
         """
         pass
 
-    def getInternetConnectivityStatus(self):
+    @property
+    def connectivityStatus(self):
         """report the current status of internet connectivity on the device
         None - status reporting not supported or status unknown
         True - connected to the Internet

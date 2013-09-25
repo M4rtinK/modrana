@@ -1242,12 +1242,12 @@ class Route(RanaModule):
             menus.showText(cr, destinationText, x4 + w1 / 20, y4 + 2 * dy + dy / 5, w1 - x4 - (w1 / 20) * 2)
 
     def _geocodeStartAndDestination(self):
-        """get the address of start and destination coordinates by using geocoding"""
+        """Get the address of start and destination coordinates by using geocoding"""
         onlineModule = self.m.get('onlineServices', None)
-        connectivity = (self.modrana.dmod.getInternetConnectivityStatus() in (True, None))
+        connectivity = (self.modrana.dmod.connectivityStatus in (constants.ONLINE, constants.CONNECTIVITY_UNKNOWN))
         if connectivity and onlineModule:
             # set that address lookups are in progress
-            # (this function should be called from "inside" theaddress lookup lock)
+            # (this function should be called from "inside" the address lookup lock)
             self._startLookup = True
             self._destinationLookup = True
 
@@ -1294,12 +1294,7 @@ class Route(RanaModule):
         self.text = None
         self.set('needRedraw', True)
 
-
-
-
     def shutdown(self):
         # stop the Monav server, if running
         if self.monav:
             self.monav.stopServer()
-  
-  
