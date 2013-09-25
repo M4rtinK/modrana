@@ -112,6 +112,7 @@ class GoogleAddressSearch(POIProvider):
     def __init__(self):
         POIProvider.__init__(self, threadName=constants.THREAD_ADDRESS_SEARCH)
 
+    # online geocoding needs Internet access
     @requirements.internet
     def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for an address using Google geocoding API"""
@@ -150,10 +151,15 @@ class GoogleLocalSearch(POIProvider):
             points.append(point)
         return points
 
-    # local search might need a GPS fix and Internet access,
-    # also check if around is provided and enable GPS if not
+    # first check if around is provided and enable GPS if not
+    # as current position "becomes" around
     @requirements.needsAround
-    @requirements.gps
+    # then start Internet and conditionally GPS,
+    # so that they both can be initialized in parallel
+    @requirements.startGPS(conditional=True)
+    @requirements.startInternet
+    # now run the GPS na Internet checks
+    @requirements.gps(conditional=True)
     @requirements.internet
     def search(self, term=None, around=None,
                controller=DummyController(), maxResults=8 ,**kwargs):
@@ -200,7 +206,7 @@ class GeocodingNominatim(POIProvider):
     def __init__(self):
         POIProvider.__init__(self, threadName=constants.THREAD_ADDRESS_SEARCH)
 
-    # online geocoding needs internet access
+    # online geocoding needs Internet access
     @requirements.internet
     def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for an address using the Nominatim geocoding API"""
@@ -255,7 +261,7 @@ class ReverseGeocodingNominatim(POIProvider):
     def __init__(self):
         POIProvider.__init__(self, threadName=constants.THREAD_REVERSE_GEOCODING)
 
-    # online geocoding needs internet access
+    # online geocoding needs Internet access
     @requirements.internet
     def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for an address for coordinates using the Nominatim
