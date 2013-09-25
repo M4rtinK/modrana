@@ -467,7 +467,7 @@ class Startup(object):
 
         # calling l.startLocation(startMainLoop=True) will start the
         # main loop and block the execution of this function until the
-        # main look is killed by the fix watch
+        # main loop is killed by the fix watch
         #
         # the fix watch will kill the main loop once a 3D fix is
         # established or once it times out,
