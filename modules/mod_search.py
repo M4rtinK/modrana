@@ -338,8 +338,7 @@ class Search(RanaModule):
             # -> we want to actually got to there :)
             activeResultTuple = self.getActiveResultTupple()
             activeResult = activeResultTuple[1]
-            lat = float(activeResult['lat'])
-            lon = float(activeResult['lng'])
+            lat, lon = activeResult.getLL()
             # clear any old route and route to the result
             self.sendMessage('route:clearRoute|md:route:route:type=pos2ll;toLat=%f;toLon=%f;show=start' % (lat, lon))
 
@@ -365,8 +364,6 @@ class Search(RanaModule):
         #    action += "|set:menu:"
         #    name = item.getTracklogName().split('/').pop()
 
-        #    lat = list[index][1]['lat']
-        #    lon = list[index][1]['lng']
         #    action += "|set:searchResultShowLatLon:%s,%s" % (lat,lon)
 
         point = itemList[index][1]
