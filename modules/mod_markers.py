@@ -35,9 +35,18 @@ class Markers(RanaModule):
         self.groups = {} # marker groups
 
     def addGroup(self, name, points, menu=False):
-        """the name must be unique,
-        if it isn't the previous similarly named group is overwritten
-        points is a list of point objects"""
+        """Add a marker group
+
+        The name must be unique, if it isn't, the previous
+        group with the same name is overwritten.
+
+        :param name: group name
+        :type name: str
+        :param points: a list of Point instances for the group
+        :type points: list
+        :param menu: if a menu should be generated for the group
+        :type menu: bool
+        """
         g = PointGroup(points)
         if menu:
             g.setMenuEnabled(menu)
@@ -49,9 +58,14 @@ class Markers(RanaModule):
         return g
 
     def removeGroup(self, name):
-        """remove a group by name
-        return True if a group was removed and False if it wasn't due to
-        not being found"""
+        """Remove a group by name
+
+        :param name: group name
+        :type name: str
+        :returns: True if a group was removed and False if it
+        wasn't due to not being found
+        :rtype: bool
+        """
         if name in self.groups.keys():
             del self.groups[name]
             return True
@@ -59,17 +73,34 @@ class Markers(RanaModule):
             return False
 
     def getGroup(self, name):
+        """Get a group by name
+        :param name: group name
+        :type name: str
+        :returns: a list of groups found or None
+        :rtype: a list or None
+        """
         if name in self.groups.keys():
             return self.groups[name]
         else:
             return None
 
     def groupExists(self, name):
-        """return if a group with a given name exists"""
+        """Return if a group with a given name exists
+
+        :param name: name of the group
+        :type name: str
+        :returns: True if groups exists False if not
+        :rtype: bool
+        """
         return name in self.groups.keys()
 
     def clearAll(self):
+        """Remove all groups"""
         self.groups = {}
+
+    def handleMessage(self, message, messageType, args):
+        if message == "removeGroup":
+            self.removeGroup(args)
 
     def drawMapOverlay(self, cr):
         if self.groups:
