@@ -63,11 +63,10 @@ class ShowPOI(RanaModule):
             proj = self.m.get('projection', None)
             if proj and self.visiblePOI:
                 for POI in self.visiblePOI:
-                    id = POI.getId()
+                    poiID = POI.getId()
                     lat = POI.getLat()
                     lon = POI.getLon()
                     name = POI.getName()
-                    description = POI.getDescription()
                     hidePOICaptionZl = int(self.get("hideMarkerCaptionsBelowZl", 13))
                     if int(self.get('z', 15)) > hidePOICaptionZl:
                         distanceString = ""
@@ -113,10 +112,10 @@ class ShowPOI(RanaModule):
                         # register clickable area
                         click = self.m.get('clickHandler', None)
                         if click:
-                            """ make the POI caption clickable"""
-                            if id is not None: # new POI have id == None
+                            # make the POI caption clickable
+                            if poiID is not None: # new POI have id == None
                                 click.registerXYWH(rx, ry - (-rh), rw, -rh,
-                                                   "ms:showPOI:setActivePOI:%d|set:menu:showPOI#POIDetail" % id)
+                                                   "ms:showPOI:setActivePOI:%d|set:menu:showPOI#POIDetail" % poiID)
                             else: # the last added POI is still set, no need to set the id
                                 click.registerXYWH(rx, ry - (-rh), rw, -rh, "set:menu:showPOI#POIDetail")
                         cr.fill()
@@ -135,8 +134,8 @@ class ShowPOI(RanaModule):
         if store and menus:
             if message == "setupCategoryList":
                 if messageType == 'ml':
-                    """this is used for executing something special instead of going to the POIDetail menu
-                       after a POI is selected"""
+                    # this is used for executing something special instead of going to the POIDetail menu
+                    # after a POI is selected
                     POISelectedAction = args[0]
                     action = "ml:showPOI:setupPOIList:%s;%s|set:menu:menu#list#POIList" % ("%d", POISelectedAction)
                 else:
@@ -152,16 +151,21 @@ class ShowPOI(RanaModule):
                 menus.addListMenu('POICategories', "set:menu:poi", usedCategories)
             elif message == 'setupPOIList':
                 if args:
+                    catId = None
+                    action = "set:menu:None"
                     if messageType == 'ms':
                         catId = int(args)
                         action = 'set:menu:showPOI#POIDetail' # use the default action
                     elif messageType == 'ml':
-                        """if the message is a message list, execute a custom action instead of the default POI detail menu
-                           TODO: use this even for selecting the POIDetail menu ?"""
+                        # if the message is a message list, execute a custom action instead of the default POI detail menu
+                        # TODO: use this even for selecting the POIDetail menu ?
                         print(args)
                         catId = int(args[0])
                         action = args[1]
-                    poiFromCategory = store.getAllPOIFromCategory(catId)
+                    if catId is not None:
+                        poiFromCategory = store.getAllPOIFromCategory(catId)
+                    else:
+                        poiFromCategory = []
                     # convert the output to a listable menu compatible state
                     i = 0
                     for item in poiFromCategory:
@@ -177,14 +181,14 @@ class ShowPOI(RanaModule):
                     self.activePOI = store.getPOI(POIId)
             elif messageType == 'ms' and message == 'storePOI':
                 if args == "manualEntry":
-                    """add all POI info manually"""
+                    # add all POI info manually
                     entry = self.m.get('textEntry', None)
                     if entry:
                         self.activePOI = store.getEmptyPOI() # set a blank POI as active
                         # start the chain of entry boxes
                         entry.entryBox(self, 'newName', 'POI name', "")
                 elif args == "currentPosition":
-                    """add current position as a new POI"""
+                    # add current position as a new POI
                     entry = self.m.get('textEntry', None)
                     if entry:
                         pos = self.get('pos', None)
@@ -204,7 +208,6 @@ class ShowPOI(RanaModule):
                 elif args == "fromMapDone": # this is after the point has been clicked
                     with self.expectLock:
                         if self.expectPoint == True:
-                            self.expectPoint == False
                             self.expectPoint = False # disable the registering
                             proj = self.m.get('projection', None)
                             lastClick = self.get('lastClickXY', None)
@@ -216,7 +219,7 @@ class ShowPOI(RanaModule):
                                 self.activePOI.setLat(lat, commit=False)
                                 self.activePOI.setLon(lon, commit=False)
                                 # start the entry box chain
-                                """we misuse the current position chain"""
+                                # we misuse the current position chain
                                 entry.entryBox(self, 'newCurrentPositionName', 'POI name', "")
 
             elif messageType == 'ms' and message == 'editActivePOI':
@@ -237,13 +240,13 @@ class ShowPOI(RanaModule):
                             entry.entryBox(self, 'lon', 'POI Longitude', lon)
 
             elif messageType == 'ml' and message == 'setupPOICategoryChooser':
-                """setup a category chooser menu"""
+                # setup a category chooser menu
                 if args:
                     (menu, key) = args
                     self._setupPOICategoryChooser(menu, key)
 
             elif messageType == 'ms' and message == 'setCatAndCommit':
-                """selecting the category is the final stage of adding a POI"""
+                # selecting the category is the final stage of adding a POI
                 if args:
                     # set the category
                     catId = int(args)
@@ -256,7 +259,7 @@ class ShowPOI(RanaModule):
                     self.set('menu', 'showPOI#POIDetail')
 
             elif message == 'checkMenus':
-                """check if the POI menus are "dirty" and need to be regenerated"""
+                # check if the POI menus are "dirty" and need to be regenerated
                 if self.listMenusDirty:
                     self.sendMessage('showPOI:setupCategoryList')
                     if self.activePOI:
@@ -268,9 +271,9 @@ class ShowPOI(RanaModule):
                 self.activePOI.updateToolsMenu()
 
             elif message == 'listMenusDirty':
-                """something regarding the POI changed
-                   ,the menus might not be up to date
-                   and may need a regen"""
+                # something regarding the POI changed
+                # ,the menus might not be up to date
+                # and may need a regen
                 self.listMenusDirty = True
 
             elif message == 'askDeleteActivePOI':
@@ -284,15 +287,15 @@ class ShowPOI(RanaModule):
                     ask.setupAskYesNo(question, yesAction, noAction)
 
             elif message == 'centerOnActivePOI':
-                """something regarding the POI changed
-                   ,the menus might not be up to date
-                   and may need a regen"""
+                # something regarding the POI changed
+                # ,the menus might not be up to date
+                # and may need a regen"""
                 self.activePOI.showOnMap()
 
             elif message == 'routeToActivePOI':
-                """something regarding the POI changed
-                   ,the menus might not be up to date
-                   and may need a regen"""
+                # something regarding the POI changed
+                # ,the menus might not be up to date
+                # and may need a regen"""
                 self.activePOI.routeFrom('currentPosition')
                 self.sendMessage('mapView:recentreToPos')
                 self.makePOIVisible(self.activePOI)
@@ -387,8 +390,8 @@ class ShowPOI(RanaModule):
         if visibleIDs:
             store = self.m.get('storePOI', None)
             if store:
-                for id in visibleIDs:
-                    self._makePOIVisible(store.getPOI(id))
+                for poiID in visibleIDs:
+                    self._makePOIVisible(store.getPOI(poiID))
                 if self.visiblePOI: # enable POI drawing only if some POI vere restored
                     self.drawPOI()
                 print("showPOI: %d visible POI restored" % len(self.visiblePOI))
@@ -428,10 +431,9 @@ class ShowPOI(RanaModule):
             entry.entryBox(self, 'newLon', 'POI Longitude', "")
         elif key == 'newLon':
             self.activePOI.setLon(result, commit=False)
-            """final step:
-            setup the category chooser menu,
-            and make sure the POI is committed after a category is chosen
-            """
+            # final step:
+            # setup the category chooser menu,
+            # and make sure the POI is committed after a category is chosen
             self._setupPOICategoryChooser('showPOI', 'setCatAndCommit')
             self.set('menu', 'menu#list#POICategoryChooser')
             self.sendMessage('ml:notification:m:Select a category for this POI;3')
