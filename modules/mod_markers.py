@@ -101,6 +101,8 @@ class Markers(RanaModule):
     def handleMessage(self, message, messageType, args):
         if message == "removeGroup":
             self.removeGroup(args)
+        elif message == "clearAll":
+            self.clearAll()
 
     def drawMapOverlay(self, cr):
         if self.groups:
