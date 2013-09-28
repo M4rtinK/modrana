@@ -686,7 +686,7 @@ class Menus(RanaModule):
 
         self.drawThreePlusOneMenu(cr, 'pointDetail', backAction, button1, button2, box, wrap=True)
 
-    def drawPointToolsMenu(self, cr, point, backAction):
+    def drawPointToolsMenu(self, cr, point, group, backAction):
         """draw a detailed menu for a Point object"""
 
         # check if the for this point is cached
@@ -700,10 +700,11 @@ class Menus(RanaModule):
             gi = self.generateItem # for better readability
             # clear old route and route to the point
             routing = 'route:clearRoute|md:route:route:type=pos2ll;toLat=%f;toLon=%f;show=start' % (lat, lon)
+            clearAll = 'ms:markers:removeGroup:%s|set:menu:None' % group.name
             items = [
                 gi('here#route', 'generic', routing),
-                gi('to POI#add', 'generic', 'ms:menu:handleToolsMenuPoint:store'), # TODO implement this
-                gi('results#clear all', 'generic', 'set:menu:None') # TODO implement this
+                gi('to POI#add', 'generic', 'ms:menu:handleToolsMenuPoint:store'),
+                gi('results#clear all', 'generic', clearAll) # TODO implement this
             ]
             # add the items to a menu
             menu = self.addItemsToThisMenu(menu, items)
@@ -812,7 +813,7 @@ class Menus(RanaModule):
 
         def drawItemToolsMenu(self, cr, index):
             item = self.container.getItem(index)
-            self.drawItemToolsMenuFunction(cr, item, self._getBackToListDetailAction(index))
+            self.drawItemToolsMenuFunction(cr, item, self, self._getBackToListDetailAction(index))
 
         def _getBackToListAction(self, index):
             return "ml:menu:setListIndex:%s;%d|set:menu:menu#list#%s" % (self.name, index, self.name)
