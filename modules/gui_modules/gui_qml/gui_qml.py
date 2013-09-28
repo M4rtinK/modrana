@@ -643,6 +643,8 @@ class TileImageProvider(QDeclarativeImageProvider):
             img = QImage()
             # lod the image from in memory buffer
             # img.loadFromData(f.read())
+            #tileData = QByteArray(tileData)
+            tileData = str(tileData)
             img.loadFromData(tileData)
             # cleanup
             # f.close()
@@ -650,7 +652,6 @@ class TileImageProvider(QDeclarativeImageProvider):
             return img
         except Exception:
             import sys
-
             e = sys.exc_info()[1]
             print("QML GUI: icon image provider: loading tile failed")
             print(e)
@@ -659,9 +660,23 @@ class TileImageProvider(QDeclarativeImageProvider):
 
 
 class MapTiles(QtCore.QObject):
+    storageTypeChanged = QtCore.Signal()
+
     def __init__(self, gui):
         QtCore.QObject.__init__(self)
         self.gui = gui
+        # assign watch to the "tileStorageType" key
+        # so that the property would correctly reflect the
+        # changed value
+        #self.gui.modrana.watch("tileStorageType",
+        #                       lambda x: x.storageTypeChanged.emit())
+        self.gui.modrana.watch("tileStorageType",
+                               self._storageTypeCB)
+        # we use a lambda for the callback, so we don't have a define
+        # a separate callback handler
+
+    def _storageTypeCB(self, *args, **kwargs):
+        self.storageTypeChanged.emit()
 
     @QtCore.Slot(result=int)
     def tileserverPort(self):
@@ -690,6 +705,18 @@ class MapTiles(QtCore.QObject):
             self.gui._mapTiles.addTileDownloadRequest(layerId, z, x, y)
             #      print("downloading, try later")
             return False
+
+    def _getStorageType(self):
+        self.gui.modrana.get("tileStorageType", "files")
+
+    def _setStorageType(self, value):
+        self.gui.modrana.set("tileStorageType", value)
+
+    storageType = QtCore.Property(six.text_type,
+        _getStorageType,
+        _setStorageType,
+        notify=storageTypeChanged
+    )
 
 
 class MapLayers(QtCore.QObject):
