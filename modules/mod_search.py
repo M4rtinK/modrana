@@ -44,6 +44,8 @@ class Search(RanaModule):
         self.where = 'position'
         self.menuWatchId = None
         self.filters = {}
+        # names of marker groups used for search results
+        self._relatedMarkerGroups = ["addressResults", "wikipediaResults"]
 
     def firstTime(self):
         self.menuWatchId = self.modrana.watch('menu', self._checkMenuEnteredCB)
@@ -168,6 +170,13 @@ class Search(RanaModule):
         elif message == 'clearSearch':
             self.localSearchResults = None
             self.list = None
+            # also remove all search related marker groups
+            markers = self.m.get("markers")
+            if markers:
+                for group in self._relatedMarkerGroups:
+                    markers.removeGroup(group)
+
+
             self.notify("search results cleared", 2000)
             #TODO: also clear address & Wikipedia search results
         elif message == 'storePOI':
