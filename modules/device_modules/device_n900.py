@@ -608,31 +608,40 @@ class DeviceN900(DeviceModule):
 
     def _connectionStateCB(self, connection, event):
         """handle Internet connectivity state changes"""
-        #    print("connection_cb(%s, %s)" % (connection, event))
-        status = event.get_status()
-        error = event.get_error()
-        iap_id = event.get_iap_id()
-        bearer = event.get_bearer_type()
-
+        #print("connection_cb(%s, %s)" % (connection, event))
+        conic_status = event.get_status()
+        #print(conic_status)
+        #error = event.get_error()
+        #iap_id = event.get_iap_id()
+        #bearer = event.get_bearer_type()
         status = constants.CONNECTIVITY_UNKNOWN
-        if status == conic.STATUS_CONNECTED:
+        if conic_status == conic.STATUS_CONNECTED:
             status = constants.ONLINE
-        elif status == conic.STATUS_DISCONNECTED:
+            #print("CONIC CONNECTED")
+        elif conic_status == conic.STATUS_DISCONNECTED:
             status = constants.OFFLINE
-        elif status == conic.STATUS_DISCONNECTING:
+            #print("CONIC DISCONNECTED")
+        elif conic_status == conic.STATUS_DISCONNECTING:
             status = constants.OFFLINE
+            #print("CONIC DISCONNECTING")
         self._connectivityStatusICD = status
         # trigger the connectivity status changed signal
         self.internetConnectivityChanged(status)
 
     def enableInternetConnectivity(self):
         """Autoconnect to the Internet using DBUS"""
-        # as we are starting Internet connectivity, let set the connectivity status
-        # to OFFLINE, the callback will set it to ONLINE once connected
-        # (or again to OFFLINE if connectivity can't be established)
-        self._connectivityStatusICD = constants.OFFLINE
+        # if connectivity is requested like this,
+        # the callback will be called at once if we are online,
+        # so current connectivity state can be determined
+        self.conicConnection.request_connection(conic.CONNECT_FLAG_AUTOMATICALLY_TRIGGERED)
 
-        subprocess.call(["sh", "modules/device_modules/n900_maemo5_autoconnect_dbus.sh"])
+    @property
+    def connectivityStatus(self):
+        # The conic/ICD callback is called both once registered
+        # and also when trying to enable connectivity, so we can use data
+        # from the callback to represent the connectivity state,
+        # overriding the portable connectivityStatus implementation in base_device_module
+        return self._connectivityStatusICD
 
     def getDeviceType(self):
         return DEVICE_TYPE_SMARTPHONE
