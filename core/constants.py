@@ -30,7 +30,10 @@ ONLINE = True
 OFFLINE = False
 CONNECTIVITY_UNKNOWN = None
 
-
+# tile storage
+DEFAULT_TILE_STORAGE_TYPE = "files"
+TILE_STORAGE_FILES = "files"
+TILE_STORAGE_SQLITE = "sqlite"
 
 # GTK GUI
 PANGO_ON = '<span color="green">ON</span>'

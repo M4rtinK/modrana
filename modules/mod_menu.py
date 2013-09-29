@@ -704,7 +704,7 @@ class Menus(RanaModule):
             items = [
                 gi('here#route', 'generic', routing),
                 gi('to POI#add', 'generic', 'ms:menu:handleToolsMenuPoint:store'),
-                gi('results#clear all', 'generic', clearAll) # TODO implement this
+                gi('results#clear all', 'generic', clearAll)
             ]
             # add the items to a menu
             menu = self.addItemsToThisMenu(menu, items)
@@ -957,7 +957,7 @@ class Menus(RanaModule):
         self.addItem('searchWhat', 'online#address', 'generic', 'search:searchAddress')
         self.addItem('searchWhat', 'online#wikipedia', 'generic', 'search:searchWikipedia')
         self.addItem('searchWhat', 'online#presets', 'generic', 'set:menu:searchWhere')
-        self.addItem('searchWhat', 'results#clear', 'generic', 'search:clearSearch|set:menu:None')
+        self.addItem('searchWhat', 'results#clear all', 'generic', 'search:clearSearch|set:menu:None')
 
     def setupSearchMenus(self):
         """Create a load of menus that are just filters for OSM tags"""

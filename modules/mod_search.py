@@ -175,9 +175,7 @@ class Search(RanaModule):
             if markers:
                 for group in self._relatedMarkerGroups:
                     markers.removeGroup(group)
-
-
-            self.notify("search results cleared", 2000)
+            self.notify("all search results cleared", 2000)
             #TODO: also clear address & Wikipedia search results
         elif message == 'storePOI':
             store = self.m.get('storePOI', None)
