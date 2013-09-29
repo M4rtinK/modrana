@@ -704,7 +704,7 @@ class Menus(RanaModule):
             items = [
                 gi('here#route', 'generic', routing),
                 gi('to POI#add', 'generic', 'ms:menu:handleToolsMenuPoint:store'),
-                gi('results#clear all', 'generic', clearAll)
+                gi('results#clear', 'generic', clearAll)
             ]
             # add the items to a menu
             menu = self.addItemsToThisMenu(menu, items)
