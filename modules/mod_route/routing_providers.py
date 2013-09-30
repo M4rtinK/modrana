@@ -6,7 +6,6 @@ import traceback
 from core import constants
 from core import way
 from core.backports import six
-from . import monav_support
 
 try:
     import json
