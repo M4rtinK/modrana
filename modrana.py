@@ -253,7 +253,10 @@ class ModRana(object):
             gui = self._loadModule("gui_gtk", "gui")
         elif GUIModuleId == "QML":
             gui = self._loadModule("gui_qml", "gui")
-            # make device module available to the GUI module
+        elif GUIModuleId == "qt5":
+            gui = self._loadModule("gui_qt5", "gui")
+
+        # make device module available to the GUI module
         if gui:
             gui.setSubtypeId(subtypeId)
             gui.dmod = self.dmod
@@ -814,6 +817,8 @@ class ModRana(object):
         else:
             print("* timing list empty *")
 
+def start():
+    program = ModRana()
 
 if __name__ == "__main__":
     # change to folder where the main modRana file is located
@@ -836,6 +841,6 @@ if __name__ == "__main__":
         callArgs.extend(sys.argv[3:])
         subprocess.call(callArgs)
     else:
-        program = ModRana()
+        start()
 
 
