@@ -26,9 +26,8 @@ from core import gs
 
 if gs.GUIString == "GTK":
     import gobject
-else:
+elif gs.GUIString == "qml":
     from PySide import QtCore
-
 
 def getModule(m, d, i):
     """
@@ -38,30 +37,31 @@ def getModule(m, d, i):
     """
     if gs.GUIString == 'QML':
         return CronQt(m, d, i)
-    else: # GTK for now
+    elif gs.GUIString == 'GTK': # GTK for now
         return CronGTK(m, d, i)
+    else:
+        return Cron(m, d, i)
 
 
 class Cron(RanaModule):
-    """A timing and scheduling module for modRana
+    """A timing and scheduling module for modRana"""
 
-    -> this is an abstract class
-    that specifies and interface for concrete implementations
-
-    Why is there a special module for timing ?
-       The reason is twofold:
-       Toolkit independence and power saving/monitoring.
-
-       If all timing calls go through this module,
-       the underlying engine (currently glibs gobject)
-       can be more easily changed than rewriting code everywhere.
-
-       Also, modRana targets mobile devices with limited power budget.
-       If all timing goes through this module, rogue modules many frequent
-       timers can be easily identified.
-       It might be also possible to stop or pause some/all of the timers
-       after a period of inactivity, or some such.
-    """
+    # -> this is an abstract class
+    # that specifies and interface for concrete implementations
+    #
+    # Why is there a special module for timing ?
+    #    The reason is twofold:
+    #    Toolkit independence and power saving/monitoring.
+    #
+    #    If all timing calls go through this module,
+    #    the underlying engine (currently glibs gobject)
+    #    can be more easily changed than rewriting code everywhere.
+    #
+    #    Also, modRana targets mobile devices with limited power budget.
+    #    If all timing goes through this module, rogue modules many frequent
+    #    timers can be easily identified.
+    #    It might be also possible to stop or pause some/all of the timers
+    #    after a period of inactivity, or some such.
 
     def __init__(self, m, d, i):
         RanaModule.__init__(self, m, d, i)
