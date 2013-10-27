@@ -817,8 +817,13 @@ class ModRana(object):
         else:
             print("* timing list empty *")
 
+modrana = None
+gui = None
 def start():
-    program = ModRana()
+    global modrana
+    global gui
+    modrana = ModRana()
+    gui = modrana.gui
 
 if __name__ == "__main__":
     # change to folder where the main modRana file is located
