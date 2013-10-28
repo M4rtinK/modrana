@@ -27,7 +27,10 @@ Rectangle {
             call_sync('modrana.start')
             evaluate("print('ASDASDASDASDASDASDASD')")
             evaluate("print(modrana.gui)")
-            guiID = evaluate("modrana.gui.getIDString()")
+            //guiID = evaluate("modrana.gui.getIDString()")
+            call("modrana.gui.getIDString", [], function(result){
+                guiID = result
+            })
             }
         onError: {
             // when an exception is raised, this error handler will be called
