@@ -26,7 +26,7 @@ from core import gs
 
 if gs.GUIString == "GTK":
     import gobject
-elif gs.GUIString == "qml":
+elif gs.GUIString.lower() == "qml":
     from PySide import QtCore
 
 def getModule(m, d, i):
