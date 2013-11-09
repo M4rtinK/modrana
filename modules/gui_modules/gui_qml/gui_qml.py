@@ -339,12 +339,6 @@ class QMLGUI(GUIModule):
         height = screenRectangle.height()
         return width, height
 
-    def getConstants(self):
-        C = {
-            "style": self._getStyleConstants()
-        }
-        return C
-
     def _registerListModel(self, modelName, model):
         """Register a list model to the QML context
         :param modelName: a unique name of the model for the QML context
@@ -374,64 +368,6 @@ class QMLGUI(GUIModule):
 
     def _getLayerListModel(self):
         pass
-
-    def _getStyleConstants(self):
-        # as True == 1 and False == 0,
-        # we use the highDPI boolean as a tuple index
-        # * highDpi == False -> first value is used
-        # * highDpi == True -> second value is used
-        i = self.highDPI
-
-        style = {
-            "m" : (1, 2)[i], # approximate size multiplier
-            "main" : {
-                "multiplier" : (1, 2)[i],
-                "spacing" : (8, 16)[i],
-                "spacingBig" : (16, 32)[i]
-            },
-            "button" : {
-                "selector" : {
-                    "width" : (200, 400)[i],
-                    "height" : (80, 160)[i],
-                    },
-                "icon" : {
-                    "size" : (80, 160)[i]
-                },
-                "iconGrid" : {
-                    "size" : (100, 200)[i],
-                    "radius" : (10, 20)[i]
-                },
-                "generic" : {
-                    "height" : (60, 120)[i]
-                }
-            },
-            "dialog" : {
-                "item" : {
-                    "height" : (80, 160)[i]
-                }
-            },
-
-            "map": {
-                "button": {
-                    "size": (72, 108)[i],
-                    "margin": (16, 24)[i],
-                    "spacing": (16, 24)[i],
-                    },
-                "scaleBar" : {
-                    "border" : (2, 4)[i],
-                    "height" : (4, 8)[i],
-                    "fontSize" : (24, 48)[i],
-
-                    },
-                },
-            "listView" : {
-                "spacing" : (8, 16)[i],
-                "cornerRadius" : (8, 16)[i],
-                "itemBorder" : (20, 40)[i],
-                }
-        }
-        return style
-
 
 class Platform(QtCore.QObject):
     """make current platform available to QML and integrable as a property"""
