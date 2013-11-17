@@ -19,10 +19,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from __future__ import with_statement
 import os
 import sys
 import re
 import traceback
+
+import pyotherside
 
 try:
     from StringIO import StringIO # python 2
@@ -78,11 +81,15 @@ class QMLGUI(GUIModule):
         # NOTE: what about multi-display devices ? :)
 
         ## add image providers
-        #self.iconProvider = IconImageProvider(self)
-        #self.view.engine().addImageProvider("icons", self.iconProvider)
-        ## add tiles provider
-        #self.tilesProvider = TileImageProvider(self)
-        #self.view.engine().addImageProvider("tiles", self.tilesProvider)
+
+        self._imageProviders = {
+            "icon" : IconImageProvider(self),
+            "tile" : TileImageProvider(self),
+        }
+        ## register the actual callback, that
+        ## will call the appropriate provider base on
+        ## image id prefix
+        pyotherside.set_image_provider(self._selectImageProviderCB)
 
         ## make constants accessible
         #self.constants = self.getConstants()
@@ -164,78 +171,7 @@ class QMLGUI(GUIModule):
         # TODO: implement this
         pass
 
-    def getConstants(self):
-        C = {
-            "style": self._getStyleConstants()
-        }
-        return C
-
-    def _getStyleConstants(self):
-        # as True == 1 and False == 0,
-        # we use the highDPI boolean as a tuple index
-        # * highDpi == False -> first value is used
-        # * highDpi == True -> second value is used
-        i = self.highDPI
-
-        style = {
-            "m" : (1, 2)[i], # approximate size multiplier
-            "main" : {
-                "multiplier" : (1, 2)[i],
-                "spacing" : (8, 16)[i],
-                "spacingBig" : (16, 32)[i]
-            },
-            "button" : {
-                "selector" : {
-                    "width" : (200, 400)[i],
-                    "height" : (80, 160)[i],
-                    },
-                "icon" : {
-                    "size" : (80, 160)[i]
-                },
-                "iconGrid" : {
-                    "size" : (100, 200)[i],
-                    "radius" : (10, 20)[i]
-                },
-                "generic" : {
-                    "height" : (60, 120)[i]
-                }
-            },
-            "dialog" : {
-                "item" : {
-                    "height" : (80, 160)[i]
-                }
-            },
-
-            "map": {
-                "button": {
-                    "size": (72, 108)[i],
-                    "margin": (16, 24)[i],
-                    "spacing": (16, 24)[i],
-                    },
-                "scaleBar" : {
-                    "border" : (2, 4)[i],
-                    "height" : (4, 8)[i],
-                    "fontSize" : (24, 48)[i],
-
-                    },
-                },
-            "listView" : {
-                "spacing" : (8, 16)[i],
-                "cornerRadius" : (8, 16)[i],
-                "itemBorder" : (20, 40)[i],
-                }
-        }
-        return style
-
-
-class Platform(object):
-    """make current platform available to QML and integrable as a property"""
-
-    def __init__(self, modrana):
-        self.modrana = modrana
-
-    @property
-    def modRanaVersion(self):
+    def getModRanaVersion(self):
         """
         report current modRana version or None if version info is not available
         """
@@ -245,125 +181,126 @@ class Platform(object):
         else:
             return version
 
-    @property
-    def showQuitButton(self):
-        """
-        Harmattan handles this by the Swype UI and
-        on PC it is a custom to have the quit action in the main menu
-        """
-        return self.modrana.dmod.needsQuitButton()
+    def _selectImageProviderCB(self, imageId, requestedSize):
+        originalImageId = imageId
+        providerId = ""
+        #print("SELECT IMAGE PROVIDER")
+        #print(imageId)
+        #print(imageId.split("/", 1))
+        try:
+            # split out the provider id
+            providerId, imageId = imageId.split("/", 1)
+            # get the provider and call its getImage()
+            return self._imageProviders[providerId].getImage(imageId, requestedSize)
+        except ValueError:  # provider id missing or image ID overall wrong
+            print("Qt5 GUI: provider ID missing: %s" % originalImageId)
+        except AttributeError:  # missing provider (we are calling methods of None ;) )
+            if providerId:
+                print("Qt5 GUI: image provider for this ID is missing: %s" % providerId)
+            else:
+                import sys
+                e = sys.exc_info()[1]
+                print("Qt5 GUI: image provider broken, image id: %s" % originalImageId)
+                print(e)
+        except Exception:  # catch and report the rest
+            import sys
+            e = sys.exc_info()[1]
+            print("Qt5 GUI: image loading failed, imageId: %s" % originalImageId)
+            print(e)
 
-    @property
-    def fullscreenOnly(self):
-        """
-        Harmattan doesn't need a minimize button
-        """
-        return self.modrana.dmod.fullscreenOnly()
+
+class ImageProvider(object):
+    """PyOtherSide image provider base class"""
+    def __init__(self, gui):
+        self.gui = gui
+
+    def getImage(self, imageId, requestedSize):
+        pass
 
 
-#class IconImageProvider(QDeclarativeImageProvider):
-#    """the IconImageProvider class provides icon images to the QML layer as
-#    QML does not seem to handle .. in the url very well"""
-#
-#    def __init__(self, gui):
-#        QDeclarativeImageProvider.__init__(self, QDeclarativeImageProvider.ImageType.Image)
-#        self.gui = gui
-#
-#    def requestImage(self, iconPath, size, requestedSize):
-#        try:
-#
-#            #TODO: theme name caching ?
-#            themeFolder = self.gui.modrana.paths.getThemesFolderPath()
-#            fullIconPath = os.path.join(themeFolder, iconPath)
-#
-#            # the path is constructed like this in QML
-#            # so we can safely just split it like this
-#            splitPath = iconPath.split("/")
-#            if not os.path.exists(fullIconPath):
-#                if splitPath[0] == constants.DEFAULT_THEME_ID:
-#                    # already on default theme and icon path does not exist
-#                    return None
-#                else:  # try to get the icon from default theme
-#                    splitPath[0] = constants.DEFAULT_THEME_ID
-#                    fullIconPath = os.path.join(themeFolder, *splitPath)
-#                    if not os.path.exists(fullIconPath):
-#                        # icon not found even in the default theme
-#                        return None
-#            f = open(fullIconPath, 'rb')
-#            #      print("ICON")
-#            #      print(iconPath)
-#            #      print(size)
-#            #      print(requestedSize)
-#            img = QImage()
-#            img.loadFromData(f.read())
-#            f.close()
-#            return img
-#        except Exception:
-#            import sys
-#
-#            e = sys.exc_info()[1]
-#            print("QML GUI: icon image provider: loading icon failed")
-#            print(e)
-#            print(os.path.join('themes', iconPath))
-#            print("Traceback:")
-#            traceback.print_exc(file=sys.stdout) # find what went wrong
-#
-#
-#class TileImageProvider(QDeclarativeImageProvider):
-#    """
-#    the TileImageProvider class provides images images to the QML map element
-#    NOTE: this image provider is currently only used as fallback in case
-#    the localhost tileserver won't start
-#    """
-#
-#    def __init__(self, gui):
-#        QDeclarativeImageProvider.__init__(self, QDeclarativeImageProvider.ImageType.Image)
-#        self.gui = gui
-#        self.loading = QImage(1, 1, QImage.Format_RGB32)
-#        self.ready = QImage(2, 1, QImage.Format_RGB32)
-#        self.error = QImage(3, 1, QImage.Format_RGB32)
-#        self.manager = QNetworkAccessManager()
-#
-#    def requestImage(self, tileInfo, size, requestedSize):
-#        """
-#        the tile info should look like this:
-#        layerID/zl/x/y
-#        """
-#        #print("IMAGE REQUESTED")
-#        #print(tileInfo)
-#        try:
-#            # split the string provided by QML
-#            split = tileInfo.split("/")
-#            layerId = split[0]
-#            z = int(split[1])
-#            x = int(split[2])
-#            y = int(split[3])
-#
-#            # get the tile from the tile module
-#            tileData = self.gui._mapTiles.getTile(layerId, z, x, y)
-#            if not tileData:
-#                # print("NO TILEDATA")
-#                return None
-#
-#            # create a file-like object
-#            # f = StringIO(tileData)
-#            # create image object
-#            img = QImage()
-#            # lod the image from in memory buffer
-#            # img.loadFromData(f.read())
-#            img.loadFromData(tileData)
-#            # cleanup
-#            # f.close()
-#            #print("OK")
-#            return img
-#        except Exception:
-#            import sys
-#
-#            e = sys.exc_info()[1]
-#            print("QML GUI: icon image provider: loading tile failed")
-#            print(e)
-#            print(tileInfo)
-#            traceback.print_exc(file=sys.stdout)
+class IconImageProvider(ImageProvider):
+    """the IconImageProvider class provides icon images to the QML layer as
+    QML does not seem to handle .. in the url very well"""
+
+    def __init__(self, gui):
+        ImageProvider.__init__(self, gui)
+
+    def getImage(self, imageId, requestedSize):
+        print("ICON!")
+        print(imageId)
+        try:
+            #TODO: theme name caching ?
+            themeFolder = self.gui.modrana.paths.getThemesFolderPath()
+            fullIconPath = os.path.join(themeFolder, imageId)
+
+            # the path is constructed like this in QML
+            # so we can safely just split it like this
+            splitPath = imageId.split("/")
+            if not os.path.exists(fullIconPath):
+                if splitPath[0] == constants.DEFAULT_THEME_ID:
+                    # already on default theme and icon path does not exist
+                    return None
+                else:  # try to get the icon from default theme
+                    splitPath[0] = constants.DEFAULT_THEME_ID
+                    fullIconPath = os.path.join(themeFolder, *splitPath)
+                    if not os.path.exists(fullIconPath):
+                        # icon not found even in the default theme
+                        return None
+            print(fullIconPath)
+            with open(fullIconPath, 'rb') as f:
+                # the context manager will make sure the icon
+                # file is properly closed
+                return bytearray(f.read()), (-1,-1), pyotherside.format_data
+        except Exception:
+            import sys
+            e = sys.exc_info()[1]
+            print("Qt5 GUI: icon image provider: loading icon failed")
+            print(e)
+            print(os.path.join('themes', imageId))
+            print("Traceback:")
+            traceback.print_exc(file=sys.stdout) # find what went wrong
+
+
+class TileImageProvider(ImageProvider):
+    """
+    the TileImageProvider class provides images images to the QML map element
+    NOTE: this image provider is currently only used as fallback in case
+    the localhost tileserver won't start
+    """
+
+    def __init__(self, gui):
+        ImageProvider.__init__(self, gui)
+
+    def getImage(self, imageId, requestedSize):
+        """
+        the tile info should look like this:
+        layerID/zl/x/y
+        """
+        #print("TILE REQUESTED")
+        #print(imageId)
+        #print(requestedSize)
+        try:
+            # split the string provided by QML
+            split = imageId.split("/")
+            layerId = split[0]
+            z = int(split[1])
+            x = int(split[2])
+            y = int(split[3])
+
+            # get the tile from the tile module
+            tileData = self.gui._mapTiles.getTile(layerId, z, x, y)
+            if not tileData:
+                #print("NO TILEDATA")
+                return None
+            return bytearray(tileData), (256,256), pyotherside.format_data
+        except Exception:
+            import sys
+            e = sys.exc_info()[1]
+            print("Qt 5 GUI: tile image provider: loading tile failed")
+            print(e)
+            print(imageId)
+            print(requestedSize)
+            traceback.print_exc(file=sys.stdout)
 
 
 class MapTiles(object):
