@@ -226,8 +226,8 @@ class IconImageProvider(ImageProvider):
         ImageProvider.__init__(self, gui)
 
     def getImage(self, imageId, requestedSize):
-        print("ICON!")
-        print(imageId)
+        #print("ICON!")
+        #print(imageId)
         try:
             #TODO: theme name caching ?
             themeFolder = self.gui.modrana.paths.getThemesFolderPath()
@@ -246,7 +246,6 @@ class IconImageProvider(ImageProvider):
                     if not os.path.exists(fullIconPath):
                         # icon not found even in the default theme
                         return None
-            print(fullIconPath)
             with open(fullIconPath, 'rb') as f:
                 # the context manager will make sure the icon
                 # file is properly closed
