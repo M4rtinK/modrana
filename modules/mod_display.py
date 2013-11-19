@@ -51,13 +51,14 @@ class Display(RanaModule):
         self.lastCheckConditions = time.time()
 
     def firstTime(self):
-        if gs.GUIString == "GTK":
+        if gs.GUIString.lower() == "gtk":
             gui = self.modrana.gui
             # connect to window state signals
             gui.topWindow.connect('window-state-event', self.windowStateChangedCallback)
             gui.topWindow.connect('visibility-notify-event', self.visibilityChangedCallback)
-        elif gs.GUIString == "QML":
-            # QML handles redrawing by itself
+        elif gs.GUIString.lower() in ("qml", "qt5"):
+            # QML (Qt4) and Qt5 handles redrawing & window state detection from inside
+            # the QML context
             pass
         else:
             print("display: WARNING, unhandled GUI toolkit, redraw disable if not visible might not work")
