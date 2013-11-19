@@ -41,9 +41,10 @@ class Keys(RanaModule):
         # TODO: make this toolkit independent
         gui = self.modrana.gui
         if gui:
-            if gui.getIDString() == "GTK":
+            if gui.getIDString().lower() == "gtk":
                 gui.topWindow.connect('key-press-event', self.on_key_press_event)
-            elif gui.getIDString() == "QML":
+            elif gui.getIDString().lower() in ("qml", "qt5"):
+                # handled from inside the QML context
                 pass
             else:
                 print("keys: WARNING, unhandled GUI toolkit, most key shortcuts would not work")
