@@ -4,19 +4,22 @@ import UC 1.0
 
 ApplicationWindow {
     id : rWin
-    //color : "green"
-    //anchors.fill : parent
     width : 640
     height : 480
-    Text {
-        text : "hello world"
-    }
 
     // properties
     property string guiID : "unknown"
-    //property real speedMS : rWin.get("speedTest", 120, function(value){speedMS = value})
+
+    //TODO: react on theme change
+    property string theme_id : rWin.get("theme", "default", function(value){theme_id = value})
 
     property variant c
+
+    Loader {
+        id : platformLoader
+    }
+    //property variant platform : platformLoader.item
+    property variant platform
 
     property variant mapPage
 
@@ -32,6 +35,7 @@ ApplicationWindow {
         */
     }
 
+    property alias python : python
     Python {
         id : python
         Component.onCompleted: {
@@ -45,8 +49,6 @@ ApplicationWindow {
             evaluate('setattr(sys, "argv" ,["modrana.py", "-u", "qt5", "-d", "pc"])')
             console.log('sys.argv faked')
             call_sync('modrana.start')
-            evaluate("print('ASDASDASDASDASDASDASD')")
-            evaluate("print(modrana.gui)")
             //guiID = evaluate("modrana.gui.getIDString()")
             call("modrana.gui.getIDString", [], function(result){
                 guiID = result
@@ -54,7 +56,7 @@ ApplicationWindow {
 
             // Python initialization done,
             // initialize the rest of QML
-            rWin.__init__()
+            //rWin.__init__()
 
         }
         onError: {
@@ -80,6 +82,12 @@ ApplicationWindow {
         }
     }
 
+    // everything should be initialized by now,
+    // including the Python backend
+    Component.onCompleted: {
+        rWin.__init__()
+    }
+
     function __init__() {
         // Do all startup tasks depending on the Python
         // backend being loaded
@@ -89,17 +97,34 @@ ApplicationWindow {
         // (including the GUI style constants)
         rWin.c = python.call_sync("modrana.gui.getConstants", [])
 
+        // the various property encapsulation items need the
+        // Python backend to be initialized, so we can load them now
+        //platformLoader.source = "Platform.qml"
+        rWin.platform = loadQMLFile("Platform.qml")
+
         rWin.mapPage = loadPage("MapPage")
         rWin.initialPage = rWin.mapPage
         rWin.pageStack.push(rWin.mapPage)
-
-        console.log(rWin.mapPage)
-        console.log(rWin.pageStack)
-        console.log(rWin.pageStack.initialItem)
     }
 
     //property variant mapPage : loadPage("MapPage")
 
+    function loadQMLFile(filename) {
+        var component = Qt.createComponent(filename);
+        if (component.status == Component.Ready) {
+            return component.createObject(rWin);
+        } else {
+            console.log("loading QML file failed: " + filename)
+            console.log("error: " + component.errorString())
+            return null
+        }
+    }
+
+    function loadPage(pageName) {
+        console.log("loading page: " + pageName)
+        return loadQMLFile(pageName + ".qml")
+    }
+    /*
     function loadPage(pageName) {
         console.log("loading page: " + pageName)
         var component = Qt.createComponent(pageName + ".qml");
@@ -111,6 +136,7 @@ ApplicationWindow {
             return null
         }
     }
+    */
 
     /* looks like object ids can't be stored in ListElements,
      so we need this function to return corresponding menu pages
@@ -158,13 +184,10 @@ ApplicationWindow {
         }
     }
 
-
     // Working with options
     function get(key, default_value, callback) {
-        //python.call("modrana.gui.get", [key, default_value], callback)
-        console.log("running " + callback)
-
-        python.call("modrana.gui.get", [key, default_value])
+        //console.log("running " + callback)
+        python.call("modrana.gui.get", [key, default_value], callback)
         return default_value
     }
 
