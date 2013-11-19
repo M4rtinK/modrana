@@ -818,11 +818,14 @@ class ModRana(object):
             print("* timing list empty *")
 
 modrana = None
+dmod = None
 gui = None
 def start():
     global modrana
+    global dmod
     global gui
     modrana = ModRana()
+    dmod = modrana.dmod
     gui = modrana.gui
 
 if __name__ == "__main__":
