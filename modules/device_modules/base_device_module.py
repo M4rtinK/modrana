@@ -171,9 +171,6 @@ class DeviceModule(RanaModule):
     def enableVolumeKeys(self):
         pass
 
-    def enableVolumeKeys(self):
-        pass
-
     def hasKineticScrollingList(self):
         """report if the device provides a native kinetic scrolling list
         widget/dialog"""
