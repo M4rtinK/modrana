@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
-# Sample of a modRana device-specific module.
+# Nokia N9 device module.
 # It is a basic modRana module, that has some special features
-# and is loaded only on the correpsponding device.
+# and is loaded only on the corresponding device.
 #----------------------------------------------------------------------------
 # Copyright 2010, Martin Kolman
 #
