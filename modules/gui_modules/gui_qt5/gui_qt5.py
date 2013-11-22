@@ -65,9 +65,11 @@ class QMLGUI(GUIModule):
         self.centeringDisableThreshold = 2048
         self.firstTimeSignal = signal.Signal()
         size = (800, 480) # initial window size
+        # register exit handler
+        pyotherside.atexit(self._shutdown)
 
         # window state
-        self.fullscreen = False
+        self._fullscreen = False
 
         # get screen resolution
         # TODO: implement this
@@ -109,6 +111,13 @@ class QMLGUI(GUIModule):
         # trigger the first time signal
         self.firstTimeSignal()
 
+    def _shutdown(self):
+        """Called by PyOtherSide once the QML side is shutdown.
+        """
+        print("Qt5 GUI: shutting down")
+        self.modrana.shutdown()
+
+
     def getIDString(self):
         return "Qt5"
 
@@ -120,17 +129,14 @@ class QMLGUI(GUIModule):
         return False
 
     def isFullscreen(self):
-        return self.window.isFullScreen()
+        return self._fullscreen
 
     def toggleFullscreen(self):
         # TODO: implement this
         pass
 
     def setFullscreen(self, value):
-        if value == True:
-            self.window.showFullScreen()
-        else:
-            self.window.showNormal()
+        pass
 
     def setCDDragThreshold(self, threshold):
         """set the threshold which needs to be reached to disable centering while dragging
