@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtQuick.Window 2.1
 import io.thp.pyotherside 1.0
 import UC 1.0
 
@@ -6,6 +7,8 @@ ApplicationWindow {
     id : rWin
     width : 640
     height : 480
+
+    title : "modRana"
 
     // properties
     property string guiID : "unknown"
@@ -248,6 +251,29 @@ ApplicationWindow {
 
     function set_sync(key, value) {
         python.call_sync("modrana.gui.set", [key, value])
+    }
+
+    property variant _lastVisibility
+
+    function toggleFullscreen() {
+        // 2 = windowed
+        // 3 = minimized
+        // 4 = maximized
+        // 5 = fullscreen
+        // 1 = auto
+        // 0 = hidden
+        if (rWin.visibility==5) {
+            // restore previous state,
+            // provided it is not fullscreen
+            if(_lastVisibility==5) {
+                rWin.visibility = 2
+            } else {
+                rWin.visibility = rWin._lastVisibility
+            }
+        } else { // switch to fullscreen
+            rWin.visibility = 5
+        }
+        rWin._lastVisibility = rWin.visibility
     }
 }
 

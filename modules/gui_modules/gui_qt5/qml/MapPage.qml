@@ -180,7 +180,7 @@ Item {
             checkable : true
             visible: !rWin.platform.fullscreenOnly
             onClicked: {
-                rWin.platform.toggleFullscreen()
+                rWin.toggleFullscreen()
             }
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
