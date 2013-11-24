@@ -24,6 +24,7 @@ import os
 import sys
 import re
 import traceback
+import math
 
 import pyotherside
 
@@ -186,6 +187,17 @@ class QMLGUI(GUIModule):
             return "unknown"
         else:
             return version
+
+    def setPosition(self, posDict):
+        lat, lon = float(posDict["latitude"]), float(posDict["longitude"])
+        self.set("pos", (lat, lon))
+        elevation = float(posDict["elevation"])
+        # check if elevation is valid
+        if not math.isnan(elevation):
+            self.set("elevation", elevation)
+        # update done
+        self.set('locationUpdated', time.time())
+        # TODO: move part of this to the location module ?
 
     def _selectImageProviderCB(self, imageId, requestedSize):
         originalImageId = imageId
