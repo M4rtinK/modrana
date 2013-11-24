@@ -2,11 +2,12 @@
 // used as dummy position source element if
 // the regular position source is not available
 // for one reason or another
+import QtQuick 2.0
 
 Item {
     id : fakeLocationSource
     property bool active : true
-    property int interval : 1000
+    property int updateInterval : 1000
     property string nmeaSource
     property string provider : "fake position provider"
     property variant position: Item {
@@ -23,8 +24,12 @@ Item {
         property bool longitudeValid : false
         property real speed: 0.0
         property bool speedValid : false
-        property date timestamp : null
+        property date timestamp
         property real verticalAccuracy : 0.0
         property bool verticalAccuracyValid : false
+    }
+    Component.onCompleted: {
+        rWin.position = fakeLocationSource.position
+        rWin.pos = fakeLocationSource.position.coordinate
     }
 }
