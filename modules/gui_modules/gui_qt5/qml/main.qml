@@ -137,13 +137,15 @@ ApplicationWindow {
 
     //property variant mapPage : loadPage("MapPage")
 
-    function loadQMLFile(filename) {
+    function loadQMLFile(filename, quiet) {
         var component = Qt.createComponent(filename);
         if (component.status == Component.Ready) {
             return component.createObject(rWin);
         } else {
-            console.log("loading QML file failed: " + filename)
-            console.log("error: " + component.errorString())
+            if (!quiet) {
+                console.log("loading QML file failed: " + filename)
+                console.log("error: " + component.errorString())
+            }
             return null
         }
     }

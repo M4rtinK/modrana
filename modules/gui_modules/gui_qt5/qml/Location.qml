@@ -56,7 +56,7 @@ Item {
         }
         // try to load the location source
         // conditional imports would be nice, wouldn't they ;)
-        var location_element = rWin.loadQMLFile("LocationSource.qml")
+        var location_element = rWin.loadQMLFile("LocationSource.qml", true)
         if (location_element) {
             console.log("Qt5 location initialized")
         } else {
