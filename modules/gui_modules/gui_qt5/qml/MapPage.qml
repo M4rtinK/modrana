@@ -22,8 +22,7 @@ Item {
     property alias layers : pinchmap.layers
 
     Component.onCompleted : {
-        //pinchmap.setCenterLatLon(gps.lastGoodFix.lat, gps.lastGoodFix.lon);
-        pinchmap.setCenterLatLon(49.2, 16.616667);
+        pinchmap.setCenterLatLon(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude)
     }
 
     function getMap() {
@@ -49,21 +48,19 @@ Item {
             rWin.set("z", parseInt(zoomLevel))
         }
 
-        /*
         Connections {
-            target: gps
-            onLastGoodFixChanged: {
+            target: rWin
+            onPosChanged: {
                 //console.log("fix changed")
                 if (tabMap.center && ! updateTimer.running) {
                     //console.debug("Update from GPS position")
-                    pinchmap.setCenterLatLon(gps.lastGoodFix.lat, gps.lastGoodFix.lon);
+                    pinchmap.setCenterLatLon(rWin.pos.latitude, rWin.pos.longitude);
                     updateTimer.start();
                 } else if (tabMap.center) {
                     console.debug("Update timer preventing another update.");
                 }
             }
         }
-        */
 
         onDrag : {
             // disable map centering once drag is detected
@@ -91,17 +88,13 @@ Item {
         // Rotating the map for fun and profit.
         // angle: -compass.azimuth
         showCurrentPosition: true
-        //currentPositionValid: gps.hasFix
-        //currentPositionLat: gps.lastGoodFix.lat
-        //currentPositionLon: gps.lastGoodFix.lon
-        currentPositionValid: true
-        currentPositionLat: 49.2
-        currentPositionLon: 16.616667
+        currentPositionValid: rWin.llValid
+        currentPositionLat: rWin.lastGoodPos.latitude
+        currentPositionLon: rWin.lastGoodPos.longitude
         //currentPositionAzimuth: compass.azimuth
         //TODO: switching between GPS bearing & compass azimuth
-        //currentPositionAzimuth: gps.lastGoodFix.bearing
+        currentPositionAzimuth: rWin.bearing
         //currentPositionError: gps.lastGoodFix.error
-        currentPositionAzimuth: 0
         currentPositionError: 0
     }
 
@@ -212,10 +205,15 @@ Item {
                     tabMap.center = false // disable
                 } else {
                     tabMap.center = true // enable
-                    //if (gps.lastGoodFix) { // recenter at once
-                    if (true) { // recenter at once
-                        //pinchmap.setCenterLatLon(gps.lastGoodFix.lat, gps.lastGoodFix.lon);
-                        pinchmap.setCenterLatLon(49.2, 16.616);
+                    if (rWin.llValid) { // recenter at once (TODO: validation ?)
+                        console.log("CBUTTON")
+                        console.log(rWin.pos)
+                        console.log(rWin.llValid)
+                        console.log(rWin.pos.latitude)
+                        console.log(rWin.pos.longitude)
+                        console.log("BUTTON END")
+
+                        pinchmap.setCenterLatLon(rWin.pos.latitude, rWin.pos.longitude);
                     }
                 }
             }

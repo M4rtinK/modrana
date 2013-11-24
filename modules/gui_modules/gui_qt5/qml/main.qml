@@ -35,6 +35,23 @@ ApplicationWindow {
         */
     }
 
+    // location
+    property variant location : Location {}
+    property variant position // full position object
+    property variant pos // coordinate only
+    // lastGoodPos needs to be always set,
+    // by defaultBrno is used or last known saved position
+    // and if available, the last known actual valid position
+    property variant lastGoodPos : Coordinate {
+        latitude : 49.2
+        longitude : 16.616667
+        altitude : 237.0
+    }
+    property real bearing
+    property bool llValid : pos.isValid
+
+    // export the Python context so other elements can use
+    // it without instantiating it themselves
     property alias python : python
     Python {
         id : python
@@ -101,10 +118,21 @@ ApplicationWindow {
         // Python backend to be initialized, so we can load them now
         //platformLoader.source = "Platform.qml"
         rWin.platform = loadQMLFile("Platform.qml")
+        _init_location()
 
+        // the map page needs to be loaded after
+        // location is initialized, so that
+        // it picks up the correct position
         rWin.mapPage = loadPage("MapPage")
         rWin.initialPage = rWin.mapPage
         rWin.pageStack.push(rWin.mapPage)
+    }
+
+    function _init_location() {
+        // initialize the location module,
+        // this also start localisation,
+        // if enabled
+        rWin.location.__init__()
     }
 
     //property variant mapPage : loadPage("MapPage")
