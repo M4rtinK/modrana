@@ -32,11 +32,6 @@ Item {
                 // computation
                 location._lastCoord = coord
             }
-
-
-
-
-
             // tell the position to Python
             var posDict = {
                 latitude : locationSource.position.coordinate.latitude,
