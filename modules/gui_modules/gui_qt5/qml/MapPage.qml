@@ -206,13 +206,6 @@ Item {
                 } else {
                     tabMap.center = true // enable
                     if (rWin.llValid) { // recenter at once (TODO: validation ?)
-                        console.log("CBUTTON")
-                        console.log(rWin.pos)
-                        console.log(rWin.llValid)
-                        console.log(rWin.pos.latitude)
-                        console.log(rWin.pos.longitude)
-                        console.log("BUTTON END")
-
                         pinchmap.setCenterLatLon(rWin.pos.latitude, rWin.pos.longitude);
                     }
                 }
