@@ -98,11 +98,12 @@ Item {
         currentPositionError: 0
     }
 
+    /* TODO: use with compass
     Image {
         id: compassImage
-        /* TODO: investigate how to replace this by an image loader
-         what about rendered size ?
-         */
+        // TODO: investigate how to replace this by an image loader
+        // what about rendered size ?
+
         source: "../../../../themes/"+ rWin.theme_id +"/windrose-simple.svg"
         transform: [Rotation {
                 id: azCompass
@@ -125,9 +126,9 @@ Item {
             property int outerMargin: 0
             id: arrowImage
             //visible: (gps.targetValid && gps.lastGoodFix.valid)
-            /* TODO: investigate how to replace this by an image loader
-             what about rendered size ?
-             */
+
+            // TODO: investigate how to replace this by an image loader
+            // what about rendered size ?
             source: "../../../../themes/"+ rWin.theme_id +"/arrow_target.svg"
             width: (compassImage.paintedWidth / compassImage.sourceSize.width)*sourceSize.width
             fillMode: Image.PreserveAspectFit
@@ -141,6 +142,7 @@ Item {
             }
         }
     }
+    */
 
     Row {
         id: buttonsRight
