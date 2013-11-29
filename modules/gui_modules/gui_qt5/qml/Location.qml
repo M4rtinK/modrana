@@ -15,7 +15,7 @@ Item {
         target : locationSource
         onPositionChanged: {
             var coord = locationSource.position.coordinate
-            console.log("Coordinate:", coord.longitude, coord.latitude)
+            //console.log("Coordinate:", coord.longitude, coord.latitude)
             rWin.position = locationSource.position
             rWin.pos = coord
             if (coord.isValid) {
@@ -26,7 +26,7 @@ Item {
                 // attribute, we need to compute it like this)
                 if (location._lastCoord) {
                     rWin.bearing = location._lastCoord.azimuthTo(coord)
-                    console.log("BEARING " + rWin.bearing)
+                    //console.log("BEARING " + rWin.bearing)
                 }
                 // save the current coord for the next bearing
                 // computation
