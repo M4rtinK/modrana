@@ -13,8 +13,7 @@ ApplicationWindow {
     // properties
     property string guiID : "unknown"
 
-    //TODO: react on theme change
-    property string theme_id : rWin.get("theme", "default", function(value){theme_id = value})
+    property bool animate : true
 
     property variant c
 
@@ -53,12 +52,24 @@ ApplicationWindow {
     property real bearing
     property bool llValid : pos.isValid
 
+    // theme
+    property variant theme
+
     // export the Python context so other elements can use
     // it without instantiating it themselves
     property alias python : python
     Python {
         id : python
         Component.onCompleted: {
+            // add Python event handlers
+            // - they will be called during
+            //   modRana startup
+            // - like this initial values will be set
+            python.setHandler("themeChanged", function(newTheme){
+                console.log("THEME CHANGED !!!!")
+                rWin.theme = newTheme
+            })
+            // import and initialize modRana
             addImportPath('.');
             //importModule('pdb', function() {})
             importModule_sync('sys')
@@ -74,15 +85,11 @@ ApplicationWindow {
                 guiID = result
             })
 
-            // Python initialization done,
-            // initialize the rest of QML
-            //rWin.__init__()
-
         }
+
         onError: {
             // when an exception is raised, this error handler will be called
             console.log('python error: ' + traceback);
-
         }
     }
 

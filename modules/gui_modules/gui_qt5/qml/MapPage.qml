@@ -104,7 +104,7 @@ Item {
         // TODO: investigate how to replace this by an image loader
         // what about rendered size ?
 
-        source: "../../../../themes/"+ rWin.theme_id +"/windrose-simple.svg"
+        source: "../../../../themes/"+ rWin.theme.id +"/windrose-simple.svg"
         transform: [Rotation {
                 id: azCompass
                 origin.x: compassImage.width/2
@@ -129,7 +129,7 @@ Item {
 
             // TODO: investigate how to replace this by an image loader
             // what about rendered size ?
-            source: "../../../../themes/"+ rWin.theme_id +"/arrow_target.svg"
+            source: "../../../../themes/"+ rWin.theme.id +"/arrow_target.svg"
             width: (compassImage.paintedWidth / compassImage.sourceSize.width)*sourceSize.width
             fillMode: Image.PreserveAspectFit
             x: compassImage.width/2 - width/2
@@ -152,7 +152,7 @@ Item {
         anchors.rightMargin: rWin.c.style.map.button.margin
         spacing: rWin.c.style.map.button.spacing
         Button {
-            iconSource: "image://python/icon/" + rWin.theme_id + "/" + "plus_small.png"
+            iconSource: "image://python/icon/" + rWin.theme.id + "/" + "plus_small.png"
             onClicked: {pinchmap.zoomIn() }
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
@@ -160,7 +160,7 @@ Item {
             //text : "<h1>+</h1>"
         }
         Button {
-            iconSource: "image://python/icon/" + rWin.theme_id + "/" + "minus_small.png"
+            iconSource: "image://python/icon/" + rWin.theme.id + "/" + "minus_small.png"
             onClicked: {pinchmap.zoomOut() }
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
@@ -177,8 +177,8 @@ Item {
         anchors.leftMargin: rWin.c.style.map.button.margin
         spacing: rWin.c.style.map.button.spacing
         Button {
-            iconSource: "image://python/icon/" + rWin.theme_id + "/" + "minimize_small.png"
-            //iconSource: "themes/" + rWin.theme_id + "/" + "minimize_small.png"
+            iconSource: "image://python/icon/" + rWin.theme.id + "/" + "minimize_small.png"
+            //iconSource: "themes/" + rWin.theme.id + "/" + "minimize_small.png"
             checkable : true
             visible: !rWin.platform.fullscreenOnly
             onClicked: {
@@ -187,12 +187,12 @@ Item {
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
             Component.onCompleted: {
-                iconSource = "image://python/icon/" + rWin.theme_id + "/" + "minimize_small.png"
+                iconSource = "image://python/icon/" + rWin.theme.id + "/" + "minimize_small.png"
             }
         }
         Button {
             id: followPositionButton
-            iconSource: "image://python/icon/" + rWin.theme_id + "/" + "center_small.png"
+            iconSource: "image://python/icon/" + rWin.theme.id + "/" + "center_small.png"
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
             checked : tabMap.center
@@ -216,8 +216,8 @@ Item {
         Button {
             id: mainMenuButton
             iconSource: showModeOnMenuButton ?
-                "image://python/icon/" + rWin.theme_id + "/" + rWin.mode  + "_small.png"
-                :"image://python/icon/" + rWin.theme_id + "/" + "menu_small.png"
+                "image://python/icon/" + rWin.theme.id + "/" + rWin.mode  + "_small.png"
+                :"image://python/icon/" + rWin.theme.id + "/" + "menu_small.png"
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
             onClicked: {
