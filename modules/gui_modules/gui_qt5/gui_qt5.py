@@ -94,6 +94,9 @@ class QMLGUI(GUIModule):
         ## image id prefix
         pyotherside.set_image_provider(self._selectImageProviderCB)
 
+        # initialize theming
+        self._theme = Theme(self)
+
         ## make constants accessible
         #self.constants = self.getConstants()
         #rc.setContextProperty("C", self.constants)
@@ -414,7 +417,6 @@ class Search(object):
             self._addressSearchStatus = threadStatus
             self._addressSignal()
 
-
     def address(self, address):
         """Trigger an asynchronous address search for the given term
 
@@ -469,7 +471,6 @@ class ModRana(object):
         self.modrana.watch("mode", self._modeChangedCB)
         self.modrana.watch("theme", self._themeChangedCB)
         self._theme = Theme(gui)
-
     # mode
 
     def _getMode(self):
@@ -484,113 +485,79 @@ class ModRana(object):
         """notify when the mode key changes in options"""
         self.modeChanged()
 
-    # theme
-
-    def _getThemeId(self):
-        return self.modrana.get('theme', "default")
-
-    def _setThemeId(self, newTheme):
-        return self.modrana.set('theme', newTheme)
-
-    def _getTheme(self):
-        return self._theme
-
-    themeChanged = signal.Signal()
-
-    def _themeChangedCB(self, *args):
-        """notify when the mode key changes in options"""
-        self.themeChanged()
-
-    # properties
-    #
-    #mode = QtCore.Property(str, _getMode, _setMode, notify=modeChanged)
-    #theme_id = QtCore.Property(str, _getThemeId, _setThemeId, notify=themeChanged)
-    #theme = QtCore.Property(QtCore.QObject, _getTheme, notify=themeChanged)
-
-
 class Theme(object):
-    """modRana themes"""
-
+    """modRana theme handling"""
     def __init__(self, gui):
         self.gui = gui
         # connect to the first time signal
         self.gui.firstTimeSignal.connect(self._firstTimeCB)
         self.themeModule = None
-        self.theme = None
+        self._themeDict = {}
         self.colors = None
         self.modrana = self.gui.modrana
+        self.themeChanged.connect(self._notifyQMLCB)
 
     themeChanged = signal.Signal()
 
     def _firstTimeCB(self):
-        # we need the them module
+        # we need the theme module
         self.themeModule = self.gui.m.get('theme')
-        self.theme = self.themeModule.theme
-        self.colors = ColorsWrapper(self.theme)
-        # connect to the theme changed signal
+        theme = self.themeModule.theme
+        # reload the theme dict so that
+        # the dict is up to date and
+        # then trigger the changed signal
+        # and give it the current theme dict
+        self.themeChanged(self._reloadTheme(theme))
+        # connect to the core theme-modules theme-changed signal
         self.themeModule.themeChanged.connect(self._themeChangedCB)
 
     def _themeChangedCB(self, newTheme):
-        self.theme = newTheme
-        self.colors.reloadTheme(self.theme)
-        self.themeChanged()
+        """ Callback from the core theme module
+        - reload theme and trigger our own themeChanged signal
 
-    def _getThemeId(self):
-        return self.theme.id
+        :param newTheme: new theme from the core theme module
+        :type newTheme: Theme
+        """
+        self.themeChanged(self._reloadTheme(newTheme))
 
-    def _setThemeId(self, newTheme):
-        return self.modrana.set('theme', newTheme)
+    def _notifyQMLCB(self, newTheme):
+        """ Notify the QML context that the modRana theme changed
 
-    def _getThemeName(self):
-        return self.theme.name
+        :param newTheme: the new theme
+        :type newTheme: dict
+        """
+        pyotherside.send("themeChanged", newTheme)
 
-    def _getColor(self):
-        return self.colors
+    @property
+    def themeId(self):
+        return self._themeDict.get("id")
 
-    #id = QtCore.Property(str, _getThemeId, _setThemeId, notify=themeChanged)
-    #name = QtCore.Property(str, _getThemeName, notify=themeChanged)
-    #color = QtCore.Property(QtCore.QObject, _getColor, notify=themeChanged)
+    @themeId.setter
+    def themeId(self, themeId):
+        self.modrana.set('theme', themeId)
 
+    @property
+    def theme(self):
+        return self._themeDict
 
-class ColorsWrapper(object):
-    """Wrapper for modRana theme colors"""
+    def _reloadTheme(self, theme):
+        """Recreate the theme dict from the new theme object
 
-    def __init__(self, theme):
-        self.t = theme
-
-    colorsChanged = signal.Signal()
-
-    def reloadTheme(self, theme):
-        """Replace the current theme with a new one
-        and emit the changed signal"""
-        self.t = theme
-        self.colorsChanged()
-
-    def _main_fill(self):
-        return self.t.getColor("main_fill", "#92aaf3")
-
-    def _icon_grid_toggled(self):
-        return self.t.getColor("icon_grid_toggled", "#c6d1f3")
-
-    def _icon_button_normal(self):
-        return self.t.getColor("icon_button_normal", "#c6d1f3")
-
-    def _icon_button_toggled(self):
-        return self.t.getColor("icon_button_toggled", "#3c60fa")
-
-    def _icon_button_text(self):
-        return self.t.getColor("icon_button_text", "black")
-
-    def _page_background(self):
-        return self.t.getColor("page_background", "black")
-
-    def _page_header_text(self):
-        return self.t.getColor("page_header_text", "black")
-
-    #main_fill = QtCore.Property(str, _main_fill, notify=colorsChanged)
-    #icon_grid_toggled = QtCore.Property(str, _icon_grid_toggled, notify=colorsChanged)
-    #icon_button_normal = QtCore.Property(str, _icon_button_normal, notify=colorsChanged)
-    #icon_button_toggled = QtCore.Property(str, _icon_button_toggled, notify=colorsChanged)
-    #icon_button_text = QtCore.Property(str, _icon_button_text, notify=colorsChanged)
-    #page_header_text = QtCore.Property(str, _page_header_text, notify=colorsChanged)
-    #page_background = QtCore.Property(str, _page_background, notify=colorsChanged)
+        :param theme: new modRana Theme object instance
+        :type theme: Theme
+        """
+        themeDict = {
+            "id" : theme.id,
+            "name" : theme.name,
+            "color" : {
+                "main_fill" : theme.getColor("main_fill", "#92aaf3"),
+                "icon_grid_toggled" : theme.getColor("icon_grid_toggled", "#c6d1f3"),
+                "icon_button_normal" : theme.getColor("icon_button_normal", "#c6d1f3"),
+                "icon_button_toggled" : theme.getColor("icon_button_toggled", "#3c60fa"),
+                "icon_button_text" : theme.getColor("icon_button_text", "black"),
+                "page_background" : theme.getColor("page_background", "black"),
+                "page_header_text" : theme.getColor("page_header_text", "black"),
+            }
+        }
+        self._themeDict = themeDict
+        return themeDict
