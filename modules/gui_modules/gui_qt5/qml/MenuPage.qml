@@ -8,6 +8,9 @@ IconGridPage {
             icon : "search.png"
             menu : "SearchMenu"
         }
+
+        // TODO: un-comment once implemented
+        /*
         ListElement {
             caption : "Routes"
             icon : "route.png"
@@ -18,16 +21,23 @@ IconGridPage {
             icon : "poi.png"
             menu : "PoiMenu"
         }
+        */
+
         ListElement {
             caption : "Map"
             icon : "map.png"
             menu : "MapMenu"
         }
+
+        // TODO: un-comment once
+        // mode does something
+        /*
         ListElement {
             caption : "Mode"
             icon : "mode.png"
             menu : "ModeMenu"
         }
+        */
         ListElement {
             caption : "Info"
             icon : "info.png"
