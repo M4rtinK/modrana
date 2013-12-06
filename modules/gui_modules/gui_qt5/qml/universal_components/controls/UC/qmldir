@@ -11,3 +11,6 @@ TextArea 1.0 TextArea.qml
 TextField 1.0 TextField.qml
 Dialog 1.0 Dialog.qml
 PageStatus 1.0 PageStatus.js
+ComboBox 1.0 ComboBox.qml
+Menu 1.0 Menu.qml
+MenuItem 1.0 MenuItem.qml
