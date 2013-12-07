@@ -124,6 +124,9 @@ ApplicationWindow {
         // (including the GUI style constants)
         rWin.c = python.call_sync("modrana.gui.getConstants", [])
 
+        // init miscellaneous other toplevel properties
+        rWin.animate = rWin.get_sync("QMLAnimate", true)
+
         // the various property encapsulation items need the
         // Python backend to be initialized, so we can load them now
         //platformLoader.source = "Platform.qml"
