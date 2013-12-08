@@ -7,9 +7,24 @@ BasePage {
     id: debugPage
     headerText : "Debug"
 
-/*
     content {
-
+        Column {
+            anchors.top : parent.top
+            anchors.left : parent.left
+            anchors.right : parent.right
+            anchors.topMargin : rWin.c.style.main.spacing
+            anchors.leftMargin : rWin.c.style.main.spacing
+            anchors.rightMargin : rWin.c.style.main.spacing
+            spacing : rWin.c.style.main.spacingBig * 2
+            width : parent.width
+            SwitchWithText {
+                text : qsTr("Show debug button")
+                checked : rWin.showDebugButton
+                onCheckedChanged : {
+                     rWin.showDebugButton = checked
+                     rWin.set("showQt5GUIDebugButton", checked)
+                }
+            }
+        }
     }
-*/
 }

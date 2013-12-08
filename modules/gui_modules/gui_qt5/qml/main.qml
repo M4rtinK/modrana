@@ -15,6 +15,8 @@ ApplicationWindow {
 
     property bool animate : true
 
+    property bool showDebugButton : false
+
     property variant c
 
     Loader {
@@ -96,6 +98,7 @@ ApplicationWindow {
     Button {
         anchors.bottom : parent.bottom
         anchors.right : parent.right
+        visible : rWin.showDebugButton
         text : "debug"
         onClicked : {
             //console.log(rWin.set("speedTest", 1337))
@@ -126,6 +129,7 @@ ApplicationWindow {
 
         // init miscellaneous other toplevel properties
         rWin.animate = rWin.get_sync("QMLAnimate", true)
+        rWin.showDebugButton = rWin.get_sync("showQt5GUIDebugButton", false)
 
         // the various property encapsulation items need the
         // Python backend to be initialized, so we can load them now
