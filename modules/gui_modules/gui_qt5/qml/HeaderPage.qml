@@ -11,7 +11,6 @@ import UC 1.0
 */
 
 Page {
-    anchors.fill : parent
     property alias content : contentField.children
     property alias headerContent : hContent.children
     property alias headerWidth : header.width

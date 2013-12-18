@@ -3,7 +3,6 @@ import UC 1.0
 
 Page {
     id : iconGP
-    anchors.fill : parent
     //signal buttonClicked(string menu)
     property alias model : gridView.model
     property int hIcons : rWin.inPortrait ? 2 : 4

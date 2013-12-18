@@ -5,7 +5,6 @@ import UC 1.0
 Item {
     id: tabMap
     property int buttonSize: 72
-    anchors.fill : parent
     function showOnMap(lat, lon) {
         pinchmap.setCenterLatLon(lat, lon);
         // show on map moves map center and
