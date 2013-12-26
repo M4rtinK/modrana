@@ -142,7 +142,6 @@ ApplicationWindow {
         // it picks up the correct position
         rWin.mapPage = loadPage("MapPage")
         rWin.initialPage = rWin.mapPage
-        rWin.pageStack.push(rWin.mapPage)
     }
 
     function _init_location() {
