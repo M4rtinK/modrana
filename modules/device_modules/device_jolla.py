@@ -2,7 +2,7 @@
 #----------------------------------------------------------------------------
 # Jolla device module.
 # It is a basic modRana module, that has some special features
-# and is loaded only on the correpsponding device.
+# and is loaded only on the corresponding device.
 #----------------------------------------------------------------------------
 # Copyright 2013, Martin Kolman
 #
@@ -41,8 +41,8 @@ class Jolla(DeviceModule):
         return "Jolla"
 
     def getWinWH(self):
-        """N9/N950 screen resolution"""
-        return 854, 480
+        """Jolla screen resolution"""
+        return 960, 540
 
     def startInFullscreen(self):
         """
@@ -53,13 +53,12 @@ class Jolla(DeviceModule):
 
     def fullscreenOnly(self):
         """
-        basically no need to
+        Applications running on Sailfish@Jolla are fullscreen only.
         """
         return True
 
     def screenBlankingControlSupported(self):
-        """
-        Screen blanking is not supported yet,
+        """ Screen blanking is not supported yet,
         might need to be handled from the QML context
         """
         return False
@@ -89,16 +88,16 @@ class Jolla(DeviceModule):
     # TODO: check Sailfish paths
 
     def getTracklogFolderPath(self):
-        return "/home/user/MyDocs/tracklogs"
+        return "/home/nemo/Public/tracklogs"
 
     def getMapFolderPath(self):
-        return "/home/user/MyDocs/.maps/"
+        return "/home/nemo/Public/maps/"
 
     def getPOIFolderPath(self):
-        return "/home/user/MyDocs/.maps"
+        return "/home/nemo/Public/maps/"
 
     def getLogFolderPath(self):
-        return "/home/user/MyDocs/modrana_debug_logs/"
+        return "/home/nemo/Public/modrana_debug_logs/"
 
     def needsQuitButton(self):
         """No need for a separate Quit button thanks
