@@ -4,6 +4,7 @@ import UC 1.0
 
 Item {
     id: tabMap
+    anchors.fill : parent
     property int buttonSize: 72
     function showOnMap(lat, lon) {
         pinchmap.setCenterLatLon(lat, lon);
@@ -30,8 +31,7 @@ Item {
 
     PinchMap {
         id: pinchmap
-        width: parent.width
-        height: parent.height
+        anchors.fill : parent
         zoomLevel: rWin.get("z", 11, function(v){zoomLevel=v})
 
         layers : ListModel {
