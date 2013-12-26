@@ -1,5 +1,10 @@
 import Sailfish.Silica 1.0
 
 IconButton {
-    property alias iconSource : icon.source
+    property string iconSource : ""
+    property bool checkable : false
+    property bool checked : false
+    onIconSourceChanged : {
+        icon.source = iconSource
+    }
 }
