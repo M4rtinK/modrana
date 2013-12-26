@@ -150,7 +150,7 @@ Item {
         anchors.right: pinchmap.right
         anchors.rightMargin: rWin.c.style.map.button.margin
         spacing: rWin.c.style.map.button.spacing
-        Button {
+        IconButton {
             iconSource: "image://python/icon/" + rWin.theme.id + "/" + "plus_small.png"
             onClicked: {pinchmap.zoomIn() }
             width: rWin.c.style.map.button.size
@@ -158,7 +158,7 @@ Item {
             enabled : pinchmap.zoomLevel != pinchmap.maxZoomLevel
             //text : "<h1>+</h1>"
         }
-        Button {
+        IconButton {
             iconSource: "image://python/icon/" + rWin.theme.id + "/" + "minus_small.png"
             onClicked: {pinchmap.zoomOut() }
             width: rWin.c.style.map.button.size
@@ -175,7 +175,7 @@ Item {
         anchors.left: pinchmap.left
         anchors.leftMargin: rWin.c.style.map.button.margin
         spacing: rWin.c.style.map.button.spacing
-        Button {
+        IconButton {
             iconSource: "image://python/icon/" + rWin.theme.id + "/" + "minimize_small.png"
             //iconSource: "themes/" + rWin.theme.id + "/" + "minimize_small.png"
             checkable : true
@@ -189,7 +189,7 @@ Item {
                 iconSource = "image://python/icon/" + rWin.theme.id + "/" + "minimize_small.png"
             }
         }
-        Button {
+        IconButton {
             id: followPositionButton
             iconSource: "image://python/icon/" + rWin.theme.id + "/" + "center_small.png"
             width: rWin.c.style.map.button.size
@@ -212,7 +212,7 @@ Item {
                 }
             }
         }
-        Button {
+        IconButton {
             id: mainMenuButton
             iconSource: showModeOnMenuButton ?
                 "image://python/icon/" + rWin.theme.id + "/" + rWin.mode  + "_small.png"
