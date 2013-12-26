@@ -59,6 +59,16 @@ def _check():
         elif "GTA02" in cpuinfo: # N9
             print("* Neo FreeRunner GTA02 detected")
             return "neo"
+
+    # check lsb_release
+    proc = subprocess.Popen(['lsb_release', '-s', '-i'])
+    distributionId = str(proc.communicate()[0]).lower()
+    if distributionId == "mer":
+        # TODO: could be ale Nemo mobile or other Mer based distro,
+        # we should probably discern those two in the future
+        print("* Jolla (or other Mer based device) detected")
+        return "jolla"
+
     return None
 
 
