@@ -5,8 +5,6 @@ import UC 1.0
 
 ApplicationWindow {
     id : rWin
-    width : 640
-    height : 480
 
     title : "modRana"
 
@@ -79,7 +77,8 @@ ApplicationWindow {
             importModule_sync('modrana')
             // fake the argv
             //call_sync('setattr','sys' , 'argv' ,'["modrana.py", "-u", "qt5", "-d", "pc"]')
-            evaluate('setattr(sys, "argv" ,["modrana.py", "-u", "qt5", "-d", "pc"])')
+            //evaluate('setattr(sys, "argv" ,["modrana.py", "-u", "qt5", "-d", "pc"])')
+            evaluate('setattr(sys, "argv" ,["modrana.py", "-u", "qt5"])')
             console.log('sys.argv faked')
             call_sync('modrana.start')
             //guiID = evaluate("modrana.gui.getIDString()")
@@ -136,6 +135,14 @@ ApplicationWindow {
         //platformLoader.source = "Platform.qml"
         rWin.platform = loadQMLFile("Platform.qml")
         _init_location()
+
+        // if on a platform that is not fullscreen-only,
+        // set some reasonable default size for the window
+        var fullscreenOnly = python.call_sync("modrana.dmod.fullscreenOnly", [])
+        if (!fullscreenOnly) {
+            rWin.width = 640
+            rWin.height = 480
+        }
 
         // the map page needs to be loaded after
         // location is initialized, so that
