@@ -61,7 +61,9 @@ def _check():
             return "neo"
 
     # check lsb_release
-    proc = subprocess.Popen(['lsb_release', '-s', '-i'])
+    proc = subprocess.Popen(['lsb_release', '-s', '-i'],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     distributionId = str(proc.communicate()[0]).lower()
     if distributionId == "mer":
         # TODO: could be ale Nemo mobile or other Mer based distro,
