@@ -252,20 +252,27 @@ class IconImageProvider(ImageProvider):
         try:
             #TODO: theme name caching ?
             themeFolder = self.gui.modrana.paths.getThemesFolderPath()
-            fullIconPath = os.path.join(themeFolder, imageId)
-
+            # fullIconPath = os.path.join(themeFolder, imageId)
             # the path is constructed like this in QML
             # so we can safely just split it like this
             splitPath = imageId.split("/")
+            # remove any Ambiance specific garbage appended by Silica
+            splitPath[-1] = splitPath[-1].rsplit("?")[0]
+            fullIconPath = os.path.join(themeFolder, *splitPath)
+
             if not os.path.exists(fullIconPath):
                 if splitPath[0] == constants.DEFAULT_THEME_ID:
                     # already on default theme and icon path does not exist
+                    print("Icon not found in default theme:")
+                    print(fullIconPath)
                     return None
                 else:  # try to get the icon from default theme
                     splitPath[0] = constants.DEFAULT_THEME_ID
                     fullIconPath = os.path.join(themeFolder, *splitPath)
                     if not os.path.exists(fullIconPath):
                         # icon not found even in the default theme
+                        print("Icon not found even in default theme:")
+                        print(fullIconPath)
                         return None
             with open(fullIconPath, 'rb') as f:
                 # the context manager will make sure the icon
