@@ -6,4 +6,15 @@ ApplicationWindow{
     // for a common API with Controls
     property string title
     property variant visibility : 5
+
+    function pushPage(pageInstance, pageProperties, animate) {
+        var animateFlag
+        if (animate) {
+            animateFlag = PageStackAction.Animated
+        } else {
+            animateFlag = PageStackAction.Immediate
+        }
+        pageStack.push(pageInstance, pageProperties, animateFlag)
+
+    }
 }
