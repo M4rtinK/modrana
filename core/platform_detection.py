@@ -61,15 +61,20 @@ def _check():
             return "neo"
 
     # check lsb_release
-    proc = subprocess.Popen(['lsb_release', '-s', '-i'],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
-    distributionId = str(proc.communicate()[0]).lower()
-    if distributionId == "mer":
-        # TODO: could be ale Nemo mobile or other Mer based distro,
-        # we should probably discern those two in the future
-        print("* Jolla (or other Mer based device) detected")
-        return "jolla"
+    try:
+        proc = subprocess.Popen(['lsb_release', '-s', '-i'],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        distributionId = str(proc.communicate()[0]).lower()
+        if distributionId == "mer":
+            # TODO: could be ale Nemo mobile or other Mer based distro,
+            # we should probably discern those two in the future
+            print("* Jolla (or other Mer based device) detected")
+            return "jolla"
+    except:
+        e = sys.exc_info()[1]
+        print("platform detection: running lsb_release failed")
+        print(e)
 
     return None
 
