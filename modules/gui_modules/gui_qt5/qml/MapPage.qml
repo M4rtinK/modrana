@@ -150,22 +150,19 @@ Item {
         anchors.right: pinchmap.right
         anchors.rightMargin: rWin.c.style.map.button.margin
         spacing: rWin.c.style.map.button.spacing
-        IconButton {
-            iconSource: "image://python/icon/" + rWin.theme.id + "/" + "plus_small.png"
+        MapButton {
+            iconName: "plus_small.png"
             onClicked: {pinchmap.zoomIn() }
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
             enabled : pinchmap.zoomLevel != pinchmap.maxZoomLevel
-            //text : "<h1>+</h1>"
         }
-        IconButton {
-            iconSource: "image://python/icon/" + rWin.theme.id + "/" + "minus_small.png"
+        MapButton {
+            iconName: "minus_small.png"
             onClicked: {pinchmap.zoomOut() }
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
             enabled : pinchmap.zoomLevel != pinchmap.minZoomLevel
-
-            //text : "<h1>-</h1>"
         }
     }
     Column {
@@ -175,9 +172,8 @@ Item {
         anchors.left: pinchmap.left
         anchors.leftMargin: rWin.c.style.map.button.margin
         spacing: rWin.c.style.map.button.spacing
-        IconButton {
-            iconSource: "image://python/icon/" + rWin.theme.id + "/" + "minimize_small.png"
-            //iconSource: "themes/" + rWin.theme.id + "/" + "minimize_small.png"
+        MapButton {
+            iconName : "minimize_small.png"
             checkable : true
             visible: !rWin.platform.fullscreenOnly
             onClicked: {
@@ -185,13 +181,10 @@ Item {
             }
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
-            Component.onCompleted: {
-                iconSource = "image://python/icon/" + rWin.theme.id + "/" + "minimize_small.png"
-            }
         }
-        IconButton {
+        MapButton {
             id: followPositionButton
-            iconSource: "image://python/icon/" + rWin.theme.id + "/" + "center_small.png"
+            iconName : "center_small.png"
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
             checked : tabMap.center
@@ -212,14 +205,13 @@ Item {
                 }
             }
         }
-        IconButton {
+        MapButton {
             id: mainMenuButton
-            iconSource: showModeOnMenuButton ?
-                "image://python/icon/" + rWin.theme.id + "/" + rWin.mode  + "_small.png"
-                :"image://python/icon/" + rWin.theme.id + "/" + "menu_small.png"
+            iconName: showModeOnMenuButton ? rWin.mode  + "_small.png" : "menu_small.png"
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
             onClicked: {
+                console.log("Menu pushed!")
                 rWin.push("Menu", undefined, !rWin.animate)
             }
         }
