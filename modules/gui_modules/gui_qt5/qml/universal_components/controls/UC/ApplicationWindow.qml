@@ -2,6 +2,9 @@ import QtQuick.Controls 1.0
 
 ApplicationWindow {
 
+    // for now, we are in landscape when using Controls
+    property bool inPortrait : false
+
     //property alias initialPage : pageStack.initialItem
     property alias pageStack : pageStack
 
