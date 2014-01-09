@@ -66,7 +66,7 @@ Page {
             }
         }
     }
-    IconButton {
+    MIconButton {
         id : backButton
         width : headerHeight * 0.8
         height : headerHeight * 0.8

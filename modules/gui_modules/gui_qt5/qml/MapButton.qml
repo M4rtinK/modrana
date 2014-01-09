@@ -12,6 +12,8 @@ Rectangle {
     property alias iconName : themedIcon.iconName
     property color normalColor : rWin.theme.color.icon_button_normal
     property color toggledColor : rWin.theme.color.icon_button_toggled
+    property bool checkable : false
+    property bool checked : false
 
     color : normalColor
 
