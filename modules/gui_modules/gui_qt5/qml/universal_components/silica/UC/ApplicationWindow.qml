@@ -1,3 +1,4 @@
+import QtQuick 2.0
 import Sailfish.Silica 1.0
 ApplicationWindow{
     property bool inPortrait : _setOrientation(deviceOrientation)
@@ -5,6 +6,15 @@ ApplicationWindow{
     onDeviceOrientationChanged : {
         _setOrientation(deviceOrientation)
     }
+
+    cover : Qt.resolvedUrl("Foo.qml")
+
+    /*
+    cover: CoverBackground {
+        CoverPlaceholder {
+            text: "modRana"
+        }
+    }*/
 
     function _setOrientation(dOrient) {
         if (dOrient == Orientation.Portrait ||
