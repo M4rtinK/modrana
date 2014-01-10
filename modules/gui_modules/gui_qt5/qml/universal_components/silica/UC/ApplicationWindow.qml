@@ -2,6 +2,10 @@ import Sailfish.Silica 1.0
 ApplicationWindow{
     property bool inPortrait : _setOrientation(deviceOrientation)
 
+    onDeviceOrientationChanged : {
+        _setOrientation(deviceOrientation)
+    }
+
     function _setOrientation(dOrient) {
         if (dOrient == Orientation.Portrait ||
             dOrient == Orientation.PortraitInverted) {
