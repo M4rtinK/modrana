@@ -15,5 +15,6 @@ ApplicationWindow {
 
     function pushPage(pageInstance, pageProperties, animate) {
         pageStack.push(pageInstance, pageProperties, animate)
+        return pageInstance
     }
 }

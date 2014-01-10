@@ -33,6 +33,6 @@ ApplicationWindow{
             animateFlag = PageStackAction.Immediate
         }
         pageStack.push(pageInstance, pageProperties, animateFlag)
-
+        return pageInstance
     }
 }
