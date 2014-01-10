@@ -147,8 +147,10 @@ ApplicationWindow {
         // the map page needs to be loaded after
         // location is initialized, so that
         // it picks up the correct position
-        rWin.mapPage = loadPage("MapPage")
-        rWin.initialPage = rWin.mapPage
+        //rWin.mapPage = loadPage("MapPage")
+        //rWin.initialPage = rWin.mapPage
+        //rWin.pushPage(rWin.mapPage, rWin.animate)
+        rWin.mapPage = rWin.pushPage(loadPage("MapPage"), rWin.animate)
     }
 
     function _init_location() {
@@ -211,11 +213,15 @@ ApplicationWindow {
                 newPage = loadPage(fullPageName)
                 if (newPage) { // loading successful
                     pages[pageName] = newPage // cache the page
+                    console.log("page cached: " + pageName)
                 } else { // loading failed, go to mapPage
                     newPage = mapPage
+                    console.log(pageName + " loading failed, using mapPage")
                 }
             }
         }
+        console.log("RETURN PAGE")
+        console.log(newPage)
         return newPage
 
     /* TODO: some pages are not so often visited pages so they could
@@ -233,7 +239,7 @@ ApplicationWindow {
             rWin.pageStack.pop(null,!animate)
         } else {
             console.log("PUSH " + pageName)
-            rWin.pageStack.push(getPage(pageName),null,!rWin.animate)
+            rWin.pushPage(getPage(pageName),null,!rWin.animate)
         }
     }
 
