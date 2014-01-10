@@ -65,8 +65,10 @@ def _check():
         proc = subprocess.Popen(['lsb_release', '-s', '-i'],
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
-        distributionId = str(proc.communicate()[0]).lower()
-        if distributionId == "mer":
+        distributionId = proc.communicate()[0].decode("utf-8").lower().strip()
+        print(distributionId)
+        # import pdb; pdb.set_trace()
+        if distributionId == 'mer':
             # TODO: could be ale Nemo mobile or other Mer based distro,
             # we should probably discern those two in the future
             print("* Jolla (or other Mer based device) detected")
