@@ -2,7 +2,7 @@ import QtQuick 2.0
 import "functions.js" as F
 import UC 1.0
 
-Item {
+Page {
     id: tabMap
     anchors.fill : parent
     property int buttonSize: 72
