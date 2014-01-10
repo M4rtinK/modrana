@@ -15,6 +15,7 @@ Page {
     Rectangle {
         anchors.fill : parent
         color : rWin.theme.color.page_background
+        visible : rWin.platform.needsPageBackground
     }
 
     function getPage(menu) {
@@ -54,7 +55,9 @@ Page {
         }
         //insert the back arrow
         Component.onCompleted: {
-            model.insert(0, {"caption": "", "icon":"", "menu":""})
+            if (rWin.platform.needsBackButton) {
+                model.insert(0, {"caption": "", "icon":"", "menu":""})
+            }
         }
 
 
@@ -71,6 +74,7 @@ Page {
         iconName : "left_thin.png"
         text : "back"
         opacity : gridView.atYBeginning ? 1.0 : 0.55
+        visible : rWin.platform.needsBackButton
         onClicked : {
             rWin.pageStack.pop(undefined,!rWin.animate)
         }

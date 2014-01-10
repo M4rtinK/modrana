@@ -105,5 +105,11 @@ class Jolla(DeviceModule):
         """
         return False
 
+    def needsBackButton(self):
+        return False
+
+    def needsPageBackground(self):
+        return False
+
     def getDeviceType(self):
         return DEVICE_TYPE_SMARTPHONE

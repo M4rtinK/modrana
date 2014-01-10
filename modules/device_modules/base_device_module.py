@@ -209,6 +209,14 @@ class DeviceModule(RanaModule):
         need to provide their own shutdown buttons"""
         return False
 
+    def needsBackButton(self):
+        """Some platforms (Jolla) don't need a in-UI back button"""
+        return True
+
+    def needsPageBackground(self):
+        """Some platforms (Jolla) don't need a page background"""
+        return True
+
     def handlesUrlOpening(self):
         """
         report if opening of URI is handled by the device module
