@@ -7,6 +7,7 @@ Screen 1.0 Screen.qml
 ProgressBar 1.0 ProgressBar.qml
 Slider 1.0 Slider.qml
 Switch 1.0 Switch.qml
+TextSwitch 1.0 TextSwitch.qml
 Label 1.0 Label.qml
 TextArea 1.0 TextArea.qml
 TextField 1.0 TextField.qml

@@ -44,7 +44,7 @@ BasePage {
                     }
                 }
             }
-            SwitchWithText {
+            TextSwitch {
                 text : qsTr("Show mode on menu button")
                 checked : rWin.mapPage.showModeOnMenuButton
                 onCheckedChanged : {
@@ -52,7 +52,7 @@ BasePage {
                      rWin.set("showModeOnMenuButton", checked)
                 }
             }
-            SwitchWithText {
+            TextSwitch {
                 text : qsTr("Animations")
                 checked : rWin.animate
                 onCheckedChanged : {

@@ -1,6 +1,5 @@
-//SwitchWithText.qml
 import QtQuick 2.0
-import UC 1.0
+import QtQuick.Controls 1.0
 
 Item {
     id: container
