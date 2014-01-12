@@ -5,6 +5,7 @@ Page {
     id : iconGP
     //signal buttonClicked(string menu)
     property alias model : gridView.model
+    property int headerHeight : rWin.platform.needsBackButton ? 0 : 100
     property int hIcons : rWin.inPortrait ? 2 : 4
     property double iconMargin : width/(hIcons*10)
     property double iconSize : (width-2)/hIcons
@@ -26,7 +27,7 @@ Page {
     GridView {
         id : gridView
         anchors.fill : parent
-        anchors.topMargin : iconGP.iconMargin/4.0
+        anchors.topMargin : iconGP.iconMargin/4.0 + iconGP.headerHeight
         //anchors.margins : iconGP.iconMargin
         cellHeight : iconGP.iconSize
         cellWidth : iconGP.iconSize
