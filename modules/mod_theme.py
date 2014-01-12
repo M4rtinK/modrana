@@ -36,8 +36,6 @@ except Exception:
     from configobj import ConfigObj # Fremantle
 
 THEME_CONFIG_FILENAME = "theme.conf"
-DEFAULT_THEME_ID = "default"
-DEFAULT_THEME_NAME = "Default"
 
 
 def getModule(m, d, i):
@@ -73,7 +71,8 @@ class ThemeModule(RanaModule):
     def _themeChangedCB(self, key, oldValue, newValue):
         """Triggered by theme change"""
         if newValue is None: # default theme
-            self._theme = Theme(DEFAULT_THEME_ID, self._getThemesPath(), DEFAULT_THEME_NAME)
+            defaultThemeId, defaultThemeName = self.modrana.dmod.defaultTheme
+            self._theme = Theme(defaultThemeId, self._getThemesPath(), defaultThemeName)
         else: # set the new theme
             self._theme = Theme(newValue, self._getThemesPath())
             self._themeChanged(self._theme)  # fire the theme changed signal

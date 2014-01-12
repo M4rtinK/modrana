@@ -113,3 +113,7 @@ class Jolla(DeviceModule):
 
     def getDeviceType(self):
         return DEVICE_TYPE_SMARTPHONE
+
+    @property
+    def defaultTheme(self):
+        return "silica", "Silica"

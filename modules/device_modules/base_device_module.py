@@ -287,6 +287,18 @@ class DeviceModule(RanaModule):
         """
         return None
 
+    @property
+    def defaultTheme(self):
+        """Some platforms might need a tweaked default theme,
+        this property can be used to set it.
+
+        :returns: default theme tuple for the given platform
+        or tuple based on default theme constants if the given
+        platform has no default theme set
+        :rtype: a (theme_id, theme_name) tuple
+        """
+        return constants.DEFAULT_THEME_ID, constants.DEFAULT_THEME_NAME
+
 #  def getAutorotationSupported(self):
 #    return False
 #
