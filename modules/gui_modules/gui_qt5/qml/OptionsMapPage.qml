@@ -37,6 +37,33 @@ BasePage {
                         }
                     }
                 }
+                Label {
+                    text : qsTr("Map scaling")
+                }
+                KeyComboBox {
+                    key : "mapScale"
+                    model : ListModel {
+                        ListElement {
+                            text : "off (1x)"
+                            value : 1
+                        }
+                        ListElement {
+                            text : "2x"
+                            value : 2
+                        }
+                        ListElement {
+                            text : "4x"
+                            value : 4
+                        }
+                    }
+                    onItemChanged : {
+                        console.log("CHANGED!!")
+                        console.log(rWin.mapPage)
+                        console.log(rWin.mapPage.mapTileScale)
+                        console.log(item.value)
+                        rWin.mapPage.mapTileScale = item.value
+                    }
+                }
             }
         }
     }

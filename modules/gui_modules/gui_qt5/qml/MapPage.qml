@@ -6,6 +6,9 @@ Page {
     id: tabMap
     anchors.fill : parent
     property int buttonSize: 72
+    property int mapTileScale : rWin.get(
+    "mapScale", 1, function(v){mapTileScale=v})
+
     function showOnMap(lat, lon) {
         pinchmap.setCenterLatLon(lat, lon);
         // show on map moves map center and
@@ -33,6 +36,7 @@ Page {
         id: pinchmap
         anchors.fill : parent
         zoomLevel: rWin.get("z", 11, function(v){zoomLevel=v})
+        tileScale : tabMap.mapTileScale
 
         layers : ListModel {
             ListElement {
