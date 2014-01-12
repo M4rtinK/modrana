@@ -1,18 +1,25 @@
 = Intro =
-Each theme is represented with its own folder. Name of the folder is used as theme name.
+Each theme is represented with its own folder.
+Name of the folder is used as theme name.
 The theme folder can contain icons and the theme.conf configuration file
-for setting colors of the cairo drawn GUI components.
-See the self documented theme.conf in the default theme.
+for setting colors of the GUI components.
+For more info about the theme configuration file,
+see the self-documented theme.conf in the default theme.
 
 = How icon loading works ? =
 Icons are first looked up in the current theme folder, if not available
 the default folder is looked up. If no icon is found in both folders,
 a generic icon is used.
 
-= What image fomats can the icons be in ? =
-Currently only png is supported, but support for other bitmap formats and SVG is planed.
-When deciding on icon resolution, look on the resolutiton of the default icons,
-icons are always scaled to fit the current iccon size.
+= What image formats can the icons be in ? =
+Currently only PNG is supported, but support for other bitmap formats and SVG is planed.
+When deciding on icon resolution, look on the resolution of the default icons,
+icons are always scaled to fit the current icon size.
 
 = Where are the source SVG files for the default icons ? =
-They are in data/gui_source.
+Due to package size & as to have a separate Git history,
+the source SVG file is in a separate Git repository:
+https://github.com/M4rtinK/modrana-graphics
+
+This repository also has scripts fir regenerating the icons
+after changing the SVG file.
