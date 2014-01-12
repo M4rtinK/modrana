@@ -19,12 +19,13 @@ BasePage {
             width : parent.width
             Column {
                 spacing : rWin.c.style.main.spacing
+                anchors.left : parent.left
+                anchors.right : parent.right
                 Label {
                     text : qsTr("Theme")
                 }
                 KeyComboBox {
                     id : themeCb
-                    //checkedButton : modrana.theme_id == "default" ? defaultButton : nightButton
                     key : "theme"
                     model : ListModel {
                         id : cbMenu
