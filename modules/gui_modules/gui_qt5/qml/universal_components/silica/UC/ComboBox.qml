@@ -1,27 +1,29 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-ComboBox{
+ComboBox {
     id : cBox
-
+    anchors.left : parent.left
+    anchors.right : parent.right
     // selected item, only assigned if user
     // clicks on an item in the context menu,
     // not if changing the current item index
     property variant item
 
-    ContextMenu {
+    menu : ContextMenu {
         id : cMenu
         Repeater {
             id : cRepeater
+            model : cBox.model
             MenuItem {
-                text : modelData.text
+                text : model.text
                 onClicked : {
-                    cBox.currentItem : modelData
+                    cBox.currentItem = model
                 }
             }
         }
     }
-    property alias model : cBox.cMenu.cRepeater.model
+    property variant model
     // how does this work ?
     //
     // Menu items are added with a ListModel to the
@@ -35,6 +37,5 @@ ComboBox{
             // property, so that the onItemChanged
             // signal is triggered
             cBox.item = cBox.model.get(currentIndex)
-        }
     }
 }
