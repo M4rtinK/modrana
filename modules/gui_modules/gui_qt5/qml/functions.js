@@ -3,7 +3,8 @@
 
 var foo = "bar"
 
-function formatDistance(d) {
+function formatDistance(d, scale) {
+    d = d/scale
     if (! d) {
         return "0"
     }

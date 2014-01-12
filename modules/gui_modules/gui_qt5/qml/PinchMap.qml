@@ -10,7 +10,8 @@ Rectangle {
     property int maxZoomLevel: 18;
     property int minZoomLevel: 2;
     property int minZoomLevelShowGeocaches: 9;
-    property int tileSize: 256;
+    property int tileScale: 1;
+    property int tileSize: 256 * tileScale;
     property int cornerTileX: 32;
     property int cornerTileY: 21;
     property int numTilesX: Math.ceil(width/tileSize) + 2;
@@ -390,6 +391,8 @@ Rectangle {
                         Image {
                             property int retryCount : 1
                             id: img
+                            width: tileSize
+                            height: tileSize
                             opacity: layerOpacity
                             //anchors.fill: tile;
                             source : tileUrl(layerId, tileX, tileY)
@@ -491,7 +494,7 @@ Rectangle {
     }
 
     Text {
-        text: F.formatDistance(scaleBarLength[1])
+        text: F.formatDistance(scaleBarLength[1], pinchmap.tileScale)
         anchors.horizontalCenter: scaleBar.horizontalCenter
         anchors.top: scaleBar.bottom
         anchors.topMargin: rWin.c.style.main.spacing
