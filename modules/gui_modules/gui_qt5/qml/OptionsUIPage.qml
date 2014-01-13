@@ -30,7 +30,12 @@ BasePage {
                     model : ListModel {
                         id : cbMenu
                         ListElement {
-                            text : "default"
+                            text : "Silica"
+                            value : "silica"
+
+                        }
+                        ListElement {
+                            text : "classic"
                             value : "default"
 
                         }
