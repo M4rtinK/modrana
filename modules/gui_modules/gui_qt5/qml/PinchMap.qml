@@ -527,58 +527,61 @@ Rectangle {
         onPinchFinished: {
             calcZoomDelta(pinch);
         }
-    }
-    MouseArea {
-        id: mousearea;
 
-        property bool __isPanning: false;
-        property int __lastX: -1;
-        property int __lastY: -1;
-        property int __firstX: -1;
-        property int __firstY: -1;
-        property bool __wasClick: false;
-        property int maxClickDistance: 100;
+        MouseArea {
+            id: mousearea;
 
-        anchors.fill : parent;
+            property bool __isPanning: false;
+            property int __lastX: -1;
+            property int __lastY: -1;
+            property int __firstX: -1;
+            property int __firstY: -1;
+            property bool __wasClick: false;
+            property int maxClickDistance: 100;
 
-        onPressed: {
-            __isPanning = true;
-            __lastX = mouse.x;
-            __lastY = mouse.y;
-            __firstX = mouse.x;
-            __firstY = mouse.y;
-            __wasClick = true;
-        }
+            propagateComposedEvents : true
 
-        onReleased: {
-            __isPanning = false;
-            if (! __wasClick) {
-                panEnd();
-            }
+            anchors.fill : parent;
 
-        }
-
-        onPositionChanged: {
-            if (__isPanning) {
-                var dx = mouse.x - __lastX;
-                var dy = mouse.y - __lastY;
-                pan(-dx, -dy);
+            onPressed: {
+                __isPanning = true;
                 __lastX = mouse.x;
                 __lastY = mouse.y;
-                /*
-                once the pan threshold is reached, additional checking is unnecessary
-                for the press duration as nothing sets __wasClick back to true
-                */
-                if (__wasClick && Math.pow(mouse.x - __firstX, 2) + Math.pow(mouse.y - __firstY, 2) > maxClickDistance) {
-                    __wasClick = false;
-                    pinchmap.drag() // send the drag-detected signal
+                __firstX = mouse.x;
+                __firstY = mouse.y;
+                __wasClick = true;
+            }
 
+            onReleased: {
+                __isPanning = false;
+                if (! __wasClick) {
+                    panEnd();
+                }
+
+            }
+
+            onPositionChanged: {
+                if (__isPanning) {
+                    var dx = mouse.x - __lastX;
+                    var dy = mouse.y - __lastY;
+                    pan(-dx, -dy);
+                    __lastX = mouse.x;
+                    __lastY = mouse.y;
+                    /*
+                    once the pan threshold is reached, additional checking is unnecessary
+                    for the press duration as nothing sets __wasClick back to true
+                    */
+                    if (__wasClick && Math.pow(mouse.x - __firstX, 2) + Math.pow(mouse.y - __firstY, 2) > maxClickDistance) {
+                        __wasClick = false;
+                        pinchmap.drag() // send the drag-detected signal
+
+                    }
                 }
             }
-        }
 
-        onCanceled: {
-            __isPanning = false;
+            onCanceled: {
+                __isPanning = false;
+            }
         }
     }
 }
