@@ -236,7 +236,7 @@ ApplicationWindow {
         if (pageName == null) { // null -> back to map
             //TODO: check if the stack can over-fil
             //console.log("BACK TO MAP")
-            rWin.pageStack.pop(null,!animate)
+            rWin.pageStack.pop(rWin.mapPage,!animate)
         } else {
             console.log("PUSH " + pageName)
             rWin.pushPage(getPage(pageName),null,!rWin.animate)
