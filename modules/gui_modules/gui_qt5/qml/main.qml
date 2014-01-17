@@ -9,8 +9,6 @@ ApplicationWindow {
     title : "modRana"
 
     // properties
-    property string guiID : "unknown"
-
     property bool animate : true
 
     property bool showDebugButton : false
@@ -62,30 +60,24 @@ ApplicationWindow {
         id : python
         Component.onCompleted: {
             // add Python event handlers
-            // - they will be called during
-            //   modRana startup
-            // - like this initial values will be set
+            // - they will be called during modRana startup
+            // - like this initial property values will be set
             python.setHandler("themeChanged", function(newTheme){
-                console.log("THEME CHANGED !!!!")
+                console.log("theme changed to: " + newTheme.name + " (id: " + newTheme.id + ")")
                 rWin.theme = newTheme
             })
+
             // import and initialize modRana
             addImportPath('.');
-            //importModule('pdb', function() {})
             importModule_sync('sys')
-            importModule_sync('pdb')
             importModule_sync('modrana')
+
             // fake the argv
-            //call_sync('setattr','sys' , 'argv' ,'["modrana.py", "-u", "qt5", "-d", "pc"]')
-            //evaluate('setattr(sys, "argv" ,["modrana.py", "-u", "qt5", "-d", "pc"])')
             evaluate('setattr(sys, "argv" ,["modrana.py", "-u", "qt5"])')
             console.log('sys.argv faked')
-            call_sync('modrana.start')
-            //guiID = evaluate("modrana.gui.getIDString()")
-            call("modrana.gui.getIDString", [], function(result){
-                guiID = result
-            })
 
+            // start modRana
+            call_sync('modrana.start')
         }
 
         onError: {
