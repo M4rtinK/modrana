@@ -48,7 +48,7 @@ ApplicationWindow {
         altitude : 237.0
     }
     property real bearing
-    property bool llValid : pos.isValid
+    property bool llValid : pos ? pos.isValid : false
 
     // theme
     property variant theme
