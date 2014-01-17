@@ -36,10 +36,6 @@ Page {
         anchors.fill : parent
         zoomLevel: rWin.get("z", 11, function(v){zoomLevel=v})
         tileScale : tabMap.mapTileScale
-        onHeightChanged: {
-            console.log("PINCHMAP HEIGHT CHANGED")
-            console.log(height)
-        }
 
         layers : ListModel {
             ListElement {
