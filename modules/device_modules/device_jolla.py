@@ -78,8 +78,8 @@ class Jolla(DeviceModule):
     # ** LOCATION **
 
     def handlesLocation(self):
-        """using Qt Mobility"""
-        return False
+        """through QtPositioning in the GUI module"""
+        return True
 
     # ** PATHS **
 

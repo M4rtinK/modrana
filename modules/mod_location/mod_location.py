@@ -182,10 +182,16 @@ class Location(RanaModule):
         # send the location start signal
         self.startSignal()
         if not self._enabled:
-            print("location: enabling location")
             if self.modrana.dmod.handlesLocation():
-                self.modrana.dmod.startLocation(startMainLoop=startMainLoop)
+                locationType = self.modrana.dmod.getLocationType()
+                if locationType != "QML":
+                    # location startup is handled by the
+                    # GUI module in if QML location
+                    # type is used
+                    print("location: enabling device module location")
+                    self.modrana.dmod.startLocation(startMainLoop=startMainLoop)
             elif self.provider:
+                print("location: enabling location")
                 self.provider.start(startMainLoop=startMainLoop)
             self._enabled = True
         else:
