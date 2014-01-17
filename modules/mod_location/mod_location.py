@@ -190,6 +190,8 @@ class Location(RanaModule):
                     # type is used
                     print("location: enabling device module location")
                     self.modrana.dmod.startLocation(startMainLoop=startMainLoop)
+            elif gs.GUIString == "qt5":
+                print("location: location is handled by Qt5 when using Qt5 GUI")
             elif self.provider:
                 print("location: enabling location")
                 self.provider.start(startMainLoop=startMainLoop)
