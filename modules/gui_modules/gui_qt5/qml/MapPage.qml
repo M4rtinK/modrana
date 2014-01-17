@@ -4,7 +4,6 @@ import UC 1.0
 
 Page {
     id: tabMap
-    anchors.fill : parent
     property int buttonSize: 72
     property int mapTileScale : rWin.get(
     "mapScale", 1, function(v){mapTileScale=v})
@@ -37,6 +36,10 @@ Page {
         anchors.fill : parent
         zoomLevel: rWin.get("z", 11, function(v){zoomLevel=v})
         tileScale : tabMap.mapTileScale
+        onHeightChanged: {
+            console.log("PINCHMAP HEIGHT CHANGED")
+            console.log(height)
+        }
 
         layers : ListModel {
             ListElement {
