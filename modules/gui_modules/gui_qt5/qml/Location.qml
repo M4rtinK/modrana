@@ -7,6 +7,8 @@ Item {
     id : location
     property variant locationSource
     property bool initialized : false
+    // enabled tracks if location usage is enabled
+    property bool usageEnabled : true
 
     property variant _lastCoord
 
@@ -47,6 +49,8 @@ Item {
     function __init__() {
         // first try to restore last known saved position
         var lastKnownPos = rWin.get_sync("pos", null)
+        // check if location is enabled
+        location.usageEnabled = rWin.get_sync("GPSEnabled", true)
         // the pos key holds the (lat, lon) tuple
         if (lastKnownPos) {
             var savedCoord = rWin.loadQMLFile("Coordinate.qml")
@@ -92,10 +96,14 @@ Item {
 
     // start location
     function start() {
-        if (location.initialized) {
-            locationSource.active = true
+        if (location.enabled) {
+            if (location.initialized) {
+                locationSource.active = true
+            } else {
+                console.log("Qt5 location: can't start, not initialized")
+            }
         } else {
-            console.log("Qt5 location: can't start, not initialized")
+            console.log("Qt5 location: location usage disabled by user")
         }
     }
 
