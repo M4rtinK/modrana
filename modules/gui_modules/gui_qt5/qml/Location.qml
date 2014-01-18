@@ -18,6 +18,8 @@ Item {
         onPositionChanged: {
             var coord = locationSource.position.coordinate
             //console.log("Coordinate:", coord.longitude, coord.latitude)
+            //console.log("Speed:", locationSource.position.speed)
+            //console.log("h/v accuracy:", locationSource.position.horizontalAccuracy, locationSource.position.verticalAccuracy)
             rWin.position = locationSource.position
             rWin.pos = coord
             rWin.hasFix = locationSource.valid
