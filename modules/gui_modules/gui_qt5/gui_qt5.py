@@ -107,6 +107,9 @@ class QMLGUI(GUIModule):
 
         self._notificationQueue = []
 
+        # provides easy access to modRana modules from QML
+        self.modules = Modules(self)
+
     def firstTime(self):
         self._location = self.m.get('location', None)
         self._mapTiles = self.m.get('mapTiles', None)
@@ -228,6 +231,21 @@ class QMLGUI(GUIModule):
             e = sys.exc_info()[1]
             print("Qt5 GUI: image loading failed, imageId: %s" % originalImageId)
             print(e)
+
+
+class Modules(object):
+    """A class that provides access to modRana modules from the QML context"""
+
+    def __init__(self, gui):
+        self._info = None
+        self.gui = gui
+
+    @property
+    def info(self):
+        """A lazy evaluated property providing access to the info module"""
+        if self._info is None:
+            self._info = self.gui.m.get("info")
+        return self._info
 
 
 class ImageProvider(object):
