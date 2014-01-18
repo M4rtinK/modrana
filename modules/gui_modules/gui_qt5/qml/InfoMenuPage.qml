@@ -18,14 +18,14 @@ IconGridPage {
             icon : "compass.png"
             menu : "CompassPage"
         }
-
+        */
 
         ListElement {
             caption : "Speed"
             icon : "speedometer.png"
             menu : "SpeedPage"
         }
-        */
+
 
         ListElement {
             caption : "Location"
