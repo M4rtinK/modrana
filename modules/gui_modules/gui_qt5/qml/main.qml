@@ -87,7 +87,7 @@ ApplicationWindow {
     }
 
     Button {
-        anchors.bottom : parent.bottom
+        anchors.top : parent.top
         anchors.right : parent.right
         visible : rWin.showDebugButton
         text : "debug"
