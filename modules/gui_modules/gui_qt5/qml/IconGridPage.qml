@@ -47,11 +47,7 @@ Page {
             onClicked : {
                 //send the  button clicked signal
                 //iconGP.buttonClicked.send(menu)
-                var targetPage = iconGP.getPage(menu)
-                if (targetPage) {
-                    // go to the page
-                    rWin.pageStack.push(targetPage, undefined, !rWin.animate)
-                }
+                rWin.pushPageInstance(iconGP.getPage(menu))
             }
         }
         //insert the back arrow

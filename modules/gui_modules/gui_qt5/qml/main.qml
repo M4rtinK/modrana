@@ -207,7 +207,7 @@ ApplicationWindow {
                     pages[pageName] = newPage // cache the page
                     console.log("page cached: " + pageName)
                 } else { // loading failed, go to mapPage
-                    newPage = mapPage
+                    newPage = null
                     console.log(pageName + " loading failed, using mapPage")
                 }
             }
@@ -223,6 +223,8 @@ ApplicationWindow {
     }
 
     function push(pageName) {
+        // push page by name
+        //
         // TODO: instantiate pages that are not in the
         // dictionary
         if (pageName == null) { // null -> back to map
@@ -231,7 +233,17 @@ ApplicationWindow {
             rWin.pageStack.pop(rWin.mapPage,!animate)
         } else {
             console.log("PUSH " + pageName)
-            rWin.pushPage(getPage(pageName),null,!rWin.animate)
+            rWin.pushPageInstance(rWin.getPage(pageName))
+        }
+    }
+
+    function pushPageInstance(pageInstance) {
+        // push page instance to page stack
+        if (pageInstance) {
+            rWin.pushPage(pageInstance, null, !rWin.animate)
+        } else {
+            // page instance not valid, go back to map
+            rWin.pageStack.pop(rWin.mapPage, !animate)
         }
     }
 
