@@ -48,6 +48,8 @@ ApplicationWindow {
         altitude : 237.0
     }
     property real bearing
+    // has fix is set to true once fix is acquired
+    property bool hasFix : false
     property bool llValid : pos ? pos.isValid : false
 
     // theme

@@ -18,6 +18,7 @@ Item {
             //console.log("Coordinate:", coord.longitude, coord.latitude)
             rWin.position = locationSource.position
             rWin.pos = coord
+            rWin.hasFix = locationSource.valid
             if (coord.isValid) {
                 // replace the last good pos if lat & lon are valid
                 rWin.lastGoodPos = locationSource.position.coordinate
