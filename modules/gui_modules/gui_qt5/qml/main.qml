@@ -92,13 +92,12 @@ ApplicationWindow {
         visible : rWin.showDebugButton
         text : "debug"
         onClicked : {
-            //console.log(rWin.set("speedTest", 1337))
-            //console.log(rWin.get_sync("speedTest", 1234))
-            //console.log(rWin.get("speed", 120, function(value){speedMS = value}))
-            //console.log(speedMS)
-            console.log(rWin.get_sync("speedTest", 1234))
-            //console.log(python.evaluate('modrana.gui.get("speedTest")'))
-            console.log(python.evaluate('pdb.set_trace()'))
+            console.log("# starting the Python Debugger (PDB) shell")
+            console.log("# to continue program execution, press c")
+            // make sure the pdb module is imported
+            python.importModule_sync('pdb')
+            // start debugging
+            python.call_sync('pdb.set_trace', [])
 
         }
     }
