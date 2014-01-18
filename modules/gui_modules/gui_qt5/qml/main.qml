@@ -283,6 +283,21 @@ ApplicationWindow {
         python.call_sync("modrana.gui.set", [key, value])
     }
 
+    function dcall(functionName, functionArgs, defaultValue, callback) {
+        // asynchronous call with immediate default value return
+        // * run functionName with functionArgs asynchronously
+        // * once the call is dispatched, return default_value
+        // * and once the function returns, callback is called
+        //
+        // The main uses case is to asynchronously initialize properties
+        // from Python data once an element is loaded. At first default values are used,
+        // that are replaced by the real values once the Python call finishes.
+        // Like this, element loading does not have to wait for Python.
+
+        rWin.python.call(functionName, functionArgs, callback)
+        return defaultValue
+    }
+
     property variant _lastVisibility
 
     function toggleFullscreen() {
