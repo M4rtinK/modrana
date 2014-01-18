@@ -238,6 +238,7 @@ class Modules(object):
 
     def __init__(self, gui):
         self._info = None
+        self._stats = None
         self.gui = gui
 
     @property
@@ -246,7 +247,13 @@ class Modules(object):
         if self._info is None:
             self._info = self.gui.m.get("info")
         return self._info
-
+    
+    @property
+    def stats(self):
+        """A lazy evaluated property providing access to the stats module"""
+        if self._stats is None:
+            self._stats = self.gui.m.get("stats")
+        return self._stats
 
 class ImageProvider(object):
     """PyOtherSide image provider base class"""
