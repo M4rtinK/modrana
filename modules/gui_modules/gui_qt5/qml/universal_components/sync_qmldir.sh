@@ -1,3 +1,4 @@
+#!/bin/sh
 # The universal components provide
 # a set of platform specific compatibility modules
 # that all need to have the exact same qmldir file.
