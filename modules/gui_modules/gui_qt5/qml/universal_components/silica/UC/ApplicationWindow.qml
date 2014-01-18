@@ -7,7 +7,7 @@ ApplicationWindow{
         _setOrientation(deviceOrientation)
     }
 
-    cover : Qt.resolvedUrl("Foo.qml")
+    cover : null
 
     /*
     cover: CoverBackground {
