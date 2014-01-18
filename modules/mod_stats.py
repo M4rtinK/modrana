@@ -104,3 +104,17 @@ class Stats(RanaModule):
         elif units: # speed unknown, just return something like "? km/h"
             speedString = "? %s" % units.currentUnitPerHourString()
         return speedString
+
+    def getSpeedStatsDict(self):
+        """Return a dictionary with speed stats
+        Like this, speed statistics can be displayed atomically.
+
+        :returns: speed statistics dictionary
+        :rtype: dict
+        """
+        return {
+            "current": self.getCurrentSpeedString(),
+            "avg": self.getAverageSpeedString(),
+            "max": self.getMaxSpeedString()
+        }
+
