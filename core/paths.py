@@ -157,6 +157,46 @@ class Paths(object):
         else:
             return self._assurePath(os.path.join(self.getProfilePath(), ROUTING_DATA_FOLDER_NAME))
 
+    ## XDG path getters ##
+
+    def getHOMEPath(self):
+        """Get the path specified by the $HOME variable
+
+        :returns: path to current users home directory
+        :rtype: str
+        """
+
+        # if $HOME is not set, return ~ in a desperate attempt
+        # to save the situation
+        return os.environ.get("$HOME", "~")
+
+    def getXDGConfigPath(self):
+        """Check the contents of the $XDG_CONFIG_HOME variable and
+        default to "$HOME/.config" if not set.
+
+        :returns: path to the XDG config folder
+        :rtype: str
+        """
+        return os.environ.get("$XDG_CONFIG_HOME", os.path.join(self.getHOMEPath(), ".config"))
+
+    def getXDGDataPath(self):
+        """Check the contents of the $XDG_DATA_HOME variable and
+        default to "$HOME/.cache" if not set.
+
+        :returns: path to the XDG config folder
+        :rtype: str
+        """
+        return os.environ.get("$XDG_DATA_HOME", os.path.join(self.getHOMEPath(), ".cache"))
+
+    def getXDGCachePath(self):
+        """Check the contents of the $XDG_CONFIG_HOME variable and
+        default to "$HOME/.local/share" if not set.
+
+        :returns: path to the XDG config folder
+        :rtype: str
+        """
+        return os.environ.get("$XDG_CACHE_HOME", os.path.join(self.getHOMEPath(), ".local/share"))
+
     ## Monav ##
 
     def getMonavDataPath(self):
