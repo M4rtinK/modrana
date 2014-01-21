@@ -50,6 +50,8 @@ BasePage {
                     }
                 }
             }
+            /*
+            // Mode stuff is not yet used
             TextSwitch {
                 text : qsTr("Show mode on menu button")
                 checked : rWin.mapPage.showModeOnMenuButton
@@ -58,6 +60,7 @@ BasePage {
                      rWin.set("showModeOnMenuButton", checked)
                 }
             }
+            */
             TextSwitch {
                 text : qsTr("Animations")
                 checked : rWin.animate
