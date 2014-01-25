@@ -817,18 +817,7 @@ class ModRana(object):
         else:
             print("* timing list empty *")
 
-modrana = None
-dmod = None
-gui = None
-def start():
-    global modrana
-    global dmod
-    global gui
-    modrana = ModRana()
-    dmod = modrana.dmod
-    gui = modrana.gui
-
-if __name__ == "__main__":
+def setCorrectCWD():
     # change to folder where the main modRana file is located
     # * this enables to run modRana with absolute path without adverse
     # effect such as modRana not finding modules or
@@ -838,6 +827,21 @@ if __name__ == "__main__":
     # that expect to be placed to path work correctly
     sys.path.append(os.path.join(currentAbsolutePath, 'modules'))
 
+modrana = None
+dmod = None
+gui = None
+def start():
+    """This function is used when starting modRana with PyOtherSide"""
+    global modrana
+    global dmod
+    global gui
+    setCorrectCWD()
+    modrana = ModRana()
+    dmod = modrana.dmod
+    gui = modrana.gui
+
+if __name__ == "__main__":
+    setCorrectCWD()
     # check if reload has been requested
     reloadArg = "--reload"
     if len(sys.argv) >= 3 and sys.argv[1] == reloadArg:
