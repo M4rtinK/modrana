@@ -92,7 +92,7 @@ ApplicationWindow {
             // fake the argv
             var fake_argv = '["modrana.py", "-u", "qt5"]'
             if (rWin._PLATFORM_ID_) {
-                fake_argv = '["modrana.py", "-u", "qt5" "-d", "'+ rWin._PLATFORM_ID_ + '"]'
+                fake_argv = '["modrana.py", "-u", "qt5", "-d", "'+ rWin._PLATFORM_ID_ + '"]'
             }
             evaluate('setattr(sys, "argv" ,' + fake_argv +')')
             console.log('sys.argv faked')
