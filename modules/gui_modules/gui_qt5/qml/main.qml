@@ -15,6 +15,16 @@ ApplicationWindow {
 
     property variant c
 
+    // properties that can be assigned a value
+    // by packaging scripts for a given platform
+    // -> who would ever want to pass arguments when
+    //    running qml file, nonsense! :P
+    // tl;dr; If we could easily pass arguments
+    // to the QML file with qmlscene or sailfish-qml,
+    // hacks like this would not be needed.
+    property string _PYTHON_IMPORT_PATH_
+    property string _PLATFORM_ID_
+
     Loader {
         id : platformLoader
     }
@@ -69,13 +79,22 @@ ApplicationWindow {
                 rWin.theme = newTheme
             })
 
-            // import and initialize modRana
-            addImportPath('.');
+            // import and initialize modRana,
+            // taking any import overrides in account
+            if (rWin._PYTHON_IMPORT_PATH_) {
+                addImportPath(rWin._PYTHON_IMPORT_PATH_)
+            } else {
+                addImportPath('.')
+            }
             importModule_sync('sys')
             importModule_sync('modrana')
 
             // fake the argv
-            evaluate('setattr(sys, "argv" ,["modrana.py", "-u", "qt5"])')
+            var fake_argv = '["modrana.py", "-u", "qt5"]'
+            if (rWin._PLATFORM_ID_) {
+                fake_argv = '["modrana.py", "-u", "qt5" "-d", "'+ rWin._PLATFORM_ID_ + '"]'
+            }
+            evaluate('setattr(sys, "argv" ,' + fake_argv +')')
             console.log('sys.argv faked')
 
             // start modRana
