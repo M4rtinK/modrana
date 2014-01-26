@@ -2,7 +2,7 @@
 #----------------------------------------------------------------------------
 # modRana N900 module
 # It is a basic modRana module, that has some special features
-# and is loaded only on the correpsponding device.
+# and is loaded only on the corresponding device.
 #----------------------------------------------------------------------------
 # Copyright 2010, Martin Kolman
 #
@@ -477,7 +477,6 @@ class DeviceN900(DeviceModule):
                 self.lControl.set_properties(preferred_interval=location.INTERVAL_1S)
             except Exception:
                 import sys
-
                 e = sys.exc_info()[1]
                 print("n900 - location: - cant set preferred location interval: %s" % e)
             try:
@@ -486,7 +485,6 @@ class DeviceN900(DeviceModule):
                 self.connected = True
             except Exception:
                 import sys
-
                 e = sys.exc_info()[1]
                 print("n900 - location: - opening the GPS device failed: %s" % e)
                 self.status = "No GPSD running"
@@ -497,7 +495,6 @@ class DeviceN900(DeviceModule):
             print("n900 - location: activated")
         except Exception:
             import sys
-
             e = sys.exc_info()[1]
             self.status = "No GPSD running"
             print("n900 - location: - importing location module failed, please install the python-location package")
