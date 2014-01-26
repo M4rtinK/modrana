@@ -184,6 +184,16 @@ class DeviceModule(RanaModule):
         """stop handling location - check handlesLocation if this is supported"""
         pass
 
+    @property
+    def profilePath(self):
+        """Return path to the main profile folder or None
+        if default path should be used.
+
+        :returns: path to the profile folder or None
+        :rtype: str or None
+        """
+        return None
+
     def getTracklogFolderPath(self):
         """return device specific tracklog folder or None if default should be used"""
         return None
@@ -202,6 +212,11 @@ class DeviceModule(RanaModule):
 
     def getLogFolderPath(self):
         """default path is handled through the options module"""
+        return None
+
+    @property
+    def cacheFolderPath(self):
+        """Return path to the cache folder or None to use default"""
         return None
 
     def needsQuitButton(self):
