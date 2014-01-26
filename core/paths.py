@@ -24,6 +24,7 @@ from core import utils
 # paths
 THEMES_FOLDER_PATH = "themes"
 # folder names
+PROFILE_FOLDER_NAME = "modrana"
 MONAV_DATA_FOLDER_NAME = "monav_data"
 CACHE_FOLDER_NAME = "cache"
 TRACKLOG_FOLDER_NAME = "tracklogs"
@@ -36,6 +37,106 @@ OPTIONS_FILENAME = "options.bin"
 POI_DB_FILENAME = "modrana_poi.db"
 VERSION_INFO_FILENAME = "version.txt"
 
+def _loadVersionString():
+    """ Load version string from file
+
+    :returns: version string or None if unknown
+    :rtype: str or None
+    """
+    # try read the version file
+    if os.path.exists(VERSION_INFO_FILENAME):
+        try:
+            f = open(VERSION_INFO_FILENAME, 'r')
+            versionString = f.read()
+            f.close()
+            # is it really string ?
+            versionString = str(versionString)
+            return versionString
+        except Exception:
+            import sys
+            e = sys.exc_info()[1]
+            print("modRana config: loading version info failed")
+            print(e)
+        finally:
+            return None
+
+VERSION_STRING = _loadVersionString()
+
+## XDG path getters ##
+
+def getHOMEPath():
+    """Get the path specified by the $HOME variable
+
+    :returns: path to current users home directory
+    :rtype: str
+    """
+
+    # if $HOME is not set, return ~ in a desperate attempt
+    # to save the situation
+    return os.environ.get("HOME", os.path.expanduser("~"))
+
+def getXDGConfigPath():
+    """Check the contents of the $XDG_CONFIG_HOME/modrana variable and
+    default to $HOME/.config/modrana if not set.
+
+    :returns: path to the XDG config folder
+    :rtype: str
+    """
+    return os.path.join(
+        os.environ.get("$XDG_CONFIG_HOME", os.path.join(getHOMEPath(), ".config")),
+        PROFILE_FOLDER_NAME
+    )
+
+def getXDGDataPath():
+    """Check the contents of the $XDG_DATA_HOME variable and
+    default to "$HOME/.cache" if not set.
+
+    :returns: path to the XDG config folder
+    :rtype: str
+    """
+    return os.path.join(
+        os.environ.get("$XDG_DATA_HOME", os.path.join(getHOMEPath(), ".local/share")),
+        PROFILE_FOLDER_NAME
+    )
+
+def getXDGCachePath():
+    """Check the contents of the $XDG_CONFIG_HOME variable and
+    default to "$HOME/.local/share" if not set.
+
+    :returns: path to the XDG config folder
+    :rtype: str
+    """
+    return os.path.join(
+        os.environ.get("$XDG_CACHE_HOME", os.path.join(getHOMEPath(), ".cache")),
+        PROFILE_FOLDER_NAME
+    )
+
+def getXDGProfilePath():
+    """Return XDG-compatible profile folder path
+
+    basically the same as getXDGConfigPath()
+    """
+    return getXDGConfigPath()
+
+def getXDGMapFolderPath():
+    """Return XDG-compatible map folder path"""
+    return os.path.join(getXDGDataPath(), MAPS_FOLDER_NAME)
+
+def getXDGTracklogFolderPath():
+    """Return XDG-compatible tracklog folder path"""
+    return os.path.join(getXDGDataPath(), TRACKLOG_FOLDER_NAME)
+
+def getXDGPOIFolderPath():
+    """Return XDG-compatible POI folder path"""
+    return os.path.join(getXDGDataPath(), POI_FOLDER_NAME)
+
+def getXDGRoutingDataPath():
+    """Return XDG-compatible routing data folder path"""
+    return os.path.join(getXDGDataPath(), ROUTING_DATA_FOLDER_NAME)
+
+def getXDGDebugLogPath():
+    """Return XDG-compatible debug log folder path"""
+    return os.path.join(getXDGDataPath(), DEBUG_LOGS_FOLDER_NAME)
 
 class Paths(object):
     """
@@ -54,14 +155,17 @@ class Paths(object):
     def __init__(self, modrana):
         self.modrana = modrana
 
-        # profile folder
-        self.profileFolderPath = self.modrana.getProfilePath()
+        # get profile folder path
+        # -> first check for device module override
+        if self.modrana.dmod.profilePath:
+            self._profileFolderPath = self.modrana.dmod.profilePath
+        else:
+            self._profileFolderPath = self.modrana.getProfilePath()
         # check the profile path and create the folders if necessary
-        utils.createFolderPath(self.profileFolderPath)
+        utils.createFolderPath(self._profileFolderPath)
 
         # load version string
         self.versionString = None
-        self._loadVersionString()
 
 
     ## Important modRana folders ##
@@ -69,8 +173,8 @@ class Paths(object):
     def getProfilePath(self):
         """return path to the profile folder"""
         # check if the path exists and create it if not
-        utils.createFolderPath(self.profileFolderPath)
-        return self.profileFolderPath
+        utils.createFolderPath(self._profileFolderPath)
+        return self._profileFolderPath
 
     def getOptionsFilePath(self):
         """return path to the options store filename"""
@@ -78,7 +182,13 @@ class Paths(object):
 
     def getCacheFolderPath(self):
         """return path to a folder used for various cache data"""
-        return self._assurePathFolder(self.getProfilePath(), CACHE_FOLDER_NAME)
+        path = self.modrana.dmod.cacheFolderPath
+        # if no path was provided by device module, use default,
+        # which is a cache folder in the profile folder
+        if path is None:
+            path = os.path.join(self.getProfilePath(), CACHE_FOLDER_NAME)
+
+        return self._assurePath(path)
 
     def getTracklogsFolderPath(self):
         """return path to a folder for storing tracklogs"""
@@ -157,46 +267,6 @@ class Paths(object):
         else:
             return self._assurePath(os.path.join(self.getProfilePath(), ROUTING_DATA_FOLDER_NAME))
 
-    ## XDG path getters ##
-
-    def getHOMEPath(self):
-        """Get the path specified by the $HOME variable
-
-        :returns: path to current users home directory
-        :rtype: str
-        """
-
-        # if $HOME is not set, return ~ in a desperate attempt
-        # to save the situation
-        return os.environ.get("$HOME", "~")
-
-    def getXDGConfigPath(self):
-        """Check the contents of the $XDG_CONFIG_HOME variable and
-        default to "$HOME/.config" if not set.
-
-        :returns: path to the XDG config folder
-        :rtype: str
-        """
-        return os.environ.get("$XDG_CONFIG_HOME", os.path.join(self.getHOMEPath(), ".config"))
-
-    def getXDGDataPath(self):
-        """Check the contents of the $XDG_DATA_HOME variable and
-        default to "$HOME/.cache" if not set.
-
-        :returns: path to the XDG config folder
-        :rtype: str
-        """
-        return os.environ.get("$XDG_DATA_HOME", os.path.join(self.getHOMEPath(), ".cache"))
-
-    def getXDGCachePath(self):
-        """Check the contents of the $XDG_CONFIG_HOME variable and
-        default to "$HOME/.local/share" if not set.
-
-        :returns: path to the XDG config folder
-        :rtype: str
-        """
-        return os.environ.get("$XDG_CACHE_HOME", os.path.join(self.getHOMEPath(), ".local/share"))
-
     ## Monav ##
 
     def getMonavDataPath(self):
@@ -242,29 +312,7 @@ class Paths(object):
         """
         return current version string or None if not available
         """
-        return self.versionString
-
-    def _loadVersionString(self):
-        """
-        load version string from file
-        """
-        self.versionString = None
-        versionFilePath = VERSION_INFO_FILENAME
-        # try read the version file
-        if os.path.exists(versionFilePath):
-            try:
-                f = open(versionFilePath, 'r')
-                versionString = f.read()
-                f.close()
-                # is it really string ?
-                versionString = str(versionString)
-                self.versionString = versionString
-            except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("modRana config: loading version info failed")
-                print(e)
+        return VERSION_STRING
 
     def _assurePathFolder(self, path, folder):
         """combine the given path and folder and make sure the path exists,

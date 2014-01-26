@@ -106,16 +106,19 @@ class ModRana(object):
         # early CLI tasks might need a "silent" modRana
         # so the startup announcement is here
         print(" == modRana Starting == ")
-
-        # add the paths handling core module
-        self.paths = paths.Paths(self)
-
-        # print(version string)
-        version = self.paths.getVersionString()
+        version = paths.VERSION_STRING
         if version is None:
             version = "unknown version"
         print("  %s" % version)
         print("  Python %s" % platform.python_version())
+
+        # load the device module now as it might override
+        # the default profile directory, so it needs to be
+        # before ve init the core paths module
+        self._loadDeviceModule()
+
+        # initialize the paths handling core module
+        self.paths = paths.Paths(self)
 
         # add the configs handling core module
         self.configs = configs.Configs(self)
@@ -127,21 +130,18 @@ class ModRana(object):
 
         if self.optLoadingOK:
             savedVersionString = self.get('modRanaVersionString', "")
-            versionStringFromFile = self.paths.getVersionString()
+            versionStringFromFile = paths.VERSION_STRING
             if savedVersionString != versionStringFromFile:
                 print("modRana: possible upgrade detected")
                 self._postUpgradeCheck()
 
         # save current version string
-        self.set('modRanaVersionString', self.paths.getVersionString())
+        self.set('modRanaVersionString', paths.VERSION_STRING)
 
         # load all configuration files
         self.configs.loadAll()
 
-        # start loading modules
-
-        # device module first
-        self._loadDeviceModule()
+        # start loading other modules
 
         # handle tasks that require the device
         # module but not GUI
