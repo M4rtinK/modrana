@@ -21,6 +21,8 @@
 #---------------------------------------------------------------------------
 from modules.device_modules.base_device_module import DeviceModule
 from core.constants import DEVICE_TYPE_SMARTPHONE
+from core import paths
+import os
 
 # NOTE: use the device_ prefix when naming the module
 
@@ -83,21 +85,32 @@ class Jolla(DeviceModule):
 
     # ** PATHS **
 
-    # NOTE: basically the same as on
-    # maemo 5 on the N900
-    # TODO: check Sailfish paths
+    # Sailfish OS uses paths based on the XDG standard,
+    # and debug logs go to $HOME/Public/modrana_debug_logs
+    # so that they are easily accessible to users
 
-    def getTracklogFolderPath(self):
-        return "/home/nemo/Public/tracklogs"
+    @property
+    def profilePath(self):
+        return paths.getXDGConfigPath()
 
     def getMapFolderPath(self):
-        return "/home/nemo/Public/maps/"
+        return paths.getXDGMapFolderPath()
+
+    def getRoutingDataFolderPath(self):
+        return paths.getXDGRoutingDataPath()
+
+    def getTracklogFolderPath(self):
+        return paths.getXDGTracklogFolderPath()
 
     def getPOIFolderPath(self):
-        return "/home/nemo/Public/maps/"
+        return paths.getXDGPOIFolderPath()
 
     def getLogFolderPath(self):
-        return "/home/nemo/Public/modrana_debug_logs/"
+        return os.path.join(paths.getHOMEPath(), "Public", "modrana_debug_logs")
+
+    @property
+    def cacheFolderPath(self):
+        return paths.getXDGCachePath()
 
     def needsQuitButton(self):
         """No need for a separate Quit button thanks
