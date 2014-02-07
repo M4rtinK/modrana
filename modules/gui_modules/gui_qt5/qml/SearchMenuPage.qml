@@ -1,9 +1,5 @@
-import QtQuick 1.1
-import "./qtc"
-
-// map, ui, POI, navigation, network, debug
-
-
+import QtQuick 2.0
+import UC 1.0
 
 IconGridPage {
     id : searchMenuPage
