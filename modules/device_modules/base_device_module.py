@@ -25,6 +25,9 @@ from core import constants
 from modules.base_module import RanaModule
 from core.signal import Signal
 
+import sys
+PYTHON3 = sys.version_info[0] > 2
+
 class DeviceModule(RanaModule):
     """A modRana device module"""
 
@@ -255,7 +258,15 @@ class DeviceModule(RanaModule):
         """
         connected = constants.OFFLINE
         # open the /proc/net/route file
-        with open('/proc/net/route', 'rc') as f:
+        #with open('/proc/net/route', 'rc') as f:
+
+        openMode = "r"
+        if not PYTHON3:
+            openMode = "rc"
+            # TODO: check if this is still needed on Python 2.5
+            # on the N900
+            
+        with open('/proc/net/route', openMode) as f:
             for line in f:
                 # the line is delimited by tabulators
                 lineSplit = line.split('\t')
