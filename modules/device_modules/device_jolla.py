@@ -130,3 +130,8 @@ class Jolla(DeviceModule):
     @property
     def defaultTheme(self):
         return "silica", "Silica"
+
+    @property
+    def connectivityStatus(self):
+        # TODO: actual connectivity tracking :)
+        return True
