@@ -26,7 +26,7 @@ except Exception:
     import simplejson as json
 
 from core.point import Point
-
+from core import constants
 
 class GeonamesWikipediaPoint(Point):
     """
@@ -93,7 +93,8 @@ def wikipediaSearch(query):
     #            'lang':'en'
     #           }
     params = {'lang': 'en',
-              'q': query
+              'q': query,
+              'username' : constants.GEONAMES_USERNAME
     }
     try:
         url, results = fetchJson(url, params)
