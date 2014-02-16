@@ -339,10 +339,13 @@ class Search(object):
 
     def _getSearchFunction(self, searchId):
         """Return the search function object for the given searchId"""
-        if searchId == "address":
+        if searchId in ("address", "wikipedia"):
             online = self.gui.m.get("onlineServices", None)
             if online:
-                return online.geocodeAsync
+                if searchId == "address":
+                    return online.geocodeAsync
+                elif searchId == "wikipedia":
+                    return online.wikipediaSearchAsync
             else:
                 print("Qt5 GUI: search function for id: %s not found" % searchId)
                 return None

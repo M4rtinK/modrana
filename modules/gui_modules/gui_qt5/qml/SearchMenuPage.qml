@@ -13,5 +13,10 @@ IconGridPage {
             icon : "signpost.png"
             menu : "AddressPage"
         }
+        ListElement {
+            caption : "Wikipedia"
+            icon : "wikipedia.png"
+            menu : "WikipediaPage"
+        }
     }
 }
