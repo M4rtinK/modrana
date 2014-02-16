@@ -14,8 +14,9 @@ Page {
     property alias content : contentField.children
     property alias headerContent : hContent.children
     property alias headerWidth : header.width
+    property alias headerOpacity : header.opacity
     property alias backButtonWidth : backButton.width
-    property int headerHeight : rWin.inPortrait ? height/7.0 : height/5.5
+    property int headerHeight : rWin.headerHeight
     property int bottomPadding : 0
     property real availableHeight : parent.height - bottomPadding - headerHeight
     property alias isFlickable :  pageFlickable.interactive
@@ -50,13 +51,8 @@ Page {
             anchors.left : parent.left
             anchors.right : parent.right
         }
-        Rectangle {
+        PageHeader {
             id : header
-            color : rWin.theme.color.main_fill
-            anchors.top : parent.top
-            anchors.left : parent.left
-            anchors.right : parent.right
-            height : headerHeight
             Item {
                 id : hContent
                 width : headerWidth - backButton.width - rWin.c.style.main.spacingBig
