@@ -11,6 +11,7 @@ TextSwitch 1.0 TextSwitch.qml
 Label 1.0 Label.qml
 TextArea 1.0 TextArea.qml
 TextField 1.0 TextField.qml
+SearchField 1.0 SearchField.qml
 Dialog 1.0 Dialog.qml
 PageStatus 1.0 PageStatus.js
 ComboBox 1.0 ComboBox.qml
