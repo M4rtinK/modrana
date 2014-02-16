@@ -39,6 +39,7 @@ import math
 from modules.gui_modules.base_gui_module import GUIModule
 from datetime import datetime
 import time
+import threading
 
 from core.fix import Fix
 from core import signal
@@ -46,6 +47,8 @@ from core.backports import six
 from core import constants
 from core.threads import threadMgr
 
+SEARCH_STATUS_PREFIX = "search:status:"
+SEARCH_RESULT_PREFIX = "search:result:"
 
 def newlines2brs(text):
     """ QML uses <br> instead of \n for linebreak """
@@ -53,6 +56,20 @@ def newlines2brs(text):
 
 def getModule(m, d, i):
     return QMLGUI(m, d, i)
+
+def point2dict(point):
+    """ Convert a Point instance to a dict
+
+        :param Point point: a Point object instance
+        :returns dict: a dict representation of the point
+    """
+    return {
+        "name" : point.name,
+        "description" : point.description,
+        "lat" : point.lat,
+        "lon" : point.lon,
+        "elevation" : point.elevation
+    }
 
 
 class QMLGUI(GUIModule):
@@ -109,6 +126,9 @@ class QMLGUI(GUIModule):
 
         # provides easy access to modRana modules from QML
         self.modules = Modules(self)
+
+        # search functionality for the QML context
+        self.search = Search(self)
 
     def firstTime(self):
         self._location = self.m.get('location', None)
@@ -254,6 +274,78 @@ class Modules(object):
         if self._stats is None:
             self._stats = self.gui.m.get("stats")
         return self._stats
+
+class Search(object):
+    """An easy to use search interface for the QML context"""
+
+    def __init__(self, gui):
+        self.gui = gui
+        self._threadsInProgress = {}
+        # register the thread status changed callback
+        threadMgr.threadStatusChanged.connect(self._threadStatusCB)
+
+    def search(self, searchId, query):
+        """Trigger an asynchronous search (specified by search id)
+        for the given term
+
+        :param str query: search query
+        """
+
+        online = self.gui.m.get("onlineServices", None)
+        if online:
+            # construct result handling callback
+            callback = lambda x : self._searchCB(searchId, x)
+            # get search function corresponding to the search id
+            searchFunction = self._getSearchFunction(searchId)
+            # start the search and remember the search thread id
+            # so we can use it to track search progress
+            # (there might be more searches in progress so we
+            #  need to know the unique search thread id)
+            threadId = searchFunction(query, callback)
+            self._threadsInProgress[threadId] = searchId
+            return threadId
+
+    def _searchCB(self, searchId, results):
+        """Handle address search results
+
+        :param list results: address search results
+        """
+        # covert the Points in the results to a list of dicts
+        resultList = []
+        for result in results:
+            resultList.append(point2dict(result))
+
+        resultId = SEARCH_RESULT_PREFIX + searchId
+        pyotherside.send(resultId, resultList)
+        thisThread = threading.currentThread()
+        # remove the finished thread from tracking
+        if thisThread.name in self._threadsInProgress:
+            del self._threadsInProgress[thisThread.name]
+
+    def cancelSearch(self, threadId):
+        """Cancel the given asynchronous search thread"""
+        print("canceling search thread: %s" % threadId)
+        threadMgr.cancel_thread(threadId)
+        if threadId in self._threadsInProgress:
+            del self._threadsInProgress[threadId]
+
+    def _threadStatusCB(self, threadName, threadStatus):
+        # check if the event corresponds to some of the
+        # in-progress search threads
+        recipient = self._threadsInProgress.get(threadName)
+        if recipient:
+            statusId = SEARCH_STATUS_PREFIX + recipient
+            pyotherside.send(statusId, threadStatus)
+
+    def _getSearchFunction(self, searchId):
+        """Return the search function object for the given searchId"""
+        if searchId == "address":
+            online = self.gui.m.get("onlineServices", None)
+            if online:
+                return online.geocodeAsync
+            else:
+                print("Qt5 GUI: search function for id: %s not found" % searchId)
+                return None
 
 class ImageProvider(object):
     """PyOtherSide image provider base class"""
@@ -418,7 +510,7 @@ class MapLayers(object):
         else:
             return "label for %s unknown" % layerId
 
-class Search(object):
+class _Search(object):
     _addressSignal = signal.Signal()
 
     changed = signal.Signal()
@@ -445,7 +537,6 @@ class Search(object):
 
     def _threadStatusCB(self, threadName, threadStatus):
         if threadName == self._addressSearchThreadName:
-        #if threadName == constants.THREAD_ADDRESS_SEARCH:
             self._addressSearchStatus = threadStatus
             self._addressSignal()
 
