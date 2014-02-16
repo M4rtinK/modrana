@@ -83,8 +83,8 @@ def fetchJson(query_url, params=None, headers=None):
     url = query_url + encoded_params
     print(url)
     request = Request(url, headers=headers)
-    response = urlopen(request)
-    return url, json.load(response)
+    response = urlopen(request).read().decode("utf-8")
+    return url, json.loads(response)
 
 
 def wikipediaSearch(query):
