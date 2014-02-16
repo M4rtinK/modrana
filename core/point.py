@@ -1,5 +1,5 @@
 """an universal class representing a point"""
-
+from core.backports import six
 
 class Point(object):
     """a point"""
@@ -21,7 +21,12 @@ class Point(object):
         return '%f,%f elev: %s "%s:%s"' % (self.lat, self.lon, elev, self.name, self.summary)
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        #return unicode(self).encode('utf-8')
+        if self.getElevation() is None:
+            elev = "unknown"
+        else:
+            elev = "%f m" % self.getElevation()
+        return '%f,%f elev: %s "%s:%s"' % (self.lat, self.lon, elev, self.name, self.summary)
 
     @property
     def name(self):
