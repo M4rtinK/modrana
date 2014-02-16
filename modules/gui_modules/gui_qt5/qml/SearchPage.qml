@@ -1,0 +1,191 @@
+//SearchPage.qml
+
+import QtQuick 2.0
+import UC 1.0
+
+HeaderPage {
+    id: searchPage
+    // search type id
+    property string searchId : ""
+    property string pageHeader : ""
+    property string _searchResultId : "search:result:"  + searchId
+    property string _searchStatusId : "search:status:" + searchId
+    // persistent dict key that should be used to store and retrieve
+    // last used search query
+    height : rWin.c.style.button.generic.height
+    property string lastSearchKey : ""
+    property bool _searchInProgress : false
+    property string _searchStatus : ""
+    property string _searchThreadId : ""
+    property bool showNavigationIndicator : false
+    //property real headerOpacity : rWin.platform.needsBackButton ? 1.0 : 0.0
+
+    function search (query) {
+        rWin.python.call("modrana.gui.search.search", [searchPage.searchId, query], function(v) {
+            console.log("searching for: " + query + " using " + searchPage.searchId)
+            searchPage._searchThreadId = v
+            searchPage._searchInProgress = true
+        })
+    }
+
+    Component.onCompleted : {
+        // connect to the status & result callbacks
+        rWin.python.setHandler(searchPage._searchStatusId, function(v){
+            console.log("search status: " + v)
+            searchPage._searchStatus = v
+        })
+        rWin.python.setHandler(searchPage._searchResultId, function(results){
+            console.log("search result: " + results)
+            // load the results into a list model
+            // (for some reason just assigning it does not work)
+            pointLW.model.clear()
+            for (var i=0; i<results.length; i++) {
+                pointLW.model.append(results[i]);
+            }
+            searchPage._searchInProgress = false
+        })
+    }
+
+    Item {
+        id : progressInfo
+        anchors.left : parent.left
+        anchors.right : parent.right
+        opacity : 0.0
+        //enabled : false
+        state : searchPage._searchInProgress ? "ON" : "OFF"
+        height : 0
+        y : rWin.headerHeight + rWin.c.style.listView.spacing
+
+        Row {
+            spacing : rWin.c.style.main.spacing
+            TextButton {
+                text : searchPage._searchStatus
+                height : progressInfo.height
+                width : progressInfo.width * 3/4
+            }
+            TextButton {
+                text : "Cancel"
+                height : progressInfo.height
+                width : progressInfo.width * 1/4 - rWin.c.style.main.spacing
+                onClicked : {
+                    console.log("Cancel pressed")
+                    rWin.python.call("modrana.gui.search.cancelSearch",
+                                     [searchPage._searchThreadId],
+                                     function(){})
+                }
+            }
+        }
+
+        onStateChanged : {
+            console.log("STATE CHANGED: " + state)
+        }
+
+        states: [
+                 State {
+                     name: "ON"
+                 },
+                 State {
+                     name: "OFF"
+                 }
+             ]
+
+             transitions: [
+                 Transition {
+                     from: "OFF"
+                     to: "ON"
+                     NumberAnimation { target: progressInfo; property: "height"; to: rWin.headerHeight ; duration: 200*rWin.animate}
+                     //NumberAnimation { target: progressInfo; property: "y"; to: progressInfo.progressH; duration: 200*rWin.animate}
+                     NumberAnimation { target: progressInfo; property: "opacity"; to: 1.0; duration: 200*rWin.animate}
+                 },
+                 Transition {
+                     from: "ON"
+                     to: "OFF"
+                     NumberAnimation { target: progressInfo; property: "height"; to: 0; duration: 200*rWin.animate}
+                     //NumberAnimation { target: progressInfo; property: "y"; to: 0; duration: 200*rWin.animate}
+                     NumberAnimation { target: progressInfo; property: "opacity"; to: 0.0; duration: 200*rWin.animate}
+                 }
+             ]
+
+
+    }
+    SearchField {
+        id : searchInput
+        anchors.left : parent.left
+        //anchors.leftMargin : rWin.c.style.main.spacing
+        anchors.leftMargin : rWin.platform.needsBackButton ? backButtonWidth + 24 * rWin.c.style.m : rWin.c.style.main.spacingBig
+        anchors.right : parent.right
+        anchors.rightMargin : rWin.c.style.main.spacingBig
+        anchors.top : searchPage.top
+        anchors.topMargin : rWin.c.style.main.spacingBig
+        height : rWin.headerHeight - rWin.c.style.main.spacingBig*2
+        placeholderText: qsTrId("enter your search query")
+        Component.onCompleted : {
+            selectAll()
+        }
+        Keys.onPressed : {
+            if (event.key == Qt.Key_Return || event.key == Qt.Key_Enter){
+                // turn off the virtual keyboard (if any) if there is some text in the search field
+                if (text !== "") {
+                    focus = false
+                }
+
+                console.log("address search for: " + text)
+                if (searchPage.lastSearchKey != "") {
+                    console.log("saving " + text)
+                    rWin.set(searchPage.lastSearchKey, text)
+                }
+                searchPage.search(text)
+            }
+        }
+        text : rWin.get(searchPage.lastSearchKey, "", function(v){searchInput.text=v})
+    }
+
+    ListView {
+        id : pointLW
+        anchors.top : progressInfo.bottom
+        anchors.left : parent.left
+        anchors.right : parent.right
+        height : searchPage.availableHeight
+        spacing : rWin.c.style.listView.spacing
+        model : ListModel {
+           id : resultsModel
+        }
+        clip : true
+        delegate : BackgroundRectangle {
+            id : resultDelegate
+            width : pointLW.width
+            //anchors.left : pointLW.left
+            //anchors.right : pointLW.right
+            height : contentC.height + rWin.c.style.listView.itemBorder
+            active : resultMA.pressed
+            Column {
+                id : contentC
+                anchors.left : parent.left
+                anchors.leftMargin : rWin.c.style.main.spacing
+                anchors.verticalCenter : parent.verticalCenter
+                spacing : rWin.c.style.main.spacing
+                Label {
+                    text : model.name
+                    font.bold : true
+                }
+                Label {
+                    text : model.description
+                    //elide : Text.ElideRight
+                    wrapMode : Text.WordWrap
+                    width : resultDelegate.width - rWin.c.style.main.spacingBig*2
+                }
+            }
+            MouseArea {
+                id : resultMA
+                anchors.fill : parent
+                onClicked : {
+                    console.log(model.name + " clicked")
+                    var lat = model.lat
+                    var lon = model.lon
+                    rWin.mapPage.showOnMap(lat, lon)
+                    rWin.push(null)
+                }
+            }
+        }
+    }
+}
