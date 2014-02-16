@@ -13,6 +13,8 @@ ApplicationWindow {
 
     property bool showDebugButton : false
 
+    property int headerHeight : rWin.inPortrait ? height/7.0 : height/5.5
+
     property variant c
 
     // properties that can be assigned a value
