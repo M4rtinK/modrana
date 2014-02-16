@@ -1,6 +1,7 @@
 """multi source geocoding"""
 import sys
-#import traceback
+import traceback
+
 try:  # Python 2
     from urllib import urlencode
     from urllib2 import urlopen, Request, build_opener, HTTPError, URLError
@@ -101,11 +102,8 @@ def wikipediaSearch(query):
         return _wikipediaResults2points(results['geonames'])
     except Exception:
         import sys
-
-        e = sys.exc_info()[1]
-        #    traceback.print_exc(file=sys.stdout) # find what went wrong
         print("online: wiki search exception")
-        print(e)
+        traceback.print_exc(file=sys.stdout)
         return []
 
 
