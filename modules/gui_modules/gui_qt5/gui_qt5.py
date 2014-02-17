@@ -411,8 +411,6 @@ class IconImageProvider(ImageProvider):
 class TileImageProvider(ImageProvider):
     """
     the TileImageProvider class provides images images to the QML map element
-    NOTE: this image provider is currently only used as fallback in case
-    the localhost tileserver won't start
     """
 
     def __init__(self, gui):
