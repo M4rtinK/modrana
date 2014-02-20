@@ -56,6 +56,7 @@ class MapLayers(RanaModule):
         RanaModule.__init__(self, m, d, i)
         self._layers = {}
         self._groups = {}
+        self._tree = {}
         # TODO: actually support runtime layer reconfiguration
         # and use this signal
         self.layersChanged = Signal()
@@ -109,6 +110,18 @@ class MapLayers(RanaModule):
         :rtype: a dict
         """
         return self._layers
+
+    def getLayerTree(self):
+        """Get a tree representation of the groups and layers,
+        a list of group dicts is returned and each group dict
+        has a list of layer dicts
+
+        :returns: list of dicts
+        :rtype: list
+        """
+        if not self._tree:
+            self._tree = [g.dict for g in self.getGroupList(sort=True)]
+        return self._tree
 
     def getGroupById(self, groupId):
         """Get group by Id
@@ -235,6 +248,26 @@ class MapLayer(object):
     def icon(self):
         return self.config.get('icon', None)
 
+    @property
+    def dict(self):
+        """ Return a dictionary representing the layer
+
+        :returns: dictionary representation of the layer
+        :rtype: dict
+        """
+        return {
+            "id" : self.id,
+            "label" : self.label,
+            "url" : self.url,
+            "type" : self.type,
+            "maxZoom" : self.maxZoom,
+            "minZoom" : self.minZoom,
+            "folderName" : self.folderName,
+            "coordinates" : self.coordinates,
+            "groupId" : self.groupId,
+            "icon" : self.icon
+        }
+
 
 class MapLayerGroup(object):
     """A group of map layers"""
@@ -285,3 +318,18 @@ class MapLayerGroup(object):
     @property
     def layerIds(self):
         return map(lambda x: x.id, self._layers)
+
+    @property
+    def dict(self):
+        """ Return a dictionary representing the layer group,
+        including a list of dictionary for all layers in the group
+
+        :returns: dictionary representation of the layer group
+        :rtype: dict
+        """
+        return {
+            "id" : self.id,
+            "label" : self.label,
+            "icon" : self.icon,
+            "layers" : [l.dict for l in self._layers],
+        }
