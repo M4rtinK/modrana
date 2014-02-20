@@ -259,6 +259,7 @@ class Modules(object):
     def __init__(self, gui):
         self._info = None
         self._stats = None
+        self._mapLayers = None
         self.gui = gui
 
     @property
@@ -274,6 +275,13 @@ class Modules(object):
         if self._stats is None:
             self._stats = self.gui.m.get("stats")
         return self._stats
+
+    @property
+    def mapLayers(self):
+        """A lazy evaluated property providing access to the stats module"""
+        if self._mapLayers is None:
+            self._mapLayers = self.gui.m.get("mapLayers")
+        return self._mapLayers
 
 class Search(object):
     """An easy to use search interface for the QML context"""
@@ -478,38 +486,6 @@ class MapTiles(object):
             self.gui._mapTiles.addTileDownloadRequest(layerId, z, x, y)
             #      print("downloading, try later")
             return False
-
-
-class MapLayers(object):
-    def __init__(self, gui):
-        self.gui = gui
-
-        self._wrappedLayers = None
-        # why are wee keeping our own dictionary of wrapped
-        # layers and not just returning a newly wrapped object on demand ?
-        # -> because PySide (1.1.1) segfaults if we don't hold any reference
-        # on the object returned :)
-
-    @property
-    def wrappedLayers(self):
-        # make sure the wrapped layer dict has benn initialized
-        # (we can't do that at init, as at that time the
-        # map layers module is not yet loaded)
-        if self._wrappedLayers is None:
-            self._wrappedLayers = {}
-            #for layerId, layer in six.iteritems(self.gui._mapLayers.getLayerDict()):
-            #    self.wrappedLayers[layerId] = wrappers.MapLayerWrapper(layer)
-        return self._wrappedLayers
-
-    def getLayer(self, layerId):
-        return self.wrappedLayers.get(layerId, None)
-
-    def getLayerName(self, layerId):
-        layer = self.wrappedLayers.get(layerId, None)
-        if layer:
-            return layer.wo.label
-        else:
-            return "label for %s unknown" % layerId
 
 class _Search(object):
     _addressSignal = signal.Signal()
