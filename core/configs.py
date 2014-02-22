@@ -42,7 +42,7 @@ class Configs(object):
         - provided the default configuration files exist and that the profile folder
         exists and is writable
         """
-        profilePath = self.modrana.getProfilePath()
+        profilePath = self.modrana.paths.getProfilePath()
         for config in CONFIGS:
             configPath = os.path.join(profilePath, config)
             if not os.path.exists(configPath):
@@ -64,7 +64,7 @@ class Configs(object):
         upgrade config files, if needed
         """
         upgradeCount = 0
-        profilePath = self.modrana.getProfilePath()
+        profilePath = self.modrana.paths.getProfilePath()
         print("modRana configs: upgrading configuration files in %s" % profilePath)
         # first check the configs actually exist
         self.checkConfigFilesExist()
@@ -113,7 +113,7 @@ class Configs(object):
 
     def loadUserConfig(self):
         """load the user oriented configuration file."""
-        path = os.path.join(self.modrana.getProfilePath(), "user_config.conf")
+        path = os.path.join(self.modrana.paths.getProfilePath(), "user_config.conf")
 
         try:
             config = ConfigObj(path)
@@ -164,7 +164,7 @@ class Configs(object):
                     return False
             return True
 
-        mapConfigPath = os.path.join(self.modrana.getProfilePath(), 'map_config.conf')
+        mapConfigPath = os.path.join(self.modrana.paths.getProfilePath(), 'map_config.conf')
         # check if the map configuration file is installed
         if not os.path.exists(mapConfigPath):
             # nothing in profile folder -> try to use the default config
