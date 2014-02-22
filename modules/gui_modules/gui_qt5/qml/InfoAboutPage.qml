@@ -79,8 +79,10 @@ BasePage {
             anchors.top : bitcoinButton.bottom
             anchors.topMargin : rWin.c.style.main.spacingBig*2
             height : paintedHeight + rWin.c.style.main.spacingBig*2 - 1
-            anchors.horizontalCenter : parent.horizontalCenter
-            //text: "<style type='text/css'>p { margin-bottom:15px; margin-top:0px; }</style>" + aboutPage.aboutText
+            anchors.left : parent.left
+            anchors.leftMargin : rWin.c.style.main.spacingBig
+            anchors.right : parent.right
+            anchors.rightMargin : rWin.c.style.main.spacingBig
             text: aboutPage.aboutText
             onTextChanged : console.log(text)
             wrapMode : Text.WordWrap
