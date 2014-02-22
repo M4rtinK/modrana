@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-
+from __future__ import with_statement  # for Python 2.5
 import os
 from core import utils
 
@@ -43,22 +43,21 @@ def _loadVersionString():
     :returns: version string or None if unknown
     :rtype: str or None
     """
-    # try read the version file
+    # try to read the version file
+    versionString = None
     if os.path.exists(VERSION_INFO_FILENAME):
         try:
-            f = open(VERSION_INFO_FILENAME, 'r')
-            versionString = f.read()
-            f.close()
-            # is it really string ?
-            versionString = str(versionString)
-            return versionString
+            with open(VERSION_INFO_FILENAME, 'r') as f:
+                versionString = f.readline()
+            # make sure it is string (or the conversion throws an exception)
+            # and that it does not have any dangling newlines
+            versionString = str(versionString).rstrip()
         except Exception:
             import sys
             e = sys.exc_info()[1]
             print("modRana config: loading version info failed")
             print(e)
-        finally:
-            return None
+        return versionString
 
 VERSION_STRING = _loadVersionString()
 
