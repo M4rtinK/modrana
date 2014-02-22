@@ -106,6 +106,11 @@ class ModRana(object):
         # early CLI tasks might need a "silent" modRana
         # so the startup announcement is here
         print(" == modRana Starting == ")
+        # load the version string (needs to be done here
+        # as PWD might change after the paths module is
+        # imported, for example when running
+        # with the Qt 5 GUI)
+        paths.loadVersionString()
         version = paths.VERSION_STRING
         if version is None:
             version = "unknown version"

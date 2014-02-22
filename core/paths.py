@@ -36,8 +36,9 @@ DEBUG_LOGS_FOLDER_NAME = "debug_logs"
 OPTIONS_FILENAME = "options.bin"
 POI_DB_FILENAME = "modrana_poi.db"
 VERSION_INFO_FILENAME = "version.txt"
+VERSION_STRING = None
 
-def _loadVersionString():
+def loadVersionString():
     """ Load version string from file
 
     :returns: version string or None if unknown
@@ -52,14 +53,14 @@ def _loadVersionString():
             # make sure it is string (or the conversion throws an exception)
             # and that it does not have any dangling newlines
             versionString = str(versionString).rstrip()
+            global VERSION_STRING
+            VERSION_STRING = versionString
         except Exception:
             import sys
             e = sys.exc_info()[1]
             print("modRana config: loading version info failed")
             print(e)
-        return versionString
 
-VERSION_STRING = _loadVersionString()
 
 ## XDG path getters ##
 
