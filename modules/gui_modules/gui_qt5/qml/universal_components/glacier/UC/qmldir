@@ -17,3 +17,4 @@ PageStatus 1.0 PageStatus.js
 ComboBox 1.0 ComboBox.qml
 Menu 1.0 Menu.qml
 MenuItem 1.0 MenuItem.qml
+BackgroundRectangle 1.0 BackgroundRectangle.qml
