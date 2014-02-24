@@ -144,7 +144,9 @@ HeaderPage {
         id : pointLW
         anchors.top : progressInfo.bottom
         anchors.left : parent.left
+        anchors.leftMargin : rWin.c.style.main.spacing/2.0
         anchors.right : parent.right
+        anchors.rightMargin : rWin.c.style.main.spacing/2.0
         height : searchPage.availableHeight
         spacing : rWin.c.style.listView.spacing
         model : ListModel {
@@ -157,7 +159,13 @@ HeaderPage {
             //anchors.left : pointLW.left
             //anchors.right : pointLW.right
             height : contentC.height + rWin.c.style.listView.itemBorder
-            active : resultMA.pressed
+            onClicked : {
+                console.log(model.name + " clicked")
+                var lat = model.lat
+                var lon = model.lon
+                rWin.mapPage.showOnMap(lat, lon)
+                rWin.push(null)
+            }
             Column {
                 id : contentC
                 anchors.left : parent.left
@@ -173,17 +181,6 @@ HeaderPage {
                     //elide : Text.ElideRight
                     wrapMode : Text.WordWrap
                     width : resultDelegate.width - rWin.c.style.main.spacingBig*2
-                }
-            }
-            MouseArea {
-                id : resultMA
-                anchors.fill : parent
-                onClicked : {
-                    console.log(model.name + " clicked")
-                    var lat = model.lat
-                    var lon = model.lon
-                    rWin.mapPage.showOnMap(lat, lon)
-                    rWin.push(null)
                 }
             }
         }
