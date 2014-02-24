@@ -67,6 +67,10 @@ ApplicationWindow {
     // theme
     property variant theme
 
+    // map layers
+    property variant layerTree : ListModel {}
+    property variant layerDict
+
     // export the Python context so other elements can use
     // it without instantiating it themselves
     property alias python : python
@@ -165,6 +169,11 @@ ApplicationWindow {
         //rWin.initialPage = rWin.mapPage
         //rWin.pushPage(rWin.mapPage, rWin.animate)
         rWin.mapPage = rWin.pushPage(loadPage("MapPage"), rWin.animate)
+
+        // now asynchronously load other stuff we might
+        // need in the future
+
+        loadMapLayers()
     }
 
     function _init_location() {
@@ -318,6 +327,26 @@ ApplicationWindow {
 
         rWin.python.call(functionName, functionArgs, callback)
         return defaultValue
+    }
+
+    function loadMapLayers () {
+        // asynchronously populate the layer tree
+        rWin.python.call(
+            "modrana.gui.modules.mapLayers.getLayerTree", [], function(results){
+                rWin.layerTree.clear()
+                for (var i=0; i<results.length; i++) {
+                    rWin.layerTree.append(results[i]);
+                }
+                console.log("layer tree loaded")
+            }
+        )
+        // asynchronously populate the layer dict
+        rWin.python.call(
+            "modrana.gui.modules.mapLayers.getDictOfLayerDicts", [], function(results){
+                rWin.layerDict = results
+                console.log("layer dict loaded")
+            }
+        )
     }
 
     property variant _lastVisibility

@@ -111,6 +111,19 @@ class MapLayers(RanaModule):
         """
         return self._layers
 
+    def getDictOfLayerDicts(self):
+        """Get a dictionary of all layers dicts
+        (each layer is represented by its dictionary
+        representation)
+
+        :return: a dict of all layer dictionaries
+        :rtype: a dict
+        """
+        d = {}
+        for k, v in self._layers.items():
+            d[k] = v.dict
+        return d
+
     def getLayerTree(self):
         """Get a tree representation of the groups and layers,
         a list of group dicts is returned and each group dict
