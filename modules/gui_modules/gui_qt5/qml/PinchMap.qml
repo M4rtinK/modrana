@@ -191,7 +191,7 @@ Rectangle {
 
     function setLayerById(layerNumber, newLayerId) {
         // set layer ID and name
-        var newLayerName = mapLayers.getLayerName(newLayerId)
+        var newLayerName = rWin.layerDict[newLayerId].label
         console.log("setting layer " + layerNumber + " to " + newLayerId + "/" + newLayerName)
         layers.setProperty(layerNumber, "layerId", newLayerId)
         layers.setProperty(layerNumber, "layerName", newLayerName)
