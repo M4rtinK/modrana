@@ -13,7 +13,8 @@ ApplicationWindow {
 
     property bool showDebugButton : false
 
-    property int headerHeight : rWin.inPortrait ? height/7.0 : height/5.5
+    property int _landscapeDivider : rWin.platform.needsBackButton ? 5.5 : 8.0
+    property int headerHeight : rWin.inPortrait ? height/8.0 : height/_landscapeDivider
 
     property variant c
 
