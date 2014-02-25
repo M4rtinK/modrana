@@ -307,11 +307,18 @@ ApplicationWindow {
     }
 
     function set(key, value) {
-        python.call("modrana.gui.set", [key, value])
+        python.call("modrana.gui.set", [key, value], function(){
+            // there seem to be some issues with proper shutdown
+            // so save after set for now
+            python.call("modrana.modrana._saveOptions", [])
+        })
     }
 
     function set_sync(key, value) {
         python.call_sync("modrana.gui.set", [key, value])
+        // there seem to be some issues with proper shutdown
+        // so save after set for now
+        python.call_sync("modrana.modrana.self._saveOptions", [])
     }
 
     function dcall(functionName, functionArgs, defaultValue, callback) {
