@@ -4,7 +4,7 @@ import "modrana_components"
 
 MapLayerSelector {
     onLayerSelected : {
-        rWin.set("layer", layerId, function(){})
+        rWin.set("layer", layerId)
         rWin.mapPage.getMap().setLayerById(0, layerId)
         rWin.push(null, !rWin.animate)
     }
