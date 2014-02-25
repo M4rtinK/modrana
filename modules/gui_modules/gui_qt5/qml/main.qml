@@ -338,6 +338,8 @@ ApplicationWindow {
                     rWin.layerTree.append(results[i]);
                 }
                 console.log("layer tree loaded")
+                // now that we have the layer dict, restore the last used layer
+                restoreLastUsedLayer()
             }
         )
         // asynchronously populate the layer dict
@@ -347,6 +349,15 @@ ApplicationWindow {
                 console.log("layer dict loaded")
             }
         )
+    }
+
+    function restoreLastUsedLayer() {
+        // restore last used map layer
+        // (the layer dict must be already loaded for this to work)
+        rWin.get("layer", "mapnik", function(layerId){
+            console.log("restoring last used map layer: " + layerId)
+            rWin.mapPage.getMap().setLayerById(0,layerId)
+        })
     }
 
     property variant _lastVisibility
