@@ -51,11 +51,13 @@ Page {
             anchors.left : parent.left
             anchors.right : parent.right
         }
-        PageHeader {
+        PageHeaderBackground {
             id : header
             Item {
                 id : hContent
-                width : headerWidth - backButton.width - rWin.c.style.main.spacingBig
+                width : rWin.platform.needsBackButton ?
+                headerWidth - backButton.width - rWin.c.style.main.spacingBig :
+                headerWidth
                 anchors.right : parent.right
                 anchors.top : parent.top
                 height : headerHeight
