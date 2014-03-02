@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# modRana color handling
+
+import traceback
 
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -43,25 +46,48 @@ class Color(object):
         if gs.GUIString == "GTK":
             try:
                 import gtk
-
                 (colorString, alpha) = colorStringAlphaTupple
-                gtkColor = gtk.gdk.color_parse(colorString)
+                try:
+                    gtkColor = gtk.gdk.color_parse(colorString)
+                except ValueError:
+                    print("** initial color parsing of %s failed" % colorString)
+                    # might be a hex color string with alpha at the end
+                    if colorString > 6:
+                        alphaString = colorString[7:]
+                        colorString = colorString[:7]
+                        try:
+                            alpha = int(alphaString, 16)/255.0
+                        except Exception:
+                            import sys
+                            e = sys.exc_info()[1]
+                            print("** alpha string parsing failed **")
+                            print("** alpha string: %s **" % alphaString)
+                            print("** from color string: %s **" % colorString)
+                            print("** using numeric alpha or default: %d **" % alpha)
+
+                        print("** retrying parsing of trimmed string: %s **" % colorString)
+                        gtkColor = gtk.gdk.color_parse(colorString)
+                    else:
+                        raise
+
                 gtkColorRange = float(2 ** 16)
                 cairoR = gtkColor.red / gtkColorRange
                 cairoG = gtkColor.green / gtkColorRange
                 cairoB = gtkColor.blue / gtkColorRange
-                self.setAlpha(alpha)
+                self.setAlpha(float(alpha))
                 self.setCairoColor(cairoR, cairoG, cairoB, alpha)
                 self.gtkColor = gtkColor
                 self.valid = True
             except Exception:
                 import sys
-
                 e = sys.exc_info()[1]
                 print("** color string parsing failed **")
                 print("** input that caused this:", colorStringAlphaTupple)
                 print("** exception: %s" % e)
+                traceback.print_exc(file=sys.stdout)
                 # fallback
+                self.setAlpha(float(1.0))
+                self.setCairoColor(1.0, 0.0, 0.0, float(1.0))
                 self.gtkColor = "ff0000"
 
     def setCairoColor(self, r, g, b, a):
