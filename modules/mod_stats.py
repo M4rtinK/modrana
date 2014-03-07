@@ -76,9 +76,9 @@ class Stats(RanaModule):
         EXAMPLE: "88 mph" or "1000 km/h" """
         speedString = "speed unknown"
         units = self.m.get('units', None)
-        metersPerSecSpeed = self.get('speed', None)
-        if units and metersPerSecSpeed is not None:
-            speedString = units.km2CurrentUnitPerHourString(metersPerSecSpeed)
+        kmhSpeed = self.get('speed', None)
+        if units and kmhSpeed is not None:
+            speedString = units.km2CurrentUnitPerHourString(kmhSpeed)
         elif units: # speed unknown, just return something like "? km/h"
             speedString = "? %s" % units.currentUnitPerHourString()
         return speedString
@@ -87,7 +87,7 @@ class Stats(RanaModule):
         """return current average speed as string with the currently unit"""
         speedString = "?"
         units = self.m.get('units', None)
-        kmhAverageSpeed = self.get('metersPerSecSpeed', None)
+        kmhAverageSpeed = self.get('speed', None)
         if units and kmhAverageSpeed is not None:
             speedString = units.km2CurrentUnitPerHourString(kmhAverageSpeed, dp=0)
         elif units: # speed unknown, just return something like "? km/h"
