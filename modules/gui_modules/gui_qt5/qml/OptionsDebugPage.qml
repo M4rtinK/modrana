@@ -25,12 +25,10 @@ BasePage {
                      rWin.set("showQt5GUIDebugButton", checked)
                 }
             }
-            width : parent.width
             TextSwitch {
                 text : qsTr("Show unfinished pages")
                 checked : rWin.showDebugButton
                 onCheckedChanged : {
-                     rWin.showDebugButton = checked
                      rWin.set("showQt5GUIUnfinishedPages", checked)
                 }
             }
