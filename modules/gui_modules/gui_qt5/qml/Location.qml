@@ -41,7 +41,8 @@ Item {
             var posDict = {
                 latitude : locationSource.position.coordinate.latitude,
                 longitude : locationSource.position.coordinate.longitude,
-                elevation : locationSource.position.coordinate.altitude
+                elevation : locationSource.position.coordinate.altitude,
+                speedMPS : locationSource.position.speed
             }
             rWin.python.call("modrana.gui.setPosition", [posDict])
         }

@@ -216,11 +216,25 @@ class QMLGUI(GUIModule):
 
     def setPosition(self, posDict):
         lat, lon = float(posDict["latitude"]), float(posDict["longitude"])
-        self.set("pos", (lat, lon))
         elevation = float(posDict["elevation"])
+        metersPerSecSpeed = float(posDict["speedMPS"])  # m/s
+
+        self.set("pos", (lat, lon))
+
         # check if elevation is valid
         if not math.isnan(elevation):
             self.set("elevation", elevation)
+        else:
+            self.set("elevation", None)
+
+        # check if speed is valid
+        if not math.isnan(metersPerSecSpeed):
+            self.set("speed", metersPerSecSpeed*3.6)
+            self.set("metersPerSecSpeed", metersPerSecSpeed)
+        else:
+            self.set("speed", None)
+            self.set("metersPerSecSpeed", None)
+
         # update done
         self.set('locationUpdated', time.time())
         # TODO: move part of this to the location module ?
