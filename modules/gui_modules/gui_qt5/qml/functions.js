@@ -89,6 +89,32 @@ function getDistanceTo(lat, lon, tlat, tlon) {
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return 6371000.0 * c;
 }
+
+function p2pDistance(point1, point2) {
+   var lat1 = point1.latitude
+   var lon1 = point1.longitude
+   var lat2 = point2.latitude
+   var lon2 = point2.longitude
+   return getDistanceTo(lat1, lon1, lat2, lon2)
+}
+
+function p2pDistanceString(point1, point2) {
+   var lat1 = point1.latitude
+   var lon1 = point1.longitude
+   var lat2 = point2.latitude
+   var lon2 = point2.longitude
+   var mDistance = getDistanceTo(lat1, lon1, lat2, lon2)
+
+   //TODO: imperial units
+
+   if (mDistance >= 1000) {
+        var kmDistance = mDistance/1000.0
+        return kmDistance.toFixed(0) + " km"
+   } else {
+        return mDistance.toFixed(0) + " m"
+   }
+}
+
 String.prototype.trunc =
      function(n,useWordBoundary){
          var toLong = this.length>n,
