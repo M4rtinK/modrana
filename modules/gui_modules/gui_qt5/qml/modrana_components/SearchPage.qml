@@ -3,6 +3,7 @@
 import QtQuick 2.0
 import UC 1.0
 import ".."
+import "../functions.js" as F
 
 HeaderPage {
     id: searchPage
@@ -160,6 +161,8 @@ HeaderPage {
             //anchors.left : pointLW.left
             //anchors.right : pointLW.right
             height : contentC.height + rWin.c.style.listView.itemBorder
+            // a string describing distance from current position to the result
+            property string distanceString : F.p2pDistanceString(model, rWin.pos)
             onClicked : {
                 console.log(model.name + " clicked")
                 var lat = model.latitude
@@ -174,8 +177,8 @@ HeaderPage {
                 anchors.verticalCenter : parent.verticalCenter
                 spacing : rWin.c.style.main.spacing
                 Label {
-                    text : model.name
-                    font.bold : true
+                    text : "<b>" + model.name + "</b> (" + resultDelegate.distanceString + ")"
+                    //font.bold : true
                 }
                 Label {
                     text : model.description
