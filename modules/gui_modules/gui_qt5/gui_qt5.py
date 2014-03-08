@@ -66,8 +66,8 @@ def point2dict(point):
     return {
         "name" : point.name,
         "description" : point.description,
-        "lat" : point.lat,
-        "lon" : point.lon,
+        "latitude" : point.lat,
+        "longitude" : point.lon,
         "elevation" : point.elevation
     }
 

@@ -162,8 +162,8 @@ HeaderPage {
             height : contentC.height + rWin.c.style.listView.itemBorder
             onClicked : {
                 console.log(model.name + " clicked")
-                var lat = model.lat
-                var lon = model.lon
+                var lat = model.latitude
+                var lon = model.longitude
                 rWin.mapPage.showOnMap(lat, lon)
                 rWin.push(null)
             }
