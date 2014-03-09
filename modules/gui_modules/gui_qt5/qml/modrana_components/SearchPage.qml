@@ -155,6 +155,7 @@ HeaderPage {
            id : resultsModel
         }
         clip : true
+        VerticalScrollDecorator {}
         delegate : BackgroundRectangle {
             id : resultDelegate
             width : pointLW.width

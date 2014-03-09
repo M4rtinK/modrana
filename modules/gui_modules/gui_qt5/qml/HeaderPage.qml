@@ -43,6 +43,7 @@ Page {
         contentWidth: parent.width
         contentHeight: (headerHeight + contentField.childrenRect.height + bottomPadding)
         //flickableDirection: Flickable.VerticalFlick
+        VerticalScrollDecorator {}
         Item {
             id : contentField
             anchors.top : header.bottom
