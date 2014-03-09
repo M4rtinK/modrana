@@ -7,13 +7,6 @@ BasePage {
     headerText: "Select map layer"
 
     signal layerSelected (string layerId)
-    // close the dialog once a layer is selected
-    /*
-    onLayerSelected : {
-        accept()
-    }*/
-
-    //selectedIndex: 1
 
     content : ListView {
         id : layerView
@@ -29,6 +22,7 @@ BasePage {
         property int itemHeight : rWin.c.style.dialog.item.height
         model : rWin.layerTree
         spacing : rWin.c.style.listView.spacing
+        VerticalScrollDecorator {}
 
         delegate: Component {
             id: listDelegate
