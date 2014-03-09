@@ -19,3 +19,4 @@ ComboBox 1.0 ComboBox.qml
 Menu 1.0 Menu.qml
 MenuItem 1.0 MenuItem.qml
 BackgroundRectangle 1.0 BackgroundRectangle.qml
+VerticalScrollDecorator 1.0 VerticalScrollDecorator.qml
