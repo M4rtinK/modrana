@@ -90,6 +90,7 @@ class MapTiles(RanaModule):
         self.loadRequestCStackSize = 10 # size for the circular loading request stack
         """so that trim does not run always run after adding a tile"""
         self.tileSide = 256 # by default, the tiles are squares, side=256
+        self.scalingInfo = (1, 15, 256)
         """ TODO: analyse memory usage,
                   set appropriate value,
                   platform dependent value,
@@ -132,6 +133,8 @@ class MapTiles(RanaModule):
 
         self.cacheImageSurfaces = gs.GUIString == "GTK"
 
+        self._filterTile = self._nop
+
     def firstTime(self):
         self.mapViewModule = self.m.get('mapView', None)
         scale = self.get('mapScale', 1)
@@ -147,9 +150,18 @@ class MapTiles(RanaModule):
         # check if tile filtering is enabled or should be enabled with current theme
 
     def getTile(self, layerId, z, x, y):
-        """return a tile specified by layerID, z, x & y
-        * first look if such a tile is available from storage
-        * if not, download it"""
+        """Return a tile specified by layerID, z, x & y
+        * first look if such a tile is available from cache
+          or persistent storage
+        * if not, download it
+
+        :param str layerId: layer id
+        :param int z: zoom level
+        :param int x: x coordinate
+        :param int y: y coordinate
+        :returns: tile data or None
+        :rtype: data or None
+        """
         # check if the tile is in the recently-downloaded cache
         name = self.getTileName(layerId, z, x, y)
         cacheItem = self.images[0].get(name, None)
@@ -159,32 +171,35 @@ class MapTiles(RanaModule):
 
         # get the layer object
         layer = self._getLayerById(layerId)
-        if layer is None:
-            print("mapTiles: invalid layer")
-            return None
         if layer is None: # is the layer info valid ?
             print("mapTiles: error: layer with id: %s not found" % layerId)
             return None
-        layerPrefix = layer.folderName
-        layerType = layer.type
-        tileData = self._storeTiles.getTileData(layerPrefix, z, x, y, layerType)
+        tileData = self._storeTiles.getTileData(layer.folderName, z, x, y, layer.type)
         if tileData:
             #print("got tile FROM disk CACHE")
             # tile was available from storage
             return tileData
         else: # download
-            #print("download")
+            #print("DOWNLOADING tile")
+            # tile was not available from storage, download it
             return self.downloadTile(layerId, z, x, y)
 
     def downloadTile(self, layerId, z, x, y):
+        """Download the given tile from the network
+
+        :param str layerId: layer id
+        :param int z: zoom level
+        :param int x: x coordinate
+        :param int y: y coordinate
+        :returns: tile data or None
+        :rtype: data or None
+        """
+
         # get the layer object
         layer = self._getLayerById(layerId)
-        if layer is None:
-            print("mapTiles: invalid layer")
-            return
         if layer is None: # is the layer info valid ?
             print("mapTiles: error: layer with id: %s not found" % layerId)
-            return
+            return None
         layerPrefix = layer.folderName
         layerType = layer.type
         tileUrl = self.getTileUrl(x, y, z, layerId)
@@ -204,6 +219,8 @@ class MapTiles(RanaModule):
                 return tileData
             else:
                 print("mapTiles: tile data returned by remote tileserver was not an image")
+                print("layer:%s x:%d y:%d z:%d" % (layerId, x, y, z))
+                print("tile url: %s" % tileUrl)
                 print("NOTE: this probably means that the tileserver returned an"
                       "error page in place of the tile, because it doesn't like you")
                 return None
@@ -211,11 +228,15 @@ class MapTiles(RanaModule):
             return None
 
     def _getConnPool(self, layerId, baseUrl):
-        """get a connection pool for the given layer
+        """Get a connection pool for the given layer id
+        Each layer ID has it's own connection pool
+        (as each connection pool handles only one base URL)
+        and non-existent pools are automatically created once requested
         NOTE: connection pools reuse open connections
 
-        :param baseUrl a URL used to initialize the connection pool
-        (basically just the domain name needs to be correct)
+        :param str layerId: pool id (mapped to layer id)
+        :param str baseUrl: a URL used to initialize the connection pool
+                           (basically just the domain name needs to be correct)
         """
         pool = self.connPools.get(layerId, None)
         if pool:
@@ -229,10 +250,16 @@ class MapTiles(RanaModule):
             return newPool
 
     def addTileDownloadRequest(self, layerId, z, x, y):
-        """add a download request to the download manager queue
+        """Add a download request to the download manager queue
         the download manager will use its download thread pool to process the request
         NOTE: no checking if tile exists in local storage is done past this point,
-        you have to do this beforehand or you might download an already available tile :)"""
+        you have to do this beforehand or you might download an already available tile :)
+
+        :param str layerId: layer id
+        :param int z: zoom level
+        :param int x: x coordinate
+        :param int y: y coordinate
+        """
 
         #    print("mapTiles: DOWNLOAD queued")
         name = self.getTileName(layerId, z, x, y)
@@ -267,17 +294,29 @@ class MapTiles(RanaModule):
                 self.threadListCondition.notifyAll() # wake up the download manager
 
     def tileInProgress(self, layerId, z, x, y):
-        """report if tile is being downloaded"""
+        """Report if tile is being downloaded
+
+        :returns: True if tile download is in progress, False otherwise
+        :rtype: bool
+        """
         name = self.getTileName(layerId, z, x, y)
         return name in self.threads
 
     def tileInMemory(self, layerId, z, x, y):
-        """report if tile is stored in memory cache"""
+        """Report if a tile is stored in memory cache
+
+        :returns: True if tile is cached, False otherwise
+        :rtype: bool
+        """
         name = self.getTileName(layerId, z, x, y)
         return name in self.images[0]
 
     def tileInStorage(self, layerId, z, x, y):
-        """report if tile is available from storage"""
+        """Report if tile is available from local persistent storage
+
+        :returns: True if tile is in storage, False otherwise
+        :rtype: bool
+        """
         return self._storeTiles.tileExists2(layerId, z, x, y)
 
     def _updateScalingCB(self, key='mapScale', oldValue=1, newValue=1):
@@ -301,13 +340,13 @@ class MapTiles(RanaModule):
         self.scalingInfo = (scale, z, tileSide)
 
     def startTileDownloadManagementThread(self):
-        """start the consumer thread for download requests"""
-        t = Thread(target=self.tileDownloadManager, name='automatic tile download management thread')
+        """Start the consumer thread for download requests"""
+        t = Thread(target=self._tileDownloadManager, name='automatic tile download management thread')
         t.setDaemon(True) # we need that the worker dies with the program
         t.start()
 
-    def tileDownloadManager(self):
-        """this is a tile loading request consumer thread"""
+    def _tileDownloadManager(self):
+        """This function is run by the tile loading request consumer thread"""
         while True:
             with self.threadListCondition:
                 try:
@@ -362,19 +401,20 @@ class MapTiles(RanaModule):
                                     self.removeImageFromMemory(name)
                             self.downloadRequestPool = cleanPool
                 except Exception:
-                    e = sys.exc_info()[1]
-                    print("exception in tile download manager thread:\n%s" % e)
-                    #          traceback.print_exc()
+                    exc = sys.exc_info()[1]
+                    print("exception in tile download manager thread:\n%s" % exc)
+                    #traceback.print_exc()
 
     def _startIdleTileLoader(self):
-        """add the tile loader as a gobject mainloop idle callback"""
+        """Add the tile loader as a gobject mainloop idle callback"""
         if not self.idleLoaderActive: # one idle loader is enough
             self.idleLoaderActive = True
             gobject.idle_add(self._idleTileLoaderCB)
 
     def _idleTileLoaderCB(self):
-        """get loading requests from the circular stack,
-        quit when the stack is empty"""
+        """Get loading requests from the circular stack,
+        quit when the stack is empty
+        """
         try:
             # check for modRana shutdown
             if self.shutdownAllThreads:
@@ -391,16 +431,19 @@ class MapTiles(RanaModule):
                 self.idleLoaderActive = False
                 return False # the stack is empty, remove this callback
         except Exception:
-            e = sys.exc_info()[1]
+            exc = sys.exc_info()[1]
             # on an error, we need to shut down or else idleLoaderActive might get stuck
             # and no loader will be started
-            print("mapTiles: exception in idle loader\n", e)
+            print("mapTiles: exception in idle loader\n", exc)
             self.idleLoaderActive = False
             traceback.print_exc()
             return False
 
     def loadSpecialTiles(self, specialTiles):
-        """load special tiles from files to the special tiles cache"""
+        """Load special tiles from files to the special tile cache
+
+        :param list specialTiles: list of special tiles to load
+        """
         for tile in specialTiles:
             (name, path) = tile
             self.loadImageFromFile(path, name, imageType="special", dictIndex=1)
@@ -730,6 +773,7 @@ class MapTiles(RanaModule):
         return backImage
 
     def removeImageFromMemory(self, name, dictIndex=0):
+        """Remove a tile from the in-memory tile cache"""
         # remove an image from memory
         if self.cacheImageSurfaces:
             with self.imagesLock: #make sure no one fiddles with the cache while we are working with it
@@ -754,7 +798,7 @@ class MapTiles(RanaModule):
         cr.restore()
 
     def _fakePrint(self, text):
-        """print that does nothing"""
+        """Print that does nothing"""
         pass
 
     def _realPrint(self, text):
@@ -1020,9 +1064,9 @@ class MapTiles(RanaModule):
             file1.close()
             loader = gtk.gdk.PixbufLoader("pnm")
             loader.write(contents, len(contents))
-            pixbuf = loader.get_pixbuf()
+            pBuff = loader.get_pixbuf()
             loader.close()
-            return pixbuf
+            return pBuff
 
             #  arr = numpy.array(im)
         #  return gtk.gdk.pixbuf_new_from_array(arr, gtk.gdk.COLORSPACE_RGB, 8)
@@ -1236,7 +1280,13 @@ class MapTiles(RanaModule):
 
 # modified from: http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/globalmaptiles.py (GPL)
 def quadTree(tx, ty, zoom):
-    """Converts OSM type tile coordinates to Microsoft QuadTree"""
+    """Converts OSM type tile coordinates to Microsoft QuadTree
+
+    :param int tx: x coordinate
+    :param int ty: y coordinate
+    :param int zoom: zoom level
+    :returns str: quad key string
+    """
     quadKey = ""
     #		ty = (2**zoom - 1) - ty
     for i in range(zoom, 0, -1):
