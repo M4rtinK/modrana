@@ -61,6 +61,7 @@ class ThreadManager(object):
 
     def __init__(self):
         self._objs = {}
+        self._objs_lock = threading.RLock()
         self._globalIndex = 0
         self._errors = {}
         self._main_thread = threading.currentThread()
@@ -99,16 +100,21 @@ class ThreadManager(object):
         if obj.name in self._objs:
             obj.name = self._getDuplicateName(obj.name)
 
-        self._objs[obj.name] = obj
-        self._errors[obj.name] = None
-        obj.start()
+        # we need to lock the thread dictionary when adding a new thread,
+        # so that callers can't get & join threads that are not yet started
+        with self._objs_lock:
+            self._objs[obj.name] = obj
+            self._errors[obj.name] = None
+            obj.start()
+        return obj.name
 
     def remove(self, name):
         """Removes a thread from the list of known objects.  This should only
            be called when a thread exits, or there will be no way to get a
            handle on it.
         """
-        thread = self._objs.pop(name)
+        with self._objs_lock:
+            thread = self._objs.pop(name)
         threadHasCallback = False
         try:
             threadHasCallback = thread.callback
@@ -122,27 +128,43 @@ class ThreadManager(object):
 
     def exists(self, name):
         """Determine if a thread or process exists with the given name."""
-        return name in self._objs
+
+        # thread in the ThreadManager only officially exists once started
+        with self._objs_lock:
+            return name in self._objs
 
     def get(self, name):
         """Given an object name, see if it exists and return the object.
            Return None if no such object exists.  Additionally, this method
            will re-raise any uncaught exception in the thread.
         """
-        obj = self._objs.get(name)
-        if obj:
-            self.raise_error(name)
 
-        return obj
+        # without the lock it would be possible to get & join
+        # a thread that was not yet started
+        with self._objs_lock:
+            obj = self._objs.get(name)
+            if obj:
+                self.raise_if_error(name)
+
+            return obj
 
     def wait(self, name):
         """Wait for the thread to exit and if the thread exited with an error
            re-raise it here.
         """
-        if self.exists(name):
+        # we don't need a lock here,
+        # because get() acquires it itself
+        try:
             self.get(name).join()
+        except AttributeError:
+            pass
+        # - if there is a thread object for the given name,
+        #   we join it
+        # - if there is not a thread object for the given name,
+        #   we get None, try to join it, suppress the AttributeError
+        #   and return immediately
 
-        self.raise_error(name)
+        self.raise_if_error(name)
 
 
     def cancel_thread(self, thread_name):
@@ -165,7 +187,20 @@ class ThreadManager(object):
             e = sys.exc_info()[1]
             print(e)
 
+    def wait_all(self):
+        """Wait for all threads to exit and if there was an error re-raise it.
+        """
+        for name in self._objs.keys():
+            if self.get(name) == threading.current_thread():
+                continue
+            log.debug("Waiting for thread %s to exit" % name)
+            self.wait(name)
 
+        if self.any_errors:
+            thread_names = ", ".join(thread_name for thread_name in self._errors.keys()
+                                     if self._errors[thread_name])
+            msg = "Unhandled errors from the following threads detected: %s" % thread_names
+            raise RuntimeError(msg)
 
     def set_error(self, name, *exc_info):
         """Set the error data for a thread
@@ -184,18 +219,42 @@ class ThreadManager(object):
         """
         return any(self._errors.values())
 
-    def raise_error(self, name):
+    def raise_if_error(self, name):
         """If a thread has failed due to an exception, raise it into the main
-           thread.
+           thread and remove it from errors.
         """
-        if self._errors.get(name):
-            raise self._errors[name][0](self._errors[name][1]).with_traceback(self._errors[name][2])
+        if name not in self._errors:
+            # no errors found for the thread
+            return
+
+        exc_info = self._errors.pop(name)
+        if exc_info:
+            raise exc_info
 
     def in_main_thread(self):
         """Return True if it is run in the main thread."""
         cur_thread = threading.currentThread()
         return cur_thread is self._main_thread
 
+    @property
+    def running(self):
+        """ Return the number of running threads.
+
+            :returns: number of running threads
+            :rtype:   int
+        """
+        with self._objs_lock:
+            return len(self._objs)
+
+    @property
+    def names(self):
+        """ Return the names of the running threads.
+
+            :returns: list of thread names
+            :rtype:   list of strings
+        """
+        with self._objs_lock:
+            return self._objs.keys()
 
 class ModRanaThread(threading.Thread):
     """A threading.Thread subclass that exists only for a couple purposes:
@@ -213,6 +272,10 @@ class ModRanaThread(threading.Thread):
     def __init__(self, *args, **kwargs):
         threading.Thread.__init__(self, *args, **kwargs)
         self.daemon = True
+        if "fatal" in kwargs:
+            self._fatal = kwargs.pop("fatal")
+        else:
+            self._fatal = True
         self._status = None  # string describing current state of the thread
         self._progress = None  # floating point value from 0.1 to 1.0
         self._stateLock = threading.Lock()
@@ -284,11 +347,10 @@ class ModRanaThread(threading.Thread):
         try:
             threading.Thread.run(self, *args, **kwargs)
             self._conditionalCallback(self.target())
-        except KeyboardInterrupt:
-            raise
         except:
             threadMgr.set_error(self.name, *sys.exc_info())
-            sys.excepthook(*sys.exc_info())
+            if self._fatal:
+                sys.excepthook(*sys.exc_info())
         finally:
             threadMgr.remove(self.name)
             log.info("Thread Done: %s (%s)" % (self.name, self.ident))
