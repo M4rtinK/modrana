@@ -36,9 +36,11 @@ from modules import urllib3
 from core import utils
 from core import rectangles
 from core import tiles
+from core import constants
 from core.tilenames import *
 from core.backports import six
 from core.signal import Signal
+from core import threads
 
 StringIO = six.moves.cStringIO
 
@@ -110,7 +112,6 @@ class MapTiles(RanaModule):
         self.downloadRequestPool = []
         self.downloadRequestPoolLock = threading.Lock()
         self.downloadRequestTimeout = 30 # in seconds
-        self.startTileDownloadManagementThread()
         self.idleLoaderActive = False # report the idle tile loader is running
 
         self.shutdownAllThreads = False # notify the threads that shutdown is in progress
@@ -163,6 +164,8 @@ class MapTiles(RanaModule):
         self.modrana.watch('currentTheme', self._updateTileFilteringCB, runNow=True)
         self.modrana.watch('invertMapTiles', self._updateTileFilteringCB, runNow=True)
         # check if tile filtering is enabled or should be enabled with current theme
+
+        self._startTileDownloadManager()
 
     def getTile(self, lzxy):
         """Return a tile specified by layerID, z, x & y
@@ -329,11 +332,12 @@ class MapTiles(RanaModule):
 
         self.scalingInfo = (scale, z, tileSide)
 
-    def startTileDownloadManagementThread(self):
+    def _startTileDownloadManager(self):
         """Start the consumer thread for download requests"""
-        t = Thread(target=self._tileDownloadManager, name='automatic tile download management thread')
-        t.setDaemon(True) # we need that the worker dies with the program
-        t.start()
+        t = threads.ModRanaThread(name=constants.THREAD_TILE_DOWNLOAD_MANAGER,
+                                  target = self._tileDownloadManager)
+        threads.threadMgr.add(t)
+
 
     def _tileDownloadManager(self):
         """This function is run by the tile loading request consumer thread"""
