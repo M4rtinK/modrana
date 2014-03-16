@@ -51,6 +51,7 @@ THREAD_ROUTING_OFFLINE_MONAV = "modRanaRoutingOfflineMonav"
 # tile down-/loading
 THREAD_TILE_DOWNLOAD_MANAGER = "modRanaTileDownloadManager"
 THREAD_TILE_DOWNLOAD_WORKER = "modRanaTileDownloadWorker"
+THREAD_TILE_STORAGE_LOADER = "modRanaTileStorageLoader"
 
 
 

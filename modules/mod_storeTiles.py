@@ -36,6 +36,8 @@ from threading import Thread
 
 # only import GKT libs if GTK GUI is used
 from core import gs
+from core import threads
+from core import constants
 
 if gs.GUIString == "GTK":
     import gtk
@@ -64,7 +66,6 @@ class StoreTiles(RanaModule):
         self.commitInterval = 5 # how often we commit to the database (only happens when there is something in the queue)
         self.lastCommit = time.time()
         self.dirty = set() # a set of connections, that have uncommitted data
-        self.startLoadingThread()
         # locks
 
         # TODO: this lock might not be needed for python2.6+,
@@ -85,6 +86,7 @@ class StoreTiles(RanaModule):
         #self.test()
         self._mapTiles = self.m.get('mapTiles', None)
         self._mapLayers = self.m.get('mapLayers', None)
+        self._startTileLoadingThread()
 
     def getLayerDbFolderPath(self, folderPrefix):
         return os.path.join(self.tileFolder, folderPrefix)
@@ -455,20 +457,20 @@ class StoreTiles(RanaModule):
         else: # we are storing to the filesystem
             return os.path.exists(filePath)
 
-    def startLoadingThread(self):
-        """start the sqlite loading thread"""
-        t = Thread(target=self.worker, name='sqlite tile storage thread')
+    def _startTileLoadingThread(self):
+        """Start the sqlite loading thread"""
+        t = threads.ModRanaThread(target=self._tileLoader,
+                                  name=constants.THREAD_TILE_STORAGE_LOADER)
         # we need that the worker tidies up,
         # (commits all "dirty" connections)
         # so it should be not daemonic
         # -> but we also cant afford that modRana wont
         # terminate completely
-        t.setDaemon(True)
-        t.start()
+        # (all ModRanaThreads are daemonic by default)
+        threads.threadMgr.add(t)
 
-
-    def worker(self):
-        """this is run by a thread that stores sqlite tiles to a db"""
+    def _tileLoader(self):
+        """This is run by a thread that stores sqlite tiles to a db"""
         while True:
             try:
                 item = self.sqliteTileQueue.get(block=True)
