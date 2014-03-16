@@ -75,8 +75,11 @@ class StoreTiles(RanaModule):
         self._mapTiles = None
         self._mapLayers = None
 
+        self.tileFolder = "/dev/null"
+
     def firstTime(self):
-        # the config folder should set the tile folder path by now
+        # the config should be parsed by now and the tile storage
+        # path thus should be final
         self.tileFolder = self.modrana.paths.getMapFolderPath()
         # testing:
         #self.test()
@@ -136,8 +139,11 @@ class StoreTiles(RanaModule):
                 connection.commit()
             self.layers[accessType][dbFolderPath] = {'lookup': connection, 'stores': {}}
 
-    def storeTile(self, tile, folderPrefix, z, x, y, extension):
+    def storeTile(self, tile, lzxy):
         """save a given tile to local storage"""
+        layer, z, x, y = lzxy
+        folderPrefix = layer.folderName
+        extension = layer.type
         if self.get('storeDownloadedTiles', True):
             accessType = "store"
             dbFolderPath = self.initializeDb(folderPrefix, accessType)
@@ -290,11 +296,12 @@ class StoreTiles(RanaModule):
         return os.path.join(folder, storeName)
 
 
-    def getTile(self, folderPrefix, z, x, y, extension):
+    def getTile(self, lzxy):
         """
         return a Pixbuf for the corresponding tile
         """
-        tileData = self.getTileData(folderPrefix, z, x, y, extension)
+
+        tileData = self.getTileData(lzxy)
         if tileData:
             try:
                 pl = gtk.gdk.PixbufLoader()
@@ -314,17 +321,17 @@ class StoreTiles(RanaModule):
             return None
 
 
-    def getTileData(self, folderPrefix, z, x, y, extension):
+    def getTileData(self, lzxy):
         """
         return data for the given tile
         """
         storageType = self.get('tileStorageType', 'files')
         if storageType == 'sqlite':
             accessType = "get"
-            dbFolderPath = self.initializeDb(folderPrefix, accessType)
+            dbFolderPath = self.initializeDb(lzxy[0].folderName, accessType)
             if dbFolderPath is not None:
                 lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
-                result = self.getTileFromDb(lookupConn, dbFolderPath, z, x, y, extension)
+                result = self.getTileFromDb(lookupConn, dbFolderPath, lzxy)
                 if result: # is the result valid ?
                     resultData = result.fetchone() # get the result content
                 else:
@@ -336,7 +343,7 @@ class StoreTiles(RanaModule):
                     return None # the tile is not stored
         else: # the only other storage method is currently classical files storage
             tileFolderPath = self._mapTiles._getTileFolderPath()
-            layerFolderAndTileFilename = self._mapTiles.getImagePath(x, y, z, folderPrefix, extension)
+            layerFolderAndTileFilename = self._mapTiles.getImagePath(lzxy)
             tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
             if os.path.exists(tilePath):
                 # load the file to pixbuf and return it
@@ -355,9 +362,10 @@ class StoreTiles(RanaModule):
             else:
                 return None # this tile is not locally stored
 
-    def getTileFromDb(self, lookupConn, dbFolderPath, z, x, y, extension):
+    def getTileFromDb(self, lookupConn, dbFolderPath, lzxy):
         """get a tile from the database"""
         accessType = "get"
+        layer, z, x, y = lzxy
         #look in the lookup db
         #with self.lookupConnectionLock:
         if 1:
@@ -367,7 +375,7 @@ class StoreTiles(RanaModule):
             lookupCursor = lookupConn.cursor()
             lookupResult = lookupCursor.execute(
                 "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
-                (z, x, y, extension)).fetchone()
+                (z, x, y, layer.type)).fetchone()
             if lookupResult: # the tile was found in the lookup db
                 # now search in the store
                 storeFilename = lookupResult[0]
@@ -377,24 +385,20 @@ class StoreTiles(RanaModule):
                 storeCursor = connectionToStore.cursor()
                 result = storeCursor.execute(
                     "select tile, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
-                    (z, x, y, extension))
+                    (z, x, y, layer.type))
                 return result
             else: # the tile was not found in the lookup table
                 return None
 
-    def tileExists2(self, layerId, z, x, y, fromThread=False):
-        """test if a tile exists
+    def tileExists2(self, lzxy, fromThread=False):
+        """Test if a tile exists
            if fromThread=False, a new connection is created and disconnected again
-           NEW CLEANED UP VERSION"""
-        layer = self._mapLayers.getLayerById(layerId)
-        if layer is None: # is the layer info valid ?
-            print("storeTiles: layerId not found: %s" % layerId)
-            return None
+           NEW CLEANED UP VERSION
+        """
+        layer, z, x, y = lzxy
         storageType = self.get('tileStorageType', 'files')
-        folderPrefix = layer.folderName
-        extension = layer.type
         if storageType == 'sqlite': # we are storing to the database
-            dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
+            dbFolderPath = self.getLayerDbFolderPath(layer.folderName)
             if dbFolderPath is not None: # is the database accessible ?
                 with self.lookupConnectionLock:
                     # just to make sure the access is sequential
@@ -407,7 +411,7 @@ class StoreTiles(RanaModule):
                     else:
                         lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
                     query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
-                    lookupResult = lookupConn.execute(query, (z, x, y, extension)).fetchone()
+                    lookupResult = lookupConn.execute(query, (z, x, y, layer.type)).fetchone()
                     if fromThread: # tidy up, just to be sure
                         lookupConn.close()
                     if lookupResult:
@@ -417,15 +421,16 @@ class StoreTiles(RanaModule):
             else:
                 return None # we cant decide if a tile is ind the db or not
         else: # we are storing to the filesystem
-            filePath = os.path.join(self.tileFolder, self._mapTiles.getImagePath(x, y, z, folderPrefix, extension))
+            filePath = os.path.join(self.tileFolder, self._mapTiles.getImagePath(lzxy))
             return os.path.exists(filePath)
 
-    def tileExists(self, filePath, folderPrefix, z, x, y, extension, fromThread=False):
+    def tileExists(self, filePath, lzxy, fromThread=False):
         """test if a tile exists
            if fromThread=False, a new connection is created and disconnected again"""
         storageType = self.get('tileStorageType', 'files')
+        layer, z, x, y = lzxy
         if storageType == 'sqlite': # we are storing to the database
-            dbFolderPath = self.getLayerDbFolderPath(folderPrefix)
+            dbFolderPath = self.getLayerDbFolderPath(layer.folderName)
             if dbFolderPath is not None: # is the database accessible ?
                 with self.lookupConnectionLock:
                     # just to make sure the access is sequential
@@ -438,7 +443,7 @@ class StoreTiles(RanaModule):
                     else:
                         lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
                     query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
-                    lookupResult = lookupConn.execute(query, (z, x, y, extension)).fetchone()
+                    lookupResult = lookupConn.execute(query, (z, x, y, layer.type)).fetchone()
                     if fromThread: # tidy up, just to be sure
                         lookupConn.close()
                     if lookupResult:
@@ -488,8 +493,8 @@ class StoreTiles(RanaModule):
             #    would wait forever for the queue to empty
             #TODO: defensive programming - check if thread is alive when storing ?
             try:
-                (tile, folderPrefix, z, x, y, extension, filename) = item # unpack the tuple
-                self.storeTile(tile, folderPrefix, z, x, y, extension) # store the tile
+                (tile, lzxy) = item # unpack the tuple
+                self.storeTile(tile, lzxy) # store the tile
                 self.sqliteTileQueue.task_done()
             except Exception:
                 import sys
@@ -509,15 +514,16 @@ class StoreTiles(RanaModule):
                     print("sqlite storage worker : exception during mass db commit:\n%s" % e)
 
 
-    def automaticStoreTile(self, tile, folderPrefix, z, x, y, extension, filename):
+    def automaticStoreTile(self, tile, lzxy):
         """store a tile to a file or db, depending on the current setting"""
 
         storageType = self.get('tileStorageType', 'files')
         if storageType == 'sqlite': # we are storing to the database
             # put the tile to the storage queue, so that then worker can store it
-            self.sqliteTileQueue.put((tile, folderPrefix, z, x, y, extension, filename), block=True, timeout=20)
+            self.sqliteTileQueue.put((tile, lzxy), block=True, timeout=20)
         else: # we are storing to the filesystem
             # get the folder path
+            filename = self._mapTiles.getTileFilename(lzxy)
             (folderPath, tail) = os.path.split(filename)
             if not os.path.exists(folderPath): # does it exist ?
                 try:
@@ -534,10 +540,14 @@ class StoreTiles(RanaModule):
                     if e.errno != 17:
                         print("storeTiles: can't create folder %s for %s" % (folderPath, filename))
                         print(e)
-
-            f = open(filename, 'wb') # write the tile to a file
-            f.write(tile)
-            f.close()
+            try:
+                with open(filename, 'wb') as f:
+                    f.write(tile)
+            except:
+                import sys
+                e = sys.exc_info()[1]
+                print("storeTiles: saving tile to file %f failed" % filename)
+                print(e)
 
     def shutdown(self):
         # try to commit possibly uncommitted tiles

@@ -19,15 +19,16 @@
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
 from modules.base_module import RanaModule
-from core.tilenames import *
 from time import clock
 import time
 import os
 from core import geo
+from core import utils
+from core import tiles
+from core.tilenames import *
 from threading import Thread
 import threading
 from modules import urllib3
-from core import utils
 
 # socket timeout
 import socket
@@ -134,22 +135,20 @@ class MapData(RanaModule):
         print("Removing already available tiles from dl took %1.2f ms" % (1000 * (clock() - start)))
         return neededTiles
 
-
-    def getTileUrlAndPath(self, x, y, z, layerId):
+    def getTileUrlAndPath(self, lzxy):
         mapTiles = self.m.get('mapTiles', None)
-        layer = self._getLayerById(layerId)
-        extension = layer.type # what is the extension for the current layer ?
-        folderName = layer.folderName # what is the extension for the current layer ?
-        url = self.getTileUrl(x, y, z, layerId) # generate url
+        url = tiles.getTileUrl(lzxy) # generate url
         tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-        filePath = os.path.join(tileFolder, mapTiles.getImagePath(x, y, z, folderName, extension))
-        fileFolder = os.path.join(tileFolder, mapTiles.getImageFolder(x, z, folderName))
-        return url, filePath, fileFolder, folderName, extension
+        filePath = os.path.join(tileFolder, mapTiles.getImagePath(lzxy))
+        fileFolder = os.path.join(tileFolder, mapTiles.getImageFolder(lzxy))
+        return url, filePath, fileFolder
 
     def addToQueue(self, neededTiles):
         """load urls and filenames to download queue,
            optionally check for duplicates
         """
+
+        # neededTiles is a list of (x, y, z) tuples
 
         tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
         print("tiles for the batch will be downloaded to: %s" % tileFolder)
@@ -160,14 +159,11 @@ class MapData(RanaModule):
         with self.dlListLock: # make sure the set of needed tiles is accessed in an atomic way
             self.currentDownloadList = neededTiles # load the files to the download queue variable
 
-    def getTileUrl(self, x, y, z, layer):
+    def getTileUrl(self, x, y, z, layerId):
         """Return url for given tile coordinates and layer"""
-        mapTiles = self.m.get('mapTiles', None)
-        if mapTiles:
-            url = mapTiles.getTileUrl(x, y, z, layer)
-            return url
-        else:
-            return None
+        layer = self._mapLayersModule.getLayerById(layerId)
+        # TODO: make this to work with layer objects directly
+        return tiles.getTileUrl((layer, z, x, y))
 
     def handleMessage(self, message, messageType, args):
         if message == "refreshTilecount":
@@ -274,7 +270,9 @@ class MapData(RanaModule):
             # will now ask the server and find the combined size if tiles in the batch
             self.set("sizeStatus", 'unknown') # first we set the size as unknown
             neededTiles = self.currentDownloadList
-            layerId = self.get('layer', None)
+            layerId = self.get('layer', "mapnik")
+            layer = self._getLayerById(layerId)
+
             print("getting size")
             if len(neededTiles) == 0:
                 print("cant get combined size, the list is empty")
@@ -287,7 +285,7 @@ class MapData(RanaModule):
 
             self.totalSize = 0
             maxThreads = self.get('maxSizeThreads', 5)
-            sizeThread = self.GetSize(self, neededTiles, layerId,
+            sizeThread = self.GetSize(self, neededTiles, layer,
                                       maxThreads) # the second parameter is the max number of threads TODO: tweak this
             print( "getSize received, starting sizeThread")
             sizeThread.start()
@@ -296,7 +294,9 @@ class MapData(RanaModule):
         elif message == "download":
             # get tilelist and download the tiles using threads
             neededTiles = self.currentDownloadList
-            layerId = self.get('layer', None)
+            layerId = self.get('layer', "mapnik")
+            layer = self._getLayerById(layerId)
+
             print("starting download")
             if len(neededTiles) == 0:
                 print("cant download an empty list")
@@ -328,7 +328,7 @@ class MapData(RanaModule):
             # well, looks like the culprit was just the urlib3 socket pool with blocking turned on
             # so all the threads (even when doing it with a single thread) hanged on the block
             # it seems to be working alright + its pretty fast too
-            getFilesThread = self.GetFiles(self, neededTiles, layerId, maxThreads)
+            getFilesThread = self.GetFiles(self, neededTiles, layer, maxThreads)
             getFilesThread.start()
             self.getFilesThread = getFilesThread
 
@@ -481,7 +481,7 @@ class MapData(RanaModule):
                     tile = t
                     break
                 (x, y, z) = (tile[0], tile[1], tile[2])
-                url = self.callback.getTileUrl(x, y, z, self.layer)
+                url = tiles.getTileUrl((self.layer, z, x, y))
             else:
                 url = ""
             return url
@@ -557,16 +557,15 @@ class MapData(RanaModule):
             size = 0
             url = "unknown url"
             try:
-                # xet the coordinates
-                (z, x, y) = (tile[2], tile[0], tile[1])
+                # get the coordinates
+                lzxy = (self.layer, tile[2], tile[0], tile[1])
                 # get the url and other info
-                (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
+                (url, filename, folder) = self.callback.getTileUrlAndPath(lzxy)
                 m = self.callback.m.get('storeTiles', None) # get the tile storage module
                 # get the store tiles module
                 if m:
                     # does the tile exist ?
-                    if m.tileExists(filename, folderPrefix, z, x, y, layerType,
-                                    fromThread=True): # if the file does not exist
+                    if m.tileExists2(lzxy): # if the file does not exist
                         size = None # it exists, return None
                     else:
                         # the tile does not exist, get ist http header
@@ -645,7 +644,7 @@ class MapData(RanaModule):
                     tile = t
                     break
                 (x, y, z) = (tile[0], tile[1], tile[2])
-                url = self.callback.getTileUrl(x, y, z, self.layer)
+                url = tiles.getTileUrl((self.layer, z, x, y))
             else:
                 url = ""
             return url
@@ -747,8 +746,8 @@ class MapData(RanaModule):
 
         def saveTileForURL(self, tile):
             """save a tile for url created from its coordinates"""
-            (z, x, y) = (tile[2], tile[0], tile[1])
-            (url, filename, folder, folderPrefix, layerType) = self.callback.getTileUrlAndPath(x, y, z, self.layer)
+            lzxy = (self.layer, tile[2], tile[0], tile[1])
+            (url, filename, folder) = self.callback.getTileUrlAndPath(lzxy)
             m = self.callback.m.get('storeTiles', None) # get the tile storage module
             if m:
                 goAhead = False
@@ -756,12 +755,12 @@ class MapData(RanaModule):
                 if not redownload:
                     # does the the file exist ?
                     # -> don't download it if it does
-                    goAhead = not m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread=True)
+                    goAhead = not m.tileExists2(lzxy, fromThread=True)
                 elif redownload == 1: # redownload all
                     goAhead = True
                 elif redownload == 2: # update
                     # only download tiles in the area that already exist
-                    goAhead = m.tileExists(filename, folderPrefix, z, x, y, layerType, fromThread=True)
+                    goAhead = m.tileExists2(filename, lzxy, fromThread=True)
                     # TODO: maybe make something like tile objects so we don't have to pass so many parameters ?
                 if goAhead: # if the file does not exist
                     request = self.connPool.request('get', url)
@@ -777,7 +776,7 @@ class MapData(RanaModule):
                     # TODO: does someone supply non-bitmap/SVG tiles ?
                     if utils.isTheStringAnImage(content):
                         #its an image, save it
-                        m.automaticStoreTile(content, folderPrefix, z, x, y, layerType, filename)
+                        m.automaticStoreTile(content, lzxy)
                     else:
                         # its not ana image, raise exception
                         raise TileNotImageException()
