@@ -48,6 +48,7 @@ THREAD_REVERSE_GEOCODING = "modRanaReverseGeocoding"
 THREAD_LOCAL_SEARCH_GOOGLE = "modRanaLocalSearchGoogle"
 THREAD_ROUTING_ONLINE_GOOGLE = "modRanaRoutingOnlineGoogle"
 THREAD_ROUTING_OFFLINE_MONAV = "modRanaRoutingOfflineMonav"
+THREAD_GPSD_CONSUMER = "modRanaGPSDConsumer"
 # tile down-/loading
 THREAD_TILE_DOWNLOAD_MANAGER = "modRanaTileDownloadManager"
 THREAD_TILE_DOWNLOAD_WORKER = "modRanaTileDownloadWorker"

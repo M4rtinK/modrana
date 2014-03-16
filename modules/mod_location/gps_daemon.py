@@ -23,6 +23,8 @@ import traceback
 
 from .base_position_source import PositionSource
 from core.fix import Fix
+from core import threads
+from core import constants
 
 
 class GPSD(PositionSource):
@@ -37,8 +39,7 @@ class GPSD(PositionSource):
         self.connected = False
         try:
             self.GPSDConsumer = GPSDConsumer()
-            self.GPSDConsumer.daemon = True
-            self.GPSDConsumer.start()
+            threads.threadMgr.add(self.GPSDConsumer)
             self.connected = True
             self.setGPSDDebug(self.debug) # check if verbose debugging is enabled
         except Exception:
@@ -51,6 +52,7 @@ class GPSD(PositionSource):
     def stop(self):
         """stop the GPSD based location update method"""
         self.GPSDConsumer.shutdown()
+        self.GPSDConsumer = None
         self.connected = False
         self.status = "No GPSD running"
 
@@ -169,11 +171,13 @@ class GPSD(PositionSource):
 #      (dx,dy,dd) = [float(a) for a in (dx,dy,dd)]
 #      print("%d sats, quality %f, %f, %f" % (count,dd,dx,dy))
 
-class GPSDConsumer(threading.Thread):
+class GPSDConsumer(threads.ModRanaThread):
     """consume data as they come in from the GPSD and store last known fix"""
 
     def __init__(self):
-        threading.Thread.__init__(self)
+        threads.ModRanaThread.__init__(self,
+                                       name=constants.THREAD_GPSD_CONSUMER
+        )
         self.lock = threading.RLock()
         self.stop = False
 
@@ -187,7 +191,9 @@ class GPSDConsumer(threading.Thread):
         self.fix = None
         self.satellites = []
 
-    def run(self):
+        self.target = self._target
+
+    def _target(self):
         import gps_module as gps
 
         print("GPSDConsumer: starting\n")
