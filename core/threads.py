@@ -279,7 +279,7 @@ class ModRanaThread(threading.Thread):
         self._status = None  # string describing current state of the thread
         self._progress = None  # floating point value from 0.1 to 1.0
         self._stateLock = threading.Lock()
-        self._callback = self._nop
+        self._callback = None
         # it is possible to set the target both in kwargs
         # and by assigning to target before the thread is started
         self.target = (kwargs.get("target", self._nop))  # payload goes here
@@ -359,8 +359,9 @@ class ModRanaThread(threading.Thread):
     def _conditionalCallback(self, *args, **kwargs):
         """Used as a "wrapper" for the real callback.
         Enables cancelling the calling of the callback while the task is not yet done"""
-        if self.callback:
-            self.callback(*args, **kwargs)
+        cb = self.callback
+        if cb:
+            cb(*args, **kwargs)
 
 def initThreading():
     """Set up threading for anaconda's use. This method must be called before
