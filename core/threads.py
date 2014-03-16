@@ -279,8 +279,10 @@ class ModRanaThread(threading.Thread):
         self._status = None  # string describing current state of the thread
         self._progress = None  # floating point value from 0.1 to 1.0
         self._stateLock = threading.Lock()
-        self._callback = self._nop()
-        self.target = self._nop()  # payload goes here
+        self._callback = self._nop
+        # it is possible to set the target both in kwargs
+        # and by assigning to target before the thread is started
+        self.target = (kwargs.get("target", self._nop))  # payload goes here
         # Python 2.5 on Maemo 5 is missing the name and ident properties
         if sys.version_info[:2] <= (2, 5):
             self.name = self.getName()
@@ -290,8 +292,7 @@ class ModRanaThread(threading.Thread):
             self.ident = thread.get_ident()
 
     def _nop(self, *args, **kwargs):
-        """A placeholder method that consumes any arguments
-        and notifies about being used"""
+        """A placeholder method that consumes any arguments"""
         pass
 
     @property
@@ -340,15 +341,15 @@ class ModRanaThread(threading.Thread):
         self._callback = value
 
     def run(self, *args, **kwargs):
-        # http://bugs.python.org/issue1230540#msg25696
         import sys
-
         log.info("Running Thread: %s (%s)" % (self.name, self.ident))
         try:
-            threading.Thread.run(self, *args, **kwargs)
-            self._conditionalCallback(self.target())
+            if self.target:
+                self._conditionalCallback(self.target())
         except:
             threadMgr.set_error(self.name, *sys.exc_info())
+            import traceback
+            #traceback.print_exc(file=sys.stdout)
             if self._fatal:
                 sys.excepthook(*sys.exc_info())
         finally:
