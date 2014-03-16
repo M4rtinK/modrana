@@ -187,10 +187,6 @@ class GPSDConsumer(threading.Thread):
         self.fix = None
         self.satellites = []
 
-        print("ASASDA")
-        print(self.session)
-        print(self.session.stream)
-
     def run(self):
         import gps_module as gps
 
