@@ -396,6 +396,9 @@ class StoreTiles(RanaModule):
         """Test if a tile exists
            if fromThread=False, a new connection is created and disconnected again
            NEW CLEANED UP VERSION
+
+           TODO: automatically check the function is being
+           called from a non-main thread
         """
         layer, z, x, y = lzxy
         storageType = self.get('tileStorageType', 'files')
