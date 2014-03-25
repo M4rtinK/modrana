@@ -32,6 +32,8 @@ except ImportError:  # Python 3
     from urllib.request import urlopen
     from urllib.error import HTTPError, URLError
 
+from Queue import Queue
+
 from modules import urllib3
 from core import utils
 from core import rectangles
@@ -41,6 +43,8 @@ from core.tilenames import *
 from core.backports import six
 from core.signal import Signal
 from core import threads
+
+from .tile_downloader import Downloader
 
 StringIO = six.moves.cStringIO
 
@@ -74,6 +78,7 @@ if gs.GUIString == "GTK":
               ' - tile image manipulation disabled')
         print(e)
 
+TERMINATOR = object()
 
 def getModule(m, d, i):
     return MapTiles(m, d, i)
@@ -147,6 +152,10 @@ class MapTiles(RanaModule):
 
         self._tileDownloaded = Signal()
 
+        self._dlRequestQueue = Queue()
+        self._downloader = None
+
+
     @property
     def tileDownloaded(self):
         return self._tileDownloaded
@@ -165,6 +174,8 @@ class MapTiles(RanaModule):
         self.modrana.watch('invertMapTiles', self._updateTileFilteringCB, runNow=True)
         # check if tile filtering is enabled or should be enabled with current theme
 
+        maxThreads = int(self.get("maxAutoDownloadThreads2", 10))
+        self._downloader = Downloader(maxThreads)
         self._startTileDownloadManager()
 
     def getTile(self, lzxy):
@@ -335,68 +346,58 @@ class MapTiles(RanaModule):
     def _startTileDownloadManager(self):
         """Start the consumer thread for download requests"""
         t = threads.ModRanaThread(name=constants.THREAD_TILE_DOWNLOAD_MANAGER,
-                                  target = self._tileDownloadManager)
+                                  target = self._tileLoadingManager)
         threads.threadMgr.add(t)
 
 
-    def _tileDownloadManager(self):
+    def _tileLoadingManager(self):
         """This function is run by the tile loading request consumer thread"""
         while True:
-            with self.threadListCondition:
-                try:
-                    # wait for notification that there might be download requests or free download slots
-                    self.threadListCondition.wait()
-                    if self.shutdownAllThreads:
-                        print("\nmapTiles: automatic tile download management thread shutting down")
-                        break
-                    with self.downloadRequestPoolLock:
-                        activeThreads = len(self.threads)
-                        maxThreads = int(self.get("maxAutoDownloadThreads2", 10))
-                        if activeThreads < maxThreads: # can we start new threads ?
-                            # ** there are free download slots **
-                            availableSlots = maxThreads - activeThreads
-                            #fill all available slots
-                            for i in range(0, availableSlots):
-                                if self.downloadRequestPool:
-                                    request = self.downloadRequestPool.pop() # download most recent requests first
-                                    (name, lzxy, timestamp, tag) = request
-                                    if name in self.threads.keys():
-                                        # tile is already being downloaded, we can skip it
-                                        continue
-                                        # start a new thread
-                                    self.threads[name] = self.TileDownloader(name, lzxy, self)
-                                    self.threads[name].daemon = True
-                                    self.threads[name].start()
-                                    if self.cacheImageSurfaces:
-                                        # change the status tile to "Downloading..."
-                                        if self.cacheImageSurfaces:
-                                            with self.imagesLock:
-                                                self.images[0][name] = self.downloadingTile
+            request = self._dlRequestQueue.get(block=True)
+            if request == TERMINATOR:
+                print("\nmapTiles: automatic tile download management thread shutting down")
+                break
+            try:
+                for lzxy in request:
+                    # first check if the tile is locally available and load it
+                    # to the image cache if it is
+
+                    # check if tile loading debugging is on
+                    # TODO: use a watch on the loading debug key
+                    debug = self.get('tileLoadingDebug', False)
+                    if debug:
+                        sprint = self._realPrint
+                    else:
+                        sprint = self._fakePrint
+
+                    if not self.loadImage(lzxy):
+                        # tile not found locally an needs to be downloaded from network
+
+                        # Are we allowed to download it ? (network=='full')
+                        if self.get('network', 'full') == 'full':
+                            sprint("automatic tile download enabled - adding download request")
+                            # switch the status tile to "Waiting for download slot"
+                            if self.cacheImageSurfaces:
+                                with self.imagesLock:
+                                    self.images[0][self.getTileName(lzxy)] = self.waitingTile
+                            droppedRequest = self._downloader.downloadTile(lzxy)
+                            if droppedRequest:
+                                # this tile download request has been dropped from
+                                # the bottom of the request stack, remove its
+                                #  "Waiting..." tile from image cache
+                                # - if it is not in view, this makes place for new tiles in cache,
+                                # - if it is in view, new download request will be added
+                                name = self.imageName(lzxy)
+                                sprint("old download request dropped from work request stack:")
+                                sprint(name)
+                                self.removeImageFromMemory(name)
                         else:
-                            # ** all download slots are full **
-                            # remove old requests
-                            currentTime = time.time()
-                            cleanPool = []
+                            sprint("automatic tile download disabled - not adding download request")
 
-                            def notOld(currentTime, request):
-                                timestamp = request[2]
-                                dt = (currentTime - timestamp)
-                                return dt < self.downloadRequestTimeout
-
-                            for request in self.downloadRequestPool:
-                                if notOld(currentTime, request):
-                                    cleanPool.append(request)
-                                else:
-                                    # this request timed out,
-                                    # remove its "Waiting..." tile from image cache,
-                                    # so that is can be retried
-                                    name = request[0]
-                                    self.removeImageFromMemory(name)
-                            self.downloadRequestPool = cleanPool
-                except Exception:
-                    exc = sys.exc_info()[1]
-                    print("exception in tile download manager thread:\n%s" % exc)
-                    traceback.print_exc()
+            except Exception:
+                exc = sys.exc_info()[1]
+                print("exception in tile download manager thread:\n%s" % exc)
+                traceback.print_exc()
 
     def _startIdleTileLoader(self):
         """Add the tile loader as a gobject mainloop idle callback"""
@@ -405,32 +406,34 @@ class MapTiles(RanaModule):
             gobject.idle_add(self._idleTileLoaderCB)
 
     def _idleTileLoaderCB(self):
-        """Get loading requests from the circular stack,
-        quit when the stack is empty
-        """
-        try:
-            # check for modRana shutdown
-            if self.shutdownAllThreads:
-                self.idleLoaderActive = False
-                return False
-            (item, valid) = self.loadRequestCStack.popValid()
-            if valid:
-                (name, lzxy) = item
-                self.loadImage(name, lzxy)
-                #        print("loaded")
-                return True # don't stop the idle handle
-            else:
-            #        print("quiting")
-                self.idleLoaderActive = False
-                return False # the stack is empty, remove this callback
-        except Exception:
-            exc = sys.exc_info()[1]
-            # on an error, we need to shut down or else idleLoaderActive might get stuck
-            # and no loader will be started
-            print("mapTiles: exception in idle loader\n", exc)
-            self.idleLoaderActive = False
-            traceback.print_exc()
-            return False
+        pass
+
+        # """Get loading requests from the circular stack,
+        # quit when the stack is empty
+        # """
+        # try:
+        #     # check for modRana shutdown
+        #     if self.shutdownAllThreads:
+        #         self.idleLoaderActive = False
+        #         return False
+        #     (item, valid) = self.loadRequestCStack.popValid()
+        #     if valid:
+        #         (name, lzxy) = item
+        #         self.loadImage(name, lzxy)
+        #         #        print("loaded")
+        #         return True # don't stop the idle handle
+        #     else:
+        #     #        print("quiting")
+        #         self.idleLoaderActive = False
+        #         return False # the stack is empty, remove this callback
+        # except Exception:
+        #     exc = sys.exc_info()[1]
+        #     # on an error, we need to shut down or else idleLoaderActive might get stuck
+        #     # and no loader will be started
+        #     print("mapTiles: exception in idle loader\n", exc)
+        #     self.idleLoaderActive = False
+        #     traceback.print_exc()
+        #     return False
 
     def loadSpecialTiles(self, specialTiles):
         """Load special tiles from files to the special tile cache
@@ -472,6 +475,10 @@ class MapTiles(RanaModule):
     def beforeDraw(self):
         """we need to synchronize centering with map redraw,
         so we first check if we need to centre the map and then redraw"""
+
+        # TODO: don't redraw the ma layer if it is tha same
+        # (viewport, map center, zoomlevel and layer are the same)
+
         mapViewModule = self.mapViewModule
         if mapViewModule:
             mapViewModule.handleCentring()
@@ -611,6 +618,8 @@ class MapTiles(RanaModule):
                                         # tile found in memory cache, draw it
                                         drawImage(cr, tileImage[0], x1, y1, scale)
                                     else:
+                                        # tile not found in memory cache - submit tile loading request
+                                        # and draw loading tile
                                         if overlay:
                                             # check if the separate tiles are already cached
                                             # and send loading request/-s if not
@@ -635,15 +644,24 @@ class MapTiles(RanaModule):
                                                     # draw the composite image
                                                     drawImage(cr, combinedImage, x1, y1, scale)
                                                 else:
-                                                    drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+                                                    #drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+                                                    combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
+                                                    drawImage(cr, combinedImage, x1, y1, scale)
                                             else:
-                                                requests.append((nameBack, (layerBack, z, x, y)))
-                                                requests.append((nameOver, (layerOver, z, x, y)))
-
+                                                requests.append((layerBack, z, x, y))
+                                                requests.append((layerOver, z, x, y))
+                                                self.storeInMemory(loadingTileImageSurface, nameBack, imageType="loadingTile")
+                                                self.storeInMemory(loadingTileImageSurface, nameOver, imageType="loadingTile")
                                                 drawImage(cr, loadingTileImageSurface, x1, y1, scale)
                                         else:
                                             # tile not found in memory cache, add a loading request
-                                            requests.append((name, (layerInfo, z, x, y)))
+                                            requests.append((layerInfo, z, x, y))
+                                            # and cache a loading tile so that we don't spam the same loading r
+                                            # request over and over again (the tile request queue is using a stack,
+                                            # so this would really not make sense)
+                                            self.storeInMemory(loadingTileImageSurface, name, imageType="loadingTile")
+                                            drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+
                         gui = self.modrana.gui
                         if gui and gui.getIDString() == "GTK":
                             if gui.getShowRedrawTime():
@@ -702,28 +720,35 @@ class MapTiles(RanaModule):
                                             if backImage[1]['type'] == "normal" and overImage[1]['type'] == "normal":
                                                 # we check the the metadata to filter out the "Downloading..."
                                                 # special tiles
-                                                combinedImage = self.combine2Tiles(backImage[0], overImage[0],
-                                                                                   alphaOver)
+                                                combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
                                                 # remove the separate images from cache
                                                 self.removeImageFromMemory(nameBack)
                                                 self.removeImageFromMemory(nameOver)
                                                 # cache the combined image
-                                                self.storeInMemory(combinedImage, name, "composite")
+                                                self.storeInMemory(combinedImage, name, imageType="composite")
                                                 # draw the composite image
                                                 drawImage(cr, combinedImage, x1, y1, scale)
                                             else: # on or more tiles not usable
-                                                drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+                                                #drawImage(cr, loadingTileImageSurface, x1, y1, scale)
+                                                combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
+                                                drawImage(cr, combinedImage, x1, y1, scale)
                                         else:
-                                            requests.append((nameBack, (layerBack, z, x, y)))
-                                            requests.append((nameOver, (layerOver, z, x, y)))
+                                            requests.append((layerBack, z, x, y))
+                                            requests.append((layerOver, z, x, y))
+                                            self.storeInMemory(loadingTileImageSurface, nameBack, imageType="loadingTile")
+                                            self.storeInMemory(loadingTileImageSurface, nameOver, imageType="loadingTile")
                                             drawImage(cr, loadingTileImageSurface, x1, y1, scale)
                                     else:
                                         # tile not found in memory cache, add a loading request
-                                        requests.append((name, (layerInfo, z, x, y)))
+                                        requests.append((layerInfo, z, x, y))
+                                        # and cache a loading tile so that we don't spam the same loading r
+                                        # request over and over again (the tile request queue is using a stack,
+                                        # so this would really not make sense)
+                                        self.storeInMemory(loadingTileImageSurface, name, imageType="loadingTile")
                                         drawImage(cr, loadingTileImageSurface, x1, y1, scale)
 
             if requests:
-                self.loadRequestCStack.batchPush(requests)
+                self._dlRequestQueue.put(requests)
                 # Question: can the loadRequestCStack get full ?
                 # Answer: NO :)
                 #  it takes the list, reverses it, extends its old internal
@@ -813,36 +838,20 @@ class MapTiles(RanaModule):
         """Get layer description from the mapLayers module"""
         return self._mapLayersModule.getLayerById(layerId)
 
-    def loadImage(self, name, lzxy):
+    def loadImage(self, lzxy):
         """Check that an image is loaded, and try to load it if not"""
 
-        # at this point, there is only a placeholder image in the memory cache
-
-        # check if tile loading debugging is on
         debug = self.get('tileLoadingDebug', False)
         if debug:
             sprint = self._realPrint
         else:
             sprint = self._fakePrint
 
+        # at this point, there is only a placeholder image in the image cache
         sprint("###")
-        sprint("loading tile %s" % name)
+        sprint("loading tile %s" % self.getTileName(lzxy))
 
-        # first, is it already in the process of being downloaded?
-        with self.threadListCondition:
-            if name in self.threads.keys():
-                sprint("tile is being downloaded")
-                if not self.threads[name].finished:
-                    with self.imagesLock: # substitute the "loading" tile with a "downloading" tile
-                        downloadingTile = self.downloadingTile
-                        downloadingTile[1]['addedTimestamp'] = time.time()
-                        downloadingTile[1]['type'] = "downloading"
-
-                        self.images[0][name] = downloadingTile
-                    return 'OK'
-
-        # second, is it in the disk cache?  (including ones recently-downloaded)
-
+        # is the tile in local storage ?
         start1 = time.clock()
         pixbuf = self._storeTiles.getTile(lzxy)
 
@@ -850,40 +859,13 @@ class MapTiles(RanaModule):
         # False means loading the tile from file to pixbuf failed
         if pixbuf:
             start2 = time.clock()
-            self.storeInMemory(self.pixbuf2cairoImageSurface(pixbuf), name)
+            self.storeInMemory(self.pixbuf2cairoImageSurface(pixbuf), self.getTileName(lzxy))
             if debug:
                 storageType = self.get('tileStorageType', 'files')
                 sprint(
                     "tile loaded from local storage (%s) in %1.2f ms" % (storageType, (1000 * (time.clock() - start1))))
                 sprint("tile cached in memory in %1.2f ms" % (1000 * (time.clock() - start2)))
-            return 'OK'
-
-        # Image not found anywhere locally - resort to downloading it
-        filename = os.path.join(self._getTileFolderPath(), (self.getImagePath(lzxy)))
-        sprint("image not found locally - trying to download")
-
-        # Are we allowed to download it ? (network=='full')
-        if self.get('network', 'full') == 'full':
-            sprint("automatic tile download enabled - starting download")
-            # use threads
-
-            # the thread list condition is used to signalize to the download manager,
-            # that here is a new download request
-            with self.threadListCondition:
-                timestamp = time.time()
-                request = (name, lzxy, timestamp, None)
-
-                with self.imagesLock: # display the "Waiting for download slot..." status tile
-                    waitingTile = self.waitingTile
-                    waitingTile[1]['addedTimestamp'] = time.time()
-                    self.images[0][name] = waitingTile
-
-                with self.downloadRequestPoolLock: # add a download request
-                    self.downloadRequestPool.append(request)
-
-                self.threadListCondition.notifyAll() # wake back the download manager
-        else:
-            sprint("automatic tile download disabled - not starting download")
+            return True
 
     def loadImageFromFile(self, path, name, imageType="normal", expireTimestamp=None, dictIndex=0):
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
@@ -1108,58 +1090,7 @@ class MapTiles(RanaModule):
     def imageY(self, z, extension):
         return '%d.%s' % (z, extension)
 
-    # def getTileUrl(self, lzxy):
-    #     """Return url for given tile coordinates and layer"""
-    #
-        # layer, z, x, y = lzxy
-        #
-        # coords = layer.coordinates
-        # if coords == 'google':
-        #     url = '%s&x=%d&y=%d&z=%d' % (
-        #         layer.url,
-        #         x, y, z)
-        # elif coords == 'web_mercator_substitution':
-        #     template = string.Template(layer.url)
-        #     url = str(template.substitute(z=z, x=x, y=y))
-        # elif coords == 'quadtree_substitution': # handle Virtual Earth with substitution
-        #     quadKey = quadTree(x, y, z)
-        #     template = string.Template(layer.url)
-        #     url = str(template.substitute(quadindex=quadKey))
-        #
-        # # the "quadtree" method is depreciated by quadtree_substitution
-        # # , drop this some time in the future
-        # elif coords == 'quadtree': # handle Virtual Earth maps and satellite
-        #     quadKey = quadTree(x, y, z)
-        #     #  don't know what the g argument is, maybe revision ? but its not optional
-        #     url = '%s%s?g=452' % ( layer.url, quadKey )
-        # elif coords == 'yahoo': # handle Yahoo maps, sat, overlay
-        #     y = ((2 ** (z - 1) - 1) - y)
-        #     z += 1
-        #     # I have no idea what the r parameter is, r=0 or no r => grey square
-        #     url = '%s&x=%d&y=%d&z=%d&r=1' % (layer.url, x, y, z)
-        # #    elif coords == 'chartbundle': # chartbundle
-        # ##      print("CHARTBUNDLE")
-        # #      y = ((2 ** (z - 1) - 1) - y)
-        # #      # TODO: fix projection so this is usable
-        # #      # NOTE: looks like with the y fix from Yahoo tilenames,
-        # #      # the map is drawn correctly, but current position is somewhere in Antarctica
-        # #      # -> thi probably means some projection lat lon -> x y errors for this layer
-        # #
-        # #      url = '%s%d/%d/%d.%s' % (
-        # #      layerDetails['tiles'],
-        # #      z, x, y,
-        # #      layerDetails.get('type', 'png'))
-        # else: # OSM, Open Cycle, T@H -> equivalent to coords == osm
-        #     url = '%s%d/%d/%d.%s' % (layer.url, z, x, y, layer.type)
-        #
-        # #    print("__%s__" % coords)
-        # #     print("TILE URL: %s" % url)
-        # return url
-
     def shutdown(self):
-        # shutdown the worker/consumer threads
-        self.shutdownAllThreads = True
-
         #    # shutdown the tile loading thread
         #    try:
         #      self.loadingNotifyQueue.put(('shutdown', ()),block=False)
@@ -1167,102 +1098,10 @@ class MapTiles(RanaModule):
         #      """the tile loading thread is demonic, so it will be still killed in the end"""
         #      pass
         # notify the automatic tile download manager thread about the shutdown
-        with self.threadListCondition:
-            self.threadListCondition.notifyAll()
+        self._dlRequestQueue.put(TERMINATOR)
 
-    class TileDownloader(Thread):
-        """Downloads an image (in a thread)"""
+        # tell the tile downloader to shutdown the thread pool
+        self._downloader.shutdown()
 
-        def __init__(self, name, lzxy, callback):
-            Thread.__init__(self)
-            self.name = name
-            self.lzxy = lzxy
-            self.finished = 0
-            self.callback = callback
-            self.useImageSurface = callback.cacheImageSurfaces
 
-        def run(self):
-            try:
-                self._downloadTile()
-                self.finished = 1
-            # something is wrong with the server or url
-            except urllib3.exceptions.HTTPError:
-                if self.useImageSurface:
-                    tileDownloadFailedSurface = self.callback.images[1]['tileDownloadFailed'][0]
-                    expireTimestamp = time.time() + 10
-                    self.callback.storeInMemory(tileDownloadFailedSurface, self.name, 'semiPermanentError',
-                                                expireTimestamp)
-                    # like this, when tile download fails due to a http error,
-                    # the error tile is loaded instead
-                    # like this:
-                    #  - modRana does not immediately try to download a tile that errors out
-                    #  - the error tile is shown without modifying the pipeline too much
-                    #  - modRana will eventually try to download the tile again,
-                    #    after it is flushed with old tiles from the memory
-            except URLError:
-                if self.useImageSurface:
-                    tileNetworkErrorSurface = self.callback.images[1]['tileNetworkError'][0]
-                    expireTimestamp = time.time() + 10
-                    self.callback.storeInMemory(tileNetworkErrorSurface, self.name, 'error',
-                                                expireTimestamp) # retry after 10 seconds
-                    # as not to DOS the system when we temporarily loose internet connection or other such error occurs,
-                    # we load a temporary error tile with expiration timestamp instead of the tile image
-                    # TODO: actually remove tiles according to expiration timestamp :)
 
-            # something other is wrong (most probably a corrupted tile)
-            except Exception:
-                e = sys.exc_info()[1]
-                self.printErrorMessage(e)
-                # remove the status tile
-                self.callback.removeImageFromMemory(self.name)
-
-            finally: # make really sure we don't get any zombie threads
-                self.finished = 1 # finished thread can be removed from the set and retried
-                self.removeSelf()
-
-        def removeSelf(self):
-            with self.callback.threadListCondition:
-                # try to remove its own instance from the thread list, so that the instance could be garbage collected
-                if self.name in self.callback.threads.keys():
-                    del self.callback.threads[self.name]
-                    # notify the download manager that a download slot is now free
-                    self.callback.threadListCondition.notifyAll()
-
-        def printErrorMessage(self, e):
-            url = tiles.getTileUrl(self.lzxy)
-            print("mapTiles: download thread reports error")
-            print("** we were doing this, when an exception occurred:")
-            print("** downloading tile: x:%d,y:%d,z:%d, layer:%s, url: %s" % (
-                self.lzxy[1],
-                self.lzxy[2],
-                self.lzxy[3],
-                self.lzxy[0].id,
-                url))
-            print("** this exception occurred: %s\n" % e)
-            print("** traceback:\n")
-            traceback.print_exc()
-
-        def _downloadTile(self):
-            """Downloads an image"""
-            content = self.callback.downloadTile(self.lzxy)
-            if content is None:
-                raise urllib3.exceptions.HTTPError
-            if self.useImageSurface:
-                pl = gtk.gdk.PixbufLoader()
-
-                pl.write(content)
-
-                pl.close() # this  blocks until the image is completely loaded
-                # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
-                surface = self.callback.pixbuf2cairoImageSurface(pl.get_pixbuf())
-                self.callback.storeInMemory(surface, self.name)
-                # like this, corrupted tiles should not get past the pixbuf loader and be stored
-            else:
-                # cache the raw data
-                self.callback.storeInMemory(content, self.name)
-
-            m = self.callback._storeTiles
-            if m:
-                filename = self.callback.getTileFilename(self.lzxy)
-                #m.automaticStoreTile(content, self.layer.name, self.z, self.x, self.y, self.layer.type, filename)
-                m.automaticStoreTile(content, self.lzxy)
