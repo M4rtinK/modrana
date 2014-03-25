@@ -54,12 +54,13 @@ THREAD_TILE_DOWNLOAD_MANAGER = "modRanaTileDownloadManager"
 THREAD_TILE_DOWNLOAD_WORKER = "modRanaTileDownloadWorker"
 THREAD_TILE_STORAGE_LOADER = "modRanaTileStorageLoader"
 
-
-
 THREAD_CONNECTIVITY_CHECK = "modRanaConnectivityCheck"
 THREAD_LOCATION_CHECK = "modRanaCurrentPositionCheck"
 
 THREAD_TESTING_PROVIDER = "modRanaTestingProvider"
+
+# thread pools
+THREAD_POOL_AUTOMATIC_TILE_DOWNLOAD = "automaticTileDownload"
 
 # device types
 DEVICE_TYPE_DESKTOP = 1
