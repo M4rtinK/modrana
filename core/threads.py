@@ -29,22 +29,25 @@
 from __future__ import with_statement # for python 2.5
 import sys
 
-class FakeLog(object):
-    def info(self, message):
-        print("INFO:" + message)
-
-    def debug(self, message):
-        print("DEBUG:" + message)
-
-    def error(self, message):
-        print("ERROR:" + message)
-
-
-log = FakeLog()
-
 import threading
 from core.signal import Signal
 
+class FakeLog(object):
+    fakeLogLock = threading.RLock()
+
+    def info(self, message):
+        with self.fakeLogLock:
+            print("INFO:" + message)
+
+    def debug(self, message):
+        with self.fakeLogLock:
+            print("DEBUG:" + message)
+
+    def error(self, message):
+        with self.fakeLogLock:
+            print("ERROR:" + message)
+
+log = FakeLog()
 
 class ThreadManager(object):
     """A singleton class for managing threads and processes.
