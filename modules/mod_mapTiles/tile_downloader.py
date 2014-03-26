@@ -74,6 +74,8 @@ class Downloader(object):
         discardedTile = None
         with self._runningLock:
             if lzxy not in self._running:
+                # drop download requests for tiles that are already
+                # being downloaded
                 discardedTile = self._pool.submit(
                     self._handleDownload, lzxy, time.time(), overwrite
                 )
@@ -119,17 +121,20 @@ class Downloader(object):
                 self._printErrorMessage(e, lzxy)
                 # remove the status tile
                 self._mapTiles.removeImageFromMemory(self._mapTiles.imageName(lzxy))
-
+            finally:
+                # done, unregister the tile from the tracking set
+                with self._runningLock:
+                    try:
+                        self._running.remove(lzxy)
+                    except KeyError:
+                        print("auto tile dl pool: warning, tuple already removed from tracking!")
+                        print(lzxy)
         else:
             # don't download tile and remove
             # any "downloading" tiles that might
             # be in the image cache
             self._mapTiles.removeImageFromMemory(self._mapTiles.imageName(lzxy))
 
-
-        # done, unregister the tile from the running set
-        with self._runningLock:
-            self._running.remove(lzxy)
 
     def _downloadTile(self, lzxy):
             """Downloads a tile image image from network"""
