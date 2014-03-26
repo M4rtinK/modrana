@@ -19,7 +19,6 @@
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
 from modules.base_module import RanaModule
-from threading import Thread
 import threading
 import os
 import time
@@ -62,7 +61,6 @@ from core import gs
 
 if gs.GUIString == "GTK":
     import gtk
-    import gobject
     import cairo
 
     # as the image manipulation is dependent on GTK being
@@ -99,27 +97,17 @@ class MapTiles(RanaModule):
         RanaModule.__init__(self, m, d, i)
         self.images = [{}, {}] # the first dict contains normal image data, the second contains special tiles
         self.imagesLock = threading.RLock()
-        self.threads = {}
-        self.threadListCondition = threading.Condition(threading.Lock())
         self.maxImagesInMemory = 150 # to avoid a memory leak
-        self.imagesTrimmingAmount = 30 # how many tiles to remove once the maximum is reached
-        self.loadRequestCStackSize = 10 # size for the circular loading request stack
-        """so that trim does not run always run after adding a tile"""
+        self.imagesTrimmingAmount = 30
+        # how many tiles to remove once the maximum is reached
+        # so that trim does not run always run after adding a tile
+        # TODO: analyse memory usage,
+        #       set appropriate value,
+        #       platform dependent value,
+        #       user configurable
         self.tileSide = 256 # by default, the tiles are squares, side=256
         self.scalingInfo = (1, 15, 256)
-        """ TODO: analyse memory usage,
-                  set appropriate value,
-                  platform dependent value,
-                  user configurable
-        """
-        self.loadRequestCStack = utils.SynchronizedCircularStack(self.loadRequestCStackSize)
-        #    self.loadingNotifyQueue = Queue.Queue(1)
-        self.downloadRequestPool = []
-        self.downloadRequestPoolLock = threading.Lock()
         self.downloadRequestTimeout = 30 # in seconds
-        self.idleLoaderActive = False # report the idle tile loader is running
-
-        self.shutdownAllThreads = False # notify the threads that shutdown is in progress
 
         specialTiles = [
             ('tileDownloading', 'themes/default/tile_downloading.png'),
@@ -176,7 +164,7 @@ class MapTiles(RanaModule):
 
         maxThreads = int(self.get("maxAutoDownloadThreads2", 10))
         self._downloader = Downloader(maxThreads)
-        self._startTileDownloadManager()
+        self._startTileLoadingManager()
 
     def getTile(self, lzxy):
         """Return a tile specified by layerID, z, x & y
@@ -184,10 +172,7 @@ class MapTiles(RanaModule):
           or persistent storage
         * if not, download it
 
-        :param str layerId: layer id
-        :param int z: zoom level
-        :param int x: x coordinate
-        :param int y: y coordinate
+        :param tuple lzxy: tile description tuple
         :returns: tile data or None
         :rtype: data or None
         """
@@ -209,12 +194,9 @@ class MapTiles(RanaModule):
             return self.downloadTile(lzxy)
 
     def downloadTile(self, lzxy):
-        """Download the given tile from the network
+        """Download the a tile from the network
 
-        :param str layerId: layer id
-        :param int z: zoom level
-        :param int x: x coordinate
-        :param int y: y coordinate
+        :param tuple lzxy: tile description tuple
         :returns: tile data or None
         :rtype: data or None
         """
@@ -267,48 +249,21 @@ class MapTiles(RanaModule):
     def addTileDownloadRequest(self, lzxy, tag=None):
         """Add a download request to the download manager queue
         the download manager will use its download thread pool to process the request
-        NOTE: no checking if tile exists in local storage is done past this point,
-        you have to do this beforehand or you might download an already available tile :)
+        NOTE: this does not check if the tile is cached or available from storage,
+              but the download pool workers will not download tiles that are available
+              from storage once the request gets to them
 
         :param tuple lzxy: tile description tuple
         """
-
-        # print("mapTiles: DOWNLOAD queued")
-        name = self.getTileName(lzxy)
-        # check if the tile is being downloaded
-        if name in self.threads or name in self.images[0]:
-            return
-        # as we check both in thread list and image cache (where download threads deposit tiles) we don't
-        # use the corresponding image cache and thread list locks
-        # - the window for collision is ver small
-        # - possible collisions:
-        # -> falsely discarding a request for a thread that actually just errored out
-        # -> adding a request for a thread that actually just started (dl manager will kill such requests, np)
-        # - so basically nothing serious, also even when ve falsely discard a loading request,
-        # it will probably be soon repeated (this is by design to flush the no longer relevant tiles from the
-        # download queue)
-        # Are we allowed to download it ? (network=='full')
-        # -> no need to submit a download request if network access is disabled
-        if self.get('network', 'full') == 'full':
-            filename = self.getTileFilename(lzxy)
-            # add tile download request
-            with self.threadListCondition:
-                timestamp = time.time()
-                request = (name, lzxy, timestamp, tag)
-                with self.downloadRequestPoolLock: # add a download request
-                    self.downloadRequestPool.append(request)
-                self.threadListCondition.notifyAll() # wake up the download manager
-
-    def tileInProgress(self, lzxy):
-        """Report if tile is being downloaded
-
-        :returns: True if tile download is in progress, False otherwise
-        :rtype: bool
-        """
-        return self.getTileName(lzxy) in self.threads
+        # TODO: request tagging/tile downloaded signals
+        self._dlRequestQueue.put([lzxy])
 
     def tileInMemory(self, lzxy):
         """Report if a tile is stored in memory cache
+
+        NOTE: the image cache is periodically scrubbed once it becomes
+              full, so even if this function reports a tile is in cache
+              it might get trimmed right after
 
         :returns: True if tile is cached, False otherwise
         :rtype: bool
@@ -343,7 +298,7 @@ class MapTiles(RanaModule):
 
         self.scalingInfo = (scale, z, tileSide)
 
-    def _startTileDownloadManager(self):
+    def _startTileLoadingManager(self):
         """Start the consumer thread for download requests"""
         t = threads.ModRanaThread(name=constants.THREAD_TILE_DOWNLOAD_MANAGER,
                                   target = self._tileLoadingManager)
@@ -351,7 +306,10 @@ class MapTiles(RanaModule):
 
 
     def _tileLoadingManager(self):
-        """This function is run by the tile loading request consumer thread"""
+        """This function is run by the tile loading request manager thread,
+        it handles both loading of tiles from local storage to the image cache
+        and submitting download requests for tiles that were not found locally.
+        """
         while True:
             request = self._dlRequestQueue.get(block=True)
             if request == TERMINATOR:
@@ -399,42 +357,6 @@ class MapTiles(RanaModule):
                 print("exception in tile download manager thread:\n%s" % exc)
                 traceback.print_exc()
 
-    def _startIdleTileLoader(self):
-        """Add the tile loader as a gobject mainloop idle callback"""
-        if not self.idleLoaderActive: # one idle loader is enough
-            self.idleLoaderActive = True
-            gobject.idle_add(self._idleTileLoaderCB)
-
-    def _idleTileLoaderCB(self):
-        pass
-
-        # """Get loading requests from the circular stack,
-        # quit when the stack is empty
-        # """
-        # try:
-        #     # check for modRana shutdown
-        #     if self.shutdownAllThreads:
-        #         self.idleLoaderActive = False
-        #         return False
-        #     (item, valid) = self.loadRequestCStack.popValid()
-        #     if valid:
-        #         (name, lzxy) = item
-        #         self.loadImage(name, lzxy)
-        #         #        print("loaded")
-        #         return True # don't stop the idle handle
-        #     else:
-        #     #        print("quiting")
-        #         self.idleLoaderActive = False
-        #         return False # the stack is empty, remove this callback
-        # except Exception:
-        #     exc = sys.exc_info()[1]
-        #     # on an error, we need to shut down or else idleLoaderActive might get stuck
-        #     # and no loader will be started
-        #     print("mapTiles: exception in idle loader\n", exc)
-        #     self.idleLoaderActive = False
-        #     traceback.print_exc()
-        #     return False
-
     def loadSpecialTiles(self, specialTiles):
         """Load special tiles from files to the special tile cache
 
@@ -444,36 +366,8 @@ class MapTiles(RanaModule):
             (name, path) = tile
             self.loadImageFromFile(path, name, imageType="special", dictIndex=1)
 
-            #  def _checkAutomaticTileDownloads(self):
-            #    """monitor if the automatic tile downloads finished and then remove them from the dictionary
-            #    (also automagically refreshes the screen once new tiles are available, even when not centered)"""
-            #
-            #
-            #    """seems that some added error handling in the download thread class can replace this,
-            #       but it left here for testing purposes"""
-            #    z = self.get('z', 15)
-            #    """when we change zoomlevel and the number of threads does not change,
-            #       we clear the threads set, this is useful, because:
-            #       * failed downloads don't accumulate and will be tried again when we visit this zoomlevel again
-            #       * tile downloads that don't actually exist (eq tiles from max+1 zoomlevel) don't accumulate
-            #       it is important to have the "self.threads" set empty when we are not downloading anything,
-            #       because otherwise we are wasting time on the "refresh on finished tile download" logic and also
-            #       the set could theoretically cause a memory leak if not periodically cleared from wrong items
-            #
-            #       this method was chosen instead of a timeout, because it would be hard to set a timeout,
-            #       that would work on GPRS and a fast connection
-            #    """
-            #    if self.oldZ != z:
-            ##      print("resetting z")
-            #      self.oldZ = z
-            #      if len(self.threads) == self.oldThreadCount:
-            #        print("clearing thread set")
-            #        self.threads = {}
-            #        self.oldThreadCount = len(self.threads)
-            #    self.oldThreadCount = len(self.threads)
-
     def beforeDraw(self):
-        """we need to synchronize centering with map redraw,
+        """We need to synchronize centering with map redraw,
         so we first check if we need to centre the map and then redraw"""
 
         # TODO: don't redraw the ma layer if it is tha same
@@ -486,8 +380,8 @@ class MapTiles(RanaModule):
         # tile cache status debugging
         if self.get('reportTileCacheStatus', False): # TODO: set to False by default
             print("** tile cache status report **")
-            print("threads: %d, images: %d, special tiles: %d, downloadRequestPool:%d" % (
-                len(self.threads), len(self.images[0]), len(self.images[1]), len(self.downloadRequestPool)))
+            print("threads: %d, images: %d, special tiles: %d, dl request queue:%d" % (
+                self._downloader.maxThreads, len(self.images[0]), len(self.images[1]), self._downloader.qsize))
 
     def drawMap(self, cr):
         """Draw map tile images"""
@@ -746,24 +640,8 @@ class MapTiles(RanaModule):
                                         # so this would really not make sense)
                                         self.storeInMemory(loadingTileImageSurface, name, imageType="loadingTile")
                                         drawImage(cr, loadingTileImageSurface, x1, y1, scale)
-
             if requests:
                 self._dlRequestQueue.put(requests)
-                # Question: can the loadRequestCStack get full ?
-                # Answer: NO :)
-                #  it takes the list, reverses it, extends its old internal
-                #  list with it - from this list a slice conforming to
-                #  its size limit is taken and set as the new internal list
-
-                #  notify the loading thread using the notify Queue
-                #         self.loadingNotifyQueue.put("load", block=False)
-                #  try to start the idle tile loader
-                self._startIdleTileLoader()
-
-                #    except Queue.Full:
-                #      """as we use the queue as a notification mechanism, we don't actually need to
-                #      process all the "load" notifications """
-                #      pass
 
         except Exception:
             exc = sys.exc_info()[1]
@@ -1025,15 +903,17 @@ class MapTiles(RanaModule):
         return tilePb
 
     def _nop(self, arg):
-        """a NOP function used for replacing functions that are not
-        currently used for some reason (such as for example _invertPixbuf)"""
+        """A NOP function used for replacing functions that are not
+        currently used for some reason (such as for example _invertPixbuf)
+        """
         return arg
 
     def _invertPixbuf(self, pixbuf):
-        """do image inversion for the given pixbuf
+        """Do image inversion for the given pixbuf
         - why PIL & Numpy -> combined, they give usable performance
         (pure python implementation was about 100x times slower
-        10 vs 1000 ms per tile)"""
+        10 vs 1000 ms per tile)
+        """
 
         #    start1 = time.clock()
         def pixbuf2Image(pb):
@@ -1069,18 +949,21 @@ class MapTiles(RanaModule):
 
     def imageName(self, lzxy):
         """Get a unique name for a tile image
-        (suitable for use as part of filenames, dictionary keys, etc)"""
+        (suitable for use as part of filenames, dictionary keys, etc)
+        """
         return "%s_%d_%d_%d" % (lzxy[0].id, lzxy[1], lzxy[2], lzxy[3])
 
     def getImagePath(self, lzxy):
         """Get a unique name for a tile image
-        (suitable for use as part of filenames, dictionary keys, etc)"""
+        (suitable for use as part of filenames, dictionary keys, etc)
+        """
         #    return("%s/%d/%d/%d.%s" % (prefix,z,x,y,extension))
         return os.path.join(lzxy[0].folderName, str(lzxy[1]), str(lzxy[2]), "%d.%s" % (lzxy[3], lzxy[0].type))
 
     def getImageFolder(self, lzxy):
         """Get a unique name for a tile image
-        (suitable for use as part of filenames, dictionary keys, etc)"""
+        (suitable for use as part of filenames, dictionary keys, etc)
+        """
         return os.path.join(lzxy[0].folderName, str(lzxy[1]), str(lzxy[2]))
 
     def _getTileFolderPath(self):
@@ -1102,6 +985,3 @@ class MapTiles(RanaModule):
 
         # tell the tile downloader to shutdown the thread pool
         self._downloader.shutdown()
-
-
-
