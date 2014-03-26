@@ -203,3 +203,11 @@ class Downloader(object):
         print("** this exception occurred: %s\n" % e)
         print("** traceback:\n")
         traceback.print_exc()
+
+    @property
+    def maxThreads(self):
+        return self._pool.maxThreads
+
+    @property
+    def qsize(self):
+        return self._pool.qsize()
