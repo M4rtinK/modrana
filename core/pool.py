@@ -59,6 +59,10 @@ class ThreadPool(object):
     def maxThreads(self):
         return self._maxThreads
 
+    @property
+    def qsize(self):
+        return self._workQueue.qsize
+
     def _start(self):
         """Start the thread pool"""
         for index in range(1, self._maxThreads+1):
