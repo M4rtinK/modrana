@@ -93,7 +93,8 @@ class LeakyLifoQueue:
             if unfinished <= 0:
                 if unfinished < 0:
                     raise ValueError('task_done() called too many times')
-                self.all_tasks_done.notify_all()
+                # we are using notifyAll due to Python 2.5 compatibility
+                self.all_tasks_done.notifyAll()
             self.unfinished_tasks = unfinished
         finally:
             self.all_tasks_done.release()
