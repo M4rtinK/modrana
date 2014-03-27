@@ -36,6 +36,10 @@ import socket
 timeout = 30 # this sets timeout for all sockets
 socket.setdefaulttimeout(timeout)
 
+DL_LOCATION_HERE = "here"
+DL_LOCATION_VIEW = "view"
+DL_LOCATION_TRACK = "track"
+DL_LOCATION_ROUTE = "route"
 
 class TileNotImageException(Exception):
     def __init__(self):
@@ -193,9 +197,12 @@ class MapData(RanaModule):
                 if layer:
                     maxZoomLimit = layer.maxZoom
 
-            z = self.get('z', 15) # this is the current zoomlevel as show on the map screen
+            # for some reason z might be a float sometimes,
+            # so we need to make sure it is an integer
+            z = int(self.get('z', 15)) # this is the current zoomlevel as show on the map screen
             minZ = z - int(
-                self.get('zoomUpSize', 0)) # how many zoomlevels up (from current zoomelevel) should we download ?
+                self.get('zoomUpSize', 0)
+            ) # how many zoomlevels up (from current zoomelevel) should we download ?
             if minZ < 0:
                 minZ = 0
                 # how many zoomlevels down (from current zoomlevel) should we download ?
@@ -225,7 +232,7 @@ class MapData(RanaModule):
                 midZ = 15
             print("max: %d, min: %d, diff: %d, middle:%d" % (maxZ, minZ, diffZ, midZ))
 
-            if location == "here":
+            if location == DL_LOCATION_HERE:
                 # Find which tile we're on
                 pos = self.get("pos", None)
                 if pos is not None:
@@ -236,7 +243,7 @@ class MapData(RanaModule):
                     # now get the tiles from other zoomlevels as specified
                     zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundHere, midZ, maxZ, minZ)
                     self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-            elif location == "track":
+            elif location == DL_LOCATION_TRACK:
                 loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
                 GPXTracklog = loadTl.getActiveTracklog()
                 # get all tracklog points
@@ -244,7 +251,7 @@ class MapData(RanaModule):
                 tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, midZ)
                 zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
                 self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-            elif location == "route": # download around
+            elif location == DL_LOCATION_ROUTE: # download around
                 routeModule = self.m.get('route', None) # get the tracklog module
                 if routeModule:
                     route = routeModule.getDirections()
@@ -255,7 +262,7 @@ class MapData(RanaModule):
                     else:
                         self.set('menu', 'main')
                         self.notify("No active route", 3000)
-            elif location == "view":
+            elif location == DL_LOCATION_VIEW:
                 proj = self.m.get('projection', None)
                 (screenCenterX, screenCenterY) = proj.screenPos(0.5, 0.5) # get pixel coordinates for the screen center
                 (lat, lon) = proj.xy2ll(screenCenterX, screenCenterY) # convert to geographic coordinates
