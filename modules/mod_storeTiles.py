@@ -414,7 +414,9 @@ class StoreTiles(RanaModule):
                         lookupDbPath = self.getLookupDbPath(dbFolderPath)
                         lookupConn = sqlite3.connect(lookupDbPath)
                     else:
-                        lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
+                        # TODO: check if the database is actually initialized for the given layer
+                        accessType = "get"
+                        lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
                     query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
                     lookupResult = lookupConn.execute(query, (z, x, y, layer.type)).fetchone()
                     if fromThread: # tidy up, just to be sure
