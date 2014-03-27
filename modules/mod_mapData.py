@@ -171,179 +171,21 @@ class MapData(RanaModule):
 
     def handleMessage(self, message, messageType, args):
         if message == "refreshTilecount":
-            size = int(self.get("downloadSize", 4))
-            messageType = self.get("downloadType")
-            if messageType != "data":
-                print("Error: mod_mapData can't download %s" % messageType)
-                return
-
-            # update the info when refreshing tilecount and and no dl/size estimation is active
-
-            if self.sizeThread:
-                if self.sizeThread.isAlive() == False:
-                    self.sizeThread = None
-
-            if self.getFilesThread:
-                if self.getFilesThread.isAlive() == False:
-                    self.getFilesThread = None
-
-            location = self.get("downloadArea", "here") # here or route
-
-            maxZoomLimit = 17
-            layerId = self.get('layer', None)
-            mapLayers = self.m.get('mapLayers', None)
-            if mapLayers:
-                layer = mapLayers.getLayerById(layerId)
-                if layer:
-                    maxZoomLimit = layer.maxZoom
-
-            # for some reason z might be a float sometimes,
-            # so we need to make sure it is an integer
-            z = int(self.get('z', 15)) # this is the current zoomlevel as show on the map screen
-            minZ = z - int(
-                self.get('zoomUpSize', 0)
-            ) # how many zoomlevels up (from current zoomelevel) should we download ?
-            if minZ < 0:
-                minZ = 0
-                # how many zoomlevels down (from current zoomlevel) should we download ?
-
-            zoomDownSize = int(self.get('zoomDownSize', 0))
-            if zoomDownSize < 0: # negative value means maximum zoom for the layer
-                maxZ = maxZoomLimit
-            else:
-                maxZ = z + zoomDownSize
-
-            if maxZ > maxZoomLimit:
-                maxZ = 17 #TODO: make layer specific
-                #      z = currentZ # current Zoomlevel
-            diffZ = maxZ - minZ
-            midZ = int(minZ + (diffZ / 2.0))
-
-            # well, its not exactly middle, its jut a value that decides, if we split down or just round up
-            # splitting from a zoomlevel too high can lead to much more tiles than requested
-            # for example, we want tiles for a 10 km radius but we choose to split from a zoomlevel, where a tile is
-            # 20km*20km and our radius intersects four of these tiles, when we split these tiles, we get tiles for an
-            # are of 40km*40km, instead of the requested 10km
-            # therefore, zoom level 15 is used as the minimum number for splitting tiles down
-            # when the maximum zoomlevel from the range requested is less than 15, we don't split at all
-            if midZ < 15 and maxZ < 15:
-                midZ = maxZ
-            else:
-                midZ = 15
-            print("max: %d, min: %d, diff: %d, middle:%d" % (maxZ, minZ, diffZ, midZ))
-
-            if location == DL_LOCATION_HERE:
-                # Find which tile we're on
-                pos = self.get("pos", None)
-                if pos is not None:
-                    (lat, lon) = pos
-                    # be advised: the xy in this case are not screen coordinates but tile coordinates
-                    (x, y) = ll2xy(lat, lon, midZ)
-                    tilesAroundHere = set(self.spiral(x, y, midZ, size)) # get tiles around our position as a set
-                    # now get the tiles from other zoomlevels as specified
-                    zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundHere, midZ, maxZ, minZ)
-                    self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-            elif location == DL_LOCATION_TRACK:
-                loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
-                GPXTracklog = loadTl.getActiveTracklog()
-                # get all tracklog points
-                trackpointsListCopy = map(lambda x: (x.latitude, x.longitude, None), GPXTracklog.trackpointsList[0])[:]
-                tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, midZ)
-                zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
-                self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-            elif location == DL_LOCATION_ROUTE: # download around
-                routeModule = self.m.get('route', None) # get the tracklog module
-                if routeModule:
-                    route = routeModule.getDirections()
-                    if route:
-                        tilesToDownload = self.getTilesForRoute(route.getPointsLLE(), size, midZ)
-                        zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
-                        self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-                    else:
-                        self.set('menu', 'main')
-                        self.notify("No active route", 3000)
-            elif location == DL_LOCATION_VIEW:
-                proj = self.m.get('projection', None)
-                (screenCenterX, screenCenterY) = proj.screenPos(0.5, 0.5) # get pixel coordinates for the screen center
-                (lat, lon) = proj.xy2ll(screenCenterX, screenCenterY) # convert to geographic coordinates
-                (x, y) = ll2xy(lat, lon, midZ) # convert to tile coordinates
-                tilesAroundView = set(self.spiral(x, y, midZ, size)) # get tiles around these coordinates
-                # now get the tiles from other zoomlevels as specified
-                zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundView, midZ, maxZ, minZ)
-
-                self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-
+            self.refreshTilecount()
         elif message == "getSize":
-            # will now ask the server and find the combined size if tiles in the batch
-            self.set("sizeStatus", 'unknown') # first we set the size as unknown
-            neededTiles = self.currentDownloadList
-            layerId = self.get('layer', "mapnik")
-            layer = self._getLayerById(layerId)
-
-            print("getting size")
-            if len(neededTiles) == 0:
-                print("cant get combined size, the list is empty")
-                return
-
-            if self.sizeThread is not None:
-                if self.sizeThread.finished == False:
-                    print("size check already in progress")
-                    return
-
-            self.totalSize = 0
-            maxThreads = self.get('maxSizeThreads', 5)
-            sizeThread = self.GetSize(self, neededTiles, layer,
-                                      maxThreads) # the second parameter is the max number of threads TODO: tweak this
-            print( "getSize received, starting sizeThread")
-            sizeThread.start()
-            self.sizeThread = sizeThread
+            self.startBatchSizeEstimation()
 
         elif message == "download":
-            # get tilelist and download the tiles using threads
-            neededTiles = self.currentDownloadList
-            layerId = self.get('layer', "mapnik")
-            layer = self._getLayerById(layerId)
-
-            print("starting download")
-            if len(neededTiles) == 0:
-                print("cant download an empty list")
-                return
-
-            if self.getFilesThread is not None:
-                if self.getFilesThread.finished == False:
-                    print("download already in progress")
-                    return
-
-            maxThreads = self.get('maxDlThreads', 5)
-            # 2.Oct.2010 2:41 :D
-            # after a lot of effort spent, I still can't get threaded download to reliably
-            # work with sqlite storage without getting stuck
-            # this currently happens only on the N900, not on PC (or I was simply not able to to reproduce it)
-            # therefore, when on N900 with sqlite tile storage, use only simple single-threaded download
-
-            #      if self.device=='n900':
-            #        storageType = self.get('tileStorageType', None)
-            #        if storageType=='sqlite':
-            #          mode='singleThreaded'
-            #        else:
-            #          mode='multiThreaded'
-            #      else:
-            #        mode='multiThreaded'
-
-            # 2.Oct.2010 3:42 ^^
-            # scratch this
-            # well, looks like the culprit was just the urlib3 socket pool with blocking turned on
-            # so all the threads (even when doing it with a single thread) hanged on the block
-            # it seems to be working alright + its pretty fast too
-            getFilesThread = self.GetFiles(self, neededTiles, layer, maxThreads)
-            getFilesThread.start()
-            self.getFilesThread = getFilesThread
+            self.startBatchDownload()
 
         elif message == "stopDownloadThreads":
-            self.stopBatchDownloadThreads()
+            self.stopBatchDownload()
 
         elif message == 'stopSizeThreads':
-            self.stopSizeThreads()
+            self.stopBatchSizeEstimation()
+
+        elif message == 'dlAroundRoute':
+            self._downloadAroundCurrentRoute()
 
         elif message == "up":
             if self.scroll > 0:
@@ -356,23 +198,6 @@ class MapData(RanaModule):
         elif message == "reset":
             self.scroll = 0
             self.set("needRedraw", True)
-
-        elif message == 'dlAroundRoute':
-            routeModule = self.m.get('route', None)
-            if routeModule:
-                route = routeModule.getDirections()
-                notification = "Using current route"
-                if route:
-                    self.set('menu', 'data2')
-                    mLength = route.getLength()
-                    if mLength:
-                        units = self.m.get('units', None)
-                        if units:
-                            lengthString = units.m2CurrentUnitString(mLength, dp=1, short=True)
-                            notification = "%s (%s)" % (notification, lengthString)
-                    self.notify(notification, 2000)
-                else:
-                    self.notify("No active route", 3000)
 
     def addOtherZoomlevels(self, tiles, tilesZ, maxZ, minZ):
         """expand the tile coverage to other zoomlevels
@@ -1103,3 +928,204 @@ class MapData(RanaModule):
     def shutdown(self):
         self.stopSizeThreads()
         self.stopBatchDownloadThreads()
+
+    def refreshTilecount(self):
+        """The batch download parameters were changed,
+        refresh the current tilecount
+        """
+        size = int(self.get("downloadSize", 4))
+        messageType = self.get("downloadType")
+        if messageType != "data":
+            print("Error: mod_mapData can't download %s" % messageType)
+            return
+
+        # update the info when refreshing tilecount and and no dl/size estimation is active
+
+        if self.sizeThread:
+            if self.sizeThread.isAlive() == False:
+                self.sizeThread = None
+
+        if self.getFilesThread:
+            if self.getFilesThread.isAlive() == False:
+                self.getFilesThread = None
+
+        location = self.get("downloadArea", "here") # here or route
+
+        maxZoomLimit = 17
+        layerId = self.get('layer', None)
+        mapLayers = self.m.get('mapLayers', None)
+        if mapLayers:
+            layer = mapLayers.getLayerById(layerId)
+            if layer:
+                maxZoomLimit = layer.maxZoom
+
+        # for some reason z might be a float sometimes,
+        # so we need to make sure it is an integer
+        z = int(self.get('z', 15)) # this is the current zoomlevel as show on the map screen
+        minZ = z - int(
+            self.get('zoomUpSize', 0)
+        ) # how many zoomlevels up (from current zoomelevel) should we download ?
+        if minZ < 0:
+            minZ = 0
+            # how many zoomlevels down (from current zoomlevel) should we download ?
+
+        zoomDownSize = int(self.get('zoomDownSize', 0))
+        if zoomDownSize < 0: # negative value means maximum zoom for the layer
+            maxZ = maxZoomLimit
+        else:
+            maxZ = z + zoomDownSize
+
+        if maxZ > maxZoomLimit:
+            maxZ = 17 #TODO: make layer specific
+            #      z = currentZ # current Zoomlevel
+        diffZ = maxZ - minZ
+        midZ = int(minZ + (diffZ / 2.0))
+
+        # well, its not exactly middle, its jut a value that decides, if we split down or just round up
+        # splitting from a zoomlevel too high can lead to much more tiles than requested
+        # for example, we want tiles for a 10 km radius but we choose to split from a zoomlevel, where a tile is
+        # 20km*20km and our radius intersects four of these tiles, when we split these tiles, we get tiles for an
+        # are of 40km*40km, instead of the requested 10km
+        # therefore, zoom level 15 is used as the minimum number for splitting tiles down
+        # when the maximum zoomlevel from the range requested is less than 15, we don't split at all
+        if midZ < 15 and maxZ < 15:
+            midZ = maxZ
+        else:
+            midZ = 15
+        print("max: %d, min: %d, diff: %d, middle:%d" % (maxZ, minZ, diffZ, midZ))
+
+        if location == DL_LOCATION_HERE:
+            # Find which tile we're on
+            pos = self.get("pos", None)
+            if pos is not None:
+                (lat, lon) = pos
+                # be advised: the xy in this case are not screen coordinates but tile coordinates
+                (x, y) = ll2xy(lat, lon, midZ)
+                tilesAroundHere = set(self.spiral(x, y, midZ, size)) # get tiles around our position as a set
+                # now get the tiles from other zoomlevels as specified
+                zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundHere, midZ, maxZ, minZ)
+                self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
+        elif location == DL_LOCATION_TRACK:
+            loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
+            GPXTracklog = loadTl.getActiveTracklog()
+            # get all tracklog points
+            trackpointsListCopy = map(lambda x: (x.latitude, x.longitude, None), GPXTracklog.trackpointsList[0])[:]
+            tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, midZ)
+            zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
+            self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
+        elif location == DL_LOCATION_ROUTE: # download around
+            routeModule = self.m.get('route', None) # get the tracklog module
+            if routeModule:
+                route = routeModule.getDirections()
+                if route:
+                    tilesToDownload = self.getTilesForRoute(route.getPointsLLE(), size, midZ)
+                    zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
+                    self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
+                else:
+                    self.set('menu', 'main')
+                    self.notify("No active route", 3000)
+        elif location == DL_LOCATION_VIEW:
+            proj = self.m.get('projection', None)
+            (screenCenterX, screenCenterY) = proj.screenPos(0.5, 0.5) # get pixel coordinates for the screen center
+            (lat, lon) = proj.xy2ll(screenCenterX, screenCenterY) # convert to geographic coordinates
+            (x, y) = ll2xy(lat, lon, midZ) # convert to tile coordinates
+            tilesAroundView = set(self.spiral(x, y, midZ, size)) # get tiles around these coordinates
+            # now get the tiles from other zoomlevels as specified
+            zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundView, midZ, maxZ, minZ)
+
+            self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
+
+    def startBatchDownload(self):
+        """Start threaded batch tile download"""
+
+        # get tilelist and download the tiles using threads
+        neededTiles = self.currentDownloadList
+        layerId = self.get('layer', "mapnik")
+        layer = self._getLayerById(layerId)
+
+        print("starting download")
+        if len(neededTiles) == 0:
+            print("cant download an empty list")
+            return
+
+        if self.getFilesThread is not None:
+            if self.getFilesThread.finished == False:
+                print("download already in progress")
+                return
+
+        maxThreads = self.get('maxDlThreads', 5)
+        # 2.Oct.2010 2:41 :D
+        # after a lot of effort spent, I still can't get threaded download to reliably
+        # work with sqlite storage without getting stuck
+        # this currently happens only on the N900, not on PC (or I was simply not able to to reproduce it)
+        # therefore, when on N900 with sqlite tile storage, use only simple single-threaded download
+
+        #      if self.device=='n900':
+        #        storageType = self.get('tileStorageType', None)
+        #        if storageType=='sqlite':
+        #          mode='singleThreaded'
+        #        else:
+        #          mode='multiThreaded'
+        #      else:
+        #        mode='multiThreaded'
+
+        # 2.Oct.2010 3:42 ^^
+        # scratch this
+        # well, looks like the culprit was just the urlib3 socket pool with blocking turned on
+        # so all the threads (even when doing it with a single thread) hanged on the block
+        # it seems to be working alright + its pretty fast too
+        getFilesThread = self.GetFiles(self, neededTiles, layer, maxThreads)
+        getFilesThread.start()
+        self.getFilesThread = getFilesThread
+
+    def stopBatchDownload(self):
+        """Stop threaded batch tile download"""
+        self.stopBatchDownloadThreads()
+
+    def _downloadAroundCurrentRoute(self):
+        """Use currently active route as batch download target"""
+        routeModule = self.m.get('route', None)
+        if routeModule:
+            route = routeModule.getDirections()
+            notification = "Using current route"
+            if route:
+                self.set('menu', 'data2')
+                mLength = route.getLength()
+                if mLength:
+                    units = self.m.get('units', None)
+                    if units:
+                        lengthString = units.m2CurrentUnitString(mLength, dp=1, short=True)
+                        notification = "%s (%s)" % (notification, lengthString)
+                self.notify(notification, 2000)
+            else:
+                self.notify("No active route", 3000)
+
+    def startBatchSizeEstimation(self):
+        """Start threaded batch size estimation"""
+        # will now ask the server and find the combined size if tiles in the batch
+        self.set("sizeStatus", 'unknown') # first we set the size as unknown
+        neededTiles = self.currentDownloadList
+        layerId = self.get('layer', "mapnik")
+        layer = self._getLayerById(layerId)
+
+        print("getting size")
+        if len(neededTiles) == 0:
+            print("cant get combined size, the list is empty")
+            return
+
+        if self.sizeThread is not None:
+            if self.sizeThread.finished == False:
+                print("size check already in progress")
+                return
+
+        self.totalSize = 0
+        maxThreads = self.get('maxSizeThreads', 5)
+        sizeThread = self.GetSize(self, neededTiles, layer,
+                                  maxThreads) # the second parameter is the max number of threads TODO: tweak this
+        print( "getSize received, starting sizeThread")
+        sizeThread.start()
+        self.sizeThread = sizeThread
+
+    def stopBatchSizeEstimation(self):
+        """Stop the threaded batch size estimation"""
+        self.stopSizeThreads()
