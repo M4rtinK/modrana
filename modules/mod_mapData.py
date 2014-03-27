@@ -397,7 +397,7 @@ class MapData(RanaModule):
                 # get the store tiles module
                 if m:
                     # does the tile exist ?
-                    if m.tileExists2(lzxy): # if the file does not exist
+                    if m.tileExists2(lzxy, fromThread=True): # if the file does not exist
                         size = None # it exists, return None
                     else:
                         # the tile does not exist, get ist http header
@@ -408,10 +408,11 @@ class MapData(RanaModule):
                 size = 0 # the url errored out, so we just say it  has zero size
             except Exception:
                 import sys
-
                 e = sys.exc_info()[1]
                 print("error, while checking size of a tile")
                 print(e)
+                import traceback
+                traceback.print_exc(file=sys.stdout) # find what went wrong
                 size = 0
             return size
 
@@ -903,7 +904,6 @@ class MapData(RanaModule):
                 self.sizeThread.quit = True
             except Exception:
                 import sys
-
                 e = sys.exc_info()[1]
                 print("error while shutting down size thread")
                 print(e)
