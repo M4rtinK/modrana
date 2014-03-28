@@ -28,7 +28,7 @@ class ThreadPool(object):
             self._name = name
 
         self._queueSize = 0  # not bounded by default
-        if taskBufferSize > 0:
+        if taskBufferSize >= 0:
             # if task buffer size is specified we set the queue
             # size to maxThread + task buffer size
             # meaning there can be at any time maxThreads*tasks in progress
