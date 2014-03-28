@@ -894,12 +894,15 @@ class MapData(RanaModule):
             return text
 
     def getFreeSpaceText(self):
-        """return a string describing the space available on the filesystem where the tile-folder is"""
-        path = self._getTileFolderPath()
-        f = os.statvfs(path)
-        freeSpaceInBytes = (f.f_bsize * f.f_bavail)
-        freeSpaceInMB = freeSpaceInBytes / (1024.0 * 1024.0)
-        text = "Free space available: %1.1f MB" % freeSpaceInMB
+        """Return a string describing the space available on the filesystem
+        where the tile-folder is located
+
+        :returns: string describing free space in tile folder
+        :rtype: str
+        """
+        path = self.modrana.paths.getMapFolderPath()
+        prettySpace = utils.bytes2PrettyUnitString(utils.freeSpaceInPath(path))
+        text = "Free space available: %s" % prettySpace
         return text
 
     def stopSizeThreads(self):

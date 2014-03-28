@@ -232,3 +232,13 @@ def bytes2PrettyUnitString(bytes):
     else:
         size = '%.2fb' % bytes
     return size
+
+def freeSpaceInPath(path):
+    """Return free space in the given path in bytes
+
+    :param string path: path to check
+    :returns: free space in path in bytes
+    :rtype: int
+    """
+    f = os.statvfs(path)
+    return f.f_bsize * f.f_bavail
