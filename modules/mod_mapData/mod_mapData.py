@@ -41,6 +41,9 @@ DL_LOCATION_VIEW = "view"
 DL_LOCATION_TRACK = "track"
 DL_LOCATION_ROUTE = "route"
 
+# maximum zoom level used when no maximum is specified for a layer
+MAX_ZOOMLEVEL = 17
+
 class TileNotImageException(Exception):
     def __init__(self):
         self.parameter = 1
@@ -63,8 +66,8 @@ class MapData(RanaModule):
     def __init__(self, m, d, i):
         RanaModule.__init__(self, m, d, i)
         self.stopThreading = True
-        self.dlListLock = threading.Lock() # well, its actually a set
-        self.currentDownloadList = [] # list of files and urls for the current download batch
+        self._tileDownloadRequests = set()
+        self._tileDownloadRequestsLock = threading.RLock()
         #    self.currentTilesToGet = [] # used for reporting the (actual) size of the tiles for download
         self.sizeThread = None
         self.getFilesThread = None
@@ -85,10 +88,28 @@ class MapData(RanaModule):
         self.tiles = []
         self.totalSize = 0
 
+        self.minZ = 0
+        self.midZ = 15
+        self.maxZ = MAX_ZOOMLEVEL
+
     def firstTime(self):
         # cache the map folder path
         self.mapFolderPath = self.modrana.paths.getMapFolderPath()
         self._mapLayersModule = self.m.get('mapLayers', None) # get the map layers module
+
+    def clearRequests(self):
+        """Clear the download request set"""
+        with self._tileDownloadRequestsLock:
+            self._tileDownloadRequests.clear()
+
+    def addDownloadRequests(self, requests):
+        """Add download requests to the download request set
+
+        :param list requests: a list of lzxy tuples representing download requests
+        """
+
+        with self._tileDownloadRequestsLock:
+            self._tileDownloadRequests.update(requests)
 
     def _getTileFolderPath(self):
         """return path to the map folder"""
@@ -146,22 +167,6 @@ class MapData(RanaModule):
         filePath = os.path.join(tileFolder, mapTiles.getImagePath(lzxy))
         fileFolder = os.path.join(tileFolder, mapTiles.getImageFolder(lzxy))
         return url, filePath, fileFolder
-
-    def addToQueue(self, neededTiles):
-        """load urls and filenames to download queue,
-           optionally check for duplicates
-        """
-
-        # neededTiles is a list of (x, y, z) tuples
-
-        tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-        print("tiles for the batch will be downloaded to: %s" % tileFolder)
-
-        check = self.get('checkTiles', False)
-        if check:
-            neededTiles = self.checkTiles(neededTiles)
-        with self.dlListLock: # make sure the set of needed tiles is accessed in an atomic way
-            self.currentDownloadList = neededTiles # load the files to the download queue variable
 
     def getTileUrl(self, x, y, z, layerId):
         """Return url for given tile coordinates and layer"""
@@ -374,7 +379,7 @@ class MapData(RanaModule):
 
                 # increment the counter or remove an available tile in a thread safe way
                 if size is None: #this signalizes that the tile is available
-                    with self.callback.dlListLock:
+                    with self.callback._tileDownloadRequestsLock:
                         self.callbackSet.discard(item)
                     size = 0 # tiles we don't have don't need to be downloaded, therefore 0
                 with incrementLock:
@@ -540,7 +545,6 @@ class MapData(RanaModule):
                     self.finished = True
                     break
 
-
         def getTilesWorker(self, shutdown, incrementLock):
             while 1:
                 if shutdown.isSet():
@@ -548,7 +552,7 @@ class MapData(RanaModule):
                     break
                     # try to get some work
                 try:
-                    with self.callback.dlListLock:
+                    with self.callback._tileDownloadRequestsLock:
                         item = self.neededTiles.pop()
                 except: # start the loop from beginning, so that shutdown can be checked and the thread can exit
                     print("waiting for more work")
@@ -831,7 +835,7 @@ class MapData(RanaModule):
     def getFilesText(self, getFilesThread):
         """return a string describing status of the download threads"""
         text = ""
-        tileCount = len(self.currentDownloadList)
+        tileCount = len(self._tileDownloadRequests)
         if getFilesThread is None:
             if tileCount:
                 text = "Press <b>Start</b> to download ~ <b>%d</b> tiles." % tileCount
@@ -872,7 +876,7 @@ class MapData(RanaModule):
 
     def getSizeText(self, sizeThread):
         """return a string describing status of the size counting threads"""
-        tileCount = len(self.currentDownloadList)
+        tileCount = len(self._tileDownloadRequests)
         if tileCount == 0:
             return ""
         if sizeThread is None:
@@ -933,7 +937,6 @@ class MapData(RanaModule):
         """The batch download parameters were changed,
         refresh the current tilecount
         """
-        size = int(self.get("downloadSize", 4))
         messageType = self.get("downloadType")
         if messageType != "data":
             print("Error: mod_mapData can't download %s" % messageType)
@@ -993,53 +996,80 @@ class MapData(RanaModule):
         else:
             midZ = 15
         print("max: %d, min: %d, diff: %d, middle:%d" % (maxZ, minZ, diffZ, midZ))
+        self.minZ = minZ
+        self.midZ = midZ
+        self.maxZ = maxZ
 
         if location == DL_LOCATION_HERE:
-            # Find which tile we're on
-            pos = self.get("pos", None)
-            if pos is not None:
-                (lat, lon) = pos
-                # be advised: the xy in this case are not screen coordinates but tile coordinates
-                (x, y) = ll2xy(lat, lon, midZ)
-                tilesAroundHere = set(self.spiral(x, y, midZ, size)) # get tiles around our position as a set
-                # now get the tiles from other zoomlevels as specified
-                zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundHere, midZ, maxZ, minZ)
-                self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-        elif location == DL_LOCATION_TRACK:
-            loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
-            GPXTracklog = loadTl.getActiveTracklog()
-            # get all tracklog points
-            trackpointsListCopy = map(lambda x: (x.latitude, x.longitude, None), GPXTracklog.trackpointsList[0])[:]
-            tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, midZ)
-            zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
-            self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-        elif location == DL_LOCATION_ROUTE: # download around
-            routeModule = self.m.get('route', None) # get the tracklog module
-            if routeModule:
-                route = routeModule.getDirections()
-                if route:
-                    tilesToDownload = self.getTilesForRoute(route.getPointsLLE(), size, midZ)
-                    zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, midZ, maxZ, minZ)
-                    self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
-                else:
-                    self.set('menu', 'main')
-                    self.notify("No active route", 3000)
-        elif location == DL_LOCATION_VIEW:
-            proj = self.m.get('projection', None)
-            (screenCenterX, screenCenterY) = proj.screenPos(0.5, 0.5) # get pixel coordinates for the screen center
-            (lat, lon) = proj.xy2ll(screenCenterX, screenCenterY) # convert to geographic coordinates
-            (x, y) = ll2xy(lat, lon, midZ) # convert to tile coordinates
-            tilesAroundView = set(self.spiral(x, y, midZ, size)) # get tiles around these coordinates
-            # now get the tiles from other zoomlevels as specified
-            zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundView, midZ, maxZ, minZ)
+            self._addTilesAroundPosition()
 
-            self.addToQueue(zoomlevelExtendedTiles) # load the files to the download queue
+        elif location == DL_LOCATION_TRACK:
+            self._addTilesAroundTrack()
+
+        elif location == DL_LOCATION_ROUTE: # download around
+            self._addTilesAroundRoute()
+
+        elif location == DL_LOCATION_VIEW:
+            self._addTilesAroundView()
+
+    def _addTilesAroundPosition(self):
+        """Add tiles around current geographic coordinates (if known)"""
+        # Find which tile we're on
+        size = int(self.get("downloadSize", 4))
+        pos = self.get("pos", None)
+        if pos is not None:
+            (lat, lon) = pos
+            # be advised: the xy in this case are not screen coordinates but tile coordinates
+            (x, y) = ll2xy(lat, lon, self.midZ)
+            tilesAroundHere = set(self.spiral(x, y, self.midZ, size)) # get tiles around our position as a set
+            # now get the tiles from other zoomlevels as specified
+            zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundHere, self.midZ, self.maxZ, self.minZ)
+            self.addDownloadRequests(zoomlevelExtendedTiles) # load the files to the download queue
+
+    def _addTilesAroundTrack(self):
+        """Get tiles around the active (?) tracklog
+        TODO: this looks kinda weird :)
+        """
+        loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
+        GPXTracklog = loadTl.getActiveTracklog()
+        size = int(self.get("downloadSize", 4))
+        # get all tracklog points
+        trackpointsListCopy = map(lambda x: (x.latitude, x.longitude, None), GPXTracklog.trackpointsList[0])[:]
+        tilesToDownload = self.getTilesForRoute(trackpointsListCopy, size, self.midZ)
+        zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, self.midZ, self.maxZ, self.minZ)
+        self.addDownloadRequests(zoomlevelExtendedTiles) # load the files to the download queue
+
+    def _addTilesAroundRoute(self):
+        """Add tiles around currently active turn-by-turn route (if any)"""
+        routeModule = self.m.get('route', None) # get the tracklog module
+        size = int(self.get("downloadSize", 4))
+        if routeModule:
+            route = routeModule.getDirections()
+            if route:
+                tilesToDownload = self.getTilesForRoute(route.getPointsLLE(), size, self.midZ)
+                zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, self.midZ, self.maxZ, self.minZ)
+                self.addDownloadRequests(zoomlevelExtendedTiles) # load the files to the download queue
+            else:
+                self.set('menu', 'main')
+                self.notify("No active route", 3000)
+
+    def _addTilesAroundView(self):
+        """Add tiles around center of the current main map view"""
+        proj = self.m.get('projection', None)
+        size = int(self.get("downloadSize", 4))
+        (screenCenterX, screenCenterY) = proj.screenPos(0.5, 0.5) # get pixel coordinates for the screen center
+        (lat, lon) = proj.xy2ll(screenCenterX, screenCenterY) # convert to geographic coordinates
+        (x, y) = ll2xy(lat, lon, self.midZ) # convert to tile coordinates
+        tilesAroundView = set(self.spiral(x, y, self.midZ, size)) # get tiles around these coordinates
+        # now get the tiles from other zoomlevels as specified
+        zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesAroundView, self.midZ, self.maxZ, self.minZ)
+        self.addDownloadRequests(zoomlevelExtendedTiles) # load the files to the download queue
 
     def startBatchDownload(self):
         """Start threaded batch tile download"""
 
         # get tilelist and download the tiles using threads
-        neededTiles = self.currentDownloadList
+        neededTiles = self._tileDownloadRequests
         layerId = self.get('layer', "mapnik")
         layer = self._getLayerById(layerId)
 
@@ -1104,7 +1134,7 @@ class MapData(RanaModule):
         """Start threaded batch size estimation"""
         # will now ask the server and find the combined size if tiles in the batch
         self.set("sizeStatus", 'unknown') # first we set the size as unknown
-        neededTiles = self.currentDownloadList
+        neededTiles = self._tileDownloadRequests
         layerId = self.get('layer', "mapnik")
         layer = self._getLayerById(layerId)
 
