@@ -62,6 +62,9 @@ THREAD_TESTING_PROVIDER = "modRanaTestingProvider"
 # thread pools
 THREAD_POOL_AUTOMATIC_TILE_DOWNLOAD = "automaticTileDownload"
 
+THREAD_POOL_BATCH_DOWNLOAD = "batchTileDownload"
+THREAD_POOL_BATCH_SIZE_CHECK = "batchTileSizeCheck"
+
 # device types
 DEVICE_TYPE_DESKTOP = 1
 DEVICE_TYPE_SMARTPHONE = 2
