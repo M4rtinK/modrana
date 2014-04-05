@@ -137,6 +137,9 @@ class GTKGUI(GUIModule):
         # the first time call
         self.mw.firstTime()
 
+        if self.get("showRedrawTime"):
+            self.setShowRedrawTime(True)
+
     def getIDString(self):
         return "GTK"
 
@@ -597,7 +600,9 @@ class MainWidget(gtk.Widget):
         self.currentDrawMethod(cr, event)
         # enable redraw speed debugging
         if self.showRedrawTime:
-            print("Redraw took %1.2f ms" % (1000 * (time.clock() - start)))
+            redrawTime = (1000 * (time.clock() - start))
+            timestamp = time.time()
+            print("Redraw took %1.2f ms at(%1.4f)" % (redrawTime, timestamp))
         self.lastFullRedraw = time.time()
 
     def getLastFullRedraw(self):
