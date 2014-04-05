@@ -844,7 +844,6 @@ class MainWidget(gtk.Widget):
 
     def do_expose_event(self, event):
         """handle screen redraw"""
-        self.chain(event)
         cr = self.window.cairo_create()
         return self._expose_cairo(event, cr)
 
