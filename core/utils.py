@@ -5,6 +5,7 @@ import threading
 import os
 import sys
 
+from core import constants
 from core.backports.six import b
 from core.backports import six
 
@@ -242,3 +243,14 @@ def freeSpaceInPath(path):
     """
     f = os.statvfs(path)
     return f.f_bsize * f.f_bavail
+
+def createConnectionPool(url, maxThreads=1):
+    """Create the connection pool -> to facilitate socket reuse
+
+    :param string url: root URL for the threadpool
+    :param int maxThreads: pool capacity
+    """
+    # only import urllib3 once needed
+    from modules import urllib3
+    return urllib3.connection_from_url(url, timeout=constants.INTERNET_CONNECTIVITY_TIMEOUT,
+                                       maxsize=maxThreads, block=False)
