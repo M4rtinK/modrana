@@ -22,13 +22,15 @@ from modules.base_module import RanaModule
 from time import clock
 import time
 import os
+import copy
 from core import geo
 from core import utils
 from core import tiles
+from core import constants
 from core.tilenames import *
-from threading import Thread
 import threading
-from modules import urllib3
+from .pools import BatchSizeCheckPool
+from .pools import BatchTileDownloadPool
 
 # socket timeout
 import socket
@@ -44,18 +46,6 @@ DL_LOCATION_ROUTE = "route"
 # maximum zoom level used when no maximum is specified for a layer
 MAX_ZOOMLEVEL = 17
 
-class TileNotImageException(Exception):
-    def __init__(self):
-        self.parameter = 1
-
-    def __str__(self):
-        message = "the downloaded tile is not an image as per \
-its magic number (it is probably an error response webpage \
-returned by the server)"
-
-        return message
-
-
 def getModule(m, d, i):
     return MapData(m, d, i)
 
@@ -65,20 +55,14 @@ class MapData(RanaModule):
 
     def __init__(self, m, d, i):
         RanaModule.__init__(self, m, d, i)
-        self.stopThreading = True
         self._tileDownloadRequests = set()
         self._tileDownloadRequestsLock = threading.RLock()
-        #    self.currentTilesToGet = [] # used for reporting the (actual) size of the tiles for download
-        self.sizeThread = None
-        self.getFilesThread = None
-        self.aliasForSet = self.set
-        self.lastMenuRedraw = 0
+
+        self._checkPool = BatchSizeCheckPool()
+        self._downloadPool = BatchTileDownloadPool()
+
         self.notificateOnce = True
         self.scroll = 0
-        self.onlineRequestTimeout = 30
-        # how often should the download info be
-        # updated during batch download, in seconds
-        self.batchInfoUpdateInterval = 0.5
         self.mapFolderPath = None
         self._mapLayersModule = None
 
@@ -97,11 +81,6 @@ class MapData(RanaModule):
         self.mapFolderPath = self.modrana.paths.getMapFolderPath()
         self._mapLayersModule = self.m.get('mapLayers', None) # get the map layers module
 
-    def clearRequests(self):
-        """Clear the download request set"""
-        with self._tileDownloadRequestsLock:
-            self._tileDownloadRequests.clear()
-
     def addDownloadRequests(self, requests):
         """Add download requests to the download request set
 
@@ -110,6 +89,39 @@ class MapData(RanaModule):
 
         with self._tileDownloadRequestsLock:
             self._tileDownloadRequests.update(requests)
+
+    def removeTileDownloadRequest(self, request):
+        with self._tileDownloadRequestsLock:
+            self._tileDownloadRequests.discard(request)
+
+    def clearRequests(self):
+        """Clear the download request set"""
+        with self._tileDownloadRequestsLock:
+            self._tileDownloadRequests.clear()
+
+    @property
+    def requestCount(self):
+        return len(self._tileDownloadRequests)
+
+    @property
+    def checkSizeRunning(self):
+        return self._checkPool.running
+
+    @property
+    def batchDownloadRunning(self):
+        return self._downloadPool.running
+
+    @property
+    def running(self):
+        return self.checkSizeRunning or self.batchDownloadRunning
+
+    @property
+    def checkSizePool(self):
+        return self._checkPool
+
+    @property
+    def downloadPool(self):
+        return self._downloadPool
 
     def _getTileFolderPath(self):
         """return path to the map folder"""
@@ -129,36 +141,6 @@ class MapData(RanaModule):
             if not tiles.has_key(tile):
                 tiles[tile] = True
         return tiles.keys()
-
-    def checkTiles(self, tilesToDownload):
-        """
-        Get tiles that need to be downloaded and look if we don't already have some of these tiles,
-        then generate a set of ('url','filename') tuples and send them to the threaded downloader
-        """
-        print("Checking if there are duplicated tiles")
-        start = clock()
-        tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-        if tileFolder is None:
-            print("mapData: tile folder path unknown or unusable")
-            return []
-        layerId = self.get('layer', "mapnik") # TODO: manual layer setting
-        layer = self._getLayerById(layerId)
-        extension = layer.type # what is the extension for the current layer ?
-        folderName = layer.folderName # what is the extension for the current layer ?
-
-        mapTiles = self.m.get('mapTiles', None)
-
-        neededTiles = []
-
-        for tile in tilesToDownload: # check what tiles are already stored
-            (z, x, y) = (tile[2], tile[0], tile[1])
-            filePath = tileFolder + mapTiles.getImagePath(x, y, z, folderName, extension)
-            if not os.path.exists(filePath): # we don't have this file
-                neededTiles.append(tile)
-
-        print("Downloading %d new tiles." % len(neededTiles))
-        print("Removing already available tiles from dl took %1.2f ms" % (1000 * (clock() - start)))
-        return neededTiles
 
     def getTileUrlAndPath(self, lzxy):
         mapTiles = self.m.get('mapTiles', None)
@@ -281,346 +263,6 @@ class MapData(RanaModule):
 
         return extendedTiles
 
-    class GetSize(Thread):
-        """a class used for estimating the size of tiles for given set of coordinates,
-           it also removes locally available tiles from the set"""
-
-        def __init__(self, callback, neededTiles, layer, maxThreads):
-            Thread.__init__(self)
-            self.callback = callback
-            self.callbackSet = neededTiles # reference to the actual global set
-            self.neededTiles = neededTiles.copy() # local version
-            self.maxThreads = maxThreads
-            self.layer = layer
-            self.processed = 0
-            self.urlCount = len(neededTiles)
-            self.totalSize = 0
-            self.finished = False
-            self.quit = False
-            url = self.getAnUrl(neededTiles)
-            self.connPool = self.createConnectionPool(url)
-
-        def createConnectionPool(self, url):
-            """create the connection pool -> to facilitate socket reuse"""
-            timeout = self.callback.onlineRequestTimeout
-            #headers = { 'User-Agent' : "Mozilla/5.0 (compatible; MSIE 5.5; Linux)" }
-            userAgent = self.callback.modrana.configs.getUserAgent()
-            headers = {'User-Agent': userAgent}
-            connPool = urllib3.connection_from_url(url, headers=headers, timeout=timeout, maxsize=self.maxThreads,
-                                                   block=False)
-            return connPool
-
-        def getAnUrl(self, neededTiles):
-            """get a random url so we can init the pool"""
-            if neededTiles:
-                tile = None
-                for t in neededTiles:
-                    tile = t
-                    break
-                (x, y, z) = (tile[0], tile[1], tile[2])
-                url = tiles.getTileUrl((self.layer, z, x, y))
-            else:
-                url = ""
-            return url
-
-        def run(self):
-            print("**!! batch tile size estimation is starting !!**")
-            maxThreads = self.maxThreads
-            shutdown = threading.Event()
-            localDlListLock = threading.Lock()
-            incrementLock = threading.Lock()
-            threads = []
-            for i in range(0, maxThreads): # start threads
-                # start download thread
-                t = Thread(target=self.getSizeWorker, args=(shutdown, incrementLock, localDlListLock))
-                t.daemon = True
-                t.start()
-                threads.append(t)
-            print("Added %d URLS to check for size." % self.urlCount)
-            while True:
-                time.sleep(
-                    self.callback.batchInfoUpdateInterval) # this governs how often we check status of the worker threads
-                print("Batch size working...")
-                print("(threads: %i)" % (threading.activeCount() - 1, ))
-                print("pending: %d, done: %d" % (len(self.neededTiles), self.processed))
-                if self.quit == True: # we were ordered to quit
-                    print("***get size quiting")
-                    shutdown.set() # dismiss all workers
-                    self.finished = True
-                    break
-                if not self.neededTiles: # we processed everything
-                    print("***get size finished")
-                    shutdown.set()
-                    self.finished = True
-                    break
-
-        def getSizeWorker(self, shutdown, incrementLock, localDlListLock):
-            """a worker thread method for estimating tile size"""
-            while 1:
-                if shutdown.isSet():
-                    print("file size estimation thread is shutting down")
-                    break
-                    # try to get some work
-                with localDlListLock:
-                    if self.neededTiles:
-                        item = self.neededTiles.pop()
-                    else:
-                        print("no more work, worker quiting")
-                        break
-                        # try to retrieve size of a tile
-                size = 0
-                try:
-                    size = self.getSizeForURL(item)
-                except Exception:
-                    import sys
-
-                    e = sys.exc_info()[1]
-                    print("exception in a get size worker thread:\n%s" % e)
-
-                # increment the counter or remove an available tile in a thread safe way
-                if size is None: #this signalizes that the tile is available
-                    with self.callback._tileDownloadRequestsLock:
-                        self.callbackSet.discard(item)
-                    size = 0 # tiles we don't have don't need to be downloaded, therefore 0
-                with incrementLock:
-                    self.processed += 1
-                    self.totalSize += size
-
-        def getSizeForURL(self, tile):
-            """get a size of a tile from its metadata
-                 return size
-                 return None if the tile is available
-                 return 0 if there is an Exception"""
-            size = 0
-            url = "unknown url"
-            try:
-                # get the coordinates
-                lzxy = (self.layer, tile[2], tile[0], tile[1])
-                # get the url and other info
-                (url, filename, folder) = self.callback.getTileUrlAndPath(lzxy)
-                m = self.callback.m.get('storeTiles', None) # get the tile storage module
-                # get the store tiles module
-                if m:
-                    # does the tile exist ?
-                    if m.tileExists2(lzxy, fromThread=True): # if the file does not exist
-                        size = None # it exists, return None
-                    else:
-                        # the tile does not exist, get ist http header
-                        request = self.connPool.urlopen('HEAD', url)
-                        size = int(request.getheaders()['content-length'])
-            except IOError:
-                print("Could not open document: %s" % url)
-                size = 0 # the url errored out, so we just say it  has zero size
-            except Exception:
-                import sys
-                e = sys.exc_info()[1]
-                print("error, while checking size of a tile")
-                print(e)
-                import traceback
-                traceback.print_exc(file=sys.stdout) # find what went wrong
-                size = 0
-            return size
-
-
-    class GetFiles(Thread):
-        """a class used for downloading tiles based on a given set of coordinates"""
-
-        def __init__(self, callback, neededTiles, layer, maxThreads):
-            Thread.__init__(self)
-            self.callback = callback
-            self.neededTiles = neededTiles
-            self.maxThreads = maxThreads
-            self.layer = layer
-
-            self.retryCount = 3
-
-            self.retryInProgress = 0
-
-            self.urlCount = len(neededTiles)
-            self.finished = False
-            self.quit = False
-            url = self.getAnUrl(neededTiles)
-            self.connPool = self.createConnectionPool(url)
-
-            # only access following variables with the incrementLock
-            self.processed = 0 # counter for processed tiles
-            self.found = 0 # number of tiles found locally
-            self.downloaded = 0 # counter for downloaded tiles
-            self.failedDownloads = []
-            self.transfered = 0
-
-        def _resetCounts(self):
-            self.processed = 0
-            self.urlCount = len(self.neededTiles)
-            self.failedDownloads = []
-
-        def getProgress(self):
-            return self.processed, self.urlCount, self.transfered, self.getFailedDownloadCount()
-
-        def getFailedDownloads(self):
-            return self.failedDownloads
-
-        def getFailedDownloadCount(self):
-            return len(self.failedDownloads)
-
-        def getDownloadCount(self):
-            return self.downloaded
-
-        def getRetryInProgress(self):
-            """return 0 if normal download is in progress
-            or 1-n for 1 - n-th retry"""
-            return self.retryInProgress
-
-        def isFinished(self):
-            return self.finished
-
-        def getAnUrl(self, neededTiles):
-            """get a random url so we can init the pool"""
-            if neededTiles:
-                tile = None
-                for t in neededTiles:
-                    tile = t
-                    break
-                (x, y, z) = (tile[0], tile[1], tile[2])
-                url = tiles.getTileUrl((self.layer, z, x, y))
-            else:
-                url = ""
-            return url
-
-        def createConnectionPool(self, url):
-            """create the connection pool -> to facilitate socket reuse"""
-            timeout = self.callback.onlineRequestTimeout
-            connPool = urllib3.connection_from_url(url, timeout=timeout, maxsize=self.maxThreads, block=False)
-            return connPool
-
-        def run(self):
-            print("**!! batch tile download is starting !!**")
-            maxThreads = self.maxThreads
-            shutdown = threading.Event()
-            incrementLock = threading.Lock()
-            workFinished = False
-
-            threads = []
-            for i in range(0, maxThreads): # start threads
-                # start download threads
-                t = Thread(target=self.getTilesWorker, args=(shutdown, incrementLock))
-                t.daemon = True
-                t.start()
-                threads.append(t)
-            self.callback.notificateOnce = False
-            print("minipool initialized")
-            print("Added %d URLS to download." % self.urlCount)
-            while True:
-                time.sleep(self.callback.batchInfoUpdateInterval)
-                print("Batch tile dl working...")
-                print("(threads: %i)" % (threading.activeCount() - 1, ))
-                print("pending: %d, done: %d" % (len(self.neededTiles), self.processed))
-                # there is some downloading going on so a notification will be needed
-                self.callback.notificateOnce = True
-                if self.quit == True: # we were ordered to quit
-                    print("***get tiles quiting")
-                    shutdown.set() # dismiss all workers
-                    self.finished = True
-                    break
-                if not self.neededTiles: # we processed everything
-                    if self.failedDownloads: # retry failed downloads
-                        if self.retryCount > 0:
-                            # retry failed tiles
-                            self.retryCount -= 1
-                            self.retryInProgress += 1
-                            self.neededTiles = list(self.failedDownloads) # make a copy
-                            self._resetCounts()
-                        else: # retries exhausted, quit
-                            workFinished = True
-
-                    else: # no failed downloads, just quit
-                        workFinished = True
-
-                if workFinished: # check if we are done
-                    print("***get tiles finished")
-                    if self.callback.notificateOnce:
-                        self.callback.sendMessage('ml:notification:m:Batch download complete.;7')
-                        self.callback.notificateOnce = False
-                    shutdown.set()
-                    self.finished = True
-                    break
-
-        def getTilesWorker(self, shutdown, incrementLock):
-            while 1:
-                if shutdown.isSet():
-                    print("file download thread is shutting down")
-                    break
-                    # try to get some work
-                try:
-                    with self.callback._tileDownloadRequestsLock:
-                        item = self.neededTiles.pop()
-                except: # start the loop from beginning, so that shutdown can be checked and the thread can exit
-                    print("waiting for more work")
-                    time.sleep(2)
-                    continue
-
-                # try to retrieve and store the tile
-                failed = False
-                try:
-                    dlSize = self.saveTileForURL(item)
-                except Exception:
-                    import sys
-
-                    e = sys.exc_info()[1]
-                    failed = True
-                    # TODO: try to re-download failed tiles
-                    print("exception in get tiles thread:\n%s" % e)
-                    #          import traceback, sys
-                #          traceback.print_exc(file=sys.stdout) # find what went wrong
-                # increment the counter in a thread safe way
-                with incrementLock:
-                    self.processed += 1
-                    if failed:
-                        self.failedDownloads.append(item)
-                    elif dlSize != False:
-                        self.downloaded += 1
-                        self.transfered += dlSize
-
-        def saveTileForURL(self, tile):
-            """save a tile for url created from its coordinates"""
-            lzxy = (self.layer, tile[2], tile[0], tile[1])
-            (url, filename, folder) = self.callback.getTileUrlAndPath(lzxy)
-            m = self.callback.m.get('storeTiles', None) # get the tile storage module
-            if m:
-                goAhead = False
-                redownload = int(self.callback.get('batchRedownloadAvailableTiles', False))
-                if not redownload:
-                    # does the the file exist ?
-                    # -> don't download it if it does
-                    goAhead = not m.tileExists2(lzxy, fromThread=True)
-                elif redownload == 1: # redownload all
-                    goAhead = True
-                elif redownload == 2: # update
-                    # only download tiles in the area that already exist
-                    goAhead = m.tileExists2(filename, lzxy, fromThread=True)
-                    # TODO: maybe make something like tile objects so we don't have to pass so many parameters ?
-                if goAhead: # if the file does not exist
-                    request = self.connPool.request('get', url)
-                    size = int(request.getheaders()['content-length'])
-                    content = request.data
-                    # The tileserver sometimes returns a HTML error page
-                    # instead of the tile, which is then saved instead of the tile an
-                    # users are then confused why tiles they have downloaded don't show up.
-
-                    # To raise a proper error on this behaviour, we check the tiles magic number
-                    # and if is not an image we raise the TileNotImageException.
-
-                    # TODO: does someone supply non-bitmap/SVG tiles ?
-                    if utils.isTheStringAnImage(content):
-                        #its an image, save it
-                        m.automaticStoreTile(content, lzxy)
-                    else:
-                        # its not ana image, raise exception
-                        raise TileNotImageException()
-                    return size # something was actually downloaded and saved
-                else:
-                    return False # nothing was downloaded
-
     def expand(self, tileset, amount=1):
         """Given a list of tiles, expand the coverage around those tiles"""
         tiles = {}
@@ -728,6 +370,102 @@ class MapData(RanaModule):
         localAddPointsToLine(lat1, lon1, lat2, lon2, maxDistance) # call the local function
         return pointsBetween
 
+    # GTK GUI stuff
+
+    @property
+    def _mainButtonState(self):
+        enabled = self.requestCount > 0
+        icon = "generic"
+        label = ""
+        action = ""
+        if enabled:
+            if self.running:
+                icon = "stop"
+                label = "stop"
+                if self.batchDownloadRunning:
+                    action = "mapData:stopDownloadThreads"
+                elif self.checkSizeRunning:
+                    action = "mapData:stopSizeThreads"
+            else:
+                icon = "start"
+                label = "start"
+                action = "mapData:download"
+
+        return enabled, icon, label, action
+
+    @property
+    def _editButtonState(self):
+        """The edit batch menu button should be enabled only if no
+        background processing is running
+        """
+        enabled = not self.running
+        icon = "generic"
+        label = ""
+        action = ""
+        if enabled:
+            icon = "tools"
+            label = "edit"
+            action = "menu:setupEditBatchMenu|set:menu:editBatch"
+        return enabled, icon, label, action
+
+    @property
+    def _primaryText(self):
+        if self.downloadPool.ended and self.requestCount == 0:
+            # check if some data was actually downloaded
+            if self._downloadPool.downloadedDataSize:
+                return "Download complete"
+            else:
+                return "All tiles found locally"
+
+        if self.running:
+            if self.checkSizeRunning:
+                return "Checking size: %d/%d" % (self._checkPool.done, self._checkPool.batchSize)
+            elif self.batchDownloadRunning:
+                return "Downloading %d/%d" % (self._downloadPool.done, self._downloadPool.batchSize)
+            else:
+                return "Running."
+
+        elif self.requestCount:
+            return "Press <b>Start</b> to download ~ <b>%d</b> tiles." % self.requestCount
+        elif self._checkPool.ended and self._checkPool.downloadSize == 0:
+            return "All tiles found locally"
+        else:
+            return "Download queue empty"
+
+    @property
+    def _secondaryText(self):
+        if self.downloadPool.ended \
+            and self.requestCount == 0 \
+            and self._downloadPool.downloadedDataSize:
+            prettyMB = utils.bytes2PrettyUnitString(self.downloadPool.downloadedDataSize)
+            return "%s has been downloaded" % prettyMB
+        elif self.running:
+            if self.checkSizeRunning:
+                prettyMB = utils.bytes2PrettyUnitString(self._checkPool.downloadSize)
+                return "batch size is ~%s, %d tiles found locally" % (prettyMB, self._checkPool.foundLocally)
+            elif self.batchDownloadRunning:
+                prettyMB = utils.bytes2PrettyUnitString(self._downloadPool.downloadedDataSize)
+                if self._checkPool.downloadSize:
+                    estimatedSizePrettyMB = utils.bytes2PrettyUnitString(self._checkPool.downloadSize)
+                    prettyMB = "%s/~%s" % (prettyMB, estimatedSizePrettyMB)
+                return "%s downloaded" % prettyMB
+        else:
+            if self._checkPool.ended:
+                if self._checkPool.downloadSize:
+                    prettyMB = utils.bytes2PrettyUnitString(self._checkPool.downloadSize)
+                    return "Total size is ~%s (<i>click to recheck</i>)." % prettyMB
+                else:
+                    return ""
+            else:
+                return "Total size of tiles is unknown (<i>click to check</i>)."
+
+    @property
+    def _boxAction(self):
+        if not self.running:
+            return "mapData:getSize"
+        else:
+            return ""
+
     def drawMenu(self, cr, menuName, args=None):
         # is this menu the correct menu ?
         if menuName == 'batchTileDl':
@@ -736,13 +474,9 @@ class MapData(RanaModule):
             # * when looking at map, the threads behave as expected :)
             # * so, when downloading:
             # -> look at the map OR the batch progress :)**
-            time.sleep(0.5)
-            self.set('needRedraw', True)
             (x1, y1, w, h) = self.get('viewport', None)
             self.set('dataMenu', 'edit')
             menus = self.m.get("menu", None)
-            sizeThread = self.sizeThread
-            getFilesThread = self.getFilesThread
             self.set("batchMenuEntered", True)
 
             if w > h:
@@ -760,31 +494,24 @@ class MapData(RanaModule):
             # * draw "escape" button
             menus.drawButton(cr, x1, y1, dx, dy, "", "back", "menu:rebootDataMenu|set:menu:main")
             # * draw "edit" button
-            menus.drawButton(cr, (x1 + w) - 2 * dx, y1, dx, dy, "edit", "tools",
-                             "menu:setupEditBatchMenu|set:menu:editBatch")
+            ebEnabled, ebIcon, ebLabel, ebAction = self._editButtonState
+            if ebEnabled:
+                menus.drawButton(cr, (x1 + w) - 2 * dx, y1, dx, dy, ebLabel, ebIcon, ebAction)
             # * draw "start" button
-            if self.getFilesThread:
-                if self.getFilesThread.isFinished():
-                    menus.drawButton(cr, (x1 + w) - 1 * dx, y1, dx, dy, "retry", "start", "mapData:download")
-                else:
-                    menus.drawButton(cr, (x1 + w) - 1 * dx, y1, dx, dy, "stop", "stop", "mapData:stopDownloadThreads")
-            else:
-                menus.drawButton(cr, (x1 + w) - 1 * dx, y1, dx, dy, "start", "start", "mapData:download")
-                # * draw the combined info area and size button (aka "box")
+            sbEnabled, sbIcon, sbLabel, sbAction = self._mainButtonState
+            if sbEnabled:
+                menus.drawButton(cr, (x1 + w) - 1 * dx, y1, dx, dy, sbLabel, sbLabel, sbAction)
+
+            # * draw the combined info area and size button (aka "box")
             boxX = x1
             boxY = y1 + dy
             boxW = w
             boxH = h - dy
-            if self.sizeThread:
-                menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "generic", "mapData:stopSizeThreads")
-            else:
-                menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "generic", "mapData:getSize")
-                # * display information about download status
-            getFilesText = self.getFilesText(getFilesThread)
-            sizeText = self.getSizeText(sizeThread)
-            getFilesTextX = boxX + dx / 8
-            getFilesTextY = boxY + boxH * 1 / 10
-            menus.showText(cr, "%s\n\n%s" % (getFilesText, sizeText), getFilesTextX, getFilesTextY, w - dx / 4, 40)
+            menus.drawButton(cr, boxX, boxY, boxW, boxH, "", "generic", self._boxAction)
+            # * display information about current status
+            mainTextX = boxX + dx / 8
+            mainTextY = boxY + boxH * 1 / 10
+            menus.showText(cr, "%s\n\n%s" % (self._primaryText, self._secondaryText), mainTextX, mainTextY, w - dx / 4, 40)
 
             #      # * display information about size of the tiles
             #      sizeTextX = boxX + dx/8
@@ -792,7 +519,7 @@ class MapData(RanaModule):
             #      menus.showText(cr, sizeText, sizeTextX, sizeTextY, w-dx/4, 40)
 
             # * display information about free space available (for the filesystem with tilefolder)
-            freeSpaceText = self.getFreeSpaceText()
+            freeSpaceText = "Free space available: %s" % self.getFreeSpaceString()
             freeSpaceTextX = boxX + dx / 8
             freeSpaceTextY = boxY + boxH * 3 / 4
             menus.showText(cr, freeSpaceText, freeSpaceTextX, freeSpaceTextY, w - dx / 4, 40)
@@ -832,68 +559,7 @@ class MapData(RanaModule):
             menus.drawListableMenuControls(cr, menuName, parent, scrollMenu)
             menus.drawListableMenuItems(cr, tracks, self.scroll, describeTracklog)
 
-    def getFilesText(self, getFilesThread):
-        """return a string describing status of the download threads"""
-        text = ""
-        tileCount = len(self._tileDownloadRequests)
-        if getFilesThread is None:
-            if tileCount:
-                text = "Press <b>Start</b> to download ~ <b>%d</b> tiles." % tileCount
-            else:
-                text = "Download queue empty."
-        else:
-            (currentTileCount, totalTileCount, BTotalTransferred, failedCount) = getFilesThread.getProgress()
-            if getFilesThread.isAlive() == True:
-                MBTotalTransferred = BTotalTransferred / float(1048576)
-                totalTileCount = getFilesThread.urlCount
-                currentTileCount = getFilesThread.processed
-                retryNumber = getFilesThread.getRetryInProgress()
-                if retryNumber:
-                    action = "Retry nr. %d" % retryNumber
-                else:
-                    action = "Downloading"
-
-                # handle singular versus plural
-                if failedCount == 1:
-                    failedCountString = "1 download failed"
-                else:
-                    failedCountString = "%d downloads failed" % failedCount
-                text = "<b>%s</b>: <b>%d</b> of <b>%d</b> tiles done\n<b>%1.2f MB</b> transferred, %s" % (
-                    action, currentTileCount, totalTileCount, MBTotalTransferred, failedCountString)
-            elif getFilesThread.isAlive() == False: #TODO: send an alert that download is complete
-                if getFilesThread.getDownloadCount():
-                    # some downloads occurred
-                    text = "<b>Download complete.</b>"
-                else:
-                    # no downloads occurred
-                    if failedCount:
-                        # no downloads + failed downloads
-                        text = "<b>Download of all tiles failed.</b>"
-                    else:
-                        # no downloads and no failed downloads
-                        text = "<b>All tiles were locally available.</b>"
-        return text
-
-    def getSizeText(self, sizeThread):
-        """return a string describing status of the size counting threads"""
-        tileCount = len(self._tileDownloadRequests)
-        if tileCount == 0:
-            return ""
-        if sizeThread is None:
-            return "Total size of tiles is unknown (<i>click to compute</i>)."
-        elif sizeThread.isAlive():
-            totalTileCount = sizeThread.urlCount
-            currentTileCount = sizeThread.processed
-            currentSize = sizeThread.totalSize / 1048576 # = 1024.0*1024.0
-            text = "Checking: %d of %d tiles complete(<b>%1.0f MB</b>)" % (
-            currentTileCount, totalTileCount, currentSize)
-            return text
-        elif sizeThread.isAlive() == False:
-            sizeInMB = sizeThread.totalSize / (1024.0 * 1024.0)
-            text = "Total size for download: %1.2f MB" % sizeInMB
-            return text
-
-    def getFreeSpaceText(self):
+    def getFreeSpaceString(self):
         """Return a string describing the space available on the filesystem
         where the tile-folder is located
 
@@ -902,39 +568,11 @@ class MapData(RanaModule):
         """
         path = self.modrana.paths.getMapFolderPath()
         prettySpace = utils.bytes2PrettyUnitString(utils.freeSpaceInPath(path))
-        text = "Free space available: %s" % prettySpace
-        return text
-
-    def stopSizeThreads(self):
-        if self.sizeThread:
-            try:
-                self.sizeThread.quit = True
-            except Exception:
-                import sys
-                e = sys.exc_info()[1]
-                print("error while shutting down size thread")
-                print(e)
-
-        time.sleep(0.1) # make place for the tread to handle whats needed
-        self.sizeThread = None
-
-    def stopBatchDownloadThreads(self):
-        if self.getFilesThread:
-            try:
-                self.getFilesThread.quit = True
-            except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("error while shutting down files thread")
-                print(e)
-
-        time.sleep(0.1) # make place for the tread to handle whats needed
-        self.getFilesThread = None
+        return prettySpace
 
     def shutdown(self):
-        self.stopSizeThreads()
-        self.stopBatchDownloadThreads()
+        self.stopBatchDownload()
+        self.stopBatchSizeEstimation()
 
     def refreshTilecount(self):
         """The batch download parameters were changed,
@@ -945,15 +583,13 @@ class MapData(RanaModule):
             print("Error: mod_mapData can't download %s" % messageType)
             return
 
-        # update the info when refreshing tilecount and and no dl/size estimation is active
+        # dump previous requests first
+        self.clearRequests()
 
-        if self.sizeThread:
-            if self.sizeThread.isAlive() == False:
-                self.sizeThread = None
-
-        if self.getFilesThread:
-            if self.getFilesThread.isAlive() == False:
-                self.getFilesThread = None
+        # don't refresh if an operation is already running
+        if self.running:
+            print("map data: not refreshing - a operation is currently running")
+            return
 
         location = self.get("downloadArea", "here") # here or route
 
@@ -1015,6 +651,11 @@ class MapData(RanaModule):
         elif location == DL_LOCATION_VIEW:
             self._addTilesAroundView()
 
+        self._checkPool.reset()
+        self._downloadPool.reset()
+
+        self.set("needsRefresh", True)
+
     def _addTilesAroundPosition(self):
         """Add tiles around current geographic coordinates (if known)"""
         # Find which tile we're on
@@ -1070,23 +711,26 @@ class MapData(RanaModule):
 
     def startBatchDownload(self):
         """Start threaded batch tile download"""
-
-        # get tilelist and download the tiles using threads
-        neededTiles = self._tileDownloadRequests
         layerId = self.get('layer', "mapnik")
-        layer = self._getLayerById(layerId)
+        self._downloadPool.layer = self._getLayerById(layerId)
 
         print("starting download")
-        if len(neededTiles) == 0:
-            print("cant download an empty list")
+        if len(self._tileDownloadRequests) == 0:
+            print("can't do batch download - no requests")
             return
 
-        if self.getFilesThread is not None:
-            if self.getFilesThread.finished == False:
-                print("download already in progress")
-                return
+        if self._downloadPool.running:
+            print("batch download already in progress")
+            return
+        elif self._checkPool.running:
+            print("check size running, not starting size check")
+            return
 
-        maxThreads = self.get('maxDlThreads', 5)
+        print("mapData: starting batch tile download")
+        # process all download request and discard processed requests from the pool
+        self._downloadPool.startBatch(self._tileDownloadRequests)
+
+        # For historical note (29.Mar.2014):
         # 2.Oct.2010 2:41 :D
         # after a lot of effort spent, I still can't get threaded download to reliably
         # work with sqlite storage without getting stuck
@@ -1107,13 +751,11 @@ class MapData(RanaModule):
         # well, looks like the culprit was just the urlib3 socket pool with blocking turned on
         # so all the threads (even when doing it with a single thread) hanged on the block
         # it seems to be working alright + its pretty fast too
-        getFilesThread = self.GetFiles(self, neededTiles, layer, maxThreads)
-        getFilesThread.start()
-        self.getFilesThread = getFilesThread
 
     def stopBatchDownload(self):
         """Stop threaded batch tile download"""
-        self.stopBatchDownloadThreads()
+        print("mapData: stopping batch tile download")
+        self._downloadPool.stop()
 
     def _downloadAroundCurrentRoute(self):
         """Use currently active route as batch download target"""
@@ -1136,29 +778,32 @@ class MapData(RanaModule):
     def startBatchSizeEstimation(self):
         """Start threaded batch size estimation"""
         # will now ask the server and find the combined size if tiles in the batch
+        # and also remove locally available tiles from the request set
         self.set("sizeStatus", 'unknown') # first we set the size as unknown
-        neededTiles = self._tileDownloadRequests
         layerId = self.get('layer', "mapnik")
-        layer = self._getLayerById(layerId)
+        self._checkPool.layer = self._getLayerById(layerId)
 
         print("getting size")
-        if len(neededTiles) == 0:
-            print("cant get combined size, the list is empty")
+        if len(self._tileDownloadRequests) == 0:
+            print("can't check size - no requests")
             return
 
-        if self.sizeThread is not None:
-            if self.sizeThread.finished == False:
-                print("size check already in progress")
-                return
+        if self._checkPool.running:
+            print("size check already in progress")
+            return
+        elif self._downloadPool.running:
+            print("batch download running, not starting size check")
+            return
 
-        self.totalSize = 0
-        maxThreads = self.get('maxSizeThreads', 5)
-        sizeThread = self.GetSize(self, neededTiles, layer,
-                                  maxThreads) # the second parameter is the max number of threads TODO: tweak this
-        print( "getSize received, starting sizeThread")
-        sizeThread.start()
-        self.sizeThread = sizeThread
+        with self._tileDownloadRequestsLock:
+            # start check on a shallow copy that we can process
+            # iterate over it but also pop locally available
+            # tiles from the the original set
+            requestsCopy = copy.copy(self._tileDownloadRequests)
+        print("mapData: starting batch size estimation")
+        self._checkPool.startBatch(requestsCopy)
 
     def stopBatchSizeEstimation(self):
         """Stop the threaded batch size estimation"""
-        self.stopSizeThreads()
+        print("mapData: stopping batch size estimation")
+        self._checkPool.stop()
