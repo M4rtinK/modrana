@@ -95,10 +95,10 @@ class OnlineServices(RanaModule):
         provider = online_providers.GoogleLocalSearch()
         return provider.search(term=term, around=around, maxResults=maxResults)
 
-    def localSearchAsync(self, term, callback, around=None, maxResults=8):
+    def localSearchAsync(self, term, callback, around=None, maxResults=20, sensor='false'):
         provider = online_providers.GoogleLocalSearch()
         # we use the Google Local Search backend at the moment
-        provider.searchAsync(callback, term=term, around=around, maxResults=maxResults)
+        provider.searchAsync(callback, term=term, around=around, maxResults=maxResults, sensor=sensor)
 
 
     # ** OSM static map URL **

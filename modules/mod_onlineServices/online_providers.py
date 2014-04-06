@@ -31,11 +31,14 @@ NOMINATIM_REVERSE_GEOCODING_URL = "http://nominatim.openstreetmap.org/reverse?"
 class LocalSearchPoint(Point):
     """a local search result point"""
 
-    def __init__(self, lat, lon, name="", description="", phoneNumbers=None, urls=None, addressLines=None, emails=None):
+    def __init__(self, lat, lon, name="", description="", phoneNumbers=None,
+                 urls=None, addressLines=None, emails=None, openingHours=None,
+                 priceLevel=None, rating=None):
         if not emails: emails = []
         if not addressLines: addressLines = []
         if not urls: urls = []
         if not phoneNumbers: phoneNumbers = []
+        if not openingHours: openingHours = {}
         Point.__init__(self, lat, lon, message=name)
         self._name = name
         self.description = description
@@ -44,6 +47,9 @@ class LocalSearchPoint(Point):
         self.urls = urls
         self._addressLines = addressLines
         self.emails = emails
+        self.openingHours = openingHours
+        self._priceLevel = priceLevel
+        self._rating = rating
 
     @property
     def addressLines(self):
@@ -52,6 +58,14 @@ class LocalSearchPoint(Point):
     @property
     def phoneNumbers(self):
         return self._phoneNumbers
+
+    @property
+    def rating(self):
+        return self._rating
+
+    @property
+    def priceLevel(self):
+        return self._priceLevel
 
     def getDescription(self):
         return self.description
@@ -73,12 +87,22 @@ class LocalSearchPoint(Point):
             message += "%s\n" % self.description
         for item in self._addressLines:
             message += "%s\n" % item
+        newline = ''
+        if self._priceLevel:
+            message += "%s " % '$$$$'[:self._priceLevel]
+            newline = '\n'
+        if self._rating:
+            message += "Rating %.1f" % self._rating
+            newline = '\n'
+        message += newline
         for item in self.phoneNumbers:
             message += "%s\n" % item[1]
         for item in self.emails:
             message += "%s\n" % item
         for item in self.urls:
             message += "%s\n" % item
+        if 'open_now' in self.openingHours and self.openingHours['open_now']:
+            message += 'Open now\n'
         self.setMessage(message)
 
     def __unicode__(self):
@@ -89,23 +113,33 @@ class GoogleLocalSearchPoint(LocalSearchPoint):
     def __init__(self, GLSResult):
         # dig the data out of the GLS result
         # and load it to the LSPoint object
-        addressLine = "%s, %s, %s" % (GLSResult['streetAddress'], GLSResult['city'], GLSResult['country'])
-        phoneNumbers = []
+        if 'address' in GLSResult:
+            addressLine = GLSResult['address']
+        else:
+            addressLine = GLSResult['vicinity']
 
-        for number in GLSResult.get('phoneNumbers', []):
-            # number types
-            # "" -> normal phone number
-            # "FAX" -> FAX phone number
-            phoneNumbers.append((number['type'], number['number']))
+        if 'geometry' in GLSResult and 'location' in GLSResult['geometry']:
+            lat = float(GLSResult['geometry']['location']['lat'])
+            lng = float(GLSResult['geometry']['location']['lng'])
+        else:
+            lat = lng = None
 
         LocalSearchPoint.__init__(
             self,
-            lat=float(GLSResult['lat']),
-            lon=float(GLSResult['lng']),
-            name=GLSResult['titleNoFormatting'],
+            lat=lat,
+            lon=lng,
+            name=GLSResult['name'],
             addressLines=[addressLine],
-            phoneNumbers=phoneNumbers
+            openingHours=self.fieldOrNone('opening_hours', GLSResult),
+            priceLevel=self.fieldOrNone('price_level', GLSResult),
+            rating=self.fieldOrNone('rating', GLSResult)
         )
+
+    def fieldOrNone(self, field, GLSResult):
+        if field in GLSResult:
+            return GLSResult[field]
+        else:
+            return None
 
 
 class GoogleAddressSearch(POIProvider):
@@ -135,18 +169,12 @@ class GoogleLocalSearch(POIProvider):
             # convert a Point object to lat,lon string
             location = "%f,%f" % (location.lat, location.lon)
 
-        query = "%s loc:%s" % (term, location)
-
-        # Local Search doesn't like the geo: prefix so we remove it
-        query = re.sub("loc:.*geo:", "loc:", query)
-
-        return query
+        return term, location
 
     def _processGLSResponse(self, response):
         """load GLS results to LocalSearchPoint objects"""
-        results = response['responseData']['results']
         points = []
-        for result in results:
+        for result in response['results']:
             point = GoogleLocalSearchPoint(result)
             points.append(point)
         return points
@@ -175,14 +203,18 @@ class GoogleLocalSearch(POIProvider):
             return []
         controller.status = "online POI search"
 
-        query = self._constructGLSQuery(term, around)
+        (query, location) = self._constructGLSQuery(term, around)
 
+        sensor = 'false'
+        if 'sensor' in kwargs:
+            sensor = kwargs['sensor']
         print("local search query: %s" % query)
         gMap = _getGmapsInstance()
         if gMap:
-            result = gMap.local_search(query, maxResults)
+            response = gMap.local_search(query, maxResults, location = location,
+                                         sensor = sensor)
             controller.status = "processing POI from search"
-            points = self._processGLSResponse(result)
+            points = self._processGLSResponse(response)
             controller.status = "online POI search done"
             return points
         else:
@@ -191,7 +223,7 @@ class GoogleLocalSearch(POIProvider):
 
 def _getGmapsInstance():
     """get a google maps wrapper instance"""
-    key = constants.GOOGLE_API_KEY
+    key = constants.GOOGLE_PLACES_API_KEY
     if key is None:
         print("online_providers:"
               " a google API key is needed for using the Google maps services")

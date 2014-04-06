@@ -21,6 +21,7 @@ from core.point import Point
 from modules.base_module import RanaModule
 from core import geo
 import math
+import re
 
 try:  # Python 2.7+
     from collections import OrderedDict as odict
@@ -201,6 +202,7 @@ class Search(RanaModule):
                     print("search: online services module not present")
                     return
                 lsType = args[0]
+                sensor = 'false'
                 if lsType == "coords": # search around coordinates
                     # format: type;lat,lon;query
                     # parse coordinates
@@ -215,6 +217,7 @@ class Search(RanaModule):
                     query = args[2]
                 elif lsType == "position": # search around current position
                     query = args[1]
+                    sensor = 'true'
                     fix = self.get('fix', 0)
                     pos = self.get('pos', None)
                     if fix > 1 and pos:
@@ -238,7 +241,7 @@ class Search(RanaModule):
 
                 if query:
                     online.localSearchAsync(query, self._handleLocalSearchResultsCB,
-                                            around=location)
+                                            around=location, sensor=sensor)
 
         elif message == "search":
             if messageType == "ml" and args:
@@ -277,6 +280,7 @@ class Search(RanaModule):
                 if self.where == 'position':
                     print("search:near position")
                     pos = self.get('pos', None)
+                    sensor = 'true'
                     if pos is None:
                         print("search: our position is not known")
                         return
@@ -285,6 +289,7 @@ class Search(RanaModule):
                 elif self.where == 'view':
                     print("search:near view")
                     proj = self.m.get('projection', None)
+                    sensor = 'false'
                     if proj:
                         centreLL = proj.getScreenCentreLL()
                         if centreLL:
@@ -295,7 +300,7 @@ class Search(RanaModule):
                 if lat and lon:
                     location = Point(lat, lon)
                     online.localSearchAsync(searchTerm, self._handleLocalSearchResultsCB,
-                                            around=location)
+                                            around=location, sensor=sensor)
 
             #        try:
             #          searchList = []
@@ -374,7 +379,8 @@ class Search(RanaModule):
         #    action += "|set:searchResultShowLatLon:%s,%s" % (lat,lon)
 
         point = itemList[index][1]
-        name = "%s" % point.name
+        # Pango does not like & so we need to replace it with &amp
+        name = re.sub('&', '&amp;', point.name)
 
         units = self.m.get('units', None)
         distanceString = units.km2CurrentUnitString(itemList[index][0], dp=2) # use correct units
@@ -539,7 +545,10 @@ class Search(RanaModule):
         menus.drawButton(cr, x4, y4, w4, h4, "", "generic", "set:menu:None")
 
         # * draw details from the search result
-        text = "\n%s (%s)" % (result.name, distanceString)
+        # Pango does not like & so we need to replace it with &amp
+        name = re.sub('&', '&amp;', result.name)
+
+        text = "\n%s (%s)" % (name, distanceString)
 
         try: # the address can be unknown
             for addressLine in result.addressLines:
@@ -554,9 +563,13 @@ class Search(RanaModule):
                 if numberType != "":
                     numberTypeString = " (%s)" % numberType
                 text += "\n%s%s" % (phoneNumber, numberTypeString)
-        else:
-            text += "\n%s" % "no phone numbers found"
 
+        if result.priceLevel or result.rating:
+            text += '\n'
+        if result.priceLevel:
+            text += '$$$$'[:result.priceLevel] + ' '
+        if result.rating:
+            text += 'Rating: %.1f' % result.rating
         text += "\ncoordinates: %f, %f" % (lat, lon)
 
         menus.drawTextToSquare(cr, x4, y4, w4, h4, text) # display the text in the box
@@ -602,7 +615,8 @@ class Search(RanaModule):
             if captions == False:
                 continue
                 # draw caption with transparent background
-            text = "%s" % point.name # result caption
+            # Pango does not like & so we need to replace it with &amp
+            text = re.sub('&', '&amp;', point.name) # result caption
 
             cr.set_font_size(20)
             extents = cr.text_extents(text) # get the text extents
@@ -650,7 +664,8 @@ class Search(RanaModule):
             cr.stroke()
 
             # draw a caption with transparent background
-            text = "%s" % point.name # result caption
+            # Pango does not like & so we need to replace it with &amp
+            text = re.sub('&', '&amp;', point.name) # result caption
             cr.set_font_size(20)
             extents = cr.text_extents(text) # get the text extents
             (w, h) = (extents[2] * 1.5, extents[3] * 1.5)
@@ -681,7 +696,7 @@ class Search(RanaModule):
     def generateMenuStructure(self):
         # TODO: do this once the menu is first entered, not always on startup
         m = self.m.get("menu", None)
-        if (m):
+        if m:
             self.loadFilters() # fill the search term dictionary
 
             m.clearMenu("search", 'set:menu:main')

@@ -183,9 +183,9 @@ class GoogleMaps(object):
 
     _GEOCODE_QUERY_URL = 'http://maps.google.com/maps/geo?'
     _DIRECTIONS_QUERY_URL = 'http://maps.googleapis.com/maps/api/directions/json?'
-    _LOCAL_QUERY_URL = 'http://ajax.googleapis.com/ajax/services/search/local?'
+    _LOCAL_QUERY_URL = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?'
     _LOCAL_RESULTS_PER_PAGE = 8
-    MAX_LOCAL_RESULTS = 32
+    MAX_LOCAL_RESULTS = 60
 
     def __init__(self, api_key='', referrer_url=''):
         """
@@ -350,78 +350,79 @@ class GoogleMaps(object):
 
     def local_search(self, query, numresults=_LOCAL_RESULTS_PER_PAGE, **kwargs):
         """
-        Searches Google Local for the string `query` and returns a
+        Searches Google Places (nearby) for the string `query` and returns a
         dictionary of the results.
 
         >>> gmaps = GoogleMaps(api_key)
         >>> local = gmaps.local_search('sushi san francisco, ca')
         >>> result = local['responseData']['results'][0]
-        >>> print result['titleNoFormatting']
+        >>> print result['name']
         Sushi Groove
-        >>> print result['streetAddress']
-        1916 Hyde St
-        >>> print(result['phoneNumbers'][0]['number'])
-        (415) 440-1905
+        >>> print result['formatted_address']
+        1916 Hyde St, San Francsiso, CA
+        >>> print(result['opening_hours']['open_now']
+        True
 
         For more information on the available data, see Google's documentation on
-        `AJAX result structure`_ and `local result properties`_.
+        `Places Search Results`_.
 
         The return value of this method is slightly different than that
         documented by Google; it attempts to stuff as many results as
         possible, from several queries (up to `numresults`), into the
-        ``['responseData']['results']`` array.  As a result, fields of
-        the results referencing this array (such as ``'cursor'``,
-        ``'currentPageIndex'``, ``'moreResultsUrl'``) may not make
-        complete sense.
+        ``['results']`` array.
 
-        This method may return fewer results than you ask for; Google Local
-        returns a maximum of :data:`GoogleMaps.MAX_LOCAL_RESULTS` results.
+        This method may return fewer results than you ask for; Google Places
+        may run out of results.
 
-        :param query: String containing a search and a location, such as
+        :param query: String containing search keywords, such as
          ``'Sushi San Francisco, CA'``.
         :type query: string
         :param numresults: Number of results to return, up to a maximum of :data:`MAX_LOCAL_RESULTS`.
         :type numresults: int
-        :param kwargs: You can pass additional `AJAX search arguments`_ and they
+        :param kwargs: You can pass additional `search arguments`_ and they
          will be tacked on to the query.
-        :return: A Google `AJAX result structure`_.
+        :return: A Google `JSON result structure`_.
         :rtype: dict
         :raises GoogleMapsError: If the query was malformed.
 
-        .. _AJAX result structure: http://code.google.com/apis/ajaxsearch/documentation/#fonje
-        .. _local result properties: http://code.google.com/apis/ajaxsearch/documentation/reference.html#_class_GlocalResult
-        .. _AJAX search arguments: http://code.google.com/apis/ajaxsearch/documentation/reference.html#_intro_fonje
+        .. _nearby query arguments: https://developers.google.com/places/documentation/search#PlaceSearchRequests
+        .. _places result properties: https://developers.google.com/places/documentation/search#PlaceSearchResults
 
         """
         params = {
-            'q': query,
-            'v': '1.0',
-            'rsz': 'large', # Return 8 results per page instead of 4
-            #'key':      self.api_key,      # Google Local seems not to like empty keys
+            'keyword': query,
+            'key': self.api_key,
+            # TODO: select the radius intelligently
+            'radius': '10000',
+            'rankby': 'prominence',
+            'sensor': 'false',
         }
         params.update(kwargs)
 
-        start = 0
-        results = None
-        while start < numresults and start < self.MAX_LOCAL_RESULTS:
-            params['start'] = start
-            url, response = fetch_json(self._LOCAL_QUERY_URL, params=params, headers={'Referer': self.referrer_url})
-            status_code = response['responseStatus']
-            if status_code != STATUS_OK:
-                raise GoogleMapsError(status_code, url=url, response=response)
-            if results is None:
-                results = response
-            else:
-                results['responseData']['results'].extend(response['responseData']['results'])
-
-            # If we didn't get a full page of results, Google has run out; don't try again
-            if len(response['responseData']['results']) < self._LOCAL_RESULTS_PER_PAGE:
+        results = []
+        while len(results) < numresults:
+            #print 'Google search params:', params
+            while True:
+                url, response = fetch_json(self._LOCAL_QUERY_URL, params=params, headers={'Referer': self.referrer_url})
+                #print 'URL and response:', url, response
+                status_code = response['status']
+                if status_code == 'INVALID_REQUEST' and 'page_token' in params:
+                    time.sleep(1)
+                else:
+                    break
+            if status_code == 'ZERO_RESULTS':
                 break
-            start += len(response['responseData']['results'])
-
-        if results is not None:
-            results['responseData']['results'] = results['responseData']['results'][:numresults]
-        return results
+            elif status_code != 'OK':
+                raise GoogleMapsError(status_code, url=url, response=response)
+            results.extend(response['results'])
+            if 'next_page_token' in response:
+                params['page_token'] = response['next_page_token']
+            else:
+                break
+        response['results'] = results[:numresults]
+        if results:
+            response['status'] = 'OK'
+        return response
 
     def directions(self, origin, destination, dir={}, **kwargs):
         """
@@ -462,7 +463,7 @@ class GoogleMaps(object):
             'destination': destination,
             'output': 'js', #modRana:NOTE:modified to js to get polyline data
             'oe': 'utf8',
-            #      'key': self.api_key, # TODO: API key
+            #'key': self.api_key, # TODO: API key
         }
         params.update(kwargs)
         params.update(dir) #modRana: add mode parameter
