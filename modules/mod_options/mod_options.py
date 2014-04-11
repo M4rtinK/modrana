@@ -890,22 +890,32 @@ class Options(RanaModule):
                "dump")
 
         # ** online POI search
-        group = addGroup("Online search", "poi_online", catPOI, "generic")
-        addOpt("Google local search ordering", "GLSOrdering",
-               [("default", "ordering from Google"),
+        group = addGroup("Local search", "poi_online", catPOI, "generic")
+        addOpt("Local search ordering", "GLSOrdering",
+               [("default", "ordering from provider"),
                 ("distance", "order by distance")
                ],
                group,
                "default")
 
-        addOpt("Google local search results", "GLSResults",
-               [("8", "max 8 results"),
-                ("16", "max 16 results"),
-                ("32", "max 32 results")],
+        addOpt("Local search radius", "localSearchRadius",
+               [(500, "500 m"),
+                (1000, "1 km"),
+                (5000, "5 km"),
+                (10000, "10 km"),
+                (25000, "25 km"),
+                (50000, "50 km")],
                group,
-               "8")
+               10000)
 
-        addOpt("Google local search captions", "drawGLSResultCaptions",
+        # addOpt("Google local search results", "GLSResults",
+        #        [("8", "max 8 results"),
+        #         ("16", "max 16 results"),
+        #         ("32", "max 32 results")],
+        #        group,
+        #        "8")
+
+        addOpt("Local search captions", "drawGLSResultCaptions",
                [("True", "draw captions"),
                 ("False", "dont draw captions")],
                group,

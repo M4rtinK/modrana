@@ -48,5 +48,12 @@ IconGridPage {
             icon : "3gears.png"
             menu : "OptionsMenu"
         }
+        Component.onCompleted : {
+            if (rWin.showUnfinishedPages) {
+                testModel.append(
+                    {"caption": "Route", "icon":"route.png", "menu":""}
+                )
+            }
+        }
     }
 }

@@ -190,7 +190,8 @@ class GoogleLocalSearch(POIProvider):
     @requirements.gps(conditional=True)
     @requirements.internet
     def search(self, term=None, around=None,
-               controller=DummyController(), maxResults=8 ,**kwargs):
+               controller=DummyController(), maxResults=8 ,
+               radius=constants.DEFAULT_LOCAL_SEARCH_RADIUS, **kwargs):
         """Search for POI using Google local search API"""
         if term is None and around is None:
             print("online_services: Google local search: term and location not set")
@@ -212,7 +213,7 @@ class GoogleLocalSearch(POIProvider):
         gMap = _getGmapsInstance()
         if gMap:
             response = gMap.local_search(query, maxResults, location = location,
-                                         sensor = sensor)
+                                         sensor = sensor, radius=radius)
             controller.status = "processing POI from search"
             points = self._processGLSResponse(response)
             controller.status = "online POI search done"
