@@ -18,6 +18,7 @@ An easy-to-use Python wrapper for the Google Maps and Local Search APIs.
 
 import urllib
 import urllib2
+import time
 #try:
 #    import json
 #except ImportError:
