@@ -944,7 +944,23 @@ class Menus(RanaModule):
         self.clearMenu('searchWhere')
         self.addItem('searchWhere', 'view#near', 'generic', 'ms:search:setWhere:view|set:menu:search')
         self.addItem('searchWhere', 'position#near', 'generic', 'ms:search:setWhere:position|set:menu:search')
-        # TODO:
+        # local search radius toggle button
+        #TODO: make this more sane
+        textIconAction = [
+            ("500 m#radius", "", "set:localSearchRadius:500"),
+            ("1 km#radius", "", "set:localSearchRadius:1000"),
+            ("5 km#radius", "", "set:localSearchRadius:5000"),
+            ("10 km#radius", "", "set:localSearchRadius:10000"),
+            ("25 km#radius", "", "set:localSearchRadius:25000"),
+            ("50 km#radius", "", "set:localSearchRadius:50000")
+        ]
+
+        radiusList = [500, 1000, 5000, 10000, 25000, 50000]
+        #lastValue = int(self.get('localSearchRadius', 0))
+        index = self.get('localSearchRadiusToggleButton', 3)
+        self.addToggleItem('searchWhere', textIconAction,
+                           index, None, 'localSearchRadiusToggleButton')
+
         # * near tracklog
         #  * start
         #  * end
