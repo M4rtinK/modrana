@@ -31,8 +31,6 @@ except ImportError:  # Python 3
     from urllib.request import urlopen
     from urllib.error import HTTPError, URLError
 
-from Queue import Queue
-
 from modules import urllib3
 from core import utils
 from core import rectangles
@@ -140,7 +138,7 @@ class MapTiles(RanaModule):
 
         self._tileDownloaded = Signal()
 
-        self._dlRequestQueue = Queue()
+        self._dlRequestQueue = six.moves.queue.Queue()
         self._downloader = None
 
 
