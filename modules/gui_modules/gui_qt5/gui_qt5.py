@@ -83,6 +83,12 @@ class QMLGUI(GUIModule):
         self.centeringDisableThreshold = 2048
         self.firstTimeSignal = signal.Signal()
         size = (800, 480) # initial window size
+
+        # often used module shortcuts
+        self._location = None
+        self._mapTiles = None
+        self._mapLayers = None
+
         # register exit handler
         pyotherside.atexit(self._shutdown)
 
@@ -437,6 +443,7 @@ class TileImageProvider(ImageProvider):
 
     def __init__(self, gui):
         ImageProvider.__init__(self, gui)
+        self.gui = gui
 
     def getImage(self, imageId, requestedSize):
         """
@@ -454,8 +461,11 @@ class TileImageProvider(ImageProvider):
             x = int(split[2])
             y = int(split[3])
 
+            # TODO: local id:layer cache ?
+            layer = self.gui._mapLayers.getLayerById(layerId)
+
             # get the tile from the tile module
-            tileData = self.gui._mapTiles.getTile(layerId, z, x, y)
+            tileData = self.gui._mapTiles.getTile((layer, z, x, y))
             if not tileData:
                 #print("NO TILEDATA")
                 return None
