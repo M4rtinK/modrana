@@ -31,7 +31,10 @@ except ImportError:  # Python 3
     from urllib.request import urlopen
     from urllib.error import HTTPError, URLError
 
-from modules import urllib3
+if sys.version_info[:2] <= (2, 5):
+    from core.backports import urllib3_python25 as urllib3
+else:
+    from core.bundle import urllib3
 from core import utils
 from core import rectangles
 from core import tiles
