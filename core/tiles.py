@@ -18,7 +18,7 @@ def getYahooUrl(lzxy):
     return '%s&x=%d&y=%d&z=%d&r=1' % (layer.url, x, y, z)
 
 def getGoogleUrl(lzxy):
-    return '%s&x=%d&y=%d&z=%d' % (lzxy[0].url, lzxy[1], lzxy[2], lzxy[3])
+    return '%s&x=%d&y=%d&z=%d' % (lzxy[0].url, lzxy[2], lzxy[3], lzxy[1])
 
 # modified from:
 # http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/globalmaptiles.py
