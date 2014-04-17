@@ -397,7 +397,7 @@ Rectangle {
 
                             //y: tile.height/2 - 32
                             y: 8 + index*16
-                            text : tile.ind + "= " +tile.tileX + " " + tile.tileY
+                            //text : tile.ind + "= " +tile.tileX + " " + tile.tileY
                             /*
                             text: layerName + " "+(img.status == Image.Ready ? "Ready" :
                                    img.status == Image.Null ? "Not Set" :
