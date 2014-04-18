@@ -74,16 +74,17 @@ class LocalSearchPoint(Point):
         # lazy message generation
         # = only generate the message once it is requested for the first time
         if self._message is None:
-            self.updateMessage()
+            self._message = self.updateMessage()
             return self._message
         else:
             return self._message
 
-    def updateMessage(self):
+    def updateMessage(self, name=True):
         """call this if you change the properties of an existing point"""
         message = ""
-        message += "%s\n\n" % self._name
-        if self.description != "":
+        if name:
+            message += "%s\n\n" % self._name
+        if self.description not in ("", None):
             message += "%s\n" % self.description
         for item in self._addressLines:
             message += "%s\n" % item
@@ -103,7 +104,7 @@ class LocalSearchPoint(Point):
             message += "%s\n" % item
         if 'open_now' in self.openingHours and self.openingHours['open_now']:
             message += 'Open now\n'
-        self.setMessage(message)
+        return message
 
     def __unicode__(self):
         return self.getMessage()
