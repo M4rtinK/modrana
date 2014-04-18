@@ -396,7 +396,7 @@ class BatchTileDownloadPool(TileBatchPool):
             goAhead = True
         elif redownload == 2: # update
             # only download tiles in the area that already exist
-            goAhead = self._storeTiles.tileExists2(filename, lzxy, fromThread=True)
+            goAhead = self._storeTiles.tileExists2(lzxy, fromThread=True)
             # TODO: maybe make something like tile objects so we don't have to pass so many parameters ?
         if goAhead: # if the file does not exist
             request = self._connPool.request('get', url)
