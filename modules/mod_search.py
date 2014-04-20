@@ -187,7 +187,7 @@ class Search(RanaModule):
                 return
             resultTuple = filter(lambda x: x[2] == int(resultNr), self.list).pop()
             result = resultTuple[1]
-            store.storeGLSResult(result)
+            store.storeLocalSearchResult(result)
 
         elif message == 'setWhere': # set the search region
             if messageType == 'ms' and args:

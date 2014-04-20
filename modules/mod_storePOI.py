@@ -472,41 +472,19 @@ class StorePOI(RanaModule):
         if entry:
             entry.entryBox(self, 'onlineResultName', 'POI Name', initialText=point.getName())
 
-    def storeGLSResult(self, result):
+    def storeLocalSearchResult(self, result):
         """store a Google Local Search result to file"""
-        name = result['titleNoFormatting']
-        lat = float(result['lat'])
-        lon = float(result['lng'])
-
         newPOI = self.getEmptyPOI()
-        newPOI.setName(name, commit=False)
-        newPOI.setLat(lat, commit=False)
-        newPOI.setLon(lon, commit=False)
-
-        text = "%s" % (result['titleNoFormatting'])
-
-        try: # the address can be unknown
-            for addressLine in result['addressLines']:
-                text += "\n%s" % addressLine
-        except:
-            text += "\n%s" % "no address found"
-
-        try: # it seems, that this entry is no guarantied
-            for phoneNumber in result['phoneNumbers']:
-                numberType = ""
-                if phoneNumber['type'] != "":
-                    numberType = " (%s)" % phoneNumber['type']
-                text += "\n%s%s" % (phoneNumber['number'], numberType)
-        except:
-            text += "\n%s" % "no phone numbers found"
-
-        newPOI.setDescription(text, commit=False)
+        newPOI.setName(result.name, commit=False)
+        newPOI.setLat(result.lat, commit=False)
+        newPOI.setLon(result.lon, commit=False)
+        newPOI.setDescription(result.updateMessage(name=False), commit=False)
         self.tempOnlinePOI = newPOI
 
         # start the name and description entry chain
         entry = self.m.get('textEntry', None)
         if entry:
-            entry.entryBox(self, 'onlineResultName', 'POI Name', name)
+            entry.entryBox(self, 'onlineResultName', 'POI Name', result.name)
 
 
 class POI():
