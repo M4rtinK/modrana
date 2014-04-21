@@ -23,6 +23,10 @@ from modules.device_modules.base_device_module import DeviceModule
 from core.constants import DEVICE_TYPE_SMARTPHONE
 from core import paths
 import os
+import sys
+
+# third party apps for Sailfish OS should use the harbour- prefix
+SAILFISH_MODRANA_PROFILE_NAME = "harbour-modrana"
 
 # NOTE: use the device_ prefix when naming the module
 
@@ -35,6 +39,13 @@ class Jolla(DeviceModule):
 
     def __init__(self, m, d, i):
         DeviceModule.__init__(self, m, d, i)
+        # migrate any old profiles
+        # TODO: remove this once it is probable
+        # that most users are using the new profile path
+        self._migrateProfiles()
+
+        # override the default profile name to harbour-modrana
+        paths.setProfileName(SAILFISH_MODRANA_PROFILE_NAME)
 
     def getDeviceIDString(self):
         return "jolla"
@@ -135,3 +146,48 @@ class Jolla(DeviceModule):
     def connectivityStatus(self):
         # TODO: actual connectivity tracking :)
         return True
+
+
+    def _migrateProfiles(self):
+        """Turns out also the profile folders need to use the
+        harbour- prefix, so look for any odl modRana
+        profile folders and migrate them to the new location
+
+        ~/.config/modrana -> ~/.config/harbour-modrana
+        ~/.local/share/modrana -> ~/.local/share/harbour-modrana
+
+
+        TODO: remove this once it is probable most users are using the
+              new profile name
+        """
+        print("jolla: looking for old profiles")
+        found = False
+
+        # config
+        configOld = "/home/nemo/.config/modrana"
+        configNew = "/home/nemo/.config/harbour-modrana"
+        if os.path.exists(configOld):
+            found = True
+            try:
+                os.rename(configOld, configNew)
+                print("jolla: config profile moved to new location")
+            except Exception:
+                print("jolla: config profile renaming failed with exception")
+                e = sys.exc_info()[1]
+                print(e)
+
+        # data
+        dataOld = "/home/nemo/.local/share/modrana"
+        dataNew = "/home/nemo/.local/share/harbour-modrana"
+        if os.path.exists(dataOld):
+            found = True
+            try:
+                os.rename(dataOld, dataNew)
+                print("jolla: data profile moved to new location")
+            except Exception:
+                print("jolla: data profile renaming failed with exception")
+                e = sys.exc_info()[1]
+                print(e)
+
+        if found == False:
+            print("jolla: no old profiles found")
