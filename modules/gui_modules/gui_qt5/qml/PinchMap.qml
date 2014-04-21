@@ -373,38 +373,10 @@ Rectangle {
                     //property string source: tileUrl(model[0].layerId, tileX, tileY)
                     property string source
                     model: pinchmap.layers
-                    Item {
-                        Image {
-                            property int retryCount : 1
-                            id: img
-                            width: tileSize
-                            height: tileSize
-                            opacity: layerOpacity
-                            //anchors.fill: tile;
-                            source : tileUrl(layerId, tileX, tileY)
-                            onSourceChanged : {
-//                                console.log("S: " + tile.ind + "= " + tileX + " " + tileY)
-                            }
-                            asynchronous : true
-                        }
-                        Label {
-                            //visible : img.status != Image.Ready
-                            opacity: 0.7
-                            //anchors.left: tile.left
-                            anchors.leftMargin: 16
-                            font.pixelSize : 16
-                            elide : Text.ElideRight
-
-                            //y: tile.height/2 - 32
-                            y: 8 + index*16
-                            //text : tile.ind + "= " +tile.tileX + " " + tile.tileY
-                            /*
-                            text: layerName + " "+(img.status == Image.Ready ? "Ready" :
-                                   img.status == Image.Null ? "Not Set" :
-                                   img.status == Image.Error ? "Error" :
-                                   "Loading...")
-                            */
-                        }
+                    Tile {
+                        tileSize : tileSize
+                        tileOpacity : layerOpacity
+                        source : tileUrl(layerId, tileX, tileY)
                     }
                 }
             }
