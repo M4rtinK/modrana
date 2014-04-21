@@ -1,0 +1,22 @@
+module UC
+Button 1.0 Button.qml
+IconButton 1.0 IconButton.qml
+ApplicationWindow 1.0 ApplicationWindow.qml
+Page 1.0 Page.qml
+PageHeader 1.0 PageHeader.qml
+Screen 1.0 Screen.qml
+ProgressBar 1.0 ProgressBar.qml
+Slider 1.0 Slider.qml
+Switch 1.0 Switch.qml
+TextSwitch 1.0 TextSwitch.qml
+Label 1.0 Label.qml
+TextArea 1.0 TextArea.qml
+TextField 1.0 TextField.qml
+SearchField 1.0 SearchField.qml
+Dialog 1.0 Dialog.qml
+PageStatus 1.0 PageStatus.js
+ComboBox 1.0 ComboBox.qml
+Menu 1.0 Menu.qml
+MenuItem 1.0 MenuItem.qml
+BackgroundRectangle 1.0 BackgroundRectangle.qml
+VerticalScrollDecorator 1.0 VerticalScrollDecorator.qml
