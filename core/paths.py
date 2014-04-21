@@ -24,7 +24,7 @@ from core import utils
 # paths
 THEMES_FOLDER_PATH = "themes"
 # folder names
-PROFILE_FOLDER_NAME = "modrana"
+DEFAULT_PROFILE_FOLDER_NAME = "modrana"
 MONAV_DATA_FOLDER_NAME = "monav_data"
 CACHE_FOLDER_NAME = "cache"
 TRACKLOG_FOLDER_NAME = "tracklogs"
@@ -37,6 +37,8 @@ OPTIONS_FILENAME = "options.bin"
 POI_DB_FILENAME = "modrana_poi.db"
 VERSION_INFO_FILENAME = "version.txt"
 VERSION_STRING = None
+
+_PROFILE_FOLDER_NAME = DEFAULT_PROFILE_FOLDER_NAME
 
 def loadVersionString():
     """ Load version string from file
@@ -75,6 +77,22 @@ def getHOMEPath():
     # to save the situation
     return os.environ.get("HOME", os.path.expanduser("~"))
 
+def getProfileName():
+    """Get name of the modRana profile folder
+
+    :returns: modRana profile folder name
+    :rtype: str
+    """
+    return _PROFILE_FOLDER_NAME
+
+def setProfileName(name):
+    """Set the name of the modRana profile folder
+
+    :param str name: new profile name
+    """
+    global _PROFILE_FOLDER_NAME
+    _PROFILE_FOLDER_NAME = name
+
 def getXDGConfigPath():
     """Check the contents of the $XDG_CONFIG_HOME/modrana variable and
     default to $HOME/.config/modrana if not set.
@@ -84,7 +102,7 @@ def getXDGConfigPath():
     """
     return os.path.join(
         os.environ.get("$XDG_CONFIG_HOME", os.path.join(getHOMEPath(), ".config")),
-        PROFILE_FOLDER_NAME
+        getProfileName()
     )
 
 def getXDGDataPath():
@@ -96,7 +114,7 @@ def getXDGDataPath():
     """
     return os.path.join(
         os.environ.get("$XDG_DATA_HOME", os.path.join(getHOMEPath(), ".local/share")),
-        PROFILE_FOLDER_NAME
+        getProfileName()
     )
 
 def getXDGCachePath():
@@ -108,7 +126,7 @@ def getXDGCachePath():
     """
     return os.path.join(
         os.environ.get("$XDG_CACHE_HOME", os.path.join(getHOMEPath(), ".cache")),
-        PROFILE_FOLDER_NAME
+        getProfileName()
     )
 
 def getXDGProfilePath():
