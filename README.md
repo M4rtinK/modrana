@@ -67,3 +67,8 @@ TODO
 
 * add pull-down menu
 * remove some modRana rWin dependencies from the QtQuick Controls backend
+
+LICENSE
+-------
+
+Universal Components are distributed under the terms of the [3-clause BSD license](http://opensource.org/licenses/BSD-3-Clause).
