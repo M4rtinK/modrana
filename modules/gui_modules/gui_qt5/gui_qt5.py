@@ -86,7 +86,6 @@ class QMLGUI(GUIModule):
 
         # often used module shortcuts
         self._location = None
-        self._mapTiles = None
         self._mapLayers = None
 
         # register exit handler
@@ -112,6 +111,10 @@ class QMLGUI(GUIModule):
             "icon" : IconImageProvider(self),
             "tile" : TileImageProvider(self),
         }
+
+        with open("data/tile_not_found.png", "rb") as f:
+            self._tileNotFoundImage = f.read()
+
         ## register the actual callback, that
         ## will call the appropriate provider base on
         ## image id prefix
@@ -138,7 +141,6 @@ class QMLGUI(GUIModule):
 
     def firstTime(self):
         self._location = self.m.get('location', None)
-        self._mapTiles = self.m.get('mapTiles', None)
         self._mapLayers = self.m.get('mapLayers', None)
 
         # trigger the first time signal
@@ -280,6 +282,8 @@ class Modules(object):
         self._info = None
         self._stats = None
         self._mapLayers = None
+        self._mapTiles = None
+        self._storeTiles = None
         self.gui = gui
 
     @property
@@ -302,6 +306,20 @@ class Modules(object):
         if self._mapLayers is None:
             self._mapLayers = self.gui.m.get("mapLayers")
         return self._mapLayers
+
+    @property
+    def mapTiles(self):
+        """A lazy evaluated property providing access to the mapTiles module"""
+        if self._mapTiles is None:
+            self._mapTiles = self.gui.m.get("mapTiles")
+        return self._mapTiles
+
+    @property
+    def storeTiles(self):
+        """A lazy evaluated property providing access to the storeTiles module"""
+        if self._storeTiles is None:
+            self._storeTiles = self.gui.m.get("storeTiles")
+        return self._storeTiles
 
 class Search(object):
     """An easy to use search interface for the QML context"""
@@ -445,6 +463,23 @@ class TileImageProvider(ImageProvider):
         ImageProvider.__init__(self, gui)
         self.gui = gui
 
+        self.gui.firstTimeSignal.connect(self._firstTimeCB)
+
+    def _firstTimeCB(self):
+        # connect to the tile downloaded callback so that we can notify
+        # the QML context that a tile has ben downloaded and should be
+        # shown on the screen
+        # NOTE: we need to wait for the firstTime signal as at GUI module init
+        # the other modules (other than the device module) are not yet initialized
+        self.gui.modules.mapTiles.tileDownloaded.connect(self._tileDownloadedCB)
+
+    def _tileDownloadedCB(self, success, lzxy, tag):
+        """Notify the QML context that a tile has been downloaded"""
+        if success:
+            pinchMapId = tag.split("/")[0]
+            #print("SENDING: %s %s" % ("tileDownloaded:%s" % pinchMapId, tag))
+            pyotherside.send("tileDownloaded:%s" % pinchMapId, tag)
+
     def getImage(self, imageId, requestedSize):
         """
         the tile info should look like this:
@@ -456,20 +491,36 @@ class TileImageProvider(ImageProvider):
         try:
             # split the string provided by QML
             split = imageId.split("/")
-            layerId = split[0]
-            z = int(split[1])
-            x = int(split[2])
-            y = int(split[3])
+            pinchMapId = split[0]
+            layerId = split[1]
+            z = int(split[2])
+            x = int(split[3])
+            y = int(split[4])
 
             # TODO: local id:layer cache ?
-            layer = self.gui._mapLayers.getLayerById(layerId)
+            layer = self.gui.modules.mapLayers.getLayerById(layerId)
+
+            # construct the tag
+            #tag = (pinchMapId, layerId, z, x, y)
+            #tag = (pinchMapId, layerId, z, x, y)
 
             # get the tile from the tile module
-            tileData = self.gui._mapTiles.getTile((layer, z, x, y))
-            if not tileData:
-                #print("NO TILEDATA")
-                return None
-            return bytearray(tileData), (256,256), pyotherside.format_data
+            tileData = self.gui.modules.mapTiles.getTile((layer, z, x, y), async=True, tag=imageId)
+            imageSize = (256,256)
+            if tileData is None:
+                # The tile was not found locally
+                # * in persistent storage (files/sqlite db)
+                # * in the tile cache in memory
+                # An asynchronous tile download request has been added
+                # automatically, so we just now need to notify the
+                # QtQuick GUI that it should wait fo the download
+                # completed signal.
+                #
+                # We notify the GUI by returning a 1x1 image.
+                tileData = self.gui._tileNotFoundImage
+                imageSize = (1,1)
+                # TODO: use some raw image data instead of PNG ?
+            return bytearray(tileData), imageSize, pyotherside.format_data
         except Exception:
             import sys
             e = sys.exc_info()[1]

@@ -5,6 +5,9 @@ import UC 1.0
 
 Rectangle {
     id: pinchmap;
+    property string name : ""
+    // TODO: give pinchmap element instances unique names
+    // if name is not set
     property int zoomLevel: 10;
     property int oldZoomLevel: 99
     property int maxZoomLevel: 18;
@@ -57,7 +60,26 @@ Rectangle {
     property int status: PageStatus.Active
     signal drag // signals that map-drag has been detected
     signal centerSet // signals that the map has been moved
+    signal tileDownloaded(string loadedTileId) // signals that a tile has been downloaded
     property bool needsUpdate: false
+
+
+    // register the tile-downloaded handler
+    // - PyOtherSide stores the handler ids in a hashtable
+    //   so even if many pinch map instances register their
+    //   handlers it should not slow down Python -> QML message
+    //   handling
+    Component.onCompleted: {
+        rWin.python.setHandler("tileDownloaded:" + pinchmap.name, pinchmap.tileDownloadedCB)
+    }
+
+    function tileDownloadedCB(tileId) {
+        // trigger the tile downloaded signal
+        // TODO: could the signal by called directly as the callback ?
+        //console.log("PINCH MAP: TILE DOWNLOADED: " + tileId)
+        tileDownloaded(tileId)
+    }
+
     transform: Rotation {
         angle: 0
         origin.x: pinchmap.width/2
@@ -307,7 +329,10 @@ Rectangle {
         return [lat_deg % 90.0, lon_deg % 180.0];
     }
 
-    function tileUrl(layerID, tx, ty) {
+    function tileUrl(tileId) {
+        return "image://python/tile/" + tileId
+    }
+    function tileUrlOld(layerID, tx, ty) {
         //console.log("tileUrl" + tx + "/" + ty)
         if (ty < 0 || ty > maxTileNo) {
             // TODO: set this externally ?
@@ -316,7 +341,10 @@ Rectangle {
             if (tileserverPort != 0) {
                 return "http://127.0.0.1:"+tileserverPort+"/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty+".png"
             } else {
-                return "image://python/tile/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty
+                // this URL either returns a valid image if the tile is
+                // available or returns a 1x1 pixel "signal tile", telling
+                // use that the tile will be downloaded
+                return "image://python/tile/"+pinchmap.name+"/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty
             }
             //var x = F.getMapTile(url, tx, ty, zoomLevel);
         }
@@ -374,9 +402,27 @@ Rectangle {
                     property string source
                     model: pinchmap.layers
                     Tile {
+                        id : tile
                         tileSize : tileSize
                         tileOpacity : layerOpacity
-                        source : tileUrl(layerId, tileX, tileY)
+                        // TODO: move to function
+                        tileId: pinchmap.name+"/"+layerId+"/"+pinchmap.zoomLevel+"/"+tileX+"/"+tileY
+                        onTileIdChanged: {
+                            tile.cache = true
+                            tile.source = tileUrl(tileId)
+                        }
+                        // set the source always once the tile stops waiting
+                        //source : tile.waiting ? "" : tileUrl(layerId, tileX, tileY)
+                        Connections {
+                            target: (tile.source == "") ? pinchmap : null
+                            //target: pinchmap
+                            onTileDownloaded: {
+                                if (tile.source == "" && loadedTileId == tile.tileId) {
+                                    tile.cache = true
+                                    tile.source = tileUrl(tileId)
+                                }
+                            }
+                        }
                     }
                 }
             }
