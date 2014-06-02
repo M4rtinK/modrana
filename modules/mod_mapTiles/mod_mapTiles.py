@@ -167,7 +167,7 @@ class MapTiles(RanaModule):
         self._downloader = Downloader(maxThreads)
         self._startTileLoadingManager()
 
-    def getTile(self, lzxy):
+    def getTile(self, lzxy, async=False, tag=None):
         """Return a tile specified by layerID, z, x & y
         * first look if such a tile is available from cache
           or persistent storage
@@ -189,7 +189,12 @@ class MapTiles(RanaModule):
             #print("got tile FROM disk CACHE")
             # tile was available from storage
             return tileData
-        else: # download
+        elif async:
+            # asynchronous download
+            self.addTileDownloadRequest(lzxy, tag)
+            return None
+        else:
+            # synchronous download
             #print("DOWNLOADING tile")
             # tile was not available from storage, download it
             return self.downloadTile(lzxy)
@@ -257,7 +262,7 @@ class MapTiles(RanaModule):
         :param tuple lzxy: tile description tuple
         """
         # TODO: request tagging/tile downloaded signals
-        self._dlRequestQueue.put([lzxy])
+        self._dlRequestQueue.put([(lzxy, tag)])
 
     def tileInMemory(self, lzxy):
         """Report if a tile is stored in memory cache
@@ -317,7 +322,8 @@ class MapTiles(RanaModule):
                 print("\nmapTiles: automatic tile download management thread shutting down")
                 break
             try:
-                for lzxy in request:
+                for item in request:
+                    lzxy, tag = item
                     # first check if the tile is locally available and load it
                     # to the image cache if it is
 
@@ -329,8 +335,8 @@ class MapTiles(RanaModule):
                     else:
                         sprint = self._fakePrint
 
-                    if not self.loadImage(lzxy):
-                        # tile not found locally an needs to be downloaded from network
+                    if not self.loadImage(lzxy):  # TODO: is this actually needed ?
+                        # tile not found locally and needs to be downloaded from network
 
                         # Are we allowed to download it ? (network=='full')
                         if self.get('network', 'full') == 'full':
@@ -339,19 +345,25 @@ class MapTiles(RanaModule):
                             if self.cacheImageSurfaces:
                                 with self.imagesLock:
                                     self.images[0][self.getTileName(lzxy)] = self.waitingTile
-                            droppedRequest = self._downloader.downloadTile(lzxy)
+                            droppedRequest = self._downloader.downloadTile(lzxy, tag)
                             if droppedRequest:
                                 # this tile download request has been dropped from
                                 # the bottom of the request stack, remove its
                                 #  "Waiting..." tile from image cache
                                 # - if it is not in view, this makes place for new tiles in cache,
                                 # - if it is in view, new download request will be added
+                                lzxy, tag = droppedRequest
                                 name = self.imageName(lzxy)
                                 sprint("old download request dropped from work request stack:")
                                 sprint(name)
                                 self.removeImageFromMemory(name)
+                                # also notify any listener that tha tile has been processed
+                                self.tileDownloaded(False, droppedRequest[0], droppedRequest[1])
                         else:
                             sprint("automatic tile download disabled - not adding download request")
+                    else:
+                        # tile found locally and not downloaded
+                        self.tileDownloaded(True, lzxy, tag)
 
             except Exception:
                 exc = sys.exc_info()[1]
@@ -543,8 +555,8 @@ class MapTiles(RanaModule):
                                                     combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
                                                     drawImage(cr, combinedImage, x1, y1, scale)
                                             else:
-                                                requests.append((layerBack, z, x, y))
-                                                requests.append((layerOver, z, x, y))
+                                                requests.append(((layerBack, z, x, y), None))
+                                                requests.append(((layerOver, z, x, y), None))
                                                 self.storeInMemory(loadingTileImageSurface, nameBack, imageType="loadingTile")
                                                 self.storeInMemory(loadingTileImageSurface, nameOver, imageType="loadingTile")
                                                 drawImage(cr, loadingTileImageSurface, x1, y1, scale)
@@ -628,14 +640,14 @@ class MapTiles(RanaModule):
                                                 combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
                                                 drawImage(cr, combinedImage, x1, y1, scale)
                                         else:
-                                            requests.append((layerBack, z, x, y))
-                                            requests.append((layerOver, z, x, y))
+                                            requests.append(((layerBack, z, x, y), None))
+                                            requests.append(((layerOver, z, x, y), None))
                                             self.storeInMemory(loadingTileImageSurface, nameBack, imageType="loadingTile")
                                             self.storeInMemory(loadingTileImageSurface, nameOver, imageType="loadingTile")
                                             drawImage(cr, loadingTileImageSurface, x1, y1, scale)
                                     else:
                                         # tile not found in memory cache, add a loading request
-                                        requests.append((layerInfo, z, x, y))
+                                        requests.append(((layerInfo, z, x, y), None))
                                         # and cache a loading tile so that we don't spam the same loading r
                                         # request over and over again (the tile request queue is using a stack,
                                         # so this would really not make sense)

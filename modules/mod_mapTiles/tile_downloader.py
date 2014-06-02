@@ -64,37 +64,48 @@ class Downloader(object):
     def shutdown(self):
         self._pool.shutdown(now=True)
 
-    def downloadTile(self, lzxy, overwrite=False):
+    def _tileDownloaded(self, success, lzxy, tag):
+        #print("DOWNLOADER: CALLING SIGNAL: %s %s" % (tag, success))
+        self._mapTiles.tileDownloaded(success, lzxy, tag)
+
+    def downloadTile(self, lzxy, tag=None, overwrite=False):
         """Add a tile download request, if this download
         request replaces another not yet handled request
         from the bottom of the work stack, the old
         lzxy will be returned
 
         :param tuple lzxy: tile to download represented by a tuple
-        :param boole overwrite: download tile even if locally available
+        :param str tag: tracking tag for the download request
+        :param bool overwrite: download tile even if locally available
         :returns: None or a tuple that was removed because of the new one
         :rtype: None or tuple
         """
+        discardedRequest = None
         discardedTile = None
         with self._runningLock:
             if lzxy not in self._running:
                 # drop download requests for tiles that are already
                 # being downloaded
-                discardedTile = self._pool.submit(
-                    self._handleDownload, lzxy, time.time(), overwrite
+                discardedRequest = self._pool.submit(
+                    self._handleDownload, lzxy, tag, time.time(), overwrite
                 )
+        # return lzxy & tag for any discarded request or return None
+        # if no request was discarded
+        if discardedRequest:
+            discardedTile = discardedRequest[1][0], discardedRequest[1][1]
         return discardedTile
 
-    def _handleDownload(self, lzxy, timestamp, overwrite):
+    def _handleDownload(self, lzxy, tag, timestamp, overwrite):
         download = True
+        success = False
         with self._runningLock:
-            if lzxy in self._running:
+            if (lzxy, tag) in self._running:
                 # tile is already being downloaded
                 download = False
             else:
                 # tile is not yet being downloaded
                 # so register we are handling it
-                self._running.add(lzxy)
+                self._running.add((lzxy, tag))
 
         if self._taskTimeout:
             dt = time.time() - timestamp
@@ -110,6 +121,7 @@ class Downloader(object):
             # download tile
             try:
                 self._downloadTile(lzxy)
+                success = True
             except urllib3.exceptions.HTTPError:
                 # server returned a HTTP error, this means we got
                 # to the server but it didn't like us for some reason,
@@ -129,15 +141,19 @@ class Downloader(object):
                 # done, unregister the tile from the tracking set
                 with self._runningLock:
                     try:
-                        self._running.remove(lzxy)
+                        self._running.remove((lzxy, tag))
                     except KeyError:
                         print("auto tile dl pool: warning, tuple already removed from tracking!")
                         print(lzxy)
+                # report that tha tile has or has not bee successfully downloaded
+                self._tileDownloaded(success, lzxy, tag)
         else:
             # don't download tile and remove
             # any "downloading" tiles that might
             # be in the image cache
             self._mapTiles.removeImageFromMemory(self._mapTiles.imageName(lzxy))
+            # report the tile as not been downloaded
+            self._tileDownloaded(success, lzxy, tag)
 
 
     def _downloadTile(self, lzxy):
