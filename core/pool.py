@@ -55,6 +55,9 @@ class ThreadPool(object):
     def _getQueue(self):
         return queues.PriorityQueue(maxsize=self._queueSize)
 
+    def _handleLeakedItem(self, leakedItem):
+        pass
+
     @property
     def name(self):
         return self._name
@@ -95,12 +98,18 @@ class ThreadPool(object):
         """Submit a function to be called with a thread
         from the thread pool
         """
+        leakedItem = None
         with self._shutdownLock:
             if self._shutdown:
                 raise RuntimeError
             else:
                 # normal work items have priority 1
-                self._workQueue.put((1, (fn, args, kwargs)))
+                leakedItem = self._workQueue.put((1, (fn, args, kwargs)))
+                # if the work queue used supports leaking items, we need
+                # to strip the leading priority number before returning
+                # the leaked item
+        return self._handleLeakedItem(leakedItem)
+
 
     def shutdown(self, now=False, join=False, async=True, callback=None):
         """Shutdown the lifo thread pool"""
@@ -175,6 +184,11 @@ class LifoThreadPool(ThreadPool):
         # we use a special lifo queue (stack) that supports leaking
         # tasks once the task becomes full as the work queue
         return queues.LeakyLifoQueue(maxsize=self._queueSize, leak=self._leak)
+
+    def _handleLeakedItem(self, leakedItem):
+        if leakedItem and leakedItem is not queues.NOTHING:
+            # drop the priority prefix
+            return leakedItem[1]
 
     def _shutdownHandler(self, now, join):
         # the stack queue actually only supports shutting
