@@ -27,9 +27,18 @@ BasePage {
             }
             TextSwitch {
                 text : qsTr("Show unfinished pages")
-                checked : rWin.showDebugButton
+                checked : rWin.showUnfinishedPages
                 onCheckedChanged : {
-                     rWin.set("showQt5GUIUnfinishedPages", checked)
+                    rWin.showUnfinishedPages = checked
+                    rWin.set("showQt5GUIUnfinishedPages", checked)
+                }
+            }
+            TextSwitch {
+                text : qsTr("Tile handling debug")
+                checked : rWin.tileDebug
+                onCheckedChanged : {
+                    rWin.tileDebug = checked
+                    rWin.set("showQt5TileDebug", checked)
                 }
             }
         }

@@ -36,21 +36,33 @@ Item {
             }
         }
     }
+    // normal status text
     Label {
         opacity: 0.7
+        visible : !rWin.tileDebug
         anchors.leftMargin: 16
         font.pixelSize : 8
         //font.pixelSize : 16
         elide : Text.ElideRight
         y: 8 + index*16
-        //text : tile.ind + "= " +tile.tileX + " " + tile.tileY
-        text: tile.tileId + "<br>" + tile.source
         /*
         text: layerName + " "+(img.status == Image.Ready ? "Ready" :
                img.status == Image.Null ? "Not Set" :
                img.status == Image.Error ? "Error" :
                "Loading...")
         */
+    }
+    // debug status text
+    Label {
+        opacity: 1.0
+        color : "black"
+        visible: rWin.tileDebug
+        anchors.leftMargin: 16
+        font.pixelSize : 16
+        //font.pixelSize : 16
+        elide : Text.ElideRight
+        y: 8 + index*16
+        text: tile.tileId + "<br>source set: " + (tile.source != '') + "<br>cache:" + tile.cache
     }
 }
 
