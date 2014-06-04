@@ -39,14 +39,17 @@ Item {
     // normal status text
     Label {
         opacity: 0.7
-        visible : !rWin.tileDebug
+        visible : !rWin.tileDebug && (img.status != Image.Ready)
         anchors.leftMargin: 16
-        font.pixelSize : 8
+        font.pixelSize : 16
         //font.pixelSize : 16
         elide : Text.ElideRight
         y: 8 + index*16
+
+        text : layerName + " " + "Downloading..."
+
         /*
-        text: layerName + " "+(img.status == Image.Ready ? "Ready" :
+        text: layerName + " "+(img.source == "" ? "Downloading" :
                img.status == Image.Null ? "Not Set" :
                img.status == Image.Error ? "Error" :
                "Loading...")
