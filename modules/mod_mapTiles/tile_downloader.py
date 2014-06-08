@@ -144,8 +144,11 @@ class Downloader(object):
                     try:
                         self._running.remove((lzxy, tag))
                     except KeyError:
-                        print("auto tile dl pool: warning, tuple already removed from tracking!")
-                        print(lzxy)
+                        pass
+                        # TODO: find why this happens (well, it appears to be harmless)
+                        #       and maybe forward it to debug log once we have one ?
+                        #print("auto tile dl pool: warning, tuple already removed from tracking!")
+                        #print(lzxy)
                 # report that tha tile has or has not bee successfully downloaded
                 self._tileDownloaded(error, lzxy, tag)
         else:
