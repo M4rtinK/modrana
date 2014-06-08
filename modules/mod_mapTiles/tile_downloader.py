@@ -64,9 +64,9 @@ class Downloader(object):
     def shutdown(self):
         self._pool.shutdown(now=True)
 
-    def _tileDownloaded(self, success, lzxy, tag):
+    def _tileDownloaded(self, error, lzxy, tag):
         #print("DOWNLOADER: CALLING SIGNAL: %s %s" % (tag, success))
-        self._mapTiles.tileDownloaded(success, lzxy, tag)
+        self._mapTiles.tileDownloaded(error, lzxy, tag)
 
     def downloadTile(self, lzxy, tag=None, overwrite=False):
         """Add a tile download request, if this download
@@ -97,7 +97,7 @@ class Downloader(object):
 
     def _handleDownload(self, lzxy, tag, timestamp, overwrite):
         download = True
-        success = False
+        error = constants.TILE_DOWNLOAD_ERROR
         with self._runningLock:
             if (lzxy, tag) in self._running:
                 # tile is already being downloaded
@@ -121,14 +121,14 @@ class Downloader(object):
             # download tile
             try:
                 self._downloadTile(lzxy)
-                success = True
+                error = constants.TILE_DOWNLOAD_SUCCESS
             except urllib3.exceptions.HTTPError:
                 # server returned a HTTP error, this means we got
                 # to the server but it didn't like us for some reason,
-                self._fatalDownloadError(lzxy)
+                error = self._fatalDownloadError(lzxy)
             except URLError:
                 # this is most probably caused by a loss of network connectivity
-                self._temporaryDownloadError(lzxy)
+                error = self._temporaryDownloadError(lzxy)
 
             # something other is wrong (most probably a corrupt tile)
             except Exception:
@@ -137,6 +137,7 @@ class Downloader(object):
                 self._printErrorMessage(e, lzxy)
                 # remove the status tile
                 self._mapTiles.removeImageFromMemory(self._mapTiles.imageName(lzxy))
+                error = constants.TILE_DOWNLOAD_ERROR
             finally:
                 # done, unregister the tile from the tracking set
                 with self._runningLock:
@@ -146,14 +147,14 @@ class Downloader(object):
                         print("auto tile dl pool: warning, tuple already removed from tracking!")
                         print(lzxy)
                 # report that tha tile has or has not bee successfully downloaded
-                self._tileDownloaded(success, lzxy, tag)
+                self._tileDownloaded(error, lzxy, tag)
         else:
             # don't download tile and remove
             # any "downloading" tiles that might
             # be in the image cache
             self._mapTiles.removeImageFromMemory(self._mapTiles.imageName(lzxy))
             # report the tile as not been downloaded
-            self._tileDownloaded(success, lzxy, tag)
+            self._tileDownloaded(error, lzxy, tag)
 
 
     def _downloadTile(self, lzxy):
@@ -174,14 +175,13 @@ class Downloader(object):
             else:
                 # cache the raw data
                 self._mapTiles.storeInMemory(content, cacheName)
-
             self._storeTiles.automaticStoreTile(content, lzxy)
 
     def _downloadInProgress(self, lzxy):
         if self._imageSurface:
             cacheName = self._mapTiles.imageName(lzxy)
             # change the status tile to "Downloading..."
-            self._mapTiles.storeInMemory(self._mapTiles.downloadingTile[0], cacheName)
+            self._mapTiles.storeInMemory(self._mapTiles.downloadingTile[0], cacheName, imageType="downloading")
 
     def _temporaryDownloadError(self, lzxy):
         if self._imageSurface:
@@ -193,6 +193,7 @@ class Downloader(object):
             # as not to DOS the system when we temporarily loose internet connection or other such error
             # occurs, we load a temporary error tile with expiration timestamp instead of the tile image
             # TODO: actually remove tiles according to expiration timestamp :)
+        return constants.TILE_DOWNLOAD_TEMPORARY_ERROR
 
     def _fatalDownloadError(self, lzxy):
         if self._imageSurface:
@@ -208,6 +209,7 @@ class Downloader(object):
             #  - the error tile is shown without modifying the pipeline too much
             #  - modRana will eventually try to download the tile again,
             #    after it is flushed with old tiles from the memory
+        return constants.TILE_DOWNLOAD_ERROR
 
     def _printErrorMessage(self, e, lzxy):
         import traceback
