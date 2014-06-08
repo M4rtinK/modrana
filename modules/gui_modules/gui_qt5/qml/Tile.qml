@@ -16,6 +16,7 @@ Item {
     property bool error : false
     property string layerName : ""
     property bool downloading : false
+    property variant mapInstance : null
 
     Image {
         id: img
@@ -47,6 +48,46 @@ Item {
             }
         }
     }
+    // connection to the map instance for for tile-downloaded notifications
+    Connections {
+        target: tile.downloading ? tile.mapInstance : null
+        onTileDownloaded: {
+            // is this us ?
+            if (tile.downloading && loadedTileId == tile.tileId) {
+                //console.log("THIS TILE " + tile.tileId + " error: " + tileError + " " + tile.source)
+                if (tileError > 0) {
+                    // something went wrong
+                    if (tileError == 1) {
+                        // fatal error
+                        tile.error = true
+                    } else {
+                        if (tileError > 1) {
+                            // non fatal error, increment retry count
+                            tile.retryCount = tile.retryCount + 1
+                        }
+                        // TODO: use a constant ?
+                        if (tile.retryCount <= 5) {
+                            // we are still within the retry count limit,
+                            // so trigger another download request by trying
+                            // to load the tile
+                            tile.cache = false
+                            tile.source = tileUrl(tileId)
+                        } else {
+                            // retry count limit reached, switch to error state
+                            tile.error = true
+                        }
+                    }
+                } else {
+                    // everything appears fine, load the tile
+                    tile.retryCount = 0
+                    tile.error = false
+                    tile.cache = true
+                    tile.source = tileUrl(tileId)
+                }
+            }
+        }
+    }
+
     // normal status text
     Label {
         opacity: 0.7

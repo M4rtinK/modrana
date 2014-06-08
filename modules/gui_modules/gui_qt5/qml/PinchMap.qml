@@ -408,56 +408,32 @@ Rectangle {
                         id : tile
                         tileSize : tileSize
                         tileOpacity : layerOpacity
+                        mapInstance : pinchmap
                         // TODO: move to function
                         tileId: pinchmap.name+"/"+layerId+"/"+pinchmap.zoomLevel+"/"+tileX+"/"+tileY
+                        // if tile id changes means that the panning reached a threshold that cased
+                        // a top-level X/Y coordinate switch
+                        // -> this basically means that all columns or rows switch coordinates and
+                        //    one row/column has new corrdinates while one column/rwo coordinate
+                        //    set is discarded
+                        // -> like this, we don't have to instantiate and discard a bazillion of
+                        //    tile elements, but instantiate them once and then shuffle them around
+                        // -> tiles are instantiated and removed only if either viewport size or layer
+                        //    count changes
                         onTileIdChanged: {
+                            // so we are now a different tile :)
+                            // therefore we need to all the asynchronous tile loading properties back
+                            // to the default state and try to load the tile, if it is in the cache
+                            // it will be loaded at once or the asynchronous loading process will start
+                            // * note that any "old" asynchronous loading process still runs and the
+                            //   "new" tile that got the "old" coordinates will get the tile-downloaded
+                            //   notification, which is actually what we want :)
                             tile.layerName = layerId
                             tile.error = false
                             tile.cache = true
                             tile.retryCount = 0
                             tile.downloading = false
                             tile.source = tileUrl(tileId)
-                        }
-                        // set the source always once the tile stops waiting
-                        //source : tile.waiting ? "" : tileUrl(layerId, tileX, tileY)
-                        Connections {
-                            target: tile.downloading ? pinchmap : null
-                            //target : pinchmap
-                            onTileDownloaded: {
-                                // is this us ?
-                                if (tile.downloading && loadedTileId == tile.tileId) {
-                                    //console.log("THIS TILE " + tile.tileId + " error: " + tileError + " " + tile.source)
-                                    if (tileError > 0) {
-                                        // something went wrong
-                                        if (tileError == 1) {
-                                            // fatal error
-                                            tile.error = true
-                                        } else {
-                                            if (tileError > 1) {
-                                                // non fatal error, increment retry count
-                                                tile.retryCount = tile.retryCount + 1
-                                            }
-                                            // TODO: use a constant ?
-                                            if (tile.retryCount <= 5) {
-                                                // we are still within the retry count limit,
-                                                // so trigger another download request by trying
-                                                // to load the tile
-                                                tile.cache = false
-                                                tile.source = tileUrl(tileId)
-                                            } else {
-                                                // retry count limit reached, switch to error state
-                                                tile.error = true
-                                            }
-                                        }
-                                    } else {
-                                        // everything appears fine, load the tile
-                                        tile.retryCount = 0
-                                        tile.error = false
-                                        tile.cache = true
-                                        tile.source = tileUrl(tileId)
-                                    }
-                                }
-                            }
                         }
                     }
                 }
