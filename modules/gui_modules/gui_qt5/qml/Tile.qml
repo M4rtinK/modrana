@@ -11,27 +11,38 @@ Item {
     property alias source : img.source
     property bool waiting : false
     property string tileId : ""
-    property bool cache : img.cache
+    property alias cache : img.cache
+    property int retryCount : 0
+    property bool error : false
+    property string layerName : ""
+    property bool downloading : false
+
     Image {
-        property int retryCount : 1
         id: img
-        cache : false
+        cache : true
         width: tile.tileSize
         height: tile.tileSize
-        opacity: tile.tileOpacity
-        //synchronous :
+        opacity: tile.downloading ? 0.0 : tile.tileOpacity
+        asynchronous : true
         onStatusChanged : {
-            //console.log("status changed:" + img.status + " " + img.source + " " + img.sourceSize.width)
+            //console.log("status changed: " + tile.tileId + " " +  img.status + " " +
+            //            img.source + " " + img.sourceSize.width)
             if (img.status == Image.Ready) {
                 // check if we got a real image or an info info
                 // pixel telling us the tile was not found locally
                 // and will be downloaded
                 if (img.sourceSize.width == 1) {
-                    // info tile, disable caching, clear source and
-                    // connect to the tile downloaded signal and wait
+                    // info tile, disable caching, clear source,
+                    // connect to the tile downloaded signal,
+                    // issue a tile download request and then wait
                     // for the tile to be downloaded
                     img.cache = false
-                    img.source = ""
+                    if (!tile.downloading) {
+                        tile.downloading = true
+                        rWin.python.call("modrana.gui.addTileDownloadRequest", [tile.tileId], function(){})
+                    }
+                } else {
+                    tile.downloading = false
                 }
             }
         }
@@ -39,21 +50,16 @@ Item {
     // normal status text
     Label {
         opacity: 0.7
-        visible : !rWin.tileDebug && (img.status != Image.Ready)
+        visible : !rWin.tileDebug && tile.downloading
         anchors.leftMargin: 16
         font.pixelSize : 16
-        //font.pixelSize : 16
-        elide : Text.ElideRight
+        elide : Text.ElideMiddle
         y: 8 + index*16
-
-        text : layerName + " " + "Downloading..."
-
-        /*
-        text: layerName + " "+(img.source == "" ? "Downloading" :
-               img.status == Image.Null ? "Not Set" :
-               img.status == Image.Error ? "Error" :
-               "Loading...")
-        */
+        width : tile.tileSize - 16
+        // TODO: use a constant ?
+        property string retryString : tile.retryCount ? "Downloading... (" + tile.retryCount + "/5)" : "Downloading..."
+        property string statusString : tile.error == true ? "dl failed" : retryString
+        text : tile.layerName + " : " + statusString
     }
     // debug status text
     Label {
@@ -62,10 +68,13 @@ Item {
         visible: rWin.tileDebug
         anchors.leftMargin: 16
         font.pixelSize : 16
-        //font.pixelSize : 16
         elide : Text.ElideRight
+        width : tile.tileSize - 16
         y: 8 + index*16
-        text: tile.tileId + "<br>source set: " + (tile.source != '') + "<br>cache:" + tile.cache
+        text: tile.tileId + "<br>source set: " + (tile.source != '') +
+              "<br>cache:" + tile.cache + "<br>error:" + tile.error +
+              "<br>retryCount: " + tile.retryCount +
+              "<br>download: " + tile.downloading
     }
 }
 

@@ -274,6 +274,37 @@ class QMLGUI(GUIModule):
             print("Qt5 GUI: image loading failed, imageId: %s" % originalImageId)
             print(e)
 
+    def _tileId2lzxy(self, tileId):
+        """Convert tile id string to the "standard" lzxy tuple
+
+        :param str tileId: map instance name/layer id/z/x/y
+
+        :returns: lzxy tuple
+        :rtype: tuple
+        """
+        split = tileId.split("/")
+        # pinchMapId = split[0]
+        layerId = split[1]
+        z = int(split[2])
+        x = int(split[3])
+        y = int(split[4])
+        # TODO: local id:layer cache ?
+        layer = self.modules.mapLayers.getLayerById(layerId)
+        return layer, z, x, y
+
+    def addTileDownloadRequest(self, tileId):
+        """Add an asynchronous download request, the tile will be
+        notified once the download is finished or fails
+        :param string tileId: unique tile id
+        """
+        try:
+            lzxy = self._tileId2lzxy(tileId)
+            self.modules._mapTiles.addTileDownloadRequest(lzxy, tileId)
+        except Exception:
+            import sys
+            e = sys.exc_info()[1]
+            print("Qt5 GUI: adding tile download request failed:")
+            print(e)
 
 class Modules(object):
     """A class that provides access to modRana modules from the QML context"""
@@ -473,20 +504,18 @@ class TileImageProvider(ImageProvider):
         # the other modules (other than the device module) are not yet initialized
         self.gui.modules.mapTiles.tileDownloaded.connect(self._tileDownloadedCB)
 
-    def _tileDownloadedCB(self, success, lzxy, tag):
+    def _tileDownloadedCB(self, error, lzxy, tag):
         """Notify the QML context that a tile has been downloaded"""
-        if success:
-            pinchMapId = tag.split("/")[0]
-            #print("SENDING: %s %s" % ("tileDownloaded:%s" % pinchMapId, tag))
-            pyotherside.send("tileDownloaded:%s" % pinchMapId, tag)
+        pinchMapId = tag.split("/")[0]
+        #print("SENDING: %s %s" % ("tileDownloaded:%s" % pinchMapId, tag))
+        pyotherside.send("tileDownloaded:%s" % pinchMapId, tag, error)
 
     def getImage(self, imageId, requestedSize):
         """
         the tile info should look like this:
         layerID/zl/x/y
         """
-        #print("TILE REQUESTED")
-        #print(imageId)
+        #print("TILE REQUESTED %s" % imageId)
         #print(requestedSize)
         try:
             # split the string provided by QML
@@ -505,7 +534,9 @@ class TileImageProvider(ImageProvider):
             #tag = (pinchMapId, layerId, z, x, y)
 
             # get the tile from the tile module
-            tileData = self.gui.modules.mapTiles.getTile((layer, z, x, y), async=True, tag=imageId)
+            tileData = self.gui.modules.mapTiles.getTile((layer, z, x, y),
+                                                         async=True, tag=imageId,
+                                                         download=False)
             imageSize = (256,256)
             if tileData is None:
                 # The tile was not found locally
@@ -519,7 +550,9 @@ class TileImageProvider(ImageProvider):
                 # We notify the GUI by returning a 1x1 image.
                 tileData = self.gui._tileNotFoundImage
                 imageSize = (1,1)
+                #print("%s NOT FOUND" % imageId)
                 # TODO: use some raw image data instead of PNG ?
+            #print("RETURNING STUFF %d %s" % (imageSize[0], imageId))
             return bytearray(tileData), imageSize, pyotherside.format_data
         except Exception:
             import sys

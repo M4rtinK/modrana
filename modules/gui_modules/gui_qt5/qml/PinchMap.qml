@@ -60,7 +60,7 @@ Rectangle {
     property int status: PageStatus.Active
     signal drag // signals that map-drag has been detected
     signal centerSet // signals that the map has been moved
-    signal tileDownloaded(string loadedTileId) // signals that a tile has been downloaded
+    signal tileDownloaded(string loadedTileId, int tileError) // signals that a tile has been downloaded
     property bool needsUpdate: false
 
 
@@ -73,11 +73,11 @@ Rectangle {
         rWin.python.setHandler("tileDownloaded:" + pinchmap.name, pinchmap.tileDownloadedCB)
     }
 
-    function tileDownloadedCB(tileId) {
+    function tileDownloadedCB(tileId, tileError) {
         // trigger the tile downloaded signal
         // TODO: could the signal by called directly as the callback ?
         //console.log("PINCH MAP: TILE DOWNLOADED: " + tileId)
-        tileDownloaded(tileId)
+        tileDownloaded(tileId, tileError)
     }
 
     transform: Rotation {
@@ -332,6 +332,8 @@ Rectangle {
     function tileUrl(tileId) {
         return "image://python/tile/" + tileId
     }
+
+    /*
     function tileUrlOld(layerID, tx, ty) {
         //console.log("tileUrl" + tx + "/" + ty)
         if (ty < 0 || ty > maxTileNo) {
@@ -349,6 +351,7 @@ Rectangle {
             //var x = F.getMapTile(url, tx, ty, zoomLevel);
         }
     }
+    */
 
     Grid {
         id: map;
@@ -408,18 +411,51 @@ Rectangle {
                         // TODO: move to function
                         tileId: pinchmap.name+"/"+layerId+"/"+pinchmap.zoomLevel+"/"+tileX+"/"+tileY
                         onTileIdChanged: {
+                            tile.layerName = layerId
+                            tile.error = false
                             tile.cache = true
+                            tile.retryCount = 0
+                            tile.downloading = false
                             tile.source = tileUrl(tileId)
                         }
                         // set the source always once the tile stops waiting
                         //source : tile.waiting ? "" : tileUrl(layerId, tileX, tileY)
                         Connections {
-                            target: (tile.source == "") ? pinchmap : null
-                            //target: pinchmap
+                            target: tile.downloading ? pinchmap : null
+                            //target : pinchmap
                             onTileDownloaded: {
-                                if (tile.source == "" && loadedTileId == tile.tileId) {
-                                    tile.cache = true
-                                    tile.source = tileUrl(tileId)
+                                // is this us ?
+                                if (tile.downloading && loadedTileId == tile.tileId) {
+                                    //console.log("THIS TILE " + tile.tileId + " error: " + tileError + " " + tile.source)
+                                    if (tileError > 0) {
+                                        // something went wrong
+                                        if (tileError == 1) {
+                                            // fatal error
+                                            tile.error = true
+                                        } else {
+                                            if (tileError > 1) {
+                                                // non fatal error, increment retry count
+                                                tile.retryCount = tile.retryCount + 1
+                                            }
+                                            // TODO: use a constant ?
+                                            if (tile.retryCount <= 5) {
+                                                // we are still within the retry count limit,
+                                                // so trigger another download request by trying
+                                                // to load the tile
+                                                tile.cache = false
+                                                tile.source = tileUrl(tileId)
+                                            } else {
+                                                // retry count limit reached, switch to error state
+                                                tile.error = true
+                                            }
+                                        }
+                                    } else {
+                                        // everything appears fine, load the tile
+                                        tile.retryCount = 0
+                                        tile.error = false
+                                        tile.cache = true
+                                        tile.source = tileUrl(tileId)
+                                    }
                                 }
                             }
                         }
