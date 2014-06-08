@@ -35,7 +35,7 @@ def getModule(m, d, i):
 
 
 class Jolla(DeviceModule):
-    """A Nokia N9 device module"""
+    """A Jolla device module"""
 
     def __init__(self, m, d, i):
         DeviceModule.__init__(self, m, d, i)
