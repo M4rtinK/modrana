@@ -10,6 +10,7 @@ Item {
     property int updateInterval : 1000
     property string nmeaSource
     property string provider : "fake position provider"
+    property bool valid : true
     property variant position: Item {
         property bool altitudeValid : false
         property variant coordinate : Coordinate {
