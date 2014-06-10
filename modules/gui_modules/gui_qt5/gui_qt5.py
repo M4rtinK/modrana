@@ -226,6 +226,11 @@ class QMLGUI(GUIModule):
         lat, lon = float(posDict["latitude"]), float(posDict["longitude"])
         elevation = float(posDict["elevation"])
         metersPerSecSpeed = float(posDict["speedMPS"])  # m/s
+        # report that we have 3D fix
+        # (looks like we can't currently reliably discern between 2D
+        # and 3D fix on the Jolla, might be good to check what other
+        # Sailfish OS running devices report)
+        self.set("fix", 3)
 
         self.set("pos", (lat, lon))
 
@@ -367,7 +372,9 @@ class Search(object):
 
         :param str query: search query
         """
-
+        print("SEARCH!")
+        print(searchId)
+        print(query)
         online = self.gui.m.get("onlineServices", None)
         if online:
             # construct result handling callback
@@ -378,6 +385,8 @@ class Search(object):
             # so we can use it to track search progress
             # (there might be more searches in progress so we
             #  need to know the unique search thread id)
+            print("SEARCH FUNCTION")
+            print(searchFunction)
             threadId = searchFunction(query, callback)
             self._threadsInProgress[threadId] = searchId
             return threadId
@@ -416,16 +425,20 @@ class Search(object):
 
     def _getSearchFunction(self, searchId):
         """Return the search function object for the given searchId"""
-        if searchId in ("address", "wikipedia"):
-            online = self.gui.m.get("onlineServices", None)
-            if online:
-                if searchId == "address":
-                    return online.geocodeAsync
-                elif searchId == "wikipedia":
-                    return online.wikipediaSearchAsync
+        online = self.gui.m.get("onlineServices", None)
+        if online:
+            if searchId == "address":
+                return online.geocodeAsync
+            elif searchId == "wikipedia":
+                return online.wikipediaSearchAsync
+            elif searchId == "local":
+                return online.localSearchAsync
             else:
                 print("Qt5 GUI: search function for id: %s not found" % searchId)
                 return None
+        else:
+            print("Qt5 GUI: onlineServices module not found")
+
 
 class ImageProvider(object):
     """PyOtherSide image provider base class"""
