@@ -14,39 +14,44 @@ Item {
 
     // connect to the location source position update signals
     Connections {
-        target : locationSource
-        onPositionChanged: {
-            var coord = locationSource.position.coordinate
-            //console.log("Coordinate:", coord.longitude, coord.latitude)
-            //console.log("Speed:", locationSource.position.speed)
-            //console.log("h/v accuracy:", locationSource.position.horizontalAccuracy, locationSource.position.verticalAccuracy)
-            rWin.position = locationSource.position
-            rWin.pos = coord
-            rWin.hasFix = locationSource.valid
-            if (coord.isValid) {
-                // replace the last good pos if lat & lon are valid
-                rWin.lastGoodPos = locationSource.position.coordinate
-                // get the direction of travel
-                // (as QML position info seems to be missing the direction
-                // attribute, we need to compute it like this)
-                if (location._lastCoord) {
-                    rWin.bearing = location._lastCoord.azimuthTo(coord)
-                    //console.log("BEARING " + rWin.bearing)
-                }
-                // save the current coord for the next bearing
-                // computation
-                location._lastCoord = coord
-            }
-            // tell the position to Python
-            var posDict = {
-                latitude : locationSource.position.coordinate.latitude,
-                longitude : locationSource.position.coordinate.longitude,
-                elevation : locationSource.position.coordinate.altitude,
-                speedMPS : locationSource.position.speed
-            }
-            rWin.python.call("modrana.gui.setPosition", [posDict])
-        }
+        id : locationUpdateConnection
+        target : null
+        onPositionChanged: positionUpdate(locationSource)
     }
+
+    function positionUpdate(locationSource) {
+        var coord = locationSource.position.coordinate
+        console.log("position changed")
+        console.log("Coordinate:", coord.longitude, coord.latitude)
+        //console.log("Speed:", locationSource.position.speed)
+        //console.log("h/v accuracy:", locationSource.position.horizontalAccuracy, locationSource.position.verticalAccuracy)
+        rWin.position = locationSource.position
+        rWin.pos = coord
+        rWin.hasFix = locationSource.valid
+        if (coord.isValid) {
+            // replace the last good pos if lat & lon are valid
+            rWin.lastGoodPos = locationSource.position.coordinate
+            // get the direction of travel
+            // (as QML position info seems to be missing the direction
+            // attribute, we need to compute it like this)
+            if (location._lastCoord) {
+                rWin.bearing = location._lastCoord.azimuthTo(coord)
+                //console.log("BEARING " + rWin.bearing)
+            }
+            // save the current coord for the next bearing
+            // computation
+            location._lastCoord = coord
+        }
+        // tell the position to Python
+        var posDict = {
+            latitude : locationSource.position.coordinate.latitude,
+            longitude : locationSource.position.coordinate.longitude,
+            elevation : locationSource.position.coordinate.altitude,
+            speedMPS : locationSource.position.speed
+        }
+        rWin.python.call("modrana.gui.setPosition", [posDict])
+    }
+
 
     // location module initialization
     function __init__() {
@@ -72,8 +77,13 @@ Item {
             // use fake source instead
             console.log("Qt5 position source init failed (Qt<5.2 ?)")
             location_element = rWin.loadQMLFile("LocationFakeSource.qml")
+            // do an initial update so that Python code also gets the fake
+            // position, which will not change anyway
+            positionUpdate(location_element)
         }
         locationSource = location_element
+        // connect the location update signal when we finally have the element
+        locationUpdateConnection.target = locationSource
         // check if NMEA file source should be used
         var posFromFile = (rWin.get_sync("posFromFile", "") == "NMEA")
         var NMEAFilePath = rWin.get_sync("NMEAFilePath", "")
