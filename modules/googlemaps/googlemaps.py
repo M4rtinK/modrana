@@ -16,8 +16,14 @@ An easy-to-use Python wrapper for the Google Maps and Local Search APIs.
 
 """
 
-import urllib
-import urllib2
+try:  # Python 2
+    from urlib import urlencode
+    from urllib2 import urlopen, HTTPError, URLError, Request
+except ImportError:  # Python 3
+    from urllib.request import urlopen, Request
+    from urllib.parse import urlencode
+    from urllib.error import HTTPError, URLError
+
 import time
 #try:
 #    import json
@@ -65,11 +71,11 @@ def fetch_json(query_url, params={}, headers={}):       # pylint: disable-msg=W0
     :rtype: (string, dict or array)
 
     """
-    encoded_params = urllib.urlencode(params)
+    encoded_params = urlencode(params)
     url = query_url + encoded_params
-    request = urllib2.Request(url, headers=headers)
-    response = urllib2.urlopen(request)
-    return (url, json.load(response))
+    request = Request(url, headers=headers)
+    response = urlopen(request)
+    return (url, json.loads(response.readall().decode('utf8')))
 
 
 class GoogleMapsError(Exception):
