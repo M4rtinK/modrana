@@ -649,6 +649,7 @@ class ModRana(object):
             return False
 
     def notify(self, message, msTimeout=0, icon=""):
+        print("modRana notify: %s" % message)
         notify = self.m.get('notification')
         if notify:
             # the notification module counts timeout in seconds
