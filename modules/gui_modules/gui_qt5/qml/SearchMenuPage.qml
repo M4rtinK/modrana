@@ -18,5 +18,10 @@ IconGridPage {
             icon : "wikipedia.png"
             menu : "WikipediaPage"
         }
+        ListElement {
+            caption : "Local"
+            icon : "localSearch.png"
+            menu : "LocalPage"
+        }
     }
 }
