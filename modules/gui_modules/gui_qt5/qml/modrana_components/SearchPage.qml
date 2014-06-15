@@ -166,6 +166,14 @@ HeaderPage {
             property string distanceString : F.p2pDistanceString(model, rWin.pos)
             onClicked : {
                 console.log(model.name + " clicked")
+                // mark the current point as highlighted so that it
+                // is highlighted once it id displayed on the map
+                pointLW.model.setProperty(index, "highlight", true)
+
+                // set the current search result model as the marker
+                // display model
+                rWin.mapPage.getMap().markers.setMarkers(pointLW.model)
+
                 var lat = model.latitude
                 var lon = model.longitude
                 rWin.mapPage.showOnMap(lat, lon)
