@@ -39,6 +39,8 @@ Rectangle {
     
     property alias angle: rot.angle
 
+    property alias markers : map.markersC
+
     // use mapnik as the default map layer
     property variant layers :  ListModel {
         ListElement {
@@ -51,9 +53,6 @@ Rectangle {
     property int earthRadius: 6371000
 
     property bool tooManyPoints: true
-
-    //property alias model: geocacheDisplay.model
-    property alias markerModel: markerDisplay.model
 
     //property int tileserverPort : mapTiles.tileserverPort()
     property int tileserverPort : 0
@@ -365,6 +364,8 @@ Rectangle {
         x: rootX + offsetX;
         y: rootY + offsetY;
 
+        property variant markersC : markers
+
         Repeater {
             id: tiles
             model: (pinchmap.numTilesX * pinchmap.numTilesY);
@@ -455,17 +456,9 @@ Rectangle {
         }
         */
 
-        Item {
-            id: markerDisplayContainer
-            Repeater {
-                id: markerDisplay
-                delegate: Marker {
-                    coordinate: model.coordinate
-                    targetPoint: getMappointFromCoord(model.coordinate.lat, model.coordinate.lon)
-                    verticalSpacing: model.numSimilar
-                    z: 2000
-                }
-            }
+        Markers {
+            id: markers
+            mapInstance : pinchmap
         }
     }
     Image {
