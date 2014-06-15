@@ -20,7 +20,7 @@ IconGridPage {
         }
         ListElement {
             caption : "Local"
-            icon : "localSearch.png"
+            icon : "local_search.png"
             menu : "Local"
         }
     }
