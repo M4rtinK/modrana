@@ -150,6 +150,13 @@ def distance(lat1, lon1, lat2, lon2):
     d = h1 * h1 + cos(lat1) * cos(lat2) * h2 * h2
     return 2.0 * atan2(sqrt(d), sqrt(1.0 - d)) * EARTH_RADIUS
 
+def distanceP2P(point1, point2):
+    """Compute distance between two point objects"""
+    return distance(point1.lat, point1.lon, point2.lat, point2.lon)
+
+def distanceP2LL(point1, lat, lon):
+    """Compute distance between a point and lat lon pair"""
+    return distance(point1.lat, point1.lon, lat, lon)
 
 def distanceApprox(lat1, lon1, lat2, lon2):
     """This method roughly calculates the shortest distance between two points on a sphere.
