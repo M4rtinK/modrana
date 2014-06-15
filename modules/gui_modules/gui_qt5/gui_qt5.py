@@ -373,9 +373,6 @@ class Search(object):
 
         :param str query: search query
         """
-        print("SEARCH!")
-        print(searchId)
-        print(query)
         online = self.gui.m.get("onlineServices", None)
         if online:
             # construct result handling callback
@@ -386,8 +383,6 @@ class Search(object):
             # so we can use it to track search progress
             # (there might be more searches in progress so we
             #  need to know the unique search thread id)
-            print("SEARCH FUNCTION")
-            print(searchFunction)
             threadId = searchFunction(query, callback)
             self._threadsInProgress[threadId] = searchId
             return threadId
