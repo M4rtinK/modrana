@@ -46,6 +46,7 @@ from core import signal
 from core.backports import six
 from core import constants
 from core.threads import threadMgr
+from core import geo
 
 SEARCH_STATUS_PREFIX = "search:status:"
 SEARCH_RESULT_PREFIX = "search:result:"
@@ -392,6 +393,16 @@ class Search(object):
 
         :param list results: address search results
         """
+        # try to sort local search results by distance
+        # TODO: make this configurable
+        if searchId == "local":
+            pos = self.gui.get("pos", None)
+            if pos:
+                distanceList = []
+                for result in results:
+                    distanceList.append((geo.distanceP2LL(result,pos[0], pos[1]), result))
+                distanceList.sort()
+                results = map(lambda x: x[1], distanceList)
         # covert the Points in the results to a list of dicts
         resultList = []
         for result in results:
