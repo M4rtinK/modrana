@@ -4,24 +4,24 @@ import UC 1.0
 IconGridPage {
     id : searchMenuPage
     function getPage(menu){
-        return Qt.createComponent("Search" + menu + ".qml")
+        return rWin.getPage("Search" + menu)
     }
     model : ListModel {
         id : testModel
         ListElement {
             caption : "Address"
             icon : "signpost.png"
-            menu : "AddressPage"
+            menu : "Address"
         }
         ListElement {
             caption : "Wikipedia"
             icon : "wikipedia.png"
-            menu : "WikipediaPage"
+            menu : "Wikipedia"
         }
         ListElement {
             caption : "Local"
             icon : "localSearch.png"
-            menu : "LocalPage"
+            menu : "Local"
         }
     }
 }
