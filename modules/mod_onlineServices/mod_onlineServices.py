@@ -147,7 +147,7 @@ class OnlineServices(RanaModule):
             print("onlineServices: a google API key is needed for using the google maps services")
             return None
             # only import when actually needed
-        from modules import googlemaps
+        from core.bundle import googlemaps
         gMap = googlemaps.GoogleMaps(key)
         return gMap
 

@@ -97,8 +97,8 @@ def _getGmapsInstance():
         print("onlineServices: online providers:"
               " a google API key is needed for using the google maps services")
         return None
-        # only import when actually needed
-    from modules import googlemaps
+    # only import when actually needed
+    from core.bundle import googlemaps
     gMap = googlemaps.GoogleMaps(key)
     return gMap
 
@@ -164,7 +164,7 @@ def _googleDirections(start, destination, waypoints, params):
             flagDir['waypoints'] = waypointOption
         flagDir['sensor'] = 'false'
         # only import the googlemaps module when actually needed
-        from modules import googlemaps
+        from core.bundle import googlemaps
 
         directions = None
         returnCode = None

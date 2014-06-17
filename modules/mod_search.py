@@ -26,7 +26,7 @@ import re
 try:  # Python 2.7+
     from collections import OrderedDict as odict
 except ImportError:
-    from modules.odict import odict  # Python <2.7
+    from core.backports.odict import odict  # Python <2.7
 
 
 def getModule(m, d, i):
