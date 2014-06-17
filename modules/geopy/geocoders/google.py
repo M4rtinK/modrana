@@ -1,5 +1,10 @@
-from urllib import urlencode
-from urllib2 import urlopen
+try:  # Python 2
+    from urllib import urlencode
+    from urllib2 import urlopen
+except ImportError:  # Python 3
+    from urllib.request import urlopen
+    from urllib.parse import urlencode
+
 try:
   try:
     import json
