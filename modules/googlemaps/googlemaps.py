@@ -17,7 +17,7 @@ An easy-to-use Python wrapper for the Google Maps and Local Search APIs.
 """
 
 try:  # Python 2
-    from urlib import urlencode
+    from urllib import urlencode
     from urllib2 import urlopen, HTTPError, URLError, Request
 except ImportError:  # Python 3
     from urllib.request import urlopen, Request
@@ -75,7 +75,7 @@ def fetch_json(query_url, params={}, headers={}):       # pylint: disable-msg=W0
     url = query_url + encoded_params
     request = Request(url, headers=headers)
     response = urlopen(request)
-    return (url, json.loads(response.readall().decode('utf8')))
+    return (url, json.loads(response.read().decode('utf8')))
 
 
 class GoogleMapsError(Exception):
