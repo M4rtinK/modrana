@@ -24,10 +24,9 @@ import fnmatch
 # for some reason one import method works
 # on Fremantle and other everywhere (?) else"""
 try:
-    from modules.configobj.configobj import ConfigObj # everywhere
+    from core.bundle.configobj import ConfigObj # everywhere
 except Exception:
     import sys
-
     e = sys.exc_info()[1]
     print(e)
     print("icons: trying alternative configobj import method")
