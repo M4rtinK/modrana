@@ -25,16 +25,11 @@ except ImportError:  # Python 3
     from urllib.error import HTTPError, URLError
 
 import time
-#try:
-#    import json
-#except ImportError:
-#    import simplejson as json       # pylint: disable-msg=F0401
-
 
 # modified for better compatibility
 
 # first we try json, than simplejson and then the simplejson package,
-# that is included in the local_simplejson folder
+# that is included in the core/bundle folder
 #
 # although it should work without an in-OS-installed simplejson package,
 # proper package has binary speedups, so it is preferred to install it if possible
@@ -46,11 +41,8 @@ try:
     except ImportError:
         import simplejson as json       # pylint: disable-msg=F0401
 except:
-    import sys
-
-    sys.path.append("modules/local_simplejson")
     print("googlemaps: using integrated non-binary simplejson, install proper simplejson package for better speed")
-    import simplejson as json
+    from core.bundle import simplejson as json
 
 VERSION = '1.0.2'
 __all__ = ['GoogleMaps', 'GoogleMapsError']

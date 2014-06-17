@@ -17,14 +17,10 @@ try:
         import simplejson as json
 except Exception:
     import sys
-
     e = sys.exc_info()[1]
-    import sys
-
-    sys.path.append("modules/local_simplejson")
     print(e)
     print("onlineServices: using integrated non-binary simplejson, install proper simplejson package for better speed")
-    import simplejson as json
+    from core.bundle import simplejson as json
 
 from core.point import Point
 from core import constants

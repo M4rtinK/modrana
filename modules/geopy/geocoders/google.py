@@ -11,10 +11,8 @@ try:
   except ImportError:
     import simplejson as json       # pylint: disable-msg=F0401
 except:
-  import sys
-  sys.path.append("modules/local_simplejson")
-  print("onlineServices: using integrated non-binary simplejson, install proper simplejson package for better speed")
-  import simplejson as json
+    print("geopy: using integrated non-binary simplejson, install proper simplejson package for better speed")
+    from core.bundle import simplejson as json
 
 import xml
 from xml.parsers.expat import ExpatError
