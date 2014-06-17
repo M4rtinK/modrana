@@ -20,7 +20,7 @@
 from modules.base_module import RanaModule
 from time import *
 
-from upoints import gpx
+from core.bundle.upoints import gpx
 
 
 def getModule(m, d, i):
