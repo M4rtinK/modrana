@@ -19,8 +19,8 @@ import math
 
 import cairo
 
-from pycha.chart import Chart, Option
-from pycha.color import hex2rgb
+from .chart import Chart, Option
+from .color import hex2rgb
 
 
 class PieChart(Chart):

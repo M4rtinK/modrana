@@ -16,3 +16,16 @@
 # along with PyCha.  If not, see <http://www.gnu.org/licenses/>.
 
 version = "0.5.1dev"
+
+__all__ = [
+    'bar', 'chart', 'color', 'line', 'pie',
+    'scatter', 'stackedbar'
+]
+
+from . import bar
+from . import chart
+from . import color
+from . import line
+from . import pie
+from . import scatter
+from . import stackedbar

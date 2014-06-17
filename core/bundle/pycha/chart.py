@@ -21,7 +21,7 @@ import math
 
 import cairo
 
-from pycha.color import ColorScheme, hex2rgb, DEFAULT_COLOR
+from .color import ColorScheme, hex2rgb, DEFAULT_COLOR
 
 
 class Chart(object):

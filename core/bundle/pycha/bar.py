@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with PyCha.  If not, see <http://www.gnu.org/licenses/>.
 
-from pycha.chart import Chart, uniqueIndices
-from pycha.color import hex2rgb
+from .chart import Chart, uniqueIndices
+from .color import hex2rgb
 
 
 class BarChart(Chart):
