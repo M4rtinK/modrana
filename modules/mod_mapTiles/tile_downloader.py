@@ -26,7 +26,7 @@ import sys
 if sys.version_info[:2] <= (2, 5):
     from core.backports import urllib3_python25 as urllib3
 else:
-    from core.bundle import urllib3
+    import urllib3
 from core.pool import LifoThreadPool
 from core.singleton import modrana
 from core import tiles

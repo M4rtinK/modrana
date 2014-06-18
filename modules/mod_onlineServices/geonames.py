@@ -20,7 +20,7 @@ except Exception:
     e = sys.exc_info()[1]
     print(e)
     print("onlineServices: using integrated non-binary simplejson, install proper simplejson package for better speed")
-    from core.bundle import simplejson as json
+    import simplejson as json
 
 from core.point import Point
 from core import constants

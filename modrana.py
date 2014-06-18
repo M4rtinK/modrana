@@ -31,6 +31,29 @@ import marshal
 import traceback
 import imp
 import platform
+
+def setCorrectCWD():
+    # change to folder where the main modRana file is located
+    # * this enables to run modRana with absolute path without adverse
+    # effect such as modRana not finding modules or
+    currentAbsolutePath = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(currentAbsolutePath)
+    # append the path to the bundle directory so that modRana can fall-back
+    # to the it's bundled modules if a given module is not available on the system
+    # - at the same just a simple "import foo" import is enough and
+    #   "from core.bundle import foo" is not needed
+    sys.path.append(os.path.join(currentAbsolutePath, 'core', 'bundle'))
+    # add the modules folder to path, so that third-party modules (such as Upoints),
+    # that expect to be placed to path work correctly
+    # NOTE: most of those modules were moved to the core/bundle
+    # directory so it might be possible to get rid of this in the
+    # future
+    sys.path.append(os.path.join(currentAbsolutePath, 'modules'))
+
+# before we start importing our stuff we need to correctly setup CWD
+# and Python import paths
+setCorrectCWD()
+
 # import core modules/classes
 from core import startup
 from core import utils
@@ -823,16 +846,6 @@ class ModRana(object):
         else:
             print("* timing list empty *")
 
-def setCorrectCWD():
-    # change to folder where the main modRana file is located
-    # * this enables to run modRana with absolute path without adverse
-    # effect such as modRana not finding modules or
-    currentAbsolutePath = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(currentAbsolutePath)
-    # add the modules folder to path, so that third-party modules (such as Upoints),
-    # that expect to be placed to path work correctly
-    sys.path.append(os.path.join(currentAbsolutePath, 'modules'))
-
 modrana = None
 dmod = None
 gui = None
@@ -841,13 +854,11 @@ def start():
     global modrana
     global dmod
     global gui
-    setCorrectCWD()
     modrana = ModRana()
     dmod = modrana.dmod
     gui = modrana.gui
 
 if __name__ == "__main__":
-    setCorrectCWD()
     # check if reload has been requested
     reloadArg = "--reload"
     if len(sys.argv) >= 3 and sys.argv[1] == reloadArg:

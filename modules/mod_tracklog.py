@@ -162,7 +162,7 @@ class Tracklog(RanaModule):
         if logType == 'gpx':
             # importing the GPX module can be time consuming so import it
             # when it is really needed
-            from core.bundle.upoints import gpx
+            from upoints import gpx
 
             self.currentLogGPX = gpx.Trackpoints()
             # set tracklog metadata

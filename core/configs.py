@@ -20,7 +20,7 @@
 import os
 import shutil
 import traceback
-from core.bundle.configobj import ConfigObj
+from configobj import ConfigObj
 
 CONFIGS = ["map_config.conf", "user_config.conf"]
 

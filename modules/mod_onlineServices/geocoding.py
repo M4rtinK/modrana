@@ -34,7 +34,7 @@ def _places2points(places):
 
 
 def geocode(address):
-    from core.bundle.geopy import geocoders
+    from geopy import geocoders
 
     g = geocoders.Google()
     try:

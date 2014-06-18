@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
-from core.bundle.upoints import gpx
+from upoints import gpx
 
 
 def getModule(m, d, i):

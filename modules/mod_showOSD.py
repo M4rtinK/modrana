@@ -25,7 +25,7 @@ from core import gs
 if gs.GUIString == "GTK":
     import cairo
     import gtk
-    from core.bundle import pycha
+    import pycha
 
 
 def getModule(m, d, i):

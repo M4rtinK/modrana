@@ -412,7 +412,7 @@ class LoadTracklogs(RanaModule):
 
         if file: # TODO: add handling of other than GPX files
             # import the GPX module only when really needed
-            from core.bundle.upoints import gpx
+            from upoints import gpx
 
             track = gpx.Trackpoints() # create new Trackpoints object
             # lets assume we have only GPX 1.1 files TODO: 1.1 and 1.0
@@ -449,7 +449,7 @@ class LoadTracklogs(RanaModule):
            return resulting path
            or None when storing fails"""
         # import the GPX module only when really needed
-        from core.bundle.upoints import gpx
+        from upoints import gpx
 
         newTracklog = gpx.Trackpoints()
         trackpoints = map(lambda x: gpx.Trackpoint(x[0], x[1]), route)

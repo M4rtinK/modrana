@@ -7,7 +7,7 @@ import threading
 import core.exceptions
 import core.paths
 from core import geo
-from core.bundle.upoints import gpx
+from upoints import gpx
 from core.point import Point
 
 

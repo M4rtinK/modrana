@@ -254,6 +254,6 @@ def createConnectionPool(url, maxThreads=1):
     if sys.version_info[:2] <= (2, 5):
         from core.backports import urllib3_python25 as urllib3
     else:
-        from core.bundle import urllib3
+        import urllib3
     return urllib3.connection_from_url(url, timeout=constants.INTERNET_CONNECTIVITY_TIMEOUT,
                                        maxsize=maxThreads, block=False)

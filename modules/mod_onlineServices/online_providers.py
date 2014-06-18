@@ -231,7 +231,7 @@ def _getGmapsInstance():
               " a google API key is needed for using the Google maps services")
         return None
         # only import when actually needed
-    from core.bundle import googlemaps
+    import googlemaps
     gMap = googlemaps.GoogleMaps(key)
     return gMap
 

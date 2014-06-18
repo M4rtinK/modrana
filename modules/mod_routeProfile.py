@@ -24,9 +24,7 @@ from core import gs
 
 if gs.GUIString == "GTK":
     import cairo
-    from core.bundle import pycha
-    # from core.bundle.pycha import line as pycha_color
-    # from core.bundle.pycha import color as pycha_line
+    import pycha
 
 def getModule(m, d, i):
     return RouteProfile(m, d, i)

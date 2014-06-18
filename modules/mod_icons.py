@@ -23,15 +23,8 @@ import glob
 import fnmatch
 # for some reason one import method works
 # on Fremantle and other everywhere (?) else"""
-try:
-    from core.bundle.configobj import ConfigObj # everywhere
-except Exception:
-    import sys
-    e = sys.exc_info()[1]
-    print(e)
-    print("icons: trying alternative configobj import method")
-    from configobj import ConfigObj # Fremantle
 
+from configobj import ConfigObj # everywhere
 
 # only import GKT libs if GTK GUI is used
 from core import gs
