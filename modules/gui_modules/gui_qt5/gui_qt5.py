@@ -314,7 +314,10 @@ class QMLGUI(GUIModule):
             print(e)
 
 class Modules(object):
-    """A class that provides access to modRana modules from the QML context"""
+    """A class that provides access to modRana modules from the QML context,
+       using the __getattr__ method so that QML can access all modules dynamically
+       with normal dot notation
+    """
 
     def __init__(self, gui):
         self._info = None
@@ -324,40 +327,9 @@ class Modules(object):
         self._storeTiles = None
         self.gui = gui
 
-    @property
-    def info(self):
-        """A lazy evaluated property providing access to the info module"""
-        if self._info is None:
-            self._info = self.gui.m.get("info")
-        return self._info
-    
-    @property
-    def stats(self):
-        """A lazy evaluated property providing access to the stats module"""
-        if self._stats is None:
-            self._stats = self.gui.m.get("stats")
-        return self._stats
+    def __getattr__(self, moduleName):
+        return self.gui.m.get(moduleName, None)
 
-    @property
-    def mapLayers(self):
-        """A lazy evaluated property providing access to the stats module"""
-        if self._mapLayers is None:
-            self._mapLayers = self.gui.m.get("mapLayers")
-        return self._mapLayers
-
-    @property
-    def mapTiles(self):
-        """A lazy evaluated property providing access to the mapTiles module"""
-        if self._mapTiles is None:
-            self._mapTiles = self.gui.m.get("mapTiles")
-        return self._mapTiles
-
-    @property
-    def storeTiles(self):
-        """A lazy evaluated property providing access to the storeTiles module"""
-        if self._storeTiles is None:
-            self._storeTiles = self.gui.m.get("storeTiles")
-        return self._storeTiles
 
 class Search(object):
     """An easy to use search interface for the QML context"""
