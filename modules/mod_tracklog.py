@@ -53,7 +53,7 @@ class Tracklog(RanaModule):
         RanaModule.__init__(self, m, d, i)
         self.loggingEnabled = False
         self.loggingPaused = False
-        self.loggingStartTimestamp = None
+        self.loggingStartTimestamp = 0
         self.logInterval = 1 #loggin interval in seconds
         self.saveInterval = 10 #saving interval in seconds
         self.lastUpdateTimestamp = None
@@ -61,6 +61,7 @@ class Tracklog(RanaModule):
         self.logName = None #name of the current log
         self.logFilename = None #name of the current log
         self.logPath = None #path to the current log
+        self.currentLogGPX = None
         self.currentTempLog = []
         # primary and secondary AOWay objects for
         # persistent log storage during logging
@@ -70,11 +71,11 @@ class Tracklog(RanaModule):
         self.updateLogTimerId = None
         self.saveLogTimerId = None
         # statistics
-        self.maxSpeed = None
+        self.maxSpeed = 0
         self.avg1 = 0
         self.avg2 = 0
-        self.avgSpeed = None
-        self.distance = None
+        self.avgSpeed = 0
+        self.distance = 0
         self.toolsMenuDone = False
         self.category = 'logs'
         # trace
@@ -82,6 +83,8 @@ class Tracklog(RanaModule):
         self.lastTracePoint = None
         self.traceIndex = 0
         self.pxpyIndex = deque()
+        self.lastX = 0
+        self.lastY = 0
 
     #    self.startupTimestamp = time.strftime("%Y%m%dT%H%M%S")
 
@@ -425,8 +428,8 @@ class Tracklog(RanaModule):
         #cr.set_source_rgb(0.0, 0.0, 0.8)
         cr.line_to(x, y)
         cr.stroke()
-        self.lastx = x
-        self.lasty = y
+        self.lastX = x
+        self.lastY = y
 
     #    s = 2 #default 2
     #    cr.rectangle(x-s,y-s,2*s,2*s)
@@ -752,10 +755,3 @@ class Tracklog(RanaModule):
         # try to stop and save the log
         if self.loggingEnabled:
             self.stopLogging()
-
-
-
-
-
-
-
