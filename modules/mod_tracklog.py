@@ -251,7 +251,15 @@ class Tracklog(RanaModule):
                     lat1, lon1 = self.lastTracePoint
                     # check if the point is distant enough from the last added point
                     # (which was either the first point or also passed the test)
-                    if geo.distanceApprox(lat, lon, lat1, lon1) * 1000 >= DONT_ADD_TO_TRACE_THRESHOLD:
+                    addToTrace = True
+                    try:
+                        addToTrace = geo.distanceApprox(lat, lon, lat1, lon1) * 1000 >= DONT_ADD_TO_TRACE_THRESHOLD
+                    except Exception:
+                        import sys
+                        e = sys.exc_info()[1]
+                        print("tracklog: measuring distance failed (yeah, really! :P), adding point anyway")
+                        print(e)
+                    if addToTrace:
                         self._addLL2Trace(lat, lon)
                 else: # this is the first known log point, just add it
                     self._addLL2Trace(lat, lon)
@@ -281,7 +289,6 @@ class Tracklog(RanaModule):
             self.log1.flush()
         except Exception:
             import sys
-
             e = sys.exc_info()[1]
             print('tracklog: saving primary temporary log failed')
             print(e)
@@ -289,7 +296,6 @@ class Tracklog(RanaModule):
             self.log2.flush()
         except Exception:
             import sys
-
             e = sys.exc_info()[1]
             print('tracklog: saving secondary temporary log failed')
             print(e)
