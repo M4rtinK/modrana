@@ -17,10 +17,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+import os
+import sys
+import traceback
+
 from modules.base_module import RanaModule
 from core.signal import Signal
 from core.backports import six
 from .layers import MapLayer, MapLayerGroup
+from .overlay_groups import OverlayGroup
 
 # lists keys that need to be defined for a layer
 # in the map configuration file to be valid,
@@ -206,3 +211,51 @@ class MapLayers(RanaModule):
         are required"""
         defSet = set(definition.keys())
         return requiredKeys <= defSet
+
+    # overlays
+
+    def getOverlayGroupNames(self):
+        """Return available overlay group names
+        NOTE: overlay group names are equal to the names of the JSON
+              files used to store the groups, minus the .json suffix
+              -> like this we don't actually have to parse all the JSONs
+                 to get a list of all available groups
+
+        :returns: list of available overlay group names
+        :rtype: list
+        """
+        candidates = os.listdir(self.modrana.paths.getOverlayGroupsFolderPath())
+        return [n[0:-5] for n in candidates if n.endswith(".json")]
+
+    def getOverlayGroup(self, name):
+        filename = "%s.json" % name
+        filePath = os.path.join(self.modrana.paths.getOverlayGroupsFolderPath(), filename)
+        if os.path.isfile(filePath):
+            return OverlayGroup(name, filePath)
+        else:
+            return None
+
+    def getOverlayGroupAsList(self, name):
+        """A convenience function for getting just the list
+        of overlays corresponding to the overlay group specified
+        by the given name
+        """
+        group = self.getOverlayGroup(name)
+        if group:
+            return group.overlays
+        else:
+            return None
+
+    def setOverlayGroup(self, name, overlayList):
+        filename = "%s.json" % name
+        filePath = os.path.join(self.modrana.paths.getOverlayGroupsFolderPath(), filename)
+        try:
+            # the overlay group automatically saves any changes to persistent
+            # storage so we don't have to explicitly call save() on it here
+            OverlayGroup(name, filePath, overlayList=overlayList)
+        except Exception:
+            e = sys.exc_info()[1]
+            print("mapLayers: setting overlay group failed: %s" % name)
+            print(e)
+            print(overlayList)
+            traceback.print_exc(file=sys.stdout)
