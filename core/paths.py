@@ -32,6 +32,7 @@ MAPS_FOLDER_NAME = "maps"
 POI_FOLDER_NAME = "poi"
 ROUTING_DATA_FOLDER_NAME = "routing_data"
 DEBUG_LOGS_FOLDER_NAME = "debug_logs"
+OVERLAY_GROUPS_FOLDER_NAME = "overlay_groups"
 # file names
 OPTIONS_FILENAME = "options.bin"
 POI_DB_FILENAME = "modrana_poi.db"
@@ -284,6 +285,10 @@ class Paths(object):
             return self._assurePath(path)
         else:
             return self._assurePath(os.path.join(self.getProfilePath(), ROUTING_DATA_FOLDER_NAME))
+
+    def getOverlayGroupsFolderPath(self):
+        """Return path to the folder where overlay groups are stored as JSON files"""
+        return self._assurePathFolder(self.getProfilePath(), OVERLAY_GROUPS_FOLDER_NAME)
 
     ## Monav ##
 
