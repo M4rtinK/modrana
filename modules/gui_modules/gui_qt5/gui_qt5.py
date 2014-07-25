@@ -24,7 +24,6 @@ import os
 import sys
 import re
 import traceback
-import math
 
 import pyotherside
 
@@ -32,18 +31,14 @@ try:
     from StringIO import StringIO # python 2
 except ImportError:
     from io import StringIO # python 3
-from pprint import pprint
 
 # modRana imports
 import math
 from modules.gui_modules.base_gui_module import GUIModule
-from datetime import datetime
 import time
 import threading
 
-from core.fix import Fix
 from core import signal
-from core.backports import six
 from core import constants
 from core.threads import threadMgr
 from core import geo
