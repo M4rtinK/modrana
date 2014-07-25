@@ -86,10 +86,6 @@ class QMLGUI(GUIModule):
         self.firstTimeSignal = signal.Signal()
         size = (800, 480) # initial window size
 
-        # often used module shortcuts
-        self._location = None
-        self._mapLayers = None
-
         # register exit handler
         pyotherside.atexit(self._shutdown)
 
@@ -142,9 +138,6 @@ class QMLGUI(GUIModule):
         self.search = Search(self)
 
     def firstTime(self):
-        self._location = self.m.get('location', None)
-        self._mapLayers = self.m.get('mapLayers', None)
-
         # trigger the first time signal
         self.firstTimeSignal()
 
@@ -306,7 +299,7 @@ class QMLGUI(GUIModule):
         """
         try:
             lzxy = self._tileId2lzxy(tileId)
-            self.modules._mapTiles.addTileDownloadRequest(lzxy, tileId)
+            self.modules.mapTiles.addTileDownloadRequest(lzxy, tileId)
         except Exception:
             import sys
             e = sys.exc_info()[1]
@@ -323,7 +316,6 @@ class Modules(object):
         self._info = None
         self._stats = None
         self._mapLayers = None
-        self._mapTiles = None
         self._storeTiles = None
         self.gui = gui
 
@@ -575,15 +567,15 @@ class MapTiles(object):
         False - tile download in progress, retry in a while
         """
         #    print(layerId, z, x, y)
-        if self.gui._mapTiles.tileInMemory(layerId, z, x, y):
+        if self.gui.mapTiles.tileInMemory(layerId, z, x, y):
         #      print("available in memory")
             return True
-        elif self.gui._mapTiles.tileInStorage(layerId, z, x, y):
+        elif self.gui.mapTiles.tileInStorage(layerId, z, x, y):
         #      print("available in storage")
             return True
         else: # not in memory or storage
             # add a tile download request
-            self.gui._mapTiles.addTileDownloadRequest(layerId, z, x, y)
+            self.gui.mapTiles.addTileDownloadRequest(layerId, z, x, y)
             #      print("downloading, try later")
             return False
 
