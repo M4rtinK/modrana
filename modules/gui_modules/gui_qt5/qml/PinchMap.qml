@@ -255,7 +255,7 @@ Rectangle {
 
     function loadLayers() {
         // load current overlay settings from persistent storage
-        rWin.python.call("modrana.gui.modules.mapLayers.getOverlayGroupAsList", [pinchMap.overlayGroupName], function(result){
+        rWin.python.call("modrana.gui.modules.mapLayers.getOverlayGroupAsList", [pinchmap.overlayGroupName], function(result){
             // TODO: verify layer is usable
             if(result.length>0) {
                 layers.clear()
@@ -273,7 +273,7 @@ Rectangle {
             var thisLayer = layers.get(i);
             list[i] = {layerName : thisLayer.layerName, layerId : thisLayer.layerId, layerOpacity : thisLayer.layerOpacity};
         }
-        rWin.python.call("modrana.gui.modules.mapLayers.setOverlayGroup", [pinchMap.overlayGroupName, list], function(){})
+        rWin.python.call("modrana.gui.modules.mapLayers.setOverlayGroup", [pinchmap.overlayGroupName, list], function(){})
     }
 
     function getMetersPerPixel(lat) {
