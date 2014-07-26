@@ -24,6 +24,7 @@ Page {
     property alias layers : pinchmap.layers
 
     Component.onCompleted : {
+        pinchmap.loadLayers()
         pinchmap.setCenterLatLon(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude)
     }
 

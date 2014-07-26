@@ -50,6 +50,9 @@ Rectangle {
         }
     }
 
+    // NOTE: for now there is only a single overlay group called "main"
+    property string overlayGroupName : "main"
+
     property int earthRadius: 6371000
 
     property bool tooManyPoints: true
@@ -208,6 +211,7 @@ Rectangle {
         console.log("setting layer " + layerNumber + " to " + newLayerId + "/" + newLayerName)
         layers.setProperty(layerNumber, "layerId", newLayerId)
         layers.setProperty(layerNumber, "layerName", newLayerName)
+        saveLayers()
     }
 
     function setLayerById(layerNumber, newLayerId) {
@@ -216,11 +220,13 @@ Rectangle {
         console.log("setting layer " + layerNumber + " to " + newLayerId + "/" + newLayerName)
         layers.setProperty(layerNumber, "layerId", newLayerId)
         layers.setProperty(layerNumber, "layerName", newLayerName)
+        saveLayers()
     }
 
     function setLayerOpacity(layerNumber, opacityValue) {
         console.log("setting layer " + layerNumber + " opacity to " + opacityValue)
         layers.setProperty(layerNumber, "layerOpacity", opacityValue)
+        saveLayers()
     }
 
     function appendLayer(layerId, layerName, opacityValue) {
@@ -228,6 +234,7 @@ Rectangle {
         // The layer will be the top-most one,
         // overlaying all other layers.
         layers.append({"layerId" : layerId, "layerName" : layerName, "layerOpacity" : opacityValue })
+        saveLayers()
     }
 
     function removeLayer(layerNumber) {
@@ -243,6 +250,30 @@ Rectangle {
         } else {
             console.log("pinch map: can't remove layer - wrong number: " + layerNumber)
         }
+        saveLayers()
+    }
+
+    function loadLayers() {
+        // load current overlay settings from persistent storage
+        rWin.python.call("modrana.gui.modules.mapLayers.getOverlayGroupAsList", [pinchMap.overlayGroupName], function(result){
+            // TODO: verify layer is usable
+            if(result.length>0) {
+                layers.clear()
+                for (var i=0; i<result.length; i++) {
+                    layers.append(result[i]);
+                }
+            }
+        })
+    }
+
+    function saveLayers() {
+        // save current overlay settings to persistent storage
+        var list = []
+        for (var i=0; i<layers.count; i++) {
+            var thisLayer = layers.get(i);
+            list[i] = {layerName : thisLayer.layerName, layerId : thisLayer.layerId, layerOpacity : thisLayer.layerOpacity};
+        }
+        rWin.python.call("modrana.gui.modules.mapLayers.setOverlayGroup", [pinchMap.overlayGroupName, list], function(){})
     }
 
     function getMetersPerPixel(lat) {
