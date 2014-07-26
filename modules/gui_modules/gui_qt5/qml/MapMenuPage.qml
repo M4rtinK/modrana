@@ -11,7 +11,6 @@ IconGridPage {
 
     function getPage(menu){
         return Qt.createComponent("Map" + menu + ".qml")
-
     }
 
     model : ListModel {
