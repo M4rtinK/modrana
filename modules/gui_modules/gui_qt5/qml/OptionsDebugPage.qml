@@ -34,11 +34,19 @@ BasePage {
                 }
             }
             TextSwitch {
-                text : qsTr("Tile handling debug")
+                text : qsTr("Tile handling debugging")
                 checked : rWin.tileDebug
                 onCheckedChanged : {
                     rWin.tileDebug = checked
                     rWin.set("showQt5TileDebug", checked)
+                }
+            }
+            TextSwitch {
+                text : qsTr("Location debugging")
+                checked : rWin.locationDebug
+                onCheckedChanged : {
+                    rWin.locationDebug = checked
+                    rWin.set("gpsDebugEnabled", checked)
                 }
             }
         }

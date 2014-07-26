@@ -15,6 +15,7 @@ ApplicationWindow {
     property bool showDebugButton : false
     property bool showUnfinishedPages : false
     property bool tileDebug : false
+    property bool locationDebug : false
 
     property int _landscapeDivider : rWin.platform.needsBackButton ? 5.5 : 8.0
     property int headerHeight : rWin.inPortrait ? height/8.0 : height/_landscapeDivider
@@ -153,6 +154,7 @@ ApplicationWindow {
         rWin.showDebugButton = rWin.get_sync("showQt5GUIDebugButton", false)
         rWin.showUnfinishedPages = rWin.get_sync("showQt5GUIUnfinishedPages", false)
         rWin.tileDebug = rWin.get_sync("showQt5TileDebug", false)
+        rWin.locationDebug = rWin.get_sync("gpsDebugEnabled", false)
 
         // the various property encapsulation items need the
         // Python backend to be initialized, so we can load them now

@@ -21,10 +21,13 @@ Item {
 
     function positionUpdate(locationSource) {
         var coord = locationSource.position.coordinate
-        console.log("position changed")
-        console.log("Coordinate:", coord.longitude, coord.latitude)
-        //console.log("Speed:", locationSource.position.speed)
-        //console.log("h/v accuracy:", locationSource.position.horizontalAccuracy, locationSource.position.verticalAccuracy)
+        if (rWin.locationDebug) {
+            console.log("== Position update ==")
+            console.log("Coordinate:", coord.longitude, coord.latitude)
+            console.log("Speed:", locationSource.position.speed)
+            console.log("h/v accuracy:", locationSource.position.horizontalAccuracy, locationSource.position.verticalAccuracy)
+            console.log("timestamp: ", locationSource.position.timestamp)
+        }
         rWin.position = locationSource.position
         rWin.pos = coord
         rWin.hasFix = locationSource.valid
