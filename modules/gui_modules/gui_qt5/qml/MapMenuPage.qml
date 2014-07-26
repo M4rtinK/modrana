@@ -42,13 +42,14 @@ IconGridPage {
             menu : "LayerPage"
         }
 
-        // not yet implemented
-        /*
         ListElement {
             caption : "Overlays"
             icon : "map_layers.png"
             menu : "LayersPage"
         }
+
+        // not yet implemented
+        /*
         ListElement {
             caption : "Download"
             icon : "download.png"

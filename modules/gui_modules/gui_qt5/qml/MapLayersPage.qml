@@ -1,35 +1,29 @@
 import QtQuick 2.0
 import UC 1.0
+import "modrana_components"
 
 BasePage {
     id: layersPage
     headerText : "Overlays"
-    bottomPadding : C.style.main.spacingBig * 2
+    bottomPadding : rWin.c.style.main.spacingBig * 2
     isFlickable : false
     property variant model
 
-    //property alias model : layersLW.model
-
-    //property alias model : rWin.mapPage.layers
     content {
         ListView {
-            model : rWin.mapPage.layers
             anchors.top : parent.top
-            anchors.topMargin : C.style.listView.spacing
+            anchors.topMargin : rWin.c.style.main.spacing
             anchors.left : parent.left
             anchors.right : parent.right
-            //anchors.bottom : parent.bottom
-            //height : 400
             id : layersLW
             height : layersPage.availableHeight
-            spacing : C.style.listView.spacing
+            spacing : rWin.c.style.listView.spacing
 
             contentWidth: parent.width
             contentHeight: childrenRect.height
 
             delegate : Item {
                 id : delegateWrapper
-                //anchors.fill : parent
                 anchors.left : parent.left
                 anchors.right : parent.right
                 height : lGrid.height + actionGrid.height
@@ -40,7 +34,6 @@ BasePage {
                     // this background only covers the delegates,
                     // the last-item buttons have their own
                     height : lGrid.height
-                    active : labelMA.pressed
                 }
 
 
@@ -50,20 +43,22 @@ BasePage {
                     id : lGrid
                     anchors.left : parent.left
                     anchors.right : parent.right
-                    anchors.leftMargin : C.style.main.spacingBig
-                    anchors.rightMargin : C.style.main.spacingBig
-                    columns : parent.inPortrait ? 1 : 2
+                    anchors.leftMargin : rWin.c.style.main.spacingBig
+                    anchors.rightMargin : rWin.c.style.main.spacingBig
+                    columns : rWin.inPortrait ? 1 : 2
                     property real cellWidth : width/columns
                     Item {
                         id : layerLabelWrapper
                         width : lGrid.cellWidth
-                        height : opacitySlider.height
+                        height : layerLabel.height * 2
                         Label {
+                            id : layerLabel
                             width : parent.width
+                            elide : Text.ElideRight
                             anchors.verticalCenter : parent.verticalCenter
                             property string label : layerId == "" ? "<i>not selected</i>" : "<b>" + layerName + "</b>"
-                            text : prefix + label
                             property string prefix : index == 0 ? "map : " : index + " : "
+                            text : prefix + label
                         }
                         MouseArea {
                             id : labelMA
@@ -72,24 +67,30 @@ BasePage {
                                 // open the layer selection dialog
                                 // and tell it what is the number of the layer
                                 // to be set
-                                layerSelectD.layerIndex = index
-                                layerSelectD.open()
+                                var layerSelector = Qt.createComponent("MapLayerPage.qml")
+                                rWin.pushPage(layerSelector, {layerIndex : index, returnToMap : false})
                             }
                         }
                     }
-                    Slider {
-                        id : opacitySlider
+                    Item {
+                        id : sliderWrapper
                         width : lGrid.cellWidth
-                        stepSize : 0.1
-                        value : layerOpacity
-                        maximumValue : 1.0
-                        minimumValue : 0.0
-                        valueIndicatorText : (value * 10) + " %"
-                        onPressedChanged : {
-                            // set the value once users
-                            // stops interacting with the slider
-                            if (pressed == false) {
-                                rWin.mapPage.getMap().setLayerOpacity(index, value)
+                        height : opacitySlider.height
+                        Slider {
+                            id : opacitySlider
+                            width : lGrid.cellWidth
+                            anchors.verticalCenter : parent.verticalCenter
+                            stepSize : 0.1
+                            maximumValue : 1.0
+                            minimumValue : 0.0
+                            value : layerOpacity
+                            valueText : ""
+                            onPressedChanged : {
+                                // set the value once users
+                                // stops interacting with the slider
+                                if (pressed == false) {
+                                    rWin.mapPage.getMap().setLayerOpacity(index, value)
+                                }
                             }
                         }
                     }
@@ -99,68 +100,41 @@ BasePage {
                     // add/remove buttons
                     id : actionGrid
                     anchors.top : lGrid.bottom
-                    anchors.topMargin : C.style.listView.spacing
+                    anchors.topMargin : rWin.c.style.listView.spacing
                     anchors.left : parent.left
                     anchors.right : parent.right
-                    //height : isLastItem ? lGrid.height : 0
                     columns : 2
-                    spacing : C.style.listView.spacing
+                    spacing : rWin.c.style.listView.spacing
                     property real cellWidth : width/columns - spacing/columns
                     visible : isLastItem
-                    BackgroundRectangle {
+                    Button {
                         width : actionGrid.cellWidth
                         height : isLastItem ? lGrid.height : 0
-                        active : addArea.pressed
-                        Label {
-                            id : addText
-                            anchors.verticalCenter : parent.verticalCenter
-                            width : parent.width
-                            text : "<b>add</b>"
-                            horizontalAlignment : Text.AlignHCenter
-                        }
-                        MouseArea {
-                            id : addArea
-                            anchors.fill : parent
-                            onClicked : {
-                                console.log("add layer")
-                                console.log(layersLW.height)
-                                console.log(layersLW.contentHeight)
-                                rWin.mapPage.getMap().appendLayer("openptmap_overlay", "OSM Transit Overlay", 1.0)
-                            }
+                        text : "<b>add</b>"
+                        onClicked : {
+                            console.log("add layer")
+                            rWin.mapPage.getMap().appendLayer("openptmap_overlay", "OSM Transit Overlay", 1.0)
                         }
                     }
-                    BackgroundRectangle {
+                    Button {
                         width : actionGrid.cellWidth
                         height : isLastItem ? lGrid.height : 0
-                        active : removeArea.pressed
                         visible : layersLW.model.count > 1
-                        Label {
-                            id : removeText
-                            anchors.verticalCenter : parent.verticalCenter
-                            width : parent.width
-                            text : "<b>remove</b>"
-                            horizontalAlignment : Text.AlignHCenter
-                        }
-                        MouseArea {
-                            id : removeArea
-                            anchors.fill : parent
-                            onClicked : {
-                                console.log("remove layer")
-                                // remove the last layer
-                                rWin.mapPage.getMap().removeLayer(layersLW.model.count - 1)
-                            }
+                        text : "<b>remove</b>"
+                        onClicked : {
+                            console.log("remove layer")
+                            // remove the last layer
+                            rWin.mapPage.getMap().removeLayer(layersLW.model.count - 1)
                         }
                     }
                 }
             }
-        }
-    }
-    MapLayerSelectionDialog {
-        id : layerSelectD
-        property int layerIndex
-        onLayerSelected  : {
-            rWin.mapPage.getMap().setLayerById(layerIndex, layerId)
-            accept()
+            // for some reason the Silica Slider won't set the highlight position
+            // properly if the model is set as the same time as the list view
+            // is instantiated - race condition ?
+            Component.onCompleted : {
+                model = rWin.mapPage.layers
+            }
         }
     }
 }
