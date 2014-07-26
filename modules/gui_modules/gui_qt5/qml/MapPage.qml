@@ -35,7 +35,14 @@ Page {
     PinchMap {
         id: pinchmap
         anchors.fill : parent
-        zoomLevel: rWin.get("z", 11, function(v){zoomLevel=v})
+        property bool initialized : false
+        zoomLevel: rWin.get("z", 11, setInitialZ)
+
+        function setInitialZ (initialZ) {
+            zoomLevel = initialZ
+            initialized = true
+        }
+
         tileScale : tabMap.mapTileScale
         name : "mainMap"
 
@@ -49,7 +56,12 @@ Page {
 
         onZoomLevelChanged : {
             // save zoom level
-            rWin.set("z", parseInt(zoomLevel))
+            if (pinchmap.initialized) {
+                // only save the changed zoom level
+                // once the map page is properly initialized
+                // (we don't want to save the initial placeholder value)
+                rWin.set("z", parseInt(zoomLevel))
+            }
         }
 
         Connections {
