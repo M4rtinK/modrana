@@ -21,20 +21,17 @@ IconGridPage {
             //menu : "mapDialog"
             menu : "LayerPage"
         }
-
         ListElement {
             caption : "Overlays"
             icon : "map_layers.png"
             menu : "LayersPage"
         }
-
-        // not yet implemented
-        /*
-        ListElement {
-            caption : "Download"
-            icon : "download.png"
-            menu : ""
+        Component.onCompleted : {
+            if (rWin.showUnfinishedPages) {
+                testModel.append(
+                    {"caption": "Download", "icon":"download.png", "menu":"DownloadPage"}
+                )
+            }
         }
-        */
     }
 }
