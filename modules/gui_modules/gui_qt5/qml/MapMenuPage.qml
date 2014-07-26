@@ -10,27 +10,8 @@ IconGridPage {
     }
 
     function getPage(menu){
-        if (menu == "LayerPage") {
-            console.log("OPEN MAP LAYER PAGE")
-            return Qt.createComponent("Map" + menu + ".qml")
-        } else {
-            return Qt.createComponent("Map" + menu + ".qml")
-        }
-        /*
-        } else if (menu == "LayersPage") {
-            var component = Qt.createComponent("Map" + menu + ".qml");
-            if (component.status == Component.Ready) {
-                var component = Qt.createComponent("Map" + menu + ".qml")
-                var layersPage = component.createObject(rWin)
-                return layersPage
-             } else if (component.status == Component.Error) {
-                 // Error Handling
-                 console.log("Error loading component:", component.errorString());
-             }
-        } else {
-            return Qt.createComponent("Map" + menu + ".qml")
-        }
-        */
+        return Qt.createComponent("Map" + menu + ".qml")
+
     }
 
     model : ListModel {
