@@ -54,8 +54,6 @@ class Tracklog(RanaModule):
         self.loggingEnabled = False
         self.loggingPaused = False
         self.loggingStartTimestamp = 0
-        self.logInterval = 1 #loggin interval in seconds
-        self.saveInterval = 10 #saving interval in seconds
         self.lastUpdateTimestamp = None
         self.lastCoords = None
         self.logName = None #name of the current log
@@ -326,6 +324,10 @@ class Tracklog(RanaModule):
                                                     "update tracklog with current position")
             # save timer
             self.saveLogTimerId = cron.addTimeout(self._saveLogCB, saveTimeout, self, "save tracklog increment")
+
+            # report the timer cadence
+            print("tracklog: starting track logging timers: update every %d s, save every %d s" %
+                  (updateTimeout/1000, saveTimeout/1000))
             # update timer intervals if they are changed
             # in the persistent dictionary
             self.modrana.watch('tracklogLogInterval', self._updateIntervalChangedCB)
@@ -359,6 +361,9 @@ class Tracklog(RanaModule):
             cron.removeTimeout(self.saveLogTimerId)
             self.saveLogTimerId = None
             self.updateLogTimerId = None
+            print("tracklog: track logging timers stopped")
+        else:
+            print("tracklog: error, the cron module is not loaded")
 
     def stopLogging(self):
         """stop logging, export the log to GPX and delete the temporary
@@ -557,7 +562,10 @@ class Tracklog(RanaModule):
             else:
                 text += "%s" % self.logName
 
-            text += "\n\nlogging interval %d s, saving every %d s" % (self.logInterval, self.saveInterval)
+            updateInterval = int(self.get('tracklogLogInterval', 1))
+            saveInterval = int(self.get('tracklogSaveInterval', 10))
+
+            text += "\n\nlogging interval %d s, saving every %d s" % (updateInterval, saveInterval)
             if self.loggingStartTimestamp:
                 elapsedSeconds = (int(time.time()) - self.loggingStartTimestamp)
                 text += "\nelapsed time: %s" % time.strftime('%H:%M:%S', time.gmtime(elapsedSeconds))
