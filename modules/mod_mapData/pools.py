@@ -19,13 +19,14 @@ DEFAULT_THREAD_POOL_NAME = "modRanaBatchPool"
 _threadPoolIndex = 1
 
 class TileNotImageException(Exception):
-    def __init__(self):
+    def __init__(self, url):
         self.parameter = 1
+        self.url = url
 
     def __str__(self):
         message = "the downloaded tile is not an image as per \
 its magic number (it is probably an error response webpage \
-returned by the server)"
+returned by the server)\nURL:%s" % self.url
 
         return message
 
@@ -414,7 +415,7 @@ class BatchTileDownloadPool(TileBatchPool):
                 self._storeTiles.automaticStoreTile(content, lzxy)
             else:
                 # its not ana image, raise exception
-                raise TileNotImageException()
+                raise TileNotImageException(url)
             return size # something was actually downloaded and saved
         else:
             return False # nothing was downloaded
