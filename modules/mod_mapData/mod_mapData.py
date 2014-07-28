@@ -448,6 +448,10 @@ class MapData(RanaModule):
                 if self._checkPool.downloadSize:
                     estimatedSizePrettyMB = utils.bytes2PrettyUnitString(self._checkPool.downloadSize)
                     prettyMB = "%s/~%s" % (prettyMB, estimatedSizePrettyMB)
+                else:
+                    approxDlSize = self.approxDownloadSize
+                    if approxDlSize >= 0:
+                        prettyMB = "%s/~%s" % (prettyMB, utils.bytes2PrettyUnitString(approxDlSize))
                 return "%s downloaded" % prettyMB
         else:
             if self._checkPool.ended:
@@ -465,6 +469,22 @@ class MapData(RanaModule):
             return "mapData:getSize"
         else:
             return ""
+
+    @property
+    def approxDownloadSize(self):
+        """Return approximate download size based on the average tile size so far
+
+        In short:
+        <avg tile size> = <downloaded so far> / <nr tiles done>
+        <approx download size> = <avg tile size> * <nr of tiles in batch>
+
+        :return int: approximate download size
+        """
+        if self.batchDownloadRunning and self._downloadPool.done:
+            return (self._downloadPool.downloadedDataSize/float(self._downloadPool.done))*self._downloadPool.batchSize
+        else:
+            return -1
+
 
     def drawMenu(self, cr, menuName, args=None):
         # is this menu the correct menu ?
