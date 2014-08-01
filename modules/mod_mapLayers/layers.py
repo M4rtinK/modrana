@@ -56,6 +56,10 @@ class MapLayer(object):
         return self.config.get('icon', None)
 
     @property
+    def timeout(self):
+        return self.config.get('timeout', None)
+
+    @property
     def dict(self):
         """ Return a dictionary representing the layer
 
@@ -72,7 +76,8 @@ class MapLayer(object):
             "folderName" : self.folderName,
             "coordinates" : self.coordinates,
             "groupId" : self.groupId,
-            "icon" : self.icon
+            "icon" : self.icon,
+            "timeout" : self.timeout
         }
 
 
