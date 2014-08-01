@@ -28,6 +28,13 @@ Page {
         pinchmap.setCenterLatLon(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude)
     }
 
+    // if the page becomes active, activate the media keys so they can be used
+    // for zooming; if the page is deactivated, deactivate them
+
+    onIsActiveChanged: {
+        rWin.actions.mediaKeysEnabled = tabMap.isActive
+    }
+
     function getMap() {
         return pinchmap
     }
@@ -75,6 +82,16 @@ Page {
                 } else if (tabMap.center) {
                     console.debug("Update timer preventing another update.");
                 }
+            }
+        }
+
+        Connections {
+            target: rWin.actions
+            onZoomUp : {
+                pinchmap.zoomOut()
+            }
+            onZoomDown : {
+                pinchmap.zoomIn()
             }
         }
 

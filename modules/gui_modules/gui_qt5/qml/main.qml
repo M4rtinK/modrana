@@ -76,6 +76,9 @@ ApplicationWindow {
     property variant layerTree : ListModel {}
     property variant layerDict
 
+    //actions
+    property variant actions : Actions {}
+
     // export the Python context so other elements can use
     // it without instantiating it themselves
     property alias python : python
