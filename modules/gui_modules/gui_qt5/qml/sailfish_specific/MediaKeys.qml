@@ -4,7 +4,7 @@ import org.nemomobile.policy 1.0
 
 Item {
     id : mediaKeys
-    enabled : true
+    enabled : false
 
     signal up
     signal down
