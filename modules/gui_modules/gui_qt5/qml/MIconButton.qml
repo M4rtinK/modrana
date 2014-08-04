@@ -12,6 +12,7 @@ Rectangle {
     property alias iconName : themedIcon.iconName
     property color normalColor : rWin.theme.color.icon_button_normal
     property color toggledColor : rWin.theme.color.icon_button_toggled
+    property color notEnabledColor : "lightgray"
     property bool checkable : false
     property bool checked : false
 
@@ -27,8 +28,18 @@ Rectangle {
     signal clicked
     signal pressAndHold
 
+    onEnabledChanged : {
+        if (icb.enabled) {
+            checked ? icb.color = toggledColor : icb.color = normalColor
+        } else {
+            icb.color = notEnabledColor
+        }
+    }
+
     onCheckedChanged : {
-        checked ? icb.color = toggledColor : icb.color = normalColor
+        if (icb.enabled) {
+            checked ? icb.color = toggledColor : icb.color = normalColor
+        }
     }
 
     TIcon {
@@ -44,6 +55,7 @@ Rectangle {
     }
     MouseArea {
         anchors.fill : parent
+        enabled : icb.enabled
         onClicked: {
             icb.clicked()
             if (icb.checkable) {
