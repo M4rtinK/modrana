@@ -32,6 +32,12 @@ import traceback
 import imp
 import platform
 
+# initialize logging
+from core import modrana_log
+modrana_log.init_logging()
+import logging
+log = logging.getLogger("")
+
 def setCorrectCWD():
     # change to folder where the main modRana file is located
     # * this enables to run modRana with absolute path without adverse
@@ -128,7 +134,7 @@ class ModRana(object):
 
         # early CLI tasks might need a "silent" modRana
         # so the startup announcement is here
-        print(" == modRana Starting == ")
+        log.info(" == modRana Starting == ")
         # load the version string (needs to be done here
         # as PWD might change after the paths module is
         # imported, for example when running
@@ -137,8 +143,8 @@ class ModRana(object):
         version = paths.VERSION_STRING
         if version is None:
             version = "unknown version"
-        print("  %s" % version)
-        print("  Python %s" % platform.python_version())
+        log.info("  %s" % version)
+        log.info("  Python %s" % platform.python_version())
 
         # load the device module now as it might override
         # the default profile directory, so it needs to be
@@ -160,7 +166,7 @@ class ModRana(object):
             savedVersionString = self.get('modRanaVersionString', "")
             versionStringFromFile = paths.VERSION_STRING
             if savedVersionString != versionStringFromFile:
-                print("modRana: possible upgrade detected")
+                log.info("possible upgrade detected")
                 self._postUpgradeCheck()
 
         # save current version string
@@ -181,7 +187,7 @@ class ModRana(object):
         # and all other modules
         self._loadModules()
 
-        # startup done, print some statistics
+        # startup done, log some statistics
         self._startupDone()
 
     def _postUpgradeCheck(self):
@@ -216,9 +222,7 @@ class ModRana(object):
             try:
                 self.GUIString = self.args.u.split(":")[0]
             except Exception:
-                e = sys.exc_info()[1]
-                print('modRana: splitting the GUI string failed')
-                print(e)
+                log.exception('splitting the GUI string failed')
         else: # no ID specified
             # the N900 device module needs the GUIString
             # at startup
@@ -235,13 +239,13 @@ class ModRana(object):
         # during init
         deviceModulesPath = os.path.join(MAIN_MODULES_FOLDER, "device_modules")
         sys.path.append(deviceModulesPath)
-        dmod = self._loadModule("device_%s" % device, "device")
-        if dmod is None:
-            print("modRana: !! device module failed to load !!\n"
-                  "loading the Neo device module as fail-safe")
+        dmod_instance = self._loadModule("device_%s" % device, "device")
+        if dmod_instance is None:
+            log.critical("!! device module failed to load !!\n"
+                         "loading the Neo device module as fail-safe")
             device = "neo"
-            dmod = self._loadModule("device_%s" % device, "device")
-        self.dmod = dmod
+            dmod_instance = self._loadModule("device_%s" % device, "device")
+        self.dmod = dmod_instance
 
         # if no GUIString was specified from CLI,
         # get preferred GUI module strings from the device module
@@ -293,7 +297,7 @@ class ModRana(object):
     def _loadModules(self):
         """load all "normal" (other than device & GUI) modules"""
 
-        print("importing modules:")
+        log.info("importing modules:")
         start = time.clock()
 
         # make shortcut for the loadModule function
@@ -307,7 +311,7 @@ class ModRana(object):
             moduleName = moduleName.split('.')[0]
             loadModule(moduleName, moduleName[4:])
 
-        print("Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start)))
+        log.info("Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start)))
         self.addTime("all modules loaded")
 
         # make sure all modules have the device module and other variables before first time
@@ -325,7 +329,7 @@ class ModRana(object):
         # run what needs to be done after firstTime is called
         self._modulesLoadedPostFirstTime()
 
-        print( "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start)) )
+        log.info( "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start)) )
 
         # add last timing checkpoint
         self.addTime("all modules initialized")
@@ -373,15 +377,15 @@ class ModRana(object):
             initInfo['name'] = modRanaName
             module = a.getModule(self.m, self.d, initInfo)
             self.m[modRanaName] = module
-            print(
-            " * %s: %s (%1.2f ms)" % (modRanaName, self.m[modRanaName].__doc__, (1000 * (time.clock() - startM))) )
+            log.info(" * %s: %s (%1.2f ms)",
+                     modRanaName,
+                     self.m[modRanaName].__doc__,
+                     (1000 * (time.clock() - startM))
+            )
             return module
         except Exception:
             e = sys.exc_info()[1]
-            print( "modRana: module: %s/%s failed to load" % (importName, modRanaName) )
-            print(e)
-            print("traceback:")
-            traceback.print_exc(file=sys.stdout) # find what went wrong
+            log.exception("module: %s/%s failed to load", importName, modRanaName)
             return None
         finally:
             if fp:
@@ -405,7 +409,7 @@ class ModRana(object):
         """this is run after all the modules have been loaded,
         after before their first time is called"""
 
-        # check if redrawing time should be printed to terminal
+        # check if redrawing time should be logged
         if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
             self.showRedrawTime = True
 
@@ -453,12 +457,12 @@ class ModRana(object):
         start shutdown cleanup and stop GUI main loop
         when finished
         """
-        print("Shutting-down modules")
+        log.info("Shutting-down modules")
         for m in self.m.values():
             m.shutdown()
         self._saveOptions()
         time.sleep(2) # leave some times for threads to shut down
-        print("Shutdown complete")
+        log.info("Shutdown complete")
 
     ## OPTIONS SETTING AND WATCHING ##
 
@@ -534,7 +538,7 @@ class ModRana(object):
             self._notifyWatcher(key, oldValue)
             return True
         else:
-            print("modrana: can't purge a not-present key: %s" % key)
+            log.error("can't purge a not-present key: %s", key)
 
     def watch(self, key, callback, args=None, runNow=False):
         """add a callback on an options key
@@ -564,8 +568,7 @@ class ModRana(object):
         if key in self.watches:
             remove = lambda x: x[0] == id
             self.watches[key][:] = [x for x in self.watches[key] if not remove(x)]
-        else:
-            print("modRana: can't remove watch - key does not exist, watchId:", id)
+        log.error("can't remove watch - key does not exist, watchId:", id)
 
     def _notifyWatcher(self, key, oldValue):
         """run callbacks registered on an options key
@@ -585,7 +588,7 @@ class ModRana(object):
                         # remove watches that return False
                         self.removeWatch(id)
                 else:
-                    print("invalid watcher callback :", callback)
+                    log.error("invalid watcher callback :", callback)
 
     def addKeyModifier(self, key, modifier=None, mode=None, copyInitialValue=True):
         """add a key modifier
@@ -651,11 +654,11 @@ class ModRana(object):
                 # done
                 return True
             else:
-                print("modrana: can't remove modifier that is not present")
-                print("key: %s, mode: %s" % (key, mode))
+                log.error("can't remove modifier that is not present")
+                log.error("key: %s, mode: %s", key, mode)
                 return False
         else:
-            print("modRana: key %s has no modifier and thus cannot be removed" % key)
+            log.error("key %s has no modifier and thus cannot be removed", key)
             return False
 
     def hasKeyModifier(self, key):
@@ -672,7 +675,7 @@ class ModRana(object):
             return False
 
     def notify(self, message, msTimeout=0, icon=""):
-        print("modRana notify: %s" % message)
+        log.info("modRana notify: %s", message)
         notify = self.m.get('notification')
         if notify:
             # the notification module counts timeout in seconds
@@ -695,7 +698,7 @@ class ModRana(object):
         try:
             return self.getModes()[modeName]
         except KeyError:
-            print('modrana: mode %s does not exist and thus has no label' % modeName)
+            log.error('mode %s does not exist and thus has no label' % modeName)
             return None
 
     def _modeChangedCB(self, key=None, oldMode=None, newMode=None):
@@ -732,15 +735,12 @@ class ModRana(object):
         try:
             return dict((k, v) for k, v in six.iteritems(inputDict) if k[0] != '#')
         except Exception:
-            e = sys.exc_info()[1]
-            print(
-                'options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n',
-                e)
+            log.exception('options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1')
             return self.d
 
     def _saveOptions(self):
         """save the persistent dictionary to file"""
-        print("modRana: saving options")
+        log.info("saving options")
         try:
             f = open(self.paths.getOptionsFilePath(), "wb")
             # remove keys marked as nonpersistent
@@ -748,16 +748,15 @@ class ModRana(object):
             d = self._removeNonPersistentOptions(self.d)
             marshal.dump(d, f)
             f.close()
-            print("modRana: options successfully saved")
+            log.info("options successfully saved")
         except IOError:
-            print("modRana: Can't save options")
+            log.exception("can't save options")
         except Exception:
-            e = sys.exc_info()[1]
-            print("modRana: saving options failed:", e)
+            log.exception("saving options failed")
 
     def _loadOptions(self):
         """load the persistent dictionary from file"""
-        print("modRana: loading options")
+        log.info("loading options")
         try:
             f = open(self.paths.getOptionsFilePath(), "rb")
             newData = marshal.load(f)
@@ -776,7 +775,7 @@ class ModRana(object):
 
         except Exception:
             e = sys.exc_info()[1]
-            print("modRana: exception while loading saved options:\n%s" % e)
+            log.exception("exception while loading saved options")
             #TODO: a yes/no dialog for clearing (renaming with timestamp :) the corrupted options file (options.bin)
             success = False
 
@@ -823,13 +822,13 @@ class ModRana(object):
 
     def reportStartupTime(self):
         if self.timing:
-            print("** modRana startup timing **")
+            log.info("** modRana startup timing **")
 
-            # print device identificator and name
+            # log device identificator and name
             if self.dmod:
                 deviceName = self.dmod.getDeviceName()
                 deviceString = self.dmod.getDeviceIDString()
-                print("# device: %s (%s)" % (deviceName, deviceString))
+                log.info("# device: %s (%s)" % (deviceName, deviceString))
 
             tl = self.timing
             startupTime = tl[0][1] * 1000
@@ -840,11 +839,11 @@ class ModRana(object):
                 t *= 1000# convert to ms
                 timeSpent = t - lastTime
                 timeSinceStart = t - startupTime
-                print( "* %s (%1.0f ms), %1.0f/%1.0f ms" % (message, timeSpent, timeSinceStart, totalTime))
+                log.info("* %s (%1.0f ms), %1.0f/%1.0f ms", message, timeSpent, timeSinceStart, totalTime)
                 lastTime = t
-            print("** whole startup: %1.0f ms **" % totalTime)
+            log.info("** whole startup: %1.0f ms **" % totalTime)
         else:
-            print("* timing list empty *")
+            log.info("* timing list empty *")
 
 modrana = None
 dmod = None
@@ -864,7 +863,7 @@ if __name__ == "__main__":
     if len(sys.argv) >= 3 and sys.argv[1] == reloadArg:
         # following argument is path to the modRana main class we want to reload to,
         # optionally followed by any argument for the main class
-        print(" == modRana Reloading == ")
+        log.info(" == modRana Reloading == ")
         reloadPath = sys.argv[2]
         callArgs = [reloadPath]
         callArgs.extend(sys.argv[3:])
