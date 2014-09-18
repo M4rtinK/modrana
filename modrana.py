@@ -375,6 +375,7 @@ class ModRana(object):
             a = imp.load_module(importName, fp, pathName, description)
             initInfo = self.initInfo
             initInfo['name'] = modRanaName
+            initInfo['importName'] = importName
             module = a.getModule(self.m, self.d, initInfo)
             self.m[modRanaName] = module
             log.info(" * %s: %s (%1.2f ms)",

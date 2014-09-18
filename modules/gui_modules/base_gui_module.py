@@ -20,6 +20,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+import logging
+
 from core import constants
 
 from modules.base_module import RanaModule
@@ -193,6 +195,13 @@ class GUIModule(RanaModule):
                 return False
         else:
             return False
+
+    def _getLog(self):
+        guiModuleSuffix = ".".join(self._importName.split("_", 1))
+        # this should turn "gui_gtk" to gui.gtk,
+        # which together with the "mod" prefix should
+        # result in a nice "mod.gui.gtk" logger hierarchy
+        return logging.getLogger("mod.%s" % guiModuleSuffix)
 
     def _getStyleConstants(self):
         # as True == 1 and False == 0,

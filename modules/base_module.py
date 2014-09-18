@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+import logging
+
 class RanaModule(object):
     def __init__(self, modules=None, data=None, initInfo=None):
         if not initInfo: initInfo = {}
@@ -33,14 +35,20 @@ class RanaModule(object):
         self.watch = self.modrana.watch
         self.removeWatch = self.modrana.removeWatch
         self._moduleName = initInfo.get('name', "")
+        self._importName = initInfo.get('importName', "")
         self.device = initInfo.get('device', "")
         self.mainWindow = None # will be provided by modrana.py (a gdk.Window) -> the Widget main window
         self.topWindow = None # will be provided by modrana.py (a gdk.Window) -> the modRana top window
         self.dmod = None # will be provided by modrana.py (a device specific module) -> current device specific module instance
+        self._log = self._getLog()
 
     @property
     def moduleName(self):
         return self._moduleName
+
+    @property
+    def log(self):
+        return self._log
 
     def module_exists(self, module):
         """Test whether a named module is loaded"""
@@ -108,6 +116,17 @@ class RanaModule(object):
             m.routeMessage(message)
         else:
             print("No message handler, cant send message.")
+
+    def _getLog(self):
+        """Return module specific logger instance
+
+        NOTE: This method can be overridden by subclasses
+              to customize logger behavior
+
+        :returns: logging.Logger instance
+        :rtype: logging.Logger
+        """
+        return logging.getLogger("mod.%s" % self.moduleName)
 
     def shutdown(self):
         """

@@ -26,6 +26,7 @@ from modules.base_module import RanaModule
 from core.signal import Signal
 
 import sys
+import logging
 PYTHON3 = sys.version_info[0] > 2
 
 class DeviceModule(RanaModule):
@@ -212,6 +213,13 @@ class DeviceModule(RanaModule):
     def getPOIFolderPath(self):
         """return device specific POI folder or None if default should be used"""
         return None
+
+    def _getLog(self):
+        deviceModuleSuffix = ".".join(self._importName.split("_", 1))
+        # this should turn "device_n900" to device.n900,
+        # which together with the "mod" prefix should
+        # result in a nice "mod.device.n900" logger hierarchy
+        return logging.getLogger("mod.%s" % deviceModuleSuffix)
 
     def getLogFolderPath(self):
         """default path is handled through the options module"""
