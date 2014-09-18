@@ -85,11 +85,7 @@ class GTKGUI(GUIModule):
 
                 win = hildon.StackableWindow()
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("creating hildon stackable window failed")
-                print(e)
+                self.log.exception("creating hildon stackable window failed")
                 win = gtk.Window()
         else:
             win = gtk.Window()
@@ -151,14 +147,9 @@ class GTKGUI(GUIModule):
             try:
                 gtk.show_uri(None, url, gtk.gdk.CURRENT_TIME)
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("GTK GUI: calling gtk.show_uri() failed, probably due to old GTK version")
-                print(e)
-                print("using the webbrowser module as fallback")
+                self.log.exception("calling gtk.show_uri() failed, probably due to old GTK version")
+                self.log.warning("using the webbrowser module as fallback")
                 import webbrowser
-
                 webbrowser.open(url)
 
     def resize(self, w, h):
@@ -297,11 +288,7 @@ class GTKGUI(GUIModule):
         try:
             self._updateCenteringShiftCB()
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("GTK GUI: initial centering shift update failed")
-            print(e)
+            self.log.exception("initial centering shift update failed")
 
         # watch centering shift related variables
         self.watch('posShiftAmount', self._updateCenteringShiftCB)
@@ -371,6 +358,8 @@ class MainWidget(gtk.Widget):
         self.draw_gc = None
         self.dmod = gui.modrana.dmod # device specific module
         self.currentDrawMethod = self.fullDrawMethod
+
+        self._log = self.gui.log
 
         self.centeringDisableThreshold = 2048
 
@@ -444,6 +433,10 @@ class MainWidget(gtk.Widget):
         """local alias for the modRana persistent dictionary set function"""
         self.modrana.set(key, value)
 
+    @property
+    def log(self):
+        return self._log
+
     def _checkForRedrawCB(self, key, oldValue, newValue):
         """react to redraw requests"""
         if newValue == True:
@@ -463,11 +456,7 @@ class MainWidget(gtk.Widget):
             try:
                 self.window.invalidate_rect((0, 0, self.rect.width, self.rect.height), False)
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("error in screen invalidating function"
-                      "exception: %s" % e)
+                self.log.exception("error in screen invalidating function")
 
     def pressed(self, w, event):
         """Press-handler"""
@@ -533,7 +522,7 @@ class MainWidget(gtk.Widget):
         # but better be safe, than eat the whole battery if the timer is not terminated
         dt = (time.time() - pressStartTime) * 1000
         if dt > 60000:
-            print("long press timeout reached")
+            self.log.debug("long press timeout reached")
             return False
 
         if pressStartEpoch == self.lastPressEpoch and self.pressInProgress:
@@ -602,7 +591,7 @@ class MainWidget(gtk.Widget):
         if self.showRedrawTime:
             redrawTime = (1000 * (time.clock() - start))
             timestamp = time.time()
-            print("Redraw took %1.2f ms at(%1.4f)" % (redrawTime, timestamp))
+            self.log.debug("Redraw took %1.2f ms at(%1.4f)", redrawTime, timestamp)
         self.lastFullRedraw = time.time()
 
     def getLastFullRedraw(self):
@@ -622,7 +611,7 @@ class MainWidget(gtk.Widget):
             if menus:
                 menus.mainDrawMenu(cr, menuName)
             else:
-                print("GTK GUI: error, menu module missing")
+                self.log.error("error, menu module missing")
         else: # draw the map
             cr.set_source_rgb(0.2, 0.2, 0.2) # map background
             cr.rectangle(0, 0, self.rect.width, self.rect.height)
@@ -656,13 +645,7 @@ class MainWidget(gtk.Widget):
                     for m in modules:
                         m.drawMapOverlay(cr)
                 except Exception:
-                    import sys
-
-                    e = sys.exc_info()[1]
-                    print("modRana GTK main loop: an exception occurred")
-                    print(e)
-                    print('modRana GTK main loop: traceback:')
-                    traceback.print_exc(file=sys.stdout) # find what went wrong
+                    self.log.exception("modRana GTK main loop: an exception occurred")
                 cr.restore()
                 cr.translate(-x, -y)
                 for m in modules:
@@ -674,13 +657,7 @@ class MainWidget(gtk.Widget):
                     for m in modules:
                         m.drawMapOverlay(cr)
                 except Exception:
-                    import sys
-
-                    e = sys.exc_info()[1]
-                    print("modRana GTK main loop: an exception occurred")
-                    print(e)
-                    print('modRana GTK main loop: traceback:')
-                    traceback.print_exc(file=sys.stdout) # find what went wrong
+                    self.log.exception("modRana GTK main loop: an exception occurred")
                 for m in modules:
                     m.drawScreenOverlay(cr)
 
@@ -741,7 +718,7 @@ class MainWidget(gtk.Widget):
         try:
             (sx, sy, w, h) = self.modrana.get('viewport', None)
         except TypeError:
-            print("gtk gui: viewport not available")
+            self.log.error("viewport not available")
             return
 
         # store current screen content in backing pixmap
@@ -815,7 +792,7 @@ class MainWidget(gtk.Widget):
         newW = allocation[2]
         newH = allocation[3]
 
-        print("GTK GUI: size allocation", allocation)
+        self.log.debug("size allocation: %r", allocation)
         # resize the backing pixmap
         self.initGCandBackingPixmap(self.allocation.width, self.allocation.height)
 
