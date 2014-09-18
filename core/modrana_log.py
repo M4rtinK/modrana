@@ -59,7 +59,7 @@ class LogManager(object):
 
         # create formatters and add them to the handlers
         # omit some stuff when printing to console to make the logs fit to terminal windows
-        console_formatter = logging.Formatter('%(levelname)s %(name)s:%(message)s')
+        console_formatter = logging.Formatter('%(levelname)s %(name)s: %(message)s')
         # file viewers should be able to handle longer lines
         self._full_formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s:%(message)s')
         self._console_handler.setFormatter(console_formatter)
