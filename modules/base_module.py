@@ -32,12 +32,15 @@ class RanaModule(object):
         self.optionsKeyExists = self.modrana.optionsKeyExists
         self.watch = self.modrana.watch
         self.removeWatch = self.modrana.removeWatch
-
-        self.moduleName = initInfo.get('name', "")
+        self._moduleName = initInfo.get('name', "")
         self.device = initInfo.get('device', "")
         self.mainWindow = None # will be provided by modrana.py (a gdk.Window) -> the Widget main window
         self.topWindow = None # will be provided by modrana.py (a gdk.Window) -> the modRana top window
         self.dmod = None # will be provided by modrana.py (a device specific module) -> current device specific module instance
+
+    @property
+    def moduleName(self):
+        return self._moduleName
 
     def module_exists(self, module):
         """Test whether a named module is loaded"""
