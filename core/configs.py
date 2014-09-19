@@ -19,8 +19,10 @@
 #---------------------------------------------------------------------------
 import os
 import shutil
-import traceback
 from configobj import ConfigObj
+
+import logging
+log = logging.getLogger("core.config")
 
 CONFIGS = ["map_config.conf", "user_config.conf"]
 
@@ -48,16 +50,13 @@ class Configs(object):
             if not os.path.exists(configPath):
                 try:
                     source = os.path.join("data/default_configuration_files", config)
-                    print(" ** config:copying default configuration file to profile folder")
-                    print(" ** from: %s" % source)
-                    print(" ** to: %s" % configPath)
+                    log.info(" ** copying default configuration file to profile folder")
+                    log.info(" ** from: %s", source)
+                    log.info(" ** to: %s", configPath)
                     shutil.copy(source, configPath)
-                    print(" ** DONE")
+                    log.info(" ** default config file copying DONE")
                 except Exception:
-                    import sys
-
-                    e = sys.exc_info()[1]
-                    print("config: copying default configuration file to profile folder failed", e)
+                    log.exception("copying default configuration file to profile folder failed")
 
     def upgradeConfigFiles(self):
         """
@@ -65,7 +64,7 @@ class Configs(object):
         """
         upgradeCount = 0
         profilePath = self.modrana.paths.getProfilePath()
-        print("modRana configs: upgrading configuration files in %s" % profilePath)
+        log.info("upgrading modRana configuration files in %s", profilePath)
         # first check the configs actually exist
         self.checkConfigFilesExist()
 
@@ -78,12 +77,12 @@ class Configs(object):
                 installedRev = int(ConfigObj(installedConfigPath).get("revision", 0))
 
                 if defaultRev > installedRev: # is installed config is outdated ?
-                    print('modRana configs: %s is outdated, upgrading' % config)
+                    log.info('config file %s is outdated, upgrading', config)
                     # rename installed config as the user might have modified it
                     newName = "%s_old_revision_%d" % (config, installedRev)
                     newPath = os.path.join(profilePath, newName)
                     shutil.move(installedConfigPath, newPath)
-                    print('modRana configs: old file renamed to %s' % newName)
+                    log.info('old config file renamed to %s' % newName)
 
                     # install the (newer) default config
                     shutil.copy(defaultConfigPath, profilePath)
@@ -91,15 +90,12 @@ class Configs(object):
                     # update upgrade counter
                     upgradeCount += 1
             except Exception:
-                import sys
+                log.exception("upgrading config file: %s failed", config)
 
-                e = sys.exc_info()[1]
-                print("modRana configs: upgrading config file: %s failed" % config)
-                print(e)
         if upgradeCount:
-            print("modRana configs: %d configuration files upgraded" % upgradeCount)
+            log.info("%d configuration files upgraded", upgradeCount)
         else:
-            print("modRana configs: no configuration files needed upgrade")
+            log.info("no configuration files needed upgrade")
 
     def loadAll(self):
         """
@@ -120,16 +116,10 @@ class Configs(object):
             if 'enabled' in config:
                 if config['enabled'] == 'True':
                     self.userConfig = config
-
         except Exception:
-
-            import sys
-
-            e = sys.exc_info()[1]
-            print("modRana configs: loading user_config.conf failed")
-            print("modRana configs: check the syntax")
-            print("modRana configs: and if the config file is present in the main directory")
-            print("modRana configs: this happened:\n%s\nconfig: that's all" % e)
+            msg = "loading user_config.conf failed, check the syntax\n" \
+                  "and if the config file is present in the modRana profile directory"
+            log.exception(msg)
 
     def getMapConfig(self):
         """
@@ -168,20 +158,16 @@ class Configs(object):
         # check if the map configuration file is installed
         if not os.path.exists(mapConfigPath):
             # nothing in profile folder -> try to use the default config
-            print("modRana configs: no config in profile folder, using default map layer configuration file")
+            log.info("no config in profile folder, using default map layer configuration file")
             mapConfigPath = os.path.join("data/default_configuration_files", 'map_config.conf')
             if not os.path.exists(mapConfigPath):
                 # no map layer config available
-                print("modRana configs: map layer configuration file not available")
+                log.info("map layer configuration file not available")
                 return False
         try:
             self.mapConfig = ConfigObj(mapConfigPath)
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("modRana configs: loading map_config.conf failed: %s" % e)
-            traceback.print_exc(file=sys.stdout) # find what went wrong
+            log.exception("loading map_config.conf failed")
             return False
         return True
 

@@ -21,6 +21,9 @@ from __future__ import with_statement  # for Python 2.5
 import os
 from core import utils
 
+import logging
+log = logging.getLogger("core.paths")
+
 # paths
 THEMES_FOLDER_PATH = "themes"
 # folder names
@@ -59,11 +62,7 @@ def loadVersionString():
             global VERSION_STRING
             VERSION_STRING = versionString
         except Exception:
-            import sys
-            e = sys.exc_info()[1]
-            print("modRana config: loading version info failed")
-            print(e)
-
+            log.exception("loading version info failed")
 
 ## XDG path getters ##
 
@@ -324,8 +323,8 @@ class Paths(object):
             if os.path.exists(monavBinaryPath):
                 return monavBinaryPath
             else:
-                print("routing: monav routing server binary missing")
-                print("(%s does not exist)" % monavBinaryPath)
+                log.error("monav routing server binary missing\n"
+                          "(%s does not exist)", monavBinaryPath)
                 return None
         else:
             # no known path to Monav binaries for this architecture

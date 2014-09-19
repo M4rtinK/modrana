@@ -32,22 +32,8 @@ import sys
 import threading
 from core.signal import Signal
 
-class FakeLog(object):
-    fakeLogLock = threading.RLock()
-
-    def info(self, message):
-        with self.fakeLogLock:
-            print("INFO:" + message)
-
-    def debug(self, message):
-        with self.fakeLogLock:
-            print("DEBUG:" + message)
-
-    def error(self, message):
-        with self.fakeLogLock:
-            print("ERROR:" + message)
-
-log = FakeLog()
+import logging
+log = logging.getLogger("core.threads")
 
 class ThreadManager(object):
     """A singleton class for managing threads and processes.
@@ -182,13 +168,10 @@ class ThreadManager(object):
             if thread_instance:
                 # cancel its callback
                 thread_instance.callback = None
-                print("threads: thread %s cancelled" % thread_name)
+                log.info("threads: thread %s cancelled" % thread_name)
         except Exception:
-            import sys
-            print("notification: exception canceling thread"
-                  " callback for %s" % thread_name)
-            e = sys.exc_info()[1]
-            print(e)
+            log.exception("notification: exception canceling thread callback for thread %s",
+                          thread_name)
 
     def wait_all(self):
         """Wait for all threads to exit and if there was an error re-raise it.

@@ -16,6 +16,9 @@ PYTHON3 = sys.version_info[0] > 2
 
 import time
 
+import logging
+log = logging.getLogger("core.utils")
+
 class Empty(Exception):
     """Exception raised by the Synchronized circular stack"""
     pass
@@ -180,15 +183,16 @@ def createFolderPath(newPath):
     -> if there is another filesystem object (like a file)
     with the same name, raise an exception"""
     if not newPath:
-        print("cannot create folder, wrong path: ", newPath)
+        log.error("cannot create folder, wrong path:")
+        log.error(newPath)
         return False
     if os.path.isdir(newPath):
         return True
     elif os.path.isfile(newPath):
-        print("cannot create directory, file already exists: '%s'" % newPath)
+        log.error("cannot create directory, file already exists: %s", newPath)
         return False
     else:
-        print("creating path: %s" % newPath)
+        log.info("creating path: %s", newPath)
         try:
             head, tail = os.path.split(newPath)
             if head and not os.path.isdir(head):
@@ -197,10 +201,7 @@ def createFolderPath(newPath):
                 os.mkdir(newPath)
             return True
         except Exception:
-            print("path creation failed")
-            import sys
-            e = sys.exc_info()[1]
-            print(e)
+            log.exception("path creation failed")
             return False
 
 #from

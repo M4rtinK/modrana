@@ -24,6 +24,9 @@ from core import constants
 from core.point import Point
 from core.singleton import modrana
 
+import logging
+log = logging.getLogger("core.requirements")
+
 def locateCurrentPosition(controller=None):
     """Try to locate current position and return it when done or time out"""
     result = None
@@ -89,14 +92,14 @@ def checkConnectivity(controller=None):
             controller.status = "waiting for Internet connectivity"
         while elapsed < constants.INTERNET_CONNECTIVITY_TIMEOUT:
             status = modrana.dmod.connectivityStatus
-            print('requirements: waiting for internet connectivity')
-            print(status)
+            log.info('waiting for internet connectivity')
+            log.info(status)
             if status == True or status is None:
                 break
             # check if the thread was cancelled
             if controller and controller.callback is None:
                 # the thread was cancelled
-                print("requirements: connectivity status check cancelled")
+                log.info("connectivity status check cancelled")
                 status = constants.CONNECTIVITY_UNKNOWN
                 break
             time.sleep(1)
@@ -105,8 +108,8 @@ def checkConnectivity(controller=None):
             modrana.notify("requirements: failed to connect to the Internet")
         return status
     else:
-        print('requirements: warning, unknown connection status:')
-        print(status)
+        log.warning('warning, unknown connection status:')
+        log.warning(status)
         return status
 
 def gps(conditional=False):

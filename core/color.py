@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # modRana color handling
 
-import traceback
+import logging
+log = logging.getLogger("core.color")
 
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -50,7 +51,7 @@ class Color(object):
                 try:
                     gtkColor = gtk.gdk.color_parse(colorString)
                 except ValueError:
-                    print("** initial color parsing of %s failed" % colorString)
+                    log.error("** initial color parsing of %s failed" % colorString)
                     # might be a hex color string with alpha at the end
                     if colorString > 6:
                         alphaString = colorString[7:]
@@ -58,14 +59,12 @@ class Color(object):
                         try:
                             alpha = int(alphaString, 16)/255.0
                         except Exception:
-                            import sys
-                            e = sys.exc_info()[1]
-                            print("** alpha string parsing failed **")
-                            print("** alpha string: %s **" % alphaString)
-                            print("** from color string: %s **" % colorString)
-                            print("** using numeric alpha or default: %d **" % alpha)
+                            log.exception("** alpha string parsing failed **")
+                            log.error("** alpha string: %s **" % alphaString)
+                            log.error("** from color string: %s **" % colorString)
+                            log.error("** using numeric alpha or default: %d **" % alpha)
 
-                        print("** retrying parsing of trimmed string: %s **" % colorString)
+                        log.info("** retrying parsing of trimmed string: %s **" % colorString)
                         gtkColor = gtk.gdk.color_parse(colorString)
                     else:
                         raise
@@ -79,12 +78,8 @@ class Color(object):
                 self.gtkColor = gtkColor
                 self.valid = True
             except Exception:
-                import sys
-                e = sys.exc_info()[1]
-                print("** color string parsing failed **")
-                print("** input that caused this:", colorStringAlphaTupple)
-                print("** exception: %s" % e)
-                traceback.print_exc(file=sys.stdout)
+                log.exception("** color string parsing failed **")
+                log.error("** input that caused this:", colorStringAlphaTupple)
                 # fallback
                 self.setAlpha(float(1.0))
                 self.setCairoColor(1.0, 0.0, 0.0, float(1.0))

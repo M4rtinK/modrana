@@ -9,6 +9,9 @@ from threading import RLock
 
 from core import utils
 
+import logging
+log = logging.getLogger("core.json_dict")
+
 try:
     import json
 except ImportError: # try to use local copy
@@ -67,13 +70,9 @@ class JSONDict(dict):
                         f.write(jsonString)
                     success = True
                 except Exception:
-                    import sys
-                    e = sys.exc_info()[1]
-                    print("JSONDict: saving to JSON file failed")
-                    print(e)
-                    traceback.print_exc(file=sys.stdout)
+                    log.exception("saving to JSON file failed")
             else:
-                print("JSONDict: can't save file to: %s" % filePath)
+                log.error("JSONDict: can't save file to: %s", filePath)
             return success
 
     def loadFromFile(self, filePath):

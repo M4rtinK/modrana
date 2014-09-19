@@ -23,6 +23,9 @@
 import sys
 import time
 
+import logging
+log = logging.getLogger("core.startup")
+
 try:
     import argparse
 except ImportError:
@@ -227,7 +230,7 @@ class Startup(object):
 
     def _focusOnCoords(self):
         """focus on coordinates provided by CLI"""
-        print("startup: focusing on CLI-provided coordinates")
+        log.info("focusing on CLI-provided coordinates")
 
         # try to parse the coordinates
         try:
@@ -240,7 +243,7 @@ class Startup(object):
                 if len(split2) >= 2:
                     lat = float(split2[0])
                     lon = float(split2[1])
-                    print("startup: focusing on %f %f" % (lat, lon))
+                    log.info("focusing on %f %f", lat, lon)
                     # disable centering & show the map screen
                     self.modrana.set("menu", None)
                     self.modrana.set("centred", False)
@@ -248,21 +251,16 @@ class Startup(object):
                     message = "mapView:recentre %f %f" % (lat, lon)
                     self._sendMessage(message)
                 else:
-                    print("startup: parsing coordinates for the --focus-on-coordinates option failed")
-                    print("unknown coordinate format: %s" % split1[1])
-
+                    log.error("parsing coordinates for the --focus-on-coordinates option failed")
+                    log.error("unknown coordinate format: %s", split1[1])
             else:
-                print("startup: parsing coordinates for the --focus-on-coordinates option failed")
-                print("missing geo: prefix")
+                log.error("parsing coordinates for the --focus-on-coordinates option failed")
+                log.error("missing geo: prefix")
 
             # make sure centering is disabled
             self.modrana.set("centred", False)
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("startup: parsing coordinates for the --focus-on-coordinates option failed")
-            print(e)
+            log.exception("parsing coordinates for the --focus-on-coordinates option failed with exception")
 
     def _getLocalSearchLocation(self):
         location = self.args.local_search_location
@@ -302,7 +300,7 @@ class Startup(object):
                 pos = self._getCurrentPosition(loadLocationModule=True, useLastKnown=True)
                 if pos is None:
                     self._enableStdout()
-                    print("no last known position available")
+                    log.error("no last known position available")
                     # done - no position found
                     self._exit(LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR)
                 else:
@@ -380,12 +378,12 @@ class Startup(object):
             self._exit(0)
         else:
             self._enableStdout()
-            print("search returned no results")
+            log.info("search returned no results")
             self._exit(SEARCH_NO_RESULTS_FOUND)
 
     def _localSearch(self):
         """CLI initiated online local search that displays the result inside modRana"""
-        print("startup: searching for CLI-provided query")
+        log.info("searching for CLI-provided query")
         query = self.args.local_search
 
         # try to make sure Internet connectivity is available
@@ -400,7 +398,7 @@ class Startup(object):
             if self._useLastKnownPos(location):
                 pos = self._getCurrentPosition(useLastKnown=True)
                 if pos is None:
-                    print("startup: no last known position")
+                    log.warning("no last known position")
                     self._sendMessage("ml:notification:m:No last known position;5")
                 else:
                     lat, lon = pos
@@ -417,7 +415,7 @@ class Startup(object):
         # -> if the device is offline, it might need this "nudge"
         # to reconnect
 
-        print("startup: searching where is the CLI-provided address")
+        log.info("searching where is the CLI-provided address")
         query = self.args.address_search
         message = "ml:search:search:address;%s" % query
         self._sendMessage(message)
@@ -429,7 +427,7 @@ class Startup(object):
         # -> if the device is offline, it might need this "nudge"
         # to reconnect
 
-        print("startup: searching Wikipedia for CLI-provided query")
+        log.info("searching Wikipedia for CLI-provided query")
         query = self.args.wikipedia_search
         message = "ml:search:search:wikipedia;%s" % query
         self._sendMessage(message)
@@ -442,14 +440,14 @@ class Startup(object):
     def _fixCB(self, key, newValue, oldValue, startTimestamp, location):
         """checks for fix and terminates the location & mainloop once
         either a valid fix is established or once the timeout is reached"""
-        print('fix value: %d' % newValue)
+        log.info('fix value: %d', newValue)
         stop = False
         # wait for 3D lock for up to 30 seconds
         if time.time() - startTimestamp > 30:
-            print('fix timed out')
+            log.error('fix timed out')
             stop = True
         elif newValue == 3: # 3 = 3D lock
-            print("3D fix established")
+            log.info("3D fix established")
             stop = True
         if stop:
         # quite the main loop so that _getCurrentPosition can finish
@@ -466,10 +464,10 @@ class Startup(object):
             l = self.modrana._loadModule("mod_location", "location")
             # register fix CB
             self.modrana.watch('fix', self._fixCB, [time.time(), l])
-            print('startup: location module loaded')
+            log.info('location module loaded')
             # start location
             l.startLocation(startMainLoop=True)
-            print('startup: location started')
+            log.info('location started')
         else:
             l = self.modrana.m.get("location", None)
 
@@ -518,16 +516,16 @@ class Startup(object):
 
         if pos is None: # as a last resort, try last known position, if available
             if not useLastKnown:
-                print("startup: current position unknown")
+                log.warning("current position unknown")
             else:
-                print("startup: using last known position")
+                log.info("using last known position")
                 # we might need to load options "manually" if run early
                 if not self.modrana.optLoadingOK:
                     self._loadOptions()
 
                 pos = self.modrana.get("pos", None)
                 if pos is None:
-                    print("startup: no last known position")
+                    log.warning("no last known position")
 
         return pos
 
