@@ -18,14 +18,15 @@
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
 import threading
-from time import sleep, time
-import traceback
+from time import sleep
 
 from .base_position_source import PositionSource
 from core.fix import Fix
 from core import threads
 from core import constants
 
+import logging
+log = logging.getLogger("mod.location.gpsd")
 
 class GPSD(PositionSource):
     def __init__(self, location):
@@ -43,10 +44,7 @@ class GPSD(PositionSource):
             self.connected = True
             self.setGPSDDebug(self.debug) # check if verbose debugging is enabled
         except Exception:
-            import sys
-            e = sys.exc_info()[1]
-            print("location GPSD: connecting to GPSD failed", e)
-            traceback.print_exc(file=sys.stdout)
+            log.exception("connecting to GPSD failed")
             self.status = "No GPSD running"
 
     def stop(self):
@@ -95,12 +93,12 @@ class GPSD(PositionSource):
         if self.GPSDConsumer:
             if verbose:
                 self.GPSDConsumer.setVerbose(True)
-                print("location: gpsd debugging output turned ON")
+                log.info("gpsd debugging output turned ON")
             else:
                 self.GPSDConsumer.setVerbose(False)
-                print("location: gpsd debugging output turned OFF")
+                log.info("gpsd debugging output turned OFF")
         else:
-            print("location: gpsd not used, so there is no debug output to enable")
+            log.info("location: gpsd not used, so there is no debug output to enable")
 
 
 ### Old commands for direct socket access to GPSD
@@ -196,19 +194,15 @@ class GPSDConsumer(threads.ModRanaThread):
     def _target(self):
         import gps_module as gps
 
-        print("GPSDConsumer: starting\n")
+        log.info("GPSDConsumer: starting\n")
         while True:
             if self.stop == True:
-                print("GPSDConsumer: breaking\n")
+                log.info("GPSDConsumer: breaking\n")
                 break
             try:
                 self.session.next() # this function blocks until a new fix is available
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("GPSD: error: GPS daemon not running")
-                print(e)
+                log.exception("GPS daemon not running")
             sf = self.session.fix
             if sf.mode > 1: # 0 & 1 -> no fix
                 with self.lock:
@@ -218,31 +212,27 @@ class GPSDConsumer(threads.ModRanaThread):
                     if self.verbose:
                     #          if 1:
                         try:
-                            print('GPSD fix debug')
-                            print(
+                            log.debug('GPSD fix debug')
+                            log.debug(
                                 'mode:' + str(sf.mode) + ' lat,lon:' + str(
                                     (sf.latitude, sf.longitude)) + ' elev:' + str(sf.altitude))
                         except Exception:
-                            import sys
-
-                            e = sys.exc_info()[1]
-                            print('ERROR debugging GPSD fix')
-                            print(e)
+                            log.exception('ERROR debugging GPSD fix')
             else:
                 if self.verbose:
-                    print("GPSDConsumer: NO FIX, will retry in 1 s")
+                    log.debug("GPSDConsumer: NO FIX, will retry in 1 s")
                 sleep(1)
-        print("GPSDConsumer: stopped\n")
+        log.info("GPSDConsumer: stopped\n")
 
     #      if r["class"] == "TPV":
     #        with self.lock:
     #          try:
     #            self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
     #          except Exception:            import sys            e = sys.exc_info()[1]
-    #            print("GPSDConsumer: error reading data", e)
+    #            log.exception("GPSDConsumer: error reading data")
 
     def shutdown(self):
-        print("GPSDConsumer: stopping")
+        log.info("GPSDConsumer: stopping")
         self.stop = True
 
     def getFix(self):

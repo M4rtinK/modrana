@@ -48,12 +48,12 @@ class Location(RanaModule):
         if not self.modrana.dmod.handlesLocation():
             method = self.modrana.dmod.getLocationType()
             if method == "qt_mobility":
-                print(" @ location: using Qt Mobility")
+                self.log.info("using Qt Mobility")
                 from . import qt_mobility
 
                 self.provider = qt_mobility.QtMobility(self)
             elif method == "gpsd": # GPSD
-                print(" @ location: using GPSD")
+                self.log.info("using GPSD")
                 from . import gps_daemon
 
                 self.provider = gps_daemon.GPSD(self)
@@ -64,7 +64,7 @@ class Location(RanaModule):
     def firstTime(self):
         # periodic screen redraw
         if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
-            print("location: starting GPSD 1 second timer")
+            self.log.info("starting GPSD 1 second timer")
             # start screen update 1 per second screen update
             # TODO: event based redrawing
             cron = self.m.get('cron', None)
@@ -78,7 +78,7 @@ class Location(RanaModule):
     def _screenUpdateCB(self):
         """update the screen and also GPSD location if enabled
         TODO: more efficient screen updates"""
-        #    print("location: screen update")
+        #    self.log.info("location: screen update")
 
         # only try to update position info if
         # location is enabled
@@ -89,8 +89,8 @@ class Location(RanaModule):
             if fix:
                 self.updatePosition(fix)
             else:
-                print("location: fix not valid")
-                print(fix)
+                self.log.warning("fix not valid")
+                self.log.info(fix)
 
                 # forced screen update is only needed by the GTK GUI
 
@@ -115,7 +115,7 @@ class Location(RanaModule):
             if args and len(args) == 2:
                 lat = float(args[0])
                 lon = float(args[1])
-                print("gps:setting current position to: %f,%f" % (lat, lon))
+                self.log.info("setting current position to: %f,%f", lat, lon)
                 self.set('pos', (lat, lon))
         elif message == "checkGPSEnabled":
             state = self.get('GPSEnabled', True)
@@ -188,22 +188,22 @@ class Location(RanaModule):
                     # location startup is handled by the
                     # GUI module in if QML location
                     # type is used
-                    print("location: enabling device module location")
+                    self.log.info("enabling device module location")
                     self.modrana.dmod.startLocation(startMainLoop=startMainLoop)
             elif gs.GUIString == "qt5":
-                print("location: location is handled by Qt5 when using Qt5 GUI")
+                self.log.info("location is handled by Qt5 when using Qt5 GUI")
             elif self.provider:
-                print("location: enabling location")
+                self.log.info("enabling location")
                 self.provider.start(startMainLoop=startMainLoop)
             self._enabled = True
         else:
-            print('location: location already enabled')
+            self.log.error('location already enabled')
 
     def stopLocation(self):
         """stop location - device based or gpsd"""
         # send the location stop signal
         self.stopSignal()
-        print("location: disabling location")
+        self.log.info("location: disabling location")
         if self.modrana.dmod.handlesLocation():
             self.modrana.dmod.stopLocation()
         # check if location provider is available,
@@ -221,10 +221,7 @@ class Location(RanaModule):
         try:
             self.stopLocation()
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("location: stopping location failed", e)
+            self.log.exception("location: stopping location failed")
 
     def _checkVerbose(self):
         if self.provider:

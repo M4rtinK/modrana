@@ -25,9 +25,12 @@
 # to check for Harmattan and enable it on other platforms.
 import sys
 
-print("importing Qt Mobility")
+import logging
+log = logging.getLogger("mod.location.qt_mobility")
+
+log.info("importing Qt Mobility")
 #from QtMobility.Location import QGeoSatelliteInfoSource
-print("Qt Mobility imported")
+log.info("Qt Mobility imported")
 
 from base_position_source import PositionSource
 from core.fix import Fix
@@ -47,9 +50,9 @@ class QtMobility(PositionSource):
         #    if self.satelliteSource is not None:
         ##      self.satelliteSource.satellitesInViewUpdated.connect(self._satsInViewUpdateCB)
         ##      self.satelliteSource.satellitesInViewUpdated.connect(self._satsInUseUpdateCB)
-        #      print("location Qt Mobility: satellite info source created")
+        #      log.info("location Qt Mobility: satellite info source created")
         #    else:
-        #      print("location Qt Mobility: satellite info source creation failed")
+        #      log.error("location Qt Mobility: satellite info source creation failed")
 
     def start(self, startMainLoop=False):
         if startMainLoop:
@@ -68,36 +71,36 @@ class QtMobility(PositionSource):
         self.source = QGeoPositionInfoSource.createDefaultSource(None)
         if self.source is not None:
             self.source.positionUpdated.connect(self._positionUpdateCB)
-            print("location Qt Mobility: position source created")
+            log.info("position source created")
             # TODO: custom interval setting
             self.source.setUpdateInterval(1000)
             self.source.startUpdates()
-            print("location qt mobility: started")
+            log.info("started")
 
             # only start the mainloop if the source was created successfully,
             # otherwise it would never end as the signal provided by the source,
-            # that stops the main lopp, would never be triggered
+            # that stops the main loop, would never be triggered
             if startMainLoop:
-                print("location qt mobility: starting headless mainloop")
+                log.info("starting headless mainloop")
                 self.qtApplication.exec_()
         else:
-            print("location Qt Mobility: source creation failed")
+            log.error("source creation failed")
             #    if self.satelliteSource:
-            #      print(self.satelliteSource.availableSources())
+            #      log.info(self.satelliteSource.availableSources())
             #      self.satelliteSource.startUpdates()
-            #      print("location qt mobility: sat source started")
+            #      log.info("sat source started")
 
     def stop(self):
-        print("location qt mobility: stopping")
+        log.info("location qt mobility: stopping")
         if self.source:
             self.source.stopUpdates()
-            print("location qt mobility: stopped")
+            log.info("stopped")
         if self.qtApplication:
-            print("location qt mobility: stopping headless mainloop")
+            log.info("stopping headless mainloop")
             self.qtApplication.exit()
             #    if self.satelliteSource:
             #      self.satelliteSource.stopUpdates()
-            #      print("location qt mobility: sat source stopped")
+            #      log.info("sat source stopped")
 
     def canSetUpdateInterval(self):
         return True
@@ -150,9 +153,9 @@ class QtMobility(PositionSource):
         # print debug message if enabled
         #    self.debug = True
         if self.debug:
-            print("Qt-Mobility POS DEBUG")
-            print("%s, %s" % (update.coordinate().latitude(), update.coordinate().longitude()))
-            print(update)
+            log.debug("Qt-Mobility POS DEBUG")
+            log.debug("%s, %s", update.coordinate().latitude(), update.coordinate().longitude())
+            log.debug(update)
 
         # trigger update in the location module
         self.location.updatePosition(fix)
