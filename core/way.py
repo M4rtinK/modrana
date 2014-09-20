@@ -10,6 +10,9 @@ from core import geo
 from upoints import gpx
 from core.point import Point
 
+import logging
+log = logging.getLogger("core.way")
+aoLog = logging.getLogger("core.way.ao")
 
 class TurnByTurnPoint(Point):
     def __init__(self, lat, lon, elevation=None, message=None, SSMLMessage=None):
@@ -220,8 +223,8 @@ class Way(object):
                     lat, lon, elev, message = mp.getLLEM()
                     routepoints.append(gpx.Routepoint(lat, lon, name, message, elev, None))
                     index += 1
-                print(
-                'way: %d points, %d routepoints saved to %s in GPX format' % (path, len(trackpoints), len(routepoints)))
+                log.info('%d points, %d routepoints saved to %s in GPX format',
+                         path, len(trackpoints), len(routepoints))
             else:
                 waypoints = []
                 for mp in messagePoints:
@@ -231,8 +234,8 @@ class Way(object):
                     lat, lon, elev, message = mp.getLLEM()
                     waypoints.append(gpx.Routepoint(lat, lon, name, message, elev, None))
                     index += 1
-                print(
-                'way: %d points, %d waypoints saved to %s in GPX format' % (len(trackpoints[0]), len(waypoints), path))
+                log.info('%d points, %d waypoints saved to %s in GPX format',
+                         len(trackpoints[0]), len(waypoints), path)
 
             # write the GPX tree to file
             # TODO: waypoints & routepoints support
@@ -242,11 +245,7 @@ class Way(object):
             f.close()
             return True
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print('way: saving to GPX format failed')
-            print(e)
+            log.exception('saving to GPX format failed')
             return False
 
 
@@ -264,14 +263,10 @@ class Way(object):
             for p in points:
                 writer.writeRow(p[0], p[1], p[2], timestamp)
             f.close()
-            print('way: %d points saved to %s as CSV' % (path, len(points)))
+            log.info('%d points saved to %s as CSV', path, len(points))
             return True
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print('way: saving to CSV failed')
-            print(e)
+            log.exception('saving to CSV failed')
             return False
 
     def __str__(self):
@@ -432,7 +427,6 @@ def fromCSV(path, delimiter=',', fieldCount=None):
         f = open(path, 'r')
     except IOError:
         import sys
-
         e = sys.exc_info()[1]
         if e.errno == 2:
             raise core.exceptions.FileNotFound
@@ -455,14 +449,10 @@ def fromCSV(path, delimiter=',', fieldCount=None):
             elif fieldCount == 4: # lat, lon, elevation, timestamp
                 points = map(lambda x: (x[0], x[1], x[2], x[3]), reader)
             else:
-                print("Way: wrong field count - use 2, 3 or 4")
+                log.error("wrong field count - use 2, 3 or 4")
                 raise ValueError
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print('Way: parsing CSV file at path: %s failed')
-            print(e)
+            log.exception('parsing CSV file at path: %s failed')
             f.close()
             return None
     else:
@@ -475,11 +465,9 @@ def fromCSV(path, delimiter=',', fieldCount=None):
                 try:
                     return float(item)
                 except Exception:
-                    import sys
-
-                    e = sys.exc_info()[1] # parsing error
-                    print("way: parsing elevation failed, data: ", item)
-                    print(e)
+                    log.error("parsing elevation failed, data:")
+                    log.error(item)
+                    log.exception()
                     return None
             else:
                 return None
@@ -502,21 +490,18 @@ def fromCSV(path, delimiter=',', fieldCount=None):
                 elif fields == 2:
                     points.append((float(r[0]), float(r[1]), None, None))
                 else:
-                    print(
-                    'Way: error, line %d has 1 or 0 fields, needs at least 2 (lat, lon):\n%r' % (reader.line_no, r))
+                    log.error('line %d has 1 or 0 fields, needs at least 2 (lat, lon):\n%r',
+                          reader.line_no, r)
                     parsingErrorCount += 1
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print('Way: parsing CSV line %d failed' % lineNumber)
-                print(e)
+                log.exception('parsing CSV line %d failed', lineNumber)
                 parsingErrorCount += 1
             lineNumber += 1
 
     # close the file
     f.close()
-    print('Way: CSV file parsing finished, %d points added with %d errors' % (len(points), parsingErrorCount))
+    log.info('CSV file parsing finished, %d points added with %d errors',
+             len(points), parsingErrorCount)
     return Way(points)
 
 
@@ -633,13 +618,9 @@ class AppendOnlyWay(Way):
             self.filePath = path
             # flush any pending points
             self.flush()
-            print('AOWay: started writing to: %s' % path)
+            aoLog.info('started writing to: %s' % path)
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print('AOWay: opening CSV file for writing failed, path: %s' % path)
-            print(e)
+            aoLog.exception('opening CSV file for writing failed, path: %s', path)
             self._cleanup() # revert to initial state
             return False
 
@@ -662,7 +643,7 @@ class AppendOnlyWay(Way):
             self.flush()
             # close the file
         self.file.close()
-        print('AOWay: file closed: %s' % self.filePath)
+        aoLog.info('file closed: %s', self.filePath)
         # cleanup
         self._cleanup()
 
@@ -674,13 +655,9 @@ class AppendOnlyWay(Way):
                 self.close() # close it
                 os.remove(path) # and delete it
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print('AOWay: deleting currently open file failed')
-                print(e)
+                aoLog.exception('deleting currently open file failed')
         else:
-            print("AOWay: can't delete current file - no file open")
+            aoLog.error("can't delete current file - no file open")
 
 
     def _cleanup(self):
