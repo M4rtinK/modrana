@@ -63,7 +63,7 @@ class TracklogManager(RanaModule):
             self.scrollDict[currentCat] = scroll
 
         elif message == 'getElevation':
-            print("tracklogManage: getting elevation info for active tracklog")
+            self.log.info("getting elevation info for active tracklog")
             activeTracklog = self.LTModule.getActiveTracklog()
             # generate a list of (lat,lon) tuples
             latLonList = map(lambda x: (x.latitude, x.longitude), activeTracklog.trackpointsList[0])
@@ -100,9 +100,7 @@ class TracklogManager(RanaModule):
             path = self.LTModule.getActiveTracklogPath()
             currentCategory = self.get('currentTracCat', None)
             if currentCategory:
-                print("changing category for:")
-                print("%s" % path)
-                print("to: %s" % currentCategory)
+                self.log.info("changing category for:\n%s\nto %s" % path, currentCategory)
                 self.LTModule.setTracklogPathCategory(path, currentCategory)
 
         elif message == 'setupColorMenu':
@@ -122,7 +120,7 @@ class TracklogManager(RanaModule):
 
     def deleteTracklog(self, path):
         # delete a tracklog
-        print("deleting tracklog:%s" % path)
+        self.log.info("deleting tracklog:%s", path)
         # from cache
         self.LTModule.deleteTrackFromCache(path)
         # from loaded tracklogs
@@ -272,7 +270,7 @@ class TracklogManager(RanaModule):
             if track.elevation == True:
                 units = self.m.get('units', None)
                 if units:
-                #          print(track.routeInfo['firstElevation'])
+                #          self.log.info(track.routeInfo['firstElevation'])
                     maxString = units.m2CurrentUnitString(track.routeInfo['maxElevation'], 2, False)
                     minString = units.m2CurrentUnitString(track.routeInfo['minElevation'], 2, False)
                     text += "\nmaximum elevation: %s\nminimum elevation: %s" % (maxString, minString)

@@ -33,6 +33,8 @@ import shutil
 from time import clock
 from time import gmtime, strftime
 
+import logging
+gpx_log = logging.getLogger("core.loadTracklogs.gpx_tracklog")
 
 def getModule(m, d, i):
     return LoadTracklogs(m, d, i)
@@ -58,7 +60,7 @@ class LoadTracklogs(RanaModule):
             # load the active tracklog
             path = self.get('activeTracklogPath', None)
             if path is not None and self.tracklogList:
-                print("* loading tracklog:\n%s" % path)
+                self.log.info("* loading tracklog:\n%s", path)
 
                 # Zeroth, is the tracklog already loaded ?
                 if path not in self.tracklogs.keys():
@@ -66,25 +68,20 @@ class LoadTracklogs(RanaModule):
                     if self.cache == {}:
                         self.loadCache()
                     else:
-                        print("not loading tracklog cache (already loaded)")
+                        self.log.warning("not loading tracklog cache (already loaded)")
                         # Second, try to load the tracklog (if its not loaded)
 
                     try:
                         self.loadTracklog(path)
-                        print("tracklog successfully loaded")
+                        self.log.info("tracklog successfully loaded")
                     except Exception:
-                        import sys
-
-                        e = sys.exc_info()[1]
-                        print("loading tracklog failed")
-                        print("path: %s" % path)
-                        print(e)
+                        self.log.exception("loading tracklog from path: %s failed", path)
 
                     # Third, assure consistency of the cache
-                    print("** Assuring tracklog cache consistency")
+                    self.log.info("** Assuring tracklog cache consistency")
                     self.save()
                     self.cleanCache()
-                    print("** Tracklog cache consistency assured")
+                    self.log.info("** Tracklog cache consistency assured")
                 #    elif message == 'renameActiveTracklog':
                 #      activeTracklog = self.getActiveTracklog()
                 #      if activeTracklog:
@@ -97,7 +94,7 @@ class LoadTracklogs(RanaModule):
         assure the patch exists before returning it"""
         tracklogFolderPath = self.modrana.paths.getTracklogsFolderPath()
         if tracklogFolderPath is None:
-            print("loadTracklogs: can't get tracklog sub path - tracklog folder path is unknown")
+            self.log.error("can't get tracklog sub path - tracklog folder path is unknown")
             return None # tracklog folder path is unknown
         else:
             TFSubPath = os.path.join(tracklogFolderPath, subPath)
@@ -116,33 +113,29 @@ class LoadTracklogs(RanaModule):
         examplesDestinationPath = os.path.join(tfp, 'examples')
         if not os.path.exists(examplesDestinationPath):
             utils.createFolderPath(examplesDestinationPath)
-            print(' ** loadTracklogs: copying example tracklogs')
+            self.log.info(' ** copying example tracklogs')
             examplesSourcePath = 'data/tracklog_examples'
             # copy all files from this folder
             for item in os.listdir(examplesSourcePath):
                 path = os.path.join(examplesSourcePath, item)
                 if os.path.isfile(path):
-                    print(' ** copying: %r' % item)
+                    self.log.info(' ** copying: %r', item)
                     shutil.copy(path, os.path.join(examplesDestinationPath, item))
-            print(' ** DONE')
+            self.log.info(' ** DONE')
 
 
     def loadCache(self):
         # unpickle the cache from file
-        print("** Loading tracklog cache")
+        self.log.info("** Loading tracklog cache")
         start = clock()
         try:
             f = open(self.getTracklogCachePath(), 'r')
             self.cache = pickle.load(f)
             f.close()
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("loadTracklogs: loading cache from file failed")
-            print(e)
+            self.log.exception("loading cache from file failed")
             self.cache = {}
-        print("** Loading tracklog cache took %1.2f ms" % (1000 * (clock() - start)))
+        self.log.info("** Loading tracklog cache took %1.2f ms", 1000 * (clock() - start))
 
     def cleanCache(self):
         """remove files that are not present from the cache"""
@@ -232,7 +225,7 @@ class LoadTracklogs(RanaModule):
         return os.path.join(self.modrana.paths.getCacheFolderPath(), 'tracklog_cache.txt')
 
     def listAvailableTracklogs(self):
-        print("** making a list of available tracklogs")
+        self.log.info("** making a list of available tracklogs")
 
         tf = self.modrana.paths.getTracklogsFolderPath()
         # does the tracklog folder exist ?
@@ -274,10 +267,10 @@ class LoadTracklogs(RanaModule):
 
         self.categoryList = currentFolders
 
-        print("*  using this tracklog folder:")
-        print("* %s" % self.modrana.paths.getTracklogsFolderPath())
-        print("*  there are %d tracklogs available" % len(availableFiles))
-        print("**")
+        self.log.info("*  using this tracklog folder:")
+        self.log.info("* %s" % self.modrana.paths.getTracklogsFolderPath())
+        self.log.info("*  there are %d tracklogs available" % len(availableFiles))
+        self.log.info("**")
         self.tracklogPathList = pathList
         self.tracklogList = availableFiles
 
@@ -350,22 +343,17 @@ class LoadTracklogs(RanaModule):
 
     def save(self):
         try:
-            print(self.getTracklogCachePath())
             f = open(self.getTracklogCachePath(), 'w')
             pickle.dump(self.cache, f)
             f.close()
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("loadTracklogs: can't store tracklog data to cache, tracklogs will be loaded from files next time")
-            print("exception: %r" % e)
+            self.log.exception("can't store tracklog data to cache, tracklogs will be loaded from files next time")
 
     def setPathAsActiveTracklog(self, path):
         self.set('activeTracklogPath', path)
 
     def loadPathList(self, pathList):
-        print("** Loading tracklogs list")
+        self.log.info("** Loading tracklogs list")
         start = clock()
         count = len(pathList)
         index = 1
@@ -376,7 +364,7 @@ class LoadTracklogs(RanaModule):
             index += 1
 
         elapsed = (1000 * (clock() - start))
-        print("** Loading tracklogs took %1.2f ms" % elapsed)
+        self.log.info("** Loading tracklogs took %1.2f ms", elapsed)
         self.save()
         self.cleanCache()
         self.sendMessage('notification:%d tracks loaded in %1.2f ms#1' % (count, elapsed))
@@ -401,11 +389,7 @@ class LoadTracklogs(RanaModule):
         try:
             file = open(path, 'r')
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("loading tracklog failed: %s" % path)
-            print(e)
+            self.log.exception("loading tracklog failed: %s", path)
 
         if notify:
             self.sendMessage('notification:loading %s#1' % path)
@@ -419,10 +403,7 @@ class LoadTracklogs(RanaModule):
             try:
                 track.import_locations(file, "1.1") # load a gpx file into it
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("loading tracklog failed:\n%s" % e)
+                self.log.exception("loading tracklog failed")
                 if notify:
                     self.sendMessage('notification:loading tracklog failed#2')
                 return
@@ -432,11 +413,11 @@ class LoadTracklogs(RanaModule):
 
             self.tracklogs[path] = GPXTracklog(track, path, type, self.cache, self.save)
 
-            print("Loading tracklog \n%s\ntook %1.2f ms" % (path, (1000 * (clock() - start))))
+            self.log.info("Loading tracklog \n%s\ntook %1.2f ms", path, (1000 * (clock() - start)))
             if notify:
                 self.sendMessage('notification:loaded in %1.2f ms' % (1000 * (clock() - start)))
         else:
-            print("No tracklog file")
+            self.log.info("No tracklog file")
 
 
     def storeRouteAndSetActive(self, route, name='', cat='misc'):
@@ -468,12 +449,12 @@ class LoadTracklogs(RanaModule):
         """store tracklog and return the resulting path"""
         folder = self.modrana.paths.getTracklogsFolderPath()
         if folder is None:
-            print("loadTracklogs: can't store tracklog - path to tracklog folder is unknown or unusable")
+            self.log.error("can't store tracklog - path to tracklog folder is unknown or unusable")
             return None
         path = os.path.join(folder, cat)
         # is it a directory ?
         if not os.path.isdir(path):
-            self.sendMessage("loadTracklogs: can't store tracklog - tracklog folder is not a directory")
+            self.sendMessage("can't store tracklog - tracklog folder is not a directory")
             return None
 
         if type == "GPX":
@@ -487,8 +468,7 @@ class LoadTracklogs(RanaModule):
                 import sys
 
                 e = sys.exc_info()[1]
-                print("loadTracklogs: saving tracklog failed")
-                print("exception: %s" % e)
+                self.log.exception("saving tracklog failed")
                 self.sendMessage('notification:Error: saving tracklog failed#3')
                 return None
 
@@ -497,8 +477,8 @@ class LoadTracklogs(RanaModule):
         if refresh:
             self.listAvailableTracklogs()
             # TODO: incremental addition of new tracklogs without relisting
-        print("tracklog: %s" % filename)
-        print("tracklog saved successfully")
+        self.log.info("tracklog: %s", filename)
+        self.log.info("tracklog saved successfully")
         return os.path.join(path, filename)
 
 
@@ -609,7 +589,7 @@ class GPXTracklog(Tracklog):
             return
 
         if filename in cache:
-            print("** loading tracklog from cache")
+            gpx_log.info("** loading tracklog from cache")
             self.clusters = cache[filename].clusters
             self.routeInfo = cache[filename].routeInfo
             if self.routeInfo is not None:
@@ -617,7 +597,7 @@ class GPXTracklog(Tracklog):
             self.perElevList = cache[filename].perElevList
 
         else:
-            print("* creating clusters,routeInfo and perElevList: %s" % filename)
+            gpx_log.info("* creating clusters,routeInfo and perElevList: %s", filename)
             clusterDistance = 5 # cluster points to clusters about 5 kilometers in diameter
             self.clusters = []
 
@@ -685,7 +665,7 @@ class GPXTracklog(Tracklog):
         f = open(self.filename, "w") # open the old file
         xmlTree = self.trackpointsList.export_gpx_file() # get the element tree
         xmlTree.write(f) # overwrite the old file with the new structure
-        print("%s has been replaced by the current in memory version" % self.filename)
+        gpx_log.info("%s has been replaced by the current in memory version", self.filename)
         del self.cache[self.filename] # the file has been modified, so it must be cached again
         self.save() # save the cache to disk
 
