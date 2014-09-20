@@ -69,7 +69,6 @@ class Display(RanaModule):
         cron = self.m.get('cron', None)
         if cron:
             # run the callback directly for the first time
-            self._updateDisplayControlCB
             cron.addTimeout(self._updateDisplayControlCB, self.msScreenBlankPauseIntervalMs, self,
                             "screen blanking update")
 
