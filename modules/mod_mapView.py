@@ -20,10 +20,8 @@
 from modules.base_module import RanaModule
 from core import color
 
-
 def getModule(m, d, i):
     return MapView(m, d, i)
-
 
 class MapView(RanaModule):
     """Controls the view being displayed on the map"""
@@ -90,11 +88,7 @@ class MapView(RanaModule):
                 self.set("centred", False) # turn off centering before moving screen to the coordinates
                 proj.recentre(lat, lon, zoom)
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("mapView: cant recenter coordinates")
-                print(e)
+                self.log.exception("cant recenter coordinates")
 
     def dragEvent(self, startX, startY, dx, dy, x, y):
         """only drag the map if centering is disabled"""
@@ -139,7 +133,7 @@ class MapView(RanaModule):
     def checkMapDraggingMode(self):
         """check and set current redraw mode configuration"""
         draggingMode = self.get('mapDraggingMode', "default")
-        print("mapView: switching map drag mode to %s" % draggingMode)
+        self.log.info("switching map drag mode to %s", draggingMode)
         if draggingMode == 'default':
             self.modrana.gui.enableDefaultDrag()
         elif draggingMode == "staticMapDrag":
@@ -148,7 +142,7 @@ class MapView(RanaModule):
     def checkCenteringDisableThreshold(self):
         """check ans set current centering disable threshold"""
         centeringDisableThreshold = self.get('centeringDisableThreshold', 2048)
-        print("mapView: switching centering disable threshold to %s" % centeringDisableThreshold)
+        self.log.info("switching centering disable threshold to %s", centeringDisableThreshold)
         self.modrana.gui.setCDDragThreshold(int(centeringDisableThreshold))
 
     def jump2point(self, point):
@@ -170,11 +164,7 @@ class MapView(RanaModule):
                 c = color.Color(newKey, (newKey, 1.0))
                 self.gridColor = c.getCairoColor()
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print('mapView: color parsing failed')
-                print(e)
+                self.log.exception('color parsing failed')
 
     def _drawGridLabelsCB(self, key, oldKey, newKey):
         if newKey is not None:
@@ -215,9 +205,9 @@ class MapView(RanaModule):
             # and this overlap is needed for high zoom
             visibleMeridians = range(lats[0] - 2, lats[1] + 2)
             visibleParallels = range(lons[0] - 2, lons[1] + 2)
-            # debug - print visible meridians/parallels:
-            #print(visibleMeridians)
-            #print(visibleParallels)
+            # debug - log visible meridians/parallels:
+            #self.log.debug(visibleMeridians)
+            #self.log.debug(visibleParallels)
             # TODO: like this, at least 4 lines are drawn even if
             # no parallel or meridian is visible - this could be optimized
             # -> probably should check if some meridian/parallel is visible and
