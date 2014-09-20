@@ -127,13 +127,13 @@ class StoreTiles(RanaModule):
         lookupDbPath = self.getLookupDbPath(dbFolderPath) # get the path
 
         if dbFolderPath not in self.layers.keys():
-            print("sqlite tiles: initializing db for layer: %s" % folderPrefix)
+            self.log.info("sqlite tiles: initializing db for layer: %s" % folderPrefix)
             if os.path.exists(lookupDbPath): #does the lookup db exist ?
                 connection = sqlite3.connect(lookupDbPath) # connect to the lookup db
             else: #create new lookup db
                 connection = sqlite3.connect(lookupDbPath)
                 cursor = connection.cursor()
-                print("sqlite tiles: creating lookup table")
+                self.log.info("sqlite tiles: creating lookup table")
                 cursor.execute(
                     "create table tiles (z integer, x integer, y integer, store_filename string, extension varchar(10), unix_epoch_timestamp integer, primary key (z, x, y, extension))")
                 cursor.execute("create table version (v integer)")
@@ -186,11 +186,7 @@ class StoreTiles(RanaModule):
                                                 [z, x, y, sqlite3.Binary(tile), extension, integerTimestamp])
                             self.commitConnections([storeConn, lookupConn])
                         except Exception:
-                            import sys
-
-                            e = sys.exc_info()[1]
-                            print("tile already present")
-                            print(e)
+                            self.log.exception("tile already present")
                             #tile is already present, skip insert
 
     def commitConnections(self, connections):
@@ -208,7 +204,7 @@ class StoreTiles(RanaModule):
             while self.dirty:
                 conn = self.dirty.pop()
                 conn.commit()
-            print("storeTiles: sqlite commit OK")
+            self.log.debug("sqlite commit OK")
 
 
     def connectToStore(self, stores, pathToStore, dbFolderPath, accessType):
@@ -282,7 +278,7 @@ class StoreTiles(RanaModule):
 
     def createNewStore(self, path):
         """create a new store table and file"""
-        print("sqlite tiles: creating a new storage database in %s" % path)
+        self.log.info("sqlite tiles: creating a new storage database in %s" % path)
         os.path.exists(path)
         connection = sqlite3.connect(path)
         cursor = connection.cursor()
@@ -312,11 +308,7 @@ class StoreTiles(RanaModule):
                 pixbuf = pl.get_pixbuf()
                 return pixbuf # return pixbuf containing the tile image
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("storeTiles: loading tile image to pixbuf failed")
-                print(e)
+                self.log.exception("loading tile image to pixbuf failed")
                 return None
         else:
             # tile not found
@@ -355,11 +347,7 @@ class StoreTiles(RanaModule):
                     f.close()
                     return data
                 except Exception:
-                    import sys
-
-                    e = sys.exc_info()[1]
-                    print("storeTiles: loading tile from file failed")
-                    print(e)
+                    self.log.exception("loading tile from file failed")
                     return None
             else:
                 return None # this tile is not locally stored
@@ -480,19 +468,15 @@ class StoreTiles(RanaModule):
             try:
                 item = self.sqliteTileQueue.get(block=True)
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
                 # this usually occurs during interpreter shutdown
                 # -> we simulate a shutdown order and try to exit cleanly
-                print("storage thread - probable shutdown")
-                print("exception: %s" % e)
+                self.log.exception("storage thread - probable shutdown")
                 item = 'shutdown'
 
             if item == 'shutdown': # we put this to the queue to announce shutdown
-                print("\nshutdown imminent, committing all uncommitted tiles")
+                self.log.info("shutdown imminent, committing all uncommitted tiles")
                 self.commitAll()
-                print("\nall tiles committed, breaking, goodbye :)")
+                self.log.info("all tiles committed, breaking, goodbye :)")
                 break
                 # the thread should not die due to an exception
             # or the queue fills up without anybody removing and processing the tiles
@@ -504,10 +488,7 @@ class StoreTiles(RanaModule):
                 self.storeTile(tile, lzxy) # store the tile
                 self.sqliteTileQueue.task_done()
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("sqlite storage worker : exception during tile storage:\n%s" % e)
+                self.log.exception("sqlite storage worker: exception during tile storage")
 
             dt = time.time() - self.lastCommit # check when the last commit was
             if dt > self.commitInterval:
@@ -515,10 +496,7 @@ class StoreTiles(RanaModule):
                     self.commitAll() # commit all "dirty" connections
                     self.lastCommit = time.time() # update the last commit timestamp
                 except Exception:
-                    import sys
-
-                    e = sys.exc_info()[1]
-                    print("sqlite storage worker : exception during mass db commit:\n%s" % e)
+                    self.log.exception("sqlite storage worker: exception during mass db commit")
 
 
     def automaticStoreTile(self, tile, lzxy):
@@ -537,7 +515,6 @@ class StoreTiles(RanaModule):
                     os.makedirs(folderPath) # create the folder
                 except Exception:
                     import sys
-
                     e = sys.exc_info()[1]
                     # errno 17 - folder already exists
                     # this is most probably cased by another thread creating the folder between
@@ -545,16 +522,12 @@ class StoreTiles(RanaModule):
                     # -> we can safely ignore it (as the the only thing we are now interested in,
                     # is having a folder to store the tile in)
                     if e.errno != 17:
-                        print("storeTiles: can't create folder %s for %s" % (folderPath, filename))
-                        print(e)
+                        self.log.exception("can't create folder %s for %s", folderPath, filename)
             try:
                 with open(filename, 'wb') as f:
                     f.write(tile)
             except:
-                import sys
-                e = sys.exc_info()[1]
-                print("storeTiles: saving tile to file %f failed" % filename)
-                print(e)
+                self.log.exception("saving tile to file %f failed", filename)
 
     def shutdown(self):
         # try to commit possibly uncommitted tiles

@@ -179,7 +179,6 @@ class MapData(RanaModule):
                 self.scroll -= 1
                 self.set('needRedraw', True)
         elif message == "down":
-            print("down")
             self.scroll += 1
             self.set('needRedraw', True)
         elif message == "reset":
@@ -207,7 +206,7 @@ class MapData(RanaModule):
 
         # start of the tile splitting code
         previousZoomlevelTiles = None # we will split the tiles from the previous zoomlevel
-        print("splitting down")
+        self.log.info("splitting down")
         for z in range(tilesZ, maxZ): # to max zoom (fo each z we split one zoomlevel down)
             newTilesFromSplit = set() # tiles from the splitting go there
             if previousZoomlevelTiles is None: # this is the first iteration
@@ -229,12 +228,12 @@ class MapData(RanaModule):
                 newTilesFromSplit.add(leftLowerTile)
                 newTilesFromSplit.add(rightLowerTile)
             extendedTiles.update(newTilesFromSplit) # add the new tiles to the main set
-            print("we are at z=%d, %d new tiles from %d" % (z, len(newTilesFromSplit), z + 1))
+            self.log.info("we are at z=%d, %d new tiles from %d", z, len(newTilesFromSplit), z + 1)
             previousZoomlevelTiles = newTilesFromSplit # set the new tiles s as prev. tiles for next iteration
 
         # start of the tile coordinates rounding code
         previousZoomlevelTiles = None # we will the tile coordinates to get tiles for the upper level
-        print("rounding up")
+        self.log.info("rounding up")
         r = range(minZ, tilesZ) # we go from the tile-z up, e.g. a sequence progressively smaller integers
         r.reverse()
         for z in r:
@@ -253,11 +252,11 @@ class MapData(RanaModule):
                 upperTile = (upperTileX, upperTileY, z)
                 newTilesFromRounding.add(upperTile)
             extendedTiles.update(newTilesFromRounding) # add the new tiles to the main set
-            print("we are at z=%d, %d new tiles" % (z, len(newTilesFromRounding)))
+            self.log.info("we are at z=%d, %d new tiles", z, len(newTilesFromRounding))
             previousZoomlevelTiles = newTilesFromRounding # set the new tiles s as prev. tiles for next iteration
 
-            print("nr of tiles after extend: %d" % len(extendedTiles))
-        print("Extend took %1.2f ms" % (1000 * (clock() - start)))
+            self.log.info("nr of tiles after extend: %d", len(extendedTiles))
+        self.log.info("Extend took %1.2f ms", 1000 * (clock() - start))
 
         del tiles
 
@@ -345,8 +344,8 @@ class MapData(RanaModule):
             # so we will save only unique tiles
             outputSet = set(map(lambda x: tuple(x), currentPointTiles))
             tilesToDownload.update(outputSet)
-        print("Listing tiles took %1.2f ms" % (1000 * (clock() - start)))
-        print("unique tiles %d" % len(tilesToDownload))
+        self.log.info("Listing tiles took %1.2f ms", 1000 * (clock() - start))
+        self.log.info("unique tiles %d", len(tilesToDownload))
         return tilesToDownload
 
     def addPointsToLine(self, lat1, lon1, lat2, lon2, maxDistance):
@@ -547,7 +546,6 @@ class MapData(RanaModule):
         if menuName == 'chooseRouteForDl':
             menus = self.m.get('menu', None)
             tracks = self.m.get('loadTracklogs', None).getTracklogList()
-            print(tracks)
 
             def describeTracklog(index, category, tracks):
                 """describe a tracklog list item"""
@@ -600,7 +598,7 @@ class MapData(RanaModule):
         """
         messageType = self.get("downloadType")
         if messageType != "data":
-            print("Error: mod_mapData can't download %s" % messageType)
+            self.log.error("can't download %s (wrong download type)", messageType)
             return
 
         # dump previous requests first
@@ -608,7 +606,7 @@ class MapData(RanaModule):
 
         # don't refresh if an operation is already running
         if self.running:
-            print("map data: not refreshing - a operation is currently running")
+            self.log.error("not refreshing - a operation is currently running")
             return
 
         location = self.get("downloadArea", "here") # here or route
@@ -654,7 +652,7 @@ class MapData(RanaModule):
             midZ = maxZ
         else:
             midZ = 15
-        print("max: %d, min: %d, diff: %d, middle:%d" % (maxZ, minZ, diffZ, midZ))
+        self.log.info("max: %d, min: %d, diff: %d, middle:%d", maxZ, minZ, diffZ, midZ)
         self.minZ = minZ
         self.midZ = midZ
         self.maxZ = maxZ
@@ -734,19 +732,19 @@ class MapData(RanaModule):
         layerId = self.get('layer', "mapnik")
         self._downloadPool.layer = self._getLayerById(layerId)
 
-        print("starting download")
+        self.log.info("starting download")
         if len(self._tileDownloadRequests) == 0:
-            print("can't do batch download - no requests")
+            self.log.error("can't do batch download - no requests")
             return
 
         if self._downloadPool.running:
-            print("batch download already in progress")
+            self.log.error("batch download already in progress")
             return
         elif self._checkPool.running:
-            print("check size running, not starting size check")
+            self.log.error("check size running, not starting size check")
             return
 
-        print("mapData: starting batch tile download")
+        self.log.info("starting batch tile download")
         # process all download request and discard processed requests from the pool
         self._downloadPool.startBatch(self._tileDownloadRequests)
 
@@ -774,7 +772,7 @@ class MapData(RanaModule):
 
     def stopBatchDownload(self):
         """Stop threaded batch tile download"""
-        print("mapData: stopping batch tile download")
+        self.log.info("stopping batch tile download")
         self._downloadPool.stop()
 
     def _downloadAroundCurrentRoute(self):
@@ -803,16 +801,16 @@ class MapData(RanaModule):
         layerId = self.get('layer', "mapnik")
         self._checkPool.layer = self._getLayerById(layerId)
 
-        print("getting size")
+        self.log.info("getting size")
         if len(self._tileDownloadRequests) == 0:
-            print("can't check size - no requests")
+            self.log.error("can't check size - no requests")
             return
 
         if self._checkPool.running:
-            print("size check already in progress")
+            self.log.error("size check already in progress")
             return
         elif self._downloadPool.running:
-            print("batch download running, not starting size check")
+            self.log.error("batch download running, not starting size check")
             return
 
         with self._tileDownloadRequestsLock:
@@ -820,10 +818,10 @@ class MapData(RanaModule):
             # iterate over it but also pop locally available
             # tiles from the the original set
             requestsCopy = copy.copy(self._tileDownloadRequests)
-        print("mapData: starting batch size estimation")
+        self.log.info("starting batch size estimation")
         self._checkPool.startBatch(requestsCopy)
 
     def stopBatchSizeEstimation(self):
         """Stop the threaded batch size estimation"""
-        print("mapData: stopping batch size estimation")
+        self.log.info("stopping batch size estimation")
         self._checkPool.stop()

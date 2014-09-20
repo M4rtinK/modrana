@@ -33,6 +33,9 @@ from core import tiles
 from core import gs
 from core import constants
 
+import logging
+log = logging.getLogger("mod.mapTiles.tile_downloader")
+
 # needed fro pixbuf handling
 if gs.GUIString == "GTK":
     import gtk
@@ -65,7 +68,7 @@ class Downloader(object):
         self._pool.shutdown(now=True)
 
     def _tileDownloaded(self, error, lzxy, tag):
-        #print("DOWNLOADER: CALLING SIGNAL: %s %s" % (tag, success))
+        #log.debug("DOWNLOADER: CALLING SIGNAL: %s %s" % (tag, success))
         self._mapTiles.tileDownloaded(error, lzxy, tag)
 
     def downloadTile(self, lzxy, tag=None, overwrite=False):
@@ -215,19 +218,16 @@ class Downloader(object):
         return constants.TILE_DOWNLOAD_ERROR
 
     def _printErrorMessage(self, e, lzxy):
-        import traceback
         url = tiles.getTileUrl(lzxy)
-        print("mapTiles: download thread reports error")
-        print("** we were doing this, when an exception occurred:")
-        print("** downloading tile: x:%d,y:%d,z:%d, layer:%s, url: %s" % (
+        error = "mapTiles: download thread reports error\n"
+        error+= "** we were doing this, when an exception occurred:\n"
+        error+= "** downloading tile: x:%d,y:%d,z:%d, layer:%s, url: %s" % (
             lzxy[1],
             lzxy[2],
             lzxy[3],
             lzxy[0].id,
-            url))
-        print("** this exception occurred: %s\n" % e)
-        print("** traceback:\n")
-        traceback.print_exc()
+            url)
+        log.exception(error)
 
     @property
     def maxThreads(self):

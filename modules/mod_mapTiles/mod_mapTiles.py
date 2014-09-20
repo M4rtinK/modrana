@@ -52,6 +52,8 @@ StringIO = six.moves.cStringIO
 #timeout = 30 # this sets timeout for all sockets
 #socket.setdefaulttimeout(timeout)
 
+import logging
+log = logging.getLogger("mod.mapTiles")
 
 # if image manipulation tools are available, import them
 # and otherwise disable tile image manipulation
@@ -72,10 +74,8 @@ if gs.GUIString == "GTK":
 
         IMAGE_MANIPULATION_IMPORT_SUCCESS = True
     except ImportError:
-        e = sys.exc_info()[1]
-        print('mapTiles: import of image manipulation tools unsuccessful'
-              ' - tile image manipulation disabled')
-        print(e)
+        log.warning('import of image manipulation tools unsuccessful'
+                    ' - tile image manipulation disabled')
 
 TERMINATOR = object()
 
@@ -129,7 +129,7 @@ class MapTiles(RanaModule):
 
         # cache the map folder path
         self.mapFolderPath = self.modrana.paths.getMapFolderPath()
-        print(" @ mapTiles: map folder path: %s" % self.mapFolderPath)
+        self.log.info("map folder path: %s" % self.mapFolderPath)
 
         self._storeTiles = None
 
@@ -181,23 +181,23 @@ class MapTiles(RanaModule):
         name = self.getTileName(lzxy)
         cacheItem = self.images[0].get(name, None)
         if cacheItem:
-        #      print("got tile FROM memory CACHE")
+        #      self.log.debug("got tile FROM memory CACHE")
             return cacheItem[0]
 
         tileData = self._storeTiles.getTileData(lzxy)
         if tileData:
-            #print("got tile FROM disk CACHE")
+            #self.log.debug("got tile FROM disk CACHE")
             # tile was available from storage
             return tileData
         if download:
             if async:
                 # asynchronous download
-                #print("DOWNLOADING tile asynchronously!")
+                #self.log.debug("DOWNLOADING tile asynchronously!")
                 self.addTileDownloadRequest(lzxy, tag)
                 return None
             else:
                 # synchronous download
-                #print("DOWNLOADING tile synchronously!")
+                #self.log.debug("DOWNLOADING tile synchronously!")
                 # tile was not available from storage, download it
                 return self.downloadTile(lzxy)
         else:
@@ -212,24 +212,25 @@ class MapTiles(RanaModule):
         """
 
         tileUrl = tiles.getTileUrl(lzxy)
-        # print("GET TILE")
-        # print(tileUrl)
+        # self.log.debug("GET TILE")
+        # self.log.debug(tileUrl)
         response = self._getConnPool(lzxy[0].id, tileUrl).request('GET', tileUrl)
-        # print("RESPONSE")
-        # print(response)
+        # self.log.debug("RESPONSE")
+        # self.log.debug(response)
         tileData = response.data
         if tileData:
             # check if the data is actually an image, and not an error page
             if utils.isTheStringAnImage(tileData):
                 self._storeTiles.automaticStoreTile(tileData, lzxy)
-                #        print("STORED")
+                #        self.log.debug("STORED")
                 return tileData
             else:
-                print("mapTiles: tile data returned by remote tileserver was not an image")
-                print("layer:%s z:%d x:%d y:%d" % (lzxy[0].id, lzxy[1], lzxy[2], lzxy[3]))
-                print("tile url: %s" % tileUrl)
-                print("NOTE: this probably means that the tileserver returned an"
-                      "error page in place of the tile, because it doesn't like you")
+                msg = "tile data returned by remote tileserver was not an image\n"
+                msg+= "layer:%s z:%d x:%d y:%d\n" % (lzxy[0].id, lzxy[1], lzxy[2], lzxy[3])
+                msg+= "tile url: %s\n" % tileUrl
+                msg+= "NOTE: this probably means that the tileserver returned an\n"
+                msg+= "error page in place of the tile, because it doesn't like you\n"
+                self.log.warning(msg)
                 return None
         else:
             return None
@@ -322,7 +323,7 @@ class MapTiles(RanaModule):
         while True:
             request = self._dlRequestQueue.get(block=True)
             if request == TERMINATOR:
-                print("\nmapTiles: automatic tile download management thread shutting down")
+                self.log.info("automatic tile download management thread shutting down")
                 break
             try:
                 for item in request:
@@ -334,9 +335,9 @@ class MapTiles(RanaModule):
                     # TODO: use a watch on the loading debug key
                     debug = self.get('tileLoadingDebug', False)
                     if debug:
-                        sprint = self._realPrint
+                        sprint = self._realDebugLog
                     else:
-                        sprint = self._fakePrint
+                        sprint = self._fakeDebugLog
                     tileData = self._storeTiles.getTileData(lzxy)
                     if not tileData:  # TODO: is this actually needed ?
                         # tile not found locally and needs to be downloaded from network
@@ -373,9 +374,7 @@ class MapTiles(RanaModule):
                             tileData = self.data2cairoImageSurface(tileData)
                         self.storeInMemory(tileData, self.getTileName(lzxy))
             except Exception:
-                exc = sys.exc_info()[1]
-                print("exception in tile download manager thread:\n%s" % exc)
-                traceback.print_exc()
+                self.log.exception("exception in tile download manager thread")
 
     def loadSpecialTiles(self, specialTiles):
         """Load special tiles from files to the special tile cache
@@ -399,8 +398,8 @@ class MapTiles(RanaModule):
 
         # tile cache status debugging
         if self.get('reportTileCacheStatus', False): # TODO: set to False by default
-            print("** tile cache status report **")
-            print("threads: %d, images: %d, special tiles: %d, dl request queue:%d" % (
+            self.log.debug("** tile cache status report **")
+            self.log.debug("threads: %d, images: %d, special tiles: %d, dl request queue:%d" % (
                 self._downloader.maxThreads, len(self.images[0]), len(self.images[1]), self._downloader.qsize))
 
     def drawMap(self, cr):
@@ -583,7 +582,7 @@ class MapTiles(RanaModule):
                         gui = self.modrana.gui
                         if gui and gui.getIDString() == "GTK":
                             if gui.getShowRedrawTime():
-                                print("currently visible tiles: %d/%d" % (visibleCounter, wTiles * hTiles))
+                                self.log.debug("currently visible tiles: %d/%d" % (visibleCounter, wTiles * hTiles))
 
                                 #            cr.set_source_rgba(0,1,0,0.5)
                                 #            cr.move_to(*p1.as_tuple())
@@ -734,12 +733,12 @@ class MapTiles(RanaModule):
         # Return to the cairo projection to what it was before
         cr.restore()
 
-    def _fakePrint(self, text):
-        """Print that does nothing"""
+    def _fakeDebugLog(self, text):
+        """Log function that does nothing"""
         pass
 
-    def _realPrint(self, text):
-        print(text)
+    def _realDebugLog(self, text):
+        self.log.debug(text)
 
     def _getLayerById(self, layerId):
         """Get layer description from the mapLayers module"""
@@ -750,9 +749,9 @@ class MapTiles(RanaModule):
 
         debug = self.get('tileLoadingDebug', False)
         if debug:
-            sprint = self._realPrint
+            sprint = self._realDebugLog
         else:
-            sprint = self._fakePrint
+            sprint = self._fakeDebugLog
 
         # at this point, there is only a placeholder image in the image cache
         sprint("###")
@@ -799,8 +798,7 @@ class MapTiles(RanaModule):
             pixbuf = gtk.gdk.pixbuf_new_from_file(filePath)
             return pixbuf
         except Exception:
-            e = sys.exc_info()[1]
-            print("the tile image is corrupted nad/or there are no tiles for this zoomlevel, exception:\n%s" % e)
+            self.log.exception("the tile image is corrupted nad/or there are no tiles for this zoomlevel")
             return False
 
     def storeInMemory(self, surface, name, imageType="normal", expireTimestamp=None, dictIndex=0):
@@ -859,7 +857,7 @@ class MapTiles(RanaModule):
 
     def _clearTileCache(self):
         """completely clear the in-memory image cache"""
-        print('mapTiles: clearing the in-memory tile cache')
+        self.log.info('clearing the in-memory tile cache')
         self.images[0] = {}
 
     def pixbuf2cairoImageSurface(self, pixbuf):
@@ -1009,7 +1007,7 @@ class MapTiles(RanaModule):
         image = ImageOps.invert(image)
         return image2pixbuf(image)
 
-    #    print("tile negative in %1.2f ms" % (1000 * (time.clock() - start1)))
+    #    self.log.debug("tile negative in %1.2f ms" % (1000 * (time.clock() - start1)))
 
     def imageName(self, lzxy):
         """Get a unique name for a tile image
