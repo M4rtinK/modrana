@@ -61,7 +61,7 @@ class Display(RanaModule):
             # the QML context
             pass
         else:
-            print("display: WARNING, unhandled GUI toolkit, redraw disable if not visible might not work")
+            self.log.warning("WARNING, unhandled GUI toolkit, redraw disable if not visible might not work")
 
         # check the screen blanking mode on startup
         self.checkScreenBlankingMode()
@@ -87,13 +87,13 @@ class Display(RanaModule):
     def enableRedraw(self, reason="not given"):
         """enable window redrawing"""
         self.modrana.gui.setRedraw(True)
-        print("display: redraw ON (%s)" % reason)
+        self.log.info("redraw ON (%s)" % reason)
         self.set('needRedraw', True) # make sure the screen is refreshed
 
     def disableRedraw(self, reason="not given"):
         """disable window redrawing"""
         self.modrana.gui.setRedraw(False)
-        print("display: redraw OFF (%s)" % reason)
+        self.log.info("redraw OFF (%s)" % reason)
 
     def windowStateChangedCallback(self, window, event):
         if event.new_window_state == gtk.gdk.WINDOW_STATE_ICONIFIED:
@@ -115,12 +115,12 @@ class Display(RanaModule):
             self.modrana.gui.setFullscreen(False)
             self.fullscreen = False
             self.menusSetFullscreen(self.fullscreen)
-            print("going out of fullscreen")
+            self.log.info("going out of fullscreen")
         else:
             self.modrana.gui.setFullscreen(True)
             self.fullscreen = True
             self.menusSetFullscreen(self.fullscreen)
-            print("going to fullscreen")
+            self.log.info("going to fullscreen")
 
     def menusSetFullscreen(self, value):
         """update the cached value in the menus module"""
@@ -161,31 +161,31 @@ class Display(RanaModule):
             if mode == 'always':
                 self.checkConditionsStop()
                 self.screenBlankingControlStart()
-                print("display: keep display ON -> always")
+                self.log.info("keep display ON -> always")
             elif mode == 'never':
                 self.checkConditionsStop()
                 self.screenBlankingControlStop()
-                print("display: keep display ON -> never :)")
+                self.log.info("keep display ON -> never :)")
             elif mode == 'moving':
                 self.screenBlankingControlStop()
                 self.checkConditionsStart(self.checkMovement)
-                print("display: keep display ON -> while moving")
+                self.log.info("keep display ON -> while moving")
             elif mode == 'movingInFullscreen':
                 self.screenBlankingControlStop()
                 self.checkConditionsStart(self.checkFullscreenMovement)
-                print("display: keep display ON -> while moving in Fullscreen")
+                self.log.info("keep display ON -> while moving in Fullscreen")
             elif mode == 'fullscreen':
                 self.screenBlankingControlStop()
                 self.checkConditionsStart(self.checkFullscreen)
-                print("display: keep display ON -> while in Fullscreen")
+                self.log.info("keep display ON -> while in Fullscreen")
             elif mode == 'gpsFix':
                 self.screenBlankingControlStop()
                 self.checkConditionsStart(self.checkGPSFix)
-                print("display: keep display ON -> while there is a GPS fix")
+                self.log.info("keep display ON -> while there is a GPS fix")
             elif mode == 'centred':
                 self.screenBlankingControlStop()
                 self.checkConditionsStart(self.checkCentred)
-                print("display: keep display ON -> while there is a GPS fix")
+                self.log.info("keep display ON -> while there is a GPS fix")
 
     def screenBlankingControlStart(self):
         self.pauseScreenBlanking()
