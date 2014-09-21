@@ -23,7 +23,7 @@ from core import geo
 from core.color import Color
 
 import logging
-log = logging.log("mod.markers")
+log = logging.getLogger("mod.markers")
 
 
 def getModule(m, d, i):
