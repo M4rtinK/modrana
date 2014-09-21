@@ -145,7 +145,7 @@ class CronGTK(Cron):
                 del self.cronTab['timeout'][timeoutId]
                 gobject.source_remove(realId)
             else:
-                print("cron: can't remove timeout, wrong id: ", timeoutId)
+                self.log.error("can't remove timeout, wrong id: %s", timeoutId)
 
     def modifyTimeout(self, timeoutId, newTimeout):
         """modify the duration of a timeout in progress"""
@@ -158,7 +158,7 @@ class CronGTK(Cron):
                 # update the timeout description
                 self.cronTab['timeout'][timeoutId] = (callback, args, newTimeout, caller, description, realId)
             else:
-                print("cron: can't modify timeout, wrong id: ", timeoutId)
+                self.log.error("can't modify timeout, wrong id: %s", timeoutId)
 
 
 class CronQt(Cron):
@@ -216,7 +216,7 @@ class CronQt(Cron):
                 timer.stop()
                 del self.cronTab['timeout'][timeoutId]
             else:
-                print("cron: can't remove timeout, wrong id: ", timeoutId)
+                self.log.error("can't remove timeout, wrong id: %s", timeoutId)
 
     def modifyTimeout(self, timeoutId, newTimeout):
         """modify the duration of a timeout in progress"""
@@ -229,7 +229,7 @@ class CronQt(Cron):
                 # update the timeout data
                 self.cronTab['timeout'][timeoutId] = (callback, args, newTimeout, caller, description, timeoutId, timer)
             else:
-                print("cron: can't modify timeout, wrong id: ", timeoutId)
+                self.log.error("can't modify timeout, wrong id: %s", timeoutId)
 
 #  def _addInfo(self, id, info):
 #    """add a message for a timeout handler to read"""
