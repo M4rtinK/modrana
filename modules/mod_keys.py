@@ -47,9 +47,9 @@ class Keys(RanaModule):
                 # handled from inside the QML context
                 pass
             else:
-                print("keys: WARNING, unhandled GUI toolkit, most key shortcuts would not work")
+                self.log.warning("WARNING, unhandled GUI toolkit, most key shortcuts would not work")
         else:
-            print("keys: GUI module not available")
+            self.log.error("GUI module not available")
 
     def on_key_press_event(self, widget, event):
         keyName = gtk.gdk.keyval_name(event.keyval)
@@ -59,4 +59,4 @@ class Keys(RanaModule):
         elif keyName == 'F7':
             # zoom in
             self.sendMessage('mapView:zoomIn')
-        print("unassigned key pressed: %s" % keyName)
+        self.log.debug("unassigned key pressed: %s" % keyName)
