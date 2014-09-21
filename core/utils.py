@@ -258,6 +258,5 @@ def createConnectionPool(url, maxThreads=1):
         import urllib3
     return urllib3.connection_from_url(url, timeout=constants.INTERNET_CONNECTIVITY_TIMEOUT,
                                        maxsize=maxThreads, block=False)
-
-def getTimeHashString(self):
+def getTimeHashString():
     return time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
