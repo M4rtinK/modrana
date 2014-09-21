@@ -109,7 +109,7 @@ class Projection(RanaModule):
 
     def setView(self, x, y, w, h):
         """Setup the display"""
-        #    print("setting view xywh:%d,%d,%d,%d" % (x,y,w,h))
+        #    self.log.debug("setting view xywh:%d,%d,%d,%d" % (x,y,w,h))
         self.w = w
         self.h = h
         self.xc = x + self.w
@@ -121,7 +121,7 @@ class Projection(RanaModule):
     def recentre(self, lat, lon, zoom=None):
         """Move the projection to a particular geographic location
         (with optional zoom level)"""
-        #    print("recentering to: %f,%f" % (lat,lon))
+        #    self.log.debug("recentering to: %f,%f" % (lat,lon))
         self.lat = lat
         self.lon = lon
         if zoom is not None:
@@ -156,7 +156,7 @@ class Projection(RanaModule):
 
     def findEdges(self):
         """Update the projection meta-info based on its fundamental parameters"""
-        #    print("find edges %f,%f" % (self.lat,self.lon))
+        #    self.log.debug("find edges %f,%f" % (self.lat,self.lon))
         if not self.xyValid or not self.llValid:
             # If the display is not known yet, then we can't do anything, but we'll
             # mark it as something that needs doing as soon as the display
@@ -266,7 +266,7 @@ class Projection(RanaModule):
             return None
 
     def nudge(self, dx, dy):
-    #    print("nudging by: %d,%d" % (dx,dy))
+    #    self.log.debug("nudging by: %d,%d" % (dx,dy))
         """Move the map by a number of pixels relative to its current position"""
         if dx == 0 and dy == 0:
             return
