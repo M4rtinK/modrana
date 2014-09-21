@@ -32,6 +32,10 @@ class ClickHandler(RanaModule):
         RanaModule.__init__(self, m, d, i)
         self.beforeDraw()
         self.ignoreNextClicks = 0
+        self.layers = {2: [], 0: []}
+        self.dragAreas = []
+        self.dragScreen = None
+        self.timedActionInProgress = None
 
     def beforeDraw(self):
         self.layers = {2: [], 0: []}
