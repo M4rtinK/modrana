@@ -12,6 +12,9 @@ try:
 except ImportError:
     import simplejson as json
 
+import logging
+log = logging.getLogger("mod.routing.providers")
+
 from core.providers import RoutingProvider, DummyController, RouteParameters, RoutingResult
 
 class MonavRouting(RoutingProvider):
@@ -35,11 +38,8 @@ class MonavRouting(RoutingProvider):
                 result = self.monav.monavDirections(waypoints)
                 controller.status = "Monav offline routing done"
             except Exception:
-                import sys
-                e = sys.exc_info()[1]
-                print('route: Monav route lookup failed')
-                print(e)
-                traceback.print_exc(file=sys.stdout) # find what went wrong
+                log.exception('Monav route lookup failed')
+
             if result is None: # routing failed for unknown reasons
                 return RoutingResult(None, routeParams)
             if result.type == result.SUCCESS:
@@ -60,7 +60,7 @@ class MonavRouting(RoutingProvider):
             else:
                 return RoutingResult(None, routeParams)
         else:
-            print("route: no Monav routing data - can't route")
+            log.error("no Monav routing data - can't route")
             RoutingResult(None, routeParams, constants.ROUTING_NO_DATA)
 
 class GoogleRouting(RoutingProvider):
@@ -74,12 +74,12 @@ class GoogleRouting(RoutingProvider):
         # check if we have at least 2 points
         routingStart = time.time()
         if len(waypoints) < 2:
-            print("GoogleRouting provider: ERROR, need at least 2 points for routing")
+            log.error("GoogleRouting provider: ERROR, need at least 2 points for routing")
             return RoutingResult(None, routeParams)
         start = waypoints[0]
         destination = waypoints[-1]
         inBetweenPoints = waypoints[1:-1]
-        print("GoogleRouting: routing from %s to %s" % (start, destination))
+        log.info("GoogleRouting: routing from %s to %s", start, destination)
         controller.status = "online routing in progress"
         route, returnCode, errorMessage = _googleDirections(start, destination, inBetweenPoints, routeParams)
         controller.status = "online routing done"
@@ -94,7 +94,7 @@ def _getGmapsInstance():
     """get a google maps wrapper instance"""
     key = constants.GOOGLE_API_KEY
     if key is None:
-        print("onlineServices: online providers:"
+        log.error("onlineServices: online providers:"
               " a google API key is needed for using the google maps services")
         return None
     # only import when actually needed
@@ -176,25 +176,20 @@ def _googleDirections(start, destination, waypoints, params):
             import sys
             e = sys.exc_info()[1]
             if e.status == 602:
-                print("online providers: Google routing failed -> address not found")
-                print(e)
+                log.error("Google routing failed -> address not found")
+                log.error(e)
                 errorMessage = "Address(es) not found"
                 returnCode = constants.ROUTING_ADDRESS_NOT_FOUND
             elif e.status == 604:
-                print("online providers: Google routing failed -> no route found")
-                print(e)
+                log.error("Google routing failed -> no route found")
+                log.error(e)
                 errorMessage = "No route found"
                 returnCode = constants.ROUTING_ROUTE_FAILED
             elif e.status == 400:
-                print("online providers: Google routing failed with googlemaps exception,"
-                      " googlemaps status code:%d" % e.status)
+                log.error("Google routing failed with googlemaps exception,"
+                          " googlemaps status code:%d", e.status)
         except Exception:
-            import sys
-            import traceback
-            e = sys.exc_info()[1]
-            print("onlineServices:GDirections:routing failed with non-googlemaps exception")
-            print(e)
-            traceback.print_exc(file=sys.stdout) # find what went wrong
+            log.exception("onlineServices:GDirections:routing failed with non-googlemaps exception")
 
         # convert the directions datastructure returned by Google
         # to modRana Way object

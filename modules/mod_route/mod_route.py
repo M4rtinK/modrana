@@ -127,7 +127,7 @@ class Route(RanaModule):
                 self._directionsFilterRules.append((regex, u(row[1])))
         f.close()
         self._directionsFilterRulesLoaded = True
-        print("route: directions filter loaded in %1.2f ms" % ((time.time() - start) * 1000))
+        self.log.debug("directions filter loaded in %1.2f ms", (time.time() - start) * 1000)
 
     def handleMessage(self, message, messageType, args):
         if message == "clear":
@@ -212,8 +212,8 @@ class Route(RanaModule):
             self.selectManyPoints = True
             self.handmade = True
             self.osdMenuState = OSD_EDIT
-            print("Handmade routing")
-            print(self.handmade)
+            self.log.info("Using handmade routing")
+            self.log.info(self.handmade)
 
         elif message == "selectTwoPoints":
             self.set('startPos', None)
@@ -248,11 +248,11 @@ class Route(RanaModule):
                 toLat, toLon = destination
                 fromLat, fromLon = start
                 middlePoints = self.get("middlePos", [])
-                print("Handmade route ")
-                print("%f,%f" % (fromLat, fromLon))
-                print(" through ")
-                print(middlePoints)
-                print(" to %f,%f" % (toLat, toLon))
+                self.log.info("Handmade route")
+                self.log.info("%f,%f", fromLat, fromLon)
+                self.log.info("through")
+                self.log.info(middlePoints)
+                self.log.info("to %f,%f", toLat, toLon)
                 handmadeRoute = way.fromHandmade(start, middlePoints, destination)
                 self._handleRoutingResultCB((handmadeRoute, "", 0))
 
@@ -300,12 +300,9 @@ class Route(RanaModule):
                         try:
                             self.llRoute(start, destination)
                         except Exception:
-                            import sys
-                            e = sys.exc_info()[1]
                             self.sendMessage('ml:notification:m:No route found;3')
                             self.set('needRedraw', True)
-                            print(e)
-                            traceback.print_exc(file=sys.stdout)
+                            self.log.exception("exception during routing")
                         if "show" in args:
                             # switch to map view and go to start/destination, if requested
                             where = args['show']
@@ -331,10 +328,10 @@ class Route(RanaModule):
         elif message == 'storeRoute':
             loadTracklogs = self.m.get('loadTracklogs', None)
             if loadTracklogs is None:
-                print("route: cant store route without the loadTracklog module")
+                self.log.error("can't store route without the loadTracklog module")
                 return
             if not self.directions:
-                print("route: the route is empty, so it will not be stored")
+                self.log.info("the route is empty, so it will not be stored")
                 return
             # TODO: rewrite this when we support more routing providers
             loadTracklogs.storeRouteAndSetActive(self.directions.getPointsLLE(),
@@ -347,7 +344,7 @@ class Route(RanaModule):
         elif message == 'startInput':
             entry = self.m.get('textEntry', None)
             if entry is None:
-                print("route: text entry module not available")
+                self.log.error("text entry module not available")
                 return
             entryText = self.get('startAddress', "")
             entry.entryBox(self, 'start', 'Input the start address', entryText)
@@ -362,7 +359,7 @@ class Route(RanaModule):
         elif message == 'destinationInput':
             entry = self.m.get('textEntry', None)
             if entry is None:
-                print("route: text entry module not available")
+                self.log.error("text entry module not available")
                 return
             entryText = self.get('destinationAddress', "")
             entry.entryBox(self, 'destination', 'Input the destination address', entryText)
@@ -371,11 +368,11 @@ class Route(RanaModule):
             startAddress = self.get('startAddress', None)
             destinationAddress = self.get('destinationAddress', None)
             if startAddress and destinationAddress:
-                print("route: address routing")
+                self.log.info("address routing")
                 self.set('menu', None) # go to the map screen
                 self.addressRoute(startAddress, destinationAddress)
             else: # notify the user about insufficient input and remain in the menu
-                print("route: can't route, start or destination (or both) not set")
+                self.log.error("can't route - start or destination (or both) not set")
                 if startAddress is None and destinationAddress is None:
                     self.notify("Can't route: start & destination not set", 3000)
                 elif startAddress is None:
@@ -402,7 +399,7 @@ class Route(RanaModule):
                 # reroute from current position to destination
 
                 # is there a destination and valid position ?
-                print("route: rerouting from current position to last destination")
+                self.log.info("rerouting from current position to last destination")
                 pos = self.get('pos', None)
                 if self.destination and pos:
                     start = Point(*pos)
@@ -514,8 +511,8 @@ class Route(RanaModule):
         for mpTuple in middlePoints:
             waypoints.append(Point(mpTuple[0], mpTuple[1]))
         waypoints.append(destination)
-        print("Routing %s to %s through %d waypoints"
-              % (start, destination, len(middlePoints)))
+        self.log.info("Routing %s to %s through %d waypoints",
+              start, destination, len(middlePoints))
         # TODO: wait message (would it be needed when using internet routing ?)
         self.doRoute(waypoints)
 
@@ -530,7 +527,7 @@ class Route(RanaModule):
         """
         # cleanup any possible previous routes
         self._goToInitialState()
-        print("Address-routing from %s to %s" % (start, destination))
+        self.log.info("Address-routing from %s to %s", start, destination)
         waypoints = [start, destination]
         # specify that this route lookup should expect start and destination
         # specified as address strings
@@ -580,9 +577,9 @@ class Route(RanaModule):
             self.startNavigation()
 
         else: # routing failed
-            print("route: routing ended with error")
+            self.log.error("routing ended with error")
             if result.errorMessage:
-                print("route error message: " % result.errorMessage)
+                self.log.error("route error message: %s", result.errorMessage)
             # show what & why failed
             if result.returnCode == constants.ROUTING_LOOKUP_FAILED:
                 self.notify('no ways near start or destination', 3000)
@@ -610,11 +607,7 @@ class Route(RanaModule):
                 dataPacks = filter(lambda x: os.path.isdir(os.path.join(mainMonavFolder, x)), dataPacks)
                 return sorted(dataPacks)
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print('route: listing the Monav data packs failed')
-                print(e)
+                self.log.exception('listing the Monav data packs failed')
                 return []
 
     def _getMonavDataPath(self):
@@ -638,12 +631,11 @@ class Route(RanaModule):
             else:
                 # just take the first (and possibly only) pack
                 packName = sorted(dataPacks)[0]
-                print("route: monav: no preferred pack set, "
-                      "using first available:\n%s" % preferredPack)
+                self.log.info("monav: no preferred pack set, "
+                      "using first available:\n%s", preferredPack)
             mainMonavFolder = self.modrana.paths.getMonavDataPath()
             monavDataFolder = os.path.abspath(os.path.join(mainMonavFolder, packName, subFolder))
-            print('Monav data folder:\n%s' % monavDataFolder)
-            print(os.path.exists(monavDataFolder))
+            self.log.info('Monav data folder:\n%s', monavDataFolder)
             return monavDataFolder
         else:
             return None
@@ -714,16 +706,8 @@ class Route(RanaModule):
                     message = regex.sub(replacement, message, re.UNICODE)
                 step.setSSMLMessage(message)
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("route: error during direction filtering")
-                print(e)
-                import traceback
-
-                traceback.print_exc(file=sys.stdout)
+                self.log.exception("error during direction filtering")
                 step.setSSMLMessage(message)
-
 
         # replace old message points with new ones
         directions.clearMessagePoints()
@@ -913,8 +897,8 @@ class Route(RanaModule):
                     # make a line to the last point (the modulo method sometimes skips the end of the track)
                     #    [cr.line_to(x[0],x[1])for x in route[1:]] # list comprehension drawing :D
 
-                    #    print(drawCount)
-                    #    print(modulo)
+                    #    self.log.debug(drawCount)
+                    #    self.log.debug(modulo)
 
             # make sure the last point is connected
             (px, py) = self.pxpyRoute[-1]
@@ -935,7 +919,7 @@ class Route(RanaModule):
         if self.selectTwoPoints:
             self.drawPointSelectors(cr)
 
-            #    print("Redraw took %1.9f ms" % (1000 * (clock() - start1)))
+            #    self.log.debug("Redraw took %1.9f ms" % (1000 * (clock() - start1)))
 
     def getCurrentDirections(self):
         """return the current route"""
@@ -1082,7 +1066,7 @@ class Route(RanaModule):
         if menuName == 'currentRoute' or menuName == 'currentRouteBackToMap':
             menus = self.m.get("menu", None)
             if menus is None:
-                print("route: no menu module, no menus will be drawn")
+                self.log.error("no menu module, no menus will be drawn")
                 return
 
             # if called from the osd menu, go back to map at escape

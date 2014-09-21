@@ -36,6 +36,9 @@ RETRY_COUNT = 3 # if routing fails, try RETRY_COUNT more times
 
 from .signals_pb2 import RoutingResult
 
+import logging
+log = logging.getLogger("mod.routing.monav_support")
+
 # Marble stores monav data like this on the N900:
 # /home/user/MyDocs/.local/share/marble/maps/earth/monav/motorcar/europe/czech_republic
 
@@ -60,21 +63,21 @@ class Monav(object):
         self._dataPath = value
 
     def startServer(self, port=None):
-        print('monav_support: starting Monav server')
+        log.info('starting Monav server')
         started = False
         try:
             # first check if monav server is already running
             try:
                 monav.TcpConnection()
-                print('monav_support: server already running')
+                log.error('server already running')
             except Exception:
                 import sys
 
                 if not self.monavServerBinaryPath:
-                    print("route: can't start monav server - binary missing")
+                    log.error("can't start monav server - monav server binary missing")
                     return
-                print('monav_support: using monav server binary in:')
-                print(self.monavServerBinaryPath)
+                log.info('using monav server binary in:')
+                log.info(self.monavServerBinaryPath)
 
                 def _startServer(self):
                     self.monavServer = subprocess.Popen(
@@ -103,16 +106,13 @@ class Monav(object):
                 started = True
                 # TODO: use other port than 8040 ?, check out tileserver code
         except Exception:
-            import sys
+            log.exception('starting Monav server failed')
 
-            e = sys.exc_info()[1]
-            print('monav_support: starting Monav server failed')
-            print(e)
         if started:
-            print('monav_support: Monav server started')
+            log.info('Monav server started')
 
     def stopServer(self):
-        print('monav_support: stopping Monav server')
+        log.info('stopping Monav server')
         stopped = False
         try:
             if self.monavServer:
@@ -121,16 +121,13 @@ class Monav(object):
                 os.kill(self.monavServer.pid, signal.SIGKILL)
                 stopped = True
             else:
-                print('monav_support: no Monav server process found')
+                log.error('no Monav server process found')
         except Exception:
-            import sys
+            log.exception('stopping Monav server failed')
 
-            e = sys.exc_info()[1]
-            print('monav_support: stopping Monav server failed')
-            print(e)
         self.monavServer = None
         if stopped:
-            print('monav_support: Monav server stopped')
+            log.info('Monav server stopped')
 
     def serverRunning(self):
         if self.monavServer:
@@ -143,7 +140,7 @@ class Monav(object):
         # check if Monav server is running
 
         if self.dataPath is None:
-            print("monav: error, dataPath not set (is None)")
+            log.error("error, dataPath not set (is None)")
             return None
         if not self.serverRunning():
             self.startServer() # start the server
@@ -153,7 +150,7 @@ class Monav(object):
         # (lat,lon) tuples
         waypoints = [x.getLL() for x in waypoints]
 
-        print('monav: starting route search')
+        log.info('starting route search')
         start = time.clock()
         tryNr = 0
         result = None
@@ -163,16 +160,13 @@ class Monav(object):
                 result = monav.get_route(self.dataPath, waypoints)
                 break
             except Exception:
-                import sys
-                e = sys.exc_info()[1]
-                print('monav_support: routing failed')
-                print(e)
-                traceback.print_exc(file=sys.stdout) # find what went wrong
+                log.exception('routing failed')
+
                 if tryNr < RETRY_COUNT:
-                    print('monav_support: retrying')
+                    log.info('retrying')
         if tryNr < RETRY_COUNT:
-            print('monav: search finished in %1.2f ms and %d tries' % (1000 * (time.clock() - start), tryNr))
+            log.info('monav: search finished in %1.2f ms and %d tries', 1000 * (time.clock() - start), tryNr)
             return result
         else:
-            print('monav: search failed after %d retries' % tryNr)
+            log.error('monav: search failed after %d retries', tryNr)
             return None
