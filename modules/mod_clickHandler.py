@@ -62,10 +62,10 @@ class ClickHandler(RanaModule):
         self.register(area, action, timedAction, layer)
 
     def handleClick(self, x, y, msDuration):
-    #    print("Clicked at %d,%d for %d" % (x,y,msDuration))
+    #    self.log.info("Clicked at %d,%d for %d", x,y,msDuration)
         if self.ignoreNextClicks > 0:
             self.ignoreNextClicks -= 1
-        #      print("ignoring click, %d remaining" % self.ignoreNextClicks)
+        #      self.log.info("ignoring click, %d remaining", self.ignoreNextClicks)
         else:
             hit = False
             for area in self.layers[2]:
@@ -84,12 +84,12 @@ class ClickHandler(RanaModule):
         if rect.contains(x, y):
             m = self.m.get("messages", None)
             if m:
-                print("Clicked, sending %s" % action)
+                self.log.info("Clicked, sending %s", action)
                 hit = True
                 self.set('lastClickXY', (x, y))
                 m.routeMessage(action)
             else:
-                print("No message handler to receive clicks")
+                self.log.error("No message handler to receive clicks")
         return hit
 
     def handleLongPress(self, pressStartEpoch, msCurrentDuration, startX, startY, x, y):
@@ -112,14 +112,14 @@ class ClickHandler(RanaModule):
                 if givenMsDuration <= msCurrentDuration:
                     m = self.m.get("messages", None)
                     if m:
-                        print("Long-clicked (%f ms), sending %s" % (givenMsDuration, action))
+                        self.log.info("Long-clicked (%f ms), sending %s", givenMsDuration, action)
                         hit = True
                         self.set('lastClickXY', (x, y))
                         self.modrana.gui.lockDrag()
                         m.routeMessage(action)
                         self.set('needRedraw', True)
                     else:
-                        print("No message handler to receive clicks")
+                        self.log.error("No message handler to receive clicks")
                     self.ignoreNextClicks = self.dmod.lpSkipCount()
         return hit
 
@@ -127,7 +127,7 @@ class ClickHandler(RanaModule):
         self.dragAreas.append((Rectangle(x1, y1, x2 - x1, y2 - y1), module))
 
     def registerDraggableEntireScreen(self, module):
-        print("Entire screen is draggable for %s " % module)
+        self.log.info("Entire screen is draggable for %s ", module)
         self.dragScreen = module
 
     def handleDrag(self, startX, startY, dx, dy, x, y, msDuration):
@@ -144,4 +144,4 @@ class ClickHandler(RanaModule):
                     if m is not None:
                         m.dragEvent(startX, startY, dx, dy, x, y)
                     else:
-                        print("Drag registered to nonexistent module %s" % module)
+                        self.log.error("Drag registered to nonexistent module %s", module)
