@@ -50,10 +50,10 @@ class Voice(RanaModule):
     def resetStringToDefault(self, type):
         if type in self.defaultStrings:
             s = self.defaultStrings[type]
-            print("voice: resetting voice string to default using string for: %s" % type)
+            self.log.info("resetting voice string to default using string for: %s", type)
             self.set("voiceString", s)
         else:
-            print("voice: cant reset string to default, no string for:", type)
+            self.log.info("can't reset string to default, no string for: %s", type)
 
     def getDefaultString(self, type):
         if type in self.defaultStrings:
@@ -87,10 +87,12 @@ class Voice(RanaModule):
                 if self.get('debugPrintVoiceMessages', False):
                     # the message can contain unicode, this might cause an exception when printing it
                     # in some systems (SHR-u on Neo, for example)
+                    # outdated ^^^ (we are using logging now)
                     try:
-                        print("saying: %s" % output)
+                        self.log.info("saying: %s" % output)
                     except UnicodeEncodeError:
-                        print("voice: printing the current message to stdout failed do to unicode conversion error")
+                        self.log.error("logging the current message to failed due to unicode conversion error")
+                        # TODO: can this actually happen then using the Python logging module ?
                 if forceLanguageCode:
                     espeakLanguageCode = forceLanguageCode
                 else:
@@ -109,11 +111,13 @@ class Voice(RanaModule):
                         collisionString = "voice: message was not pronounced due to other message in progress"
                         collisionString += "\nlanguage code: \n%s\nmessage text:\n%s" % (language, text)
                         # the message can contain unicode, this might cause an exception when printing it
-                        # in some systems (SHR-u on Neo, for example)"""
+                        # in some systems (SHR-u on Neo, for example)
+                        # outdated ^^^ (we are using logging now)
                         try:
-                            print(collisionString)
+                            self.log.debug("collision string: %s", collisionString)
                         except UnicodeEncodeError:
-                            print("voice: printing the current message to stdout failed do to unicode conversion error")
+                            self.log.error("logging the current message failed due to unicode conversion error")
+                            # TODO: can this actually happen then using the Python logging module
                     return False
                 else:
                     self._speak(language, text)
@@ -134,9 +138,9 @@ class Voice(RanaModule):
                 # the message can contain unicode, this might cause an exception when printing it
                 #  in some systems (SHR-u on Neo FreeRunner, for example)"""
                 try:
-                    print("voice: resulting custom voice string:\n%s" % voiceString)
+                    self.log.info("resulting custom voice string:\n%s", voiceString)
                 except UnicodeEncodeError:
-                    print("voice: printing the current message to stdout failed do to unicode conversion error")
+                    self.log.error("logging the current message failed due to unicode conversion error")
                 self.espaekProcess = self._startSubprocess(voiceString, shell=True)
         else:
             languageParam = '-v%s' % languageCode
@@ -163,8 +167,7 @@ class Voice(RanaModule):
         try:
             return subprocess.Popen(args, shell=shell)
         except TypeError:
-            print(
-            "voice: voice output failed - most probably due to the message containing unicode characters and your shell not properly supporting unicode")
+            self.log.error("voice output failed - most probably due to the message containing unicode characters and your shell improperly supported unicode")
             return None
 
 
