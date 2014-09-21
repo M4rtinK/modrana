@@ -23,16 +23,15 @@ from modules.base_module import RanaModule
 from core.signal import Signal
 from core.backports import six
 
+import logging
+log = logging.getLogger("mod.theme")
+
 # for some reason one import method works
 # on Fremantle and other everywhere (?) else"""
 try:
     from configobj import ConfigObj # everywhere
 except Exception:
-    import sys
-
-    e = sys.exc_info()[1]
-    print(e)
-    print("theme: trying alternative configobj import method")
+    log.exception("alternative configobj import method failed")
     from configobj import ConfigObj # Fremantle
 
 THEME_CONFIG_FILENAME = "theme.conf"
