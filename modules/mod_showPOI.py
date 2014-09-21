@@ -159,7 +159,6 @@ class ShowPOI(RanaModule):
                     elif messageType == 'ml':
                         # if the message is a message list, execute a custom action instead of the default POI detail menu
                         # TODO: use this even for selecting the POIDetail menu ?
-                        print(args)
                         catId = int(args[0])
                         action = args[1]
                     if catId is not None:
@@ -329,7 +328,6 @@ class ShowPOI(RanaModule):
         menus = self.m.get('menu', None)
         store = self.m.get('storePOI', None)
         cats = store.getCategories()
-        print(cats)
         i = 0
         for cat in cats:
             (label, desc, cat_id) = cat
@@ -394,9 +392,9 @@ class ShowPOI(RanaModule):
                     self._makePOIVisible(store.getPOI(poiID))
                 if self.visiblePOI: # enable POI drawing only if some POI vere restored
                     self.drawPOI()
-                print("showPOI: %d visible POI restored" % len(self.visiblePOI))
+                self.log.info("showPOI: %d visible POI restored", len(self.visiblePOI))
             else:
-                print("showPOI: can't restore visible, storePOI not loaded")
+                self.log.error("showPOI: can't restore visible, the storePOI module is not loaded")
 
     def drawPOI(self):
         """enable drawing of the active POI"""

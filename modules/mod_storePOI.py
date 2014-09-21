@@ -17,14 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-import traceback
-import sys
 from modules.base_module import RanaModule
 import os
 import sqlite3
 import csv
 from core.backports.six import u
-
 
 def getModule(m, d, i):
     return StorePOI(m, d, i)
@@ -50,33 +47,30 @@ class StorePOI(RanaModule):
         """connect to the database"""
         DBPath = self.modrana.paths.getPOIDatabasePath()
         if os.path.exists(DBPath): # connect to db
-            print(" @ storePOI: POI database path:\n @ %s" % DBPath)
+            self.log.info("POI database path:")
+            self.log.info(DBPath)
             try:
                 self.db = sqlite3.connect(DBPath)
-                print(" @ storePOI: connection to POI db established")
+                self.log.info("connection to POI db established")
             except Exception:
-                import sys
+                self.log.exception("connecting to POI database failed")
 
-                e = sys.exc_info()[1]
-                print(" @ storePOI: connecting to POI database failed:\n%s" % e)
         else: # create new db
             try:
                 self.db = self.createDatabase(DBPath)
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print(" @ storePOI: creating POI database failed:\n%s" % e)
+                self.log.exception("POI database creation failed")
 
     def disconnectFromDb(self):
-        print("storePOI: disconnecting from db")
+        self.log.info("disconnecting from POI db")
         if self.db:
             self.db.close()
 
     def createDatabase(self, path):
         """create a new database, including tables and initial data
         return the connection object"""
-        print("storePOI: creating new database file in:\n%s" % path)
+        self.log.debug("creating new database file in:")
+        self.log.debug(path)
         conn = sqlite3.connect(path)
 
         # create the category table
@@ -101,7 +95,7 @@ class StorePOI(RanaModule):
             conn.execute('insert into category values(?,?,?,?)', cat)
             # commit the changes
         conn.commit()
-        print("storePoi: new database file has been created")
+        self.log.debug("new database file has been created")
         return conn
 
     def storePOI(self, POI):
@@ -317,7 +311,7 @@ class StorePOI(RanaModule):
         if os.path.exists(oldPOIPath):
             try:
                 renamedOldPOIPath = "data/poi/imported_old_poi.txt"
-                print("storePOI:importing old POI from: %s" % oldPOIPath)
+                self.log.info("importing old POI from: %s", oldPOIPath)
                 points = self.loadOld(oldPOIPath)
                 if points:
                     for point in points:
@@ -329,16 +323,12 @@ class StorePOI(RanaModule):
                         catId = 11
                         newPOI = self.POI(self, label, description, lat, lon, catId)
                         newPOI.storeToDb()
-                    print("storePOI: imported %d old POI" % len(points))
+                    self.log.info("imported %d old POI", len(points))
                     os.rename(oldPOIPath, renamedOldPOIPath)
-                    print("storePOI: old POI file moved to: %s" % renamedOldPOIPath)
+                    self.log.info("old POI file moved to: %s", renamedOldPOIPath)
                     self.sendMessage('ml:notification:m:%d old POI imported to category "Other";10' % len(points))
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("storePOI: import of old POI failed:\n%s" % e)
-
+                self.log.exception("import of old POI failed")
 
     def loadOld(self, path):
         """load POI from file - depreciated, used sqlite for POI storage"""
@@ -350,10 +340,7 @@ class StorePOI(RanaModule):
             f.close()
             return points
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("storePOI: loading POI from file failed:\n%s" % e)
+            self.log.exception("loading POI from file failed")
             return None
 
     def handleMessage(self, message, messageType, args):
@@ -437,12 +424,7 @@ class StorePOI(RanaModule):
 
                 self.sendMessage('ml:notification:m:POI exported to: %s;5' % POIFolderPath)
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("storePOI: CSV dump failed")
-                print(e)
-                traceback.print_exc(file=sys.stdout)
+                self.log.exception("CSV dump failed")
                 self.sendMessage('ml:notification:m:POI export failed;5')
 
     def shutdown(self):
