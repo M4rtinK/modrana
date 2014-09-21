@@ -60,7 +60,7 @@ class MessageModule(RanaModule):
                 if m is not None:
                     m.handleMessage(key, 'ms', string)
                 else:
-                    print("Message addressed to %s which isn't loaded" % module)
+                    self.log.error("Message addressed to module %s, which isn't loaded", module)
 
             elif module == 'ml': # short for message + list of strings
                 # Example:
@@ -74,7 +74,7 @@ class MessageModule(RanaModule):
                 if m is not None:
                     m.handleMessage(key, 'ml', list)
                 else:
-                    print("Message addressed to %s which isn't loaded" % module)
+                    self.log.error("Message addressed to module %s, which isn't loaded", module)
 
             elif module == 'md': # short for message + dictionary of string=string key:value pairs
                 # Example:
@@ -93,7 +93,7 @@ class MessageModule(RanaModule):
                 if m is not None:
                     m.handleMessage(mainKey, 'md', d)
                 else:
-                    print("Message addressed to %s which isn't loaded" % module)
+                    self.log.error("Message addressed to module %s, which isn't loaded", module)
 
             elif module == "setWithMode":
                 (mode, key, value) = text.split(":", 2)
@@ -115,4 +115,4 @@ class MessageModule(RanaModule):
                 if m is not None:
                     m.handleMessage(text, None, None)
                 else:
-                    print("Message addressed to %s which isn't loaded" % module)
+                    self.log.error("Message addressed to module %s, which isn't loaded", module)
