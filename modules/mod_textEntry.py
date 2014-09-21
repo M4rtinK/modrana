@@ -47,12 +47,12 @@ class TextEntry(RanaModule):
         dialog.destroy()
 
     def respondToDialog(self, dialog, response_id, entry, instance, key, persistentKey):
-        print("textEntry: responding to dialog")
+        self.log.info("responding to dialog")
         if response_id == gtk.RESPONSE_ACCEPT:
-            print("** dialog accepted **")
+            self.log.info("dialog accepted")
             self.respond(entry.get_text(), instance, key, persistentKey)
         else:
-            print("** dialog rejected **")
+            self.log.info("dialog rejected")
             # the dialog was rejected so we don't
             # report the input that could have been entered
         dialog.destroy()
