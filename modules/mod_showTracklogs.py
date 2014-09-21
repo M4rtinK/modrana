@@ -243,7 +243,7 @@ class ShowTracklogs(RanaModule):
         #are the projection and screen usable ?
         if proj is None or GPXTracklog is None:
             # we don't have WHAT to draw or HOW or BOTH :D
-            print("draw track: skipping one track (tracklog or projection == None)")
+            self.log.info("skipping drawing of one track (tracklog or projection == None)")
             return
 
         (screenCentreX, screenCentreY, screenRadius) = proj.screenRadius()
@@ -261,7 +261,7 @@ class ShowTracklogs(RanaModule):
             if (screenToClusterDistance - (screenRadius + clusterRadius)) >= 0:
                 continue # we don't see this cluster se we skip it
             clusterNr = GPXTracklog.clusters.index(cluster)
-            #print("Cluster nr %d" % clusterNr)
+            #self.log.debug("Cluster nr %d" % clusterNr)
             # now we need to draw lines to connect neighboring clusters
             prevClusterNr = clusterNr - 1
             nextClusterNr = clusterNr + 1
@@ -299,8 +299,8 @@ class ShowTracklogs(RanaModule):
         cr.fill()
 
     #    if pointsDrawn > 0:
-    #    print("Nr of trackpoints drawn: %d" % pointsDrawn)
-    #    print("Redraw took %1.2f ms" % (1000 * (clock() - start)))
+    #    self.log.debug("Nr of trackpoints drawn: %d" % pointsDrawn)
+    #    self.log.debug("Redraw took %1.2f ms" % (1000 * (clock() - start)))
 
 
     def drawColoredTracklog(self, cr, GPXTracklog):
