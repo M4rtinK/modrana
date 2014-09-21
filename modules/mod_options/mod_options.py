@@ -346,7 +346,7 @@ class Options(RanaModule):
             items = choices['items']
             self.addItemsOption(title, variable, items, group, default, fakeMode=fakeMode)
         else: # no side effects, just add the raw option
-            if self.options.has_key(group):
+            if group in self.options:
                 self.options[group][2].append(optionData)
                 self.keyDefault[variable] = default
             else:
@@ -357,7 +357,7 @@ class Options(RanaModule):
 
         group = self._getGroupId(categoryId, groupId)
 
-        if self.options.has_key(group):
+        if group in self.options:
             remove = lambda x: x[1] == variable
             self.options[group][2][:] = [x for x in self.options[group][2] if not remove(x)]
             if variable in self.keyDefault:
@@ -367,7 +367,7 @@ class Options(RanaModule):
 
     def getOption(self, groupID, index):
         """get a options item from a given group by its index"""
-        if self.options.has_key(groupID):
+        if groupID in self.options:
             try:
                 return self.options[groupID][2][index]
             except IndexError:
