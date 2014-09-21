@@ -31,6 +31,9 @@ from . import geonames
 from . import local_search
 from . import online_providers
 
+import logging
+log = logging.getLogger("mod.onlineServices")
+
 def getModule(m, d, i):
     return OnlineServices(m, d, i)
 
@@ -229,7 +232,7 @@ class Worker(threading.Thread):
         self.progress = 0.0
 
     def run(self):
-        print("onlineServices: worker starting")
+        log.info("worker starting")
         # check for flags that the method might need
         # before it can be started
         start = True
@@ -263,7 +266,7 @@ class Worker(threading.Thread):
                 self.outputHandler(self.key, result)
 
         # cleanup
-        print("onlineServices: worker finished")
+        log.info("worker finished")
         self.online._done(self)
 
     def dontReturnResult(self):
@@ -302,12 +305,7 @@ class Worker(threading.Thread):
             self._setWorkStatusText("online elevation lookup done   ")
             return results, tracklog
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print('onlineServices: exception during elevation lookup')
-            print(e)
-            traceback.print_exc(file=sys.stdout) # find what went wrong
+            log.exception('exception during elevation lookup')
             return None, tracklog
 
     def _geonamesCallback(self, progress):

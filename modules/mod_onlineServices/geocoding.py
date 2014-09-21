@@ -2,6 +2,8 @@
 from core.point import Point
 import re
 
+import logging
+log = logging.getLogger("mod.onlineServices.geocoding")
 
 class GeoPyPoint(Point):
     """
@@ -41,10 +43,7 @@ def geocode(address):
         places = list(g.geocode(address, exactly_one=False))
         return _places2points(places)
     except Exception:
-        import sys
-
-        e = sys.exc_info()[1]
-        print("geocoding exception:\n", e)
+        log.exception("geocoding exception")
         return []
 
 #def wikipediaSearch(query):
@@ -59,7 +58,7 @@ def geocode(address):
 ##    places = list(wiki.geocode(query))
 ##    return _places2points(places)
 ##  except Exception:    import sys    e = sys.exc_info()[1]
-##    print("wiki search exception:\n", e)
+##    log.exception("wiki search exception")
 ##    return []
 
 

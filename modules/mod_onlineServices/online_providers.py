@@ -22,6 +22,9 @@ except ImportError:  # Python 3
     from urllib.parse import urlencode
     from urllib.error import HTTPError, URLError
 
+import logging
+log = logging.getLogger("mod.onlineServices.providers")
+
 NOMINATIM_GEOCODING_URL = "http://nominatim.openstreetmap.org/search?"
 NOMINATIM_REVERSE_GEOCODING_URL = "http://nominatim.openstreetmap.org/reverse?"
 
@@ -152,7 +155,7 @@ class GoogleAddressSearch(POIProvider):
     def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for an address using Google geocoding API"""
         if term is None:
-            print("online_services: GoogleAddressSearch: term is None")
+            log.error("GoogleAddressSearch: term is None")
             return []
         controller.status = "starting online address search"
         controller.status = "online address search done"
@@ -195,13 +198,13 @@ class GoogleLocalSearch(POIProvider):
                radius=constants.DEFAULT_LOCAL_SEARCH_RADIUS, **kwargs):
         """Search for POI using Google local search API"""
         if term is None and around is None:
-            print("online_services: Google local search: term and location not set")
+            log.error("Google local search: term and location not set")
             return []
         elif term is None:
-            print("online_services: Google local search: term not set")
+            log.error("Google local search: term not set")
             return []
         elif around is None:
-            print("online_services: Google local search: location not set")
+            log.error("Google local search: location not set")
             return []
         controller.status = "online POI search"
 
@@ -210,7 +213,7 @@ class GoogleLocalSearch(POIProvider):
         sensor = 'false'
         if 'sensor' in kwargs:
             sensor = kwargs['sensor']
-        print("local search query: %s" % query)
+        log.info("Google local search query: %s" % query)
         gMap = _getGmapsInstance()
         if gMap:
             response = gMap.local_search(query, maxResults, location = location,
@@ -220,15 +223,14 @@ class GoogleLocalSearch(POIProvider):
             controller.status = "online POI search done"
             return points
         else:
-            print("Google local search: no Google maps instance")
+            log.error("Google local search: no Google maps instance")
 
 
 def _getGmapsInstance():
     """get a google maps wrapper instance"""
     key = constants.GOOGLE_PLACES_API_KEY
     if key is None:
-        print("online_providers:"
-              " a google API key is needed for using the Google maps services")
+        log.error("a google API key is needed for using the Google maps services")
         return None
         # only import when actually needed
     import googlemaps
@@ -245,7 +247,7 @@ class GeocodingNominatim(POIProvider):
     def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for an address using the Nominatim geocoding API"""
         if term is None:
-            print("online_services: NominatimAddressSearch: term is None")
+            log.error("NominatimAddressSearch: term is None")
             return []
         results = []
         controller.status = "starting online address search"
@@ -278,14 +280,7 @@ class GeocodingNominatim(POIProvider):
                                   name=name, summary=summary, message=description)
                     results.append(point)
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            import traceback
-
-            traceback.print_exc(file=sys.stdout)
-
-            print("online_services: NominatimAddressSearch: failed with exception\n%s" % e)
+            log.exception("NominatimAddressSearch: failed with exception")
 
         controller.status = "online address search done"
         return results
@@ -302,7 +297,7 @@ class ReverseGeocodingNominatim(POIProvider):
         reverse geocoding API
         """
         if term is None:
-            print("online_services: Nominatim reverse geocoding: term is None")
+            log.error("Nominatim reverse geocoding: term is None")
             return []
         results = []
         controller.status = "starting online reverse geocoding"
@@ -336,11 +331,7 @@ class ReverseGeocodingNominatim(POIProvider):
                               name=name, summary=summary, message=description)
                 results.append(point)
         except Exception:
-            import sys
-            e = sys.exc_info()[1]
-            import traceback
-            traceback.print_exc(file=sys.stdout)
-            print("online_services: Nominatim reverse geocoding:\nfailed with exception\n%s" % e)
+            log.exception("Nominatim reverse geocoding: failed with exception")
 
         controller.status = "online reverse geocoding done"
         return results
@@ -357,7 +348,7 @@ class WikipediaSearchNominatim(POIProvider):
     def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         """Search for Wikipedia articles around the given location"""
         if term is None:
-            print("online_services: Nominatim Wikipedia search: term not set")
+            log.error("Nominatim Wikipedia search: term not set")
             return []
         controller.status = "online Wikipedia search"
         results = geonames.wikipediaSearch(term)
@@ -371,18 +362,18 @@ class TestingProvider(POIProvider):
 
     def search(self, term=None, around=None, controller=DummyController(), **kwargs):
         controller.status  = "starting provider test"
-        print("starting provider test")
+        log.debug("starting provider test")
         for i in range(1,7,1):
             controller.status = "waiting %d seconds" % i
-            print("waiting %d seconds" % i)
+            log.debug("waiting %d seconds" % i)
             time.sleep(1)
         controller.status = "provider test done"
-        print("provider test done")
+        log.debug("provider test done")
         return None
 
 def _callbackTest(self, value):
-    print("Callback test got:")
-    print(value)
+    log.debug("Callback test got:")
+    log.debug(value)
 
 
 

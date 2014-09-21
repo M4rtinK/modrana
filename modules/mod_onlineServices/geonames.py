@@ -9,6 +9,10 @@ except ImportError:  # Python 3
     from urllib.request import urlopen, Request, build_opener
     from urllib.parse import urlencode
     from urllib.error import HTTPError, URLError
+
+import logging
+log = logging.getLogger("mod.onlineServices.geonames")
+
 # handle simplejson import
 try:
     try:
@@ -16,10 +20,7 @@ try:
     except ImportError:
         import simplejson as json
 except Exception:
-    import sys
-    e = sys.exc_info()[1]
-    print(e)
-    print("onlineServices: using integrated non-binary simplejson, install proper simplejson package for better speed")
+    log.warning("using integrated non-binary simplejson, install proper simplejson package for better speed")
     import simplejson as json
 
 from core.point import Point
@@ -77,7 +78,7 @@ def fetchJson(query_url, params=None, headers=None):
     if not params: params = {}
     encoded_params = urlencode(params)
     url = query_url + encoded_params
-    print(url)
+    log.debug(url)
     request = Request(url, headers=headers)
     response = urlopen(request).read().decode("utf-8")
     return url, json.loads(response)
@@ -97,9 +98,7 @@ def wikipediaSearch(query):
         url, results = fetchJson(url, params)
         return _wikipediaResults2points(results['geonames'])
     except Exception:
-        import sys
-        print("online: wiki search exception")
-        traceback.print_exc(file=sys.stdout)
+        log.exception("wiki search exception")
         return []
 
 
@@ -109,11 +108,7 @@ def elevSRTM(lat, lon):
     try:
         query = urlopen(url)
     except Exception:
-        import sys
-
-        e = sys.exc_info()[1]
-        print("onlineServices: getting elevation from geonames returned an error")
-        print(e)
+        log.exception("getting elevation from geonames returned an error")
         return 0
     return query.read()
 
@@ -127,7 +122,7 @@ def elevBatchSRTM(latLonList, threadCB=None, userAgent=None):
     latLonElevList = []
     mL = len(latLonList)
     while len(latLonList) > 0:
-    #    print("elevation: %d of %d done" % (mL - len(latLonList), mL))
+    #    log.debug("elevation: %d of %d done", mL - len(latLonList), mL)
         if threadCB: # report progress to the worker thread
             progress = len(latLonList) / float(mL)
             threadCB(progress)
@@ -154,12 +149,7 @@ def elevBatchSRTM(latLonList, threadCB=None, userAgent=None):
             query = opener.open(request)
 
         except Exception:
-
-            import sys
-
-            e = sys.exc_info()[1]
-            print("online: getting elevation from geonames returned an error")
-            print(e)
+            log.exception("getting elevation from geonames returned an error")
             results = "0"
             for i in range(1, len(tempList)):
                 results += " 0"
@@ -168,11 +158,7 @@ def elevBatchSRTM(latLonList, threadCB=None, userAgent=None):
                 results = query.read().split('\r\n')
                 query.close()
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("online: elevation string from geonames has a wrong format")
-            print(e)
+            log.exception("elevation string from geonames has a wrong format")
             results = "0"
             for i in range(1, len(tempList)):
                 results += " 0"
