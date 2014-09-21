@@ -61,7 +61,6 @@ class LogManager(object):
         # omit some stuff when printing to console to make the logs fit to terminal windows
         console_formatter = logging.Formatter('%(levelname)s %(name)s: %(message)s')
         # file viewers should be able to handle longer lines
-        self._full_formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s:%(message)s')
         self._console_handler.setFormatter(console_formatter)
 
         # also, the file log can't be created and opened at once as modRana needs to load
@@ -86,7 +85,7 @@ class LogManager(object):
         self._log_folder_path = path
 
     def _get_log_filename(self):
-        return "modrana_%.log" % utils.getTimeHashString()
+        return "modrana_%s.log" % utils.getTimeHashString()
 
     def clear_early_log(self):
         """ModRana stores early log messages in a MemoryHandler to have a complete log file
@@ -117,10 +116,11 @@ class LogManager(object):
             return
 
         # create a file logger that logs everything
-        self._file_handler = logging.FileHandler(
-            os.path.join(self.log_folder_path, self._get_log_filename())
-        )
+        log_file_path = os.path.join(self.log_folder_path, self._get_log_filename())
+        self._file_handler = logging.FileHandler(log_file_path)
         self._file_handler.setLevel(logging.DEBUG)
+        full_formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s:%(message)s')
+        self._file_handler.setFormatter(full_formatter)
 
         # dump any early log messages to the log file
         if self._memory_handler:
@@ -140,6 +140,7 @@ class LogManager(object):
         else :
             # just attach the log file to the root logger
             self._root_modrana_logger.addHandler(self._file_handler)
+        self._root_modrana_logger.info("log file enabled: %s" % log_file_path)
 
     def disable_log_file(self):
         self._root_modrana_logger.info("disabling the log file in: %s", self.log_folder_path)
