@@ -99,14 +99,14 @@ class Options(RanaModule):
         if groupID in self.options:
             self.options[groupID][0] = "set:menu:options#%s" % parentID
         else:
-            print('options - set group parent: group not found: %s' % groupID)
+            self.log.error("can't set group parent - group %s not found", groupID)
 
     def getGroupParent(self, groupID):
         """set the parent id of a given group id"""
         if groupID in self.options:
             return self.options[groupID][0]
         else:
-            print('options - get group parent: group not found: %s' % groupID)
+            self.log.error("can't get group parent - group %s not found", groupID)
 
     def clearGroup(self, groupID):
         """clear a given group from any options,
@@ -328,7 +328,7 @@ class Options(RanaModule):
             self.options[group][2].append(newOption)
             self.keyDefault[variable] = default
         else:
-            print("options: group %s does not exist, call addGroup to create it first" % group)
+            self.log.error("group %s does not exist, call addGroup to create it first", group)
 
     def addRawOption(self, optionData):
         """add a raw option to options
@@ -350,7 +350,7 @@ class Options(RanaModule):
                 self.options[group][2].append(optionData)
                 self.keyDefault[variable] = default
             else:
-                print("options: group %s does not exist, can't add a raw option to it" % group)
+                self.log.error("group %s does not exist, can't add a raw option to it", group)
 
     def removeOption(self, categoryId, groupId, variable):
         """remove an option given by group and variable name"""
@@ -363,7 +363,7 @@ class Options(RanaModule):
             if variable in self.keyDefault:
                 del self.keyDefault[variable]
         else:
-            print("options: group %s does not exist, so option with variable %s can not be removed" % (group, variable))
+            self.log.error("group %s does not exist, so option with variable %s can not be removed", group, variable)
 
     def getOption(self, groupID, index):
         """get a options item from a given group by its index"""
@@ -371,11 +371,11 @@ class Options(RanaModule):
             try:
                 return self.options[groupID][2][index]
             except IndexError:
-                print("options: group %s has no index %d, so this option can not be returned" % (groupID, index))
+                self.log.error("group %s has no index %d, so this option can not be returned", groupID, index)
                 return False
 
         else:
-            print("options: group %s does not exist, so option with index %d can not be returned" % (groupID, index))
+            self.log.error("group %s does not exist, so option with index %d can not be returned", groupID, index)
             return False
 
     def getKeyDefault(self, key, default=None):
@@ -617,9 +617,10 @@ class Options(RanaModule):
                 currentTheme = self.get('currentTheme', None)
                 if currentTheme is not None:
                     if currentTheme not in themeList:
-                        print("options: theme with id %s is not available,\n"
-                              "switching back to default theme" % currentTheme)
-                        self.set('currentTheme', defaultTheme) # theme not valid, reset to default
+                        self.log.error("theme with id %s is not available,\nswitching "
+                                       "back to default theme", currentTheme)
+                        # theme not valid, reset to default
+                        self.set('currentTheme', defaultTheme)
 
                 themeChangedMessage = "icons:themeChanged"
                 nameValueList = map(lambda x: (x, x, themeChangedMessage), themeList)
@@ -1093,12 +1094,7 @@ class Options(RanaModule):
         try:
             return dict((k, v) for k, v in six.iteritems(inputDict) if k[0] != '#')
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print(
-                'options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1\n'
-                , e)
+            self.log.exception("error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1")
             return self.d
 
     def _reloadKeyStateList(self, groupID, index, key):
@@ -1210,12 +1206,12 @@ class Options(RanaModule):
                 if target == 'packListMonav':
                     self._reloadMonavPackList()
             else:
-                print('options: error - update target not specified')
+                self.log.error('update target not specified')
 
     def _reloadMonavPackList(self):
         route = self.m.get('route', None)
         if route:
-            print('options: reloading Monav data pack list')
+            self.log.info('reloading Monav data pack list')
             # wee need a list of (name, key) tuples
             self.monavPackList = map(lambda x: (x, x), route.getAvailableMonavDataPacks())
 
@@ -1243,7 +1239,7 @@ class Options(RanaModule):
     def handleTextEntryResult(self, key, result):
         (optionType, variable) = key.split("_", 1)
         if optionType == "editVariable":
-            print("editing variable: %s with: %s" % (variable, result))
+            self.log.info("editing variable: %s with: %s", variable, result)
             self.set(variable, result)
 
     def drawMenu(self, cr, menuName, args=None):
