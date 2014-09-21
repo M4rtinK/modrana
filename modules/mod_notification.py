@@ -117,14 +117,10 @@ class Notification(RanaModule):
                     try:
                         timeout = int(parameterList[1]) # override the default timeout
                     except Exception:
-                        import sys
-
-                        e = sys.exc_info()[1]
-                        print("notification: wrong timeout, using default 5 seconds")
-                        print(e)
+                        self.log.exception("wrong timeout, using default 5 seconds")
                 self.handleNotification(messageText, timeout)
             else:
-                print("notification: wrong message: %s" % message)
+                self.log.error("wrong message: %s", message)
 
     def setTaskStatus(self, taskName, status):
         """Set textual status of the given WiP task
@@ -169,7 +165,7 @@ class Notification(RanaModule):
                 del self._tasks[taskName]
                 self.tasksChanged(self._tasks)
             except KeyError:
-                print("notification: error, can't remove unknown task: %s" % taskName)
+                self.log.error("error, can't remove unknown task: %s", taskName)
         if self._tasks == {}:
             self._stopWorkInProgressOverlay()
 
@@ -183,7 +179,7 @@ class Notification(RanaModule):
         threadMgr.cancel_thread(taskName)
         # and finally stop tracking the task
         self.removeTask(taskName)
-        print("notification: task %s has been cancelled" % taskName)
+        self.log.info("task %s has been cancelled", taskName)
 
     def _startWorkInProgressOverlay(self):
         """start background work notification"""
@@ -291,12 +287,12 @@ class Notification(RanaModule):
         if timeout is None:
             timeout = self.timeout
 
-        print("notification: message: %s, timeout: %s" % (message, timeout))
+        self.log.info("message: %s, timeout: %s", message, timeout)
 
         # if some module sends a notification during init, the device module might not be loaded yet
         if self.modrana.dmod and self.modrana.gui:
             if self.dmod.hasNotificationSupport(): # use platform specific method
-                print("notification@dmod: message: %s, timeout: %s" % (message, timeout))
+                self.log.info("notification@dmod: message: %s, timeout: %s", message, timeout)
                 self.dmod.notify(message, int(timeout) * 1000)
             elif self.modrana.gui.hasNotificationSupport():
                 self.modrana.gui.notify(message, timeout, icon)
@@ -306,13 +302,12 @@ class Notification(RanaModule):
             self._startCustomNotification(message, timeout, icon)
 
     def _startCustomNotification(self, message, timeout, icon=""):
-        print("notification: message: %s, timeout: %s" % (message, timeout))
+        self.log.info("message: %s, timeout: %s", message, timeout)
         self.position = 'middle'
         self.notificationText = message
         self.expirationTimestamp = time.time() + timeout
         self.draw = True # enable drawing of notifications
         self.set('needRedraw', True) # make sure the notification is displayed
-
 
     def drawMasterOverlay(self, cr):
         """this function is called by the menu module, both in map mode and menu mode
