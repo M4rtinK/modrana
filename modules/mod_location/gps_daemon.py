@@ -194,10 +194,10 @@ class GPSDConsumer(threads.ModRanaThread):
     def _target(self):
         import gps_module as gps
 
-        log.info("GPSDConsumer: starting\n")
+        log.info("GPSDConsumer: starting")
         while True:
             if self.stop == True:
-                log.info("GPSDConsumer: breaking\n")
+                log.info("GPSDConsumer: breaking")
                 break
             try:
                 self.session.next() # this function blocks until a new fix is available
@@ -222,7 +222,7 @@ class GPSDConsumer(threads.ModRanaThread):
                 if self.verbose:
                     log.debug("GPSDConsumer: NO FIX, will retry in 1 s")
                 sleep(1)
-        log.info("GPSDConsumer: stopped\n")
+        log.info("GPSDConsumer: stopped")
 
     #      if r["class"] == "TPV":
     #        with self.lock:
