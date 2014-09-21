@@ -161,20 +161,17 @@ class Info(RanaModule):
             self._dirPoint = None
             self.set("directionPointLatLon" ,None)
 
-
-
     def handleTextEntryResult(self, key, result):
         if key == 'directionPointCoordinates':
             try:
                 lat, lon = result.split(",")
                 lat = float(lat)
                 lon = float(lon)
-                print("info: Direction coordinates %f,%f" % (lat, lon))
+                self.log.info("Direction coordinates %f,%f", lat, lon)
                 self._dirPoint = Point(lat, lon)
                 self.set("directionPointLatLon", (lat, lon))
             except Exception:
-                print("info: direction point coordinate parsing failed")
-
+                self.log.exception("direction point coordinate parsing failed")
 
     # from SGTL
     # TODO: move to appropriate place
