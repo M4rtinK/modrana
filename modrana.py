@@ -159,6 +159,7 @@ class ModRana(object):
 
         # load persistent options
         self.optLoadingOK = self._loadOptions()
+        self._optionsLoaded()
 
         # check if upgrade took place
 
@@ -385,12 +386,37 @@ class ModRana(object):
             )
             return module
         except Exception:
-            e = sys.exc_info()[1]
             log.exception("module: %s/%s failed to load", importName, modRanaName)
             return None
         finally:
             if fp:
                 fp.close()
+
+    def _optionsLoaded(self):
+        """This is run after the persistent options dictionary is
+        loaded from storage
+        """
+        # tell the log manager what where it should store log files
+        modrana_log.log_manager.log_folder_path = self.paths.getLogFolderPath()
+
+        # check if logging to file should be enabled
+        if self.get('loggingStatus', False):
+            modrana_log.log_manager.enable_log_file()
+        else:
+            modrana_log.log_manager.clear_early_log()
+            # tell log manager log file is not needed and that it should
+            # purge early log messages it is storing in case file log is enabled
+
+        # add a watch on the loggingStatus key, so that log file can be enabled
+        # and disabled at runtime with immediate effect
+        self.watch("loggingStatus", self._logFileCB)
+
+    def _logFileCB(self, _key, _oldValue, newValue):
+        """Convenience function turning the log file on or off"""
+        if newValue:
+            modrana_log.log_manager.enable_log_file()
+        else:
+            modrana_log.log_manager.disable_log_file()
 
     def _modulesLoadedPreFirstTime(self):
         """this is run after all the modules have been loaded,
