@@ -107,7 +107,7 @@ class TurnByTurn(RanaModule):
             self.automaticRerouteCounter = 0
             self._reroute()
         elif message == "toggleBoxHiding":
-            print("turnByTurn: toggling navigation box visibility")
+            self.log.info("toggling navigation box visibility")
             self.navigationBoxHidden = not self.navigationBoxHidden
         elif message == "switchToPreviousTurn":
             self.switchToPreviousStep()
@@ -129,7 +129,7 @@ class TurnByTurn(RanaModule):
         if dt >= AUTOMATIC_REROUTE_COUNTER_EXPIRATION_TIME:
             # reset the automatic reroute counter
             self.automaticRerouteCounter = 0
-            print('tbt: automatic reroute counter expired, clearing')
+            self.log.debug('automatic reroute counter expired, clearing')
 
         # on some routes, when we are moving away from the start of the route, it
         # is needed to reroute a couple of times before the correct way is found
@@ -143,12 +143,12 @@ class TurnByTurn(RanaModule):
         # 3. the counter is reset by manual rerouting, by reaching the route or after 10 minutes
 
         if self.automaticRerouteCounter < MAX_CONSECUTIVE_AUTOMATIC_REROUTES:
-            print('tbt: faking that route was reached to enable new rerouting')
+            self.log.debug('faking that route was reached to enable new rerouting')
             self.overrideRouteReached = True
         else:
-            print('tbt: too many consecutive reroutes (%d),' % self.automaticRerouteCounter)
-            print('reach the route to enable automatic rerouting')
-            print('or reroute manually')
+            self.log.info('tbt: too many consecutive reroutes (%d),', self.automaticRerouteCounter)
+            self.log.info('reach the route to enable automatic rerouting')
+            self.log.info('or reroute manually')
 
         # increment the automatic reroute counter & update the timestamp
         self.automaticRerouteCounter += 1
@@ -394,7 +394,7 @@ class TurnByTurn(RanaModule):
         """return steps for valid index, None otherwise"""
         maxIndex = self.getMaxStepIndex()
         if index > maxIndex or index < -(maxIndex + 1):
-            print("turnByTurn: wrong turn index: %d, max index is: %d" % (index, maxIndex))
+            self.log.error("wrong turn index: %d, max index is: %d", index, maxIndex)
             return None
         else:
             return self.route.getMessagePointByID(index)
@@ -426,9 +426,9 @@ class TurnByTurn(RanaModule):
             self._setCurrentStepIndex(nextIndex)
             self.espeakFirstTrigger = False
             self.espeakSecondTrigger = False
-            print("tbt: switching to previous step")
+            self.log.info("switching to previous step")
         else:
-            print("tbt: previous step reached")
+            self.log.info("previous step reached")
 
     def switchToNextStep(self):
         """switch to next step and clean up"""
@@ -439,9 +439,9 @@ class TurnByTurn(RanaModule):
             self.espeakFirstAndHalfTrigger = False
             self.espeakFirstTrigger = False
             self.espeakSecondTrigger = False
-            print("tbt: switching to next step")
+            self.log.info("switching to next step")
         else:
-            print("tbt: last step reached")
+            self.log.info("last step reached")
             self._lastStepReached()
 
     def _lastStepReached(self):
@@ -487,10 +487,10 @@ class TurnByTurn(RanaModule):
                 # some statistics
                 metersPerSecSpeed = self.get('metersPerSecSpeed', None)
                 dt = m.routeLookupDuration
-                print("turnByTurn: route lookup took: %f s" % dt)
+                self.log.info("route lookup took: %f s" % dt)
                 if dt and metersPerSecSpeed:
                     dm = dt * metersPerSecSpeed
-                    print("distance traveled during lookup: %f m" % dm)
+                    self.log.info("distance traveled during lookup: %f m" % dm)
                     # the duration of the road lookup and other variables are currently not used
                 # in the heuristics but might be added later to make the heuristics more robust
 
@@ -503,7 +503,7 @@ class TurnByTurn(RanaModule):
                 nextTurnId = self.getStepID(cs) + 1
                 nextStep = self.getStep(nextTurnId)
                 # check if we have all the data needed for our heuristics
-                print("tbt: trying to guess correct step to start navigation")
+                self.log.info("trying to guess correct step to start navigation")
                 if nextStep and pos and pReachedDist:
                     (lat, lon) = pos
                     (csLat, csLon) = cs.getLL()
@@ -511,13 +511,13 @@ class TurnByTurn(RanaModule):
                     pos2nextStep = geo.distance(lat, lon, nsLat, nsLon) * 1000
                     pos2currentStep = geo.distance(lat, lon, csLat, csLon) * 1000
                     currentStep2nextStep = geo.distance(csLat, csLon, nsLat, nsLon) * 1000
-                    #          print("pos",(lat,lon))
-                    #          print("cs",(csLat,csLon))
-                    #          print("ns",(nsLat,nsLon))
-                    print("position to next turn: %f m" % pos2nextStep)
-                    print("position to current turn: %f m" % pos2currentStep)
-                    print("current turn to next turn: %f m" % currentStep2nextStep)
-                    print("turn reached trigger distance: %f m" % pReachedDist)
+                    #          self.log.debug("pos",(lat,lon))
+                    #          self.log.debug("cs",(csLat,csLon))
+                    #          self.log.debug("ns",(nsLat,nsLon))
+                    self.log.debug("position to next turn: %f m" % pos2nextStep)
+                    self.log.debug("position to current turn: %f m" % pos2currentStep)
+                    self.log.debug("current turn to next turn: %f m" % currentStep2nextStep)
+                    self.log.debug("turn reached trigger distance: %f m" % pReachedDist)
 
                     if pos2currentStep > pReachedDist:
                         #this means we are out of the "capture circle" of the closest step
@@ -526,7 +526,7 @@ class TurnByTurn(RanaModule):
                         if pos2nextStep < currentStep2nextStep:
                             # we are mostly probably already past the closest step,
                             # so we switch to the next step at once
-                            print("tbt: already past closest turn, switching to next turn")
+                            self.log.debug("already past closest turn, switching to next turn")
                             self.setStepAsCurrent(nextStep)
                             # we play the message for the next step,
                             # with current distance to this step,
@@ -537,7 +537,7 @@ class TurnByTurn(RanaModule):
                         else:
                             # we have probably not yet reached the closest step,
                             # so we start navigation from it
-                            print("tbt: closest turn not yet reached")
+                            self.log.debug("closest turn not yet reached")
                             self.setStepAsCurrent(cs)
 
                     else:
@@ -545,18 +545,18 @@ class TurnByTurn(RanaModule):
                         # this means the navigation will trigger the voice message by itself
                         # and correctly switch to next step
                         # -> no need to switch to next step from here
-                        print("tbt: inside reach distance of closest turn")
+                        self.log.debug("inside reach distance of closest turn")
                         self.setStepAsCurrent(cs)
 
                 else:
                     # we dont have some of the data, that is needed to decide
                     # if we start the navigation from the closest step of from the step that is after it
                     # -> we just start from the closest step
-                    print("tbt: not enough data to decide, using closest turn")
+                    self.log.debug("not enough data to decide, using closest turn")
                     self.setStepAsCurrent(cs)
         self._doNavigationUpdate() # run a first time navigation update
         self.locationWatchID = self.watch('locationUpdated', self.locationUpdateCB)
-        print("tbt: started")
+        self.log.info("started and ready")
 
     def stopTBT(self):
         """stop Turn-by-turn navigation"""
@@ -566,24 +566,24 @@ class TurnByTurn(RanaModule):
             # cleanup
         self.goToInitialState()
         self._stopTBTWorker()
-        print("tbt: stopped")
+        self.log.info("stopped")
 
     def locationUpdateCB(self, key, newValue, oldValue):
         """position changed, do a tbt navigation update"""
         if key == "locationUpdated": # just to be sure
             self._doNavigationUpdate()
         else:
-            print("tbt: invalid key: %r" % key)
+            self.log.error("invalid key: %r", key)
 
     def _doNavigationUpdate(self):
         """do a navigation update"""
         # make sure there really are some steps
         if not self.route:
-            print("tbt: error no route")
+            self.log.error("no route")
             return
         pos = self.get('pos', None)
         if pos is None:
-            print("tbt: skipping update, invalid position")
+            self.log.error("skipping update, invalid position")
             return
 
         # get/compute/update necessary the values
@@ -644,7 +644,7 @@ class TurnByTurn(RanaModule):
             # when moving at high speed to prevent unnecessary rerouting
             if metersPerSecSpeed > pointReachedDistance * 0.75:
                 pointReachedDistance = metersPerSecSpeed * 2
-            #        print("tbt: enlarging point reached distance to: %1.2f m due to large speed (%1.2f m/s)" % (pointReachedDistance, metersPerSecSpeed))
+            #        self.log.debug("tbt: enlarging point reached distance to: %1.2f m due to large speed (%1.2f m/s)". (pointReachedDistance, metersPerSecSpeed)
 
             if metersPerSecSpeed > INCREASE_REROUTING_THRESHOLD_SPEED:
                 self.reroutingThresholdMultiplier = REROUTING_THRESHOLD_MULTIPLIER
@@ -666,21 +666,21 @@ class TurnByTurn(RanaModule):
             distance = max(distance, warnTime * metersPerSecSpeed)
 
             if self.get('debugTbT', False):
-                print("#####")
-                print("min/max announce time: %d/%d s" % (lowTime, highTime))
-                print("trigger distance: %1.2f m (%1.2f s warning)" % (distance, distance / float(metersPerSecSpeed)))
-                print("current distance: %1.2f m" % currentDistance)
-                print("current speed: %1.2f m/s (%1.2f km/h)" % (metersPerSecSpeed, metersPerSecSpeed * 3.6))
-                print("point reached distance: %f m" % pointReachedDistance)
-                print("1. triggered=%r, 1.5. triggered=%r, 2. triggered=%r" % (
-                self.espeakFirstTrigger, self.espeakFirstAndHalfTrigger, self.espeakSecondTrigger))
+                self.log.debug("#####")
+                self.log.debug("min/max announce time: %d/%d s", lowTime, highTime)
+                self.log.debug("trigger distance: %1.2f m (%1.2f s warning)", distance, distance / float(metersPerSecSpeed))
+                self.log.debug("current distance: %1.2f m", currentDistance)
+                self.log.debug("current speed: %1.2f m/s (%1.2f km/h)", metersPerSecSpeed, metersPerSecSpeed * 3.6)
+                self.log.debug("point reached distance: %f m", pointReachedDistance)
+                self.log.debug("1. triggered=%r, 1.5. triggered=%r, 2. triggered=%r",
+                               self.espeakFirstTrigger, self.espeakFirstAndHalfTrigger, self.espeakSecondTrigger)
                 if warnTime > 30:
-                    print("optional (20 s) trigger distance: %1.2f" % (20.0 * metersPerSecSpeed))
+                    self.log.debug("optional (20 s) trigger distance: %1.2f", 20.0 * metersPerSecSpeed)
 
             if currentDistance <= pointReachedDistance:
                 # this means we reached the point"""
                 if self.espeakSecondTrigger == False:
-                    print("triggering espeak nr. 2")
+                    self.log.debug("triggering espeak nr. 2")
                     # say the message without distance
                     plaintextMessage = currentStep.getSSMLMessage()
                     # consider turn said even if it was skipped (ignore errors)
@@ -693,7 +693,7 @@ class TurnByTurn(RanaModule):
                 if currentDistance <= distance:
                     # this means we reached an optimal distance for saying the message"""
                     if self.espeakFirstTrigger == False:
-                        print("triggering espeak nr. 1")
+                        self.log.debug("triggering espeak nr. 1")
                         plaintextMessage = currentStep.getSSMLMessage()
                         if self.sayTurn(plaintextMessage, currentDistance):
                             self.espeakFirstTrigger = True # first message done
@@ -714,7 +714,7 @@ class TurnByTurn(RanaModule):
                 if self.onRoute and not self.routeReached:
                     self.routeReached = True
                     self.automaticRerouteCounter = 0
-                    print('tbt: route reached, rerouting enabled')
+                    self.log.info('route reached, rerouting enabled')
 
                 # did the TBT worker detect that the rerouting threshold was reached ?
                 if self._reroutingConditionsMet():
@@ -744,7 +744,7 @@ class TurnByTurn(RanaModule):
             pLat = geo.radians(pLat)
             pLon = geo.radians(pLon)
             if len(radiansLL) == 0:
-                print("Divergence: can't follow a zero point route")
+                self.log.error("Divergence: can't follow a zero point route")
                 return False
             elif len(radiansLL) == 1: # 1 point route
                 aLat, aLon = radiansLL[0]
@@ -763,12 +763,12 @@ class TurnByTurn(RanaModule):
                 # the multiplier tries to compensate for high speed movement
             threshold = float(
                 self.get('reroutingThreshold', REROUTING_DEFAULT_THRESHOLD)) * self.reroutingThresholdMultiplier
-            print("Divergence from route: %1.2f/%1.2f m computed in %1.0f ms" % (
-            minDistance * 1000, float(threshold), (1000 * (time.clock() - start1))) )
+            self.log.debug("Divergence from route: %1.2f/%1.2f m computed in %1.0f ms",
+            minDistance * 1000, float(threshold), (1000 * (time.clock() - start1)))
             return minDistance * 1000 < threshold
 
     def _startTBTWorker(self):
-        print("tbt: starting worker thread")
+        self.log.info("starting worker thread")
         startThread = True
         if not self.TBTWorker: # reuse previous thread or start new one
             self.TBTWorkerEnabled = True
@@ -777,7 +777,7 @@ class TurnByTurn(RanaModule):
             t.start()
             self.TBTWorker = t
         else:
-            print("tbt: reusing worker thread")
+            self.log.info("reusing worker thread")
 
     def _stopTBTWorker(self):
         self.TBTWorkerEnabled = False
@@ -786,32 +786,32 @@ class TurnByTurn(RanaModule):
     def _TBTWorker(self):
         """this function is run in its own thread and check if
         we are following the current route"""
-        print("TBTWorker: started")
+        self.log.info("TBTWorker: started")
         while self.route and self.TBTWorkerEnabled:
             # first make sure automatic rerouting is enabled
             # eq. reroutingThreshold != None
             if self._automaticReroutingEnabled():
             # check if we are still following the route
-            #        print('TBTWorker: checking divergence from route')
+            #        self.log.debug('TBTWorker: checking divergence from route')
                 self.onRoute = self._followingRoute()
                 if self._reroutingConditionsMet():
-                    print('TBTWorker: divergence detected')
+                    self.log.info('TBTWorker: divergence detected')
                     # switch to quick updates
                     for i in range(0, REROUTING_TRIGGER_COUNT + 1):
                         time.sleep(1)
                         onRoute = self._followingRoute()
                         if onRoute: # divergence stopped
                             self.onRoute = onRoute
-                            print('TBTWorker: false alarm')
+                            self.log.info('TBTWorker: false alarm')
                             break
                         else: # still diverging from current route
                             self.onRoute = onRoute
                             # increase divergence counter
                             self.reroutingThresholdCrossedCounter += 1
-                            print(
-                            'TBTWorker: increasing divergence counter (%d)' % self.reroutingThresholdCrossedCounter)
+                            self.log.debug('TBTWorker: increasing divergence counter (%d)',
+                                           self.reroutingThresholdCrossedCounter)
             time.sleep(REROUTE_CHECK_INTERVAL / 1000.0)
-        print("TBTWorker: shutting down")
+        self.log.info("TBTWorker: shutting down")
 
     def getMonavTurns(self, monavResult):
         return instructions_generator.detectMonavTurns(monavResult)
