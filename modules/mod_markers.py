@@ -22,6 +22,9 @@ import math
 from core import geo
 from core.color import Color
 
+import logging
+log = logging.log("mod.markers")
+
 
 def getModule(m, d, i):
     return Markers(m, d, i)
@@ -216,11 +219,7 @@ class PointGroup():
         try:
             self.points[pointId][1] = True
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("markers: highlight index out of range: %r" % pointId)
-            print(e)
+            log.exception("markers: highlight index out of range: %r" % pointId)
 
     def unhighlightAll(self):
         for pointTuple in self.points:
