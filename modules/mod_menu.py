@@ -335,7 +335,7 @@ class Menus(RanaModule):
                 m.registerXYWH(x1, y1, w, h, action, timedAction)
 
     def resetMenu(self, menu=None):
-        print("Menu knows menu changed")
+        self.log.debug("Menu knows menu changed")
         self.listOffset = 0
 
     def dragEvent(self, startX, startY, dx, dy, x, y):
@@ -345,7 +345,7 @@ class Menus(RanaModule):
         menuList = self.lists.get(menuName, None)
         if menuList is not None:
             self.listOffset += dy
-            print("Drag in menu + %f = %f" % (dy, self.listOffset))
+            self.log.debug("Drag in menu + %f = %f", dy, self.listOffset)
 
     def setItemMenuGrid(self, x1, y1, cols, rows, dx, dy):
         """generate an icon placement grid for a given number of
@@ -378,14 +378,14 @@ class Menus(RanaModule):
             if module:
                 module.drawMenu(cr, menuName)
             else:
-                print('menu: module %s that should handle menu drawing is missing' % moduleName)
+                self.log.error('module %s that should handle menu drawing is missing', moduleName)
         elif len(split) == 3:
             (moduleName, menuName, args) = split
             module = self.m.get(moduleName, None)
             if module:
                 module.drawMenu(cr, menuName, args)
             else:
-                print('menu: module %s that should handle menu drawing is missing' % moduleName)
+                self.log.error('module %s that should handle menu drawing is missing', moduleName)
 
     def drawMenu(self, cr, menuName, args=None):
         """Handles list menus"""
@@ -398,7 +398,7 @@ class Menus(RanaModule):
                 index = None
 
             if listName in self.lists.keys():
-            #        print("drawing list: %s" % menuName)
+            #        self.log.debug("drawing list: %s" % menuName)
                 self.lists[listName].draw(cr, index) # draw the list
         elif menuName == 'listDetail':
             listName, index = args.split('#', 1)
@@ -415,7 +415,7 @@ class Menus(RanaModule):
         # Find the menu
         menu = self.menus.get(menuName, None)
         if menu is None:
-            print("Menu %s doesn't exist, returning to main screen" % menuName)
+            self.log.error("Menu %s doesn't exist, returning to main screen", menuName)
             self.set('menu', None)
             self.set('needRedraw', True)
             return
@@ -426,7 +426,7 @@ class Menus(RanaModule):
         """Draw the item menu"""
         vp = self.get('viewport', None)
         if not vp:
-            print('menu: ERROR, no viewport found')
+            self.log.error('ERROR, no viewport found')
             return
         else:
             (x1, y1, w, h) = vp
@@ -554,7 +554,7 @@ class Menus(RanaModule):
         if itemType == 'list':
             self.lists[menu] = module
         else:
-            print("Can't register \"%s\" menu - unknown type" % itemType)
+            self.log.error("Can't register \"%s\" menu - unknown type", itemType)
 
     def initMenu(self, menu):
         """initialize menu a menu dictionary instance to default parameters"""
@@ -898,7 +898,7 @@ class Menus(RanaModule):
             if 0 <= index < self.container.getLength():
                 self.index = index
             else:
-                print("listable menu %s: invalid index: %d" % (self.getName(), index))
+                self.log.error("listable menu %s: invalid index: %d", self.getName(), index)
 
         def setOnceBackAction(self, action):
             """replace the back button action with a given action for a single listable menu entry"""
@@ -1505,13 +1505,9 @@ class Menus(RanaModule):
                 if l:
                     l.setIndex(int(args[1]))
                 else:
-                    print("menu: no list %s available, can't set index" % listName)
+                    self.log.error("no list %s available, can't set index", listName)
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("menu: setting list index failed")
-                print(e)
+                self.log.exception("setting list index failed")
 
         elif messageType == "ms" and message == "openUrl":
             url = args
@@ -1543,7 +1539,7 @@ class Menus(RanaModule):
                 if point and store:
                     store.storePoint(point, returnToMenu=None)
                 else:
-                    print("menu: can't store point, point or storePOI module missing")
+                    self.log.error("can't store point, point or storePOI module missing")
 
         elif message == 'askQuit':
             ask = self.m.get('askMenu', None)
