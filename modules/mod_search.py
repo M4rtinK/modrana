@@ -162,7 +162,6 @@ class Search(RanaModule):
                 self.scroll -= 1
                 self.set("needRedraw", True)
         elif (message == "down") and self.scroll < self.maxIndex:
-            print("down")
             self.scroll += 1
             self.set("needRedraw", True)
         elif message == "reset":
@@ -199,7 +198,7 @@ class Search(RanaModule):
                 location = None
                 online = self.m.get('onlineServices', None)
                 if not online:
-                    print("search: online services module not present")
+                    self.log.error("online services module not present")
                     return
                 lsType = args[0]
                 sensor = 'false'
@@ -224,7 +223,7 @@ class Search(RanaModule):
                         lat, lon = pos
                         location = Point(lat, lon)
                     else:
-                        print("search: position unknown - trying to get GPS lock")
+                        self.log.info("position unknown - trying to get GPS lock")
                         # location = None will trigger GPS fix attempt (provided GPS is enabled in Options)
                         location = None
                 elif lsType == "view": #search around current map center
@@ -236,7 +235,7 @@ class Search(RanaModule):
                             (lat, lon) = centreLL
                             location = Point(lat, lon)
                         else:
-                            print("search: screen center coordinates unknown")
+                            self.log.warning("screen center coordinates unknown")
                             return
 
                 if query:
@@ -247,23 +246,23 @@ class Search(RanaModule):
             if messageType == "ml" and args:
                 sType = args[0]
                 if sType == "address":
-                    print("search: address search")
+                    self.log.info("address search")
                     query = args[1]
                     online = self.m.get('onlineServices', None)
                     if online:
                         # geocode the text input asynchronously
                         online.geocodeAsync(query, self._address2llCB)
                     else:
-                        print("search: online services module missing")
+                        self.log.error("online services module missing")
                 elif sType == "wikipedia":
-                    print("search: Wikipedia search")
+                    self.log.info("Wikipedia search")
                     query = args[1]
                     online = self.m.get('onlineServices', None)
                     if online:
                         # search Wikipedia asynchronously
                         online.wikipediaSearchAsync(query, self._handleWikipediaResultsCB)
                     else:
-                        print("search: online services module missing")
+                        self.log.error("online services module missing")
 
         # DEPRECIATED ?, use the localSearch method
         # TODO: depreciate this
@@ -274,20 +273,20 @@ class Search(RanaModule):
                 lon = None
                 online = self.m.get('onlineServices', None)
                 if online is None:
-                    print("search: online services module not present")
+                    self.log.error("online services module not present")
                     return
 
                 if self.where == 'position':
-                    print("search:near position")
+                    self.log.info("near position")
                     pos = self.get('pos', None)
                     sensor = 'true'
                     if pos is None:
-                        print("search: our position is not known")
+                        self.log.error("our position is not known")
                         return
                     else:
                         (lat, lon) = pos
                 elif self.where == 'view':
-                    print("search:near view")
+                    self.log.info("near view")
                     proj = self.m.get('projection', None)
                     sensor = 'false'
                     if proj:
@@ -295,7 +294,7 @@ class Search(RanaModule):
                         if centreLL:
                             (lat, lon) = centreLL
                         else:
-                            print("search: screen center coordinates unknown")
+                            self.log.error("screen center coordinates unknown")
                             return
                 if lat and lon:
                     location = Point(lat, lon)
@@ -312,14 +311,14 @@ class Search(RanaModule):
             #          term = searchList[0] # we have a list, because an amenity can have theoretically more "providers"
             #
             #        except:
-            #          print("search: key not present in the filter dictionary, using the key as search term")
+            #          self.log.error("search: key not present in the filter dictionary, using the key as search term")
             #          term = searchTerm
 
             # initiate asynchronous search, that is running in a separate thread
 
             #        if local['responseStatus'] != 200:
-            #          print("search: google returned %d return code" % local['responseStatus'])
-            #        print(("search: local search returned %d results") % len(local['responseData']['results']))
+            #          self.log.error("search: google returned %d return code" % local['responseStatus'])
+            #        self.log.error(("search: local search returned %d results") % len(local['responseData']['results']))
             #        self.localSearchResults = local
 
         elif message == "customQuery":
@@ -368,8 +367,8 @@ class Search(RanaModule):
 
     def describeItem(self, index, category, itemList):
     #    longName = name = item.getTracklogName()
-    #    print(filter(lambda x: x.getTracklogName() == longName, loadedTracklogs))
-    #    print(loadedTracklogs.index(item))
+    #    self.log.debug(filter(lambda x: x.getTracklogName() == longName, loadedTracklogs))
+    #    self.log.debug(loadedTracklogs.index(item))
         action = "set:menu:search#searchResultsItem"
         action += "|set:searchResultsItemNr:%d" % itemList[index][
             2] # here we use the ABSOLUTE index, not the relative one
@@ -426,7 +425,7 @@ class Search(RanaModule):
             self.list = resultList
             return resultList
         else:
-            print("search: error -> distance update on empty results")
+            self.log.error("error -> distance update on empty results")
 
     def drawMenu(self, cr, menuName, args=None):
         if menuName == 'searchResults':
@@ -528,7 +527,7 @@ class Search(RanaModule):
         if units:
             distanceString = units.km2CurrentUnitString(float(distance), dp=2)
         else:
-            print("search: warning, the units module uis missing")
+            self.log.warning("the units module uis missing")
             distanceString = "%1.2f km" % float(distance)
             # * draw "escape" button
         menus.drawButton(cr, x1, y1, dx, dy, "", "back", "search:reset|set:menu:search#searchResults")
@@ -738,7 +737,7 @@ class Search(RanaModule):
                 # geocode the text input asynchronously
                 online.geocodeAsync(textInput, self._address2llCB)
             else:
-                print("search: online services module missing")
+                self.log.error("online services module missing")
 
         elif key == "wikipedia":
             online = self.m.get('onlineServices')
@@ -747,11 +746,11 @@ class Search(RanaModule):
                 # search Wikipedia asynchronously
                 online.wikipediaSearchAsync(textInput, self._handleWikipediaResultsCB)
             else:
-                print("search: online services module missing")
+                self.log.error("online services module missing")
 
     def _address2llCB(self, points):
         if points:
-            print("geocoding done - something found")
+            self.log.info("geocoding done - something found")
             markers = self.m.get('markers', None)
             name = 'addressResults'
             if markers:
@@ -767,12 +766,12 @@ class Search(RanaModule):
                 point = points[0]
                 self._jumpToPoint(point)
         else:
-            print("geocoding done - nothing found")
+            self.log.info("geocoding done - nothing found")
             self.sendMessage('ml:notification:m:No results found for this address.;5')
 
 
     def _handleLocalSearchResultsCB(self, results):
-        print("search: local search result received")
+        self.log.info("local search result received")
         # only show the results list if there are some results
         if results:
             self.localSearchResults = results
@@ -781,7 +780,7 @@ class Search(RanaModule):
     def _handleWikipediaResultsCB(self, results):
         """Handle results from the asynchronous Wikipedia search"""
         if results:
-            print("wikipedia search done - something found")
+            self.log.info("wikipedia search done - something found")
             name = 'wikipediaResults'
             markers = self.m.get('markers', None)
             if markers:
@@ -797,7 +796,7 @@ class Search(RanaModule):
                 point = results[0]
                 self._jumpToPoint(point)
         else:
-            print("wikipedia search done - nothing found")
+            self.log.info("wikipedia search done - nothing found")
             self.sendMessage('ml:notification:m:No results found for this query.;5')
 
     def _jumpToPoint(self, point):
