@@ -63,7 +63,7 @@ class Tileserver(RanaModule):
 
 
     def runServer(self):
-        print("tile server: starting localhost tileserver")
+        self.log.info("starting localhost tileserver")
 
         self.port = 9009
         #    self.tileserverPort = random.randint(8000,9000)
@@ -73,20 +73,16 @@ class Tileserver(RanaModule):
 
 
         try:
-            print("tileserver: starting on port %d" % self.port)
+            self.log.info("starting on port %d", self.port)
             self.httpd = Server(("", self.tileserverPort), self)
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("tileserver: starting server on port %d failed" % self.port)
-            print(e)
+            self.log.exception("starting server on port %d failed", self.port)
             self.port = random.randint(9000, 10000)
-            print("tileserver: generating random port")
-            print("tileserver: starting on port %d" % self.port)
+            self.log.info("generating random port")
+            self.log.info("starting on port %d", self.port)
             self.server = Server(("", self.port), self)
 
-        print("tile server: serving at port: %d" % self.port)
+        self.log.info("running at port: %d", self.port)
         self.server.serve_forever()
 
 
@@ -94,7 +90,7 @@ class Tileserver(RanaModule):
         """
         start the tileserver
         """
-        print("tileserver: starting localhost tileserver")
+        self.log.info("starting localhost tileserver")
         t = Thread(target=self.runServer)
         t.daemon = True
         t.start()
@@ -136,8 +132,8 @@ class Server(SocketServer.TCPServer):
             z = int(split[2])
             x = int(split[3])
             y = int(split[4].split(".")[0])
-            print(self.path)
-            print(tileserver_callback_proxy.cb._mapTiles)
+            self.log.debug(self.path)
+            self.log.debug(tileserver_callback_proxy.cb._mapTiles)
             try:
                 tileData = tileserver_callback_proxy.cb._mapTiles.getTile(layer, z, x, y)
                 if tileData:
@@ -150,12 +146,12 @@ class Server(SocketServer.TCPServer):
                     #              self.send_header('Date', self.date_time_string())
                     self.end_headers()
 
-                    print("GET returning file")
+                    self.log.debug("GET returning file")
 
                     self.wfile.write(StringIO(tileData).read())
                     return True
                 else:
-                    print("GET tile not found")
+                    self.log.debug("GET tile not found")
                     return False
             except HTTPError:
                 e = sys.exc_info()[1]
