@@ -117,10 +117,10 @@ class Icons(RanaModule):
                     return icon
             else:
                 # image is probably not loadable
-                print("icon: icon not loadable (by pixbuf loader): %s" % name)
+                self.log.error("icon not loadable (by pixbuf loader): %s", name)
                 return None
         else:
-            print("icons: no icon found with name: %s" % name)
+            self.log.warning("no icon found with name: %s" % name)
             return None
 
 
@@ -168,11 +168,8 @@ class Icons(RanaModule):
                     # try to load the icon to pixbuf and get its original width and height
                     pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(aboveTextIconPath, int(scaledW), int(scaledH))
                 except Exception:
-                    import sys
+                    self.log.exception("icon %s ir probably corrupted", aboveTextIconPath)
 
-                    e = sys.exc_info()[1]
-                    print("icons: icon probably corrupted: %s" % aboveTextIconPath)
-                    print("%s" % e)
                 if pixbuf:
                     compositeIcon = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
                     ct = cairo.Context(compositeIcon)
@@ -194,7 +191,7 @@ class Icons(RanaModule):
 
         # no icon found
         else:
-            print("icons: %s not found" % name)
+            self.log.warning("icon %s not found", name)
             # we use the default button background if the tile is missing
             return self.roundedRectangle(w, h, self.buttonFillColor, self.buttonOutlineColor), False
 
@@ -227,12 +224,7 @@ class Icons(RanaModule):
             ct2.paint()
             # surface now contains the image in a Cairo surface
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("** loading image to pixbuf failed")
-            print("** filename: %s" % path)
-            print("** exception: %s" % e)
+            self.log.exception("** loading image (filename: %s) to pixbuf failed", path)
             return None
         return image
 
@@ -317,22 +309,14 @@ class Icons(RanaModule):
             (r, g, b, a) = fillColorRGBATuple
             fillColorRGBATuple = (r, g, b, fillAlpha)
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("** wrong fill color code or name: %s" % fillColorString)
-            print("** exception: %s" % e)
+            self.log.exception("** wrong fill color code or name: %s", fillColorString)
             fillColorRGBATuple = self.buttonFillColor
 
         try:
             (r, g, b, a) = outlineColorRGBATuple
             outlineColorRGBATuple = (r, g, b, outlineAlpha)
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("** wrong outline color code or name: %s" % fillColorString)
-            print("** exception: %s" % e)
+            self.log.exception("** wrong outline color code or name: %s", fillColorString)
             outlineColorRGBATuple = self.buttonOutlineColor
 
         # create the icon
@@ -535,7 +519,7 @@ class Icons(RanaModule):
         if len(self.images) >= self.maxImages:
             # get the oldest image + remove it from the queue
             oldestImageName = self.imageOrderList.pop(0) # TODO: this might be slow
-            #      print("trimming cache, %s, %d" % (oldestImageName, len(self.images)))
+            #      self.log.debug("trimming cache, %s, %d" % (oldestImageName, len(self.images)))
             # remove it from the cache
             del self.images[oldestImageName]
         cacheRepresentation = {'image': image, 'w': w, 'h': h, 'name': name}
@@ -617,7 +601,7 @@ class Icons(RanaModule):
         themeColors = self.loadColorsFromFile(os.path.join(self.getCurrentThemePath(), 'theme.conf'))
         self.colors.update(themeColors) # then overwrite theme specific colors
         self.notifyColorSubscribers() # notify color info subscribers
-        print("icons: switched theme to: %s" % newTheme)
+        self.log.info("switched theme to: %s" % newTheme)
 
     def loadColorsFromFile(self, path):
         """load color definitions from file"""
