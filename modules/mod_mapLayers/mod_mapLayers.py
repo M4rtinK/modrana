@@ -173,10 +173,10 @@ class MapLayers(RanaModule):
             if self._hasRequiredKeys(layerDefinition, MAP_LAYER_REQUIRED_KEYS):
                 self._layers[layerId] = MapLayer(layerId, layerDefinition)
             else:
-                print('MapLAyers: layer %s definition is missing required keys')
+                self.log.error('layer %s definition is missing required keys', layerId)
         if self._layers == {}:
-            print('MapLayers: map config has no valid layers,'
-                  ' using Mapnik fallback layer')
+            self.log.error('map layer config has no valid layers,'
+                           ' using Mapnik fallback layer')
             self._layers['mapnik'] = self._getFallbackLayer()
 
     def _parseGroups(self):
@@ -254,8 +254,6 @@ class MapLayers(RanaModule):
             # storage so we don't have to explicitly call save() on it here
             OverlayGroup(name, filePath, overlayList=overlayList)
         except Exception:
-            e = sys.exc_info()[1]
-            print("mapLayers: setting overlay group failed: %s" % name)
-            print(e)
-            print(overlayList)
-            traceback.print_exc(file=sys.stdout)
+            self.log.exception("setting overlay group %s failed", name)
+            self.log.error("current overlay list:")
+            self.log.error(overlayList)

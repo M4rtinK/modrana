@@ -57,7 +57,6 @@ class OverlayGroup(object):
         else:
             self._dict = json_dict.JSONDict(filePath=filePath)
 
-        print(self._dict)
         if autosave:
             self.save()
 
