@@ -52,6 +52,12 @@ class LogManager(object):
         self._mod_logger = logging.getLogger('mod')
         self._mod_logger.setLevel(logging.DEBUG)
 
+        # as we set the root logger to accept even debug messages,
+        # we need to explicitly tell urllib3 to skip debug level
+        # messages
+        urllib3_logger = logging.getLogger("urllib3")
+        urllib3_logger.setLevel(logging.INFO)
+
         # create console handler that prints everything to stdout
         # (as was done previously by just using print)
         self._console_handler = logging.StreamHandler()
