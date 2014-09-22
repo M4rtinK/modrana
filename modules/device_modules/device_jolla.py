@@ -160,7 +160,7 @@ class Jolla(DeviceModule):
         TODO: remove this once it is probable most users are using the
               new profile name
         """
-        print("jolla: looking for old profiles")
+        self.log.info("looking for old profiles")
         found = False
 
         # config
@@ -170,11 +170,9 @@ class Jolla(DeviceModule):
             found = True
             try:
                 os.rename(configOld, configNew)
-                print("jolla: config profile moved to new location")
+                self.log.info("config profile moved to new location")
             except Exception:
-                print("jolla: config profile renaming failed with exception")
-                e = sys.exc_info()[1]
-                print(e)
+                self.log.exception("config profile renaming failed")
 
         # data
         dataOld = "/home/nemo/.local/share/modrana"
@@ -183,11 +181,9 @@ class Jolla(DeviceModule):
             found = True
             try:
                 os.rename(dataOld, dataNew)
-                print("jolla: data profile moved to new location")
+                self.log.info("data profile moved to new location")
             except Exception:
-                print("jolla: data profile renaming failed with exception")
-                e = sys.exc_info()[1]
-                print(e)
+                self.log.exception("data profile renaming failed")
 
         if found == False:
-            print("jolla: no old profiles found")
+            self.log.info("no old profiles found")

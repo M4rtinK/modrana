@@ -22,17 +22,16 @@
 from modules.device_modules.base_device_module import DeviceModule
 from core.constants import DEVICE_TYPE_SMARTPHONE
 
+import logging
+log = logging.getLogger("device.nemo")
+
 QTM_IMPORT_SUCCESS = False
 try:
     from QtMobility.SystemInfo import QSystemScreenSaver
 
     QTM_IMPORT_SUCCESS = True
 except Exception:
-    import sys
-
-    e = sys.exc_info()[1]
-    print('device_nemo: QtMobility import failed - do you have python-qtmobility installed ?')
-    print(e)
+    log.exception('QtMobility import failed - do you have python-qtmobility installed ?')
 # ^^ back-light control for QML GUI
 
 # NOTE: use the device_ prefix when naming the module

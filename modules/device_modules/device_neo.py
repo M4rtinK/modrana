@@ -44,11 +44,11 @@ class DeviceNeo(DeviceModule):
 
     def _startLocationCB(self):
         """start the GPS hardware"""
-        print("HANDLE GPS STARTUP")
+        self.log.info("HANDLE GPS STARTUP")
 
     def _stopLocationCB(self):
         """stop the GPS hardware"""
-        print("HANDLE GPS SHUTDOWN")
+        self.log.info("HANDLE GPS SHUTDOWN")
 
 
     def getDeviceIDString(self):

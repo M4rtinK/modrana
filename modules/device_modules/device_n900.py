@@ -70,7 +70,7 @@ class DeviceN900(DeviceModule):
         self.mceSignal = self.bus.get_object('com.nokia.mce', '/com/nokia/mce/signal')
         self.mceSignalInterface = dbus.Interface(self.mceSignal, 'com.nokia.mce.signal')
         self.mceSignalInterface.connect_to_signal("display_status_ind", self.screenStateChangedCallback)
-        print("N900: DBUS initialized")
+        self.log.info("DBUS initialized")
 
         # Internet connectivity related
 
@@ -92,10 +92,10 @@ class DeviceN900(DeviceModule):
             self._conicConnect()
 
         elif gs.GUIString == "QML":
-            print("N900 Qt screen saver controller created")
+            self.log.info("N900 Qt screen saver controller created")
             self.qScreenSaver = QSystemScreenSaver()
 
-        print("N900 device specific module initialized")
+        self.log.info("N900 device specific module initialized")
 
     def _conicConnect(self):
         if self.conicConnection is None:
@@ -112,10 +112,10 @@ class DeviceN900(DeviceModule):
             # load the rotation object
             rotationObject = self.startAutorotation()
             if rotationObject != False:
-                print("N900: rotation object loaded")
+                self.log.info("rotation object loaded")
                 self.rotationObject = rotationObject
             else:
-                print("N900: loading rotation object failed")
+                self.log.error("loading rotation object failed")
 
             self.topWindow = gui.getGTKTopWindow()
 
@@ -124,7 +124,7 @@ class DeviceN900(DeviceModule):
             self.rotationToggleButton = None
             self.soundToggleButton = None
             self._addHildonAppMenu()
-            print("N900: application menu added")
+            self.log.info("application menu added")
 
             # window-active detection
             self.topWindow.connect('notify::is-active', self.windowIsActiveChangedCallback)
@@ -152,7 +152,7 @@ class DeviceN900(DeviceModule):
             rotationMode = self.get('rotationMode', None)
             if rotationMode:
                 self.setRotationMode(rotationMode)
-                print("rotation mode changed")
+                self.log.info("rotation mode changed")
         elif message == 'updateKeys':
             self._updateVolumeKeys()
 
@@ -180,14 +180,10 @@ class DeviceN900(DeviceModule):
             lastModeNumber = self.getRotationModeNumber(rotationMode) # get last used mode number
             rObject = n900_maemo5_portrait.FremantleRotation(self.ossoAppName, main_window=self.topWindow,
                                                              mode=lastModeNumber)
-            print("N900 rotation object initialized")
+            self.log.info("rotation object initialized")
             return rObject
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
-            print("initializing N900 rotation object failed")
-            print(e)
+            self.log.exception("initializing rotation object failed")
 
     def setRotationMode(self, rotationMode):
         rotationModeNumber = self.getRotationModeNumber(rotationMode)
@@ -211,10 +207,10 @@ class DeviceN900(DeviceModule):
 
     def pauseScreenBlanking(self):
         if gs.GUIString == "GTK":
-        #      print("n900: pausing screen blanking in GTK GUI")
+        #      self.log.debug("pausing screen blanking in GTK GUI")
             self.mceRequest.req_display_blanking_pause()
         elif gs.GUIString == "QML":
-        #      print("n900: pausing screen blanking in QML GUI")
+        #      self.log.debug("pausing screen blanking in QML GUI")
             QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
 
     def unlockScreen(self):
@@ -275,7 +271,7 @@ class DeviceN900(DeviceModule):
             if msTimeout:
                 banner.set_timeout(msTimeout)
         else:
-            print("n900: the N900 device module currently handles only Hildon based notifications")
+            self.log.warning("the N900 device module currently handles only Hildon based notifications")
 
     def hasButtons(self):
         """the N900 has the volume keys (2 buttons), the camera trigger (2 states)
@@ -369,7 +365,7 @@ class DeviceN900(DeviceModule):
 
 
     def _toggle(self, toggleButton, key):
-        print("N900: key %s toggled" % key)
+        self.log.debug("key %s toggled" % key)
         self.set(key, toggleButton.get_active())
 
     def _switchToMenu(self, toggleButton, menu):
@@ -378,7 +374,7 @@ class DeviceN900(DeviceModule):
         self.set('needRedraw', True)
 
     def _updateAppMenu(self, key=None, value=None, oldValue=None):
-        print(self.get("centred", True))
+        self.log.debug(self.get("centred", True))
         if self.centeringToggleButton:
             self.centeringToggleButton.set_active(self.get("centred", True))
         if self.rotationToggleButton:
@@ -438,14 +434,14 @@ class DeviceN900(DeviceModule):
             import gobject
 
             self.mainloop = gobject.MainLoop()
-            print('N900: location: starting headless mainloop')
+            self.log.info('location: starting headless mainloop')
             self.mainloop.run()
 
     def stopLocation(self):
         """this will called by mod_location automatically"""
         self._libLocationStop()
         if self.mainloop:
-            print('N900: location: stopping headless mainloop')
+            self.log.info('location: stopping headless mainloop')
             self.mainloop.quit()
 
     def _libLocationStart(self):
@@ -460,51 +456,37 @@ class DeviceN900(DeviceModule):
                 self.lControl = location.GPSDControl.get_default()
                 self.lDevice = location.GPSDevice()
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("n900 - location: - cant create location objects: %s" % e)
+                self.log.exception("location: - can't create location objects")
 
             try:
                 self.lControl.set_properties(preferred_method=location.METHOD_USER_SELECTED)
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
-                print("n900 - location: - cant set preferred location method: %s" % e)
+                self.log.exception("location: - can't set preferred location method")
 
             try:
                 self.lControl.set_properties(preferred_interval=location.INTERVAL_1S)
             except Exception:
-                import sys
-                e = sys.exc_info()[1]
-                print("n900 - location: - cant set preferred location interval: %s" % e)
+                self.log.exception("location: - can't set preferred location interval")
             try:
                 self.lControl.start()
-                print("** n900 - location: - GPS successfully activated **")
+                self.log.info("** location: - GPS successfully activated **")
                 self.connected = True
             except Exception:
-                import sys
-                e = sys.exc_info()[1]
-                print("n900 - location: - opening the GPS device failed: %s" % e)
+                self.log.exception("location: - opening the GPS device failed")
                 self.status = "No GPSD running"
 
             # connect callbacks
             #self.lControl.connect("error-verbose", self._liblocationErrorCB)
             self.lDevice.connect("changed", self._libLocationUpdateCB)
-            print("n900 - location: activated")
+            self.log.info("location: activated")
         except Exception:
-            import sys
-            e = sys.exc_info()[1]
             self.status = "No GPSD running"
-            print("n900 - location: - importing location module failed, please install the python-location package")
-            print(e)
+            self.log.exception("location: - importing location module failed, please install the python-location package")
             self.sendMessage('notification:install python-location package to enable GPS#7')
-
 
     def _libLocationStop(self):
         """stop the liblocation based location update method"""
-        print('n900 - location: stopping')
+        self.log.info('location: stopping')
         if self.lControl:
             self.lControl.stop()
             # cleanup
@@ -514,15 +496,15 @@ class DeviceN900(DeviceModule):
 
     def _liblocationErrorCB(self, control, error):
         if error == location.ERROR_USER_REJECTED_DIALOG:
-            print("User didn't enable requested methods")
+            self.log.error("User didn't enable requested methods")
         elif error == location.ERROR_USER_REJECTED_SETTINGS:
-            print("User changed settings, which disabled location")
+            self.log.error("User changed settings, which disabled location")
         elif error == location.ERROR_BT_GPS_NOT_AVAILABLE:
-            print("Problems with BT GPS")
+            self.log.error("Problems with BT GPS")
         elif error == location.ERROR_METHOD_NOT_ALLOWED_IN_OFFLINE_MODE:
-            print("Requested method is not allowed in offline mode")
+            self.log.error("Requested method is not allowed in offline mode")
         elif error == location.ERROR_SYSTEM:
-            print("System error")
+            self.log.error("System error")
 
     def _libLocationUpdateCB(self, device):
         """from:  http://wiki.maemo.org/PyMaemo/Using_Location_API
@@ -576,51 +558,48 @@ class DeviceN900(DeviceModule):
                     self.set('elevation', elev)
 
                 if self.get('n900GPSDebug', False):
-                    print("## N900 GPS debugging info ##")
-                    print("fix tuple from the Location API:")
-                    print(fix)
-                    print("position,bearing,speed (in descending order):")
-                    print(self.get('pos', None))
-                    print(self.get('bearing', None))
-                    print(self.get('speed', None))
-                    print("#############################")
+                    self.log.debug("## N900 GPS debugging info ##")
+                    self.log.debug("fix tuple from the Location API:")
+                    self.log.debug(fix)
+                    self.log.debug("position,bearing,speed (in descending order):")
+                    self.log.debug(self.get('pos', None))
+                    self.log.debug(self.get('bearing', None))
+                    self.log.debug(self.get('speed', None))
+                    self.log.debug("#############################")
                     # always set this key to current epoch once the location is updated
                 # so that modules can watch it and react
                 self.set('locationUpdated', time.time())
-                #        print("updating location")
+                #        self.log.debug("updating location")
                 self.set('needRedraw', True)
 
             else:
                 self.status = "Unknown"
-                print("n900 - location: getting fix failed (on a regular update)")
+                self.log.info("location: getting fix failed (on a regular update)")
         except Exception:
-            import sys
-
-            e = sys.exc_info()[1]
             self.status = "Unknown"
-            print("n900 - location:getting fix failed (on a regular update + exception: %s)" % e)
+            self.log.exception("location: getting fix failed (on a regular update)")
 
 
     # ** Internet connectivity **
 
     def _connectionStateCB(self, connection, event):
         """handle Internet connectivity state changes"""
-        #print("connection_cb(%s, %s)" % (connection, event))
+        #self.log.debug("connection_cb(%s, %s)" % (connection, event))
         conic_status = event.get_status()
-        #print(conic_status)
+        #self.log.debug(conic_status)
         #error = event.get_error()
         #iap_id = event.get_iap_id()
         #bearer = event.get_bearer_type()
         status = constants.CONNECTIVITY_UNKNOWN
         if conic_status == conic.STATUS_CONNECTED:
             status = constants.ONLINE
-            #print("CONIC CONNECTED")
+            #self.log.debug("CONIC CONNECTED")
         elif conic_status == conic.STATUS_DISCONNECTED:
             status = constants.OFFLINE
-            #print("CONIC DISCONNECTED")
+            #self.log.debug("CONIC DISCONNECTED")
         elif conic_status == conic.STATUS_DISCONNECTING:
             status = constants.OFFLINE
-            #print("CONIC DISCONNECTING")
+            #self.log.debug("CONIC DISCONNECTING")
         self._connectivityStatusICD = status
         # trigger the connectivity status changed signal
         self.internetConnectivityChanged(status)
