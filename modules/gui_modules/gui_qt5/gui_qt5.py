@@ -43,6 +43,9 @@ from core import constants
 from core.threads import threadMgr
 from core import geo
 
+import logging
+log = logging.getLogger("device.gui.qt5")
+
 SEARCH_STATUS_PREFIX = "search:status:"
 SEARCH_RESULT_PREFIX = "search:result:"
 
@@ -90,11 +93,11 @@ class QMLGUI(GUIModule):
         # get screen resolution
         # TODO: implement this
         #screenWH = self.getScreenWH()
-        #print(" @ screen size: %dx%d" % screenWH)
+        #self.log.debug(" @ screen size: %dx%d" % screenWH)
         #if self.highDPI:
-        #    print(" @ high DPI")
+        #    self.log.debug(" @ high DPI")
         #else:
-        #    print(" @ normal DPI")
+        #    self.log.debug(" @ normal DPI")
 
         # NOTE: what about multi-display devices ? :)
 
@@ -139,7 +142,7 @@ class QMLGUI(GUIModule):
     def _shutdown(self):
         """Called by PyOtherSide once the QML side is shutdown.
         """
-        print("Qt5 GUI: shutting down")
+        self.log.info("shutting down")
         self.modrana.shutdown()
 
 
@@ -180,7 +183,7 @@ class QMLGUI(GUIModule):
 
         #    # QML uses <br> instead of \n for linebreak
         #    text = newlines2brs(text)
-        #    print("QML GUI notify:\n message: %s, timeout: %d" % (text, msTimeout))
+        #    self.log.debug("notify:\n message: %s, timeout: %d" % (text, msTimeout))
         #    if self.rootObject:
         #      self.rootObject.notify(text, msTimeout)
         #    else:
@@ -245,29 +248,23 @@ class QMLGUI(GUIModule):
     def _selectImageProviderCB(self, imageId, requestedSize):
         originalImageId = imageId
         providerId = ""
-        #print("SELECT IMAGE PROVIDER")
-        #print(imageId)
-        #print(imageId.split("/", 1))
+        #self.log.debug("SELECT IMAGE PROVIDER")
+        #self.log.debug(imageId)
+        #self.log.debug(imageId.split("/", 1))
         try:
             # split out the provider id
             providerId, imageId = imageId.split("/", 1)
             # get the provider and call its getImage()
             return self._imageProviders[providerId].getImage(imageId, requestedSize)
         except ValueError:  # provider id missing or image ID overall wrong
-            print("Qt5 GUI: provider ID missing: %s" % originalImageId)
+            self.log.error("provider ID missing: %s", originalImageId)
         except AttributeError:  # missing provider (we are calling methods of None ;) )
             if providerId:
-                print("Qt5 GUI: image provider for this ID is missing: %s" % providerId)
+                self.log.error("image provider for this ID is missing: %s", providerId)
             else:
-                import sys
-                e = sys.exc_info()[1]
-                print("Qt5 GUI: image provider broken, image id: %s" % originalImageId)
-                print(e)
+                self.log.error("image provider broken, image id: %s", originalImageId)
         except Exception:  # catch and report the rest
-            import sys
-            e = sys.exc_info()[1]
-            print("Qt5 GUI: image loading failed, imageId: %s" % originalImageId)
-            print(e)
+            self.log.exception("image loading failed, imageId: %s", originalImageId)
 
     def _tileId2lzxy(self, tileId):
         """Convert tile id string to the "standard" lzxy tuple
@@ -296,10 +293,7 @@ class QMLGUI(GUIModule):
             lzxy = self._tileId2lzxy(tileId)
             self.modules.mapTiles.addTileDownloadRequest(lzxy, tileId)
         except Exception:
-            import sys
-            e = sys.exc_info()[1]
-            print("Qt5 GUI: adding tile download request failed:")
-            print(e)
+            self.log.exception("adding tile download request failed")
 
 class Modules(object):
     """A class that provides access to modRana modules from the QML context,
@@ -376,7 +370,7 @@ class Search(object):
 
     def cancelSearch(self, threadId):
         """Cancel the given asynchronous search thread"""
-        print("canceling search thread: %s" % threadId)
+        log.info("canceling search thread: %s", threadId)
         threadMgr.cancel_thread(threadId)
         if threadId in self._threadsInProgress:
             del self._threadsInProgress[threadId]
@@ -400,10 +394,10 @@ class Search(object):
             elif searchId == "local":
                 return online.localSearchAsync
             else:
-                print("Qt5 GUI: search function for id: %s not found" % searchId)
+                log.error("search function for id: %s not found", searchId)
                 return None
         else:
-            print("Qt5 GUI: onlineServices module not found")
+            log.error("onlineServices module not found")
 
 
 class ImageProvider(object):
@@ -423,8 +417,8 @@ class IconImageProvider(ImageProvider):
         ImageProvider.__init__(self, gui)
 
     def getImage(self, imageId, requestedSize):
-        #print("ICON!")
-        #print(imageId)
+        #log.debug("ICON!")
+        #log.debug(imageId)
         try:
             #TODO: theme name caching ?
             themeFolder = self.gui.modrana.paths.getThemesFolderPath()
@@ -439,30 +433,23 @@ class IconImageProvider(ImageProvider):
             if not os.path.exists(fullIconPath):
                 if splitPath[0] == constants.DEFAULT_THEME_ID:
                     # already on default theme and icon path does not exist
-                    print("Icon not found in default theme:")
-                    print(fullIconPath)
+                    log.error("Icon not found in default theme:")
+                    log.error(fullIconPath)
                     return None
                 else:  # try to get the icon from default theme
                     splitPath[0] = constants.DEFAULT_THEME_ID
                     fullIconPath = os.path.join(themeFolder, *splitPath)
                     if not os.path.exists(fullIconPath):
                         # icon not found even in the default theme
-                        print("Icon not found even in default theme:")
-                        print(fullIconPath)
+                        log.error("Icon not found even in default theme:")
+                        log.error(fullIconPath)
                         return None
             with open(fullIconPath, 'rb') as f:
                 # the context manager will make sure the icon
                 # file is properly closed
                 return bytearray(f.read()), (-1,-1), pyotherside.format_data
         except Exception:
-            import sys
-            e = sys.exc_info()[1]
-            print("Qt5 GUI: icon image provider: loading icon failed")
-            print(e)
-            print(os.path.join('themes', imageId))
-            print("Traceback:")
-            traceback.print_exc(file=sys.stdout) # find what went wrong
-
+            log.exception("icon image provider: loading icon failed, id:\n%s" % imageId)
 
 class TileImageProvider(ImageProvider):
     """
@@ -486,7 +473,7 @@ class TileImageProvider(ImageProvider):
     def _tileDownloadedCB(self, error, lzxy, tag):
         """Notify the QML context that a tile has been downloaded"""
         pinchMapId = tag.split("/")[0]
-        #print("SENDING: %s %s" % ("tileDownloaded:%s" % pinchMapId, tag))
+        #log.debug("SENDING: %s %s" % ("tileDownloaded:%s" % pinchMapId, tag))
         pyotherside.send("tileDownloaded:%s" % pinchMapId, tag, error)
 
     def getImage(self, imageId, requestedSize):
@@ -494,8 +481,8 @@ class TileImageProvider(ImageProvider):
         the tile info should look like this:
         layerID/zl/x/y
         """
-        #print("TILE REQUESTED %s" % imageId)
-        #print(requestedSize)
+        #log.debug("TILE REQUESTED %s" % imageId)
+        #log.debug(requestedSize)
         try:
             # split the string provided by QML
             split = imageId.split("/")
@@ -529,19 +516,15 @@ class TileImageProvider(ImageProvider):
                 # We notify the GUI by returning a 1x1 image.
                 tileData = self.gui._tileNotFoundImage
                 imageSize = (1,1)
-                #print("%s NOT FOUND" % imageId)
+                #log.debug("%s NOT FOUND" % imageId)
                 # TODO: use some raw image data instead of PNG ?
-            #print("RETURNING STUFF %d %s" % (imageSize[0], imageId))
+            #log.debug("RETURNING STUFF %d %s" % (imageSize[0], imageId))
             return bytearray(tileData), imageSize, pyotherside.format_data
         except Exception:
-            import sys
-            e = sys.exc_info()[1]
-            print("Qt 5 GUI: tile image provider: loading tile failed")
-            print(e)
-            print(imageId)
-            print(requestedSize)
-            traceback.print_exc(file=sys.stdout)
-
+            log.error("tile image provider: loading tile failed")
+            log.error(imageId)
+            log.error(requestedSize)
+            log.exception()
 
 class MapTiles(object):
     def __init__(self, gui):
@@ -561,17 +544,17 @@ class MapTiles(object):
         True - tile already in storage or in memory
         False - tile download in progress, retry in a while
         """
-        #    print(layerId, z, x, y)
+        #    log.debug(layerId, z, x, y)
         if self.gui.mapTiles.tileInMemory(layerId, z, x, y):
-        #      print("available in memory")
+        #      log.debug("available in memory")
             return True
         elif self.gui.mapTiles.tileInStorage(layerId, z, x, y):
-        #      print("available in storage")
+        #      log.debug("available in storage")
             return True
         else: # not in memory or storage
             # add a tile download request
             self.gui.mapTiles.addTileDownloadRequest(layerId, z, x, y)
-            #      print("downloading, try later")
+            #      log.debug("downloading, try later")
             return False
 
 class _Search(object):
