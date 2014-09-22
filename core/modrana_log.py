@@ -143,11 +143,12 @@ class LogManager(object):
         self._root_modrana_logger.info("log file enabled: %s" % log_file_path)
 
     def disable_log_file(self):
-        self._root_modrana_logger.info("disabling the log file in: %s", self.log_folder_path)
-        self._file_handler.close()
-        self._root_modrana_logger.removeHandler(self._file_handler)
-        self._file_handler = None
-        self._root_modrana_logger.info("log file disabled")
+        if self._file_handler:
+            self._root_modrana_logger.info("disabling the log file in: %s", self.log_folder_path)
+            self._file_handler.close()
+            self._root_modrana_logger.removeHandler(self._file_handler)
+            self._file_handler = None
+            self._root_modrana_logger.info("log file disabled")
 
 def init_logging():
     global log_manager
