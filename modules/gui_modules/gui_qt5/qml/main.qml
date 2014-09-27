@@ -93,7 +93,7 @@ ApplicationWindow {
             // - they will be called during modRana startup
             // - like this initial property values will be set
             python.setHandler("themeChanged", function(newTheme){
-                console.log("theme changed to: " + newTheme.name + " (id: " + newTheme.id + ")")
+                rWin.log.info("theme changed to: " + newTheme.name + " (id: " + newTheme.id + ")")
                 rWin.theme = newTheme
             })
 
@@ -113,7 +113,7 @@ ApplicationWindow {
                 fake_argv = '["modrana.py", "-u", "qt5", "-d", "'+ rWin._PLATFORM_ID_ + '"]'
             }
             evaluate('setattr(sys, "argv" ,' + fake_argv +')')
-            console.log('sys.argv faked')
+            rWin.log.info('sys.argv faked')
 
             // start modRana
             call_sync('modrana.start')
@@ -121,7 +121,7 @@ ApplicationWindow {
 
         onError: {
             // when an exception is raised, this error handler will be called
-            console.log('python error: ' + traceback);
+            rWin.log.error('python error: ' + traceback);
         }
     }
 
@@ -131,8 +131,8 @@ ApplicationWindow {
         visible : rWin.showDebugButton
         text : "debug"
         onClicked : {
-            console.log("# starting the Python Debugger (PDB) shell")
-            console.log("# to continue program execution, press c")
+            rWin.log.info("# starting the Python Debugger (PDB) shell")
+            rWin.log.info("# to continue program execution, press c")
             // make sure the pdb module is imported
             python.importModule_sync('pdb')
             // start debugging
@@ -150,7 +150,7 @@ ApplicationWindow {
     function __init__() {
         // Do all startup tasks depending on the Python
         // backend being loaded
-        console.log("__init__ running")
+        rWin.log.info("__init__ running")
 
         // load the constants
         // (including the GUI style constants)
@@ -206,26 +206,26 @@ ApplicationWindow {
             return component.createObject(rWin);
         } else {
             if (!quiet) {
-                console.log("loading QML file failed: " + filename)
-                console.log("error: " + component.errorString())
+                rWin.log.error("loading QML file failed: " + filename)
+                rWin.log.error("error: " + component.errorString())
             }
             return null
         }
     }
 
     function loadPage(pageName) {
-        console.log("loading page: " + pageName)
+        rWin.log.info("loading page: " + pageName)
         return loadQMLFile(pageName + ".qml")
     }
     /*
     function loadPage(pageName) {
-        console.log("loading page: " + pageName)
+        rWin.log.info("loading page: " + pageName)
         var component = Qt.createComponent(pageName + ".qml");
         if (component.status == Component.Ready) {
             return component.createObject(rWin);
         } else {
-            console.log("loading page failed: " + pageName + ".qml")
-            console.log("error: " + component.errorString())
+            rWin.log.error("loading page failed: " + pageName + ".qml")
+            rWin.log.error("error: " + component.errorString())
             return null
         }
     }
@@ -237,8 +237,8 @@ ApplicationWindow {
     */
 
     function getPage(pageName) {
-        console.log("GET PAGE")
-        console.log(pageName)
+        rWin.log.debug("GET PAGE")
+        rWin.log.debug(pageName)
 
         var newPage
         if (pageName == null) { //signal that we should return to the map page
@@ -251,15 +251,15 @@ ApplicationWindow {
                 newPage = loadPage(fullPageName)
                 if (newPage) { // loading successful
                     pages[pageName] = newPage // cache the page
-                    console.log("page cached: " + pageName)
+                    rWin.log.debug("page cached: " + pageName)
                 } else { // loading failed, go to mapPage
                     newPage = null
-                    console.log(pageName + " loading failed, using mapPage")
+                    rWin.log.debug(pageName + " loading failed, using mapPage")
                 }
             }
         }
-        console.log("RETURN PAGE")
-        console.log(newPage)
+        rWin.log.debug("RETURN PAGE")
+        rWin.log.debug(newPage)
         return newPage
 
     /* TODO: some pages are not so often visited pages so they could
@@ -278,7 +278,7 @@ ApplicationWindow {
             //console.log("BACK TO MAP")
             rWin.pageStack.pop(rWin.mapPage,!animate)
         } else {
-            console.log("PUSH " + pageName)
+            rWin.log.debug("PUSH " + pageName)
             rWin.pushPageInstance(rWin.getPage(pageName))
         }
     }
@@ -295,7 +295,7 @@ ApplicationWindow {
 
     // Working with options
     function get(key, default_value, callback) {
-        //console.log("running " + callback)
+        //rWin.log.debug("running " + callback)
         python.call("modrana.gui.get", [key, default_value], callback)
         return default_value
     }
@@ -362,7 +362,7 @@ ApplicationWindow {
                 for (var i=0; i<results.length; i++) {
                     rWin.layerTree.append(results[i]);
                 }
-                console.log("layer tree loaded")
+                rWin.log.info("layer tree loaded")
                 // now that we have the layer dict, restore the last used layer
                 restoreLastUsedLayer()
             }
@@ -371,7 +371,7 @@ ApplicationWindow {
         rWin.python.call(
             "modrana.gui.modules.mapLayers.getDictOfLayerDicts", [], function(results){
                 rWin.layerDict = results
-                console.log("layer dict loaded")
+                rWin.log.info("layer dict loaded")
             }
         )
     }
@@ -380,7 +380,7 @@ ApplicationWindow {
         // restore last used map layer
         // (the layer dict must be already loaded for this to work)
         rWin.get("layer", "mapnik", function(layerId){
-            console.log("restoring last used map layer: " + layerId)
+            rWin.log.info("restoring last used map layer: " + layerId)
             rWin.mapPage.getMap().setLayerById(0,layerId)
         })
     }
