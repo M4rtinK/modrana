@@ -36,6 +36,7 @@ class LogManager(object):
 
         self._log_folder_path = None
         self._file_handler = None
+        self._log_file_path = None
 
         # create main modRana logger (root logger)
         self._root_modrana_logger = logging.getLogger('')
@@ -104,6 +105,20 @@ class LogManager(object):
             self._memory_handler.flush()
             self._memory_handler = None
 
+    def get_log_file_path(self):
+        """For use from QML/PyOtherSide - it has some
+           issues with accessing properties
+           """
+        return self._log_file_path
+
+    @property
+    def log_file_path(self):
+        return self._log_file_path
+
+    @log_file_path.setter
+    def log_file_path(self, value):
+        self._log_file_path = value
+
     def enable_log_file(self):
         """Enable logging modRana log messages to file.
 
@@ -146,6 +161,7 @@ class LogManager(object):
         else :
             # just attach the log file to the root logger
             self._root_modrana_logger.addHandler(self._file_handler)
+        self.log_file_path = log_file_path
         self._root_modrana_logger.info("log file enabled: %s" % log_file_path)
 
     def disable_log_file(self):
@@ -154,6 +170,7 @@ class LogManager(object):
             self._file_handler.close()
             self._root_modrana_logger.removeHandler(self._file_handler)
             self._file_handler = None
+            self._log_file_path = None
             self._root_modrana_logger.info("log file disabled")
 
 def init_logging():
