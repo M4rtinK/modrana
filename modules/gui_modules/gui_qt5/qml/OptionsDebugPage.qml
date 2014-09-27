@@ -7,6 +7,9 @@ BasePage {
     id: debugPage
     headerText : "Debug"
 
+    property bool logFileEnabled : rWin.get("loggingStatus", false,
+    function(v){logFileEnabled=v})
+
     content {
         Column {
             anchors.top : parent.top
@@ -47,6 +50,17 @@ BasePage {
                 onCheckedChanged : {
                     rWin.locationDebug = checked
                     rWin.set("gpsDebugEnabled", checked)
+                }
+            }
+            Label {
+                text : "Logging"
+            }
+            TextSwitch {
+                text : qsTr("Log file")
+                checked : debugPage.logFileEnabled
+                onCheckedChanged : {
+                    debugPage.logFileEnabled = checked
+                    rWin.set("loggingStatus", checked)
                 }
             }
         }
