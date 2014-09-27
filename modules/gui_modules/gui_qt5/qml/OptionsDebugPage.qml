@@ -10,6 +10,22 @@ BasePage {
     property bool logFileEnabled : rWin.get("loggingStatus", false,
     function(v){logFileEnabled=v})
 
+    property string logFilePath : setLogFilePath()
+
+    function setLogFilePath() {
+        rWin.python.call("modrana.gui.log_manager.get_log_file_path", [], function(v){
+            console.log("GOT PATH")
+            console.log(v)
+
+            if (v) {
+                debugPage.logFilePath = v
+            } else {
+                debugPage.logFilePath = qsTr("log file disabled")
+            }
+    })
+        return qsTr("log path unknown")
+   }
+
     content {
         Column {
             anchors.top : parent.top
@@ -60,8 +76,13 @@ BasePage {
                 checked : debugPage.logFileEnabled
                 onCheckedChanged : {
                     debugPage.logFileEnabled = checked
-                    rWin.set("loggingStatus", checked)
+                    rWin.once_set("loggingStatus", checked, setLogFilePath)
                 }
+            }
+            Label {
+                text : debugPage.logFilePath
+                wrapMode : Text.WrapAnywhere
+                width : parent.width
             }
         }
     }
