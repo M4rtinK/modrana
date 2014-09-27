@@ -14,9 +14,6 @@ BasePage {
 
     function setLogFilePath() {
         rWin.python.call("modrana.gui.log_manager.get_log_file_path", [], function(v){
-            console.log("GOT PATH")
-            console.log(v)
-
             if (v) {
                 debugPage.logFilePath = v
             } else {
@@ -76,7 +73,7 @@ BasePage {
                 checked : debugPage.logFileEnabled
                 onCheckedChanged : {
                     debugPage.logFileEnabled = checked
-                    rWin.once_set("loggingStatus", checked, setLogFilePath)
+                    rWin.set("loggingStatus", checked, setLogFilePath)
                 }
             }
             Label {
