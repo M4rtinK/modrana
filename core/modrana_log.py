@@ -56,7 +56,7 @@ class LogManager(object):
         # we need to explicitly tell urllib3 to skip debug level
         # messages
         urllib3_logger = logging.getLogger("urllib3")
-        urllib3_logger.setLevel(logging.INFO)
+        urllib3_logger.setLevel(logging.ERROR)
 
         # create console handler that prints everything to stdout
         # (as was done previously by just using print)
