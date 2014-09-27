@@ -22,11 +22,11 @@ Item {
     function positionUpdate(locationSource) {
         var coord = locationSource.position.coordinate
         if (rWin.locationDebug) {
-            console.log("== Position update ==")
-            console.log("Coordinate:", coord.longitude, coord.latitude)
-            console.log("Speed:", locationSource.position.speed)
-            console.log("h/v accuracy:", locationSource.position.horizontalAccuracy, locationSource.position.verticalAccuracy)
-            console.log("timestamp: ", locationSource.position.timestamp)
+            rWin.log.debug("== Position update ==")
+            rWin.log.debug("Coordinate:", coord.longitude, coord.latitude)
+            rWin.log.debug("Speed:", locationSource.position.speed)
+            rWin.log.debug("h/v accuracy:", locationSource.position.horizontalAccuracy, locationSource.position.verticalAccuracy)
+            rWin.log.debug("timestamp: ", locationSource.position.timestamp)
         }
         rWin.position = locationSource.position
         rWin.pos = coord
@@ -39,7 +39,7 @@ Item {
             // attribute, we need to compute it like this)
             if (location._lastCoord) {
                 rWin.bearing = location._lastCoord.azimuthTo(coord)
-                //console.log("BEARING " + rWin.bearing)
+                //rWin.log.debug("BEARING " + rWin.bearing)
             }
             // save the current coord for the next bearing
             // computation
@@ -68,17 +68,17 @@ Item {
             savedCoord.latitude = lastKnownPos[0]
             savedCoord.longitude = lastKnownPos[1]
             rWin.lastGoodPos = savedCoord
-            console.log("Qt5 location: saved position restored")
+            rWin.log.info("Qt5 location: saved position restored")
         }
         // try to load the location source
         // conditional imports would be nice, wouldn't they ;)
         var location_element = rWin.loadQMLFile("LocationSource.qml", true)
         if (location_element) {
-            console.log("Qt5 location initialized")
+            rWin.log.info("Qt5 location initialized")
         } else {
             // initializing the real source failed (Qt<5.2 ?),
             // use fake source instead
-            console.log("Qt5 position source init failed (Qt<5.2 ?)")
+            rWin.log.error("Qt5 position source init failed (Qt<5.2 ?)")
             location_element = rWin.loadQMLFile("LocationFakeSource.qml")
             // do an initial update so that Python code also gets the fake
             // position, which will not change anyway
@@ -93,8 +93,8 @@ Item {
         // check if NMEA file should be used as position source
         // (useful for debugging without real positioning source)
         if (posFromFile && NMEAFilePath) {
-            console.log("Qt5 GUI: using NMEA file as position source")
-            console.log("NMEA file path: " + NMEAFilePath)
+            rWin.log.debug("Qt5 GUI: using NMEA file as position source")
+            rWin.log.debug("NMEA file path: " + NMEAFilePath)
             locationSource.nmeaSource = NMEAFilePath
             // if the nmeaSource is on an initialized PositionSource,
             // the update interval needs to be reset, or it is ignored
@@ -102,7 +102,7 @@ Item {
             locationSource.updateInterval = 1000
         }
         // report which position provider is being used
-        console.log("Qt5 GUI location provider: " + locationSource.provider)
+        rWin.log.info("Qt5 GUI location provider: " + locationSource.provider)
         // initialization complete
         location.initialized = true
         // start location
@@ -116,10 +116,10 @@ Item {
             if (location.initialized) {
                 locationSource.active = true
             } else {
-                console.log("Qt5 location: can't start, not initialized")
+                rWin.log.error("Qt5 location: can't start, not initialized")
             }
         } else {
-            console.log("Qt5 location: location usage disabled by user")
+            rWin.log.info("Qt5 location: location usage disabled by user")
         }
     }
 
@@ -128,7 +128,7 @@ Item {
         if (location.initialized) {
             locationSource.active = false
         } else {
-            console.log("Qt5 location: can't stop, not initialized")
+            rWin.log.error("Qt5 location: can't stop, not initialized")
         }
     }
 }
