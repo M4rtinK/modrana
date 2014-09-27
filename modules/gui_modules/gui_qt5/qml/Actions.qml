@@ -47,10 +47,10 @@ Item {
         // (real conditional imports would be nice, wouldn't they ;))
         var mediaKeysInstance = rWin.loadQMLFile("sailfish_specific/MediaKeys.qml", true)
         if (mediaKeysInstance) {
-            console.log("Actions: Sailfish media keys initialized")
+            rWin.log.info("Actions: Sailfish media keys initialized")
             actions.mediaKeys = mediaKeysInstance
         } else {
-            console.log("Actions: media keys not available")
+            rWin.log.info("Actions: media keys not available")
         }
     }
 }
