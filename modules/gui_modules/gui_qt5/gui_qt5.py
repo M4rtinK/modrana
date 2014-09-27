@@ -42,6 +42,7 @@ from core import signal
 from core import constants
 from core.threads import threadMgr
 from core import geo
+from core import modrana_log
 
 import logging
 log = logging.getLogger("device.gui.qt5")
@@ -134,6 +135,9 @@ class QMLGUI(GUIModule):
 
         # search functionality for the QML context
         self.search = Search(self)
+
+        # make the log manager easily accessible
+        self.log_manager = modrana_log.log_manager
 
     def firstTime(self):
         # trigger the first time signal
