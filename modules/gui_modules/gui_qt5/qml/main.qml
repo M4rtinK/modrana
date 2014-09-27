@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Window 2.1
 import io.thp.pyotherside 1.0
 import UC 1.0
+import "modrana_components"
 
 ApplicationWindow {
     id : rWin
@@ -16,6 +17,9 @@ ApplicationWindow {
     property bool showUnfinishedPages : false
     property bool tileDebug : false
     property bool locationDebug : false
+
+    // logging
+    property variant log : PythonLog {}
 
     property int _landscapeDivider : rWin.platform.needsBackButton ? 5.5 : 8.0
     property int headerHeight : rWin.inPortrait ? height/8.0 : height/_landscapeDivider

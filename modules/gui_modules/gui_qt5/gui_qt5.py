@@ -46,6 +46,7 @@ from core import modrana_log
 
 import logging
 log = logging.getLogger("device.gui.qt5")
+qml_log = logging.getLogger("device.gui.qt5.qml")
 
 SEARCH_STATUS_PREFIX = "search:status:"
 SEARCH_RESULT_PREFIX = "search:result:"
@@ -138,6 +139,9 @@ class QMLGUI(GUIModule):
 
         # make the log manager easily accessible
         self.log_manager = modrana_log.log_manager
+
+        # log for log messages from the QML context
+        self.qml_log = qml_log
 
     def firstTime(self):
         # trigger the first time signal
