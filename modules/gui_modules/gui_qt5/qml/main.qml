@@ -117,6 +117,9 @@ ApplicationWindow {
 
             // start modRana
             call_sync('modrana.start')
+
+            // the Python-side logging system should be now up and running
+            rWin.log.backendAvailable = true
         }
 
         onError: {
