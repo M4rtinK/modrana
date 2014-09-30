@@ -14,9 +14,7 @@ HeaderPage {
     id : searchPage
     property alias headerTextColor : headerLabel.color
     property alias headerText: headerLabel.title
-    headerContent {
-        PageHeader {
-            id : headerLabel
-        }
+    headerContent : PageHeader {
+        id : headerLabel
     }
 }

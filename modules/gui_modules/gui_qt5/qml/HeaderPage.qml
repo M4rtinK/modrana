@@ -12,6 +12,7 @@ import UC 1.0
 
 Page {
     property alias content : contentField.children
+    property alias contentParent : contentField
     property alias headerContent : hContent.children
     property alias headerWidth : header.width
     property alias headerOpacity : header.opacity
