@@ -6,11 +6,5 @@ import UC 1.0
 BasePage {
     id: compassPage
     headerText : "Navigation"
-
-/*
-    content {
-
-    }
-*/
 }
 

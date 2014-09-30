@@ -8,11 +8,4 @@ BasePage {
     headerText : "Compass"
     bottomPadding : 0
     isFlickable : false
-    //anchors.fill : parent
-
-/*
-    content {
-
-    }
-*/
 }

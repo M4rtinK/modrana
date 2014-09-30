@@ -6,10 +6,4 @@ import UC 1.0
 BasePage {
     id: poiPage
     headerText : "POI"
-
-/*
-    content {
-
-    }
-*/
 }

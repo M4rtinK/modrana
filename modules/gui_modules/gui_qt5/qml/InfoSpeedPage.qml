@@ -11,25 +11,22 @@ BasePage {
     property string currentSpeedString : "unknown"
     property string speedStatsString : ""
 
-    content {
-        Label {
-            id : currentSpeed
-            anchors.verticalCenter : parent.verticalCenter
-            //anchors.top : spacer1.bottom
-            //anchors.topMargin : 96 * rWin.c.style.main.multiplier
-            anchors.horizontalCenter : parent.horizontalCenter
-            text: currentSpeedString
-            font.pixelSize : 96 * rWin.c.style.main.multiplier
-        }
-        Label {
-            id : otherSpeed
-            anchors.top : currentSpeed.bottom
-            //anchors.top : spacer1.bottom
-            anchors.topMargin : 96 * rWin.c.style.main.multiplier
-            anchors.horizontalCenter : parent.horizontalCenter
-            text: speedStatsString
-            font.pixelSize : 32 * rWin.c.style.main.multiplier
-        }
+    Label {
+        id : currentSpeed
+        parent : contentParent
+        anchors.verticalCenter : parent.verticalCenter
+        anchors.horizontalCenter : parent.horizontalCenter
+        text: currentSpeedString
+        font.pixelSize : 96 * rWin.c.style.main.multiplier
+    }
+    Label {
+        id : otherSpeed
+        parent : contentParent
+        anchors.top : currentSpeed.bottom
+        anchors.topMargin : 96 * rWin.c.style.main.multiplier
+        anchors.horizontalCenter : content.horizontalCenter
+        text: speedStatsString
+        font.pixelSize : 32 * rWin.c.style.main.multiplier
     }
 
     function setSpeeds(speeds) {
