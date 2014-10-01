@@ -2,6 +2,7 @@ import QtQuick 2.0
 import "functions.js" as F
 //import "./qtc/PageStatus.js" as PageStatus
 import UC 1.0
+import "modrana_components"
 
 Rectangle {
     id: pinchmap;

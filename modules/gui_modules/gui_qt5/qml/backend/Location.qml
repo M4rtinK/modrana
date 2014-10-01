@@ -64,7 +64,7 @@ Item {
         location.usageEnabled = rWin.get_sync("GPSEnabled", true)
         // the pos key holds the (lat, lon) tuple
         if (lastKnownPos) {
-            var savedCoord = rWin.loadQMLFile("Coordinate.qml")
+            var savedCoord = rWin.loadQMLFile("backend/Coordinate.qml")
             savedCoord.latitude = lastKnownPos[0]
             savedCoord.longitude = lastKnownPos[1]
             rWin.lastGoodPos = savedCoord
@@ -72,14 +72,14 @@ Item {
         }
         // try to load the location source
         // conditional imports would be nice, wouldn't they ;)
-        var location_element = rWin.loadQMLFile("LocationSource.qml", true)
+        var location_element = rWin.loadQMLFile("backend/LocationSource.qml", true)
         if (location_element) {
             rWin.log.info("Qt5 location initialized")
         } else {
             // initializing the real source failed (Qt<5.2 ?),
             // use fake source instead
             rWin.log.error("Qt5 position source init failed (Qt<5.2 ?)")
-            location_element = rWin.loadQMLFile("LocationFakeSource.qml")
+            location_element = rWin.loadQMLFile("backend/LocationFakeSource.qml")
             // do an initial update so that Python code also gets the fake
             // position, which will not change anyway
             positionUpdate(location_element)

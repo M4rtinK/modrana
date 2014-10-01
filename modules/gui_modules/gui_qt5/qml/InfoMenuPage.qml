@@ -1,7 +1,7 @@
 import QtQuick 2.0
+import "modrana_components"
 
 // map, ui, POI, navigation, network, debug
-
 
 IconGridPage {
     function getPage(menu){

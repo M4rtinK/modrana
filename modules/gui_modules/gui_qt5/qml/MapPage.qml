@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import "functions.js" as F
 import UC 1.0
+import "modrana_components"
 
 Page {
     id: tabMap

@@ -3,6 +3,7 @@ import QtQuick.Window 2.1
 import io.thp.pyotherside 1.0
 import UC 1.0
 import "modrana_components"
+import "backend"
 
 ApplicationWindow {
     id : rWin
@@ -169,7 +170,7 @@ ApplicationWindow {
         // the various property encapsulation items need the
         // Python backend to be initialized, so we can load them now
         //platformLoader.source = "Platform.qml"
-        rWin.platform = loadQMLFile("Platform.qml")
+        rWin.platform = loadQMLFile("backend/Platform.qml")
         _init_location()
 
         // if on a platform that is not fullscreen-only,
