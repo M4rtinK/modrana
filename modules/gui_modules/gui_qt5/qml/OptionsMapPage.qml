@@ -9,7 +9,9 @@ BasePage {
     headerText : "Map"
     bottomPadding : 0
     property string mapFolderPath : rWin.dcall("modrana.gui.modrana.paths.getMapFolderPath", [],
-    "path lookup in progress", function(v){mapFolderPath=v} )
+    qsTr("path lookup in progress"), function(v){mapFolderPath=v})
+    property string freeSpace : rWin.dcall("modrana.gui.modules.mapData.getFreeSpaceString", [],
+    qsTr("unknown"), function(v){freeSpace=v})
 
     content : Column {
         anchors.top : parent.top
@@ -73,6 +75,11 @@ BasePage {
         Label {
             text : mapOptionsPage.mapFolderPath
             wrapMode : Text.WrapAnywhere
+            width : parent.width
+        }
+        Label {
+            text : qsTr("Free space available: <b>" + mapOptionsPage.freeSpace + "</b>")
+            wrapMode : Text.Wrap
             width : parent.width
         }
     }
