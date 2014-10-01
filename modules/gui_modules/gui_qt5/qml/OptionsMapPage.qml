@@ -8,6 +8,8 @@ BasePage {
     id: mapOptionsPage
     headerText : "Map"
     bottomPadding : 0
+    property string mapFolderPath : rWin.dcall("modrana.gui.modrana.paths.getMapFolderPath", [],
+    "path lookup in progress", function(v){mapFolderPath=v} )
 
     content : Column {
         anchors.top : parent.top
@@ -64,6 +66,14 @@ BasePage {
                     rWin.mapPage.mapTileScale = item.value
                 }
             }
+        }
+        Label {
+            text : qsTr("Map folder path:")
+        }
+        Label {
+            text : mapOptionsPage.mapFolderPath
+            wrapMode : Text.WrapAnywhere
+            width : parent.width
         }
     }
 }
