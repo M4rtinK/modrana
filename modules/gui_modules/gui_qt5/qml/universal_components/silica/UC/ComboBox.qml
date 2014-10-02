@@ -3,8 +3,7 @@ import Sailfish.Silica 1.0
 
 ComboBox {
     id : cBox
-    anchors.left : parent.left
-    anchors.right : parent.right
+    labelMargin : 0
     // selected item, only assigned if user
     // clicks on an item in the context menu,
     // not if changing the current item index
