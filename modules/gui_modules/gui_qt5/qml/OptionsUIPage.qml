@@ -7,7 +7,6 @@ import "modrana_components"
 BasePage {
     id: optionsUIPage
     headerText : "UI"
-
     content : Column {
         anchors.top : parent.top
         anchors.left : parent.left
@@ -21,30 +20,25 @@ BasePage {
             spacing : rWin.c.style.main.spacing
             anchors.left : parent.left
             anchors.right : parent.right
-            Label {
-                text : qsTr("Theme")
-            }
             KeyComboBox {
                 id : themeCb
+                label : qsTr("Theme")
                 key : "theme"
                 model : ListModel {
                     id : cbMenu
                     ListElement {
                         text : "Silica"
                         value : "silica"
-
                     }
                     ListElement {
                         text : "classic"
                         value : "default"
-
                     }
                     ListElement {
                         text : "night"
                         value : "night"
                     }
                 }
-
                 onItemChanged : {
                     console.log("setting theme: " + themeCb.item.value)
                 }
