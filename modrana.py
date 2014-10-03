@@ -427,7 +427,7 @@ class ModRana(object):
         # cache key modifiers
         self.keyModifiers = self.d.get('keyModifiers', {})
         # check if own Quit button is needed
-        if self.dmod.needsQuitButton():
+        if self.gui.showQuitButton():
             menus = self.m.get('menu', None)
             if menus:
                 menus.addItem('main', 'Quit', 'quit', 'menu:askQuit')

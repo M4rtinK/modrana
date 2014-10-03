@@ -314,11 +314,12 @@ class GUIModule(RanaModule):
                self.get("startInFullscreen", False))
         )
 
+    def showQuitButton(self):
+        """Report if the GUI should show a quit button
+        * could be required by device module
+        * could be enabled in options
 
-
-
-
-
-
-
-
+        :returns: if GUI should show quit button or not
+        :rtype: bool
+        """
+        return any((self.dmod.needsQuitButton(), self.get("showQuitButton", False)))

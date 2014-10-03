@@ -592,6 +592,11 @@ class Options(RanaModule):
         if not self.modrana.dmod.fullscreenOnly():
             addBoolOpt("Start in fullscreen", "startInFullscreen", group, False)
 
+        # if the quit button should be shown even if it is not needed on the
+        # given platform
+        if not self.modrana.gui.showQuitButton():
+            addBoolOpt("Show Quit button", "showQuitButton", group, False)
+
         # ** screen
         # only add if supported on device
         display = self.m.get('display', None)

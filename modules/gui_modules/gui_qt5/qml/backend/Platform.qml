@@ -5,7 +5,7 @@ Item {
     rWin.python.call_sync("modrana.gui.getModRanaVersion", [])
 
     property bool showQuitButton :
-    rWin.python.call_sync("modrana.dmod.needsQuitButton", [])
+    rWin.python.call_sync("modrana.gui.showQuitButton", [])
 
     property bool fullscreenOnly :
     rWin.python.call_sync("modrana.dmod.fullscreenOnly", [])
