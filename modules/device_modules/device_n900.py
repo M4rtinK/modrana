@@ -142,7 +142,7 @@ class DeviceN900(DeviceModule):
             self.conicConnection.set_property("automatic-connection-events", False)
 
     def startInFullscreen(self):
-        return True
+        return False
 
     def fullscreenOnly(self):
         return False
@@ -164,9 +164,6 @@ class DeviceN900(DeviceModule):
 
     def getWinWH(self):
         return 800, 480
-
-    def startInFullscreen(self):
-        return True
 
     def getSupportedGUIModuleIds(self):
         return ["GTK", "QML:harmattan", "QML:indep"]
