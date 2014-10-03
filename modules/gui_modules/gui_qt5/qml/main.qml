@@ -181,6 +181,13 @@ ApplicationWindow {
             rWin.height = 480
         }
 
+        if (!fullscreenOnly) {
+            // no need to trigger fullscreen or even read the value if the platform is fullscreen only
+            var startInFullscreen = python.call_sync("modrana.gui.shouldStartInFullscreen", [])
+            if (startInFullscreen) {
+                rWin.setFullscreen(5) // 5 == fullscreen
+            }
+        }
         // the map page needs to be loaded after
         // location is initialized, so that
         // it picks up the correct position
@@ -409,6 +416,12 @@ ApplicationWindow {
         } else { // switch to fullscreen
             rWin.visibility = 5
         }
+        rWin._lastVisibility = rWin.visibility
+    }
+
+    function setFullscreen(value) {
+        //TODO: value checking :D
+        rWin.visibility = value
         rWin._lastVisibility = rWin.visibility
     }
 }

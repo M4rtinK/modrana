@@ -586,6 +586,11 @@ class Options(RanaModule):
                group,
                "auto")
 
+        # if non-fullscreen mode is supported on the device, add a button
+        # that enables starting in fullscreen
+        # (requested by N900 users)
+        if not self.modrana.dmod.fullscreenOnly():
+            addBoolOpt("Start in fullscreen", "startInFullscreen", group, False)
 
         # ** screen
         # only add if supported on device

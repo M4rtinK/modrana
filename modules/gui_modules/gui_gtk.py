@@ -111,6 +111,10 @@ class GTKGUI(GUIModule):
         self.topWindow = win
         self.modrana.addTime("map widget created")
 
+        # check if we should start in fullscreen
+        if self.shouldStartInFullscreen():
+            self.setFullscreen(True)
+
         # Event handling
         event_box = gtk.EventBox()
 

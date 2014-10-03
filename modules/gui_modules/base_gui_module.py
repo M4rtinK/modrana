@@ -299,6 +299,20 @@ class GUIModule(RanaModule):
             w, h = screenWH
         return w == h
 
+    def shouldStartInFullscreen(self):
+        """Report if the GUI should start in fullscreen
+        * could be required by device module
+        * could be requested by CLI flag
+        * could be enabled in options
+
+        :returns: if GUI should start in fullscreen or not
+        :rtype: bool
+        """
+        return any(
+            (self.modrana.dmod.startInFullscreen(),
+               self.modrana.args.fullscreen,
+               self.get("startInFullscreen", False))
+        )
 
 
 

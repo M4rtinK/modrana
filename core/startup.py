@@ -155,6 +155,13 @@ class Startup(object):
             default=None,
             action="store_true"
         )
+        # start in fullscreen
+        parser.add_argument(
+            '--fullscreen',
+            help="start in fullscreen",
+            default=None,
+            action="store_true"
+        )
 
         self.args = parser.parse_args()
 
