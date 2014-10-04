@@ -37,7 +37,6 @@ class Display(RanaModule):
     def __init__(self, m, d, i):
         RanaModule.__init__(self, m, d, i)
 
-        self.fullscreen = False
         """according to documentation on:
         (http://wiki.maemo.org/PyMaemo/Python-osso_examples#Device_State),
         every display_blanking_pause() call pauses screenblank for 60 seconds,
@@ -73,10 +72,7 @@ class Display(RanaModule):
                             "screen blanking update")
 
     def handleMessage(self, message, messageType, args):
-        if message == "fullscreen" and messageType == "ms":
-            if args == "toggle":
-                self.fullscreenToggle()
-        elif message == "blankingModeChanged":
+        if message == "blankingModeChanged":
             self.checkScreenBlankingMode() # check if screen blanking changed
         elif message == "checkShowRedrawTime":
             state = self.get('showRedrawTime', False)
@@ -109,30 +105,6 @@ class Display(RanaModule):
         else:
             self.enableRedraw(reason="window is un-obscured or partially obscured")
 
-    def fullscreenToggle(self):
-        """toggle fullscreen state"""
-        if self.fullscreen:
-            self.modrana.gui.setFullscreen(False)
-            self.fullscreen = False
-            self.menusSetFullscreen(self.fullscreen)
-            self.log.info("going out of fullscreen")
-        else:
-            self.modrana.gui.setFullscreen(True)
-            self.fullscreen = True
-            self.menusSetFullscreen(self.fullscreen)
-            self.log.info("going to fullscreen")
-
-    def menusSetFullscreen(self, value):
-        """update the cached value in the menus module"""
-        m = self.m.get('menu', None)
-        if m:
-            m.fullscreen = value
-
-    def getFullscreenEnabled(self):
-        """
-        True - we are in fullscreen, False otherwise
-        """
-        return self.fullscreen
 
     # * screen blanking control *
 
@@ -206,7 +178,7 @@ class Display(RanaModule):
 
     def checkFullscreenMovement(self):
         """check if we are in fullscreen and moving"""
-        if self.fullscreen:
+        if self.modrana.gui.fullscreen:
             # OK, we are in fullscreen, check movement
             self.checkMovement()
         else:
@@ -216,7 +188,7 @@ class Display(RanaModule):
 
     def checkFullscreen(self):
         """check if we are in fullscreen"""
-        if self.fullscreen:
+        if self.modrana.gui.fullscreen:
             # OK, we are in fullscreen, check if blanking is being paused
             if self.pauseScreenBlankingEnabled == False:
                 # unlock screen
