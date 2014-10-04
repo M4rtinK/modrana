@@ -76,22 +76,20 @@ class DeviceNeo(DeviceModule):
         return 2
 
     def textEntryIminent(self):
-        """in SHR on Neo, we need to temporarily disable fullscreen
+        """In SHR on Neo, we need to temporarily disable fullscreen
         (if we are in fullscreen),
         or else the text entry box won't show up"""
-        display = self.m.get('display', None)
-        if display:
-            if display.getFullscreenEnabled():
-                display.fullscreenToggle()
+        if self.modrana.gui:
+            if self.modrana.gui.fullscreen:
+                self.modrana.gui.toggleFullscreen()
                 self.tempUnfullscreen = True
 
     def textEntryDone(self):
-        """restore fullscreen if needed"""
+        """Restore fullscreen if needed"""
         if self.tempUnfullscreen:
-            display = self.m.get('display', None)
-            if display:
-                if not display.getFullscreenEnabled():
-                    display.fullscreenToggle()
+            if self.modrana.gui:
+                if not self.modrana.gui.fullscreen:
+                    self.modrana.gui.toggleFullscreen()
                     self.tempUnfullscreen = False
 
     def getLocationType(self):
