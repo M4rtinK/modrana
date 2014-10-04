@@ -975,6 +975,16 @@ class Options(RanaModule):
                group,
                10)
 
+        addOpt("Batch tile download thread count", "maxDlThreads",
+               [(1, "1 (serial)"),
+                (2, "2"),
+                (3, "3"),
+                (5, "5 (default)"),
+                (10, "10"),
+                (20, "20")],
+               group,
+               10)
+
         # * the Sound category *
         catSound = addCat("Sound", "sound", "sound")
         # * sound output
