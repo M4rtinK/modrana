@@ -83,6 +83,16 @@ DEFAULT_THREAD_COUNT_BATCH_SIZE_CHECK = 20
 # * if a 101th request comes, it replaces the oldest not in progress task
 DEFAULT_AUTOMATIC_TILE_DOWNLOAD_QUEUE_SIZE = 100
 
+# in-memory tile cache size
+# * this controls how many tiles modRana keeps in memory
+#   after downloading them of loading them from storage
+# * the tiles are cached so they can be quickly used if
+#   requested again, which is often needed by the GTK GUI
+#   and should also help the Qt 5 GUI
+DEFAULT_MEMORY_TILE_CACHE_SIZE = 150
+# how many tiles to remove from cache when it gets full
+DEFAULT_MEMORY_TILE_CACHE_TRIM_SIZE = 30
+
 # device types
 DEVICE_TYPE_DESKTOP = 1
 DEVICE_TYPE_SMARTPHONE = 2
