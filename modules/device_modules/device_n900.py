@@ -23,6 +23,7 @@ import subprocess
 import time
 from modules.device_modules.base_device_module import DeviceModule
 from core.constants import DEVICE_TYPE_SMARTPHONE
+import logging
 #N900 specific:
 import dbus.glib
 
@@ -94,6 +95,11 @@ class DeviceN900(DeviceModule):
         elif gs.GUIString == "QML":
             self.log.info("N900 Qt screen saver controller created")
             self.qScreenSaver = QSystemScreenSaver()
+
+        # the old Python 2.5 based urllib3 has a bit different logging,
+        # so we need to make it shut up here
+        urllib3_logger = logging.getLogger("core.backports.urllib3_python25")
+        urllib3_logger.setLevel(logging.ERROR)
 
         self.log.info("N900 device specific module initialized")
 
