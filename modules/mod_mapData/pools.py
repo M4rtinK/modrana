@@ -238,7 +238,7 @@ class BatchSizeCheckPool(TileBatchPool):
         self._foundLocally = 0
 
     def _maxThreads(self):
-        return modrana.get('maxSizeThreads', 5)
+        return modrana.get('maxSizeThreads', constants.DEFAULT_THREAD_COUNT_BATCH_SIZE_CHECK)
 
     def _processBatch(self):
         """When checking the size of the download batch we
@@ -338,7 +338,7 @@ class BatchTileDownloadPool(TileBatchPool):
         self._downloadedDataSize = 0
 
     def _maxThreads(self):
-        return modrana.get('maxDlThreads', 5)
+        return modrana.get('maxDlThreads', constants.DEFAULT_THREAD_COUNT_AUTOMATIC_TILE_DOWNLOAD)
 
     def _processBatch(self):
         """While processing the download batch we remove

@@ -163,7 +163,8 @@ class MapTiles(RanaModule):
         self.modrana.watch('invertMapTiles', self._updateTileFilteringCB, runNow=True)
         # check if tile filtering is enabled or should be enabled with current theme
 
-        maxThreads = int(self.get("maxAutoDownloadThreads2", 10))
+        maxThreads = int(self.get("maxAutoDownloadThreads2",
+                                  constants.DEFAULT_THREAD_COUNT_AUTOMATIC_TILE_DOWNLOAD))
         self._downloader = Downloader(maxThreads, taskBufferSize=100)
         self._startTileLoadingManager()
 

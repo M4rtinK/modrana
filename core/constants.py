@@ -61,9 +61,21 @@ THREAD_TESTING_PROVIDER = "modRanaTestingProvider"
 
 # thread pools
 THREAD_POOL_AUTOMATIC_TILE_DOWNLOAD = "automaticTileDownload"
-
 THREAD_POOL_BATCH_DOWNLOAD = "batchTileDownload"
 THREAD_POOL_BATCH_SIZE_CHECK = "batchTileSizeCheck"
+
+# default thread counts for pools
+DEFAULT_THREAD_COUNT_AUTOMATIC_TILE_DOWNLOAD = 10
+# Default number of threads for bach tile download, even a value of 10
+# can lead to 3000+ open sockets on a fast Internet connection
+# handle with care :)
+# UPDATE: modRana now reuses open sockets so it might not be that bad any more
+DEFAULT_THREAD_COUNT_BATCH_DOWNLOAD = 5
+# Default number of batch size estimation threads - this sets the number of threads
+# used for determining the size of the batch download (from http headers)
+# NOTE: even though we are downloading only the headers, for a few thousand tiles this can be an
+#       un-trivial amount of data (so use this with caution on metered connections)
+DEFAULT_THREAD_COUNT_BATCH_SIZE_CHECK = 20
 
 # device types
 DEVICE_TYPE_DESKTOP = 1
