@@ -165,8 +165,11 @@ class MapTiles(RanaModule):
 
         maxThreads = int(self.get("maxAutoDownloadThreads2",
                                   constants.DEFAULT_THREAD_COUNT_AUTOMATIC_TILE_DOWNLOAD))
+        taskQueueSize = int(self.get("autoDownloadQueueSize",
+                                     constants.DEFAULT_AUTOMATIC_TILE_DOWNLOAD_QUEUE_SIZE))
+        self.log.debug("automatic tile download queue size: %d", taskQueueSize)
         self._downloader = Downloader(maxThreads,
-                                      taskBufferSize=constants.DEFAULT_AUTOMATIC_TILE_DOWNLOAD_TASK_QUEUE_SIZE)
+                                      taskBufferSize=taskQueueSize)
         self._startTileLoadingManager()
 
     def getTile(self, lzxy, async=False, tag=None, download=True):
