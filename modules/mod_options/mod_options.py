@@ -403,6 +403,9 @@ class Options(RanaModule):
         addBoolOpt = self.addBoolOption
         addItems = self.addItemsOption
 
+        # useful notifications
+        notifyRestartNeeded = "ml:notification:m:restart modRana to apply this change;3"
+
         # * the Map category *
         catMap = addCat("Map", "map", "map")
 
@@ -961,13 +964,14 @@ class Options(RanaModule):
                group,
                "full")
 
-        addOpt("Max nr. of threads for tile auto-download", "maxAutoDownloadThreads2",
-               [(5, "5"),
-                (10, "10 (default)"),
-                (20, "20"),
-                (30, "30"),
-                (40, "40"),
-                (50, "50")],
+        addOpt("Auto tile download thread count", "maxAutoDownloadThreads2",
+               [(1, "1 (serial)", notifyRestartNeeded),
+                (5, "5", notifyRestartNeeded),
+                (10, "10 (default)", notifyRestartNeeded),
+                (20, "20", notifyRestartNeeded),
+                (30, "30", notifyRestartNeeded),
+                (40, "40", notifyRestartNeeded),
+                (50, "50", notifyRestartNeeded)],
                group,
                10)
 
