@@ -46,7 +46,6 @@ class Menus(RanaModule):
         self.listOffset = 0
         self.setupGeneralMenus()
         self.lastActivity = int(time.time())
-        self.fullscreen = False
         self.mainScreenCoords = {}
         self.userConfig = self.modrana.configs.getUserConfig()
         self.hideMapScreenButtons = False
@@ -170,13 +169,13 @@ class Menus(RanaModule):
 
 
             # draw the maximize icon
-            if self.fullscreen:
+            if self.modrana.gui.fullscreen:
                 icon = 'center:minimize;0.05'
             else:
                 icon = 'center:maximize;0.05'
 
             (x1, y1) = buttons['fullscreen']
-            self.drawButton(cr, x1, y1, dx, dy, "", icon, "ms:display:fullscreen:toggle")
+            self.drawButton(cr, x1, y1, dx, dy, "", icon, "ms:gui:fullscreen:toggle")
 
             # draw the centering button
             (x1, y1) = buttons['centre']
