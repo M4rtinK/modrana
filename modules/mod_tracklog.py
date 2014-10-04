@@ -441,14 +441,6 @@ class Tracklog(RanaModule):
     #    last_y = y
     #print("bod")
 
-    #  def update(self):
-    #    # Run scheduledUpdate every second
-    #    t = time()
-    #    dt = t - self.updateTime
-    #    if(dt > self.get("logPeriod", 2)):
-    #      self.updateTime = t
-    #      self.scheduledUpdate()
-
     def initToolsMenu(self):
         """initialize the tools submenu"""
         menus = self.m.get('menu', None)

@@ -69,10 +69,6 @@ class RanaModule(object):
         """Runs on application start (after all other modules are loaded)"""
         pass
 
-    def update(self):
-        """Regular updates (several per second)"""
-        pass
-
     def beforeDraw(self):
         """Before a screen is redrawn (don't use this for regular updates)"""
         pass

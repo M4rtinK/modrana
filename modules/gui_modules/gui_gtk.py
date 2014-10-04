@@ -378,9 +378,6 @@ class MainWidget(gtk.Widget):
         self.dragX = 0
         self.dragY = 0
 
-        """ setting this both to 100 and 1 in mapView and gpsd fixes the arrow
-         orientation bug """
-        self.timer1 = gobject.timeout_add(100, self.update, self) #default 100
         self.timer3 = None # will be used for timing long press events
 
         self.notMovingSpeed = 1 # in m/s
@@ -424,12 +421,6 @@ class MainWidget(gtk.Widget):
         trigger the modRana standard shutdown sequence,
         then terminate the GTK main loop"""
         gtk.main_quit()
-
-    def update(self):
-        """ trigger periodic module update """
-        # TODO: depreciate this
-        # in favor of event based and explicit update timers
-        self.modrana.update()
 
     def get(self, key, defaultValue):
         """local alias for the modRana persistent dictionary get function"""
@@ -542,7 +533,6 @@ class MainWidget(gtk.Widget):
         m = self.modrana.getModule("clickHandler", None)
         if m:
             m.handleClick(x, y, msDuration)
-            self.update()
 
     def handleDrag(self, x, y, dx, dy, startX, startY, msDuration):
         """handle dragging on the screen"""

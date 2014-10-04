@@ -457,13 +457,6 @@ class ModRana(object):
         """
         return self.m
 
-    def update(self):
-        """perform module state update"""
-        # TODO: depreciate this
-        # in favor of event based and explicit update timers
-        for m in self.m.values():
-            m.update()
-
     ## STARTUP AND SHUTDOWN ##
 
     def _startupDone(self):
