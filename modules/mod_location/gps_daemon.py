@@ -18,12 +18,15 @@
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
 import threading
+import socket
 from time import sleep
 
 from .base_position_source import PositionSource
 from core.fix import Fix
 from core import threads
 from core import constants
+
+MAX_CONSECUTIVE_GPSD_WARNINGS = 5
 
 import logging
 log = logging.getLogger("mod.location.gpsd")
@@ -181,9 +184,12 @@ class GPSDConsumer(threads.ModRanaThread):
 
         from .gps_module import gps
         from .gps_module import client
-
-        self.session = gps(host="localhost", port="2947")
-        self.session.stream(flags=client.WATCH_JSON)
+        try:
+            self.session = gps(host="localhost", port="2947")
+            self.session.stream(flags=client.WATCH_JSON)
+        except socket.error:
+            self.session = None
+            log.warning("GPS daemon refused initial connection")
         self.verbose = False
         # vars
         self.fix = None
@@ -191,9 +197,12 @@ class GPSDConsumer(threads.ModRanaThread):
 
         self.target = self._target
 
-    def _target(self):
-        import gps_module as gps
+        self._consecutiveGPSDErrors = 0
 
+    def _target(self):
+        if self.session is None:
+            # connection to GPS daemon not established
+            return
         log.info("GPSDConsumer: starting")
         while True:
             if self.stop == True:
@@ -201,8 +210,22 @@ class GPSDConsumer(threads.ModRanaThread):
                 break
             try:
                 self.session.next() # this function blocks until a new fix is available
+
+            except socket.error:
+                log.warning("GPS daemon connection refused")
+            except socket.timeout:
+                self._consecutiveGPSDErrors+=1
+                if self._consecutiveGPSDErrors <= MAX_CONSECUTIVE_GPSD_WARNINGS:
+                    log.warning("GPS daemon not running (%d/%d",
+                                self._consecutiveGPSDErrors, MAX_CONSECUTIVE_GPSD_WARNINGS)
+                else:
+                    log.warning("ignoring further GPSD-not-running warnings")
             except Exception:
-                log.exception("GPS daemon not running")
+                log.exception("GPS daemon connection failed")
+
+            # connection successful, clear the error count
+            self._consecutiveGPSDErrors = 0
+
             sf = self.session.fix
             if sf.mode > 1: # 0 & 1 -> no fix
                 with self.lock:
