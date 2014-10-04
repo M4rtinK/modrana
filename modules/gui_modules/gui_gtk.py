@@ -191,9 +191,11 @@ class GTKGUI(GUIModule):
         if value:
             self.mw.topWindow.fullscreen()
             self.fullscreen = True
+            self.log.info("going to fullscreen")
         else:
             self.mw.topWindow.unfullscreen()
             self.fullscreen = False
+            self.log.info("going out of fullscreen")
 
 
     def enableDefaultDrag(self):
