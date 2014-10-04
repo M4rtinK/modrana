@@ -1076,9 +1076,20 @@ class Options(RanaModule):
         addBoolOpt("Print tile cache status to terminal", "reportTileCacheStatus", group, False)
         addBoolOpt("Tile loading status to terminal", "tileLoadingDebug", group, False)
         addBoolOpt("Redraw screen once a new tile is loaded", "tileLoadedRedraw", group, True)
+        addOpt("In memory tile cache size", "memoryTileCacheSize",
+               [(20, "20", notifyRestartNeeded),
+                (50, "50", notifyRestartNeeded),
+                (100, "100", notifyRestartNeeded),
+                (150, "150 (default)", notifyRestartNeeded),
+                (200, "200", notifyRestartNeeded),
+                (300, "300", notifyRestartNeeded),
+                (500, "500", notifyRestartNeeded),
+                (1000, "1000", notifyRestartNeeded)],
+               group,
+               150)
         addOpt("Auto tile download queue size", "autoDownloadQueueSize",
                [(1, "1", notifyRestartNeeded),
-                (10, "5", notifyRestartNeeded),
+                (10, "10", notifyRestartNeeded),
                 (20, "20", notifyRestartNeeded),
                 (50, "50", notifyRestartNeeded),
                 (100, "100 (default)", notifyRestartNeeded),

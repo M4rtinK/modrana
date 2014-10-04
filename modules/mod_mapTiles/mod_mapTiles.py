@@ -99,7 +99,9 @@ class MapTiles(RanaModule):
         self.images = [{}, {}] # the first dict contains normal image data, the second contains special tiles
         self.imagesLock = threading.RLock()
         # we need to limit the size of the tile cache to avoid a memory leak
-        self.maxImagesInMemory = constants.DEFAULT_MEMORY_TILE_CACHE_SIZE
+        memoryTileCacheSize = int(self.get("memoryTileCacheSize", constants.DEFAULT_MEMORY_TILE_CACHE_SIZE))
+        self.log.info("in memory tile cache size: %d", memoryTileCacheSize)
+        self.maxImagesInMemory = memoryTileCacheSize
         self.imagesTrimmingAmount = constants.DEFAULT_MEMORY_TILE_CACHE_TRIM_SIZE
         # how many tiles to remove once the maximum is reached
         # so that trim does not run always run after adding a tile
