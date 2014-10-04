@@ -77,6 +77,12 @@ DEFAULT_THREAD_COUNT_BATCH_DOWNLOAD = 5
 #       un-trivial amount of data (so use this with caution on metered connections)
 DEFAULT_THREAD_COUNT_BATCH_SIZE_CHECK = 20
 
+# tile download request queue default size
+# * up to 100 download tasks can be stored in the request queue
+# * up to DEFAULT_THREAD_COUNT_AUTOMATIC_TILE_DOWNLOAD tasks can be in progress
+# * if a 101th request comes, it replaces the oldest not in progress task
+DEFAULT_AUTOMATIC_TILE_DOWNLOAD_TASK_QUEUE_SIZE = 100
+
 # device types
 DEVICE_TYPE_DESKTOP = 1
 DEVICE_TYPE_SMARTPHONE = 2
