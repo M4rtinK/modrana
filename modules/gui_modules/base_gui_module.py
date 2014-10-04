@@ -51,6 +51,17 @@ class GUIModule(RanaModule):
         """
         self.subtypeId = subtypeId
 
+    def handleMessage(self, message, messageType, args):
+        if message == "fullscreen" and messageType == "ms":
+            if args == "toggle":
+                self.toggleFullscreen()
+            elif args == "enable":
+                self.setFullscreen(True)
+            elif args == "disable":
+                self.setFullscreen(False)
+            else:
+                self.log.error("incorrect fullscreen message argument: %s", args)
+
     def resize(self, mrw, h):
         """resize the GUI to given width and height"""
         pass
