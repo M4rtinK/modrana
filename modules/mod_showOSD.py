@@ -63,24 +63,23 @@ class ShowOSD(RanaModule):
 
     def drawScreenOverlay(self, cr):
         """ draw currently active information widgets TODO: just draw object from list"""
-        if self.m.get('config', {}):
-            config = self.modrana.configs.getUserConfig()
+        config = self.modrana.configs.getUserConfig()
 
-            mode = self.get('mode', None)
-            if mode is None:
-                return
+        mode = self.get('mode', None)
+        if mode is None:
+            return
 
-            if mode not in config:
-                return
-            if 'OSD' in config[mode]:
-                items = config[mode]['OSD']
-                # we don't know the nearest point when refreshing the screen
-                # TODO: don't search for nearest point on every refresh ?
-                self.nearestPoint = None
-                self.nearestIndex = None
-                self.distanceList = None
-                for item in items:
-                    self.drawWidget(cr, items[item], item)
+        if mode not in config:
+            return
+        if 'OSD' in config[mode]:
+            items = config[mode]['OSD']
+            # we don't know the nearest point when refreshing the screen
+            # TODO: don't search for nearest point on every refresh ?
+            self.nearestPoint = None
+            self.nearestIndex = None
+            self.distanceList = None
+            for item in items:
+                self.drawWidget(cr, items[item], item)
 
 
     def drawWidget(self, cr, item, type):
