@@ -40,7 +40,7 @@ BasePage {
                     }
                 }
                 onItemChanged : {
-                    console.log("setting theme: " + themeCb.item.value)
+                    rWin.log.info("setting theme: " + themeCb.item.value)
                 }
             }
         }
