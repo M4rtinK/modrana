@@ -59,11 +59,14 @@ class StoreTiles(RanaModule):
         self.maxDbFileSizeGibiBytes = 3.7 # maximum database file size (to avoid the FAT32 file size limitation) in GibiBytes
         self.maxTilesInQueue = 50
         self.sqliteTileQueue = Queue.Queue(self.maxTilesInQueue)
-        """if there are more tiles in the buffer than maxTilesInBuffer,
-           the whole buffer will be processed at once (flushed) to avoid a potential memory leak
-        """
-        self.processPerUpdate = 1 #how many tiles will be processed per update (updates should happen every 100ms)
-        self.commitInterval = 5 # how often we commit to the database (only happens when there is something in the queue)
+        # if there are more tiles in the buffer than maxTilesInBuffer,
+        # the whole buffer will be processed at once (flushed) to avoid
+        # a potential memory leak
+
+        # how often we commit to the database (only happens when there is something in the queue)
+        self.commitInterval = int(self.get("sqliteTileDatabaseCommitInterval",
+                                           constants.DEFAULT_SQLITE_TILE_DATABASE_COMMIT_INTERVAL))
+        self.log.info("sqlite tile database commit interval: %d s", self.commitInterval)
         self.lastCommit = time.time()
         self.dirty = set() # a set of connections, that have uncommitted data
         # locks

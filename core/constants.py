@@ -93,6 +93,13 @@ DEFAULT_MEMORY_TILE_CACHE_SIZE = 150
 # how many tiles to remove from cache when it gets full
 DEFAULT_MEMORY_TILE_CACHE_TRIM_SIZE = 30
 
+# sqlite tile database commit interval
+# * lower interval - lower amount of tiles in flight and this
+#   lower memory usage but more & less efficient IO (less batching)
+# * longer interval - more tiles in flight, more memory usage but
+#   IO happens less often in longer hopefully more efficient bursts
+DEFAULT_SQLITE_TILE_DATABASE_COMMIT_INTERVAL = 5 # seconds
+
 # device types
 DEVICE_TYPE_DESKTOP = 1
 DEVICE_TYPE_SMARTPHONE = 2

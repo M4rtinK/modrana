@@ -565,6 +565,15 @@ class Options(RanaModule):
                group,
                'files')
         addBoolOpt("Store downloaded tiles", "storeDownloadedTiles", group, True)
+        addOpt("Sqlite tile db commit interval", "sqliteTileDatabaseCommitInterval",
+               [(1, "1 second", notifyRestartNeeded),
+                (2, "2 seconds", notifyRestartNeeded),
+                (5, "5 seconds (default)", notifyRestartNeeded),
+                (10, "10 seconds", notifyRestartNeeded),
+                (30, "30 seconds", notifyRestartNeeded),
+                (60, "1 minute", notifyRestartNeeded)],
+               group,
+               150)
 
         # * the view category *
         catView = addCat("View", "view", "view")
