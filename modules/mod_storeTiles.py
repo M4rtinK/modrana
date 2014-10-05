@@ -198,7 +198,7 @@ class StoreTiles(RanaModule):
             self.dirty.add(c)
 
 
-    def commitAll(self):
+    def commitAll(self, tilesInCommit=0):
         """commit all uncommitted"""
         with self.lookupConnectionLock:
             # just to make sure the access is sequential
@@ -207,7 +207,7 @@ class StoreTiles(RanaModule):
             while self.dirty:
                 conn = self.dirty.pop()
                 conn.commit()
-            self.log.debug("sqlite commit OK")
+            self.log.debug("sqlite commit OK (%d tiles)", tilesInCommit)
 
 
     def connectToStore(self, stores, pathToStore, dbFolderPath, accessType):
@@ -467,6 +467,7 @@ class StoreTiles(RanaModule):
 
     def _tileLoader(self):
         """This is run by a thread that stores sqlite tiles to a db"""
+        tilesInCommit = 0
         while True:
             try:
                 item = self.sqliteTileQueue.get(block=True)
@@ -478,7 +479,7 @@ class StoreTiles(RanaModule):
 
             if item == 'shutdown': # we put this to the queue to announce shutdown
                 self.log.info("shutdown imminent, committing all uncommitted tiles")
-                self.commitAll()
+                self.commitAll(tilesInCommit)
                 self.log.info("all tiles committed, breaking, goodbye :)")
                 break
                 # the thread should not die due to an exception
@@ -489,6 +490,7 @@ class StoreTiles(RanaModule):
             try:
                 (tile, lzxy) = item # unpack the tuple
                 self.storeTile(tile, lzxy) # store the tile
+                tilesInCommit+=1
                 self.sqliteTileQueue.task_done()
             except Exception:
                 self.log.exception("sqlite storage worker: exception during tile storage")
@@ -496,7 +498,8 @@ class StoreTiles(RanaModule):
             dt = time.time() - self.lastCommit # check when the last commit was
             if dt > self.commitInterval:
                 try:
-                    self.commitAll() # commit all "dirty" connections
+                    self.commitAll(tilesInCommit) # commit all "dirty" connections
+                    tilesInCommit = 0
                     self.lastCommit = time.time() # update the last commit timestamp
                 except Exception:
                     self.log.exception("sqlite storage worker: exception during mass db commit")
