@@ -2,6 +2,7 @@ import QtQuick 2.0
 import "functions.js" as F
 import UC 1.0
 import "modrana_components"
+import QtSensors 5.0 as Sensors
 
 Page {
     id: tabMap
@@ -132,19 +133,29 @@ Page {
         currentPositionError: 0
     }
 
-    /* TODO: use with compass
+    Sensors.Compass {
+        id : compass
+        dataRate : 50
+        active : tabMap.isActive
+        onReadingChanged : {
+            compassImage.rotation = -compass.reading.azimuth
+        }
+    }
+
     Image {
         id: compassImage
         // TODO: investigate how to replace this by an image loader
         // what about rendered size ?
+        // also why are the edges of the image so jarred ?
 
         source: "../../../../themes/"+ rWin.theme.id +"/windrose-simple.svg"
-        transform: [Rotation {
-                id: azCompass
-                origin.x: compassImage.width/2
-                origin.y: compassImage.height/2
-                //angle: -compass.azimuth
-            }]
+        transformOrigin: Item.Center
+
+        Behavior on rotation {
+            SmoothedAnimation{ velocity: -1; duration:100;maximumEasingTime: 100 }
+        }
+
+
         anchors.left: tabMap.left
         anchors.leftMargin: rWin.c.style.main.spacingBig
         anchors.top: tabMap.top
@@ -154,29 +165,28 @@ Page {
         fillMode: Image.PreserveAspectFit
         z: 2
 
-        Image {
-            //property int angle: gps.targetBearing || 0
-            property int angle: 0
-            property int outerMargin: 0
-            id: arrowImage
-            //visible: (gps.targetValid && gps.lastGoodFix.valid)
-
-            // TODO: investigate how to replace this by an image loader
-            // what about rendered size ?
-            source: "../../../../themes/"+ rWin.theme.id +"/arrow_target.svg"
-            width: (compassImage.paintedWidth / compassImage.sourceSize.width)*sourceSize.width
-            fillMode: Image.PreserveAspectFit
-            x: compassImage.width/2 - width/2
-            y: arrowImage.outerMargin
-            z: 3
-            transform: Rotation {
-                origin.y: compassImage.height/2 - arrowImage.outerMargin
-                origin.x: arrowImage.width/2
-                angle: arrowImage.angle
-            }
-        }
+//        Image {
+//            //property int angle: gps.targetBearing || 0
+//            property int angle: 0
+//            property int outerMargin: 0
+//            id: arrowImage
+//            //visible: (gps.targetValid && gps.lastGoodFix.valid)
+//
+//            // TODO: investigate how to replace this by an image loader
+//            // what about rendered size ?
+//            source: "../../../../themes/"+ rWin.theme.id +"/arrow_target.svg"
+//            width: (compassImage.paintedWidth / compassImage.sourceSize.width)*sourceSize.width
+//            fillMode: Image.PreserveAspectFit
+//            x: compassImage.width/2 - width/2
+//            y: arrowImage.outerMargin
+//            z: 3
+//            transform: Rotation {
+//                origin.y: compassImage.height/2 - arrowImage.outerMargin
+//                origin.x: arrowImage.width/2
+//                angle: arrowImage.angle
+//            }
+//        }
     }
-    */
 
     Row {
         id: buttonsRight
