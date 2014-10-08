@@ -10,6 +10,11 @@ Page {
     property int mapTileScale : rWin.get(
     "mapScale", 1, function(v){mapTileScale=v})
 
+    property bool showCompass : rWin.get("showQt5GUIMapCompass", true,
+                                         function(v){tabMap.showCompass=v})
+    property real compassOpacity : rWin.get("qt5GUIMapCompassOpacity", 0.7,
+                                         function(v){tabMap.compassOpacity=v})
+
     function showOnMap(lat, lon) {
         pinchmap.setCenterLatLon(lat, lon);
         // show on map moves map center and
@@ -136,7 +141,7 @@ Page {
     Sensors.Compass {
         id : compass
         dataRate : 50
-        active : tabMap.isActive
+        active : tabMap.isActive && tabMap.showCompass
         onReadingChanged : {
             compassImage.rotation = -compass.reading.azimuth
         }
@@ -144,6 +149,8 @@ Page {
 
     Image {
         id: compassImage
+        visible : tabMap.showCompass
+        opacity : tabMap.compassOpacity
         // TODO: investigate how to replace this by an image loader
         // what about rendered size ?
         // also why are the edges of the image so jarred ?

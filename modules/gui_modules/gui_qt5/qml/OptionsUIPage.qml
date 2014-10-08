@@ -63,5 +63,36 @@ BasePage {
                  rWin.set("QMLAnimate", checked)
             }
         }
+        Label {
+            text : qsTr("Map screen")
+        }
+        TextSwitch {
+            text : qsTr("Show compass")
+            checked : rWin.mapPage.showCompass
+            onCheckedChanged : {
+                 rWin.mapPage.showCompass = checked
+                 rWin.set("showQt5GUIMapCompass", checked)
+            }
+        }
+        Label {
+            text : qsTr("Compass opacity")
+        }
+        Slider {
+            id : compassOpacitySlider
+            width : parent.width
+            stepSize : 0.1
+            maximumValue : 1.0
+            minimumValue : 0.0
+            value : rWin.mapPage.compassOpacity
+            valueText : ""
+            onPressedChanged : {
+                // set the value once users
+                // stops interacting with the slider
+                if (pressed == false) {
+                    rWin.mapPage.compassOpacity = value
+                    rWin.set("qt5GUIMapCompassOpacity", value)
+                }
+            }
+        }
     }
 }
