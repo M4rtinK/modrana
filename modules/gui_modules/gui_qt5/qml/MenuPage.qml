@@ -54,6 +54,15 @@ IconGridPage {
                 testModel.append(
                     {"caption": "Route", "icon":"route.png", "menu":""}
                 )
+                testModel.append(
+                    {"caption": "POI", "icon":"poi.png", "menu":""}
+                )
+                testModel.append(
+                    {"caption": "Tracks", "icon":"tracklogs.png", "menu":""}
+                )
+                testModel.append(
+                    {"caption": "Data", "icon":"download.png", "menu":""}
+                )
             }
         }
     }
