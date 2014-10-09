@@ -25,7 +25,7 @@ BasePage {
         parent : contentParent
         anchors.top : currentSpeed.bottom
         anchors.topMargin : 96 * rWin.c.style.main.multiplier
-        anchors.horizontalCenter : content.horizontalCenter
+        anchors.horizontalCenter : parent.horizontalCenter
         text: speedStatsString
         font.pixelSize : 32 * rWin.c.style.main.multiplier
     }
