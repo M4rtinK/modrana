@@ -34,6 +34,9 @@ BasePage {
             id : aboutTitle
             anchors.horizontalCenter : parent.horizontalCenter
             text: "<h4>version: " + rWin.platform.modRanaVersion + "</h4>"
+            width : parent.width
+            horizontalAlignment : Text.AlignHCenter
+            wrapMode : Text.Wrap
         }
         Image {
             id : aboutModRanaIcon
