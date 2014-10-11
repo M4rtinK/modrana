@@ -7,15 +7,7 @@ import "modrana_components"
 BasePage {
     id: optionsUIPage
     headerText : "UI"
-    content : Column {
-        anchors.top : parent.top
-        anchors.left : parent.left
-        anchors.right : parent.right
-        anchors.topMargin : rWin.c.style.main.spacing
-        anchors.leftMargin : rWin.c.style.main.spacing
-        anchors.rightMargin : rWin.c.style.main.spacing
-        spacing : rWin.c.style.main.spacingBig * 2
-        width : parent.width
+    content : ContentColumn {
         Column {
             spacing : rWin.c.style.main.spacing
             anchors.left : parent.left
