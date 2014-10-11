@@ -533,7 +533,7 @@ class StoreTiles(RanaModule):
                 with open(filename, 'wb') as f:
                     f.write(tile)
             except:
-                self.log.exception("saving tile to file %f failed", filename)
+                self.log.exception("saving tile to file %s failed", filename)
 
     def shutdown(self):
         # try to commit possibly uncommitted tiles
