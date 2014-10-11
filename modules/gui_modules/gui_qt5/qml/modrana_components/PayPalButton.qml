@@ -15,6 +15,7 @@ Rectangle {
         anchors.horizontalCenter : parent.horizontalCenter
         anchors.verticalCenter : parent.verticalCenter
         text : "<b>PayPal</b>"
+        font.pixelSize : 24 * rWin.c.style.m
     }
     MouseArea {
         id : ppMA

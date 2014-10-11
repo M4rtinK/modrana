@@ -18,8 +18,11 @@ Rectangle {
         anchors.verticalCenter : parent.verticalCenter
         font.family: "Arial"
         font.pixelSize : 24 * rWin.c.style.m
-        text : "<h3>Bitcoin</h3>"
+        text : "<b>Bitcoin</b>"
         color : bitcoinMA.pressed ? "black" : "white"
+        width : parent.width
+        horizontalAlignment : Text.AlignHCenter
+        verticalAlignment : Text.AlignVCenter
     }
     MouseArea {
         id : bitcoinMA
