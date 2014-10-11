@@ -424,5 +424,9 @@ ApplicationWindow {
         rWin.visibility = value
         rWin._lastVisibility = rWin.visibility
     }
+
+    function notify(message, timeout) {
+        rWin.log.warning("notification skipped (fixme): " + message)
+    }
 }
 
