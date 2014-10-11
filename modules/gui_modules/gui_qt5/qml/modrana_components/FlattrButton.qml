@@ -23,7 +23,7 @@ Rectangle {
         id : flattrMA
         anchors.fill : parent
         onClicked : {
-            console.log('Flattr button clicked')
+            rWin.log.info('Flattr button clicked')
             Qt.openUrlExternally(url)
         }
     }

@@ -21,7 +21,7 @@ Rectangle {
         id : ppMA
         anchors.fill : parent
         onClicked : {
-            console.log('PayPal button clicked')
+            rWin.log.info('PayPal button clicked')
             Qt.openUrlExternally(url)
         }
     }
