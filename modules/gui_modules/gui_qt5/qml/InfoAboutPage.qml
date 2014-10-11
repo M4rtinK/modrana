@@ -15,6 +15,9 @@ BasePage {
     property string flattrUrl : rWin.dcall(
     "modrana.gui.modules.info.getFlattrUrl", [], "", function(v){flattrUrl=v})
 
+    property string gratipayUrl : rWin.dcall(
+    "modrana.gui.modules.info.getGratipayUrl", [], "", function(v){gratipayUrl=v})
+
     property string bitcoinAddress : rWin.dcall(
     "modrana.gui.modules.info.getBitcoinAddress", [], "", function(v){bitcoinAddress=v})
 
@@ -53,17 +56,26 @@ BasePage {
                     anchors.verticalCenter : parent.verticalCenter
                     url : aboutPage.payPalUrl
                 }
-
                 FlattrButton {
                     id : flattrButton
                     anchors.verticalCenter : parent.verticalCenter
                     url : aboutPage.flattrUrl
                 }
             }
-            BitcoinButton {
-                id : bitcoinButton
+            Row {
+                id : bitcoinGPRow
                 anchors.horizontalCenter : parent.horizontalCenter
-                url : aboutPage.bitcoinAddress
+                spacing : rWin.c.style.main.spacingBig*2
+                GratipayButton {
+                    id : gpButton
+                    anchors.verticalCenter : parent.verticalCenter
+                    url : aboutPage.gratipayUrl
+                }
+                BitcoinButton {
+                    id : bitcoinButton
+                    anchors.verticalCenter : parent.verticalCenter
+                    url : aboutPage.bitcoinAddress
+                }
             }
         }
 

@@ -51,6 +51,9 @@ class Info(RanaModule):
     def getFlattrUrl(self):
         return "https://flattr.com/thing/678708/modRana-flexible-GPS-navigation-system"
 
+    def getGratipayUrl(self):
+        return "https://gratipay.com/M4rtinK"
+
     def getBitcoinAddress(self):
         return "14DXzkqqYCfSG5vZNYPnPiZzg3wW2hXsE8"
 
