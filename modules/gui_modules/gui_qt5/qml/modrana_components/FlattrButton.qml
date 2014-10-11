@@ -17,7 +17,7 @@ Rectangle {
         anchors.verticalCenter : parent.verticalCenter
         text : "<b>Flattr this !</b>"
         color : "white"
-        font.pixelSize : 24 * rWin.c.style.m
+        font.pixelSize : 28 * rWin.c.style.m
     }
     MouseArea {
         id : flattrMA

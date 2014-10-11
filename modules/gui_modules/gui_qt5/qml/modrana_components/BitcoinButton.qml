@@ -10,7 +10,7 @@ Rectangle {
     border.width : 2
     border.color : "white"
     width : 210 * rWin.c.style.m
-    height : rWin.c.style.button.generic.height * 0.75
+    height : rWin.c.style.button.generic.height * 0.85
     property string url : ""
 
     Label {
