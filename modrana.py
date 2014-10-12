@@ -482,7 +482,9 @@ class ModRana(object):
             m.shutdown()
         self._saveOptions()
         time.sleep(2) # leave some times for threads to shut down
+        modrana_log.log_manager.disable_log_file()
         log.info("Shutdown complete")
+
 
     ## OPTIONS SETTING AND WATCHING ##
 
