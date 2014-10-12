@@ -11,13 +11,23 @@ ApplicationWindow {
     title : "modRana"
 
     // properties
-    property bool animate : true
+    property alias animate : animateProperty.value
+    OptProp {
+        id : animateProperty
+        value : true
+    }
 
     // debugging
-    property bool showDebugButton : false
-    property bool showUnfinishedPages : false
-    property bool tileDebug : false
-    property bool locationDebug : false
+    property variant showDebugButton : OptProp {value : false}
+    property variant showUnfinishedPages : OptProp {value : false}
+    //TODO: check if using .value has any performance impact to all
+    //      those bindings in Tile
+    property alias tileDebug : tileDebugProperty.value
+    OptProp {
+        id : tileDebugProperty
+        value : false
+    }
+    property variant locationDebug : OptProp {value : false}
 
     // logging
     property variant log : PythonLog {}
@@ -132,7 +142,7 @@ ApplicationWindow {
     Button {
         anchors.top : parent.top
         anchors.right : parent.right
-        visible : rWin.showDebugButton
+        visible : rWin.showDebugButton.value
         text : "debug"
         onClicked : {
             rWin.log.info("# starting the Python Debugger (PDB) shell")
@@ -161,11 +171,11 @@ ApplicationWindow {
         rWin.c = python.call_sync("modrana.gui.getConstants", [])
 
         // init miscellaneous other toplevel properties
-        rWin.animate = rWin.get_sync("QMLAnimate", true)
-        rWin.showDebugButton = rWin.get_sync("showQt5GUIDebugButton", false)
-        rWin.showUnfinishedPages = rWin.get_sync("showQt5GUIUnfinishedPages", false)
-        rWin.tileDebug = rWin.get_sync("showQt5TileDebug", false)
-        rWin.locationDebug = rWin.get_sync("gpsDebugEnabled", false)
+        animateProperty.key = "QMLAnimate"
+        showDebugButton.key = "showQt5GUIDebugButton"
+        showUnfinishedPages.key = "showQt5GUIUnfinishedPages"
+        tileDebugProperty.key = "showQt5TileDebug"
+        locationDebug.key = "gpsDebugEnabled"
 
         // the various property encapsulation items need the
         // Python backend to be initialized, so we can load them now
@@ -306,7 +316,7 @@ ApplicationWindow {
 
     // Working with options
     function get(key, default_value, callback) {
-        //rWin.log.debug("running " + callback)
+        //rWin.log.debug("get " + callback)
         python.call("modrana.gui.get", [key, default_value], callback)
         return default_value
     }

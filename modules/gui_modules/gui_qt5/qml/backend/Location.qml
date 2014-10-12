@@ -21,7 +21,7 @@ Item {
 
     function positionUpdate(locationSource) {
         var coord = locationSource.position.coordinate
-        if (rWin.locationDebug) {
+        if (rWin.locationDebug.value) {
             rWin.log.debug("== Position update ==")
             rWin.log.debug("Coordinate:", coord.longitude, coord.latitude)
             rWin.log.debug("Speed:", locationSource.position.speed)

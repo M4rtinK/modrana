@@ -27,18 +27,16 @@ BasePage {
     content : ContentColumn {
         TextSwitch {
             text : qsTr("Show debug button")
-            checked : rWin.showDebugButton
+            checked : rWin.showDebugButton.value
             onCheckedChanged : {
-                 rWin.showDebugButton = checked
-                 rWin.set("showQt5GUIDebugButton", checked)
+                 rWin.showDebugButton.value = checked
             }
         }
         TextSwitch {
             text : qsTr("Show unfinished pages")
-            checked : rWin.showUnfinishedPages
+            checked : rWin.showUnfinishedPages.value
             onCheckedChanged : {
-                rWin.showUnfinishedPages = checked
-                rWin.set("showQt5GUIUnfinishedPages", checked)
+                rWin.showUnfinishedPages.value = checked
             }
         }
         TextSwitch {
@@ -46,15 +44,13 @@ BasePage {
             checked : rWin.tileDebug
             onCheckedChanged : {
                 rWin.tileDebug = checked
-                rWin.set("showQt5TileDebug", checked)
             }
         }
         TextSwitch {
             text : qsTr("Location debugging")
-            checked : rWin.locationDebug
+            checked : rWin.locationDebug.value
             onCheckedChanged : {
-                rWin.locationDebug = checked
-                rWin.set("gpsDebugEnabled", checked)
+                rWin.locationDebug.value = checked
             }
         }
         Label {

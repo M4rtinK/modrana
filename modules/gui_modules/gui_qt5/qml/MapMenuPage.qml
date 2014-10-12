@@ -28,7 +28,7 @@ IconGridPage {
             menu : "LayersPage"
         }
         Component.onCompleted : {
-            if (rWin.showUnfinishedPages) {
+            if (rWin.showUnfinishedPages.value) {
                 testModel.append(
                     {"caption": "Download", "icon":"download.png", "menu":"DownloadPage"}
                 )
