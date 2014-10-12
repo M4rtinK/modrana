@@ -3,13 +3,13 @@
 import QtQuick 2.0
 import UC 1.0
 import "modrana_components"
+import "backend"
 
 BasePage {
     id: debugPage
     headerText : "Debug"
 
-    property bool logFileEnabled : rWin.get("loggingStatus", false,
-    function(v){logFileEnabled=v})
+    property variant logFileEnabled: OptProp {key : "loggingStatus"; value : false}
 
     property string logFilePath : setLogFilePath()
 
@@ -62,10 +62,9 @@ BasePage {
         }
         TextSwitch {
             text : qsTr("Log file")
-            checked : debugPage.logFileEnabled
+            checked : logFileEnabled.value
             onCheckedChanged : {
-                debugPage.logFileEnabled = checked
-                rWin.set("loggingStatus", checked, setLogFilePath)
+                logFileEnabled.value = checked
             }
         }
         Label {
