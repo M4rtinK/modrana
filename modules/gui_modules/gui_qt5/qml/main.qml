@@ -127,10 +127,7 @@ ApplicationWindow {
             rWin.log.info('sys.argv faked')
 
             // start modRana
-            call_sync('modrana.start')
-
-            // the Python-side logging system should be now up and running
-            rWin.log.backendAvailable = true
+            call('modrana.start', [], rWin.__init__)
         }
 
         onError: {
@@ -155,15 +152,31 @@ ApplicationWindow {
         }
     }
 
+    Label {
+        id : startingLabel
+        anchors.horizontalCenter : parent.horizontalCenter
+        anchors.verticalCenter : parent.verticalCenter
+        anchors.right : parent.right
+        font.pixelSize : 32
+        text: "<b>starting modRana...</b>"
+        width : parent.width
+        horizontalAlignment : Text.AlignHCenter
+        verticalAlignment : Text.AlignVCenter
+    }
+
     // everything should be initialized by now,
     // including the Python backend
     Component.onCompleted: {
-        rWin.__init__()
+        //rWin.__init__()
     }
 
     function __init__() {
         // Do all startup tasks depending on the Python
         // backend being loaded
+        // TODO: fade in/out + spinner
+        startingLabel.visible = false
+        // the Python-side logging system should be now up and running
+        rWin.log.backendAvailable = true
         rWin.log.info("__init__ running")
 
         // load the constants
