@@ -140,7 +140,7 @@ class LogManager(object):
         log_file_path = os.path.join(self.log_folder_path, self._get_log_filename())
         self._file_handler = logging.FileHandler(log_file_path)
         self._file_handler.setLevel(logging.DEBUG)
-        full_formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s:%(message)s')
+        full_formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s: %(message)s')
         self._file_handler.setFormatter(full_formatter)
 
         # dump any early log messages to the log file
