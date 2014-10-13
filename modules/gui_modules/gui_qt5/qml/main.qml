@@ -10,6 +10,8 @@ ApplicationWindow {
 
     title : "modRana"
 
+    property bool startupDone : false
+
     // properties
     property alias animate : animateProperty.value
     OptProp {
@@ -156,25 +158,28 @@ ApplicationWindow {
         id : startingLabel
         anchors.horizontalCenter : parent.horizontalCenter
         anchors.verticalCenter : parent.verticalCenter
-        anchors.right : parent.right
         font.pixelSize : 32
         text: "<b>starting modRana...</b>"
-        width : parent.width
         horizontalAlignment : Text.AlignHCenter
         verticalAlignment : Text.AlignVCenter
+        // TODO: fade in/out
+        visible : !rWin.startupDone
     }
-
-    // everything should be initialized by now,
-    // including the Python backend
-    Component.onCompleted: {
-        //rWin.__init__()
+    ProgressBar {
+        anchors.horizontalCenter : parent.horizontalCenter
+        anchors.top : startingLabel.bottom
+        //anchors.left : startingLabel.left
+        //anchors.right : startingLabel.right
+        width : parent.width * 0.8
+        indeterminate : true
+        visible : !rWin.startupDone
     }
 
     function __init__() {
         // Do all startup tasks depending on the Python
         // backend being loaded
-        // TODO: fade in/out + spinner
-        startingLabel.visible = false
+        rWin.startupDone = true
+
         // the Python-side logging system should be now up and running
         rWin.log.backendAvailable = true
         rWin.log.info("__init__ running")
