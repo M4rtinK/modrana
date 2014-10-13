@@ -401,7 +401,8 @@ class ModRana(object):
 
         # check if logging to file should be enabled
         if self.get('loggingStatus', False):
-            modrana_log.log_manager.enable_log_file()
+            logCompression = self.get('compressLogFile', False)
+            modrana_log.log_manager.enable_log_file(compression=logCompression)
         else:
             modrana_log.log_manager.clear_early_log()
             # tell log manager log file is not needed and that it should

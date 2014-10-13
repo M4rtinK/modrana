@@ -22,6 +22,7 @@
 import logging
 import logging.handlers
 import os
+import gzip
 
 from core import utils
 
@@ -37,6 +38,8 @@ class LogManager(object):
         self._log_folder_path = None
         self._file_handler = None
         self._log_file_path = None
+        self._log_file_compression = False
+        self._compressed_log_file = None
 
         # create main modRana logger (root logger)
         self._root_modrana_logger = logging.getLogger('')
@@ -91,8 +94,11 @@ class LogManager(object):
     def log_folder_path(self, path):
         self._log_folder_path = path
 
-    def _get_log_filename(self):
-        return "modrana_%s.log" % utils.getTimeHashString()
+    def _get_log_filename(self, compression=False):
+        if compression:
+            return "modrana_%s.log.gz" % utils.getTimeHashString()
+        else:
+            return "modrana_%s.log" % utils.getTimeHashString()
 
     def clear_early_log(self):
         """ModRana stores early log messages in a MemoryHandler to have a complete log file
@@ -119,7 +125,7 @@ class LogManager(object):
     def log_file_path(self, value):
         self._log_file_path = value
 
-    def enable_log_file(self):
+    def enable_log_file(self, compression=False):
         """Enable logging modRana log messages to file.
 
         If this is called during startup, early log messages preceding the log file
@@ -136,11 +142,17 @@ class LogManager(object):
             self._root_modrana_logger.error("log file already exist")
             return
 
+        self._log_file_compression = compression
+
         # create a file logger that logs everything
-        log_file_path = os.path.join(self.log_folder_path, self._get_log_filename())
-        self._file_handler = logging.FileHandler(log_file_path)
+        log_file_path = os.path.join(self.log_folder_path, self._get_log_filename(compression=compression))
+        if compression:
+            self._compressed_log_file = gzip.open(log_file_path, mode="wb")
+            self._file_handler = logging.StreamHandler(stream=self._compressed_log_file)
+        else:
+            self._file_handler = logging.FileHandler(log_file_path)
         self._file_handler.setLevel(logging.DEBUG)
-        full_formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s: %(message)s')
+        full_formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s: á%(message)s')
         self._file_handler.setFormatter(full_formatter)
 
         # dump any early log messages to the log file
@@ -167,10 +179,17 @@ class LogManager(object):
     def disable_log_file(self):
         if self._file_handler:
             self._root_modrana_logger.info("disabling the log file in: %s", self.log_folder_path)
-            self._file_handler.close()
             self._root_modrana_logger.removeHandler(self._file_handler)
+            if self._log_file_compression:
+                self._file_handler.flush()
+                if self._compressed_log_file:
+                    self._compressed_log_file.close()
+                    self._compressed_log_file = None
+            else:
+                self._file_handler.close()
             self._file_handler = None
             self._log_file_path = None
+            self._log_file_compression = False
             self._root_modrana_logger.info("log file disabled")
 
 def init_logging():
