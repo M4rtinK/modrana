@@ -163,7 +163,7 @@ class Startup(object):
             action="store_true"
         )
 
-        self.args = parser.parse_args()
+        self.args, _unknownArgs = parser.parse_known_args()
 
 
     def getArgs(self):
