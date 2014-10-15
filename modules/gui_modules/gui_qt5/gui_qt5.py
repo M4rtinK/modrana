@@ -303,6 +303,28 @@ class QMLGUI(GUIModule):
         except Exception:
             self.log.exception("adding tile download request failed")
 
+    def _getStartupValues(self):
+        """ Return a dict of values needed by the Qt 5 GUI right after startup.
+        By grouping the requested values in a single dict we reduce the number
+        of Python <-> QML roundtrips and also make it possible to more easily
+        get these values asynchronously (values arrive all at the same time,
+        not in random order at random time).
+
+        :returns: a dict gathering the requested values
+        :rtype dict:
+        """
+        values = {
+            "modRanaVersion" : self.getModRanaVersion(),
+            "constants" : self.getConstants(),
+            "showQuitButton": self.showQuitButton(),
+            "fullscreenOnly": self.modrana.dmod.fullscreenOnly(),
+            "shouldStartInFullscreen": self.shouldStartInFullscreen(),
+            "needsBackButton": self.modrana.dmod.needsBackButton(),
+            "needsPageBackground": self.modrana.dmod.needsPageBackground()
+        }
+        return values
+
+
 class Modules(object):
     """A class that provides access to modRana modules from the QML context,
        using the __getattr__ method so that QML can access all modules dynamically
