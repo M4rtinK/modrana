@@ -99,46 +99,15 @@ ApplicationWindow {
     // export the Python context so other elements can use
     // it without instantiating it themselves
     property alias python : python
+
+    Component.onCompleted: {
+        // start the modRana Python part initialization only once the main Qt 5 GUI
+        // element finishes loading so that we can show the "starting up" feedback
+        rWin.__import_modRana()
+    }
+
     Python {
         id : python
-        Component.onCompleted: {
-            // add Python event handlers
-            // - they will be called during modRana startup
-            // - like this initial property values will be set
-            python.setHandler("themeChanged", function(newTheme){
-                rWin.log.info("theme changed to: " + newTheme.name + " (id: " + newTheme.id + ")")
-                rWin.theme = newTheme
-            })
-
-            // import and initialize modRana,
-            // taking any import overrides in account
-            if (rWin._PYTHON_IMPORT_PATH_) {
-                addImportPath(rWin._PYTHON_IMPORT_PATH_)
-            } else {
-                addImportPath('.')
-            }
-            importModule_sync('modrana')
-
-            // get the argv & remove the qml launcher
-            // & qml file name from it (args nr. 0 and 1)
-            var argv = Qt.application.arguments.slice(2)
-
-            // add the GUI module id if not in argv
-            if (argv.indexOf("-u") == -1) {
-                argv = argv.concat(["-u", "qt5"])
-            }
-
-            if (rWin._PLATFORM_ID_) {
-                if (argv.indexOf("-d") == -1) {
-                    argv = argv.concat(["-d", rWin._PLATFORM_ID])
-                }
-            }
-            rWin.log.info('starting the modRana Python core')
-            // start modRana
-            call('modrana.start', [argv], rWin.__init__)
-            rWin.log.debug(Qt.application.arguments)
-        }
-
         onError: {
             // when an exception is raised, this error handler will be called
             rWin.log.error('python error: ' + traceback);
@@ -162,7 +131,7 @@ ApplicationWindow {
     }
 
     Label {
-        id : startingLabel
+        id : startupLabel
         anchors.horizontalCenter : parent.horizontalCenter
         anchors.verticalCenter : parent.verticalCenter
         font.pixelSize : 32
@@ -174,12 +143,57 @@ ApplicationWindow {
     }
     ProgressBar {
         anchors.horizontalCenter : parent.horizontalCenter
-        anchors.top : startingLabel.bottom
-        //anchors.left : startingLabel.left
-        //anchors.right : startingLabel.right
+        anchors.top : startupLabel.bottom
         width : parent.width * 0.8
         indeterminate : true
         visible : !rWin.startupDone
+    }
+
+    function __import_modRana() {
+        // import the modRana module asynchronously and trigger modRana
+        // start once the module is loaded
+
+        // import and initialize modRana,
+        // taking any import overrides in account
+        if (rWin._PYTHON_IMPORT_PATH_) {
+            python.addImportPath(rWin._PYTHON_IMPORT_PATH_)
+        } else {
+            python.addImportPath('.')
+        }
+        rWin.log.info("importing the modRana Python core")
+        python.importModule('modrana', rWin.__start_modRana)
+    }
+
+    function __start_modRana() {
+        // start modRana asynchronously and trigger Qt 5 GUI initialization
+        // once done
+
+        // add Python event handlers
+        // - they will be called during modRana startup
+        // - like this initial property values will be set
+        python.setHandler("themeChanged", function(newTheme){
+            rWin.log.info("theme changed to: " + newTheme.name + " (id: " + newTheme.id + ")")
+            rWin.theme = newTheme
+        })
+
+
+        // get the argv & remove the qml launcher
+        // & qml file name from it (args nr. 0 and 1)
+        var argv = Qt.application.arguments.slice(2)
+
+        // add the GUI module id if not in argv
+        if (argv.indexOf("-u") == -1) {
+            argv = argv.concat(["-u", "qt5"])
+        }
+
+        if (rWin._PLATFORM_ID_) {
+            if (argv.indexOf("-d") == -1) {
+                argv = argv.concat(["-d", rWin._PLATFORM_ID])
+            }
+        }
+        rWin.log.info('starting the modRana Python core')
+        // start modRana
+        python.call('modrana.start', [argv], rWin.__init__)
     }
 
     function __init__() {
@@ -233,7 +247,6 @@ ApplicationWindow {
 
         // now asynchronously load other stuff we might
         // need in the future
-
         loadMapLayers()
     }
 
