@@ -117,19 +117,26 @@ ApplicationWindow {
             } else {
                 addImportPath('.')
             }
-            importModule_sync('sys')
             importModule_sync('modrana')
 
-            // fake the argv
-            var fake_argv = '["modrana.py", "-u", "qt5"]'
-            if (rWin._PLATFORM_ID_) {
-                fake_argv = '["modrana.py", "-u", "qt5", "-d", "'+ rWin._PLATFORM_ID_ + '"]'
-            }
-            evaluate('setattr(sys, "argv" ,' + fake_argv +')')
-            rWin.log.info('sys.argv faked')
+            // get the argv & remove the qml launcher
+            // & qml file name from it (args nr. 0 and 1)
+            var argv = Qt.application.arguments.slice(2)
 
+            // add the GUI module id if not in argv
+            if (argv.indexOf("-u") == -1) {
+                argv = argv.concat(["-u", "qt5"])
+            }
+
+            if (rWin._PLATFORM_ID_) {
+                if (argv.indexOf("-d") == -1) {
+                    argv = argv.concat(["-d", rWin._PLATFORM_ID])
+                }
+            }
+            rWin.log.info('starting the modRana Python core')
             // start modRana
-            call('modrana.start', [], rWin.__init__)
+            call('modrana.start', [argv], rWin.__init__)
+            rWin.log.debug(Qt.application.arguments)
         }
 
         onError: {
@@ -181,7 +188,7 @@ ApplicationWindow {
         rWin.startupDone = true
 
         // the Python-side logging system should be now up and running
-        rWin.log.backendAvailable = true
+        //rWin.log.backendAvailable = true
         rWin.log.info("__init__ running")
 
         // load the constants

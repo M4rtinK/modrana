@@ -871,8 +871,20 @@ class ModRana(object):
 modrana = None
 dmod = None
 gui = None
-def start():
-    """This function is used when starting modRana with PyOtherSide"""
+def start(argv=None):
+    """This function is used when starting modRana with PyOtherSide.
+    When modRana is started from PyOtherSide there is no sys.argv,
+    so QML needs to pass it from its side.
+
+    :param list argv: arguments the program got on cli or arguments
+                      injected by QML
+    """
+    if not argv: argv = []
+    log.debug("argv from QML:\n%s", argv)
+    sys.argv = ["modrana.py"]
+    sys.argv.extend(argv)
+    log.debug("full argv:\n%s", sys.argv)
+
     global modrana
     global dmod
     global gui
