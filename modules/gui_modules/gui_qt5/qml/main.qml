@@ -49,11 +49,7 @@ ApplicationWindow {
     property string _PYTHON_IMPORT_PATH_
     property string _PLATFORM_ID_
 
-    Loader {
-        id : platformLoader
-    }
-    //property variant platform : platformLoader.item
-    property variant platform
+    property variant platform : Platform {}
 
     property variant mapPage
 
@@ -146,7 +142,7 @@ ApplicationWindow {
         anchors.top : startupLabel.bottom
         width : parent.width * 0.8
         indeterminate : true
-        visible : !rWin.startupDone
+        visible : startupLabel.visible
     }
 
     function __import_modRana() {
@@ -205,10 +201,6 @@ ApplicationWindow {
         //rWin.log.backendAvailable = true
         rWin.log.info("__init__ running")
 
-        // load the constants
-        // (including the GUI style constants)
-        rWin.c = python.call_sync("modrana.gui.getConstants", [])
-
         // init miscellaneous other toplevel properties
         animateProperty.key = "QMLAnimate"
         showDebugButton.key = "showQt5GUIDebugButton"
@@ -216,48 +208,49 @@ ApplicationWindow {
         tileDebugProperty.key = "showQt5TileDebug"
         locationDebug.key = "gpsDebugEnabled"
 
-        // the various property encapsulation items need the
-        // Python backend to be initialized, so we can load them now
-        //platformLoader.source = "Platform.qml"
-        rWin.platform = loadQMLFile("backend/Platform.qml")
-        _init_location()
+        // initialize localization
+        rWin.location.__init__()
 
+        // load the constants
+        // (including the GUI style constants)
+        python.call("modrana.gui._getStartupValues", [], rWin.__startup_values_from_modRana)
+    }
+
+    function __startup_values_from_modRana(values) {
+        // our Python backend returned the values we needed
+        rWin.c = values.constants
+        rWin.platform.setValuesFromPython(values)
+        rWin.log.debug("startup values loaded")
+        // the map page needs to be loaded after
+        // location is initialized, so that
+        // it picks up the correct position
+        // and also once style and other constants
+        // are also loaded
+        rWin.log.debug("loading map page")
+        rWin.mapPage = rWin.pushPage(loadPage("MapPage"), rWin.animate)
+
+        // now check for fullscreen handling
+        rWin.log.debug("handling fullscreen state")
         // if on a platform that is not fullscreen-only,
         // set some reasonable default size for the window
-        var fullscreenOnly = python.call_sync("modrana.dmod.fullscreenOnly", [])
-        if (!fullscreenOnly) {
+        if (!rWin.platform.fullscreenOnly) {
             rWin.width = 640
             rWin.height = 480
         }
 
-        if (!fullscreenOnly) {
-            // no need to trigger fullscreen or even read the value if the platform is fullscreen only
-            var startInFullscreen = python.call_sync("modrana.gui.shouldStartInFullscreen", [])
-            if (startInFullscreen) {
+        if (!rWin.platform.fullscreenOnly) {
+            // no need to trigger fullscreen if the
+            // platform is fullscreen only
+            if (rWin.platform.shouldStartInFullscreen) {
                 rWin.setFullscreen(5) // 5 == fullscreen
             }
         }
-        // the map page needs to be loaded after
-        // location is initialized, so that
-        // it picks up the correct position
-        //rWin.mapPage = loadPage("MapPage")
-        //rWin.initialPage = rWin.mapPage
-        //rWin.pushPage(rWin.mapPage, rWin.animate)
-        rWin.mapPage = rWin.pushPage(loadPage("MapPage"), rWin.animate)
+        rWin.startupLabel.visible = false
 
-        // now asynchronously load other stuff we might
-        // need in the future
+        // now asynchronously load the map layers
+        rWin.log.debug("loading map layers")
         loadMapLayers()
     }
-
-    function _init_location() {
-        // initialize the location module,
-        // this also start localisation,
-        // if enabled
-        rWin.location.__init__()
-    }
-
-    //property variant mapPage : loadPage("MapPage")
 
     function loadQMLFile(filename, quiet) {
         var component = Qt.createComponent(filename);
