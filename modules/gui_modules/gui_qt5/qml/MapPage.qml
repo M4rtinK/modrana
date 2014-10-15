@@ -142,8 +142,20 @@ Page {
         id : compass
         dataRate : 50
         active : tabMap.isActive && tabMap.showCompass
+        property int old_value: 0
         onReadingChanged : {
-            compassImage.rotation = -compass.reading.azimuth
+            // fix for the "northern wiggle" originally
+            // from Sailcompass by THP - Thanks! :)
+            var new_value = -1.0 * compass.reading.azimuth
+            if (Math.abs(old_value-new_value)>270){
+                if (old_value > new_value){
+                    new_value += 360.0
+                }else{
+                    new_value -= 360.0
+                }
+            }
+            old_value = new_value
+            compassImage.rotation = new_value
         }
     }
 
