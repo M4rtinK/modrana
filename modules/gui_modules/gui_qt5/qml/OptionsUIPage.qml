@@ -56,6 +56,16 @@ BasePage {
             }
         }
         Label {
+            text : qsTr("Screen")
+        }
+        TextSwitch {
+            text : qsTr("Keep screen on")
+            checked : rWin.keepScreenOn
+            onCheckedChanged : {
+                 rWin.keepScreenOn = checked
+            }
+        }
+        Label {
             text : qsTr("Map screen")
         }
         TextSwitch {

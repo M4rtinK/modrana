@@ -2,55 +2,38 @@
 import QtQuick 2.0
 
 Item {
-    id : actions
+    id : screen
 
-    property bool mediaKeysEnabled : false
+    property bool keepScreenOn : false
 
-    signal zoomUp
-    signal zoomDown
+    property var screenInstance : null
 
-    property variant mediaKeys : null
-
-    // we need to handle the case where the MediaKeys element
-    // is not available so we use the Connections a nd Binding
-    // elements to work with it
-
-    Connections {
-        // this condition setting null prevents warnings if the media
-        // keys element is not available
-        target : actions.mediaKeys ? actions.mediaKeys : null
-
-        onUp : {
-            actions.zoomUp()
+    onKeepScreenOnChanged : {
+        if  (screenInstance != null) {
+            screenInstance.suspend = keepScreenOn
+            if (keepScreenOn) {
+                rWin.log.info("screen blanking enabled")
+            } else {
+                rWin.log.info("screen blanking disabled")
+            }
         }
-
-        onDown : {
-            actions.zoomDown()
-        }
-    }
-
-    Binding {
-        // this condition setting null prevents warnings if the media
-        // keys element is not available
-        target : actions.mediaKeys ? actions.mediaKeys : null
-        property : "enabled"
-        value : actions.mediaKeysEnabled
     }
 
     Component.onCompleted : {
-        initMediaKeys()
+        initScreen()
     }
 
-    function initMediaKeys() {
-        // the media keys module might not be available on
+    function initScreen() {
+        // the screen control module might not be available on
         // all platforms so we need to handle import failure
         // (real conditional imports would be nice, wouldn't they ;))
-        var mediaKeysInstance = rWin.loadQMLFile("sailfish_specific/MediaKeys.qml", true)
-        if (mediaKeysInstance) {
-            rWin.log.info("Actions: Sailfish media keys initialized")
-            actions.mediaKeys = mediaKeysInstance
+        // TODO: handle also other platforms than Sailfish OS
+        var sailfishScreenInstance = rWin.loadQMLFile("sailfish_specific/SailfishScreen.qml", true)
+        if (sailfishScreenInstance) {
+            rWin.log.info("Screen: screen blanking control initialized")
+            screen.screenInstance = sailfishScreenInstance
         } else {
-            rWin.log.info("Actions: media keys not available")
+            rWin.log.info("Screen: screen blanking control is not available")
         }
     }
 }

@@ -90,8 +90,45 @@ ApplicationWindow {
     property variant layerTree : ListModel {}
     property variant layerDict
 
-    //actions
+    // actions
     property variant actions : Actions {}
+
+    // screen
+    property var screen: Screen {
+        // only prevent screen blanking if modRana is the active application
+        keepScreenOn : Qt.application.active && rWin.keepScreenOn
+    }
+
+    property alias keepScreenOn : keepScreenOnProp.publicValue
+    OptProp {
+        // the "internal" modRana value supports multiple
+        // modes, so for now we present a bool outside
+        // while managing the mode strings in the background
+        // and in the future the other modes might also be supported
+        // with the Qt 5 GUI
+        id: keepScreenOnProp
+        value : "always" // we should keep screen on by default
+        property bool publicValue : true
+        onInitializedChanged : {
+            if (keepScreenOnProp.initialized) {
+                if (keepScreenOnProp.value == "never") {
+                    rWin.log.info("not keeping screen on")
+                    keepScreenOnProp.publicValue = false
+                } else {
+                    rWin.log.info("keeping screen on")
+                    keepScreenOnProp.publicValue = true
+                }
+            }
+        }
+        // save change to public value to the real value
+        onPublicValueChanged : {
+            if (keepScreenOnProp.publicValue) {
+                keepScreenOnProp.value = "always"
+            } else {
+                keepScreenOnProp.value = "never"
+            }
+        }
+    }
 
     // export the Python context so other elements can use
     // it without instantiating it themselves
