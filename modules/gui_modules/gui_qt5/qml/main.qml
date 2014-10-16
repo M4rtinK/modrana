@@ -20,16 +20,17 @@ ApplicationWindow {
     }
 
     // debugging
-    property variant showDebugButton : OptProp {value : false}
-    property variant showUnfinishedPages : OptProp {value : false}
-    //TODO: check if using .value has any performance impact to all
-    //      those bindings in Tile
+    property alias showDebugButton : showDebugButtonProp.value
+    OptProp {id: showDebugButtonProp; value : false}
+    property alias showUnfinishedPages : showUnfinishedPagesProp.value
+    OptProp {id: showUnfinishedPagesProp; value : false}
     property alias tileDebug : tileDebugProperty.value
     OptProp {
         id : tileDebugProperty
         value : false
     }
-    property variant locationDebug : OptProp {value : false}
+    property alias locationDebug : locationDebugProp.value
+    OptProp {id: locationDebugProp; value : false}
 
     // logging
     property variant log : PythonLog {}
@@ -113,7 +114,7 @@ ApplicationWindow {
     Button {
         anchors.top : parent.top
         anchors.right : parent.right
-        visible : rWin.showDebugButton.value
+        visible : rWin.showDebugButton
         text : "debug"
         onClicked : {
             rWin.log.info("# starting the Python Debugger (PDB) shell")
@@ -203,10 +204,11 @@ ApplicationWindow {
 
         // init miscellaneous other toplevel properties
         animateProperty.key = "QMLAnimate"
-        showDebugButton.key = "showQt5GUIDebugButton"
-        showUnfinishedPages.key = "showQt5GUIUnfinishedPages"
+        showDebugButtonProp.key = "showQt5GUIDebugButton"
+        showUnfinishedPagesProp.key = "showQt5GUIUnfinishedPages"
         tileDebugProperty.key = "showQt5TileDebug"
-        locationDebug.key = "gpsDebugEnabled"
+        locationDebugProp.key = "gpsDebugEnabled"
+        keepScreenOnProp.key = "screenBlankingMode"
 
         // initialize localization
         rWin.location.__init__()

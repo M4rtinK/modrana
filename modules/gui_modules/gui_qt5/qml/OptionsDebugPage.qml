@@ -9,7 +9,8 @@ BasePage {
     id: debugPage
     headerText : "Debug"
 
-    property variant logFileEnabled: OptProp {key : "loggingStatus"; value : false}
+    property alias logFileEnabled: logFileEnabledProp.value
+    OptProp {id: logFileEnabledProp; key : "loggingStatus"; value : false}
 
     property string logFilePath : setLogFilePath()
 
@@ -27,16 +28,16 @@ BasePage {
     content : ContentColumn {
         TextSwitch {
             text : qsTr("Show debug button")
-            checked : rWin.showDebugButton.value
+            checked : rWin.showDebugButton
             onCheckedChanged : {
-                 rWin.showDebugButton.value = checked
+                 rWin.showDebugButton = checked
             }
         }
         TextSwitch {
             text : qsTr("Show unfinished pages")
-            checked : rWin.showUnfinishedPages.value
+            checked : rWin.showUnfinishedPages
             onCheckedChanged : {
-                rWin.showUnfinishedPages.value = checked
+                rWin.showUnfinishedPages = checked
             }
         }
         TextSwitch {
@@ -48,9 +49,9 @@ BasePage {
         }
         TextSwitch {
             text : qsTr("Location debugging")
-            checked : rWin.locationDebug.value
+            checked : rWin.locationDebug
             onCheckedChanged : {
-                rWin.locationDebug.value = checked
+                rWin.locationDebug = checked
             }
         }
         Label {
@@ -58,9 +59,9 @@ BasePage {
         }
         TextSwitch {
             text : qsTr("Log file")
-            checked : logFileEnabled.value
+            checked : logFileEnabled
             onCheckedChanged : {
-                logFileEnabled.value = checked
+                logFileEnabled = checked
             }
         }
         Label {
