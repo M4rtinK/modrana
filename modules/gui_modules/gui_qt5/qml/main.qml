@@ -199,7 +199,7 @@ ApplicationWindow {
         rWin.startupDone = true
 
         // the Python-side logging system should be now up and running
-        //rWin.log.backendAvailable = true
+        rWin.log.backendAvailable = true
         rWin.log.info("__init__ running")
 
         // init miscellaneous other toplevel properties
