@@ -183,6 +183,7 @@ class LogManager(object):
     def disable_log_file(self):
         if self._file_handler:
             self._root_modrana_logger.info("disabling the log file in: %s", self.log_folder_path)
+            self._root_modrana_logger.info(self.log_file_path)
             self._root_modrana_logger.removeHandler(self._file_handler)
             if self._log_file_compression:
                 self._file_handler.flush()
