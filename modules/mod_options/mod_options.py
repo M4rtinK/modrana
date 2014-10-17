@@ -1080,6 +1080,7 @@ class Options(RanaModule):
         # ** logging
         group = addGroup("Logging", "logging", catDebug, "generic")
         addBoolOpt("Log to file", "loggingStatus", group, False, "log:checkLoggingStatus")
+        addBoolOpt("Log file compression", "compressLogFile", group, False)
         # ** tiles
         group = addGroup("Tiles", "tiles", catDebug, "generic")
         addBoolOpt("Print tile cache status to terminal", "reportTileCacheStatus", group, False)
