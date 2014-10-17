@@ -23,6 +23,7 @@ import logging
 import logging.handlers
 import os
 import gzip
+import sys
 
 from core import utils
 
@@ -147,7 +148,10 @@ class LogManager(object):
         # create a file logger that logs everything
         log_file_path = os.path.join(self.log_folder_path, self._get_log_filename(compression=compression))
         if compression:
-            self._compressed_log_file = gzip.open(log_file_path, mode="wb")
+            if sys.version_info >= (3, 0):
+                self._compressed_log_file = gzip.open(log_file_path, mode="wt", encoding="utf-8")
+            else:
+                self._compressed_log_file = gzip.open(log_file_path, mode="wb")
             self._file_handler = logging.StreamHandler(stream=self._compressed_log_file)
         else:
             self._file_handler = logging.FileHandler(log_file_path)
