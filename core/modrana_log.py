@@ -152,7 +152,7 @@ class LogManager(object):
                 self._compressed_log_file = gzip.open(log_file_path, mode="wt", encoding="utf-8")
             else:
                 self._compressed_log_file = gzip.open(log_file_path, mode="wb")
-            self._file_handler = logging.StreamHandler(stream=self._compressed_log_file)
+            self._file_handler = logging.StreamHandler(self._compressed_log_file)
         else:
             self._file_handler = logging.FileHandler(log_file_path)
         self._file_handler.setLevel(logging.DEBUG)
