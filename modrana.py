@@ -415,7 +415,8 @@ class ModRana(object):
     def _logFileCB(self, _key, _oldValue, newValue):
         """Convenience function turning the log file on or off"""
         if newValue:
-            modrana_log.log_manager.enable_log_file()
+            logCompression = self.get('compressLogFile', False)
+            modrana_log.log_manager.enable_log_file(compression=logCompression)
         else:
             modrana_log.log_manager.disable_log_file()
 
