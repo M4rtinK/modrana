@@ -12,6 +12,9 @@ BasePage {
     property alias logFileEnabled: logFileEnabledProp.value
     OptProp {id: logFileEnabledProp; key : "loggingStatus"; value : false}
 
+    property alias logFileCompression: logFileCompressionProp.value
+    OptProp {id: logFileCompressionProp; key : "compressLogFile"; value : false}
+
     property string logFilePath : setLogFilePath()
 
     function setLogFilePath() {
@@ -62,6 +65,13 @@ BasePage {
             checked : logFileEnabled
             onCheckedChanged : {
                 logFileEnabled = checked
+            }
+        }
+        TextSwitch {
+            text : qsTr("Log file compression")
+            checked : logFileCompression
+            onCheckedChanged : {
+                logFileCompression = checked
             }
         }
         Label {
