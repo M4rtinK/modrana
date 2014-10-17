@@ -1079,7 +1079,7 @@ class Options(RanaModule):
         addBoolOpt("Print redraw time to terminal", "showRedrawTime", group, False, "display:checkShowRedrawTime")
         # ** logging
         group = addGroup("Logging", "logging", catDebug, "generic")
-        addBoolOpt("Log to file", "loggingStatus", group, False, "log:checkLoggingStatus")
+        addBoolOpt("Log to file", "loggingStatus", group, False)
         addBoolOpt("Log file compression", "compressLogFile", group, False)
         # ** tiles
         group = addGroup("Tiles", "tiles", catDebug, "generic")
