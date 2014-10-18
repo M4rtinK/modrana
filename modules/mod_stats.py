@@ -87,7 +87,7 @@ class Stats(RanaModule):
         """return current average speed as string with the currently unit"""
         speedString = "?"
         units = self.m.get('units', None)
-        kmhAverageSpeed = self.get('speed', None)
+        kmhAverageSpeed = self.get('avgSpeed', None)
         if units and kmhAverageSpeed is not None:
             speedString = units.km2CurrentUnitPerHourString(kmhAverageSpeed, dp=0)
         elif units: # speed unknown, just return something like "? km/h"
