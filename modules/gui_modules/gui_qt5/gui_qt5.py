@@ -45,8 +45,8 @@ from core import geo
 from core import modrana_log
 
 import logging
-log = logging.getLogger("device.gui.qt5")
-qml_log = logging.getLogger("device.gui.qt5.qml")
+log = logging.getLogger("mod.gui.qt5")
+qml_log = logging.getLogger("mod.gui.qt5.qml")
 
 SEARCH_STATUS_PREFIX = "search:status:"
 SEARCH_RESULT_PREFIX = "search:result:"
