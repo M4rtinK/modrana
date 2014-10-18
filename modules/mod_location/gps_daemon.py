@@ -52,7 +52,8 @@ class GPSD(PositionSource):
 
     def stop(self):
         """stop the GPSD based location update method"""
-        self.GPSDConsumer.shutdown()
+        if self.GPSDConsumer:
+            self.GPSDConsumer.shutdown()
         self.GPSDConsumer = None
         self.connected = False
         self.status = "No GPSD running"
