@@ -87,7 +87,10 @@ class QMLGUI(GUIModule):
         size = (800, 480) # initial window size
 
         # register exit handler
-        pyotherside.atexit(self._shutdown)
+        #pyotherside.atexit(self._shutdown)
+        # FIXME: for some reason the exit handler is never
+        # called on Sailfish OS, so we use a onDestruction
+        # handler on the QML side to trigger shutdown
 
         # window state
         self._fullscreen = False
@@ -150,9 +153,8 @@ class QMLGUI(GUIModule):
     def _shutdown(self):
         """Called by PyOtherSide once the QML side is shutdown.
         """
-        self.log.info("shutting down")
+        self.log.info("Qt 5 GUI module shutting down")
         self.modrana.shutdown()
-
 
     def getIDString(self):
         return "Qt5"

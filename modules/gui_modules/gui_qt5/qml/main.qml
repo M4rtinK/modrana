@@ -140,6 +140,16 @@ ApplicationWindow {
         rWin.__import_modRana()
     }
 
+    Component.onDestruction: {
+        // for some reason the PyOtherSide atexit handler does not
+        // work on Sailfish OS, so we use this
+        rWin.log.info("Qt 5 GUI shutdown requested")
+        rWin.log.info("notifying Python about shutdown")
+        // the Python side shutdown actually runs asynchronously
+        // from the QML side shutdown
+        rWin.python.call("modrana.gui._shutdown", [])
+    }
+
     Python {
         id : python
         onError: {
