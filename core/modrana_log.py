@@ -187,6 +187,7 @@ class LogManager(object):
             self._root_modrana_logger.removeHandler(self._file_handler)
             if self._log_file_compression:
                 self._file_handler.flush()
+                self._file_handler.close()
                 if self._compressed_log_file:
                     self._compressed_log_file.close()
                     self._compressed_log_file = None
