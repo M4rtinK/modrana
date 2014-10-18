@@ -163,6 +163,8 @@ class LogManager(object):
         if self._memory_handler:
             self._memory_handler.setTarget(self._file_handler)
             self._memory_handler.flush()
+            # write all the early log records
+            self._file_handler.flush()
             # now attach the log file to the root logger
             self._root_modrana_logger.addHandler(self._file_handler)
             # flush the memory logger again in case any messages arrived before
@@ -170,9 +172,9 @@ class LogManager(object):
             # (this might duplicate some messages, but we should not loose any
             # as both the MemoryHandler and root logger are connected at the moment)
             # now flush & nuke the MemoryHandler
+            self._root_modrana_logger.removeHandler(self._memory_handler)
             self._memory_handler.flush()
             self._memory_handler.close()
-            self._root_modrana_logger.removeHandler(self._memory_handler)
             self._memory_handler = None
         else :
             # just attach the log file to the root logger
