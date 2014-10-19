@@ -232,7 +232,7 @@ ApplicationWindow {
 
         if (rWin._PLATFORM_ID_) {
             if (argv.indexOf("-d") == -1) {
-                argv = argv.concat(["-d", rWin._PLATFORM_ID])
+                argv = argv.concat(["-d", rWin._PLATFORM_ID_])
             }
         }
         rWin.log.info('starting the modRana Python core')
