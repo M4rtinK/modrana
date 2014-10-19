@@ -31,7 +31,11 @@ Page {
     property alias layers : pinchmap.layers
 
     Component.onCompleted : {
+        rWin.log.info("map page: loaded, loading layers")
         pinchmap.loadLayers()
+        rWin.log.info("map page: setting map center to: " +
+                      rWin.lastGoodPos.latitude + "," +
+                      rWin.lastGoodPos.longitude)
         pinchmap.setCenterLatLon(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude)
     }
 
