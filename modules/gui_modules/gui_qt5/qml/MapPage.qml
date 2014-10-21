@@ -37,6 +37,9 @@ Page {
                       rWin.lastGoodPos.latitude + "," +
                       rWin.lastGoodPos.longitude)
         pinchmap.setCenterLatLon(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude)
+        // report that the map page has been loaded,
+        // so that startup feedback can be disabled
+        rWin.firstPageLoaded = true
     }
 
     // if the page becomes active, activate the media keys so they can be used

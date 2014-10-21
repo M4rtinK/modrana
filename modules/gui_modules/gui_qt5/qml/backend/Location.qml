@@ -59,9 +59,9 @@ Item {
     // location module initialization
     function __init__() {
         // first try to restore last known saved position
-        var lastKnownPos = rWin.get_sync("pos", null)
+        var lastKnownPos = rWin.platform.lastKnownPos
         // check if location is enabled
-        location.usageEnabled = rWin.get_sync("GPSEnabled", true)
+        location.usageEnabled = rWin.platform.gpsEnabled
         // the pos key holds the (lat, lon) tuple
         if (lastKnownPos) {
             var savedCoord = rWin.loadQMLFile("backend/Coordinate.qml")
@@ -88,8 +88,8 @@ Item {
         // connect the location update signal when we finally have the element
         locationUpdateConnection.target = locationSource
         // check if NMEA file source should be used
-        var posFromFile = (rWin.get_sync("posFromFile", "") == "NMEA")
-        var NMEAFilePath = rWin.get_sync("NMEAFilePath", "")
+        var posFromFile = (rWin.platform.posFromFile == "NMEA")
+        var NMEAFilePath = rWin.platform.nmeaFilePath
         // check if NMEA file should be used as position source
         // (useful for debugging without real positioning source)
         if (posFromFile && NMEAFilePath) {

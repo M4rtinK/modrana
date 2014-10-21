@@ -11,6 +11,14 @@ ApplicationWindow {
     title : "modRana"
 
     property bool startupDone : false
+    property bool firstPageLoaded : false
+    onFirstPageLoadedChanged : {
+        rWin.log.debug(firstPageLoaded)
+        if (firstPageLoaded) {
+            // hide the startup indicators
+            startupLabel.opacity = 0
+        }
+    }
 
     // properties
     property alias animate : animateProperty.value
@@ -52,7 +60,19 @@ ApplicationWindow {
 
     property variant platform : Platform {}
 
-    property variant mapPage
+    property alias mapPage : mapPageLoader.item
+
+    Loader {
+        id : mapPageLoader
+        asynchronous : true
+        onLoaded : {
+            rWin.log.debug("map page loaded")
+            rWin.pushPage(item, rWin.animate)
+            // now that the map page has been loaded,
+            // restore the last used layers
+            restoreLastUsedLayers()
+        }
+    }
 
     property variant pages : {
         // pre-load the toplevel pages
@@ -182,14 +202,21 @@ ApplicationWindow {
         text: "<b>starting modRana...</b>"
         horizontalAlignment : Text.AlignHCenter
         verticalAlignment : Text.AlignVCenter
-        // TODO: fade in/out
-        visible : !rWin.startupDone
+        visible : opacity != 0
+        opacity : 0
+        Behavior on opacity {
+            NumberAnimation { duration: 250*rWin.animate }
+        }
+        Component.onCompleted : {
+                opacity = 1
+        }
     }
     ProgressBar {
         anchors.horizontalCenter : parent.horizontalCenter
         anchors.top : startupLabel.bottom
         width : parent.width * 0.8
         indeterminate : true
+        opacity : startupLabel.opacity
         visible : startupLabel.visible
     }
 
@@ -270,13 +297,6 @@ ApplicationWindow {
         rWin.c = values.constants
         rWin.platform.setValuesFromPython(values)
         rWin.log.debug("startup values loaded")
-        // the map page needs to be loaded after
-        // location is initialized, so that
-        // it picks up the correct position
-        // and also once style and other constants
-        // are also loaded
-        rWin.log.debug("loading map page")
-        rWin.mapPage = rWin.pushPage(loadPage("MapPage"), rWin.animate)
 
         // now check for fullscreen handling
         rWin.log.debug("handling fullscreen state")
@@ -294,11 +314,18 @@ ApplicationWindow {
                 rWin.setFullscreen(5) // 5 == fullscreen
             }
         }
-        rWin.startupLabel.visible = false
 
-        // now asynchronously load the map layers
+        // and now load the map layers
         rWin.log.debug("loading map layers")
-        loadMapLayers()
+        loadMapLayers(values)
+        // and initiate asynchronous loading of the map page
+        // as it needs to be loaded after
+        // location is initialized, so that
+        // it picks up the correct position
+        // and also once style and other constants
+        // such as map layers are also loaded
+        rWin.log.debug("loading map page")
+        mapPageLoader.source = "MapPage.qml"
     }
 
     function loadQMLFile(filename, quiet) {
@@ -455,29 +482,20 @@ ApplicationWindow {
         return defaultValue
     }
 
-    function loadMapLayers () {
-        // asynchronously populate the layer tree
-        rWin.python.call(
-            "modrana.gui.modules.mapLayers.getLayerTree", [], function(results){
-                rWin.layerTree.clear()
-                for (var i=0; i<results.length; i++) {
-                    rWin.layerTree.append(results[i]);
-                }
-                rWin.log.info("layer tree loaded")
-                // now that we have the layer dict, restore the last used layer
-                restoreLastUsedLayer()
-            }
-        )
-        // asynchronously populate the layer dict
-        rWin.python.call(
-            "modrana.gui.modules.mapLayers.getDictOfLayerDicts", [], function(results){
-                rWin.layerDict = results
-                rWin.log.info("layer dict loaded")
-            }
-        )
+    function loadMapLayers(values) {
+        // populate the layer tree
+        rWin.layerTree.clear()
+        var lTree = values.layerTree
+        for (var i=0; i<lTree.length; i++) {
+            rWin.layerTree.append(lTree[i])
+        }
+        rWin.log.info("layer tree loaded")
+        // set the layer dict
+        rWin.layerDict = values.dictOfLayerDicts
+        rWin.log.info("layer dict loaded")
     }
 
-    function restoreLastUsedLayer() {
+    function restoreLastUsedLayers() {
         // restore last used map layer
         // (the layer dict must be already loaded for this to work)
         rWin.get("layer", "mapnik", function(layerId){

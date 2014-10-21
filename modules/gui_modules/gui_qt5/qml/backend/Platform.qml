@@ -8,6 +8,11 @@ Item {
     property bool shouldStartInFullscreen : false
     property bool needsBackButton : true
     property bool needsPageBackground : false
+    // location specific
+    property var lastKnownPos : null
+    property bool gpsEnabled : true
+    property var posFromFile : null
+    property var nmeaFilePath : null
 
     function setValuesFromPython(values) {
         modRanaVersion = values.modRanaVersion
@@ -16,6 +21,10 @@ Item {
         shouldStartInFullscreen = values.shouldStartInFullscreen
         needsBackButton = values.needsBackButton
         needsPageBackground = values.needsPageBackground
+        lastKnownPos = values.lastKnownPos
+        gpsEnabled = values.lastKnownPos
+        posFromFile = values.posFromFile
+        nmeaFilePath = values.nmeaFilePath
         // done, we now have the values from Python we needed
         valid = true
     }

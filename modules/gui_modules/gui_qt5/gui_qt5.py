@@ -322,7 +322,13 @@ class QMLGUI(GUIModule):
             "fullscreenOnly": self.modrana.dmod.fullscreenOnly(),
             "shouldStartInFullscreen": self.shouldStartInFullscreen(),
             "needsBackButton": self.modrana.dmod.needsBackButton(),
-            "needsPageBackground": self.modrana.dmod.needsPageBackground()
+            "needsPageBackground": self.modrana.dmod.needsPageBackground(),
+            "lastKnownPos" : self.get("pos", None),
+            "gpsEnabled" : self.get("GPSEnabled", True),
+            "posFromFile" : self.get("posFromFile", None),
+            "nmeaFilePath" : self.get("NMEAFilePath", None),
+            "layerTree" : self.modules.mapLayers.getLayerTree(),
+            "dictOfLayerDicts" : self.modules.mapLayers.getDictOfLayerDicts()
         }
         return values
 
