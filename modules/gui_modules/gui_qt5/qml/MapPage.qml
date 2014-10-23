@@ -174,7 +174,7 @@ Page {
         // what about rendered size ?
         // also why are the edges of the image so jarred ?
 
-        source: "../../../../themes/"+ rWin.theme.id +"/windrose-simple.svg"
+        source: "file://" + rWin.platform.themesFolderPath + "/" + rWin.theme.id +"/windrose-simple.svg"
         transformOrigin: Item.Center
 
         Behavior on rotation {
