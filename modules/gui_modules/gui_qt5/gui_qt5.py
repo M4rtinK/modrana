@@ -328,7 +328,8 @@ class QMLGUI(GUIModule):
             "posFromFile" : self.get("posFromFile", None),
             "nmeaFilePath" : self.get("NMEAFilePath", None),
             "layerTree" : self.modules.mapLayers.getLayerTree(),
-            "dictOfLayerDicts" : self.modules.mapLayers.getDictOfLayerDicts()
+            "dictOfLayerDicts" : self.modules.mapLayers.getDictOfLayerDicts(),
+            "themesFolderPath" : os.path.abspath(self.modrana.paths.getThemesFolderPath())
         }
         return values
 

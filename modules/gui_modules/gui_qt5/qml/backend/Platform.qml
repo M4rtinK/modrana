@@ -13,6 +13,7 @@ Item {
     property bool gpsEnabled : true
     property var posFromFile : null
     property var nmeaFilePath : null
+    property string themesFolderPath : "unknown_path"
 
     function setValuesFromPython(values) {
         modRanaVersion = values.modRanaVersion
@@ -25,6 +26,7 @@ Item {
         gpsEnabled = values.gpsEnabled
         posFromFile = values.posFromFile
         nmeaFilePath = values.nmeaFilePath
+        themesFolderPath = values.themesFolderPath
         // done, we now have the values from Python we needed
         valid = true
     }
