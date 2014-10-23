@@ -22,7 +22,7 @@ Item {
         needsBackButton = values.needsBackButton
         needsPageBackground = values.needsPageBackground
         lastKnownPos = values.lastKnownPos
-        gpsEnabled = values.lastKnownPos
+        gpsEnabled = values.gpsEnabled
         posFromFile = values.posFromFile
         nmeaFilePath = values.nmeaFilePath
         // done, we now have the values from Python we needed
