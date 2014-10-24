@@ -68,9 +68,6 @@ ApplicationWindow {
         onLoaded : {
             rWin.log.debug("map page loaded")
             rWin.pushPage(item, rWin.animate)
-            // now that the map page has been loaded,
-            // restore the last used layers
-            restoreLastUsedLayers()
         }
     }
 
@@ -493,15 +490,6 @@ ApplicationWindow {
         // set the layer dict
         rWin.layerDict = values.dictOfLayerDicts
         rWin.log.info("layer dict loaded")
-    }
-
-    function restoreLastUsedLayers() {
-        // restore last used map layer
-        // (the layer dict must be already loaded for this to work)
-        rWin.get("layer", "mapnik", function(layerId){
-            rWin.log.info("restoring last used map layer: " + layerId)
-            rWin.mapPage.getMap().setLayerById(0,layerId)
-        })
     }
 
     property variant _lastVisibility
