@@ -209,7 +209,7 @@ Rectangle {
 
     function setLayer(layerNumber, newLayerId, newLayerName) {
         // set layer ID and name
-        console.log("setting layer " + layerNumber + " to " + newLayerId + "/" + newLayerName)
+        rWin.log.debug("pinchmap: setting layer " + layerNumber + " to " + newLayerId + "/" + newLayerName)
         layers.setProperty(layerNumber, "layerId", newLayerId)
         layers.setProperty(layerNumber, "layerName", newLayerName)
         saveLayers()
@@ -217,15 +217,15 @@ Rectangle {
 
     function setLayerById(layerNumber, newLayerId) {
         // set layer ID and name
+        rWin.log.debug("pinchmap: setting layer by id " + layerNumber + " to " + newLayerId + "/" + newLayerName)
         var newLayerName = rWin.layerDict[newLayerId].label
-        console.log("setting layer " + layerNumber + " to " + newLayerId + "/" + newLayerName)
         layers.setProperty(layerNumber, "layerId", newLayerId)
         layers.setProperty(layerNumber, "layerName", newLayerName)
         saveLayers()
     }
 
     function setLayerOpacity(layerNumber, opacityValue) {
-        console.log("setting layer " + layerNumber + " opacity to " + opacityValue)
+        rWin.log.debug("pinchmap: setting layer " + layerNumber + " opacity to " + opacityValue)
         layers.setProperty(layerNumber, "layerOpacity", opacityValue)
         saveLayers()
     }
@@ -234,6 +234,7 @@ Rectangle {
         // Add layer to the end of the layer list.
         // The layer will be the top-most one,
         // overlaying all other layers.
+        rWin.log.debug("pinchmap: appending layer " + layerId + ":" + layerName + " with opacity " + opacityValue)
         layers.append({"layerId" : layerId, "layerName" : layerName, "layerOpacity" : opacityValue })
         saveLayers()
     }
@@ -246,16 +247,18 @@ Rectangle {
         // check if the layer number is larger than 0
         // (we don't allow to remove the background layer)
         // and also if it is not out of the model range
+        rWin.log.debug("removing layer " + layerNumber)
         if (layerNumber>0 && layerNumber<layers.count) {
             layers.remove(layerNumber)
         } else {
-            console.log("pinch map: can't remove layer - wrong number: " + layerNumber)
+            rWin.log.error("pinch map: can't remove layer - wrong number: " + layerNumber)
         }
         saveLayers()
     }
 
     function loadLayers() {
         // load current overlay settings from persistent storage
+        rWin.log.info("pinchmap: loading overlay settings for " + pinchmap.overlayGroupName)
         rWin.python.call("modrana.gui.modules.mapLayers.getOverlayGroupAsList", [pinchmap.overlayGroupName], function(result){
             // TODO: verify layer is usable
             if(result.length>0) {
@@ -269,6 +272,7 @@ Rectangle {
 
     function saveLayers() {
         // save current overlay settings to persistent storage
+        rWin.log.info("pinchmap: saving overlay settings for " + pinchmap.overlayGroupName)
         var list = []
         for (var i=0; i<layers.count; i++) {
             var thisLayer = layers.get(i);
