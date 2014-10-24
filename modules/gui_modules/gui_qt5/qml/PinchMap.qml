@@ -261,12 +261,19 @@ Rectangle {
         rWin.log.info("pinchmap: loading overlay settings for " + pinchmap.overlayGroupName)
         rWin.python.call("modrana.gui.modules.mapLayers.getOverlayGroupAsList", [pinchmap.overlayGroupName], function(result){
             // TODO: verify layer is usable
+            // TODO: handle load layers on non initial state, the current implementation
+            //       kinda expects the layers model having only a single layer and does not
+            //       clear it before appending to it to prevent a race condition with tile
+            //       loading
             if(result.length>0) {
-                layers.clear()
-                for (var i=0; i<result.length; i++) {
+                // don't clear and vut replace instead
+                // TODO: handle non default (1 layer) state
+                layers.set(0, result[0])
+                for (var i=1; i<result.length; i++) {
                     layers.append(result[i]);
                 }
             }
+            rWin.log.debug("settings loaded")
         })
     }
 
