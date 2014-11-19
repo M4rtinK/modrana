@@ -2,6 +2,8 @@
 import os
 import sys
 
+from core import qrc
+
 DEFAULT_DEVICE_MODULE_ID = "pc"
 DEFAULT_GUI_MODULE_ID = "GTK"
 
@@ -31,6 +33,11 @@ def _check():
     """
     try to detect current device
     """
+    # qrc is currently used only on Android, so if we are running with
+    # qrc, we are on Android
+    if qrc.is_qrc:
+        return "android"
+
     # check CPU architecture
     import subprocess
 
