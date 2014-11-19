@@ -45,13 +45,21 @@ VERSION_STRING = None
 _PROFILE_FOLDER_NAME = DEFAULT_PROFILE_FOLDER_NAME
 
 def loadVersionString():
-    """ Load version string from file
+    """ Load version string from file"""
+    # try to read the version file
+    versionString = getVersionString()
+    if versionString is not None:
+        global VERSION_STRING
+        VERSION_STRING = versionString
+
+
+def getVersionString():
+    """ Get version string from the default version file
 
     :returns: version string or None if unknown
     :rtype: str or None
     """
-    # try to read the version file
-    versionString = None
+
     if os.path.exists(VERSION_INFO_FILENAME):
         try:
             with open(VERSION_INFO_FILENAME, 'r') as f:
@@ -59,10 +67,13 @@ def loadVersionString():
             # make sure it is string (or the conversion throws an exception)
             # and that it does not have any dangling newlines
             versionString = str(versionString).rstrip()
-            global VERSION_STRING
-            VERSION_STRING = versionString
+            return versionString
         except Exception:
             log.exception("loading version info failed")
+            return None
+    else:
+        log.warning("local version file is missing")
+        return None
 
 ## XDG path getters ##
 
