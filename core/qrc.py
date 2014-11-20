@@ -36,6 +36,7 @@ VERSION_FILE_NAME = "version.txt"
 if IS_QRC:
     import pyotherside
 
+@property
 def is_qrc():
     return IS_QRC
 
@@ -80,7 +81,7 @@ def _get_qrc_version():
 def handle_qrc():
     """Export files needed by modRana from qrc to "normal" storage"""
     #TODO: replace on upgrade
-    qrc = is_qrc()
+    qrc = is_qrc
     if qrc:
         log.info("modRana is using qrc")
         # modRana needs some data as files on filesystem, it might be
