@@ -38,23 +38,37 @@ modrana_log.init_logging()
 import logging
 log = logging.getLogger("")
 
+# qrc handling
+from core import qrc
+USING_QRC = qrc.is_qrc
+qrc.handle_qrc()
+
 def setCorrectCWD():
     # change to folder where the main modRana file is located
     # * this enables to run modRana with absolute path without adverse
     # effect such as modRana not finding modules or
     currentAbsolutePath = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(currentAbsolutePath)
+    if USING_QRC:
+        # we are runing from qrc, so just use the qrc:/ prefix as CWD,
+        # no need to chdir
+        currentAbsolutePath = "qrc:/"
+    else:
+        os.chdir(currentAbsolutePath)
     # append the path to the bundle directory so that modRana can fall-back
     # to the it's bundled modules if a given module is not available on the system
     # - at the same just a simple "import foo" import is enough and
     #   "from core.bundle import foo" is not needed
     sys.path.append(os.path.join(currentAbsolutePath, 'core', 'bundle'))
+    #sys.path.append(os.path.join('core', 'bundle'))
+    #sys.path.append(os.path.join("qrc:/", 'core', 'bundle'))
     # add the modules folder to path, so that third-party modules (such as Upoints),
     # that expect to be placed to path work correctly
     # NOTE: most of those modules were moved to the core/bundle
     # directory so it might be possible to get rid of this in the
     # future
     sys.path.append(os.path.join(currentAbsolutePath, 'modules'))
+    sys.path.append(os.path.join(currentAbsolutePath, 'modules/device_modules'))
+    sys.path.append(os.path.join(currentAbsolutePath, 'modules/gui_modules'))
 
 # before we start importing our stuff we need to correctly setup CWD
 # and Python import paths
@@ -347,9 +361,18 @@ class ModRana(object):
         that was removed are not loaded by mistake.
         This situation shouldn't really happen if modRana is installed from a package,
         as all .pyc files are purged during package upgrade and regenerated."""
-        moduleNames = filter(
-            lambda x: x[0:len(prefix)] == prefix, os.listdir(folder)
-        )
+        if USING_QRC:
+            # if we are running from qrc, we need to use the pyotherside function for enumerating
+            # the modules stored in the qrc "bundle"
+            import pyotherside 
+            moduleNames = filter(
+                lambda x: x[0:len(prefix)] == prefix, pyotherside.qrc_list_dir(os.path.join("/", folder))
+            )
+        else:
+            moduleNames = filter(
+                lambda x: x[0:len(prefix)] == prefix, os.listdir(folder)
+            )
+
         # remove the extension
         moduleNames = map(lambda x: os.path.splitext(x)[0], moduleNames)
         # return a set of unique module names
@@ -372,8 +395,15 @@ class ModRana(object):
         startM = time.clock()
         fp = None
         try:
-            fp, pathName, description = imp.find_module(importName, ALL_MODULE_FOLDERS)
-            a = imp.load_module(importName, fp, pathName, description)
+            if USING_QRC:
+                # we need to use importlib for importing modules from qrc,
+                # the "old" imp modules seems to be unable to do that
+                import importlib
+                a = importlib.import_module(importName)
+            else:
+                fp, pathName, description = imp.find_module(importName, ALL_MODULE_FOLDERS)
+                a = imp.load_module(importName, fp, pathName, description)
+
             initInfo = self.initInfo
             initInfo['name'] = modRanaName
             initInfo['importName'] = importName
