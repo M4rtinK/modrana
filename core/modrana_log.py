@@ -18,14 +18,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from __future__ import with_statement  # Python 2.5 compatibility
 
 import logging
 import logging.handlers
 import os
 import gzip
 import sys
+import threading
 
 from core import utils
+from core import qrc
+
+ANDROID_SPECIAL_LOG_FOLDER = "/sdcard/modrana_debug_logs"
 
 log_manager = None
 
@@ -38,9 +43,12 @@ class LogManager(object):
 
         self._log_folder_path = None
         self._file_handler = None
+        self._log_file_enabled = False
+        self._log_file_enabled_lock = threading.RLock()
         self._log_file_path = None
         self._log_file_compression = False
         self._compressed_log_file = None
+        self._log_file_override = False
 
         # create main modRana logger (root logger)
         self._root_modrana_logger = logging.getLogger('')
@@ -86,6 +94,21 @@ class LogManager(object):
         # * like this all messages should arrive in the handlers
         self._root_modrana_logger.addHandler(self._console_handler)
         self._root_modrana_logger.addHandler(self._memory_handler)
+
+        # check if we are running on Android - if we do (by checking qrc usage), check
+        # if the Android debug log folder exists - if it does, enable the log file at once
+        # This is done Android being such a mess needs the possibility to easily enable early
+        # logging to debug all the breakage. :)
+        if qrc.is_qrc:
+            # check for the debug log folder (note that this is on purpose folder is different
+            # from the folder used to store debug logs enabled by the user)
+            if os.path.isdir(ANDROID_SPECIAL_LOG_FOLDER):
+                self._root_modrana_logger.debug("special Android log folder (%s) detected")
+                self._root_modrana_logger.debug("enabling early Android log file")
+                self.log_folder_path = ANDROID_SPECIAL_LOG_FOLDER
+                self.enable_log_file()
+                self._log_file_override = True
+                self._root_modrana_logger.debug("early Android log file enabled")
 
     @property
     def log_folder_path(self):
@@ -133,72 +156,88 @@ class LogManager(object):
         activation are dumped to the log, so no messages from a modRana run should be
         missing from the log file.
         """
-        # first try to make sure the logging folder actually exists
-        if not utils.createFolderPath(self.log_folder_path):
-            self._root_modrana_logger.error("failed to create logging folder in: %s",
-                                            self.log_folder_path)
-            return
 
-        if self._file_handler:
-            self._root_modrana_logger.error("log file already exist")
-            return
+        # attempt to enable the log file
+        with self._log_file_enabled_lock:
+            # check if the log file is not already enabled
+            if self._log_file_enabled:
+                self._root_modrana_logger.error("log file already exist")
+                return
 
-        self._log_file_compression = compression
+            # first try to make sure the logging folder actually exists
+            if not utils.createFolderPath(self.log_folder_path):
+                self._root_modrana_logger.error("failed to create logging folder in: %s",
+                                                self.log_folder_path)
+                return
 
-        # create a file logger that logs everything
-        log_file_path = os.path.join(self.log_folder_path, self._get_log_filename(compression=compression))
-        if compression:
-            if sys.version_info >= (3, 0):
-                self._compressed_log_file = gzip.open(log_file_path, mode="wt", encoding="utf-8")
+            self._log_file_compression = compression
+
+            # create a file logger that logs everything
+            log_file_path = os.path.join(self.log_folder_path, self._get_log_filename(compression=compression))
+            if compression:
+                if sys.version_info >= (3, 0):
+                    self._compressed_log_file = gzip.open(log_file_path, mode="wt", encoding="utf-8")
+                else:
+                    self._compressed_log_file = gzip.open(log_file_path, mode="wb")
+                self._file_handler = logging.StreamHandler(self._compressed_log_file)
             else:
-                self._compressed_log_file = gzip.open(log_file_path, mode="wb")
-            self._file_handler = logging.StreamHandler(self._compressed_log_file)
-        else:
-            self._file_handler = logging.FileHandler(log_file_path)
-        self._file_handler.setLevel(logging.DEBUG)
-        full_formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s: %(message)s')
-        self._file_handler.setFormatter(full_formatter)
+                self._file_handler = logging.FileHandler(log_file_path)
+            self._file_handler.setLevel(logging.DEBUG)
+            full_formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s: %(message)s')
+            self._file_handler.setFormatter(full_formatter)
 
-        # dump any early log messages to the log file
-        if self._memory_handler:
-            self._memory_handler.setTarget(self._file_handler)
-            self._memory_handler.flush()
-            # write all the early log records
-            self._file_handler.flush()
-            # now attach the log file to the root logger
-            self._root_modrana_logger.addHandler(self._file_handler)
-            # flush the memory logger again in case any messages arrived before
-            # the last flush and connecting the log file to the root logger
-            # (this might duplicate some messages, but we should not loose any
-            # as both the MemoryHandler and root logger are connected at the moment)
-            # now flush & nuke the MemoryHandler
-            self._root_modrana_logger.removeHandler(self._memory_handler)
-            self._memory_handler.flush()
-            self._memory_handler.close()
-            self._memory_handler = None
-        else :
-            # just attach the log file to the root logger
-            self._root_modrana_logger.addHandler(self._file_handler)
-        self.log_file_path = log_file_path
+            # dump any early log messages to the log file
+            if self._memory_handler:
+                self._memory_handler.setTarget(self._file_handler)
+                self._memory_handler.flush()
+                # write all the early log records
+                self._file_handler.flush()
+                # now attach the log file to the root logger
+                self._root_modrana_logger.addHandler(self._file_handler)
+                # flush the memory logger again in case any messages arrived before
+                # the last flush and connecting the log file to the root logger
+                # (this might duplicate some messages, but we should not loose any
+                # as both the MemoryHandler and root logger are connected at the moment)
+                # now flush & nuke the MemoryHandler
+                self._root_modrana_logger.removeHandler(self._memory_handler)
+                self._memory_handler.flush()
+                self._memory_handler.close()
+                self._memory_handler = None
+            else :
+                # just attach the log file to the root logger
+                self._root_modrana_logger.addHandler(self._file_handler)
+            self.log_file_path = log_file_path
+            self._log_file_enabled = True
         self._root_modrana_logger.info("log file enabled: %s" % log_file_path)
 
     def disable_log_file(self):
-        if self._file_handler:
-            self._root_modrana_logger.info("disabling the log file in: %s", self.log_folder_path)
-            self._root_modrana_logger.info(self.log_file_path)
-            self._root_modrana_logger.removeHandler(self._file_handler)
-            if self._log_file_compression:
-                self._file_handler.flush()
-                self._file_handler.close()
-                if self._compressed_log_file:
-                    self._compressed_log_file.close()
-                    self._compressed_log_file = None
-            else:
-                self._file_handler.close()
-            self._file_handler = None
-            self._log_file_path = None
-            self._log_file_compression = False
-            self._root_modrana_logger.info("log file disabled")
+        with self._log_file_enabled_lock:
+            if self._log_file_override:
+                # in some cases (Android debugging) we might not want to disable the log file
+                # even if it is disabled in options
+                self._root_modrana_logger.info("not disabling log file due to log file override")
+                return
+            if self._file_handler:
+                self._root_modrana_logger.info("disabling the log file in: %s", self.log_folder_path)
+                self._root_modrana_logger.info(self.log_file_path)
+                self._root_modrana_logger.removeHandler(self._file_handler)
+                if self._log_file_compression:
+                    self._file_handler.flush()
+                    self._file_handler.close()
+                    if self._compressed_log_file:
+                        self._compressed_log_file.close()
+                        self._compressed_log_file = None
+                else:
+                    self._file_handler.close()
+                self._file_handler = None
+                self._log_file_path = None
+                self._log_file_compression = False
+                self._root_modrana_logger.info("log file disabled")
+
+    @property
+    def log_file_enabled(self):
+        with self._log_file_enabled_lock:
+            return self._log_file_enabled
 
 def init_logging():
     global log_manager
