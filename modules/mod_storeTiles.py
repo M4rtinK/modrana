@@ -22,7 +22,15 @@ from __future__ import with_statement # for python 2.5
 #---------------------------------------------------------------------------
 
 from modules.base_module import RanaModule
-import sqlite3
+
+import logging
+log = logging.getLogger("mod.storeTiles")
+
+try:
+    import sqlite3
+except Exception:
+    log.exception("sqlite import failed")
+
 import os
 import time
 import glob
