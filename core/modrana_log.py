@@ -103,7 +103,7 @@ class LogManager(object):
             # check for the debug log folder (note that this is on purpose folder is different
             # from the folder used to store debug logs enabled by the user)
             if os.path.isdir(ANDROID_SPECIAL_LOG_FOLDER):
-                self._root_modrana_logger.debug("special Android log folder (%s) detected")
+                self._root_modrana_logger.debug("special Android log folder (%s) detected", ANDROID_SPECIAL_LOG_FOLDER)
                 self._root_modrana_logger.debug("enabling early Android log file")
                 self.log_folder_path = ANDROID_SPECIAL_LOG_FOLDER
                 self.enable_log_file()
