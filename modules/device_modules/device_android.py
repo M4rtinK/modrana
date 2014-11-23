@@ -23,7 +23,7 @@ from modules.device_modules.base_device_module import DeviceModule
 
 import os
 
-MAIN_MODRANA_DATA_FOLDER "/sdcard/modrana"  # main modRana data folder on Android
+MAIN_MODRANA_DATA_FOLDER = "/sdcard/modrana"  # main modRana data folder on Android
 MAP_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "maps")
 ROUTING_DATA_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "routing_data")
 TRACKLOG_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "tracklogs")
