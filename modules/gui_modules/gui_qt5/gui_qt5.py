@@ -113,9 +113,6 @@ class QMLGUI(GUIModule):
             "tile" : TileImageProvider(self),
         }
 
-        with open("data/tile_not_found.png", "rb") as f:
-            self._tileNotFoundImage = f.read()
-
         ## register the actual callback, that
         ## will call the appropriate provider base on
         ## image id prefix
@@ -500,6 +497,7 @@ class TileImageProvider(ImageProvider):
         self.gui = gui
 
         self.gui.firstTimeSignal.connect(self._firstTimeCB)
+        self._tileNotFoundImage = bytearray([0, 255, 255, 255])
 
     def _firstTimeCB(self):
         # connect to the tile downloaded callback so that we can notify
@@ -553,10 +551,8 @@ class TileImageProvider(ImageProvider):
                 # completed signal.
                 #
                 # We notify the GUI by returning a 1x1 image.
-                tileData = self.gui._tileNotFoundImage
-                imageSize = (1,1)
+                return self._tileNotFoundImage, (1,1), pyotherside.format_argb32
                 #log.debug("%s NOT FOUND" % imageId)
-                # TODO: use some raw image data instead of PNG ?
             #log.debug("RETURNING STUFF %d %s" % (imageSize[0], imageId))
             return bytearray(tileData), imageSize, pyotherside.format_data
         except Exception:
