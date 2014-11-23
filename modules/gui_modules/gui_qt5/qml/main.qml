@@ -230,8 +230,17 @@ ApplicationWindow {
         if (rWin._PYTHON_IMPORT_PATH_) {
             python.addImportPath(rWin._PYTHON_IMPORT_PATH_)
         } else {
-            python.addImportPath('.')
-            python.addImportPath('qrc:/')
+            var full_path = Qt.application.arguments.slice(0,1)[0]
+            var filename = full_path.split("/").slice(-1)
+            if (filename == "libmodrana-android.so") {
+                // we are running on Android and using qrc so
+                // add the qrc root to import path
+                rWin.log.debug("running on Android")
+                rWin.log.debug("adding qrc:/ to Python import path")
+                python.addImportPath('qrc:/')
+            } else {
+                python.addImportPath('.')
+            }
         }
         rWin.log.info("importing the modRana Python core")
         python.importModule('modrana', rWin.__start_modRana)
