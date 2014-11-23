@@ -1,12 +1,16 @@
 import QtQuick 2.0
 import QtQuick.Window 2.1
-import io.thp.pyotherside 1.0
+import io.thp.pyotherside 1.3
 import UC 1.0
 import "modrana_components"
 import "backend"
 
 ApplicationWindow {
     id : rWin
+
+    visible: true
+    width: 640
+    height: 480
 
     title : "modRana"
 
@@ -227,6 +231,7 @@ ApplicationWindow {
             python.addImportPath(rWin._PYTHON_IMPORT_PATH_)
         } else {
             python.addImportPath('.')
+            python.addImportPath('qrc:/')
         }
         rWin.log.info("importing the modRana Python core")
         python.importModule('modrana', rWin.__start_modRana)
