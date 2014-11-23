@@ -36,9 +36,8 @@ VERSION_FILE_NAME = "version.txt"
 if IS_QRC:
     import pyotherside
 
-@property
-def is_qrc():
-    return IS_QRC
+# looks like @property does not work outside of class ?
+is_qrc = IS_QRC
 
 def export_from_qrc(root, target):
     """Recursively export a given qrc subtree as given by root
@@ -80,9 +79,8 @@ def _get_qrc_version():
 
 def handle_qrc():
     """Export files needed by modRana from qrc to "normal" storage"""
-    #TODO: replace on upgrade
-    qrc = is_qrc
-    if qrc:
+
+    if is_qrc:
         log.info("modRana is using qrc")
         # modRana needs some data as files on filesystem, it might be
         # good to eventually load larger stuff directly from qrc, but
