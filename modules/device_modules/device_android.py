@@ -21,9 +21,14 @@
 #---------------------------------------------------------------------------
 from modules.device_modules.base_device_module import DeviceModule
 
-MAP_FOLDER_PATH = "/sdcard/modrana/maps"
-ROUTING_DATA_FOLDER_PATH = "/sdcard/modrana/routing_data"
+import os
 
+MAIN_MODRANA_DATA_FOLDER "/sdcard/modrana"  # main modRana data folder on Android
+MAP_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "maps")
+ROUTING_DATA_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "routing_data")
+TRACKLOG_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "tracklogs")
+DEBUG_LOG_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "debug_logs")
+POI_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "poi")
 
 def getModule(m, d, i):
     return Android(m, d, i)
@@ -43,7 +48,8 @@ class Android(DeviceModule):
         return "Android device"
 
     def getWinWH(self):
-        return 480, 800
+        #return 480, 800
+        return None
 
     def startInFullscreen(self):
         return True
@@ -52,7 +58,7 @@ class Android(DeviceModule):
         return True
 
     def getSupportedGUIModuleIds(self):
-        return ["QML:harmattan", "QML:indep"]
+        return ["qt5"]
 
     def getLocationType(self):
         # TODO: get to location data on Android
@@ -64,27 +70,26 @@ class Android(DeviceModule):
         """
         return False
 
-    # def pauseScreenBlanking(self):
-    #   """
-    #   inhibit screen blanking
-    #   """
-    #   from QtMobility.SystemInfo import QSystemScreenSaver
-    #
-    #   if self.qScreenSaver:
-    #     QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
-    #   else:
-    #     self.qScreenSaver = QSystemScreenSaver()
-
     def needsQuitButton(self):
         """due to no window decoration, own quit button
-        might be needed"""
-        return True
+        might be needed so that users can quit modRana when
+        they want to"""
+        return False
 
     def getMapFolderPath(self):
         return MAP_FOLDER_PATH
 
     def getRoutingDataFolderPath(self):
         return ROUTING_DATA_FOLDER_PATH
+
+    def getTracklogFolderPath(self):
+        return TRACKLOG_FOLDER_PATH
+
+    def getLogFolderPath(self):
+        return DEBUG_LOG_FOLDER_PATH
+    
+    def getPOIFolderPath(self):
+        return POI_FOLDER_PATH
 
     def getDeviceType(self):
         # TODO: device type detection
