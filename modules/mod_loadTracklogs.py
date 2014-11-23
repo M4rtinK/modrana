@@ -114,14 +114,17 @@ class LoadTracklogs(RanaModule):
         if not os.path.exists(examplesDestinationPath):
             utils.createFolderPath(examplesDestinationPath)
             self.log.info(' ** copying example tracklogs')
-            examplesSourcePath = 'data/tracklog_examples'
-            # copy all files from this folder
-            for item in os.listdir(examplesSourcePath):
-                path = os.path.join(examplesSourcePath, item)
-                if os.path.isfile(path):
-                    self.log.info(' ** copying: %r', item)
-                    shutil.copy(path, os.path.join(examplesDestinationPath, item))
-            self.log.info(' ** DONE')
+            try:
+                examplesSourcePath = 'data/tracklog_examples'
+                # copy all files from this folder
+                for item in os.listdir(examplesSourcePath):
+                    path = os.path.join(examplesSourcePath, item)
+                    if os.path.isfile(path):
+                        self.log.info(' ** copying: %r', item)
+                        shutil.copy(path, os.path.join(examplesDestinationPath, item))
+                self.log.info(' ** DONE')
+            except Exception:
+                self.log.exception("could not copy example tracklogs")
 
 
     def loadCache(self):
