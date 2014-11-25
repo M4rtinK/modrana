@@ -27,8 +27,6 @@ import shutil
 log = logging.getLogger("core.qrc")
 import os
 
-from core import paths
-
 IS_QRC = __file__.startswith("qrc:")
 
 VERSION_FILE_NAME = "version.txt"
@@ -65,6 +63,7 @@ def export_from_qrc(root, target):
        log.exception("qrc export from %s to %s failed", root, target)
 
 def _get_qrc_version():
+    from core import paths
     if pyotherside.qrc_is_file(paths.VERSION_INFO_FILENAME):
         try:
             return pyotherside.qrc_get_file_contents(paths.VERSION_INFO_FILENAME).decode("utf-8").rstrip()
@@ -79,7 +78,7 @@ def _get_qrc_version():
 
 def handle_qrc():
     """Export files needed by modRana from qrc to "normal" storage"""
-
+    from core import paths
     if is_qrc:
         log.info("modRana is using qrc")
         # modRana needs some data as files on filesystem, it might be
