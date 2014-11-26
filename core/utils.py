@@ -6,6 +6,7 @@ import os
 import sys
 
 from core import constants
+from core import qrc
 from core.backports.six import b
 from core.backports import six
 
@@ -13,6 +14,8 @@ StringIO = six.moves.cStringIO
 
 PYTHON3 = sys.version_info[0] > 2
 
+if qrc.is_qrc:
+    import pyotherside
 
 import time
 
@@ -260,3 +263,74 @@ def createConnectionPool(url, maxThreads=1):
                                        maxsize=maxThreads, block=False)
 def getTimeHashString():
     return time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
+
+# Note about the "internal" functions
+#
+# This are used to work with files that modRana ships and expects to be available
+# once installed (themes, example tracklogs, default configuration files).
+# These files are normally just present in the modRana installation directory,
+# but in some case (running on Android) might be bundled using qrc. In such case they
+# are not available like "real" files/folders and special functions need to be called
+# to access them.
+#
+# These internal_* function serve as wrappers that make it possible to handle both "normal"
+# and qrc bundled files and folders in the same way.
+#
+# If modRana is running from qrc, the path is expected to point
+# inside the qrc bundle. If you need to work with both qrc and non-qrc paths at once
+# (eq. listing stuff from qrc & from real filesystem on Android) you need to handle
+# that yourself (check if path should go to qrc and not use an internal_* function). :)
+
+def internal_listdir(path):
+    """Internal listdir function that works on both normal files and files
+    bundled in qrc.
+
+    :param str path: path to the folder to list
+    :returns: folder contents
+    :rtype: list of strings
+    """
+    if qrc.is_qrc:
+        return pyotherside.qrc_list_dir(path)
+    else:
+        return os.listdir(path)
+
+def internal_isdir(path):
+    """Internal isdir function that works on both normal files and files
+    bundled in qrc.
+
+    :param str path: path to the folder to check
+    :returns: True if path is file, False if not
+    :rtype: bool
+    """
+    if qrc.is_qrc:
+        return pyotherside.qrc_is_dir(path)
+    else:
+        return os.path.isdir(path)
+
+def internal_isfile(path):
+    """Internal isfile function that works on both normal files and files
+    bundled in qrc.
+
+    :param str path: path to the file to check
+    :returns: True if path is file, False if not
+    :rtype: bool
+    """
+    if qrc.is_qrc:
+        return pyotherside.qrc_is_file(path)
+    else:
+        return os.path.isfile(path)
+
+def internal_get_file_contents(path):
+    """Internal function for getting file content as bytearray,
+    works both on normal files and files bundled in qrc.
+
+    :param str path: path to the file to fetch
+    :returns: file contents as bytearray
+    :rtype: bytearray
+    """
+
+    if qrc.is_qrc:
+        return pyotherside.qrc_get_file_contents(path)
+    else:
+        with open(path, 'rb') as f:
+            return bytearray(f.read())
