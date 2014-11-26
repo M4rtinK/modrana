@@ -20,7 +20,7 @@
 #---------------------------------------------------------------------------
 #
 # On Android with PyOtherSide modRana might be distributed using the qrc
-# mechanism and might need a few tweeks applied to work properly.
+# mechanism and might need a few tweaks applied to work properly.
 #
 import logging
 import shutil
