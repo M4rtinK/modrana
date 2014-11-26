@@ -41,6 +41,7 @@ from core import constants
 from core.threads import threadMgr
 from core import geo
 from core import modrana_log
+from core import utils
 
 import logging
 log = logging.getLogger("mod.gui.qt5")
@@ -464,7 +465,7 @@ class IconImageProvider(ImageProvider):
             splitPath[-1] = splitPath[-1].rsplit("?")[0]
             fullIconPath = os.path.join(themeFolder, *splitPath)
 
-            if not os.path.exists(fullIconPath):
+            if not utils.internal_isfile(fullIconPath):
                 if splitPath[0] == constants.DEFAULT_THEME_ID:
                     # already on default theme and icon path does not exist
                     log.error("Icon not found in default theme:")
@@ -473,15 +474,12 @@ class IconImageProvider(ImageProvider):
                 else:  # try to get the icon from default theme
                     splitPath[0] = constants.DEFAULT_THEME_ID
                     fullIconPath = os.path.join(themeFolder, *splitPath)
-                    if not os.path.exists(fullIconPath):
+                    if not utils.internal_isfile(fullIconPath):
                         # icon not found even in the default theme
                         log.error("Icon not found even in default theme:")
                         log.error(fullIconPath)
                         return None
-            with open(fullIconPath, 'rb') as f:
-                # the context manager will make sure the icon
-                # file is properly closed
-                return bytearray(f.read()), (-1,-1), pyotherside.format_data
+            return utils.internal_get_file_contents(fullIconPath), (-1,-1), pyotherside.format_data
         except Exception:
             log.exception("icon image provider: loading icon failed, id:\n%s" % imageId)
 
