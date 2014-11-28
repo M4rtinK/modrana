@@ -347,6 +347,11 @@ class StoreTiles(RanaModule):
                 else:
                     resultData = None # the result is invalid
                 if resultData:
+                    if layer.timeout:
+                        self.log.debug("timeout set for layer %s: %fs (expired at %d), tile timestamp: %d" % (layer.label,timeout,time.time()-timeout,resultData[1]) )
+                        if resultData[1] < (time.time()-timeout):
+                            self.log.debug("tile is older than configured timeout, not loading tile")
+                            return None # pretend the tile is not stored
                     # return tile data
                     return resultData[0]
                 else:
