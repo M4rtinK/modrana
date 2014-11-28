@@ -331,6 +331,10 @@ class StoreTiles(RanaModule):
         return data for the given tile
         """
         layer = lzxy[0] # only the layer part of the tuple
+        if layer.timeout:
+            self.log.debug("layer.timeout %s" % layer.timeout )
+            # stored timeout is in hours, convert to seconds
+            timeout = float(layer.timeout)*60*60
         storageType = self.get('tileStorageType', 'files')
         if storageType == 'sqlite':
             accessType = "get"
@@ -353,7 +357,6 @@ class StoreTiles(RanaModule):
             tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
             if os.path.exists(tilePath):
                 if layer.timeout:
-                    timeout=float(layer.timeout)*60*60 # maxium time to cache in seconds
                     tile_mtime = os.path.getmtime(tilePath)
                     if tile_mtime < (time.time()-timeout):
                         self.log.debug("file is older than configured timeout of %fs, not loading tile" % timeout)
