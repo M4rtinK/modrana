@@ -330,6 +330,11 @@ class StoreTiles(RanaModule):
         """
         return data for the given tile
         """
+        layer = lzxy[0] # only the layer part of the tuple
+        if layer.timeout:
+            self.log.debug("layer.timeout %s" % layer.timeout )
+            # stored timeout is in hours, convert to seconds
+            timeout = float(layer.timeout)*60*60
         storageType = self.get('tileStorageType', 'files')
         if storageType == 'sqlite':
             accessType = "get"
@@ -342,6 +347,11 @@ class StoreTiles(RanaModule):
                 else:
                     resultData = None # the result is invalid
                 if resultData:
+                    if layer.timeout:
+                        self.log.debug("timeout set for layer %s: %fs (expired at %d), tile timestamp: %d" % (layer.label,timeout,time.time()-timeout,resultData[1]) )
+                        if resultData[1] < (time.time()-timeout):
+                            self.log.debug("tile is older than configured timeout, not loading tile")
+                            return None # pretend the tile is not stored
                     # return tile data
                     return resultData[0]
                 else:
@@ -351,6 +361,11 @@ class StoreTiles(RanaModule):
             layerFolderAndTileFilename = self._mapTiles.getImagePath(lzxy)
             tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
             if os.path.exists(tilePath):
+                if layer.timeout:
+                    tile_mtime = os.path.getmtime(tilePath)
+                    if tile_mtime < (time.time()-timeout):
+                        self.log.debug("file is older than configured timeout of %fs, not loading tile" % timeout)
+                        return None
                 # load the file to pixbuf and return it
                 try:
                     f = open(tilePath, "rb")
