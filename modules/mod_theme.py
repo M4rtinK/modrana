@@ -23,6 +23,8 @@ from modules.base_module import RanaModule
 from core.signal import Signal
 from core.backports import six
 
+from core import utils
+
 import logging
 log = logging.getLogger("mod.theme")
 
@@ -133,7 +135,16 @@ class Theme(object):
     def _loadConfigFile(self, path):
         """load color definitions from file"""
 
-        config = ConfigObj(path)
+        try:
+            if utils.internal_isfile(path):
+                config_content = utils.internal_get_file_contents(path)
+                config = ConfigObj(six.StringIO(config_content.decode()))
+            else:
+                log.error("theme config file %s does not exist", path)
+                return
+        except Exception:
+            log.exception("loading theme config file from %s failed", path)
+            return
 
         # try to get theme name from the config
         try:

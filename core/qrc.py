@@ -97,9 +97,6 @@ def handle_qrc():
                 if os.path.exists("data"):
                     log.info("removing old local folder data")
                     shutil.rmtree("data")
-                if os.path.exists("themes"):
-                    log.info("removing old local folder themes")
-                    shutil.rmtree("themes")
                 if os.path.isfile(paths.VERSION_INFO_FILENAME):
                     log.info("removing old local version file")
                     os.remove(paths.VERSION_INFO_FILENAME)
@@ -111,8 +108,6 @@ def handle_qrc():
                 os.makedirs("themes")
                 log.info("extracting the data folder and its content")
                 export_from_qrc('data', ".")
-                log.info("extracting the themes folder and its content")
-                export_from_qrc('themes', ".")
 
                 # only write the version file once done ;-)
                 if qrc_version:
