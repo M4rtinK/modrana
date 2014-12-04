@@ -105,7 +105,6 @@ def handle_qrc():
                 log.info("extracting files & folders needed by modRana from qrc")
 
                 os.makedirs("data")
-                os.makedirs("themes")
                 log.info("extracting the data folder and its content")
                 export_from_qrc('data', ".")
 
