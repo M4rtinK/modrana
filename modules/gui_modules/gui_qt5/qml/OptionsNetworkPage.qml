@@ -16,6 +16,7 @@ BasePage {
                 id : networkUsage
                 label : qsTr("Network Usage")
                 key : "network"
+                description: qsTr("In minimal network usage mode no map tiles are downloaded over the network, only previously cached tiles are used.")
                 model : ListModel {
                     id : network
                     ListElement {
