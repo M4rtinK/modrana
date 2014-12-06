@@ -28,12 +28,10 @@ BasePage {
                         value : "minimal"
                     }
                 }
+                onItemChanged : {
+                    rWin.log.info("setting network mode: " + item.value)
+                }
             }
-// the onItemChanged bit below breaks the page, no idea why at the moment
-// Frederik
-//            onItemChanged : {
-//                rWin.log.info("setting network mode: " + network.value)
-//            }
         }
     }
 }
