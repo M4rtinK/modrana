@@ -33,7 +33,6 @@ Column {
             property bool _skipNext : false
 
             onModelChanged : {
-                console.log("model assigned")
                 _skipNext = true
             }
 
