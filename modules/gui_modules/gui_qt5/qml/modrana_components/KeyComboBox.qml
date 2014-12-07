@@ -22,6 +22,8 @@ import UC 1.0
 
 ComboBox {
     property string key
+    property string value
+    property var defaultValue
     property bool setValue : true
 
     id : keyCombo
@@ -34,13 +36,14 @@ ComboBox {
         // (will probably need something like get_exists
         // function in GUI module & rWin, that only runs the callback
         // if the key exists in the dictionary)
-        rWin.get(keyCombo.key, null, function(value) {
+        rWin.get(keyCombo.key, keyCombo.defaultValue, function(value) {
             for(var i = 0; keyCombo.model.count; i++) {
                 // check if the element has the
                 // value we got from the persistent dict
                 if (keyCombo.model.get(i).value == value) {
                     // matching value found, set index & return
                     keyCombo.currentIndex = i
+                    keyCombo.value = value
                     break
                     return
                 }
@@ -56,7 +59,7 @@ ComboBox {
             // set the value of the persistent dictionary key
             // to the value of the selected item
             rWin.set(keyCombo.key, item.value)
+            keyCombo.value = item.value
         }
     }
-
 }
