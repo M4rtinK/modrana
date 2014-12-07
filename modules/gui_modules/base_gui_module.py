@@ -272,11 +272,18 @@ class GUIModule(RanaModule):
         return style
 
     def getConstants(self):
+        if self.modrana.dmod.getDeviceIDString() == "jolla":
+            defaultTheme = "silica"
+        else:
+            defaultTheme = "default"
+
         C = {
-            "style": self._getStyleConstants()
+            "style": self._getStyleConstants(),
+            "default" : {
+                "theme" : defaultTheme
+            }
         }
         return C
-
 
     @property
     def portrait(self):
