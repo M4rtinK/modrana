@@ -83,7 +83,7 @@ class ThemeModule(RanaModule):
         :returns: a list of available theme ids
         :rtype: a list of strings
         """
-        rawFolderContent = os.listdir(self.modrana.paths.getThemesFolderPath())
+        rawFolderContent = utils.internal_listdir(self.modrana.paths.getThemesFolderPath())
         # append the full path and filter out all dot-folders, such as .svn, .git & co
         themesFolderPath = self.modrana.paths.getThemesFolderPath()
         return filter(
