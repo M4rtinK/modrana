@@ -16,7 +16,11 @@ BasePage {
                 id : networkUsage
                 label : qsTr("Network Usage")
                 key : "network"
-                description: qsTr("In minimal network usage mode no map tiles are downloaded over the network, only previously cached tiles are used.")
+                description: if (networkUsage.value == "minimal") {
+                        qsTr("In <b>minimal</b> network usage mode no map tiles are downloaded over the network, only previously cached tiles are used.")
+                    } else {
+                        qsTr("In <b>full</b> network usage mode no network usage restrictions are in place.")
+                    }
                 model : ListModel {
                     id : network
                     ListElement {
