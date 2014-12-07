@@ -16,6 +16,7 @@ BasePage {
                 id : themeCb
                 label : qsTr("Theme")
                 key : "theme"
+                defaultValue : rWin.c.default.theme
                 model : ListModel {
                     id : cbMenu
                     ListElement {
