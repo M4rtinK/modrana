@@ -7,6 +7,7 @@ Row {
     property alias item : cBox.item
     property alias currentItem : cBox.currentItem
     property alias currentIndex : cBox.currentIndex
+    property string description : ""
 
     // no spacing if the label is empty, so that the combobox
     // can be used as a standalone label-less combobox
