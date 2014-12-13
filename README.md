@@ -1,4 +1,4 @@
-tile-storage
+Tile storage
 ============
 
 Flexible multi-backend tile storage module.
