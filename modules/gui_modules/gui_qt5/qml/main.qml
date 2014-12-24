@@ -100,6 +100,14 @@ ApplicationWindow {
     property bool hasFix : false
     property bool llValid : pos ? pos.isValid : false
 
+    //routing
+    property variant routingStartPos : Coordinate {
+        altitude : 0.0
+    }
+    property variant routingDestinationPos : Coordinate {
+        altitude : 0.0
+    }
+
     // theme
     property variant theme
 

@@ -30,6 +30,14 @@ Page {
 
     property alias layers : pinchmap.layers
 
+    // routing related stuff
+    property bool selectRoutingStart : false
+    property bool selectRoutingDestination : false
+    property real routingStartLat: 0.
+    property real routingStartLon: 0.
+    property real routingDestinationLat: 0.
+    property real routingDestinationLon: 0.
+    
     Component.onCompleted : {
         rWin.log.info("map page: loaded, loading layers")
         pinchmap.loadLayers()
@@ -283,6 +291,48 @@ Page {
                 rWin.push("Menu", undefined, !rWin.animate)
             }
         }
+        TextButton {
+            id: routingStart
+            text: "routing start"
+            width: rWin.c.style.map.button.size
+            height: rWin.c.style.map.button.size
+            Rectangle {
+                id: routingStartRect
+                color: "red"
+                anchors.fill: parent
+            }
+            Text {
+                text: parent.text
+            }
+            onClicked: {
+                console.log("set startpoint for routing")
+                selectRoutingStart = true
+                selectRoutingDestination = false
+                routingStartRect.color = "blue"
+                routingEndRect.color = "red"
+            }
+        }
+        TextButton {
+            id: routingEnd
+            text: "routing end"
+            width: rWin.c.style.map.button.size
+            height: rWin.c.style.map.button.size
+            Rectangle {
+                id: routingEndRect
+                color: "red"
+                anchors.fill: parent
+            }
+            Text {
+                text: parent.text
+            }
+            onClicked: {
+                console.log("set endpoint for routing")
+                selectRoutingStart = false
+                selectRoutingDestination = true
+                routingEndRect.color = "blue"
+                routingStartRect.color = "red"
+            }
+        }
     }
     /*
     ProgressBar {
@@ -304,4 +354,100 @@ Page {
             }
         }
     }*/
+    Canvas {
+        id: routingData
+        anchors.fill: parent
+        opacity: 0.8
+        visible: true
+        property var touchpos: [0,0]
+
+        onPaint: { 
+            console.log("FJF: canvas paint requested start")
+            var startpos = pinchmap.getScreenpointFromCoord(rWin.routingStartPos.latitude,rWin.routingStartPos.longitude)
+            var destipos = pinchmap.getScreenpointFromCoord(rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude)
+            var startX = startpos[0]
+            var startY = startpos[1]
+            var destX = destipos[0]
+            var destY = destipos[1]
+            console.log("routing points to plot: ",startpos, destipos)
+            var ctx = getContext("2d")
+            // clear the canvas
+            ctx.clearRect(0,0,tabMap.width,tabMap.height)
+
+            // setup the stroke
+            ctx.lineWidth = 4
+            ctx.strokeStyle = "red"
+
+            // create a path
+            ctx.beginPath()
+            console.log("moveto: ", startX, startY)
+            ctx.moveTo(startX,startY)
+            console.log("lineTo: ", destX, destY)
+            ctx.lineTo(destX,destY)
+            ctx.closePath()
+
+            // stroke path
+            ctx.stroke()
+
+            console.log("FJF: canvas paint requested done")
+        }
+        onPainted: {
+            console.log("FJF: canvas painted")
+        }
+        Component.onCompleted: {
+            console.log("FJF: Canvas: onCompleted")
+        }
+
+        Connections {
+            target: pinchmap
+            onCenterSet: {
+                console.log("FJF: Canvas: pinchmap centerSet")
+                routingData.requestPaint()
+            }
+            onDrag: {
+                console.log("FJF: Canvas: pinchmap drag")
+                routingData.requestPaint()
+            }
+            onZoomLevelChanged: {
+                console.log("FJF: Canvas: pinchmap zoomLevel changed")
+                routingData.requestPaint()
+            }
+            onMapClicked: {
+                console.log("FJF: Canvas: map clicked")
+            }
+            onMapDoubleClicked: {
+                console.log("FJF: Canvas: map doubleClicked")
+                console.log("FJF: screen coordinates", screenX, screenY)
+                console.log("FJF: geographic coordinates", pinchmap.getCoordFromScreenpoint(screenX, screenY))
+                // store the position we touched in Lat,Lon
+                routingData.touchpos = pinchmap.getCoordFromScreenpoint(screenX, screenY)
+                if (selectRoutingStart) {
+                    routingStartLat = routingData.touchpos[0]
+                    routingStartLon = routingData.touchpos[1]
+                    rWin.routingStartPos.latitude=routingStartLat
+                    rWin.routingStartPos.longitude=routingStartLon
+                    console.log("FJF new start point")
+                }
+                if (selectRoutingDestination) {
+                    routingDestinationLat = routingData.touchpos[0]
+                    routingDestinationLon = routingData.touchpos[1]
+                    rWin.routingDestinationPos.latitude=routingDestinationLat
+                    rWin.routingDestinationPos.longitude=routingDestinationLon
+                    console.log("FJF new destination point")
+                    rWin.python.call("modrana.gui.modules.route.llRoute", [[rWin.routingStartPos.latitude,rWin.routingStartPos.longitude], [rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude]])
+                    rWin.log.debug("routing called")
+                }
+
+                console.log("FJF: routing:")
+                console.log("FJF: startpoint: ", routingStartLat, routingStartLon)
+                console.log("FJF: endpoint: ", routingDestinationLat, routingDestinationLon)
+
+                routingData.requestPaint()
+            }
+            onMapPanEnd: {
+                console.log("FJF: mapPanEnd")
+                routingData.requestPaint()
+            }
+        }
+    }
 }
