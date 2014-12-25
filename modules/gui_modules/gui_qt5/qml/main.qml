@@ -114,6 +114,9 @@ ApplicationWindow {
     // actions
     property variant actions : Actions {}
 
+    // are we using qrc ?
+    property bool qrc : false
+
     // screen
     property var screen: Screen {
         // only prevent screen blanking if modRana is the active application
@@ -238,6 +241,7 @@ ApplicationWindow {
                 rWin.log.debug("running on Android")
                 rWin.log.debug("adding qrc:/ to Python import path")
                 python.addImportPath('qrc:/')
+                rWin.qrc = true
             } else {
                 python.addImportPath('.')
             }

@@ -174,7 +174,15 @@ Page {
         // what about rendered size ?
         // also why are the edges of the image so jarred ?
 
-        source: "file://" + rWin.platform.themesFolderPath + "/" + rWin.theme.id +"/windrose-simple.svg"
+        property string rosePath : if (rWin.qrc) {
+            "qrc:/themes/" + rWin.theme.id +"/windrose-simple.svg"
+        } else {
+            "file://" + rWin.platform.themesFolderPath + "/" + rWin.theme.id +"/windrose-simple.svg"
+        }
+
+        //source: "qrc:/themes/" + rWin.theme.id +"/windrose-simple.svg"
+        //source: "file://" + rWin.platform.themesFolderPath + "/" + rWin.theme.id +"/windrose-simple.svg"
+        source : compassImage.rosePath
         transformOrigin: Item.Center
 
         Behavior on rotation {
