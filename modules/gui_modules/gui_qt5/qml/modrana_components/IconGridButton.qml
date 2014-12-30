@@ -55,6 +55,9 @@ Item {
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.bottom : parent.bottom
             anchors.bottomMargin : icgb.margin/2
+            property int desiredWidth : background.width-icgb.margin/2
+            scale: paintedWidth > desiredWidth ? (desiredWidth / paintedWidth) : 1
+            //TODO: find out why the scaled text looks kinda blurry
         }
     }
     MouseArea {
