@@ -88,6 +88,9 @@ def handle_qrc():
         # change management
         qrc_version = _get_qrc_version()
         local_version = paths.getVersionString()
+        log.debug("versions:")
+        log.debug("qrc: %s", qrc_version)
+        log.debug("local: %s", local_version)
 
         # only replace the exported files if both version are not None
         # but different
