@@ -8,10 +8,6 @@ import "backend"
 ApplicationWindow {
     id : rWin
 
-    visible: true
-    width: 640
-    height: 480
-
     title : "modRana"
 
     property bool startupDone : false
@@ -115,7 +111,37 @@ ApplicationWindow {
     property variant actions : Actions {}
 
     // are we using qrc ?
-    property bool qrc : false
+    property bool qrc : is_qrc()
+
+    function is_qrc() {
+        // Check if modRana is running from qrc by checking the
+        // application arguments for the filename of the
+        // file that has been started.
+        // If it is an so file, it means that we are running from
+        // qrc that has been compiled into the so file.
+        var full_path = Qt.application.arguments.slice(0,1)[0]
+        var filename = full_path.split("/").slice(-1)
+        if (filename == "libmodrana-android.so") {
+            // As qrc is currently only used on Android,
+            // so when when we detect iss used we also setup the Window
+            // parameters needed on Android:
+            // * window width and height need to be set,
+            //   or else only flickering will be seen on
+            //   the screen
+            // * switch to fullscreen so that the window covers the
+            //   whole screen
+            // Also when using the sailfish-qml launcher we must *not*
+            // set the window size as it wont switch to fullscreen once a size
+            // is set.
+            rWin.width = 640
+            rWin.height = 480
+            rWin.setFullscreen(5)  // 5 == fullscreen
+            rWin.visible = true
+            return true
+        } else {
+            return false
+        }
+    }
 
     // screen
     property var screen: Screen {
@@ -233,15 +259,12 @@ ApplicationWindow {
         if (rWin._PYTHON_IMPORT_PATH_) {
             python.addImportPath(rWin._PYTHON_IMPORT_PATH_)
         } else {
-            var full_path = Qt.application.arguments.slice(0,1)[0]
-            var filename = full_path.split("/").slice(-1)
-            if (filename == "libmodrana-android.so") {
+            if (rWin.qrc) {
                 // we are running on Android and using qrc so
                 // add the qrc root to import path
                 rWin.log.debug("running on Android")
                 rWin.log.debug("adding qrc:/ to Python import path")
                 python.addImportPath('qrc:/')
-                rWin.qrc = true
             } else {
                 python.addImportPath('.')
             }
