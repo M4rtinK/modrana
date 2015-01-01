@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 import os
+import sys
 from modules.base_module import RanaModule
 
 from core.signal import Signal
@@ -37,6 +38,7 @@ except Exception:
     from configobj import ConfigObj # Fremantle
 
 THEME_CONFIG_FILENAME = "theme.conf"
+PYTHON3 = sys.version_info[0] > 2
 
 
 def getModule(m, d, i):
@@ -136,13 +138,20 @@ class Theme(object):
         """load color definitions from file"""
 
         try:
-            if utils.internal_isfile(path):
-                config_content = utils.internal_get_file_contents(path)
-                config = ConfigObj(config_content.decode().split("\n"))
+            if PYTHON3:
+                if utils.internal_isfile(path):
+                    config_content = utils.internal_get_file_contents(path)
+                    config = ConfigObj(config_content.decode('utf-8').split("\n"))
 
+                else:
+                    log.error("theme config file %s does not exist", path)
+                    return
             else:
-                log.error("theme config file %s does not exist", path)
-                return
+                # Python 2.5 lack the bytearray builtin and Android where qrc is
+                # needed is Python 3 only, so just access the theme conf directly
+                # on Python 2
+                config = ConfigObj(path)
+
         except Exception:
             log.exception("loading theme config file from %s failed", path)
             return
