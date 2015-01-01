@@ -138,7 +138,8 @@ class Theme(object):
         try:
             if utils.internal_isfile(path):
                 config_content = utils.internal_get_file_contents(path)
-                config = ConfigObj(six.StringIO(config_content.decode()))
+                config = ConfigObj(config_content.decode().split("\n"))
+
             else:
                 log.error("theme config file %s does not exist", path)
                 return
