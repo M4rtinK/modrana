@@ -13,6 +13,8 @@ Confirmed to run on:
 * Nokia N9 & N950
 * Neo FreeRunner
 * Smart Q7
+* the Jolla smartphone and other Sailfish OS devices
+* Android 4.0+ devices
 
 ## Dependencies ##
 
@@ -23,10 +25,15 @@ Confirmed to run on:
 * PyCairo
 * Python-Location (N900)
 
-### QML GUI ###
+### Qt 4/QML GUI ###
 * PySide & Qt 4.7.4+
 * Qt Components
 * python-mobility
+
+## Qt 5/QML GUI ###
+* Qt 5.1+
+* Python 3.2+
+* PyOtherSide 1.3+
 
 ## Ancestry ##
 
@@ -53,3 +60,4 @@ ModRana is licenced under GPLv3.
 
 [modRana project website](http://www.modrana.org)
 [discussion thread on talk.maemo.org](http://talk.maemo.org/showthread.php?t=58861)
+[main source code repository](https://github.com/M4rtinK/modrana)
