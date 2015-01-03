@@ -23,6 +23,7 @@ from modules.base_module import RanaModule
 
 from core.signal import Signal
 from core.backports import six
+from core import qrc
 
 from core import utils
 
@@ -38,8 +39,6 @@ except Exception:
     from configobj import ConfigObj # Fremantle
 
 THEME_CONFIG_FILENAME = "theme.conf"
-PYTHON3 = sys.version_info[0] > 2
-
 
 def getModule(m, d, i):
     return ThemeModule(m, d, i)
@@ -138,18 +137,17 @@ class Theme(object):
         """load color definitions from file"""
 
         try:
-            if PYTHON3:
+            if qrc.is_qrc:
                 if utils.internal_isfile(path):
                     config_content = utils.internal_get_file_contents(path)
                     config = ConfigObj(config_content.decode('utf-8').split("\n"))
-
                 else:
                     log.error("theme config file %s does not exist", path)
                     return
             else:
                 # Python 2.5 lack the bytearray builtin and Android where qrc is
                 # needed is Python 3 only, so just access the theme conf directly
-                # on Python 2
+                # when not running from qrc
                 config = ConfigObj(path)
 
         except Exception:
