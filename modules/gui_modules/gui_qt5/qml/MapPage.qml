@@ -89,6 +89,7 @@ Page {
             target: rWin
             onPosChanged: {
                 //rWin.log.debug("map page: fix changed")
+                // this callback is used to keep the map centered when the current position changes
                 if (tabMap.center && ! updateTimer.running) {
                     //rWin.log.debug("map page: Update from GPS position")
                     pinchmap.setCenterLatLon(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude);
