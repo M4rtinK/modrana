@@ -20,20 +20,25 @@ Item {
     }
 
     function positionUpdate(locationSource) {
-        var coord = locationSource.position.coordinate
+        // use local variables both for readability and to hopefully make
+        // the updates atomic in case that the source itself changes when
+        // we are in the middle of an update
+        var position = locationSource.position
+        var coord = position.coordinate
+        var sourceValid = locationSource.valid
         if (rWin.locationDebug.value) {
             rWin.log.debug("== Position update ==")
             rWin.log.debug("Coordinate:", coord.longitude, coord.latitude)
-            rWin.log.debug("Speed:", locationSource.position.speed)
-            rWin.log.debug("h/v accuracy:", locationSource.position.horizontalAccuracy, locationSource.position.verticalAccuracy)
-            rWin.log.debug("timestamp: ", locationSource.position.timestamp)
+            rWin.log.debug("Speed:", position.speed)
+            rWin.log.debug("h/v accuracy:", position.horizontalAccuracy, position.verticalAccuracy)
+            rWin.log.debug("timestamp: ", position.timestamp)
         }
-        rWin.position = locationSource.position
+        rWin.position = position
         rWin.pos = coord
-        rWin.hasFix = locationSource.valid
+        rWin.hasFix = sourceValid
         if (coord.isValid) {
             // replace the last good pos if lat & lon are valid
-            rWin.lastGoodPos = locationSource.position.coordinate
+            rWin.lastGoodPos = coord
             // get the direction of travel
             // (as QML position info seems to be missing the direction
             // attribute, we need to compute it like this)
@@ -47,10 +52,10 @@ Item {
         }
         // tell the position to Python
         var posDict = {
-            latitude : locationSource.position.coordinate.latitude,
-            longitude : locationSource.position.coordinate.longitude,
-            elevation : locationSource.position.coordinate.altitude,
-            speedMPS : locationSource.position.speed
+            latitude : coord.latitude,
+            longitude : coord.longitude,
+            elevation : coord.altitude,
+            speedMPS : position.speed
         }
         rWin.python.call("modrana.gui.setPosition", [posDict])
     }
