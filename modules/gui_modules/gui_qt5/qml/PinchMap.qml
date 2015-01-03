@@ -66,6 +66,24 @@ Rectangle {
     signal tileDownloaded(string loadedTileId, int tileError) // signals that a tile has been downloaded
     property bool needsUpdate: false
 
+    // if the map is clicked or double clicked the mapClicked and mapDoubleClicked signals
+    // are triggered
+    //
+    // NOTE: screenX and screenY are display coordinates with 0,0 is in upper left corner
+    // of the screen; if you want latitude and longitude of the click use the getCoordFromScreenpoint()
+    // conversion function
+    //
+    // Example:
+    //
+    //    onMapClicked: {
+    //        rWin.log.debug("map clicked, screen coordinates:")
+    //        rWin.log.debug(screenX + " " + screenY)
+    //        rWin.log.debug("geographic coordinates:")
+    //        rWin.log.debug(getCoordFromScreenpoint(screenX, screenY))
+    //    }
+
+    signal mapClicked(int screenX, int screenY)
+    signal mapDoubleClicked(int screenX, int screenY)
 
     // register the tile-downloaded handler
     // - PyOtherSide stores the handler ids in a hashtable
@@ -615,6 +633,14 @@ Rectangle {
             propagateComposedEvents : true
 
             anchors.fill : parent;
+
+            onClicked: {
+                mapClicked(mouse.x, mouse.y)
+            }
+
+            onDoubleClicked: {
+                mapDoubleClicked(mouse.x, mouse.y)
+            }
 
             onPressed: {
                 __isPanning = true;
