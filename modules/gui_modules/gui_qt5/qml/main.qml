@@ -88,7 +88,7 @@ ApplicationWindow {
     property variant position // full position object
     property variant pos // coordinate only
     // lastGoodPos needs to be always set,
-    // by defaultBrno is used or last known saved position
+    // by default Brno is used or last known saved position
     // and if available, the last known actual valid position
     property variant lastGoodPos : Coordinate {
         latitude : 49.2
