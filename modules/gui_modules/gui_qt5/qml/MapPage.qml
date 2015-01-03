@@ -120,18 +120,6 @@ Page {
             repeat: false
         }
 
-        /*
-        onLatitudeChanged: {
-            settings.mapPositionLat = latitude;
-        }
-        onLongitudeChanged: {
-            settings.mapPositionLon = longitude;
-        }
-        onZoomLevelChanged: {
-            settings.mapZoom = pinchmap.zoomLevel;
-        }
-        */
-
         // Rotating the map for fun and profit.
         // angle: -compass.azimuth
         showCurrentPosition: true
