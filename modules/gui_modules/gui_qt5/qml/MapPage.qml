@@ -91,7 +91,7 @@ Page {
                 //rWin.log.debug("map page: fix changed")
                 if (tabMap.center && ! updateTimer.running) {
                     //rWin.log.debug("map page: Update from GPS position")
-                    pinchmap.setCenterLatLon(rWin.pos.latitude, rWin.pos.longitude);
+                    pinchmap.setCenterLatLon(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude);
                     updateTimer.start();
                 } else if (tabMap.center) {
                     rWin.log.debug("map page: Update timer preventing another update.");
