@@ -88,13 +88,13 @@ Page {
         Connections {
             target: rWin
             onPosChanged: {
-                //console.log("fix changed")
+                //rWin.log.debug("map page: fix changed")
                 if (tabMap.center && ! updateTimer.running) {
-                    //console.debug("Update from GPS position")
+                    //rWin.log.debug("map page: Update from GPS position")
                     pinchmap.setCenterLatLon(rWin.pos.latitude, rWin.pos.longitude);
                     updateTimer.start();
                 } else if (tabMap.center) {
-                    console.debug("Update timer preventing another update.");
+                    rWin.log.debug("map page: Update timer preventing another update.");
                 }
             }
         }
@@ -290,7 +290,7 @@ Page {
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
             onClicked: {
-                console.log("Menu pushed!")
+                rWin.log.debug("map page: Menu pushed!")
                 rWin.push("Menu", undefined, !rWin.animate)
             }
         }
