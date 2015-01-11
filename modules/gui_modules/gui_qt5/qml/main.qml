@@ -27,6 +27,12 @@ ApplicationWindow {
         value : true
     }
 
+    property alias showBackButton : showBackButtonProperty.value
+    OptProp {
+        id : showBackButtonProperty
+        value : rWin.platform.needsBackButton
+    }
+
     // debugging
     property alias showDebugButton : showDebugButtonProp.value
     OptProp {id: showDebugButtonProp; value : false}
@@ -335,6 +341,12 @@ ApplicationWindow {
         rWin.c = values.constants
         rWin.platform.setValuesFromPython(values)
         rWin.log.debug("startup values loaded")
+
+        rWin.log.debug("handling back button display")
+        // we need to set showBackButtonProperty here
+        // because we need to know if the current platform
+        // needs the back button by default or not
+        showBackButtonProperty.key = "showQt5BackButton"
 
         // now check for fullscreen handling
         rWin.log.debug("handling fullscreen state")

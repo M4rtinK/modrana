@@ -114,7 +114,7 @@ HeaderPage {
         id : searchInput
         anchors.left : parent.left
         //anchors.leftMargin : rWin.c.style.main.spacing
-        anchors.leftMargin : rWin.platform.needsBackButton ? backButtonWidth + 24 * rWin.c.style.m : rWin.c.style.main.spacingBig
+        anchors.leftMargin : rWin.showBackButton ? backButtonWidth + 24 * rWin.c.style.m : rWin.c.style.main.spacingBig
         anchors.right : parent.right
         anchors.rightMargin : rWin.c.style.main.spacingBig
         anchors.top : searchPage.top
