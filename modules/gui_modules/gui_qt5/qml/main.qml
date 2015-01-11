@@ -67,7 +67,7 @@ ApplicationWindow {
         asynchronous : true
         onLoaded : {
             rWin.log.debug("map page loaded")
-            rWin.pushPage(item, rWin.animate)
+            rWin.pushPage(item, null, rWin.animate)
         }
     }
 
@@ -452,7 +452,7 @@ ApplicationWindow {
     function pushPageInstance(pageInstance) {
         // push page instance to page stack
         if (pageInstance) {
-            rWin.pushPage(pageInstance, null, !rWin.animate)
+            rWin.pushPage(pageInstance, null, rWin.animate)
         } else {
             // page instance not valid, go back to map
             rWin.pageStack.pop(rWin.mapPage, !animate)

@@ -52,7 +52,7 @@ BasePage {
             text : qsTr("Animations")
             checked : rWin.animate
             onCheckedChanged : {
-                 rWin.animate = checked
+                rWin.animate = checked
                  //rWin.set("QMLAnimate", checked)
             }
         }

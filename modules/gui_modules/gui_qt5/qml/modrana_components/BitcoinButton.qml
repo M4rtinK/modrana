@@ -30,7 +30,7 @@ Rectangle {
         onClicked : {
             console.log('Bitcoin button clicked')
             var bitcoinPage = Qt.createComponent("BitcoinPage.qml")
-            rWin.pushPage(bitcoinPage, {url : bitcoinButton.url})
+            rWin.pushPage(bitcoinPage, {url : bitcoinButton.url}, rWin.animate)
         }
     }
 }

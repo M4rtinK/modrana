@@ -67,7 +67,7 @@ BasePage {
                             // and tell it what is the number of the layer
                             // to be set
                             var layerSelector = Qt.createComponent("MapLayerPage.qml")
-                            rWin.pushPage(layerSelector, {layerIndex : index, returnToMap : false})
+                            rWin.pushPage(layerSelector, {layerIndex : index, returnToMap : false}, rWin.animate)
                         }
                     }
                 }
