@@ -335,7 +335,6 @@ class StoreTiles(RanaModule):
         """
         layer = lzxy[0] # only the layer part of the tuple
         if layer.timeout:
-            self.log.debug("layer.timeout %s" % layer.timeout )
             # stored timeout is in hours, convert to seconds
             timeout = float(layer.timeout)*60*60
         storageType = self.get('tileStorageType', 'files')
