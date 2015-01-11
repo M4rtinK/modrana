@@ -346,6 +346,11 @@ class StoreTiles(RanaModule):
     def _getTileDataFromSqlite(self, lzxy):
         accessType = "get"
         layer = lzxy[0] # only the layer part of the tuple
+        if layer.timeout:
+            # stored timeout is in hours, convert to seconds
+            timeout = float(layer.timeout)*60*60
+        else:
+            timeout = 0
         dbFolderPath = self.initializeDb(lzxy[0].folderName, accessType)
         if dbFolderPath is not None:
             lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
@@ -367,6 +372,11 @@ class StoreTiles(RanaModule):
 
     def _getTileDataFromFiles(self, lzxy):
         layer = lzxy[0] # only the layer part of the tuple
+        if layer.timeout:
+            # stored timeout is in hours, convert to seconds
+            timeout = float(layer.timeout)*60*60
+        else:
+            timeout = 0
         tileFolderPath = self._mapTiles._getTileFolderPath()
         layerFolderAndTileFilename = self._mapTiles.getImagePath(lzxy)
         tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
