@@ -337,46 +337,54 @@ class StoreTiles(RanaModule):
             timeout = float(layer.timeout)*60*60
         storageType = self.get('tileStorageType', 'files')
         if storageType == 'sqlite':
-            accessType = "get"
-            dbFolderPath = self.initializeDb(lzxy[0].folderName, accessType)
-            if dbFolderPath is not None:
-                lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
-                result = self.getTileFromDb(lookupConn, dbFolderPath, lzxy)
-                if result: # is the result valid ?
-                    resultData = result.fetchone() # get the result content
-                else:
-                    resultData = None # the result is invalid
-                if resultData:
-                    if layer.timeout:
-                        self.log.debug("timeout set for layer %s: %fs (expired at %d), tile timestamp: %d" % (layer.label,timeout,time.time()-timeout,resultData[1]) )
-                        if resultData[1] < (time.time()-timeout):
-                            self.log.debug("tile is older than configured timeout, not loading tile")
-                            return None # pretend the tile is not stored
-                    # return tile data
-                    return resultData[0]
-                else:
-                    return None # the tile is not stored
-        else: # the only other storage method is currently classical files storage
-            tileFolderPath = self._mapTiles._getTileFolderPath()
-            layerFolderAndTileFilename = self._mapTiles.getImagePath(lzxy)
-            tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
-            if os.path.exists(tilePath):
-                if layer.timeout:
-                    tile_mtime = os.path.getmtime(tilePath)
-                    if tile_mtime < (time.time()-timeout):
-                        self.log.debug("file is older than configured timeout of %fs, not loading tile" % timeout)
-                        return None
-                # load the file to pixbuf and return it
-                try:
-                    f = open(tilePath, "rb")
-                    data = f.read()
-                    f.close()
-                    return data
-                except Exception:
-                    self.log.exception("loading tile from file failed")
-                    return None
+            self._getTileDataFromSqlite(lzxy)
+        else:  # the only other storage method is currently classical files storage
+            self._getTileDataFromFiles(lzxy)
+
+    def _getTileDataFromSqlite(self, lzxy):
+        accessType = "get"
+        layer = lzxy[0] # only the layer part of the tuple
+        dbFolderPath = self.initializeDb(lzxy[0].folderName, accessType)
+        if dbFolderPath is not None:
+            lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
+            result = self.getTileFromDb(lookupConn, dbFolderPath, lzxy)
+            if result: # is the result valid ?
+                resultData = result.fetchone() # get the result content
             else:
-                return None # this tile is not locally stored
+                resultData = None # the result is invalid
+            if resultData:
+                if layer.timeout:
+                    self.log.debug("timeout set for layer %s: %fs (expired at %d), tile timestamp: %d" % (layer.label,timeout,time.time()-timeout,resultData[1]) )
+                    if resultData[1] < (time.time()-timeout):
+                        self.log.debug("tile is older than configured timeout, not loading tile")
+                        return None # pretend the tile is not stored
+                # return tile data
+                return resultData[0]
+            else:
+                return None # the tile is not stored
+
+    def _getTileDataFromFiles(self, lzxy):
+        layer = lzxy[0] # only the layer part of the tuple
+        tileFolderPath = self._mapTiles._getTileFolderPath()
+        layerFolderAndTileFilename = self._mapTiles.getImagePath(lzxy)
+        tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
+        if os.path.exists(tilePath):
+            if layer.timeout:
+                tile_mtime = os.path.getmtime(tilePath)
+                if tile_mtime < (time.time()-timeout):
+                    self.log.debug("file is older than configured timeout of %fs, not loading tile" % timeout)
+                    return None
+            # load the file to pixbuf and return it
+            try:
+                f = open(tilePath, "rb")
+                data = f.read()
+                f.close()
+                return data
+            except Exception:
+                self.log.exception("loading tile from file failed")
+                return None
+        else:
+            return None # this tile is not locally stored
 
     def getTileFromDb(self, lookupConn, dbFolderPath, lzxy):
         """get a tile from the database"""
