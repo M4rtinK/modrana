@@ -53,7 +53,6 @@ BasePage {
             checked : rWin.animate
             onCheckedChanged : {
                 rWin.animate = checked
-                 //rWin.set("QMLAnimate", checked)
             }
         }
         Label {
