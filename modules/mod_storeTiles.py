@@ -152,11 +152,6 @@ class StoreTiles(RanaModule):
                 connection.commit()
             self.layers[accessType][dbFolderPath] = {'lookup': connection, 'stores': {}}
 
-    def storeTile(self, tile, lzxy):
-        """save a given tile to local storage"""
-        if self.get('storeDownloadedTiles', True):
-            self._storeTileToSqlite(tile, lzxy)
-
     def _storeTileToSqlite(self, tile, lzxy):
         layer, z, x, y = lzxy
         folderPrefix = layer.folderName
@@ -532,7 +527,7 @@ class StoreTiles(RanaModule):
             #TODO: defensive programming - check if thread is alive when storing ?
             try:
                 (tile, lzxy) = item # unpack the tuple
-                self.storeTile(tile, lzxy) # store the tile
+                self._storeTileToSqlite(tile, lzxy) # store the tile
                 tilesInCommit+=1
                 self.sqliteTileQueue.task_done()
             except Exception:
@@ -551,32 +546,38 @@ class StoreTiles(RanaModule):
     def automaticStoreTile(self, tile, lzxy):
         """store a tile to a file or db, depending on the current setting"""
 
-        storageType = self.get('tileStorageType', 'files')
-        if storageType == 'sqlite': # we are storing to the database
-            # put the tile to the storage queue, so that then worker can store it
-            self.sqliteTileQueue.put((tile, lzxy), block=True, timeout=20)
-        else: # we are storing to the filesystem
-            # get the folder path
-            filename = self._mapTiles.getTileFilename(lzxy)
-            (folderPath, tail) = os.path.split(filename)
-            if not os.path.exists(folderPath): # does it exist ?
-                try:
-                    os.makedirs(folderPath) # create the folder
-                except Exception:
-                    import sys
-                    e = sys.exc_info()[1]
-                    # errno 17 - folder already exists
-                    # this is most probably cased by another thread creating the folder between
-                    # the check & our os.makedirs() call
-                    # -> we can safely ignore it (as the the only thing we are now interested in,
-                    # is having a folder to store the tile in)
-                    if e.errno != 17:
-                        self.log.exception("can't create folder %s for %s", folderPath, filename)
+        # check if persistent tile storage is enabled ?
+        if self.get('storeDownloadedTiles', True):
+            storageType = self.get('tileStorageType', 'files')
+            if storageType == 'sqlite': # we are storing to the database
+                # put the tile to the storage queue, so that then worker can store it
+                self.sqliteTileQueue.put((tile, lzxy), block=True, timeout=20)
+            else: # we are storing to the filesystem
+                self._storeTileToFile(tile, lzxy)
+
+    def _storeTileToFile(self, tile, lzxy):
+        """Store the given tile to a file"""
+        # get the folder path
+        filename = self._mapTiles.getTileFilename(lzxy)
+        (folderPath, tail) = os.path.split(filename)
+        if not os.path.exists(folderPath): # does it exist ?
             try:
-                with open(filename, 'wb') as f:
-                    f.write(tile)
-            except:
-                self.log.exception("saving tile to file %s failed", filename)
+                os.makedirs(folderPath) # create the folder
+            except Exception:
+                import sys
+                e = sys.exc_info()[1]
+                # errno 17 - folder already exists
+                # this is most probably cased by another thread creating the folder between
+                # the check & our os.makedirs() call
+                # -> we can safely ignore it (as the the only thing we are now interested in,
+                # is having a folder to store the tile in)
+                if e.errno != 17:
+                    self.log.exception("can't create folder %s for %s", folderPath, filename)
+        try:
+            with open(filename, 'wb') as f:
+                f.write(tile)
+        except:
+            self.log.exception("saving tile to file %s failed", filename)
 
     def shutdown(self):
         # try to commit possibly uncommitted tiles
