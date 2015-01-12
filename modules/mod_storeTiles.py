@@ -50,6 +50,27 @@ from core import constants
 if gs.GUIString == "GTK":
     import gtk
 
+def sqliteConnectionWrapper(databasePath):
+    """Setting check_same_thread to False fixes a Sqlite exception
+    that happens when a thread tries to access a database read connection
+    that was created in a different thread. All write connections are "owned"
+    by the storage thread so they don't have these issues.
+    According to shreds of information available on the Internet &
+    GitHub search revealing massive usage of check_same_thread=False,
+    we are also using this flag to fix the issues.
+    Possible alternative solutions:
+    * per thread connections read connections
+    * replacing the connection if it was created in a different thread
+    * having a thread own the connection and handling read operations
+      asynchronously
+    In case that check_same_thread does not work somewhere or that is
+    found that it has some serious disadvantages, some of these alternative
+    solutions could be used.
+
+    :param str databasePath: path to the database
+    :returns: Sqlite database connection
+    """
+    return sqlite3.connect(databasePath, check_same_thread=False)
 
 def getModule(m, d, i):
     return StoreTiles(m, d, i)
@@ -140,9 +161,9 @@ class StoreTiles(RanaModule):
         if dbFolderPath not in self.layers.keys():
             self.log.info("sqlite tiles: initializing db for layer: %s" % folderPrefix)
             if os.path.exists(lookupDbPath): #does the lookup db exist ?
-                connection = sqlite3.connect(lookupDbPath) # connect to the lookup db
+                connection = sqliteConnectionWrapper(lookupDbPath) # connect to the lookup db
             else: #create new lookup db
-                connection = sqlite3.connect(lookupDbPath)
+                connection = sqliteConnectionWrapper(lookupDbPath)
                 cursor = connection.cursor()
                 self.log.info("sqlite tiles: creating lookup table")
                 cursor.execute(
@@ -226,7 +247,7 @@ class StoreTiles(RanaModule):
                 # just to make sure the access is sequential
                 # (due to sqlite in python 2.5 probably not liking concurrent access,
                 # resulting in te database becoming unavailable)
-                storeConn = sqlite3.connect(pathToStore) #TODO: add some error handling
+                storeConn = sqliteConnectionWrapper(pathToStore) #TODO: add some error handling
                 self.layers[accessType][dbFolderPath]['stores'][pathToStore] = storeConn # cache the connection
                 return storeConn
 
@@ -289,7 +310,7 @@ class StoreTiles(RanaModule):
         """create a new store table and file"""
         self.log.info("sqlite tiles: creating a new storage database in %s" % path)
         os.path.exists(path)
-        connection = sqlite3.connect(path)
+        connection = sqliteConnectionWrapper(path)
         cursor = connection.cursor()
         cursor.execute(
             "create table tiles (z integer, x integer, y integer, tile blob, extension varchar(10), unix_epoch_timestamp integer, primary key (z, x, y, extension))")
@@ -441,7 +462,7 @@ class StoreTiles(RanaModule):
                     if fromThread: # is this called from a thread ?
                         # due to sqlite quirks, connections can't be shared between threads
                         lookupDbPath = self.getLookupDbPath(dbFolderPath)
-                        lookupConn = sqlite3.connect(lookupDbPath)
+                        lookupConn = sqliteConnectionWrapper(lookupDbPath)
                     else:
                         # TODO: check if the database is actually initialized for the given layer
                         accessType = "get"
@@ -475,7 +496,7 @@ class StoreTiles(RanaModule):
                     if fromThread: # is this called from a thread ?
                         # due to sqlite quirks, connections can't be shared between threads
                         lookupDbPath = self.getLookupDbPath(dbFolderPath)
-                        lookupConn = sqlite3.connect(lookupDbPath)
+                        lookupConn = sqliteConnectionWrapper(lookupDbPath)
                     else:
                         lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
                     query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
@@ -598,7 +619,7 @@ class StoreTiles(RanaModule):
 #      (z, x, y, extension) = tile
 #
 #      lookupDbPath = self.getLookupDbPath(dbFolderPath)
-#      lookupConn = sqlite3.connect(lookupDbPath)
+#      lookupConn = sqliteConnectionWrapper(lookupDbPath)
 #      lookupCursor = lookupConn.cursor()
 #      lookupResult = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension)).fetchone()
 #      lookupConn.close()
@@ -606,7 +627,7 @@ class StoreTiles(RanaModule):
 #
 #    start = time.clock()
 #    lookupDbPath = self.getLookupDbPath(dbFolderPath)
-#    lookupConn = sqlite3.connect(lookupDbPath)
+#    lookupConn = sqliteConnectionWrapper(lookupDbPath)
 #    lookupCursor = lookupConn.cursor()
 #    for tile in temp:
 #      (z, x, y, extension) = tile
