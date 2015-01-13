@@ -35,7 +35,7 @@ class ShowPOI(RanaModule):
         RanaModule.__init__(self, m, d, i)
         self.activePOI = None
         self.visiblePOI = []
-        self.listMenusDirty = False
+        self.listMenusDirty = True
         self.drawActivePOI = False
         self.expectPoint = False
         self.expectLock = threading.Lock()
