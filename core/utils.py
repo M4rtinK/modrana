@@ -249,7 +249,7 @@ def freeSpaceInPath(path):
     """
     try:
         f = os.statvfs(path)
-        #return f.f_bsize * f.f_bavail
+        return f.f_bsize * f.f_bavail
     except Exception:
         log.exception("using statvfs() for free space detection failed")
 
