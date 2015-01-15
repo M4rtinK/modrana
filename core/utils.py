@@ -4,6 +4,7 @@ from __future__ import with_statement # for python 2.5
 import threading
 import os
 import sys
+import subprocess
 
 from core import constants
 from core import qrc
@@ -242,11 +243,27 @@ def freeSpaceInPath(path):
     """Return free space in the given path in bytes
 
     :param string path: path to check
-    :returns: free space in path in bytes
-    :rtype: int
+    :returns: free space in path in bytes, None if free space
+              could not be determined
+    :rtype: int or None
     """
-    f = os.statvfs(path)
-    return f.f_bsize * f.f_bavail
+    try:
+        f = os.statvfs(path)
+        #return f.f_bsize * f.f_bavail
+    except Exception:
+        log.exception("using statvfs() for free space detection failed")
+
+    # yes, this can happen even on Unix-like operating systems such as
+    # Android, if the Python build that is used is incorrectly compiled
+    log.debug("calling the df utility as a fallback to broken statvfs()")
+    try:
+        df_process = subprocess.Popen(["df", path], stdout=subprocess.PIPE)
+        df_output = df_process.communicate()[0]
+        mega_bytes_available_string = df_output.split("\n")[1].split()[3]
+        return int(mega_bytes_available_string)*1024
+    except Exception:
+        log.exception("calling df also failed")
+        return None
 
 def createConnectionPool(url, maxThreads=1):
     """Create the connection pool -> to facilitate socket reuse

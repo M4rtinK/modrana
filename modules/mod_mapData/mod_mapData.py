@@ -585,8 +585,12 @@ class MapData(RanaModule):
         :rtype: str
         """
         path = self.modrana.paths.getMapFolderPath()
-        prettySpace = utils.bytes2PrettyUnitString(utils.freeSpaceInPath(path))
-        return prettySpace
+        free_space = utils.freeSpaceInPath(path)
+        if free_space is not None:
+            prettySpace = utils.bytes2PrettyUnitString(utils.freeSpaceInPath(path))
+            return prettySpace
+        else:
+            return "unknown"
 
     def shutdown(self):
         self.stopBatchDownload()
