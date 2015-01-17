@@ -50,7 +50,7 @@ IconGridPage {
             menu : "OptionsMenu"
         }
         Component.onCompleted : {
-            if (rWin.showUnfinishedPages.value) {
+            if (rWin.showUnfinishedFeatures) {
                 testModel.append(
                     {"caption": "Route", "icon":"route.png", "menu":""}
                 )

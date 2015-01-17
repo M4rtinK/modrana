@@ -37,10 +37,10 @@ BasePage {
             }
         }
         TextSwitch {
-            text : qsTr("Show unfinished pages")
-            checked : rWin.showUnfinishedPages
+            text : qsTr("Show unfinished features")
+            checked : rWin.showUnfinishedFeatures
             onCheckedChanged : {
-                rWin.showUnfinishedPages = checked
+                rWin.showUnfinishedFeatures = checked
             }
         }
         TextSwitch {

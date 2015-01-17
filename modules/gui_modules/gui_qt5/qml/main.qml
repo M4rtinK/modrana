@@ -36,8 +36,8 @@ ApplicationWindow {
     // debugging
     property alias showDebugButton : showDebugButtonProp.value
     OptProp {id: showDebugButtonProp; value : false}
-    property alias showUnfinishedPages : showUnfinishedPagesProp.value
-    OptProp {id: showUnfinishedPagesProp; value : false}
+    property alias showUnfinishedFeatures : showUnfinishedFeaturesProp.value
+    OptProp {id: showUnfinishedFeaturesProp; value : false}
     property alias tileDebug : tileDebugProperty.value
     OptProp {
         id : tileDebugProperty
@@ -323,7 +323,7 @@ ApplicationWindow {
         // init miscellaneous other toplevel properties
         animateProperty.key = "QMLAnimate"
         showDebugButtonProp.key = "showQt5GUIDebugButton"
-        showUnfinishedPagesProp.key = "showQt5GUIUnfinishedPages"
+        showUnfinishedFeaturesProp.key = "showQt5GUIUnfinishedFeatures"
         tileDebugProperty.key = "showQt5TileDebug"
         locationDebugProp.key = "gpsDebugEnabled"
         keepScreenOnProp.key = "screenBlankingMode"
