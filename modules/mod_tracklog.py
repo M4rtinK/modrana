@@ -93,15 +93,13 @@ class Tracklog(RanaModule):
 
     def handleMessage(self, message, messageType, args):
         if message == "startLogging":
-            self.log.info("starting to log")
+            self.log.info("starting track logging")
             # start a new log
             if not self.loggingEnabled:
-                self.loggingEnabled = True
-                self.log.info("initializing the log file")
-                self.initLog()
+                self.startLogging()
             # or resume an existing one
             elif self.loggingEnabled == True & self.loggingPaused == True:
-                self.log.info("resuming the logging")
+                self.log.info("resuming track logging")
                 self.loggingPaused = False
             self.set('needRedraw', True)
 
@@ -110,7 +108,7 @@ class Tracklog(RanaModule):
             self.set('needRedraw', True)
 
         elif message == "stopLogging":
-            self.log.info("stopping logging")
+            self.log.info("stopping track logging")
             self.stopLogging()
             self.set('needRedraw', True)
 
@@ -143,8 +141,21 @@ class Tracklog(RanaModule):
         if key == 'logNameEntry':
             self.set('logNameEntry', result)
 
-    def initLog(self, logType='gpx', name=None):
-        """start a new log, zero the appropriate variables, etc."""
+    def startLogging(self, logType='gpx', name=None):
+        """Start a new log file
+
+        :param str logType: tracklog output type
+        :param name: tracklog name
+        :type name: str or None
+        :returns: tracklog filename or None
+        :rtype: str or None
+        """
+        if self.loggingEnabled:
+            self.log.error("track logging already in progress")
+            return None
+        self.log.info("initializing the tracklog file")
+        # zero the appropriate variables, etc.
+        self.loggingEnabled = True
         self.loggingStartTimestamp = int(time.time())
         self.maxSpeed = 0
         self.avg1 = 0
@@ -159,6 +170,8 @@ class Tracklog(RanaModule):
             name = self.generateLogName()
 
         self.logName = name
+
+        filename = None
 
         if logType == 'gpx':
             # importing the GPX module can be time consuming so import it
@@ -194,25 +207,54 @@ class Tracklog(RanaModule):
 
         self.lastUpdateTimestamp = time.time()
         self.lastCoords = self.get('pos', None)
-        self.log.info("log file initialized")
+        self.log.info("tracklog file initialized")
+
+        return filename
+
+    def stopLogging(self):
+        """stop logging, export the log to GPX and delete the temporary
+        log files"""
+        # stop timers
+        self._stopTimers()
+
+        # save current log increment to storage (in CSV)
+        self._saveLogIncrement()
+
+        # try to export the log to GPX
+        self.notify("saving tracklog", 3000)
+        # first from the primary log
+        if not self.log1.saveToGPX(self.logPath):
+            self.log2.saveToGPX(self.logPath) # try the secondary log
+            # TODO: check if the GPX file is loadable and retry ?
+
+        # cleanup
+        # -> this deletes the temporary log files
+        # and discards the temporary AOWay objects
+        self._cleanup()
+        self.loggingEnabled = False
+        # now we make the tracklog manager aware, that there is a new log
+        loadTl = self.m.get('loadTracklogs', None)
+        if loadTl:
+            loadTl.listAvailableTracklogs() #TODO: incremental addition
+
 
     def pauseLogging(self):
         """pause logging"""
         if self.loggingEnabled:
             self._saveLogIncrement() # save increment
             self.loggingPaused = True # pause logging
-            self.log.info('logging paused')
+            self.log.info('track logging paused')
         else:
-            self.log.error("can't pause logging - no logging in progress")
+            self.log.error("can't pause track logging - no logging in progress")
 
     def unPauseLogging(self):
         """pause logging"""
         if self.loggingEnabled:
             self._saveLogIncrement() # save increment
             self.loggingPaused = False # un-pause logging
-            self.log.info('logging un-paused')
+            self.log.info('track logging un-paused')
         else:
-            self.log.error("can't un-pause logging - no logging in progress")
+            self.log.error("can't un-pause track logging - no logging in progress")
 
     def clearTrace(self):
         """Clear the on-map log trace
@@ -283,19 +325,19 @@ class Tracklog(RanaModule):
         (only the increment from last save needs to be stored)"""
         if not self.loggingPaused:
             self._saveLogIncrement()
-            self.log.info('temporary log files saved')
+            self.log.info('temporary tracklog files saved')
 
     def _saveLogIncrement(self):
         """save current log increment to storage"""
         try:
             self.log1.flush()
         except Exception:
-            self.log.exception('saving primary temporary log failed')
+            self.log.exception('saving primary temporary tracklog failed')
 
         try:
             self.log2.flush()
         except Exception:
-            self.log.exception('saving secondary temporary log failed')
+            self.log.exception('saving secondary temporary tracklog failed')
 
     def generateLogName(self):
         """generate a unique name for a log"""
@@ -363,33 +405,6 @@ class Tracklog(RanaModule):
             self.log.info("track logging timers stopped")
         else:
             self.log.error("the modRana cron module is not available")
-
-    def stopLogging(self):
-        """stop logging, export the log to GPX and delete the temporary
-        log files"""
-        # stop timers
-        self._stopTimers()
-
-        # save current log increment to storage (in CSV)
-        self._saveLogIncrement()
-
-        # try to export the log to GPX
-        self.notify("saving tracklog", 3000)
-        # first from the primary log
-        if not self.log1.saveToGPX(self.logPath):
-            self.log2.saveToGPX(self.logPath) # try the secondary log
-            # TODO: check if the GPX file is loadable and retry ?
-
-        # cleanup
-        # -> this deletes the temporary log files
-        # and discards the temporary AOWay objects
-        self._cleanup()
-        self.loggingEnabled = False
-        # now we make the tracklog manager aware, that there is a new log
-        loadTl = self.m.get('loadTracklogs', None)
-        if loadTl:
-            loadTl.listAvailableTracklogs() #TODO: incremental addition
-
 
     def _cleanup(self, deleteTempLogs=True):
         """zero unneeded datastructures after logging is stopped"""
@@ -664,7 +679,7 @@ class Tracklog(RanaModule):
             self.set('needRedraw', True)
 
         if primaryLogs:
-            self.log.info('exporting %d unsaved primary log files to GPX', len(primaryLogs))
+            self.log.info('exporting %d unsaved primary tracklog files to GPX', len(primaryLogs))
             for logPath in primaryLogs:
                 # export any found files
                 self.log.info('exporting %s to GPX', logPath)
