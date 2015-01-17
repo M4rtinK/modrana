@@ -252,9 +252,9 @@ class GUIModule(RanaModule):
 
             "map": {
                 "button": {
-                    "size": (72, 108)[i],
-                    "margin": (16, 24)[i],
-                    "spacing": (16, 24)[i],
+                    "size": (72, 144)[i],
+                    "margin": (16, 32)[i],
+                    "spacing": (16, 32)[i],
                     },
                 "scaleBar" : {
                     "border" : (2, 4)[i],
