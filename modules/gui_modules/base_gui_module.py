@@ -280,7 +280,8 @@ class GUIModule(RanaModule):
         C = {
             "style": self._getStyleConstants(),
             "default" : {
-                "theme" : defaultTheme
+                "theme" : defaultTheme,
+                "routingProvider" : constants.DEFAULT_ROUTING_PROVIDER
             }
         }
         return C
