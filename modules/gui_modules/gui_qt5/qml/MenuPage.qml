@@ -58,7 +58,7 @@ IconGridPage {
                     {"caption": "POI", "icon":"poi.png", "menu":""}
                 )
                 testModel.append(
-                    {"caption": "Tracks", "icon":"tracklogs.png", "menu":""}
+                    {"caption": "Tracks", "icon":"tracklogs.png", "menu":"TracksMenu"}
                 )
                 testModel.append(
                     {"caption": "Data", "icon":"download.png", "menu":""}
