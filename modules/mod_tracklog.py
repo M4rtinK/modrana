@@ -127,7 +127,7 @@ class Tracklog(RanaModule):
             self.set('needRedraw', True)
 
         elif message == 'clearTrace':
-            self.pxpyIndex = []
+            self.clearTrace()
 
         elif message == 'setupColorMenu':
             m = self.m.get('showTracklogs', None)
@@ -213,6 +213,12 @@ class Tracklog(RanaModule):
             self.log.info('logging un-paused')
         else:
             self.log.error("can't un-pause logging - no logging in progress")
+
+    def clearTrace(self):
+        """Clear the on-map log trace
+        NOTE: currently does something only with GTK GUI
+        """
+        self.pxpyIndex = []
 
     def _updateLogCB(self):
         """add current position at the end of the log"""
