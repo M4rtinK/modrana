@@ -565,7 +565,7 @@ class Tracklog(RanaModule):
             text += "\n\n"
 
             if not self.loggingEnabled:
-                text += "%s" % self.generateLogName(self.logName)
+                text += "%s" % self.generateLogName(self.get('logNameEntry', ""))
             else:
                 text += "%s" % self.logName
 
