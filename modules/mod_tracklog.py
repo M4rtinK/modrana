@@ -676,83 +676,85 @@ class Tracklog(RanaModule):
         secondaryLogs = glob.glob("%s/*.temporary_csv_2" % logFolder)
 
         if primaryLogs or secondaryLogs:
+            self.log.info("unsaved temporary tracklogs detected")
             self.notify("exporting temporary tracklogs to GPX", 5000)
             self.set('needRedraw', True)
 
-        if primaryLogs:
-            self.log.info('exporting %d unsaved primary tracklog files to GPX', len(primaryLogs))
-            for logPath in primaryLogs:
-                # export any found files
-                self.log.info('exporting %s to GPX', logPath)
-                try:
-                    w1 = way.fromCSV(logPath, delimiter=",")
-                    exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
-                    # does the GPX file already exist ?
-                    # TODO: check if the GPX file is corrupted and swap with newly exported one ?
-                    # (eq. caused by a crash during saving the GPX file)
-                    if os.path.exists(exportPath): # save to backup path
-                        exportPath = "%s_1.gpx" % os.path.splitext(logPath)[0]
-                    w1.saveToGPX(exportPath)
-                    self.log.info('GPX export successful')
-                    # success, delete temporary files
-
-                    # primary
-                    os.remove(logPath)
-                    self.log.debug('primary temporary file %s deleted', logPath)
-                    # secondary
-                    secondaryPath = "%s.temporary_csv_2" % os.path.splitext(logPath)[0]
-                    if os.path.exists(secondaryPath):
-                        os.remove(secondaryPath)
-                        self.log.debug('secondary temporary file %s deleted', secondaryPath)
-
-                except Exception:
-                    self.log.exception('exporting unsaved primary log file failed')
-                    failedPath = "%s_1.csv" % os.path.splitext(logPath)[0]
-                    self.log.info('renaming to %s instead', failedPath)
+            if primaryLogs:
+                self.log.info('exporting %d unsaved primary tracklog files to GPX', len(primaryLogs))
+                for logPath in primaryLogs:
+                    # export any found files
+                    self.log.info('exporting %s to GPX', logPath)
                     try:
-                        shutil.move(logPath, failedPath)
-                        self.log.info("renaming successful")
+                        w1 = way.fromCSV(logPath, delimiter=",")
+                        exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
+                        # does the GPX file already exist ?
+                        # TODO: check if the GPX file is corrupted and swap with newly exported one ?
+                        # (eq. caused by a crash during saving the GPX file)
+                        if os.path.exists(exportPath): # save to backup path
+                            exportPath = "%s_1.gpx" % os.path.splitext(logPath)[0]
+                        w1.saveToGPX(exportPath)
+                        self.log.info('GPX export of unsaved primary tracklog successful')
+                        # success, delete temporary files
+
+                        # primary
+                        os.remove(logPath)
+                        self.log.debug('primary temporary file %s deleted', logPath)
+                        # secondary
+                        secondaryPath = "%s.temporary_csv_2" % os.path.splitext(logPath)[0]
+                        if os.path.exists(secondaryPath):
+                            os.remove(secondaryPath)
+                            self.log.debug('secondary temporary file %s deleted', secondaryPath)
+
                     except Exception:
-                        self.log.exception('renaming %s to %s failed', logPath, failedPath)
+                        self.log.exception('exporting unsaved primary log file failed')
+                        failedPath = "%s_1.csv" % os.path.splitext(logPath)[0]
+                        self.log.info('renaming to %s instead', failedPath)
+                        try:
+                            shutil.move(logPath, failedPath)
+                            self.log.info("renaming successful")
+                        except Exception:
+                            self.log.exception('renaming %s to %s failed', logPath, failedPath)
 
-        # rescan for secondary logs
-        # (there should be only secondary logs that
-        # either don't have primary logs or where primary logs
-        # failed to parse (primary logs delete secondary logs
-        # after successful processing)
+            # rescan for secondary logs
+            # (there should be only secondary logs that
+            # either don't have primary logs or where primary logs
+            # failed to parse (primary logs delete secondary logs
+            # after successful processing)
 
-        secondaryLogs = glob.glob("%s/*.temporary_csv_2" % logFolder)
-        if secondaryLogs:
-            self.log.info('exporting %d unsaved secondary log files to GPX' % len(primaryLogs))
-            for logPath in secondaryLogs:
-                # export any found files
-                self.log.info('exporting %s to GPX' % logPath)
-                try:
-                    w2 = way.fromCSV(logPath, delimiter=",")
-                    exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
-                    # does the GPX file already exist ?
-                    # TODO: check if the GPX file is corrupted and swap with newly exported one ?
-                    # (eq. caused by a crash during saving the GPX file)
-                    if os.path.exists(exportPath): # save to backup path
-                        exportPath = "%s_2.gpx" % os.path.splitext(logPath)[0]
-                    w2.saveToGPX(exportPath)
-                    self.log.info('GPX export successful')
-                    # success, delete temporary file
-
-                    # secondary
-                    # (primary is either not there or was already removed in primary pass)
-                    os.remove(logPath)
-                    self.log.info('secondary temporary file %s deleted' % logPath)
-
-                except Exception:
-                    self.log.exception('exporting unsaved secondary log file failed')
-                    failedPath = "%s_2.csv" % os.path.splitext(logPath)[0]
-                    self.log.info('renaming to %s instead', failedPath)
+            secondaryLogs = glob.glob("%s/*.temporary_csv_2" % logFolder)
+            if secondaryLogs:
+                self.log.info('exporting %d unsaved secondary log files to GPX' % len(primaryLogs))
+                for logPath in secondaryLogs:
+                    # export any found files
+                    self.log.info('exporting %s to GPX' % logPath)
                     try:
-                        shutil.move(logPath, failedPath)
-                        self.log.info("renaming successful")
+                        w2 = way.fromCSV(logPath, delimiter=",")
+                        exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
+                        # does the GPX file already exist ?
+                        # TODO: check if the GPX file is corrupted and swap with newly exported one ?
+                        # (eq. caused by a crash during saving the GPX file)
+                        if os.path.exists(exportPath): # save to backup path
+                            exportPath = "%s_2.gpx" % os.path.splitext(logPath)[0]
+                        w2.saveToGPX(exportPath)
+                        self.log.info('GPX export of unsaved secondary tracklog successful')
+                        # success, delete temporary file
+
+                        # secondary
+                        # (primary is either not there or was already removed in primary pass)
+                        os.remove(logPath)
+                        self.log.info('secondary temporary file %s deleted' % logPath)
+
                     except Exception:
-                        self.log.exception('renaming %s to %s failed', logPath, failedPath)
+                        self.log.exception('exporting unsaved secondary log file failed')
+                        failedPath = "%s_2.csv" % os.path.splitext(logPath)[0]
+                        self.log.info('renaming to %s instead', failedPath)
+                        try:
+                            shutil.move(logPath, failedPath)
+                            self.log.info("renaming successful")
+                        except Exception:
+                            self.log.exception('renaming %s to %s failed', logPath, failedPath)
+            self.log.debug("unsaved tracklog handling finished")
 
     def shutdown(self):
         # try to stop and save the log
