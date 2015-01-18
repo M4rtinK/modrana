@@ -537,8 +537,8 @@ class _GpxMeta(object):
             metadata.append(elementise("keywords", None, self.keywords))
         if self.bounds:
             if not isinstance(self.bounds, dict):
-                latitudes = map(attrgetter("latitude"), self.bounds)
-                longitudes = map(attrgetter("longitude"), self.bounds)
+                latitudes = list(map(attrgetter("latitude"), self.bounds))
+                longitudes = list(map(attrgetter("longitude"), self.bounds))
                 bounds = {
                     "minlat": str(min(latitudes)),
                     "maxlat": str(max(latitudes)),
