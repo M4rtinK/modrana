@@ -96,7 +96,7 @@ class Tracklog(RanaModule):
             self.log.info("starting track logging")
             # start a new log
             if not self.loggingEnabled:
-                self.startLogging()
+                self.startLogging(self.get('logNameEntry', ""))
             # or resume an existing one
             elif self.loggingEnabled == True & self.loggingPaused == True:
                 self.log.info("resuming track logging")
@@ -141,12 +141,11 @@ class Tracklog(RanaModule):
         if key == 'logNameEntry':
             self.set('logNameEntry', result)
 
-    def startLogging(self, logType='gpx', name=None):
+    def startLogging(self, logType='gpx', name=""):
         """Start a new log file
 
         :param str logType: tracklog output type
-        :param name: tracklog name
-        :type name: str or None
+        :param str name: tracklog name
         :returns: tracklog filename or None
         :rtype: str or None
         """
@@ -166,8 +165,7 @@ class Tracklog(RanaModule):
         self.pxpyIndex.clear()
         logFolder = self.getLogFolderPath()
 
-        if name is None:
-            name = self.generateLogName()
+        name = self.generateLogName(name)
 
         self.logName = name
 
@@ -339,13 +337,12 @@ class Tracklog(RanaModule):
         except Exception:
             self.log.exception('saving secondary temporary tracklog failed')
 
-    def generateLogName(self):
+    def generateLogName(self, name):
         """generate a unique name for a log"""
         timeString = time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
         prefix = "log"
-        logNameEntry = self.get('logNameEntry', None)
-        if logNameEntry:
-            prefix = logNameEntry
+        if name:
+            prefix = name
         return prefix + "_" + timeString
 
     def getLogFolderPath(self):
@@ -355,11 +352,11 @@ class Tracklog(RanaModule):
 
     def _startTimers(self):
         """start the update and save timers"""
+        # in milliseconds, stored as seconds
+        updateTimeout = int(self.get('tracklogLogInterval', 1)) * 1000
+        saveTimeout = int(self.get('tracklogSaveInterval', 10)) * 1000
         cron = self.m.get('cron', None)
         if cron:
-            # in milliseconds, stored as seconds
-            updateTimeout = int(self.get('tracklogLogInterval', 1)) * 1000
-            saveTimeout = int(self.get('tracklogSaveInterval', 10)) * 1000
             # update timer
             self.updateLogTimerId = cron.addTimeout(self._updateLogCB, updateTimeout, self,
                                                     "update tracklog with current position")
@@ -564,7 +561,7 @@ class Tracklog(RanaModule):
             text += "\n\n"
 
             if not self.loggingEnabled:
-                text += "%s" % self.generateLogName()
+                text += "%s" % self.generateLogName(self.logName)
             else:
                 text += "%s" % self.logName
 
