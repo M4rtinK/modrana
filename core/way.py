@@ -193,16 +193,12 @@ class Way(object):
             # check for stored timestamps
             if self.points and len(self.points[0]) >= 4: # LLET
                 trackpoints.append(
-                    map(lambda x:
-                        gpx.Trackpoint(x[0], x[1], None, None, x[2], x[3]),
-                        self.points)
+                    [gpx.Trackpoint(x[0], x[1], None, None, x[2], x[3]) for x in self.points]
                 )
 
             else: # LLE
                 trackpoints.append(
-                    map(lambda x:
-                        gpx.Trackpoint(x[0], x[1], None, None, x[2], None),
-                        self.points)
+                    [gpx.Trackpoint(x[0], x[1], None, None, x[2], None) for x in self.points]
                 )
 
             # Handle message points
@@ -443,11 +439,11 @@ def fromCSV(path, delimiter=',', fieldCount=None):
     if fieldCount: # assume fixed field count
         try:
             if fieldCount == 2: # lat, lon
-                points = map(lambda x: (x[0], x[1]), reader)
+                points = [(x[0], x[1]) for x in reader]
             elif fieldCount == 3: # lat, lon, elevation
-                points = map(lambda x: (x[0], x[1], x[2]), reader)
+                points = [(x[0], x[1], x[2]) for x in reader]
             elif fieldCount == 4: # lat, lon, elevation, timestamp
-                points = map(lambda x: (x[0], x[1], x[2], x[3]), reader)
+                points = [(x[0], x[1], x[2], x[3]) for x in reader]
             else:
                 log.error("wrong field count - use 2, 3 or 4")
                 raise ValueError
@@ -574,7 +570,7 @@ class AppendOnlyWay(Way):
                 #mark all points added on startup with a single timestamp
                 timestamp = geo.timestampUTC()
                 # convert to LLET
-                points = map(lambda x: (x[0], x[1], x[2], timestamp), points)
+                points = [(x[0], x[1], x[2], timestamp) for x in points]
 
                 # mark points as not yet saved
                 self.increment = points
@@ -583,7 +579,7 @@ class AppendOnlyWay(Way):
 
     def getPointsLLE(self):
         # drop the timestamp
-        return map(lambda x: (x[0], x[1], x[2]), self.points)
+        return [(x[0], x[1], x[2]) for x in self.points]
 
     def getPointsLLET(self):
         """returns all points in LLET format, both saved an not yet saved to storage"""
