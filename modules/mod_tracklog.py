@@ -141,7 +141,7 @@ class Tracklog(RanaModule):
         if key == 'logNameEntry':
             self.set('logNameEntry', result)
 
-    def startLogging(self, logType='gpx', name=""):
+    def startLogging(self, name="", logType='gpx'):
         """Start a new log file
 
         :param str logType: tracklog output type
@@ -174,6 +174,8 @@ class Tracklog(RanaModule):
         if logType == 'gpx':
             # importing the GPX module can be time consuming so import it
             # when it is really needed
+            self.log.info("GPX selected as format for the final output")
+
             from upoints import gpx
 
             self.currentLogGPX = gpx.Trackpoints()
@@ -202,6 +204,8 @@ class Tracklog(RanaModule):
 
             # start update and save timers
             self._startTimers()
+        else:
+            self.log.error("unknown track log format: %s" % logType)
 
         self.lastUpdateTimestamp = time.time()
         self.lastCoords = self.get('pos', None)
