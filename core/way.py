@@ -257,7 +257,7 @@ class Way(object):
         TODO: message point support"""
         timestamp = geo.timestampUTC()
         try:
-            f = open(path, "wb")
+            f = open(path, "w")
             writer = csv.writer(f, dialect=csv.excel)
             points = self.getPointsLLE()
             for p in points:
@@ -613,7 +613,7 @@ class AppendOnlyWay(Way):
 
     def startWritingCSV(self, path):
         try:
-            self.file = open(path, "wb")
+            self.file = open(path, "w")
             self.writer = csv.writer(self.file)
             self.filePath = path
             # flush any pending points
