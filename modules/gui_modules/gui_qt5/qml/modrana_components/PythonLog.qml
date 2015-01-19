@@ -10,7 +10,7 @@ Item {
 
     function debug(message) {
         if (pythonLogger.backendAvailable) {
-            rWin.python.call("modrana.gui.qml_log.debug", [message])
+            rWin.python.call("modrana.gui.qml_log.debug", ["" + message])
         } else {
             console.log("DEBUG: " + message)
         }
@@ -18,7 +18,7 @@ Item {
 
     function info(message) {
         if (pythonLogger.backendAvailable) {
-            rWin.python.call("modrana.gui.qml_log.info", [message])
+            rWin.python.call("modrana.gui.qml_log.info", ["" + message])
         } else {
             console.log("INFO: " + message)
         }
@@ -26,7 +26,7 @@ Item {
 
     function warning(message) {
         if (pythonLogger.backendAvailable) {
-            rWin.python.call("modrana.gui.qml_log.warning", [message])
+            rWin.python.call("modrana.gui.qml_log.warning", ["" + message])
         } else {
             console.log("WARNING: " + message)
         }
@@ -34,7 +34,7 @@ Item {
 
     function error(message) {
         if (pythonLogger.backendAvailable) {
-            rWin.python.call("modrana.gui.qml_log.error", [message])
+            rWin.python.call("modrana.gui.qml_log.error", ["" + message])
         } else {
             console.log("ERROR: " + message)
         }
@@ -42,7 +42,7 @@ Item {
 
     function critical(message) {
         if (pythonLogger.backendAvailable) {
-            rWin.python.call("modrana.gui.qml_log.critical", [message])
+            rWin.python.call("modrana.gui.qml_log.critical", ["" + message])
         } else {
             console.log("CRITICAL: " + message)
         }
