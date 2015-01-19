@@ -415,20 +415,21 @@ ApplicationWindow {
     */
 
     function getPage(pageName) {
-        rWin.log.debug("GET PAGE")
-        rWin.log.debug(pageName)
-
+        rWin.log.debug("main: getPage: " + pageName)
         var newPage
         if (pageName == null) { //signal that we should return to the map page
             newPage = mapPage
         } else { // load a page
             var fullPageName = pageName + "Page"
-            newPage = pages[pageName]
-            if (!newPage) { // is the page cached ?
-                // load the page and cache it
+            newPage = rWin.pages[pageName]
+            if (newPage) {
+                rWin.log.debug("main: " + pageName + " found in page cache")
+            } else {
+                // page is not cached
+                // - load the page and cache it
                 newPage = loadPage(fullPageName)
                 if (newPage) { // loading successful
-                    pages[pageName] = newPage // cache the page
+                    rWin.pages[pageName] = newPage // cache the page
                     rWin.log.debug("page cached: " + pageName)
                 } else { // loading failed, go to mapPage
                     newPage = null
@@ -436,8 +437,7 @@ ApplicationWindow {
                 }
             }
         }
-        rWin.log.debug("RETURN PAGE")
-        rWin.log.debug(newPage)
+        rWin.log.debug("main: returning page: " + pageName)
         return newPage
 
     /* TODO: some pages are not so often visited pages so they could
