@@ -6,6 +6,7 @@ import "modrana_components"
 
 BasePage {
     id: rtPage
+
     headerText : rtPage.recording ? recordingText : qsTr("Record a tracklog")
     property bool ready : true
     property bool recording : false
@@ -17,8 +18,14 @@ BasePage {
         if (recording) {
             if (paused) {
                 rWin.log.info("TracksRecord: pausing recording")
+                rWin.python.call("modrana.gui.modules.tracklog.pauseLogging", [], function(){
+                    rWin.log.info("TracksRecord: recording paused")
+                })
             } else {
                 rWin.log.info("TracksRecord: unpausing recording")
+                rWin.python.call("modrana.gui.modules.tracklog.unPauseLogging", [], function(){
+                    rWin.log.info("TracksRecord: recording unpaused")
+                })
             }
         } else {
             rWin.log.error("TracksRecord: can't pause/unpause when not recording")
@@ -28,9 +35,28 @@ BasePage {
     onRecordingChanged : {
         if (recording) {
             rWin.log.info("TracksRecord: starting recording")
+            // first save the tracklog name to the options key,
+            // then start logging from the callback once the key is set
+            rWin.set("logNameEntry", tracklogNameField.text, function(){
+                rtPage.startRecording()
+            })
+
+
+
         } else {
             rWin.log.info("TracksRecord: stopping recording")
+            rWin.python.call("modrana.gui.modules.tracklog.stopLogging", [], function(){
+                rWin.log.info("TracksRecord: recording stopped")
+                tracklogNameField.text = ""
+            })
         }
+    }
+
+    function startRecording() {
+        rWin.python.call("modrana.gui.modules.tracklog.startLogging", [tracklogNameField.text], function(v){
+            rWin.log.info("TracksRecord: recording started to file: " + v)
+            tracklogNameField.text = v
+        })
     }
 
     content : ContentColumn {
