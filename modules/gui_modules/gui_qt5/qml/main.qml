@@ -77,7 +77,7 @@ ApplicationWindow {
         }
     }
 
-    property variant pages : {
+    property var pages : {
         // pre-load the toplevel pages
         "MapPage" : mapPage
         /*
