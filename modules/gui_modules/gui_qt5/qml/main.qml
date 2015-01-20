@@ -119,6 +119,10 @@ ApplicationWindow {
     // cron (dynamic timer creation)
     property variant cron : Cron {}
 
+    // keep alive/wake locks
+    property variant keepAlive : KeepAlive {}
+
+
     // are we using qrc ?
     property bool qrc : is_qrc()
 
