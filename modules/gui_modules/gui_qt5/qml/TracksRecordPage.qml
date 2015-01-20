@@ -40,19 +40,23 @@ BasePage {
             rWin.set("logNameEntry", tracklogNameField.text, function(){
                 rtPage.startRecording()
             })
-
-
-
         } else {
             rWin.log.info("TracksRecord: stopping recording")
             rWin.python.call("modrana.gui.modules.tracklog.stopLogging", [], function(){
                 rWin.log.info("TracksRecord: recording stopped")
                 tracklogNameField.text = ""
+                // we are done, remove the wake lock we added when we started
+                // recording the track log
+                rWin.keepAlive.removeWakeLock("tracklog_recording")
             })
         }
     }
 
     function startRecording() {
+        // set a wake lock so that the device suspend does not ruin
+        // our track logging attempt
+        // TODO: report if suspend inhibition is not supported
+        rWin.keepAlive.addWakeLock("tracklog_recording")
         rWin.python.call("modrana.gui.modules.tracklog.startLogging", [tracklogNameField.text], function(v){
             rWin.log.info("TracksRecord: recording started to file: " + v)
             tracklogNameField.text = v
