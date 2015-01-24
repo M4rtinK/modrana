@@ -15,6 +15,7 @@ BasePage {
                                          [], "unknown", function(v){realTracklogFolder = v})
     property string tracklogFolder : symlinkSwitch.checked ? "~/Documents/modrana_tracklogs" : rtPage.realTracklogFolder
     property string recordingText : rtPage.paused ? qsTr("Tracklog recording paused") : qsTr("Recording a tracklog")
+    property string lastUsedTracklogName : rWin.get("logNameEntry", "", function(v){lastUsedTracklogName=v})
 
     onPausedChanged : {
         if (recording) {
@@ -39,6 +40,7 @@ BasePage {
             rWin.log.info("TracksRecord: starting recording")
             // first save the tracklog name to the options key,
             // then start logging from the callback once the key is set
+            lastUsedTracklogName = tracklogNameField.text
             rWin.set("logNameEntry", tracklogNameField.text, function(){
                 rtPage.startRecording()
             })
@@ -46,7 +48,7 @@ BasePage {
             rWin.log.info("TracksRecord: stopping recording")
             rWin.python.call("modrana.gui.modules.tracklog.stopLogging", [], function(){
                 rWin.log.info("TracksRecord: recording stopped")
-                tracklogNameField.text = ""
+                tracklogNameField.text = rtPage.lastUsedTracklogName
                 // we are done, remove the wake lock we added when we started
                 // recording the track log
                 rWin.keepAlive.removeWakeLock("tracklog_recording")
@@ -70,12 +72,16 @@ BasePage {
         TextField {
             id : tracklogNameField
             placeholderText: qsTr("Enter tracklog name here!")
+            text : rtPage.lastUsedTracklogName
             readOnly : rtPage.recording
             anchors.horizontalCenter : parent.horizontalCenter
-            onTextChanged : {
-                selectAll()
-            }
+            inputMethodHints : Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
             width : parent.width
+            onFocusChanged : {
+                if (focus) {
+                    selectAll()
+                }
+            }
         }
         Grid {
             id : buttonGrid
