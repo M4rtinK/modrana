@@ -111,17 +111,22 @@ BasePage {
             visible : rWin.platform.sailfish
             text : qsTr("Symlink tracklogs to Documents")
             checked : false
+            property bool readyForUse : false
 
             Component.onCompleted : {
                 if (rWin.platform.sailfish) {
                     rWin.python.call("modrana.gui.tracklogs.sailfishSymlinkExists", [],
                                      function(v) {
                                         symlinkSwitch.checked = v
+                                        readyForUse = true
                                      })
                 }
             }
             onCheckedChanged : {
-                if (symlinkSwitch.visible) {
+                // ignore changes to the checked property until the switch is ready for use
+                // - that means that we are on Sailfish OS and that we have checked if the
+                //   symlink exists or not
+                if (readyForUse) {
                     if (checked) {
                         rWin.python.call("modrana.gui.tracklogs.createSailfishSymlink", [])
                     } else {
