@@ -9,7 +9,7 @@ IconGridPage {
         id : testModel
         ListElement {
             caption : "Record"
-            icon : "tracklogs.png"
+            icon : "log.png"
             menu : "TracksRecord"
         }
     }
