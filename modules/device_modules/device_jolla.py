@@ -111,11 +111,10 @@ class Jolla(DeviceModule):
         return paths.getXDGRoutingDataPath()
 
     def getTracklogFolderPath(self):
-        """Make the tracklogs recorded by users more easily accessible by storing
-        them in the Public folder, which is easily accessible by available Sailfish OS
-        file managers, such as Cargodock.
+        """We have an option for making a symlink to the Documents folder,
+        so the XDG path for the actual tracklog storage is fine.
         """
-        return os.path.join(paths.getHOMEPath(), "Public", "modrana/tracklogs")
+        return paths.getXDGTracklogFolderPath()
 
     def getPOIFolderPath(self):
         return paths.getXDGPOIFolderPath()

@@ -11,8 +11,10 @@ BasePage {
     property bool ready : true
     property bool recording : false
     property bool paused : false
-    property string tracklogFolder : rWin.dcall("modrana.gui.modrana.paths.getTracklogsFolderPath",
-                                     [], "unknown", function(v){tracklogFolder = v})
+    property string realTracklogFolder : rWin.dcall("modrana.gui.modrana.paths.getTracklogsFolderPath",
+                                         [], "unknown", function(v){realTracklogFolder = v})
+    property bool sailfishSymlinkActive : false
+    property string tracklogFolder : symlinkSwitch.checked ? "~/Documents/modrana_tracklogs" : rtPage.realTracklogFolder
     property string recordingText : rtPage.paused ? qsTr("Tracklog recording paused") : qsTr("Recording a tracklog")
 
     onPausedChanged : {
@@ -102,6 +104,34 @@ BasePage {
             //wrapMode : Text.WrapAnywhere
             wrapMode : Text.WrapAnywhere
             width : contentC.width
+        }
+        TextSwitch {
+            // provide an easy way to create and remove a link from ~/Documents to the
+            // modRana tracklogs folder location to make tracklogs more easily available to users
+            id : symlinkSwitch
+            visible : rWin.platform.sailfish
+            text : qsTr("Symlink tracklogs to Documents")
+            checked : false
+
+            Component.onCompleted : {
+                if (symlinkSwitch.visible) {
+                    rWin.python.call("modrana.gui.tracklogs.sailfishSymlinkExists", [],
+                                     function(v) {
+                                        symlinkSwitch.checked = v
+                                        rtPage.sailfishSymlinkActive = v
+                                     })
+                }
+            }
+            onCheckedChanged : {
+                if (symlinkSwitch.visible) {
+                    if (checked) {
+                        rWin.python.call("modrana.gui.tracklogs.createSailfishSymlink", [])
+                    } else {
+                        rWin.python.call("modrana.gui.tracklogs.removeSailfishSymlink", [])
+                    }
+                    rtPage.sailfishSymlinkActive = checked
+                }
+            }
         }
     }
 }
