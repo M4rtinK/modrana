@@ -11,7 +11,8 @@ BasePage {
     property bool ready : true
     property bool recording : false
     property bool paused : false
-    property string tracklogFolder : "unknown"
+    property string tracklogFolder : rWin.dcall("modrana.gui.modrana.paths.getTracklogsFolderPath",
+                                     [], "unknown", function(v){tracklogFolder = v})
     property string recordingText : rtPage.paused ? qsTr("Tracklog recording paused") : qsTr("Recording a tracklog")
 
     onPausedChanged : {
@@ -64,6 +65,7 @@ BasePage {
     }
 
     content : ContentColumn {
+        id : contentC
         TextField {
             id : tracklogNameField
             placeholderText: qsTr("Enter tracklog name here!")
@@ -94,16 +96,12 @@ BasePage {
                 onClicked :  rtPage.paused = !rtPage.paused
             }
         }
-        Grid {
-            id : folderGrid
-            columns : rWin.inPortrait ? 1 : 2
-            spacing : rWin.c.style.main.spacing
-            Label {
-                text: "Tracklogs folder:"
-            }
-            Label {
-                text: "/blah/blah"
-            }
+        Label {
+            text: qsTr("Recorded tracklogs folder:") + newline + rtPage.tracklogFolder + "/logs"
+            property string newline : rWin.inPortrait ? "<br>" : " "
+            //wrapMode : Text.WrapAnywhere
+            wrapMode : Text.WrapAnywhere
+            width : contentC.width
         }
     }
 }
