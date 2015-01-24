@@ -325,7 +325,8 @@ class QMLGUI(GUIModule):
             "nmeaFilePath" : self.get("NMEAFilePath", None),
             "layerTree" : self.modules.mapLayers.getLayerTree(),
             "dictOfLayerDicts" : self.modules.mapLayers.getDictOfLayerDicts(),
-            "themesFolderPath" : os.path.abspath(self.modrana.paths.getThemesFolderPath())
+            "themesFolderPath" : os.path.abspath(self.modrana.paths.getThemesFolderPath()),
+            "sailfish" : self.dmod.getDeviceIDString() == "jolla"
         }
         return values
 

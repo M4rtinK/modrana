@@ -14,6 +14,7 @@ Item {
     property var posFromFile : null
     property var nmeaFilePath : null
     property string themesFolderPath : "unknown_path"
+    property bool sailfish : false
 
     function setValuesFromPython(values) {
         modRanaVersion = values.modRanaVersion
@@ -27,6 +28,7 @@ Item {
         posFromFile = values.posFromFile
         nmeaFilePath = values.nmeaFilePath
         themesFolderPath = values.themesFolderPath
+        sailfish = values.sailfish
         // done, we now have the values from Python we needed
         valid = true
     }
