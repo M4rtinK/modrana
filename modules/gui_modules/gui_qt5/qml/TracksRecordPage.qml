@@ -13,7 +13,6 @@ BasePage {
     property bool paused : false
     property string realTracklogFolder : rWin.dcall("modrana.gui.modrana.paths.getTracklogsFolderPath",
                                          [], "unknown", function(v){realTracklogFolder = v})
-    property bool sailfishSymlinkActive : false
     property string tracklogFolder : symlinkSwitch.checked ? "~/Documents/modrana_tracklogs" : rtPage.realTracklogFolder
     property string recordingText : rtPage.paused ? qsTr("Tracklog recording paused") : qsTr("Recording a tracklog")
 
@@ -118,7 +117,6 @@ BasePage {
                     rWin.python.call("modrana.gui.tracklogs.sailfishSymlinkExists", [],
                                      function(v) {
                                         symlinkSwitch.checked = v
-                                        rtPage.sailfishSymlinkActive = v
                                      })
                 }
             }
@@ -129,7 +127,6 @@ BasePage {
                     } else {
                         rWin.python.call("modrana.gui.tracklogs.removeSailfishSymlink", [])
                     }
-                    rtPage.sailfishSymlinkActive = checked
                 }
             }
         }
