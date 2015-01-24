@@ -40,6 +40,11 @@ IconGridPage {
         }
         */
         ListElement {
+            caption : "tracks"
+            icon : "tracklogs.png"
+            menu : "TracksMenu"
+        }
+        ListElement {
             caption : "Info"
             icon : "info.png"
             menu : "InfoMenu"
@@ -56,9 +61,6 @@ IconGridPage {
                 )
                 testModel.append(
                     {"caption": "POI", "icon":"poi.png", "menu":""}
-                )
-                testModel.append(
-                    {"caption": "Tracks", "icon":"tracklogs.png", "menu":"TracksMenu"}
                 )
                 testModel.append(
                     {"caption": "Data", "icon":"download.png", "menu":""}
