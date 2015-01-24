@@ -114,7 +114,7 @@ BasePage {
             checked : false
 
             Component.onCompleted : {
-                if (symlinkSwitch.visible) {
+                if (rWin.platform.sailfish) {
                     rWin.python.call("modrana.gui.tracklogs.sailfishSymlinkExists", [],
                                      function(v) {
                                         symlinkSwitch.checked = v
