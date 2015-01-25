@@ -336,18 +336,14 @@ class StoreTiles(RanaModule):
         """
         return data for the given tile
         """
-        self._loadingLog("tile requested: %s", lzxy)
-        layer = lzxy[0] # only the layer part of the tuple
-        if layer.timeout:
-            # stored timeout is in hours, convert to seconds
-            timeout = float(layer.timeout)*60*60
         storageType = self.get('tileStorageType', 'files')
         if storageType == 'sqlite':
             self._getTileDataFromSqlite(lzxy)
-        else:  # the only other storage method is currently classical files storage
+        else:  # the only other storage method is currently the classical files storage
             self._getTileDataFromFiles(lzxy)
 
     def _getTileDataFromSqlite(self, lzxy):
+        self._loadingLog("looking for tile in sqlite %s", lzxy)
         accessType = "get"
         layer = lzxy[0] # only the layer part of the tuple
         if layer.timeout:
@@ -375,6 +371,7 @@ class StoreTiles(RanaModule):
                 return None # the tile is not stored
 
     def _getTileDataFromFiles(self, lzxy):
+        self._loadingLog("looking for tile in files %s", lzxy)
         layer = lzxy[0] # only the layer part of the tuple
         if layer.timeout:
             # stored timeout is in hours, convert to seconds
