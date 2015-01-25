@@ -338,9 +338,9 @@ class StoreTiles(RanaModule):
         """
         storageType = self.get('tileStorageType', 'files')
         if storageType == 'sqlite':
-            self._getTileDataFromSqlite(lzxy)
+            return self._getTileDataFromSqlite(lzxy)
         else:  # the only other storage method is currently the classical files storage
-            self._getTileDataFromFiles(lzxy)
+            return self._getTileDataFromFiles(lzxy)
 
     def _getTileDataFromSqlite(self, lzxy):
         self._loadingLog("looking for tile in sqlite %s", lzxy)
@@ -391,13 +391,11 @@ class StoreTiles(RanaModule):
                     return None
             # load the file to pixbuf and return it
             try:
-                f = open(tilePath, "rb")
-                data = f.read()
-                f.close()
-                self._loadingLog("returning data for %s", lzxy)
-                return data
+                with open(tilePath, "rb") as f:
+                    self._loadingLog("returning data for %s", lzxy)
+                    return f.read()
             except Exception:
-                self.log.exception("loading tile from file failed for %", lzxy)
+                self.log.exception("loading tile from file failed for %s", lzxy)
                 return None
         else:
             self._loadingLog("path does not exist for %s", lzxy)
