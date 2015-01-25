@@ -381,7 +381,9 @@ class StoreTiles(RanaModule):
         tileFolderPath = self._mapTiles._getTileFolderPath()
         layerFolderAndTileFilename = self._mapTiles.getImagePath(lzxy)
         tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
+        self._loadingLog("checking if path %s exists for %s", tilePath, lzxy)
         if os.path.exists(tilePath):
+            self._loadingLog("path exists for %s", lzxy)
             if layer.timeout:
                 tile_mtime = os.path.getmtime(tilePath)
                 if tile_mtime < (time.time()-timeout):
@@ -392,11 +394,13 @@ class StoreTiles(RanaModule):
                 f = open(tilePath, "rb")
                 data = f.read()
                 f.close()
+                self._loadingLog("returning data for %s", lzxy)
                 return data
             except Exception:
-                self.log.exception("loading tile from file failed")
+                self.log.exception("loading tile from file failed for %", lzxy)
                 return None
         else:
+            self._loadingLog("path does not exist for %s", lzxy)
             return None # this tile is not locally stored
 
     def getTileFromDb(self, lookupConn, dbFolderPath, lzxy):
