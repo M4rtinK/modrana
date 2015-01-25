@@ -5,6 +5,7 @@ import threading
 import os
 import sys
 import subprocess
+import re
 
 from core import constants
 from core import qrc
@@ -258,8 +259,11 @@ def freeSpaceInPath(path):
     log.debug("calling the df utility as a fallback to broken statvfs()")
     try:
         df_process = subprocess.Popen(["df", path], stdout=subprocess.PIPE)
-        df_output = df_process.communicate()[0]
-        mega_bytes_available_string = df_output.split("\n")[1].split()[3]
+        df_output = df_process.communicate()[0].decode('utf-8')
+        # replace continuous whitespace and tabs by single whitespace
+        df_output = re.sub("\s\s+", " ", df_output)
+        # split by whitespace and extract free space info
+        mega_bytes_available_string = df_output.split("\n")[1].split(" ")[3]
         return int(mega_bytes_available_string)*1024
     except Exception:
         log.exception("calling df also failed")
