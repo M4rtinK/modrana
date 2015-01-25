@@ -327,7 +327,8 @@ class Tracklog(RanaModule):
         (only the increment from last save needs to be stored)"""
         if not self.loggingPaused:
             self._saveLogIncrement()
-            self.log.info('temporary tracklog files saved')
+            minutesElapsed = (time.time() - self.loggingStartTimestamp)/60.0
+            self.log.info('temp log files saved for %s, %1.1f min elapsed', self.logName, minutesElapsed)
 
     def _saveLogIncrement(self):
         """save current log increment to storage"""
