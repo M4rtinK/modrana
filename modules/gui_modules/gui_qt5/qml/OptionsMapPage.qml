@@ -48,10 +48,7 @@ BasePage {
                 }
             }
             onItemChanged : {
-                console.log("CHANGED!!")
-                console.log(rWin.mapPage)
-                console.log(rWin.mapPage.mapTileScale)
-                console.log(item.value)
+                rWin.log.info("map scale changed to: " + item.value)
                 rWin.mapPage.mapTileScale = item.value
             }
         }
