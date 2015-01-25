@@ -110,6 +110,12 @@ class StoreTiles(RanaModule):
 
         self.tileFolder = "/dev/null"
 
+        # the tile loading debug log function is no-op by default, but can be
+        # redirected to the normal debug log by setting the "tileLoadingDebug"
+        # key to True
+        self._loadingLog = self._noOp
+        self.modrana.watch('tileLoadingDebug', self._tileLoadingDebugChangedCB, runNow=True)
+
     def firstTime(self):
         # the config should be parsed by now and the tile storage
         # path thus should be final
@@ -119,6 +125,15 @@ class StoreTiles(RanaModule):
         self._mapTiles = self.m.get('mapTiles', None)
         self._mapLayers = self.m.get('mapLayers', None)
         self._startTileLoadingThread()
+
+    def _tileLoadingDebugChangedCB(self, key, oldValue, newValue):
+        if newValue:
+            self._loadingLog = self.log.debug
+        else:
+            self._loadingLog = self._noOp
+
+    def _noOp(self, *args):
+        pass
 
     def getLayerDbFolderPath(self, folderPrefix):
         return os.path.join(self.tileFolder, folderPrefix)
@@ -349,6 +364,7 @@ class StoreTiles(RanaModule):
         """
         return data for the given tile
         """
+        self._loadingLog("tile requested: %s", lzxy)
         layer = lzxy[0] # only the layer part of the tuple
         if layer.timeout:
             # stored timeout is in hours, convert to seconds
