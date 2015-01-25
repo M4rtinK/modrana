@@ -43,6 +43,7 @@ import threading
 
 from core import threads
 from core import constants
+from core import utils
 
 def sqliteConnectionWrapper(databasePath):
     """Setting check_same_thread to False fixes a Sqlite exception
@@ -197,8 +198,8 @@ class StoreTiles(RanaModule):
                 # (due to sqlite in python 2.5 probably not liking concurrent access,
                 # resulting in te database becoming unavailable)
                 result = lookupCursor.execute(
-                    "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
-                    (z, x, y, extension))
+                    "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=?",
+                    (z, x, y))
                 if not result.fetchone():
                     # store the tile as its not already in the database
 
@@ -378,12 +379,9 @@ class StoreTiles(RanaModule):
             timeout = float(layer.timeout)*60*60
         else:
             timeout = 0
-        tileFolderPath = self._mapTiles._getTileFolderPath()
-        layerFolderAndTileFilename = self._mapTiles.getImagePath(lzxy)
-        tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
-        self._loadingLog("checking if path %s exists for %s", tilePath, lzxy)
-        if os.path.exists(tilePath):
-            self._loadingLog("path exists for %s", lzxy)
+        tilePath = self._fuzzyTileFileExists(lzxy)
+        if tilePath:
+            self._loadingLog("tile file found %s (path: %s)", lzxy, tilePath)
             if layer.timeout:
                 tile_mtime = os.path.getmtime(tilePath)
                 if tile_mtime < (time.time()-timeout):
@@ -413,8 +411,8 @@ class StoreTiles(RanaModule):
             # resulting in te database becoming unavailable)
             lookupCursor = lookupConn.cursor()
             lookupResult = lookupCursor.execute(
-                "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
-                (z, x, y, layer.type)).fetchone()
+                "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=?",
+                (z, x, y)).fetchone()
             if lookupResult: # the tile was found in the lookup db
                 # now search in the store
                 storeFilename = lookupResult[0]
@@ -422,9 +420,14 @@ class StoreTiles(RanaModule):
                 stores = self.layers[accessType][dbFolderPath]['stores']
                 connectionToStore = self.connectToStore(stores, pathToStore, dbFolderPath, accessType)
                 storeCursor = connectionToStore.cursor()
+                # as the x,y & z are used as the primary key, all rows need to have a unique
+                # x, y & z combination and thus there can be only one result for a select
+                # over x, y & z
                 result = storeCursor.execute(
-                    "select tile, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?",
-                    (z, x, y, layer.type))
+                    "select tile, unix_epoch_timestamp from tiles where z=? and x=? and y=?",
+                    (z, x, y))
+                if utils.isTheStringAnImage(str(result)):
+                    self.log.warning("%s,%s,%s in %s is probably not an image", x, y, z, dbFolderPath)
                 return result
             else: # the tile was not found in the lookup table
                 return None
@@ -454,8 +457,8 @@ class StoreTiles(RanaModule):
                         # TODO: check if the database is actually initialized for the given layer
                         accessType = "get"
                         lookupConn = self.layers[accessType][dbFolderPath]['lookup'] # connect to the lookup db
-                    query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
-                    lookupResult = lookupConn.execute(query, (z, x, y, layer.type)).fetchone()
+                    query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=?"
+                    lookupResult = lookupConn.execute(query, (z, x, y)).fetchone()
                     if fromThread: # tidy up, just to be sure
                         lookupConn.close()
                     if lookupResult:
@@ -486,8 +489,8 @@ class StoreTiles(RanaModule):
                         lookupConn = sqliteConnectionWrapper(lookupDbPath)
                     else:
                         lookupConn = self.layers[dbFolderPath]['lookup'] # connect to the lookup db
-                    query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?"
-                    lookupResult = lookupConn.execute(query, (z, x, y, layer.type)).fetchone()
+                    query = "select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=?"
+                    lookupResult = lookupConn.execute(query, (z, x, y)).fetchone()
                     if fromThread: # tidy up, just to be sure
                         lookupConn.close()
                     if lookupResult:
@@ -586,6 +589,49 @@ class StoreTiles(RanaModule):
                 f.write(tile)
         except:
             self.log.exception("saving tile to file %s failed", filename)
+
+    def _getImagePath(self, lzxy):
+        """Get a unique name for a tile image
+        (suitable for use as part of filenames, dictionary keys, etc)
+        """
+        return os.path.join(lzxy[0].folderName, str(lzxy[1]), str(lzxy[2]), "%d.%s" % (lzxy[3], lzxy[0].type))
+
+    def _fuzzyTileFileExists(self, lzxy):
+        # first check if the primary tile path exists
+        tileFolderPath = self._mapTiles._getTileFolderPath()
+        layerFolderAndTileFilename = self._getImagePath(lzxy)
+        tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
+        # check if the primary file path exists and also if it actually
+        # is an image file
+        if os.path.exists(tilePath):
+            try:
+                with open(tilePath, "rb") as f:
+                    if utils.isTheStringAnImage(f.read(32)):
+                        return tilePath
+                    else:
+                        self.log.warning("%s is not an image", tilePath)
+            except Exception:
+                self.log("error when checking if primary tile file is an image")
+
+        # look also for other supported image formats
+        alternativeTilePath = None
+        # TODO: might be good to investigate the performance impact,
+        #       just to be sure :P
+
+        # replace the extension with a * so that the path can be used
+        # as wildcard in glob
+        wildcardTilePath = "%s.*" % os.path.splitext(tilePath)[0]
+        # iterate over potential paths returned by the glob iterator
+        for path in glob.iglob(wildcardTilePath):
+            # go over the paths and check if they point to an image files
+            with open(path, "rb") as f:
+                if utils.isTheStringAnImage(f.read(32)):
+                    # once an image file is found, break & returns its path
+                    alternativeTilePath = path
+                    break
+                else:
+                    self.log.warning("%s is not an image", tilePath)
+        return alternativeTilePath
 
     def shutdown(self):
         # try to commit possibly uncommitted tiles
