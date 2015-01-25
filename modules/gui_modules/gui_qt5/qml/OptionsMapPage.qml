@@ -56,10 +56,8 @@ BasePage {
             }
         }
         Label {
-            text : qsTr("Map folder path:")
-        }
-        Label {
-            text : mapOptionsPage.mapFolderPath
+            text : qsTr("Map folder path:") + newline + mapOptionsPage.mapFolderPath
+            property string newline : rWin.inPortrait ? "<br>" : " "
             wrapMode : Text.WrapAnywhere
             width : parent.width
         }
