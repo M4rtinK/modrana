@@ -24,7 +24,7 @@ Column {
             // selected item, only assigned if user
             // clicks on an item in the context menu,
             // not if changing the current item index
-            property variant item
+            property var item
             // changes active item
             // without triggering the
             // the on current item changed signal
