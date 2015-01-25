@@ -40,7 +40,7 @@ IconGridPage {
         }
         */
         ListElement {
-            caption : "tracks"
+            caption : "Tracks"
             icon : "tracklogs.png"
             menu : "TracksMenu"
         }
