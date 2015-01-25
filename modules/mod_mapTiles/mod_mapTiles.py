@@ -346,12 +346,14 @@ class MapTiles(RanaModule):
                         sprint = self._realDebugLog
                     else:
                         sprint = self._fakeDebugLog
+                    sprint("looking for tile %s", lzxy)
                     tileData = self._storeTiles.getTileData(lzxy)
                     if not tileData:  # TODO: is this actually needed ?
+                        sprint("%s not found locally", lzxy)
                         # tile not found locally and needs to be downloaded from network
                         # Are we allowed to download it ? (network=='full')
                         if self.get('network', 'full') == 'full':
-                            sprint("automatic tile download enabled - adding download request")
+                            sprint("auto tile dl enabled - adding dl request for %s", lzxy)
                             # switch the status tile to "Waiting for download slot"
                             if self.cacheImageSurfaces:
                                 with self.imagesLock:
@@ -365,15 +367,15 @@ class MapTiles(RanaModule):
                                 # - if it is in view, new download request will be added
                                 lzxy, tag = droppedRequest
                                 name = self.imageName(lzxy)
-                                sprint("old download request dropped from work request stack:")
-                                sprint(name)
+                                sprint("old download request dropped from work request stack: %s", name)
                                 self.removeImageFromMemory(name)
                                 # also notify any listener that tha tile has been processed
                                 self.tileDownloaded(constants.TILE_DOWNLOAD_QUEUE_FULL, droppedRequest[0], droppedRequest[1])
                         else:
-                            sprint("automatic tile download disabled - not adding download request")
+                            sprint("auto tile dl disabled - not adding dl request for %s", lzxy)
                     else:
                         # tile found locally and not downloaded, trigger the downloaded signal
+                        sprint("%s found locally", lzxy)
                         self.tileDownloaded(True, lzxy, tag)
                         # and cache it in memory
                         if self.cacheImageSurfaces:
@@ -741,12 +743,12 @@ class MapTiles(RanaModule):
         # Return to the cairo projection to what it was before
         cr.restore()
 
-    def _fakeDebugLog(self, text):
+    def _fakeDebugLog(self, *argv):
         """Log function that does nothing"""
         pass
 
-    def _realDebugLog(self, text):
-        self.log.debug(text)
+    def _realDebugLog(self, *argv):
+        self.log.debug(*argv)
 
     def _getLayerById(self, layerId):
         """Get layer description from the mapLayers module"""
