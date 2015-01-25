@@ -349,7 +349,7 @@ class MapTiles(RanaModule):
                     sprint("looking for tile %s", lzxy)
                     tileData = self._storeTiles.getTileData(lzxy)
                     if not tileData:  # TODO: is this actually needed ?
-                        sprint("%s not found locally", lzxy)
+                        sprint("tile not found locally %s", lzxy)
                         # tile not found locally and needs to be downloaded from network
                         # Are we allowed to download it ? (network=='full')
                         if self.get('network', 'full') == 'full':
