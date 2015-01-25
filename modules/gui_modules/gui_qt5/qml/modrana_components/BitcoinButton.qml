@@ -28,7 +28,7 @@ Rectangle {
         id : bitcoinMA
         anchors.fill : parent
         onClicked : {
-            console.log('Bitcoin button clicked')
+            rWin.log.info('Bitcoin button clicked')
             var bitcoinPage = Qt.createComponent("BitcoinPage.qml")
             rWin.pushPage(bitcoinPage, {url : bitcoinButton.url}, rWin.animate)
         }

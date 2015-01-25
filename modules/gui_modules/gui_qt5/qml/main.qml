@@ -460,7 +460,7 @@ ApplicationWindow {
         // dictionary
         if (pageName == null) { // null -> back to map
             //TODO: check if the stack can over-fil
-            //console.log("BACK TO MAP")
+            //rWin.log.debug("BACK TO MAP")
             rWin.pageStack.pop(rWin.mapPage,!animate)
         } else {
             rWin.log.debug("PUSH " + pageName)
@@ -487,15 +487,15 @@ ApplicationWindow {
 
     function get_auto(key, default_value, target_property) {
         //python.call("modrana.gui.get", [key, default_value], callback)
-        console.log("get called")
-        console.log(key)
-        console.log(default_value)
-        console.log(target_property)
+        rWin.log.debug("get called")
+        rWin.log.debug(key)
+        rWin.log.debug(default_value)
+        rWin.log.debug(target_property)
         python.call("modrana.gui._get", [key, default_value], function(returned_value) {
-            console.log("callback running")
-            console.log(target_property)
-            console.log(returned_value)
-            console.log("done running")
+            rWin.log.debug("callback running")
+            rWin.log.debug(target_property)
+            rWin.log.debug(returned_value)
+            rWin.log.debug("done running")
             //target_property=returned_value
             target_property=9001
         })

@@ -111,7 +111,7 @@ BasePage {
                     height : isLastItem ? lGrid.height : 0
                     text : "<b>add</b>"
                     onClicked : {
-                        console.log("add layer")
+                        rWin.log.info("add layer")
                         rWin.mapPage.getMap().appendLayer("openptmap_overlay", "OSM Transit Overlay", 1.0)
                     }
                 }
@@ -121,7 +121,7 @@ BasePage {
                     visible : layersLW.model.count > 1
                     text : "<b>remove</b>"
                     onClicked : {
-                        console.log("remove layer")
+                        rWin.log.info("remove layer")
                         // remove the last layer
                         rWin.mapPage.getMap().removeLayer(layersLW.model.count - 1)
                     }
