@@ -264,7 +264,11 @@ def freeSpaceInPath(path):
         df_output = re.sub("\s\s+", " ", df_output)
         # split by whitespace and extract free space info
         mega_bytes_available_string = df_output.split("\n")[1].split(" ")[3]
-        return int(mega_bytes_available_string)*1024
+        if mega_bytes_available_string.upper().endswith("M"):
+            mega_bytes_available_string = int(mega_bytes_available_string[:-1])
+        else:
+            mega_bytes_available_string = int(mega_bytes_available_string)*1024
+        return mega_bytes_available_string
     except Exception:
         log.exception("calling df also failed")
         return None
