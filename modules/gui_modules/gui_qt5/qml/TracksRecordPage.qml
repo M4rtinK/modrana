@@ -106,7 +106,6 @@ BasePage {
         Label {
             text: qsTr("Recorded tracklogs folder:") + newline + rtPage.tracklogFolder + "/logs"
             property string newline : rWin.inPortrait ? "<br>" : " "
-            //wrapMode : Text.WrapAnywhere
             wrapMode : Text.WrapAnywhere
             width : contentC.width
         }
