@@ -24,7 +24,7 @@ HeaderPage {
 
     function search (query) {
         rWin.python.call("modrana.gui.search.search", [searchPage.searchId, query], function(v) {
-            console.log("searching for: " + query + " using " + searchPage.searchId)
+            rWin.log.info("searching for: " + query + " using " + searchPage.searchId)
             searchPage._searchThreadId = v
             searchPage._searchInProgress = true
         })
@@ -33,11 +33,11 @@ HeaderPage {
     Component.onCompleted : {
         // connect to the status & result callbacks
         rWin.python.setHandler(searchPage._searchStatusId, function(v){
-            console.log("search status: " + v)
+            rWin.log.info("search status: " + v)
             searchPage._searchStatus = v
         })
         rWin.python.setHandler(searchPage._searchResultId, function(results){
-            console.log("search result: " + results)
+            rWin.log.info("search result: " + results)
             // load the results into a list model
             // (for some reason just assigning it does not work)
             pointLW.model.clear()
@@ -70,7 +70,7 @@ HeaderPage {
                 height : progressInfo.height
                 width : progressInfo.width * 1/4 - rWin.c.style.main.spacing
                 onClicked : {
-                    console.log("Cancel pressed")
+                    rWin.log.info("search: cancel pressed")
                     rWin.python.call("modrana.gui.search.cancelSearch",
                                      [searchPage._searchThreadId],
                                      function(){})
@@ -79,7 +79,7 @@ HeaderPage {
         }
 
         onStateChanged : {
-            console.log("STATE CHANGED: " + state)
+            rWin.log.info("search: progress state changed: " + state)
         }
 
         states: [
@@ -131,9 +131,9 @@ HeaderPage {
                     focus = false
                 }
 
-                console.log("address search for: " + text)
+                rWin.log.info("address search for: " + text)
                 if (searchPage.lastSearchKey != "") {
-                    console.log("saving " + text)
+                    rWin.log.info("search: saving " + text)
                     rWin.set(searchPage.lastSearchKey, text)
                 }
                 searchPage.search(text)
@@ -165,7 +165,7 @@ HeaderPage {
             // a string describing distance from current position to the result
             property string distanceString : F.p2pDistanceString(model, rWin.pos)
             onClicked : {
-                console.log(model.name + " clicked")
+                rWin.log.info("search:" + model.name + " clicked")
                 // mark the current point as highlighted so that it
                 // is highlighted once it id displayed on the map
                 pointLW.model.setProperty(index, "highlight", true)
