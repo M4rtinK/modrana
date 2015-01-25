@@ -40,7 +40,6 @@ try:
 except ImportError:
     import queue as Queue
 import threading
-from threading import Thread
 
 from core import threads
 from core import constants
