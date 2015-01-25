@@ -42,13 +42,8 @@ except ImportError:
 import threading
 from threading import Thread
 
-# only import GKT libs if GTK GUI is used
-from core import gs
 from core import threads
 from core import constants
-
-if gs.GUIString == "GTK":
-    import gtk
 
 def sqliteConnectionWrapper(databasePath):
     """Setting check_same_thread to False fixes a Sqlite exception
@@ -337,28 +332,6 @@ class StoreTiles(RanaModule):
     def getStorePath(self, folder, storeName):
         """get a standardized store path from folder path and filename"""
         return os.path.join(folder, storeName)
-
-
-    def getTile(self, lzxy):
-        """
-        return a Pixbuf for the corresponding tile
-        """
-
-        tileData = self.getTileData(lzxy)
-        if tileData:
-            try:
-                pl = gtk.gdk.PixbufLoader()
-                pl.write(tileData)
-                pl.close()
-                pixbuf = pl.get_pixbuf()
-                return pixbuf # return pixbuf containing the tile image
-            except Exception:
-                self.log.exception("loading tile image to pixbuf failed")
-                return None
-        else:
-            # tile not found
-            return None
-
 
     def getTileData(self, lzxy):
         """

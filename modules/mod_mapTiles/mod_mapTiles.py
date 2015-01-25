@@ -765,23 +765,31 @@ class MapTiles(RanaModule):
 
         # at this point, there is only a placeholder image in the image cache
         sprint("###")
-        sprint("loading tile %s" % self.getTileName(lzxy))
+        tileName = self.getTileName(lzxy)
+        sprint("loading tile %s", tileName)
 
         # is the tile in local storage ?
         start1 = time.clock()
-        pixbuf = self._storeTiles.getTile(lzxy)
+        tileData = self._storeTiles.getTileData(lzxy)
 
-        # None from getTiles means the tile was not found
-        # False means loading the tile from file to pixbuf failed
-        if pixbuf:
-            start2 = time.clock()
-            self.storeInMemory(self.pixbuf2cairoImageSurface(pixbuf), self.getTileName(lzxy))
-            if debug:
-                storageType = self.get('tileStorageType', 'files')
-                sprint(
-                    "tile loaded from local storage (%s) in %1.2f ms" % (storageType, (1000 * (time.clock() - start1))))
-                sprint("tile cached in memory in %1.2f ms" % (1000 * (time.clock() - start2)))
-            return True
+        if tileData:
+            try:
+                pixbuf = self.data2pixbuf(tileData)
+            except Exception:
+                self.log.exception("loading tile image to pixbuf failed, name: %s", tileName)
+                return False
+        else:
+            sprint("tile name not found: %s", tileName)
+            return False
+
+        start2 = time.clock()
+        self.storeInMemory(self.pixbuf2cairoImageSurface(pixbuf), self.getTileName(lzxy))
+        if debug:
+            storageType = self.get('tileStorageType', 'files')
+            sprint(
+                "tile loaded from local storage (%s) in %1.2f ms" % (storageType, (1000 * (time.clock() - start1))))
+            sprint("tile cached in memory in %1.2f ms" % (1000 * (time.clock() - start2)))
+        return True
 
     def loadImageFromFile(self, path, name, imageType="normal", expireTimestamp=None, dictIndex=0):
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
