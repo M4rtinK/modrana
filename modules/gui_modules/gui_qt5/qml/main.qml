@@ -47,12 +47,12 @@ ApplicationWindow {
     OptProp {id: locationDebugProp; value : false}
 
     // logging
-    property variant log : PythonLog {}
+    property var log : PythonLog {}
 
     property int _landscapeDivider : rWin.platform.needsBackButton ? 5.5 : 8.0
     property int headerHeight : rWin.inPortrait ? height/8.0 : height/_landscapeDivider
 
-    property variant c
+    property var c
 
     // properties that can be assigned a value
     // by packaging scripts for a given platform
@@ -64,7 +64,7 @@ ApplicationWindow {
     property string _PYTHON_IMPORT_PATH_
     property string _PLATFORM_ID_
 
-    property variant platform : Platform {}
+    property var platform : Platform {}
 
     property alias mapPage : mapPageLoader.item
 
@@ -90,13 +90,13 @@ ApplicationWindow {
     }
 
     // location
-    property variant location : Location {}
-    property variant position // full position object
-    property variant pos // coordinate only
+    property var location : Location {}
+    property var position // full position object
+    property var pos // coordinate only
     // lastGoodPos needs to be always set,
     // by default Brno is used or last known saved position
     // and if available, the last known actual valid position
-    property variant lastGoodPos : Coordinate {
+    property var lastGoodPos : Coordinate {
         latitude : 49.2
         longitude : 16.616667
         altitude : 237.0
@@ -107,20 +107,20 @@ ApplicationWindow {
     property bool llValid : pos ? pos.isValid : false
 
     // theme
-    property variant theme
+    property var theme
 
     // map layers
-    property variant layerTree : ListModel {}
-    property variant layerDict
+    property var layerTree : ListModel {}
+    property var layerDict
 
     // actions
-    property variant actions : Actions {}
+    property var actions : Actions {}
 
     // cron (dynamic timer creation)
-    property variant cron : Cron {}
+    property var cron : Cron {}
 
     // keep alive/wake locks
-    property variant keepAlive : KeepAlive {}
+    property var keepAlive : KeepAlive {}
 
 
     // are we using qrc ?
@@ -553,7 +553,7 @@ ApplicationWindow {
         rWin.log.info("layer dict loaded")
     }
 
-    property variant _lastVisibility
+    property var _lastVisibility
 
     function toggleFullscreen() {
         // 2 = windowed

@@ -9,7 +9,7 @@ Item {
     signal zoomUp
     signal zoomDown
 
-    property variant mediaKeys : null
+    property var mediaKeys : null
 
     // we need to handle the case where the MediaKeys element
     // is not available so we use the Connections a nd Binding

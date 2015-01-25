@@ -11,9 +11,9 @@ Item {
     property string nmeaSource
     property string provider : "fake position provider"
     property bool valid : true
-    property variant position: Item {
+    property var position: Item {
         property bool altitudeValid : false
-        property variant coordinate : Coordinate {
+        property var coordinate : Coordinate {
             // Brno
             latitude : 49.2
             longitude : 16.616667

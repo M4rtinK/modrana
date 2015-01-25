@@ -16,7 +16,7 @@ Item {
     property bool error : false
     property string layerName : ""
     property bool downloading : false
-    property variant mapInstance : null
+    property var mapInstance : null
 
     Image {
         id: img

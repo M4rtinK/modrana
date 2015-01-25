@@ -28,7 +28,7 @@ BasePage {
             id: listDelegate
             Item {
                 id : itemWrapper
-                property variant dModel : model
+                property var dModel : model
                 anchors.left : parent.left
                 anchors.right : parent.right
                 height : groupWrapper.height + layersWrapper.height

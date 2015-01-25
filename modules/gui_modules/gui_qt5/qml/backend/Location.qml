@@ -5,12 +5,12 @@ import QtQuick 2.0
 
 Item {
     id : location
-    property variant locationSource
+    property var locationSource
     property bool initialized : false
     // enabled tracks if location usage is enabled
     property bool usageEnabled : true
 
-    property variant _lastCoord
+    property var _lastCoord
 
     // connect to the location source position update signals
     Connections {

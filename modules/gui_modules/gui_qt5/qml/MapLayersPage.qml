@@ -7,7 +7,7 @@ BasePage {
     headerText : "Overlays"
     bottomPadding : rWin.c.style.main.spacingBig * 2
     isFlickable : false
-    property variant model
+    property var model
 
     content : ListView {
         anchors.top : parent.top

@@ -4,8 +4,8 @@ Rectangle {
     id: marker
     width: 20
     height: 20
-    property variant targetPoint
-    property variant point
+    property var targetPoint
+    property var point
     x: targetPoint[0] - width/2
     y: targetPoint[1] - height/2
     border.width: 3
