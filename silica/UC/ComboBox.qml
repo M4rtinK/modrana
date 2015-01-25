@@ -7,7 +7,7 @@ ComboBox {
     // selected item, only assigned if user
     // clicks on an item in the context menu,
     // not if changing the current item index
-    property variant item
+    property var item
 
     menu : ContextMenu {
         id : cMenu
@@ -22,7 +22,7 @@ ComboBox {
             }
         }
     }
-    property variant model
+    property var model
     // how does this work ?
     //
     // Menu items are added with a ListModel to the
