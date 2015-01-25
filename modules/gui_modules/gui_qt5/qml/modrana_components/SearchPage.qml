@@ -20,7 +20,6 @@ HeaderPage {
     property string _searchStatus : ""
     property string _searchThreadId : ""
     property bool showNavigationIndicator : false
-    //property real headerOpacity : rWin.platform.needsBackButton ? 1.0 : 0.0
 
     function search (query) {
         rWin.python.call("modrana.gui.search.search", [searchPage.searchId, query], function(v) {
@@ -53,7 +52,6 @@ HeaderPage {
         anchors.left : parent.left
         anchors.right : parent.right
         opacity : 0.0
-        //enabled : false
         state : searchPage._searchInProgress ? "ON" : "OFF"
         height : 0
         y : rWin.headerHeight + rWin.c.style.listView.spacing
@@ -96,14 +94,12 @@ HeaderPage {
                      from: "OFF"
                      to: "ON"
                      NumberAnimation { target: progressInfo; property: "height"; to: rWin.headerHeight ; duration: 200*rWin.animate}
-                     //NumberAnimation { target: progressInfo; property: "y"; to: progressInfo.progressH; duration: 200*rWin.animate}
                      NumberAnimation { target: progressInfo; property: "opacity"; to: 1.0; duration: 200*rWin.animate}
                  },
                  Transition {
                      from: "ON"
                      to: "OFF"
                      NumberAnimation { target: progressInfo; property: "height"; to: 0; duration: 200*rWin.animate}
-                     //NumberAnimation { target: progressInfo; property: "y"; to: 0; duration: 200*rWin.animate}
                      NumberAnimation { target: progressInfo; property: "opacity"; to: 0.0; duration: 200*rWin.animate}
                  }
              ]
@@ -113,7 +109,6 @@ HeaderPage {
     SearchField {
         id : searchInput
         anchors.left : parent.left
-        //anchors.leftMargin : rWin.c.style.main.spacing
         anchors.leftMargin : rWin.showBackButton ? backButtonWidth + 24 * rWin.c.style.m : rWin.c.style.main.spacingBig
         anchors.right : parent.right
         anchors.rightMargin : rWin.c.style.main.spacingBig
@@ -159,8 +154,6 @@ HeaderPage {
         delegate : BackgroundRectangle {
             id : resultDelegate
             width : pointLW.width
-            //anchors.left : pointLW.left
-            //anchors.right : pointLW.right
             height : contentC.height + rWin.c.style.listView.itemBorder
             // a string describing distance from current position to the result
             property string distanceString : F.p2pDistanceString(model, rWin.pos)
@@ -187,11 +180,9 @@ HeaderPage {
                 spacing : rWin.c.style.main.spacing
                 Label {
                     text : "<b>" + model.name + "</b> (" + resultDelegate.distanceString + ")"
-                    //font.bold : true
                 }
                 Label {
                     text : model.description
-                    //elide : Text.ElideRight
                     wrapMode : Text.WordWrap
                     width : resultDelegate.width - rWin.c.style.main.spacingBig*2
                 }
