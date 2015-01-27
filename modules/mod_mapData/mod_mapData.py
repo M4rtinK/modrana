@@ -63,7 +63,6 @@ class MapData(RanaModule):
 
         self.notificateOnce = True
         self.scroll = 0
-        self._mapLayersModule = None
 
         self.x = None
         self.y = None
@@ -74,9 +73,6 @@ class MapData(RanaModule):
         self.minZ = 0
         self.midZ = 15
         self.maxZ = MAX_ZOOMLEVEL
-
-    def firstTime(self):
-        self._mapLayersModule = self.m.get('mapLayers', None) # get the map layers module
 
     def addDownloadRequests(self, requests):
         """Add download requests to the download request set
@@ -122,7 +118,7 @@ class MapData(RanaModule):
 
     def _getLayerById(self, layerId):
         """Get layer description from the mapLayers module"""
-        return self._mapLayersModule.getLayerById(layerId)
+        return self.m.get("mapLayers").getLayerById(layerId)
 
     def listTiles(self, route):
         """List all tiles touched by a polyline"""
