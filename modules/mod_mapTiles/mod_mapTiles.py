@@ -366,7 +366,7 @@ class MapTiles(RanaModule):
                                 # - if it is not in view, this makes place for new tiles in cache,
                                 # - if it is in view, new download request will be added
                                 lzxy, tag = droppedRequest
-                                name = self._imageName(lzxy)
+                                name = self._getTileName(lzxy)
                                 sprint("old download request dropped from work request stack: %s", name)
                                 self.removeImageFromMemory(name)
                                 # also notify any listener that tha tile has been processed
@@ -1021,12 +1021,6 @@ class MapTiles(RanaModule):
         return image2pixbuf(image)
 
     #    self.log.debug("tile negative in %1.2f ms" % (1000 * (time.clock() - start1)))
-
-    def _imageName(self, lzxy):
-        """Get a unique name for a tile image
-        (suitable for use as part of filenames, dictionary keys, etc)
-        """
-        return "%s_%d_%d_%d" % (lzxy[0].id, lzxy[1], lzxy[2], lzxy[3])
 
     def shutdown(self):
         #    # shutdown the tile loading thread
