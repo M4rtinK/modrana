@@ -284,8 +284,7 @@ class BatchSizeCheckPool(TileBatchPool):
         size = 0
         url = "unknown url"
         try:
-            # get the url and other info
-            (url, filename, folder) = self._mapData.getTileUrlAndPath(lzxy)
+            url = tiles.getTileUrl(lzxy)
             # does the tile exist ?
             if self._storeTiles.tileExists2(lzxy, fromThread=True): # if the file does not exist
                 size = None # it exists, return None
@@ -378,7 +377,7 @@ class BatchTileDownloadPool(TileBatchPool):
 
     def _saveTileForURL(self, lzxy):
         """save a tile for url created from its coordinates"""
-        (url, filename, folder) = self._mapData.getTileUrlAndPath(lzxy)
+        url = tiles.getTileUrl(lzxy)
 
         goAhead = False
         redownload = int(modrana.get('batchRedownloadAvailableTiles', False))

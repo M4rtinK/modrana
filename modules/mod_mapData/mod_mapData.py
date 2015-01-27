@@ -138,14 +138,6 @@ class MapData(RanaModule):
                 tiles[tile] = True
         return tiles.keys()
 
-    def getTileUrlAndPath(self, lzxy):
-        mapTiles = self.m.get('mapTiles', None)
-        url = tiles.getTileUrl(lzxy) # generate url
-        # where should we store the downloaded tiles
-        filePath = os.path.join(self._mapFolderPath, mapTiles._getImagePath(lzxy))
-        fileFolder = os.path.join(self._mapFolderPath, mapTiles._getImageFolder(lzxy))
-        return url, filePath, fileFolder
-
     def getTileUrl(self, x, y, z, layerId):
         """Return url for given tile coordinates and layer"""
         layer = self._mapLayersModule.getLayerById(layerId)
