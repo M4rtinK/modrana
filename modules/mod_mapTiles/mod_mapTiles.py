@@ -697,12 +697,6 @@ class MapTiles(RanaModule):
     def _getTileName(self, lxyz):
         return "%s_%d_%d_%d" % (lxyz[0].id, lxyz[1], lxyz[2], lxyz[3])
 
-    def _getTileFilename(self, lxyz):
-        return os.path.join(
-            self._getTileFolderPath(),
-            (self._getImagePath(lxyz))
-        )
-
     def _getCompositeTileName(self, overlaySpec):
         (layers, z, x, y) = overlaySpec
         (layer1, layer2) = layers
@@ -1046,10 +1040,6 @@ class MapTiles(RanaModule):
         (suitable for use as part of filenames, dictionary keys, etc)
         """
         return os.path.join(lzxy[0].folderName, str(lzxy[1]), str(lzxy[2]))
-
-    def _getTileFolderPath(self):
-        """helper function that returns path to the tile folder"""
-        return self.mapFolderPath
 
     def _imageY(self, z, extension):
         return '%d.%s' % (z, extension)

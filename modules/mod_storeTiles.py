@@ -100,24 +100,18 @@ class StoreTiles(RanaModule):
 
         self.lookupConnectionLock = threading.RLock()
 
-        self._mapTiles = None
         self._mapLayers = None
-
-        self.tileFolder = "/dev/null"
 
         # the tile loading debug log function is no-op by default, but can be
         # redirected to the normal debug log by setting the "tileLoadingDebug"
         # key to True
         self._loadingLog = self._noOp
         self.modrana.watch('tileLoadingDebug', self._tileLoadingDebugChangedCB, runNow=True)
+        # device modules are loaded and initialized and configs are parsed before "normal"
+        # modRana modules are initialized, so we can cache the map folder path in init
+        self._mapFolderPath = self.modrana.paths.getMapFolderPath()
 
     def firstTime(self):
-        # the config should be parsed by now and the tile storage
-        # path thus should be final
-        self.tileFolder = self.modrana.paths.getMapFolderPath()
-        # testing:
-        #self.test()
-        self._mapTiles = self.m.get('mapTiles', None)
         self._mapLayers = self.m.get('mapLayers', None)
         self._startTileLoadingThread()
 
@@ -131,7 +125,7 @@ class StoreTiles(RanaModule):
         pass
 
     def getLayerDbFolderPath(self, folderPrefix):
-        return os.path.join(self.tileFolder, folderPrefix)
+        return os.path.join(self._mapFolderPath, folderPrefix)
 
     def getLookupDbPath(self, dbFolderPath):
         return os.path.join(dbFolderPath, "lookup.sqlite") # get the path to the lookup db
@@ -468,8 +462,7 @@ class StoreTiles(RanaModule):
             else:
                 return None # we cant decide if a tile is ind the db or not
         else: # we are storing to the filesystem
-            filePath = os.path.join(self.tileFolder, self._mapTiles._getImagePath(lzxy))
-            return os.path.exists(filePath)
+            return os.path.exists(self._getTileFilePath(lzxy))
 
     def tileExists(self, filePath, lzxy, fromThread=False):
         """test if a tile exists
@@ -569,8 +562,8 @@ class StoreTiles(RanaModule):
     def _storeTileToFile(self, tile, lzxy):
         """Store the given tile to a file"""
         # get the folder path
-        filename = self._mapTiles._getTileFilename(lzxy)
-        (folderPath, tail) = os.path.split(filename)
+        filePath = self._getTileFilePath(lzxy)
+        (folderPath, tail) = os.path.split(filePath)
         if not os.path.exists(folderPath): # does it exist ?
             try:
                 os.makedirs(folderPath) # create the folder
@@ -583,24 +576,34 @@ class StoreTiles(RanaModule):
                 # -> we can safely ignore it (as the the only thing we are now interested in,
                 # is having a folder to store the tile in)
                 if e.errno != 17:
-                    self.log.exception("can't create folder %s for %s", folderPath, filename)
+                    self.log.exception("can't create folder %s for %s", folderPath, filePath)
         try:
-            with open(filename, 'wb') as f:
+            with open(filePath, 'wb') as f:
                 f.write(tile)
         except:
-            self.log.exception("saving tile to file %s failed", filename)
+            self.log.exception("saving tile to file %s failed", filePath)
 
-    def _getImagePath(self, lzxy):
-        """Get a unique name for a tile image
-        (suitable for use as part of filenames, dictionary keys, etc)
-        """
-        return os.path.join(lzxy[0].folderName, str(lzxy[1]), str(lzxy[2]), "%d.%s" % (lzxy[3], lzxy[0].type))
+    def _getTileFilePath(self, lzxy):
+        """Return full filesystem path to the tile file corresponding to the coordinates
+         given by the lzxy tuple.
+
+         :param tuple lzxy: tile coordinates
+         :returns: full filesystem path to the tile
+         :rtype: str
+
+         """
+        return os.path.join(
+            self._mapFolderPath,
+            lzxy[0].folderName,
+            str(lzxy[1]),
+            str(lzxy[2]),
+            "%d.%s" % (lzxy[3], lzxy[0].type)
+        )
 
     def _fuzzyTileFileExists(self, lzxy):
+        """Try to find a tile image file for the given coordinates."""
         # first check if the primary tile path exists
-        tileFolderPath = self._mapTiles._getTileFolderPath()
-        layerFolderAndTileFilename = self._getImagePath(lzxy)
-        tilePath = os.path.join(tileFolderPath, layerFolderAndTileFilename)
+        tilePath = self._getTileFilePath(lzxy)
         # check if the primary file path exists and also if it actually
         # is an image file
         if os.path.exists(tilePath):
