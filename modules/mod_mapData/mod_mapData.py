@@ -122,14 +122,14 @@ class MapData(RanaModule):
 
     def listTiles(self, route):
         """List all tiles touched by a polyline"""
-        tiles = {}
+        _tiles = {}
         for pos in route:
             (lat, lon) = pos
             (tx, ty) = tileXY(lat, lon, 15)
             tile = "%d,%d" % (tx, ty)
-            if not tile in tiles:
-                tiles[tile] = True
-        return tiles.keys()
+            if not tile in _tiles:
+                _tiles[tile] = True
+        return _tiles.keys()
 
     def handleMessage(self, message, messageType, args):
         if message == "refreshTilecount":
