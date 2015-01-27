@@ -100,8 +100,6 @@ class StoreTiles(RanaModule):
 
         self.lookupConnectionLock = threading.RLock()
 
-        self._mapLayers = None
-
         # the tile loading debug log function is no-op by default, but can be
         # redirected to the normal debug log by setting the "tileLoadingDebug"
         # key to True
@@ -112,7 +110,6 @@ class StoreTiles(RanaModule):
         self._mapFolderPath = self.modrana.paths.getMapFolderPath()
 
     def firstTime(self):
-        self._mapLayers = self.m.get('mapLayers', None)
         self._startTileLoadingThread()
 
     def _tileLoadingDebugChangedCB(self, key, oldValue, newValue):
