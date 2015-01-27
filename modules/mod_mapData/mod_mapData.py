@@ -63,7 +63,9 @@ class MapData(RanaModule):
 
         self.notificateOnce = True
         self.scroll = 0
-        self.mapFolderPath = None
+        # cache the map folder path (device module is loaded and configs
+        # already parsed, so we can already cache it now).
+        self._mapFolderPath = self.modrana.paths.getMapFolderPath()
         self._mapLayersModule = None
 
         self.x = None
@@ -77,8 +79,6 @@ class MapData(RanaModule):
         self.maxZ = MAX_ZOOMLEVEL
 
     def firstTime(self):
-        # cache the map folder path
-        self.mapFolderPath = self.modrana.paths.getMapFolderPath()
         self._mapLayersModule = self.m.get('mapLayers', None) # get the map layers module
 
     def addDownloadRequests(self, requests):
@@ -123,10 +123,6 @@ class MapData(RanaModule):
     def downloadPool(self):
         return self._downloadPool
 
-    def _getTileFolderPath(self):
-        """return path to the map folder"""
-        return self.mapFolderPath
-
     def _getLayerById(self, layerId):
         """Get layer description from the mapLayers module"""
         return self._mapLayersModule.getLayerById(layerId)
@@ -145,9 +141,9 @@ class MapData(RanaModule):
     def getTileUrlAndPath(self, lzxy):
         mapTiles = self.m.get('mapTiles', None)
         url = tiles.getTileUrl(lzxy) # generate url
-        tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-        filePath = os.path.join(tileFolder, mapTiles._getImagePath(lzxy))
-        fileFolder = os.path.join(tileFolder, mapTiles._getImageFolder(lzxy))
+        # where should we store the downloaded tiles
+        filePath = os.path.join(self._mapFolderPath, mapTiles._getImagePath(lzxy))
+        fileFolder = os.path.join(self._mapFolderPath, mapTiles._getImageFolder(lzxy))
         return url, filePath, fileFolder
 
     def getTileUrl(self, x, y, z, layerId):
