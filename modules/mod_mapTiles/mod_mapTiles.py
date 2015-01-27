@@ -1028,22 +1028,6 @@ class MapTiles(RanaModule):
         """
         return "%s_%d_%d_%d" % (lzxy[0].id, lzxy[1], lzxy[2], lzxy[3])
 
-    def _getImagePath(self, lzxy):
-        """Get a unique name for a tile image
-        (suitable for use as part of filenames, dictionary keys, etc)
-        """
-        #    return("%s/%d/%d/%d.%s" % (prefix,z,x,y,extension))
-        return os.path.join(lzxy[0].folderName, str(lzxy[1]), str(lzxy[2]), "%d.%s" % (lzxy[3], lzxy[0].type))
-
-    def _getImageFolder(self, lzxy):
-        """Get a unique name for a tile image
-        (suitable for use as part of filenames, dictionary keys, etc)
-        """
-        return os.path.join(lzxy[0].folderName, str(lzxy[1]), str(lzxy[2]))
-
-    def _imageY(self, z, extension):
-        return '%d.%s' % (z, extension)
-
     def shutdown(self):
         #    # shutdown the tile loading thread
         #    try:
