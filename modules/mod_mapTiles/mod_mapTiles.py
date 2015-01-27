@@ -58,6 +58,10 @@ log = logging.getLogger("mod.mapTiles")
 # if image manipulation tools are available, import them
 # and otherwise disable tile image manipulation
 IMAGE_MANIPULATION_IMPORT_SUCCESS = False
+NORMAL_TILE = "normal"
+LOADING_TILE = "loadingTile"
+COMPOSITE_TILE = "composite"
+SPECIAL_TILE = "special"
 
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -391,7 +395,7 @@ class MapTiles(RanaModule):
         """
         for tile in specialTiles:
             (name, path) = tile
-            self._loadImageFromFile(path, name, imageType="special", dictIndex=1)
+            self._loadImageFromFile(path, name, imageType=SPECIAL_TILE, dictIndex=1)
 
     def beforeDraw(self):
         """We need to synchronize centering with map redraw,
@@ -558,7 +562,7 @@ class MapTiles(RanaModule):
                                                     self.removeImageFromMemory(nameBack)
                                                     self.removeImageFromMemory(nameOver)
                                                     # cache the combined image
-                                                    self.storeInMemory(combinedImage, name, imageType="composite")
+                                                    self.storeInMemory(combinedImage, name, imageType=COMPOSITE_TILE)
                                                     # draw the composite image
                                                     drawImage(cr, combinedImage, x1, y1, scale)
                                                 else: # on or more tiles not usable
@@ -567,10 +571,10 @@ class MapTiles(RanaModule):
                                             else:
                                                 if backImage:
                                                     requests.append(((layerBack, z, x, y), None))
-                                                    self.storeInMemory(loadingTileImageSurface, nameBack, imageType="loadingTile")
+                                                    self.storeInMemory(loadingTileImageSurface, nameBack, imageType=LOADING_TILE)
                                                 elif overImage:
                                                     requests.append(((layerOver, z, x, y), None))
-                                                    self.storeInMemory(loadingTileImageSurface, nameOver, imageType="loadingTile")
+                                                    self.storeInMemory(loadingTileImageSurface, nameOver, imageType=LOADING_TILE)
                                                 else:
                                                     requests.append(((layerBack, z, x, y), None))
                                                     requests.append(((layerOver, z, x, y), None))
@@ -581,7 +585,7 @@ class MapTiles(RanaModule):
                                             # and cache a loading tile so that we don't spam the same loading r
                                             # request over and over again (the tile request queue is using a stack,
                                             # so this would really not make sense)
-                                            self.storeInMemory(loadingTileImageSurface, name, imageType="loadingTile")
+                                            self.storeInMemory(loadingTileImageSurface, name, imageType=LOADING_TILE)
                                             drawImage(cr, loadingTileImageSurface, x1, y1, scale)
 
                         gui = self.modrana.gui
@@ -647,7 +651,7 @@ class MapTiles(RanaModule):
                                                 self.removeImageFromMemory(nameBack)
                                                 self.removeImageFromMemory(nameOver)
                                                 # cache the combined image
-                                                self.storeInMemory(combinedImage, name, imageType="composite")
+                                                self.storeInMemory(combinedImage, name, imageType=COMPOSITE_TILE)
                                                 # draw the composite image
                                                 drawImage(cr, combinedImage, x1, y1, scale)
                                             else: # on or more tiles not usable
@@ -656,10 +660,10 @@ class MapTiles(RanaModule):
                                         else:
                                             if backImage:
                                                 requests.append(((layerBack, z, x, y), None))
-                                                self.storeInMemory(loadingTileImageSurface, nameBack, imageType="loadingTile")
+                                                self.storeInMemory(loadingTileImageSurface, nameBack, imageType=LOADING_TILE)
                                             elif overImage:
                                                 requests.append(((layerOver, z, x, y), None))
-                                                self.storeInMemory(loadingTileImageSurface, nameOver, imageType="loadingTile")
+                                                self.storeInMemory(loadingTileImageSurface, nameOver, imageType=LOADING_TILE)
                                             else:
                                                 requests.append(((layerBack, z, x, y), None))
                                                 requests.append(((layerOver, z, x, y), None))
@@ -670,7 +674,7 @@ class MapTiles(RanaModule):
                                         # and cache a loading tile so that we don't spam the same loading r
                                         # request over and over again (the tile request queue is using a stack,
                                         # so this would really not make sense)
-                                        self.storeInMemory(loadingTileImageSurface, name, imageType="loadingTile")
+                                        self.storeInMemory(loadingTileImageSurface, name, imageType=LOADING_TILE)
                                         drawImage(cr, loadingTileImageSurface, x1, y1, scale)
             if requests:
                 self._dlRequestQueue.put(requests)
@@ -771,7 +775,7 @@ class MapTiles(RanaModule):
             sprint("tile cached in memory in %1.2f ms" % (1000 * (time.clock() - start2)))
         return True
 
-    def _loadImageFromFile(self, path, name, imageType="normal", expireTimestamp=None, dictIndex=0):
+    def _loadImageFromFile(self, path, name, imageType=NORMAL_TILE, expireTimestamp=None, dictIndex=0):
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
         #x = pixbuf.get_width()
         #y = pixbuf.get_height()
@@ -799,7 +803,7 @@ class MapTiles(RanaModule):
             self.log.exception("the tile image is corrupted nad/or there are no tiles for this zoomlevel")
             return False
 
-    def storeInMemory(self, surface, name, imageType="normal", expireTimestamp=None, dictIndex=0):
+    def storeInMemory(self, surface, name, imageType=NORMAL_TILE, expireTimestamp=None, dictIndex=0):
         """store a given image surface in the memory image cache
            dictIndex = 0 -> normal map tiles + tile specific error tiles
            dictIndex = 1 -> special tiles that exist in only once in memory and are drawn directly
@@ -824,7 +828,7 @@ class MapTiles(RanaModule):
         if self.get('tileLoadedRedraw', True) and self.get('menu', None) is None:
             overlay = self.get('overlay', False)
             if overlay: # only redraw when a composited tile is loaded with overlay on
-                if imageType == "composite":
+                if imageType == COMPOSITE_TILE:
                     self.set('needRedraw', True)
             else: # redraw regardless of type with overlay off
                 self.set('needRedraw', True)
