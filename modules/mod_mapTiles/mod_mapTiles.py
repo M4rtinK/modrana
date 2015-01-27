@@ -875,8 +875,9 @@ class MapTiles(RanaModule):
 
     def _clearTileCache(self):
         """completely clear the in-memory image cache"""
-        self.log.info('clearing the in-memory tile cache')
-        self.images[0] = {}
+        with self.imagesLock:
+            self.log.info('clearing the in-memory tile cache')
+            self.images[0] = {}
 
     def pixbuf2cairoImageSurface(self, pixbuf):
         """Convert a GTK Pixbuf into a Cairo ImageSurface
