@@ -694,8 +694,8 @@ class MapTiles(RanaModule):
         cr.paint()
         cr.restore() # Return the cairo projection to what it was
 
-    def _getTileName(self, lxyz):
-        return "%s_%d_%d_%d" % (lxyz[0].id, lxyz[1], lxyz[2], lxyz[3])
+    def _getTileName(self, lzxy):
+        return "%s_%d_%d_%d" % (lzxy[0].id, lzxy[1], lzxy[2], lzxy[3])
 
     def _getCompositeTileName(self, overlaySpec):
         (layers, z, x, y) = overlaySpec
