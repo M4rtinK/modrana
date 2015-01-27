@@ -468,7 +468,7 @@ class StoreTiles(RanaModule):
             else:
                 return None # we cant decide if a tile is ind the db or not
         else: # we are storing to the filesystem
-            filePath = os.path.join(self.tileFolder, self._mapTiles.getImagePath(lzxy))
+            filePath = os.path.join(self.tileFolder, self._mapTiles._getImagePath(lzxy))
             return os.path.exists(filePath)
 
     def tileExists(self, filePath, lzxy, fromThread=False):
@@ -569,7 +569,7 @@ class StoreTiles(RanaModule):
     def _storeTileToFile(self, tile, lzxy):
         """Store the given tile to a file"""
         # get the folder path
-        filename = self._mapTiles.getTileFilename(lzxy)
+        filename = self._mapTiles._getTileFilename(lzxy)
         (folderPath, tail) = os.path.split(filename)
         if not os.path.exists(folderPath): # does it exist ?
             try:

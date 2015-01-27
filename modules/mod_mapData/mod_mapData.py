@@ -146,8 +146,8 @@ class MapData(RanaModule):
         mapTiles = self.m.get('mapTiles', None)
         url = tiles.getTileUrl(lzxy) # generate url
         tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-        filePath = os.path.join(tileFolder, mapTiles.getImagePath(lzxy))
-        fileFolder = os.path.join(tileFolder, mapTiles.getImageFolder(lzxy))
+        filePath = os.path.join(tileFolder, mapTiles._getImagePath(lzxy))
+        fileFolder = os.path.join(tileFolder, mapTiles._getImageFolder(lzxy))
         return url, filePath, fileFolder
 
     def getTileUrl(self, x, y, z, layerId):
