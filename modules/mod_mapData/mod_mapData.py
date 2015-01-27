@@ -134,7 +134,7 @@ class MapData(RanaModule):
             (lat, lon) = pos
             (tx, ty) = tileXY(lat, lon, 15)
             tile = "%d,%d" % (tx, ty)
-            if not tiles.has_key(tile):
+            if not tile in tiles:
                 tiles[tile] = True
         return tiles.keys()
 
