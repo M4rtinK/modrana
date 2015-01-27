@@ -63,9 +63,6 @@ class MapData(RanaModule):
 
         self.notificateOnce = True
         self.scroll = 0
-        # cache the map folder path (device module is loaded and configs
-        # already parsed, so we can already cache it now).
-        self._mapFolderPath = self.modrana.paths.getMapFolderPath()
         self._mapLayersModule = None
 
         self.x = None
