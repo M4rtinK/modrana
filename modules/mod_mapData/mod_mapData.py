@@ -138,12 +138,6 @@ class MapData(RanaModule):
                 tiles[tile] = True
         return tiles.keys()
 
-    def getTileUrl(self, x, y, z, layerId):
-        """Return url for given tile coordinates and layer"""
-        layer = self._mapLayersModule.getLayerById(layerId)
-        # TODO: make this to work with layer objects directly
-        return tiles.getTileUrl((layer, z, x, y))
-
     def handleMessage(self, message, messageType, args):
         if message == "refreshTilecount":
             self.refreshTilecount()
