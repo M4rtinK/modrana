@@ -363,6 +363,9 @@ Page {
         property var route : ListModel {
             id: routeModel
         }
+        property var routeMessages : ListModel {
+            id: routeMessageList
+        }
 
         onPaint: { 
             console.log("FJF: canvas paint requested start")
@@ -396,6 +399,13 @@ Page {
                 console.log("lineTo: ", destipos[0], destipos[1])
                 ctx.lineTo(destipos[0],destipos[1])
             }
+            for (var i=0; i<routingData.routeMessages.count; i++) {
+                console.log("message " + i + routingData.routeMessages.get(i))
+                thispos = routingData.routeMessages.get(i)
+                console.log("thispos: ", thispos.lat, thispos.lon)
+                destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                ctx.ellipse(destipos[0],destipos[1], 10, 10)
+            }
             //ctx.closePath()
 
             // stroke path
@@ -408,13 +418,17 @@ Page {
         }
         Component.onCompleted: {
             console.log("FJF: Canvas: onCompleted")
-            rWin.python.setHandler("routeReceived", function(route){
+            rWin.python.setHandler("routeReceived", function(route, routeMessagePoints){
                 rWin.log.debug("routing received:" + route)
                 // clear old route first
                 routingData.route.clear()
                  for (var i=0; i<route.length; i++) {
                      rWin.log.debug("route: step " + i +": "+route[i][0] + "XXX" + route[i][1])
                      routingData.route.append({"lat": route[i][0], "lon": route[i][1]});
+                 }
+                 for (var i=0; i<routeMessagePoints.length; i++) {
+                     rWin.log.debug("routeMessage: " +routeMessagePoints[i][0]+"X"+routeMessagePoints[i][1]+"XX"+routeMessagePoints[i][2]+"XXX"+routeMessagePoints[i][3])
+                     routingData.routeMessages.append({"lat": routeMessagePoints[i][0], "lon": routeMessagePoints[i][1], "message": routeMessagePoints[i][3]})
                  }
                  routingData.requestPaint()
             })

@@ -578,8 +578,12 @@ class Route(RanaModule):
 
 ###### sailfish/qml stuff
             routePoints = result.route.getPointsLLE()
+            messagePoints = result.route.getMessagePoints()
+            messagePointsLLEM = []
+            for mp in messagePoints:
+                messagePointsLLEM.append(mp.getLLEM())
             self.log.debug("FJF about to send signal, routeReceived")
-            pyotherside.send("routeReceived", routePoints)
+            pyotherside.send("routeReceived", routePoints, messagePointsLLEM)
             #self.startNavigation()
 
         else: # routing failed
