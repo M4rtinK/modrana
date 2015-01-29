@@ -360,6 +360,9 @@ Page {
         opacity: 0.8
         visible: true
         property var touchpos: [0,0]
+        property var route : ListModel {
+            id: routeModel
+        }
 
         onPaint: { 
             console.log("FJF: canvas paint requested start")
@@ -369,6 +372,7 @@ Page {
             var startY = startpos[1]
             var destX = destipos[0]
             var destY = destipos[1]
+            var thispos = (0,0,0)
             console.log("routing points to plot: ",startpos, destipos)
             var ctx = getContext("2d")
             // clear the canvas
@@ -382,9 +386,17 @@ Page {
             ctx.beginPath()
             console.log("moveto: ", startX, startY)
             ctx.moveTo(startX,startY)
-            console.log("lineTo: ", destX, destY)
-            ctx.lineTo(destX,destY)
-            ctx.closePath()
+            console.log("list count: " + routingData.route.count)
+            console.log("list: " + routingData.route)
+            for (var i=0; i<routingData.route.count; i++) {
+                console.log("route " + i + routingData.route.get(i))
+                thispos = routingData.route.get(i)
+                console.log("thispos: ", thispos.lat, thispos.lon)
+                destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                console.log("lineTo: ", destipos[0], destipos[1])
+                ctx.lineTo(destipos[0],destipos[1])
+            }
+            //ctx.closePath()
 
             // stroke path
             ctx.stroke()
@@ -396,6 +408,16 @@ Page {
         }
         Component.onCompleted: {
             console.log("FJF: Canvas: onCompleted")
+            rWin.python.setHandler("routeReceived", function(route){
+                rWin.log.debug("routing received:" + route)
+                // clear old route first
+                routingData.route.clear()
+                 for (var i=0; i<route.length; i++) {
+                     rWin.log.debug("route: step " + i +": "+route[i][0] + "XXX" + route[i][1])
+                     routingData.route.append({"lat": route[i][0], "lon": route[i][1]});
+                 }
+                 routingData.requestPaint()
+            })
         }
 
         Connections {
@@ -406,7 +428,7 @@ Page {
             }
             onDrag: {
                 console.log("FJF: Canvas: pinchmap drag")
-                routingData.requestPaint()
+                //routingData.requestPaint()
             }
             onZoomLevelChanged: {
                 console.log("FJF: Canvas: pinchmap zoomLevel changed")

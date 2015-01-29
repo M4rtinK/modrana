@@ -34,6 +34,7 @@ from core.point import Point
 import core.way as way
 from core.backports.six import u
 from . import routing_providers
+import pyotherside
 
 
 DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
@@ -574,7 +575,12 @@ class Route(RanaModule):
                 self.destination = destination
 
             self.osdMenuState = OSD_CURRENT_ROUTE
-            self.startNavigation()
+
+###### sailfish/qml stuff
+            routePoints = result.route.getPointsLLE()
+            self.log.debug("FJF about to send signal, routeReceived")
+            pyotherside.send("routeReceived", routePoints)
+            #self.startNavigation()
 
         else: # routing failed
             self.log.error("routing ended with error")
