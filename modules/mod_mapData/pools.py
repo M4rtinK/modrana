@@ -124,8 +124,6 @@ class BatchPool(object):
         with self._mutex:
             if self._running:
                 self._shutdown = True
-        # self._pool.shutdown(now=True, join=True, async=True,
-        #                     callback=self._stoppedCallback)
 
     def _stoppedCallback(self):
         """Called from a thread once the thread pool is fully stopped"""
