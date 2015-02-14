@@ -43,6 +43,7 @@ class Location(RanaModule):
         self.provider = None
         self.startSignal = Signal()
         self.stopSignal = Signal()
+        self.positionUpdate = Signal()
 
         # check if the device handles location by itself
         if not self.modrana.dmod.handlesLocation():
@@ -172,6 +173,7 @@ class Location(RanaModule):
         self.set("fix", fixClass)
         # always set this key to current epoch once the location is updated
         # so that modules can watch it and react on position updates
+        self.positionUpdate(fix)
         self.set('locationUpdated', time())
 
     def getFix(self):
@@ -190,7 +192,7 @@ class Location(RanaModule):
                     # type is used
                     self.log.info("enabling device module location")
                     self.modrana.dmod.startLocation(startMainLoop=startMainLoop)
-            elif gs.GUIString == "qt5":
+            elif gs.GUIString == "qt5" and self.modrana.dmod.getDeviceIDString() != "pc":
                 self.log.info("location is handled by Qt5 when using Qt5 GUI")
             elif self.provider:
                 self.log.info("enabling location")
