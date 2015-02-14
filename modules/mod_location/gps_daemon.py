@@ -43,7 +43,9 @@ class GPSD(PositionSource):
         self.connected = False
         try:
             self.GPSDConsumer = GPSDConsumer()
-            threads.threadMgr.add(self.GPSDConsumer)
+            t = threads.ModRanaThread(name=constants.THREAD_GPSD_CONSUMER,
+                                      target = self.GPSDConsumer._start)
+            threads.threadMgr.add(t)
             self.connected = True
             self.setGPSDDebug(self.debug) # check if verbose debugging is enabled
         except Exception:
@@ -68,7 +70,7 @@ class GPSD(PositionSource):
                 # is actually requested
                 #        (lat,lon,elevation,bearing,speed,timestamp) = fix
                 satCount = len(sats)
-                inUseSatCount = len(filter(lambda x: x.used, sats))
+                inUseSatCount = len([x for x in sats if x.used])
 
                 modRanaFix = Fix((fix.latitude, fix.longitude),
                                  fix.altitude,
@@ -104,82 +106,10 @@ class GPSD(PositionSource):
         else:
             log.info("location: gpsd not used, so there is no debug output to enable")
 
-
-### Old commands for direct socket access to GPSD
-#
-#  def socket_cmd(self, cmd):
-#    try:
-#      self.s.send("%s\r\n" % cmd)
-#    except:
-#        print("something is wrong with the gps daemon")
-#    result = self.s.recv(8192)
-#    #print("Reply: %s" % result)
-#    expect = 'GPSD,' + cmd.upper() + '='
-#    if(result[0:len(expect)] != expect):
-#      print("Fail: received %s after sending %s" % (result, cmd))
-#      return(None)
-#    remainder = result[len(expect):]
-#    if(remainder[0:1] == '?'):
-#      print("Fail: Unknown data in " + cmd)
-#      return(None)
-#    return(remainder)
-#
-#  def test_socket(self):
-#    for i in ('i','p','p','p','p'):
-#      print("%s = %s" % (i, self.socket_cmd(i)))
-#      sleep(1)
-#
-#  def gpsStatus(self):
-#    return(self.socket_cmd("M"))
-#
-#  def bearing(self):
-#    """return bearing as reported by gpsd"""
-#    return self.socket_cmd("t")
-#
-#  def elevation(self):
-#    """return elevation as reported by gpsd
-#  (meters above mean sea level)"""
-#    return self.socket_cmd("a")
-#
-#  def speed(self):
-#    """return speed in knots/sec as reported by gpsd"""
-#    return self.socket_cmd("v")
-#
-#  def GPSTime(self):
-#    """return a string representing gps time
-#  in this format: D=yyyy-mm-ddThh:nmm:ss.ssZ (fractional seccond are not guarantied)
-#  (for tagging trackpoints with accurate timestamp ?)"""
-#    timeFromGPS = self.socket_cmd("d")
-#    return timeFromGPS
-#
-#  def satellites(self):
-#    list = self.socket_cmd('y')
-#    if(not list):
-#      return
-#    parts = list.split(':')
-#    (spare1,spare2,count) = parts[0].split(' ')
-#    count = int(count)
-#    self.set("gps_num_sats", count)
-#    for i in range(count):
-#      (prn,el,az,db,used) = [int(a) for a in parts[i+1].split(' ')]
-#      self.set("gps_sat_%d"%i, (db,used,prn))
-#      #print("%d: %d, %d, %d, %d, %d" % (i,prn,el,az,db,used))
-#
-#  def quality(self):
-#    result = self.socket_cmd('q')
-#    if result:
-#      (count,dd,dx,dy) = result.split(' ')
-#      count = int(count)
-#      (dx,dy,dd) = [float(a) for a in (dx,dy,dd)]
-#      print("%d sats, quality %f, %f, %f" % (count,dd,dx,dy))
-
-class GPSDConsumer(threads.ModRanaThread):
+class GPSDConsumer(object):
     """consume data as they come in from the GPSD and store last known fix"""
 
     def __init__(self):
-        threads.ModRanaThread.__init__(self,
-                                       name=constants.THREAD_GPSD_CONSUMER
-        )
         self.lock = threading.RLock()
         self.stop = False
 
@@ -192,17 +122,14 @@ class GPSDConsumer(threads.ModRanaThread):
             self.session = None
             log.warning("GPS daemon refused initial connection")
         self.verbose = False
-        # vars
         self.fix = None
         self.satellites = []
-
-        self.target = self._target
-
         self._consecutiveGPSDErrors = 0
 
-    def _target(self):
+    def _start(self):
         if self.session is None:
             # connection to GPS daemon not established
+            log.debug("GPSDConsumer: could not connect to GPSD session")
             return
         log.info("GPSDConsumer: starting")
         while True:
@@ -232,9 +159,7 @@ class GPSDConsumer(threads.ModRanaThread):
                 with self.lock:
                     self.fix = sf
                     self.satellites = self.session.satellites
-                    #          self.fix = (sf.latitude,sf.longitude,sf.altitude,sf.track,sf.speed, time())
                     if self.verbose:
-                    #          if 1:
                         try:
                             log.debug('GPSD fix debug')
                             log.debug(
@@ -247,13 +172,6 @@ class GPSDConsumer(threads.ModRanaThread):
                     log.debug("GPSDConsumer: NO FIX, will retry in 1 s")
                 sleep(1)
         log.info("GPSDConsumer: stopped")
-
-    #      if r["class"] == "TPV":
-    #        with self.lock:
-    #          try:
-    #            self.fix = (r['lat'],r['lon'],r['alt'],r['track'],r['speed'], time())
-    #          except Exception:            import sys            e = sys.exc_info()[1]
-    #            log.exception("GPSDConsumer: error reading data")
 
     def shutdown(self):
         log.info("GPSDConsumer: stopping")
