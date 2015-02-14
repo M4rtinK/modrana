@@ -80,7 +80,7 @@ class gpscommon(object):
         eol = self.linebuffer.find('\n')
         if eol == -1:
             frag = self.sock.recv(4096)
-            self.linebuffer += frag
+            self.linebuffer += frag.decode("ascii")
             if self.verbose > 1:
                 sys.stderr.write("poll: read complete.\n")
             if not self.linebuffer:
@@ -120,7 +120,7 @@ class gpscommon(object):
         "Ship commands to the daemon."
         if not commands.endswith("\n"):
             commands += "\n"
-        self.sock.send(commands)
+        self.sock.send(commands.encode("utf-8"))
 
 WATCH_ENABLE	= 0x000001	# enable streaming
 WATCH_DISABLE	= 0x000002	# disable watching
