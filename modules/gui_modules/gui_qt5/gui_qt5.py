@@ -86,6 +86,9 @@ class QMLGUI(GUIModule):
         self.firstTimeSignal = signal.Signal()
         size = (800, 480) # initial window size
 
+        # positioning related
+        self._pythonPositioning = False
+
         # register exit handler
         #pyotherside.atexit(self._shutdown)
         # FIXME: for some reason the exit handler is never
@@ -149,6 +152,8 @@ class QMLGUI(GUIModule):
     def firstTime(self):
         # trigger the first time signal
         self.firstTimeSignal()
+
+        self.modules.location.positionUpdate.connect(self._pythonPositionUpdateCB)
 
     def _shutdown(self):
         """Called by PyOtherSide once the QML side is shutdown.
@@ -226,6 +231,10 @@ class QMLGUI(GUIModule):
             return version
 
     def setPosition(self, posDict):
+        if self._pythonPositioning:
+            # ignore the setPosition call if Python-side positioning
+            # is used as the Python side already has fresh position data
+            return
         lat, lon = float(posDict["latitude"]), float(posDict["longitude"])
         elevation = float(posDict["elevation"])
         metersPerSecSpeed = float(posDict["speedMPS"])  # m/s
@@ -254,6 +263,23 @@ class QMLGUI(GUIModule):
         # update done
         self.set('locationUpdated', time.time())
         # TODO: move part of this to the location module ?
+
+    def _pythonPositionUpdateCB(self, fix):
+        self._pythonPositioning = True
+        if fix.position:
+            (lat, lon) = fix.position
+        else:
+            (lat, lon) = None
+        pyotherside.send("pythonPositionUpdate", {
+            "latitude" : lat,
+            "longitude" : lon,
+            "altitude" : fix.altitude,
+            "speed" : fix.speed,
+            "horizontalAccuracy" : fix.horizontal_accuracy,
+            "verticalAccuracy" : fix.vertical_accuracy,
+            "timestamp" : fix.timestamp,
+            "valid" : bool(fix.position)
+        })
 
     def _selectImageProviderCB(self, imageId, requestedSize):
         originalImageId = imageId

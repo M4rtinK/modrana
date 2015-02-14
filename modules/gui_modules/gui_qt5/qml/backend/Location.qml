@@ -12,6 +12,8 @@ Item {
 
     property var _lastCoord
 
+    property var _pythonSource : LocationPythonSource {}
+
     // connect to the location source position update signals
     Connections {
         id : locationUpdateConnection
@@ -135,5 +137,26 @@ Item {
         } else {
             rWin.log.error("Qt5 location: can't stop, not initialized")
         }
+    }
+
+    Component.onCompleted : {
+        // on some platforms the position source could be on the
+        // Python side, such as GPSD
+        rWin.python.setHandler("pythonPositionUpdate", function(update) {
+            _pythonSource.valid = update.valid
+            if (update.altitude != null) {
+                _pythonSource.position.altitudeValid = true
+                _pythonSource.position.coordinate.altitude = update.altitude
+            } else {
+                _pythonSource.position.altitudeValid = false
+            }
+            _pythonSource.position.coordinate.latitude = update.latitude
+            _pythonSource.position.coordinate.longitude = update.longitude
+            _pythonSource.position.horizontalAccuracy = update.horizontalAccuracy
+            _pythonSource.position.verticalAccuracy = update.verticalAccuracy
+            _pythonSource.position.speed = update.speed
+            _pythonSource.position.timestamp = update.timestamp
+            positionUpdate(_pythonSource)
+        })
     }
 }
