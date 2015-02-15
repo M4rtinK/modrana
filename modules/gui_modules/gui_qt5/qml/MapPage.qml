@@ -460,6 +460,8 @@ Page {
                     rWin.routingStartPos.latitude=routingStartLat
                     rWin.routingStartPos.longitude=routingStartLon
                     console.log("FJF new start point")
+                    selectRoutingStart = false
+                    routingStartRect.color = "red"
                 }
                 if (selectRoutingDestination) {
                     routingDestinationLat = routingData.touchpos[0]
@@ -467,6 +469,8 @@ Page {
                     rWin.routingDestinationPos.latitude=routingDestinationLat
                     rWin.routingDestinationPos.longitude=routingDestinationLon
                     console.log("FJF new destination point")
+                    selectRoutingDestination = false
+                    routingEndRect.color = "red"
                     rWin.python.call("modrana.gui.modules.route.llRoute", [[rWin.routingStartPos.latitude,rWin.routingStartPos.longitude], [rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude]])
                     rWin.log.debug("routing called")
                 }
