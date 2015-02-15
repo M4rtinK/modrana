@@ -388,12 +388,17 @@ Page {
 
             // setup the stroke
             ctx.lineWidth = 4
-            ctx.strokeStyle = "red"
 
-            // create a path
-            ctx.beginPath()
             //console.log("moveto: ", startX, startY)
+            ctx.beginPath()
+            //place a green square at the start point
+            ctx.strokeStyle = "green"
             ctx.moveTo(startX,startY)
+            ctx.rect(startX-messagePointDiameter/2,startY-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
+            ctx.stroke()
+            // paint the route red
+            ctx.strokeStyle = "red"
+            ctx.beginPath()
             //console.log("list count: " + routingData.route.count)
             //console.log("list: " + routingData.route)
             for (var i=0; i<routingData.route.count; i++) {
@@ -414,6 +419,13 @@ Page {
             //ctx.closePath()
 
             // stroke path
+            ctx.stroke()
+
+            // place a blue square at the destination point
+            ctx.beginPath()
+            ctx.strokeStyle = "blue"
+            ctx.moveTo(destX,destY)
+            ctx.rect(destX-messagePointDiameter/2,destY-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
             ctx.stroke()
 
             console.log("FJF: canvas paint requested done")
