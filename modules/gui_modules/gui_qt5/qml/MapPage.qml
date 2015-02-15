@@ -380,6 +380,7 @@ Page {
             var destX = destipos[0]
             var destY = destipos[1]
             var thispos = (0,0,0)
+            var messagePointDiameter = 10
             //console.log("routing points to plot: ",startpos, destipos)
             var ctx = getContext("2d")
             // clear the canvas
@@ -408,7 +409,7 @@ Page {
                 thispos = routingData.routeMessages.get(i)
                 //console.log("thispos: ", thispos.lat, thispos.lon)
                 destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
-                ctx.ellipse(destipos[0],destipos[1], 10, 10)
+                ctx.ellipse(destipos[0]-messagePointDiameter/2,destipos[1]-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
             }
             //ctx.closePath()
 
