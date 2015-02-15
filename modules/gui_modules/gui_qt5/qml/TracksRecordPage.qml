@@ -17,6 +17,17 @@ BasePage {
     property string recordingText : rtPage.paused ? qsTr("Tracklog recording paused") : qsTr("Recording a tracklog")
     property string lastUsedTracklogName : rWin.get("logNameEntry", "", function(v){lastUsedTracklogName=v})
 
+    property var currentStatus : {
+        "speed" : {
+            "current" : 0,
+            "avg" : 0,
+            "max" : 0
+        },
+        "distance" : 0,
+        "elapsedTime" : 0,
+        "pointCount" : 0
+    }
+
     onPausedChanged : {
         if (recording) {
             if (paused) {
@@ -103,6 +114,35 @@ BasePage {
                 onClicked :  rtPage.paused = !rtPage.paused
             }
         }
+        SmartGrid {
+            id : statusGrid
+            visible : rtPage.recording
+            Label {
+                text: "<b>current speed:</b> " + rtPage.currentStatus.speed.current
+                width : statusGrid.cellWidth
+            }
+            Label {
+                text: "<b>average speed:</b> " + rtPage.currentStatus.speed.avg
+                width : statusGrid.cellWidth
+            }
+            Label {
+                text: "<b>max speed:</b> " + rtPage.currentStatus.speed.max
+                width : statusGrid.cellWidth
+            }
+            Label {
+                text: "<b>distance:</b> " + rtPage.currentStatus.distance
+                width : statusGrid.cellWidth
+            }
+            Label {
+                text: "<b>elapsed time:</b> " + rtPage.currentStatus.elapsedTime
+                width : statusGrid.cellWidth
+            }
+            Label {
+                text: "<b>points:</b> " + rtPage.currentStatus.pointCount
+                width : statusGrid.cellWidth
+            }
+        }
+
         Label {
             text: qsTr("Recorded tracklogs folder:") + newline + rtPage.tracklogFolder + "/logs"
             property string newline : rWin.inPortrait ? "<br>" : " "
@@ -141,4 +181,19 @@ BasePage {
             }
         }
     }
+
+    Component.onCompleted : {
+        rWin.python.setHandler("tracklogUpdated", function(update) {
+            rtPage.currentStatus = update
+        })
+    }
+
+    onIsActiveChanged : {
+        if (isActive) {
+            rWin.python.call("modrana.gui.tracklogs.setSendUpdates", [true])
+        } else {
+            rWin.python.call("modrana.gui.tracklogs.setSendUpdates", [false])
+        }
+    }
+
 }

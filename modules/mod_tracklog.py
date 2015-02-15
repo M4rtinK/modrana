@@ -26,6 +26,7 @@ from collections import deque
 from core import geo
 from core import way
 from core import gs
+from core.signal import Signal
 
 if gs.GUIString == "GTK":
     import gtk
@@ -68,6 +69,8 @@ class Tracklog(RanaModule):
         # timer ids
         self.updateLogTimerId = None
         self.saveLogTimerId = None
+        # signals
+        self.tracklogUpdated = Signal()
         # statistics
         self.maxSpeed = 0
         self.avg1 = 0
@@ -309,6 +312,33 @@ class Tracklog(RanaModule):
                         self._addLL2Trace(lat, lon)
                 else: # this is the first known log point, just add it
                     self._addLL2Trace(lat, lon)
+        # done, trigger the tracklog updated signal
+        self.tracklogUpdated()
+
+    def getStatusDict(self):
+        """Return status of the current track logging as a dictionary
+        This is used by the Qt 5 GUI to show the various logging related
+        statistics.
+
+        :returns: dictionary describing current track logging state
+        """
+
+        self.log.debug("generating stuff")
+
+        pointCount = 0
+        units = self.m.get('units', None)
+        if self.log1:
+            pointCount = self.log1.getPointCount()
+        return {
+            "speed" : {
+                "current" : units.km2CurrentUnitPerHourString(self.get('speed', 0)),
+                "max" : units.km2CurrentUnitPerHourString(self.maxSpeed),
+                "avg" : units.km2CurrentUnitPerHourString(self.avgSpeed)
+            },
+            "distance" : units.km2CurrentUnitString(self.distance, 2),
+            "elapsedTime" : time.strftime('%H:%M:%S', time.gmtime(int(time.time()) - self.loggingStartTimestamp)),
+            "pointCount" : pointCount
+        }
 
     def _addLL2Trace(self, lat, lon):
         proj = self.m.get('projection')

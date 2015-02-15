@@ -802,6 +802,28 @@ class Tracklogs(object):
 
     def __init__(self, gui):
         self.gui = gui
+        self.gui.firstTimeSignal.connect(self._firstTimeCB)
+        self._sendUpdates = False
+
+    def _firstTimeCB(self):
+        # connect to the tracklog update signal, so that we can send
+        # track logging state updates to the GUI
+        self.gui.modules.tracklog.tracklogUpdated.connect(self._sendUpdateCB)
+
+    def _sendUpdateCB(self):
+        """Tracklog has been updated, send the updated info dict to GUI"""
+        if self._sendUpdates:
+            pyotherside.send("tracklogUpdated", self.gui.modules.tracklog.getStatusDict())
+
+    def setSendUpdates(self, value):
+        """Set if tracklog updates should be sent to the GUI layer or not.
+        This is used to disable updates when the track recording page is not visible.
+        """
+        self._sendUpdates = value
+        if value:
+            self.gui.log.debug("tracklog: enabling logging status updates")
+        else:
+            self.gui.log.debug("tracklog: disabling logging status updates")
 
     def sailfishSymlinkExists(self):
         """Report if the easy access symlink on Sailfish OS for tracklogs exists
