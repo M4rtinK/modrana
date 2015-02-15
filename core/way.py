@@ -535,13 +535,13 @@ def fromHandmade(start, middlePoints, destination):
 
 
 class AppendOnlyWay(Way):
-    """a way subclass that is optimized for efficient incremental file storage
+    """A way subclass that is optimized for efficient incremental file storage
     -> points can be only appended or completely replaced, no insert support at he moment
     -> only CSV storage is supported at the moment
     -> call openCSV(path) to start incremental file storage
-    -> call flush() if to write the points added since open* or last flush to disk
+    -> call flush() if to write the points added since openCSV() or last flush to disk
     -> call close() once you are finished - this flushes any remaining points to disk
-    and closes the file
+       and closes the file
     NOTE: this subclass also records per-point timestamps when points are added and these timestamps
     are stored in the output file
 
@@ -550,9 +550,9 @@ class AppendOnlyWay(Way):
     -> on every flush, the increment list is added to the file in storage and cleared
     -> like this, we don't need to combine the two lists when we need to return all points
     -> only possible downside is duplicate space needed for the points if flush is never called,
-    as the same points would be stored both in points and increment
-    -> if flush is called regularly (which is the expected behaviour when using this class), this should not be an issue
-
+       as the same points would be stored both in points and increment
+    -> if flush is called regularly (which is the expected behaviour when using this class),
+       this should not be an issue
     """
 
     def __init__(self, points=None):
@@ -567,7 +567,7 @@ class AppendOnlyWay(Way):
 
         if points:
             with self.pointsLock:
-                #mark all points added on startup with a single timestamp
+                # mark all points added on startup with a single timestamp
                 timestamp = geo.timestampUTC()
                 # convert to LLET
                 points = [(x[0], x[1], x[2], timestamp) for x in points]
