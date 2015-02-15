@@ -380,7 +380,7 @@ Page {
             var destX = destipos[0]
             var destY = destipos[1]
             var thispos = (0,0,0)
-            console.log("routing points to plot: ",startpos, destipos)
+            //console.log("routing points to plot: ",startpos, destipos)
             var ctx = getContext("2d")
             // clear the canvas
             ctx.clearRect(0,0,tabMap.width,tabMap.height)
@@ -391,22 +391,22 @@ Page {
 
             // create a path
             ctx.beginPath()
-            console.log("moveto: ", startX, startY)
+            //console.log("moveto: ", startX, startY)
             ctx.moveTo(startX,startY)
-            console.log("list count: " + routingData.route.count)
-            console.log("list: " + routingData.route)
+            //console.log("list count: " + routingData.route.count)
+            //console.log("list: " + routingData.route)
             for (var i=0; i<routingData.route.count; i++) {
-                console.log("route " + i + routingData.route.get(i))
+                //console.log("route " + i + routingData.route.get(i))
                 thispos = routingData.route.get(i)
-                console.log("thispos: ", thispos.lat, thispos.lon)
+                //console.log("thispos: ", thispos.lat, thispos.lon)
                 destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
-                console.log("lineTo: ", destipos[0], destipos[1])
+                //console.log("lineTo: ", destipos[0], destipos[1])
                 ctx.lineTo(destipos[0],destipos[1])
             }
             for (var i=0; i<routingData.routeMessages.count; i++) {
-                console.log("message " + i + routingData.routeMessages.get(i))
+                //console.log("message " + i + routingData.routeMessages.get(i))
                 thispos = routingData.routeMessages.get(i)
-                console.log("thispos: ", thispos.lat, thispos.lon)
+                //console.log("thispos: ", thispos.lat, thispos.lon)
                 destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
                 ctx.ellipse(destipos[0],destipos[1], 10, 10)
             }
