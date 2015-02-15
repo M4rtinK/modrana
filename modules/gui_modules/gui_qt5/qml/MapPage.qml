@@ -37,6 +37,8 @@ Page {
     property real routingStartLon: 0.
     property real routingDestinationLat: 0.
     property real routingDestinationLon: 0.
+    property bool routingEnabled: rWin.get("routingEnabled", false,
+    function(v){routingEnabled=v})
     
     Component.onCompleted : {
         rWin.log.info("map page: loaded, loading layers")
@@ -293,6 +295,7 @@ Page {
         }
         TextButton {
             id: routingStart
+            visible: tabMap.routingEnabled
             text: "routing start"
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
@@ -314,6 +317,7 @@ Page {
         }
         TextButton {
             id: routingEnd
+            visible: tabMap.routingEnabled
             text: "routing end"
             width: rWin.c.style.map.button.size
             height: rWin.c.style.map.button.size
