@@ -77,6 +77,10 @@ class Route(RanaModule):
         # Monav
         self.monav = None
 
+        # QT5 routing specific
+        self.deviceId = self.modrana.gui.getIDString()
+        self.log.debug("My ID: " + self.deviceId)
+
     def _goToInitialState(self):
         """restorer initial routing state
         -> used in init and when rerouting"""
@@ -576,15 +580,17 @@ class Route(RanaModule):
 
             self.osdMenuState = OSD_CURRENT_ROUTE
 
-###### sailfish/qml stuff
-            routePoints = result.route.getPointsLLE()
-            messagePoints = result.route.getMessagePoints()
-            messagePointsLLEM = []
-            for mp in messagePoints:
-                messagePointsLLEM.append(mp.getLLEM())
-            self.log.debug("FJF about to send signal, routeReceived")
-            pyotherside.send("routeReceived", routePoints, messagePointsLLEM)
-            #self.startNavigation()
+            if self.deviceId == "Qt5":
+                ###### sailfish/qml stuff
+                routePoints = result.route.getPointsLLE()
+                messagePoints = result.route.getMessagePoints()
+                messagePointsLLEM = []
+                for mp in messagePoints:
+                    messagePointsLLEM.append(mp.getLLEM())
+                self.log.debug("FJF about to send signal, routeReceived")
+                pyotherside.send("routeReceived", routePoints, messagePointsLLEM)
+            else:
+                self.startNavigation()
 
         else: # routing failed
             self.log.error("routing ended with error")
