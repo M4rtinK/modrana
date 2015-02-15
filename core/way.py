@@ -586,7 +586,7 @@ class AppendOnlyWay(Way):
         return self.points
 
     def getPointCount(self):
-        return len(self.points) + len(self.increment)
+        return len(self.points)
 
     def addPoint(self, point):
         with self.pointsLock:
