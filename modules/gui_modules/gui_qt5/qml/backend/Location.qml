@@ -3,6 +3,8 @@
 
 import QtQuick 2.0
 
+import "../functions.js" as F
+
 Item {
     id : location
     property var locationSource
@@ -10,7 +12,7 @@ Item {
     // enabled tracks if location usage is enabled
     property bool usageEnabled : true
 
-    property var _lastCoord
+    property var _lastCoords : []
 
     property var _pythonSource : LocationPythonSource {}
 
@@ -44,13 +46,9 @@ Item {
             // get the direction of travel
             // (as QML position info seems to be missing the direction
             // attribute, we need to compute it like this)
-            if (location._lastCoord) {
-                rWin.bearing = location._lastCoord.azimuthTo(coord)
-                //rWin.log.debug("BEARING " + rWin.bearing)
-            }
-            // save the current coord for the next bearing
-            // computation
-            location._lastCoord = coord
+            location._addCoord(coord)
+            rWin.bearing = location._getBearing()
+            //rWin.log.debug("BEARING: " + rWin.bearing)
         }
         // tell the position to Python
         var posDict = {
@@ -62,6 +60,31 @@ Item {
         rWin.python.call("modrana.gui.setPosition", [posDict])
     }
 
+    function _addCoord(coord) {
+        // add the current position coordinate to an array so that it can be used
+        // together with the previous coordinate to compute current bearing
+        // (the QtPositioning QML interface really needs to fix the missing bearing property
+        //  that the C++ interface has..)
+
+        // push() returns new array length
+        if (_lastCoords.push([coord.latitude,coord.longitude]) > 2) {
+            // shift the oldest point out of the array
+            _lastCoords.shift()
+        }
+    }
+
+    function _getBearing() {
+        // compute current bearing by computing the bearing between the current
+        // and previous coordinates
+        if (_lastCoords.length) {
+            var first = _lastCoords[0]
+            var last = _lastCoords[_lastCoords.length-1]
+            return F.getBearingTo(first[0], first[1], last[0], last[1])
+        } else {
+            rWin.log.error("location: no coordinates, can't get bearing")
+            return 0
+        }
+    }
 
     // location module initialization
     function __init__() {
