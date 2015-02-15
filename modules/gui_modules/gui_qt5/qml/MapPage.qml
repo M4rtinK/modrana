@@ -450,9 +450,6 @@ Page {
             }
             onMapClicked: {
                 console.log("FJF: Canvas: map clicked")
-            }
-            onMapDoubleClicked: {
-                console.log("FJF: Canvas: map doubleClicked")
                 console.log("FJF: screen coordinates", screenX, screenY)
                 console.log("FJF: geographic coordinates", pinchmap.getCoordFromScreenpoint(screenX, screenY))
                 // store the position we touched in Lat,Lon
