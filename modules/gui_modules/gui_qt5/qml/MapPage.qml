@@ -426,6 +426,7 @@ Page {
                 rWin.log.debug("routing received:" + route)
                 // clear old route first
                 routingData.route.clear()
+                routingData.routeMessages.clear()
                  for (var i=0; i<route.length; i++) {
                      rWin.log.debug("route: step " + i +": "+route[i][0] + "XXX" + route[i][1])
                      routingData.route.append({"lat": route[i][0], "lon": route[i][1]});
