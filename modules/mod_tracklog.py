@@ -329,9 +329,16 @@ class Tracklog(RanaModule):
         units = self.m.get('units', None)
         if self.log1:
             pointCount = self.log1.getPointCount()
+
+        speed = self.get('speed', 0)
+        if speed is not None:
+            speed = units.km2CurrentUnitPerHourString(speed)
+        else:
+            speed = "unknown"
+
         return {
             "speed" : {
-                "current" : units.km2CurrentUnitPerHourString(self.get('speed', 0)),
+                "current" : speed,
                 "max" : units.km2CurrentUnitPerHourString(self.maxSpeed),
                 "avg" : units.km2CurrentUnitPerHourString(self.avgSpeed)
             },
