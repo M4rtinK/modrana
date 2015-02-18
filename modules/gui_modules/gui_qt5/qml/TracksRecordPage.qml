@@ -27,6 +27,8 @@ BasePage {
         "elapsedTime" : 0,
         "pointCount" : 0
     }
+    // report if the status dict has real data
+    property bool statusValid : false
 
     onPausedChanged : {
         if (recording) {
@@ -116,7 +118,7 @@ BasePage {
         }
         SmartGrid {
             id : statusGrid
-            visible : rtPage.recording
+            visible : rtPage.statusValid
             Label {
                 text: "<b>current speed:</b> " + rtPage.currentStatus.speed.current
                 width : statusGrid.cellWidth
@@ -184,6 +186,7 @@ BasePage {
 
     Component.onCompleted : {
         rWin.python.setHandler("tracklogUpdated", function(update) {
+            rtPage.statusValid = true
             rtPage.currentStatus = update
         })
     }
