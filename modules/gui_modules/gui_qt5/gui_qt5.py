@@ -803,7 +803,7 @@ class Tracklogs(object):
     def __init__(self, gui):
         self.gui = gui
         self.gui.firstTimeSignal.connect(self._firstTimeCB)
-        self._sendUpdates = False
+        self._sendUpdates = True
 
     def _firstTimeCB(self):
         # connect to the tracklog update signal, so that we can send
