@@ -308,7 +308,6 @@ Page {
                 text: parent.text
             }
             onClicked: {
-                console.log("set startpoint for routing")
                 selectRoutingStart = true
                 selectRoutingDestination = false
                 routingStartRect.color = "blue"
@@ -330,7 +329,6 @@ Page {
                 text: parent.text
             }
             onClicked: {
-                console.log("set endpoint for routing")
                 selectRoutingStart = false
                 selectRoutingDestination = true
                 routingEndRect.color = "blue"
@@ -372,7 +370,6 @@ Page {
         }
 
         onPaint: { 
-            console.log("FJF: canvas paint requested start")
             var startpos = pinchmap.getScreenpointFromCoord(rWin.routingStartPos.latitude,rWin.routingStartPos.longitude)
             var destipos = pinchmap.getScreenpointFromCoord(rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude)
             var startX = startpos[0]
@@ -381,7 +378,6 @@ Page {
             var destY = destipos[1]
             var thispos = (0,0,0)
             var messagePointDiameter = 10
-            //console.log("routing points to plot: ",startpos, destipos)
             var ctx = getContext("2d")
             // clear the canvas
             ctx.clearRect(0,0,tabMap.width,tabMap.height)
@@ -389,7 +385,6 @@ Page {
             // setup the stroke
             ctx.lineWidth = 4
 
-            //console.log("moveto: ", startX, startY)
             ctx.beginPath()
             //place a green square at the start point
             ctx.strokeStyle = "green"
@@ -399,20 +394,13 @@ Page {
             // paint the route red
             ctx.strokeStyle = "red"
             ctx.beginPath()
-            //console.log("list count: " + routingData.route.count)
-            //console.log("list: " + routingData.route)
             for (var i=0; i<routingData.route.count; i++) {
-                //console.log("route " + i + routingData.route.get(i))
                 thispos = routingData.route.get(i)
-                //console.log("thispos: ", thispos.lat, thispos.lon)
                 destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
-                //console.log("lineTo: ", destipos[0], destipos[1])
                 ctx.lineTo(destipos[0],destipos[1])
             }
             for (var i=0; i<routingData.routeMessages.count; i++) {
-                //console.log("message " + i + routingData.routeMessages.get(i))
                 thispos = routingData.routeMessages.get(i)
-                //console.log("thispos: ", thispos.lat, thispos.lon)
                 destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
                 ctx.ellipse(destipos[0]-messagePointDiameter/2,destipos[1]-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
             }
@@ -427,25 +415,18 @@ Page {
             ctx.moveTo(destX,destY)
             ctx.rect(destX-messagePointDiameter/2,destY-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
             ctx.stroke()
-
-            console.log("FJF: canvas paint requested done")
         }
         onPainted: {
-            console.log("FJF: canvas painted")
         }
         Component.onCompleted: {
-            console.log("FJF: Canvas: onCompleted")
             rWin.python.setHandler("routeReceived", function(route, routeMessagePoints){
-                rWin.log.debug("routing received:" + route)
                 // clear old route first
                 routingData.route.clear()
                 routingData.routeMessages.clear()
                  for (var i=0; i<route.length; i++) {
-                     rWin.log.debug("route: step " + i +": "+route[i][0] + "XXX" + route[i][1])
                      routingData.route.append({"lat": route[i][0], "lon": route[i][1]});
                  }
                  for (var i=0; i<routeMessagePoints.length; i++) {
-                     rWin.log.debug("routeMessage: " +routeMessagePoints[i][0]+"X"+routeMessagePoints[i][1]+"XX"+routeMessagePoints[i][2]+"XXX"+routeMessagePoints[i][3])
                      routingData.routeMessages.append({"lat": routeMessagePoints[i][0], "lon": routeMessagePoints[i][1], "message": routeMessagePoints[i][3]})
                  }
                  routingData.requestPaint()
@@ -455,21 +436,15 @@ Page {
         Connections {
             target: pinchmap
             onCenterSet: {
-                console.log("FJF: Canvas: pinchmap centerSet")
                 routingData.requestPaint()
             }
             onDrag: {
-                console.log("FJF: Canvas: pinchmap drag")
                 //routingData.requestPaint()
             }
             onZoomLevelChanged: {
-                console.log("FJF: Canvas: pinchmap zoomLevel changed")
                 routingData.requestPaint()
             }
             onMapClicked: {
-                console.log("FJF: Canvas: map clicked")
-                console.log("FJF: screen coordinates", screenX, screenY)
-                console.log("FJF: geographic coordinates", pinchmap.getCoordFromScreenpoint(screenX, screenY))
                 // store the position we touched in Lat,Lon
                 routingData.touchpos = pinchmap.getCoordFromScreenpoint(screenX, screenY)
                 if (selectRoutingStart) {
@@ -477,7 +452,6 @@ Page {
                     routingStartLon = routingData.touchpos[1]
                     rWin.routingStartPos.latitude=routingStartLat
                     rWin.routingStartPos.longitude=routingStartLon
-                    console.log("FJF new start point")
                     selectRoutingStart = false
                     routingStartRect.color = "red"
                 }
@@ -486,21 +460,15 @@ Page {
                     routingDestinationLon = routingData.touchpos[1]
                     rWin.routingDestinationPos.latitude=routingDestinationLat
                     rWin.routingDestinationPos.longitude=routingDestinationLon
-                    console.log("FJF new destination point")
                     selectRoutingDestination = false
                     routingEndRect.color = "red"
                     rWin.python.call("modrana.gui.modules.route.llRoute", [[rWin.routingStartPos.latitude,rWin.routingStartPos.longitude], [rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude]])
                     rWin.log.debug("routing called")
                 }
 
-                console.log("FJF: routing:")
-                console.log("FJF: startpoint: ", routingStartLat, routingStartLon)
-                console.log("FJF: endpoint: ", routingDestinationLat, routingDestinationLon)
-
                 routingData.requestPaint()
             }
             onMapPanEnd: {
-                console.log("FJF: mapPanEnd")
                 routingData.requestPaint()
             }
         }
