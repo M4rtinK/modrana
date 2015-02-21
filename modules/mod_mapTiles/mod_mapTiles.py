@@ -58,6 +58,10 @@ log = logging.getLogger("mod.mapTiles")
 # if image manipulation tools are available, import them
 # and otherwise disable tile image manipulation
 IMAGE_MANIPULATION_IMPORT_SUCCESS = False
+NORMAL_TILE = "normal"
+LOADING_TILE = "loadingTile"
+COMPOSITE_TILE = "composite"
+SPECIAL_TILE = "special"
 
 # only import GKT libs if GTK GUI is used
 from core import gs
@@ -122,7 +126,7 @@ class MapTiles(RanaModule):
         ]
 
         if gs.GUIString == "GTK":
-            self.loadSpecialTiles(specialTiles) # load the special tiles to the special image cache
+            self._loadSpecialTiles(specialTiles) # load the special tiles to the special image cache
             self.loadingTile = self.images[1]['tileLoading']
             self.downloadingTile = self.images[1]['tileDownloading']
             self.waitingTile = self.images[1]['tileWaitingForDownloadSlot']
@@ -147,6 +151,18 @@ class MapTiles(RanaModule):
         self._dlRequestQueue = six.moves.queue.Queue()
         self._downloader = None
 
+        if gs.GUIString == "GTK":
+            # The in memory tile cache clearing watches
+            # are only relevant for the GTK GUI as only the GTK GUI
+            # stores special anc composite tiles in the cache.
+            # The Qt 5 GUI only uses it as a raw in memory tile cache and does not
+            # need it to remove tiles other than the automatic cache size
+            # trimming that occurs when the hard cache size limit is reached.
+            self.modrana.watch("layer", self._mapStateChangedCB)
+            self.modrana.watch("layer2", self._mapStateChangedCB)
+            self.modrana.watch("overlay", self._mapStateChangedCB)
+            self.modrana.watch("network", self._mapStateChangedCB)
+            self.m.get("mapData").downloadPool.batchDone.connect(self._batchDownloadCompleteDB)
 
     @property
     def tileDownloaded(self):
@@ -186,8 +202,7 @@ class MapTiles(RanaModule):
         :rtype: data or None
         """
         # check if the tile is in the recently-downloaded cache
-        name = self.getTileName(lzxy)
-        cacheItem = self.images[0].get(name, None)
+        cacheItem = self.images[0].get(lzxy, None)
         if cacheItem:
         #      self.log.debug("got tile FROM memory CACHE")
             return cacheItem[0]
@@ -207,11 +222,11 @@ class MapTiles(RanaModule):
                 # synchronous download
                 #self.log.debug("DOWNLOADING tile synchronously!")
                 # tile was not available from storage, download it
-                return self.downloadTile(lzxy)
+                return self._downloadTile(lzxy)
         else:
             return None
 
-    def downloadTile(self, lzxy):
+    def _downloadTile(self, lzxy):
         """Download the a tile from the network
 
         :param tuple lzxy: tile description tuple
@@ -286,7 +301,7 @@ class MapTiles(RanaModule):
         :returns: True if tile is cached, False otherwise
         :rtype: bool
         """
-        return self.getTileName(lzxy) in self.images[0]
+        return lzxy in self.images[0]
 
     def tileInStorage(self, lzxy):
         """Report if tile is available from local persistent storage
@@ -346,16 +361,18 @@ class MapTiles(RanaModule):
                         sprint = self._realDebugLog
                     else:
                         sprint = self._fakeDebugLog
+                    sprint("looking for tile %s", lzxy)
                     tileData = self._storeTiles.getTileData(lzxy)
                     if not tileData:  # TODO: is this actually needed ?
+                        sprint("tile not found locally %s", lzxy)
                         # tile not found locally and needs to be downloaded from network
                         # Are we allowed to download it ? (network=='full')
                         if self.get('network', 'full') == 'full':
-                            sprint("automatic tile download enabled - adding download request")
+                            sprint("auto tile dl enabled - adding dl request for %s", lzxy)
                             # switch the status tile to "Waiting for download slot"
                             if self.cacheImageSurfaces:
                                 with self.imagesLock:
-                                    self.images[0][self.getTileName(lzxy)] = self.waitingTile
+                                    self.images[0][lzxy] = self.waitingTile
                             droppedRequest = self._downloader.downloadTile(lzxy, tag)
                             if droppedRequest:
                                 # this tile download request has been dropped from
@@ -364,34 +381,33 @@ class MapTiles(RanaModule):
                                 # - if it is not in view, this makes place for new tiles in cache,
                                 # - if it is in view, new download request will be added
                                 lzxy, tag = droppedRequest
-                                name = self.imageName(lzxy)
-                                sprint("old download request dropped from work request stack:")
-                                sprint(name)
-                                self.removeImageFromMemory(name)
+                                sprint("old download request dropped from work request stack: %s", lzxy)
+                                self.removeImageFromMemory(lzxy)
                                 # also notify any listener that tha tile has been processed
                                 self.tileDownloaded(constants.TILE_DOWNLOAD_QUEUE_FULL, droppedRequest[0], droppedRequest[1])
                         else:
-                            sprint("automatic tile download disabled - not adding download request")
+                            sprint("auto tile dl disabled - not adding dl request for %s", lzxy)
                     else:
                         # tile found locally and not downloaded, trigger the downloaded signal
+                        sprint("%s found locally", lzxy)
                         self.tileDownloaded(True, lzxy, tag)
                         # and cache it in memory
                         if self.cacheImageSurfaces:
                             # if we are using image surfaces, convert the raw image data
                             # into an image surface
-                            tileData = self.data2cairoImageSurface(tileData)
-                        self.storeInMemory(tileData, self.getTileName(lzxy))
+                            tileData = self._data2cairoImageSurface(tileData)
+                        self.storeInMemory(tileData, lzxy)
             except Exception:
                 self.log.exception("exception in tile download manager thread")
 
-    def loadSpecialTiles(self, specialTiles):
+    def _loadSpecialTiles(self, specialTiles):
         """Load special tiles from files to the special tile cache
 
         :param list specialTiles: list of special tiles to load
         """
         for tile in specialTiles:
             (name, path) = tile
-            self.loadImageFromFile(path, name, imageType="special", dictIndex=1)
+            self._loadImageFromFile(path, name, imageType=SPECIAL_TILE, dictIndex=1)
 
     def beforeDraw(self):
         """We need to synchronize centering with map redraw,
@@ -415,7 +431,7 @@ class MapTiles(RanaModule):
         try: # this should get rid of a fair share of the infamous "black screens"
             # get all needed data and objects to local variables
             proj = self.m.get('projection', None)
-            drawImage = self.drawImage # method binding to speed back method lookup
+            drawImage = self._drawImage # method binding to speed back method lookup
             overlay = self.get('overlay', False)
             requests = []
             # if overlay is enabled, we use a special naming
@@ -423,7 +439,6 @@ class MapTiles(RanaModule):
             # -> like this we don't need additional
             #    overlay/no-overlay branching
 
-            singleGetName = self.getTileName
             ratio = self.get('transpRatio', "0.5,1").split(',') # get the transparency ratio
             (alphaOver, alphaBack) = (float(ratio[0]), float(ratio[1])) # convert it to floats
             # TODO: cache current layers
@@ -431,10 +446,8 @@ class MapTiles(RanaModule):
                 layer1 = self._mapLayersModule.getLayerById(self.get('layer', 'mapnik'))
                 layer2 = self._mapLayersModule.getLayerById(self.get('layer2', 'cycle'))
                 layerInfo = ((layer1, alphaBack), (layer2, alphaOver))
-                getName = self.getCompositeTileName
             else:
                 layerInfo = self._mapLayersModule.getLayerById(self.get('layer', 'mapnik'))
-                getName = self.getTileName
 
             if proj and proj.isValid():
                 loadingTileImageSurface = self.loadingTile[0]
@@ -533,7 +546,7 @@ class MapTiles(RanaModule):
                                 if polygon.intersects(tempPolygon):
                                     visibleCounter += 1
                                     (x, y, x1, y1) = (tx, ty, cx1 + tileSide * ix, cy1 + tileSide * iy)
-                                    name = getName((layerInfo, z, x, y))
+                                    name = (layerInfo, z, x, y)
                                     tileImage = self.images[0].get(name)
                                     if tileImage:
                                         # tile found in memory cache, draw it
@@ -548,32 +561,25 @@ class MapTiles(RanaModule):
                                             # and remove the separate tiles from cache
                                             layerBack = layerInfo[0][0]
                                             layerOver = layerInfo[1][0]
-                                            nameBack = singleGetName((layer1, z, x, y))
-                                            nameOver = singleGetName((layer2, z, x, y))
+                                            nameBack = (layer1, z, x, y)
+                                            nameOver = (layer2, z, x, y)
                                             backImage = self.images[0].get(nameBack)
                                             overImage = self.images[0].get(nameOver)
                                             if backImage and overImage: # both images available
+                                                # we check the the metadata to filter out the "Downloading... special tiles
                                                 if backImage[1]['type'] == "normal" and overImage[1]['type'] == "normal":
-                                                    # we check the the metadata to filter out the "Downloading..."
-                                                    # special tiles
-                                                    combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
-                                                    # remove the separate images from cache
-                                                    self.removeImageFromMemory(nameBack)
-                                                    self.removeImageFromMemory(nameOver)
-                                                    # cache the combined image
-                                                    self.storeInMemory(combinedImage, name, imageType="composite")
-                                                    # draw the composite image
-                                                    drawImage(cr, combinedImage, x1, y1, scale)
+                                                    # if both tiles are available, combine them remove the old tiles and cache the new one
+                                                    drawImage(cr, self._combine2Tiles(name, backImage[0], nameBack, overImage[0], nameOver, alphaOver), x1, y1, scale)
                                                 else: # on or more tiles not usable
                                                     # so at least draw a combined image
-                                                    self.drawCompositeImage(cr, backImage[0], overImage[0], x1, y1, scale, alpha1=alphaOver)
+                                                    self._drawCompositeImage(cr, backImage[0], overImage[0], x1, y1, scale, alpha1=alphaOver)
                                             else:
                                                 if backImage:
                                                     requests.append(((layerBack, z, x, y), None))
-                                                    self.storeInMemory(loadingTileImageSurface, nameBack, imageType="loadingTile")
+                                                    self.storeInMemory(loadingTileImageSurface, nameBack, imageType=LOADING_TILE)
                                                 elif overImage:
                                                     requests.append(((layerOver, z, x, y), None))
-                                                    self.storeInMemory(loadingTileImageSurface, nameOver, imageType="loadingTile")
+                                                    self.storeInMemory(loadingTileImageSurface, nameOver, imageType=LOADING_TILE)
                                                 else:
                                                     requests.append(((layerBack, z, x, y), None))
                                                     requests.append(((layerOver, z, x, y), None))
@@ -584,7 +590,7 @@ class MapTiles(RanaModule):
                                             # and cache a loading tile so that we don't spam the same loading r
                                             # request over and over again (the tile request queue is using a stack,
                                             # so this would really not make sense)
-                                            self.storeInMemory(loadingTileImageSurface, name, imageType="loadingTile")
+                                            self.storeInMemory(loadingTileImageSurface, name, imageType=LOADING_TILE)
                                             drawImage(cr, loadingTileImageSurface, x1, y1, scale)
 
                         gui = self.modrana.gui
@@ -623,7 +629,7 @@ class MapTiles(RanaModule):
                                 y1 = cy1 + tileSide * iy
 
                                 # Try to load and display images
-                                name = getName((layerInfo, z, x, y))
+                                name = (layerInfo, z, x, y)
                                 tileImage = self.images[0].get(name)
                                 if tileImage:
                                     # tile found in memory cache, draw it
@@ -637,32 +643,25 @@ class MapTiles(RanaModule):
                                         # and remove the separate tiles from cache
                                         layerBack = layerInfo[0][0]
                                         layerOver = layerInfo[1][0]
-                                        nameBack = singleGetName((layer1, z, x, y))
-                                        nameOver = singleGetName((layer2, z, x, y))
+                                        nameBack = (layer1, z, x, y)
+                                        nameOver = (layer2, z, x, y)
                                         backImage = self.images[0].get(nameBack)
                                         overImage = self.images[0].get(nameOver)
                                         if backImage and overImage: # both images available
+                                            # we check the the metadata to filter out the "Downloading..." special tiles
                                             if backImage[1]['type'] == "normal" and overImage[1]['type'] == "normal":
-                                                # we check the the metadata to filter out the "Downloading..."
-                                                # special tiles
-                                                combinedImage = self.combine2Tiles(backImage[0], overImage[0], alphaOver)
-                                                # remove the separate images from cache
-                                                self.removeImageFromMemory(nameBack)
-                                                self.removeImageFromMemory(nameOver)
-                                                # cache the combined image
-                                                self.storeInMemory(combinedImage, name, imageType="composite")
-                                                # draw the composite image
-                                                drawImage(cr, combinedImage, x1, y1, scale)
+                                                # if both tiles are available, combine them remove the old tiles and cache the new one
+                                                drawImage(cr, self._combine2Tiles(name, backImage[0], nameBack, overImage[0], nameOver, alphaOver), x1, y1, scale)
                                             else: # on or more tiles not usable
                                                 # so at least draw a combined image
-                                                self.drawCompositeImage(cr, backImage[0], overImage[0], x1, y1, scale, alpha1=alphaOver)
+                                                self._drawCompositeImage(cr, backImage[0], overImage[0], x1, y1, scale, alpha1=alphaOver)
                                         else:
                                             if backImage:
                                                 requests.append(((layerBack, z, x, y), None))
-                                                self.storeInMemory(loadingTileImageSurface, nameBack, imageType="loadingTile")
+                                                self.storeInMemory(loadingTileImageSurface, nameBack, imageType=LOADING_TILE)
                                             elif overImage:
                                                 requests.append(((layerOver, z, x, y), None))
-                                                self.storeInMemory(loadingTileImageSurface, nameOver, imageType="loadingTile")
+                                                self.storeInMemory(loadingTileImageSurface, nameOver, imageType=LOADING_TILE)
                                             else:
                                                 requests.append(((layerBack, z, x, y), None))
                                                 requests.append(((layerOver, z, x, y), None))
@@ -673,7 +672,7 @@ class MapTiles(RanaModule):
                                         # and cache a loading tile so that we don't spam the same loading r
                                         # request over and over again (the tile request queue is using a stack,
                                         # so this would really not make sense)
-                                        self.storeInMemory(loadingTileImageSurface, name, imageType="loadingTile")
+                                        self.storeInMemory(loadingTileImageSurface, name, imageType=LOADING_TILE)
                                         drawImage(cr, loadingTileImageSurface, x1, y1, scale)
             if requests:
                 self._dlRequestQueue.put(requests)
@@ -683,7 +682,7 @@ class MapTiles(RanaModule):
             print("mapTiles: exception while drawing the map layer: %s" % exc)
             traceback.print_exc()
 
-    def drawImage(self, cr, imageSurface, x, y, scale):
+    def _drawImage(self, cr, imageSurface, x, y, scale):
         """draw a map tile image"""
         cr.save() # save the cairo projection context
         cr.translate(x, y)
@@ -692,39 +691,38 @@ class MapTiles(RanaModule):
         cr.paint()
         cr.restore() # Return the cairo projection to what it was
 
-    def getTileName(self, lxyz):
-        return "%s_%d_%d_%d" % (lxyz[0].id, lxyz[1], lxyz[2], lxyz[3])
-
-    def getTileFilename(self, lxyz):
-        return os.path.join(
-            self._getTileFolderPath(),
-            (self.getImagePath(lxyz))
-        )
-
-    def getCompositeTileName(self, overlaySpec):
-        (layers, z, x, y) = overlaySpec
-        (layer1, layer2) = layers
-        return "%s-%1.1f+%s-%1.1f:%d_%d_%d" % (layer1[0].id, layer1[1], layer2[0].id, layer2[1], z, x, y)
-
-    def combine2Tiles(self, backImage, overImage, alphaOver):
+    def _combine2Tiles(self, name, backImage, nameBack, overImage, nameOver, alphaOver):
         # transparently combine two tiles
         # WARNING: this modifies the backImage ImageSurface !
+
+        # combine the two images
         ct = cairo.Context(backImage)
         ct2 = gtk.gdk.CairoContext(ct)
         ct2.set_source_surface(overImage, 0, 0)
         ct2.paint_with_alpha(alphaOver)
+
+        #drop the two individual images
+        # remove the separate images from cache
+        self.removeImageFromMemory(nameBack)
+        self.removeImageFromMemory(nameOver)
+        # cache the combined image
+        self.storeInMemory(backImage, name, imageType=COMPOSITE_TILE)
+        # return the composite image
         return backImage
 
     def removeImageFromMemory(self, name, dictIndex=0):
-        """Remove a tile from the in-memory tile cache"""
+        """Remove a tile from the in memory tile cache"""
 
         # remove an image from memory
         if self.cacheImageSurfaces:
-            with self.imagesLock:  # make sure no one fiddles with the cache while we are working with it
-                if name in self.images:
+            # make sure no one fiddles with the cache while we are working with it
+            with self.imagesLock:
+                if name in self.images[dictIndex]:
                     del self.images[dictIndex][name]
+                else:
+                    self.log.debug("can't remove unknown %s from memory tile cache", name)
 
-    def drawCompositeImage(self, cr, backImage, overImage, x, y, scale, alpha1=1.0, alpha2=1.0, dictIndex1=0, dictIndex2=0):
+    def _drawCompositeImage(self, cr, backImage, overImage, x, y, scale, alpha1=1.0, alpha2=1.0, dictIndex1=0, dictIndex2=0):
         """Draw a composited tile image"""
 
         # Move the cairo projection onto the area where we want to draw the image
@@ -741,18 +739,18 @@ class MapTiles(RanaModule):
         # Return to the cairo projection to what it was before
         cr.restore()
 
-    def _fakeDebugLog(self, text):
+    def _fakeDebugLog(self, *argv):
         """Log function that does nothing"""
         pass
 
-    def _realDebugLog(self, text):
-        self.log.debug(text)
+    def _realDebugLog(self, *argv):
+        self.log.debug(*argv)
 
     def _getLayerById(self, layerId):
         """Get layer description from the mapLayers module"""
         return self._mapLayersModule.getLayerById(layerId)
 
-    def loadImage(self, lzxy):
+    def _loadImage(self, lzxy):
         """Check that an image is loaded, and try to load it if not"""
 
         debug = self.get('tileLoadingDebug', False)
@@ -763,25 +761,32 @@ class MapTiles(RanaModule):
 
         # at this point, there is only a placeholder image in the image cache
         sprint("###")
-        sprint("loading tile %s" % self.getTileName(lzxy))
+        sprint("loading tile %s", lzxy)
 
         # is the tile in local storage ?
         start1 = time.clock()
-        pixbuf = self._storeTiles.getTile(lzxy)
+        tileData = self._storeTiles.getTileData(lzxy)
 
-        # None from getTiles means the tile was not found
-        # False means loading the tile from file to pixbuf failed
-        if pixbuf:
-            start2 = time.clock()
-            self.storeInMemory(self.pixbuf2cairoImageSurface(pixbuf), self.getTileName(lzxy))
-            if debug:
-                storageType = self.get('tileStorageType', 'files')
-                sprint(
-                    "tile loaded from local storage (%s) in %1.2f ms" % (storageType, (1000 * (time.clock() - start1))))
-                sprint("tile cached in memory in %1.2f ms" % (1000 * (time.clock() - start2)))
-            return True
+        if tileData:
+            try:
+                pixbuf = self._data2pixbuf(tileData)
+            except Exception:
+                self.log.exception("loading tile image to pixbuf failed, name: %s", lzxy)
+                return False
+        else:
+            sprint("tile not found locally: %s", lzxy)
+            return False
 
-    def loadImageFromFile(self, path, name, imageType="normal", expireTimestamp=None, dictIndex=0):
+        start2 = time.clock()
+        self.storeInMemory(self._pixbuf2cairoImageSurface(pixbuf), lzxy)
+        if debug:
+            storageType = self.get('tileStorageType', 'files')
+            sprint(
+                "tile loaded from local storage (%s) in %1.2f ms" % (storageType, (1000 * (time.clock() - start1))))
+            sprint("tile cached in memory in %1.2f ms" % (1000 * (time.clock() - start2)))
+        return True
+
+    def _loadImageFromFile(self, path, name, imageType=NORMAL_TILE, expireTimestamp=None, dictIndex=0):
         pixbuf = gtk.gdk.pixbuf_new_from_file(path)
         #x = pixbuf.get_width()
         #y = pixbuf.get_height()
@@ -800,7 +805,7 @@ class MapTiles(RanaModule):
         # surface now contains the image in a Cairo surface
         self.storeInMemory(surface, name, imageType, expireTimestamp, dictIndex)
 
-    def filePath2Pixbuf(self, filePath):
+    def _filePath2Pixbuf(self, filePath):
         """return a pixbuf for a given filePath"""
         try:
             pixbuf = gtk.gdk.pixbuf_new_from_file(filePath)
@@ -809,7 +814,7 @@ class MapTiles(RanaModule):
             self.log.exception("the tile image is corrupted nad/or there are no tiles for this zoomlevel")
             return False
 
-    def storeInMemory(self, surface, name, imageType="normal", expireTimestamp=None, dictIndex=0):
+    def storeInMemory(self, surface, name, imageType=NORMAL_TILE, expireTimestamp=None, dictIndex=0):
         """store a given image surface in the memory image cache
            dictIndex = 0 -> normal map tiles + tile specific error tiles
            dictIndex = 1 -> special tiles that exist in only once in memory and are drawn directly
@@ -823,7 +828,7 @@ class MapTiles(RanaModule):
             # check cache size,
             # if there are too many images, delete them
             if len(self.images[0]) > self.maxImagesInMemory:
-                self.trimCache()
+                self._trimCache()
                 # new tile available, make redraw request TODO: what overhead does this create ?
             self._tileLoadedNotify(imageType)
 
@@ -834,12 +839,12 @@ class MapTiles(RanaModule):
         if self.get('tileLoadedRedraw', True) and self.get('menu', None) is None:
             overlay = self.get('overlay', False)
             if overlay: # only redraw when a composited tile is loaded with overlay on
-                if imageType == "composite":
+                if imageType == COMPOSITE_TILE:
                     self.set('needRedraw', True)
             else: # redraw regardless of type with overlay off
                 self.set('needRedraw', True)
 
-    def trimCache(self):
+    def _trimCache(self):
         """To avoid a memory leak, the maximum size of the image cache is fixed
            when we reach the maximum size, we start removing images,
            starting from the oldest ones with an amount of images specified
@@ -864,11 +869,27 @@ class MapTiles(RanaModule):
                 del self.images[0][key]
 
     def _clearTileCache(self):
-        """completely clear the in-memory image cache"""
-        self.log.info('clearing the in-memory tile cache')
-        self.images[0] = {}
+        """completely clear the in memory image cache"""
+        with self.imagesLock:
+            self.log.info('fully clearing the in memory tile cache (%d tiles)', len(self.images[0]))
+            self.images[0] = {}
 
-    def pixbuf2cairoImageSurface(self, pixbuf):
+    def _removeTilesFromCache(self, imageTypes):
+        """Remove tiles of the given types from the in memory tile cache.
+
+        :param list imageTypes: list if image types to remove
+        """
+        with self.imagesLock:
+            self.log.info("removing %s from the tile cache", imageTypes)
+            removedCounter = 0
+            keys = list(self.images[0].keys())
+            for key in keys:
+                if self.images[0][key][1]["type"] in imageTypes:
+                    del self.images[0][key]
+                    removedCounter += 1
+            self.log.debug("removed %d tiles from total of %d", removedCounter, len(keys))
+
+    def _pixbuf2cairoImageSurface(self, pixbuf):
         """Convert a GTK Pixbuf into a Cairo ImageSurface
 
         :param pixbuf: a GTK Pixbuf instance
@@ -900,7 +921,7 @@ class MapTiles(RanaModule):
         ct2.paint()
         return surface
 
-    def data2pixbuf(self, data):
+    def _data2pixbuf(self, data):
         """Convert binary image data into a GTK Pixbuf
 
         :param data: binary image data
@@ -915,7 +936,7 @@ class MapTiles(RanaModule):
         pl.close()
         return pl.get_pixbuf()
 
-    def data2cairoImageSurface(self, data):
+    def _data2cairoImageSurface(self, data):
         """Convert binary image data to a Cairo image surface
 
         :param data: binary image data
@@ -925,7 +946,7 @@ class MapTiles(RanaModule):
         :rtype: Cairo ImageSurface
 
         """
-        return self.pixbuf2cairoImageSurface(self.data2pixbuf(data))
+        return self._pixbuf2cairoImageSurface(self._data2pixbuf(data))
 
     def _updateTileFilteringCB(self, key='mapScale', oldValue=1, newValue=1):
         if key == 'invertMapTiles':
@@ -1017,31 +1038,28 @@ class MapTiles(RanaModule):
 
     #    self.log.debug("tile negative in %1.2f ms" % (1000 * (time.clock() - start1)))
 
-    def imageName(self, lzxy):
-        """Get a unique name for a tile image
-        (suitable for use as part of filenames, dictionary keys, etc)
-        """
-        return "%s_%d_%d_%d" % (lzxy[0].id, lzxy[1], lzxy[2], lzxy[3])
+    def _mapStateChangedCB(self, key, oldValue, newValue):
+        if key == "overlay":
+            if newValue:
+                # for some reason we need to drop the cache or else overlay won't
+                # activate properly when turned off and on
+                self._clearTileCache()
+            else:
+                self._removeTilesFromCache([COMPOSITE_TILE])
+        elif key in ("layer", "layer2"):
+            # clear old composites so that they can be replaced by new ones
+            self._removeTilesFromCache([COMPOSITE_TILE])
+        elif key == "network":
+            self._removeTilesFromCache([LOADING_TILE, SPECIAL_TILE, COMPOSITE_TILE])
 
-    def getImagePath(self, lzxy):
-        """Get a unique name for a tile image
-        (suitable for use as part of filenames, dictionary keys, etc)
-        """
-        #    return("%s/%d/%d/%d.%s" % (prefix,z,x,y,extension))
-        return os.path.join(lzxy[0].folderName, str(lzxy[1]), str(lzxy[2]), "%d.%s" % (lzxy[3], lzxy[0].type))
-
-    def getImageFolder(self, lzxy):
-        """Get a unique name for a tile image
-        (suitable for use as part of filenames, dictionary keys, etc)
-        """
-        return os.path.join(lzxy[0].folderName, str(lzxy[1]), str(lzxy[2]))
-
-    def _getTileFolderPath(self):
-        """helper function that returns path to the tile folder"""
-        return self.mapFolderPath
-
-    def imageY(self, z, extension):
-        return '%d.%s' % (z, extension)
+    def _batchDownloadCompleteDB(self):
+        # Clear all special tiles once batch download finishes,
+        # so that any batch downloaded tiles that have been batch-downloaded
+        # can be loaded.
+        # It might be more efficient to only dump tiles only related to the batch
+        # or dump special tiles for tiles that have been downloaded, but full
+        # special tile dump seems like a simpler and more robust solution.
+        self._removeTilesFromCache([LOADING_TILE, SPECIAL_TILE, COMPOSITE_TILE])
 
     def shutdown(self):
         #    # shutdown the tile loading thread

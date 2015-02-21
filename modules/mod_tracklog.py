@@ -26,6 +26,7 @@ from collections import deque
 from core import geo
 from core import way
 from core import gs
+from core.signal import Signal
 
 if gs.GUIString == "GTK":
     import gtk
@@ -68,6 +69,8 @@ class Tracklog(RanaModule):
         # timer ids
         self.updateLogTimerId = None
         self.saveLogTimerId = None
+        # signals
+        self.tracklogUpdated = Signal()
         # statistics
         self.maxSpeed = 0
         self.avg1 = 0
@@ -93,15 +96,13 @@ class Tracklog(RanaModule):
 
     def handleMessage(self, message, messageType, args):
         if message == "startLogging":
-            self.log.info("starting to log")
+            self.log.info("starting track logging")
             # start a new log
             if not self.loggingEnabled:
-                self.loggingEnabled = True
-                self.log.info("initializing the log file")
-                self.initLog()
+                self.startLogging(self.get('logNameEntry', ""))
             # or resume an existing one
             elif self.loggingEnabled == True & self.loggingPaused == True:
-                self.log.info("resuming the logging")
+                self.log.info("resuming track logging")
                 self.loggingPaused = False
             self.set('needRedraw', True)
 
@@ -110,7 +111,7 @@ class Tracklog(RanaModule):
             self.set('needRedraw', True)
 
         elif message == "stopLogging":
-            self.log.info("stopping logging")
+            self.log.info("stopping track logging")
             self.stopLogging()
             self.set('needRedraw', True)
 
@@ -127,7 +128,7 @@ class Tracklog(RanaModule):
             self.set('needRedraw', True)
 
         elif message == 'clearTrace':
-            self.pxpyIndex = []
+            self.clearTrace()
 
         elif message == 'setupColorMenu':
             m = self.m.get('showTracklogs', None)
@@ -143,8 +144,20 @@ class Tracklog(RanaModule):
         if key == 'logNameEntry':
             self.set('logNameEntry', result)
 
-    def initLog(self, logType='gpx', name=None):
-        """start a new log, zero the appropriate variables, etc."""
+    def startLogging(self, name="", logType='gpx'):
+        """Start a new log file
+
+        :param str logType: tracklog output type
+        :param str name: tracklog name
+        :returns: tracklog filename or None
+        :rtype: str or None
+        """
+        if self.loggingEnabled:
+            self.log.error("track logging already in progress")
+            return None
+        self.log.info("initializing the tracklog file")
+        # zero the appropriate variables, etc.
+        self.loggingEnabled = True
         self.loggingStartTimestamp = int(time.time())
         self.maxSpeed = 0
         self.avg1 = 0
@@ -155,14 +168,17 @@ class Tracklog(RanaModule):
         self.pxpyIndex.clear()
         logFolder = self.getLogFolderPath()
 
-        if name is None:
-            name = self.generateLogName()
+        name = self.generateLogName(name)
 
         self.logName = name
+
+        filename = None
 
         if logType == 'gpx':
             # importing the GPX module can be time consuming so import it
             # when it is really needed
+            self.log.info("GPX selected as format for the final output")
+
             from upoints import gpx
 
             self.currentLogGPX = gpx.Trackpoints()
@@ -191,28 +207,65 @@ class Tracklog(RanaModule):
 
             # start update and save timers
             self._startTimers()
+        else:
+            self.log.error("unknown track log format: %s" % logType)
 
         self.lastUpdateTimestamp = time.time()
         self.lastCoords = self.get('pos', None)
-        self.log.info("log file initialized")
+        self.log.info("tracklog file initialized")
+
+        return filename
+
+    def stopLogging(self):
+        """stop logging, export the log to GPX and delete the temporary
+        log files"""
+        # stop timers
+        self._stopTimers()
+
+        # save current log increment to storage (in CSV)
+        self._saveLogIncrement()
+
+        # try to export the log to GPX
+        self.notify("saving tracklog", 3000)
+        # first from the primary log
+        if not self.log1.saveToGPX(self.logPath):
+            self.log2.saveToGPX(self.logPath) # try the secondary log
+            # TODO: check if the GPX file is loadable and retry ?
+
+        # cleanup
+        # -> this deletes the temporary log files
+        # and discards the temporary AOWay objects
+        self._cleanup()
+        self.loggingEnabled = False
+        # now we make the tracklog manager aware, that there is a new log
+        loadTl = self.m.get('loadTracklogs', None)
+        if loadTl:
+            loadTl.listAvailableTracklogs() #TODO: incremental addition
+
 
     def pauseLogging(self):
         """pause logging"""
         if self.loggingEnabled:
             self._saveLogIncrement() # save increment
             self.loggingPaused = True # pause logging
-            self.log.info('logging paused')
+            self.log.info('track logging paused')
         else:
-            self.log.error("can't pause logging - no logging in progress")
+            self.log.error("can't pause track logging - no logging in progress")
 
     def unPauseLogging(self):
         """pause logging"""
         if self.loggingEnabled:
             self._saveLogIncrement() # save increment
             self.loggingPaused = False # un-pause logging
-            self.log.info('logging un-paused')
+            self.log.info('track logging un-paused')
         else:
-            self.log.error("can't un-pause logging - no logging in progress")
+            self.log.error("can't un-pause track logging - no logging in progress")
+
+    def clearTrace(self):
+        """Clear the on-map log trace
+        NOTE: currently does something only with GTK GUI
+        """
+        self.pxpyIndex = []
 
     def _updateLogCB(self):
         """add current position at the end of the log"""
@@ -259,6 +312,40 @@ class Tracklog(RanaModule):
                         self._addLL2Trace(lat, lon)
                 else: # this is the first known log point, just add it
                     self._addLL2Trace(lat, lon)
+        # done, trigger the tracklog updated signal
+        self.tracklogUpdated()
+
+    def getStatusDict(self):
+        """Return status of the current track logging as a dictionary
+        This is used by the Qt 5 GUI to show the various logging related
+        statistics.
+
+        :returns: dictionary describing current track logging state
+        """
+
+        self.log.debug("generating stuff")
+
+        pointCount = 0
+        units = self.m.get('units', None)
+        if self.log1:
+            pointCount = self.log1.getPointCount()
+
+        speed = self.get('speed', 0)
+        if speed is not None:
+            speed = units.km2CurrentUnitPerHourString(speed)
+        else:
+            speed = "unknown"
+
+        return {
+            "speed" : {
+                "current" : speed,
+                "max" : units.km2CurrentUnitPerHourString(self.maxSpeed),
+                "avg" : units.km2CurrentUnitPerHourString(self.avgSpeed)
+            },
+            "distance" : units.km2CurrentUnitString(self.distance, 2),
+            "elapsedTime" : time.strftime('%H:%M:%S', time.gmtime(int(time.time()) - self.loggingStartTimestamp)),
+            "pointCount" : pointCount
+        }
 
     def _addLL2Trace(self, lat, lon):
         proj = self.m.get('projection')
@@ -277,27 +364,27 @@ class Tracklog(RanaModule):
         (only the increment from last save needs to be stored)"""
         if not self.loggingPaused:
             self._saveLogIncrement()
-            self.log.info('temporary log files saved')
+            minutesElapsed = (time.time() - self.loggingStartTimestamp)/60.0
+            self.log.info('temp log files saved for %s, %1.1f min elapsed', self.logName, minutesElapsed)
 
     def _saveLogIncrement(self):
         """save current log increment to storage"""
         try:
             self.log1.flush()
         except Exception:
-            self.log.exception('saving primary temporary log failed')
+            self.log.exception('saving primary temporary tracklog failed')
 
         try:
             self.log2.flush()
         except Exception:
-            self.log.exception('saving secondary temporary log failed')
+            self.log.exception('saving secondary temporary tracklog failed')
 
-    def generateLogName(self):
+    def generateLogName(self, name):
         """generate a unique name for a log"""
         timeString = time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
         prefix = "log"
-        logNameEntry = self.get('logNameEntry', None)
-        if logNameEntry:
-            prefix = logNameEntry
+        if name:
+            prefix = name
         return prefix + "_" + timeString
 
     def getLogFolderPath(self):
@@ -307,11 +394,11 @@ class Tracklog(RanaModule):
 
     def _startTimers(self):
         """start the update and save timers"""
+        # in milliseconds, stored as seconds
+        updateTimeout = int(self.get('tracklogLogInterval', 1)) * 1000
+        saveTimeout = int(self.get('tracklogSaveInterval', 10)) * 1000
         cron = self.m.get('cron', None)
         if cron:
-            # in milliseconds, stored as seconds
-            updateTimeout = int(self.get('tracklogLogInterval', 1)) * 1000
-            saveTimeout = int(self.get('tracklogSaveInterval', 10)) * 1000
             # update timer
             self.updateLogTimerId = cron.addTimeout(self._updateLogCB, updateTimeout, self,
                                                     "update tracklog with current position")
@@ -357,33 +444,6 @@ class Tracklog(RanaModule):
             self.log.info("track logging timers stopped")
         else:
             self.log.error("the modRana cron module is not available")
-
-    def stopLogging(self):
-        """stop logging, export the log to GPX and delete the temporary
-        log files"""
-        # stop timers
-        self._stopTimers()
-
-        # save current log increment to storage (in CSV)
-        self._saveLogIncrement()
-
-        # try to export the log to GPX
-        self.notify("saving tracklog", 3000)
-        # first from the primary log
-        if not self.log1.saveToGPX(self.logPath):
-            self.log2.saveToGPX(self.logPath) # try the secondary log
-            # TODO: check if the GPX file is loadable and retry ?
-
-        # cleanup
-        # -> this deletes the temporary log files
-        # and discards the temporary AOWay objects
-        self._cleanup()
-        self.loggingEnabled = False
-        # now we make the tracklog manager aware, that there is a new log
-        loadTl = self.m.get('loadTracklogs', None)
-        if loadTl:
-            loadTl.listAvailableTracklogs() #TODO: incremental addition
-
 
     def _cleanup(self, deleteTempLogs=True):
         """zero unneeded datastructures after logging is stopped"""
@@ -543,7 +603,7 @@ class Tracklog(RanaModule):
             text += "\n\n"
 
             if not self.loggingEnabled:
-                text += "%s" % self.generateLogName()
+                text += "%s" % self.generateLogName(self.get('logNameEntry', ""))
             else:
                 text += "%s" % self.logName
 
@@ -654,83 +714,85 @@ class Tracklog(RanaModule):
         secondaryLogs = glob.glob("%s/*.temporary_csv_2" % logFolder)
 
         if primaryLogs or secondaryLogs:
+            self.log.info("unsaved temporary tracklogs detected")
             self.notify("exporting temporary tracklogs to GPX", 5000)
             self.set('needRedraw', True)
 
-        if primaryLogs:
-            self.log.info('exporting %d unsaved primary log files to GPX', len(primaryLogs))
-            for logPath in primaryLogs:
-                # export any found files
-                self.log.info('exporting %s to GPX', logPath)
-                try:
-                    w1 = way.fromCSV(logPath, delimiter=",")
-                    exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
-                    # does the GPX file already exist ?
-                    # TODO: check if the GPX file is corrupted and swap with newly exported one ?
-                    # (eq. caused by a crash during saving the GPX file)
-                    if os.path.exists(exportPath): # save to backup path
-                        exportPath = "%s_1.gpx" % os.path.splitext(logPath)[0]
-                    w1.saveToGPX(exportPath)
-                    self.log.info('GPX export successful')
-                    # success, delete temporary files
-
-                    # primary
-                    os.remove(logPath)
-                    self.log.debug('primary temporary file %s deleted', logPath)
-                    # secondary
-                    secondaryPath = "%s.temporary_csv_2" % os.path.splitext(logPath)[0]
-                    if os.path.exists(secondaryPath):
-                        os.remove(secondaryPath)
-                        self.log.debug('secondary temporary file %s deleted', secondaryPath)
-
-                except Exception:
-                    self.log.exception('exporting unsaved primary log file failed')
-                    failedPath = "%s_1.csv" % os.path.splitext(logPath)[0]
-                    self.log.info('renaming to %s instead', failedPath)
+            if primaryLogs:
+                self.log.info('exporting %d unsaved primary tracklog files to GPX', len(primaryLogs))
+                for logPath in primaryLogs:
+                    # export any found files
+                    self.log.info('exporting %s to GPX', logPath)
                     try:
-                        shutil.move(logPath, failedPath)
-                        self.log.info("renaming successful")
+                        w1 = way.fromCSV(logPath, delimiter=",")
+                        exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
+                        # does the GPX file already exist ?
+                        # TODO: check if the GPX file is corrupted and swap with newly exported one ?
+                        # (eq. caused by a crash during saving the GPX file)
+                        if os.path.exists(exportPath): # save to backup path
+                            exportPath = "%s_1.gpx" % os.path.splitext(logPath)[0]
+                        w1.saveToGPX(exportPath)
+                        self.log.info('GPX export of unsaved primary tracklog successful')
+                        # success, delete temporary files
+
+                        # primary
+                        os.remove(logPath)
+                        self.log.debug('primary temporary file %s deleted', logPath)
+                        # secondary
+                        secondaryPath = "%s.temporary_csv_2" % os.path.splitext(logPath)[0]
+                        if os.path.exists(secondaryPath):
+                            os.remove(secondaryPath)
+                            self.log.debug('secondary temporary file %s deleted', secondaryPath)
+
                     except Exception:
-                        self.log.exception('renaming %s to %s failed', logPath, failedPath)
+                        self.log.exception('exporting unsaved primary log file failed')
+                        failedPath = "%s_1.csv" % os.path.splitext(logPath)[0]
+                        self.log.info('renaming to %s instead', failedPath)
+                        try:
+                            shutil.move(logPath, failedPath)
+                            self.log.info("renaming successful")
+                        except Exception:
+                            self.log.exception('renaming %s to %s failed', logPath, failedPath)
 
-        # rescan for secondary logs
-        # (there should be only secondary logs that
-        # either don't have primary logs or where primary logs
-        # failed to parse (primary logs delete secondary logs
-        # after successful processing)
+            # rescan for secondary logs
+            # (there should be only secondary logs that
+            # either don't have primary logs or where primary logs
+            # failed to parse (primary logs delete secondary logs
+            # after successful processing)
 
-        secondaryLogs = glob.glob("%s/*.temporary_csv_2" % logFolder)
-        if secondaryLogs:
-            self.log.info('exporting %d unsaved secondary log files to GPX' % len(primaryLogs))
-            for logPath in secondaryLogs:
-                # export any found files
-                self.log.info('exporting %s to GPX' % logPath)
-                try:
-                    w2 = way.fromCSV(logPath, delimiter=",")
-                    exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
-                    # does the GPX file already exist ?
-                    # TODO: check if the GPX file is corrupted and swap with newly exported one ?
-                    # (eq. caused by a crash during saving the GPX file)
-                    if os.path.exists(exportPath): # save to backup path
-                        exportPath = "%s_2.gpx" % os.path.splitext(logPath)[0]
-                    w2.saveToGPX(exportPath)
-                    self.log.info('GPX export successful')
-                    # success, delete temporary file
-
-                    # secondary
-                    # (primary is either not there or was already removed in primary pass)
-                    os.remove(logPath)
-                    self.log.info('secondary temporary file %s deleted' % logPath)
-
-                except Exception:
-                    self.log.exception('exporting unsaved secondary log file failed')
-                    failedPath = "%s_2.csv" % os.path.splitext(logPath)[0]
-                    self.log.info('renaming to %s instead', failedPath)
+            secondaryLogs = glob.glob("%s/*.temporary_csv_2" % logFolder)
+            if secondaryLogs:
+                self.log.info('exporting %d unsaved secondary log files to GPX' % len(primaryLogs))
+                for logPath in secondaryLogs:
+                    # export any found files
+                    self.log.info('exporting %s to GPX' % logPath)
                     try:
-                        shutil.move(logPath, failedPath)
-                        self.log.info("renaming successful")
+                        w2 = way.fromCSV(logPath, delimiter=",")
+                        exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
+                        # does the GPX file already exist ?
+                        # TODO: check if the GPX file is corrupted and swap with newly exported one ?
+                        # (eq. caused by a crash during saving the GPX file)
+                        if os.path.exists(exportPath): # save to backup path
+                            exportPath = "%s_2.gpx" % os.path.splitext(logPath)[0]
+                        w2.saveToGPX(exportPath)
+                        self.log.info('GPX export of unsaved secondary tracklog successful')
+                        # success, delete temporary file
+
+                        # secondary
+                        # (primary is either not there or was already removed in primary pass)
+                        os.remove(logPath)
+                        self.log.info('secondary temporary file %s deleted' % logPath)
+
                     except Exception:
-                        self.log.exception('renaming %s to %s failed', logPath, failedPath)
+                        self.log.exception('exporting unsaved secondary log file failed')
+                        failedPath = "%s_2.csv" % os.path.splitext(logPath)[0]
+                        self.log.info('renaming to %s instead', failedPath)
+                        try:
+                            shutil.move(logPath, failedPath)
+                            self.log.info("renaming successful")
+                        except Exception:
+                            self.log.exception('renaming %s to %s failed', logPath, failedPath)
+            self.log.debug("unsaved tracklog handling finished")
 
     def shutdown(self):
         # try to stop and save the log

@@ -77,7 +77,7 @@ Page {
         iconName : "left_thin.png"
         //iconSource : "image://icons/"+ rWin.theme_id +"/back_small.png"
         opacity : pageFlickable.atYBeginning ? 1.0 : 0.55
-        visible : rWin.platform.needsBackButton
+        visible : rWin.showBackButton
         onClicked : {
             rWin.pageStack.pop(undefined, !rWin.animate)
         }

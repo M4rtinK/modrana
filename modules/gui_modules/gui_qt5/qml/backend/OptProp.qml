@@ -4,7 +4,7 @@ import QtQuick 2.0
 Item {
     id : optProp
     property string key : ""
-    property variant value : null
+    property var value : null
     property bool initialized : false
 
     // if the value changes, save it to the persistent options

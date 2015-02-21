@@ -26,7 +26,7 @@ Page {
     property bool showModeOnMenuButton : rWin.get("showModeOnMenuButton", false,
     function(v){showModeOnMenuButton=v})
 
-    property variant pinchmap
+    property var pinchmap
 
     property alias layers : pinchmap.layers
 

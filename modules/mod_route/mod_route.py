@@ -446,8 +446,8 @@ class Route(RanaModule):
             # based on current settings
 
 
-        providerID = self.get('routingProvider', "GoogleDirections")
-        if providerID == "Monav":
+        providerID = self.get('routingProvider', constants.DEFAULT_ROUTING_PROVIDER)
+        if providerID == constants.ROUTING_PROVIDER_MONAV:
             # is Monav initialized ? (lazy initialization)
             if self.monav is None:
                 # start Monav server #
@@ -475,13 +475,15 @@ class Route(RanaModule):
                 waypoints,
                 routeParams=routeParams
             )
-        else:
+        elif providerID == constants.ROUTING_PROVIDER_GOOGLE:
             provider = routing_providers.GoogleRouting()
             provider.searchAsync(
                 callback,
                 waypoints,
                 routeParams=routeParams
             )
+        else:
+            self.log.error("unknown routing provider ID: %s", providerID)
 
 
     def _getDefaultRouteParameters(self):
@@ -993,8 +995,9 @@ class Route(RanaModule):
 
         menus.drawButton(cr, x1 - dx, y1, dx, dy, 'start', startIcon, "route:expectStart")
         # Monav currently has a bug preventing waypoint routing
-        routingProvider = self.get('routingProvider', 'GoogleDirections')
-        if self.handmade or routingProvider == 'GoogleDirections':
+        routingProvider = self.get('routingProvider', constants.DEFAULT_ROUTING_PROVIDER)
+        # TODO: find if Monav/Routino can handle middle points ?
+        if self.handmade or routingProvider == constants.ROUTING_PROVIDER_GOOGLE:
             menus.drawButton(cr, x1 - dx, y1 - dy, dx, dy, 'middle', middleIcon, "route:expectMiddle") # handmade
         menus.drawButton(cr, x1, y1 - dy, dx, dy, 'end', endIcon, "route:expectEnd")
         menus.drawButton(cr, x1, y1, dx, dy, 'route', "generic:;0.5;;0.5;;", routingAction)

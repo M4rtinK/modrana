@@ -27,11 +27,17 @@ ApplicationWindow {
         value : true
     }
 
+    property alias showBackButton : showBackButtonProperty.value
+    OptProp {
+        id : showBackButtonProperty
+        value : rWin.platform.needsBackButton
+    }
+
     // debugging
     property alias showDebugButton : showDebugButtonProp.value
     OptProp {id: showDebugButtonProp; value : false}
-    property alias showUnfinishedPages : showUnfinishedPagesProp.value
-    OptProp {id: showUnfinishedPagesProp; value : false}
+    property alias showUnfinishedFeatures : showUnfinishedFeaturesProp.value
+    OptProp {id: showUnfinishedFeaturesProp; value : false}
     property alias tileDebug : tileDebugProperty.value
     OptProp {
         id : tileDebugProperty
@@ -41,12 +47,12 @@ ApplicationWindow {
     OptProp {id: locationDebugProp; value : false}
 
     // logging
-    property variant log : PythonLog {}
+    property var log : PythonLog {}
 
     property int _landscapeDivider : rWin.platform.needsBackButton ? 5.5 : 8.0
     property int headerHeight : rWin.inPortrait ? height/8.0 : height/_landscapeDivider
 
-    property variant c
+    property var c
 
     // properties that can be assigned a value
     // by packaging scripts for a given platform
@@ -58,7 +64,7 @@ ApplicationWindow {
     property string _PYTHON_IMPORT_PATH_
     property string _PLATFORM_ID_
 
-    property variant platform : Platform {}
+    property var platform : Platform {}
 
     property alias mapPage : mapPageLoader.item
 
@@ -67,11 +73,11 @@ ApplicationWindow {
         asynchronous : true
         onLoaded : {
             rWin.log.debug("map page loaded")
-            rWin.pushPage(item, rWin.animate)
+            rWin.pushPage(item, null, rWin.animate)
         }
     }
 
-    property variant pages : {
+    property var pages : {
         // pre-load the toplevel pages
         "MapPage" : mapPage
         /*
@@ -84,13 +90,13 @@ ApplicationWindow {
     }
 
     // location
-    property variant location : Location {}
-    property variant position // full position object
-    property variant pos // coordinate only
+    property var location : Location {}
+    property var position // full position object
+    property var pos // coordinate only
     // lastGoodPos needs to be always set,
     // by default Brno is used or last known saved position
     // and if available, the last known actual valid position
-    property variant lastGoodPos : Coordinate {
+    property var lastGoodPos : Coordinate {
         latitude : 49.2
         longitude : 16.616667
         altitude : 237.0
@@ -109,14 +115,21 @@ ApplicationWindow {
     }
 
     // theme
-    property variant theme
+    property var theme
 
     // map layers
-    property variant layerTree : ListModel {}
-    property variant layerDict
+    property var layerTree : ListModel {}
+    property var layerDict
 
     // actions
-    property variant actions : Actions {}
+    property var actions : Actions {}
+
+    // cron (dynamic timer creation)
+    property var cron : Cron {}
+
+    // keep alive/wake locks
+    property var keepAlive : KeepAlive {}
+
 
     // are we using qrc ?
     property bool qrc : is_qrc()
@@ -325,7 +338,7 @@ ApplicationWindow {
         // init miscellaneous other toplevel properties
         animateProperty.key = "QMLAnimate"
         showDebugButtonProp.key = "showQt5GUIDebugButton"
-        showUnfinishedPagesProp.key = "showQt5GUIUnfinishedPages"
+        showUnfinishedFeaturesProp.key = "showQt5GUIUnfinishedFeatures"
         tileDebugProperty.key = "showQt5TileDebug"
         locationDebugProp.key = "gpsDebugEnabled"
         keepScreenOnProp.key = "screenBlankingMode"
@@ -343,6 +356,12 @@ ApplicationWindow {
         rWin.c = values.constants
         rWin.platform.setValuesFromPython(values)
         rWin.log.debug("startup values loaded")
+
+        rWin.log.debug("handling back button display")
+        // we need to set showBackButtonProperty here
+        // because we need to know if the current platform
+        // needs the back button by default or not
+        showBackButtonProperty.key = "showQt5BackButton"
 
         // now check for fullscreen handling
         rWin.log.debug("handling fullscreen state")
@@ -411,20 +430,21 @@ ApplicationWindow {
     */
 
     function getPage(pageName) {
-        rWin.log.debug("GET PAGE")
-        rWin.log.debug(pageName)
-
+        rWin.log.debug("main: getPage: " + pageName)
         var newPage
         if (pageName == null) { //signal that we should return to the map page
             newPage = mapPage
         } else { // load a page
             var fullPageName = pageName + "Page"
-            newPage = pages[pageName]
-            if (!newPage) { // is the page cached ?
-                // load the page and cache it
+            newPage = rWin.pages[pageName]
+            if (newPage) {
+                rWin.log.debug("main: " + pageName + " found in page cache")
+            } else {
+                // page is not cached
+                // - load the page and cache it
                 newPage = loadPage(fullPageName)
                 if (newPage) { // loading successful
-                    pages[pageName] = newPage // cache the page
+                    rWin.pages[pageName] = newPage // cache the page
                     rWin.log.debug("page cached: " + pageName)
                 } else { // loading failed, go to mapPage
                     newPage = null
@@ -432,8 +452,7 @@ ApplicationWindow {
                 }
             }
         }
-        rWin.log.debug("RETURN PAGE")
-        rWin.log.debug(newPage)
+        rWin.log.debug("main: returning page: " + pageName)
         return newPage
 
     /* TODO: some pages are not so often visited pages so they could
@@ -449,7 +468,7 @@ ApplicationWindow {
         // dictionary
         if (pageName == null) { // null -> back to map
             //TODO: check if the stack can over-fil
-            //console.log("BACK TO MAP")
+            //rWin.log.debug("BACK TO MAP")
             rWin.pageStack.pop(rWin.mapPage,!animate)
         } else {
             rWin.log.debug("PUSH " + pageName)
@@ -460,7 +479,7 @@ ApplicationWindow {
     function pushPageInstance(pageInstance) {
         // push page instance to page stack
         if (pageInstance) {
-            rWin.pushPage(pageInstance, null, !rWin.animate)
+            rWin.pushPage(pageInstance, null, rWin.animate)
         } else {
             // page instance not valid, go back to map
             rWin.pageStack.pop(rWin.mapPage, !animate)
@@ -476,15 +495,15 @@ ApplicationWindow {
 
     function get_auto(key, default_value, target_property) {
         //python.call("modrana.gui.get", [key, default_value], callback)
-        console.log("get called")
-        console.log(key)
-        console.log(default_value)
-        console.log(target_property)
+        rWin.log.debug("get called")
+        rWin.log.debug(key)
+        rWin.log.debug(default_value)
+        rWin.log.debug(target_property)
         python.call("modrana.gui._get", [key, default_value], function(returned_value) {
-            console.log("callback running")
-            console.log(target_property)
-            console.log(returned_value)
-            console.log("done running")
+            rWin.log.debug("callback running")
+            rWin.log.debug(target_property)
+            rWin.log.debug(returned_value)
+            rWin.log.debug("done running")
             //target_property=returned_value
             target_property=9001
         })
@@ -499,10 +518,11 @@ ApplicationWindow {
         python.call("modrana.gui.set", [key, value], function(){
             // there seem to be some issues with proper shutdown
             // so save after set for now
-            python.call("modrana.modrana._saveOptions", [])
-            if (callback) {
-                callback()
-            }
+            python.call("modrana.modrana._saveOptions", [], function(){
+                if (callback) {
+                    callback()
+                }
+            })
         })
     }
 
@@ -541,7 +561,7 @@ ApplicationWindow {
         rWin.log.info("layer dict loaded")
     }
 
-    property variant _lastVisibility
+    property var _lastVisibility
 
     function toggleFullscreen() {
         // 2 = windowed

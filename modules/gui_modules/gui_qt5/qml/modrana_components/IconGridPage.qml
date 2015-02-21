@@ -10,6 +10,7 @@ Page {
     property double iconMargin : width/(hIcons*10)
     property double iconSize : (width-2)/hIcons
     property alias isMockup : mockup.visible
+    property bool hasBackButton : false
     // search, routes, POI, mode, options, info
 
     // page background
@@ -50,14 +51,31 @@ Page {
                 rWin.pushPageInstance(iconGP.getPage(menu))
             }
         }
+
         //insert the back arrow
         Component.onCompleted: {
-            if (rWin.platform.needsBackButton) {
-                model.insert(0, {"caption": "", "icon":"", "menu":""})
+            if (rWin.showBackButton && !iconGP.hasBackButton) {
+                iconGP.model.insert(0, {"caption": "", "icon":"", "menu":""})
+                iconGP.hasBackButton = true
             }
         }
 
+        Connections {
+            target : rWin
+            onShowBackButtonChanged : {
+                if (rWin.showBackButton && !iconGP.hasBackButton) {
+                    // add back button
+                    iconGP.model.insert(0, {"caption": "", "icon":"", "menu":""})
+                    iconGP.hasBackButton = true
+                }
+                if (!rWin.showBackButton && iconGP.hasBackButton) {
+                    // remove the back buttons
+                    iconGP.model.remove(0)
+                    iconGP.hasBackButton = false
+                }
 
+            }
+        }
     }
 
     // main "escape" button
@@ -65,13 +83,12 @@ Page {
     IconGridButton {
         iconSize : iconGP.iconSize
         margin : iconGP.iconMargin
-        anchors.top : parent.top
+        anchors.top : gridView.top
         anchors.left : parent.left
-        anchors.topMargin : iconGP.iconMargin/4.0
         iconName : "left_thin.png"
         text : "back"
         opacity : gridView.atYBeginning ? 1.0 : 0.55
-        visible : rWin.platform.needsBackButton
+        visible : rWin.showBackButton
         onClicked : {
             rWin.pageStack.pop(undefined,!rWin.animate)
         }

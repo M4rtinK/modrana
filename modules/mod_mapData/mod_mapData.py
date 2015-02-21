@@ -63,8 +63,6 @@ class MapData(RanaModule):
 
         self.notificateOnce = True
         self.scroll = 0
-        self.mapFolderPath = None
-        self._mapLayersModule = None
 
         self.x = None
         self.y = None
@@ -75,11 +73,6 @@ class MapData(RanaModule):
         self.minZ = 0
         self.midZ = 15
         self.maxZ = MAX_ZOOMLEVEL
-
-    def firstTime(self):
-        # cache the map folder path
-        self.mapFolderPath = self.modrana.paths.getMapFolderPath()
-        self._mapLayersModule = self.m.get('mapLayers', None) # get the map layers module
 
     def addDownloadRequests(self, requests):
         """Add download requests to the download request set
@@ -123,38 +116,20 @@ class MapData(RanaModule):
     def downloadPool(self):
         return self._downloadPool
 
-    def _getTileFolderPath(self):
-        """return path to the map folder"""
-        return self.mapFolderPath
-
     def _getLayerById(self, layerId):
         """Get layer description from the mapLayers module"""
-        return self._mapLayersModule.getLayerById(layerId)
+        return self.m.get("mapLayers").getLayerById(layerId)
 
     def listTiles(self, route):
         """List all tiles touched by a polyline"""
-        tiles = {}
+        _tiles = {}
         for pos in route:
             (lat, lon) = pos
             (tx, ty) = tileXY(lat, lon, 15)
             tile = "%d,%d" % (tx, ty)
-            if not tiles.has_key(tile):
-                tiles[tile] = True
-        return tiles.keys()
-
-    def getTileUrlAndPath(self, lzxy):
-        mapTiles = self.m.get('mapTiles', None)
-        url = tiles.getTileUrl(lzxy) # generate url
-        tileFolder = self._getTileFolderPath() # where should we store the downloaded tiles
-        filePath = os.path.join(tileFolder, mapTiles.getImagePath(lzxy))
-        fileFolder = os.path.join(tileFolder, mapTiles.getImageFolder(lzxy))
-        return url, filePath, fileFolder
-
-    def getTileUrl(self, x, y, z, layerId):
-        """Return url for given tile coordinates and layer"""
-        layer = self._mapLayersModule.getLayerById(layerId)
-        # TODO: make this to work with layer objects directly
-        return tiles.getTileUrl((layer, z, x, y))
+            if not tile in _tiles:
+                _tiles[tile] = True
+        return _tiles.keys()
 
     def handleMessage(self, message, messageType, args):
         if message == "refreshTilecount":
@@ -585,8 +560,12 @@ class MapData(RanaModule):
         :rtype: str
         """
         path = self.modrana.paths.getMapFolderPath()
-        prettySpace = utils.bytes2PrettyUnitString(utils.freeSpaceInPath(path))
-        return prettySpace
+        free_space = utils.freeSpaceInPath(path)
+        if free_space is not None:
+            prettySpace = utils.bytes2PrettyUnitString(utils.freeSpaceInPath(path))
+            return prettySpace
+        else:
+            return "unknown"
 
     def shutdown(self):
         self.stopBatchDownload()

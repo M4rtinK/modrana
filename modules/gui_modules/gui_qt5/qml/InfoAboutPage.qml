@@ -84,10 +84,9 @@ BasePage {
             height : paintedHeight + rWin.c.style.main.spacingBig*2 - 1
             width : parent.width
             text: aboutPage.aboutText
-            onTextChanged : console.log(text)
             wrapMode : Text.WordWrap
             onLinkActivated : {
-                console.log('about text link clicked: ' + link)
+                rWin.log.info('about text link clicked: ' + link)
                 //rWin.notify("Opening:<br><b>"+link+"</b>", 5000)
                 Qt.openUrlExternally(link)
             }

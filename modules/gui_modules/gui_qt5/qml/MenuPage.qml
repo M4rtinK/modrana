@@ -40,6 +40,11 @@ IconGridPage {
         }
         */
         ListElement {
+            caption : "Tracks"
+            icon : "tracklogs.png"
+            menu : "TracksMenu"
+        }
+        ListElement {
             caption : "Info"
             icon : "info.png"
             menu : "InfoMenu"
@@ -50,15 +55,12 @@ IconGridPage {
             menu : "OptionsMenu"
         }
         Component.onCompleted : {
-            if (rWin.showUnfinishedPages.value) {
+            if (rWin.showUnfinishedFeatures) {
                 testModel.append(
                     {"caption": "Route", "icon":"route.png", "menu":""}
                 )
                 testModel.append(
                     {"caption": "POI", "icon":"poi.png", "menu":""}
-                )
-                testModel.append(
-                    {"caption": "Tracks", "icon":"tracklogs.png", "menu":""}
                 )
                 testModel.append(
                     {"caption": "Data", "icon":"download.png", "menu":""}

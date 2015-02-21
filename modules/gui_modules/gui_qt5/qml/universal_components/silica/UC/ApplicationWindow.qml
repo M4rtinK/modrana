@@ -37,7 +37,7 @@ ApplicationWindow{
     // so we need to add some properties
     // for a common API with Controls
     property string title
-    property variant visibility : 5
+    property var visibility : 5
 
     function pushPage(pageInstance, pageProperties, animate) {
         var animateFlag

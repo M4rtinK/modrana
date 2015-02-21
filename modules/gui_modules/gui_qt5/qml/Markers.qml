@@ -4,7 +4,7 @@ import QtQuick 2.0
 
 Item {
     id: markerContainer
-    property variant mapInstance
+    property var mapInstance
     Repeater {
         id : markersR
         delegate: Marker {

@@ -52,9 +52,19 @@ BasePage {
             text : qsTr("Animations")
             checked : rWin.animate
             onCheckedChanged : {
-                 rWin.animate = checked
-                 //rWin.set("QMLAnimate", checked)
+                rWin.animate = checked
             }
+        }
+        TextSwitch {
+            text : qsTr("Show back button")
+            checked : rWin.showBackButton
+            onCheckedChanged : {
+                rWin.showBackButton = checked
+            }
+            // only show this switch on platforms that don't
+            // require the back button, so that users don't
+            // easily "luck themselves out"
+            visible : !rWin.platform.needsBackButton
         }
         Label {
             text : qsTr("Screen")

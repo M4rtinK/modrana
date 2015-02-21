@@ -36,14 +36,14 @@ Rectangle {
 
     property double latitude: 0
     property double longitude: 0
-    property variant scaleBarLength: getScaleBarLength(latitude);
+    property var scaleBarLength: getScaleBarLength(latitude);
     
     property alias angle: rot.angle
 
     property alias markers : map.markersC
 
     // use mapnik as the default map layer
-    property variant layers :  ListModel {
+    property var layers :  ListModel {
         ListElement {
             layerName : "OSM Mapnik"
             layerId : "mapnik"
@@ -426,7 +426,7 @@ Rectangle {
         x: rootX + offsetX;
         y: rootY + offsetY;
 
-        property variant markersC : markers
+        property var markersC : markers
 
         Repeater {
             id: tiles
@@ -526,7 +526,7 @@ Rectangle {
     Image {
         id: targetIndicator
         source: "image://python/icon/"+ rWin.theme.id +"/target-indicator-cross.png"
-        property variant t: getMappointFromCoord(showTargetAtLat, showTargetAtLon)
+        property var t: getMappointFromCoord(showTargetAtLat, showTargetAtLon)
         x: map.x + t[0] - width/2
         y: map.y + t[1] - height/2
 
@@ -558,7 +558,7 @@ Rectangle {
         source: currentPositionValid ?
                 "image://python/icon/"+ rWin.theme.id +"/position-indicator.png" :
                 "image://python/icon/"+ rWin.theme.id +"/position-indicator-red.png"
-        property variant t: getMappointFromCoord(currentPositionLat, currentPositionLon)
+        property var t: getMappointFromCoord(currentPositionLat, currentPositionLon)
         x: map.x + t[0] - width/2
         y: map.y + t[1] - height + positionIndicator.width/2
         smooth: true

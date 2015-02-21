@@ -747,10 +747,10 @@ class Options(RanaModule):
         addBoolOpt("Enable Routing", "routingEnabled", group, False)
 
         addOpt("Routing provider", "routingProvider",
-               [("GoogleDirections", "Google - <b>online</b>"),
-                ("Monav", "Monav - <b>on device</b>")],
+               [(constants.ROUTING_PROVIDER_GOOGLE, "Google - <b>online</b>"),
+                (constants.ROUTING_PROVIDER_MONAV, "Monav - <b>on device</b>")],
                group,
-               "GoogleDirections")
+               constants.DEFAULT_ROUTING_PROVIDER)
 
         addBoolOpt("Avoid major highways", "routingAvoidHighways", group, False)
 

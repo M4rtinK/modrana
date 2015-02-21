@@ -15,7 +15,11 @@ ApplicationWindow {
     }
 
     function pushPage(pageInstance, pageProperties, animate) {
-        pageStack.push(pageInstance, pageProperties, animate)
+        // the Controls page stack disables animations when
+        // false is passed as the third argument, but we want to
+        // have a more logical interface, so just invert the value
+        // before passing it to the page stack
+        pageStack.push(pageInstance, pageProperties, !animate)
         return pageInstance
     }
 }

@@ -9,7 +9,7 @@ Item {
     signal zoomUp
     signal zoomDown
 
-    property variant mediaKeys : null
+    property var mediaKeys : null
 
     // we need to handle the case where the MediaKeys element
     // is not available so we use the Connections a nd Binding
@@ -45,7 +45,7 @@ Item {
         // the media keys module might not be available on
         // all platforms so we need to handle import failure
         // (real conditional imports would be nice, wouldn't they ;))
-        var mediaKeysInstance = rWin.loadQMLFile("sailfish_specific/MediaKeys.qml", true)
+        var mediaKeysInstance = rWin.loadQMLFile("sailfish_specific/SailfishMediaKeys.qml", true)
         if (mediaKeysInstance) {
             rWin.log.info("Actions: Sailfish media keys initialized")
             actions.mediaKeys = mediaKeysInstance

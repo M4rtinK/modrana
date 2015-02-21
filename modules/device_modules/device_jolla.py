@@ -111,6 +111,9 @@ class Jolla(DeviceModule):
         return paths.getXDGRoutingDataPath()
 
     def getTracklogFolderPath(self):
+        """We have an option for making a symlink to the Documents folder,
+        so the XDG path for the actual tracklog storage is fine.
+        """
         return paths.getXDGTracklogFolderPath()
 
     def getPOIFolderPath(self):

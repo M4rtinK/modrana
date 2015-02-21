@@ -193,16 +193,12 @@ class Way(object):
             # check for stored timestamps
             if self.points and len(self.points[0]) >= 4: # LLET
                 trackpoints.append(
-                    map(lambda x:
-                        gpx.Trackpoint(x[0], x[1], None, None, x[2], x[3]),
-                        self.points)
+                    [gpx.Trackpoint(x[0], x[1], None, None, x[2], x[3]) for x in self.points]
                 )
 
             else: # LLE
                 trackpoints.append(
-                    map(lambda x:
-                        gpx.Trackpoint(x[0], x[1], None, None, x[2], None),
-                        self.points)
+                    [gpx.Trackpoint(x[0], x[1], None, None, x[2], None) for x in self.points]
                 )
 
             # Handle message points
@@ -257,7 +253,7 @@ class Way(object):
         TODO: message point support"""
         timestamp = geo.timestampUTC()
         try:
-            f = open(path, "wb")
+            f = open(path, "w")
             writer = csv.writer(f, dialect=csv.excel)
             points = self.getPointsLLE()
             for p in points:
@@ -443,11 +439,11 @@ def fromCSV(path, delimiter=',', fieldCount=None):
     if fieldCount: # assume fixed field count
         try:
             if fieldCount == 2: # lat, lon
-                points = map(lambda x: (x[0], x[1]), reader)
+                points = [(x[0], x[1]) for x in reader]
             elif fieldCount == 3: # lat, lon, elevation
-                points = map(lambda x: (x[0], x[1], x[2]), reader)
+                points = [(x[0], x[1], x[2]) for x in reader]
             elif fieldCount == 4: # lat, lon, elevation, timestamp
-                points = map(lambda x: (x[0], x[1], x[2], x[3]), reader)
+                points = [(x[0], x[1], x[2], x[3]) for x in reader]
             else:
                 log.error("wrong field count - use 2, 3 or 4")
                 raise ValueError
@@ -539,13 +535,13 @@ def fromHandmade(start, middlePoints, destination):
 
 
 class AppendOnlyWay(Way):
-    """a way subclass that is optimized for efficient incremental file storage
+    """A way subclass that is optimized for efficient incremental file storage
     -> points can be only appended or completely replaced, no insert support at he moment
     -> only CSV storage is supported at the moment
     -> call openCSV(path) to start incremental file storage
-    -> call flush() if to write the points added since open* or last flush to disk
+    -> call flush() if to write the points added since openCSV() or last flush to disk
     -> call close() once you are finished - this flushes any remaining points to disk
-    and closes the file
+       and closes the file
     NOTE: this subclass also records per-point timestamps when points are added and these timestamps
     are stored in the output file
 
@@ -554,9 +550,9 @@ class AppendOnlyWay(Way):
     -> on every flush, the increment list is added to the file in storage and cleared
     -> like this, we don't need to combine the two lists when we need to return all points
     -> only possible downside is duplicate space needed for the points if flush is never called,
-    as the same points would be stored both in points and increment
-    -> if flush is called regularly (which is the expected behaviour when using this class), this should not be an issue
-
+       as the same points would be stored both in points and increment
+    -> if flush is called regularly (which is the expected behaviour when using this class),
+       this should not be an issue
     """
 
     def __init__(self, points=None):
@@ -571,10 +567,10 @@ class AppendOnlyWay(Way):
 
         if points:
             with self.pointsLock:
-                #mark all points added on startup with a single timestamp
+                # mark all points added on startup with a single timestamp
                 timestamp = geo.timestampUTC()
                 # convert to LLET
-                points = map(lambda x: (x[0], x[1], x[2], timestamp), points)
+                points = [(x[0], x[1], x[2], timestamp) for x in points]
 
                 # mark points as not yet saved
                 self.increment = points
@@ -583,14 +579,14 @@ class AppendOnlyWay(Way):
 
     def getPointsLLE(self):
         # drop the timestamp
-        return map(lambda x: (x[0], x[1], x[2]), self.points)
+        return [(x[0], x[1], x[2]) for x in self.points]
 
     def getPointsLLET(self):
         """returns all points in LLET format, both saved an not yet saved to storage"""
         return self.points
 
     def getPointCount(self):
-        return len(self.points) + len(self.increment)
+        return len(self.points)
 
     def addPoint(self, point):
         with self.pointsLock:
@@ -613,7 +609,7 @@ class AppendOnlyWay(Way):
 
     def startWritingCSV(self, path):
         try:
-            self.file = open(path, "wb")
+            self.file = open(path, "w")
             self.writer = csv.writer(self.file)
             self.filePath = path
             # flush any pending points

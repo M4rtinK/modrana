@@ -264,7 +264,7 @@ class gps(gpsdata, gpsjson):
                 if type(self.fix.time) == type(0.0):
                     self.fix.time = self.utc
                 else:
-                    self.fix.time = isotime(self.utc.encode("ascii"))
+                    self.fix.time = isotime(self.utc)
             self.fix.ept =       default("ept",   NaN, TIMERR_SET)
             self.fix.latitude =  default("lat",   NaN, LATLON_SET)
             self.fix.longitude = default("lon",   NaN)

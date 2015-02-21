@@ -42,6 +42,7 @@ from core.threads import threadMgr
 from core import geo
 from core import modrana_log
 from core import utils
+from core import paths
 
 import logging
 log = logging.getLogger("mod.gui.qt5")
@@ -84,6 +85,9 @@ class QMLGUI(GUIModule):
         self.centeringDisableThreshold = 2048
         self.firstTimeSignal = signal.Signal()
         size = (800, 480) # initial window size
+
+        # positioning related
+        self._pythonPositioning = False
 
         # register exit handler
         #pyotherside.atexit(self._shutdown)
@@ -142,9 +146,14 @@ class QMLGUI(GUIModule):
         # log for log messages from the QML context
         self.qml_log = qml_log
 
+        # tracklogs
+        self.tracklogs = Tracklogs(self)
+
     def firstTime(self):
         # trigger the first time signal
         self.firstTimeSignal()
+
+        self.modules.location.positionUpdate.connect(self._pythonPositionUpdateCB)
 
     def _shutdown(self):
         """Called by PyOtherSide once the QML side is shutdown.
@@ -222,6 +231,10 @@ class QMLGUI(GUIModule):
             return version
 
     def setPosition(self, posDict):
+        if self._pythonPositioning:
+            # ignore the setPosition call if Python-side positioning
+            # is used as the Python side already has fresh position data
+            return
         lat, lon = float(posDict["latitude"]), float(posDict["longitude"])
         elevation = float(posDict["elevation"])
         metersPerSecSpeed = float(posDict["speedMPS"])  # m/s
@@ -250,6 +263,23 @@ class QMLGUI(GUIModule):
         # update done
         self.set('locationUpdated', time.time())
         # TODO: move part of this to the location module ?
+
+    def _pythonPositionUpdateCB(self, fix):
+        self._pythonPositioning = True
+        if fix.position:
+            (lat, lon) = fix.position
+        else:
+            (lat, lon) = None
+        pyotherside.send("pythonPositionUpdate", {
+            "latitude" : lat,
+            "longitude" : lon,
+            "altitude" : fix.altitude,
+            "speed" : fix.speed,
+            "horizontalAccuracy" : fix.horizontal_accuracy,
+            "verticalAccuracy" : fix.vertical_accuracy,
+            "timestamp" : fix.timestamp,
+            "valid" : bool(fix.position)
+        })
 
     def _selectImageProviderCB(self, imageId, requestedSize):
         originalImageId = imageId
@@ -325,7 +355,8 @@ class QMLGUI(GUIModule):
             "nmeaFilePath" : self.get("NMEAFilePath", None),
             "layerTree" : self.modules.mapLayers.getLayerTree(),
             "dictOfLayerDicts" : self.modules.mapLayers.getDictOfLayerDicts(),
-            "themesFolderPath" : os.path.abspath(self.modrana.paths.getThemesFolderPath())
+            "themesFolderPath" : os.path.abspath(self.modrana.paths.getThemesFolderPath()),
+            "sailfish" : self.dmod.getDeviceIDString() == "jolla"
         }
         return values
 
@@ -762,3 +793,68 @@ class Theme(object):
         }
         self._themeDict = themeDict
         return themeDict
+
+class Tracklogs(object):
+    """Some tracklog specific functionality"""
+
+    SAILFISH_TRACKLOGS_SYMLINK_NAME = "modrana_tracklogs"
+    SAILFISH_SYMLINK_PATH = os.path.join(paths.getHOMEPath(), "Documents", SAILFISH_TRACKLOGS_SYMLINK_NAME)
+
+    def __init__(self, gui):
+        self.gui = gui
+        self.gui.firstTimeSignal.connect(self._firstTimeCB)
+        self._sendUpdates = True
+
+    def _firstTimeCB(self):
+        # connect to the tracklog update signal, so that we can send
+        # track logging state updates to the GUI
+        self.gui.modules.tracklog.tracklogUpdated.connect(self._sendUpdateCB)
+
+    def _sendUpdateCB(self):
+        """Tracklog has been updated, send the updated info dict to GUI"""
+        if self._sendUpdates:
+            pyotherside.send("tracklogUpdated", self.gui.modules.tracklog.getStatusDict())
+
+    def setSendUpdates(self, value):
+        """Set if tracklog updates should be sent to the GUI layer or not.
+        This is used to disable updates when the track recording page is not visible.
+        """
+        self._sendUpdates = value
+        if value:
+            self.gui.log.debug("tracklog: enabling logging status updates")
+        else:
+            self.gui.log.debug("tracklog: disabling logging status updates")
+
+    def sailfishSymlinkExists(self):
+        """Report if the easy access symlink on Sailfish OS for tracklogs exists
+
+        :returns: True if the symlink exists, False if not
+        :rtype: bool
+        """
+        return os.path.islink(self.SAILFISH_SYMLINK_PATH)
+
+    def createSailfishSymlink(self):
+        """Create symlink from the actual tracklogs folder in the XDG path
+        to ~/Documents for easier access to the tracklogs by the users
+        """
+        self.gui.log.info("tracklogs: creating sailfish tracklogs symlink")
+        if self.sailfishSymlinkExists():
+            self.gui.log.warning("tracklogs: the Sailfish tracklogs symlink already exists")
+        else:
+            try:
+                os.symlink(self.gui.modrana.paths.getTracklogsFolderPath(), self.SAILFISH_SYMLINK_PATH)
+                self.gui.log.info("tracklogs: sailfish tracklogs symlink created")
+            except Exception:
+                self.gui.log.exception("tracklogs: sailfish tracklogs symlink creation failed")
+
+    def removeSailfishSymlink(self):
+        """Remove the easy-access Sailfish OS symlink"""
+        self.gui.log.info("tracklogs: removing sailfish tracklogs symlink")
+        if not self.sailfishSymlinkExists():
+            self.gui.log.warning("tracklogs: the Sailfish tracklogs symlink does not exist")
+        else:
+            try:
+                os.remove(self.SAILFISH_SYMLINK_PATH)
+                self.gui.log.info("tracklogs: sailfish tracklogs symlink removed")
+            except Exception:
+                self.gui.log.exception("tracklogs: sailfish tracklogs symlink removed")

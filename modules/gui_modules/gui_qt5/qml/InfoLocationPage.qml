@@ -48,7 +48,7 @@ BasePage {
             property real cellWidth : width/columns
             // 2 columns in landscape, 1 in portrait
             columns : rWin.inPortrait ? 1 : 2
-            spacing : 16
+            spacing : rWin.c.style.main.spacing
 
             property real lat : rWin.position.coordinate.latitude
             property real lon : rWin.position.coordinate.longitude

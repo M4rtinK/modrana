@@ -139,7 +139,7 @@ class Downloader(object):
                 e = sys.exc_info()[1]
                 self._printErrorMessage(e, lzxy)
                 # remove the status tile
-                self._mapTiles.removeImageFromMemory(self._mapTiles.imageName(lzxy))
+                self._mapTiles.removeImageFromMemory(lzxy)
                 error = constants.TILE_DOWNLOAD_ERROR
             finally:
                 # done, unregister the tile from the tracking set
@@ -158,7 +158,7 @@ class Downloader(object):
             # don't download tile and remove
             # any "downloading" tiles that might
             # be in the image cache
-            self._mapTiles.removeImageFromMemory(self._mapTiles.imageName(lzxy))
+            self._mapTiles.removeImageFromMemory(lzxy)
             # report the tile as not been downloaded
             self._tileDownloaded(error, lzxy, tag)
 
@@ -166,35 +166,32 @@ class Downloader(object):
     def _downloadTile(self, lzxy):
             """Downloads a tile image image from network"""
             self._downloadInProgress(lzxy)
-            content = self._mapTiles.downloadTile(lzxy)
+            content = self._mapTiles._downloadTile(lzxy)
             if content is None:
                 raise urllib3.exceptions.HTTPError
-            cacheName = self._mapTiles.imageName(lzxy)
             if self._imageSurface:
                 pl = gtk.gdk.PixbufLoader()
                 pl.write(content)
                 pl.close() # this  blocks until the image is completely loaded
                 # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
-                surface = self._mapTiles.pixbuf2cairoImageSurface(pl.get_pixbuf())
-                self._mapTiles.storeInMemory(surface, cacheName)
+                surface = self._mapTiles._pixbuf2cairoImageSurface(pl.get_pixbuf())
+                self._mapTiles.storeInMemory(surface, lzxy)
                 # like this, corrupted tiles should not get past the pixbuf loader and be stored
             else:
                 # cache the raw data
-                self._mapTiles.storeInMemory(content, cacheName)
+                self._mapTiles.storeInMemory(content, lzxy)
             self._storeTiles.automaticStoreTile(content, lzxy)
 
     def _downloadInProgress(self, lzxy):
         if self._imageSurface:
-            cacheName = self._mapTiles.imageName(lzxy)
             # change the status tile to "Downloading..."
-            self._mapTiles.storeInMemory(self._mapTiles.downloadingTile[0], cacheName, imageType="downloading")
+            self._mapTiles.storeInMemory(self._mapTiles.downloadingTile[0], lzxy, imageType="downloading")
 
     def _temporaryDownloadError(self, lzxy):
         if self._imageSurface:
             tileNetworkErrorSurface = self._mapTiles.images[1]['tileNetworkError'][0]
             expireTimestamp = time.time() + 10
-            cacheName = self._mapTiles.imageName(lzxy)
-            self._mapTiles.storeInMemory(tileNetworkErrorSurface, cacheName, 'error',
+            self._mapTiles.storeInMemory(tileNetworkErrorSurface, lzxy, 'error',
                                          expireTimestamp) # retry after 10 seconds
             # as not to DOS the system when we temporarily loose internet connection or other such error
             # occurs, we load a temporary error tile with expiration timestamp instead of the tile image
@@ -205,8 +202,7 @@ class Downloader(object):
         if self._imageSurface:
             tileDownloadFailedSurface = self._mapTiles.images[1]['tileDownloadFailed'][0]
             expireTimestamp = time.time() + 10
-            cacheName = self._mapTiles.imageName(lzxy)
-            self._mapTiles.storeInMemory(tileDownloadFailedSurface, cacheName, 'semiPermanentError',
+            self._mapTiles.storeInMemory(tileDownloadFailedSurface, lzxy, 'semiPermanentError',
                                          expireTimestamp)
             # like this, when tile download fails due to a http error,
             # the error tile is loaded instead

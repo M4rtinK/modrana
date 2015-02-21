@@ -12,6 +12,9 @@ from core import utils
 from core.pool import ThreadPool
 from core.singleton import modrana
 
+import logging
+log = logging.getLogger("mod.mapData.pools")
+
 MAX_RETRIES = 3
 RETRY_WAIT = 0.1  # 100 ms
 
@@ -68,7 +71,7 @@ class BatchPool(object):
         """Process a batch"""
         with self._mutex:
             if self._running:
-                print("can't start another batch - already running")
+                log.debug("can't start another batch - already running")
             else:
                 self._running = True
                 self._batch = batch
@@ -107,7 +110,7 @@ class BatchPool(object):
         # as quickly as possible (now==True)
         self._pool.shutdown(now=self._shutdown, join=True, async=False,
                             callback=self._stoppedCallback)
-        print("%s loader done" % self.name)
+        log.info("%s loader done", self.name)
 
     def _handleItemWrapper(self, item):
         self._handleItem(item)
@@ -121,8 +124,6 @@ class BatchPool(object):
         with self._mutex:
             if self._running:
                 self._shutdown = True
-        # self._pool.shutdown(now=True, join=True, async=True,
-        #                     callback=self._stoppedCallback)
 
     def _stoppedCallback(self):
         """Called from a thread once the thread pool is fully stopped"""
@@ -187,7 +188,7 @@ class TileBatchPool(BatchPool):
     def layer(self, layer):
         with self._mutex:
             if self._running:
-                print("tile batch pool: can't set layer when batch is running")
+                log.debug("tile batch pool: can't set layer when batch is running")
             else:
                 self._layer = layer
 
@@ -211,7 +212,7 @@ class TileBatchPool(BatchPool):
     def _processBatch(self):
         # setup the connection pool
         if self.layer is None:
-            print("tile batch pool: layer is None, aborting")
+            log.error("tile batch pool: layer is None, aborting")
             return
         self._connPool = utils.createConnectionPool(getAnUrl(self._batch, self._layer))
 
@@ -281,8 +282,7 @@ class BatchSizeCheckPool(TileBatchPool):
         size = 0
         url = "unknown url"
         try:
-            # get the url and other info
-            (url, filename, folder) = self._mapData.getTileUrlAndPath(lzxy)
+            url = tiles.getTileUrl(lzxy)
             # does the tile exist ?
             if self._storeTiles.tileExists2(lzxy, fromThread=True): # if the file does not exist
                 size = None # it exists, return None
@@ -291,17 +291,11 @@ class BatchSizeCheckPool(TileBatchPool):
                 request = self._connPool.urlopen('HEAD', url)
                 size = int(request.getheaders()['content-length'])
         except IOError:
-            print("Could not open document: %s" % url)
+            log.error("Could not open document: %s", url)
             # the url errored out, so we just say it  has zero size
             size = 0
         except Exception:
-            import sys
-            e = sys.exc_info()[1]
-            print("error, while checking size of tile:", lzxy)
-            print(e)
-            import traceback
-            # find what went wrong
-            traceback.print_exc(file=sys.stdout)
+            log.exception("error, while checking size of tile: %s", lzxy)
             size = 0
         return size
 
@@ -368,10 +362,7 @@ class BatchTileDownloadPool(TileBatchPool):
             try:
                 size = self._saveTileForURL(lzxy)
             except Exception:
-                import sys
-                e = sys.exc_info()[1]
-                print("exception in batch download thread:")
-                print(e)
+                log.exception("exception in batch download thread:")
             if size != False:  # download successful
                 with self._mutex:
                     self._downloadedDataSize+=size
@@ -384,7 +375,7 @@ class BatchTileDownloadPool(TileBatchPool):
 
     def _saveTileForURL(self, lzxy):
         """save a tile for url created from its coordinates"""
-        (url, filename, folder) = self._mapData.getTileUrlAndPath(lzxy)
+        url = tiles.getTileUrl(lzxy)
 
         goAhead = False
         redownload = int(modrana.get('batchRedownloadAvailableTiles', False))

@@ -26,6 +26,8 @@ from core import gs
 
 if gs.GUIString == "GTK":
     import gobject
+elif gs.GUIString.lower() == "qt5":
+    import pyotherside
 elif gs.GUIString.lower() == "qml":
     from PySide import QtCore
 
@@ -35,6 +37,8 @@ def getModule(m, d, i):
     (eq. one that uses the timers provided by the toolkit
     - gobject.timeout_add, QTimer, etc.
     """
+    if gs.GUIString.lower() == 'qt5':
+        return CronQt5(m, d, i)
     if gs.GUIString == 'QML':
         return CronQt(m, d, i)
     elif gs.GUIString == 'GTK': # GTK for now
@@ -228,6 +232,77 @@ class CronQt(Cron):
                 timer.setInterval(newTimeout)
                 # update the timeout data
                 self.cronTab['timeout'][timeoutId] = (callback, args, newTimeout, caller, description, timeoutId, timer)
+            else:
+                self.log.error("can't modify timeout, wrong id: %s", timeoutId)
+
+class CronQt5(Cron):
+    """A Qt 5 timing and scheduling module for modRana"""
+
+    def __init__(self, m, d, i):
+        Cron.__init__(self, m, d, i)
+        self.nextId = 0
+        # cronTab and activeIds should be in sync
+        self.cronTab = {"idle": {}, "timeout": {}}
+        self.dataLock = threading.RLock()
+
+    def _timerTriggered(self, timerId):
+        with self.dataLock:
+            timerTuple = self.cronTab['timeout'].get(timerId)
+            if timerTuple:
+                call = timerTuple[6]
+                call()
+            else:
+                self.log.error("unknown timer triggered: %s", timerId)
+
+    def _getID(self):
+        """get an unique id for timing related request that can be
+        returned to the callers and used as a handle
+        TODO: can int overflow in Python ?
+        TODO: id recycling ?"""
+        with self.dataLock:
+            timeoutId = self.nextId
+            self.nextId += 1
+            return timeoutId
+
+    def addTimeout(self, callback, timeout, caller, description, args=None):
+        """the callback will be called timeout + time needed to execute the callback
+        and other events
+        """
+        if not args: args = []
+        timeoutId = self._getID()
+        self.log.debug("qt5: adding a %s ms timeout from %s as %s", timeout, caller, timeoutId)
+        # create a new function that calls the callback processing function
+        # with thh provided arguments
+        handleThisTimeout = lambda: self._doTimeout(timeoutId, callback, args)
+        # store timer data
+        # - we don't actually have a Python-side timer object, so we just store
+        #   the callback function and tell QML to add the timer
+        timeoutTuple = (callback, args, timeout, caller, description, timeoutId, handleThisTimeout)
+        with self.dataLock:
+            self.cronTab['timeout'][timeoutId] = timeoutTuple
+            pyotherside.send("addTimer", timeoutId, timeout)
+
+        # return the id
+        return timeoutId
+
+    def removeTimeout(self, timeoutId):
+        """remove timeout with a given id"""
+        with self.dataLock:
+            if timeoutId in self.cronTab['timeout'].keys():
+                caller = self.cronTab['timeout'][timeoutId][3]
+                del self.cronTab['timeout'][timeoutId]
+                pyotherside.send("removeTimer", timeoutId)
+                self.log.debug("qt5: timeout %s from %s has been removed", timeoutId, caller)
+            else:
+                self.log.error("can't remove timeout, wrong id: %s", timeoutId)
+
+    def modifyTimeout(self, timeoutId, newTimeout):
+        """modify the duration of a timeout in progress"""
+        with self.dataLock:
+            if timeoutId in self.cronTab['timeout'].keys():
+                # we don't store the timeout value Python-side,
+                # so we just notify QML about the change
+                pyotherside.send("modifyTimerTimeout", timeoutId, newTimeout)
             else:
                 self.log.error("can't modify timeout, wrong id: %s", timeoutId)
 

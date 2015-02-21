@@ -80,6 +80,9 @@ class MapLayer(object):
             "timeout" : self.timeout
         }
 
+    def __repr__(self):
+        return "%s layer" % self.id
+
 
 class MapLayerGroup(object):
     """A group of map layers"""

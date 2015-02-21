@@ -42,7 +42,8 @@ class Display(RanaModule):
         every display_blanking_pause() call pauses screenblank for 60 seconds,
         to make sure, we request it every 30 seconds"""
         self.pauseScreenBlankingEnabled = False
-        self.msScreenBlankPauseIntervalMs = 30000
+        #self.msScreenBlankPauseIntervalMs = 30000
+        self.msScreenBlankPauseIntervalMs = 1000
 
         self.checkMethod = None
         self.checkConditions = False
@@ -57,19 +58,22 @@ class Display(RanaModule):
             gui.topWindow.connect('visibility-notify-event', self.visibilityChangedCallback)
         elif gs.GUIString.lower() in ("qml", "qt5"):
             # QML (Qt4) and Qt5 handles redrawing & window state detection from inside
-            # the QML context
+            # the QML context.
             pass
         else:
             self.log.warning("WARNING, unhandled GUI toolkit, redraw disable if not visible might not work")
 
-        # check the screen blanking mode on startup
-        self.checkScreenBlankingMode()
-        # register blanking check update
-        cron = self.m.get('cron', None)
-        if cron:
-            # run the callback directly for the first time
-            cron.addTimeout(self._updateDisplayControlCB, self.msScreenBlankPauseIntervalMs, self,
-                            "screen blanking update")
+        # there are currently no Qt 5 platforms where the current Python based
+        # screen blanking control code works
+        if self.screenBlankingControlSupported() and gs.GUIString.lower() in ("qml", "gtk"):
+            # check the screen blanking mode on startup
+            self.checkScreenBlankingMode()
+            # register blanking check update
+            cron = self.m.get('cron', None)
+            if cron:
+                # run the callback directly for the first time
+                cron.addTimeout(self._updateDisplayControlCB, self.msScreenBlankPauseIntervalMs, self,
+                                "screen blanking update")
 
     def handleMessage(self, message, messageType, args):
         if message == "blankingModeChanged":
