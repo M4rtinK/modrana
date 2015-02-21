@@ -15,6 +15,7 @@ BasePage {
             onCheckedChanged : {
                 rWin.log.info("changed routing enable: " + checked)
                 rWin.mapPage.routingEnabled = checked
+                rWin.set("routingEnabled", checked)
             }
         }
     }
