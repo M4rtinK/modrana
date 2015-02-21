@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.0
+import "style.js" as S
 
 Item {
     id: container
@@ -16,7 +17,7 @@ Item {
             top: parent.top
             left: parent.left
             right: switcher.left
-            rightMargin: rWin.c.style.main.spacingBig
+            rightMargin: S.style.main.spacingBig
         }
     }
 

@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.0
+import "style.js" as S
 
 Column {
     id : comboColumn
@@ -14,11 +15,12 @@ Column {
     Row {
         // no spacing if the label is empty, so that the combobox
         // can be used as a standalone label-less combobox
-        spacing : comboLabel.text ? rWin.c.style.main.spacing : 0
+        spacing : comboLabel.text ? S.style.main.spacing : 0
+        property var bar : S.foo
         Label {
             id : comboLabel
         }
-        ComboBox{
+        ComboBox {
             id : cBox
             anchors.verticalCenter : comboLabel.verticalCenter
             // selected item, only assigned if user
