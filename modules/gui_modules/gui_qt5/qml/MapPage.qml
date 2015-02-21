@@ -33,10 +33,13 @@ Page {
     // routing related stuff
     property bool selectRoutingStart : false
     property bool selectRoutingDestination : false
+    property bool routingStartSet: false
+    property bool routingDestinationSet: false
     property real routingStartLat: 0.
     property real routingStartLon: 0.
     property real routingDestinationLat: 0.
     property real routingDestinationLon: 0.
+    property bool routingRequestChanged : false
     property bool routingEnabled: rWin.get("routingEnabled", false,
     function(v){routingEnabled=v})
     
@@ -445,6 +448,7 @@ Page {
                 routingData.requestPaint()
             }
             onMapClicked: {
+                routingRequestChanged = false
                 // store the position we touched in Lat,Lon
                 routingData.touchpos = pinchmap.getCoordFromScreenpoint(screenX, screenY)
                 if (selectRoutingStart) {
@@ -454,6 +458,8 @@ Page {
                     rWin.routingStartPos.longitude=routingStartLon
                     selectRoutingStart = false
                     routingStartRect.color = "red"
+                    routingStartSet = true
+                    routingRequestChanged = true
                 }
                 if (selectRoutingDestination) {
                     routingDestinationLat = routingData.touchpos[0]
@@ -462,6 +468,10 @@ Page {
                     rWin.routingDestinationPos.longitude=routingDestinationLon
                     selectRoutingDestination = false
                     routingEndRect.color = "red"
+                    routingDestinationSet = true
+                    routingRequestChanged = true
+                }
+                if (routingRequestChanged && routingStartSet && routingDestinationSet) {
                     rWin.python.call("modrana.gui.modules.route.llRoute", [[rWin.routingStartPos.latitude,rWin.routingStartPos.longitude], [rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude]])
                     rWin.log.debug("routing called")
                 }
