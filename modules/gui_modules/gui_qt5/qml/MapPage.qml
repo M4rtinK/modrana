@@ -475,8 +475,11 @@ Page {
                     rWin.python.call("modrana.gui.modules.route.llRoute", [[rWin.routingStartPos.latitude,rWin.routingStartPos.longitude], [rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude]])
                     rWin.log.debug("routing called")
                 }
-
-                routingData.requestPaint()
+                if (routingRequestChanged) {
+                    // request a refresh of the canvas to
+                    // display newly set start/destination point
+                    routingData.requestPaint()
+                }
             }
             onMapPanEnd: {
                 routingData.requestPaint()
