@@ -384,40 +384,42 @@ Page {
             var ctx = getContext("2d")
             // clear the canvas
             ctx.clearRect(0,0,tabMap.width,tabMap.height)
+            if (tabMap.routingEnabled) {
 
-            // setup the stroke
-            ctx.lineWidth = 4
+                // setup the stroke
+                ctx.lineWidth = 4
 
-            ctx.beginPath()
-            //place a green square at the start point
-            ctx.strokeStyle = "green"
-            ctx.moveTo(startX,startY)
-            ctx.rect(startX-messagePointDiameter/2,startY-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
-            ctx.stroke()
-            // paint the route red
-            ctx.strokeStyle = "red"
-            ctx.beginPath()
-            for (var i=0; i<routingData.route.count; i++) {
-                thispos = routingData.route.get(i)
-                destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
-                ctx.lineTo(destipos[0],destipos[1])
+                ctx.beginPath()
+                //place a green square at the start point
+                ctx.strokeStyle = "green"
+                ctx.moveTo(startX,startY)
+                ctx.rect(startX-messagePointDiameter/2,startY-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
+                ctx.stroke()
+                // paint the route red
+                ctx.strokeStyle = "red"
+                ctx.beginPath()
+                for (var i=0; i<routingData.route.count; i++) {
+                    thispos = routingData.route.get(i)
+                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                    ctx.lineTo(destipos[0],destipos[1])
+                }
+                for (var i=0; i<routingData.routeMessages.count; i++) {
+                    thispos = routingData.routeMessages.get(i)
+                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                    ctx.ellipse(destipos[0]-messagePointDiameter/2,destipos[1]-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
+                }
+                //ctx.closePath()
+
+                // stroke path
+                ctx.stroke()
+
+                // place a blue square at the destination point
+                ctx.beginPath()
+                ctx.strokeStyle = "blue"
+                ctx.moveTo(destX,destY)
+                ctx.rect(destX-messagePointDiameter/2,destY-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
+                ctx.stroke()
             }
-            for (var i=0; i<routingData.routeMessages.count; i++) {
-                thispos = routingData.routeMessages.get(i)
-                destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
-                ctx.ellipse(destipos[0]-messagePointDiameter/2,destipos[1]-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
-            }
-            //ctx.closePath()
-
-            // stroke path
-            ctx.stroke()
-
-            // place a blue square at the destination point
-            ctx.beginPath()
-            ctx.strokeStyle = "blue"
-            ctx.moveTo(destX,destY)
-            ctx.rect(destX-messagePointDiameter/2,destY-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
-            ctx.stroke()
         }
         onPainted: {
         }
