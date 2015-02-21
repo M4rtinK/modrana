@@ -66,7 +66,6 @@ TODO
 ----
 
 * add pull-down menu
-* remove some modRana rWin dependencies from the QtQuick Controls backend
 
 LICENSE
 -------
