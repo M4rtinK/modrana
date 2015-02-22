@@ -48,6 +48,9 @@ class Color(object):
             try:
                 import gtk
                 (colorString, alpha) = colorStringAlphaTupple
+                if colorString == "transparent":
+                    colorString = "black"
+                    alpha = 0.0
                 try:
                     gtkColor = gtk.gdk.color_parse(colorString)
                 except ValueError:
