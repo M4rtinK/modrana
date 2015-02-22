@@ -39,7 +39,7 @@ BasePage {
                     height : layerView.itemHeight
                     property bool toggled : false
                     property int childrenCount : model.layers.count
-                    BackgroundRectangle {
+                    ThemedBackgroundRectangle {
                         anchors.fill : parent
                         onClicked : {
                             //console.log("group clicked")
@@ -80,7 +80,7 @@ BasePage {
                             anchors.right : parent.right
                             height : layerRepeater.itemHeight
                             y : index * layerRepeater.itemHeight
-                            BackgroundRectangle {
+                            ThemedBackgroundRectangle {
                                 anchors.fill : parent
                                 anchors.topMargin : layersWrapper.spacing/2.0
                                 anchors.bottomMargin : layersWrapper.spacing/2.0

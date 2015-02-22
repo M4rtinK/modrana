@@ -151,7 +151,7 @@ HeaderPage {
         }
         clip : true
         VerticalScrollDecorator {}
-        delegate : BackgroundRectangle {
+        delegate : ThemedBackgroundRectangle {
             id : resultDelegate
             width : pointLW.width
             height : contentC.height + rWin.c.style.listView.itemBorder

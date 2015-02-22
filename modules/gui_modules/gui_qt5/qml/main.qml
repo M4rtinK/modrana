@@ -345,6 +345,11 @@ ApplicationWindow {
 
     function __startup_values_from_modRana(values) {
         // our Python backend returned the values we needed
+
+        // set normal/hiDPI mode
+        rWin.hiDPI = values.hiDPI
+
+        // assign to constants
         rWin.c = values.constants
         rWin.platform.setValuesFromPython(values)
         rWin.log.debug("startup values loaded")

@@ -356,7 +356,8 @@ class QMLGUI(GUIModule):
             "layerTree" : self.modules.mapLayers.getLayerTree(),
             "dictOfLayerDicts" : self.modules.mapLayers.getDictOfLayerDicts(),
             "themesFolderPath" : os.path.abspath(self.modrana.paths.getThemesFolderPath()),
-            "sailfish" : self.dmod.getDeviceIDString() == "jolla"
+            "sailfish" : self.dmod.getDeviceIDString() == "jolla",
+            "hiDPI" : self.highDPI
         }
         return values
 

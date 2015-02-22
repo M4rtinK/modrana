@@ -16,5 +16,9 @@ HeaderPage {
     property alias headerText: headerLabel.title
     headerContent : PageHeader {
         id : headerLabel
+        // override the default header height with a dynamic
+        // (depends on back button being shown) modRana specific value
+        headerHeight : rWin.headerHeight
+        color : rWin.theme.color.page_header_text
     }
 }

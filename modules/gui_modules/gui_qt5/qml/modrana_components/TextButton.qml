@@ -3,7 +3,7 @@
 import QtQuick 2.0
 import UC 1.0
 
-BackgroundRectangle {
+ThemedBackgroundRectangle {
     id : textButton
     property alias text : tbLabel.text
     signal clicked
