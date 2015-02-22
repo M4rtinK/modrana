@@ -84,6 +84,7 @@ Rectangle {
 
     signal mapClicked(int screenX, int screenY)
     signal mapDoubleClicked(int screenX, int screenY)
+    signal mapPanEnd
 
     // register the tile-downloaded handler
     // - PyOtherSide stores the handler ids in a hashtable
@@ -655,6 +656,7 @@ Rectangle {
                 __isPanning = false;
                 if (! __wasClick) {
                     panEnd();
+                    mapPanEnd();
                 }
 
             }

@@ -34,6 +34,7 @@ from core.point import Point
 import core.way as way
 from core.backports.six import u
 from . import routing_providers
+import pyotherside
 
 
 DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
@@ -75,6 +76,10 @@ class Route(RanaModule):
 
         # Monav
         self.monav = None
+
+        # QT5 routing specific
+        self.deviceId = self.modrana.gui.getIDString()
+        self.log.debug("My ID: " + self.deviceId)
 
     def _goToInitialState(self):
         """restorer initial routing state
@@ -576,7 +581,18 @@ class Route(RanaModule):
                 self.destination = destination
 
             self.osdMenuState = OSD_CURRENT_ROUTE
-            self.startNavigation()
+
+            if self.deviceId == "Qt5":
+                ###### sailfish/qml stuff
+                routePoints = result.route.getPointsLLE()
+                messagePoints = result.route.getMessagePoints()
+                messagePointsLLEM = []
+                for mp in messagePoints:
+                    messagePointsLLEM.append(mp.getLLEM())
+                self.log.debug("FJF about to send signal, routeReceived")
+                pyotherside.send("routeReceived", routePoints, messagePointsLLEM)
+            else:
+                self.startNavigation()
 
         else: # routing failed
             self.log.error("routing ended with error")

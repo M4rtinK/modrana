@@ -11,7 +11,15 @@ BasePage {
     content : ContentColumn {
         Label {
             text : qsTr("Routing")
-            visible : rWin.showUnfinishedFeatures
+        }
+        TextSwitch {
+            text : qsTr("Enable Routing")
+            checked : rWin.mapPage.routingEnabled
+            onCheckedChanged : {
+                rWin.log.info("changed routing enable: " + checked)
+                rWin.mapPage.routingEnabled = checked
+                rWin.set("routingEnabled", checked)
+            }
         }
 
         KeyComboBox {

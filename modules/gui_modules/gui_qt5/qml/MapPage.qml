@@ -30,6 +30,19 @@ Page {
 
     property alias layers : pinchmap.layers
 
+    // routing related stuff
+    property bool selectRoutingStart : false
+    property bool selectRoutingDestination : false
+    property bool routingStartSet: false
+    property bool routingDestinationSet: false
+    property real routingStartLat: 0.
+    property real routingStartLon: 0.
+    property real routingDestinationLat: 0.
+    property real routingDestinationLon: 0.
+    property bool routingRequestChanged : false
+    property bool routingEnabled: rWin.get("routingEnabled", false,
+    function(v){routingEnabled=v})
+    
     Component.onCompleted : {
         rWin.log.info("map page: loaded, loading layers")
         pinchmap.loadLayers()
@@ -283,6 +296,48 @@ Page {
                 rWin.push("Menu", undefined, !rWin.animate)
             }
         }
+        TextButton {
+            id: routingStart
+            visible: tabMap.routingEnabled
+            text: "routing start"
+            width: rWin.c.style.map.button.size
+            height: rWin.c.style.map.button.size
+            Rectangle {
+                id: routingStartRect
+                color: "red"
+                anchors.fill: parent
+            }
+            Text {
+                text: parent.text
+            }
+            onClicked: {
+                selectRoutingStart = true
+                selectRoutingDestination = false
+                routingStartRect.color = "blue"
+                routingEndRect.color = "red"
+            }
+        }
+        TextButton {
+            id: routingEnd
+            visible: tabMap.routingEnabled
+            text: "routing end"
+            width: rWin.c.style.map.button.size
+            height: rWin.c.style.map.button.size
+            Rectangle {
+                id: routingEndRect
+                color: "red"
+                anchors.fill: parent
+            }
+            Text {
+                text: parent.text
+            }
+            onClicked: {
+                selectRoutingStart = false
+                selectRoutingDestination = true
+                routingEndRect.color = "blue"
+                routingStartRect.color = "red"
+            }
+        }
     }
     /*
     ProgressBar {
@@ -304,4 +359,133 @@ Page {
             }
         }
     }*/
+    Canvas {
+        id: routingData
+        anchors.fill: parent
+        opacity: 0.8
+        visible: true
+        property var touchpos: [0,0]
+        property var route : ListModel {
+            id: routeModel
+        }
+        property var routeMessages : ListModel {
+            id: routeMessageList
+        }
+
+        onPaint: { 
+            var startpos = pinchmap.getScreenpointFromCoord(rWin.routingStartPos.latitude,rWin.routingStartPos.longitude)
+            var destipos = pinchmap.getScreenpointFromCoord(rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude)
+            var startX = startpos[0]
+            var startY = startpos[1]
+            var destX = destipos[0]
+            var destY = destipos[1]
+            var thispos = (0,0,0)
+            var messagePointDiameter = 10
+            var ctx = getContext("2d")
+            // clear the canvas
+            ctx.clearRect(0,0,tabMap.width,tabMap.height)
+            if (tabMap.routingEnabled) {
+
+                // setup the stroke
+                ctx.lineWidth = 4
+
+                ctx.beginPath()
+                //place a green square at the start point
+                ctx.strokeStyle = "green"
+                ctx.moveTo(startX,startY)
+                ctx.rect(startX-messagePointDiameter/2,startY-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
+                ctx.stroke()
+                // paint the route red
+                ctx.strokeStyle = "red"
+                ctx.beginPath()
+                for (var i=0; i<routingData.route.count; i++) {
+                    thispos = routingData.route.get(i)
+                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                    ctx.lineTo(destipos[0],destipos[1])
+                }
+                for (var i=0; i<routingData.routeMessages.count; i++) {
+                    thispos = routingData.routeMessages.get(i)
+                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                    ctx.ellipse(destipos[0]-messagePointDiameter/2,destipos[1]-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
+                }
+                //ctx.closePath()
+
+                // stroke path
+                ctx.stroke()
+
+                // place a blue square at the destination point
+                ctx.beginPath()
+                ctx.strokeStyle = "blue"
+                ctx.moveTo(destX,destY)
+                ctx.rect(destX-messagePointDiameter/2,destY-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
+                ctx.stroke()
+            }
+        }
+        onPainted: {
+        }
+        Component.onCompleted: {
+            rWin.python.setHandler("routeReceived", function(route, routeMessagePoints){
+                // clear old route first
+                routingData.route.clear()
+                routingData.routeMessages.clear()
+                 for (var i=0; i<route.length; i++) {
+                     routingData.route.append({"lat": route[i][0], "lon": route[i][1]});
+                 }
+                 for (var i=0; i<routeMessagePoints.length; i++) {
+                     routingData.routeMessages.append({"lat": routeMessagePoints[i][0], "lon": routeMessagePoints[i][1], "message": routeMessagePoints[i][3]})
+                 }
+                 routingData.requestPaint()
+            })
+        }
+
+        Connections {
+            target: pinchmap
+            onCenterSet: {
+                routingData.requestPaint()
+            }
+            onDrag: {
+                //routingData.requestPaint()
+            }
+            onZoomLevelChanged: {
+                routingData.requestPaint()
+            }
+            onMapClicked: {
+                routingRequestChanged = false
+                // store the position we touched in Lat,Lon
+                routingData.touchpos = pinchmap.getCoordFromScreenpoint(screenX, screenY)
+                if (selectRoutingStart) {
+                    routingStartLat = routingData.touchpos[0]
+                    routingStartLon = routingData.touchpos[1]
+                    rWin.routingStartPos.latitude=routingStartLat
+                    rWin.routingStartPos.longitude=routingStartLon
+                    selectRoutingStart = false
+                    routingStartRect.color = "red"
+                    routingStartSet = true
+                    routingRequestChanged = true
+                }
+                if (selectRoutingDestination) {
+                    routingDestinationLat = routingData.touchpos[0]
+                    routingDestinationLon = routingData.touchpos[1]
+                    rWin.routingDestinationPos.latitude=routingDestinationLat
+                    rWin.routingDestinationPos.longitude=routingDestinationLon
+                    selectRoutingDestination = false
+                    routingEndRect.color = "red"
+                    routingDestinationSet = true
+                    routingRequestChanged = true
+                }
+                if (routingRequestChanged && routingStartSet && routingDestinationSet) {
+                    rWin.python.call("modrana.gui.modules.route.llRoute", [[rWin.routingStartPos.latitude,rWin.routingStartPos.longitude], [rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude]])
+                    rWin.log.debug("routing called")
+                }
+                if (routingRequestChanged) {
+                    // request a refresh of the canvas to
+                    // display newly set start/destination point
+                    routingData.requestPaint()
+                }
+            }
+            onMapPanEnd: {
+                routingData.requestPaint()
+            }
+        }
+    }
 }
