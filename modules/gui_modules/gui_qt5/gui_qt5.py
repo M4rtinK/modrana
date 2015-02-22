@@ -149,6 +149,9 @@ class QMLGUI(GUIModule):
         # tracklogs
         self.tracklogs = Tracklogs(self)
 
+        #routing
+        self.routing = Routing(self)
+
     def firstTime(self):
         # trigger the first time signal
         self.firstTimeSignal()
@@ -859,3 +862,26 @@ class Tracklogs(object):
                 self.gui.log.info("tracklogs: sailfish tracklogs symlink removed")
             except Exception:
                 self.gui.log.exception("tracklogs: sailfish tracklogs symlink removed")
+
+class Routing(object):
+    """Qt 5 GUI specific stuff for routing support"""
+
+    def __init__(self, gui):
+        self.gui = gui
+        self.gui.firstTimeSignal.connect(self._firstTimeCB)
+        self._sendUpdates = True
+
+    def _firstTimeCB(self):
+        self.gui.modules.route.routingDone.connect(self._routingDoneCB)
+
+    def _routingDoneCB(self, result):
+        if result and result.returnCode == constants.ROUTING_SUCCESS:
+            routePoints = result.route.getPointsLLE()
+            messagePoints = result.route.getMessagePoints()
+            messagePointsLLEM = []
+            for mp in messagePoints:
+                messagePointsLLEM.append(mp.getLLEM())
+            self.gui.log.debug("routing successful")
+            pyotherside.send("routeReceived", routePoints, messagePointsLLEM)
+        else:
+            self.gui.log.debug("routing failed")

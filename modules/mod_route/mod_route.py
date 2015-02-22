@@ -31,10 +31,10 @@ import time
 import threading
 from core import constants
 from core.point import Point
+from core.signal import Signal
 import core.way as way
 from core.backports.six import u
 from . import routing_providers
-import pyotherside
 
 
 DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
@@ -77,9 +77,8 @@ class Route(RanaModule):
         # Monav
         self.monav = None
 
-        # QT5 routing specific
-        self.deviceId = self.modrana.gui.getIDString()
-        self.log.debug("My ID: " + self.deviceId)
+        # signals
+        self.routingDone = Signal()
 
     def _goToInitialState(self):
         """restorer initial routing state
@@ -560,15 +559,12 @@ class Route(RanaModule):
     def _handleRoutingResultCB(self, result):
         # remove any previous route description
         self.text = None
+        # trigger the routing done signal
+        self.routingDone(result)
+
         if result.route and result.returnCode == constants.ROUTING_SUCCESS:
             # process and save routing results
             self.routeLookupDuration = result.lookupDuration
-
-            # save a copy of the route in projection units for faster drawing
-            proj = self.m.get('projection', None)
-            if proj:
-                self.pxpyRoute = [proj.ll2pxpyRel(x[0], x[1]) for x in result.route.getPointsLLE()]
-            self.processAndSaveDirections(result.route)
 
             # set start and destination
             start = result.route.getPointByID(0)
@@ -582,16 +578,14 @@ class Route(RanaModule):
 
             self.osdMenuState = OSD_CURRENT_ROUTE
 
-            if self.deviceId == "Qt5":
-                ###### sailfish/qml stuff
-                routePoints = result.route.getPointsLLE()
-                messagePoints = result.route.getMessagePoints()
-                messagePointsLLEM = []
-                for mp in messagePoints:
-                    messagePointsLLEM.append(mp.getLLEM())
-                self.log.debug("FJF about to send signal, routeReceived")
-                pyotherside.send("routeReceived", routePoints, messagePointsLLEM)
-            else:
+            # do the GTK GUI specific stuff only when running with GTK GUI
+            if self.modrana.gui.getIDString() == "GTK":
+                # save a copy of the route in projection units for faster drawing
+                proj = self.m.get('projection', None)
+                if proj:
+                    self.pxpyRoute = [proj.ll2pxpyRel(x[0], x[1]) for x in result.route.getPointsLLE()]
+                self.processAndSaveDirections(result.route)
+                self.osdMenuState = OSD_CURRENT_ROUTE
                 self.startNavigation()
 
         else: # routing failed
