@@ -622,7 +622,7 @@ class ModRana(object):
         if key in self.watches:
             remove = lambda x: x[0] == id
             self.watches[key][:] = [x for x in self.watches[key] if not remove(x)]
-        log.error("can't remove watch - key does not exist, watchId:", id)
+        log.error("can't remove watch - key does not exist, watchId: %s", id)
 
     def _notifyWatcher(self, key, oldValue):
         """run callbacks registered on an options key
