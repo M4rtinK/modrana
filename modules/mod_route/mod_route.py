@@ -604,7 +604,7 @@ class Route(RanaModule):
             elif result.returnCode == constants.ROUTING_ADDRESS_NOT_FOUND:
                 self.notify('start or destination address not found', 3000)
             else:
-                self.notify('offline routing failed', 5000)
+                self.notify('routing failed', 5000)
 
     def getAvailableMonavDataPacks(self):
             """Return all available Monav data packs in the main monav data folder
