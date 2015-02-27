@@ -162,7 +162,6 @@ class MapTiles(RanaModule):
             self.modrana.watch("layer2", self._mapStateChangedCB)
             self.modrana.watch("overlay", self._mapStateChangedCB)
             self.modrana.watch("network", self._mapStateChangedCB)
-            self.m.get("mapData").downloadPool.batchDone.connect(self._batchDownloadCompleteDB)
 
     @property
     def tileDownloaded(self):
@@ -190,6 +189,9 @@ class MapTiles(RanaModule):
         self._downloader = Downloader(maxThreads,
                                       taskBufferSize=taskQueueSize)
         self._startTileLoadingManager()
+
+        if gs.GUIString == "GTK":
+            self.m.get("mapData").downloadPool.batchDone.connect(self._batchDownloadCompleteDB)
 
     def getTile(self, lzxy, async=False, tag=None, download=True):
         """Return a tile specified by layerID, z, x & y
