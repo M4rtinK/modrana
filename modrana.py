@@ -28,7 +28,6 @@ import time
 startTimestamp = time.time()
 import os
 import marshal
-import traceback
 import imp
 import platform
 
