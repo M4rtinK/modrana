@@ -48,7 +48,7 @@ def setCorrectCWD():
     # effect such as modRana not finding modules or
     currentAbsolutePath = os.path.dirname(os.path.abspath(__file__))
     if USING_QRC:
-        # we are runing from qrc, so just use the qrc:/ prefix as CWD,
+        # we are running from qrc, so just use the qrc:/ prefix as CWD,
         # no need to chdir
         currentAbsolutePath = "qrc:/"
     else:
