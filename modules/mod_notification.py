@@ -312,11 +312,11 @@ class Notification(RanaModule):
     def drawMasterOverlay(self, cr):
         """this function is called by the menu module, both in map mode and menu mode
         -> its bit of a hack, but we can """
-        self.drawNotification(cr)
+        self._drawNotification(cr)
         if self._showWorkInProgressOverlay:
             self.drawWorkInProgressOverlay(cr)
 
-    def drawNotification(self, cr):
+    def _drawNotification(self, cr):
         """Draw the notifications on the screen on top of everything."""
         if time.time() <= self.expirationTimestamp:
             proj = self.m.get('projection', None)
