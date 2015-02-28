@@ -79,5 +79,20 @@ BasePage {
             wrapMode : Text.WrapAnywhere
             width : parent.width
         }
+        Label {
+            text : "Notifications"
+        }
+        Button {
+            text : "Notify"
+            onClicked : {
+                rWin.notify("Hello world!")
+            }
+        }
+        Button {
+            text : "Notify long"
+            onClicked : {
+                rWin.notify("ModRana is a flexible navigation software for (not only) mobile Linux devices.")
+            }
+        }
     }
 }
