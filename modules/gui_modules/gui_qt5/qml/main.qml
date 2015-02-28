@@ -271,6 +271,25 @@ ApplicationWindow {
         visible : startupLabel.visible
     }
 
+    // TODO: instantiating the popup here might prevent the correct UC style
+    //       from being set, making the popup use non-hiDPI style on hiDPI
+    //       devices - we should probably doe something about that once this
+    //       is actually encountered somewhere
+    Popup {
+        anchors.top : parent.top
+        id : notification
+    }
+
+    function notify(message, timeout) {
+        if (timeout) {
+            notification.timeout = timeout
+        } else {
+            // make sure the timeout is reset back to default if not specified
+            notification.timeout = 5000
+        }
+        notification.notify(message)
+    }
+
     function __import_modRana() {
         // import the modRana module asynchronously and trigger modRana
         // start once the module is loaded
@@ -306,6 +325,9 @@ ApplicationWindow {
             rWin.theme = newTheme
         })
 
+        python.setHandler("pythonNotify", function(pythonNotify) {
+            rWin.notify(pythonNotify.message, pythonNotify.timeout)
+        })
 
         // get the argv & remove the qml launcher
         // & qml file name from it (args nr. 0 and 1)
@@ -593,10 +615,6 @@ ApplicationWindow {
         //TODO: value checking :D
         rWin.visibility = value
         rWin._lastVisibility = rWin.visibility
-    }
-
-    function notify(message, timeout) {
-        rWin.log.warning("notification skipped (fixme): " + message)
     }
 }
 
