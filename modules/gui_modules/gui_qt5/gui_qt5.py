@@ -89,6 +89,9 @@ class QMLGUI(GUIModule):
         # positioning related
         self._pythonPositioning = False
 
+        # we handle notifications by forwarding them to the QML context
+        self.modrana.notificationTriggered.connect(self._dispatchNotificationCB)
+
         # register exit handler
         #pyotherside.atexit(self._shutdown)
         # FIXME: for some reason the exit handler is never
@@ -194,19 +197,18 @@ class QMLGUI(GUIModule):
     def hasNotificationSupport(self):
         return True
 
-    def notify(self, text, msTimeout=5000, icon=""):
-        """trigger a notification using the Qt Quick Components
-        InfoBanner notification"""
-        # TODO: implement this
+    def _dispatchNotificationCB(self, text, msTimeout=5000, icon=""):
+        """Let the QML context know that it should show a notification
 
-        #    # QML uses <br> instead of \n for linebreak
-        #    text = newlines2brs(text)
-        #    self.log.debug("notify:\n message: %s, timeout: %d" % (text, msTimeout))
-        #    if self.rootObject:
-        #      self.rootObject.notify(text, msTimeout)
-        #    else:
-        #      self._notificationQueue.append((text, msTimeout, icon))
-        return
+        :param str text: text of the notification message
+        :param int msTimeout: how long to show the notification in ms
+        """
+
+        self.log.debug("notify:\n message: %s, timeout: %d" % (text, msTimeout))
+        pyotherside.send("pythonNotify", {
+            "message" : newlines2brs(text),  # QML uses <br> in place of \n
+            "timeout" : msTimeout
+        })
 
     def openUrl(self, url):
         # TODO: implement this

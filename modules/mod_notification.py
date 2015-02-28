@@ -73,6 +73,10 @@ class Notification(RanaModule):
         if gs.GUIString == "GTK":
             self.wipOverlayEnabled.connect(self._doRefresh)
             self.tasksChanged.connect(self._doRefresh)
+            # we handle notification only with the GTK GUI and when the device module does not
+            # support showing them
+            if not self.modrana.dmod.hasNotificationSupport():
+                self.modrana.notificationTriggered.connect(self._startCustomNotificationCB)
 
     def _doRefresh(self, ignore):
         self.set('needRedraw', True)
@@ -94,7 +98,7 @@ class Notification(RanaModule):
                 if len(args) >= 2:
                     timeout = float(args[1])
                 messageText = args[0]
-                self.handleNotification(messageText, timeout)
+                self.modrana.notify(messageText, timeout)
 
         elif messageType == 'ml' and message == 'workInProgressOverlay':
             if args:
@@ -112,13 +116,13 @@ class Notification(RanaModule):
             if len(parameterList) >= 2:
                 messageText = parameterList[0]
                 timeout = self.timeout
-                self.handleNotification(messageText, timeout)
+                self.modrana.notify(messageText, timeout)
                 if len(parameterList) == 2:
                     try:
                         timeout = int(parameterList[1]) # override the default timeout
                     except Exception:
                         self.log.exception("wrong timeout, using default 5 seconds")
-                self.handleNotification(messageText, timeout)
+                self.modrana.notify(messageText, timeout)
             else:
                 self.log.error("wrong message: %s", message)
 
@@ -262,47 +266,7 @@ class Notification(RanaModule):
             else:
                 click.registerXYWH(x1, y1, dx, dy, "onlineServices:cancelOperation", layer=2)
 
-
-    def handleNotification(self, message, timeout=None, icon=""):
-        """Handle a notification request
-
-        As on some platforms, such as on Maemo 5 Fremantle, system
-        notifications should only be triggered from the main thread,
-        we pass the notification request to the main loop, to be
-        dispatched once the main GUI thread becomes idle
-        """
-
-        cron = self.m.get("cron", None)
-        if cron:
-            cron.addIdle(self._dispatchNotification, [message, timeout, icon])
-
-    def _dispatchNotification(self, message, timeout, icon):
-        """Dispatch a notification using the most optimal method for the
-        current device & platform combination
-
-        NOTE: This method should be run from the main thread as there might be
-        issues otherwise (such as the "Xlib: unexpected async reply" errors).
-        """
-        # TODO: icon support
-        if timeout is None:
-            timeout = self.timeout
-
-        self.log.info("message: %s, timeout: %s", message, timeout)
-
-        # if some module sends a notification during init, the device module might not be loaded yet
-        if self.modrana.dmod and self.modrana.gui:
-            if self.dmod.hasNotificationSupport(): # use platform specific method
-                self.log.info("notification@dmod: message: %s, timeout: %s", message, timeout)
-                self.dmod.notify(message, int(timeout) * 1000)
-            elif self.modrana.gui.hasNotificationSupport():
-                self.modrana.gui.notify(message, timeout, icon)
-            else:
-                self._startCustomNotification(message, timeout, icon)
-        else:
-            self._startCustomNotification(message, timeout, icon)
-
-    def _startCustomNotification(self, message, timeout, icon=""):
-        self.log.info("message: %s, timeout: %s", message, timeout)
+    def _startCustomNotificationCB(self, message, timeout, icon=""):
         self.position = 'middle'
         self.notificationText = message
         self.expirationTimestamp = time.time() + timeout

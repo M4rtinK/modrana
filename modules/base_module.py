@@ -55,11 +55,8 @@ class RanaModule(object):
         return self.m.get(module, None) is not None
 
     def notify(self, message, msTimeout=0, icon=""):
-        notify = self.m.get('notification')
-        if notify:
-            # the notification module counts timeout in seconds
-            sTimeout = msTimeout / 1000.0
-            notify.handleNotification(message, sTimeout, icon)
+        # forward the notification to the main singleton modRana class
+        self.modrana.notify(message, msTimeout, icon)
 
     def getStatus(self):
         return self.status

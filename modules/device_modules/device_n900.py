@@ -92,6 +92,9 @@ class DeviceN900(DeviceModule):
             # libconic
             self._conicConnect()
 
+            # we handle notifications only for the GTK GUI
+            self.modrana.notificationTriggered.connect(self._dispatchNotificationCB)
+
         elif gs.GUIString == "QML":
             self.log.info("N900 Qt screen saver controller created")
             self.qScreenSaver = QSystemScreenSaver()
@@ -261,20 +264,26 @@ class DeviceN900(DeviceModule):
         else:
             return False
 
-    def notify(self, message, msTimeout=0, icon="icon_text"):
+    def _dispatchNotificationCB(self, message, msTimeout, icon):
+        # make sure the notification is triggered from the main thread,
+        # if it is not called from the main thread modRana might crash
+        # (both X and GTK are not very thread-safe)
+        cron = self.m.get("cron", None)
+        if cron:
+            cron.addIdle(self._showNotificationCB, [message, msTimeout, icon])
+
+    def _showNotificationCB(self, message, msTimeout=0, icon="icon_text"):
         """the third parameter has to be a non zero-length string or
         else the banner is not created"""
         #TODO: find what strings to submit to actually get an icon displayed
 
         if len(icon) == 0:
             icon = "spam" # as mentioned above, the string has to be longer than zero
-        if gs.GUIString == "GTK":
-            topWindow = self.modrana.gui.getWindow()
-            banner = hildon.hildon_banner_show_information_with_markup(topWindow, icon, message)
-            if msTimeout:
-                banner.set_timeout(msTimeout)
-        else:
-            self.log.warning("the N900 device module currently handles only Hildon based notifications")
+
+        topWindow = self.modrana.gui.getWindow()
+        banner = hildon.hildon_banner_show_information_with_markup(topWindow, icon, message)
+        if msTimeout:
+            banner.set_timeout(msTimeout)
 
     def hasButtons(self):
         """the N900 has the volume keys (2 buttons), the camera trigger (2 states)

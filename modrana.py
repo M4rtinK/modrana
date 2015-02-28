@@ -33,6 +33,7 @@ import platform
 
 # initialize logging
 from core import modrana_log
+from core.signal import Signal
 modrana_log.init_logging()
 import logging
 log = logging.getLogger("")
@@ -123,6 +124,8 @@ class ModRana(object):
             'device': None, # TODO: do this directly
             'name': ""
         }
+
+        self.notificationTriggered = Signal()
 
         self.mapRotationAngle = 0 # in radians
         self.notMovingSpeed = 1 # in m/s
@@ -729,11 +732,18 @@ class ModRana(object):
 
     def notify(self, message, msTimeout=0, icon=""):
         log.info("modRana notify: %s", message)
-        notify = self.m.get('notification')
-        if notify:
-            # the notification module counts timeout in seconds
-            sTimeout = msTimeout / 1000.0
-            notify.handleNotification(message, sTimeout, icon)
+        # trigger the notification signal - this will
+        # trigger an actual notification by one of the
+        # notification systems connected to the notification
+        # signal (if any)
+        self.notificationTriggered(message, msTimeout, icon)
+
+
+        # notify = self.m.get('notification')
+        # if notify:
+        #     # the notification module counts timeout in seconds
+        #     sTimeout = msTimeout / 1000.0
+        #     notify.handleNotification(message, sTimeout, icon)
 
     def getModes(self):
         """return supported modes"""
