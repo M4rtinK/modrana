@@ -49,15 +49,15 @@ POI_FOLDER_PATH = "/home/user/MyDocs/.maps"
 DEBUG_LOG_FOLDER_PATH = "/home/user/MyDocs/modrana_debug_logs/"
 
 
-def getModule(m, d, i):
-    return DeviceN900(m, d, i)
+def getModule(*args, **kwargs):
+    return DeviceN900(*args, **kwargs)
 
 
 class DeviceN900(DeviceModule):
     """A N900 modRana device-specific module"""
 
-    def __init__(self, m, d, i):
-        DeviceModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        DeviceModule.__init__(self, *args, **kwargs)
         self.rotationObject = None
         # start the N900 specific automatic GUI rotation support
         self.done = False

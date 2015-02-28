@@ -21,12 +21,12 @@ from modules.base_module import RanaModule
 from . import tile
 
 
-def getModule(m, d, i):
-    return AnimatedMapView(m, d, i)
+def getModule(*args, **kwargs):
+    return AnimatedMapView(*args, **kwargs)
 
 
 class AnimatedMapView(RanaModule):
     """A sample pyroute module"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)

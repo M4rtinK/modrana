@@ -20,12 +20,12 @@
 from modules.base_module import RanaModule
 
 
-def getModule(m, d, i):
-    return InterfaceFeedback(m, d, i)
+def getModule(*args, **kwargs):
+    return InterfaceFeedback(*args, **kwargs)
 
 
 class InterfaceFeedback(RanaModule):
     """A sample pyroute module"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)

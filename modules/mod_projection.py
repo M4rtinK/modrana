@@ -25,8 +25,8 @@ from math import *
 import math
 
 
-def getModule(m, d, i):
-    return Projection(m, d, i)
+def getModule(*args, **kwargs):
+    return Projection(*args, **kwargs)
 
 
 class Projection(RanaModule):
@@ -46,8 +46,8 @@ class Projection(RanaModule):
     # - use a mechanism similar to nudging for faster tracklog drawing
     #  -> show the trackpoints so no ll2xy would be needed
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
         self.xyValid = False
         self.llValid = False

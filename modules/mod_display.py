@@ -27,15 +27,15 @@ if gs.GUIString == "GTK":
     import gtk
 
 
-def getModule(m, d, i):
-    return Display(m, d, i)
+def getModule(*args, **kwargs):
+    return Display(*args, **kwargs)
 
 
 class Display(RanaModule):
     """A platform independent display device control module"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
         """according to documentation on:
         (http://wiki.maemo.org/PyMaemo/Python-osso_examples#Device_State),

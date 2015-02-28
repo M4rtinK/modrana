@@ -45,16 +45,16 @@ OSD_CURRENT_ROUTE = 2 # a single button that triggers the options menu
 OSD_ROUTE_OPTIONS = 3 # buttons that go to the edit or info menus
 
 
-def getModule(m, d, i):
-    return Route(m, d, i)
+def getModule(*args, **kwargs):
+    return Route(*args, **kwargs)
 
 
 #noinspection PyAttributeOutsideInit
 class Route(RanaModule):
     """Routes"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self._goToInitialState()
         # how long the last routing lookup took in seconds
         self.routeLookupDuration = 0

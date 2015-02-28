@@ -93,15 +93,15 @@ class Logger(object):
 logger = Logger(log=False)
 
 
-def getModule(m, d, i):
-    return QMLGUI(m, d, i)
+def getModule(*args, **kwargs):
+    return QMLGUI(*args, **kwargs)
 
 
 class QMLGUI(GUIModule):
     """A Qt + QML GUI module"""
 
-    def __init__(self, m, d, i):
-        GUIModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        GUIModule.__init__(self, *args, **kwargs)
 
         # some constants
         self.msLongPress = 400

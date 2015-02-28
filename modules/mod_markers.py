@@ -26,15 +26,15 @@ import logging
 log = logging.getLogger("mod.markers")
 
 
-def getModule(m, d, i):
-    return Markers(m, d, i)
+def getModule(*args, **kwargs):
+    return Markers(*args, **kwargs)
 
 
 class Markers(RanaModule):
     """A module handling markers on the map."""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.groups = {} # marker groups
 
     def addGroup(self, name, points, menu=False):

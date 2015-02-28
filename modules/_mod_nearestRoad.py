@@ -28,8 +28,8 @@
 #
 #class nearestRoad(ranaModule):
 #  """Handles messages"""
-#  def __init__(self, m, d, i):
-#    ranaModule.__init__(self, m, d, i)
+#  def __init__(self, *args, **kwargs):
+#    ranaModule.__init__(self, *args, **kwargs)
 #    self.lastpos = [0,0]
 #    self.dataFilename = ''
 #    self.data = None

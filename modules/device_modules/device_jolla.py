@@ -30,15 +30,15 @@ SAILFISH_MODRANA_PROFILE_NAME = "harbour-modrana"
 
 # NOTE: use the device_ prefix when naming the module
 
-def getModule(m, d, i):
-    return Jolla(m, d, i)
+def getModule(*args, **kwargs):
+    return Jolla(*args, **kwargs)
 
 
 class Jolla(DeviceModule):
     """A Jolla device module"""
 
-    def __init__(self, m, d, i):
-        DeviceModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        DeviceModule.__init__(self, *args, **kwargs)
         # migrate any old profiles
         # TODO: remove this once it is probable
         # that most users are using the new profile path

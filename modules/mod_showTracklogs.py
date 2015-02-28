@@ -28,15 +28,15 @@ if gs.GUIString == "GTK":
     import gtk
 
 
-def getModule(m, d, i):
-    return ShowTracklogs(m, d, i)
+def getModule(*args, **kwargs):
+    return ShowTracklogs(*args, **kwargs)
 
 
 class ShowTracklogs(RanaModule):
     """draws a GPX track on the map"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
         self.lineWidth = 7 #with of the line denoting GPX tracks
         self.distinctColors = [

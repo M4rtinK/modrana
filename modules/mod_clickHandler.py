@@ -21,15 +21,15 @@ from modules.base_module import RanaModule
 from core.rectangle import Rectangle
 
 
-def getModule(m, d, i):
-    return ClickHandler(m, d, i)
+def getModule(*args, **kwargs):
+    return ClickHandler(*args, **kwargs)
 
 
 class ClickHandler(RanaModule):
     """handle mouse clicks"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.beforeDraw()
         self.ignoreNextClicks = 0
         self.layers = {2: [], 0: []}

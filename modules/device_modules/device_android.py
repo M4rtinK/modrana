@@ -30,15 +30,15 @@ TRACKLOG_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "tracklogs")
 DEBUG_LOG_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "debug_logs")
 POI_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "poi")
 
-def getModule(m, d, i):
-    return Android(m, d, i)
+def getModule(*args, **kwargs):
+    return Android(*args, **kwargs)
 
 
 class Android(DeviceModule):
     """A modRana device-specific module for Android"""
 
-    def __init__(self, m, d, i):
-        DeviceModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        DeviceModule.__init__(self, *args, **kwargs)
         self.tempUnfullscreen = False
 
     def getDeviceIDString(self):

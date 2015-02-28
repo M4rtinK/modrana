@@ -23,15 +23,15 @@ from datetime import *
 import math
 
 
-def getModule(m, d, i):
-    return Placenames(m, d, i)
+def getModule(*args, **kwargs):
+    return Placenames(*args, **kwargs)
 
 
 class Placenames(poiModule):
     """Lookup nearest town or village"""
 
-    def __init__(self, m, d, i):
-        poiModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        poiModule.__init__(self, *args, **kwargs)
         self.poi = {'villages': [], 'cities': [], 'towns': []} # village, city, town
         self.load("places.txt")
         self.lastpos = (None, None)

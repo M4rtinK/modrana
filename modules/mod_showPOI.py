@@ -24,15 +24,15 @@ import math
 import threading
 
 
-def getModule(m, d, i):
-    return ShowPOI(m, d, i)
+def getModule(*args, **kwargs):
+    return ShowPOI(*args, **kwargs)
 
 
 class ShowPOI(RanaModule):
     """Show POI on the map and in the menu."""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.activePOI = None
         self.visiblePOI = []
         self.listMenusDirty = True

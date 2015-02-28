@@ -46,15 +46,15 @@ DL_LOCATION_ROUTE = "route"
 # maximum zoom level used when no maximum is specified for a layer
 MAX_ZOOMLEVEL = 17
 
-def getModule(m, d, i):
-    return MapData(m, d, i)
+def getModule(*args, **kwargs):
+    return MapData(*args, **kwargs)
 
 
 class MapData(RanaModule):
     """Handle downloading of map data"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self._tileDownloadRequests = set()
         self._tileDownloadRequestsLock = threading.RLock()
 

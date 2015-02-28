@@ -24,15 +24,15 @@ import re
 import threading
 
 
-def getModule(m, d, i):
-    return Voice(m, d, i)
+def getModule(*args, **kwargs):
+    return Voice(*args, **kwargs)
 
 
 class Voice(RanaModule):
     """Handle text to speech."""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.espaekProcess = None
         # this lock is used to make sure there is only one voice speaking at once
         self.voiceLock = threading.Lock()

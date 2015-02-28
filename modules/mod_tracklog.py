@@ -43,15 +43,15 @@ DONT_ADD_TO_TRACE_THRESHOLD = 1
 # NOTE: all points are still stored, just not drawn
 
 
-def getModule(m, d, i):
-    return Tracklog(m, d, i)
+def getModule(*args, **kwargs):
+    return Tracklog(*args, **kwargs)
 
 
 class Tracklog(RanaModule):
     """Record tracklogs"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.loggingEnabled = False
         self.loggingPaused = False
         self.loggingStartTimestamp = 0

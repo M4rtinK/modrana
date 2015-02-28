@@ -38,15 +38,15 @@ from modules.base_module import RanaModule
 from modules import tileserver_callback_proxy
 
 
-def getModule(m, d, i):
-    return Tileserver(m, d, i)
+def getModule(*args, **kwargs):
+    return Tileserver(*args, **kwargs)
 
 
 class Tileserver(RanaModule):
     """A modRana built-in tileserver"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
         tileserver_callback_proxy.cb = self
 

@@ -24,15 +24,15 @@ from core.constants import DEVICE_TYPE_SMARTPHONE
 
 # NOTE: use the device_ prefix when naming the module
 
-def getModule(m, d, i):
-    return DeviceN9(m, d, i)
+def getModule(*args, **kwargs):
+    return DeviceN9(*args, **kwargs)
 
 
 class DeviceN9(DeviceModule):
     """A Nokia N9 device module"""
 
-    def __init__(self, m, d, i):
-        DeviceModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        DeviceModule.__init__(self, *args, **kwargs)
         # create the screen-saver controller
         self.qScreenSaver = None
 

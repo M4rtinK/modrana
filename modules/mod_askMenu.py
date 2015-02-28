@@ -20,15 +20,15 @@
 from modules.base_module import RanaModule
 
 
-def getModule(m, d, i):
-    return AskMenu(m, d, i)
+def getModule(*args, **kwargs):
+    return AskMenu(*args, **kwargs)
 
 
 class AskMenu(RanaModule):
     """A module providing yes/no question dialogs"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.menus = None
         self.question = None
         self.yesAction = None

@@ -23,15 +23,15 @@ from time import *
 from upoints import gpx
 
 
-def getModule(m, d, i):
-    return ReplayGpx(m, d, i)
+def getModule(*args, **kwargs):
+    return ReplayGpx(*args, **kwargs)
 
 
 class ReplayGpx(RanaModule):
     """Replay a GPX"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.nodes = []
         self.pos = 0
         self.numNodes = 0

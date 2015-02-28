@@ -20,14 +20,14 @@
 from modules.base_module import RanaModule
 from core import color
 
-def getModule(m, d, i):
-    return MapView(m, d, i)
+def getModule(*args, **kwargs):
+    return MapView(*args, **kwargs)
 
 class MapView(RanaModule):
     """Controls the view being displayed on the map"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
     def firstTime(self):
         self.checkMapDraggingMode() # check the map dragging mode on startup

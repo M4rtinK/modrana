@@ -23,15 +23,15 @@ from core import gs
 from core.signal import Signal
 
 
-def getModule(m, d, i):
-    return Location(m, d, i)
+def getModule(*args, **kwargs):
+    return Location(*args, **kwargs)
 
 
 class Location(RanaModule):
     """Supplies position info from a position source"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.tt = 0
         self.connected = False
         self.set('speed', None)

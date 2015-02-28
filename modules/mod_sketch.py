@@ -26,15 +26,15 @@ if gs.GUIString == "GTK":
     import cairo
 
 
-def getModule(m, d, i):
-    return Sketch(m, d, i)
+def getModule(*args, **kwargs):
+    return Sketch(*args, **kwargs)
 
 
 class Sketch(RanaModule):
     """Sketching functionality"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.points = []
 
         if 0: # to test

@@ -24,15 +24,15 @@ from core.constants import DEVICE_TYPE_SMARTPHONE
 import subprocess
 
 
-def getModule(m, d, i):
-    return DeviceNeo(m, d, i)
+def getModule(*args, **kwargs):
+    return DeviceNeo(*args, **kwargs)
 
 
 class DeviceNeo(DeviceModule):
     """A Neo FreeRunner modRana device-specific module"""
 
-    def __init__(self, m, d, i):
-        DeviceModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        DeviceModule.__init__(self, *args, **kwargs)
         self.tempUnfullscreen = False
         # connect to the location start & stop signals,
         # so that the FreeRunners GPS can be started/stopped

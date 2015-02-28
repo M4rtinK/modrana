@@ -25,15 +25,15 @@ from time import sleep
 import re
 
 
-def getModule(m, d, i):
-    return PosFromFile(m, d, i)
+def getModule(*args, **kwargs):
+    return PosFromFile(*args, **kwargs)
 
 
 class PosFromFile(RanaModule):
     """Supplies position info from GPSD"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
     def update(self):
         filename = self.get('pos_filename', 'pos.txt')

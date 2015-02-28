@@ -40,15 +40,15 @@ except Exception:
 
 THEME_CONFIG_FILENAME = "theme.conf"
 
-def getModule(m, d, i):
-    return ThemeModule(m, d, i)
+def getModule(*args, **kwargs):
+    return ThemeModule(*args, **kwargs)
 
 
 class ThemeModule(RanaModule):
     """ModRana theming module"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self._themeChanged = Signal()
 
         self.modrana.watch('theme', self._themeChangedCB, runNow=True)

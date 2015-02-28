@@ -32,8 +32,8 @@
 #
 #class vmap(ranaModule):
 #  """Display map vectors"""
-#  def __init__(self, m, d, i):
-#    ranaModule.__init__(self, m, d, i)
+#  def __init__(self, *args, **kwargs):
+#    ranaModule.__init__(self, *args, **kwargs)
 #    self.tiles = {}
 #    self.style_d = 0
 #    self.style_c = 0

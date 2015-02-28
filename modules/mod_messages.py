@@ -20,15 +20,15 @@
 from modules.base_module import RanaModule
 
 
-def getModule(m, d, i):
-    return MessageModule(m, d, i)
+def getModule(*args, **kwargs):
+    return MessageModule(*args, **kwargs)
 
 
 class MessageModule(RanaModule):
     """Handles messages"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
     def routeMessage(self, messages):
         for message in messages.split('|'):

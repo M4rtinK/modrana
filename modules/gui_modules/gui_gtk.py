@@ -47,15 +47,15 @@ def simplePythagoreanDistance(x1, y1, x2, y2):
     return math.sqrt(dx ** 2 + dy ** 2)
 
 
-def getModule(m, d, i):
-    return GTKGUI(m, d, i)
+def getModule(*args, **kwargs):
+    return GTKGUI(*args, **kwargs)
 
 
 class GTKGUI(GUIModule):
     """A GTK GUI module"""
 
-    def __init__(self, m, d, i):
-        GUIModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        GUIModule.__init__(self, *args, **kwargs)
 
         # some constants
         self.msLongPress = 400

@@ -47,15 +47,15 @@ if gs.GUIString == "GTK":
     import pangocairo
 
 
-def getModule(m, d, i):
-    return TurnByTurn(m, d, i)
+def getModule(*args, **kwargs):
+    return TurnByTurn(*args, **kwargs)
 
 
 class TurnByTurn(RanaModule):
     """A turn by turn navigation module."""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         # initial colors
         self.navigationBoxBackground = (0, 0, 1, 0.3) # very transparent blue
         self.navigationBoxText = (1, 1, 1, 1) # non-transparent white

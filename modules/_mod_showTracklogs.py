@@ -21,15 +21,15 @@ from modules.base_module import RanaModule
 from upoints import gpx
 
 
-def getModule(m, d, i):
-    return ShowTracklogs(m, d, i)
+def getModule(*args, **kwargs):
+    return ShowTracklogs(*args, **kwargs)
 
 
 class ShowTracklogs(RanaModule):
     """draws a GPX track on the map"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
         self.tracks = {} #dictionary of tracklists TODO: support tracklists with same filenames
         #self.tracks_filelist = {} #dictionary in form of filename:key_in_tracks

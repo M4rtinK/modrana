@@ -26,15 +26,15 @@ if gs.GUIString == "GTK":
     import cairo
     import pycha
 
-def getModule(m, d, i):
-    return RouteProfile(m, d, i)
+def getModule(*args, **kwargs):
+    return RouteProfile(*args, **kwargs)
 
 
 class RouteProfile(RanaModule):
     """Creates a route profile (an elevation chart)"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
     def drawMenu(self, cr, menuName, args=None):
         # is this menu the correct menu ?

@@ -32,15 +32,15 @@ if gs.GUIString == "GTK":
     import pangocairo
 
 
-def getModule(m, d, i):
-    return Menus(m, d, i)
+def getModule(*args, **kwargs):
+    return Menus(*args, **kwargs)
 
 
 class Menus(RanaModule):
     """Handle menus"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.menus = {}
         self.lists = {}
         self.listOffset = 0

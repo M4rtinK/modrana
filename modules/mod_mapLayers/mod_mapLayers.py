@@ -51,15 +51,15 @@ MAP_LAYER_GROUP_REQUIRED_KEYS = set([
 ])
 
 
-def getModule(m, d, i):
-    return MapLayers(m, d, i)
+def getModule(*args, **kwargs):
+    return MapLayers(*args, **kwargs)
 
 
 class MapLayers(RanaModule):
     """Map layer handling"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self._layers = {}
         self._groups = {}
         self._tree = {}

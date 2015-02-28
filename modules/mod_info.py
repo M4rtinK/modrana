@@ -22,15 +22,15 @@ from core.point import Point
 import math
 from core import geo
 
-def getModule(m, d, i):
-    return Info(m, d, i)
+def getModule(*args, **kwargs):
+    return Info(*args, **kwargs)
 
 
 class Info(RanaModule):
     """A modRana information handling module"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.versionString = "unknown version"
         currentVersionString = self.modrana.paths.getVersionString()
         if currentVersionString is not None:

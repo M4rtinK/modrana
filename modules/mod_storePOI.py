@@ -23,15 +23,15 @@ import sqlite3
 import csv
 from core.backports.six import u
 
-def getModule(m, d, i):
-    return StorePOI(m, d, i)
+def getModule(*args, **kwargs):
+    return StorePOI(*args, **kwargs)
 
 
 class StorePOI(RanaModule):
     """Store POI data."""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.db = None
         self.tempOnlinePOI = None # temporary slot for an uncommitted POI from online search
         # to which menu to return after the POI is stored

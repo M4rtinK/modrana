@@ -20,12 +20,12 @@
 from modules.base_module import RanaModule
 
 
-def getModule(m, d, i):
-    return UpdateTiles(m, d, i)
+def getModule(*args, **kwargs):
+    return UpdateTiles(*args, **kwargs)
 
 
 class UpdateTiles(RanaModule):
     """Update stored map tiles."""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)

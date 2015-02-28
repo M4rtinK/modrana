@@ -22,15 +22,15 @@ import math
 from math import radians
 
 
-def getModule(m, d, i):
-    return PositionMarker(m, d, i)
+def getModule(*args, **kwargs):
+    return PositionMarker(*args, **kwargs)
 
 
 class PositionMarker(RanaModule):
     """A sample pyroute module"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
     def drawMapOverlay(self, cr):
         """Draw an "own position" marker"""

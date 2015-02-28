@@ -23,15 +23,15 @@ from random import *
 from urllib import *
 
 
-def getModule(m, d, i):
-    return ShareServer(m, d, i)
+def getModule(*args, **kwargs):
+    return ShareServer(*args, **kwargs)
 
 
 class ShareServer(poiModule):
     """Shares position info with groups"""
 
-    def __init__(self, m, d, i):
-        poiModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        poiModule.__init__(self, *args, **kwargs)
 
     def update(self):
         pass

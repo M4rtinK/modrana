@@ -34,15 +34,15 @@ from . import online_providers
 import logging
 log = logging.getLogger("mod.onlineServices")
 
-def getModule(m, d, i):
-    return OnlineServices(m, d, i)
+def getModule(*args, **kwargs):
+    return OnlineServices(*args, **kwargs)
 
 
 class OnlineServices(RanaModule):
     """A module for talking to various online services"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.workerThreads = []
         self.drawOverlay = False
         self.workStartTimestamp = None

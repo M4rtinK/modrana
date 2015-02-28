@@ -32,8 +32,8 @@ PYTHON3 = sys.version_info[0] > 2
 class DeviceModule(RanaModule):
     """A modRana device module"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.internetConnectivityChanged = Signal()
 
     def getDeviceIDString(self):

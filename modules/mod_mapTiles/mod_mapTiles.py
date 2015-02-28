@@ -83,9 +83,8 @@ if gs.GUIString == "GTK":
 
 TERMINATOR = object()
 
-def getModule(m, d, i):
-    return MapTiles(m, d, i)
-
+def getModule(*args, **kwargs):
+    return MapTiles(*args, **kwargs)
 
 class MapTiles(RanaModule):
     """Display map images"""
@@ -98,8 +97,8 @@ class MapTiles(RanaModule):
     #   web mercator tile coordinates
 
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.images = [{}, {}] # the first dict contains normal image data, the second contains special tiles
         self.imagesLock = threading.RLock()
         # we need to limit the size of the tile cache to avoid a memory leak

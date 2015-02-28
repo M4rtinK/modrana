@@ -23,15 +23,15 @@ from modules.device_modules.base_device_module import DeviceModule
 from core.constants import DEVICE_TYPE_DESKTOP
 
 
-def getModule(m, d, i):
-    return DeviceNetbook(m, d, i)
+def getModule(*args, **kwargs):
+    return DeviceNetbook(*args, **kwargs)
 
 
 class DeviceNetbook(DeviceModule):
     """A netbook modRana device-specific module"""
 
-    def __init__(self, m, d, i):
-        DeviceModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        DeviceModule.__init__(self, *args, **kwargs)
 
     def getDeviceIDString(self):
         return "netbook"

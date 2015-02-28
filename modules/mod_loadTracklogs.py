@@ -36,15 +36,15 @@ from time import gmtime, strftime
 import logging
 gpx_log = logging.getLogger("core.loadTracklogs.gpx_tracklog")
 
-def getModule(m, d, i):
-    return LoadTracklogs(m, d, i)
+def getModule(*args, **kwargs):
+    return LoadTracklogs(*args, **kwargs)
 
 
 class LoadTracklogs(RanaModule):
     """A sample pyroute module"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.tracklogs = {} # dictionary of all loaded tracklogs, path is the key
         #self.set('tracklogs', self.tracklogs) # now we make the list easily acessible to other modules
         self.cache = {}

@@ -25,16 +25,14 @@ from core import constants
 # identifies item as a group
 GROUP_IDENTIFIER = "groupIdentifier"
 
-
-def getModule(m, d, i):
-    return Options(m, d, i)
-
+def getModule(*args, **kwargs):
+    return Options(*args, **kwargs)
 
 class Options(RanaModule):
     """Handle options"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.options = {}
         # for fast searching defaults for corresponding keys
         self.keyDefault = {}

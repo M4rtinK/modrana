@@ -67,16 +67,16 @@ def sqliteConnectionWrapper(databasePath):
     """
     return sqlite3.connect(databasePath, check_same_thread=False)
 
-def getModule(m, d, i):
-    return StoreTiles(m, d, i)
+def getModule(*args, **kwargs):
+    return StoreTiles(*args, **kwargs)
 
 
 class StoreTiles(RanaModule):
     """Single-file-fs tile storage"""
     #TODO: maybe run this in separate thread ?
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.layers = {}
         self.threadLayers = {}
         self.currentStorageVersion = 1

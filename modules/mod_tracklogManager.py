@@ -21,15 +21,15 @@ from modules.base_module import RanaModule
 import os
 
 
-def getModule(m, d, i):
-    return TracklogManager(m, d, i)
+def getModule(*args, **kwargs):
+    return TracklogManager(*args, **kwargs)
 
 
 class TracklogManager(RanaModule):
     """Module for managing tracklogs"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.scrollDict = {}
         self.currentNumItems = 0
         self.LTModule = None

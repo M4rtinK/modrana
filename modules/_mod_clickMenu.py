@@ -23,15 +23,15 @@ from time import time
 from math import pi
 
 
-def getModule(m, d, i):
-    return ClickMenu(m, d, i)
+def getModule(*args, **kwargs):
+    return ClickMenu(*args, **kwargs)
 
 
 class ClickMenu(RanaModule):
     """Overlay info on the map"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.lastWaypoint = "(none)"
         self.lastWaypointAddTime = 0
         self.messageLingerTime = 2

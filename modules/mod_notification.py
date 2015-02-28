@@ -28,15 +28,15 @@ from core.threads import threadMgr
 from core import gs
 
 
-def getModule(m, d, i):
-    return Notification(m, d, i)
+def getModule(*args, **kwargs):
+    return Notification(*args, **kwargs)
 
 
 class Notification(RanaModule):
     """This module provides notification support."""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.notificationText = ""
         self.timeout = 5
         self.position = 'middle'

@@ -31,20 +31,20 @@ elif gs.GUIString.lower() == "qt5":
 elif gs.GUIString.lower() == "qml":
     from PySide import QtCore
 
-def getModule(m, d, i):
+def getModule(*args, **kwargs):
     """
     return module version corresponding to the currently used toolkit
     (eq. one that uses the timers provided by the toolkit
     - gobject.timeout_add, QTimer, etc.
     """
     if gs.GUIString.lower() == 'qt5':
-        return CronQt5(m, d, i)
+        return CronQt5(*args, **kwargs)
     if gs.GUIString == 'QML':
-        return CronQt(m, d, i)
+        return CronQt(*args, **kwargs)
     elif gs.GUIString == 'GTK': # GTK for now
-        return CronGTK(m, d, i)
+        return CronGTK(*args, **kwargs)
     else:
-        return Cron(m, d, i)
+        return Cron(*args, **kwargs)
 
 
 class Cron(RanaModule):
@@ -67,8 +67,8 @@ class Cron(RanaModule):
     #    It might be also possible to stop or pause some/all of the timers
     #    after a period of inactivity, or some such.
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
     def addIdle(self, callback, args):
         """add a callback that is called once the main loop becomes idle"""
@@ -109,8 +109,8 @@ class Cron(RanaModule):
 class CronGTK(Cron):
     """A GTK timing and scheduling module for modRana"""
 
-    def __init__(self, m, d, i):
-        Cron.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        Cron.__init__(self, *args, **kwargs)
         gui = self.modrana.gui
 
         self.nextId = 0
@@ -168,8 +168,8 @@ class CronGTK(Cron):
 class CronQt(Cron):
     """A Qt timing and scheduling module for modRana"""
 
-    def __init__(self, m, d, i):
-        Cron.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        Cron.__init__(self, *args, **kwargs)
         self.nextId = 0
         # cronTab and activeIds should be in sync
         self.cronTab = {"idle": {}, "timeout": {}}
@@ -238,8 +238,8 @@ class CronQt(Cron):
 class CronQt5(Cron):
     """A Qt 5 timing and scheduling module for modRana"""
 
-    def __init__(self, m, d, i):
-        Cron.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        Cron.__init__(self, *args, **kwargs)
         self.nextId = 0
         # cronTab and activeIds should be in sync
         self.cronTab = {"idle": {}, "timeout": {}}

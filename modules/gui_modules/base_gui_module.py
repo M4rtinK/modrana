@@ -28,8 +28,8 @@ from modules.base_module import RanaModule
 
 
 class GUIModule(RanaModule):
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.msLongPress = 400
         self.subtypeId = None
 

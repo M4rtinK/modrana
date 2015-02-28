@@ -20,26 +20,24 @@
 import logging
 
 class RanaModule(object):
-    def __init__(self, modules=None, data=None, initInfo=None):
-        if not initInfo: initInfo = {}
-        if not data: data = {}
-        if not modules: modules = {}
-        self.m = modules
-        self.d = data
+    def __init__(self, modrana, moduleName, importName):
+        self.modrana = modrana # this is modRana
+        # bind the persistent dictionary
+        self.d = self.modrana.d
+        # bind the module dictionary
+        self.m = self.modrana.m
         self.status = ''
-        self.modrana = initInfo.get('modrana') # this is modRana
-        # bind the get set and watch methods to the "kernel" :D
+        # and also bind the get set and watch methods to the "kernel" :D
         self.get = self.modrana.get
         self.set = self.modrana.set
         self.optionsKeyExists = self.modrana.optionsKeyExists
         self.watch = self.modrana.watch
         self.removeWatch = self.modrana.removeWatch
-        self._moduleName = initInfo.get('name', "")
-        self._importName = initInfo.get('importName', "")
-        self.device = initInfo.get('device', "")
+        self._moduleName = moduleName
+        self._importName = importName
         self.mainWindow = None # will be provided by modrana.py (a gdk.Window) -> the Widget main window
         self.topWindow = None # will be provided by modrana.py (a gdk.Window) -> the modRana top window
-        self.dmod = None # will be provided by modrana.py (a device specific module) -> current device specific module instance
+        self.dmod = self.modrana.dmod # will be provided by modrana.py (a device specific module) -> current device specific module instance
         self._log = self._getLog()
 
     @property

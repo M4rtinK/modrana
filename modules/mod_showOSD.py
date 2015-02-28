@@ -28,15 +28,15 @@ if gs.GUIString == "GTK":
     import pycha
 
 
-def getModule(m, d, i):
-    return ShowOSD(m, d, i)
+def getModule(*args, **kwargs):
+    return ShowOSD(*args, **kwargs)
 
 
 class ShowOSD(RanaModule):
     """Draw OSD (On Screen Display)."""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.items = None
         self.routeProfileData = None
         self.nearestPoint = None

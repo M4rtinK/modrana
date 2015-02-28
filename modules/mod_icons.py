@@ -36,15 +36,15 @@ if gs.GUIString == "GTK":
 from core import constants
 
 
-def getModule(m, d, i):
-    return Icons(m, d, i)
+def getModule(*args, **kwargs):
+    return Icons(*args, **kwargs)
 
 
 class Icons(RanaModule):
     """Draw icons"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
         self.defaultTheme = constants.DEFAULT_THEME_ID
         self.cantLoad = []

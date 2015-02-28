@@ -26,15 +26,15 @@ if gs.GUIString == "GTK":
     import gtk
 
 
-def getModule(m, d, i):
-    return TextEntry(m, d, i)
+def getModule(*args, **kwargs):
+    return TextEntry(*args, **kwargs)
 
 
 class TextEntry(RanaModule):
     """A module for handling text entry."""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.entryBoxVisible = False
 
 

@@ -29,15 +29,15 @@ except ImportError:
     from core.backports.odict import odict  # Python <2.7
 
 
-def getModule(m, d, i):
-    return Search(m, d, i)
+def getModule(*args, **kwargs):
+    return Search(*args, **kwargs)
 
 
 class Search(RanaModule):
     """Search for POI"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.localSearchResults = None # GLS results from onlineServices
         self.scroll = 0
         self.list = None # processed results: (distance from pos, result, absolute index)

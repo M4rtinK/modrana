@@ -22,15 +22,15 @@ from core import geo
 from time import *
 
 
-def getModule(m, d, i):
-    return Stats(m, d, i)
+def getModule(*args, **kwargs):
+    return Stats(*args, **kwargs)
 
 
 class Stats(RanaModule):
     """Handles statistics"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.minimalSpeed = 2 #  in kmh, we don't update the avg speed if the current speed is like this
         self.lastT = None
         self.maxSpeed = 0

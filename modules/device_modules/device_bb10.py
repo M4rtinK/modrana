@@ -24,15 +24,15 @@ from core.constants import DEVICE_TYPE_SMARTPHONE
 import bbpy
 
 
-def getModule(m, d, i):
-    return BB10(m, d, i)
+def getModule(*args, **kwargs):
+    return BB10(*args, **kwargs)
 
 
 class BB10(DeviceModule):
     """A modRana device-specific module for BB10 devices"""
 
-    def __init__(self, m, d, i):
-        DeviceModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        DeviceModule.__init__(self, *args, **kwargs)
         self.tempUnfullscreen = False
 
     def getDeviceIDString(self):

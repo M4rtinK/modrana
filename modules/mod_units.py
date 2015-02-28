@@ -21,8 +21,8 @@ from modules.base_module import RanaModule
 import time
 
 
-def getModule(m, d, i):
-    return Units(m, d, i)
+def getModule(*args, **kwargs):
+    return Units(*args, **kwargs)
 
 
 class Units(RanaModule):
@@ -36,8 +36,8 @@ class Units(RanaModule):
     yardInMeters = 0.9144
 
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         """
         # we consider 2km/h as as stationary
         (to filter out the standard GPS drift while not moving)

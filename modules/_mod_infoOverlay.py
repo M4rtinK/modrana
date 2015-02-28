@@ -22,15 +22,15 @@ import cairo
 from datetime import *
 
 
-def getModule(m, d, i):
-    return InfoOverlay(m, d, i)
+def getModule(*args, **kwargs):
+    return InfoOverlay(*args, **kwargs)
 
 
 class InfoOverlay(RanaModule):
     """Overlay info on the map"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
         self.lines = ['hello', 'world']
         self.oldLines = ['', '']
         self.mode = 0

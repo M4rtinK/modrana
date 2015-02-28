@@ -392,7 +392,7 @@ class ModRana(object):
     def _listAvailableGUIModulesByID(self):
         return self._getModuleNamesFromFolder(GUI_MODULES_FOLDER)
 
-    def _loadModule(self, importName, modRanaName):
+    def _loadModule(self, importName, moduleName):
         """load a single module by name from path"""
         startM = time.clock()
         fp = None
@@ -406,19 +406,16 @@ class ModRana(object):
                 fp, pathName, description = imp.find_module(importName, ALL_MODULE_FOLDERS)
                 a = imp.load_module(importName, fp, pathName, description)
 
-            initInfo = self.initInfo
-            initInfo['name'] = modRanaName
-            initInfo['importName'] = importName
-            module = a.getModule(self.m, self.d, initInfo)
-            self.m[modRanaName] = module
+            module = a.getModule(self, moduleName, importName)
+            self.m[moduleName] = module
             log.info(" * %s: %s (%1.2f ms)",
-                     modRanaName,
-                     self.m[modRanaName].__doc__,
+                     moduleName,
+                     self.m[moduleName].__doc__,
                      (1000 * (time.clock() - startM))
             )
             return module
         except Exception:
-            log.exception("module: %s/%s failed to load", importName, modRanaName)
+            log.exception("module: %s/%s failed to load", importName, moduleName)
             return None
         finally:
             if fp:

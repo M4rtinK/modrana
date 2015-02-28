@@ -55,8 +55,8 @@ def newlines2brs(text):
     """ QML uses <br> instead of \n for linebreak """
     return re.sub('\n', '<br>', text)
 
-def getModule(m, d, i):
-    return QMLGUI(m, d, i)
+def getModule(*args, **kwargs):
+    return QMLGUI(*args, **kwargs)
 
 def point2dict(point):
     """ Convert a Point instance to a dict
@@ -77,8 +77,8 @@ def point2dict(point):
 class QMLGUI(GUIModule):
     """A Qt + QML GUI module"""
 
-    def __init__(self, m, d, i):
-        GUIModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        GUIModule.__init__(self, *args, **kwargs)
 
         # some constants
         self.msLongPress = 400

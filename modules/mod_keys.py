@@ -26,15 +26,15 @@ if gs.GUIString == "GTK":
     import gtk
 
 
-def getModule(m, d, i):
-    return Keys(m, d, i)
+def getModule(*args, **kwargs):
+    return Keys(*args, **kwargs)
 
 
 class Keys(RanaModule):
     """A keyboard input handling module"""
 
-    def __init__(self, m, d, i):
-        RanaModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        RanaModule.__init__(self, *args, **kwargs)
 
     def firstTime(self):
         # connect the key press handler

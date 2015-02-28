@@ -36,15 +36,15 @@ except Exception:
 
 # NOTE: use the device_ prefix when naming the module
 
-def getModule(m, d, i):
-    return DeviceNemo(m, d, i)
+def getModule(*args, **kwargs):
+    return DeviceNemo(*args, **kwargs)
 
 
 class DeviceNemo(DeviceModule):
     """A Nokia N9 device module"""
 
-    def __init__(self, m, d, i):
-        DeviceModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        DeviceModule.__init__(self, *args, **kwargs)
         # create the screen-saver controller
         self.qScreenSaver = QSystemScreenSaver()
 

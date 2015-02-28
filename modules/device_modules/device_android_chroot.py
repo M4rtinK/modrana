@@ -22,15 +22,15 @@
 from modules.device_modules.base_device_module import DeviceModule
 
 
-def getModule(m, d, i):
-    return AndroidChroot(m, d, i)
+def getModule(*args, **kwargs):
+    return AndroidChroot(*args, **kwargs)
 
 
 class AndroidChroot(DeviceModule):
     """A modRana device-specific module for Android chroot"""
 
-    def __init__(self, m, d, i):
-        DeviceModule.__init__(self, m, d, i)
+    def __init__(self, *args, **kwargs):
+        DeviceModule.__init__(self, *args, **kwargs)
         self.tempUnfullscreen = False
 
     def getDeviceIDString(self):
