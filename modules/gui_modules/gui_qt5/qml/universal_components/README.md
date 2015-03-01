@@ -56,6 +56,17 @@ UC plugin directly:
 import "./UC"
 
 
+Component usage notes
+---------------------
+
+**PlatformFlickable** and **PlatformListView**
+
+These two components provide access to enhanced platform specific Flickables
+and ListViews (SilicaListView has fast scroll support, etc.).
+With backends that don't have such enhancements a normal Flickable or ListView
+is used.
+
+
 Applications using Universal Controls
 -------------------------------------
 
