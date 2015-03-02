@@ -105,7 +105,7 @@ but users will need to provide custom triggering for the TopMenu (calling its po
 when not using the Silica backend.
 
 
-Applications using Universal Controls
+Applications using Universal Components
 -------------------------------------
 
 * [modRana flexible navigation system](https://github.com/M4rtinK/modrana)
