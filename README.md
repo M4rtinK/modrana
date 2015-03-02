@@ -77,22 +77,24 @@ menu should also be supported.
 The easiest way to use the TopMenu is to place PageHeader on top of your Page
 and assing the TopMenu into its *menu* property:
 
-    import UC 1.0
-    Page {
-        PageHeader {
-            anchors.top : parent.top
-            menu : TopMenu {
-                MenuItem {
-                    text : "option 1"
-                    onClicked : {console.log("1 clicked!")}
-                }
-                MenuItem {
-                    text : "option 2"
-                    onClicked : {console.log("2 clicked!")}
-                }
+```QML
+import UC 1.0
+Page {
+    PageHeader {
+        anchors.top : parent.top
+        menu : TopMenu {
+            MenuItem {
+                text : "option 1"
+                onClicked : {console.log("1 clicked!")}
+            }
+            MenuItem {
+                text : "option 2"
+                onClicked : {console.log("2 clicked!")}
             }
         }
     }
+}
+```
 
 The top menu makes sure that the TopMenu can be activated when needed, either in a
 platform specific way (pull down gesture with Silica) or by showing a button
