@@ -114,7 +114,8 @@ Applications using Universal Components
 TODO
 ----
 
-* add pull-down menu
+* Glacier backend
+
 
 LICENSE
 -------
