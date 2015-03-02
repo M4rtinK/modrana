@@ -17,6 +17,10 @@ Dialog 1.0 Dialog.qml
 PageStatus 1.0 PageStatus.js
 ComboBox 1.0 ComboBox.qml
 Menu 1.0 Menu.qml
+TopMenu 1.0 TopMenu.qml
 MenuItem 1.0 MenuItem.qml
 BackgroundRectangle 1.0 BackgroundRectangle.qml
 VerticalScrollDecorator 1.0 VerticalScrollDecorator.qml
+Popup 1.0 Popup.qml
+PlatformFlickable 1.0 PlatformFlickable.qml
+PlatformListView 1.0 PlatformListView.qml
