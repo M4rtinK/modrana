@@ -91,7 +91,7 @@ Item {
     // normal status text
     Label {
         opacity: 0.7
-        visible : !rWin.tileDebug && tile.downloading
+        visible : tile.downloading
         anchors.leftMargin: 16
         font.pixelSize : 16
         elide : Text.ElideMiddle
@@ -103,10 +103,10 @@ Item {
         text : tile.layerName + " : " + statusString
     }
     // debug status text
+    /*
     Label {
         opacity: 1.0
         color : "black"
-        visible: rWin.tileDebug
         anchors.leftMargin: 16
         font.pixelSize : 16
         elide : Text.ElideRight
@@ -116,6 +116,6 @@ Item {
               "<br>cache:" + tile.cache + "<br>error:" + tile.error +
               "<br>retryCount: " + tile.retryCount +
               "<br>download: " + tile.downloading
-    }
+    }*/
 }
 
