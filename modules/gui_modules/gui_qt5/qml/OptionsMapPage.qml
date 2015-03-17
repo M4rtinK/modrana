@@ -17,7 +17,7 @@ BasePage {
         KeyComboBox {
             width : parent.width
             label : qsTr("Store map tiles in")
-            key : "tileStorageType"
+            defaultValue : rWin.startupValues.defaultTileStorageType
             model : ListModel {
                 ListElement {
                     text : "files"
@@ -28,8 +28,12 @@ BasePage {
                     text : "Sqlite"
                     value : "sqlite"
                 }
+                }
+            Component.onCompleted : {
+                key = "tileStorageType"
             }
         }
+
         KeyComboBox {
             label : qsTr("Map scaling")
             key : "mapScale"

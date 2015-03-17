@@ -201,6 +201,8 @@ ApplicationWindow {
         }
     }
 
+    property var startupValues : null
+
     // export the Python context so other elements can use
     // it without instantiating it themselves
     property alias python : python
@@ -382,6 +384,7 @@ ApplicationWindow {
         // assign to constants
         rWin.c = values.constants
         rWin.platform.setValuesFromPython(values)
+        rWin.startupValues = values
         rWin.log.debug("startup values loaded")
 
         rWin.log.debug("handling back button display")
