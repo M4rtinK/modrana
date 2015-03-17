@@ -328,7 +328,7 @@ class StoreTiles(RanaModule):
         """
         return data for the given tile
         """
-        storageType = self.get('tileStorageType', 'files')
+        storageType = self.get('tileStorageType', self.modrana.dmod.defaultTileStorageType)
         if storageType == 'sqlite':
             return self._getTileDataFromSqlite(lzxy)
         else:  # the only other storage method is currently the classical files storage
@@ -432,7 +432,7 @@ class StoreTiles(RanaModule):
            called from a non-main thread
         """
         layer, z, x, y = lzxy
-        storageType = self.get('tileStorageType', 'files')
+        storageType = self.get('tileStorageType', self.modrana.dmod.defaultTileStorageType)
         if storageType == 'sqlite': # we are storing to the database
             dbFolderPath = self.getLayerDbFolderPath(layer.folderName)
             if dbFolderPath is not None: # is the database accessible ?
@@ -464,7 +464,7 @@ class StoreTiles(RanaModule):
     def tileExists(self, filePath, lzxy, fromThread=False):
         """test if a tile exists
            if fromThread=False, a new connection is created and disconnected again"""
-        storageType = self.get('tileStorageType', 'files')
+        storageType = self.get('tileStorageType', self.modrana.dmod.defaultTileStorageType)
         layer, z, x, y = lzxy
         if storageType == 'sqlite': # we are storing to the database
             dbFolderPath = self.getLayerDbFolderPath(layer.folderName)
@@ -549,7 +549,7 @@ class StoreTiles(RanaModule):
 
         # check if persistent tile storage is enabled ?
         if self.get('storeDownloadedTiles', True):
-            storageType = self.get('tileStorageType', 'files')
+            storageType = self.get('tileStorageType', self.modrana.dmod.defaultTileStorageType)
             if storageType == 'sqlite': # we are storing to the database
                 # put the tile to the storage queue, so that then worker can store it
                 self.sqliteTileQueue.put((tile, lzxy), block=True, timeout=20)

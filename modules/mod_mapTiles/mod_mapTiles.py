@@ -781,7 +781,7 @@ class MapTiles(RanaModule):
         start2 = time.clock()
         self.storeInMemory(self._pixbuf2cairoImageSurface(pixbuf), lzxy)
         if debug:
-            storageType = self.get('tileStorageType', 'files')
+            storageType = self.get('tileStorageType', self.modrana.dmod.defaultTileStorageType)
             sprint(
                 "tile loaded from local storage (%s) in %1.2f ms" % (storageType, (1000 * (time.clock() - start1))))
             sprint("tile cached in memory in %1.2f ms" % (1000 * (time.clock() - start2)))

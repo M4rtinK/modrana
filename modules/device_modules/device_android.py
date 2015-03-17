@@ -23,6 +23,8 @@ from modules.device_modules.base_device_module import DeviceModule
 
 import os
 
+from core import constants
+
 MAIN_MODRANA_DATA_FOLDER = "/sdcard/modrana"  # main modRana data folder on Android
 MAP_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "maps")
 ROUTING_DATA_FOLDER_PATH = os.path.join(MAIN_MODRANA_DATA_FOLDER, "routing_data")
@@ -94,3 +96,13 @@ class Android(DeviceModule):
     def getDeviceType(self):
         # TODO: device type detection
         return None
+
+    @property
+    def defaultTileStorageType(self):
+        """Use Sqlite tile storage by default on Android to both
+        make sure the tiles would not be indexed into the gallery and also as
+        sharing the tile image files with another mapping application is not
+        very probably on Android. And who knows how would the usual Android
+        filesystems handle such a big amount of very small files.
+        """
+        return constants.TILE_STORAGE_SQLITE

@@ -561,7 +561,7 @@ class Options(RanaModule):
                [('files', "files (default, more space used)"),
                 ('sqlite', "sqlite (new, less space used)")],
                group,
-               'files')
+               self.modrana.dmod.defaultTileStorageType)
         addBoolOpt("Store downloaded tiles", "storeDownloadedTiles", group, True)
         addOpt("Sqlite tile db commit interval", "sqliteTileDatabaseCommitInterval",
                [(1, "1 second", notifyRestartNeeded),

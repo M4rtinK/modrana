@@ -643,7 +643,7 @@ class MapTiles(QtCore.QObject):
             return False
 
     def _getStorageType(self):
-        self.gui.modrana.get("tileStorageType", "files")
+        self.gui.modrana.get("tileStorageType", self.gui.modrana.dmod.defaultTileStorageType)
 
     def _setStorageType(self, value):
         self.gui.modrana.set("tileStorageType", value)

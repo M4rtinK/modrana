@@ -333,6 +333,21 @@ class DeviceModule(RanaModule):
         """
         return constants.DEFAULT_THEME_ID, constants.DEFAULT_THEME_NAME
 
+    @property
+    def defaultTileStorageType(self):
+        """Default tile storage type for the platform
+        Some platforms might not heavy issues with many small files
+        and there might be a bigger possibility of sharing tile files
+        with other mapping applications. On other platforms storing
+        many small files might be very inefficient or there might be
+        other issues such as the files being indexed into a gallery,
+        etc.
+
+        :returns: default tile storage type
+        :rtype: str
+        """
+        return constants.DEFAULT_TILE_STORAGE_TYPE
+
 #  def getAutorotationSupported(self):
 #    return False
 #
