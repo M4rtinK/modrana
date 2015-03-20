@@ -108,6 +108,10 @@ class StoreTiles(RanaModule):
         # device modules are loaded and initialized and configs are parsed before "normal"
         # modRana modules are initialized, so we can cache the map folder path in init
         self._mapFolderPath = self.modrana.paths.getMapFolderPath()
+        # check if the folder exists and create it if it does not exist yet and do any other
+        # operations that might need to be done on the folder to make it usable for storing
+        # map data, such as preventing indexing of the tile images, etc.
+        self._checkMapFolder()
 
     def firstTime(self):
         self._startTileLoadingThread()
@@ -120,6 +124,38 @@ class StoreTiles(RanaModule):
 
     def _noOp(self, *args):
         pass
+
+    def _checkMapFolder(self):
+        """ Check if the top level map folder exists and create it if it doesn't.
+        (The paths module should take care of this when getMapFolderPath is called,
+         but still check for it just in case.)
+        Also does platform specific tweaks like creating a .nomedia file in the
+        map folder on Android to prevent tile images from being indexed into the
+        Android gallery.
+        """
+
+        if os.path.exists(self._mapFolderPath):
+            if not os.path.isdir:
+                # path exists but is not a directory
+                self.log.critical("map data folder path exists but is not a directory: %s", self._mapFolderPath)
+        else:  # path does not exist, create it
+            try:
+                self.log.info("creating map data folder in %s", self._mapFolderPath)
+                os.makedirs(self._mapFolderPath)
+            except Exception:
+                self.log.exception("map folder creation failed for path %s", self._mapFolderPath)
+
+        if self.dmod.getDeviceIDString() == "android":
+            nomedia_file_path = os.path.join(self._mapFolderPath, ".nomedia")
+            if os.path.exists(nomedia_file_path):
+                if not os.path.isfile(nomedia_file_path):
+                    self.log.warning(".nomedia in the map data folder is not a file %s", nomedia_file_path)
+            else :  # create the .nomedia file to prevent indexing of tile images
+                self.log.info("creating a .nomedia file in %s", self._mapFolderPath)
+                try:
+                    open(nomedia_file_path, "w").close()
+                except Exception:
+                    self.log.exception(".nomedia file creation failed in %s", nomedia_file_path)
 
     def getLayerDbFolderPath(self, folderPrefix):
         return os.path.join(self._mapFolderPath, folderPrefix)
