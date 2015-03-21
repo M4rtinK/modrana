@@ -144,7 +144,6 @@ class Projection(RanaModule):
         # compute display unit position on the new zoom level
         lat, lon = self.xy2ll(x, y)
         newX, newY = self.llz2xy(lat, lon, zoom)
-        self.log.debug("%s,%s", newX, newY)
         # get the difference from map center
         dx = (x-newX)/2.0
         dy = (y-newY)/2.0
