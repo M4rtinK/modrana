@@ -108,6 +108,7 @@ class Menus(RanaModule):
         if m is not None:
             m.registerDraggable(x, y, x + w, y + h, "mapView") # handler for dragging the map
             m.registerXYWH(x, y, x + w, y + h, "menu:screenClicked")
+            m.registerXYWH(x, y, x + w, y + h, "mapView:zoomInOnDoubleClick", doubleClick=True)
 
         # check out if button hiding is on and behave accordingly
         if self.hideMapScreenButtons:

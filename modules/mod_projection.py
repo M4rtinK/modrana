@@ -131,6 +131,28 @@ class Projection(RanaModule):
             self.findEdges()
         self.llValid = True
 
+    def setZoomXY(self, x, y, zoom):
+        """Set a new zoom level while keeping the coordinates corresponding to
+        x,y on the same place on the screen.
+        This is used for example for double-click zoom so that you can repeatedly
+        double-click a point on the map and the point will still stay in the
+        same place on the screen.
+        """
+
+        # disable centering as this will almost always shift map center
+        self.set("centred", False)
+        # compute display unit position on the new zoom level
+        lat, lon = self.xy2ll(x, y)
+        newX, newY = self.llz2xy(lat, lon, zoom)
+        self.log.debug("%s,%s", newX, newY)
+        # get the difference from map center
+        dx = (x-newX)/2.0
+        dy = (y-newY)/2.0
+        # nudge the map center to compensate
+        self.nudge(dx, dy)
+        # implement the new zoom level
+        self.implementNewZoom(zoom)
+
     def setZoom(self, value, isAdjustment=False):
         """Change the zoom level, keeping same map centre
         if isAdjustment is true, then value is relative to current zoom
@@ -284,6 +306,14 @@ class Projection(RanaModule):
         x = (px - self.px1) * self.scale
         y = (py - self.py1) * self.scale
         return x, y
+
+    def llz2xy(self, lat, lon, zoom):
+        """Convert geographic units to display units at given zoom level"""
+        px, py = ll2xy(lat, lon, zoom)
+        px1, px2, py1, py2 = self.findEdgesForZl(zoom, self.scale)
+        x = (px - px1) * self.scale
+        y = (py - py1) * self.scale
+        return x + self.w/2.0, y+self.h/2.0
 
     def ll2pxpy(self, lat, lon):
         """Convert geographic units to projection units"""

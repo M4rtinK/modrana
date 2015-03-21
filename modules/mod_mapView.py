@@ -19,6 +19,7 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 from core import color
+from core import geo
 
 def getModule(*args, **kwargs):
     return MapView(*args, **kwargs)
@@ -61,6 +62,14 @@ class MapView(RanaModule):
             else:
                 self.notify("minimum zoomlevel reached")
 
+        elif message == "zoomInOnDoubleClick":
+            newZ = z + 1
+            x, y = self.get("lastClickXY", (0.5, 0.5))
+            self.set('z', newZ)
+            proj = self.m.get('projection', None)
+            if proj:
+                proj.setZoomXY(x, y, zoom=newZ)
+                self.notify("zooming <b>in</b> to zl %d" % newZ)
 
         elif message == 'recentreToPos':
             pos = self.get('pos', None)
