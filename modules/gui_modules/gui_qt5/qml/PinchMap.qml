@@ -83,7 +83,6 @@ Rectangle {
     //    }
 
     signal mapClicked(int screenX, int screenY)
-    signal mapDoubleClicked(int screenX, int screenY)
     signal mapPanEnd
 
     // register the tile-downloaded handler
@@ -640,7 +639,7 @@ Rectangle {
             }
 
             onDoubleClicked: {
-                mapDoubleClicked(mouse.x, mouse.y)
+                setZoomLevelPoint(pinchmap.zoomLevel + 1, mouse.x, mouse.y);
             }
 
             onWheel:  {
