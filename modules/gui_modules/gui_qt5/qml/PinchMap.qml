@@ -643,6 +643,11 @@ Rectangle {
                 mapDoubleClicked(mouse.x, mouse.y)
             }
 
+            onWheel:  {
+                var zoom_diff = (wheel.angleDelta.y > 0) ? 1 : -1;
+                setZoomLevelPoint(pinchmap.zoomLevel + zoom_diff, wheel.x, wheel.y);
+            }
+
             onPressed: {
                 __isPanning = true;
                 __lastX = mouse.x;
