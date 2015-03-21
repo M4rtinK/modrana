@@ -470,6 +470,9 @@ class MainWidget(gtk.Widget):
         if not self.pressLengthTimer:
             self.pressLengthTimer = gobject.timeout_add(50, self.checkStillPressed, event.time, time.time(), event.x,
                                                         event.y)
+        # check for double-click
+        if event.type == gdk._2BUTTON_PRESS:
+            self.doubleClick(event.x, event.y)
 
     def moved(self, w, event):
         """Drag-handler"""
@@ -533,6 +536,12 @@ class MainWidget(gtk.Widget):
         m = self.modrana.getModule("clickHandler", None)
         if m:
             m.handleClick(x, y, msDuration)
+
+    def doubleClick(self, x, y):
+        """this fires after a double-click is detected"""
+        m = self.modrana.getModule("clickHandler", None)
+        if m:
+            m.handleDoubleClick(x, y)
 
     def handleDrag(self, x, y, dx, dy, startX, startY, msDuration):
         """handle dragging on the screen"""
