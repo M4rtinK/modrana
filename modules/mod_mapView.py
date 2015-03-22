@@ -63,13 +63,8 @@ class MapView(RanaModule):
                 self.notify("minimum zoomlevel reached")
 
         elif message == "zoomInOnDoubleClick":
-            newZ = z + 1
             x, y = self.get("lastClickXY", (0.5, 0.5))
-            self.set('z', newZ)
-            proj = self.m.get('projection', None)
-            if proj:
-                proj.setZoomXY(x, y, zoom=newZ)
-                self.notify("zooming <b>in</b> to zl %d" % newZ)
+            self.zoomOnXY(x, y, z+1)
 
         elif message == 'recentreToPos':
             pos = self.get('pos', None)
@@ -98,6 +93,16 @@ class MapView(RanaModule):
                 proj.recentre(lat, lon, zoom)
             except Exception:
                 self.log.exception("cant recenter coordinates")
+
+    def zoomOnXY(self, x, y, zoom):
+        """Zoom on the given screen x, y so that the corresponding point
+        on the map is always in the same place on the screen.
+        """
+        self.set('z', zoom)
+        proj = self.m.get('projection', None)
+        if proj:
+            proj.setZoomXY(x, y, zoom=zoom)
+            self.notify("zooming to zl %d" % zoom)
 
     def dragEvent(self, startX, startY, dx, dy, x, y):
         """only drag the map if centering is disabled"""

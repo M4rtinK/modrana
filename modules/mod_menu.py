@@ -28,6 +28,7 @@ from core import gs
 
 if gs.GUIString == "GTK":
     import gtk
+    from gtk import gdk
     import pango
     import pangocairo
 
@@ -93,6 +94,18 @@ class Menus(RanaModule):
         """report whether button hiding is enabled"""
         return self.hideMapScreenButtons
 
+    def _zoomScrollCB(self, event):
+        z = self.get("z", 15)
+        newZoom = z
+        if event.direction == gdk.SCROLL_UP:
+            newZoom = z + 1
+        elif event.direction == gdk.SCROLL_DOWN:
+            newZoom = z - 1
+
+        mapView = self.m.get("mapView", None)
+        if mapView:
+                mapView.zoomOnXY(event.x, event.y, newZoom)
+
     def drawScreenOverlay(self, cr):
         """Draw an overlay on top of the map, showing various information
         about position etc."""
@@ -110,6 +123,7 @@ class Menus(RanaModule):
             #m.registerXYWH(x, y, x + w, y + h, "menu:screenClicked")
             m.registerScreenClicked("menu:screenClicked")
             m.registerXYWH(x, y, x + w, y + h, "mapView:zoomInOnDoubleClick", doubleClick=True)
+            m.registerScrollXYWH(x, y, x + w, y + h, self._zoomScrollCB)
 
         # check out if button hiding is on and behave accordingly
         if self.hideMapScreenButtons:
