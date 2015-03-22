@@ -19,7 +19,7 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 from core.rectangle import Rectangle
-
+import time
 
 def getModule(*args, **kwargs):
     return ClickHandler(*args, **kwargs)
@@ -32,22 +32,30 @@ class ClickHandler(RanaModule):
         RanaModule.__init__(self, *args, **kwargs)
         self.beforeDraw()
         self.ignoreNextClicks = 0
-        self.layers = {2: [], 0: []}
+        self._layers = [[],[],[]]
         self.dragAreas = []
         self.dragScreen = None
         self.timedActionInProgress = None
+        self._lastSingleActionTimestamp = time.time()
+        self._screenClickedNotify = None
+        self._messages = None
+
+    def firstTime(self):
+        self._messages = self.m.get("messages")
 
     def beforeDraw(self):
-        self.layers = {2: [], 0: []}
+        self._layers = [[],[],[]]
         self.dragAreas = []
         self.dragScreen = None
         self.timedActionInProgress = None
+        self._screenClickedNotify = None
 
     def register(self, rect, action, timedAction, layerNumber, doubleClick=False):
-        #NOTE: layers with higher number "cover" layers with lower number
-        #currently layers 0 and 2 are used
-        # -> if a click is "caught" in in upper layer, it is not propagated to the layer below
-        self.layers[layerNumber].append([rect, action, timedAction, doubleClick])
+        # NOTE: layers with higher number "cover" layers with lower number
+        #       currently layers 0, 1 and 2 are used
+        #       -> if a click is "caught" in an upper layer,
+        #          it is not propagated to the layer below
+        self._layers[layerNumber].append([rect, action, timedAction, doubleClick])
 
     def registerXYWH(self, x1, y1, dx, dy, action, timedAction=None, layer=0, doubleClick=False):
         if timedAction: # at least one timed action
@@ -61,66 +69,57 @@ class ClickHandler(RanaModule):
         area = Rectangle(x1, y1, x2 - x1, y2 - y1)
         self.register(area, action, timedAction, layer, doubleClick)
 
-    def handleClick(self, x, y, msDuration):
-    #    self.log.info("Clicked at %d,%d for %d", x,y,msDuration)
+    def registerScreenClicked(self, message):
+        self._screenClickedNotify = message
+
+    def handleClick(self, x, y, msDuration, doubleClick=False):
+        if self._screenClickedNotify:
+            self._messages.routeMessage(self._screenClickedNotify)
         if self.ignoreNextClicks > 0:
             self.ignoreNextClicks -= 1
-        #      self.log.info("ignoring click, %d remaining", self.ignoreNextClicks)
         else:
-            hit = False
-            for area in self.layers[2]:
-                hit = self._processClickArea(area, x, y)
-                if hit:
-                    break
-            if not hit: # no hit in upper layer, continue to lower layer
-                for area in self.layers[0]:
-                    self._processClickArea(area, x, y)
-
+            for layer in reversed(self._layers):
+                for area in layer:
+                    if self._processClickArea(area, x, y, doubleClick=doubleClick):
+                        break
         self.set('needRedraw', True)
 
     def handleDoubleClick(self, x, y):
-        if self.ignoreNextClicks > 0:
-            self.ignoreNextClicks -= 1
-        else:
-            hit = False
-            for area in self.layers[2]:
-                hit = self._processClickArea(area, x, y, doubleClick=True)
-                if hit:
-                    break
-            if not hit: # no hit in upper layer, continue to lower layer
-                for area in self.layers[0]:
-                    self._processClickArea(area, x, y, doubleClick=True)
-
-        self.set('needRedraw', True)
+        self.handleClick(x, y, 0, doubleClick=True)
 
     def _processClickArea(self, area, x, y, doubleClick=False):
         hit = False
         (rect, action, timedAction, doubleClickRequested) = area
         clickMatching = doubleClickRequested == doubleClick
         if rect.contains(x, y) and clickMatching:
-            m = self.m.get("messages", None)
-            if m:
-                if doubleClick:
-                    self.log.info("DoubleClicked, sending %s", action)
+            hit = True
+            if doubleClick:
+                # prevent double click from triggering if a single click
+                # action has just been triggered
+                # -> for example rapid clicking on the zoom buttons
+                #    should not trigger the double click zoom action
+                dt = time.time() - self._lastSingleActionTimestamp
+                if dt < 0.2:
+                    self.log.info("Skipping double-click")
+                    hit = False
                 else:
-                    self.log.info("Clicked, sending %s", action)
-                hit = True
-                self.set('lastClickXY', (x, y))
-                m.routeMessage(action)
+                    self.log.info("DoubleClicked, sending %s", action)
             else:
-                self.log.error("No message handler to receive clicks")
+                self._lastSingleActionTimestamp = time.time()
+                self.log.info("Clicked, sending %s", action)
+            self.set('lastClickXY', (x, y))
+            if hit:
+                self._messages.routeMessage(action)
         return hit
 
     def handleLongPress(self, pressStartEpoch, msCurrentDuration, startX, startY, x, y):
         """handle long press"""
         # make sure subsequent long presses are ignored until release
         if self.ignoreNextClicks == 0:
-            hit = False
-            for area in self.layers[2]:
-                hit = self._processLPArea(area, msCurrentDuration, x, y)
-            if not hit: # no hit in upper layer, continue to lower layer
-                for area in self.layers[0]:
-                    self._processLPArea(area, msCurrentDuration, x, y)
+            for layer in reversed(self._layers):
+                for area in layer:
+                    if self._processLPArea(area, msCurrentDuration, x, y):
+                        break
 
     def _processLPArea(self, area, msCurrentDuration, x, y):
         hit = False
@@ -129,16 +128,12 @@ class ClickHandler(RanaModule):
             if rect.contains(x, y):
                 (givenMsDuration, action) = timedAction
                 if givenMsDuration <= msCurrentDuration:
-                    m = self.m.get("messages", None)
-                    if m:
-                        self.log.info("Long-clicked (%f ms), sending %s", givenMsDuration, action)
-                        hit = True
-                        self.set('lastClickXY', (x, y))
-                        self.modrana.gui.lockDrag()
-                        m.routeMessage(action)
-                        self.set('needRedraw', True)
-                    else:
-                        self.log.error("No message handler to receive clicks")
+                    self.log.info("Long-clicked (%f ms), sending %s", givenMsDuration, action)
+                    hit = True
+                    self.set('lastClickXY', (x, y))
+                    self.modrana.gui.lockDrag()
+                    self._messages.routeMessage(action)
+                    self.set('needRedraw', True)
                     self.ignoreNextClicks = self.dmod.lpSkipCount()
         return hit
 

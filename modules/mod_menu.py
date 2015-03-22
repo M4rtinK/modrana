@@ -107,7 +107,8 @@ class Menus(RanaModule):
         m = self.m.get('clickHandler', None)
         if m is not None:
             m.registerDraggable(x, y, x + w, y + h, "mapView") # handler for dragging the map
-            m.registerXYWH(x, y, x + w, y + h, "menu:screenClicked")
+            #m.registerXYWH(x, y, x + w, y + h, "menu:screenClicked")
+            m.registerScreenClicked("menu:screenClicked")
             m.registerXYWH(x, y, x + w, y + h, "mapView:zoomInOnDoubleClick", doubleClick=True)
 
         # check out if button hiding is on and behave accordingly
@@ -156,17 +157,18 @@ class Menus(RanaModule):
             menuIcon = "%s>generic:;;;;5;10" % modeIcon
 
             (x1, y1) = buttons['zoom_out']
-            self.drawButton(cr, x1, y1, dx, dy, '', minusIcon, "mapView:zoomOut")
+            self.drawButton(cr, x1, y1, dx, dy, '', minusIcon, "mapView:zoomOut", layer=1)
 
             (x1, y1) = buttons['menu']
             self.drawButton(cr, x1, y1, dx, dy,
                             'menu',
                             menuIcon,
                             "set:menu:main",
-                            timedAction=(self.modrana.gui.msLongPress, "set:menu:modes"))
+                            timedAction=(self.modrana.gui.msLongPress, "set:menu:modes"),
+                            layer=1)
 
             (x1, y1) = buttons['zoom_in']
-            self.drawButton(cr, x1, y1, dx, dy, '', plusIcon, "mapView:zoomIn")
+            self.drawButton(cr, x1, y1, dx, dy, '', plusIcon, "mapView:zoomIn", layer=1)
 
 
             # draw the maximize icon
@@ -176,11 +178,11 @@ class Menus(RanaModule):
                 icon = 'center:maximize;0.05'
 
             (x1, y1) = buttons['fullscreen']
-            self.drawButton(cr, x1, y1, dx, dy, "", icon, "ms:gui:fullscreen:toggle")
+            self.drawButton(cr, x1, y1, dx, dy, "", icon, "ms:gui:fullscreen:toggle", layer=1)
 
             # draw the centering button
             (x1, y1) = buttons['centre']
-            self.drawButton(cr, x1, y1, dx, dy, "", 'generic:;0.5;;0.5;;', "toggle:centred")
+            self.drawButton(cr, x1, y1, dx, dy, "", 'generic:;0.5;;0.5;;', "toggle:centred", layer=1)
 
             # the central circle
             cr.stroke()
@@ -310,7 +312,7 @@ class Menus(RanaModule):
         """
         self.drawButton(cr, x1, y1, w, h, textIconAction[index][0], textIconAction[index][1], textIconAction[index][2])
 
-    def drawButton(self, cr, x1, y1, w, h, text='', icon='generic', action='', timedAction=None):
+    def drawButton(self, cr, x1, y1, w, h, text='', icon='generic', action='', timedAction=None, layer=0):
         """Draw a clickable button, with icon image and text
 
         NOTE: # delimits the different captions: text_down#text_middle#text_up
@@ -332,7 +334,7 @@ class Menus(RanaModule):
         if action is not None:
             m = self.m.get('clickHandler', None)
             if m is not None:
-                m.registerXYWH(x1, y1, w, h, action, timedAction)
+                m.registerXYWH(x1, y1, w, h, action, timedAction, layer=layer)
 
     def resetMenu(self, menu=None):
         self.log.debug("Menu knows menu changed")
