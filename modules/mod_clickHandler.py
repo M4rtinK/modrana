@@ -34,6 +34,7 @@ class ClickHandler(RanaModule):
         self.ignoreNextClicks = 0
         self._layers = [[],[],[]]
         self.dragAreas = []
+        self._scrollAreas = []
         self.dragScreen = None
         self.timedActionInProgress = None
         self._lastSingleActionTimestamp = time.time()
@@ -46,6 +47,7 @@ class ClickHandler(RanaModule):
     def beforeDraw(self):
         self._layers = [[],[],[]]
         self.dragAreas = []
+        self._scrollAreas = []
         self.dragScreen = None
         self.timedActionInProgress = None
         self._screenClickedNotify = None
@@ -72,6 +74,10 @@ class ClickHandler(RanaModule):
     def registerScreenClicked(self, message):
         self._screenClickedNotify = message
 
+    def registerScrollXYWH(self, x1, y1, dx, dy, callback):
+        area = Rectangle(x1, y1, dx, dy)
+        self._scrollAreas.append((area, callback))
+
     def handleClick(self, x, y, msDuration, doubleClick=False):
         if self._screenClickedNotify:
             self._messages.routeMessage(self._screenClickedNotify)
@@ -86,6 +92,13 @@ class ClickHandler(RanaModule):
 
     def handleDoubleClick(self, x, y):
         self.handleClick(x, y, 0, doubleClick=True)
+
+    def handleScrolling(self, event):
+        for area in self._scrollAreas:
+            rect, callback = area
+            if rect.contains(event.x, event.y):
+                callback(event)
+                break
 
     def _processClickArea(self, area, x, y, doubleClick=False):
         hit = False

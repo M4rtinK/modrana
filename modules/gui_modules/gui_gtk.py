@@ -120,6 +120,7 @@ class GTKGUI(GUIModule):
 
         event_box.connect("button_press_event", self.mw.pressed)
         event_box.connect("button_release_event", self.mw.released)
+        event_box.connect("scroll_event", self.mw.scrolled)
         event_box.connect("motion_notify_event", self.mw.moved)
         win.add(event_box)
 
@@ -508,6 +509,12 @@ class MainWidget(gtk.Widget):
         distSq = dx * dx + dy * dy
         if distSq < CLICK_DRAG_THRESHOLD:
             self.click(event.x, event.y, msDuration)
+
+    def scrolled(self, w, event):
+        """mouse wheel scrolling"""
+        m = self.modrana.getModule("clickHandler", None)
+        if m:
+            m.handleScrolling(event)
 
     def checkStillPressed(self, pressStartEpoch, pressStartTime, startX, startY):
         """check if a press is still in progress and report:
