@@ -34,7 +34,7 @@ Item {
         // keys element is not available
         target : actions.mediaKeys ? actions.mediaKeys : null
         property : "enabled"
-        value : actions.mediaKeysEnabled
+        value : actions.mediaKeysEnabled && Qt.application.active
     }
 
     Component.onCompleted : {

@@ -116,9 +116,11 @@ Page {
         Connections {
             target: rWin.actions
             onZoomUp : {
+                console.log("UP")
                 pinchmap.zoomOut()
             }
             onZoomDown : {
+                console.log("DOWN")
                 pinchmap.zoomIn()
             }
         }
