@@ -917,10 +917,15 @@ def start(argv=None):
                       injected by QML
     """
     if not argv: argv = []
-    log.debug("argv from QML:\n%s", argv)
-    sys.argv = ["modrana.py"]
-    sys.argv.extend(argv)
-    log.debug("full argv:\n%s", sys.argv)
+    # only assign fake values to argv if argv is empty or missing,
+    # so that real command line arguments are not overwritten
+    if not hasattr(sys, "argv") or not isinstance(sys.argv, list) or not sys.argv:
+        log.debug("argv from QML:\n%s", argv)
+        sys.argv = ["modrana.py"]
+    # only log full argv if it was extended
+    if argv:
+        sys.argv.extend(argv)
+        log.debug("full argv:\n%s", sys.argv)
 
     global modrana
     global dmod
