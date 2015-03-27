@@ -148,6 +148,9 @@ class QMLGUI(GUIModule):
 
         # log for log messages from the QML context
         self.qml_log = qml_log
+        # queue a notification to QML context that
+        # a Python loggers is available
+        pyotherside.send("loggerAvailable")
 
         # tracklogs
         self.tracklogs = Tracklogs(self)

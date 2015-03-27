@@ -331,6 +331,11 @@ ApplicationWindow {
             rWin.notify(pythonNotify.message, pythonNotify.timeout)
         })
 
+        python.setHandler("loggerAvailable", function(){
+            rWin.log.backendAvailable = true
+            rWin.log.info("redirecting QML log to the Python log")
+        })
+
         // get the argv & remove the qml launcher
         // & qml file name from it (args nr. 0 and 1)
         var argv = Qt.application.arguments.slice(2)
@@ -356,7 +361,6 @@ ApplicationWindow {
         rWin.startupDone = true
 
         // the Python-side logging system should be now up and running
-        rWin.log.backendAvailable = true
         rWin.log.info("__init__ running")
 
         // init miscellaneous other toplevel properties
