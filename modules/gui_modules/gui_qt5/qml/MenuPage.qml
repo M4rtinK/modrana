@@ -2,6 +2,21 @@ import QtQuick 2.0
 import "modrana_components"
 
 IconGridPage {
+
+    function getPage(menu) {
+        if (menu == "RouteMenu") {
+            // until we have a proper routing page just enable
+            // a simplified routing mode right away :)
+            rWin.mapPage.routingEnabled = true
+            rWin.getPage(null)
+            rWin.notify("Routing mode enabled", 3000)
+
+        } else {
+            // just do the normal thing
+            return rWin.getPage(menu)
+        }
+    }
+
     model : ListModel {
         id : testModel
         ListElement {
@@ -13,16 +28,17 @@ IconGridPage {
         // TODO: un-comment once implemented
         /*
         ListElement {
-            caption : "Routes"
-            icon : "route.png"
-            menu : "RoutesMenu"
-        }
-        ListElement {
             caption : "POI"
             icon : "poi.png"
             menu : "PoiMenu"
         }
         */
+
+        ListElement {
+            caption : "Route"
+            icon : "route.png"
+            menu : "RouteMenu"
+        }
 
         ListElement {
             caption : "Map"
@@ -39,6 +55,7 @@ IconGridPage {
             menu : "ModeMenu"
         }
         */
+
         ListElement {
             caption : "Tracks"
             icon : "tracklogs.png"
@@ -54,11 +71,9 @@ IconGridPage {
             icon : "3gears.png"
             menu : "OptionsMenu"
         }
+
         Component.onCompleted : {
             if (rWin.showUnfinishedFeatures) {
-                testModel.append(
-                    {"caption": "Route", "icon":"route.png", "menu":""}
-                )
                 testModel.append(
                     {"caption": "POI", "icon":"poi.png", "menu":""}
                 )
