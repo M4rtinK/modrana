@@ -6,7 +6,6 @@ import UC 1.0
 ThemedBackgroundRectangle {
     id : textButton
     property alias text : tbLabel.text
-    signal clicked
     Label {
         id : tbLabel
         anchors.verticalCenter : parent.verticalCenter
@@ -17,11 +16,7 @@ ThemedBackgroundRectangle {
         elide : Text.ElideRight
         horizontalAlignment : Text.AlignHCenter
     }
-    MouseArea {
-        id : tbMA
-        anchors.fill : parent
-        onClicked : {
-            textButton.clicked()
-        }
+    onClicked : {
+        textButton.clicked()
     }
 }
