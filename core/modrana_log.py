@@ -34,6 +34,14 @@ ANDROID_SPECIAL_LOG_FOLDER = "/sdcard/modrana_debug_logs"
 
 log_manager = None
 
+
+class FilterAll(logging.Filter):
+    """A filter tha filters out all log messages"""
+
+    def filter(self, record):
+        return False
+
+
 class LogManager(object):
     def __init__(self):
         """Initialize logging for modRana
@@ -49,6 +57,8 @@ class LogManager(object):
         self._log_file_compression = False
         self._compressed_log_file = None
         self._log_file_override = False
+        self._filterAll = FilterAll()
+        self._stdoutLoggingDisabled = False
 
         # create main modRana logger (root logger)
         self._root_modrana_logger = logging.getLogger('')
@@ -238,6 +248,21 @@ class LogManager(object):
     def log_file_enabled(self):
         with self._log_file_enabled_lock:
             return self._log_file_enabled
+
+    def disableStdoutLog(self):
+        """Disable output to stdout from to console log handler
+
+        This is mainly used in the CLI mode to not pollute stdout with modRana log messages.
+        """
+        self._console_handler.addFilter(self._filterAll)
+        self._stdoutLoggingDisabled = True
+
+    def enableStdoutLog(self):
+        """Enable logging to stdout that has been previously disabled with disableStdoutLog()"""
+        if self._stdoutLoggingDisabled:
+            self._console_handler.removeFilter(self._filterAll)
+            self._stdoutLoggingDisabled = False
+
 
 def init_logging():
     global log_manager

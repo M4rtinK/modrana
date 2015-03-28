@@ -26,6 +26,8 @@ import time
 import logging
 log = logging.getLogger("core.startup")
 
+from core import modrana_log
+
 try:
     import argparse
 except ImportError:
@@ -548,6 +550,9 @@ class Startup(object):
             sys.stderr = self.originalStderr
             self.originalStderr = None
 
+        # re-enable logging to stdout
+        modrana_log.log_manager.enableStdoutLog()
+
     def _disableStdout(self):
         """disable stdout output
         -> this is mainly used for CLI processing so that modRanas status messages don't get into the output
@@ -564,6 +569,9 @@ class Startup(object):
         if self.originalStderr is None:
             self.originalStderr = sys.stderr
             sys.stdout = self
+
+        # also disable output to stdout from our logging infrastructure
+        modrana_log.log_manager.disableStdoutLog()
 
     def write(self, s):
         """a write function that does nothing for stdout redirection"""
