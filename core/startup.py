@@ -48,6 +48,7 @@ class Startup(object):
     def __init__(self, modrana):
         self.modrana = modrana
         self.originalStdout = None
+        self.originalStderr = None
         parser = argparse.ArgumentParser(description="A flexible GPS navigation system.")
         # device
         parser.add_argument(
@@ -543,6 +544,10 @@ class Startup(object):
             sys.stdout = self.originalStdout
             self.originalStdout = None
 
+        if self.originalStderr:
+            sys.stderr = self.originalStderr
+            self.originalStderr = None
+
     def _disableStdout(self):
         """disable stdout output
         -> this is mainly used for CLI processing so that modRanas status messages don't get into the output
@@ -554,6 +559,10 @@ class Startup(object):
 
         if self.originalStdout is None:
             self.originalStdout = sys.stdout
+            sys.stdout = self
+
+        if self.originalStderr is None:
+            self.originalStderr = sys.stderr
             sys.stdout = self
 
     def write(self, s):
