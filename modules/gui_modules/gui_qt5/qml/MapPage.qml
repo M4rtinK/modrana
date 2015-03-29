@@ -40,9 +40,8 @@ Page {
     property real routingDestinationLat: 0.
     property real routingDestinationLon: 0.
     property bool routingRequestChanged : false
-    property bool routingEnabled: rWin.get("routingEnabled", false,
-    function(v){routingEnabled=v})
-    
+    property bool routingEnabled: false
+
     Component.onCompleted : {
         rWin.log.info("map page: loaded, loading layers")
         pinchmap.loadLayers()
@@ -225,7 +224,48 @@ Page {
 //            }
 //        }
     }
-
+    Column {
+        anchors.bottom: buttonsRight.top
+        anchors.bottomMargin: rWin.c.style.map.button.margin * 2
+        anchors.right: pinchmap.right
+        anchors.rightMargin: rWin.c.style.map.button.margin
+        spacing: rWin.c.style.map.button.spacing
+        visible: tabMap.routingEnabled
+        MapButton {
+            id: routingStart
+            text: qsTr("<b>start</b>")
+            width: rWin.c.style.map.button.size * 1.25
+            height: rWin.c.style.map.button.size
+            checked : selectRoutingStart
+            onClicked: {
+                selectRoutingStart = !selectRoutingStart
+                selectRoutingDestination = false
+            }
+        }
+        MapButton {
+            id: routingEnd
+            text: qsTr("<b>end</b>")
+            width: rWin.c.style.map.button.size * 1.25
+            height: rWin.c.style.map.button.size
+            checked : selectRoutingDestination
+            onClicked: {
+                selectRoutingStart = false
+                selectRoutingDestination = !selectRoutingDestination
+            }
+        }
+        MapButton {
+            id: endRouting
+            visible: tabMap.routingEnabled
+            text: qsTr("<b>clear</b>")
+            width: rWin.c.style.map.button.size * 1.25
+            height: rWin.c.style.map.button.size
+            onClicked: {
+                selectRoutingStart = false
+                selectRoutingDestination = false
+                tabMap.routingEnabled = false
+            }
+        }
+    }
     Row {
         id: buttonsRight
         anchors.bottom: pinchmap.bottom
@@ -296,48 +336,6 @@ Page {
             onClicked: {
                 rWin.log.debug("map page: Menu pushed!")
                 rWin.push("Menu", undefined, !rWin.animate)
-            }
-        }
-        TextButton {
-            id: routingStart
-            visible: tabMap.routingEnabled
-            text: "routing start"
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
-            Rectangle {
-                id: routingStartRect
-                color: "red"
-                anchors.fill: parent
-            }
-            Text {
-                text: parent.text
-            }
-            onClicked: {
-                selectRoutingStart = true
-                selectRoutingDestination = false
-                routingStartRect.color = "blue"
-                routingEndRect.color = "red"
-            }
-        }
-        TextButton {
-            id: routingEnd
-            visible: tabMap.routingEnabled
-            text: "routing end"
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
-            Rectangle {
-                id: routingEndRect
-                color: "red"
-                anchors.fill: parent
-            }
-            Text {
-                text: parent.text
-            }
-            onClicked: {
-                selectRoutingStart = false
-                selectRoutingDestination = true
-                routingEndRect.color = "blue"
-                routingStartRect.color = "red"
             }
         }
     }
@@ -461,7 +459,6 @@ Page {
                     rWin.routingStartPos.latitude=routingStartLat
                     rWin.routingStartPos.longitude=routingStartLon
                     selectRoutingStart = false
-                    routingStartRect.color = "red"
                     routingStartSet = true
                     routingRequestChanged = true
                 }
@@ -471,7 +468,6 @@ Page {
                     rWin.routingDestinationPos.latitude=routingDestinationLat
                     rWin.routingDestinationPos.longitude=routingDestinationLon
                     selectRoutingDestination = false
-                    routingEndRect.color = "red"
                     routingDestinationSet = true
                     routingRequestChanged = true
                 }
