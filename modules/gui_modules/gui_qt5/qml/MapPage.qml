@@ -137,7 +137,10 @@ Page {
 
         // Rotating the map for fun and profit.
         // angle: -compass.azimuth
-        showCurrentPosition: true
+
+        // we will draw the position indicator ourselves
+        // so that it can stay on top of the route
+        showCurrentPosition: false
         currentPositionValid: rWin.llValid
         currentPositionLat: rWin.lastGoodPos.latitude
         currentPositionLon: rWin.lastGoodPos.longitude
@@ -306,6 +309,29 @@ Page {
             onMapPanEnd: {
                 routingData.requestPaint()
             }
+        }
+    }
+
+    // This is basically a gross hack - we don't show the position indicator
+    // present on the PinchMap element but we bind to its coordinates
+    // and show a visible copy of it in the MapPage so that it is over the route...
+    // The best solution for this will probably be refactoring the route drawing code
+    // into a separate element and placing it on the PinchMap right over the
+    // map layer but below all the other elements such as the position indicator or scale.
+    Image {
+        id: positionIndicator
+        source: pinchmap.currentPositionValid ?
+                "image://python/icon/"+ rWin.theme.id +"/position-indicator.png" :
+                "image://python/icon/"+ rWin.theme.id +"/position-indicator-red.png"
+
+        x : pinchmap.positionIndicator.x
+        y : pinchmap.positionIndicator.y
+        smooth: true
+
+        transform: Rotation {
+            origin.x: positionIndicator.width/2
+            origin.y: positionIndicator.height - positionIndicator.width/2
+            angle: pinchmap.currentPositionAzimuth
         }
     }
 

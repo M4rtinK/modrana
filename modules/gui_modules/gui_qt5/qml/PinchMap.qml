@@ -32,6 +32,12 @@ Rectangle {
     property double currentPositionAzimuth: 0;
     property double currentPositionError: 0;
 
+    //property var t: getMappointFromCoord(currentPositionLat, currentPositionLon)
+    //property double positionIndicatorX: map.x + t[0] - width/2
+    //property double positionIndicatorY: map.y + t[1] - height + positionIndicator.width/2
+
+    property alias positionIndicator : positionIndicator
+
     property bool rotationEnabled: false
 
     property double latitude: 0
