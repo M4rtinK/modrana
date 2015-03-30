@@ -49,7 +49,6 @@ Rectangle {
         anchors.horizontalCenter : parent.horizontalCenter
         anchors.top : parent.top
         anchors.bottom : parent.bottom
-        iconName : icon
         anchors.topMargin : icb.margin
         anchors.bottomMargin : icb.margin
         width : parent.width-icb.margin
