@@ -148,6 +148,167 @@ Page {
         currentPositionError: 0
     }
 
+    Canvas {
+        id: routingData
+        anchors.fill: parent
+        visible: true
+        property var touchpos: [0,0]
+        property var route : ListModel {
+            id: routeModel
+        }
+        property var routeMessages : ListModel {
+            id: routeMessageList
+        }
+
+        onPaint: {
+            var startpos = pinchmap.getScreenpointFromCoord(rWin.routingStartPos.latitude,rWin.routingStartPos.longitude)
+            var destipos = pinchmap.getScreenpointFromCoord(rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude)
+            var startX = startpos[0]
+            var startY = startpos[1]
+            var destX = destipos[0]
+            var destY = destipos[1]
+            var thispos = (0,0,0)
+            var messagePointDiameter = 10
+            var ctx = getContext("2d")
+            // clear the canvas
+            ctx.clearRect(0,0,tabMap.width,tabMap.height)
+            if (tabMap.routingEnabled) {
+                // draw the step point background
+                ctx.lineWidth = 10
+                ctx.strokeStyle = Qt.rgba(0, 0, 0.5, 1.0)
+                for (var i=0; i<routingData.routeMessages.count; i++) {
+                    ctx.beginPath()
+                    thispos = routingData.routeMessages.get(i)
+                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                    //ctx.ellipse(destipos[0]-messagePointDiameter,destipos[1]-messagePointDiameter, messagePointDiameter*2, messagePointDiameter*2)
+                    ctx.arc(destipos[0],destipos[1], 3, 0, 2.0 * Math.PI)
+                    ctx.stroke()
+                }
+
+                // draw the route
+                ctx.beginPath()
+                for (var i=0; i<routingData.route.count; i++) {
+                    thispos = routingData.route.get(i)
+                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                    ctx.lineTo(destipos[0],destipos[1])
+                }
+                ctx.stroke()
+
+                // draw the step points
+                ctx.lineWidth = 7
+                ctx.strokeStyle = Qt.rgba(1, 1, 0, 1)
+                ctx.fillStyle = Qt.rgba(1, 1, 0, 1)
+                for (var i=0; i<routingData.routeMessages.count; i++) {
+                    ctx.beginPath()
+                    thispos = routingData.routeMessages.get(i)
+                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                    ctx.beginPath()
+                    ctx.arc(destipos[0],destipos[1], 2, 0, 2.0 * Math.PI)
+                    ctx.stroke()
+                    ctx.fill()
+                }
+
+                // now draw the start and end indicators so that they
+                // are "above" the route and not obscured by it
+
+                // place a red marker on the start point
+                ctx.beginPath()
+                ctx.strokeStyle = Qt.rgba(1, 0, 0, 1)
+                ctx.fillStyle = Qt.rgba(1, 0, 0, 1)
+                ctx.moveTo(startX,startY)
+                // inner point
+                ctx.arc(startX, startY, 3, 0, 2.0 * Math.PI)
+                ctx.stroke()
+                ctx.fill()
+                // outer circle
+                ctx.beginPath()
+                ctx.strokeStyle = Qt.rgba(1, 0, 0, 0.95)
+                ctx.arc(startX, startY, 15, 0, 2.0 * Math.PI)
+                ctx.stroke()
+
+                // place a green marker at the destination point
+                ctx.beginPath()
+                // place a red marker on the start point
+                ctx.strokeStyle = Qt.rgba(0, 1, 0, 1)
+                ctx.fillStyle = Qt.rgba(0, 1, 0, 1)
+                ctx.moveTo(destX, destY)
+                // inner point
+                ctx.arc(destX, destY, 3, 0, 2.0 * Math.PI)
+                ctx.stroke()
+                ctx.fill()
+                // outer circle
+                ctx.beginPath()
+                ctx.strokeStyle = Qt.rgba(0, 1, 0, 0.95)
+                ctx.arc(destX, destY, 15, 0, 2.0 * Math.PI)
+                ctx.stroke()
+            }
+        }
+        onPainted: {
+        }
+        Component.onCompleted: {
+            rWin.python.setHandler("routeReceived", function(route, routeMessagePoints){
+                // clear old route first
+                routingData.route.clear()
+                routingData.routeMessages.clear()
+                 for (var i=0; i<route.length; i++) {
+                     routingData.route.append({"lat": route[i][0], "lon": route[i][1]});
+                 }
+                 for (var i=0; i<routeMessagePoints.length; i++) {
+                     routingData.routeMessages.append({"lat": routeMessagePoints[i][0], "lon": routeMessagePoints[i][1], "message": routeMessagePoints[i][3]})
+                 }
+                 routingData.requestPaint()
+            })
+        }
+
+        Connections {
+            target: pinchmap
+            onCenterSet: {
+                routingData.requestPaint()
+            }
+            onDrag: {
+                //routingData.requestPaint()
+            }
+            onZoomLevelChanged: {
+                routingData.requestPaint()
+            }
+            onMapClicked: {
+                routingRequestChanged = false
+                // store the position we touched in Lat,Lon
+                routingData.touchpos = pinchmap.getCoordFromScreenpoint(screenX, screenY)
+                if (selectRoutingStart) {
+                    routingStartLat = routingData.touchpos[0]
+                    routingStartLon = routingData.touchpos[1]
+                    rWin.routingStartPos.latitude=routingStartLat
+                    rWin.routingStartPos.longitude=routingStartLon
+                    selectRoutingStart = false
+                    routingStartSet = true
+                    routingRequestChanged = true
+                }
+                if (selectRoutingDestination) {
+                    routingDestinationLat = routingData.touchpos[0]
+                    routingDestinationLon = routingData.touchpos[1]
+                    rWin.routingDestinationPos.latitude=routingDestinationLat
+                    rWin.routingDestinationPos.longitude=routingDestinationLon
+                    selectRoutingDestination = false
+                    routingDestinationSet = true
+                    routingRequestChanged = true
+                }
+                if (routingRequestChanged && routingStartSet && routingDestinationSet) {
+                    rWin.python.call("modrana.gui.modules.route.llRoute", [[rWin.routingStartPos.latitude,rWin.routingStartPos.longitude], [rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude]])
+                    rWin.log.debug("routing called")
+                }
+                if (routingRequestChanged) {
+                    // request a refresh of the canvas to
+                    // display newly set start/destination point
+                    routingData.requestPaint()
+                }
+            }
+            onMapPanEnd: {
+                routingData.requestPaint()
+            }
+        }
+    }
+
     Sensors.Compass {
         id : compass
         dataRate : 50
@@ -361,164 +522,5 @@ Page {
             }
         }
     }*/
-    Canvas {
-        id: routingData
-        anchors.fill: parent
-        visible: true
-        property var touchpos: [0,0]
-        property var route : ListModel {
-            id: routeModel
-        }
-        property var routeMessages : ListModel {
-            id: routeMessageList
-        }
 
-        onPaint: { 
-            var startpos = pinchmap.getScreenpointFromCoord(rWin.routingStartPos.latitude,rWin.routingStartPos.longitude)
-            var destipos = pinchmap.getScreenpointFromCoord(rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude)
-            var startX = startpos[0]
-            var startY = startpos[1]
-            var destX = destipos[0]
-            var destY = destipos[1]
-            var thispos = (0,0,0)
-            var messagePointDiameter = 10
-            var ctx = getContext("2d")
-            // clear the canvas
-            ctx.clearRect(0,0,tabMap.width,tabMap.height)
-            if (tabMap.routingEnabled) {
-                // draw the step point background
-                ctx.lineWidth = 10
-                ctx.strokeStyle = Qt.rgba(0, 0, 0.5, 1.0)
-                for (var i=0; i<routingData.routeMessages.count; i++) {
-                    ctx.beginPath()
-                    thispos = routingData.routeMessages.get(i)
-                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
-                    //ctx.ellipse(destipos[0]-messagePointDiameter,destipos[1]-messagePointDiameter, messagePointDiameter*2, messagePointDiameter*2)
-                    ctx.arc(destipos[0],destipos[1], 3, 0, 2.0 * Math.PI)
-                    ctx.stroke()
-                }
-
-                // draw the route
-                ctx.beginPath()
-                for (var i=0; i<routingData.route.count; i++) {
-                    thispos = routingData.route.get(i)
-                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
-                    ctx.lineTo(destipos[0],destipos[1])
-                }
-                ctx.stroke()
-
-                // draw the step points
-                ctx.lineWidth = 7
-                ctx.strokeStyle = Qt.rgba(1, 1, 0, 1)
-                ctx.fillStyle = Qt.rgba(1, 1, 0, 1)
-                for (var i=0; i<routingData.routeMessages.count; i++) {
-                    ctx.beginPath()
-                    thispos = routingData.routeMessages.get(i)
-                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
-                    ctx.beginPath()
-                    ctx.arc(destipos[0],destipos[1], 2, 0, 2.0 * Math.PI)
-                    ctx.stroke()
-                    ctx.fill()
-                }
-
-                // now draw the start and end indicators so that they
-                // are "above" the route and not obscured by it
-
-                // place a red marker on the start point
-                ctx.beginPath()
-                ctx.strokeStyle = Qt.rgba(1, 0, 0, 1)
-                ctx.fillStyle = Qt.rgba(1, 0, 0, 1)
-                ctx.moveTo(startX,startY)
-                // inner point
-                ctx.arc(startX, startY, 3, 0, 2.0 * Math.PI)
-                ctx.stroke()
-                ctx.fill()
-                // outer circle
-                ctx.beginPath()
-                ctx.strokeStyle = Qt.rgba(1, 0, 0, 0.95)
-                ctx.arc(startX, startY, 15, 0, 2.0 * Math.PI)
-                ctx.stroke()
-
-                // place a green marker at the destination point
-                ctx.beginPath()
-                // place a red marker on the start point
-                ctx.strokeStyle = Qt.rgba(0, 1, 0, 1)
-                ctx.fillStyle = Qt.rgba(0, 1, 0, 1)
-                ctx.moveTo(destX, destY)
-                // inner point
-                ctx.arc(destX, destY, 3, 0, 2.0 * Math.PI)
-                ctx.stroke()
-                ctx.fill()
-                // outer circle
-                ctx.beginPath()
-                ctx.strokeStyle = Qt.rgba(0, 1, 0, 0.95)
-                ctx.arc(destX, destY, 15, 0, 2.0 * Math.PI)
-                ctx.stroke()
-            }
-        }
-        onPainted: {
-        }
-        Component.onCompleted: {
-            rWin.python.setHandler("routeReceived", function(route, routeMessagePoints){
-                // clear old route first
-                routingData.route.clear()
-                routingData.routeMessages.clear()
-                 for (var i=0; i<route.length; i++) {
-                     routingData.route.append({"lat": route[i][0], "lon": route[i][1]});
-                 }
-                 for (var i=0; i<routeMessagePoints.length; i++) {
-                     routingData.routeMessages.append({"lat": routeMessagePoints[i][0], "lon": routeMessagePoints[i][1], "message": routeMessagePoints[i][3]})
-                 }
-                 routingData.requestPaint()
-            })
-        }
-
-        Connections {
-            target: pinchmap
-            onCenterSet: {
-                routingData.requestPaint()
-            }
-            onDrag: {
-                //routingData.requestPaint()
-            }
-            onZoomLevelChanged: {
-                routingData.requestPaint()
-            }
-            onMapClicked: {
-                routingRequestChanged = false
-                // store the position we touched in Lat,Lon
-                routingData.touchpos = pinchmap.getCoordFromScreenpoint(screenX, screenY)
-                if (selectRoutingStart) {
-                    routingStartLat = routingData.touchpos[0]
-                    routingStartLon = routingData.touchpos[1]
-                    rWin.routingStartPos.latitude=routingStartLat
-                    rWin.routingStartPos.longitude=routingStartLon
-                    selectRoutingStart = false
-                    routingStartSet = true
-                    routingRequestChanged = true
-                }
-                if (selectRoutingDestination) {
-                    routingDestinationLat = routingData.touchpos[0]
-                    routingDestinationLon = routingData.touchpos[1]
-                    rWin.routingDestinationPos.latitude=routingDestinationLat
-                    rWin.routingDestinationPos.longitude=routingDestinationLon
-                    selectRoutingDestination = false
-                    routingDestinationSet = true
-                    routingRequestChanged = true
-                }
-                if (routingRequestChanged && routingStartSet && routingDestinationSet) {
-                    rWin.python.call("modrana.gui.modules.route.llRoute", [[rWin.routingStartPos.latitude,rWin.routingStartPos.longitude], [rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude]])
-                    rWin.log.debug("routing called")
-                }
-                if (routingRequestChanged) {
-                    // request a refresh of the canvas to
-                    // display newly set start/destination point
-                    routingData.requestPaint()
-                }
-            }
-            onMapPanEnd: {
-                routingData.requestPaint()
-            }
-        }
-    }
 }
