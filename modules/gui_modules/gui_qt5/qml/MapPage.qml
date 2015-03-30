@@ -237,6 +237,7 @@ Page {
             width: rWin.c.style.map.button.size * 1.25
             height: rWin.c.style.map.button.size
             checked : selectRoutingStart
+            toggledColor : Qt.rgba(1, 0, 0, 0.7)
             onClicked: {
                 selectRoutingStart = !selectRoutingStart
                 selectRoutingDestination = false
@@ -248,6 +249,7 @@ Page {
             width: rWin.c.style.map.button.size * 1.25
             height: rWin.c.style.map.button.size
             checked : selectRoutingDestination
+            toggledColor : Qt.rgba(0, 1, 0, 0.7)
             onClicked: {
                 selectRoutingStart = false
                 selectRoutingDestination = !selectRoutingDestination
@@ -362,7 +364,6 @@ Page {
     Canvas {
         id: routingData
         anchors.fill: parent
-        opacity: 0.8
         visible: true
         property var touchpos: [0,0]
         property var route : ListModel {
@@ -385,39 +386,73 @@ Page {
             // clear the canvas
             ctx.clearRect(0,0,tabMap.width,tabMap.height)
             if (tabMap.routingEnabled) {
+                // draw the step point background
+                ctx.lineWidth = 10
+                ctx.strokeStyle = Qt.rgba(0, 0, 0.5, 1.0)
+                for (var i=0; i<routingData.routeMessages.count; i++) {
+                    ctx.beginPath()
+                    thispos = routingData.routeMessages.get(i)
+                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                    //ctx.ellipse(destipos[0]-messagePointDiameter,destipos[1]-messagePointDiameter, messagePointDiameter*2, messagePointDiameter*2)
+                    ctx.arc(destipos[0],destipos[1], 3, 0, 2.0 * Math.PI)
+                    ctx.stroke()
+                }
 
-                // setup the stroke
-                ctx.lineWidth = 4
-
-                ctx.beginPath()
-                //place a green square at the start point
-                ctx.strokeStyle = "green"
-                ctx.moveTo(startX,startY)
-                ctx.rect(startX-messagePointDiameter/2,startY-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
-                ctx.stroke()
-                // paint the route red
-                ctx.strokeStyle = "red"
+                // draw the route
                 ctx.beginPath()
                 for (var i=0; i<routingData.route.count; i++) {
                     thispos = routingData.route.get(i)
                     destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
                     ctx.lineTo(destipos[0],destipos[1])
                 }
-                for (var i=0; i<routingData.routeMessages.count; i++) {
-                    thispos = routingData.routeMessages.get(i)
-                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
-                    ctx.ellipse(destipos[0]-messagePointDiameter/2,destipos[1]-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
-                }
-                //ctx.closePath()
-
-                // stroke path
                 ctx.stroke()
 
-                // place a blue square at the destination point
+                // draw the step points
+                ctx.lineWidth = 7
+                ctx.strokeStyle = Qt.rgba(1, 1, 0, 1)
+                ctx.fillStyle = Qt.rgba(1, 1, 0, 1)
+                for (var i=0; i<routingData.routeMessages.count; i++) {
+                    ctx.beginPath()
+                    thispos = routingData.routeMessages.get(i)
+                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                    ctx.beginPath()
+                    ctx.arc(destipos[0],destipos[1], 2, 0, 2.0 * Math.PI)
+                    ctx.stroke()
+                    ctx.fill()
+                }
+
+                // now draw the start and end indicators so that they
+                // are "above" the route and not obscured by it
+
+                // place a red marker on the start point
                 ctx.beginPath()
-                ctx.strokeStyle = "blue"
-                ctx.moveTo(destX,destY)
-                ctx.rect(destX-messagePointDiameter/2,destY-messagePointDiameter/2, messagePointDiameter, messagePointDiameter)
+                ctx.strokeStyle = Qt.rgba(1, 0, 0, 1)
+                ctx.fillStyle = Qt.rgba(1, 0, 0, 1)
+                ctx.moveTo(startX,startY)
+                // inner point
+                ctx.arc(startX, startY, 3, 0, 2.0 * Math.PI)
+                ctx.stroke()
+                ctx.fill()
+                // outer circle
+                ctx.beginPath()
+                ctx.strokeStyle = Qt.rgba(1, 0, 0, 0.95)
+                ctx.arc(startX, startY, 15, 0, 2.0 * Math.PI)
+                ctx.stroke()
+
+                // place a green marker at the destination point
+                ctx.beginPath()
+                // place a red marker on the start point
+                ctx.strokeStyle = Qt.rgba(0, 1, 0, 1)
+                ctx.fillStyle = Qt.rgba(0, 1, 0, 1)
+                ctx.moveTo(destX, destY)
+                // inner point
+                ctx.arc(destX, destY, 3, 0, 2.0 * Math.PI)
+                ctx.stroke()
+                ctx.fill()
+                // outer circle
+                ctx.beginPath()
+                ctx.strokeStyle = Qt.rgba(0, 1, 0, 0.95)
+                ctx.arc(destX, destY, 15, 0, 2.0 * Math.PI)
                 ctx.stroke()
             }
         }
