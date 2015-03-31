@@ -87,6 +87,8 @@ Page {
             }
         }
 
+        canvas.onPaint : routing.paintRoute(canvas.getContext("2d"))
+
         onZoomLevelChanged : {
             // save zoom level
             if (pinchmap.initialized) {
@@ -138,9 +140,7 @@ Page {
         // Rotating the map for fun and profit.
         // angle: -compass.azimuth
 
-        // we will draw the position indicator ourselves
-        // so that it can stay on top of the route
-        showCurrentPosition: false
+        showCurrentPosition: true
         currentPositionValid: rWin.llValid
         currentPositionLat: rWin.lastGoodPos.latitude
         currentPositionLon: rWin.lastGoodPos.longitude
@@ -151,19 +151,17 @@ Page {
         currentPositionError: 0
     }
 
-    Canvas {
-        id: routingData
-        anchors.fill: parent
-        visible: true
+    Item {
+        id : routing
         property var touchpos: [0,0]
-        property var route : ListModel {
+        property var routePoints : ListModel {
             id: routeModel
         }
         property var routeMessages : ListModel {
             id: routeMessageList
         }
 
-        onPaint: {
+        function paintRoute(ctx) {
             var startpos = pinchmap.getScreenpointFromCoord(rWin.routingStartPos.latitude,rWin.routingStartPos.longitude)
             var destipos = pinchmap.getScreenpointFromCoord(rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude)
             var startX = startpos[0]
@@ -172,16 +170,15 @@ Page {
             var destY = destipos[1]
             var thispos = (0,0,0)
             var messagePointDiameter = 10
-            var ctx = getContext("2d")
             // clear the canvas
             ctx.clearRect(0,0,tabMap.width,tabMap.height)
             if (tabMap.routingEnabled) {
                 // draw the step point background
                 ctx.lineWidth = 10
                 ctx.strokeStyle = Qt.rgba(0, 0, 0.5, 1.0)
-                for (var i=0; i<routingData.routeMessages.count; i++) {
+                for (var i=0; i<routeMessages.count; i++) {
                     ctx.beginPath()
-                    thispos = routingData.routeMessages.get(i)
+                    thispos = routeMessages.get(i)
                     destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
                     //ctx.ellipse(destipos[0]-messagePointDiameter,destipos[1]-messagePointDiameter, messagePointDiameter*2, messagePointDiameter*2)
                     ctx.arc(destipos[0],destipos[1], 3, 0, 2.0 * Math.PI)
@@ -190,8 +187,8 @@ Page {
 
                 // draw the route
                 ctx.beginPath()
-                for (var i=0; i<routingData.route.count; i++) {
-                    thispos = routingData.route.get(i)
+                for (var i=0; i<routePoints.count; i++) {
+                    thispos = routePoints.get(i)
                     destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
                     ctx.lineTo(destipos[0],destipos[1])
                 }
@@ -201,9 +198,9 @@ Page {
                 ctx.lineWidth = 7
                 ctx.strokeStyle = Qt.rgba(1, 1, 0, 1)
                 ctx.fillStyle = Qt.rgba(1, 1, 0, 1)
-                for (var i=0; i<routingData.routeMessages.count; i++) {
+                for (var i=0; i<routeMessages.count; i++) {
                     ctx.beginPath()
-                    thispos = routingData.routeMessages.get(i)
+                    thispos = routeMessages.get(i)
                     destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
                     ctx.beginPath()
                     ctx.arc(destipos[0],destipos[1], 2, 0, 2.0 * Math.PI)
@@ -246,41 +243,16 @@ Page {
                 ctx.stroke()
             }
         }
-        onPainted: {
-        }
-        Component.onCompleted: {
-            rWin.python.setHandler("routeReceived", function(route, routeMessagePoints){
-                // clear old route first
-                routingData.route.clear()
-                routingData.routeMessages.clear()
-                 for (var i=0; i<route.length; i++) {
-                     routingData.route.append({"lat": route[i][0], "lon": route[i][1]});
-                 }
-                 for (var i=0; i<routeMessagePoints.length; i++) {
-                     routingData.routeMessages.append({"lat": routeMessagePoints[i][0], "lon": routeMessagePoints[i][1], "message": routeMessagePoints[i][3]})
-                 }
-                 routingData.requestPaint()
-            })
-        }
 
         Connections {
-            target: pinchmap
-            onCenterSet: {
-                routingData.requestPaint()
-            }
-            onDrag: {
-                //routingData.requestPaint()
-            }
-            onZoomLevelChanged: {
-                routingData.requestPaint()
-            }
+            target : pinchmap
             onMapClicked: {
                 routingRequestChanged = false
                 // store the position we touched in Lat,Lon
-                routingData.touchpos = pinchmap.getCoordFromScreenpoint(screenX, screenY)
+                routing.touchpos = pinchmap.getCoordFromScreenpoint(screenX, screenY)
                 if (selectRoutingStart) {
-                    routingStartLat = routingData.touchpos[0]
-                    routingStartLon = routingData.touchpos[1]
+                    routingStartLat = routing.touchpos[0]
+                    routingStartLon = routing.touchpos[1]
                     rWin.routingStartPos.latitude=routingStartLat
                     rWin.routingStartPos.longitude=routingStartLon
                     selectRoutingStart = false
@@ -288,8 +260,8 @@ Page {
                     routingRequestChanged = true
                 }
                 if (selectRoutingDestination) {
-                    routingDestinationLat = routingData.touchpos[0]
-                    routingDestinationLon = routingData.touchpos[1]
+                    routingDestinationLat = routing.touchpos[0]
+                    routingDestinationLon = routing.touchpos[1]
                     rWin.routingDestinationPos.latitude=routingDestinationLat
                     rWin.routingDestinationPos.longitude=routingDestinationLon
                     selectRoutingDestination = false
@@ -303,35 +275,24 @@ Page {
                 if (routingRequestChanged) {
                     // request a refresh of the canvas to
                     // display newly set start/destination point
-                    routingData.requestPaint()
+                    pinchmap.canvas.requestPaint()
                 }
             }
-            onMapPanEnd: {
-                routingData.requestPaint()
-            }
         }
-    }
 
-    // This is basically a gross hack - we don't show the position indicator
-    // present on the PinchMap element but we bind to its coordinates
-    // and show a visible copy of it in the MapPage so that it is over the route...
-    // The best solution for this will probably be refactoring the route drawing code
-    // into a separate element and placing it on the PinchMap right over the
-    // map layer but below all the other elements such as the position indicator or scale.
-    Image {
-        id: positionIndicator
-        source: pinchmap.currentPositionValid ?
-                "image://python/icon/"+ rWin.theme.id +"/position-indicator.png" :
-                "image://python/icon/"+ rWin.theme.id +"/position-indicator-red.png"
-
-        x : pinchmap.positionIndicator.x
-        y : pinchmap.positionIndicator.y
-        smooth: true
-
-        transform: Rotation {
-            origin.x: positionIndicator.width/2
-            origin.y: positionIndicator.height - positionIndicator.width/2
-            angle: pinchmap.currentPositionAzimuth
+        Component.onCompleted: {
+            rWin.python.setHandler("routeReceived", function(route, routeMessagePoints){
+                // clear old route first
+                routePoints.clear()
+                routeMessages.clear()
+                for (var i=0; i<route.length; i++) {
+                    routePoints.append({"lat": route[i][0], "lon": route[i][1]});
+                }
+                for (var i=0; i<routeMessagePoints.length; i++) {
+                    routeMessages.append({"lat": routeMessagePoints[i][0], "lon": routeMessagePoints[i][1], "message": routeMessagePoints[i][3]})
+                }
+                pinchmap.canvas.requestPaint()
+            })
         }
     }
 

@@ -37,6 +37,7 @@ Rectangle {
     //property double positionIndicatorY: map.y + t[1] - height + positionIndicator.width/2
 
     property alias positionIndicator : positionIndicator
+    property alias canvas : canvas
 
     property bool rotationEnabled: false
 
@@ -528,6 +529,29 @@ Rectangle {
             mapInstance : pinchmap
         }
     }
+
+    Canvas {
+        id: canvas
+        anchors.fill: parent
+        visible: true
+
+        Connections {
+            target: pinchmap
+            onCenterSet: {
+                canvas.requestPaint()
+            }
+            onDrag: {
+                //canvas.requestPaint()
+            }
+            onZoomLevelChanged: {
+                canvas.requestPaint()
+            }
+            onMapPanEnd: {
+                canvas.requestPaint()
+            }
+        }
+    }
+
     Image {
         id: targetIndicator
         source: "image://python/icon/"+ rWin.theme.id +"/target-indicator-cross.png"
