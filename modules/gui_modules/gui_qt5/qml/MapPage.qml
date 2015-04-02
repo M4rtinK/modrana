@@ -40,7 +40,7 @@ Page {
     property real routingDestinationLat: 0.
     property real routingDestinationLon: 0.
     property bool routingRequestChanged : false
-    property bool routingEnabled: false
+    property bool routingEnabled: true
 
     Component.onCompleted : {
         rWin.log.info("map page: loaded, loading layers")
@@ -162,16 +162,25 @@ Page {
         }
 
         function paintRoute(ctx) {
+            var offsetX = pinchmap.canvas.canvasWindow.x
+            var offsetY = pinchmap.canvas.canvasWindow.y
             var startpos = pinchmap.getScreenpointFromCoord(rWin.routingStartPos.latitude,rWin.routingStartPos.longitude)
             var destipos = pinchmap.getScreenpointFromCoord(rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude)
-            var startX = startpos[0]
-            var startY = startpos[1]
-            var destX = destipos[0]
-            var destY = destipos[1]
+            var startX = startpos[0]+offsetX
+            var startY = startpos[1]+offsetY
+            var destX = destipos[0]+offsetX
+            var destY = destipos[1]+offsetY
             var thispos = (0,0,0)
             var messagePointDiameter = 10
             // clear the canvas
-            ctx.clearRect(0,0,tabMap.width,tabMap.height)
+            ctx.clearRect(0,0,pinchmap.canvas.width,pinchmap.canvas.height)
+            ctx.save()
+            // The canvas has its x,y coordinates shifted to the upper left, so that
+            // when it is moved during map panning, the offscreen parts of the route will
+            // be visible and not cut off. Because of this we need to apply a translation
+            // before we start drawing the route and related objects to take the shifted
+            // origin into account.
+            ctx.translate(pinchmap.width, pinchmap.height)
             if (tabMap.routingEnabled) {
                 // draw the step point background
                 ctx.lineWidth = 10
@@ -242,6 +251,7 @@ Page {
                 ctx.arc(destX, destY, 15, 0, 2.0 * Math.PI)
                 ctx.stroke()
             }
+            ctx.restore()
         }
 
         Connections {

@@ -172,6 +172,9 @@ Rectangle {
     function pan(dx, dy) {
         map.offsetX -= dx;
         map.offsetY -= dy;
+
+        canvas.x -= dx
+        canvas.y -= dy
     }
 
     function panEnd() {
@@ -200,6 +203,11 @@ Rectangle {
             changed = true;
         }
         updateCenter();
+
+        // reset the canvas origin back to the initial
+        // values once the pan ends
+        canvas.x = -pinchmap.width
+        canvas.y = -pinchmap.height
     }
 
     function updateCenter() {
@@ -532,8 +540,15 @@ Rectangle {
 
     Canvas {
         id: canvas
-        anchors.fill: parent
         visible: true
+
+        // Expand the canvas outside of the visible map area
+        // so that the route is not cut-off when the map is
+        // being panned.
+        width : pinchmap.width*3
+        height : pinchmap.height*3
+        x : - pinchmap.width
+        y : - pinchmap.height
 
         Connections {
             target: pinchmap
