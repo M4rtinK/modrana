@@ -665,11 +665,11 @@ Rectangle {
             anchors.fill : parent;
 
             onClicked: {
-                mapClicked(mouse.x, mouse.y)
+                mapClicked(Math.round(mouse.x), Math.round(mouse.y))
             }
 
             onDoubleClicked: {
-                setZoomLevelPoint(pinchmap.zoomLevel + 1, mouse.x, mouse.y);
+                setZoomLevelPoint(pinchmap.zoomLevel + 1, Math.round(mouse.x), Math.round(mouse.y));
             }
 
             onWheel:  {
@@ -679,10 +679,10 @@ Rectangle {
 
             onPressed: {
                 __isPanning = true;
-                __lastX = mouse.x;
-                __lastY = mouse.y;
-                __firstX = mouse.x;
-                __firstY = mouse.y;
+                __lastX = Math.round(mouse.x);
+                __lastY = Math.round(mouse.y);
+                __firstX = Math.round(mouse.x);
+                __firstY = Math.round(mouse.y);
                 __wasClick = true;
             }
 
@@ -697,16 +697,20 @@ Rectangle {
 
             onPositionChanged: {
                 if (__isPanning) {
-                    var dx = mouse.x - __lastX;
-                    var dy = mouse.y - __lastY;
+                    // as Qt 5 on Sailfish OS for some reasons returns pointer coordinates as
+                    // floating point numbers, convert them all to integers first to prevent
+                    // precision loss
+                    var dx = Math.round(mouse.x) - __lastX;
+                    var dy = Math.round(mouse.y) - __lastY;
+
                     pan(-dx, -dy);
-                    __lastX = mouse.x;
-                    __lastY = mouse.y;
+                    __lastX = Math.round(mouse.x);
+                    __lastY = Math.round(mouse.y);
                     /*
                     once the pan threshold is reached, additional checking is unnecessary
                     for the press duration as nothing sets __wasClick back to true
                     */
-                    if (__wasClick && Math.pow(mouse.x - __firstX, 2) + Math.pow(mouse.y - __firstY, 2) > maxClickDistance) {
+                    if (__wasClick && Math.pow(Math.round(mouse.x) - __firstX, 2) + Math.pow(Math.round(mouse.y) - __firstY, 2) > maxClickDistance) {
                         __wasClick = false;
                         pinchmap.drag() // send the drag-detected signal
 
