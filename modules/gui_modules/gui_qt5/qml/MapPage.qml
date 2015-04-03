@@ -40,7 +40,7 @@ Page {
     property real routingDestinationLat: 0.
     property real routingDestinationLon: 0.
     property bool routingRequestChanged : false
-    property bool routingEnabled: true
+    property bool routingEnabled: false
 
     Component.onCompleted : {
         rWin.log.info("map page: loaded, loading layers")
