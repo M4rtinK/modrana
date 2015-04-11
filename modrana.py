@@ -806,7 +806,7 @@ class ModRana(object):
             # remove keys marked as nonpersistent
             self.d['keyModifiers'] = self.keyModifiers
             d = self._removeNonPersistentOptions(self.d)
-            marshal.dump(d, f)
+            marshal.dump(d, f, 2)
             f.close()
             log.info("options successfully saved")
         except IOError:
