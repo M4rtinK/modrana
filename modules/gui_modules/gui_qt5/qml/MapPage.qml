@@ -268,7 +268,9 @@ Page {
         }
 
         Connections {
-            target : pinchmap
+            // only connect to the PinchMap onClicked signal
+            // when expecting start or destination input
+            target : selectRoutingStart || selectRoutingDestination ? pinchmap : null
             onMapClicked: {
                 routingRequestChanged = false
                 // store the position we touched in Lat,Lon
