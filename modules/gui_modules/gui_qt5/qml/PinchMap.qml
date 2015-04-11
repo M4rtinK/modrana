@@ -551,7 +551,7 @@ Rectangle {
         y : - pinchmap.height
 
         Connections {
-            target: pinchmap
+            target: canvas.visible ? pinchmap : null
             onCenterSet: {
                 canvas.requestPaint()
             }
