@@ -87,6 +87,7 @@ Page {
             }
         }
 
+        canvas.visible : tabMap.routingEnabled
         canvas.onPaint : routing.paintRoute(canvas.getContext("2d"))
 
         onZoomLevelChanged : {
