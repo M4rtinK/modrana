@@ -555,9 +555,6 @@ Rectangle {
             onCenterSet: {
                 canvas.requestPaint()
             }
-            onDrag: {
-                //canvas.requestPaint()
-            }
             onZoomLevelChanged: {
                 canvas.requestPaint()
             }
