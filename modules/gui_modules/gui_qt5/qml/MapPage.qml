@@ -220,36 +220,48 @@ Page {
                 // now draw the start and end indicators so that they
                 // are "above" the route and not obscured by it
 
-                // place a red marker on the start point
-                ctx.beginPath()
-                ctx.strokeStyle = Qt.rgba(1, 0, 0, 1)
-                ctx.fillStyle = Qt.rgba(1, 0, 0, 1)
-                ctx.moveTo(startX,startY)
-                // inner point
-                ctx.arc(startX, startY, 3, 0, 2.0 * Math.PI)
-                ctx.stroke()
-                ctx.fill()
-                // outer circle
-                ctx.beginPath()
-                ctx.strokeStyle = Qt.rgba(1, 0, 0, 0.95)
-                ctx.arc(startX, startY, 15, 0, 2.0 * Math.PI)
-                ctx.stroke()
+                // place a red marker on the start point (if the point is set)
+                if(rWin.routingStartPos.isValid) {
+                    var startpos = pinchmap.getScreenpointFromCoord(rWin.routingStartPos.latitude,rWin.routingStartPos.longitude)
+                    var startX = startpos[0]+offsetX
+                    var startY = startpos[1]+offsetY
 
-                // place a green marker at the destination point
-                ctx.beginPath()
-                // place a red marker on the start point
-                ctx.strokeStyle = Qt.rgba(0, 1, 0, 1)
-                ctx.fillStyle = Qt.rgba(0, 1, 0, 1)
-                ctx.moveTo(destX, destY)
-                // inner point
-                ctx.arc(destX, destY, 3, 0, 2.0 * Math.PI)
-                ctx.stroke()
-                ctx.fill()
-                // outer circle
-                ctx.beginPath()
-                ctx.strokeStyle = Qt.rgba(0, 1, 0, 0.95)
-                ctx.arc(destX, destY, 15, 0, 2.0 * Math.PI)
-                ctx.stroke()
+                    ctx.beginPath()
+                    ctx.strokeStyle = Qt.rgba(1, 0, 0, 1)
+                    ctx.fillStyle = Qt.rgba(1, 0, 0, 1)
+                    ctx.moveTo(startX,startY)
+                    // inner point
+                    ctx.arc(startX, startY, 3, 0, 2.0 * Math.PI)
+                    ctx.stroke()
+                    ctx.fill()
+                    // outer circle
+                    ctx.beginPath()
+                    ctx.strokeStyle = Qt.rgba(1, 0, 0, 0.95)
+                    ctx.arc(startX, startY, 15, 0, 2.0 * Math.PI)
+                    ctx.stroke()
+                }
+
+                // place a green marker at the destination point (if the point is set)
+                if(rWin.routingDestinationPos.isValid) {
+                    var destipos = pinchmap.getScreenpointFromCoord(rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude)
+                    var destX = destipos[0]+offsetX
+                    var destY = destipos[1]+offsetY
+
+                    ctx.beginPath()
+                    // place a red marker on the start point
+                    ctx.strokeStyle = Qt.rgba(0, 1, 0, 1)
+                    ctx.fillStyle = Qt.rgba(0, 1, 0, 1)
+                    ctx.moveTo(destX, destY)
+                    // inner point
+                    ctx.arc(destX, destY, 3, 0, 2.0 * Math.PI)
+                    ctx.stroke()
+                    ctx.fill()
+                    // outer circle
+                    ctx.beginPath()
+                    ctx.strokeStyle = Qt.rgba(0, 1, 0, 0.95)
+                    ctx.arc(destX, destY, 15, 0, 2.0 * Math.PI)
+                    ctx.stroke()
+                }
             }
             ctx.restore()
         }
@@ -265,6 +277,7 @@ Page {
                     routingStartLon = routing.touchpos[1]
                     rWin.routingStartPos.latitude=routingStartLat
                     rWin.routingStartPos.longitude=routingStartLon
+                    rWin.routingStartPos.isValid = true
                     selectRoutingStart = false
                     routingStartSet = true
                     routingRequestChanged = true
@@ -274,6 +287,7 @@ Page {
                     routingDestinationLon = routing.touchpos[1]
                     rWin.routingDestinationPos.latitude=routingDestinationLat
                     rWin.routingDestinationPos.longitude=routingDestinationLon
+                    rWin.routingDestinationPos.isValid = true
                     selectRoutingDestination = false
                     routingDestinationSet = true
                     routingRequestChanged = true

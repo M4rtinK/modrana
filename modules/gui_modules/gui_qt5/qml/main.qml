@@ -108,9 +108,11 @@ ApplicationWindow {
 
     //routing
     property variant routingStartPos : Coordinate {
+        isValid : false
         altitude : 0.0
     }
     property variant routingDestinationPos : Coordinate {
+        isValid : false
         altitude : 0.0
     }
 
