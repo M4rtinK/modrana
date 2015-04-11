@@ -90,6 +90,16 @@ Page {
         canvas.visible : tabMap.routingEnabled
         canvas.onPaint : routing.paintRoute(canvas.getContext("2d"))
 
+//        property var redrawStart : 0
+//        canvas.onPaint : {
+//            redrawStart = new Date().valueOf()
+//            routing.paintRoute(canvas.getContext("2d"))
+//        }
+//        canvas.onPainted : {
+//            var currentTime = new Date().valueOf()
+//            rWin.log.debug("Canvas redraw time: " + (currentTime - redrawStart) + " ms")
+//        }
+
         onZoomLevelChanged : {
             // save zoom level
             if (pinchmap.initialized) {
