@@ -175,12 +175,6 @@ Page {
         function paintRoute(ctx) {
             var offsetX = pinchmap.canvas.canvasWindow.x
             var offsetY = pinchmap.canvas.canvasWindow.y
-            var startpos = pinchmap.getScreenpointFromCoord(rWin.routingStartPos.latitude,rWin.routingStartPos.longitude)
-            var destipos = pinchmap.getScreenpointFromCoord(rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude)
-            var startX = startpos[0]+offsetX
-            var startY = startpos[1]+offsetY
-            var destX = destipos[0]+offsetX
-            var destY = destipos[1]+offsetY
             var thispos = (0,0,0)
             var messagePointDiameter = 10
             // clear the canvas
@@ -193,8 +187,41 @@ Page {
             // origin into account.
             ctx.translate(pinchmap.width, pinchmap.height)
             if (tabMap.routingEnabled) {
-                // draw the step point background
                 ctx.lineWidth = 10
+                ctx.strokeStyle = Qt.rgba(0, 0, 0.5, 0.45)
+                if(rWin.routingStartPos.isValid) {
+                    // draw a semi-transparent line from start marker to start of the route
+                    var startpos = pinchmap.getScreenpointFromCoord(rWin.routingStartPos.latitude,rWin.routingStartPos.longitude)
+                    var startX = startpos[0]+offsetX
+                    var startY = startpos[1]+offsetY
+                    // only draw the lines when there is a route
+                    if (routeMessages.count) {
+                        var routeStart = routePoints.get(0)
+                        var routeStartXY = pinchmap.getScreenpointFromCoord(routeStart.lat, routeStart.lon)
+                        ctx.beginPath()
+                        ctx.moveTo(startX, startY)
+                        ctx.lineTo(routeStartXY[0], routeStartXY[1])
+                        ctx.stroke()
+                    }
+                }
+
+                if(rWin.routingDestinationPos.isValid) {
+                    // draw a semi-transparent line from destination marker to end of the route
+                    var destipos = pinchmap.getScreenpointFromCoord(rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude)
+                    var destX = destipos[0]+offsetX
+                    var destY = destipos[1]+offsetY
+                    // only draw the lines when there is a route
+                    if (routeMessages.count) {
+                        var routeEnd = routePoints.get(routePoints.count-1)
+                        var routeEndXY = pinchmap.getScreenpointFromCoord(routeEnd.lat, routeEnd.lon)
+                        ctx.beginPath()
+                        ctx.moveTo(destX, destY)
+                        ctx.lineTo(routeEndXY[0], routeEndXY[1])
+                        ctx.stroke()
+                    }
+                }
+
+                // draw the step point background
                 ctx.strokeStyle = Qt.rgba(0, 0, 0.5, 1.0)
                 for (var i=0; i<routeMessages.count; i++) {
                     ctx.beginPath()
@@ -233,10 +260,6 @@ Page {
 
                 // place a red marker on the start point (if the point is set)
                 if(rWin.routingStartPos.isValid) {
-                    var startpos = pinchmap.getScreenpointFromCoord(rWin.routingStartPos.latitude,rWin.routingStartPos.longitude)
-                    var startX = startpos[0]+offsetX
-                    var startY = startpos[1]+offsetY
-
                     ctx.beginPath()
                     ctx.strokeStyle = Qt.rgba(1, 0, 0, 1)
                     ctx.fillStyle = Qt.rgba(1, 0, 0, 1)
@@ -254,10 +277,6 @@ Page {
 
                 // place a green marker at the destination point (if the point is set)
                 if(rWin.routingDestinationPos.isValid) {
-                    var destipos = pinchmap.getScreenpointFromCoord(rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude)
-                    var destX = destipos[0]+offsetX
-                    var destY = destipos[1]+offsetY
-
                     ctx.beginPath()
                     // place a red marker on the start point
                     ctx.strokeStyle = Qt.rgba(0, 1, 0, 1)
