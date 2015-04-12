@@ -492,10 +492,15 @@ class Route(RanaModule):
         # the (Google) language code is the second part of
         # this whitespace delimited string
         langCode = langCode.split(" ")[1]
-        if mode == "walk":
-            routeMode = constants.ROUTE_PEDESTRIAN
-        elif mode == "cycle":
-            routeMode = constants.ROUTE_BIKE
+        if self.modrana.gui.getIDString() == "GTK":
+            if mode == "walk":
+                routeMode = constants.ROUTE_PEDESTRIAN
+            elif mode == "cycle":
+                routeMode = constants.ROUTE_BIKE
+        elif self.modrana.gui.getIDString() == "Qt5":
+            # the Qt 5 GUI currently does not use an application wide
+            # mode concept and sets the routing mode separately
+            routeMode = self.get("routingModeQt5", constants.ROUTE_CAR)
         routeParams = routing_providers.RouteParameters(
             routeMode=routeMode,
             avoidTollRoads=self.get("routingAvoidToll", False),
