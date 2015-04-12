@@ -887,6 +887,12 @@ class Routing(object):
             messagePointsLLEM = []
             for mp in messagePoints:
                 messagePointsLLEM.append(mp.getLLEM())
+            # also add a point for the route end
+            if routePoints:
+                lastPoint = routePoints[-1]
+                lastPointMessage = "You <b>should</b> be near the destination."
+                messagePointsLLEM.append((lastPoint[0], lastPoint[1],
+                                          lastPoint[2], lastPointMessage))
             self.gui.log.debug("routing successful")
             pyotherside.send("routeReceived", routePoints, messagePointsLLEM)
         else:
