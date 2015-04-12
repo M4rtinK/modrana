@@ -1450,9 +1450,7 @@ class Options(RanaModule):
                                                dy,
                                                None,
                                                "generic", # background for a 3x1 icon
-                                               "")
-                    # due to the button on the right, register a slightly smaller area
-                    clickHandler.registerXYWH(x4, y, w - smallButtonW, dy, onClick)
+                                               onClick)
 
                     # draw mode specific combined toggle & indicator
                     if self.modrana.hasKeyModifierInMode(variable, mode):
@@ -1469,7 +1467,8 @@ class Options(RanaModule):
                                                smallButtonH,
                                                toggleText,
                                                "generic",
-                                               modeSpecToggleAction)
+                                               modeSpecToggleAction,
+                                               layer=1)
 
                     groupName = choices['groupName']
                     if 'noToolsIcon' not in choices:
@@ -1481,8 +1480,9 @@ class Options(RanaModule):
                                                    smallButtonH,
                                                    None,
                                                    "tools", # tools icon
-                                                   "ml:options:go2ItemToolsMenu:%s;%d;%s" % (
-                                                       groupName, index, variable))
+                                                   "ml:options:go2ItemToolsMenu:%s;%d;%s" %
+                                                   (groupName, index, variable),
+                                                   layer=1)
 
                     border = 20
 
