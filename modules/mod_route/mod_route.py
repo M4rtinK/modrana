@@ -844,6 +844,8 @@ class Route(RanaModule):
                 (x, y) = destination
                 (px1, py1) = self.pxpyRoute[-1]
                 (x1, y1) = proj.pxpyRel2xy(px1, py1)
+                cr.set_source_rgba(0, 0, 0.5, 0.45)
+                cr.set_line_width(10)
                 cr.move_to(x, y)
                 cr.line_to(x1, y1)
                 cr.stroke()
