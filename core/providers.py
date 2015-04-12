@@ -168,6 +168,13 @@ class RouteParameters(object):
     def addressRoute(self, value):
         self._addressRoute = value
 
+    def __str__(self):
+        description = "Route parameters\n"
+        description+= "route mode: %s, language: %s\n" % (self.routeMode, self.language)
+        description+= "avoid major highways: %s, avoid toll roads: %s\n" % (self.avoidHighways, self.avoidTollRoads)
+        description+= "address route: %s" % self.addressRoute
+        return description
+
 class RoutingResult(object):
     """This class acts as a wrapper for the results of a routing lookup,
     the main "payload" is the route object, but it also wraps other

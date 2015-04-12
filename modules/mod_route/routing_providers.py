@@ -35,6 +35,7 @@ class MonavRouting(RoutingProvider):
                     controller.status = "starting Monav routing server"
                     self.monav.startServer()
                 controller.status = "Monav offline routing in progress"
+                log.info(routeParams)
                 result = self.monav.monavDirections(waypoints)
                 controller.status = "Monav offline routing done"
             except Exception:
@@ -80,6 +81,7 @@ class GoogleRouting(RoutingProvider):
         destination = waypoints[-1]
         inBetweenPoints = waypoints[1:-1]
         log.info("GoogleRouting: routing from %s to %s", start, destination)
+        log.info(routeParams)
         controller.status = "online routing in progress"
         route, returnCode, errorMessage = _googleDirections(start, destination, inBetweenPoints, routeParams)
         controller.status = "online routing done"
