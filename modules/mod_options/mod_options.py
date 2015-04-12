@@ -742,8 +742,6 @@ class Options(RanaModule):
         # ** online routing submenu
         group = addGroup("Routing", "routing", catNavigation, "generic")
 
-        addBoolOpt("Enable Routing", "routingEnabled", group, False)
-
         addOpt("Routing provider", "routingProvider",
                [(constants.ROUTING_PROVIDER_GOOGLE, "Google - <b>online</b>"),
                 (constants.ROUTING_PROVIDER_MONAV, "Monav - <b>on device</b>")],
