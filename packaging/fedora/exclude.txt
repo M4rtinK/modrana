@@ -1,0 +1,15 @@
+# remove the GUI modules that don't run on Fedora
+modules/gui_modules/gui_qml
+# remove some bigger device modules that are not needed on sailfish
+modules/device_modules/device_n900.py
+modules/device_modules/device_n9.py
+modules/device_modules/n900_maemo5_portrait.py
+modules/device_modules/device_bb10.py
+modules/device_modules/device_nemo.py
+modules/device_modules/device_neo.py
+modules/device_modules/device_android.py
+modules/device_modules/device_android_chroot.py
+# other modules that are currently not needed on Fedora
+modules/mod_route/monav_armv7
+modules/mod_route/monav_amd64
+modules/mod_route/monav_i386

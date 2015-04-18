@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Name=modRana Qt 5
+GenericName=Navigation System
+Comment=A flexible navigation system
+Exec=/usr/bin/modrana-qt5
+Icon=modrana-qml
+Categories=Navigation;
+Name[cs_CZ]=modrana-qt5.desktop
+Terminal=false

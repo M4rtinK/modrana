@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Name=modRana
+GenericName=Navigation System
+Comment=A flexible navigation system
+Exec=/usr/bin/modrana
+Icon=modrana
+Categories=Navigation;
+Terminal=false
