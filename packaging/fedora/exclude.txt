@@ -1,0 +1,25 @@
+# remove the GUI modules that don't run on Fedora
+#modules/gui_modules/gui_gtk.py
+modules/gui_modules/gui_qml
+# remove some bigger device modules that are not needed on sailfish
+modules/device_modules/device_n900.py
+modules/device_modules/device_n9.py
+modules/device_modules/n900_maemo5_portrait.py
+modules/device_modules/device_bb10.py
+modules/device_modules/device_nemo.py
+modules/device_modules/device_neo.py
+modules/device_modules/device_android.py
+modules/device_modules/device_android_chroot.py
+# other modules that are currently not needed on Sailfish
+#modules/pyrender
+modules/mod_route/monav_armv7
+modules/mod_route/monav_amd64
+modules/mod_route/monav_i386
+# backported modules not needed on Python 3.4
+# (they are already part of the standard library)
+#core/backports
+# bundled modules not needed on Sailfish OS
+# as they are already available by default
+# or not needed by the Qt 5 GUI
+#core/bundle/simplejson
+#core/bundle/pycha
