@@ -1,0 +1,4 @@
+# exclude the optional QML files that use imports that are
+# currently not supported for Jolla Store (Harbour) applications
+
+sailfish_specific/*.qml
