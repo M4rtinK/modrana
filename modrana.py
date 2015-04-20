@@ -237,7 +237,7 @@ class ModRana(object):
         # get GUI ID from the CLI argument
         if self.args.u:
             try:
-                self.GUIString = self.args.u.split(":")[0]
+                self.GUIString = self.args.u.split(":")[0].upper()
             except Exception:
                 log.exception('splitting the GUI string failed')
         else: # no ID specified
@@ -302,7 +302,7 @@ class ModRana(object):
             gui = self._loadModule("gui_gtk", "gui")
         elif GUIModuleId == "QML":
             gui = self._loadModule("gui_qml", "gui")
-        elif GUIModuleId == "qt5":
+        elif GUIModuleId == "QT5":
             gui = self._loadModule("gui_qt5", "gui")
 
         # make device module available to the GUI module
