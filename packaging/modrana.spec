@@ -1,11 +1,6 @@
 # if the macros are not defined, define them equal to 0
-%if 0%{!?with_sailfish}
-%define with_sailfish 0
-%endif
-
-%if 0%{!?with_harbour}
-%define with_harbour 0
-%endif
+%{!?with_sailfish: %define with_sailfish 0}
+%{!?with_harbour: %define with_harbour 0}
 
 Summary:  A flexible navigation system. 
 %if 0%{with_sailfish}
@@ -14,7 +9,7 @@ Name: harbour-modrana
 Name: modrana
 %endif
 Url: http://modrana.org
-Version: 0.52.2
+Version: 0.52.3
 Release: 1%{?dist}
 Source0: modrana-%{version}.tar.gz
 
@@ -125,5 +120,8 @@ fi
 %endif
 
 %changelog
+* Tue Apr 21 2015 Martin Kolman <martin.kolman@gmail.com> - 0.52.3-1
+- Fix the Sailfish QML mangling script (martin.kolman)
+
 * Wed Apr 01 2015 Martin Kolman <martin.kolman@gmail.com> - 0.52.2-1
 - Initial package
