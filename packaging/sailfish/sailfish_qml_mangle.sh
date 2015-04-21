@@ -2,7 +2,7 @@
 
 echo "* mangling source for Sailfish"
 
-PATH_TO_SOURCE=$1 
+export PATH_TO_SOURCE=$1
 
 # make sure the PWD is consistent even if the script is called
 # from a different directory
