@@ -25,6 +25,7 @@ BuildRoot: %{_tmppath}/modrana-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: make
 BuildRequires: python3-devel
+BuildRequires: rsync
 
 %if 0%{with_sailfish}
 Requires: python3-base
