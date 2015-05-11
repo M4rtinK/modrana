@@ -2,3 +2,8 @@
 # currently not supported for Jolla Store (Harbour) applications
 
 sailfish_specific/*.qml
+# Harbour RPM validator does not like executable files
+run/*
+themes/default/optipng_all.sh
+themes/default/pngcursh_all.sh
+core/other/test_geo.py

@@ -23,3 +23,12 @@ modules/mod_route/monav_i386
 # or not needed by the Qt 5 GUI
 core/bundle/simplejson
 core/bundle/pycha
+# startups scripts that are not needed
+run/fremantle_gtk
+run/fremantle_qml
+run/harmattan
+run/neo
+run/pc
+run/echo_qt5.sh
+# also we don't really need the test_geo.py script
+core/other/test_geo.py

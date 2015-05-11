@@ -41,6 +41,12 @@ rsync-sailfish: sailfish-qml-mangle
 	$(RSYNC) -ar --exclude-from $(EXCLUDESAILFISH) $(SOURCEDIR)/ $(BUILDDIR)
 
 rsync-harbour: sailfish-qml-mangle
+	# first mark modrana.py as not executable as Harbour RPM validator does not like that
+	# for some reason (not like you could not just run it with python3 modrana.py...)
+	chmod -x $(SOURCEDIR)/modrana.py
+	# also mark the startup scripts as not executable to make the Harbour RPM validator happy
+	chmod -x $(SOURCEDIR)/run/*
+
 	# cleanup the source for a Sailfish OS Harbour package
 	$(RSYNC) -ar --exclude-from $(EXCLUDESAILFISH) --exclude-from $(EXCLUDEHARBOUR) $(SOURCEDIR)/ $(BUILDDIR)
 
@@ -87,7 +93,7 @@ install-sailfish:
 	cp -r $(BUILDDIR)/* $(DESTDIR)/usr/share/harbour-modrana
 	# install the icon
 	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/86x86/apps/
-	cp packaging/icons/modrana/86x86/modrana.png $(DESTDIR)/usr/share/icons/hicolor/86x86/apps/
+	cp packaging/icons/modrana/86x86/modrana.png $(DESTDIR)/usr/share/icons/hicolor/86x86/apps/harbour-modrana.png
 	# install the desktop file
 	-mkdir -p $(DESTDIR)/usr/share/applications/
 	cp packaging/sailfish/harbour-modrana.desktop $(DESTDIR)/usr/share/applications/

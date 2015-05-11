@@ -39,10 +39,6 @@ class Jolla(DeviceModule):
 
     def __init__(self, *args, **kwargs):
         DeviceModule.__init__(self, *args, **kwargs)
-        # migrate any old profiles
-        # TODO: remove this once it is probable
-        # that most users are using the new profile path
-        self._migrateProfiles()
 
         # override the default profile name to harbour-modrana
         paths.setProfileName(SAILFISH_MODRANA_PROFILE_NAME)
@@ -149,44 +145,3 @@ class Jolla(DeviceModule):
     def connectivityStatus(self):
         # TODO: actual connectivity tracking :)
         return True
-
-
-    def _migrateProfiles(self):
-        """Turns out also the profile folders need to use the
-        harbour- prefix, so look for any odl modRana
-        profile folders and migrate them to the new location
-
-        ~/.config/modrana -> ~/.config/harbour-modrana
-        ~/.local/share/modrana -> ~/.local/share/harbour-modrana
-
-
-        TODO: remove this once it is probable most users are using the
-              new profile name
-        """
-        self.log.info("looking for old profiles")
-        found = False
-
-        # config
-        configOld = "/home/nemo/.config/modrana"
-        configNew = "/home/nemo/.config/harbour-modrana"
-        if os.path.exists(configOld):
-            found = True
-            try:
-                os.rename(configOld, configNew)
-                self.log.info("config profile moved to new location")
-            except Exception:
-                self.log.exception("config profile renaming failed")
-
-        # data
-        dataOld = "/home/nemo/.local/share/modrana"
-        dataNew = "/home/nemo/.local/share/harbour-modrana"
-        if os.path.exists(dataOld):
-            found = True
-            try:
-                os.rename(dataOld, dataNew)
-                self.log.info("data profile moved to new location")
-            except Exception:
-                self.log.exception("data profile renaming failed")
-
-        if found == False:
-            self.log.info("no old profiles found")

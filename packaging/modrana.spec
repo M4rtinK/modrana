@@ -4,6 +4,8 @@
 
 Summary:  A flexible navigation system. 
 %if 0%{with_sailfish}
+%define __provides_exclude_from ^%{_datadir}/.*$
+%define __requires_exclude /bin/bash|/usr/bin/env|/bin/sh
 Name: harbour-modrana
 %else
 Name: modrana
