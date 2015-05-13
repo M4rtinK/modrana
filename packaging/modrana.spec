@@ -25,7 +25,6 @@ BuildRequires: python3-devel
 BuildRequires: rsync
 
 %if 0%{with_sailfish}
-Requires: python3-base
 Requires: sailfishsilica-qt5
 Requires: mapplauncherd-booster-silica-qt5
 Requires: pyotherside-qml-plugin-python3-qt5
