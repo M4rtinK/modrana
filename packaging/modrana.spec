@@ -11,7 +11,7 @@ Name: harbour-modrana
 Name: modrana
 %endif
 Url: http://modrana.org
-Version: 0.52.3
+Version: 0.52.4
 Release: 1%{?dist}
 Source0: modrana-%{version}.tar.gz
 
@@ -122,6 +122,9 @@ fi
 %endif
 
 %changelog
+* Wed May 13 2015 Martin Kolman <martin.kolman@gmail.com> - 0.52.4-1
+- Sailfish packaging fixes (martin.kolman)
+
 * Tue Apr 21 2015 Martin Kolman <martin.kolman@gmail.com> - 0.52.3-1
 - Fix the Sailfish QML mangling script (martin.kolman)
 
