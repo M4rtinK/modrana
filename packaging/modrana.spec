@@ -11,7 +11,7 @@ Name: harbour-modrana
 Name: modrana
 %endif
 Url: http://modrana.org
-Version: 0.52.4
+Version: 0.52.5
 Release: 1%{?dist}
 Source0: modrana-%{version}.tar.gz
 
@@ -121,6 +121,9 @@ fi
 %endif
 
 %changelog
+* Wed May 13 2015 Martin Kolman <martin.kolman@gmail.com> - 0.52.5-1
+- Remove python3-base dependency on Sailfish OS (martin.kolman)
+
 * Wed May 13 2015 Martin Kolman <martin.kolman@gmail.com> - 0.52.4-1
 - Sailfish packaging fixes (martin.kolman)
 
