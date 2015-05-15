@@ -7,12 +7,13 @@ Summary:  A flexible navigation system.
 %define __provides_exclude_from ^%{_datadir}/.*$
 %define __requires_exclude /bin/bash|/usr/bin/env|/bin/sh
 Name: harbour-modrana
+Release: 1
 %else
 Name: modrana
+Release: 1%{?dist}
 %endif
 Url: http://modrana.org
 Version: 0.52.5
-Release: 1%{?dist}
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+

@@ -116,7 +116,7 @@ class Jolla(DeviceModule):
         return paths.getXDGPOIFolderPath()
 
     def getLogFolderPath(self):
-        return os.path.join(paths.getHOMEPath(), "Public", "modrana_debug_logs")
+        return os.path.join(paths.getHOMEPath(), "Documents", "modrana_debug_logs")
 
     @property
     def cacheFolderPath(self):

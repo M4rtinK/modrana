@@ -6,7 +6,7 @@
 //       available on the given platform / Qt5 version.
 //       If the import fails, a fake dummy source is used.
 
-import QtPositioning 5.0
+import QtPositioning 5.2
 PositionSource {
     id: locSource
     updateInterval: 1000
