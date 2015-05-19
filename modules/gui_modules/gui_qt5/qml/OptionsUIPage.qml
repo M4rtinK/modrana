@@ -68,10 +68,13 @@ BasePage {
         }
         Label {
             text : qsTr("Screen")
+            visible : keepScreenOnSwitch.visible
         }
         TextSwitch {
+            id : keepScreenOnSwitch
             text : qsTr("Keep screen on")
             checked : rWin.keepScreenOn
+            visible : rWin.keepAlive.available
             onCheckedChanged : {
                  rWin.keepScreenOn = checked
             }
