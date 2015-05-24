@@ -107,9 +107,11 @@ archive: tag local
 local:
 	@rm -f ChangeLog
 	@make ChangeLog
+	@make VersionFile
 	git archive --format=tar --prefix=$(PKGNAME)-$(VERSION)/ $(TAG) > $(PKGNAME)-$(VERSION).tar
 	mkdir -p $(PKGNAME)-$(VERSION)
 	cp ChangeLog $(PKGNAME)-$(VERSION)/
+	cp version.txt $(PKGNAME)-$(VERSION)/
 	tar -rf $(PKGNAME)-$(VERSION).tar $(PKGNAME)-$(VERSION)
 	gzip -9 $(PKGNAME)-$(VERSION).tar
 	rm -rf $(PKGNAME)-$(VERSION)
@@ -121,6 +123,9 @@ rpmlog:
 
 ChangeLog:
 	(GIT_DIR=.git git log > .changelog.tmp && mv .changelog.tmp ChangeLog; rm -f .changelog.tmp) || (touch ChangeLog; echo 'git directory not found: installing possibly empty changelog.' >&2)
+
+VersionFile:
+	echo $(VERSION) > version.txt
 
 bumpver:
 	@NEWSUBVER=$$((`echo $(VERSION) |cut -d . -f 3` + 1)) ; \
