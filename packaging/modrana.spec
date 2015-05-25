@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.52.7
+Version: 0.52.8
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -122,6 +122,9 @@ fi
 %endif
 
 %changelog
+* Mon May 25 2015 Martin Kolman <martin.kolman@gmail.com> - 0.52.8-1
+- Create a version.txt file when making the tarball (martin.kolman)
+
 * Tue May 19 2015 Martin Kolman <martin.kolman@gmail.com> - 0.52.7-1
 - Only show the keep-screen-on toggle when it does something (martin.kolman)
 
