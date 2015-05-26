@@ -31,6 +31,7 @@ all:
 	cp -r run $(SOURCEDIR)
 	cp -r themes $(SOURCEDIR)
 	cp -r modrana.py $(SOURCEDIR)
+	cp -r version.txt $(SOURCEDIR)
 
 rsync:
 	# cleanup the source tree
