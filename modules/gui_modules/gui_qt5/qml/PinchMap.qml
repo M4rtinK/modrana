@@ -46,8 +46,7 @@ Rectangle {
     property var scaleBarLength: getScaleBarLength(latitude);
     
     property alias angle: rot.angle
-
-    property alias markers : map.markersC
+    property var searchMarkerModel : null
 
     // use mapnik as the default map layer
     property var layers :  ListModel {
@@ -441,8 +440,6 @@ Rectangle {
         x: rootX + offsetX;
         y: rootY + offsetY;
 
-        property var markersC : markers
-
         Repeater {
             id: tiles
             model: (pinchmap.numTilesX * pinchmap.numTilesY);
@@ -518,23 +515,9 @@ Rectangle {
             }
 
         }
-        /*
-        Item {
-            id: geocacheDisplayContainer
-            Repeater {
-                id: geocacheDisplay
-                delegate: Geocache {
-                    cache: model.geocache
-                    targetPoint: getMappointFromCoord(model.geocache.lat, model.geocache.lon)
-                    drawSimple: zoomLevel < 12
-                    z: 1000
-                }
-            }
-        }
-        */
-
-        Markers {
+        SearchMarkers {
             id: markers
+            model : pinchmap.searchMarkerModel
             mapInstance : pinchmap
         }
     }

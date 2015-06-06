@@ -1,56 +1,64 @@
 import QtQuick 2.0
 
-// on map marker display support
+// on map marker display support - "abstract class" part
 
 Item {
     id: markerContainer
     property var mapInstance
+
+    property variant model : ListModel {}
+
+    property var delegate
+
     Repeater {
-        id : markersR
-        delegate: Marker {
-            point: model
-            targetPoint: mapInstance.getMappointFromCoord(model.latitude, model.longitude)
-            //verticalSpacing: model.numSimilar
-            z: 2000
-            //TODO: use a constant/make this configurable ?
-            simple : mapInstance.zoomLevel < 13
-        }
+        id : markerR
+        model : markerContainer.model
+        delegate : markerContainer.delegate
     }
 
     function clear() {
         // clear all markers
-        markersR.model.clear()
+        markerContainer.model.clear()
     }
 
-    function addMarker(lat, lon) {
-        //TODO: implement this
+    function appendMarker(lat, lon, highlight) {
+        if (!highlight) {
+            highlight = false
+        }
+        markerContainer.model.append({"latitude": lat, "longitude" : lon, "highlight" : highlight})
+    }
+
+    function appendMarkers(markerList) {
+        // append the given marker list to our model
+        for (var i=0; i<markerList.count; i++) {
+            var item = markerList.get(i)
+            markerContainer.model.appendMarker(item.latitude, item.longitude, item.highlight)
+        }
 
     }
 
     function removeMarker(markerIndex) {
-        //TODO: implement this
+        markerContainer.model.remove(markerIndex)
+    }
 
+    function setMarker(markerIndex, markerDict) {
+        markerContainer.model.set(markerIndex, markerDict)
     }
 
     function setMarkers(markersModel) {
         // set the marker list model to markersModel
-
-        markersR.model = markersModel
+        markerContainer.model = markersModel
     }
 
-    function appendMarkers(markers) {
-        //TODO: implement this
-
-    }
-
-    function setMarkerHighlight(markerIndex) {
-        //TODO: implement this
-
+    function setMarkerHighlight(markerIndex, value) {
+        // set the value of the highlight property for the marker on the given index
+        markerContainer.model.setProperty(markerIndex, "highlight", value)
     }
 
     function clearAllHighlights() {
-        //TODO: implement this
-
+        // unhighlight all markers
+        for (var i=0; i<markerContainer.model.count; i++) {
+            setMarkerHighlight(i, false)
+        }
     }
-
 }

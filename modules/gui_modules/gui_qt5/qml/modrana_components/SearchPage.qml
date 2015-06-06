@@ -166,7 +166,7 @@ HeaderPage {
 
                 // set the current search result model as the marker
                 // display model
-                rWin.mapPage.getMap().markers.setMarkers(pointLW.model)
+                rWin.mapPage.getMap().searchMarkerModel = pointLW.model
 
                 var lat = model.latitude
                 var lon = model.longitude

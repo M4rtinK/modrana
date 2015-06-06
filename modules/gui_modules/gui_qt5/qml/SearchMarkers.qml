@@ -2,15 +2,10 @@ import QtQuick 2.0
 
 Markers {
     id : markers
-    Repeater {
-        id : markersR
-        model : markers.model
-        delegate: Marker {
+    delegate: Component {
+        Marker {
             point: model
-            Component.onCompleted : {
-                console.log("test")
-            }
-            //targetPoint: markers.mapInstance.getMappointFromCoord(modelData.latitude, modelData.longitude)
+            targetPoint: markers.mapInstance.getMappointFromCoord(model.latitude, model.longitude)
             //verticalSpacing: model.numSimilar
             z: 2000
             //TODO: use a constant/make this configurable ?
