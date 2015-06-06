@@ -156,7 +156,8 @@ HeaderPage {
             width : pointLW.width
             height : contentC.height + rWin.c.style.listView.itemBorder
             // a string describing distance from current position to the result
-            property string distanceString : F.p2pDistanceString(model, rWin.pos)
+            property string distanceString : F.p2pDistanceString(model, rWin.lastGoodPos)
+
             onClicked : {
                 rWin.log.info("search:" + model.name + " clicked")
                 // mark the current point as highlighted so that it
