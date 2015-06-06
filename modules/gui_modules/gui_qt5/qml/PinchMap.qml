@@ -636,7 +636,7 @@ Rectangle {
             if (rotationEnabled) {
                 rot.angle = p.rotation
             }
-            pan(p.previousCenter.x - p.center.x, p.previousCenter.y - p.center.y);
+            pan(Math.round(p.previousCenter.x - p.center.x), Math.round(p.previousCenter.y - p.center.y));
         }
 
         onPinchStarted: {
