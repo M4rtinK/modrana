@@ -18,7 +18,7 @@ Confirmed to run on:
 
 ## Dependencies ##
 
-* Python 2.5+
+* Python 2.5+ (including Python 3.2+)
 
 ### GTK GUI ###
 * PyGTK
