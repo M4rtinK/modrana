@@ -675,7 +675,10 @@ Rectangle {
             }
 
             onPressAndHold: {
-                mapLongClicked(Math.round(mouse.x), Math.round(mouse.y))
+                // prevent map panning from triggering long clicks
+                if (__wasClick) {
+                    mapLongClicked(Math.round(mouse.x), Math.round(mouse.y))
+                }
             }
 
             onWheel:  {
