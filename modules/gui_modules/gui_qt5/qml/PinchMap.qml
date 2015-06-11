@@ -660,7 +660,9 @@ Rectangle {
             property int __firstX: -1;
             property int __firstY: -1;
             property bool __wasClick: false;
-            property int maxClickDistance: 100;
+            // take HiDPI into account 
+            // (bigger pixel density -> bigger chance of detecting a click as a pan by mistake)
+            property int maxClickDistance: 100 * rWin.c.style.m
 
             propagateComposedEvents : true
 
