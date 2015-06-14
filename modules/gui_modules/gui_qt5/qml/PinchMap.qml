@@ -428,6 +428,118 @@ Rectangle {
     }
     */
 
+    PinchArea {
+        id: pincharea;
+        property double __oldZoom;
+        anchors.fill: parent;
+
+        function calcZoomDelta(p) {
+            pinchmap.setZoomLevelPoint(Math.round((Math.log(p.scale)/Math.log(2)) + __oldZoom), p.center.x, p.center.y);
+            if (rotationEnabled) {
+                rot.angle = p.rotation
+            }
+            pan(Math.round(p.previousCenter.x - p.center.x), Math.round(p.previousCenter.y - p.center.y));
+        }
+
+        onPinchStarted: {
+            __oldZoom = pinchmap.zoomLevel;
+        }
+
+        onPinchUpdated: {
+            calcZoomDelta(pinch);
+        }
+
+        onPinchFinished: {
+            calcZoomDelta(pinch);
+        }
+
+        MouseArea {
+            id: mousearea;
+
+            property bool __isPanning: false;
+            property int __lastX: -1;
+            property int __lastY: -1;
+            property int __firstX: -1;
+            property int __firstY: -1;
+            property bool __wasClick: false;
+            // take HiDPI into account
+            // (bigger pixel density -> bigger chance of detecting a click as a pan by mistake)
+            property int maxClickDistance: 100 * rWin.c.style.m
+
+            propagateComposedEvents : true
+
+            anchors.fill : parent;
+
+            onClicked: {
+                mapClicked(Math.round(mouse.x), Math.round(mouse.y))
+            }
+
+            onDoubleClicked: {
+                setZoomLevelPoint(pinchmap.zoomLevel + 1, Math.round(mouse.x), Math.round(mouse.y));
+            }
+
+            onPressAndHold: {
+                // prevent map panning from triggering long clicks
+                if (__wasClick) {
+                    mapLongClicked(Math.round(mouse.x), Math.round(mouse.y))
+                }
+            }
+
+            onWheel:  {
+                var zoom_diff = (wheel.angleDelta.y > 0) ? 1 : -1;
+                setZoomLevelPoint(pinchmap.zoomLevel + zoom_diff, wheel.x, wheel.y);
+            }
+
+            onPressed: {
+                __isPanning = true;
+                __lastX = Math.round(mouse.x);
+                __lastY = Math.round(mouse.y);
+                __firstX = Math.round(mouse.x);
+                __firstY = Math.round(mouse.y);
+                __wasClick = true;
+                rWin.log.debug("PRESSED")
+                //mouse.accepted = false
+            }
+
+            onReleased: {
+                __isPanning = false;
+                if (! __wasClick) {
+                    panEnd();
+                    mapPanEnd();
+                }
+
+            }
+
+            onPositionChanged: {
+                if (__isPanning) {
+                    // as Qt 5 on Sailfish OS for some reasons returns pointer coordinates as
+                    // floating point numbers, convert them all to integers first to prevent
+                    // precision loss
+                    var dx = Math.round(mouse.x) - __lastX;
+                    var dy = Math.round(mouse.y) - __lastY;
+
+                    pan(-dx, -dy);
+                    __lastX = Math.round(mouse.x);
+                    __lastY = Math.round(mouse.y);
+                    /*
+                    once the pan threshold is reached, additional checking is unnecessary
+                    for the press duration as nothing sets __wasClick back to true
+                    */
+                    if (__wasClick && Math.pow(Math.round(mouse.x) - __firstX, 2) + Math.pow(Math.round(mouse.y) - __firstY, 2) > maxClickDistance) {
+                        __wasClick = false;
+                        pinchmap.drag() // send the drag-detected signal
+
+                    }
+                }
+            }
+
+            onCanceled: {
+                __isPanning = false;
+            }
+        }
+    }
+
+
     Grid {
         id: map;
         columns: numTilesX;
@@ -624,114 +736,5 @@ Rectangle {
         style: Text.Outline
         styleColor: "white"
         font.pixelSize: rWin.c.style.map.scaleBar.fontSize
-    }
-
-    PinchArea {
-        id: pincharea;
-        property double __oldZoom;
-        anchors.fill: parent;
-
-        function calcZoomDelta(p) {
-            pinchmap.setZoomLevelPoint(Math.round((Math.log(p.scale)/Math.log(2)) + __oldZoom), p.center.x, p.center.y);
-            if (rotationEnabled) {
-                rot.angle = p.rotation
-            }
-            pan(Math.round(p.previousCenter.x - p.center.x), Math.round(p.previousCenter.y - p.center.y));
-        }
-
-        onPinchStarted: {
-            __oldZoom = pinchmap.zoomLevel;
-        }
-
-        onPinchUpdated: {
-            calcZoomDelta(pinch);
-        }
-
-        onPinchFinished: {
-            calcZoomDelta(pinch);
-        }
-
-        MouseArea {
-            id: mousearea;
-
-            property bool __isPanning: false;
-            property int __lastX: -1;
-            property int __lastY: -1;
-            property int __firstX: -1;
-            property int __firstY: -1;
-            property bool __wasClick: false;
-            // take HiDPI into account 
-            // (bigger pixel density -> bigger chance of detecting a click as a pan by mistake)
-            property int maxClickDistance: 100 * rWin.c.style.m
-
-            propagateComposedEvents : true
-
-            anchors.fill : parent;
-
-            onClicked: {
-                mapClicked(Math.round(mouse.x), Math.round(mouse.y))
-            }
-
-            onDoubleClicked: {
-                setZoomLevelPoint(pinchmap.zoomLevel + 1, Math.round(mouse.x), Math.round(mouse.y));
-            }
-
-            onPressAndHold: {
-                // prevent map panning from triggering long clicks
-                if (__wasClick) {
-                    mapLongClicked(Math.round(mouse.x), Math.round(mouse.y))
-                }
-            }
-
-            onWheel:  {
-                var zoom_diff = (wheel.angleDelta.y > 0) ? 1 : -1;
-                setZoomLevelPoint(pinchmap.zoomLevel + zoom_diff, wheel.x, wheel.y);
-            }
-
-            onPressed: {
-                __isPanning = true;
-                __lastX = Math.round(mouse.x);
-                __lastY = Math.round(mouse.y);
-                __firstX = Math.round(mouse.x);
-                __firstY = Math.round(mouse.y);
-                __wasClick = true;
-            }
-
-            onReleased: {
-                __isPanning = false;
-                if (! __wasClick) {
-                    panEnd();
-                    mapPanEnd();
-                }
-
-            }
-
-            onPositionChanged: {
-                if (__isPanning) {
-                    // as Qt 5 on Sailfish OS for some reasons returns pointer coordinates as
-                    // floating point numbers, convert them all to integers first to prevent
-                    // precision loss
-                    var dx = Math.round(mouse.x) - __lastX;
-                    var dy = Math.round(mouse.y) - __lastY;
-
-                    pan(-dx, -dy);
-                    __lastX = Math.round(mouse.x);
-                    __lastY = Math.round(mouse.y);
-                    /*
-                    once the pan threshold is reached, additional checking is unnecessary
-                    for the press duration as nothing sets __wasClick back to true
-                    */
-                    if (__wasClick && Math.pow(Math.round(mouse.x) - __firstX, 2) + Math.pow(Math.round(mouse.y) - __firstY, 2) > maxClickDistance) {
-                        __wasClick = false;
-                        pinchmap.drag() // send the drag-detected signal
-
-                    }
-                }
-            }
-
-            onCanceled: {
-                __isPanning = false;
-            }
-        }
     }
 }
