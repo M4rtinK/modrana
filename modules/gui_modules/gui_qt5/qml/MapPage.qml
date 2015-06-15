@@ -41,6 +41,22 @@ Page {
     property real routingDestinationLon: 0.
     property bool routingRequestChanged : false
     property bool routingEnabled: false
+    property bool routingP2P: true
+
+    function enableRoutingUI(p2p) {
+        // enable the routing UI (currently just the 1-3 buttons)
+        if (p2p == null) {
+            p2p = true
+        }
+        routingP2P = p2p
+        routingEnabled = true
+    }
+
+    function disableRoutingUI() {
+        // disable the routing UI & hide the route
+        routingEnabled = false
+        routingP2P = false
+    }
 
     Component.onCompleted : {
         rWin.log.info("map page: loaded, loading layers")
@@ -442,6 +458,7 @@ Page {
             height: rWin.c.style.map.button.size
             checked : selectRoutingStart
             toggledColor : Qt.rgba(1, 0, 0, 0.7)
+            visible: tabMap.routingEnabled && tabMap.routingP2P
             onClicked: {
                 selectRoutingStart = !selectRoutingStart
                 selectRoutingDestination = false
@@ -454,6 +471,7 @@ Page {
             height: rWin.c.style.map.button.size
             checked : selectRoutingDestination
             toggledColor : Qt.rgba(0, 1, 0, 0.7)
+            visible: tabMap.routingEnabled && tabMap.routingP2P
             onClicked: {
                 selectRoutingStart = false
                 selectRoutingDestination = !selectRoutingDestination

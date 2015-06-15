@@ -7,7 +7,7 @@ IconGridPage {
         if (menu == "RouteMenu") {
             // until we have a proper routing page just enable
             // a simplified routing mode right away :)
-            rWin.mapPage.routingEnabled = true
+            rWin.mapPage.enableRoutingUI(true)
             rWin.getPage(null)
             rWin.notify("Routing mode enabled", 3000)
 
