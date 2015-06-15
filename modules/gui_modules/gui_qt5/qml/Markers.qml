@@ -21,11 +21,14 @@ Item {
         markerContainer.model.clear()
     }
 
-    function appendMarker(lat, lon, highlight) {
+    function appendMarker(lat, lon, name, highlight) {
         if (!highlight) {
             highlight = false
         }
-        markerContainer.model.append({"latitude": lat, "longitude" : lon, "highlight" : highlight})
+        if (!name) {
+            name = ""
+        }
+        markerContainer.model.append({"latitude": lat, "longitude" : lon, "name":name, "highlight" : highlight})
     }
 
     function appendMarkers(markerList) {
