@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.52.9
+Version: 0.52.10
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -122,6 +122,21 @@ fi
 %endif
 
 %changelog
+* Tue Jun 16 2015 Martin Kolman <martin.kolman@gmail.com> - 0.52.10-1
+- Make sure the background bubble stays visible on Sailfish OS (martin.kolman)
+- Add long-click menu with a "route here" button (martin.kolman)
+- Set start and destination by a function (martin.kolman)
+- Add functions for enabling and disabling the routing UI (martin.kolman)
+- Make it possible to set marker name when appending it (martin.kolman)
+- Move the pinch and mouse areas under them tile grid (martin.kolman)
+- Make pan detection HiDPI aware (martin.kolman)
+- Don't trigger the long-click signal if a pan is in progress (martin.kolman)
+- Clarify Python 3 support (martin.kolman)
+- Round position change when panning during pinch zoom (martin.kolman)
+- Refactor the map marker implementation (martin.kolman)
+- Add support for long-click detection to the PinchMap element (martin.kolman)
+- Use rWin.lastGoodPos when computing distance to search results (martin.kolman)
+
 * Wed May 27 2015 Martin Kolman <martin.kolman@gmail.com> - 0.52.9-1
 - Make sure that version.txt is present in sourcedir (martin.kolman)
 
