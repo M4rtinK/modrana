@@ -18,6 +18,18 @@ Canvas {
 
     onRadiusChanged:requestPaint()
 
+    // Sailfish OS destroys the Canvas rendering context
+    // when the application is minimised, so wee need
+    // to re-render the canvas once the context is again
+    // available
+    onContextChanged: {
+         if (canvas.context) {
+            canvas.requestPaint()
+         } else {
+            return
+         }
+    }
+
     onPaint: {
         var ctx = getContext("2d")
         ctx.save()
