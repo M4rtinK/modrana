@@ -58,6 +58,24 @@ Page {
         routingP2P = false
     }
 
+    function setRoutingStart(lat, lon) {
+        rWin.routingStartPos.latitude = lat
+        rWin.routingStartPos.longitude = lon
+        rWin.routingStartPos.isValid = true
+        routingStartLat = lat
+        routingStartLon = lon
+        routingStartSet = true
+    }
+
+    function setRoutingDestination(lat, lon) {
+        rWin.routingDestinationPos.latitude = lat
+        rWin.routingDestinationPos.longitude = lon
+        rWin.routingDestinationPos.isValid = true
+        routingDestinationLat = lat
+        routingDestinationLon = lon
+        routingDestinationSet = true
+    }
+
     Component.onCompleted : {
         rWin.log.info("map page: loaded, loading layers")
         pinchmap.loadLayers()
@@ -321,28 +339,18 @@ Page {
                 // store the position we touched in Lat,Lon
                 routing.touchpos = pinchmap.getCoordFromScreenpoint(screenX, screenY)
                 if (selectRoutingStart) {
-                    routingStartLat = routing.touchpos[0]
-                    routingStartLon = routing.touchpos[1]
-                    rWin.routingStartPos.latitude=routingStartLat
-                    rWin.routingStartPos.longitude=routingStartLon
-                    rWin.routingStartPos.isValid = true
+                    setRoutingStart(routing.touchpos[0],  routing.touchpos[1])
                     selectRoutingStart = false
-                    routingStartSet = true
                     routingRequestChanged = true
                 }
                 if (selectRoutingDestination) {
-                    routingDestinationLat = routing.touchpos[0]
-                    routingDestinationLon = routing.touchpos[1]
-                    rWin.routingDestinationPos.latitude=routingDestinationLat
-                    rWin.routingDestinationPos.longitude=routingDestinationLon
-                    rWin.routingDestinationPos.isValid = true
+                    setRoutingDestination(routing.touchpos[0],  routing.touchpos[1])
                     selectRoutingDestination = false
-                    routingDestinationSet = true
                     routingRequestChanged = true
                 }
                 if (routingRequestChanged && routingStartSet && routingDestinationSet) {
-                    rWin.python.call("modrana.gui.modules.route.llRoute", [[rWin.routingStartPos.latitude,rWin.routingStartPos.longitude], [rWin.routingDestinationPos.latitude,rWin.routingDestinationPos.longitude]])
-                    rWin.log.debug("routing called")
+                    // a (possibly new) route is needed
+                    routing.requestRoute()
                 }
                 if (routingRequestChanged) {
                     // request a refresh of the canvas to
@@ -350,6 +358,25 @@ Page {
                     pinchmap.canvas.requestPaint()
                 }
             }
+        }
+
+        function requestRoute() {
+            // request route for the current start and destination
+            if (!routingStartSet) {
+                rWin.log.error("can't get route: start not set")
+                return false
+            }
+            if (!routingDestinationSet) {
+                rWin.log.error("can't get route: destination not set")
+                return false
+            }
+            if (!routingStartSet && !routingDestinationSet) {
+                rWin.log.error("can't get route: start and destination not set")
+                return false
+            }
+            rWin.python.call("modrana.gui.modules.route.llRoute", [[routingStartLat,routingStartLon], [routingDestinationLat, routingDestinationLon]])
+            rWin.log.info("route requested")
+            return true
         }
 
         Component.onCompleted: {
