@@ -31,6 +31,7 @@ Page {
     property alias layers : pinchmap.layers
 
     // routing related stuff
+    property alias routing : routing
     property bool selectRoutingStart : false
     property bool selectRoutingDestination : false
     property bool routingStartSet: false

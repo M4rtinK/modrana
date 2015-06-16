@@ -70,6 +70,7 @@ Rectangle {
     signal drag // signals that map-drag has been detected
     signal centerSet // signals that the map has been moved
     signal tileDownloaded(string loadedTileId, int tileError) // signals that a tile has been downloaded
+    signal clearPointMenus
     property bool needsUpdate: false
 
     // if the map is clicked or double clicked the mapClicked and mapDoubleClicked signals
@@ -631,6 +632,22 @@ Rectangle {
             id: markers
             model : pinchmap.searchMarkerModel
             mapInstance : pinchmap
+        }
+        PointMenuMarkers {
+            id: pointMenuMarkers
+            mapInstance : pinchmap
+            Connections {
+                target : pinchmap
+                onMapLongClicked : {
+                    var ll = pinchmap.getCoordFromScreenpoint(screenX, screenY)
+                    // replace the previously shown menu (if any)
+                    pointMenuMarkers.clear()
+                    pointMenuMarkers.appendMarker(ll[0], ll[1], "", true)
+                }
+                onClearPointMenus : {
+                    pointMenuMarkers.clear()
+                }
+            }
         }
     }
 
