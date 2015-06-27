@@ -44,13 +44,13 @@ def quadTree(tx, ty, zoom):
     return quadKey
 
 def getQuadtreeUrl(lzxy):
-    quadKey = quadTree(lzxy[1], lzxy[2], lzxy[3])
+    quadKey = quadTree(lzxy[2], lzxy[3], lzxy[1])
     #  don't know what the g argument is, maybe revision ?
     #  looks like it isn't optional
     return '%s%s?g=452' % (lzxy[0].url, quadKey)
 
 def getQuadtreeSubstitutionUrl(lzxy):
-    quadKey = quadTree(lzxy[1], lzxy[2], lzxy[3])
+    quadKey = quadTree(lzxy[2], lzxy[3], lzxy[1])
     template = string.Template(lzxy[0].url)
     return str(template.substitute(quadindex=quadKey))
 
