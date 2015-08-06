@@ -140,3 +140,5 @@ bumpver:
 
 .PHONY: clean install tag archive local
 
+check:
+	nosetests -w tests -v
