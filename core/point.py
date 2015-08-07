@@ -5,27 +5,27 @@ class Point(object):
     """a point"""
 
     def __init__(self, lat, lon, elevation=None, name=None, summary=None, message=None):
-        self.lat = lat
-        self.lon = lon
-        self.elevation = elevation # should be in meters
+        self._lat = lat
+        self._lon = lon
+        self._elevation = elevation # should be in meters
         self._name = name
         self._summary = summary
         self._message = message
 
     def __unicode__(self):
-        if self.getElevation() is None:
+        if self.elevation is None:
             elev = "unknown"
         else:
-            elev = "%f m" % self.getElevation()
+            elev = "%f m" % self.elevation
 
         return '%f,%f elev: %s "%s:%s"' % (self.lat, self.lon, elev, self.name, self.summary)
 
     def __str__(self):
         #return unicode(self).encode('utf-8')
-        if self.getElevation() is None:
+        if self.elevation is None:
             elev = "unknown"
         else:
-            elev = "%f m" % self.getElevation()
+            elev = "%f m" % self.elevation
         return '%f,%f elev: %s "%s:%s"' % (self.lat, self.lon, elev, self.name, self.summary)
 
     @property
@@ -65,6 +65,30 @@ class Point(object):
     def description(self, value):
         self._message = value
 
+    @property
+    def lat(self):
+        return self._lat
+
+    @lat.setter
+    def lat(self, latitude):
+        self._lat = latitude
+
+    @property
+    def lon(self):
+        return self._lon
+
+    @lon.setter
+    def lon(self, longitude):
+        self._lon = longitude
+
+    @property
+    def elevation(self):
+        return self._elevation
+
+    @elevation.setter
+    def elevation(self, elevation):
+        self._elevation = elevation
+
     def getLL(self):
         return self.lat, self.lon
 
@@ -82,12 +106,6 @@ class Point(object):
 
     def getLLEM(self):
         return self.lat, self.lon, self.elevation, self._message
-
-    def getElevation(self):
-        return self.elevation
-
-    def setElevation(self, elevation):
-        self.elevation = elevation
 
     def getMessage(self):
         return self._message
