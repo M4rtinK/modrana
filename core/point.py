@@ -1,13 +1,12 @@
-"""an universal class representing a point"""
-from core.backports import six
+"""An universal class representing a point"""
 
 class Point(object):
-    """a point"""
+    """A point"""
 
     def __init__(self, lat, lon, elevation=None, name=None, summary=None, message=None):
         self._lat = lat
         self._lon = lon
-        self._elevation = elevation # should be in meters
+        self._elevation = elevation  # in meters
         self._name = name
         self._summary = summary
         self._message = message
@@ -21,7 +20,6 @@ class Point(object):
         return '%f,%f elev: %s "%s:%s"' % (self.lat, self.lon, elev, self.name, self.summary)
 
     def __str__(self):
-        #return unicode(self).encode('utf-8')
         if self.elevation is None:
             elev = "unknown"
         else:
@@ -126,7 +124,7 @@ class Point(object):
             return self._message
 
     def getAbstract(self):
-        """a short single line point description"""
+        """A short single line point description"""
         if self.summary:
             return self.summary
         elif self._message:
@@ -135,5 +133,5 @@ class Point(object):
             return "no abstract"
 
     def getUrls(self):
-        """get a list of (Url, Url description) tuples corresponding to the point"""
+        """Get a list of (Url, Url description) tuples corresponding to the point"""
         return []
