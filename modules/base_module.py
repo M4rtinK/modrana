@@ -106,7 +106,7 @@ class RanaModule(object):
             self.log.info("Sending message: " + message)
             m.routeMessage(message)
         else:
-            print("No message handler, cant send message.")
+            self.log.error("No message handler, cant send message.")
 
     def _getLog(self):
         """Return module specific logger instance
