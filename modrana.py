@@ -742,6 +742,15 @@ class ModRana(object):
         #     sTimeout = msTimeout / 1000.0
         #     notify.handleNotification(message, sTimeout, icon)
 
+    def sendMessage(self, message):
+        m = self.m.get("messages", None)
+        if m is not None:
+            log.info("Sending message: " + message)
+            m.routeMessage(message)
+        else:
+            log.error("No message handler, can't send message.")
+
+
     def getModes(self):
         """return supported modes"""
         modes = {
