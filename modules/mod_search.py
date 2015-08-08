@@ -597,7 +597,7 @@ class Search(RanaModule):
             return
         for itemTuple in self.list:
             (distance, point, index) = itemTuple
-            if index == highlightNr: # the highlighted result is draw in the end
+            if index == highlightNr:  # the highlighted result is draw in the end
                 # skip it this time
                 continue
             (lat, lon) = point.getLL()
@@ -613,30 +613,28 @@ class Search(RanaModule):
 
             if captions == False:
                 continue
-                # draw caption with transparent background
+            # draw caption with transparent background
+
             # Pango does not like & so we need to replace it with &amp
             text = re.sub('&', '&amp;', point.name) # result caption
 
             cr.set_font_size(20)
             extents = cr.text_extents(text) # get the text extents
             (w, h) = (extents[2] * 1.5, extents[3] * 1.5)
-            #      (w,h) = (extents[2], extents[3])
-
             border = 2
             cr.set_line_width(2)
-            cr.set_source_rgba(0, 0, 1, 0.45) # transparent blue
+            cr.set_source_rgba(0, 0, 1, 0.45)  # transparent blue
             (rx, ry, rw, rh) = (x - border + 10, y + border + h * 0.2, w + 4 * border, -(h * 1.4))
-            cr.rectangle(rx, ry, rw, rh) # create the transparent background rectangle
-            m = self.m.get('clickHandler', None)
+            cr.rectangle(rx, ry, rw, rh)  # create the transparent background rectangle
+            cr.fill()
             # register clickable area
+            m = self.m.get('clickHandler', None)
             if m is not None:
                 m.registerXYWH(rx, ry - (-rh), rw, -rh,
                                "search:reset|set:searchResultsItemNr:%d|set:menu:search#searchResultsItem" % index)
-            cr.fill()
             # draw the actual text
-            cr.set_source_rgba(1, 1, 1, 0.95) # slightly transparent white
+            cr.set_source_rgba(1, 1, 1, 0.95)  # slightly transparent white
             menus.drawText(cr, text, rx, ry - (-rh), rw, -rh, 0.05)
-            #      cr.show_text(text) # show the transparent result caption
             cr.stroke()
 
         if highlightNr != -1: # is there some search result to highlight ?
