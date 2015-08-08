@@ -63,6 +63,7 @@ class ShowPOI(RanaModule):
             self.makeMapClickable()
         if self.drawActivePOI:
             proj = self.m.get('projection', None)
+            menus = self.m.get('menu', None)
             if proj and self.visiblePOI:
                 for POI in self.visiblePOI:
                     poiID = POI.db_index
@@ -125,8 +126,7 @@ class ShowPOI(RanaModule):
                         # draw the actual text
                         #        cr.set_source_rgba(1, 1, 0, 0.95) # slightly transparent white
                         cr.set_source_rgba(1, 1, 1, 0.95) # slightly transparent white
-                        cr.move_to(x + 15, y + 7)
-                        cr.show_text(text) # show the transparent result caption
+                        menus.drawText(cr, text, rx, ry - (-rh), rw, -rh, 0.05)
                         cr.stroke()
 
     def handleMessage(self, message, messageType, args):
