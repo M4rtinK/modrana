@@ -22,6 +22,7 @@ import os
 import sqlite3
 import csv
 from core.backports.six import u
+from core.point import POI
 
 def getModule(*args, **kwargs):
     return StorePOI(*args, **kwargs)
@@ -98,10 +99,10 @@ class StorePOI(RanaModule):
         self.log.debug("new database file has been created")
         return conn
 
-    def storePOI(self, POI):
+    def storePOI(self, poi_instance):
         """store a POI object to the database"""
         if self.db:
-            values = POI.getDbOrder()
+            values = poi_instance.get_db_order()
             query = "replace into poi values(?,?,?,?,?,?)"
             self.db.execute(query, values)
             self.db.commit()
@@ -146,164 +147,27 @@ class StorePOI(RanaModule):
             return None
 
     def getPOI(self, POIId):
-        """return a complete POI row from db fow a given POI Id"""
+        """Return a complete POI row from db fow a given POI id"""
         if self.db:
             result = self.db.execute('select poi_id, lat, lon, label, desc, cat_id from poi where poi_id=?',
                                      [POIId]).fetchone()
             if result:
-                (poi_id, lat, lon, label, desc, cat_id) = result
+                (poi_id, lat, lon, name, desc, cat_id) = result
                 # make it more usable
-                POIObject = self.POI(self, label, desc, lat, lon, cat_id, poi_id)
-                return POIObject
+                poiObject = POI(name, desc, lat, lon, cat_id, poi_id)
+                return poiObject
             else:
                 return None
         else:
             return None
 
-    class POI(object):
-        """This class represents a POI"""
-
-        def __init__(self, callback, label, description, lat, lon, catId, poiId=None):
-            self.callback = callback
-            self.id = poiId
-            self.lat = lat
-            self.lon = lon
-            self.label = u('%s') % label
-            self.description = u('%s') % description
-            self.categoryId = catId
-
-        def __str__(self):
-            s = "POI named: %s, lat,lon: %f,%f with id: %d" % (
-            self.getName(), self.getLat(), self.getLon(), self.getId())
-            return s
-
-        def __eq__(self, other):
-            return self.getId() == other.getId()
-
-        def getMenus(self):
-            """convenience function for getting the menus object"""
-            return self.callback.m.get('menu', None)
-
-        def getId(self):
-            return self.id
-
-        def getLat(self):
-            return self.lat
-
-        def getLon(self):
-            return self.lon
-
-        def getName(self):
-            return self.label
-
-        def getDescription(self):
-            return self.description
-
-        def getCatId(self):
-            return self.categoryId
-
-        def getDbOrder(self):
-            """get the variables in the order, they are stored in the database"""
-            return (
-                self.getId(),
-                self.getLat(),
-                self.getLon(),
-                self.getName(),
-                self.getDescription(),
-                self.getCatId()
-            )
-
-        def drawMenu(self, cr):
-            menus = self.getMenus()
-            if menus:
-                button1 = ('map#show on', 'generic',
-                           'mapView:recentre %f %f|showPOI:drawActivePOI|set:menu:None' % (self.lat, self.lon))
-                button2 = ('tools', 'tools', 'showPOI:updateToolsMenu|set:menu:POIDetailTools')
-                if self.label is not None and self.lat is not None and self.lon is not None and self.description is not None:
-                    text = "<big><b>%s</b></big>\n\n%s\n\nlat: <b>%f</b> lon: <b>%f</b>" % (
-                    self.label, self.description, self.lat, self.lon)
-                else:
-                    text = "POI is being initialized"
-                box = (text, '')
-                menus.drawThreePlusOneMenu(cr, 'POIDetail', 'showPOI:checkMenus|set:menu:menu#list#POIList', button1,
-                                           button2, box, wrap=True)
-
-        def updateToolsMenu(self):
-            # setup the tools submenu
-            menus = self.getMenus()
-            if menus:
-                menus.clearMenu('POIDetailTools', "set:menu:showPOI#POIDetail")
-                menus.addItem('POIDetailTools', 'here#route', 'generic', 'showPOI:routeToActivePOI')
-                menus.addItem('POIDetailTools', 'name#edit', 'generic', 'ms:showPOI:editActivePOI:name')
-                menus.addItem('POIDetailTools', 'description#edit', 'generic', 'ms:showPOI:editActivePOI:description')
-                menus.addItem('POIDetailTools', 'latitude#edit', 'generic', 'ms:showPOI:editActivePOI:lat')
-                menus.addItem('POIDetailTools', 'longitude#edit', 'generic', 'ms:showPOI:editActivePOI:lon')
-                menus.addItem('POIDetailTools', 'category#change', 'generic',
-                              'ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit|set:menu:menu#list#POICategoryChooser')
-                menus.addItem('POIDetailTools', 'position#set as', 'generic',
-                              'showPOI:centerOnActivePOI|ml:location:setPosLatLon:%f;%f' % (self.lat, self.lon))
-                # just after the point is stored and and its detail menu shows up for the first time,
-                # it cant be deleted from the database, because we don't know which index it got :D
-                # TODO: find a free index and then store the point on it
-                # (make sure no one writes to the database between getting the free index and writing the poi to it)
-                # then we would be able to delete even newly created points
-                if self.getId():
-                    menus.addItem('POIDetailTools', 'POI#delete', 'generic', 'showPOI:askDeleteActivePOI')
-
-        def getValues(self):
-            return [self.id, self.lat, self.lon, self.label, self.description, self.categoryId]
-
-        def setName(self, newLabel, commit=True):
-            self.label = u('%s') % newLabel
-            if commit:
-                self.storeToDb()
-
-        def setDescription(self, newDescription, commit=True):
-            self.description = u('%s') % newDescription
-            if commit:
-                self.storeToDb()
-
-        def setLat(self, lat, commit=True):
-            self.lat = float(lat)
-            if commit:
-                self.storeToDb()
-
-        def setLon(self, lon, commit=True):
-            self.lon = float(lon)
-            if commit:
-                self.storeToDb()
-
-        def setCategory(self, newCatId, commit=True):
-            self.categoryId = newCatId
-            if commit:
-                self.storeToDb()
-
-        def storeToDb(self):
-            """store this POI object to the database"""
-            self.callback.storePOI(self)
-
-        def showOnMap(self):
-            """recentre to this POI and active point and label drawing"""
-            self.callback.sendMessage(
-                'mapView:recentre %f %f|showPOI:drawActivePOI|set:menu:None' % (self.lat, self.lon))
-
-        def routeFrom(self, fromWhere):
-            if fromWhere == 'currentPosition': # route from current position to this POI
-                pos = self.callback.get('pos', None)
-                if pos:
-                    (fromLat, fromLon) = pos
-                    # clear old route and route to the point
-                    self.callback.sendMessage(
-                        'route:clearRoute|md:route:route:type=ll2ll;fromLat=%f;fromLon=%f;toLat=%f;toLon=%f;' % (
-                        fromLat, fromLon, self.getLat(), self.getLon()))
-
     def getEmptyPOI(self):
-        """get a POI with all variables set to None"""
-        POIObject = self.POI(self, None, None, None, None, None, None)
-        return POIObject
+        """Get a POI with all variables set to None"""
+        poiObject = POI(None, None, None, None, None, None)
+        return poiObject
 
     def checkImport(self):
-        """check if there are any POI in the old format
+        """Check if there are any POI in the old format
            and try to import them to the db (into the "other" category)
            then rename the old poi file to prevent multiple imports"""
 
@@ -316,13 +180,13 @@ class StorePOI(RanaModule):
                 if points:
                     for point in points:
                         # create a new POI object
-                        label = point.name
+                        name = point.name
                         description = point.description.replace('|', '\n')
                         lat = point.lat
                         lon = point.lon
                         catId = 11
-                        newPOI = self.POI(self, label, description, lat, lon, catId)
-                        newPOI.storeToDb()
+                        newPOI = POI(name, description, lat, lon, catId)
+                        newPOI.commit()
                     self.log.info("imported %d old POI", len(points))
                     os.rename(oldPOIPath, renamedOldPOIPath)
                     self.log.info("old POI file moved to: %s", renamedOldPOIPath)
@@ -353,17 +217,17 @@ class StorePOI(RanaModule):
                 self.sendMessage('showPOI:listMenusDirty')
         elif messageType == 'ms' and message == 'setCatAndCommit':
             # set category and as this is the last needed input,
-            # commit the new POI to db"""
+            # commit the new POI to the database
             catId = int(args)
             # set the category to the one the user just selected
-            self.tempOnlinePOI.setCategory(catId, commit=False)
+            self.tempOnlinePOI.db_category_index = int(args)
             # commit the new online result based POI to db
-            self.tempOnlinePOI.storeToDb()
+            self.tempOnlinePOI.commit()
             # signal that the showPOI menus may need to be regenerated
             self.sendMessage('showPOI:listMenusDirty')
             catInfo = self.getCategoryForId(catId)
             catName = catInfo[1]
-            POIName = self.tempOnlinePOI.getName()
+            POIName = self.tempOnlinePOI.name
             # NOTE: False means the the variable is unset, as None means the map screen
             if self.menuNameAfterStorageComplete == False:
                 self.set('menu', 'search#searchResultsItem')
@@ -388,7 +252,7 @@ class StorePOI(RanaModule):
         if key == 'onlineResultName':
             # like this, the user can edit the name of the
             # result before saving it to POI
-            self.tempOnlinePOI.setName(result, commit=False)
+            self.tempOnlinePOI.name = result
             self.sendMessage('ml:notification:m:Select a category for the new POI;3')
             self.sendMessage('ml:showPOI:setupPOICategoryChooser:storePOI;setCatAndCommit')
             self.set('menu', 'menu#list#POICategoryChooser')
@@ -436,13 +300,10 @@ class StorePOI(RanaModule):
         # TODO: automatic saving without asking
         # * skip name entry
         # * and/or skip category entry
-
-        newPOI = self.getEmptyPOI()
-        newPOI.setName(point.getName(), commit=False)
         (lat, lon) = point.getLL()
-        newPOI.setLat(lat, commit=False)
-        newPOI.setLon(lon, commit=False)
-        newPOI.setDescription(point.getDescription())
+        newPOI = POI(name=point.name, description=point.description,
+                     lat=lat, lon=lon, db_cat_id=None)
+
 
         # temporarily store the new POI to make it
         # available during filling its name, description, etc.
@@ -452,15 +313,15 @@ class StorePOI(RanaModule):
         # start the name and description entry chain
         entry = self.m.get('textEntry', None)
         if entry:
-            entry.entryBox(self, 'onlineResultName', 'POI Name', initialText=point.getName())
+            entry.entryBox(self, 'onlineResultName', 'POI Name', initialText=point.name)
 
     def storeLocalSearchResult(self, result):
-        """store a Google Local Search result to file"""
-        newPOI = self.getEmptyPOI()
-        newPOI.setName(result.name, commit=False)
-        newPOI.setLat(result.lat, commit=False)
-        newPOI.setLon(result.lon, commit=False)
-        newPOI.setDescription(result.updateMessage(name=False), commit=False)
+        """store a local search result to the database"""
+
+        (lat, lon) = result.getLL()
+        newPOI = POI(name=result.name, description=result.description,
+                     lat=lat, lon=lon, db_cat_id=None)
+
         self.tempOnlinePOI = newPOI
 
         # start the name and description entry chain
@@ -469,23 +330,3 @@ class StorePOI(RanaModule):
             entry.entryBox(self, 'onlineResultName', 'POI Name', result.name)
 
 
-class POI():
-    """
-    !! DEPRECIATED
-    A basic class representing a POI.
-       DEPRECIATED, use the new version in the main class
-       this is there only because it is needed for import of old POI
-    !! DEPRECIATED
-    """
-
-    def __init__(self, name, category, lat, lon):
-        self.name = name
-        self.category = category
-        self.description = ""
-        self.lat = lat
-        self.lon = lon
-
-    def setDescription(self, description):
-        self.description = description
-
-    #    self.GLSResult = None # optional

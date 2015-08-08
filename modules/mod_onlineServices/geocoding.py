@@ -10,20 +10,22 @@ class GeoPyPoint(Point):
     * the GeoPy geocoding results return composite place names containing
     the address components delimited by ','
     * this point Point subclass just splits the part before the first ','
-    and returns it when the getName method is called
+    and returns it when the name property is read
     * also, it outputs a description text where all ',' are replaced by newlines
     """
 
     def __init__(self, lat, lon, placeText):
         Point.__init__(self, lat, lon, message=placeText)
         self._name = placeText.split(',')[0]
-        self.description = re.sub(',', '\n', placeText) # replace separators with newlines
+        self._description = re.sub(',', '\n', placeText) # replace separators with newlines
 
-    def getName(self):
+    @property
+    def name(self):
         return self._name
 
-    def getDescription(self):
-        return self.description
+    @property
+    def description(self):
+        return self._description
 
 
 def _places2points(places):

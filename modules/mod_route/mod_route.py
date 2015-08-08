@@ -674,7 +674,7 @@ class Route(RanaModule):
             (lat, lon) = route.getPointByID(-1).getLL()
             destStep = way.TurnByTurnPoint(lat, lon)
             destStep.setSSMLMessage('<p xml:lang="en">you <b>should</b> be near the destination</p>')
-            destStep.setMessage('you <b>should</b> be near the destination')
+            destStep.description ='you <b>should</b> be near the destination'
             destStep.setDistanceFromStart(route.getLength())
             # TODO: make this multilingual
             # add it to the end of the message point list
@@ -695,7 +695,7 @@ class Route(RanaModule):
         steps = directions.getMessagePoints()
 
         for step in steps:
-            originalMessage = "".join(str(step.getMessage()))
+            originalMessage = "".join(str(step.description))
             message = ""
             try:
                 message = step.description #TODO: make a method for this
@@ -703,7 +703,7 @@ class Route(RanaModule):
                 message = re.sub(r'</div[^>]*?>', '</i>', message)
                 message = re.sub(r'<wbr/>', ', ', message)
                 message = re.sub(r'<wbr>', ', ', message)
-                step.setMessage(message)
+                step.description = message
                 # special processing of the original message for Espeak
                 message = originalMessage
 

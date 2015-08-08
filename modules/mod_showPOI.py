@@ -20,6 +20,8 @@
 from __future__ import with_statement # for python 2.5
 from modules.base_module import RanaModule
 from core import geo
+from core.point import POI
+from core.singleton import modrana
 import math
 import threading
 
@@ -63,10 +65,10 @@ class ShowPOI(RanaModule):
             proj = self.m.get('projection', None)
             if proj and self.visiblePOI:
                 for POI in self.visiblePOI:
-                    poiID = POI.getId()
-                    lat = POI.getLat()
-                    lon = POI.getLon()
-                    name = POI.getName()
+                    poiID = POI.db_index
+                    lat = POI.lat
+                    lon = POI.lon
+                    name = POI.name
                     hidePOICaptionZl = int(self.get("hideMarkerCaptionsBelowZl", 13))
                     if int(self.get('z', 15)) > hidePOICaptionZl:
                         distanceString = ""
@@ -177,13 +179,13 @@ class ShowPOI(RanaModule):
             elif messageType == 'ms' and message == 'setActivePOI':
                 if args:
                     POIId = int(args)
-                    self.activePOI = store.getPOI(POIId)
+                    self.activePOI = GTKPOI(store.getPOI(POIId))
             elif messageType == 'ms' and message == 'storePOI':
                 if args == "manualEntry":
                     # add all POI info manually
                     entry = self.m.get('textEntry', None)
                     if entry:
-                        self.activePOI = store.getEmptyPOI() # set a blank POI as active
+                        self.activePOI = GTKPOI(store.getEmptyPOI())  # set a blank POI as active
                         # start the chain of entry boxes
                         entry.entryBox(self, 'newName', 'POI name', "")
                 elif args == "currentPosition":
@@ -192,10 +194,10 @@ class ShowPOI(RanaModule):
                     if entry:
                         pos = self.get('pos', None)
                         if pos:
-                            self.activePOI = store.getEmptyPOI() # set a blank POI as active
+                            self.activePOI = GTKPOI(store.getEmptyPOI()) # set a blank POI as active
                             (lat, lon) = pos
-                            self.activePOI.setLat(lat, commit=False)
-                            self.activePOI.setLon(lon, commit=False)
+                            self.activePOI.lat = lat
+                            self.activePOI.lon = lon
                             # start the entry box chain
                             entry.entryBox(self, 'newCurrentPositionName', 'POI name', "")
                 elif args == "fromMap":
@@ -214,9 +216,9 @@ class ShowPOI(RanaModule):
                             if proj and lastClick and entry:
                                 (x, y) = lastClick
                                 (lat, lon) = proj.xy2ll(x, y)
-                                self.activePOI = store.getEmptyPOI() # set a blank POI as active
-                                self.activePOI.setLat(lat, commit=False)
-                                self.activePOI.setLon(lon, commit=False)
+                                self.activePOI = GTKPOI(store.getEmptyPOI()) # set a blank POI as active
+                                self.activePOI.lat = lat
+                                self.activePOI.lon = lon
                                 # start the entry box chain
                                 # we misuse the current position chain
                                 entry.entryBox(self, 'newCurrentPositionName', 'POI name', "")
@@ -226,16 +228,16 @@ class ShowPOI(RanaModule):
                 if args:
                     if entry:
                         if args == 'name':
-                            name = self.activePOI.getName()
+                            name = self.activePOI.name
                             entry.entryBox(self, 'name', 'POI name', name)
                         if args == 'description':
-                            description = self.activePOI.getDescription()
+                            description = self.activePOI.description
                             entry.entryBox(self, 'description', 'POI Description', description)
                         if args == 'lat':
-                            lat = str(self.activePOI.getLat())
+                            lat = str(self.activePOI.lat)
                             entry.entryBox(self, 'lat', 'POI Latitude', lat)
                         if args == 'lon':
-                            lon = str(self.activePOI.getLon())
+                            lon = str(self.activePOI.lon)
                             entry.entryBox(self, 'lon', 'POI Longitude', lon)
 
             elif messageType == 'ml' and message == 'setupPOICategoryChooser':
@@ -247,11 +249,10 @@ class ShowPOI(RanaModule):
             elif messageType == 'ms' and message == 'setCatAndCommit':
                 # selecting the category is the final stage of adding a POI
                 if args:
-                    # set the category
-                    catId = int(args)
-                    self.activePOI.setCategory(catId, commit=False)
+                    # set the category index
+                    self.activePOI.db_category_index = int(args)
                     # commit the new POI to db
-                    self.activePOI.storeToDb()
+                    self.activePOI.commit()
                     # mark list menus for regeneration
                     self.listMenusDirty = True
                     # go to the new POI menu
@@ -262,7 +263,7 @@ class ShowPOI(RanaModule):
                 if self.listMenusDirty:
                     self.sendMessage('showPOI:setupCategoryList')
                     if self.activePOI:
-                        catId = self.activePOI.getCatId()
+                        catId = self.activePOI.db_category_index
                         self.sendMessage('ms:showPOI:setupPOIList:%d' % catId)
                     self.listMenusDirty = False
 
@@ -278,8 +279,8 @@ class ShowPOI(RanaModule):
             elif message == 'askDeleteActivePOI':
                 ask = self.m.get('askMenu', None)
                 if ask:
-                    id = self.activePOI.getId()
-                    name = self.activePOI.getName()
+                    id = self.activePOI.db_index
+                    name = self.activePOI.name
                     question = "Do you really want to delete:\n%s\nfrom the POI database ?" % name
                     yesAction = "ms:storePOI:deletePOI:%d|set:menu:menu#list#POICategories" % id
                     noAction = "showPOI:updateToolsMenu|set:menu:POIDetailTools"
@@ -380,7 +381,7 @@ class ShowPOI(RanaModule):
     def saveVisibleIDs(self):
         visibleIDs = []
         for POI in self.visiblePOI:
-            visibleIDs.append(POI.getId())
+            visibleIDs.append(POI.db_index)
         self.set("visiblePOIIDs", visibleIDs)
 
     def restoreVisibleIDs(self):
@@ -408,44 +409,91 @@ class ShowPOI(RanaModule):
         # TODO: add input checking
         entry = self.m.get('textEntry', None)
         if key == 'name':
-            self.activePOI.setName(result)
+            self.activePOI.name = result
+            self.activePOI.commit()
         elif key == 'description':
-            self.activePOI.setDescription(result)
+            self.activePOI.description = result
+            self.activePOI.commit()
         elif key == 'lat':
-            self.activePOI.setLat(float(result))
+            self.activePOI.lat = float(result)
+            self.activePOI.commit()
         elif key == 'lon':
-            self.activePOI.setLon(float(result))
+            self.activePOI.lon = float(result)
+            self.activePOI.commit()
 
-        # new  poi will be committed at once, so we disable the autocommit
-        # also, the events are chained, so one entry box follows the other
+        # New POI will be committed at the end, so we don't need to commit
+        # after each data entry.
+        # The events are also chained, so one entry box follows the other.
         elif key == 'newName':
-            self.activePOI.setName(result, commit=False)
+            self.activePOI.name = result
             entry.entryBox(self, 'newDescription', 'POI Description', "")
         elif key == 'newDescription':
-            self.activePOI.setDescription(result, commit=False)
+            self.activePOI.description = result
             entry.entryBox(self, 'newLat', 'POI Latitude', "")
         elif key == 'newLat':
-            self.activePOI.setLat(result, commit=False)
+            self.activePOI.lat = float(result)
             entry.entryBox(self, 'newLon', 'POI Longitude', "")
         elif key == 'newLon':
-            self.activePOI.setLon(result, commit=False)
+            self.activePOI.lon = float(result)
             # final step:
-            # setup the category chooser menu,
-            # and make sure the POI is committed after a category is chosen
+            # * setup the category chooser menu,
+            # * make sure the POI is committed after a category is chosen
             self._setupPOICategoryChooser('showPOI', 'setCatAndCommit')
             self.set('menu', 'menu#list#POICategoryChooser')
             self.sendMessage('ml:notification:m:Select a category for this POI;3')
 
-        # "current position as a new POI" entry chain
+        # current position as a new POI" entry chain
         elif key == 'newCurrentPositionName':
-            self.activePOI.setName(result, commit=False)
+            self.activePOI.name = result
             entry.entryBox(self, 'newCurrentPositionDescription', 'POI Description', "")
         elif key == 'newCurrentPositionDescription':
-            self.activePOI.setDescription(result, commit=False)
-            # setting the category is the last step
-
+            self.activePOI.description = result
             # setup the category chooser
+            # (category selection will be the last step)
             self._setupPOICategoryChooser('showPOI', 'setCatAndCommit')
             self.set('menu', 'menu#list#POICategoryChooser')
             self.sendMessage('ml:notification:m:Select a category for this POI;3')
             self.set('needRedraw', True)
+
+
+class GTKPOI(POI):
+    """A POI wrapper with additional methods needed by the GTK GUI"""
+    def __init__(self, poi):
+        POI.__init__(self, name=poi.name, description=poi.description, lat=poi.lat, lon=poi.lon,
+                     db_cat_id=poi.db_category_index, db_poi_id=poi.db_index)
+
+    def drawMenu(self, cr):
+        menus = modrana.m.get('menu', None)
+        if menus:
+            button1 = ('map#show on', 'generic',
+                       'mapView:recentre %f %f|showPOI:drawActivePOI|set:menu:None' % (self.lat, self.lon))
+            button2 = ('tools', 'tools', 'showPOI:updateToolsMenu|set:menu:POIDetailTools')
+            if self.name is not None and self.lat is not None and self.lon is not None and self.description is not None:
+                text = "<big><b>%s</b></big>\n\n%s\n\nlat: <b>%f</b> lon: <b>%f</b>" % (
+                self.name, self.description, self.lat, self.lon)
+            else:
+                text = "POI is being initialized"
+            box = (text, '')
+            menus.drawThreePlusOneMenu(cr, 'POIDetail', 'showPOI:checkMenus|set:menu:menu#list#POIList', button1,
+                                       button2, box, wrap=True)
+    def updateToolsMenu(self):
+        # setup the tools submenu
+        menus = modrana.m.get('menu', None)
+        if menus:
+            menus.clearMenu('POIDetailTools', "set:menu:showPOI#POIDetail")
+            menus.addItem('POIDetailTools', 'here#route', 'generic', 'showPOI:routeToActivePOI')
+            menus.addItem('POIDetailTools', 'name#edit', 'generic', 'ms:showPOI:editActivePOI:name')
+            menus.addItem('POIDetailTools', 'description#edit', 'generic', 'ms:showPOI:editActivePOI:description')
+            menus.addItem('POIDetailTools', 'latitude#edit', 'generic', 'ms:showPOI:editActivePOI:lat')
+            menus.addItem('POIDetailTools', 'longitude#edit', 'generic', 'ms:showPOI:editActivePOI:lon')
+            menus.addItem('POIDetailTools', 'category#change', 'generic',
+                          'ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit|set:menu:menu#list#POICategoryChooser')
+            menus.addItem('POIDetailTools', 'position#set as', 'generic',
+                          'showPOI:centerOnActivePOI|ml:location:setPosLatLon:%f;%f' % (self.lat, self.lon))
+            # just after the point is stored and and its detail menu shows up for the first time,
+            # it cant be deleted from the database, because we don't know which index it got :D
+            # TODO: find a free index and then store the point on it
+            # (make sure no one writes to the database between getting the free index and writing the poi to it)
+            # then we would be able to delete even newly created points
+            if self.db_index:
+                menus.addItem('POIDetailTools', 'POI#delete', 'generic', 'showPOI:askDeleteActivePOI')

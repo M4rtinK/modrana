@@ -34,7 +34,7 @@ NOMINATIM_REVERSE_GEOCODING_URL = "http://nominatim.openstreetmap.org/reverse?"
 class LocalSearchPoint(Point):
     """a local search result point"""
 
-    def __init__(self, lat, lon, name="", description="", phoneNumbers=None,
+    def __init__(self, lat, lon, name="", phoneNumbers=None,
                  urls=None, addressLines=None, emails=None, openingHours=None,
                  priceLevel=None, rating=None):
         if not emails: emails = []
@@ -42,17 +42,22 @@ class LocalSearchPoint(Point):
         if not urls: urls = []
         if not phoneNumbers: phoneNumbers = []
         if not openingHours: openingHours = {}
-        Point.__init__(self, lat, lon, message=name)
-        self._name = name
-        self.description = description
-        self._message = None
+        Point.__init__(self, lat, lon, name=name)
+        self._message_loaded = False
         self._phoneNumbers = phoneNumbers
-        self.urls = urls
+        self._urls = urls
         self._addressLines = addressLines
-        self.emails = emails
-        self.openingHours = openingHours
+        self._emails = emails
+        self._openingHours = openingHours
         self._priceLevel = priceLevel
         self._rating = rating
+
+    @Point.name.setter
+    def name(self, value):
+        self._name = value
+        # we now need to update the generated message
+        # as the point name is a part of it
+        self._update_message()
 
     @property
     def addressLines(self):
@@ -70,25 +75,20 @@ class LocalSearchPoint(Point):
     def priceLevel(self):
         return self._priceLevel
 
-    def getDescription(self):
-        return self.description
-
-    def getMessage(self):
-        # lazy message generation
-        # = only generate the message once it is requested for the first time
-        if self._message is None:
-            self._message = self.updateMessage()
+    @property
+    def description(self):
+        # Lazy description generation
+        # * only generate the message once it is requested for the first time
+        if self._message_loaded is False:
+            self._update_message()
             return self._message
         else:
             return self._message
 
-    def updateMessage(self, name=True):
-        """call this if you change the properties of an existing point"""
+    def _update_message(self):
+        """Regenerates the local search point description."""
         message = ""
-        if name:
-            message += "%s\n\n" % self._name
-        if self.description not in ("", None):
-            message += "%s\n" % self.description
+        message += "%s\n\n" % self._name
         for item in self._addressLines:
             message += "%s\n" % item
         newline = ''
@@ -101,16 +101,17 @@ class LocalSearchPoint(Point):
         message += newline
         for item in self.phoneNumbers:
             message += "%s\n" % item[1]
-        for item in self.emails:
+        for item in self._emails:
             message += "%s\n" % item
-        for item in self.urls:
+        for item in self._urls:
             message += "%s\n" % item
-        if 'open_now' in self.openingHours and self.openingHours['open_now']:
+        if 'open_now' in self._openingHours and self._openingHours['open_now']:
             message += 'Open now\n'
-        return message
+        self._message = message
+        self._message_loaded = True
 
     def __unicode__(self):
-        return self.getMessage()
+        return self.description
 
 
 class GoogleLocalSearchPoint(LocalSearchPoint):

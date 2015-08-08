@@ -1,4 +1,11 @@
-"""An universal class representing a point"""
+"""The universal class representing a point and derived classes"""
+
+
+from core.singleton import modrana
+from core.backports.six import u
+
+import logging
+log = logging.getLogger("core.point")
 
 class Point(object):
     """A point"""
@@ -105,24 +112,6 @@ class Point(object):
     def getLLEM(self):
         return self.lat, self.lon, self.elevation, self._message
 
-    def getMessage(self):
-        return self._message
-
-    def setMessage(self, message):
-        self._message = message
-
-    def getName(self):
-        if self.name:
-            return self.name
-        else:
-            return self._message
-
-    def getDescription(self):
-        if self.description:
-            return self.description
-        else:
-            return self._message
-
     def getAbstract(self):
         """A short single line point description"""
         if self.summary:
@@ -135,3 +124,74 @@ class Point(object):
     def getUrls(self):
         """Get a list of (Url, Url description) tuples corresponding to the point"""
         return []
+
+
+class POI(Point):
+    """This class represents a POI"""
+
+    def __init__(self, name, description, lat, lon, db_cat_id, db_poi_id=None):
+        self.id = db_poi_id
+        # this probably handles some Unicode encoding issues
+        name = u('%s') % name
+        description = u('%s') % description
+        Point.__init__(self, lat, lon, name=name, message=description)
+        self._db_category_index = db_cat_id
+
+    def __str__(self):
+        return "POI named: %s, lat,lon: %f,%f with id: %d" % (
+            self.name,
+            self.lon,
+            self.lon,
+            self.db_index
+        )
+
+    def __eq__(self, other):
+        return self.db_index == other.db_index
+
+    @property
+    def db_index(self):
+        return self.id
+
+    @property
+    def db_category_index(self):
+        return self._db_category_index
+
+    @db_category_index.setter
+    def db_category_index(self, new_category_index):
+        self._db_category_index = new_category_index
+
+    def get_db_order(self):
+        """get the variables in the order, they are stored in the database"""
+        return (
+            self.db_index,
+            self.lat,
+            self.lon,
+            self.name.decode("utf-8"),
+            self.description.decode("utf-8"),
+            self.db_category_index
+        )
+
+    def commit(self):
+        """Store the current state of this POI object to the database"""
+        storePOI = modrana.m.get('storePOI', None)
+        if storePOI:
+            storePOI.storePOI(self)
+        else:
+            log.error("can't commit %s to POI database: storePOI module missing", self)
+
+    def showOnMap(self):
+        """Recentre to this POI and show its marker and label"""
+        modrana.sendMessage('mapView:recentre %f %f|showPOI:drawActivePOI|set:menu:None' %
+                            (self.lat, self.lon))
+
+    def routeFrom(self, fromWhere):
+        """Route from somewhere to this POI"""
+        if fromWhere == 'currentPosition': # route from current position to this POI
+            pos = modrana.get('pos', None)
+            if pos:
+                (fromLat, fromLon) = pos
+                # clear old route (if any) and route to the point
+                modrana.sendMessage(
+                    'route:clearRoute|md:route:route:type=ll2ll;fromLat=%f;fromLon=%f;toLat=%f;toLon=%f;' %
+                    (fromLat, fromLon, self.lat, self.lon)
+                )

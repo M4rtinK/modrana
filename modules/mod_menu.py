@@ -742,8 +742,8 @@ class Menus(RanaModule):
             return mainText, secText, action
 
         def describePointGo2Detail(point, index, listName):
-            mainText = point.getName()
-            secText = point.getDescription()
+            mainText = point.name
+            secText = point.description
             action = 'set:menu:menu#listDetail#%s#%d' % (name, index)
             return mainText, secText, action
 

@@ -116,7 +116,7 @@ class TurnByTurn(RanaModule):
         elif message == "showMessageInsideNotification":
             currentStep = self.getCurrentStep()
             if currentStep:
-                message = "<i>turn description:</i>\n%s" % currentStep.getMessage()
+                message = "<i>turn description:</i>\n%s" % currentStep.description
                 if self.dmod.hasNotificationSupport():
                     self.dmod.notify(message, 7000)
                     #TODO: add support for modRana notifications once they support line wrapping
@@ -222,7 +222,7 @@ class TurnByTurn(RanaModule):
                     layout = pg.create_layout()
 
                     # get the current turn message
-                    message = currentStep.getMessage()
+                    message = currentStep.description
 
                     # display current distance to the next point & other unit conversions
                     units = self.m.get('units', None)
