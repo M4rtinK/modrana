@@ -69,7 +69,6 @@ class Menus(RanaModule):
         self.spButtonHiFillTup = ("#ffec8b", 1.0)
         self.spButtonHiOutlineTup = ("yellow", 1.0)
 
-
     def beforeDraw(self):
         # check if buttons should be hidden, every second by default
         # TODO: implement this by using a timer ?
@@ -91,7 +90,7 @@ class Menus(RanaModule):
                 # so that the hiding counter runs from the start when we come back to the map screen
 
     def buttonsHidingOn(self):
-        """report whether button hiding is enabled"""
+        """Report whether button hiding is enabled"""
         return self.hideMapScreenButtons
 
     def _zoomScrollCB(self, event):
@@ -108,7 +107,8 @@ class Menus(RanaModule):
 
     def drawScreenOverlay(self, cr):
         """Draw an overlay on top of the map, showing various information
-        about position etc."""
+           about position etc.
+        """
         (x, y, w, h) = self.get('viewport')
 
         # Where is the map?
@@ -120,7 +120,6 @@ class Menus(RanaModule):
         m = self.m.get('clickHandler', None)
         if m is not None:
             m.registerDraggable(x, y, x + w, y + h, "mapView") # handler for dragging the map
-            #m.registerXYWH(x, y, x + w, y + h, "menu:screenClicked")
             m.registerScreenClicked("menu:screenClicked")
             m.registerXYWH(x, y, x + w, y + h, "mapView:zoomInOnDoubleClick", doubleClick=True)
             m.registerScrollXYWH(x, y, x + w, y + h, self._zoomScrollCB)
@@ -239,7 +238,7 @@ class Menus(RanaModule):
             self.drawScalebar(cr, proj, x1, y1, w)
 
     def needRedraw(self):
-        """convenience function for asking for redraw"""
+        """Convenience function for asking for redraw"""
         self.set('needRedraw', True)
 
     def showText(self, cr, text, x, y, widthLimit=None, fontSize=40, colorString=None):
@@ -292,19 +291,17 @@ class Menus(RanaModule):
 
     def drawText(self, cr, text, x, y, w, h, border=0, rgbaColor=None):
         """This is mainly used to draw the text on icons,
-        this method uses pango, for the old show_text based one,
-        see the  drawTextOld method"""
+           this method uses pango, for the old show_text based one,
+           see the  drawTextOld method
+        """
         if not text:
             return
-        #    cr.rectangle(x,y,w,h)
         # Put a border around the area
         if border != 0:
             x += w * border
             y += h * border
             w *= (1 - 2 * border)
             h *= (1 - 2 * border)
-        #    cr.rectangle(x,y,w,h)
-        #    cr.stroke()
 
         # get a pangocairo context
         pg = pangocairo.CairoContext(cr)
@@ -334,7 +331,7 @@ class Menus(RanaModule):
         cr.restore()
 
     def drawToggleButtonOld(self, cr, x1, y1, w, h, textIconAction, index):
-        """draw an automatic toggleable icon
+        """Draw an automatic toggleable icon
            textActionIcon -> a dictionary of text strings/actions/icons
         """
         self.drawButton(cr, x1, y1, w, h, textIconAction[index][0], textIconAction[index][1], textIconAction[index][2])
@@ -343,7 +340,9 @@ class Menus(RanaModule):
         """Draw a clickable button, with icon image and text
 
         NOTE: # delimits the different captions: text_down#text_middle#text_up
-           text_up is NOT YET IMPLEMENTED"""
+           text_up is NOT YET IMPLEMENTED
+        """
+
         # Draw icon
         self.icons.draw(cr, icon, x1, y1, w, h)
 
@@ -377,15 +376,16 @@ class Menus(RanaModule):
             self.log.debug("Drag in menu + %f = %f", dy, self.listOffset)
 
     def setItemMenuGrid(self, x1, y1, cols, rows, dx, dy):
-        """generate an icon placement grid for a given number of
-           number of columns,rows and icon sizes"""
+        """Generate an icon placement grid for a given number of
+           number of columns,rows and icon sizes
+        """
         grid = []
         for y in range(rows):
             for x in range(cols):
                 grid.append((x1 + x * dx, y1 + y * dy))
         self.itemMenuGrid = ((x1, y1, cols, rows, dx, dy), grid)
 
-    # menu drawing logic#
+    # menu drawing logic #
 
     def mainDrawMenu(self, cr, menuName, args=None):
         """Draw menus
@@ -427,7 +427,6 @@ class Menus(RanaModule):
                 index = None
 
             if listName in self.lists.keys():
-            #        self.log.debug("drawing list: %s" % menuName)
                 self.lists[listName].draw(cr, index) # draw the list
         elif menuName == 'listDetail':
             listName, index = args.split('#', 1)
@@ -559,8 +558,6 @@ class Menus(RanaModule):
                     # make the button highlighted
                     icon = "%s>>%s" % (highlightIconDescription, icon)
                 self.drawButton(cr, x, y, dx, dy, text, icon, action, timedAction)
-            #        (text, icon, action, itemType) = item
-            #        self.drawButton(cr, x, y, dx, dy, text, icon, action)
             elif itemType == 'toggle':
                 index = item[1]
                 toggleCount = len(item[0])
@@ -586,16 +583,16 @@ class Menus(RanaModule):
             self.log.error("Can't register \"%s\" menu - unknown type", itemType)
 
     def initMenu(self, menu):
-        """initialize menu a menu dictionary instance to default parameters"""
+        """Initialize menu a menu dictionary instance to default parameters"""
         self.menus[menu] = self.getInitializedMenu()
 
     def getInitializedMenu(self):
-        """initialize the itemized menu datastructure
+        """Initialize the itemized menu datastructure
         TODO: make this object oriented"""
         return {'metadata': {'itemCount': 0, 'currentPage': 0}}
 
     def clearMenu(self, menuName, cancelButtonAction='set:menu:main'):
-        """clear a local itemized menu instance and add the escape button"""
+        """Clear a local itemized menu instance and add the escape button"""
         self.initMenu(menuName)
         if self.modrana.gui:
             if self.modrana.gui.getIDString() == "GTK":
@@ -609,19 +606,19 @@ class Menus(RanaModule):
         self.addItems(menuName, [item])
 
     def drawClearButton(self, cr, x, y, w, h, parentAction, icon='back'):
-        """draw a correct back button, including the timed jump-to-map action"""
+        """Draw a correct back button, including the timed jump-to-map action"""
         timedAction = (self.modrana.gui.msLongPress, "set:menu:None")
         self.drawButton(cr, x, y, w, h, '', icon, parentAction, timedAction)
 
     def getClearedMenu(self, cancelButtonAction='set:menu:main'):
-        """clear a given itemized menu instance, add the escape button and return it"""
+        """Clear a given itemized menu instance, add the escape button and return it"""
         menu = self.getInitializedMenu()
         timedAction = (self.modrana.gui.msLongPress, "set:menu:None")
         item = self.generateItem("", "back", cancelButtonAction, "simple", timedAction)
         return self.addItemsToThisMenu(menu, [item])
 
     def addItemsToThisMenu(self, menu, items=None):
-        """add items to a given itemized menu datastructure and return it"""
+        """Add items to a given itemized menu datastructure and return it"""
         if not items: items = []
         if not menu:
             menu = self.getInitializedMenu()
@@ -636,40 +633,39 @@ class Menus(RanaModule):
         return menu
 
     def addItem(self, menuName, text, icon=None, action=None, pos=None, timedAction=None):
-        """add item to the local menu structure"""
+        """Add item to the local menu structure"""
         item = self.generateItem(text, icon, action, "simple", timedAction)
         self.menus[menuName] = self.addItemsToThisMenu(self.menus.get(menuName, None), [item, ])
 
     def getItem(self, menuName, itemId, ):
-        """get a given itemized menu item"""
+        """Get a given itemized menu item"""
         return self.menus[menuName][itemId]
 
     def setItem(self, menuName, itemId, item):
-        """set a given itemized menu item to a given value"""
+        """Set a given itemized menu item to a given value"""
         self.menus[menuName][itemId] = item
 
     def highlightItem(self, menuName, itemId):
-        """highlight an item in a given itemized menu, replacing the previous highlighted"""
+        """Highlight an item in a given itemized menu, replacing the previous highlighted"""
         self.menus[menuName]['metadata']['highlightId'] = itemId
 
     def addItems(self, menuName, items):
-        """add multiple items to the local menu structure"""
+        """Add multiple items to the local menu structure"""
         self.menus[menuName] = self.addItemsToThisMenu(self.menus.get(menuName, None), items)
 
     def addItemMenu(self, menuName, menu, wideButtons=False):
-        """store a given item menu
+        """Store a given item menu
         NOTE: if there already is a menu with the given key, it will be replaced"""
         menu['metadata']['wideButtons'] = wideButtons
         self.menus[menuName] = menu
 
     def generateItem(self, text, icon, action, itemType='simple', timedAction=None):
-        """generate an itemized menu item"""
+        """Generate an itemized menu item"""
         return text, icon, action, itemType, timedAction
 
     def addToggleItem(self, menu, textIconAction, index=0, pos=None, uniqueName=None):
-        """
-        add a toggleable item to the menu
-        textIconAction is a list of texts icons and actions -> (text,icon,action)
+        """Add a toggleable item to the menu
+           textIconAction is a list of texts icons and actions -> (text,icon,action)
         """
         if menu not in self.menus:
             self.initMenu(menu)
@@ -697,7 +693,7 @@ class Menus(RanaModule):
     # Point menus #
 
     def drawPointDetailMenu(self, cr, point, backAction, menuName, index):
-        """draw a detailed menu for a Point object"""
+        """Draw a detailed menu for a Point object"""
         lat, lon = point.getLL()
         z = self.get('z', 15)
         urls = point.getUrls()
@@ -716,7 +712,7 @@ class Menus(RanaModule):
         self.drawThreePlusOneMenu(cr, 'pointDetail', backAction, button1, button2, box, wrap=True)
 
     def drawPointToolsMenu(self, cr, point, group, backAction):
-        """draw a detailed menu for a Point object"""
+        """Draw a detailed menu for a Point object"""
 
         # check if the for this point is cached
         if self.itemToolsMenuCache[0] == point:
@@ -782,11 +778,11 @@ class Menus(RanaModule):
         return newListableMenu
 
     class ListableMenu(object):
-        """a listable menu object"""
+        """A listable menu object"""
 
         def __init__(self, name, menus, container, parentAction, descFunction=None, drawFunction=None,
                      displayedItems=3):
-            """use custom item and description drawing functions, or use the default ones"""
+            """Use custom item and description drawing functions, or use the default ones"""
             # TODO: is this possible in the header ?
             if descFunction is None:
                 self.descFunction = self.describeListItem
@@ -806,19 +802,19 @@ class Menus(RanaModule):
             self.drawItemToolsMenuFunction = self.nop
 
         def getName(self):
-            """this name is also used as a key for this list by the menu module"""
+            """This name is also used as a key for this list by the menu module"""
             return self.name
 
         def nop(self, cr=None, item=None, backAction=None, index=None, menuName=None):
-            """a function that does nothing and acts as a callable placeholder"""
+            """A function that does nothing and acts as a callable placeholder"""
             pass
 
         def setDrawItemMenuMethod(self, method):
-            """select a method for drawing a detail menu for an item"""
+            """Select a method for drawing a detail menu for an item"""
             self.drawItemMenuFunction = method
 
         def setDrawItemToolsMenuMethod(self, method):
-            """select a method for drawing a tools menu for an item"""
+            """Select a method for drawing a tools menu for an item"""
             self.drawItemToolsMenuFunction = method
 
         def setDrawMethod(self, method):
@@ -831,7 +827,7 @@ class Menus(RanaModule):
             self.parentAction = action
 
         def describeListItem(self, item, index=None, name=None):
-            """default item description function
+            """Default item description function
                -> get the needed strings for the default item drawing function"""
             (mainText, secText, action) = item
             return mainText, secText, action
@@ -851,7 +847,7 @@ class Menus(RanaModule):
             return "set:menu:menu#listDetail#%s#%d" % (self.name, index)
 
         def drawListItem(self, cr, item, x, y, w, h, index, descFunction=None):
-            """default list item drawing function"""
+            """Default list item drawing function"""
             if descFunction is None:
                 descFunction = self.descFunction
 
@@ -872,7 +868,7 @@ class Menus(RanaModule):
             self.menus.drawText(cr, indexString, x + 0.85 * w, y + 0.6 * h, w * 0.15, 0.2 * h)
 
         def draw(self, cr, index=None):
-            """draw the listable menu"""
+            """Draw the listable menu"""
             (e1, e2, e3, e4, alloc) = self.menus.threePlusOneMenuCoords()
             (x1, y1) = e1
             (x2, y2) = e2
@@ -927,10 +923,10 @@ class Menus(RanaModule):
             if 0 <= index < self.container.getLength():
                 self.index = index
             else:
-                self.log.error("listable menu %s: invalid index: %d", self.getName(), index)
+                self.menus.log.error("listable menu %s: invalid index: %d", self.getName(), index)
 
         def setOnceBackAction(self, action):
-            """replace the back button action with a given action for a single listable menu entry"""
+            """Replace the back button action with a given action for a single listable menu entry"""
             oldAction = self.parentAction # save the previous back action
             self.parentAction = action # replace with the given one
             # restore by callback once the menu is left
@@ -946,10 +942,10 @@ class Menus(RanaModule):
             return self.container.getItem(index)
 
     def getList(self, listName):
-        """get a list by name, return None if no list is found"""
+        """Get a list by name, return None if no list is found"""
 
     def getListItem(self, listName, index):
-        """get an item object for a given list"""
+        """Get an item object for a given list"""
         return self.getList(listName).getItem(index)
 
     def setupProfile(self):
@@ -963,10 +959,10 @@ class Menus(RanaModule):
         modes.sort()
         for (mode, label) in modes:
             self.addItem(
-                'modes', # menu
-                label, # label
-                mode, # icon
-                'set:mode:%s|set:menu:None' % mode, # action
+                'modes',  # menu
+                label,  # label
+                mode,  # icon
+                'set:mode:%s|set:menu:None' % mode,  # action
             )
 
     def setupSearchWhereMenu(self):
@@ -985,7 +981,6 @@ class Menus(RanaModule):
         ]
 
         radiusList = [500, 1000, 5000, 10000, 25000, 50000]
-        #lastValue = int(self.get('localSearchRadius', 0))
         index = self.get('localSearchRadiusToggleButton', 3)
         self.addToggleItem('searchWhere', textIconAction,
                            index, None, 'localSearchRadiusToggleButton')
@@ -1022,7 +1017,6 @@ class Menus(RanaModule):
                     self.addItem(sectionID, name, name.lower(), '')
         f.close()
 
-
     def setupPoiMenu(self):
         self.clearMenu('poi', "set:menu:main")
         self.addItem('poi', 'POI#list', 'generic', "showPOI:setupCategoryList|set:menu:menu#list#POICategories")
@@ -1046,10 +1040,9 @@ class Menus(RanaModule):
         self.addItem('POIAddFromWhere', 'position#current', 'generic', "ms:showPOI:storePOI:currentPosition")
 
     def setupEditBatchMenu(self):
-        """this is a menu for editing settings of a batch before running the said batch"""
+        """This is a menu for editing settings of a batch before running the said batch"""
         self.clearMenu('editBatch', "mapData:refreshTilecount|set:menu:mapData#batchTileDl")
         # on exit from the edit-menu refresh the tilecount
-
         maxZoomLimit = 17
         layerId = self.get('layer', None)
         mapLayers = self.m.get('mapLayers', None)
@@ -1110,7 +1103,7 @@ class Menus(RanaModule):
         self.setupZoomUpMenu('editBatch|menu:setupEditBatchMenu', 'editBatch')
 
     def setupZoomUpMenu(self, nextMenu='mapData#batchTileDl', prevMenu='data'):
-        """in this menu, we set the maximal zoom level UP from the current zoomlevel (eq less detail)"""
+        """In this menu, we set the maximal zoom level UP from the current zoomlevel (eq less detail)"""
         self.clearMenu('zoomUp', "set:menu:%s" % prevMenu)
         if nextMenu == 'mapData#batchTileDl':
             # if the next menu is the batch tile download menu (eq we are not called from the edit menu)
@@ -1127,7 +1120,7 @@ class Menus(RanaModule):
         self.addItem('zoomUp', 'max up', 'generic', 'set:zoomUpSize:50|set:menu:%s' % nextMenu)
 
     def setupZoomDownMenu(self, nextMenu='zoomUp', prevMenu='data'):
-        """in this menu, we set the maximal zoom level DOWN from the current zoomlevel (eq more detail)"""
+        """In this menu, we set the maximal zoom level DOWN from the current zoomlevel (eq more detail)"""
         self.clearMenu('zoomDown', "set:menu:%s" % prevMenu)
         self.addItem('zoomDown', '+ 0 down', 'generic', 'set:zoomDownSize:0|set:menu:%s' % nextMenu)
         self.addItem('zoomDown', '+ 1 down', 'generic', 'set:zoomDownSize:1|set:menu:%s' % nextMenu)
@@ -1139,7 +1132,7 @@ class Menus(RanaModule):
         self.setupZoomUpMenu()
 
     def setupDataSubMenu(self, nextMenu='zoomDown', prevMenu='data'):
-        """here we set the radius for download"""
+        """Here we set the radius for download"""
         self.clearMenu('data2', "set:menu:%s" % prevMenu)
 
         # TODO: compute the download size with more precision
@@ -1155,7 +1148,7 @@ class Menus(RanaModule):
         self.setupZoomDownMenu()
 
     def setupDataMenu(self, nextMenu='data2', prevMenu='main'):
-        """we can download tiles around "here" (GPS coordinates), route or the current view"""
+        """We can download tiles around "here" (GPS coordinates), route or the current view"""
         self.clearMenu('data', "set:menu:%s" % prevMenu)
         self.addItem('data', 'Around here', 'generic',
                      'set:downloadType:data|set:downloadArea:here|set:menu:%s' % nextMenu)
@@ -1221,7 +1214,7 @@ class Menus(RanaModule):
         self.set('editBatchMenuActive', False) # at startup, the edit batch menu is inactive
 
     def drawTextToSquare(self, cr, x, y, w, h, text, wrap=False):
-        """draw lines of text to a square text box, \n is used as a delimiter"""
+        """Draw lines of text to a square text box, \n is used as a delimiter"""
         border = int(min(w / 30.0, h / 30.0))
         spacing = 20
         if wrap:
@@ -1236,10 +1229,11 @@ class Menus(RanaModule):
                 i += 1
 
     def drawThreeItemHorizontalMenu(self, cr, first, second, third):
-        """draw a menu, that consists from three horizontal buttons
+        """Draw a menu, that consists from three horizontal buttons
            this is mostly intended for asking YES/NO questions
            the three parameters are tuples, like this:
-           (text,icon,action)"""
+           (text,icon,action)
+        """
         (x1, y1, w, h) = self.get('viewport', None)
         dy = h / 3
 
@@ -1254,12 +1248,11 @@ class Menus(RanaModule):
         self.drawTextToSquare(cr, x1, y1 + 2 * dy, w, dy, third[0])
 
     def threePlusOneMenuCoords(self):
-        """
-        get element coordinates for a menu,
-        that combines three normal and one big button/area
-        * because we want the big button/area to be cca square,
-          we move the buttons to the upper part of the screen in portrait mode
-          and to the left in landscape
+        """Get element coordinates for a menu,
+           that combines three normal and one big button/area
+           * because we want the big button/area to be cca square,
+             we move the buttons to the upper part of the screen in portrait mode
+             and to the left in landscape
         """
         (x1, y1, w1, h1) = self.get('viewport', None)
 
@@ -1291,12 +1284,13 @@ class Menus(RanaModule):
         return elem1, elem2, elem3, elem4, alloc
 
     def listableMenuCoords(self):
-        """listable menu is basically the same as the three plus one menu,
-        eq the listable entries are in the place of the square element"""
+        """Listable menu is basically the same as the three plus one menu,
+           eq the listable entries are in the place of the square element
+        """
         return self.threePlusOneMenuCoords()
 
     def drawListableMenuControls(self, cr, menuName, parent, scrollMenu):
-        """draw the controls for a listable menu"""
+        """Draw the controls for a listable menu"""
         (e1, e2, e3, e4, alloc) = self.threePlusOneMenuCoords()
         (x1, y1) = e1
         (x2, y2) = e2
@@ -1310,7 +1304,7 @@ class Menus(RanaModule):
         self.drawButton(cr, x3, y3, dx, dy, "", "down_list", "%s:down" % scrollMenu)
 
     def drawListableMenuItems(self, cr, itemList, scroll, describeItem):
-        """draw the items for a listable menu"""
+        """Draw the items for a listable menu"""
         (e1, e2, e3, e4, alloc) = self.listableMenuCoords()
         (x1, y1) = e1
         (x4, y4) = e4
@@ -1348,7 +1342,7 @@ class Menus(RanaModule):
                 self.showText(cr, "%d/%d" % (index + 1, numItems), x4 + 0.85 * w, y + 0.42 * dy, w * 0.15 - border, 20)
 
     def drawThreePlusOneMenu(self, cr, menuName, parentAction, button1, button2, box, wrap=False):
-        """draw a three plus on menu"""
+        """Draw a three plus one menu"""
         (e1, e2, e3, e4, alloc) = self.threePlusOneMenuCoords()
         (x1, y1) = e1
         (x2, y2) = e2
@@ -1375,7 +1369,7 @@ class Menus(RanaModule):
         self.drawTextToSquare(cr, x4, y4, w4, h4, text, wrap) # display the text in the box
 
     def drawSixPlusOneMenu(self, cr, menuName, parentAction, fiveButtons, box):
-        """draw a three plus on menu
+        """Draw a three plus on menu
         + support for toggle buttons"""
         (e1, e2, e3, e4, alloc) = self.threePlusOneMenuCoords()
         (x1, y1) = e1
@@ -1384,10 +1378,7 @@ class Menus(RanaModule):
         (x4, y4) = e4
         (w, h, dx, dy) = alloc
 
-
-
         # button: (index,[[text1,icon1,action1],..,[textN,iconN,actionN]])
-
         (boxTextLines, boxAction) = box
 
         # * draw "escape" button
@@ -1411,27 +1402,8 @@ class Menus(RanaModule):
         text = boxTextLines
         self.drawTextToSquare(cr, x4, y4 + dy, w4, h4, text) # display the text in the box
 
-    def showTextOld(self, cr, text, x, y, widthLimit=None, fontSize=40):
-        """DEPRECIATED show text function"""
-        if text:
-            cr.set_font_size(fontSize)
-            stats = cr.text_extents(text)
-            (textWidth, textHeight) = stats[2:4]
-
-            if widthLimit and (textWidth > widthLimit):
-                cr.set_font_size(fontSize * widthLimit / textWidth)
-                stats = cr.text_extents(text)
-                (textWidth, textHeight) = stats[2:4]
-
-            cr.move_to(x, y + textHeight)
-            cr.show_text(text)
-
     def drawScalebar(self, cr, proj, x1, y1, w):
-
         (x2, y2) = (x1 + 0.2 * w, y1)
-
-        #    (x1,y1) = proj.screenPos(0.05, 0.97)
-        #    (x2,y2) = proj.screenPos(0.25, 0.97)
 
         (lat1, lon1) = proj.xy2ll(x1, y1)
         (lat2, lon2) = proj.xy2ll(x2, y2)
@@ -1459,7 +1431,6 @@ class Menus(RanaModule):
         )
 
     def boxedText(self, cr, x, y, text, size=12, align=1, border=2, fg=(0, 0, 0, 1), bg=(1, 1, 1, 1)):
-
         cr.set_font_size(12)
         extents = cr.text_extents(text)
         (w, h) = (extents[2], extents[3])
@@ -1490,13 +1461,14 @@ class Menus(RanaModule):
         self.scalebarColor = colors['scalebar_color'].getCairoColor()
         self.scalebarTextColor = colors['scalebar_text'].getCairoColor()
         self.scalebarTextBgColor = colors['scalebar_text_bg'].getCairoColor()
-
         self.centerButtonCircleColor = colors['center_button_circle'].getCairoColor()
+
         # normal
         sbFill = colors['special_button_fill']
         self.spButtonFillTup = (sbFill.getColorString(), sbFill.getAlpha())
         sbOutline = colors['special_button_outline']
         self.spButtonOutlineTup = (sbOutline.getColorString(), sbOutline.getAlpha())
+
         # highlight
         sbFill = colors['main_highlight_fill']
         self.spButtonHiFillTup = (sbFill.getColorString(), sbFill.getAlpha())
@@ -1546,20 +1518,25 @@ class Menus(RanaModule):
             menuName = args[0]
             targetPageNr = int(args[1])
             self.menus[menuName]['metadata']['currentPage'] = targetPageNr
+
         elif message == "rebootDataMenu":
             self.setupDataMenu() # we are returning from the batch menu, data menu needs to be "rebooted"
             self.set('editBatchMenuActive', False)
+
         elif message == "setupEditBatchMenu":
             self.setupEditBatchMenu()
             self.set('editBatchMenuActive', True)
+
         elif message == 'screenClicked':
             self.lastActivity = int(time.time())
             self.hideMapScreenButtons = False # show the buttons at once
             self.set('needRedraw', True)
+
         elif messageType == 'ml' and message == 'highlightItem':
             menuName, index = args
             index = int(index)
             self.highlightItem(menuName, index)
+
         elif messageType == 'ms' and message == 'handleToolsMenuPoint':
             # store the currently selected point to the POI database
             if args == 'store':
@@ -1602,4 +1579,3 @@ class Menus(RanaModule):
 
             self.set(uniqueName, newIndex)
             self.menus[menu][pos] = (textIconAction, newIndex, uniqueName, messageType)
-  
