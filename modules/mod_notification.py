@@ -283,23 +283,34 @@ class Notification(RanaModule):
     def _drawNotification(self, cr):
         """Draw the notifications on the screen on top of everything."""
         if time.time() <= self.expirationTimestamp:
+            menus = self.m.get('menu', None)
+            proj = self.m.get('projection', None)
+            viewport = self.get('viewport', None)
+            if not proj or not menus or not viewport:
+                return
+            x, y, w, h = viewport
+            border = min(w / 20.0, h / 20.0)
             proj = self.m.get('projection', None)
             (x1, y1) = proj.screenPos(0.5, 0.5) # middle fo the screen
-            cr.set_font_size(30)
-            text = self.notificationText
             cr.set_source_rgba(0, 0, 1, 0.45) # transparent blue
-            extents = cr.text_extents(text)
-            (w, h) = (extents[2], extents[3])
-            (x, y) = (x1 - w / 2.0, y1 - h / 2.0)
+            font_size = 30
+            # compute rendered text size
+            textw, texth = menus.measureWrappedText(cr, self.notificationText, w - border * 2, font_size)
+            # the background rectangle is as large as the text + borders
+            rw = textw + 2 * border
+            rh = texth + 2 * border
+            # center the rectangle & text to be in the middle of the screen
+            rx = (w - rw) / 2.0
+            ry = (h - rh) / 2.0
+            tx = rx + border
+            ty = ry + border
+            # draw the background rectangle
             cr.set_line_width(2)
             cr.set_source_rgba(0, 0, 1, 0.45) # transparent blue
-            (rx, ry, rw, rh) = (x - 0.25 * w, y - h * 1.5, w * 1.5, (h * 2))
             cr.rectangle(rx, ry, rw, rh) # create the transparent background rectangle
             cr.fill()
-            cr.set_source_rgba(1, 1, 1, 0.95) # slightly transparent white
-            cr.move_to(x + 10, y)
-            cr.show_text(text) # show the transparent notification text
-            cr.stroke()
-            cr.fill()
+            # draw the text
+            if menus and viewport and proj:
+                menus.showWrappedText(cr, self.notificationText, tx, ty, textw, font_size, "white")
         else:
-            self.draw = False # we are finished, disable drawing notifications
+            self.draw = False  # we are finished, disable drawing notifications
