@@ -266,14 +266,27 @@ class Menus(RanaModule):
             cr.move_to(x, y)
             pg.show_layout(layout)
 
-    def showWrappedText(self, cr, text, x, y, widthLimit, fontSize=20):
+    def _setupWrappedText(self, cr, text, widthLimit, fontSize=20):
+        """Setup a pango context and layout for measuring and drawing of wrapped text"""
         pg = pangocairo.CairoContext(cr)
-        # create a layout for your drawing area
+        # create a layout for the text
         layout = pg.create_layout()
         layout.set_width(int(widthLimit * pango.SCALE))
         layout.set_wrap(pango.WRAP_WORD)
         layout.set_font_description(pango.FontDescription("Sans Serif %d" % fontSize))
         layout.set_markup(text)
+        return pg, layout
+
+    def measureWrappedText(self, cr, text, widthLimit, fontSize=20):
+        """Return width and height of text rendered with the given settings"""
+        _pg, layout = self._setupWrappedText(cr, text, widthLimit, fontSize)
+        return layout.get_pixel_size()
+
+    def showWrappedText(self, cr, text, x, y, widthLimit, fontSize=20, colorString=None):
+        """Show wrapped text according to the given settings"""
+        pg, layout = self._setupWrappedText(cr, text, widthLimit, fontSize)
+        if colorString: #optinaly set text color
+            cr.set_source_color(gtk.gdk.color_parse(colorString))
         cr.move_to(x, y)
         pg.show_layout(layout)
 
