@@ -42,16 +42,28 @@ SEARCH_PROVIDER_TIMEOUT_ERROR = 4
 SEARCH_PROVIDER_ERROR = 5
 LOCAL_SEARCH_CURRENT_POSITION_UNKNOWN_ERROR = 6
 CURRENT_POSITION_UNKNOWN_ERROR = 7
+COORDINATE_PARSING_ERROR = 8
 
 USE_LAST_KNOWN_POSITION_KEYWORD = "LAST_KNOWN_POSITION"
 
+POI_SUBCOMMAND = "poi"
+
+SUBCOMMAND_LIST = [POI_SUBCOMMAND]
+
+SUBCOMMANDS = set(SUBCOMMAND_LIST)
 
 class Startup(object):
     def __init__(self, modrana):
         self.modrana = modrana
         self.originalStdout = None
         self.originalStderr = None
-        parser = argparse.ArgumentParser(description="A flexible GPS navigation system.")
+        self._subcommand_present = len(sys.argv) >= 2 and sys.argv[1] in SUBCOMMANDS
+        self._poi_subcommand_present = False
+        current_subcommands = ",".join(SUBCOMMAND_LIST)
+        parser = argparse.ArgumentParser(description="A flexible GPS navigation system.",
+                                         epilog="You can also use the following subcommands: [%s] \
+                                                 To see what a subcommand does use <subcommand> --help, \
+                                                 EXAMPLE: poi --help" % current_subcommands)
         # device
         parser.add_argument(
             '-d', metavar="device ID", type=str,
@@ -103,6 +115,8 @@ class Startup(object):
             default=None,
             action="store"
         )
+
+
         # return static map url & shutdown
         parser.add_argument(
             '--return-static-map-url',
@@ -166,6 +180,37 @@ class Startup(object):
             action="store_true"
         )
 
+        # subcommands
+        #
+        # As argparse does not support support optional subcommands
+        # (non-optional subcommands would preclude running modrana without arguments
+        #  or with the current optional arguments), so only register subcommands if
+        # they are spotted in sys.argv. Like this the subcommands don't show up in the
+        # automatically generated help, which we workaround by mentioning the available
+        # subcommands in the epilog.
+        # Handling subcommands like this also has the benefit of skipping all the subcommand
+        # setup code when the subcommand is not actually needed a even if a subcommand is
+        # spotted only a single subcommand is setup, not all of them.
+
+        if self._subcommand_present:
+            subcommand = sys.argv[1]
+            if subcommand == POI_SUBCOMMAND:
+                # poi subcommand
+                self._poi_subcommand_present = True
+                subcommands = parser.add_subparsers()
+                poi = subcommands.add_parser("poi", help="Points of Interest handling")
+                poi.required = False
+                poi_subcommands = poi.add_subparsers()
+                poi_add = poi_subcommands.add_parser("add", help='add a POI to the database')
+                poi_add.add_argument(type=str, dest="poi_add_coords", default=None, nargs="?",
+                                     help='geographic coordinates with the geo: prefix, EXAMPLE: "geo:50.083333,14.416667"')
+                poi_add.add_argument("--name", type=str, dest="poi_name",
+                                     help='POI name, EXAMPLE: "Baker Street 221b, London"')
+                poi_add.add_argument("--description", type=str,  dest="poi_description",
+                                     help='POI name, EXAMPLE: "The house of Sherlock Holmes."')
+                poi_add.add_argument("--category", type=str, dest="poi_category",
+                                     help='POI category, default: Other, EXAMPLE: "Landmark"')
+
         self.args, _unknownArgs = parser.parse_known_args()
 
 
@@ -189,6 +234,8 @@ class Startup(object):
                 self._disableStdout()
         elif self.args.return_current_coordinates:
             self._disableStdout()
+        elif self._poi_subcommand_present:
+            self._disableStdout()
 
     def handleNonGUITasks(self):
         """Handle CLI arguments that can be handled before the general modRana startup,
@@ -207,8 +254,8 @@ class Startup(object):
                 self._earlyWikipediaSearch()
         elif self.args.return_current_coordinates:
             self._earlyReturnCoordinates()
-
-
+        elif self._poi_subcommand_present and self.args.poi_add_coords:
+            self._addPOI()
 
     def handlePostFirstTimeTasks(self):
         """
@@ -369,6 +416,27 @@ class Startup(object):
         else:
             # done - no position found
             self._exit(CURRENT_POSITION_UNKNOWN_ERROR)
+
+    def _addPOI(self):
+        """Add a poi to the database"""
+        self._disableStdout()
+        from core import geo
+        coords = geo.parse_geo_coords(self.args.poi_add_coords)
+        if coords is None:
+            self._enableStdout()
+            print("coordinate format parsing failed, should be: geo:latitude,longitude")
+            self._exit(COORDINATE_PARSING_ERROR)
+        else:
+            from core.point import POI
+            lat, lon = coords
+            store_poi = self.modrana._loadModule("mod_storePOI", "storePOI")
+            poi = POI(lat=lat, lon=lon, name=self.args.poi_name,
+                      description=self.args.poi_description,
+                      db_cat_id=11)
+            store_poi.storePOI(poi)
+            self._enableStdout()
+            print("the point has been added to the modRana POI database")
+            self._exit(0)
 
     def _returnStaticMapUrl(self, results, online):
         """return static map url for early search methods & exit"""
