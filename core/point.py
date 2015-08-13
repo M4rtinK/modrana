@@ -138,7 +138,7 @@ class POI(Point):
         self._db_category_index = db_cat_id
 
     def __str__(self):
-        return "POI named: %s, lat,lon: %f,%f with id: %d" % (
+        return "POI named: %s, lat,lon: %f,%f with id: %s" % (
             self.name,
             self.lon,
             self.lon,
