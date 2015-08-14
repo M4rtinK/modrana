@@ -478,6 +478,23 @@ def perElevList(trackpointsList, numPoints=200):
 
     return periodicElevationList
 
+def parse_geo_coords(geo_coords_string):
+    """Parse a string geographic coordinates with the geo: prefix
+       to a lat, lon tuple
+       Example: "geo:49.2,16.616667" -> 49.2,16.616667
+
+       :returns: a lat, lon tuple or None if the input is not valid
+       :rtype: tuple or None
+    """
+    result = None
+    # split off the geo prefix
+    split1 = str.lower(geo_coords_string).split("geo:")
+    if len(split1) >= 2:
+        # split to coordinates
+        split2 = split1[1].split(",")
+        if len(split2) >= 2:
+            result = float(split2[0]), float(split2[1])
+    return result
 
 def distanceBenchmark(LLE, sampleSize=None):
     """geographic distance measurement method benchmark"""
