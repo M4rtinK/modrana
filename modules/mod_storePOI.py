@@ -138,6 +138,11 @@ class StorePOI(RanaModule):
         result = self.db.execute('select cat_id,label,desc,enabled from category where cat_id=?', [catId]).fetchone()
         return result
 
+    def getCategoryForName(self, catName):
+        """return cat_id,label, desc, enabled for a given label"""
+        result = self.db.execute('select cat_id,label,desc,enabled from category where label=?', [catName]).fetchone()
+        return result
+
     def getAllPOIFromCategory(self, catId):
         """return a list of POI from a given category"""
         if self.db:
