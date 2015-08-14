@@ -200,7 +200,8 @@ class Startup(object):
                 subcommands = parser.add_subparsers()
                 poi = subcommands.add_parser("poi", help="Points of Interest handling")
                 poi.required = False
-                poi_subcommands = poi.add_subparsers()
+                poi_subcommands = poi.add_subparsers(dest="poi_subcommand")
+                # add
                 poi_add = poi_subcommands.add_parser("add", help='add a POI to the database')
                 poi_add.add_argument(type=str, dest="poi_add_coords", default=None, nargs="?",
                                      help='geographic coordinates with the geo: prefix, EXAMPLE: "geo:50.083333,14.416667"')
@@ -208,8 +209,10 @@ class Startup(object):
                                      help='POI name, EXAMPLE: "Baker Street 221b, London"')
                 poi_add.add_argument("--description", type=str,  dest="poi_description",
                                      help='POI name, EXAMPLE: "The house of Sherlock Holmes."')
-                poi_add.add_argument("--category", type=str, dest="poi_category",
-                                     help='POI category, default: Other, EXAMPLE: "Landmark"')
+                poi_add.add_argument("--category", type=str, dest="poi_category", default="Other",
+                                         help='POI category name or index (default: 11/Other), EXAMPLE: "Landmark" or "10"')
+                # list-categories
+                poi_subcommands.add_parser("list-categories", help='list POI database categories')
 
         self.args, _unknownArgs = parser.parse_known_args()
 
@@ -254,8 +257,11 @@ class Startup(object):
                 self._earlyWikipediaSearch()
         elif self.args.return_current_coordinates:
             self._earlyReturnCoordinates()
-        elif self._poi_subcommand_present and self.args.poi_add_coords:
-            self._addPOI()
+        elif self._poi_subcommand_present:
+            if self.args.poi_subcommand == "add":
+                self._addPOI()
+            elif self.args.poi_subcommand == "list-categories":
+                self._listCategories()
 
     def handlePostFirstTimeTasks(self):
         """
@@ -417,6 +423,29 @@ class Startup(object):
             # done - no position found
             self._exit(CURRENT_POSITION_UNKNOWN_ERROR)
 
+    # POI
+
+    def _find_category(self, store_poi, cat_spec):
+        """Try to match the cat_spec to a POI category.
+           The category specification is expected to be either an integer index
+           or a category name.
+
+           :param str cat_cat_spec: category specification
+           :returns: category index, category name or None, None if cat_spec can't be matched to a category
+           :rtype: tuple
+        """
+        try:
+            # first try converting the spec to the integer index
+            result = store_poi.getCategoryForId(int(cat_spec))
+        except ValueError:
+            # next try to fetch category for the name
+            result = store_poi.getCategoryForName(cat_spec)
+        if result:  # category found
+            cat_id, cat_name, _desc, _enabled = result
+            return cat_id, cat_name
+        else:  # category not found
+            return None, None
+
     def _addPOI(self):
         """Add a poi to the database"""
         self._disableStdout()
@@ -430,13 +459,32 @@ class Startup(object):
             from core.point import POI
             lat, lon = coords
             store_poi = self.modrana._loadModule("mod_storePOI", "storePOI")
+            cat_id, cat_name = self._find_category(store_poi, self.args.poi_category)
+            if cat_id is None:
+                self._enableStdout()
+                print("invalid category specification (%s), falling back to default (%s)" %
+                      (self.args.poi_category, "Other"))
+                self._disableStdout()
+                cat_id = 11
+                cat_name = "Other"
+
             poi = POI(lat=lat, lon=lon, name=self.args.poi_name,
                       description=self.args.poi_description,
-                      db_cat_id=11)
+                      db_cat_id=cat_id)
             store_poi.storePOI(poi)
             self._enableStdout()
-            print("the point has been added to the modRana POI database")
+            print("point added to the modRana POI database to category %d/%s" % (cat_id, cat_name))
             self._exit(0)
+
+    def _listCategories(self):
+        """List POI database categories"""
+        self._disableStdout()
+        store_poi = self.modrana._loadModule("mod_storePOI", "storePOI")
+        categories = store_poi.getCategories()
+        self._enableStdout()
+        for name, description, index in categories:
+            print("%d, %s, %s" % (index, name, description))
+        self._exit(0)
 
     def _returnStaticMapUrl(self, results, online):
         """return static map url for early search methods & exit"""
