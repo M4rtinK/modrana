@@ -473,7 +473,7 @@ class Startup(object):
                       db_cat_id=cat_id)
             store_poi.storePOI(poi)
             self._enableStdout()
-            print("point added to the modRana POI database to category %d/%s" % (cat_id, cat_name))
+            print("point added to the modRana POI database (category: %d/%s)" % (cat_id, cat_name))
             self._exit(0)
 
     def _listCategories(self):
