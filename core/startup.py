@@ -436,10 +436,10 @@ class Startup(object):
         """
         try:
             # first try converting the spec to the integer index
-            result = store_poi.getCategoryForId(int(cat_spec))
+            result = store_poi.db.get_category_from_index(int(cat_spec))
         except ValueError:
             # next try to fetch category for the name
-            result = store_poi.getCategoryForName(cat_spec)
+            result = store_poi.db.get_category_from_name(cat_spec)
         if result:  # category found
             cat_id, cat_name, _desc, _enabled = result
             return cat_id, cat_name
@@ -471,7 +471,7 @@ class Startup(object):
             poi = POI(lat=lat, lon=lon, name=self.args.poi_name,
                       description=self.args.poi_description,
                       db_cat_id=cat_id)
-            store_poi.storePOI(poi)
+            store_poi.db.store_poi(poi)
             self._enableStdout()
             print("point added to the modRana POI database (category: %d/%s)" % (cat_id, cat_name))
             self._exit(0)
@@ -480,7 +480,7 @@ class Startup(object):
         """List POI database categories"""
         self._disableStdout()
         store_poi = self.modrana._loadModule("mod_storePOI", "storePOI")
-        categories = store_poi.getCategories()
+        categories = store_poi.db.list_categories()
         self._enableStdout()
         for name, description, index in categories:
             print("%d, %s, %s" % (index, name, description))

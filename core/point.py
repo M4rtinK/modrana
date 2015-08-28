@@ -160,22 +160,11 @@ class POI(Point):
     def db_category_index(self, new_category_index):
         self._db_category_index = new_category_index
 
-    def get_db_order(self):
-        """get the variables in the order, they are stored in the database"""
-        return (
-            self.db_index,
-            self.lat,
-            self.lon,
-            self.name.decode("utf-8"),
-            self.description.decode("utf-8"),
-            self.db_category_index
-        )
-
     def commit(self):
         """Store the current state of this POI object to the database"""
         storePOI = modrana.m.get('storePOI', None)
         if storePOI:
-            storePOI.storePOI(self)
+            storePOI.db.store_poi(self)
         else:
             log.error("can't commit %s to POI database: storePOI module missing", self)
 

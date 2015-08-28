@@ -142,7 +142,7 @@ class ShowPOI(RanaModule):
                     action = "ml:showPOI:setupPOIList:%s;%s|set:menu:menu#list#POIList" % ("%d", POISelectedAction)
                 else:
                     action = "ms:showPOI:setupPOIList:%d|set:menu:menu#list#POIList"
-                usedCategories = store.getUsedCategories()
+                usedCategories = store.db.list_used_categories()
                 # convert cat_id to actions
                 i = 0
                 for item in usedCategories:
@@ -164,7 +164,7 @@ class ShowPOI(RanaModule):
                         catId = int(args[0])
                         action = args[1]
                     if catId is not None:
-                        poiFromCategory = store.getAllPOIFromCategory(catId)
+                        poiFromCategory = store.db.get_all_poi_from_category(catId)
                     else:
                         poiFromCategory = []
                     # convert the output to a listable menu compatible state
@@ -179,7 +179,7 @@ class ShowPOI(RanaModule):
             elif messageType == 'ms' and message == 'setActivePOI':
                 if args:
                     POIId = int(args)
-                    self.activePOI = GTKPOI(store.getPOI(POIId))
+                    self.activePOI = GTKPOI(store.db.get_poi(POIId))
             elif messageType == 'ms' and message == 'storePOI':
                 if args == "manualEntry":
                     # add all POI info manually
@@ -328,7 +328,7 @@ class ShowPOI(RanaModule):
     def _setupPOICategoryChooser(self, menu, key):
         menus = self.m.get('menu', None)
         store = self.m.get('storePOI', None)
-        cats = store.getCategories()
+        cats = store.db.list_categories()
         i = 0
         for cat in cats:
             (label, desc, cat_id) = cat
@@ -351,16 +351,16 @@ class ShowPOI(RanaModule):
     def makeAllStoredPOIVisible(self):
         """make all stored POI visible"""
         store = self.m.get('storePOI', None)
-        cats = store.getCategories()
+        cats = store.db.list_categories()
         count = 0
         _makePOIVisible = self._makePOIVisible
         for cat in cats:
             (label, desc, cat_id) = cat
-            catPOI = store.getAllPOIFromCategory(cat_id)
+            catPOI = store.db.get_all_poi_from_category(cat_id)
             count += len(catPOI)
             for item in catPOI:
                 (label, lat, lon, poi_id) = item
-                _makePOIVisible(store.getPOI(poi_id))
+                _makePOIVisible(store.db.get_poi(poi_id))
         self.saveVisibleIDs()
         self.drawPOI()
         return count
@@ -390,7 +390,7 @@ class ShowPOI(RanaModule):
             store = self.m.get('storePOI', None)
             if store:
                 for poiID in visibleIDs:
-                    self._makePOIVisible(store.getPOI(poiID))
+                    self._makePOIVisible(store.db.get_poi(poiID))
                 if self.visiblePOI: # enable POI drawing only if some POI vere restored
                     self.drawPOI()
                 self.log.info("showPOI: %d visible POI restored", len(self.visiblePOI))
