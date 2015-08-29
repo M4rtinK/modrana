@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd /usr/share/modrana
-./modrana.py -u gtk -d pc
+./modrana.py -u gtk -d pc "$@"

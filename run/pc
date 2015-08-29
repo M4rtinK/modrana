@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd ..
-python modrana.py
+python modrana.py "$@"
