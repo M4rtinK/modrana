@@ -228,8 +228,8 @@ class TurnByTurn(RanaModule):
                     units = self.m.get('units', None)
                     if units and self.currentDistance:
                         distString = units.m2CurrentUnitString(self.currentDistance, 1, True)
-                        if currentStep.getDistanceFromStart():
-                            currentDistString = units.m2CurrentUnitString(currentStep.getDistanceFromStart(), 1, True)
+                        if currentStep.distanceFromStart:
+                            currentDistString = units.m2CurrentUnitString(currentStep.distanceFromStart, 1, True)
                         else:
                             currentDistString = "?"
                         routeLengthString = units.m2CurrentUnitString(self.mRouteLength, 1, True)
@@ -385,8 +385,8 @@ class TurnByTurn(RanaModule):
             tempSteps = self.route.getMessagePoints()
             for step in tempSteps:
                 (lat2, lon2) = step.getLL()
-                step.setCurrentDistance = geo.distance(lat1, lon1, lat2, lon2) * 1000 # km to m
-            closestStep = sorted(tempSteps, key=lambda x: x.getCurrentDistance())[0]
+                step.currentDistance = geo.distance(lat1, lon1, lat2, lon2) * 1000 # km to m
+            closestStep = sorted(tempSteps, key=lambda x: x.currentDistance)[0]
 
             return closestStep
 
@@ -413,11 +413,11 @@ class TurnByTurn(RanaModule):
 
     def getCurrentStepVisitStatus(self):
         """report visit status for  current step"""
-        return self.getCurrentStep().getVisited()
+        return self.getCurrentStep().visited
 
     def markCurrentStepAsVisited(self):
         """mark current step as visited"""
-        self.getCurrentStep().setVisited(True)
+        self.getCurrentStep().visited = True
 
     def switchToPreviousStep(self):
         """switch to previous step and clean up"""
@@ -532,7 +532,7 @@ class TurnByTurn(RanaModule):
                             # with current distance to this step,
                             # to assure there is some voice output immediately after
                             # getting a new route or rerouting"""
-                            plaintextMessage = nextStep.getSSMLMessage()
+                            plaintextMessage = nextStep.ssmlMessage
                             self.sayTurn(plaintextMessage, pos2nextStep)
                         else:
                             # we have probably not yet reached the closest step,
@@ -682,7 +682,7 @@ class TurnByTurn(RanaModule):
                 if self.espeakSecondTrigger == False:
                     self.log.debug("triggering espeak nr. 2")
                     # say the message without distance
-                    plaintextMessage = currentStep.getSSMLMessage()
+                    plaintextMessage = currentStep.ssmlMessage
                     # consider turn said even if it was skipped (ignore errors)
                     self.sayTurn(plaintextMessage, 0)
                     self.markCurrentStepAsVisited() # mark this point as visited
@@ -694,14 +694,14 @@ class TurnByTurn(RanaModule):
                     # this means we reached an optimal distance for saying the message"""
                     if self.espeakFirstTrigger == False:
                         self.log.debug("triggering espeak nr. 1")
-                        plaintextMessage = currentStep.getSSMLMessage()
+                        plaintextMessage = currentStep.ssmlMessage
                         if self.sayTurn(plaintextMessage, currentDistance):
                             self.espeakFirstTrigger = True # first message done
                 if self.espeakFirstAndHalfTrigger == False and warnTime > 30:
                     if currentDistance <= (20.0 * metersPerSecSpeed):
                         # in case that the warning time gets too big, add an intermediate warning at 20 seconds
                         # NOTE: this means it is said after the first trigger
-                        plaintextMessage = currentStep.getSSMLMessage()
+                        plaintextMessage = currentStep.ssmlMessage
                         if self.sayTurn(plaintextMessage, currentDistance):
                             self.espeakFirstAndHalfTrigger = True # intermediate message done
 

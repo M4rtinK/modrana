@@ -15,36 +15,44 @@ log = logging.getLogger("core.way")
 aoLog = logging.getLogger("core.way.ao")
 
 class TurnByTurnPoint(Point):
-    def __init__(self, lat, lon, elevation=None, message=None, SSMLMessage=None):
+    def __init__(self, lat, lon, elevation=None, message=None, ssml_message=None):
         Point.__init__(self, lat, lon, elevation=elevation, message=message)
-        self.currentDistance = None # in meters
-        self.distanceFromStart = None # in meters
-        self.visited = False
-        self.SSMLMessage = SSMLMessage
+        self._current_distance = None # in meters
+        self._distance_from_start = None # in meters
+        self._visited = False
+        self._ssml_message = ssml_message
 
-    def getCurrentDistance(self):
-        return self.currentDistance
+    @property
+    def currentDistance(self):
+        return self._current_distance
 
-    def setCurrentDistance(self, mDistance):
-        self.currentDistance = mDistance
+    @currentDistance.setter
+    def currentDistance(self, distance_in_meters):
+        self._current_distance = distance_in_meters
 
-    def getDistanceFromStart(self):
-        return self.distanceFromStart
+    @property
+    def distanceFromStart(self):
+        return self._distance_from_start
 
-    def setDistanceFromStart(self, distanceFromStart):
-        self.distanceFromStart = distanceFromStart
+    @distanceFromStart.setter
+    def distanceFromStart(self, distance_from_start):
+        self._distance_from_start = distance_from_start
 
-    def getVisited(self):
-        return self.visited
+    @property
+    def visited(self):
+        return self._visited
 
-    def setVisited(self, value):
-        self.visited = value
+    @visited.setter
+    def visited(self, value):
+        self._visited = value
 
-    def getSSMLMessage(self):
-        return self.SSMLMessage
+    @property
+    def ssmlMessage(self):
+        return self._ssml_message
 
-    def setSSMLMessage(self, message):
-        self.SSMLMessage = message
+    @ssmlMessage.setter
+    def ssmlMessage(self, message):
+        self._ssml_message = message
 
 
 class Way(object):
@@ -313,7 +321,7 @@ def fromGoogleDirectionsResult(gResult):
         lon = step['start_location']['lng']
         #TODO: end location ?
         point = TurnByTurnPoint(lat, lon, message=message)
-        point.setDistanceFromStart(mDistanceFromStart)
+        point.distanceFromStart = mDistanceFromStart
         # store point to temporary list
         messagePoints.append(point)
         # update distance for next point
@@ -354,7 +362,7 @@ def fromGoogleDirectionsResultOld(gResult):
         lat = step['Point']['coordinates'][1]
         lon = step['Point']['coordinates'][0]
         point = TurnByTurnPoint(lat, lon, message=message)
-        point.setDistanceFromStart(mDistanceFromStart)
+        point.distanceFromStart = mDistanceFromStart
         # store point to temporary list
         messagePoints.append(point)
         # update distance for next point
@@ -516,7 +524,7 @@ def fromHandmade(start, middlePoints, destination):
             routePoints.append((lat, lon, elevation))
             if message != "": # is it a message point ?
                 point = TurnByTurnPoint(lat, lon, elevation, message)
-                point.setDistanceFromStart(mLength)
+                point.distanceFromStart = mLength
                 messagePoints.append(point)
             lastLat, lastLon = lat, lon
         routePoints.append((destination[0], destination[1], None))
@@ -530,8 +538,6 @@ def fromHandmade(start, middlePoints, destination):
         return way
     else:
         return None
-
-        #point.setDistanceFromStart(mDistanceFromStart)
 
 
 class AppendOnlyWay(Way):

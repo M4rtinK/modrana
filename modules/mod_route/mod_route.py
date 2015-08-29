@@ -673,9 +673,9 @@ class Route(RanaModule):
         if route.getPointCount() > 0:
             (lat, lon) = route.getPointByID(-1).getLL()
             destStep = way.TurnByTurnPoint(lat, lon)
-            destStep.setSSMLMessage('<p xml:lang="en">you <b>should</b> be near the destination</p>')
+            destStep.ssmlMessage = '<p xml:lang="en">you <b>should</b> be near the destination</p>'
             destStep.description ='you <b>should</b> be near the destination'
-            destStep.setDistanceFromStart(route.getLength())
+            destStep.distanceFromStart = route.getLength()
             # TODO: make this multilingual
             # add it to the end of the message point list
             route.addMessagePoint(destStep)
@@ -721,10 +721,10 @@ class Route(RanaModule):
                 for (regex, replacement) in self.directionsFilterRules:
                     # replace strings according to the csv file
                     message = regex.sub(replacement, message, re.UNICODE)
-                step.setSSMLMessage(message)
+                step.ssmlMessage = message
             except Exception:
                 self.log.exception("error during direction filtering")
-                step.setSSMLMessage(message)
+                step.ssmlMessage = message
 
         # replace old message points with new ones
         directions.clearMessagePoints()
