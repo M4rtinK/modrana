@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cd /opt/modrana
-python modrana.py -u QML -d pc
+cd ..
+python modrana.py
