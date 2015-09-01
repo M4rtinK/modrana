@@ -286,7 +286,7 @@ class Way(object):
         leg = gResult['routes'][0]['legs'][0]
         steps = leg['steps']
 
-        points = _decodePolyline(gResult['routes'][0]['overview_polyline']['points'])
+        points = decode_polyline(gResult['routes'][0]['overview_polyline']['points'])
         # length of the route can computed from its metadata
         if 'distance' in leg: # this field might not be present
             mLength = leg['distance']['value']
@@ -622,7 +622,7 @@ class AppendOnlyWay(Way):
 
 
 #from: http://seewah.blogspot.com/2009/11/gpolyline-decoding-in-python.html
-def _decodePolyline(encoded):
+def decode_polyline(encoded):
     """Decodes a polyline that was encoded using the Google Maps method.
 
     See http://code.google.com/apis/maps/documentation/polylinealgorithm.html
