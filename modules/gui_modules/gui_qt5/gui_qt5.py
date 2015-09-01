@@ -882,8 +882,8 @@ class Routing(object):
 
     def _routingDoneCB(self, result):
         if result and result.returnCode == constants.ROUTING_SUCCESS:
-            routePoints = result.route.getPointsLLE()
-            messagePoints = result.route.getMessagePoints()
+            routePoints = result.route.points_lle
+            messagePoints = result.route.message_points
             messagePointsLLEM = []
             for mp in messagePoints:
                 messagePointsLLEM.append(mp.getLLEM())

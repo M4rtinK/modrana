@@ -32,7 +32,7 @@ import threading
 from core import constants
 from core.point import Point
 from core.signal import Signal
-import core.way as way
+from core.way import Way, TurnByTurnPoint
 from core.backports.six import u
 from . import routing_providers
 
@@ -257,7 +257,7 @@ class Route(RanaModule):
                 self.log.info("through")
                 self.log.info(middlePoints)
                 self.log.info("to %f,%f", toLat, toLon)
-                handmadeRoute = way.fromHandmade(start, middlePoints, destination)
+                handmadeRoute = Way.from_handmade(start, middlePoints, destination)
                 self._handleRoutingResultCB((handmadeRoute, "", 0))
 
         elif message == "p2posRoute": # simple route, from here to selected point
@@ -338,7 +338,7 @@ class Route(RanaModule):
                 self.log.info("the route is empty, so it will not be stored")
                 return
             # TODO: rewrite this when we support more routing providers
-            loadTracklogs.storeRouteAndSetActive(self.directions.getPointsLLE(),
+            loadTracklogs.storeRouteAndSetActive(self.directions.points_lle,
                                                  '',
                                                  'online')
 
@@ -572,8 +572,8 @@ class Route(RanaModule):
             self.routeLookupDuration = result.lookupDuration
 
             # set start and destination
-            start = result.route.getPointByID(0)
-            destination = result.route.getPointByID(-1)
+            start = result.route.get_point_by_index(0)
+            destination = result.route.get_point_by_index(-1)
             # use coordinates for start dest or use first/last point from the route
             # if start/dest coordinates are unknown (None)
             if self.start is None:
@@ -588,7 +588,7 @@ class Route(RanaModule):
                 # save a copy of the route in projection units for faster drawing
                 proj = self.m.get('projection', None)
                 if proj:
-                    self.pxpyRoute = [proj.ll2pxpyRel(x[0], x[1]) for x in result.route.getPointsLLE()]
+                    self.pxpyRoute = [proj.ll2pxpyRel(x[0], x[1]) for x in result.route.points_lle]
                 self.processAndSaveDirections(result.route)
                 self.osdMenuState = OSD_CURRENT_ROUTE
                 self.startNavigation()
@@ -670,15 +670,15 @@ class Route(RanaModule):
         route = self.filterDirections(route)
 
         # add a fake destination step, so there is a "destination reached" message
-        if route.getPointCount() > 0:
-            (lat, lon) = route.getPointByID(-1).getLL()
-            destStep = way.TurnByTurnPoint(lat, lon)
+        if route.point_count > 0:
+            (lat, lon) = route.get_point_by_index(-1).getLL()
+            destStep = TurnByTurnPoint(lat, lon)
             destStep.ssmlMessage = '<p xml:lang="en">you <b>should</b> be near the destination</p>'
             destStep.description ='you <b>should</b> be near the destination'
-            destStep.distanceFromStart = route.getLength()
+            destStep.distanceFromStart = route.length
             # TODO: make this multilingual
             # add it to the end of the message point list
-            route.addMessagePoint(destStep)
+            route.add_message_point(destStep)
 
         # save
         self.directions = route
@@ -692,7 +692,7 @@ class Route(RanaModule):
         -> mostly used to replace abbreviations by full words in espeak output
         -> also assure Pango compatibility (eq. get rid of  <div> and company)
         """
-        steps = directions.getMessagePoints()
+        steps = directions.message_points
 
         for step in steps:
             originalMessage = "".join(str(step.description))
@@ -727,8 +727,8 @@ class Route(RanaModule):
                 step.ssmlMessage = message
 
         # replace old message points with new ones
-        directions.clearMessagePoints()
-        directions.addMessagePoints(steps)
+        directions.clear_message_points
+        directions.add_message_points(steps)
 
         return directions
 
@@ -821,7 +821,7 @@ class Route(RanaModule):
                 return
 
             # get LLE tuples for message points
-            steps = self.directions.getMessagePointsLLE()
+            steps = self.directions.message_points_lle
 
             # now we convert geographic coordinates to screen coordinates, so we dont need to do it twice
             steps = map(lambda x: (proj.ll2xy(x[0], x[1])), steps)
@@ -1096,7 +1096,7 @@ class Route(RanaModule):
                 parent = 'set:menu:route'
 
             if self.directions:
-                (lat, lon) = self.directions.getPointByID(0).getLL()
+                (lat, lon) = self.directions.get_point_by_index(0).getLL()
                 action = "mapView:recentre %f %f|set:menu:None" % (lat, lon)
 
             else:
@@ -1127,12 +1127,12 @@ class Route(RanaModule):
                 else:
                     duration = "? minutes"
                 units = self.m.get('units', None) # get the correct units
-                length = self.directions.getLength()
+                length = self.directions.length
                 if length:
                     distance = units.m2CurrentUnitString(length, 1)
                 else:
                     distance = "? km"
-                steps = self.directions.getMessagePointCount() # number of steps
+                steps = self.directions.message_point_count  # number of steps
 
                 # TODO: do this cleaner with autowrap and elide
 
@@ -1259,7 +1259,7 @@ class Route(RanaModule):
             if self.start:
                 start = self.start
             else:
-                start = self.directions.getPointByID(0)
+                start = self.directions.get_point_by_index(0)
                 # geocode start
             onlineModule.reverseGeocodeAsync(start, self._setStartAddressCB)
 
@@ -1267,7 +1267,7 @@ class Route(RanaModule):
             if self.destination:
                 destination = self.destination
             else:
-                destination = self.directions.getPointByID(-1)
+                destination = self.directions.get_point_by_index(-1)
             onlineModule.reverseGeocodeAsync(destination, self._setDestinationAddressCB)
 
     def _setStartAddressCB(self, results):

@@ -4,7 +4,7 @@ import os
 import time
 import traceback
 from core import constants
-from core import way
+from core.way import Way
 from core.backports import six
 
 try:
@@ -47,7 +47,7 @@ class MonavRouting(RoutingProvider):
                 # convert the Monav result to a Way object usable
                 # for turn-by-turn navigation using the instruction
                 # generator set in the Monav wrapper
-                route = way.fromMonavResult(result, self.monav.result2turns)
+                route = Way.from_monav_result(result, self.monav.result2turns)
                 return RoutingResult(route,
                                      routeParams,
                                      constants.ROUTING_SUCCESS,
@@ -197,7 +197,7 @@ def _googleDirections(start, destination, waypoints, params):
         # to modRana Way object
         if directions is not None:
             returnCode = constants.ROUTING_SUCCESS
-            route = way.fromGoogleDirectionsResult(directions)
+            route = Way.from_google_directions_result(directions)
         else:
             route = None
         return route, returnCode, errorMessage

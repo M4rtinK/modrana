@@ -24,7 +24,7 @@ import time
 import os
 from collections import deque
 from core import geo
-from core import way
+from core.way import Way, AppendOnlyWay
 from core import gs
 from core.signal import Signal
 
@@ -197,11 +197,11 @@ class Tracklog(RanaModule):
             path1 = os.path.join(logFolder, "%s.temporary_csv_1" % name)
             path2 = os.path.join(logFolder, "%s.temporary_csv_2" % name)
 
-            log1 = way.AppendOnlyWay()
+            log1 = AppendOnlyWay()
             log1.startWritingCSV(path1)
             self.log1 = log1
 
-            log2 = way.AppendOnlyWay()
+            log2 = AppendOnlyWay()
             log2.startWritingCSV(path2)
             self.log2 = log2
 
@@ -328,7 +328,7 @@ class Tracklog(RanaModule):
         pointCount = 0
         units = self.m.get('units', None)
         if self.log1:
-            pointCount = self.log1.getPointCount()
+            pointCount = self.log1.point_count
 
         speed = self.get('speed', 0)
         if speed is not None:
@@ -724,7 +724,7 @@ class Tracklog(RanaModule):
                     # export any found files
                     self.log.info('exporting %s to GPX', logPath)
                     try:
-                        w1 = way.fromCSV(logPath, delimiter=",")
+                        w1 = Way.from_csv(logPath, delimiter=",")
                         exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
                         # does the GPX file already exist ?
                         # TODO: check if the GPX file is corrupted and swap with newly exported one ?
@@ -767,7 +767,7 @@ class Tracklog(RanaModule):
                     # export any found files
                     self.log.info('exporting %s to GPX' % logPath)
                     try:
-                        w2 = way.fromCSV(logPath, delimiter=",")
+                        w2 = Way.from_csv(logPath, delimiter=",")
                         exportPath = "%s.gpx" % os.path.splitext(logPath)[0]
                         # does the GPX file already exist ?
                         # TODO: check if the GPX file is corrupted and swap with newly exported one ?

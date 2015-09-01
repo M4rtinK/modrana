@@ -687,7 +687,7 @@ class MapData(RanaModule):
         if routeModule:
             route = routeModule.getDirections()
             if route:
-                tilesToDownload = self.getTilesForRoute(route.getPointsLLE(), size, self.midZ)
+                tilesToDownload = self.getTilesForRoute(route.points_lle, size, self.midZ)
                 zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, self.midZ, self.maxZ, self.minZ)
                 self.addDownloadRequests(zoomlevelExtendedTiles) # load the files to the download queue
             else:
@@ -762,7 +762,7 @@ class MapData(RanaModule):
             notification = "Using current route"
             if route:
                 self.set('menu', 'data2')
-                mLength = route.getLength()
+                mLength = route.length
                 if mLength:
                     units = self.m.get('units', None)
                     if units:

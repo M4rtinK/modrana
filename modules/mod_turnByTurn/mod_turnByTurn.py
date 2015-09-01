@@ -367,7 +367,7 @@ class TurnByTurn(RanaModule):
             return voice.say(text, espeakLanguageCode)
 
     def getMaxStepIndex(self):
-        return self.route.getMessagePointCount() - 1
+        return self.route.message_point_count - 1
 
     def getStartingStep(self, which='first'):
         if self.route:
@@ -382,7 +382,7 @@ class TurnByTurn(RanaModule):
         pos = self.get('pos', None) # and current position
         if pos and proj:
             (lat1, lon1) = pos
-            tempSteps = self.route.getMessagePoints()
+            tempSteps = self.route.message_points
             for step in tempSteps:
                 (lat2, lon2) = step.getLL()
                 step.currentDistance = geo.distance(lat1, lon1, lat2, lon2) * 1000 # km to m
@@ -397,19 +397,19 @@ class TurnByTurn(RanaModule):
             self.log.error("wrong turn index: %d, max index is: %d", index, maxIndex)
             return None
         else:
-            return self.route.getMessagePointByID(index)
+            return self.route.get_message_point_by_index(index)
 
     def setStepAsCurrent(self, step):
         """set a given step as current step"""
-        mpId = self.route.getMessagePointID(step)
+        mpId = self.route.get_message_point_index(step)
         self._setCurrentStepIndex(mpId)
 
     def getCurrentStep(self):
         """return current step"""
-        return self.route.getMessagePointByID(self.currentStepIndex)
+        return self.route.get_message_point_by_index(self.currentStepIndex)
 
     def getStepID(self, step):
-        return self.route.getMessagePointID(step)
+        return self.route.get_message_point_index(step)
 
     def getCurrentStepVisitStatus(self):
         """report visit status for  current step"""
@@ -475,14 +475,14 @@ class TurnByTurn(RanaModule):
             if route: # is the route nonempty ?
                 self.route = route
                 # get route in radians for automatic rerouting
-                self.radiansRoute = route.getPointsLLERadians(dropElevation=True)
+                self.radiansRoute = route.get_points_lle_radians(drop_elevation=True)
                 # start rerouting watch
                 self._startTBTWorker()
 
                 # show the warning message
                 self.sendMessage('ml:notification:m:use at own risk, watch for cliffs, etc.;3')
                 # for some reason the combined distance does not account for the last step
-                self.mRouteLength = route.getLength()
+                self.mRouteLength = route.length
 
                 # some statistics
                 metersPerSecSpeed = self.get('metersPerSecSpeed', None)
