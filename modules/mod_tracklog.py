@@ -198,11 +198,11 @@ class Tracklog(RanaModule):
             path2 = os.path.join(logFolder, "%s.temporary_csv_2" % name)
 
             log1 = AppendOnlyWay()
-            log1.startWritingCSV(path1)
+            log1.start_writing_csv(path1)
             self.log1 = log1
 
             log2 = AppendOnlyWay()
-            log2.startWritingCSV(path2)
+            log2.start_writing_csv(path2)
             self.log2 = log2
 
             # start update and save timers
@@ -274,8 +274,8 @@ class Tracklog(RanaModule):
             timestamp = geo.timestampUTC()
             lat, lon = pos
             elevation = self.get('elevation', None)
-            self.log1.addPointLLET(lat, lon, elevation, timestamp)
-            self.log2.addPointLLET(lat, lon, elevation, timestamp)
+            self.log1.add_point_llet(lat, lon, elevation, timestamp)
+            self.log2.add_point_llet(lat, lon, elevation, timestamp)
 
             # update statistics for the current log
             if self.loggingEnabled and not self.loggingPaused:
@@ -450,8 +450,8 @@ class Tracklog(RanaModule):
 
         # delete the temporary log files
         if deleteTempLogs:
-            self.log1.deleteFile()
-            self.log2.deleteFile()
+            self.log1.delete_file()
+            self.log2.delete_file()
         self.log1 = None
         self.log2 = None
 

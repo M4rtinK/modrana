@@ -538,7 +538,8 @@ class AppendOnlyWay(Way):
         # drop the timestamp
         return [(x[0], x[1], x[2]) for x in self._points]
 
-    def getPointsLLET(self):
+    @property
+    def points_llet(self):
         """returns all points in LLET format, both saved an not yet saved to storage"""
         return self._points
 
@@ -557,15 +558,16 @@ class AppendOnlyWay(Way):
             self._points.append((lat, lon, elevation, geo.timestampUTC()))
             self.increment.append((lat, lon, elevation, geo.timestampUTC()))
 
-    def addPointLLET(self, lat, lon, elevation, timestamp):
+    def add_point_llet(self, lat, lon, elevation, timestamp):
         with self._points_lock:
             self._points.append((lat, lon, elevation, timestamp))
             self.increment.append((lat, lon, elevation, timestamp))
 
-    def getFilePath(self):
+    @property
+    def file_path(self):
         return self.filePath
 
-    def startWritingCSV(self, path):
+    def start_writing_csv(self, path):
         try:
             self.file = open(path, "w")
             self.writer = csv.writer(self.file)
@@ -579,7 +581,7 @@ class AppendOnlyWay(Way):
             return False
 
     def flush(self):
-        """flush all points that are only in memory to storage"""
+        """Flush all points that are only in memory to storage"""
         # get the pointsLock, the current increment to local variable and clear the original
         # we release the lock afterwards so that other threads can start adding more points right away
         with self._points_lock:
@@ -601,18 +603,17 @@ class AppendOnlyWay(Way):
         # cleanup
         self._cleanup()
 
-    def deleteFile(self):
-        """delete the currently open file"""
+    def delete_file(self):
+        """Delete the currently open file"""
         path = self.filePath
         if self.file:
             try:
-                self.close() # close it
-                os.remove(path) # and delete it
+                self.close()  # close it
+                os.remove(path)  # and delete it
             except Exception:
                 aoLog.exception('deleting currently open file failed')
         else:
             aoLog.error("can't delete current file - no file open")
-
 
     def _cleanup(self):
         self.file = None
