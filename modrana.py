@@ -59,6 +59,9 @@ def setCorrectCWD():
     # - at the same just a simple "import foo" import is enough and
     #   "from core.bundle import foo" is not needed
     sys.path.append(os.path.join(currentAbsolutePath, 'core', 'bundle'))
+    # do the same thing for the backports folder, which serves a similar role
+    # as the bundle folder (TODO: merge content of backports to bundle ?)
+    sys.path.append(os.path.join(currentAbsolutePath, 'core', 'backports'))
     #sys.path.append(os.path.join('core', 'bundle'))
     #sys.path.append(os.path.join("qrc:/", 'core', 'bundle'))
     # add the modules folder to path, so that third-party modules (such as Upoints),
