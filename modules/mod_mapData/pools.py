@@ -284,7 +284,7 @@ class BatchSizeCheckPool(TileBatchPool):
         try:
             url = tiles.getTileUrl(lzxy)
             # does the tile exist ?
-            if self._storeTiles.tileExists2(lzxy, fromThread=True): # if the file does not exist
+            if self._storeTiles.tile_is_stored(lzxy): # if the file does not exist
                 size = None # it exists, return None
             else:
                 # the tile does not exist, get its HTTP header
@@ -383,12 +383,12 @@ class BatchTileDownloadPool(TileBatchPool):
         if not redownload:
             # does the the file exist ?
             # -> don't download it if it does
-            goAhead = not self._storeTiles.tileExists2(lzxy, fromThread=True)
+            goAhead = not self._storeTiles.tile_is_stored(lzxy)
         elif redownload == 1: # redownload all
             goAhead = True
         elif redownload == 2: # update
             # only download tiles in the area that already exist
-            goAhead = self._storeTiles.tileExists2(lzxy, fromThread=True)
+            goAhead = self._storeTiles.tile_is_stored(lzxy)
         if goAhead: # if the file does not exist
             request = self._connPool.request('get', url)
             size = int(request.getheaders()['content-length'])
@@ -403,7 +403,7 @@ class BatchTileDownloadPool(TileBatchPool):
             # TODO: does someone supply non-bitmap/SVG tiles ?
             if utils.isTheStringAnImage(content):
                 #its an image, save it
-                self._storeTiles.automaticStoreTile(content, lzxy)
+                self._storeTiles.store_tile_data(lzxy, content)
             else:
                 # its not ana image, raise exception
                 raise TileNotImageException(url)

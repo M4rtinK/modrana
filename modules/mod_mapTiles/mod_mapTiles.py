@@ -245,7 +245,7 @@ class MapTiles(RanaModule):
         if tileData:
             # check if the data is actually an image, and not an error page
             if utils.isTheStringAnImage(tileData):
-                self._storeTiles.automaticStoreTile(tileData, lzxy)
+                self._storeTiles.store_tile_data(lzxy, tileData)
                 #        self.log.debug("STORED")
                 return tileData
             else:
@@ -310,7 +310,7 @@ class MapTiles(RanaModule):
         :returns: True if tile is in storage, False otherwise
         :rtype: bool
         """
-        return self._storeTiles.tileExists2(lzxy)
+        return self._storeTiles.tile_is_stored(lzxy)
 
     def _updateScalingCB(self, key='mapScale', oldValue=1, newValue=1):
         """as this only needs to be updated once on startup and then only
@@ -363,7 +363,7 @@ class MapTiles(RanaModule):
                     else:
                         sprint = self._fakeDebugLog
                     sprint("looking for tile %s", lzxy)
-                    tileData = self._storeTiles.getTileData(lzxy)
+                    tileData = self._storeTiles.get_tile_data(lzxy)
                     if not tileData:  # TODO: is this actually needed ?
                         sprint("tile not found locally %s", lzxy)
                         # tile not found locally and needs to be downloaded from network
@@ -678,10 +678,8 @@ class MapTiles(RanaModule):
             if requests:
                 self._dlRequestQueue.put(requests)
 
-        except Exception:
-            exc = sys.exc_info()[1]
-            print("mapTiles: exception while drawing the map layer: %s" % exc)
-            traceback.print_exc()
+        except:
+            self.log.exception("mapTiles: exception while drawing the map layer")
 
     def _drawImage(self, cr, imageSurface, x, y, scale):
         """draw a map tile image"""
@@ -766,7 +764,7 @@ class MapTiles(RanaModule):
 
         # is the tile in local storage ?
         start1 = time.clock()
-        tileData = self._storeTiles.getTileData(lzxy)
+        tileData = self._storeTiles.get_tile_data(lzxy)
 
         if tileData:
             try:

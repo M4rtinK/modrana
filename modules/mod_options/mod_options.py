@@ -558,8 +558,8 @@ class Options(RanaModule):
         # ** tile storage
         group = addGroup("Tile storage", "tile_storage", catMap, "generic")
         addOpt("Tile storage", "tileStorageType",
-               [('files', "files (default, more space used)"),
-                ('sqlite', "sqlite (new, less space used)")],
+               [(constants.TILE_STORAGE_FILES, "files (default, more space used)"),
+                (constants.TILE_STORAGE_SQLITE, "sqlite (new, less space used)")],
                group,
                self.modrana.dmod.defaultTileStorageType)
         addBoolOpt("Store downloaded tiles", "storeDownloadedTiles", group, True)
