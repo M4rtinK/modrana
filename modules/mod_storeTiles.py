@@ -283,35 +283,3 @@ class StoreTiles(RanaModule):
                     store.close()
                     store_count+=1
         self.log.debug("closed %d tile stores")
-
-## TESTING CODE
-#    accessType = "get"
-#    folderPrefix = 'OpenStreetMap I'
-#    dbFolderPath = self._get_storage_db_connections(folderPrefix, accessType)
-##    lookupConn = self.layers[accessType][dbFolderPath]['lookup']
-#    start = time.clock()
-#
-#    temp = [(13, 4466, 2815, 'png'), (13, 4466, 2816, 'png'), (13, 4467, 2815, 'png'), (13, 4467, 2816, 'png'), (13, 4468, 2815, 'png'), (13, 4468, 2816, 'png'), (13, 4469, 2815, 'png'), (13, 4469, 2816, 'png'), (13, 4467, 2814, 'png'), (13, 4468, 2814, 'png'), (13, 4469, 2814, 'png'), (13, 4470, 2814, 'png'), (13, 4470, 2815, 'png'), (13, 4470, 2816, 'png'), (13, 4471, 2814, 'png'), (13, 4471, 2815, 'png'), (13, 4471, 2816, 'png'), (13, 4472, 2814, 'png'), (13, 4472, 2815, 'png'), (13, 4472, 2816, 'png'), (13, 4473, 2814, 'png'), (13, 4473, 2815, 'png'), (13, 4473, 2816, 'png'), (13, 4474, 2814, 'png'), (13, 4474, 2815, 'png'), (13, 4474, 2816, 'png'), (13, 4475, 2814, 'png'), (13, 4475, 2815, 'png'), (13, 4475, 2816, 'png'), (13, 4476, 2814, 'png'), (13, 4476, 2815, 'png'), (13, 4476, 2816, 'png'), (13, 4477, 2814, 'png'), (13, 4477, 2815, 'png'), (13, 4477, 2816, 'png'), (13, 4478, 2814, 'png'), (13, 4478, 2815, 'png'), (13, 4478, 2816, 'png'), (13, 4479, 2814, 'png'), (13, 4479, 2815, 'png'), (13, 4479, 2816, 'png'), (13, 4480, 2814, 'png'), (13, 4480, 2815, 'png'), (13, 4480, 2816, 'png'), (13, 4481, 2814, 'png'), (13, 4481, 2815, 'png'), (13, 4481, 2816, 'png'), (13, 4482, 2814, 'png'), (13, 4482, 2815, 'png'), (13, 4483, 2814, 'png'), (13, 4483, 2815, 'png'), (13, 4484, 2814, 'png'), (13, 4484, 2815, 'png'), (13, 4485, 2814, 'png'), (13, 4485, 2815, 'png'), (13, 4486, 2814, 'png'), (13, 4486, 2815, 'png'), (13, 4485, 2813, 'png'), (13, 4486, 2813, 'png'), (13, 4487, 2813, 'png'), (13, 4487, 2814, 'png'), (13, 4487, 2815, 'png'), (13, 4488, 2813, 'png'), (13, 4488, 2814, 'png'), (13, 4488, 2815, 'png'), (13, 4481, 2813, 'png'), (13, 4482, 2813, 'png'), (13, 4483, 2813, 'png'), (13, 4484, 2813, 'png'), (13, 4480, 2813, 'png'), (13, 4477, 2812, 'png'), (13, 4477, 2813, 'png'), (13, 4478, 2812, 'png'), (13, 4478, 2813, 'png'), (13, 4479, 2812, 'png'), (13, 4479, 2813, 'png'), (13, 4480, 2812, 'png'), (13, 4475, 2811, 'png'), (13, 4475, 2812, 'png'), (13, 4475, 2813, 'png'), (13, 4476, 2811, 'png'), (13, 4476, 2812, 'png'), (13, 4476, 2813, 'png'), (13, 4477, 2811, 'png'), (13, 4478, 2811, 'png'), (13, 4474, 2810, 'png'), (13, 4474, 2811, 'png'), (13, 4474, 2812, 'png'), (13, 4475, 2810, 'png'), (13, 4476, 2810, 'png'), (13, 4477, 2810, 'png'), (13, 4473, 2810, 'png'), (13, 4473, 2811, 'png'), (13, 4473, 2812, 'png')]
-#
-#    print(len(temp), "tiles")
-#    for tile in temp:
-#      (z, x, y, extension) = tile
-#
-#      lookupDbPath = self.get_lookup_db_path(dbFolderPath)
-#      lookupConn = connect_to_db(lookupDbPath)
-#      lookupCursor = lookupConn.cursor()
-#      lookupResult = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension)).fetchone()
-#      lookupConn.close()
-#    print("no connection reuse %f ms" % (1000 * (time.clock() - start)))
-#
-#    start = time.clock()
-#    lookupDbPath = self.get_lookup_db_path(dbFolderPath)
-#    lookupConn = connect_to_db(lookupDbPath)
-#    lookupCursor = lookupConn.cursor()
-#    for tile in temp:
-#      (z, x, y, extension) = tile
-#      lookupResult = lookupCursor.execute("select store_filename, unix_epoch_timestamp from tiles where z=? and x=? and y=? and extension=?", (z, x, y, extension)).fetchone()
-#      print(lookupResult)
-#    lookupCursor.close()
-#    lookupConn.close()
-#    print("connection reuse %f ms" % (1000 * (time.clock() - start)))
