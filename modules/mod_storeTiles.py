@@ -215,9 +215,10 @@ class StoreTiles(RanaModule):
         for store in stores:
             tile_tuple = store.get_tile(lzxy)
             if tile_tuple is not None:
+                self._llog("tile %s found in %s" % (str(lzxy), store))
                 tile_data, timestamp = tile_tuple
                 if layer.timeout:
-                    # stored timeout is in hours, convert to seconds
+                    # layer.timeout is in hours, convert to seconds
                     layer_timeout = float(layer.timeout)*60*60
                     dt = time.time() - layer_timeout
                     self._llog("timeout set for layer %s: %fs (expired at %d), "
@@ -226,11 +227,13 @@ class StoreTiles(RanaModule):
                                                        dt,
                                                        timestamp))
                     if timestamp < dt:
-                        self.log.debug("not loading timed-out tile: %s" % lzxy)
+                        self.log.debug("not loading timed-out tile: %s" % str(lzxy))
                         return None # pretend the tile is not stored
                     else:  # still fresh enough
+                        self._llog("tile is still fresh enough: %s" % str(lzxy))
                         return tile_data
                 else:  # the tile is always fresh
+                    self._llog("returning tile data for: %s" % str(lzxy))
                     return tile_data
         # nothing found in any store (or no stores)
         self._llog("tile not found: %s" % str(lzxy))
@@ -244,6 +247,7 @@ class StoreTiles(RanaModule):
         for store in stores:
             tile_tuple = store.tile_is_stored(lzxy)
             if tile_tuple is not False:
+                self._llog("we have tile %s in %s" % (str(lzxy), store))
                 _true, timestamp = tile_tuple
                 self._llog("we have tile: %s with timestamp %s" % (str(lzxy), timestamp))
                 if layer.timeout:
@@ -256,9 +260,10 @@ class StoreTiles(RanaModule):
                                                        dt,
                                                        timestamp))
                     if timestamp < dt:
-                        self.log.debug("not loading timed-out tile: %s" % lzxy)
+                        self.log.debug("reporting we don't have timed-out tile: %s" % str(lzxy))
                         return False # pretend the tile is not stored
                     else:  # still fresh enough
+                        self._llog("tile is still fresh enough to report as stored: %s" % str(lzxy))
                         return True
                 else:  # the tile is always fresh
                     return True
