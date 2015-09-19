@@ -511,13 +511,13 @@ class ModRana(object):
         start shutdown cleanup and stop GUI main loop
         when finished
         """
+        start_timestamp = time.clock()
         log.info("Shutting-down modules")
         for m in self.m.values():
             m.shutdown()
         self._saveOptions()
-        time.sleep(2) # leave some times for threads to shut down
         modrana_log.log_manager.disable_log_file()
-        log.info("Shutdown complete")
+        log.info("Shutdown complete (%s)" % utils.get_elapsed_time_string(start_timestamp))
 
 
     ## OPTIONS SETTING AND WATCHING ##
