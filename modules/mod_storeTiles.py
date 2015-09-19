@@ -293,4 +293,5 @@ class StoreTiles(RanaModule):
                     store.close()
                     store_count+=1
             layer_count+=1
-        self.log.debug("closed all tile stores (for %d layers, %d stores in total)" % (layer_count, store_count))
+        self.log.debug("closed all tile stores (for %d layers, %d stores in total in %s)"
+                       % (layer_count, store_count, utils.get_elapsed_time_string(start)))
