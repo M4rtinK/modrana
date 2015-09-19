@@ -80,7 +80,7 @@ class StoreTiles(RanaModule):
         # the tile loading debug log function is no-op by default, but can be
         # redirected to the normal debug log by setting the "tileLoadingDebug"
         # key to True
-        self._llog = self._noOp
+        self._llog = self._no_op
         self.modrana.watch('tileLoadingDebug', self._tile_loading_debug_changed_cb, runNow=True)
         self.modrana.watch('tileStorageType', self._primary_tile_storage_type_changed_cb, runNow=True)
         # device modules are loaded and initialized and configs are parsed before "normal"
@@ -90,6 +90,7 @@ class StoreTiles(RanaModule):
         """Check for any existing stores for the given layer in persistent storage
            and return a dictionary with the found stores under file storage type keys.
         """
+        start = time.clock()
         self._llog("looking for existing stores for layer %s" % layer)
         layer_folder_path = os.path.join(self.modrana.paths.getMapFolderPath(), layer.folderName)
         store_tuples = []
@@ -109,7 +110,7 @@ class StoreTiles(RanaModule):
             store_tuple = (constants.TILE_STORAGE_SQLITE, SqliteTileStore(layer_folder_path))
             store_tuples.append(store_tuple)
 
-        self._llog("%d existing stores have been found for layer %s" % (len(store_tuples), layer))
+        self._llog("%d existing stores have been found for layer %s" % (len(store_tuples), layer), start)
         # sort the tuples so that the primary tile storage type (if any) is first
         store_tuples.sort(key=self._sort_store_tuples)
         return OrderedDict(store_tuples)
@@ -129,6 +130,7 @@ class StoreTiles(RanaModule):
         with self._tile_storage_management_lock:
             store = self._stores[layer].get(self._primary_tile_storage_type)
             if store is None:
+                start = time.clock()
                 self._llog("store type %s not found for layer %s" % (self._primary_tile_storage_type, layer))
                 layer_folder_path = os.path.join(self.modrana.paths.getMapFolderPath(), layer.folderName)
                 if self._primary_tile_storage_type == constants.TILE_STORAGE_FILES:
@@ -143,7 +145,7 @@ class StoreTiles(RanaModule):
                     self._llog("adding file based store for layer %s" % layer)
                 # add the store to the stores dict while keeping the primary-storage-type first ordering
                 self._add_store_for_layer(layer, (store_type, store))
-                self._llog("added store type %s for layer %s" % (self._primary_tile_storage_type, layer))
+                self._llog("added store type %s for layer %s" % (self._primary_tile_storage_type, layer), start)
             return store
 
     def _sort_store_tuples(self, key):
@@ -172,6 +174,7 @@ class StoreTiles(RanaModule):
             self._stores[layer] = OrderedDict(store_tuples)
 
     def _primary_tile_storage_type_changed_cb(self, key, oldValue, newValue):
+        start = time.clock()
         # primary tile storage type has been changed, update internal variables accordingly
         with self._tile_storage_management_lock:
             self._llog("primary tile storage type changed to: %s" % newValue)
@@ -184,17 +187,24 @@ class StoreTiles(RanaModule):
             self._llog("resorting ordered dicts for the new primary storage type")
             for layer in self._stores.keys():
                 self._sort_layer_odict(layer)
+            self._llog("ordered dicts resorted", start)
 
     def _tile_loading_debug_changed_cb(self, key, oldValue, newValue):
         if newValue:
-            self._llog = self.log.debug
+            self._llog = self._tile_loading_log
         else:
-            self._llog = self._noOp
+            self._llog = self._no_op
 
-    def _noOp(self, *args):
+    def _tile_loading_log(self, message, start_timestamp=None):
+        if start_timestamp is not None:
+            message = "%s (%1.2f ms)" % (message, (1000 * (time.clock() - start_timestamp)))
+        self.log.debug(message)
+
+    def _no_op(self, *args):
         pass
 
     def get_tile_data(self, lzxy):
+        start = time.clock()
         layer = lzxy[0]
         self._llog("tile requested: %s" % str(lzxy))
         with self._tile_storage_management_lock:
@@ -219,16 +229,17 @@ class StoreTiles(RanaModule):
                         self.log.debug("not loading timed-out tile: %s" % str(lzxy))
                         return None # pretend the tile is not stored
                     else:  # still fresh enough
-                        self._llog("tile is still fresh enough: %s" % str(lzxy))
+                        self._llog("tile is still fresh enough: %s" % str(lzxy), start)
                         return tile_data
                 else:  # the tile is always fresh
-                    self._llog("returning tile data for: %s" % str(lzxy))
+                    self._llog("returning tile data for: %s" % str(lzxy), start)
                     return tile_data
         # nothing found in any store (or no stores)
-        self._llog("tile not found: %s" % str(lzxy))
+        self._llog("tile not found: %s" % str(lzxy), start)
         return None
 
     def tile_is_stored(self, lzxy):
+        start = time.clock()
         self._llog("do we have tile: %s ?" % str(lzxy))
         layer = lzxy[0]
         with self._tile_storage_management_lock:
@@ -249,31 +260,36 @@ class StoreTiles(RanaModule):
                                                        dt,
                                                        timestamp))
                     if timestamp < dt:
-                        self.log.debug("reporting we don't have timed-out tile: %s" % str(lzxy))
+                        self.log.debug("reporting we don't have timed-out tile: %s" % str(lzxy), start)
                         return False # pretend the tile is not stored
                     else:  # still fresh enough
-                        self._llog("tile is still fresh enough to report as stored: %s" % str(lzxy))
+                        self._llog("tile is still fresh enough to report as stored: %s" % str(lzxy), start)
                         return True
                 else:  # the tile is always fresh
+                    self._llog("we have tile: %s" % str(lzxy), start)
                     return True
         # nothing found in any store (or no stores)
-        self._llog("we have not found tile: %s" % str(lzxy))
+        self._llog("we have not found tile: %s" % str(lzxy), start)
         return False
 
     def store_tile_data(self, lzxy, tile_data):
+        start = time.clock()
         self._llog("store tile data for: %s" % str(lzxy))
         store = self._get_store_for_writing(lzxy[0])
         self._llog("store tile data for: %s into %s" % (str(lzxy), store))
         store.store_tile_data(lzxy, tile_data)
-        self._llog("stored tile data for: %s" % str(lzxy))
+        self._llog("stored tile data for: %s" % str(lzxy), start)
 
     def shutdown(self):
+        start = time.clock()
         # close all stores
         self.log.debug("closing tile stores")
+        layer_count = 0
         store_count = 0
         with self._tile_storage_management_lock:
             for store_odicts in self._stores.values():
                 for store in store_odicts.values():
                     store.close()
                     store_count+=1
-        self.log.debug("closed %d tile stores")
+            layer_count+=1
+        self.log.debug("closed all tile stores (for %d layers, %d stores in total)" % (layer_count, store_count))
