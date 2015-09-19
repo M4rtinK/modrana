@@ -118,9 +118,7 @@ class Downloader(object):
 
         if not download and not overwrite:
             # check if the tile has been already downloaded
-            print("IS STORED ?")
             download = not self._storeTiles.tile_is_stored(lzxy)
-            print(download)
 
         if download:
             # download tile
@@ -182,7 +180,6 @@ class Downloader(object):
             else:
                 # cache the raw data
                 self._mapTiles.storeInMemory(content, lzxy)
-            print("STORE TILE DATA")
             self._storeTiles.store_tile_data(lzxy, content)
 
     def _downloadInProgress(self, lzxy):
