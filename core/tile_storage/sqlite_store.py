@@ -148,7 +148,10 @@ class SqliteTileStore(BaseTileStore):
         self._new_tiles_store_connection = store_connection
 
     def __str__(self):
-        return "sqlite tile store at %s" % self.store_path
+        return "sqlite store @ %s" % self.store_path
+
+    def __repr__(self):
+        return str(self)
 
     def _get_lookup_db_connection(self):
         """Initialize the lookup database

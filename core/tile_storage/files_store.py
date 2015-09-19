@@ -45,7 +45,10 @@ class FileBasedTileStore(BaseTileStore):
         BaseTileStore.__init__(self, store_path, prevent_media_indexing=prevent_media_indexing)
 
     def __str__(self):
-        return "file based tile store at %s" % self.store_path
+        return "file based store @ %s" % self.store_path
+
+    def __repr__(self):
+        return str(self)
 
     def store_tile_data(self, lzxy, tile_data):
         """Store the given tile to a file"""
