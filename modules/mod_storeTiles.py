@@ -42,6 +42,7 @@ except ImportError:
     from core.backports.odict import odict as OrderedDict  # Python <2.7
 
 from core import constants
+from core import utils
 from core.tile_storage.files_store import FileBasedTileStore
 from core.tile_storage.sqlite_store import SqliteTileStore
 
@@ -197,7 +198,7 @@ class StoreTiles(RanaModule):
 
     def _tile_loading_log(self, message, start_timestamp=None):
         if start_timestamp is not None:
-            message = "%s (%1.2f ms)" % (message, (1000 * (time.clock() - start_timestamp)))
+            message = "%s (%s)" % (message, utils.get_elapsed_time_string(start_timestamp))
         self.log.debug(message)
 
     def _no_op(self, *args):

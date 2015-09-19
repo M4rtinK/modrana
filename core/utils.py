@@ -289,6 +289,9 @@ def createConnectionPool(url, maxThreads=1):
 def getTimeHashString():
     return time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
 
+def get_elapsed_time_string(start_timestamp):
+    return "%1.2f ms" % (1000 * (time.clock() - start_timestamp))
+
 # Note about the "internal" functions
 #
 # This are used to work with files that modRana ships and expects to be available

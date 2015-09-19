@@ -208,7 +208,7 @@ class MapTiles(RanaModule):
         #      self.log.debug("got tile FROM memory CACHE")
             return cacheItem[0]
 
-        tileData = self._storeTiles.getTileData(lzxy)
+        tileData = self._storeTiles.get_tile_data(lzxy)
         if tileData:
             #self.log.debug("got tile FROM disk CACHE")
             # tile was available from storage
