@@ -33,26 +33,15 @@ except Exception:
 
 import os
 import time
-import glob
-import collections
 from collections import defaultdict
+from threading import RLock
 
 try:  # Python 2.7+
     from collections import OrderedDict as OrderedDict
 except ImportError:
     from core.backports.odict import odict as OrderedDict  # Python <2.7
 
-
-
-try:
-    import Queue
-except ImportError:
-    import queue as Queue
-from threading import RLock
-
-from core import threads
 from core import constants
-from core import utils
 from core.tile_storage.files_store import FileBasedTileStore
 from core.tile_storage.sqlite_store import SqliteTileStore
 
