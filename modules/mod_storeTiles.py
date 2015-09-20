@@ -192,8 +192,10 @@ class StoreTiles(RanaModule):
 
     def _tile_loading_debug_changed_cb(self, key, oldValue, newValue):
         if newValue:
+            self.log.debug("tile loading debug messages state: enabled")
             self._llog = self._tile_loading_log
         else:
+            self.log.debug("tile loading debug messages state: disabled")
             self._llog = self._no_op
 
     def _tile_loading_log(self, message, start_timestamp=None):
