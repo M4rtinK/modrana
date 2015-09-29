@@ -44,10 +44,17 @@ BasePage {
             }
         }
         TextSwitch {
-            text : qsTr("Tile handling debugging")
+            text : qsTr("Tile display debugging")
             checked : rWin.tileDebug
             onCheckedChanged : {
                 rWin.tileDebug = checked
+            }
+        }
+        TextSwitch {
+            text : qsTr("Tile storage debugging")
+            checked : rWin.tileStorageDebug
+            onCheckedChanged : {
+                rWin.tileStorageDebug = checked
             }
         }
         TextSwitch {

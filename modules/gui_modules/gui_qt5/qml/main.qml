@@ -43,6 +43,11 @@ ApplicationWindow {
         id : tileDebugProperty
         value : false
     }
+    property alias tileStorageDebug : tileStorageDebugProperty.value
+    OptProp {
+        id : tileStorageDebugProperty
+        value : false
+    }
     property alias locationDebug : locationDebugProp.value
     OptProp {id: locationDebugProp; value : false}
 
@@ -370,6 +375,7 @@ ApplicationWindow {
         showDebugButtonProp.key = "showQt5GUIDebugButton"
         showUnfinishedFeaturesProp.key = "showQt5GUIUnfinishedFeatures"
         tileDebugProperty.key = "showQt5TileDebug"
+        tileStorageDebugProperty.key = "tileLoadingDebug"
         locationDebugProp.key = "gpsDebugEnabled"
         keepScreenOnProp.key = "screenBlankingMode"
 
