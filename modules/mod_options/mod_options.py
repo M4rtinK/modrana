@@ -1081,8 +1081,8 @@ class Options(RanaModule):
         addBoolOpt("Log file compression", "compressLogFile", group, False)
         # ** tiles
         group = addGroup("Tiles", "tiles", catDebug, "generic")
-        addBoolOpt("Print tile cache status to terminal", "reportTileCacheStatus", group, False)
-        addBoolOpt("Tile loading status to terminal", "tileLoadingDebug", group, False)
+        addBoolOpt("Ttile cache status debugging messages", "reportTileCacheStatus", group, False)
+        addBoolOpt("Tile storage debugging messages", "tileLoadingDebug", group, False)
         addBoolOpt("Redraw screen once a new tile is loaded", "tileLoadedRedraw", group, True)
         addOpt("In memory tile cache size", "memoryTileCacheSize",
                [(20, "20", notifyRestartNeeded),
