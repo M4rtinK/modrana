@@ -374,7 +374,7 @@ class SqliteTileStore(BaseTileStore):
                 result = store_cursor.execute(
                     "select tile, unix_epoch_timestamp from tiles where z=? and x=? and y=?",
                     (z, x, y)).fetchone()
-                if not utils.is_an_image(str(result[0])):
+                if not utils.is_an_image(result[0]):
                     log.warning("%s,%s,%s in %s/%s is probably not an image", x, y, z, self.store_path, store_name)
                 return result
             else:  # the tile was not found in the lookup database
