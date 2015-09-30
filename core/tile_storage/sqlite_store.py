@@ -178,10 +178,11 @@ class SqliteTileStore(BaseTileStore):
            - if no storage databases exist, create the first (store.sqlite.0) storage database
         """
         connections = {}
-        existing_stores = self._list_stores()
+        existing_stores = self._list_store_files()
         if existing_stores:
             for store_path in existing_stores:
-                connections[store_path] = connect_to_db(store_path)
+                store_name = os.path.basename(store_path)
+                connections[store_name] = connect_to_db(store_path)
         else:  # no stores yet, create the first one
             store_name, store_connection = self._add_store()
             connections = {store_name : store_connection}
@@ -192,7 +193,7 @@ class SqliteTileStore(BaseTileStore):
            - find an ascending numbered name and create the db file with the corresponding tables
         """
         new_highest_number = 0
-        storeList = self._list_stores()
+        storeList = self._list_store_files()
         if storeList:
             number_candidate_list = map(lambda x: x.split('store.sqlite.')[1], storeList)
             integer_list = []
@@ -249,10 +250,10 @@ class SqliteTileStore(BaseTileStore):
                 self._new_tiles_store_connection = new_store_connection
                 return new_store_name, new_store_connection
 
-    def _list_stores(self):
+    def _list_store_files(self):
         """Return a list of available storage database files
 
-        :returns: list of storage database paths
+        :returns: list of found storage database paths
         :rtype: list of strings
         """
         return glob.glob(os.path.join(self.store_path, "%s*" % STORE_DB_NAME_PREFIX))
