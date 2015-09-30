@@ -212,7 +212,7 @@ class StoreTiles(RanaModule):
         self._llog("tile requested: %s" % str(lzxy))
         with self._tile_storage_management_lock:
             stores = self._get_stores_for_reading(layer)
-            self._llog("tile %s got stores: %s" % (str(lzxy), stores))
+            self._llog("tile %s got stores: %s" % (str(lzxy), list(stores)))
 
         for store in stores:
             tile_tuple = store.get_tile(lzxy)
