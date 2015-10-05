@@ -32,10 +32,6 @@ Rectangle {
     property double currentPositionAzimuth: 0;
     property double currentPositionError: 0;
 
-    //property var t: getMappointFromCoord(currentPositionLat, currentPositionLon)
-    //property double positionIndicatorX: map.x + t[0] - width/2
-    //property double positionIndicatorY: map.y + t[1] - height + positionIndicator.width/2
-
     property alias positionIndicator : positionIndicator
     property alias canvas : canvas
 
@@ -59,12 +55,8 @@ Rectangle {
 
     // NOTE: for now there is only a single overlay group called "main"
     property string overlayGroupName : "main"
-
     property int earthRadius: 6371000
-
     property bool tooManyPoints: true
-
-    //property int tileserverPort : mapTiles.tileserverPort()
     property int tileserverPort : 0
     property int status: PageStatus.Active
     signal drag // signals that map-drag has been detected
@@ -173,7 +165,6 @@ Rectangle {
     function pan(dx, dy) {
         map.offsetX -= dx;
         map.offsetY -= dy;
-
         canvas.x -= dx
         canvas.y -= dy
     }
@@ -409,26 +400,6 @@ Rectangle {
         return "image://python/tile/" + tileId
     }
 
-    /*
-    function tileUrlOld(layerID, tx, ty) {
-        //console.log("tileUrl" + tx + "/" + ty)
-        if (ty < 0 || ty > maxTileNo) {
-            // TODO: set this externally ?
-            return "image://python/icon/"+ rWin.theme.id +"/noimage.png"
-        } else {
-            if (tileserverPort != 0) {
-                return "http://127.0.0.1:"+tileserverPort+"/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty+".png"
-            } else {
-                // this URL either returns a valid image if the tile is
-                // available or returns a 1x1 pixel "signal tile", telling
-                // use that the tile will be downloaded
-                return "image://python/tile/"+pinchmap.name+"/"+layerID+"/"+zoomLevel+"/"+tx+"/"+ty
-            }
-            //var x = F.getMapTile(url, tx, ty, zoomLevel);
-        }
-    }
-    */
-
     PinchArea {
         id: pincharea;
         property double __oldZoom;
@@ -456,7 +427,6 @@ Rectangle {
 
         MouseArea {
             id: mousearea;
-
             property bool __isPanning: false;
             property int __lastX: -1;
             property int __lastY: -1;
@@ -498,8 +468,6 @@ Rectangle {
                 __firstX = Math.round(mouse.x);
                 __firstY = Math.round(mouse.y);
                 __wasClick = true;
-                rWin.log.debug("PRESSED")
-                //mouse.accepted = false
             }
 
             onReleased: {
@@ -508,7 +476,6 @@ Rectangle {
                     panEnd();
                     mapPanEnd();
                 }
-
             }
 
             onPositionChanged: {
@@ -518,7 +485,6 @@ Rectangle {
                     // precision loss
                     var dx = Math.round(mouse.x) - __lastX;
                     var dy = Math.round(mouse.y) - __lastY;
-
                     pan(-dx, -dy);
                     __lastX = Math.round(mouse.x);
                     __lastY = Math.round(mouse.y);
@@ -539,7 +505,6 @@ Rectangle {
             }
         }
     }
-
 
     Grid {
         id: map;
@@ -567,27 +532,7 @@ Rectangle {
                 height: tileSize;
                 color: "#c0c0c0";
 
-                /*
-                Rectangle {
-                    id: progressBar;
-                    property real p: 0;
-                    height: 16;
-                    width: parent.width - 32;
-                    anchors.centerIn: img;
-                    color: "#c0c0c0";
-                    border.width: 1;
-                    border.color: "#000000";
-                    Rectangle {
-                        anchors.left: parent.left;
-                        anchors.margins: 2;
-                        anchors.top: parent.top;
-                        anchors.bottom: parent.bottom;
-                        width: (parent.width - 4) * progressBar.p;
-                        color: "#000000";
-                    }
-                }
-                */
-                Repeater {
+               Repeater {
                     id: imgs
                     //property string source: tileUrl(model[0].layerId, tileX, tileY)
                     property string source
@@ -628,11 +573,13 @@ Rectangle {
             }
 
         }
+
         SearchMarkers {
             id: markers
             model : pinchmap.searchMarkerModel
             mapInstance : pinchmap
         }
+
         PointMenuMarkers {
             id: pointMenuMarkers
             mapInstance : pinchmap
@@ -700,7 +647,6 @@ Rectangle {
 
     Rectangle {
         id: positionErrorIndicator
-        //visible: showCurrentPosition && settings.optionsShowPositionError
         visible: false
         width: currentPositionError * (1/getMetersPerPixel(currentPositionLat)) * 2
         height: width
@@ -714,7 +660,6 @@ Rectangle {
 
     Image {
         id: positionIndicator
-
         source: currentPositionValid ?
                 "image://python/icon/"+ rWin.theme.id +"/position-indicator.png" :
                 "image://python/icon/"+ rWin.theme.id +"/position-indicator-red.png"
@@ -722,7 +667,6 @@ Rectangle {
         x: map.x + t[0] - width/2
         y: map.y + t[1] - height + positionIndicator.width/2
         smooth: true
-
         visible: showCurrentPosition
         transform: Rotation {
             origin.x: positionIndicator.width/2
