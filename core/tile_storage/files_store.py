@@ -44,6 +44,10 @@ class FileBasedTileStore(BaseTileStore):
     def __init__(self, store_path, prevent_media_indexing = False):
         BaseTileStore.__init__(self, store_path, prevent_media_indexing=prevent_media_indexing)
 
+        # make sure the folder for the file based tile store exists and is in a correct state,
+        # such as that it contains a file that disables media indexing on platforms where this is needed
+        utils.check_folder(self.store_path, prevent_media_indexing=prevent_media_indexing)
+
     def __str__(self):
         return "file based store @ %s" % self.store_path
 

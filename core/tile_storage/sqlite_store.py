@@ -124,6 +124,9 @@ class SqliteTileStore(BaseTileStore):
         # storage database free space checking and the related adding of new stores
         self._storage_db_management_lock = RLock()
 
+        # make sure the folder containing the sqlite tile databases exists
+        utils.check_folder(self.store_path, prevent_media_indexing=prevent_media_indexing)
+
         # there is always only one lookup database per store that stores only tile coordinates
         # and name of the storage database holding the tile data
         # (hitting the 4 GB file size limit while storing only tile coordinates

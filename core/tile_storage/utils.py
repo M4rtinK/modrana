@@ -2,7 +2,12 @@
 import six
 from six import b
 import sys
+import os
+import logging
+
 from .tile_types import ID_TO_CLASS_MAP
+
+log = logging.getLogger("tile_storage.utils")
 
 PYTHON3 = sys.version_info[0] > 2
 
@@ -36,3 +41,35 @@ def is_an_image(tile_data):
 
 def get_tile_data_type(tile_data):
     return ID_TO_CLASS_MAP.get(is_an_image(tile_data), None)
+
+def check_folder(folder_path, prevent_media_indexing=False):
+    """ Check if the top level map folder for the store exists and create it if it doesn't.
+    Also does platform specific tweaks like creating a .nomedia file in the
+    map folder on Android to prevent tile images from being indexed into the
+    Android gallery.
+    """
+
+    if os.path.exists(folder_path):
+        if not os.path.isdir(folder_path):
+            # path exists but is not a directory
+            log.critical("can't create tile storage folder: path exists but is not a directory: %s", folder_path)
+    else:  # path does not exist, create it
+        try:
+            log.info("creating tile storage folder in: %s", folder_path)
+            os.makedirs(folder_path)
+        except Exception:
+            log.exception("tile storage folder creation failed for path: %s", folder_path)
+
+    if prevent_media_indexing:
+        nomedia_file_path = os.path.join(folder_path, ".nomedia")
+        if os.path.exists(nomedia_file_path):
+            if not os.path.isfile(nomedia_file_path):
+                log.warning(".nomedia in the map data folder is not a file %s", nomedia_file_path)
+        # create the .nomedia file to prevent indexing of tile images
+        # - this should work at least on Android
+        else :
+            log.info("creating a .nomedia file in: %s", folder_path)
+            try:
+                open(nomedia_file_path, "w").close()
+            except Exception:
+                log.exception(".nomedia file creation failed in: %s", nomedia_file_path)
