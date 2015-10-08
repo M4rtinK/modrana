@@ -86,8 +86,8 @@ class DeviceN900(DeviceModule):
             # liblocation
             self.lControl = None
             self.lDevice = None
-            """location starting is handled by mod_location
-            in its firstTime call"""
+            # location startup is handled by mod_location
+            # in its firstTime call
 
             # libconic
             self._conicConnect()
