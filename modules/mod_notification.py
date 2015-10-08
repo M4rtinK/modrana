@@ -38,7 +38,7 @@ class Notification(RanaModule):
     def __init__(self, *args, **kwargs):
         RanaModule.__init__(self, *args, **kwargs)
         self.notificationText = ""
-        self.timeout = 5
+        self.timeout = 5000
         self.position = 'middle'
         self.expirationTimestamp = time.time()
         self.draw = False
@@ -96,7 +96,9 @@ class Notification(RanaModule):
             if args:
                 timeout = self.timeout
                 if len(args) >= 2:
-                    timeout = float(args[1])
+                    # convert to float, multiply by 1000 to convert to ms
+                    # and then convert to integer number of ms
+                    timeout = int(float(args[1])*1000)
                 messageText = args[0]
                 self.modrana.notify(messageText, timeout)
 
@@ -119,7 +121,8 @@ class Notification(RanaModule):
                 self.modrana.notify(messageText, timeout)
                 if len(parameterList) == 2:
                     try:
-                        timeout = int(parameterList[1]) # override the default timeout
+                         # override the default timeout and convert to ms
+                        timeout = int(parameterList[1])*1000
                     except Exception:
                         self.log.exception("wrong timeout, using default 5 seconds")
                 self.modrana.notify(messageText, timeout)
@@ -266,10 +269,10 @@ class Notification(RanaModule):
             else:
                 click.registerXYWH(x1, y1, dx, dy, "onlineServices:cancelOperation", layer=2)
 
-    def _startCustomNotificationCB(self, message, timeout, icon=""):
+    def _startCustomNotificationCB(self, message, ms_timeout, icon=""):
         self.position = 'middle'
         self.notificationText = message
-        self.expirationTimestamp = time.time() + timeout
+        self.expirationTimestamp = time.time() + ms_timeout/1000.0
         self.draw = True # enable drawing of notifications
         self.set('needRedraw', True) # make sure the notification is displayed
 
