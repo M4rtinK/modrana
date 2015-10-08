@@ -283,7 +283,7 @@ class DeviceN900(DeviceModule):
         topWindow = self.modrana.gui.getWindow()
         banner = hildon.hildon_banner_show_information_with_markup(topWindow, icon, message)
         if msTimeout:
-            banner.set_timeout(msTimeout)
+            banner.set_timeout(int(msTimeout))
 
     def hasButtons(self):
         """the N900 has the volume keys (2 buttons), the camera trigger (2 states)
