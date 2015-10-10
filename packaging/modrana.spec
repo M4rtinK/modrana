@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.53.1
+Version: 0.53.2
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -122,6 +122,10 @@ fi
 %endif
 
 %changelog
+* Sun Oct 11 2015 Martin Kolman <martin.kolman@gmail.com> - 0.53.2-1
+- Handle no results for saved overlay configs (martin.kolman)
+- Hack around Android/Qt Resource import weirdness in bundled urllib3 (martin.kolman)
+
 * Sat Oct 10 2015 Martin Kolman <martin.kolman@gmail.com> - 0.53.1-1
 - Don't instantiate tile elements until layer list is loaded (martin.kolman)
 - Fix a typo (martin.kolman)
