@@ -53,6 +53,13 @@ Rectangle {
         }
     }
 
+    // indicates that the map layer list has been succesfully initialized
+    // and the pinchmap is ready for tile element instantiation
+    // - this avoids a strange race condition where sometimes a tile
+    //   has been missing some overlays resulting in tiles missing from
+    //   the map
+    property bool layersReady : false
+
     // NOTE: for now there is only a single overlay group called "main"
     property string overlayGroupName : "main"
     property int earthRadius: 6371000
@@ -293,12 +300,13 @@ Rectangle {
             if(result.length>0) {
                 // don't clear and vut replace instead
                 // TODO: handle non default (1 layer) state
-                layers.set(0, result[0])
+                pinchmap.layers.set(0, result[0])
                 for (var i=1; i<result.length; i++) {
-                    layers.append(result[i]);
+                    pinchmap.layers.append(result[i]);
                 }
             }
-            rWin.log.debug("settings loaded")
+            rWin.log.debug("pinchmap: overlay settings for " + pinchmap.overlayGroupName + " loaded")
+            pinchmap.layersReady = true
         })
     }
 
@@ -520,7 +528,7 @@ Rectangle {
 
         Repeater {
             id: tiles
-            model: (pinchmap.numTilesX * pinchmap.numTilesY);
+            model: pinchmap.layersReady ? pinchmap.numTilesX * pinchmap.numTilesY : null
             Rectangle {
                 id: tile
                 property alias source: imgs.source;
@@ -536,7 +544,7 @@ Rectangle {
                     id: imgs
                     //property string source: tileUrl(model[0].layerId, tileX, tileY)
                     property string source
-                    model: pinchmap.layers
+                    model: pinchmap.layersReady ? pinchmap.layers : null
                     Tile {
                         id : tile
                         tileSize : tileSize
