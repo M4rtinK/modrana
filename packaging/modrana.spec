@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.52.10
+Version: 0.53.1
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -122,6 +122,65 @@ fi
 %endif
 
 %changelog
+* Sat Oct 10 2015 Martin Kolman <martin.kolman@gmail.com> - 0.53.1-1
+- Don't instantiate tile elements until layer list is loaded (martin.kolman)
+- Fix a typo (martin.kolman)
+- Add Thunderforest map layers (martin.kolman)
+- Handle inheritence in the 2.5 property setter implementation (martin.kolman)
+- Use milliseconds for internal timeout specifications consistently (martin.kolman)
+- Make sure the timeout is an integer (martin.kolman)
+- Improve a docstring (martin.kolman)
+- Create folder for store if it does not exist yet (martin.kolman)
+- Update the bundled copy of urllib3 to 1.11 (martin.kolman)
+- Cleanup the PinchMap file a bit (martin.kolman)
+- Handle the unlikely case of a lookup db and store db mismatch (martin.kolman)
+- Don't wrap sqlite tile lookup in str() before detection (martin.kolman)
+- Improve debugging output when listing stores for a tile loading request (martin.kolman)
+- Use store name not full path for discovered storage db connections (martin.kolman)
+- Make it possible to enable tile storage debugging from the Qt 5 GUI (martin.kolman)
+- Reword debugging message triggers for tiles (martin.kolman)
+- Add a log message for enabling/disabling of tile loading debugging (martin.kolman)
+- Don't sleep when shutting down modRana (martin.kolman)
+- Log how long store closing at shutdown took (martin.kolman)
+- Move elapsed time string generation to utils (martin.kolman)
+- Add information about elapsed time to relevant tile loading debugging messages (martin.kolman)
+- cleanup unused imports in storeTiles (martin.kolman)
+- Add more tile loading debugging messages (martin.kolman)
+- Remove old tile storage testing code (martin.kolman)
+- Remove some leftover debugging messages (martin.kolman)
+- Implement __repr__ for the file based and sqlite tile stores (martin.kolman)
+- Use the tile-storage module for tile storage (martin.kolman)
+- Initial implementation (martin.kolman)
+- Add the backports folder to the Python import path (martin.kolman)
+- Add 'core/tile_storage/' from commit 'b41f83a698e46700468e46b52b45266451eea368' (martin.kolman)
+- Refactor the AppendOnlyWay class (martin.kolman)
+- Make the polyline decoding method public and switch to underscores (martin.kolman)
+- Refactor the Way class (martin.kolman)
+- Refactor TurnByTurnPoint (martin.kolman)
+- Forward command like arguments in startup scripts (martin.kolman)
+- Fix generic pc startup script (martin.kolman)
+- Add an initial ultra rudimentary unit test for the Point class (martin.kolman)
+- Refactor the POI database to a separate module (martin.kolman)
+- Reword the "POI added" message a bit (martin.kolman)
+- Add function for parsing coordinates in the geo:latitude,longitude format (martin.kolman)
+- Make it possible to get POI category by name (martin.kolman)
+- Add the poi list-categories subcommand (martin.kolman)
+- Add initial poi handling subcommand (martin.kolman)
+- The database index might not always be an integer (martin.kolman)
+- Refactor and cleanup the menu module a bit (martin.kolman)
+- Display Japanese and long strings correctly in notifications (martin.kolman)
+- Make it possible to measure the size of wrapped text (martin.kolman)
+- Correctly display Japanese on POI markers (martin.kolman)
+- Small search result drawing refactoring (martin.kolman)
+- Big Point class usage cleanup and improvements (martin.kolman)
+- Make it possible to send messages from the main modRana class (martin.kolman)
+- Log the "no message handler" error (martin.kolman)
+- Rename the check target to test target (martin.kolman)
+- Small Point module/class refactoring (martin.kolman)
+- Turn point lat, lon and elevation to proper properties (martin.kolman)
+- Add basic unit testing infrastructure (martin.kolman)
+- Use correct values when generating quad keys (martin.kolman)
+
 * Tue Jun 16 2015 Martin Kolman <martin.kolman@gmail.com> - 0.52.10-1
 - Make sure the background bubble stays visible on Sailfish OS (martin.kolman)
 - Add long-click menu with a "route here" button (martin.kolman)
