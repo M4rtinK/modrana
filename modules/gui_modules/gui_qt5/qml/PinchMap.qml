@@ -297,7 +297,7 @@ Rectangle {
             //       kinda expects the layers model having only a single layer and does not
             //       clear it before appending to it to prevent a race condition with tile
             //       loading
-            if(result.length>0) {
+            if(result && result.length>0) {
                 // don't clear and vut replace instead
                 // TODO: handle non default (1 layer) state
                 pinchmap.layers.set(0, result[0])
