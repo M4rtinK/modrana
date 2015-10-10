@@ -1,7 +1,7 @@
 # For backwards compatibility, provide imports that used to be here.
 from .connection import is_connection_dropped
 from .request import make_headers
-from .response import is_fp_closed
+from .response import is_fp_closed, is_response_to_head
 from .ssl_ import (
     SSLContext,
     HAS_SNI,

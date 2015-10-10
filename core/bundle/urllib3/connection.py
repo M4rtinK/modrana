@@ -42,15 +42,14 @@ from .exceptions import (
 )
 from .packages.ssl_match_hostname import match_hostname
 
-from .util.ssl_ import (
+from .util import (
     resolve_cert_reqs,
     resolve_ssl_version,
     ssl_wrap_socket,
     assert_fingerprint,
 )
 
-
-from .util import connection
+from . import connection_ as connection
 
 port_by_scheme = {
     'http': 80,

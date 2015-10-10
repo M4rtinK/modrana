@@ -38,11 +38,11 @@ from .connection import (
 from .request import RequestMethods
 from .response import HTTPResponse
 
-from .util.connection import is_connection_dropped
-from .util.response import assert_header_parsing
-from .util.retry import Retry
-from .util.timeout import Timeout
-from .util.url import get_host, Url
+from .connection_ import is_connection_dropped
+from .response_ import assert_header_parsing
+from .retry_ import Retry
+from .timeout_ import Timeout
+from .url_ import get_host, Url
 
 
 xrange = six.moves.xrange

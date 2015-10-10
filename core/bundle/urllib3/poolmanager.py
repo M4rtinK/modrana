@@ -10,8 +10,8 @@ from .connectionpool import HTTPConnectionPool, HTTPSConnectionPool
 from .connectionpool import port_by_scheme
 from .exceptions import LocationValueError, MaxRetryError, ProxySchemeUnknown
 from .request import RequestMethods
-from .util.url import parse_url
-from .util.retry import Retry
+from .url_ import parse_url
+from .retry_ import Retry
 
 
 __all__ = ['PoolManager', 'ProxyManager', 'proxy_from_url']

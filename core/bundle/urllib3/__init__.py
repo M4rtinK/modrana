@@ -17,10 +17,10 @@ from . import exceptions
 from .filepost import encode_multipart_formdata
 from .poolmanager import PoolManager, ProxyManager, proxy_from_url
 from .response import HTTPResponse
-from .util.request import make_headers
-from .util.url import get_host
-from .util.timeout import Timeout
-from .util.retry import Retry
+from .request_ import make_headers
+from .url_ import get_host
+from .timeout_ import Timeout
+from .retry_ import Retry
 
 
 # Set default logging handler to avoid "No handler found" warnings.

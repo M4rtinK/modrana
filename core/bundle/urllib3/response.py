@@ -13,7 +13,7 @@ from .exceptions import (
 )
 from .packages.six import string_types as basestring, binary_type, PY3
 from .connection import HTTPException, BaseSSLError
-from .util.response import is_fp_closed, is_response_to_head
+from .response_ import is_fp_closed, is_response_to_head
 
 
 class DeflateDecoder(object):
