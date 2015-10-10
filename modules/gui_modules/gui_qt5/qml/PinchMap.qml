@@ -547,7 +547,7 @@ Rectangle {
                         // if tile id changes means that the panning reached a threshold that cased
                         // a top-level X/Y coordinate switch
                         // -> this basically means that all columns or rows switch coordinates and
-                        //    one row/column has new corrdinates while one column/rwo coordinate
+                        //    one row/column has new coordinates while one column/rwo coordinate
                         //    set is discarded
                         // -> like this, we don't have to instantiate and discard a bazillion of
                         //    tile elements, but instantiate them once and then shuffle them around
