@@ -128,7 +128,9 @@ class ModRana(object):
             'name': ""
         }
 
+        # signals
         self.notificationTriggered = Signal()
+        self.shutdown_signal = Signal()
 
         self.mapRotationAngle = 0 # in radians
         self.notMovingSpeed = 1 # in m/s
@@ -515,6 +517,8 @@ class ModRana(object):
         log.info("Shutting-down modules")
         for m in self.m.values():
             m.shutdown()
+        # trigger the shudown signal
+        self.shutdown_signal()
         self._saveOptions()
         modrana_log.log_manager.disable_log_file()
         log.info("Shutdown complete (%s)" % utils.get_elapsed_time_string(start_timestamp))
