@@ -57,13 +57,18 @@ turnTypes = {
 }
 
 
-def _getTurnMessage(turnType):
+def _get_turn_message(turnType):
     return turnTypes.get(turnType, UNKNOWN_TURN_TYPE_MESSAGE)
 
 
-def detectMonavTurns(result):
-    """go through the edges and try to detect turns,
-    return a list of RoutingPoints for the turns
+def detect_monav_turns(result):
+    """Go through the edges and try to detect turns,
+       return a list of RoutingPoints for the turns.
+
+       :param result: a Monav offline routing result
+       :type result: Monav offline routing result object
+       :returns: list of RoutingPoints for turns
+       :rtype: list of RoutingPoint instances
     """
 
     # How to get the corresponding nodes for edges
@@ -81,16 +86,13 @@ def detectMonavTurns(result):
     edges = result.edges
     nodes = result.nodes
     names = result.edge_names
-    types = result.edge_types
 
     # need at least two edges for any meaningful routing
     if len(edges) >= 2:
-        maxId = len(edges) - 1
         lastEdge = edges[0]
 
         nodeId = 0
         maxNodeId = len(nodes) - 1
-        edgeId = 1
         for edge in edges[1:]:
             nodeId += lastEdge.n_segments
             edgeId = edge.type_id
@@ -115,9 +117,8 @@ def detectMonavTurns(result):
                         middle = node.latitude, node.longitude
                         last = nextNode.latitude, nextNode.longitude
                         angle = geo.turnAngle(first, middle, last)
-                        #            name+=" %1.0f degrees" % angle
 
-                        turnDescription = _getTurnDescription(angle, name=name)
+                        turnDescription = _get_turn_description(angle, name=name)
                         # get the corresponding node
 
                         turns.append(TurnByTurnPoint(node.latitude, node.longitude, message=turnDescription))
@@ -128,16 +129,7 @@ def detectMonavTurns(result):
             lastEdge = edge
     return turns
 
-#    prevEdge = edges[0]
-#    thisEdge = edges[1]
-#
-#    # we stop one edge before maxId,
-#    # so we don't have to check if there
-#    # is a next edge
-#    for i in range(2, maxId):
-#      nextEdge =
-
-def _getTurnDescription(angle, name=None):
+def _get_turn_description(angle, name=None):
     """generate turn description based on the turn angle and
     append street name, if known"""
     if 8 < angle <= 45:
@@ -157,7 +149,7 @@ def _getTurnDescription(angle, name=None):
     else: # 352 < angle <= 8
         turnType = HEAD_STRAIGHTFORWARD
         # get the basic turn message
-    message = _getTurnMessage(turnType)
+    message = _get_turn_message(turnType)
     if name:
         # append street name
         message = "%s to %s" % (message, name)
