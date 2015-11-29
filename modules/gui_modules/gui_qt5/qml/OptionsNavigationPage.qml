@@ -17,7 +17,6 @@ BasePage {
             label : qsTr("Routing provider")
             key : "routingProvider"
             defaultValue : rWin.c.default.routingProvider
-            visible : rWin.showUnfinishedFeatures
             model : ListModel {
                 id : cbMenu
                 ListElement {
@@ -25,8 +24,8 @@ BasePage {
                     value : "GoogleDirections"
                 }
                 ListElement {
-                    text : "Routino - on device"
-                    value : "Routino"
+                    text : "Monav - on device"
+                    value : "MonavLight"
                 }
             }
             onItemChanged : {

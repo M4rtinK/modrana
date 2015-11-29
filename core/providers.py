@@ -68,30 +68,30 @@ class RoutingProvider(object):
     def __init__(self, threadName=constants.THREAD_POI_SEARCH):
         self._threadName = threadName
 
-    def search(self, waypoints, routeParams=None, controller=DummyController()):
+    def search(self, waypoints, route_params=None, controller=DummyController()):
         """Search for a route given by a list of points
         :param waypoints: 2 or more waypoints for route search
         -> the first point is the start, the last one is the destination
         -> any point in between are regarded as waypoints the route has to go through
         NOTE: not all providers might support waypoints
         :type waypoints: list
-        :param routeParams: further parameters for the route search
-        :type routeParams: RouteParameters instance
+        :param route_params: further parameters for the route search
+        :type route_params: RouteParameters instance
         :param controller: task controller
         :returns: a list of routes (Way objects), None if search failed
         :rtype: list
         """
         pass
 
-    def searchAsync(self, callback, waypoints, routeParams=None):
+    def searchAsync(self, callback, waypoints, route_params=None):
         """Search for a route given by a list of points asynchronously
         :param waypoints: 2 or more waypoints for route search
         -> the first point is the start, the last one is the destination
         -> any point in between are regarded as waypoints the route has to go through
         NOTE: not all providers might support waypoints
         :type waypoints: list
-        :param routeParams: further parameters for the route search
-        :type routeParams: RouteParameters instance
+        :param route_params: further parameters for the route search
+        :type route_params: RouteParameters instance
         :param controller: task controller
         :returns: a list of routes (Way objects), None if search failed
         :rtype: list
@@ -102,7 +102,7 @@ class RoutingProvider(object):
         thread = threads.ModRanaThread(name=self._threadName)
         thread.target = lambda: self.search(
             waypoints=waypoints,
-            routeParams=routeParams,
+            route_params=route_params,
             controller=thread
         )
         thread.callback = callback

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # Offline routing providers
-import os
 import time
-import traceback
 from core import constants
 from core.way import Way
 from core.backports import six
@@ -17,52 +15,129 @@ log = logging.getLogger("mod.routing.providers")
 
 from core.providers import RoutingProvider, DummyController, RouteParameters, RoutingResult
 
-class MonavRouting(RoutingProvider):
-    """An online provider that does online
-    point to point routing using Google API"""
-    def __init__(self, monav):
-        threadName = constants.THREAD_ROUTING_ONLINE_GOOGLE
-        RoutingProvider.__init__(self, threadName=threadName)
-        self.monav = monav
+class MonavServerRouting(RoutingProvider):
+    """Provider that does offline point to point routing
+       using the Monav offline routing server API.
+    """
 
-    def search(self, waypoints, routeParams=None, controller=DummyController()):
-        # get mode based sub-folder
+    def __init__(self, monav_server_executable_path, monav_data_path):
+        threadName = constants.THREAD_ROUTING_OFFLINE_MONAV
+        RoutingProvider.__init__(self, threadName=threadName)
+        from core import monav_support
+        self._monav = monav_support.MonavServer(
+            monav_data_path=monav_data_path,
+            monav_server_executable_path=monav_server_executable_path
+        )
+
+    @property
+    def data_path(self):
+        return self._monav.data_path
+
+    @data_path.setter
+    def data_path(self, new_data_path):
+        self._monav.data_path = new_data_path
+
+    def search(self, waypoints, route_params=None, controller=DummyController()):
         routingStart = time.time()
-        if self.monav.dataPath is not None:
+        if self._monav.data_path is not None:
             result = None
             try:
-                if self.monav.monavServer is None:
+                if not self._monav.server_running:
                     controller.status = "starting Monav routing server"
-                    self.monav.startServer()
+                    self._monav.start_server()
                 controller.status = "Monav offline routing in progress"
-                log.info(routeParams)
-                result = self.monav.monavDirections(waypoints)
+                log.info(route_params)
+                result = self._monav.get_monav_directions(waypoints)
                 controller.status = "Monav offline routing done"
             except Exception:
                 log.exception('Monav route lookup failed')
 
             if result is None: # routing failed for unknown reasons
-                return RoutingResult(None, routeParams)
+                return RoutingResult(None, route_params)
             if result.type == result.SUCCESS:
                 # convert the Monav result to a Way object usable
                 # for turn-by-turn navigation using the instruction
                 # generator set in the Monav wrapper
-                route = Way.from_monav_result(result, self.monav.result2turns)
+                route = Way.from_monav_result(result)
                 return RoutingResult(route,
-                                     routeParams,
+                                     route_params,
                                      constants.ROUTING_SUCCESS,
                                      lookupDuration=time.time() - routingStart)
             elif result.type == result.LOAD_FAILED:
-                return RoutingResult(None, routeParams, constants.ROUTING_LOAD_FAILED)
+                return RoutingResult(None, route_params, constants.ROUTING_LOAD_FAILED)
             elif result.type == result.LOOKUP_FAILED:
-                return RoutingResult(None, routeParams, constants.ROUTING_LOOKUP_FAILED)
+                return RoutingResult(None, route_params, constants.ROUTING_LOOKUP_FAILED)
             elif result.type == result.ROUTE_FAILED:
-                RoutingResult(None, routeParams, constants.ROUTING_ROUTE_FAILED)
+                RoutingResult(None, route_params, constants.ROUTING_ROUTE_FAILED)
             else:
-                return RoutingResult(None, routeParams)
+                return RoutingResult(None, route_params)
         else:
             log.error("no Monav routing data - can't route")
-            RoutingResult(None, routeParams, constants.ROUTING_NO_DATA)
+            RoutingResult(None, route_params, constants.ROUTING_NO_DATA)
+
+
+class MonavLightRouting(RoutingProvider):
+    """Provider that does offline point to point routing
+       using the Monav Light routing utility.
+    """
+
+    def __init__(self, monav_light_executable_path, monav_data_path):
+        threadName = constants.THREAD_ROUTING_OFFLINE_MONAV
+        RoutingProvider.__init__(self, threadName=threadName)
+        self._utility_path = monav_light_executable_path
+        self._data_path = monav_data_path
+
+        from core import monav_support
+        self._monav = monav_support.MonavLight(
+            monav_light_executable_path=monav_light_executable_path,
+            monav_data_path=monav_data_path,
+        )
+
+    @property
+    def data_path(self):
+        return self._monav.data_path
+
+    @data_path.setter
+    def data_path(self, new_data_path):
+        self._monav.data_path = new_data_path
+
+    def search(self, waypoints, route_params=None, controller=DummyController()):
+        routingStart = time.time()
+        if self._data_path is not None:
+            result = None
+            try:
+                controller.status = "Monav offline routing in progress"
+                log.info(route_params)
+                result = self._monav.get_monav_directions(waypoints, route_params)
+                controller.status = "Monav offline routing done"
+            except Exception:
+                log.exception('Monav route lookup failed')
+
+            if result is None: # routing failed for unknown reasons
+                return RoutingResult(None, route_params)
+            if result.type == result.SUCCESS:
+                # convert the Monav result to a Way object usable
+                # for turn-by-turn navigation using the instruction
+                # generator set in the Monav wrapper
+                route = Way.from_monav_result(result)
+                return RoutingResult(route,
+                                     route_params,
+                                     constants.ROUTING_SUCCESS,
+                                     lookupDuration=time.time() - routingStart)
+            elif result.type == result.LOAD_FAILED:
+                return RoutingResult(None, route_params, constants.ROUTING_LOAD_FAILED)
+            elif result.type == result.SOURCE_LOOKUP_FAILED:
+                return RoutingResult(None, route_params, constants.ROUTING_SOURCE_LOOKUP_FAILED)
+            elif result.type == result.TARGET_LOOKUP_FAILED:
+                return RoutingResult(None, route_params, constants.ROUTING_TARGET_LOOKUP_FAILED)
+            elif result.type == result.ROUTE_FAILED:
+                RoutingResult(None, route_params, constants.ROUTING_ROUTE_FAILED)
+            else:
+                return RoutingResult(None, route_params)
+        else:
+            log.error("no Monav routing data - can't route")
+            RoutingResult(None, route_params, constants.ROUTING_NO_DATA)
+
 
 class GoogleRouting(RoutingProvider):
     """An online provider that does online
@@ -71,26 +146,27 @@ class GoogleRouting(RoutingProvider):
         threadName = constants.THREAD_ROUTING_ONLINE_GOOGLE
         RoutingProvider.__init__(self, threadName=threadName)
 
-    def search(self, waypoints, routeParams=RouteParameters(), controller=DummyController()):
+    def search(self, waypoints, route_params=RouteParameters(), controller=DummyController()):
         # check if we have at least 2 points
         routingStart = time.time()
         if len(waypoints) < 2:
             log.error("GoogleRouting provider: ERROR, need at least 2 points for routing")
-            return RoutingResult(None, routeParams)
+            return RoutingResult(None, route_params)
         start = waypoints[0]
         destination = waypoints[-1]
         inBetweenPoints = waypoints[1:-1]
         log.info("GoogleRouting: routing from %s to %s", start, destination)
-        log.info(routeParams)
+        log.info(route_params)
         controller.status = "online routing in progress"
-        route, returnCode, errorMessage = _googleDirections(start, destination, inBetweenPoints, routeParams)
+        route, returnCode, errorMessage = _googleDirections(start, destination, inBetweenPoints, route_params)
         controller.status = "online routing done"
         # return the data from the routing function and add elapsed time in ms
         return RoutingResult(route,
-                             routeParams,
+                             route_params,
                              returnCode=returnCode,
                              errorMessage=errorMessage,
                              lookupDuration=time.time() - routingStart)
+
 
 def _getGmapsInstance():
     """get a google maps wrapper instance"""

@@ -35,7 +35,7 @@ file, in types that make this information accessible in Python.
 __author__ = 'robinson@google.com (Will Robinson)'
 
 
-from google.protobuf.internal import api_implementation
+from .internal import api_implementation
 
 
 if api_implementation.Type() == 'cpp':

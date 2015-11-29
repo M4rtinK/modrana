@@ -21,20 +21,18 @@ from __future__ import with_statement # for python 2.5
 from modules.base_module import RanaModule
 
 import os
-import sys
 import math
 import re
 import csv
-import traceback
 import unicodedata
 import time
 import threading
 from core import constants
-from core.point import Point
+from core.point import Point, TurnByTurnPoint
 from core.signal import Signal
-from core.way import Way, TurnByTurnPoint
+from core.way import Way
 from core.backports.six import u
-from . import routing_providers
+from core import routing_providers
 
 
 DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
@@ -74,8 +72,8 @@ class Route(RanaModule):
         self._startLookup = False
         self._destinationLookup = False
 
-        # Monav
-        self.monav = None
+        # offline routing provider
+        self._offline_routing_provider = None
 
         # signals
         self.routingDone = Signal()
@@ -426,7 +424,7 @@ class Route(RanaModule):
             self.osdMenuState = int(args)
             self.set('needRedraw', True) # show the new menu
 
-    def routeAsync(self, callback, waypoints, routeParams=None):
+    def routeAsync(self, callback, waypoints, route_params=None):
         """Asynchronous routing
 
         NOTE: online/offline routing provider is selected automatically
@@ -435,51 +433,49 @@ class Route(RanaModule):
         :type callback: a callable
         :param waypoints: a list of 2 or more waypoints defining the route
         :type waypoints: a list of Point objects
-        :param routeParams: parameters for the route search
-        :type routeParams: RouteParameters object instance or None for defaults
+        :param route_params: parameters for the route search
+        :type route_params: RouteParameters object instance or None for defaults
         """
 
-        if routeParams is None:
-            routeParams = self._getDefaultRouteParameters()
+        if route_params is None:
+            route_params = self._getDefaultRouteParameters()
             # no custom route parameters provided, build default ones
             # based on current settings
 
-
         providerID = self.get('routingProvider', constants.DEFAULT_ROUTING_PROVIDER)
-        if providerID == constants.ROUTING_PROVIDER_MONAV:
+        self.log.debug("routing provider ID: %s", providerID)
+        if providerID in (constants.ROUTING_PROVIDER_MONAV_SERVER, constants.ROUTING_PROVIDER_MONAV_LIGHT):
             # is Monav initialized ? (lazy initialization)
-            if self.monav is None:
-                # start Monav server #
-                # only import Monav & company when actually needed
-                # -> the protobuf modules are quite large
-                from . import monav_support
-                self.monav = monav_support.Monav(
-                    self.modrana.paths.getMonavServerBinaryPath()
-                )
-                # set the instruction generator method
-                tbt = self.m.get("turnByTurn", None)
-                if tbt:
-                    getTurns = tbt.getMonavTurns
+            if self._offline_routing_provider is None:
+                # instantiate the offline routing provider
+                if providerID == constants.ROUTING_PROVIDER_MONAV_LIGHT:
+                    provider = routing_providers.MonavLightRouting(
+                        monav_light_executable_path=self.modrana.dmod.monav_light_binary_path,
+                        monav_data_path = self._getMonavDataPath()
+                    )
                 else:
-                    getTurns = None
-                self.monav.result2turns = getTurns
+                    provider = routing_providers.MonavServerRouting(
+                        monav_server_executable_path=self.modrana.paths.getMonavServerBinaryPath(),
+                        monav_data_path = self._getMonavDataPath()
+                    )
+                self._offline_routing_provider = provider
 
             # update the path to the Monav data folder
             # in the Monav wrapper in case in changed since last search
-            self.monav.dataPath = self._getMonavDataPath()
+            self._offline_routing_provider.data_path = self._getMonavDataPath()
 
-            provider = routing_providers.MonavRouting(self.monav)
-            provider.searchAsync(
-                callback,
-                waypoints,
-                routeParams=routeParams
-            )
+            # do the offline routing
+            self._offline_routing_provider.searchAsync(
+            callback,
+            waypoints,
+            route_params=route_params
+        )
         elif providerID == constants.ROUTING_PROVIDER_GOOGLE:
             provider = routing_providers.GoogleRouting()
             provider.searchAsync(
                 callback,
                 waypoints,
-                routeParams=routeParams
+                route_params=route_params
             )
         else:
             self.log.error("unknown routing provider ID: %s", providerID)
@@ -501,13 +497,13 @@ class Route(RanaModule):
             # the Qt 5 GUI currently does not use an application wide
             # mode concept and sets the routing mode separately
             routeMode = self.get("routingModeQt5", constants.ROUTE_CAR)
-        routeParams = routing_providers.RouteParameters(
+        route_params = routing_providers.RouteParameters(
             routeMode=routeMode,
             avoidTollRoads=self.get("routingAvoidToll", False),
             avoidHighways=self.get("routingAvoidHighways", False),
             language = langCode
         )
-        return routeParams
+        return route_params
 
     def llRoute(self, start, destination, middlePoints=None):
         if not middlePoints: middlePoints = []
@@ -544,7 +540,7 @@ class Route(RanaModule):
         # specified as address strings
         params = self._getDefaultRouteParameters()
         params.addressRoute = True
-        self.routeAsync(self._handleRoutingResultCB, waypoints, routeParams=params)
+        self.routeAsync(self._handleRoutingResultCB, waypoints, route_params=params)
 
     def doRoute(self, waypoints):
         """Route from one point to another"""
@@ -1297,8 +1293,3 @@ class Route(RanaModule):
         # trigger route text update
         self.text = None
         self.set('needRedraw', True)
-
-    def shutdown(self):
-        # stop the Monav server, if running
-        if self.monav:
-            self.monav.stopServer()

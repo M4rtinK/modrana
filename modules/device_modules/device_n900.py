@@ -633,3 +633,11 @@ class DeviceN900(DeviceModule):
 
     def getDeviceType(self):
         return DEVICE_TYPE_SMARTPHONE
+
+    @property
+    def offline_routing_available(self):
+        return True
+
+    @property
+    def offline_routing_provider(self):
+        return constants.ROUTING_PROVIDER_MONAV_SERVER

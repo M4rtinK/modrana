@@ -26,6 +26,7 @@ from modules.base_module import RanaModule
 from core.signal import Signal
 
 import sys
+import os
 import logging
 PYTHON3 = sys.version_info[0] > 2
 
@@ -347,6 +348,20 @@ class DeviceModule(RanaModule):
         :rtype: str
         """
         return constants.DEFAULT_TILE_STORAGE_TYPE
+
+    # offline routing
+
+    @property
+    def offline_routing_available(self):
+        return os.path.exists(self.monav_light_binary_path)
+
+    @property
+    def offline_routing_provider(self):
+        return constants.ROUTING_PROVIDER_MONAV_LIGHT
+
+    @property
+    def monav_light_binary_path(self):
+        return "/usr/bin/monav-light"
 
 #  def getAutorotationSupported(self):
 #    return False

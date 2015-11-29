@@ -742,9 +742,14 @@ class Options(RanaModule):
         # ** online routing submenu
         group = addGroup("Routing", "routing", catNavigation, "generic")
 
+        routing_providers = [(constants.ROUTING_PROVIDER_GOOGLE, "Google - <b>online</b>")]
+        if self.modrana.dmod.offline_routing_available:
+            provider = self.modrana.dmod.offline_routing_provider
+            provider_name = constants.ROUTING_PROVIDER_NAMES.get(provider, "unknown provider")
+            routing_providers.append((provider, "%s - <b>on device</b>" % provider_name))
+
         addOpt("Routing provider", "routingProvider",
-               [(constants.ROUTING_PROVIDER_GOOGLE, "Google - <b>online</b>"),
-                (constants.ROUTING_PROVIDER_MONAV, "Monav - <b>on device</b>")],
+               routing_providers,
                group,
                constants.DEFAULT_ROUTING_PROVIDER)
 

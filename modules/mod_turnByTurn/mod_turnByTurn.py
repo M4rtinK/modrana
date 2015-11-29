@@ -23,8 +23,6 @@ from threading import Thread
 import math
 import time
 
-from . import instructions_generator
-
 REROUTE_CHECK_INTERVAL = 5000 # in ms
 #in m/s, about 46 km/h - if this speed is reached, the rerouting threshold is multiplied
 # by REROUTING_THRESHOLD_MULTIPLIER
@@ -812,9 +810,6 @@ class TurnByTurn(RanaModule):
                                            self.reroutingThresholdCrossedCounter)
             time.sleep(REROUTE_CHECK_INTERVAL / 1000.0)
         self.log.info("TBTWorker: shutting down")
-
-    def getMonavTurns(self, monavResult):
-        return instructions_generator.detectMonavTurns(monavResult)
 
     def shutdown(self):
         # cleanup

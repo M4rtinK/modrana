@@ -48,17 +48,17 @@ this file*.
 __author__ = 'robinson@google.com (Will Robinson)'
 
 
-from google.protobuf.internal import api_implementation
-from google.protobuf import descriptor as descriptor_mod
+from .internal import api_implementation
+from . import descriptor as descriptor_mod
 _FieldDescriptor = descriptor_mod.FieldDescriptor
 
 
 if api_implementation.Type() == 'cpp':
-  from google.protobuf.internal import cpp_message
+  from .internal import cpp_message
   _NewMessage = cpp_message.NewMessage
   _InitMessage = cpp_message.InitMessage
 else:
-  from google.protobuf.internal import python_message
+  from .internal import python_message
   _NewMessage = python_message.NewMessage
   _InitMessage = python_message.InitMessage
 

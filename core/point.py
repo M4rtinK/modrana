@@ -184,3 +184,43 @@ class POI(Point):
                     'route:clearRoute|md:route:route:type=ll2ll;fromLat=%f;fromLon=%f;toLat=%f;toLon=%f;' %
                     (fromLat, fromLon, self.lat, self.lon)
                 )
+
+class TurnByTurnPoint(Point):
+    def __init__(self, lat, lon, elevation=None, message=None, ssml_message=None):
+        Point.__init__(self, lat, lon, elevation=elevation, message=message)
+        self._current_distance = None # in meters
+        self._distance_from_start = None # in meters
+        self._visited = False
+        self._ssml_message = ssml_message
+
+    @property
+    def currentDistance(self):
+        return self._current_distance
+
+    @currentDistance.setter
+    def currentDistance(self, distance_in_meters):
+        self._current_distance = distance_in_meters
+
+    @property
+    def distanceFromStart(self):
+        return self._distance_from_start
+
+    @distanceFromStart.setter
+    def distanceFromStart(self, distance_from_start):
+        self._distance_from_start = distance_from_start
+
+    @property
+    def visited(self):
+        return self._visited
+
+    @visited.setter
+    def visited(self, value):
+        self._visited = value
+
+    @property
+    def ssmlMessage(self):
+        return self._ssml_message
+
+    @ssmlMessage.setter
+    def ssmlMessage(self, message):
+        self._ssml_message = message

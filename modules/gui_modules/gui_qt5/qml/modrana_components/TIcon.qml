@@ -11,4 +11,5 @@ Image {
     source : iconName == "" ? "" : "image://python/icon/" + rWin.theme.id + "/" + iconName
     fillMode : Image.PreserveAspectFit
     smooth : true
+    asynchronous : true
 }

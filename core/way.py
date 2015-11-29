@@ -8,52 +8,12 @@ import core.exceptions
 import core.paths
 from core import geo
 from upoints import gpx
-from core.point import Point
+from core.point import Point, TurnByTurnPoint
+from core.instructions_generator import detect_monav_turns
 
 import logging
 log = logging.getLogger("core.way")
 aoLog = logging.getLogger("core.way.ao")
-
-class TurnByTurnPoint(Point):
-    def __init__(self, lat, lon, elevation=None, message=None, ssml_message=None):
-        Point.__init__(self, lat, lon, elevation=elevation, message=message)
-        self._current_distance = None # in meters
-        self._distance_from_start = None # in meters
-        self._visited = False
-        self._ssml_message = ssml_message
-
-    @property
-    def currentDistance(self):
-        return self._current_distance
-
-    @currentDistance.setter
-    def currentDistance(self, distance_in_meters):
-        self._current_distance = distance_in_meters
-
-    @property
-    def distanceFromStart(self):
-        return self._distance_from_start
-
-    @distanceFromStart.setter
-    def distanceFromStart(self, distance_from_start):
-        self._distance_from_start = distance_from_start
-
-    @property
-    def visited(self):
-        return self._visited
-
-    @visited.setter
-    def visited(self, value):
-        self._visited = value
-
-    @property
-    def ssmlMessage(self):
-        return self._ssml_message
-
-    @ssmlMessage.setter
-    def ssmlMessage(self, message):
-        self._ssml_message = message
-
 
 class Way(object):
     """A segment of a way
@@ -325,7 +285,7 @@ class Way(object):
         return way
 
     @classmethod
-    def from_monav_result(cls, result, getTurns=None):
+    def from_monav_result(cls, result):
         """Convert route nodes from the Monav routing result"""
         # to (lat, lon) tuples
         if result:
@@ -334,23 +294,21 @@ class Way(object):
             mLength = 0 # in meters
             if result.nodes:
                 firstNode = result.nodes[0]
-                prevLat, prevLon = firstNode.latitude, firstNode.longitude
+                prevLat, prevLon = firstNode.lat, firstNode.lon
                 # there is one from first to first calculation on start,
                 # but as it should return 0, it should not be an issue
                 for node in result.nodes:
-                    routePoints.append((node.latitude, node.longitude, None))
-                    mLength += geo.distance(prevLat, prevLon, node.latitude, node.longitude) * 1000
-                    prevLat, prevLon = node.latitude, node.longitude
+                    routePoints.append((node.lat, node.lon, None))
+                    mLength += geo.distance(prevLat, prevLon, node.lat, node.lon) * 1000
+                    prevLat, prevLon = node.lat, node.lon
 
             way = cls(routePoints)
             way.duration = result.seconds
             way._setLength(mLength)
 
-            # was a directions generation method provided ?
-            if getTurns:
-                # generate directions
-                messagePoints = getTurns(result)
-                way.add_message_points(messagePoints)
+            # detect turns
+            messagePoints = detect_monav_turns(result)
+            way.add_message_points(messagePoints)
             return way
         else:
             return None

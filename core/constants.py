@@ -108,8 +108,16 @@ DEVICE_TYPE_TABLET = 3
 
 # providers
 ROUTING_PROVIDER_GOOGLE = "GoogleDirections"
-ROUTING_PROVIDER_MONAV = "Monav"
+ROUTING_PROVIDER_MONAV_SERVER = "MonavServer"
+ROUTING_PROVIDER_MONAV_LIGHT = "MonavLight"
 ROUTING_PROVIDER_ROUTINO = "Routino"
+
+ROUTING_PROVIDER_NAMES = {
+    ROUTING_PROVIDER_GOOGLE : "Google Directions",
+    ROUTING_PROVIDER_MONAV_SERVER : "Monav server",
+    ROUTING_PROVIDER_MONAV_LIGHT : "Monav Light",
+    ROUTING_PROVIDER_ROUTINO : "Routino"
+}
 
 # routing
 ROUTE_DEFAULT_LANGUAGE = "en"
@@ -120,8 +128,11 @@ ROUTING_SUCCESS = 0
 ROUTING_NO_DATA = 1 # failed to load routing data
 ROUTING_LOAD_FAILED = 2 # failed to load routing data
 ROUTING_LOOKUP_FAILED = 3 # failed to locate nearest way/edge
-ROUTING_ROUTE_FAILED = 4 # failed to compute route
-ROUTING_ADDRESS_NOT_FOUND = 5 # start or destination address not found
+ROUTING_SOURCE_LOOKUP_FAILED = 4 # start or destination address not found
+ROUTING_TARGET_LOOKUP_FAILED = 5 # start or destination address not found
+ROUTING_WAYPOINT_LOOKUP_FAILED = 6 # start or destination address not found
+ROUTING_ROUTE_FAILED = 7 # failed to compute route
+ROUTING_ADDRESS_NOT_FOUND = 8 # start or destination address not found
 
 # route types
 ROUTE_PEDESTRIAN = 1
