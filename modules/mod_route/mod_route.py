@@ -592,20 +592,11 @@ class Route(RanaModule):
         else: # routing failed
             self.log.error("routing ended with error")
             if result.errorMessage:
-                self.log.error("route error message: %s", result.errorMessage)
-            # show what & why failed
-            if result.returnCode == constants.ROUTING_LOOKUP_FAILED:
-                self.notify('no ways near start or destination', 3000)
-            elif result.returnCode == constants.ROUTING_NO_DATA:
-                self.notify('no routing data available', 3000)
-            elif result.returnCode == constants.ROUTING_LOAD_FAILED:
-                self.notify('failed to load routing data', 3000)
-            elif result.returnCode == constants.ROUTING_ROUTE_FAILED:
-                self.notify('failed to compute route', 3000)
-            elif result.returnCode == constants.ROUTING_ADDRESS_NOT_FOUND:
-                self.notify('start or destination address not found', 3000)
+                error_message = result.errorMessage
             else:
-                self.notify('routing failed', 5000)
+                error_message = constants.ROUTING_FAILURE_MESSAGES.get(result.returnCode, "Routing failed.")
+            self.log.error("routing error message: %s", error_message)
+            self.notify(error_message, 3000)
 
     def getAvailableMonavDataPacks(self):
             """Return all available Monav data packs in the main monav data folder

@@ -134,6 +134,16 @@ ROUTING_WAYPOINT_LOOKUP_FAILED = 6 # start or destination address not found
 ROUTING_ROUTE_FAILED = 7 # failed to compute route
 ROUTING_ADDRESS_NOT_FOUND = 8 # start or destination address not found
 
+ROUTING_FAILURE_MESSAGES = {
+    ROUTING_NO_DATA : "No usable offline routing data found.",
+    ROUTING_LOAD_FAILED : "Routing data could not be loaded.",
+    ROUTING_LOOKUP_FAILED : "No way near start or destination.",
+    ROUTING_SOURCE_LOOKUP_FAILED : "No way near route start.",
+    ROUTING_TARGET_LOOKUP_FAILED : "No way near route destination.",
+    ROUTING_WAYPOINT_LOOKUP_FAILED : "No way near one of the waypoints.",
+    ROUTING_ADDRESS_NOT_FOUND : "Couldn't find start or destination address."
+}
+
 # route types
 ROUTE_PEDESTRIAN = 1
 ROUTE_BIKE = 2

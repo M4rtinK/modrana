@@ -896,4 +896,5 @@ class Routing(object):
             self.gui.log.debug("routing successful")
             pyotherside.send("routeReceived", routePoints, messagePointsLLEM)
         else:
-            self.gui.log.debug("routing failed")
+            error_message = constants.ROUTING_FAILURE_MESSAGES.get(result.returnCode, "Routing failed.")
+            self.gui.log.debug(error_message)
