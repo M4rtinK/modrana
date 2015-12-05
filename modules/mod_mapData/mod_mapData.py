@@ -685,7 +685,7 @@ class MapData(RanaModule):
         routeModule = self.m.get('route', None) # get the tracklog module
         size = int(self.get("downloadSize", 4))
         if routeModule:
-            route = routeModule.getDirections()
+            route = routeModule.get_directions()
             if route:
                 tilesToDownload = self.getTilesForRoute(route.points_lle, size, self.midZ)
                 zoomlevelExtendedTiles = self.addOtherZoomlevels(tilesToDownload, self.midZ, self.maxZ, self.minZ)
@@ -758,7 +758,7 @@ class MapData(RanaModule):
         """Use currently active route as batch download target"""
         routeModule = self.m.get('route', None)
         if routeModule:
-            route = routeModule.getDirections()
+            route = routeModule.get_directions()
             notification = "Using current route"
             if route:
                 self.set('menu', 'data2')

@@ -469,7 +469,7 @@ class TurnByTurn(RanaModule):
         # NOTE: turn and step are used interchangeably in the documentation
         m = self.m.get('route', None)
         if m:
-            route = m.getCurrentDirections()
+            route = m.get_current_directions()
             if route: # is the route nonempty ?
                 self.route = route
                 # get route in radians for automatic rerouting
@@ -484,7 +484,7 @@ class TurnByTurn(RanaModule):
 
                 # some statistics
                 metersPerSecSpeed = self.get('metersPerSecSpeed', None)
-                dt = m.routeLookupDuration
+                dt = m.route_lookup_duration
                 self.log.info("route lookup took: %f s" % dt)
                 if dt and metersPerSecSpeed:
                     dm = dt * metersPerSecSpeed

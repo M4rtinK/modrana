@@ -7,7 +7,7 @@
 # Usage as library:
 #   datastore = loadOsm('transport type')
 #   router = Router(datastore)
-#   result, route = router.doRoute(node1, node2)
+#   result, route = router._do_route(node1, node2)
 #
 # (where transport is cycle, foot, car, etc...)
 #------------------------------------------------------

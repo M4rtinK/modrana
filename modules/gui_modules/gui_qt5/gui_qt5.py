@@ -874,13 +874,13 @@ class Routing(object):
 
     def __init__(self, gui):
         self.gui = gui
-        self.gui.firstTimeSignal.connect(self._firstTimeCB)
+        self.gui.firstTimeSignal.connect(self._first_time_cb)
         self._sendUpdates = True
 
-    def _firstTimeCB(self):
-        self.gui.modules.route.routingDone.connect(self._routingDoneCB)
+    def _first_time_cb(self):
+        self.gui.modules.route.routing_done.connect(self._routing_done_cb)
 
-    def _routingDoneCB(self, result):
+    def _routing_done_cb(self, result):
         if result and result.returnCode == constants.ROUTING_SUCCESS:
             routePoints = result.route.points_lle
             messagePoints = result.route.message_points

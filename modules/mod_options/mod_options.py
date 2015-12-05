@@ -1272,7 +1272,7 @@ class Options(RanaModule):
         if route:
             self.log.info('reloading Monav data pack list')
             # wee need a list of (name, key) tuples
-            self.monavPackList = map(lambda x: (x, x), route.getAvailableMonavDataPacks())
+            self.monavPackList = map(lambda x: (x, x), route.get_available_monav_data_packs())
 
 
     def _updateVoiceManual(self, action):
