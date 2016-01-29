@@ -109,6 +109,7 @@ Applications using Universal Components
 -------------------------------------
 
 * [modRana flexible navigation system](https://github.com/M4rtinK/modrana)
+* [the Tensor Matrix client](https://github.com/davidar/tensor)
 
 
 TODO
