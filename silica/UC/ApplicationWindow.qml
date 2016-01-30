@@ -9,13 +9,6 @@ ApplicationWindow{
 
     cover : null
 
-    /*
-    cover: CoverBackground {
-        CoverPlaceholder {
-            text: "modRana"
-        }
-    }*/
-
     // this property is provided for API compatibility
     // as the Silica UC backend uses the Silica built-in
     // element sizing
