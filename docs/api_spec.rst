@@ -5,7 +5,7 @@ Universal Components API reference
    Martin Kolman
 
 .. contents::
-    :depth 3
+   :depth: 3
 
 Introduction
 ============
