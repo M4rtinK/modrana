@@ -1,6 +1,9 @@
 Universal Components API reference
 **********************************
 
+:Authors:
+   Martin Kolman
+
 .. contents::
     :depth 3
 
