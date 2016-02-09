@@ -86,7 +86,7 @@ Properties
 Methods
 ^^^^^^^
 
-**pushPage**(Item *pageInstance*, object *pageProperties*, bool *animate*)
+**pushPage**\(Item *pageInstance*, object *pageProperties*, bool *animate*)
     Push *pageInstance* to the page stack. The optional *properties* parameter specifies
     a map of properties to be set on the page. The *animate* parameter controls if the
     page push should be animated (true) or not (false).
@@ -450,7 +450,7 @@ when not using the Silica backend.
 Methods
 ^^^^^^^
 
-**popup**()
+**popup**\()
     Opens the menu.
 
     NOTE: Only actually does something on the Controls backend and is currently provided 
@@ -538,13 +538,13 @@ Properties
 Methods
 ^^^^^^^
 
-**hide**()
+**hide**\()
     Hides the popup.
 
-**show**()
+**show**\()
     Shows the popup.
 
-**notify**(text, color)
+**notify**\(text, color)
     A shortcut function for showing a popup notification with given **text** and **color**.
 
 
