@@ -13,3 +13,4 @@
 cp main_qmldir controls/UC/qmldir
 cp main_qmldir silica/UC/qmldir
 cp main_qmldir glacier/UC/qmldir
+cp main_qmldir ubuntu/UC/qmldir
