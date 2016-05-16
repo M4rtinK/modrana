@@ -449,24 +449,30 @@ class Route(RanaModule):
         provider_id = self.get('routingProvider', constants.DEFAULT_ROUTING_PROVIDER)
         self.log.debug("routing provider ID: %s", provider_id)
         if provider_id in (constants.ROUTING_PROVIDER_MONAV_SERVER, constants.ROUTING_PROVIDER_MONAV_LIGHT):
+            self.log.info("using the Monav offline routing provider (%s)", provider_id)
             # is Monav initialized ? (lazy initialization)
             if self._offline_routing_provider is None:
                 # instantiate the offline routing provider
                 if provider_id == constants.ROUTING_PROVIDER_MONAV_LIGHT:
                     provider = routing_providers.MonavLightRouting(
-                        monav_light_executable_path=self.modrana.dmod.monav_light_binary_path,
-                        monav_data_path = self._get_monav_data_path()
+                        monav_light_executable_path=self.modrana.dmod.monav_light_binary_path
                     )
                 else:
                     provider = routing_providers.MonavServerRouting(
-                        monav_server_executable_path=self.modrana.paths.getMonavServerBinaryPath(),
-                        monav_data_path = self._get_monav_data_path()
+                        monav_server_executable_path=self.modrana.paths.getMonavServerBinaryPath()
                     )
                 self._offline_routing_provider = provider
 
-            # update the path to the Monav data folder
-            # in the Monav wrapper in case in changed since last search
-            self._offline_routing_provider.data_path = self._get_monav_data_path()
+            # update the list of candidate routing data paths for the Monav router,
+            # as it might have changed since the previous time routing was requested
+            mode = self.get('mode', 'car')
+            monav_data_folder = self.modrana.paths.getMonavDataPath()
+            candidates = self._get_monav_data_pack_candidates(
+                monav_data_folder = self.modrana.paths.getMonavDataPath(),
+                mode = self.get('mode', 'car')
+            )
+
+            self._offline_routing_provider.candidate_data_paths = candidates
 
             # do the offline routing
             self._offline_routing_provider.searchAsync(
@@ -602,51 +608,71 @@ class Route(RanaModule):
             self.log.error("routing error message: %s", error_message)
             self.notify(error_message, 3000)
 
-    def get_available_monav_data_packs(self):
-            """Return all available Monav data packs in the main monav data folder
+    def get_all_available_monav_data_packs(self, monav_data_folder=""):
+        """Return all available Monav data packs in the main monav data folder
 
-            :return: list of all packs in Monav data folder
-            :rtype: a list of strings
-            """
-            # basically just list all directories in the Monav data folder
-            try:
-                main_monav_folder = self.modrana.paths.getMonavDataPath()
-                data_packs = os.listdir(main_monav_folder)
-                data_packs = filter(lambda x: os.path.isdir(os.path.join(main_monav_folder, x)), data_packs)
-                return sorted(data_packs)
-            except Exception:
-                self.log.exception('listing the Monav data packs failed')
-                return []
+        :param str monav_data_folder: path to a Monav data folder
 
-    def _get_monav_data_path(self):
-        """Get path to the correct Monav data path based on current settings
+        :return: list of all packs in Monav data folder
+        :rtype: a list of strings
         """
-        # TODO: handle not all mode folders being available
-        # (eq. user only downloading routing data for cars)
-        modeFolders = {
+        # basically just list all directories in the Monav data folder
+        try:
+            if monav_data_folder == "":
+                # path not provided, use the default one
+                main_monav_folder = self.modrana.paths.getMonavDataPath()
+            data_packs = os.listdir(main_monav_folder)
+            data_packs = filter(lambda x: os.path.isdir(os.path.join(main_monav_folder, x)), data_packs)
+            return sorted(data_packs)
+        except Exception:
+            self.log.exception('listing the Monav data packs failed')
+            return []
+
+    def _get_monav_data_pack_candidates(self, monav_data_folder, mode):
+        # Get perspective routing data pack candidates for the offline routing settings
+        # - if a preferred pack is set, just a single pack will be tried
+        # - otherwise all pack that have data for the current mode will be tried
+        mode_folders = {
             'cycle': 'routing_bike',
             'walk': 'routing_pedestrian',
             'car': 'routing_car'
         }
-        mode = self.get('mode', 'car')
-        sub_folder = modeFolders.get(mode, 'routing_car')
-        data_packs = self.get_available_monav_data_packs()
-        if data_packs:
+        mode_folder_name = mode_folders.get(mode, 'routing_car')
+
+        available_data_packs = self.get_all_available_monav_data_packs(monav_data_folder=monav_data_folder)
+        self.log.debug('using main Monav data folder in:\n%s', monav_data_folder)
+        pack_list = []
+        if available_data_packs:
             # TODO: bounding box based pack selection
             preferred_pack = self.get('preferredMonavDataPack', None)
-            if preferred_pack in data_packs:
-                pack_name = preferred_pack
-            else:
-                # just take the first (and possibly only) pack
-                pack_name = sorted(data_packs)[0]
-                self.log.info("monav: no preferred pack set, "
-                      "using first available:\n%s", preferred_pack)
-            main_monav_folder = self.modrana.paths.getMonavDataPath()
-            monav_data_folder = os.path.abspath(os.path.join(main_monav_folder, pack_name, sub_folder))
-            self.log.info('Monav data folder:\n%s', monav_data_folder)
-            return monav_data_folder
-        else:
-            return None
+            if preferred_pack is not None:
+                if preferred_pack in available_data_packs:
+                    if os.path.isdir(os.path.join(monav_data_folder, preferred_pack, mode_folder_name)):
+                        # mode data for the pack has also been found has been found,
+                        # so we can indeed actually use it
+                        pack_list = [preferred_pack]
+                    else:
+                        self.log.error("% mode data for pack %s not found", mode, preferred_pack)
+                else:
+                    self.log.error("preferred data pack %s not found", preferred_pack)
+
+                # pack set but not found
+                if not pack_list:
+                    self.log.warning("preferred pack set but was not found or is not usable, "
+                                     "falling back to other available packs")
+            if not pack_list:
+                # return a list of all packs that have data for the current mode
+                self.log.info("returning list of all packs available for mode %", mode)
+                usable_pack_names = []
+                for pack_name in available_data_packs:
+                    path_to_mode_folder = os.path.join(monav_data_folder, pack_name, mode_folder_name)
+                    if os.path.isdir(path_to_mode_folder):
+                        pack_list.append(path_to_mode_folder)
+                        usable_pack_names.append(pack_name)
+                self.log.info("found %d packs usable in the %s mode")
+                if usable_pack_names:
+                    self.log.debug("%s", ",".join(usable_pack_names))
+        return pack_list
 
     def start_navigation(self):
         """handle navigation autostart"""

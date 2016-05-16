@@ -28,6 +28,25 @@ class MonavServerRouting(RoutingProvider):
             monav_data_path=monav_data_path,
             monav_server_executable_path=monav_server_executable_path
         )
+        self._candidate_data_paths = []
+
+    # about the candidate_data_paths property
+    # - holds a list of perspective routing data paths to try out
+    # - can be just a single path if a preferred routing data pack is set and exists
+    # - can be multiple paths that will be tried in the given order
+
+    @property
+    def candidate_data_paths(self):
+        return self._candidate_data_paths
+
+    @candidate_data_paths.setter
+    def candidate_data_paths(self, paths):
+        self._candidate_data_paths = paths
+
+    # About the data_path property
+    # - will be used to handle the next offline routing request
+    # - must be set to a valid path to Monav routing data folder
+    #   or else the offline routing attempt will fail
 
     @property
     def data_path(self):

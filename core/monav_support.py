@@ -34,6 +34,18 @@ RETRY_COUNT = 3 # if routing fails, try RETRY_COUNT more times
 #
 # Monav routing is also very fast, so doing more tries is not a problem
 
+MONAV_MODE_DIRS = ["routing_bike", "routing_car", "routing_pedestrian"]
+MONAV_MODA_DATA_REQUIRED_FILES = [
+    "Contraction Hierarchies_edges",
+    "Contraction Hierarchies_names",
+    "Contraction Hierarchies_paths",
+    "Contraction Hierarchies_types",
+    "GPSGrid_grid",
+    "GPSGrid_index_1",
+    "GPSGrid_index_2",
+    "GPSGrid_index_3",
+    "Module.ini"
+]
 
 import logging
 log = logging.getLogger("mod.routing.monav_support")
@@ -318,3 +330,47 @@ class MonavLight(MonavBase):
             return result
         else:
             log.error("calling monav-light failed with return code %d", process.returncode)
+
+
+def is_monav_area_data_pack(path):
+    """ Check if the given path looks like a folder with Monav offline routing
+        data for an area with at least one mode-of-travel data pack.
+        This check might not be 100% bullet proof as it only checks
+        if correctly named folders and files exist and it does not check if
+        the Monav data files contain valid data.
+
+        :param str path: filesystem path to check
+        :returns: True if path leads to Monav area folder, False if not
+        :rtype: bool
+    """
+
+    for name in os.listdir(path):
+        combined_path = os.path.join(path, name)
+        if os.path.isdir(combined_path) and is_monav_mode_data_pack(combined_path):
+            # we found something!
+            return True
+
+    # we found nothing...
+    return False
+
+def is_monav_mode_data_pack(path):
+    """ Check if the given path looks like a folder with Monav offline routing
+        data for a mode of travel.
+        This check might not be 100% bullet proof as it only checks
+        if correctly named files exist and it does not check if
+        the data files contain valid data.
+
+        :param str path: filesystem path to check
+        :returns: True if path leads to Monav mode data folder, False if not
+        :rtype: bool
+    """
+
+    path_files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+
+    for required_file in MONAV_MODA_DATA_REQUIRED_FILES:
+        if required_file not in path_files:
+            # one of the required Monav data files has not been found,
+            # so the mode data pack is considered as not "valid"
+            return False
+    # looks like all of the required files have been found
+    return True
