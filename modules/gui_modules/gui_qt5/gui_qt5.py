@@ -328,13 +328,42 @@ class QMLGUI(GUIModule):
         layer = self.modules.mapLayers.getLayerById(layerId)
         return layer, z, x, y
 
-    def addTileDownloadRequest(self, tileId):
+    def areTilesAvailable(self, tile_ids):
+        """Report if tiles are available & request download for those that are not.
+
+        :param list tile_ids: list of tile ids to check
+        :return: a distionary of tile states, True = available, False = will be downloaded
+        :rtype: dict
+        """
+        available_tiles = {}
+        for tile_id in tile_ids:
+            available_tiles[tile_id] = self.isTileAvailable(tile_id)
+        return available_tiles
+
+    def isTileAvailable(self, tileId):
+        """Check if tile is available and add download request if not.
+
+        NOTE: If automatic tile downloads are disabled tile download
+              request will not be queued.
+
+        :param str tileId: tile identificator
+        :return: True if the tile is locally available, False if not
+        :rtype: bool
+        """
+        lzxy = self._tileId2lzxy(tileId)
+        if self.modules.mapTiles.tileInStorage(lzxy):
+            return True
+        else:
+            self._addTileDownloadRequest(lzxy, tileId)
+            return False
+
+
+    def _addTileDownloadRequest(self, lzxy, tileId):
         """Add an asynchronous download request, the tile will be
         notified once the download is finished or fails
         :param string tileId: unique tile id
         """
         try:
-            lzxy = self._tileId2lzxy(tileId)
             self.modules.mapTiles.addTileDownloadRequest(lzxy, tileId)
         except Exception:
             self.log.exception("adding tile download request failed")
@@ -548,7 +577,9 @@ class TileImageProvider(ImageProvider):
         """Notify the QML context that a tile has been downloaded"""
         pinchMapId = tag.split("/")[0]
         #log.debug("SENDING: %s %s" % ("tileDownloaded:%s" % pinchMapId, tag))
-        pyotherside.send("tileDownloaded:%s" % pinchMapId, tag, error)
+        resoundingSuccess = error == constants.TILE_DOWNLOAD_SUCCESS
+        fatalError = error == constants.TILE_DOWNLOAD_ERROR
+        pyotherside.send("tileDownloaded:%s" % pinchMapId, tag, resoundingSuccess, fatalError)
 
     def getImage(self, imageId, requestedSize):
         """
