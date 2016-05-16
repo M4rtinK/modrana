@@ -72,6 +72,9 @@ Rectangle {
     signal clearPointMenus
     property bool needsUpdate: false
 
+    property var tilesModel : ListModel {}
+    property var tilesBeingDownloaded : []
+
     // if the map is clicked or double clicked the mapClicked and mapDoubleClicked signals
     // are triggered
     //
@@ -99,13 +102,48 @@ Rectangle {
     //   handling
     Component.onCompleted: {
         rWin.python.setHandler("tileDownloaded:" + pinchmap.name, pinchmap.tileDownloadedCB)
+        // instantiate the nested backing data model for tiles
+        updateTilesModel(pinchmap.cornerTileX, pinchmap.cornerTileY,
+                         pinchmap.numTilesX, pinchmap.numTilesY)
     }
 
-    function tileDownloadedCB(tileId, tileError) {
-        // trigger the tile downloaded signal
-        // TODO: could the signal by called directly as the callback ?
-        //console.log("PINCH MAP: TILE DOWNLOADED: " + tileId)
-        tileDownloaded(tileId, tileError)
+    function updateTilesModel(cornerX, cornerY, tilesX, tilesY) {
+        // Update the tiles data model to the given corner tile x/y
+        // and horizontal anv vertical tile number.
+        // This basically amounts to newly enumerating the tiles
+        // while keeping items already in the lists so that the corresponding
+        // delegates are not needlessly re-rendered.
+        // TODO: move this to a worker script and do it asynchronously ?
+        var maxCornerX = cornerX + tilesX - 1
+        var maxCornerY = cornerY + tilesY - 1
+
+        // first remove all tiles that are no longer visible from the
+        // tile tracking list model (if any)
+        for (var i=0;i<pinchmap.tilesModel.count;i++) {
+            var tile = pinchmap.tilesModel.get(i)
+            if (tile != null) {
+                if (tile.tile_x >= cornerX && tile.tile_x <= maxCornerX &&
+                    tile.tile_y >= cornerY && tile.tile_y <= maxCornerY) {
+                    pinchmap.tilesModel.remove(i)
+                    i--
+                }
+            }
+        }
+
+        // now add newly visible tiles (if any)
+        for (var cx = cornerX; cx<=maxCornerX; cx++) {
+            for (var cy = cornerY; cy<=maxCornerY; cy++) {
+                pinchmap.tilesModel.append({"tile_x" : cx, "tile_y" : cy})
+            }
+        }
+    }
+
+    function tileDownloadedCB(tileId, resoundingSuccess, fatalError) {
+        // notify tile delegates waiting for tile data to be available
+        var tile = pinchmap.visibleTiles[tileId]
+        if (tile) {
+            tile.tileDownloaded(resoundingSuccess, fatalError)
+        }
     }
 
     transform: Rotation {
@@ -144,6 +182,15 @@ Rectangle {
         }
     }
 
+    onCornerTileXChanged: {
+        updateTilesModel(pinchmap.cornerTileX, pinchmap.cornerTileY,
+                         pinchmap.numTilesX, pinchmap.numTilesY)
+    }
+
+    onCornerTileYChanged: {
+        updateTilesModel(pinchmap.cornerTileX, pinchmap.cornerTileY,
+                         pinchmap.numTilesX, pinchmap.numTilesY)
+    }
 
     function setZoomLevel(z) {
         setZoomLevelPoint(z, pinchmap.width/2, pinchmap.height/2);
@@ -330,6 +377,7 @@ Rectangle {
     }
 
     function deg2num(lat, lon) {
+        // lat/lon to tile x/y
         var rad = deg2rad(lat % 90);
         var n = maxTileNo + 1;
         var xtile = ((lon % 180.0) + 180.0) / 360.0 * n;
@@ -348,6 +396,8 @@ Rectangle {
         map.offsetX = -(cornerTileFloatX - Math.floor(cornerTileFloatX)) * tileSize;
         map.offsetY = -(cornerTileFloatY - Math.floor(cornerTileFloatY)) * tileSize;
         updateCenter();
+        updateTilesModel(pinchmap.cornerTileX, pinchmap.cornerTileY,
+                         pinchmap.numTilesX, pinchmap.numTilesY)
     }
 
     function setCoord(c, x, y) {
@@ -355,8 +405,8 @@ Rectangle {
     }
 
     function setCenterLatLon(lat, lon) {
-        setLatLon(lat, lon, pinchmap.width/2, pinchmap.height/2);
-        centerSet();
+        setLatLon(lat, lon, pinchmap.width/2, pinchmap.height/2)
+        centerSet()
     }
 
     function setCenterCoord(c) {
@@ -406,6 +456,22 @@ Rectangle {
 
     function tileUrl(tileId) {
         return "image://python/tile/" + tileId
+    }
+
+    function isTileAvailable(tileId, callback) {
+        // check if the tile is available from local storage
+        // TODO: make this Python independent
+        rWin.python.call("modrana.gui.isTileAvailable", [tileId], callback)
+    }
+
+    function downloadTile(tileId) {
+        // download the tile
+        // TODO: make this Python independent
+        rWin.python.call("modrana.gui.addTileDownloadRequest", [tileId], function(){})
+    }
+
+    function removeTileFromTracking(tileId) {
+        delete pinchmap.tilesBeingDownloaded[tileId]
     }
 
     PinchArea {
@@ -514,72 +580,62 @@ Rectangle {
         }
     }
 
-    Grid {
+    Item {
         id: map;
-        columns: numTilesX;
         width: numTilesX * tileSize;
         height: numTilesY * tileSize;
         property int rootX: -(width - parent.width)/2;
         property int rootY: -(height - parent.height)/2;
         property int offsetX: 0;
         property int offsetY: 0;
-        x: rootX + offsetX;
-        y: rootY + offsetY;
-
+        x: 0
+        y: 0
         Repeater {
-            id: tiles
-            model: pinchmap.layersReady ? pinchmap.numTilesX * pinchmap.numTilesY : null
-            Rectangle {
-                id: tile
-                property alias source: imgs.source;
-                property int tileX: cornerTileX + (index % numTilesX)
-                property int tileY: cornerTileY + Math.floor(index / numTilesX)
-                property int ind : index
+            id: tilesX
 
-                width: tileSize;
-                height: tileSize;
-                color: "#c0c0c0";
-
-               Repeater {
-                    id: imgs
-                    //property string source: tileUrl(model[0].layerId, tileX, tileY)
-                    property string source
-                    model: pinchmap.layersReady ? pinchmap.layers : null
-                    Tile {
-                        id : tile
-                        tileSize : tileSize
-                        tileOpacity : layerOpacity
-                        mapInstance : pinchmap
-                        // TODO: move to function
-                        tileId: pinchmap.name+"/"+layerId+"/"+pinchmap.zoomLevel+"/"+tileX+"/"+tileY
-                        // if tile id changes means that the panning reached a threshold that cased
-                        // a top-level X/Y coordinate switch
-                        // -> this basically means that all columns or rows switch coordinates and
-                        //    one row/column has new coordinates while one column/rwo coordinate
-                        //    set is discarded
-                        // -> like this, we don't have to instantiate and discard a bazillion of
-                        //    tile elements, but instantiate them once and then shuffle them around
-                        // -> tiles are instantiated and removed only if either viewport size or layer
-                        //    count changes
-                        onTileIdChanged: {
-                            // so we are now a different tile :)
-                            // therefore we need to all the asynchronous tile loading properties back
-                            // to the default state and try to load the tile, if it is in the cache
-                            // it will be loaded at once or the asynchronous loading process will start
-                            // * note that any "old" asynchronous loading process still runs and the
-                            //   "new" tile that got the "old" coordinates will get the tile-downloaded
-                            //   notification, which is actually what we want :)
-                            tile.layerName = layerId
-                            tile.error = false
-                            tile.cache = true
-                            tile.retryCount = 0
-                            tile.downloading = false
-                            tile.source = tileUrl(tileId)
-                        }
-                    }
+            Component.onCompleted: {
+                for (var i=0; i<model.length; i++) {
+                    var item = model.get(i)
                 }
             }
 
+            model : pinchmap.tilesModel
+
+            Rectangle {
+                x : ((tileX - pinchmap.cornerTileX) * tile.width) + map.offsetX
+                y : ((tileY - pinchmap.cornerTileY) * tile.height) + map.offsetY
+                id: tile
+                property int tileX: tile_x
+                property int tileY: tile_y
+                property int ind : index
+
+                width: pinchmap.tileSize;
+                height: pinchmap.tileSize;
+                border.width : 2
+                border.color : "black"
+                Text {
+                    anchors.horizontalCenter : parent.horizontalCenter
+                    anchors.verticalCenter : parent.verticalCenter
+                    text : tileX + "/" + tileY
+                    font.pixelSize : 24
+                }
+
+                Repeater {
+                    id: tileRepeater
+                    model : pinchmap.layers
+                    Tile {
+                        id : tileImage
+                        tileSize : pinchmap.tileSize
+                        tileOpacity : layerOpacity
+                        zoomLevel : pinchmap.zoomLevel
+                        mapInstance : pinchmap
+                        tileX : tile.tileX
+                        tileY : tile.tileY
+                        layerId : pinchmap.layers.get(index).layerId
+                        layerName : pinchmap.layers.get(index).layerName
+                    }
+                }
+            }
         }
 
         SearchMarkers {

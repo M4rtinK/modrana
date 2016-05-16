@@ -328,13 +328,30 @@ class QMLGUI(GUIModule):
         layer = self.modules.mapLayers.getLayerById(layerId)
         return layer, z, x, y
 
-    def addTileDownloadRequest(self, tileId):
+    def isTileAvailable(self, tileId):
+        """Check if tile is available and add download request if not.
+
+        NOTE: If automatic tile downloads are disabled tile download
+              request will not be queued.
+
+        :param str tileId: tile identificator
+        :return: True if the tile is locally available, False if not
+        :rtype: bool
+        """
+        lzxy = self._tileId2lzxy(tileId)
+        if self.modules.mapTiles.tileInStorage(lzxy):
+            return True
+        else:
+            self._addTileDownloadRequest(lzxy, tileId)
+            return False
+
+
+    def _addTileDownloadRequest(self, lzxy, tileId):
         """Add an asynchronous download request, the tile will be
         notified once the download is finished or fails
         :param string tileId: unique tile id
         """
         try:
-            lzxy = self._tileId2lzxy(tileId)
             self.modules.mapTiles.addTileDownloadRequest(lzxy, tileId)
         except Exception:
             self.log.exception("adding tile download request failed")

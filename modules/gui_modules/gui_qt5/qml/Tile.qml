@@ -3,7 +3,6 @@
 import QtQuick 2.0
 import UC 1.0
 
-
 Item {
     id : tile
     property int tileSize : 256
@@ -11,81 +10,133 @@ Item {
     property alias source : img.source
     property bool waiting : false
     property string tileId : ""
-    property alias cache : img.cache
+    property string oldTileId : ""
     property int retryCount : 0
     property bool error : false
+    property string layerId : ""
     property string layerName : ""
     property bool downloading : false
-    property var mapInstance : null
+    property int zoomLevel : 15
+    property int tileX : null
+    property int tileY : null
+    property var mapInstance
+
+    function _getTileId() {
+        return mapInstance.name+"/"+tile.layerId+"/"+pinchmap.zoomLevel+"/"+tile.tileX+"/"+tile.tileY
+    }
+
+    function _tileStatusCB(tileAvailable) {
+        // this function is a callback for an asynchronous tile availability checking call
+        // - if tileAvailable is true the tile is locally available,
+        //   which means we can can set the source property for the
+        //   tile Image element to that it can be loaded
+        // - if tileAvailable is false it means that the tile is not
+        //   available locally and a tile download request has been
+        //   queued (provided automatic tile downloading is enabled)
+
+        if (tileAvailable) {
+            // tile is available from local storage - load it at once! :)
+            tile.retryCount = 0
+            tile.error = false
+            tile.downloading = false
+            tile.source = tile.mapInstance.tileUrl(tileId)
+        } else {
+            // tile is queued to be downloaded
+            tile.downloading = true
+            tile.waiting = false
+        }
+    }
+
+    function tileDownloaded(result) {
+        // result[0] = success true/false
+        // result[1] = fatal error true/false
+        if (!result[0]) {
+            // something went wrong
+            if (result[1]) {
+                // fatal error
+                tile.downloading = false
+                tile.error = true
+            } else {
+                // non fatal error, increment retry count
+                tile.retryCount++
+                // TODO: use a constant ?
+                if (tile.retryCount <= 5) {
+                    // we are still within the retry count limit,
+                    // so trigger another download request
+                    mapInstance.isTileAvailable(tile.tileId, tile._tileStatusCB)
+                } else {
+                    // retry count limit reached, switch to error state
+                    tile.downloading = false
+                    tile.error = true
+                }
+            }
+        } else {
+            // the file has been apparently successfully downloaded,
+            // load it
+            tile._loadTile()
+        }
+    }
+
+
+    function _registerDownloadNotification() {
+        // register into a dictionary of tiles waiting for notification
+        // about a tile being downloaded
+        mapInstance.tilesBeingDownloaded[tile.tileId] = tile
+    }
+
+    function _unregisterDownloadNotification() {
+        // unregister form the download notification directory
+        delete mapInstance.tilesBeingDownloaded[tile.TileId]
+    }
+
+    function _loadTile() {
+        tile.retryCount = 0
+        tile.error = false
+        tile.downloading = false
+        tile.source = tile.mapInstance.tileUrl(tileId)
+    }
+
+    Component.onCompleted : {
+        tile.tileId = tile._getTileId()
+    }
+
+    Component.onDestruction : {
+        // remove tile from tracking
+        tile._unregisterDownloadNotification()
+    }
+
+    onZoomLevelChanged : {
+        // zoom level changed, we need to reload the tile
+        tile.downloading = false
+        tile.waiting = true
+        tile.tileId = tile._getTileId()
+    }
+
+    onTileIdChanged : {
+        // update tile id in the tracking dict to account for the tile id
+        delete mapInstance.tilesBeingDownloaded[tile.oldTileId]
+        tile.oldTileId = tile.tileId
+        tile._registerDownloadNotification()
+
+        // check if the new tile id is available from local storage
+        // (and thus could be loaded at once) or needs to be downloaded
+        mapInstance.isTileAvailable(tile.tileId, tile._tileStatusCB)
+    }
+
+    onDownloadingChanged : {
+        if (tile.downloading) {
+            _registerDownloadNotification()
+        } else {
+            _unregisterDownloadNotification()
+        }
+    }
 
     Image {
         id: img
-        cache : true
         width: tile.tileSize
         height: tile.tileSize
         opacity: tile.downloading ? 0.0 : tile.tileOpacity
         asynchronous : true
-        onStatusChanged : {
-            //console.log("status changed: " + tile.tileId + " " +  img.status + " " +
-            //            img.source + " " + img.sourceSize.width)
-            if (img.status == Image.Ready) {
-                // check if we got a real image or an info info
-                // pixel telling us the tile was not found locally
-                // and will be downloaded
-                if (img.sourceSize.width == 1) {
-                    // info tile, disable caching, clear source,
-                    // connect to the tile downloaded signal,
-                    // issue a tile download request and then wait
-                    // for the tile to be downloaded
-                    img.cache = false
-                    if (!tile.downloading) {
-                        tile.downloading = true
-                        rWin.python.call("modrana.gui.addTileDownloadRequest", [tile.tileId], function(){})
-                    }
-                } else {
-                    tile.downloading = false
-                }
-            }
-        }
-    }
-    // connection to the map instance for for tile-downloaded notifications
-    Connections {
-        target: tile.downloading ? tile.mapInstance : null
-        onTileDownloaded: {
-            // is this us ?
-            if (tile.downloading && loadedTileId == tile.tileId) {
-                //console.log("THIS TILE " + tile.tileId + " error: " + tileError + " " + tile.source)
-                if (tileError > 0) {
-                    // something went wrong
-                    if (tileError == 1) {
-                        // fatal error
-                        tile.error = true
-                    } else {
-                        if (tileError > 1) {
-                            // non fatal error, increment retry count
-                            tile.retryCount = tile.retryCount + 1
-                        }
-                        // TODO: use a constant ?
-                        if (tile.retryCount <= 5) {
-                            // we are still within the retry count limit,
-                            // so trigger another download request by trying
-                            // to load the tile
-                            tile.cache = false
-                            tile.source = tileUrl(tileId)
-                        } else {
-                            // retry count limit reached, switch to error state
-                            tile.error = true
-                        }
-                    }
-                } else {
-                    // everything appears fine, load the tile
-                    tile.retryCount = 0
-                    tile.error = false
-                    tile.cache = true
-                    tile.source = tileUrl(tileId)
-                }
-            }
-        }
     }
 
     // normal status text
