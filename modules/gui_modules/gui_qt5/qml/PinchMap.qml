@@ -619,7 +619,7 @@ Rectangle {
                     text : tileX + "/" + tileY
                     font.pixelSize : 24
                 }
-
+                /*
                 Repeater {
                     id: tileRepeater
                     model : pinchmap.layers
@@ -634,7 +634,7 @@ Rectangle {
                         layerId : pinchmap.layers.get(index).layerId
                         layerName : pinchmap.layers.get(index).layerName
                     }
-                }
+                }*/
             }
         }
 
