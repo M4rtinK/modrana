@@ -306,9 +306,11 @@ class Menus(RanaModule):
         # get a pangocairo context
         pg = pangocairo.CairoContext(cr)
         layout = pg.create_layout()
-        layout.set_markup(text)
-        # set default font
-        layout.set_font_description(pango.FontDescription("Sans Serif 60"))
+        # we need to replace & by &amp; otherwise Pyngo will not draw the string containing it
+        layout.set_markup(text.replace("&", "&amp;"))
+        # NOTE: string.replace() is Python 2 only, but this is a PyGTK code anyway,
+        #       so it should not be an issue
+        layout.set_font_description(pango.FontDescription("Sans Serif 60"))  # set default font
         (lw, lh) = layout.get_pixel_size()
         if lw == 0 or lh == 0:
             return # no need to draw this + avoid a division by zero
