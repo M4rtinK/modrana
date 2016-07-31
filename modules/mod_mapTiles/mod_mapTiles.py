@@ -275,7 +275,7 @@ class MapTiles(RanaModule):
             return pool
         else: # create pool
             #headers = { 'User-Agent' : "Mozilla/5.0 (compatible; MSIE 5.5; Linux)" }
-            userAgent = self.modrana.configs.getUserAgent()
+            userAgent = self.modrana.configs.user_agent
             headers = {'User-Agent': userAgent}
             newPool = urllib3.connection_from_url(url=baseUrl, headers=headers, maxsize=10, timeout=10, block=False)
             self.connPools[layerId] = newPool

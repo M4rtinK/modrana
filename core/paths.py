@@ -223,7 +223,7 @@ class Paths(object):
         """return path to a folder for storing tracklogs"""
         path = None
         # first check if the user overrode the tracklog folder path
-        config = self.modrana.configs.getUserConfig()
+        config = self.modrana.configs.user_config
         if config:
             path = config.get("tracklog_folder", None)
         if path is None:
@@ -241,7 +241,7 @@ class Paths(object):
         """return a path to folder for map data storage"""
         path = None
         # first check if the user overrode the map folder path
-        config = self.modrana.configs.getUserConfig()
+        config = self.modrana.configs.user_config
         if config:
             path = config.get("map_folder", None)
         if path is None:

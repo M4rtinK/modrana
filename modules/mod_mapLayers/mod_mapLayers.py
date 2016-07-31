@@ -168,7 +168,7 @@ class MapLayers(RanaModule):
         """Parse all map layer definitions"""
         # check if there is at least one valid layer
 
-        layerDefinitions = self.modrana.configs.mapConfig.get('layers', {})
+        layerDefinitions = self.modrana.configs.map_config.get('layers', {})
         for layerId, layerDefinition in six.iteritems(layerDefinitions):
             if self._hasRequiredKeys(layerDefinition, MAP_LAYER_REQUIRED_KEYS):
                 self._layers[layerId] = MapLayer(layerId, layerDefinition)
@@ -184,8 +184,8 @@ class MapLayers(RanaModule):
         # as groups are not strictly needed for modRana
         # to show at least one map layer, we don't check if the
         # configuration file has any
-        if self.modrana.configs.mapConfig:
-            groupsDict = self.modrana.configs.mapConfig.get('groups', {})
+        if self.modrana.configs.map_config:
+            groupsDict = self.modrana.configs.map_config.get('groups', {})
             for groupId, groupDefinition in six.iteritems(groupsDict):
                 if self._hasRequiredKeys(groupDefinition, MAP_LAYER_GROUP_REQUIRED_KEYS):
                     self._groups[groupId] = MapLayerGroup(self, groupId, groupDefinition)

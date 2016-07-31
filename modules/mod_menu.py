@@ -48,7 +48,7 @@ class Menus(RanaModule):
         self.setupGeneralMenus()
         self.lastActivity = int(time.time())
         self.mainScreenCoords = {}
-        self.userConfig = self.modrana.configs.getUserConfig()
+        self.userConfig = self.modrana.configs.user_config
         self.hideMapScreenButtons = False
         self.lastHideCheckTimestamp = time.time()
         self.itemMenuGrid = (None, [])

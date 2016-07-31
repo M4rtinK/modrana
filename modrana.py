@@ -176,7 +176,7 @@ class ModRana(object):
         self.paths = paths.Paths(self)
 
         # add the configs handling core module
-        self.configs = configs.Configs(self)
+        self.configs = configs.Configs(configs_dir=self.paths.getProfilePath())
 
         # load persistent options
         self.optLoadingOK = self._loadOptions()
@@ -195,7 +195,7 @@ class ModRana(object):
         self.set('modRanaVersionString', paths.VERSION_STRING)
 
         # load all configuration files
-        self.configs.loadAll()
+        self.configs.load_all()
 
         # start loading other modules
 
@@ -216,7 +216,7 @@ class ModRana(object):
         """
         perform post upgrade checks
         """
-        self.configs.upgradeConfigFiles()
+        self.configs.upgrade_config_files()
 
     ##  MODULE HANDLING ##
 
