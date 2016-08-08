@@ -391,7 +391,7 @@ class MapTiles(RanaModule):
                     else:
                         # tile found locally and not downloaded, trigger the downloaded signal
                         sprint("%s found locally", lzxy)
-                        self.tileDownloaded(True, lzxy, tag)
+                        self.tileDownloaded(constants.TILE_DOWNLOAD_SUCCESS, lzxy, tag)
                         # and cache it in memory
                         if self.cacheImageSurfaces:
                             # if we are using image surfaces, convert the raw image data
