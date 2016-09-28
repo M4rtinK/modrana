@@ -30,9 +30,10 @@ def getBestGUIModuleId():
 
 
 def _check():
-    """
-    try to detect current device
-    """
+    """Try to detect current device."""
+
+    # TODO: turn platform IDs to proper constants
+
     # qrc is currently used only on Android, so if we are running with
     # qrc, we are on Android
     if qrc.is_qrc:
@@ -49,6 +50,13 @@ def _check():
     if sys.platform == "qnx6":
         log.info("* BlackBerry 10 device detected")
         return "bb10"
+
+    try:
+        import platform
+        if platform.node == "Sailfish":
+            return "jolla"
+    except:
+        log.exception("the Python stdlib platform module is apparently unusable on this platform")
 
     # check procFS
     if os.path.exists("/proc/cpuinfo"):
@@ -75,10 +83,10 @@ def _check():
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         distributionId = proc.communicate()[0].decode("utf-8").lower().strip()
-        log.info(distributionId)
+        log.info("lsb_release distro id: %s ", distributionId)
         # import pdb; pdb.set_trace()
         if distributionId == 'mer':
-            # TODO: could be ale Nemo mobile or other Mer based distro,
+            # TODO: could be also Nemo mobile or other Mer based distro,
             # we should probably discern those two in the future
             log.info("* Jolla (or other Mer based device) detected")
             return "jolla"
