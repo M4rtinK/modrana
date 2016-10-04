@@ -857,6 +857,7 @@ Rectangle {
         }
     }
 
+/*
     Rectangle {
         id: positionErrorIndicator
         visible: false
@@ -869,6 +870,7 @@ Rectangle {
         y: map.y + positionIndicator.t[1] - height/2
         radius: width/2
     }
+*/
 
     Image {
         id: positionIndicator
