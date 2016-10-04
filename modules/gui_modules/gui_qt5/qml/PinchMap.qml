@@ -76,6 +76,26 @@ Rectangle {
         }
     }
 
+    property bool modelSet : false
+
+    // For some reason on Sailfish OS the tiles repeater
+    // won't work correctly if the tilesModel is assigned
+    // or bound by a property binding to the repeater model
+    // property, but it works correctly if the model is set
+    // with a slight delay after the initial updateTilesModel() runs.
+    // And of course it all works just fine on desktop...
+
+    Timer {
+        id : wtfTimer  // I think this is a fitting name for this timer
+        interval : 10
+        running : false
+        repeat : false
+        onTriggered : {
+            rWin.log.debug("setting tiles model")
+            map.tilesRepeater.model = pinchmap.tilesModel
+            modelSet = true
+        }
+    }
 
 
     // use mapnik as the default map layer
@@ -251,6 +271,13 @@ Rectangle {
         rWin.log.debug("TILE MODEL COUNT: " + pinchmap.tilesModel.count)
         rWin.log.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         */
+
+        // Handle the unfortunate but required due to yet another bug
+        // in the Sailfish OS version os Qt5 delayed assignment of
+        // the tilesModel as a model for the tiles repeater.
+        if (!modelSet) {
+            wtfTimer.restart()
+        }
     }
 
     function tilesAvailabilityCB(tileAvailabilityDict) {
@@ -717,12 +744,12 @@ Rectangle {
         property int rootY: -(height - parent.height)/2;
         property int offsetX: 0;
         property int offsetY: 0;
+
+        property alias tilesRepeater : tilesX
         x: 0
         y: 0
         Repeater {
             id: tilesX
-
-            model : pinchmap.tilesModel
 
             Rectangle {
                 id: tile
