@@ -378,26 +378,29 @@ Rectangle {
     function panEnd() {
         var changed = false;
         var threshold = pinchmap.tileSize;
+        if (map.offsetX < 0) {
+            var multiplier = Math.floor(Math.abs(map.offsetX)/threshold)
+            map.offsetX += threshold * multiplier;
+            pinchmap.cornerTileX += multiplier;
+            changed = true;
+        }
+        else if (map.offsetX > 0) {
+            var multiplier = Math.floor(map.offsetX/threshold) + 1
+            map.offsetX -= threshold * multiplier;
+            pinchmap.cornerTileX -= multiplier;
+            changed = true;
+        }
 
-        while (map.offsetX < -threshold) {
-            map.offsetX += threshold;
-            cornerTileX += 1;
+        if (map.offsetY < 0) {
+            var multiplier = Math.floor(Math.abs(map.offsetY)/threshold)
+            map.offsetY += threshold * multiplier;
+            pinchmap.cornerTileY += multiplier;
             changed = true;
         }
-        while (map.offsetX > threshold) {
-            map.offsetX -= threshold;
-            cornerTileX -= 1;
-            changed = true;
-        }
-
-        while (map.offsetY < -threshold) {
-            map.offsetY += threshold;
-            cornerTileY += 1;
-            changed = true;
-        }
-        while (map.offsetY > threshold) {
-            map.offsetY -= threshold;
-            cornerTileY -= 1;
+        else if (map.offsetY > 0) {
+            var multiplier = Math.floor(map.offsetY/threshold) + 1
+            map.offsetY -= threshold * multiplier;
+            pinchmap.cornerTileY -= multiplier;
             changed = true;
         }
         updateCenter();
