@@ -985,7 +985,7 @@ class Options(RanaModule):
                 (40, "40", notifyRestartNeeded),
                 (50, "50", notifyRestartNeeded)],
                group,
-               10)
+               constants.DEFAULT_THREAD_COUNT_AUTOMATIC_TILE_DOWNLOAD)
 
         addOpt("Batch tile download thread count", "maxDlThreads",
                [(1, "1 (serial)"),
