@@ -281,7 +281,8 @@ class GUIModule(RanaModule):
             "style": self._getStyleConstants(),
             "default" : {
                 "theme" : defaultTheme,
-                "routingProvider" : constants.DEFAULT_ROUTING_PROVIDER
+                "routingProvider" : constants.DEFAULT_ROUTING_PROVIDER,
+                "autoDownloadThreadCount" : constants.DEFAULT_THREAD_COUNT_AUTOMATIC_TILE_DOWNLOAD
             }
         }
         return C

@@ -36,6 +36,45 @@ BasePage {
                     rWin.log.info("setting network mode: " + item.value)
                 }
             }
+            KeyComboBox {
+                id : automaticDownloadThreadCount
+                label : qsTr("Number of automatic tile download threads")
+                key : "maxAutoDownloadThreads2"
+                property string previousValue : null
+                defaultValue : rWin.c.default.autoDownloadThreadCount
+                model : ListModel {
+                    id : maxAutoDownloadThreads2
+                    ListElement {
+                        text : "1 (serial)"
+                        value : "1"
+                    }
+                    ListElement {
+                        text : "5"
+                        value : "5"
+                    }
+                    ListElement {
+                        text : "10 (default)"
+                        value : "10"
+                    }
+                    ListElement {
+                        text : "20"
+                        value : "20"
+                    }
+                    ListElement {
+                        text : "50"
+                        value : "50"
+                    }
+                }
+                onValueChanged : {
+                    rWin.log.info("setting automatic download thread count: " + item.value)
+                    // don't trigger the notification when the key combo box is initialized
+                    // for the first time with values from the Python backend (if any)
+                    if (previousValue && value != previousValue) {
+                        rWin.notify("You need to restart modRana for the thread number change to take effect.", 5000)
+                    }
+                    previousValue = value
+                }
+            }
         }
     }
 }
