@@ -49,8 +49,12 @@ BasePage {
                         value : "1"
                     }
                     ListElement {
-                        text : "5"
-                        value : "5"
+                        text : "2"
+                        value : "2"
+                    }
+                     ListElement {
+                        text : "4"
+                        value : "4"
                     }
                     ListElement {
                         text : "10 (default)"
