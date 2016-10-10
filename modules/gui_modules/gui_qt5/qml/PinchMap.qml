@@ -18,8 +18,8 @@ Rectangle {
     property int tileSize: 256 * tileScale;
     property int cornerTileX: 32;
     property int cornerTileY: 21;
-    property int numTilesX: Math.ceil(width/tileSize) + 2;
-    property int numTilesY: Math.ceil(height/tileSize) + 2;
+    property int numTilesX: Math.ceil(width/tileSize) + 1
+    property int numTilesY: Math.ceil(height/tileSize) + 1
     property int maxTileNo: Math.pow(2, zoomLevel) - 1;
     property bool showTargetIndicator: false
     property double showTargetAtLat: 0;
@@ -62,6 +62,17 @@ Rectangle {
     //       once every 10 seconds, so requests would continuously accumulate
     //       and would never be sent. This is however almost guaranteed to never
     //       happen due to the modRana screen update logic.
+
+    property color backgroundColor : "#cccccc"
+    property color gridColor : "#d9d9d9"
+
+    Rectangle {
+        id : backgroundColorRectangle
+        color : pinchmap.backgroundColor
+        anchors.fill : parent
+
+    }
+
     Timer {
         id : tileRequestTimer
         interval: 10
@@ -129,6 +140,9 @@ Rectangle {
     property var tilesModel : ListModel {}
     property var currentTiles : new Object()
 
+    property bool tilesModelUpdateRunning : false
+    property bool anotherTilesModelUpdateNeeded : false
+
     // if the map is clicked or double clicked the mapClicked and mapDoubleClicked signals
     // are triggered
     //
@@ -157,126 +171,61 @@ Rectangle {
     Component.onCompleted: {
         rWin.python.setHandler("tileDownloaded:" + pinchmap.name, pinchmap.tileDownloadedCB)
         // instantiate the nested backing data model for tiles
-        updateTilesModel(pinchmap.cornerTileX, pinchmap.cornerTileY,
-                         pinchmap.numTilesX, pinchmap.numTilesY)
+        updateTilesModel()
     }
 
-    function updateTilesModel(cornerX, cornerY, tilesX, tilesY) {
-        // Update the tiles data model to the given corner tile x/y
-        // and horizontal anv vertical tile number.
-        // This basically amounts to newly enumerating the tiles
-        // while keeping items already in the lists so that the corresponding
-        // delegates are not needlessly re-rendered.
-        // TODO: move this to a worker script and do it asynchronously ?
-
-        tileRequestTimer.stop()
-        tileRequestTimerPause = true
-        var maxCornerX = cornerX + tilesX - 1
-        var maxCornerY = cornerY + tilesY - 1
-
-        /*
-        rWin.log.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        rWin.log.debug("UPDATE TILES MODEL")
-        rWin.log.debug("COUNT: " + pinchmap.tilesModel.count)
-        rWin.log.debug("cornerX: " + cornerX)
-        rWin.log.debug("cornerY: " + cornerY)
-        rWin.log.debug("tilesX: " + tilesX)
-        rWin.log.debug("tilesY: " + tilesY)
-        rWin.log.debug("maxCornerX: " + maxCornerX)
-        rWin.log.debug("maxCornerY: " + maxCornerY)
-        rWin.log.debug("INITIAL COUNT: " + pinchmap.tilesModel.count)
-        */
-
-        // tiles that should be on the screen due to the new coordinate update
-        var newScreenContent = {}
-        // tiles that need to be added (eq. were not displayed before the coordinate
-        // were updated)
-        var newTiles = []
-        // find what new tiles are needed
-        //var newSCCount = 0
-        //var newTilesCount = 0
-        for (var cx = cornerX; cx<=maxCornerX; cx++) {
-            for (var cy = cornerY; cy<=maxCornerY; cy++) {
-                var tileId = cx + "/" + cy
-                newScreenContent[tileId] = true
-                //newSCCount++
-                if (!(tileId in pinchmap.shouldBeOnScreen)) {
-                    // this a new tile that was not on screen before the coordinate update
-                    newTiles.push({"x" : cx, "y" : cy, "id" : tileId})
-                    //newTilesCount++
-                }
+    WorkerScript {
+        id : updateTilesModelWorker
+        source : "workers/update_tiles_model.js"
+        onMessage: {
+            // update the shouldBeOnScreen dict with data based
+            // on the tiles model update
+            pinchmap.shouldBeOnScreen = messageObject.shouldBeOnScreen
+            // re-enable the tile requests timer
+            tileRequestTimerPause = false
+            tileRequestTimer.start()
+            // handle the unfortunate but required due to yet another bug
+            // in the Sailfish OS version os Qt5 delayed assignment of
+            // the tilesModel as a model for the tiles repeater.
+            if (!modelSet) {
+                wtfTimer.restart()
+            }
+            tilesModelUpdateRunning = false
+            if (anotherTilesModelUpdateNeeded) {
+                // do the additional tiles model update
+                // just in case that the screen & map geometry
+                // changed since this asynchronous tile model
+                // update has been triggered
+                pinchmap.updateTilesModel()
+                anotherTilesModelUpdateNeeded = false
             }
         }
 
-        // update the pinchmap-wide "what should be on screen" dict
-        pinchmap.shouldBeOnScreen = newScreenContent
+    }
 
-        // go over all tiles in the tilesModel list model that is used to generate the tile delegates
-        // - if the tile is in newScreenContent do nothing - the tile is still visible
-        // - if the tile is not in newScreenContent it should no longer be visible, there are two options in this case:
-        //   1) if newTiles is non-empty, pop a tile from it and reset coordinates for the tile, effectively reusing
-        //      the tile item & it's delegate instead of destroying it and creating a new one
-        //   2) if newTiles is empty just remove the item, which also destroys the delegate
-
-        //var iterations = 0
-        //var removed = 0
-        //var recycledCount = 0
-
-        for (var i=0;i<pinchmap.tilesModel.count;i++){
-            //iterations++
-            var tile = pinchmap.tilesModel.get(i)
-            if (tile != null) {
-                if (!(tile.tile_coords.id in newScreenContent)) {
-                    // check if we can recycle this tile by recycling it into one
-                    // of the new tiles that should be displayed
-                    var newTile = newTiles.pop()
-                    //rWin.log.debug("RECYCLING: " + tile.tile_coords.id + " to " + newTile.id)
-                    if (newTile) {
-                        //recycledCount++
-                        // recycle the tile by setting the coordinates to values for a new tile
-                        pinchmap.tilesModel.set(i, {"tile_coords" : newTile})
-                    } else {
-                        // no tiles to recycle into, so just remove the tile
-                        pinchmap.tilesModel.remove(i)
-                        i--
-                        //rWin.log.debug("REMOVING: " + tile.tile_coords)
-                        //removed++
-                    }
+    function updateTilesModel() {
+        // trigger asynchronous tile model update
+        if (tilesModelUpdateRunning) {
+            // skip duplicate update requests but remember at least
+            // one has been requested and run one mor asynchronous tile model
+            // update once the current one finishes
+            anotherTilesModelUpdateNeeded = true
+        } else {
+            tilesModelUpdateRunning = true
+            // turn off the tile requests timer until the tiles model update is done
+            tileRequestTimer.stop()
+            tileRequestTimerPause = true
+            // start the asynchronous tile model update
+            updateTilesModelWorker.sendMessage(
+                {
+                    cornerX : pinchmap.cornerTileX,
+                    cornerY : pinchmap.cornerTileY,
+                    tilesX : pinchmap.numTilesX,
+                    tilesY : pinchmap.numTilesY,
+                    tilesModel : pinchmap.tilesModel,
+                    shouldBeOnScreen : pinchmap.shouldBeOnScreen
                 }
-            }
-        }
-
-        // Add any items remaining in newTiles to the tilesModel, this usually means:
-        // - this is the first run and the tilesModel is empty
-        // - the viewport has been enlarged and more tiles in total are now visible than before
-        // If no new tiles are added to the tilesMode, it usually means that the viewport is the
-        // same (all tiles are recycled) or has even been shrunk.
-        //var tilesAdded = 0
-        for (var i=0; i < newTiles.length; i++){
-            newTile = newTiles[i]
-            pinchmap.tilesModel.append({"tile_coords" : newTile})
-            //tilesAdded++
-        }
-
-        tileRequestTimerPause = false
-        tileRequestTimer.start()
-        /*
-        rWin.log.debug("NEW SCREEN CONTENT: " + newSCCount)
-        rWin.log.debug("NEW TILES: " + newTilesCount)
-        rWin.log.debug("ITERATIONS: " + iterations)
-        rWin.log.debug("REMOVED: " + removed)
-        rWin.log.debug("RECYCLED: " + recycledCount)
-        rWin.log.debug("ADDED: " + tilesAdded)
-        rWin.log.debug("UPDATE TILES MODEL DONE")
-        rWin.log.debug("TILE MODEL COUNT: " + pinchmap.tilesModel.count)
-        rWin.log.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        */
-
-        // Handle the unfortunate but required due to yet another bug
-        // in the Sailfish OS version os Qt5 delayed assignment of
-        // the tilesModel as a model for the tiles repeater.
-        if (!modelSet) {
-            wtfTimer.restart()
+            )
         }
     }
 
@@ -335,13 +284,11 @@ Rectangle {
     }
 
     onCornerTileXChanged: {
-        updateTilesModel(pinchmap.cornerTileX, pinchmap.cornerTileY,
-                         pinchmap.numTilesX, pinchmap.numTilesY)
+        updateTilesModel()
     }
 
     onCornerTileYChanged: {
-        updateTilesModel(pinchmap.cornerTileX, pinchmap.cornerTileY,
-                         pinchmap.numTilesX, pinchmap.numTilesY)
+        updateTilesModel()
     }
 
     function setZoomLevel(z) {
@@ -375,36 +322,34 @@ Rectangle {
         canvas.y -= dy
     }
 
-    function panEnd() {
-        var changed = false;
+    function panUpdate() {
         var threshold = pinchmap.tileSize;
         if (map.offsetX < 0) {
             var multiplier = Math.floor(Math.abs(map.offsetX)/threshold)
             map.offsetX += threshold * multiplier;
             pinchmap.cornerTileX += multiplier;
-            changed = true;
         }
         else if (map.offsetX > 0) {
             var multiplier = Math.floor(map.offsetX/threshold) + 1
             map.offsetX -= threshold * multiplier;
             pinchmap.cornerTileX -= multiplier;
-            changed = true;
         }
 
         if (map.offsetY < 0) {
             var multiplier = Math.floor(Math.abs(map.offsetY)/threshold)
             map.offsetY += threshold * multiplier;
             pinchmap.cornerTileY += multiplier;
-            changed = true;
         }
         else if (map.offsetY > 0) {
             var multiplier = Math.floor(map.offsetY/threshold) + 1
             map.offsetY -= threshold * multiplier;
             pinchmap.cornerTileY -= multiplier;
-            changed = true;
         }
         updateCenter();
+    }
 
+    function panEnd() {
+        panUpdate()
         // reset the canvas origin back to the initial
         // values once the pan ends
         canvas.x = -pinchmap.width
@@ -551,8 +496,7 @@ Rectangle {
         map.offsetX = -(cornerTileFloatX - Math.floor(cornerTileFloatX)) * tileSize;
         map.offsetY = -(cornerTileFloatY - Math.floor(cornerTileFloatY)) * tileSize;
         updateCenter();
-        updateTilesModel(pinchmap.cornerTileX, pinchmap.cornerTileY,
-                         pinchmap.numTilesX, pinchmap.numTilesY)
+        updateTilesModel()
     }
 
     function setCoord(c, x, y) {
@@ -719,6 +663,12 @@ Rectangle {
                     var dx = Math.round(mouse.x) - __lastX;
                     var dy = Math.round(mouse.y) - __lastY;
                     pan(-dx, -dy);
+
+                    // a new tile row/column has become visible - trigger an
+                    // asynchronous tile model update
+                    if (map.offsetX > 0 || map.offsetX < -pinchmap.tileSize || map.offsetY > 0 || map.offsetY < -pinchmap.tileSize) {
+                        panUpdate()
+                    }
                     __lastX = Math.round(mouse.x);
                     __lastY = Math.round(mouse.y);
                     /*
@@ -790,14 +740,18 @@ Rectangle {
 
                 width: pinchmap.tileSize;
                 height: pinchmap.tileSize;
-                border.width : 2
-                border.color : "black"
+                border.width : 1
+                //border.color : "#e5e5e5"
+                border.color : pinchmap.gridColor
+                color : pinchmap.backgroundColor
+                /*
                 Text {
                     anchors.horizontalCenter : parent.horizontalCenter
                     anchors.verticalCenter : parent.verticalCenter
                     text : tile_coords.x + "/" + tile_coords.y
                     font.pixelSize : 24
                 }
+                */
 
                 Repeater {
                     id: tileRepeater
