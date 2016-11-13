@@ -1,19 +1,22 @@
-try:
-    import http.client as httplib
-except ImportError:
-    import httplib
+from __future__ import absolute_import
 from contextlib import contextmanager
 import zlib
 import io
+import logging
 from socket import timeout as SocketTimeout
+from socket import error as SocketError
 
 from ._collections import HTTPHeaderDict
 from .exceptions import (
-    ProtocolError, DecodeError, ReadTimeoutError, ResponseNotChunked
+    BodyNotHttplibCompatible, ProtocolError, DecodeError, ReadTimeoutError,
+    ResponseNotChunked, IncompleteRead, InvalidHeader
 )
 from .packages.six import string_types as basestring, binary_type, PY3
+from .packages.six.moves import http_client as httplib
 from .connection import HTTPException, BaseSSLError
-from .response_ import is_fp_closed, is_response_to_head
+from .util.response import is_fp_closed, is_response_to_head
+
+log = logging.getLogger(__name__)
 
 
 class DeflateDecoder(object):
@@ -90,6 +93,14 @@ class HTTPResponse(io.IOBase):
         When this HTTPResponse wrapper is generated from an httplib.HTTPResponse
         object, it's convenient to include the original for debug purposes. It's
         otherwise unused.
+
+    :param retries:
+        The retries contains the last :class:`~urllib3.util.retry.Retry` that
+        was used during the request.
+
+    :param enforce_content_length:
+        Enforce content length checking. Body returned by server must match
+        value of Content-Length header, if present. Otherwise, raise error.
     """
 
     CONTENT_DECODERS = ['gzip', 'deflate']
@@ -97,7 +108,8 @@ class HTTPResponse(io.IOBase):
 
     def __init__(self, body='', headers=None, status=0, version=0, reason=None,
                  strict=0, preload_content=True, decode_content=True,
-                 original_response=None, pool=None, connection=None):
+                 original_response=None, pool=None, connection=None,
+                 retries=None, enforce_content_length=False, request_method=None):
 
         if isinstance(headers, HTTPHeaderDict):
             self.headers = headers
@@ -108,6 +120,8 @@ class HTTPResponse(io.IOBase):
         self.reason = reason
         self.strict = strict
         self.decode_content = decode_content
+        self.retries = retries
+        self.enforce_content_length = enforce_content_length
 
         self._decoder = None
         self._body = None
@@ -133,8 +147,11 @@ class HTTPResponse(io.IOBase):
         if "chunked" in encodings:
             self.chunked = True
 
-        # We certainly don't want to preload content when the response is chunked.
-        if not self.chunked and preload_content and not self._body:
+        # Determine length of response
+        self.length_remaining = self._init_length(request_method)
+
+        # If requested, preload the body.
+        if preload_content and not self._body:
             self._body = self.read(decode_content=decode_content)
 
     def get_redirect_location(self):
@@ -166,6 +183,10 @@ class HTTPResponse(io.IOBase):
         if self._fp:
             return self.read(cache_content=True)
 
+    @property
+    def connection(self):
+        return self._connection
+
     def tell(self):
         """
         Obtain the number of bytes pulled over the wire so far. May differ from
@@ -174,9 +195,57 @@ class HTTPResponse(io.IOBase):
         """
         return self._fp_bytes_read
 
+    def _init_length(self, request_method):
+        """
+        Set initial length value for Response content if available.
+        """
+        length = self.headers.get('content-length')
+
+        if length is not None and self.chunked:
+            # This Response will fail with an IncompleteRead if it can't be
+            # received as chunked. This method falls back to attempt reading
+            # the response before raising an exception.
+            log.warning("Received response with both Content-Length and "
+                        "Transfer-Encoding set. This is expressly forbidden "
+                        "by RFC 7230 sec 3.3.2. Ignoring Content-Length and "
+                        "attempting to process response as Transfer-Encoding: "
+                        "chunked.")
+            return None
+
+        elif length is not None:
+            try:
+                # RFC 7230 section 3.3.2 specifies multiple content lengths can
+                # be sent in a single Content-Length header
+                # (e.g. Content-Length: 42, 42). This line ensures the values
+                # are all valid ints and that as long as the `set` length is 1,
+                # all values are the same. Otherwise, the header is invalid.
+                lengths = set([int(val) for val in length.split(',')])
+                if len(lengths) > 1:
+                    raise InvalidHeader("Content-Length contained multiple "
+                                        "unmatching values (%s)" % length)
+                length = lengths.pop()
+            except ValueError:
+                length = None
+            else:
+                if length < 0:
+                    length = None
+
+        # Convert status to int for comparison
+        # In some cases, httplib returns a status of "_UNKNOWN"
+        try:
+            status = int(self.status)
+        except ValueError:
+            status = 0
+
+        # Check for responses that shouldn't include a body
+        if status in (204, 304) or 100 <= status < 200 or request_method == 'HEAD':
+            length = 0
+
+        return length
+
     def _init_decoder(self):
         """
-        Set-up the _decoder attribute if necessar.
+        Set-up the _decoder attribute if necessary.
         """
         # Note: content-encoding value should be case-insensitive, per RFC 7230
         # Section 3.2
@@ -197,11 +266,21 @@ class HTTPResponse(io.IOBase):
                 "Received response with content-encoding: %s, but "
                 "failed to decode it." % content_encoding, e)
 
-        if flush_decoder and decode_content and self._decoder:
-            buf = self._decoder.decompress(binary_type())
-            data += buf + self._decoder.flush()
+        if flush_decoder and decode_content:
+            data += self._flush_decoder()
 
         return data
+
+    def _flush_decoder(self):
+        """
+        Flushes the decoder. Should only be called if the decoder is actually
+        being used.
+        """
+        if self._decoder:
+            buf = self._decoder.decompress(b'')
+            return buf + self._decoder.flush()
+
+        return b''
 
     @contextmanager
     def _error_catcher(self):
@@ -212,6 +291,8 @@ class HTTPResponse(io.IOBase):
 
         On exit, release the connection back to the pool.
         """
+        clean_exit = False
+
         try:
             try:
                 yield
@@ -230,17 +311,31 @@ class HTTPResponse(io.IOBase):
 
                 raise ReadTimeoutError(self._pool, None, 'Read timed out.')
 
-            except HTTPException as e:
+            except (HTTPException, SocketError) as e:
                 # This includes IncompleteRead.
                 raise ProtocolError('Connection broken: %r' % e, e)
-        except Exception:
-            # The response may not be closed but we're not going to use it anymore
-            # so close it now to ensure that the connection is released back to the pool.
-            if self._original_response and not self._original_response.isclosed():
-                self._original_response.close()
 
-            raise
+            # If no exception is thrown, we should avoid cleaning up
+            # unnecessarily.
+            clean_exit = True
         finally:
+            # If we didn't terminate cleanly, we need to throw away our
+            # connection.
+            if not clean_exit:
+                # The response may not be closed but we're not going to use it
+                # anymore so close it now to ensure that the connection is
+                # released back to the pool.
+                if self._original_response:
+                    self._original_response.close()
+
+                # Closing the response may not actually be sufficient to close
+                # everything, so if we have a hold of the connection close that
+                # too.
+                if self._connection:
+                    self._connection.close()
+
+            # If we hold the original response but it's closed now, we should
+            # return the connection back to the pool.
             if self._original_response and self._original_response.isclosed():
                 self.release_conn()
 
@@ -293,9 +388,18 @@ class HTTPResponse(io.IOBase):
                     # no harm in redundantly calling close.
                     self._fp.close()
                     flush_decoder = True
+                    if self.enforce_content_length and self.length_remaining not in (0, None):
+                        # This is an edge case that httplib failed to cover due
+                        # to concerns of backward compatibility. We're
+                        # addressing it here to make sure IncompleteRead is
+                        # raised during streaming, so all calls with incorrect
+                        # Content-Length are caught.
+                        raise IncompleteRead(self._fp_bytes_read, self.length_remaining)
 
         if data:
             self._fp_bytes_read += len(data)
+            if self.length_remaining is not None:
+                self.length_remaining -= len(data)
 
             data = self._decode(data, decode_content, flush_decoder)
 
@@ -303,7 +407,6 @@ class HTTPResponse(io.IOBase):
                 self._body = data
 
         return data
-
 
     def stream(self, amt=2**16, decode_content=None):
         """
@@ -321,7 +424,7 @@ class HTTPResponse(io.IOBase):
             If True, will attempt to decode the body based on the
             'content-encoding' header.
         """
-        if self.chunked:
+        if self.chunked and self.supports_chunked_reads():
             for line in self.read_chunked(amt, decode_content=decode_content):
                 yield line
         else:
@@ -343,9 +446,9 @@ class HTTPResponse(io.IOBase):
         headers = r.msg
 
         if not isinstance(headers, HTTPHeaderDict):
-            if PY3: # Python 3
+            if PY3:  # Python 3
                 headers = HTTPHeaderDict(headers.items())
-            else: # Python 2
+            else:  # Python 2
                 headers = HTTPHeaderDict.from_httplib(headers)
 
         # HTTPResponse objects in Python 3 don't have a .strict attribute
@@ -372,14 +475,17 @@ class HTTPResponse(io.IOBase):
         if not self.closed:
             self._fp.close()
 
+        if self._connection:
+            self._connection.close()
+
     @property
     def closed(self):
         if self._fp is None:
             return True
+        elif hasattr(self._fp, 'isclosed'):
+            return self._fp.isclosed()
         elif hasattr(self._fp, 'closed'):
             return self._fp.closed
-        elif hasattr(self._fp, 'isclosed'):  # Python 2
-            return self._fp.isclosed()
         else:
             return True
 
@@ -408,6 +514,15 @@ class HTTPResponse(io.IOBase):
         else:
             b[:len(temp)] = temp
             return len(temp)
+
+    def supports_chunked_reads(self):
+        """
+        Checks if the underlying file-like object looks like a
+        httplib.HTTPResponse object. We do this by testing for the fp
+        attribute. If it is present we assume it returns raw chunks as
+        processed by read_chunked().
+        """
+        return hasattr(self._fp, 'fp')
 
     def _update_chunk_length(self):
         # First, we'll figure out length of a chunk and then
@@ -457,8 +572,13 @@ class HTTPResponse(io.IOBase):
         self._init_decoder()
         # FIXME: Rewrite this method and make it a class with a better structured logic.
         if not self.chunked:
-            raise ResponseNotChunked("Response is not chunked. "
+            raise ResponseNotChunked(
+                "Response is not chunked. "
                 "Header 'transfer-encoding: chunked' is missing.")
+        if not self.supports_chunked_reads():
+            raise BodyNotHttplibCompatible(
+                "Body should be httplib.HTTPResponse like. "
+                "It should have have an fp attribute which returns raw chunks.")
 
         # Don't bother reading the body of a HEAD request.
         if self._original_response and is_response_to_head(self._original_response):
@@ -471,8 +591,18 @@ class HTTPResponse(io.IOBase):
                 if self.chunk_left == 0:
                     break
                 chunk = self._handle_chunk(amt)
-                yield self._decode(chunk, decode_content=decode_content,
-                                   flush_decoder=True)
+                decoded = self._decode(chunk, decode_content=decode_content,
+                                       flush_decoder=False)
+                if decoded:
+                    yield decoded
+
+            if decode_content:
+                # On CPython and PyPy, we should never need to flush the
+                # decoder. However, on Jython we *might* need to, so
+                # lets defensively do it anyway.
+                decoded = self._flush_decoder()
+                if decoded:  # Platform-specific: Jython.
+                    yield decoded
 
             # Chunk content ends with \r\n: discard it.
             while True:

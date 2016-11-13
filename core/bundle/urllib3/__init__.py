@@ -2,10 +2,8 @@
 urllib3 - Thread-safe connection pooling and re-using.
 """
 
-__author__ = 'Andrey Petrov (andrey.petrov@shazow.net)'
-__license__ = 'MIT'
-__version__ = '1.11'
-
+from __future__ import absolute_import
+import warnings
 
 from .connectionpool import (
     HTTPConnectionPool,
@@ -17,10 +15,10 @@ from . import exceptions
 from .filepost import encode_multipart_formdata
 from .poolmanager import PoolManager, ProxyManager, proxy_from_url
 from .response import HTTPResponse
-from .request_ import make_headers
-from .url_ import get_host
-from .timeout_ import Timeout
-from .retry_ import Retry
+from .util.request import make_headers
+from .util.url import get_host
+from .util.timeout import Timeout
+from .util.retry import Retry
 
 
 # Set default logging handler to avoid "No handler found" warnings.
@@ -32,7 +30,29 @@ except ImportError:
         def emit(self, record):
             pass
 
+__author__ = 'Andrey Petrov (andrey.petrov@shazow.net)'
+__license__ = 'MIT'
+__version__ = '1.19'
+
+__all__ = (
+    'HTTPConnectionPool',
+    'HTTPSConnectionPool',
+    'PoolManager',
+    'ProxyManager',
+    'HTTPResponse',
+    'Retry',
+    'Timeout',
+    'add_stderr_logger',
+    'connection_from_url',
+    'disable_warnings',
+    'encode_multipart_formdata',
+    'get_host',
+    'make_headers',
+    'proxy_from_url',
+)
+
 logging.getLogger(__name__).addHandler(NullHandler())
+
 
 def add_stderr_logger(level=logging.DEBUG):
     """
@@ -48,21 +68,26 @@ def add_stderr_logger(level=logging.DEBUG):
     handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
     logger.addHandler(handler)
     logger.setLevel(level)
-    logger.debug('Added a stderr logging handler to logger: %s' % __name__)
+    logger.debug('Added a stderr logging handler to logger: %s', __name__)
     return handler
 
 # ... Clean up.
 del NullHandler
 
 
-import warnings
+# All warning filters *must* be appended unless you're really certain that they
+# shouldn't be: otherwise, it's very hard for users to use most Python
+# mechanisms to silence them.
 # SecurityWarning's always go off by default.
 warnings.simplefilter('always', exceptions.SecurityWarning, append=True)
 # SubjectAltNameWarning's should go off once per host
-warnings.simplefilter('default', exceptions.SubjectAltNameWarning)
+warnings.simplefilter('default', exceptions.SubjectAltNameWarning, append=True)
 # InsecurePlatformWarning's don't vary between requests, so we keep it default.
 warnings.simplefilter('default', exceptions.InsecurePlatformWarning,
                       append=True)
+# SNIMissingWarnings should go off only once.
+warnings.simplefilter('default', exceptions.SNIMissingWarning, append=True)
+
 
 def disable_warnings(category=exceptions.HTTPWarning):
     """

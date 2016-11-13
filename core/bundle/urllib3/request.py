@@ -1,9 +1,7 @@
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
+from __future__ import absolute_import
 
 from .filepost import encode_multipart_formdata
+from .packages.six.moves.urllib.parse import urlencode
 
 
 __all__ = ['RequestMethods']
@@ -133,7 +131,8 @@ class RequestMethods(object):
 
         if fields:
             if 'body' in urlopen_kw:
-                raise TypeError('request got values for both \'fields\' and \'body\', can only specify one.')
+                raise TypeError(
+                    "request got values for both 'fields' and 'body', can only specify one.")
 
             if encode_multipart:
                 body, content_type = encode_multipart_formdata(fields, boundary=multipart_boundary)
