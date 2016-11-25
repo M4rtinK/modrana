@@ -43,6 +43,7 @@ from core import qrc
 USING_QRC = qrc.is_qrc
 qrc.handle_qrc()
 
+
 def setCorrectCWD():
     # change to folder where the main modRana file is located
     # * this enables to run modRana with absolute path without adverse
@@ -112,14 +113,14 @@ class ModRana(object):
         self.addCustomTime("imports done", importsDoneTimestamp)
 
         # constants & variable initialization
-        self.dmod = None # device specific module
+        self.dmod = None  # device specific module
         self.gui = None
         self.GUIString = ""
         self.optLoadingOK = None
 
-        self.d = {} # persistent dictionary of data
-        self.m = {} # dictionary of loaded modules
-        self.watches = {} # List of data change watches
+        self.d = {}  # persistent dictionary of data
+        self.m = {}  # dictionary of loaded modules
+        self.watches = {}  # List of data change watches
         self.maxWatchId = 0
 
         self.initInfo = {
@@ -132,8 +133,8 @@ class ModRana(object):
         self.notificationTriggered = Signal()
         self.shutdown_signal = Signal()
 
-        self.mapRotationAngle = 0 # in radians
-        self.notMovingSpeed = 1 # in m/s
+        self.mapRotationAngle = 0  # in radians
+        self.notMovingSpeed = 1  # in m/s
 
         # per mode options
         # NOTE: this variable is automatically saved by the
@@ -222,20 +223,20 @@ class ModRana(object):
 
     def _loadDeviceModule(self):
         """Load the device module"""
-        if self.dmod: # don't reload the module
+        if self.dmod:  # don't reload the module
             return
 
         # get the device module string
         # (a unique device module string identificator)
         if self.args.d:
             device = self.args.d
-        else: # no device specified from CLI
+        else:  # no device specified from CLI
             # try to auto-detect the current device
             from core import platform_detection
 
             device = platform_detection.getBestDeviceModuleId()
 
-        device = device.lower() # convert to lowercase
+        device = device.lower()  # convert to lowercase
 
         self.initInfo["device"] = device
 
@@ -245,7 +246,7 @@ class ModRana(object):
                 self.GUIString = self.args.u.split(":")[0].upper()
             except Exception:
                 log.exception('splitting the GUI string failed')
-        else: # no ID specified
+        else:  # no ID specified
             # the N900 device module needs the GUIString
             # at startup
             if device == "n900":
@@ -277,7 +278,7 @@ class ModRana(object):
             if ids:
                 self.GUIString = ids[0]
             else:
-                self.GUIString = "GTK" # fallback
+                self.GUIString = "GTK"  # fallback
                 # export the GUI string
                 # set the pre-import visible GUI string and subtype
         splitGUIString = self.GUIString.split(":")
@@ -338,7 +339,7 @@ class ModRana(object):
 
         # make sure all modules have the device module and other variables before first time
         for m in self.m.values():
-            m.modrana = self # make this class accessible from modules
+            m.modrana = self  # make this class accessible from modules
             m.dmod = self.dmod
 
             # run what needs to be done before firstTime is called
@@ -371,7 +372,7 @@ class ModRana(object):
         if USING_QRC:
             # if we are running from qrc, we need to use the pyotherside function for enumerating
             # the modules stored in the qrc "bundle"
-            import pyotherside 
+            import pyotherside
             moduleNames = filter(
                 lambda x: x[0:len(prefix)] == prefix, pyotherside.qrc_list_dir(os.path.join("/", folder))
             )
@@ -417,7 +418,7 @@ class ModRana(object):
                      moduleName,
                      self.m[moduleName].__doc__,
                      (1000 * (time.clock() - startM))
-            )
+                     )
             return module
         except Exception:
             log.exception("module: %s/%s failed to load", importName, moduleName)
@@ -479,7 +480,6 @@ class ModRana(object):
         # run any tasks specified by CLI arguments
         self.startup.handlePostFirstTimeTasks()
 
-
     def getModule(self, name, default=None):
         """
         return a given module instance, return default if no instance
@@ -523,7 +523,6 @@ class ModRana(object):
         modrana_log.log_manager.disable_log_file()
         log.info("Shutdown complete (%s)" % utils.get_elapsed_time_string(start_timestamp))
 
-
     ## OPTIONS SETTING AND WATCHING ##
 
     def get(self, name, default=None, mode=None):
@@ -542,7 +541,7 @@ class ModRana(object):
             else:
                 return self.d.get(name, default)
 
-        else: # just return the normal value
+        else:  # just return the normal value
             return self.d.get(name, default)
 
     def set(self, name, value, save=False, mode=None):
@@ -561,11 +560,11 @@ class ModRana(object):
                 # save it to the name + #multi key under the mode key
                 try:
                     self.d['%s#multi' % name][mode] = value
-                except KeyError: # key not yet created
+                except KeyError:  # key not yet created
                     self.d['%s#multi' % name] = {mode: value}
-            else: # just save to the key as usual
+            else:  # just save to the key as usual
                 self.d[name] = value
-        else: # just save to the key as usual
+        else:  # just save to the key as usual
             self.d[name] = value
 
         self._notifyWatcher(name, oldValue)
@@ -610,9 +609,9 @@ class ModRana(object):
         if not args: args = []
         nrId = self.maxWatchId + 1
         id = "%d_%s" % (nrId, key)
-        self.maxWatchId = nrId # TODO: recycle ids ? (alla PID)
+        self.maxWatchId = nrId  # TODO: recycle ids ? (alla PID)
         if key not in self.watches:
-            self.watches[key] = [] # create the initial list
+            self.watches[key] = []  # create the initial list
         self.watches[key].append((id, callback, args))
         # should we now run the callback one ?
         # -> this is useful for modules that configure
@@ -664,7 +663,7 @@ class ModRana(object):
         oldValue = self.get(key, defaultValue)
         if mode is None:
             mode = self.d.get('mode', 'car')
-        if key not in self.keyModifiers.keys(): # initialize
+        if key not in self.keyModifiers.keys():  # initialize
             self.keyModifiers[key] = {'modes': {mode: modifier}}
         else:
             self.keyModifiers[key]['modes'][mode] = modifier
@@ -742,7 +741,6 @@ class ModRana(object):
         # signal (if any)
         self.notificationTriggered(message, msTimeout, icon)
 
-
         # notify = self.m.get('notification')
         # if notify:
         #     # the notification module counts timeout in seconds
@@ -756,7 +754,6 @@ class ModRana(object):
             m.routeMessage(message)
         else:
             log.error("No message handler, can't send message.")
-
 
     def getModes(self):
         """return supported modes"""
@@ -801,7 +798,6 @@ class ModRana(object):
             oldValue = self.get(key, defaultValue)
             # notify watchers
             self._notifyWatcher(key, oldValue)
-
 
     def _removeNonPersistentOptions(self, inputDict):
         """keys that begin with # are not saved
@@ -852,7 +848,7 @@ class ModRana(object):
         except Exception:
             e = sys.exc_info()[1]
             log.exception("exception while loading saved options")
-            #TODO: a yes/no dialog for clearing (renaming with timestamp :) the corrupted options file (options.bin)
+            # TODO: a yes/no dialog for clearing (renaming with timestamp :) the corrupted options file (options.bin)
             success = False
 
         self.overrideOptions()
@@ -863,7 +859,7 @@ class ModRana(object):
         without this, there would not be any projection values at start,
         because modRana does not know, what part of the map to show
         """
-        self.set('centred', True) # set centering to True at start to get setView to run
+        self.set('centred', True)  # set centering to True at start to get setView to run
         self.set('editBatchMenuActive', False)
 
     ## PROFILE PATH ##
@@ -912,7 +908,7 @@ class ModRana(object):
             totalTime = (tl[-1][1] * 1000) - startupTime
             for i in tl:
                 (message, t) = i
-                t *= 1000# convert to ms
+                t *= 1000  # convert to ms
                 timeSpent = t - lastTime
                 timeSinceStart = t - startupTime
                 log.info("* %s (%1.0f ms), %1.0f/%1.0f ms", message, timeSpent, timeSinceStart, totalTime)
@@ -924,6 +920,8 @@ class ModRana(object):
 modrana = None
 dmod = None
 gui = None
+
+
 def start(argv=None):
     """This function is used when starting modRana with PyOtherSide.
     When modRana is started from PyOtherSide there is no sys.argv,
@@ -963,5 +961,3 @@ if __name__ == "__main__":
         subprocess.call(callArgs)
     else:
         start()
-
-
