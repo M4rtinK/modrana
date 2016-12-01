@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.53.2
+Version: 0.53.3
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -122,6 +122,38 @@ fi
 %endif
 
 %changelog
+* Thu Dec 01 2016 Martin Kolman <martin.kolman@gmail.com> - 0.53.3-1
+- Add OSM Scout Server layers (martin.kolman)
+- Some PEP8 for gprof2dot.py (martin.kolman)
+- Some PEP8 for modrana.py (martin.kolman)
+- Update bundled urllib3 to 1.19 (martin.kolman)
+- Change thread count options a bit (martin.kolman)
+- Expose automatic thread download count in the Qt 5 GUI (martin.kolman)
+- Use default thread count from constants (martin.kolman)
+- Fix platform detection on Sailfish OS (martin.kolman)
+- Add a more comprehensive test for the Point class (martin.kolman)
+- Refactor config handling code & config handling unit tests (martin.kolman)
+- Redirect all log messages to stdout when running tests (martin.kolman)
+- Prevent & from breaking Pango (martin.kolman)
+- Merge branch 'master' of github.com:M4rtinK/modrana (martin.kolman)
+- Check if the default map and user config files are valid (martin.kolman)
+- Merge pull request #137 from DerDakon/preset-OpenRailwayMap (martin.kolman)
+- add OpenRailwayMap overlays (eike)
+- Bump map config file revision (martin.kolman)
+- Add an "overlay" suffix to the OpenFireMap label (martin.kolman)
+- Merge pull request #136 from DerDakon/preset-OpenFireMap (martin.kolman)
+- add OpenFireMap to map presets (kde)
+- Bump map config file revision (martin.kolman)
+- Remove OSM prefixes for OpenStreetMap layer names (martin.kolman)
+- Update URLs for OpenTopoMap, Hike & Bike and Land/Hill Shading layers (martin.kolman)
+- PEP8 for the routing module (martin.kolman)
+- Show what failed when routing fails (martin.kolman)
+- Initial Monav Light offline routing support (martin.kolman)
+- Fix imports (martin.kolman)
+- More PEP8 and a little cleanup (martin.kolman)
+- Add a shutdown signal (martin.kolman)
+- Add a script for pretty human readable changelog generation (martin.kolman)
+
 * Sun Oct 11 2015 Martin Kolman <martin.kolman@gmail.com> - 0.53.2-1
 - Handle no results for saved overlay configs (martin.kolman)
 - Hack around Android/Qt Resource import weirdness in bundled urllib3 (martin.kolman)
