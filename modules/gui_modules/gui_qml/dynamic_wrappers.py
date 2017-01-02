@@ -175,9 +175,9 @@ class MapLayerWrapper(AutoQObject):
             ("id", str, wrappedObject.id),
             ("label", str, wrappedObject.label),
             ("url", str, wrappedObject.url),
-            ("maxZoom", int, wrappedObject.maxZoom),
-            ("minZoom", int, wrappedObject.minZoom),
-            ("folderName", str, wrappedObject.folderName),
+            ("max_zoom", int, wrappedObject.max_zoom),
+            ("min_zoom", int, wrappedObject.min_zoom),
+            ("folder_name", str, wrappedObject.folder_name),
             ("coordinates", str, wrappedObject.coordinates),
             ("icon", str, wrappedObject.icon)
         )

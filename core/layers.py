@@ -13,49 +13,105 @@ class MapLayer(object):
 
     @property
     def id(self):
-        """
+        """Unique map layer indicator.
+
         :return: unique map layer identifier
         """
         return self._layerId
 
     @property
     def label(self):
+        """Human readable name of the ma layer.
+
+        :returns: human readable name
+        :rtype: str
+        """
         return self.config['label']
 
     @property
     def url(self):
+        """Map layer URL.
+
+        :returns: map layer URL
+        :rtype: str
+        """
         return self.config['url']
 
     @property
     def type(self):
+        """Map layer type.
+
+        :returns: map layer type
+        """
         return self.config['type']
 
     @property
-    def maxZoom(self):
+    def max_zoom(self):
+        """Maximum zoom level.
+
+        :returns: maximum zoom level
+        :rtype: int
+        """
         return int(self.config['max_zoom'])
 
     @property
-    def minZoom(self):
+    def min_zoom(self):
+        """Minimum zoom level.
+
+        :returns: manimum zoom level
+        :rtype: int
+        """
         return int(self.config['min_zoom'])
 
     @property
-    def folderName(self):
+    def folder_name(self):
+        """Name of the folder for storing the tiles.
+
+
+        :returns: map layer folder name
+        :rtype: str
+        """
         return self.config['folder_prefix']
 
     @property
     def coordinates(self):
+        """Layer coordinate type.
+
+        :returns: layer coordinate type
+        :rtype: str
+        """
         return self.config['coordinates']
 
     @property
-    def groupId(self):
+    def group_id(self):
+        """Parent layer group id.
+
+        :returns: parent layer group id
+        :rtype: str
+        """
         return self.config.get('group', None)
 
     @property
     def icon(self):
+        """Layer icon name.
+
+        Has to be a name of an icon modRana has available locally.
+
+        :returns: layer icon name
+        :rtype: str
+        """
         return self.config.get('icon', None)
 
     @property
     def timeout(self):
+        """How long should tiles be considered current.
+
+        Tiles that are no longer considered current will be downloaded again
+        instead of being loaded from storage.
+
+        :returns: tile storage timeout (in hours)
+        :rtype: float
+        """
         return self.config.get('timeout', None)
 
     @property
@@ -70,11 +126,11 @@ class MapLayer(object):
             "label" : self.label,
             "url" : self.url,
             "type" : self.type,
-            "maxZoom" : self.maxZoom,
-            "minZoom" : self.minZoom,
-            "folderName" : self.folderName,
+            "max_zoom" : self.max_zoom,
+            "min_zoom" : self.min_zoom,
+            "folder_name" : self.folder_name,
             "coordinates" : self.coordinates,
-            "groupId" : self.groupId,
+            "group_id" : self.group_id,
             "icon" : self.icon,
             "timeout" : self.timeout
         }
@@ -99,11 +155,11 @@ class MapLayerGroup(object):
         self._groupId = groupId
         self._config = config
         # load layers
-        self._reloadLayers()
+        self._reload_layers()
         # connect to the layer changed signal
-        self._mapLayers.layersChanged.connect(self._reloadLayers)
+        self._mapLayers.layersChanged.connect(self._reload_layers)
 
-    def _reloadLayers(self):
+    def _reload_layers(self):
         """Reload map layers for this group from the mapLayers module"""
         self._layers = self._mapLayers.getLayersByGroupId(self.id)
         # sort the layers by the label
@@ -112,25 +168,51 @@ class MapLayerGroup(object):
 
     @property
     def id(self):
-        """
-        :return: unique map layer group identifier
+        """Unique map layer group id.
+
+        :returns: unique map layer group identifier
+        :rtype: str
         """
         return self._groupId
 
     @property
     def label(self):
+        """Layer icon name.
+
+        Has to be a name of an icon modRana has available locally.
+
+        :returns: icon name
+        :rtype: str
+        """
         return self._config['label']
 
     @property
     def icon(self):
+        """Layer group icon name.
+
+        Has to be a name of an icon modRana has available locally.
+
+        :returns: layer group icon name
+        :rtype: str
+        """
         return self._config.get('icon', None)
 
     @property
     def layers(self):
+        """List of contained layers.
+
+        :returns: list of contained layers
+        :rtype: list of layer instances
+        """
         return self._layers
 
     @property
-    def layerIds(self):
+    def layer_ids(self):
+        """Map layer ids of contained map layers.
+
+        :returns: map layer ids of contained map layers
+        :rtype: iterable of strings
+        """
         return map(lambda x: x.id, self._layers)
 
     @property

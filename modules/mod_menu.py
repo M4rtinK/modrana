@@ -1051,7 +1051,7 @@ class Menus(RanaModule):
         if mapLayers:
             layer = mapLayers.getLayerById(layerId)
             if layer:
-                maxZoomLimit = layer.maxZoom
+                maxZoomLimit = layer.max_zoom
 
         # we show the values of the settings
         location = self.get("downloadArea", "here")
