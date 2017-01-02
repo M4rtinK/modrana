@@ -147,8 +147,8 @@ class Configs(object):
         config_variables = {
             'label': 'label',
             'url': 'tiles',
-            'max_zoom': 'maxZoom',
-            'min_zoom': 'minZoom',
+            'max_zoom': 'max_zoom',
+            'min_zoom': 'min_zoom',
             'type': 'type',
             'folder_prefix': 'folderPrefix',
             'coordinates': 'coordinates',

@@ -123,9 +123,9 @@ class MapLayerWrapper(QtCore.QObject):
     id = QtCore.Property(str, lambda x: x.wo.id, notify=changed)
     label = QtCore.Property(str, lambda x: x.wo.label, notify=changed)
     url = QtCore.Property(str, lambda x: x.wo.url, notify=changed)
-    maxZoom = QtCore.Property(int, lambda x: x.wo.maxZoom, notify=changed)
-    minZoom = QtCore.Property(int, lambda x: x.wo.minZoom, notify=changed)
-    folderName = QtCore.Property(str, lambda x: x.wo.folderName, notify=changed)
+    maxZoom = QtCore.Property(int, lambda x: x.wo.max_zoom, notify=changed)
+    minZoom = QtCore.Property(int, lambda x: x.wo.min_zoom, notify=changed)
+    folderName = QtCore.Property(str, lambda x: x.wo.folder_name, notify=changed)
     coordinates = QtCore.Property(str, lambda x: x.wo.coordinates, notify=changed)
     icon = QtCore.Property(str, lambda x: x.wo.icon, notify=changed)
 

@@ -24,7 +24,7 @@ import traceback
 from modules.base_module import RanaModule
 from core.signal import Signal
 from core.backports import six
-from .layers import MapLayer, MapLayerGroup
+from core.layers import MapLayer, MapLayerGroup
 from .overlay_groups import OverlayGroup
 
 # lists keys that need to be defined for a layer
@@ -88,7 +88,7 @@ class MapLayers(RanaModule):
         :param groupId: map layer group ID
         :return: MapLayer object instance
         """
-        return filter(lambda x: x.groupId == groupId, self._layers.values())
+        return filter(lambda x: x.group_id == groupId, self._layers.values())
 
     def getLayersWithoutGroup(self):
         """Map layers without group have their group id set to None

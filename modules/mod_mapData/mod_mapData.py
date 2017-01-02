@@ -596,7 +596,7 @@ class MapData(RanaModule):
         if mapLayers:
             layer = mapLayers.getLayerById(layerId)
             if layer:
-                maxZoomLimit = layer.maxZoom
+                maxZoomLimit = layer.max_zoom
 
         # for some reason z might be a float sometimes,
         # so we need to make sure it is an integer
