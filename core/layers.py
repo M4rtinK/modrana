@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Layer classes
+# Map layer representation classes
 
 class MapLayer(object):
     """A map layer"""
