@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.53.3
+Version: 0.53.4
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -125,6 +125,17 @@ fi
 %endif
 
 %changelog
+* Wed Jan 04 2017 Martin Kolman <martin.kolman@gmail.com> - 0.53.4-1
+- Add Sailfish OS styled icon to the Silica theme (martin.kolman)
+- Use appropriately styled icons on Sailfish OS (martin.kolman)
+- Run unit tests with Python 3 (martin.kolman)
+- Add unit test for the MapLayers class (martin.kolman)
+- Fix a typo and add a nite (martin.kolman)
+- Layer timeout should be either float or None (martin.kolman)
+- Merge branch 'master-move_layer_classes_to_core' (martin.kolman)
+- PEP 8 & docs for map layer classes (martin.kolman)
+- Move layer definition classes to core (martin.kolman)
+
 * Thu Dec 01 2016 Martin Kolman <martin.kolman@gmail.com> - 0.53.3-1
 - Add OSM Scout Server layers (martin.kolman)
 - Some PEP8 for gprof2dot.py (martin.kolman)
