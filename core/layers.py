@@ -58,7 +58,7 @@ class MapLayer(object):
     def min_zoom(self):
         """Minimum zoom level.
 
-        :returns: manimum zoom level
+        :returns: minimum zoom level
         :rtype: int
         """
         return int(self.config['min_zoom'])
@@ -165,6 +165,7 @@ class MapLayerGroup(object):
 
     def _reload_layers(self):
         """Reload map layers for this group from the mapLayers module"""
+        # TODO: move the layer loading code here
         self._layers = self._mapLayers.getLayersByGroupId(self.id)
         # sort the layers by the label
         # as that is what is usually needed when displaying them
