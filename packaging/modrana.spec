@@ -110,6 +110,9 @@ fi
 %if 0%{with_sailfish}
 /usr/share/harbour-modrana
 /usr/share/icons/hicolor/86x86/apps/*
+/usr/share/icons/hicolor/108x108/apps/*
+/usr/share/icons/hicolor/128x128/apps/*
+/usr/share/icons/hicolor/256x256/apps/*
 %else
 %doc README.md
 %license COPYING.txt

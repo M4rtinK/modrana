@@ -92,9 +92,15 @@ install:
 install-sailfish:
 	-mkdir -p $(DESTDIR)/usr/share/harbour-modrana
 	cp -r $(BUILDDIR)/* $(DESTDIR)/usr/share/harbour-modrana
-	# install the icon
+	# install the icons
 	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/86x86/apps/
-	cp packaging/icons/modrana/86x86/modrana.png $(DESTDIR)/usr/share/icons/hicolor/86x86/apps/harbour-modrana.png
+	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/108x108/apps/
+	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/128x128/apps/
+	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/256x256/apps/
+	cp packaging/icons/modrana-sailfish/86x86/harbour-modrana.png $(DESTDIR)/usr/share/icons/hicolor/86x86/apps/
+	cp packaging/icons/modrana-sailfish/108x108/harbour-modrana.png $(DESTDIR)/usr/share/icons/hicolor/108x108/apps/
+	cp packaging/icons/modrana-sailfish/128x128/harbour-modrana.png $(DESTDIR)/usr/share/icons/hicolor/128x128/apps/
+	cp packaging/icons/modrana-sailfish/256x256/harbour-modrana.png $(DESTDIR)/usr/share/icons/hicolor/256x256/apps/
 	# install the desktop file
 	-mkdir -p $(DESTDIR)/usr/share/applications/
 	cp packaging/sailfish/harbour-modrana.desktop $(DESTDIR)/usr/share/applications/
