@@ -110,9 +110,13 @@ class MapLayer(object):
         instead of being loaded from storage.
 
         :returns: tile storage timeout (in hours)
-        :rtype: float
+        :rtype: float or None
         """
-        return self.config.get('timeout', None)
+        tile_timeout = self.config.get('timeout', None)
+        if tile_timeout is not None:
+            return float(tile_timeout)
+        else:
+            return tile_timeout
 
     @property
     def dict(self):

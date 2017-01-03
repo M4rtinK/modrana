@@ -219,9 +219,9 @@ class StoreTiles(RanaModule):
             if tile_tuple is not None:
                 self._llog("tile %s found in %s" % (str(lzxy), store))
                 tile_data, timestamp = tile_tuple
-                if layer.timeout:
+                if layer.timeout is not None:
                     # layer.timeout is in hours, convert to seconds
-                    layer_timeout = float(layer.timeout)*60*60
+                    layer_timeout = layer.timeout*60*60
                     dt = time.time() - layer_timeout
                     self._llog("timeout set for layer %s: %fs (expired at %d), "
                                "tile timestamp: %d" % (layer.label,
@@ -253,9 +253,9 @@ class StoreTiles(RanaModule):
                 self._llog("we have tile %s in %s" % (str(lzxy), store))
                 _true, timestamp = tile_tuple
                 self._llog("we have tile: %s with timestamp %s" % (str(lzxy), timestamp))
-                if layer.timeout:
+                if layer.timeout is not None:
                     # stored timeout is in hours, convert to seconds
-                    layer_timeout = float(layer.timeout)*60*60
+                    layer_timeout = layer.timeout*60*60
                     dt = time.time() - layer_timeout
                     self._llog("timeout set for layer %s: %fs (expired at %d), "
                                "tile timestamp: %d" % (layer.label,
