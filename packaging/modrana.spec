@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.53.4
+Version: 0.53.5
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -125,6 +125,9 @@ fi
 %endif
 
 %changelog
+* Wed Jan 04 2017 Martin Kolman <martin.kolman@gmail.com> - 0.53.5-1
+- Use a slightly lighter background for the Sailfish OS icon (martin.kolman)
+
 * Wed Jan 04 2017 Martin Kolman <martin.kolman@gmail.com> - 0.53.4-1
 - Add Sailfish OS styled icon to the Silica theme (martin.kolman)
 - Use appropriately styled icons on Sailfish OS (martin.kolman)
