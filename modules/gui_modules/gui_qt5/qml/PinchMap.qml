@@ -486,16 +486,26 @@ Rectangle {
     }
 
     function setLatLon(lat, lon, x, y) {
-        var oldCornerTileX = cornerTileX
-        var oldCornerTileY = cornerTileY
         var tile = deg2num(lat, lon);
-        var cornerTileFloatX = tile[0] + (map.rootX - x) / tileSize // - numTilesX/2.0;
-        var cornerTileFloatY = tile[1] + (map.rootY - y) / tileSize // - numTilesY/2.0;
+        var cornerTileFloatX = tile[0] - x / tileSize
+        var cornerTileFloatY = tile[1] - y / tileSize
         cornerTileX = Math.floor(cornerTileFloatX);
         cornerTileY = Math.floor(cornerTileFloatY);
         map.offsetX = -(cornerTileFloatX - Math.floor(cornerTileFloatX)) * tileSize;
         map.offsetY = -(cornerTileFloatY - Math.floor(cornerTileFloatY)) * tileSize;
-        updateCenter();
+        // Check if x & y point to map center, if they do then
+        // set pinchmap center latitude & longitude directly to lat & lon.
+        // Otherwise map center coordinates would move at random due to floating
+        // point error when setCenterLatLon calls setLatLon many times
+        // in a row, such as when the user (or a window manager animation)
+        // seamlessly changes window size.
+        var isCenter = (x == pinchmap.width/2) && (y == pinchmap.height/2)
+        if (isCenter) {
+            pinchmap.latitude = lat
+            pinchmap.longitude = lon
+        } else {
+            updateCenter();
+        }
         updateTilesModel()
     }
 
@@ -513,13 +523,24 @@ Rectangle {
         centerSet();
     }
 
+/*  longer & easier to read version
+
     function getCoordFromScreenpoint(x, y) {
-        var realX = - map.rootX - map.offsetX + x;
-        var realY = - map.rootY - map.offsetY + y;
+        var realX = x - map.offsetX
+        var realY = y - map.offsetY
         var realTileX = cornerTileX + realX / tileSize;
         var realTileY = cornerTileY + realY / tileSize;
         return num2deg(realTileX, realTileY);
     }
+*/
+
+    // shorter version without intermediate variables
+    function getCoordFromScreenpoint(x, y) {
+        return num2deg(cornerTileX + (x - map.offsetX) / tileSize,
+                       cornerTileY + (y - map.offsetY) / tileSize)
+    }
+
+/*  longer & easier to read version
 
     function getScreenpointFromCoord(lat, lon) {
         var tile = deg2num(lat, lon)
@@ -529,12 +550,31 @@ Rectangle {
         var y = realY + map.rootY + map.offsetY
         return [x, y]
     }
+*/
+
+    // shorter version with less intermediate variables
+    function getScreenpointFromCoord(lat, lon) {
+        var tile = deg2num(lat, lon)
+        return [((tile[0] - cornerTileX) * tileSize) + map.offsetX,
+                ((tile[1] - cornerTileY) * tileSize) + map.offsetY]
+    }
+
+
+/*  longer & easier to read version
 
     function getMappointFromCoord(lat, lon) {
         var tile = deg2num(lat, lon)
-        var realX = (tile[0] - cornerTileX) * tileSize
-        var realY = (tile[1] - cornerTileY) * tileSize
+        var realX = ((tile[0] - cornerTileX) * tileSize) + map.offsetX
+        var realY = ((tile[1] - cornerTileY) * tileSize) + map.offsetY
         return [realX, realY]
+    }
+*/
+
+    // shorter version with less intermediate variables
+    function getMappointFromCoord(lat, lon) {
+        var tile = deg2num(lat, lon)
+        return [((tile[0] - cornerTileX) * tileSize) + map.offsetX,
+                ((tile[1] - cornerTileY) * tileSize) + map.offsetY]
     }
 
     function getCenter() {
@@ -693,8 +733,6 @@ Rectangle {
         id: map;
         width: numTilesX * tileSize;
         height: numTilesY * tileSize;
-        property int rootX: -(width - parent.width)/2;
-        property int rootY: -(height - parent.height)/2;
         property int offsetX: 0;
         property int offsetY: 0;
 
