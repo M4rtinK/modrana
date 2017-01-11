@@ -18,8 +18,8 @@ Rectangle {
     property int tileSize: 256 * tileScale;
     property int cornerTileX: 32;
     property int cornerTileY: 21;
-    property int numTilesX: Math.ceil(width/tileSize) + 2;
-    property int numTilesY: Math.ceil(height/tileSize) + 2;
+    property int numTilesX: Math.ceil(width/tileSize) + 1
+    property int numTilesY: Math.ceil(height/tileSize) + 1
     property int maxTileNo: Math.pow(2, zoomLevel) - 1;
     property bool showTargetIndicator: false
     property double showTargetAtLat: 0;
@@ -43,6 +43,71 @@ Rectangle {
     
     property alias angle: rot.angle
     property var searchMarkerModel : null
+
+    // a dictionary of tile coordinates that should be current visible
+    property var shouldBeOnScreen : {"foo" : true}
+
+    // tile status check request staging
+    property var tileRequests : []
+    property bool tileRequestTimerPause : false
+    // Due to the many individual tile status queries triggering a PyOtherSide crash &
+    // for general efficiency reasons (it should be more efficient to group the queries
+    // and to send them & answer them at once) we group the queries to a batch that is then
+    // sent at once.
+    //
+    // This is achieved by a timer that is reset every time a new request is added,
+    // which effectively batches all requests coming inside the given timer interval
+    // (currently 10 ms) & sends them once no request comes for 10 ms.
+    // NOTE: This could theoretically fail horribly if a request came *at least*
+    //       once every 10 seconds, so requests would continuously accumulate
+    //       and would never be sent. This is however almost guaranteed to never
+    //       happen due to the modRana screen update logic.
+
+    property color backgroundColor : "#cccccc"
+    property color gridColor : "#d9d9d9"
+
+    Rectangle {
+        id : backgroundColorRectangle
+        color : pinchmap.backgroundColor
+        anchors.fill : parent
+
+    }
+
+    Timer {
+        id : tileRequestTimer
+        interval: 10
+        running: false
+        repeat: false
+        property bool paused : false
+        onTriggered : {
+            var requestBatch = pinchmap.tileRequests.slice()
+            pinchmap.tileRequests = []
+            rWin.python.call("modrana.gui.areTilesAvailable", [requestBatch], tilesAvailabilityCB)
+            running = false
+        }
+    }
+
+    property bool modelSet : false
+
+    // For some reason on Sailfish OS the tiles repeater
+    // won't work correctly if the tilesModel is assigned
+    // or bound by a property binding to the repeater model
+    // property, but it works correctly if the model is set
+    // with a slight delay after the initial updateTilesModel() runs.
+    // And of course it all works just fine on desktop...
+
+    Timer {
+        id : wtfTimer  // I think this is a fitting name for this timer
+        interval : 10
+        running : false
+        repeat : false
+        onTriggered : {
+            rWin.log.debug("setting tiles model")
+            map.tilesRepeater.model = pinchmap.tilesModel
+            modelSet = true
+        }
+    }
+
 
     // use mapnik as the default map layer
     property var layers :  ListModel {
@@ -72,6 +137,12 @@ Rectangle {
     signal clearPointMenus
     property bool needsUpdate: false
 
+    property var tilesModel : ListModel {}
+    property var currentTiles : new Object()
+
+    property bool tilesModelUpdateRunning : false
+    property bool anotherTilesModelUpdateNeeded : false
+
     // if the map is clicked or double clicked the mapClicked and mapDoubleClicked signals
     // are triggered
     //
@@ -99,13 +170,81 @@ Rectangle {
     //   handling
     Component.onCompleted: {
         rWin.python.setHandler("tileDownloaded:" + pinchmap.name, pinchmap.tileDownloadedCB)
+        // instantiate the nested backing data model for tiles
+        updateTilesModel()
     }
 
-    function tileDownloadedCB(tileId, tileError) {
-        // trigger the tile downloaded signal
-        // TODO: could the signal by called directly as the callback ?
-        //console.log("PINCH MAP: TILE DOWNLOADED: " + tileId)
-        tileDownloaded(tileId, tileError)
+    WorkerScript {
+        id : updateTilesModelWorker
+        source : "workers/update_tiles_model.js"
+        onMessage: {
+            // update the shouldBeOnScreen dict with data based
+            // on the tiles model update
+            pinchmap.shouldBeOnScreen = messageObject.shouldBeOnScreen
+            // re-enable the tile requests timer
+            tileRequestTimerPause = false
+            tileRequestTimer.start()
+            // handle the unfortunate but required due to yet another bug
+            // in the Sailfish OS version os Qt5 delayed assignment of
+            // the tilesModel as a model for the tiles repeater.
+            if (!modelSet) {
+                wtfTimer.restart()
+            }
+            tilesModelUpdateRunning = false
+            if (anotherTilesModelUpdateNeeded) {
+                // do the additional tiles model update
+                // just in case that the screen & map geometry
+                // changed since this asynchronous tile model
+                // update has been triggered
+                pinchmap.updateTilesModel()
+                anotherTilesModelUpdateNeeded = false
+            }
+        }
+
+    }
+
+    function updateTilesModel() {
+        // trigger asynchronous tile model update
+        if (tilesModelUpdateRunning) {
+            // skip duplicate update requests but remember at least
+            // one has been requested and run one mor asynchronous tile model
+            // update once the current one finishes
+            anotherTilesModelUpdateNeeded = true
+        } else {
+            tilesModelUpdateRunning = true
+            // turn off the tile requests timer until the tiles model update is done
+            tileRequestTimer.stop()
+            tileRequestTimerPause = true
+            // start the asynchronous tile model update
+            updateTilesModelWorker.sendMessage(
+                {
+                    cornerX : pinchmap.cornerTileX,
+                    cornerY : pinchmap.cornerTileY,
+                    tilesX : pinchmap.numTilesX,
+                    tilesY : pinchmap.numTilesY,
+                    tilesModel : pinchmap.tilesModel,
+                    shouldBeOnScreen : pinchmap.shouldBeOnScreen
+                }
+            )
+        }
+    }
+
+    function tilesAvailabilityCB(tileAvailabilityDict) {
+        for (var tileId in tileAvailabilityDict) {
+            var tileAvailable = tileAvailabilityDict[tileId]
+            var tile = pinchmap.currentTiles[tileId]
+            if (tile) {
+                tile.available = tileAvailable
+            }
+        }
+    }
+
+    function tileDownloadedCB(tileId, resoundingSuccess, fatalError) {
+        // notify tile delegates waiting for tile data to be available
+        var tile = pinchmap.currentTiles[tileId]
+        if (tile) {
+            tile.tileDownloaded([resoundingSuccess, fatalError])
+        }
     }
 
     transform: Rotation {
@@ -144,6 +283,13 @@ Rectangle {
         }
     }
 
+    onCornerTileXChanged: {
+        updateTilesModel()
+    }
+
+    onCornerTileYChanged: {
+        updateTilesModel()
+    }
 
     function setZoomLevel(z) {
         setZoomLevelPoint(z, pinchmap.width/2, pinchmap.height/2);
@@ -176,33 +322,34 @@ Rectangle {
         canvas.y -= dy
     }
 
-    function panEnd() {
-        var changed = false;
+    function panUpdate() {
         var threshold = pinchmap.tileSize;
+        if (map.offsetX < 0) {
+            var multiplier = Math.floor(Math.abs(map.offsetX)/threshold)
+            map.offsetX += threshold * multiplier;
+            pinchmap.cornerTileX += multiplier;
+        }
+        else if (map.offsetX > 0) {
+            var multiplier = Math.floor(map.offsetX/threshold) + 1
+            map.offsetX -= threshold * multiplier;
+            pinchmap.cornerTileX -= multiplier;
+        }
 
-        while (map.offsetX < -threshold) {
-            map.offsetX += threshold;
-            cornerTileX += 1;
-            changed = true;
+        if (map.offsetY < 0) {
+            var multiplier = Math.floor(Math.abs(map.offsetY)/threshold)
+            map.offsetY += threshold * multiplier;
+            pinchmap.cornerTileY += multiplier;
         }
-        while (map.offsetX > threshold) {
-            map.offsetX -= threshold;
-            cornerTileX -= 1;
-            changed = true;
-        }
-
-        while (map.offsetY < -threshold) {
-            map.offsetY += threshold;
-            cornerTileY += 1;
-            changed = true;
-        }
-        while (map.offsetY > threshold) {
-            map.offsetY -= threshold;
-            cornerTileY -= 1;
-            changed = true;
+        else if (map.offsetY > 0) {
+            var multiplier = Math.floor(map.offsetY/threshold) + 1
+            map.offsetY -= threshold * multiplier;
+            pinchmap.cornerTileY -= multiplier;
         }
         updateCenter();
+    }
 
+    function panEnd() {
+        panUpdate()
         // reset the canvas origin back to the initial
         // values once the pan ends
         canvas.x = -pinchmap.width
@@ -330,6 +477,7 @@ Rectangle {
     }
 
     function deg2num(lat, lon) {
+        // lat/lon to tile x/y
         var rad = deg2rad(lat % 90);
         var n = maxTileNo + 1;
         var xtile = ((lon % 180.0) + 180.0) / 360.0 * n;
@@ -338,16 +486,27 @@ Rectangle {
     }
 
     function setLatLon(lat, lon, x, y) {
-        var oldCornerTileX = cornerTileX
-        var oldCornerTileY = cornerTileY
         var tile = deg2num(lat, lon);
-        var cornerTileFloatX = tile[0] + (map.rootX - x) / tileSize // - numTilesX/2.0;
-        var cornerTileFloatY = tile[1] + (map.rootY - y) / tileSize // - numTilesY/2.0;
+        var cornerTileFloatX = tile[0] - x / tileSize
+        var cornerTileFloatY = tile[1] - y / tileSize
         cornerTileX = Math.floor(cornerTileFloatX);
         cornerTileY = Math.floor(cornerTileFloatY);
         map.offsetX = -(cornerTileFloatX - Math.floor(cornerTileFloatX)) * tileSize;
         map.offsetY = -(cornerTileFloatY - Math.floor(cornerTileFloatY)) * tileSize;
-        updateCenter();
+        // Check if x & y point to map center, if they do then
+        // set pinchmap center latitude & longitude directly to lat & lon.
+        // Otherwise map center coordinates would move at random due to floating
+        // point error when setCenterLatLon calls setLatLon many times
+        // in a row, such as when the user (or a window manager animation)
+        // seamlessly changes window size.
+        var isCenter = (x == pinchmap.width/2) && (y == pinchmap.height/2)
+        if (isCenter) {
+            pinchmap.latitude = lat
+            pinchmap.longitude = lon
+        } else {
+            updateCenter();
+        }
+        updateTilesModel()
     }
 
     function setCoord(c, x, y) {
@@ -355,8 +514,8 @@ Rectangle {
     }
 
     function setCenterLatLon(lat, lon) {
-        setLatLon(lat, lon, pinchmap.width/2, pinchmap.height/2);
-        centerSet();
+        setLatLon(lat, lon, pinchmap.width/2, pinchmap.height/2)
+        centerSet()
     }
 
     function setCenterCoord(c) {
@@ -364,13 +523,24 @@ Rectangle {
         centerSet();
     }
 
+/*  longer & easier to read version
+
     function getCoordFromScreenpoint(x, y) {
-        var realX = - map.rootX - map.offsetX + x;
-        var realY = - map.rootY - map.offsetY + y;
+        var realX = x - map.offsetX
+        var realY = y - map.offsetY
         var realTileX = cornerTileX + realX / tileSize;
         var realTileY = cornerTileY + realY / tileSize;
         return num2deg(realTileX, realTileY);
     }
+*/
+
+    // shorter version without intermediate variables
+    function getCoordFromScreenpoint(x, y) {
+        return num2deg(cornerTileX + (x - map.offsetX) / tileSize,
+                       cornerTileY + (y - map.offsetY) / tileSize)
+    }
+
+/*  longer & easier to read version
 
     function getScreenpointFromCoord(lat, lon) {
         var tile = deg2num(lat, lon)
@@ -380,12 +550,31 @@ Rectangle {
         var y = realY + map.rootY + map.offsetY
         return [x, y]
     }
+*/
+
+    // shorter version with less intermediate variables
+    function getScreenpointFromCoord(lat, lon) {
+        var tile = deg2num(lat, lon)
+        return [((tile[0] - cornerTileX) * tileSize) + map.offsetX,
+                ((tile[1] - cornerTileY) * tileSize) + map.offsetY]
+    }
+
+
+/*  longer & easier to read version
 
     function getMappointFromCoord(lat, lon) {
         var tile = deg2num(lat, lon)
-        var realX = (tile[0] - cornerTileX) * tileSize
-        var realY = (tile[1] - cornerTileY) * tileSize
+        var realX = ((tile[0] - cornerTileX) * tileSize) + map.offsetX
+        var realY = ((tile[1] - cornerTileY) * tileSize) + map.offsetY
         return [realX, realY]
+    }
+*/
+
+    // shorter version with less intermediate variables
+    function getMappointFromCoord(lat, lon) {
+        var tile = deg2num(lat, lon)
+        return [((tile[0] - cornerTileX) * tileSize) + map.offsetX,
+                ((tile[1] - cornerTileY) * tileSize) + map.offsetY]
     }
 
     function getCenter() {
@@ -406,6 +595,26 @@ Rectangle {
 
     function tileUrl(tileId) {
         return "image://python/tile/" + tileId
+    }
+
+    function isTileAvailable(tileId, callback) {
+        // check if the tile is available from local storage
+        // TODO: make this Python independent
+        pinchmap.tileRequests.push(tileId)
+        // In some cases where a lot of tiles are checked at once
+        // (screen panning or zooming, etc.) we want to batch these
+        // check requests as effectively as possible, so we "pause"
+        // the timer and "unpause" it once done.
+        // So no need to bother the timer until it is unpaused.
+        if (!tileRequestTimerPause) {
+            tileRequestTimer.restart()
+        }
+    }
+
+    function downloadTile(tileId) {
+        // download the tile
+        // TODO: make this Python independent
+        rWin.python.call("modrana.gui.addTileDownloadRequest", [tileId], function(){})
     }
 
     PinchArea {
@@ -494,6 +703,12 @@ Rectangle {
                     var dx = Math.round(mouse.x) - __lastX;
                     var dy = Math.round(mouse.y) - __lastY;
                     pan(-dx, -dy);
+
+                    // a new tile row/column has become visible - trigger an
+                    // asynchronous tile model update
+                    if (map.offsetX > 0 || map.offsetX < -pinchmap.tileSize || map.offsetY > 0 || map.offsetY < -pinchmap.tileSize) {
+                        panUpdate()
+                    }
                     __lastX = Math.round(mouse.x);
                     __lastY = Math.round(mouse.y);
                     /*
@@ -514,72 +729,83 @@ Rectangle {
         }
     }
 
-    Grid {
+    Item {
         id: map;
-        columns: numTilesX;
         width: numTilesX * tileSize;
         height: numTilesY * tileSize;
-        property int rootX: -(width - parent.width)/2;
-        property int rootY: -(height - parent.height)/2;
         property int offsetX: 0;
         property int offsetY: 0;
-        x: rootX + offsetX;
-        y: rootY + offsetY;
 
+        property alias tilesRepeater : tilesX
+        x: 0
+        y: 0
         Repeater {
-            id: tiles
-            model: pinchmap.layersReady ? pinchmap.numTilesX * pinchmap.numTilesY : null
+            id: tilesX
+
             Rectangle {
                 id: tile
-                property alias source: imgs.source;
-                property int tileX: cornerTileX + (index % numTilesX)
-                property int tileY: cornerTileY + Math.floor(index / numTilesX)
+
+                // tileID is a "<map x>/<map y>" string
+                property string tileID : ""
+                // Basically alias for the tile_coords field from the model
+                // so that we can bind to it & react changes.
+                property var tileCoords : tile_coords
+                // current map coordinates of the tile (upper left corner)
+                property int tileX: 0
+                property int tileY: 0
+
+                onTileCoordsChanged : {
+                    // The idea is simple - we need to first change the tileID before changing
+                    // the tile coordinates, otherwise there will be intermittent artifacts
+                    // visible on the map when a tile is recycled in the tile model.
+                    //
+                    // The tileID change switches the tile to the no-image state (and starts tile
+                    // image lookup), effectively blanking the tile. Only after this is done we can update the
+                    // screen coordinates of the tile, to avoid artifacts.
+
+                    // so first step - update tileID
+                    tileID = tileCoords.id
+                    // second step - trigger screen coordinate update
+                    tileX = tileCoords.x
+                    tileY = tileCoords.y
+                }
+
+                // screen coordinates of the tile (upper left corner)
+                x : ((tileX - pinchmap.cornerTileX) * tile.width) + map.offsetX
+                y : ((tileY - pinchmap.cornerTileY) * tile.height) + map.offsetY
+
                 property int ind : index
 
-                width: tileSize;
-                height: tileSize;
-                color: "#c0c0c0";
+                width: pinchmap.tileSize;
+                height: pinchmap.tileSize;
+                border.width : 1
+                //border.color : "#e5e5e5"
+                border.color : pinchmap.gridColor
+                color : pinchmap.backgroundColor
+                /*
+                Text {
+                    anchors.horizontalCenter : parent.horizontalCenter
+                    anchors.verticalCenter : parent.verticalCenter
+                    text : tile_coords.x + "/" + tile_coords.y
+                    font.pixelSize : 24
+                }
+                */
 
-               Repeater {
-                    id: imgs
-                    //property string source: tileUrl(model[0].layerId, tileX, tileY)
-                    property string source
-                    model: pinchmap.layersReady ? pinchmap.layers : null
+                Repeater {
+                    id: tileRepeater
+                    model : pinchmap.layers
                     Tile {
-                        id : tile
-                        tileSize : tileSize
+                        id : tileImage
+                        tileSize : pinchmap.tileSize
                         tileOpacity : layerOpacity
+                        zoomLevel : pinchmap.zoomLevel
                         mapInstance : pinchmap
-                        // TODO: move to function
-                        tileId: pinchmap.name+"/"+layerId+"/"+pinchmap.zoomLevel+"/"+tileX+"/"+tileY
-                        // if tile id changes means that the panning reached a threshold that cased
-                        // a top-level X/Y coordinate switch
-                        // -> this basically means that all columns or rows switch coordinates and
-                        //    one row/column has new coordinates while one column/rwo coordinate
-                        //    set is discarded
-                        // -> like this, we don't have to instantiate and discard a bazillion of
-                        //    tile elements, but instantiate them once and then shuffle them around
-                        // -> tiles are instantiated and removed only if either viewport size or layer
-                        //    count changes
-                        onTileIdChanged: {
-                            // so we are now a different tile :)
-                            // therefore we need to all the asynchronous tile loading properties back
-                            // to the default state and try to load the tile, if it is in the cache
-                            // it will be loaded at once or the asynchronous loading process will start
-                            // * note that any "old" asynchronous loading process still runs and the
-                            //   "new" tile that got the "old" coordinates will get the tile-downloaded
-                            //   notification, which is actually what we want :)
-                            tile.layerName = layerId
-                            tile.error = false
-                            tile.cache = true
-                            tile.retryCount = 0
-                            tile.downloading = false
-                            tile.source = tileUrl(tileId)
-                        }
+                        tileXY : tileID
+                        layerId : pinchmap.layers.get(index).layerId
+                        layerName : pinchmap.layers.get(index).layerName
                     }
                 }
             }
-
         }
 
         SearchMarkers {
@@ -653,6 +879,7 @@ Rectangle {
         }
     }
 
+/*
     Rectangle {
         id: positionErrorIndicator
         visible: false
@@ -665,6 +892,7 @@ Rectangle {
         y: map.y + positionIndicator.t[1] - height/2
         radius: width/2
     }
+*/
 
     Image {
         id: positionIndicator

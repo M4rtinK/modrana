@@ -1,0 +1,31 @@
+new tile display logic
+- fix offset
+- fix position marker & route here marker
+- check POI markers & routing overlay
+-> routing overlay seems OK
+- load tiles during drag if cornerX/cornerY changes changes
+
+- tile instance recycling ? - DONE
+-> eq, reset rather than destroy ? ;-)
+ 1) generate list of what should be on screen before and now, new_list & old_list
+ 2) generate a list of new_items that contains only items that are in
+    new_list but not in old_list
+ 3) iterate over tilesModel:
+    -> if tile is in new_list, do nothing
+    -> if tile not in new_list:
+     -> pop an item from new_items and set x & y accordingly
+     -> if new_items is empty then remove the tile from the tilesModel
+ 4) iterate over new_tiles (if any) and add new tiles to the tilesModel
+    accordingly
+
+- areTilesAvailable() should send a batch notifications for all tiles once it finishes iterating
+  over tile_ids; true for tiles that are available, false for the others - DONE
+
+- idea: seamless zoom - use scaling of previous zoom level to "mask" zooming
+ 0) only trigger real zooming once user stops attempting to zoom in/out
+ 1) keep the tiles that will still be visible after being scaled appropriately
+    visible and add tiles corresponding to the new zoom level
+ 2) remove the tiles from the previous zoom level once the new tiles cover the tile
+    or possibly after a timeout
+
+
