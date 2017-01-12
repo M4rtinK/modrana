@@ -53,7 +53,7 @@ def _check():
 
     try:
         import platform
-        if platform.node == "Sailfish":
+        if platform.node() == "Sailfish":
             return "jolla"
     except:
         log.exception("the Python stdlib platform module is apparently unusable on this platform")
