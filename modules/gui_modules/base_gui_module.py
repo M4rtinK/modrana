@@ -224,49 +224,51 @@ class GUIModule(RanaModule):
         style = {
             "m" : (1, 2)[i], # approximate size multiplier
             "main" : {
-                "multiplier" : (1, 2)[i],
-                "spacing" : (8, 16)[i],
-                "spacingBig" : (16, 32)[i]
+                "multiplier" : (1, 1.5)[i],
+                "spacing" : (8, 12)[i],
+                "spacingBig" : (16, 24)[i]
             },
             "button" : {
                 "selector" : {
-                    "width" : (200, 400)[i],
-                    "height" : (80, 160)[i],
+                    "width" : (200, 300)[i],
+                    "height" : (80, 120)[i],
                     },
                 "icon" : {
-                    "size" : (80, 160)[i]
+                    "size" : (80, 120)[i]
                 },
                 "iconGrid" : {
-                    "size" : (100, 200)[i],
-                    "radius" : (10, 20)[i]
+                    "size" : (100, 150)[i],
+                    "radius" : (10, 15)[i],
+                    "textSizePortrait" : (42, 60)[i],
+                    "textSizeLandscape" : (36, 54)[i]
                 },
                 "generic" : {
-                    "height" : (60, 120)[i]
+                    "height" : (60, 90)[i]
                 }
             },
             "dialog" : {
                 "item" : {
-                    "height" : (80, 160)[i]
+                    "height" : (80, 120)[i]
                 }
             },
 
             "map": {
                 "button": {
-                    "size": (72, 144)[i],
-                    "margin": (16, 32)[i],
-                    "spacing": (16, 32)[i],
+                    "size": (72, 108)[i],
+                    "margin": (16, 24)[i],
+                    "spacing": (16, 24)[i],
                     },
                 "scaleBar" : {
-                    "border" : (2, 4)[i],
-                    "height" : (4, 8)[i],
-                    "fontSize" : (24, 48)[i],
+                    "border" : (2, 3)[i],
+                    "height" : (4, 6)[i],
+                    "fontSize" : (24, 36)[i],
 
                     },
                 },
             "listView" : {
-                "spacing" : (8, 16)[i],
-                "cornerRadius" : (8, 16)[i],
-                "itemBorder" : (20, 40)[i],
+                "spacing" : (8, 24)[i],
+                "cornerRadius" : (8, 12)[i],
+                "itemBorder" : (20, 30)[i],
                 }
         }
         return style
