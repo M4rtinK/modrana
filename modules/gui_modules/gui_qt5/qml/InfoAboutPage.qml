@@ -4,11 +4,9 @@ import "modrana_components"
 
 BasePage {
     id: aboutPage
-    headerText : "modRana"
-    bottomPadding : rWin.c.style.main.spacingBig*2
+    headerText : "modRana " + rWin.platform.modRanaVersion
 
     // asynchronously assign properties
-
     property string payPalUrl : rWin.dcall(
     "modrana.gui.modules.info.getPayPalUrl", [], "", function(v){payPalUrl=v})
 
@@ -25,14 +23,6 @@ BasePage {
     "modrana.gui.modules.info.getAboutText", [], "", function(v){aboutText=v})
 
     content : ContentColumn {
-        Label {
-            id : aboutTitle
-            anchors.horizontalCenter : parent.horizontalCenter
-            text: "<h4>version: " + rWin.platform.modRanaVersion + "</h4>"
-            width : parent.width
-            horizontalAlignment : Text.AlignHCenter
-            wrapMode : Text.Wrap
-        }
         Image {
             width : 120 * rWin.c.style.m
             height : 120 * rWin.c.style.m
