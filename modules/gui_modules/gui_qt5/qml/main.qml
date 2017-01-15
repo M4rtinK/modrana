@@ -382,10 +382,15 @@ ApplicationWindow {
         // initialize localization
         rWin.location.__init__()
 
+        // set screen size
+        // - this needs to be done now so that the correct style constants
+        //   (high-DPI/normal-DPI) are returned later
+        python.call("modrana.gui._set_screen_size", [[Screen.width, Screen.height]])
+
         // load the constants
         // (including the GUI style constants)
         python.call("modrana.gui._getStartupValues", [], rWin.__startup_values_from_modRana)
-    }
+   }
 
     function __startup_values_from_modRana(values) {
         // our Python backend returned the values we needed

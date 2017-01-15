@@ -85,6 +85,7 @@ class QMLGUI(GUIModule):
         self.centeringDisableThreshold = 2048
         self.firstTimeSignal = signal.Signal()
         size = (800, 480) # initial window size
+        self._screen_size = None
 
         # positioning related
         self._pythonPositioning = False
@@ -225,8 +226,7 @@ class QMLGUI(GUIModule):
             return None
 
     def getScreenWH(self):
-        # TODO: implement this
-        pass
+        return self._screen_size
 
     def getModRanaVersion(self):
         """
@@ -398,6 +398,14 @@ class QMLGUI(GUIModule):
             "defaultTileStorageType" : self.modrana.dmod.defaultTileStorageType
         }
         return values
+
+    def _set_screen_size(self, screen_size):
+        """A method called by QML to report current screen size in pixels.
+
+        :param screen_size: screen width and height in pixels
+        :type screen_size: a tuple of integers
+        """
+        self._screen_size = screen_size
 
 
 class Modules(object):
