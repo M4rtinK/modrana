@@ -51,7 +51,7 @@ Item {
             id : iconLabel
             text : icgb.text
             color : rWin.theme.color.icon_button_text
-            font.pixelSize : rWin.inPortrait ? 42 * rWin.c.style.m : 36 * rWin.c.style.m
+            font.pixelSize : rWin.inPortrait ? rWin.c.style.button.iconGrid.textSizePortrait : rWin.c.style.button.iconGrid.textSizeLandscape
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.bottom : parent.bottom
             anchors.bottomMargin : icgb.margin/2

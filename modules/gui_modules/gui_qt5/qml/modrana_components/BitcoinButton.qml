@@ -9,7 +9,7 @@ Rectangle {
     radius : 25
     border.width : 2
     border.color : "white"
-    width : 210 * rWin.c.style.m
+    width : 150 * rWin.c.style.m
     height : rWin.c.style.button.generic.height * 0.85
     property string url : ""
 

@@ -211,6 +211,7 @@ Page {
             var offsetX = pinchmap.canvas.canvasWindow.x
             var offsetY = pinchmap.canvas.canvasWindow.y
             var thispos = (0,0,0)
+            var m = rWin.c.style.m // DPI multiplier
             var messagePointDiameter = 10
             // clear the canvas
             ctx.clearRect(0,0,pinchmap.canvas.width,pinchmap.canvas.height)
@@ -222,7 +223,7 @@ Page {
             // origin into account.
             ctx.translate(pinchmap.width, pinchmap.height)
             if (tabMap.routingEnabled) {
-                ctx.lineWidth = 10
+                ctx.lineWidth = 10 * m
                 ctx.strokeStyle = Qt.rgba(0, 0, 0.5, 0.45)
                 if(rWin.routingStartPos.isValid) {
                     // draw a semi-transparent line from start marker to start of the route
@@ -263,11 +264,12 @@ Page {
                     thispos = routeMessages.get(i)
                     destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
                     //ctx.ellipse(destipos[0]-messagePointDiameter,destipos[1]-messagePointDiameter, messagePointDiameter*2, messagePointDiameter*2)
-                    ctx.arc(destipos[0],destipos[1], 3, 0, 2.0 * Math.PI)
+                    ctx.arc(destipos[0],destipos[1], 3 * m, 0, 2.0 * Math.PI)
                     ctx.stroke()
                 }
 
                 // draw the route
+                ctx.lineWidth = 10 * m
                 ctx.beginPath()
                 for (var i=0; i<routePoints.count; i++) {
                     thispos = routePoints.get(i)
@@ -277,7 +279,7 @@ Page {
                 ctx.stroke()
 
                 // draw the step points
-                ctx.lineWidth = 7
+                ctx.lineWidth = 7 * m
                 ctx.strokeStyle = Qt.rgba(1, 1, 0, 1)
                 ctx.fillStyle = Qt.rgba(1, 1, 0, 1)
                 for (var i=0; i<routeMessages.count; i++) {
@@ -285,7 +287,7 @@ Page {
                     thispos = routeMessages.get(i)
                     destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
                     ctx.beginPath()
-                    ctx.arc(destipos[0],destipos[1], 2, 0, 2.0 * Math.PI)
+                    ctx.arc(destipos[0],destipos[1], 2 * m, 0, 2.0 * Math.PI)
                     ctx.stroke()
                     ctx.fill()
                 }
@@ -300,13 +302,13 @@ Page {
                     ctx.fillStyle = Qt.rgba(1, 0, 0, 1)
                     ctx.moveTo(startX,startY)
                     // inner point
-                    ctx.arc(startX, startY, 3, 0, 2.0 * Math.PI)
+                    ctx.arc(startX, startY, 3 * m, 0, 2.0 * Math.PI)
                     ctx.stroke()
                     ctx.fill()
                     // outer circle
                     ctx.beginPath()
                     ctx.strokeStyle = Qt.rgba(1, 0, 0, 0.95)
-                    ctx.arc(startX, startY, 15, 0, 2.0 * Math.PI)
+                    ctx.arc(startX, startY, 15 * m, 0, 2.0 * Math.PI)
                     ctx.stroke()
                 }
 
@@ -318,13 +320,13 @@ Page {
                     ctx.fillStyle = Qt.rgba(0, 1, 0, 1)
                     ctx.moveTo(destX, destY)
                     // inner point
-                    ctx.arc(destX, destY, 3, 0, 2.0 * Math.PI)
+                    ctx.arc(destX, destY, 3 * m, 0, 2.0 * Math.PI)
                     ctx.stroke()
                     ctx.fill()
                     // outer circle
                     ctx.beginPath()
                     ctx.strokeStyle = Qt.rgba(0, 1, 0, 0.95)
-                    ctx.arc(destX, destY, 15, 0, 2.0 * Math.PI)
+                    ctx.arc(destX, destY, 15 * m, 0, 2.0 * Math.PI)
                     ctx.stroke()
                 }
             }

@@ -7,7 +7,7 @@ Rectangle {
     id : ppButton
     color : ppMA.pressed ? "yellow" : "gold"
     radius : 30
-    width : 210 * rWin.c.style.m
+    width : 150 * rWin.c.style.m
     height : rWin.c.style.button.generic.height
     property string url : ""
 

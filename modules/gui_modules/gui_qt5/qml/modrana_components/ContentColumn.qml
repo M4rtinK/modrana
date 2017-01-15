@@ -7,6 +7,6 @@ Column {
         anchors.topMargin : rWin.c.style.main.spacing
         anchors.leftMargin : rWin.c.style.main.spacing
         anchors.rightMargin : rWin.c.style.main.spacing
-        spacing : rWin.c.style.main.spacingBig * 2
+        spacing : rWin.c.style.main.spacingBig
         width : parent.width
 }

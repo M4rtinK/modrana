@@ -34,9 +34,27 @@ BasePage {
             wrapMode : Text.Wrap
         }
         Image {
+            width : 120 * rWin.c.style.m
+            height : 120 * rWin.c.style.m
+            // If sourceSize is not set an SVG looks blurry - WTF QML ?? :P
+            sourceSize.width: parent.width
+            sourceSize.height: parent.height
             id : aboutModRanaIcon
             anchors.horizontalCenter : parent.horizontalCenter
-            source : "image://python/icon/" + rWin.theme.id +"/modrana.svg"
+            smooth : true
+
+            // TODO: use the Python image provider once Sailfish OS
+            //       has PyOtherSide 1.5, which contains a fix for
+            //       the broken SVG rendering in older versions
+            property string modRanaIconPath : if (rWin.qrc) {
+                "qrc:/themes/" + rWin.theme.id +"/modrana.svg"
+            } else {
+                "file://" + rWin.platform.themesFolderPath + "/" + rWin.theme.id +"/modrana.svg"
+            }
+            source : modRanaIconPath
+            onSourceChanged  : {
+                rWin.log.debug("ICON SOURCE: " + source)
+            }
         }
 
         Label {

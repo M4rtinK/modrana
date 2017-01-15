@@ -25,7 +25,7 @@ Rectangle {
     // #3c60fa outline
     // "#92aaf3" fill
     // "#00004d" main text
-    radius : 10
+    radius : 10 * rWin.c.style.m
     smooth : true
     signal clicked
     signal pressAndHold
@@ -63,6 +63,7 @@ Rectangle {
         anchors.right : parent.right
         anchors.rightMargin : rWin.c.style.main.spacing
         elide : Text.ElideRight
+        fontSizeMode : Text.HorizontalFit
         horizontalAlignment : Text.AlignHCenter
     }
 

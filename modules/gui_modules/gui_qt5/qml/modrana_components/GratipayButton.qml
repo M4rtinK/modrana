@@ -12,7 +12,7 @@ Rectangle {
     }
     radius : 5
     smooth : true
-    width : 180 * rWin.c.style.m
+    width : 150 * rWin.c.style.m
     // height should be slightly smaller than for the flattr button
     height : rWin.c.style.button.generic.height * 0.8
     property string url : ""
@@ -29,7 +29,7 @@ Rectangle {
         anchors.verticalCenter : parent.verticalCenter
         text : "<b>Gratipay</b>"
         color : "white"
-        font.pixelSize : 32 * rWin.c.style.m
+        font.pixelSize : 24 * rWin.c.style.m
     }
     MouseArea {
         id : gpMA
