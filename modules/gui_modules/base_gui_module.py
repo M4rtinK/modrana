@@ -262,7 +262,10 @@ class GUIModule(RanaModule):
                     "border" : (2, 3)[i],
                     "height" : (4, 6)[i],
                     "fontSize" : (24, 36)[i],
-
+                },
+                "tracklogTrace" : {
+                    "width" : (10, 15)[i],
+                    "color" : "blue",
                 },
             },
             "listView" : {
