@@ -232,7 +232,7 @@ class GUIModule(RanaModule):
                 "selector" : {
                     "width" : (200, 300)[i],
                     "height" : (80, 120)[i],
-                    },
+                },
                 "icon" : {
                     "size" : (80, 120)[i]
                 },
@@ -257,19 +257,19 @@ class GUIModule(RanaModule):
                     "size": (72, 108)[i],
                     "margin": (16, 24)[i],
                     "spacing": (16, 24)[i],
-                    },
+                },
                 "scaleBar" : {
                     "border" : (2, 3)[i],
                     "height" : (4, 6)[i],
                     "fontSize" : (24, 36)[i],
 
-                    },
                 },
+            },
             "listView" : {
                 "spacing" : (8, 24)[i],
                 "cornerRadius" : (8, 12)[i],
                 "itemBorder" : (20, 30)[i],
-                }
+            }
         }
         return style
 
