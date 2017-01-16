@@ -9,11 +9,11 @@ Pull requests welcome ! :D
 ## Devices ##
 Confirmed to run on:
 * desktop PCs
+* the Jolla smartphone and other Sailfish OS devices
 * Nokia N900
 * Nokia N9 & N950
 * Neo FreeRunner
 * Smart Q7
-* the Jolla smartphone and other Sailfish OS devices
 * Android 4.0+ devices
 
 ## Dependencies ##
@@ -54,10 +54,12 @@ but currently uses code from many open source projects:
 
 ## Licence ##
 
-ModRana is licenced under GPLv3.
+ModRana is licensed under GPLv3.
 
 ## Resources ##
 
 [modRana project website](http://www.modrana.org)
 [discussion thread on talk.maemo.org](http://talk.maemo.org/showthread.php?t=58861)
 [main source code repository](https://github.com/M4rtinK/modrana)
+[Sailfish OS package on OpenRepos](https://openrepos.net/content/martink/modrana-0)
+[nightly packages for Fedora](https://copr.fedorainfracloud.org/coprs/m4rtink/modrana-nightly/)
