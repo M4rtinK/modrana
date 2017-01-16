@@ -54,11 +54,15 @@ BasePage {
             // first save the tracklog name to the options key,
             // then start logging from the callback once the key is set
             lastUsedTracklogName = tracklogNameField.text
+            // enabled trace drawing
+            // (provided it was not turned off by the switch)
+            rWin.mapPage.drawTracklogTrace = drawTraceSwitch.checked
             rWin.set("logNameEntry", tracklogNameField.text, function(){
                 rtPage.startRecording()
             })
         } else {
             rWin.log.info("TracksRecord: stopping recording")
+            rWin.mapPage.drawTracklogTrace = true
             rWin.python.call("modrana.gui.modules.tracklog.stopLogging", [], function(){
                 rWin.log.info("TracksRecord: recording stopped")
                 tracklogNameField.text = rtPage.lastUsedTracklogName
@@ -180,6 +184,15 @@ BasePage {
                         rWin.python.call("modrana.gui.tracklogs.removeSailfishSymlink", [])
                     }
                 }
+            }
+        }
+        KeyTextSwitch {
+            id : drawTraceSwitch
+            text : qsTr("Draw logging trace")
+            key : "drawTracklogTrace"
+            defaultValue : true
+            onCheckedChanged : {
+                rWin.mapPage.drawTracklogTrace = checked
             }
         }
     }

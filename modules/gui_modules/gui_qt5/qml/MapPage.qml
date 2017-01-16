@@ -77,6 +77,28 @@ Page {
         routingDestinationSet = true
     }
 
+    // tracklog trace related stuff
+    property bool drawTracklogTrace : false
+    onDrawTracklogTraceChanged : {
+        // clear trace points once drawing is turned off
+        if (!drawTracklogTrace) {
+            tracePoints = []
+        }
+    }
+    property var tracePoints : []
+    property int maxTracePoints : 1000
+
+    function addTracePoint(point) {
+        tracePoints.push(point)
+        if (tracePoints.length > maxTracePoints) {
+            // maximum length of the tracklog trace point array
+            // has been reached - remove the first (oldest) point
+            tracePoints.shift()
+        }
+        // trigger canvas redraw
+        pinchmap.canvas.requestPaint()
+    }
+
     Component.onCompleted : {
         rWin.log.info("map page: loaded, loading layers")
         pinchmap.loadLayers()
@@ -122,8 +144,29 @@ Page {
             }
         }
 
-        canvas.visible : tabMap.routingEnabled
-        canvas.onPaint : routing.paintRoute(canvas.getContext("2d"))
+        canvas.visible : tabMap.routingEnabled || tabMap.drawTracklogTrace
+        canvas.onPaint : {
+            var ctx = canvas.getContext("2d")
+            // clear the canvas
+            ctx.clearRect(0,0,pinchmap.canvas.width,pinchmap.canvas.height)
+            ctx.save()
+            // The canvas has its x,y coordinates shifted to the upper left, so that
+            // when it is moved during map panning, the offscreen parts of the route will
+            // be visible and not cut off. Because of this we need to apply a translation
+            // before we start drawing the route and related objects to take the shifted
+            // origin into account.
+            //ctx.translate(pinchmap.width, pinchmap.height)
+            ctx.translate(pinchmap.width, pinchmap.height)
+            tracklogs.paintTrace(ctx)
+            routing.paintRoute(ctx)
+            ctx.restore()
+            // in the future some trace drawing optimizations could be done:
+            // - drawing less points for low zoom levels, as done by the GTK GUI
+            //   or TangoGPS and probably others
+            // - don'T redraw the trace each time, just add another segment,
+            //   only redraw the whole trace if really needed (zooming in/out, etc.)
+            // - don't record points to the array if they are close together
+        }
 
 //        property var redrawStart : 0
 //        canvas.onPaint : {
@@ -156,6 +199,9 @@ Page {
                     updateTimer.start();
                 } else if (tabMap.center) {
                     rWin.log.debug("map page: Update timer preventing another update.");
+                }
+                if (drawTracklogTrace) {
+                   addTracePoint([rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude])
                 }
             }
         }
@@ -213,15 +259,6 @@ Page {
             var thispos = (0,0,0)
             var m = rWin.c.style.m // DPI multiplier
             var messagePointDiameter = 10
-            // clear the canvas
-            ctx.clearRect(0,0,pinchmap.canvas.width,pinchmap.canvas.height)
-            ctx.save()
-            // The canvas has its x,y coordinates shifted to the upper left, so that
-            // when it is moved during map panning, the offscreen parts of the route will
-            // be visible and not cut off. Because of this we need to apply a translation
-            // before we start drawing the route and related objects to take the shifted
-            // origin into account.
-            ctx.translate(pinchmap.width, pinchmap.height)
             if (tabMap.routingEnabled) {
                 ctx.lineWidth = 10 * m
                 ctx.strokeStyle = Qt.rgba(0, 0, 0.5, 0.45)
@@ -330,7 +367,6 @@ Page {
                     ctx.stroke()
                 }
             }
-            ctx.restore()
         }
 
         Connections {
@@ -395,6 +431,24 @@ Page {
                 }
                 pinchmap.canvas.requestPaint()
             })
+        }
+    }
+
+    Item {
+        id : tracklogs
+        function paintTrace(ctx) {
+            if (drawTracklogTrace) {
+                // draw the track logging trace
+                ctx.lineWidth = rWin.c.style.map.tracklogTrace.width
+                ctx.strokeStyle = rWin.c.style.map.tracklogTrace.color
+                ctx.beginPath()
+                //for (var i=0; i<tracePoints.length; i++) {
+                tracePoints.forEach(function (llPoint, pointIndex) {
+                    var xyPoint = pinchmap.getScreenpointFromCoord(llPoint[0],llPoint[1])
+                    ctx.lineTo(xyPoint[0],xyPoint[1])
+                })
+                ctx.stroke()
+            }
         }
     }
 
