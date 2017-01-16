@@ -5,7 +5,6 @@ import UC 1.0
 
 BasePage {
     id : bitcoinPage
-    width : parent.width - 30 * rWin.c.style.m
     headerText: "Bitcoin address"
     property string url : ""
     content : ContentColumn {
@@ -20,7 +19,10 @@ BasePage {
             anchors.horizontalCenter : parent.horizontalCenter
             font.pointSize : 20 * rWin.c.style.m
             height : 48 * rWin.c.style.m
+            width : bitcoinPage.width - 24 * rWin.c.style.m
             text : bitcoinPage.url
+            wrapMode : TextInput.WrapAnywhere
+            horizontalAlignment : TextInput.AlignHCenter
             onTextChanged : {
                 selectAll()
             }
