@@ -79,10 +79,12 @@ Page {
 
     // tracklog trace related stuff
     property bool drawTracklogTrace : false
+    property bool trackRecordingPaused : false
     onDrawTracklogTraceChanged : {
         // clear trace points once drawing is turned off
         if (!drawTracklogTrace) {
             tracePoints = []
+            trackRecordingPaused = false
         }
     }
     property var tracePoints : []
@@ -200,7 +202,7 @@ Page {
                 } else if (tabMap.center) {
                     rWin.log.debug("map page: Update timer preventing another update.");
                 }
-                if (drawTracklogTrace) {
+                if (drawTracklogTrace && !trackRecordingPaused) {
                    addTracePoint([rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude])
                 }
             }

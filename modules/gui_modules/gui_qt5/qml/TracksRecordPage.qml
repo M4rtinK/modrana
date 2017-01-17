@@ -34,11 +34,13 @@ BasePage {
         if (recording) {
             if (paused) {
                 rWin.log.info("TracksRecord: pausing recording")
+                rWin.mapPage.trackRecordingPaused = true
                 rWin.python.call("modrana.gui.modules.tracklog.pauseLogging", [], function(){
                     rWin.log.info("TracksRecord: recording paused")
                 })
             } else {
                 rWin.log.info("TracksRecord: unpausing recording")
+                rWin.mapPage.trackRecordingPaused = false
                 rWin.python.call("modrana.gui.modules.tracklog.unPauseLogging", [], function(){
                     rWin.log.info("TracksRecord: recording unpaused")
                 })
