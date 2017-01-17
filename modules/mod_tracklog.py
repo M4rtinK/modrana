@@ -240,7 +240,7 @@ class Tracklog(RanaModule):
         # now we make the tracklog manager aware, that there is a new log
         loadTl = self.m.get('loadTracklogs', None)
         if loadTl:
-            loadTl.listAvailableTracklogs() #TODO: incremental addition
+            loadTl.list_available_tracklogs() #TODO: incremental addition
 
 
     def pauseLogging(self):

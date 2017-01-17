@@ -331,16 +331,16 @@ class Route(RanaModule):
                     self.llRoute(start, destination)
                     self.set('needRedraw', True)
 
-        elif message == 'storeRoute':
+        elif message == 'store_route':
             load_tracklogs = self.m.get('loadTracklogs', None)
             if load_tracklogs is None:
-                self.log.error("can't store route without the loadTracklog module")
+                self.log.error("can't store route without the load_tracklog module")
                 return
             if not self._directions:
                 self.log.info("the route is empty, so it will not be stored")
                 return
             # TODO: rewrite this when we support more routing providers
-            load_tracklogs.storeRouteAndSetActive(self._directions.points_lle,
+            load_tracklogs.store_route_and_set_active(self._directions.points_lle,
                                                  '',
                                                  'online')
 
@@ -1178,7 +1178,7 @@ class Route(RanaModule):
             menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
             menus.clearMenu('currentRouteTools', "set:menu:route#currentRoute")
             menus.addItem('currentRouteTools', 'tracklog#save as', 'generic',
-                          'route:storeRoute|set:currentTracCat:online|set:menu:tracklogManager#tracklogInfo')
+                          'route:store_route|set:currentTracCat:online|set:menu:tracklogManager#tracklogInfo')
 
             # add turn-by-turn navigation buttons
             tbt = self.m.get('turnByTurn', None)

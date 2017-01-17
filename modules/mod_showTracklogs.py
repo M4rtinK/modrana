@@ -129,7 +129,7 @@ class ShowTracklogs(RanaModule):
 
         visibleTracklogs = self.get('visibleTracklogsDict', {})
         loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
-        loadedTracklogsPathList = loadTl.getLoadedTracklogPathList()
+        loadedTracklogsPathList = loadTl.get_loaded_tracklog_path_list()
 
         # find what tracklogs are not loaded and load them
         notLoaded = filter(lambda x: x not in loadedTracklogsPathList, visibleTracklogs)
@@ -140,7 +140,7 @@ class ShowTracklogs(RanaModule):
             loadTl.loadPathList(notLoaded)
 
         for path in visibleTracklogs.keys():
-            GPXTracklog = loadTl.getTracklogForPath(path)
+            GPXTracklog = loadTl.get_tracklog_for_path(path)
             colorName = visibleTracklogs[path]['colorName']
 
             if self.get('showTracklog', None) == 'simple':
@@ -161,7 +161,7 @@ class ShowTracklogs(RanaModule):
            then return the tracks that do exist """
         loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
         if loadTl:
-            availablePaths = loadTl.getTracklogPathList()
+            availablePaths = loadTl.get_tracklog_path_list()
 
             # look which files exist and which don't
             nonexistent = filter(lambda x: x not in availablePaths, tracks)
@@ -184,7 +184,7 @@ class ShowTracklogs(RanaModule):
         loadTl = self.m.get('loadTracklogs', None)
         if loadTl is None:
             return
-        return loadTl.getActiveTracklogPath()
+        return loadTl.get_active_tracklog_path()
 
     def makeTrackVisible(self, path):
         """
@@ -418,7 +418,7 @@ class ShowTracklogs(RanaModule):
             if loadTl is None:
                 return
 
-            availableTracklogs = loadTl.getTracklogPathList()
+            availableTracklogs = loadTl.get_tracklog_path_list()
 
             visibleTracklogs = self.get('visibleTracklogsDict', {})
 

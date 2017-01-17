@@ -520,7 +520,7 @@ class MapData(RanaModule):
 
         if menuName == 'chooseRouteForDl':
             menus = self.m.get('menu', None)
-            tracks = self.m.get('loadTracklogs', None).getTracklogList()
+            tracks = self.m.get('loadTracklogs', None).get_tracklog_list()
 
             def describeTracklog(index, category, tracks):
                 """describe a tracklog list item"""
@@ -672,7 +672,7 @@ class MapData(RanaModule):
         TODO: this looks kinda weird :)
         """
         loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
-        GPXTracklog = loadTl.getActiveTracklog()
+        GPXTracklog = loadTl.get_active_tracklog()
         size = int(self.get("downloadSize", 4))
         # get all tracklog points
         trackpointsListCopy = map(lambda x: (x.latitude, x.longitude, None), GPXTracklog.trackpointsList[0])[:]

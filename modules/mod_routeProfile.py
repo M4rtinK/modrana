@@ -64,7 +64,7 @@ class RouteProfile(RanaModule):
 
         menus = self.m.get("menu", None)
         loadTl = self.m.get('loadTracklogs', None) # get the tracklog module
-        tracklog = loadTl.getActiveTracklog()
+        tracklog = loadTl.get_active_tracklog()
         if tracklog.elevation == True:
             self.lineChart(cr, tracklog, 0, 0, w, h)
 

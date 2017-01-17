@@ -64,7 +64,7 @@ class TracklogManager(RanaModule):
 
         elif message == 'getElevation':
             self.log.info("getting elevation info for active tracklog")
-            activeTracklog = self.LTModule.getActiveTracklog()
+            activeTracklog = self.LTModule.get_active_tracklog()
             # generate a list of (lat,lon) tuples
             latLonList = map(lambda x: (x.latitude, x.longitude), activeTracklog.trackpointsList[0])
             # look-up elevation data using Geonames asynchronously
@@ -76,7 +76,7 @@ class TracklogManager(RanaModule):
 
         elif message == 'loadTrackProfile':
             # get the data needed for drawing the dynamic route profile in the osd
-            track = self.LTModule.getActiveTracklog()
+            track = self.LTModule.get_active_tracklog()
             self.m.get('showOSD', None).routeProfileData = track.perElevList
 
         elif message == 'unLoadTrackProfile':
@@ -84,20 +84,20 @@ class TracklogManager(RanaModule):
 
         elif message == 'askDeleteActiveTracklog':
             ask = self.m.get('askMenu', None)
-            path = self.LTModule.getActiveTracklogPath()
+            path = self.LTModule.get_active_tracklog_path()
             question = "do you really want to delete:|%s|?" % path
             yesAction = "tracklogManager:deleteActiveTracklog|set:menu:tracklogManager#tracklogManager"
             noAction = "set:menu:tracklogManager#tracklogInfo"
             ask.setupAskYesNo(question, yesAction, noAction)
 
         elif message == 'deleteActiveTracklog':
-            path = self.LTModule.getActiveTracklogPath()
+            path = self.LTModule.get_active_tracklog_path()
             if path:
                 self.deleteTracklog(path)
                 self.set('activeTracklogPath', None)
 
         elif message == 'setActiveTracklogToCurrentCat':
-            path = self.LTModule.getActiveTracklogPath()
+            path = self.LTModule.get_active_tracklog_path()
             currentCategory = self.get('currentTracCat', None)
             if currentCategory:
                 self.log.info("changing category for:\n%s\nto %s" % path, currentCategory)
@@ -122,14 +122,14 @@ class TracklogManager(RanaModule):
         # delete a tracklog
         self.log.info("deleting tracklog:%s", path)
         # from cache
-        self.LTModule.deleteTrackFromCache(path)
+        self.LTModule.delete_tracklog_from_cache(path)
         # from loaded tracklogs
         del self.LTModule.tracklogs[path]
         # delete the tracklog file
         os.remove(path)
 
         # relist all tracklogs
-        self.LTModule.listAvailableTracklogs()
+        self.LTModule.list_available_tracklogs()
 
     def setupCategoriesMenu(self):
         # setup the categories menu
@@ -141,7 +141,7 @@ class TracklogManager(RanaModule):
         nextAction = '|set:menu:tracklogManager#tracklogManager'
         menus.clearMenu(menu, "set:menu:main")
 
-        categories = self.LTModule.getCatList()
+        categories = self.LTModule.get_category_list()
         for category in categories:
             catId = category
             text = category
@@ -189,7 +189,7 @@ class TracklogManager(RanaModule):
 
             # get current category
             cat = self.get('currentTracCat', '')
-            tracksInCatList = self.LTModule.getTracPathsInCat(cat)
+            tracksInCatList = self.LTModule.get_tracklog_paths_for_category(cat)
 
             # One option per row
             for row in (0, 1, 2):
@@ -227,7 +227,7 @@ class TracklogManager(RanaModule):
             menus = self.m.get("menu", None)
             # * draw "escape" button
             menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:tracklogManager#tracklogManager")
-            track = self.LTModule.getActiveTracklog()
+            track = self.LTModule.get_active_tracklog()
             # is there an active tracklog ?
             if track is None:
                 # there is no active tracklog,
@@ -287,11 +287,11 @@ class TracklogManager(RanaModule):
     def setupToolsSubmenu(self):
         # setup the tools submenu
         menus = self.m.get("menu", None)
-        track = self.LTModule.getActiveTracklog()
+        track = self.LTModule.get_active_tracklog()
 
         # is the current track visible ?
         visibleTracklogs = self.get('visibleTracklogsDict', {})
-        currentPath = self.LTModule.getActiveTracklogPath()
+        currentPath = self.LTModule.get_active_tracklog_path()
         isVisible = (currentPath in visibleTracklogs)
 
         menus.clearMenu('tracklogTools', "set:menu:tracklogManager#tracklogInfo")
