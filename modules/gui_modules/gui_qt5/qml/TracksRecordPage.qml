@@ -64,7 +64,7 @@ BasePage {
             })
         } else {
             rWin.log.info("TracksRecord: stopping recording")
-            rWin.mapPage.drawTracklogTrace = true
+            rWin.mapPage.drawTracklogTrace = false
             rWin.python.call("modrana.gui.modules.tracklog.stopLogging", [], function(){
                 rWin.log.info("TracksRecord: recording stopped")
                 tracklogNameField.text = rtPage.lastUsedTracklogName
