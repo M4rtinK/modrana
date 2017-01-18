@@ -322,9 +322,6 @@ class Tracklog(RanaModule):
 
         :returns: dictionary describing current track logging state
         """
-
-        self.log.debug("generating stuff")
-
         pointCount = 0
         units = self.m.get('units', None)
         if self.log1:
