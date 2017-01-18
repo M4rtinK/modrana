@@ -595,6 +595,9 @@ Page {
                 selectRoutingStart = false
                 selectRoutingDestination = false
                 tabMap.routingEnabled = false
+                // make sure the cleared route no longer
+                // shows up on the canvas
+                pinchmap.canvas.requestPaint()
             }
         }
     }
