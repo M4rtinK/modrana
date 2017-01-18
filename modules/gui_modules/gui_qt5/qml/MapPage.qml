@@ -79,26 +79,48 @@ Page {
 
     // tracklog trace related stuff
     property bool drawTracklogTrace : false
-    property bool trackRecordingPaused : false
     onDrawTracklogTraceChanged : {
         // clear trace points once drawing is turned off
-        if (!drawTracklogTrace) {
-            tracePoints = []
+        if (drawTracklogTrace) {
+            // make sure lastTrace point is always set
+            // when trace drawing is going on
+            lastTracePoint = {"latitude" : rWin.lastGoodPos.latitude, "longitude": rWin.lastGoodPos.longitude}
+        } else {
+            clearTracePoints()
             trackRecordingPaused = false
         }
     }
+    property bool trackRecordingPaused : false
     property var tracePoints : []
+    property var lastTracePoint : null
     property int maxTracePoints : 1000
+    // Don't add to trace threshold in meters.
+    // - if a point is less distant from the last point than the threshold
+    //   it will not be added to the list for drawing
+    property real addToTraceThreshold : 1.5
 
     function addTracePoint(point) {
-        tracePoints.push(point)
-        if (tracePoints.length > maxTracePoints) {
-            // maximum length of the tracklog trace point array
-            // has been reached - remove the first (oldest) point
-            tracePoints.shift()
+        // Ignore points under the threshold, as they generally correspond to
+        // standing still/bus waiting on a bus stop, etc.
+        // Drawing them would only result in weird artifacts &
+        // needlessly degrades trace drawing performance.
+        if (F.p2pDistance(lastTracePoint, point) > addToTraceThreshold) {
+            var pointDict = {"latitude" : point.latitude, "longitude": point.longitude}
+            lastTracePoint = pointDict
+            tracePoints.push(pointDict)
+            if (tracePoints.length > maxTracePoints) {
+                // maximum length of the tracklog trace point array
+                // has been reached - remove the first (oldest) point
+                tracePoints.shift()
+            }
+            // trigger canvas redraw
+            pinchmap.canvas.requestPaint()
         }
-        // trigger canvas redraw
-        pinchmap.canvas.requestPaint()
+    }
+
+    function clearTracePoints() {
+       tracePoints = []
+       lastTracePoint = null
     }
 
     Component.onCompleted : {
@@ -203,7 +225,7 @@ Page {
                     rWin.log.debug("map page: Update timer preventing another update.");
                 }
                 if (drawTracklogTrace && !trackRecordingPaused) {
-                   addTracePoint([rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude])
+                    addTracePoint(rWin.lastGoodPos)
                 }
             }
         }
@@ -446,7 +468,7 @@ Page {
                 ctx.beginPath()
                 //for (var i=0; i<tracePoints.length; i++) {
                 tracePoints.forEach(function (llPoint, pointIndex) {
-                    var xyPoint = pinchmap.getScreenpointFromCoord(llPoint[0],llPoint[1])
+                    var xyPoint = pinchmap.getScreenpointFromCoord(llPoint.latitude,llPoint.longitude)
                     ctx.lineTo(xyPoint[0],xyPoint[1])
                 })
                 ctx.stroke()
