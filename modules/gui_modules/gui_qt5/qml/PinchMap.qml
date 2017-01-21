@@ -832,7 +832,7 @@ Rectangle {
         }
     }
 
-    Canvas {
+    MapCanvas {
         id: canvas
         visible: true
 
@@ -844,24 +844,7 @@ Rectangle {
         x : - pinchmap.width
         y : - pinchmap.height
 
-        onVisibleChanged : {
-            if (canvas.visible) {
-                canvas.requestPaint()
-            }
-        }
-
-        Connections {
-            target: canvas.visible ? pinchmap : null
-            onCenterSet: {
-                canvas.requestPaint()
-            }
-            onZoomLevelChanged: {
-                canvas.requestPaint()
-            }
-            onMapPanEnd: {
-                canvas.requestPaint()
-            }
-        }
+        pinchmap : pinchmap
     }
 
     Image {

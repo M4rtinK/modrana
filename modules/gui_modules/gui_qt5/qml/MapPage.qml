@@ -114,7 +114,7 @@ Page {
                 tracePoints.shift()
             }
             // trigger canvas redraw
-            pinchmap.canvas.requestPaint()
+            pinchmap.canvas.requestFullPaint()
         }
     }
 
@@ -166,41 +166,12 @@ Page {
                 layerId: "mapnik"
                 layerOpacity: 1.0
             }
-        }
-
+    }
         canvas.visible : tabMap.routingEnabled || tabMap.drawTracklogTrace
-        canvas.onPaint : {
-            var ctx = canvas.getContext("2d")
-            // clear the canvas
-            ctx.clearRect(0,0,pinchmap.canvas.width,pinchmap.canvas.height)
-            ctx.save()
-            // The canvas has its x,y coordinates shifted to the upper left, so that
-            // when it is moved during map panning, the offscreen parts of the route will
-            // be visible and not cut off. Because of this we need to apply a translation
-            // before we start drawing the route and related objects to take the shifted
-            // origin into account.
-            //ctx.translate(pinchmap.width, pinchmap.height)
-            ctx.translate(pinchmap.width, pinchmap.height)
+        canvas.onFullPaint : {
             tracklogs.paintTrace(ctx)
             routing.paintRoute(ctx)
-            ctx.restore()
-            // in the future some trace drawing optimizations could be done:
-            // - drawing less points for low zoom levels, as done by the GTK GUI
-            //   or TangoGPS and probably others
-            // - don'T redraw the trace each time, just add another segment,
-            //   only redraw the whole trace if really needed (zooming in/out, etc.)
-            // - don't record points to the array if they are close together
         }
-
-//        property var redrawStart : 0
-//        canvas.onPaint : {
-//            redrawStart = new Date().valueOf()
-//            routing.paintRoute(canvas.getContext("2d"))
-//        }
-//        canvas.onPainted : {
-//            var currentTime = new Date().valueOf()
-//            rWin.log.debug("Canvas redraw time: " + (currentTime - redrawStart) + " ms")
-//        }
 
         onZoomLevelChanged : {
             // save zoom level
@@ -418,7 +389,7 @@ Page {
                 if (routingRequestChanged) {
                     // request a refresh of the canvas to
                     // display newly set start/destination point
-                    pinchmap.canvas.requestPaint()
+                    pinchmap.canvas.requestFullPaint()
                 }
             }
         }
@@ -453,7 +424,7 @@ Page {
                 for (var i=0; i<routeMessagePoints.length; i++) {
                     routeMessages.append({"lat": routeMessagePoints[i][0], "lon": routeMessagePoints[i][1], "message": routeMessagePoints[i][3]})
                 }
-                pinchmap.canvas.requestPaint()
+                pinchmap.canvas.requestFullPaint()
             })
         }
     }
@@ -595,9 +566,8 @@ Page {
                 selectRoutingStart = false
                 selectRoutingDestination = false
                 tabMap.routingEnabled = false
-                // make sure the cleared route no longer
-                // shows up on the canvas
-                pinchmap.canvas.requestPaint()
+
+                pinchmap.canvas.requestFullPaint()
             }
         }
     }

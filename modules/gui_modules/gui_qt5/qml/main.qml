@@ -50,6 +50,8 @@ ApplicationWindow {
     }
     property alias locationDebug : locationDebugProp.value
     OptProp {id: locationDebugProp; value : false}
+    property alias pinchmapCanvasDebug : pinchmapCanvasDebugProp.value
+    OptProp {id: pinchmapCanvasDebugProp; value : false}
 
     // logging
     property var log : PythonLog {}
@@ -375,6 +377,7 @@ ApplicationWindow {
         showDebugButtonProp.key = "showQt5GUIDebugButton"
         showUnfinishedFeaturesProp.key = "showQt5GUIUnfinishedFeatures"
         tileDebugProperty.key = "showQt5TileDebug"
+        pinchmapCanvasDebug.key = "pinchmapCanvasDebug"
         tileStorageDebugProperty.key = "tileLoadingDebug"
         locationDebugProp.key = "gpsDebugEnabled"
         keepScreenOnProp.key = "screenBlankingMode"

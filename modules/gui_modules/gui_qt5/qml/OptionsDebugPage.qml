@@ -64,6 +64,13 @@ BasePage {
                 rWin.locationDebug = checked
             }
         }
+        TextSwitch {
+            text : qsTr("Map canvas debugging")
+            checked : rWin.pinchmapCanvasDebug
+            onCheckedChanged : {
+                rWin.pinchmapCanvasDebug = checked
+            }
+        }
         Label {
             text : "Logging"
         }
