@@ -879,13 +879,24 @@ Rectangle {
 
     Image {
         id: positionIndicator
-        source: currentPositionValid ?
-                "image://python/icon/"+ rWin.theme.id +"/position-indicator.png" :
-                "image://python/icon/"+ rWin.theme.id +"/position-indicator-red.png"
+        property string iconName : currentPositionValid ?
+                "position-indicator.svg" :
+                "position-indicator-red.svg"
+
+        // TODO: use Python image provider once PyOtherSide 1.5+ is available on Sailfish OS
+        // That way we can also use only a single copy of the position indicator SVG files.
+        source : if (rWin.qrc) {
+            "qrc:/themes/" + rWin.theme.id +"/modrana.svg"
+        } else {
+            "file://" + rWin.platform.themesFolderPath + "/" + rWin.theme.id + "/" + iconName
+        }
+
         property var t: getMappointFromCoord(currentPositionLat, currentPositionLon)
         x: map.x + t[0] - width/2
         y: map.y + t[1] - height + positionIndicator.width/2
         smooth: true
+        sourceSize.width : 22 * rWin.c.style.m
+        sourceSize.height : 50 * rWin.c.style.m
         visible: showCurrentPosition
         transform: Rotation {
             origin.x: positionIndicator.width/2
