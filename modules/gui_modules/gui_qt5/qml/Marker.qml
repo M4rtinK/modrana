@@ -19,11 +19,11 @@ Rectangle {
         id: label
         visible: !marker.simple
         anchors.left: parent.right
-        anchors.leftMargin: 12
+        anchors.leftMargin: 12 * rWin.c.style.m
         anchors.verticalCenter : parent.verticalCenter
         text: point.name
         style: Text.Outline
         styleColor: "white"
-        font.pixelSize: 24
+        font.pixelSize: 24 * rWin.c.style.m
     }
 }
