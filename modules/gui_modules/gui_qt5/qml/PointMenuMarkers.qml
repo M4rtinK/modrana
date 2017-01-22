@@ -34,7 +34,7 @@ Markers {
             Marker {
                 id : pointMarker
                 point: model
-                targetPoint: markers.mapInstance.getMappointFromCoord(model.latitude, model.longitude)
+                targetPoint: markers.mapInstance.getScreenpointFromCoord(model.latitude, model.longitude)
                 //verticalSpacing: model.numSimilar
                 z: 2000
                 //TODO: use a constant/make this configurable ?

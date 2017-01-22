@@ -476,17 +476,17 @@ Rectangle {
         return deg * (Math.PI /180.0);
     }
 
-    function deg2num(lat, lon) {
+    function deg2num(lat, lon, z) {
         // lat/lon to tile x/y
         var rad = deg2rad(lat % 90);
-        var n = maxTileNo + 1;
+        var n = Math.pow(2, z);
         var xtile = ((lon % 180.0) + 180.0) / 360.0 * n;
         var ytile = (1.0 - Math.log(Math.tan(rad) + (1.0 / Math.cos(rad))) / Math.PI) / 2.0 * n;
         return [xtile, ytile];
     }
 
     function setLatLon(lat, lon, x, y) {
-        var tile = deg2num(lat, lon);
+        var tile = deg2num(lat, lon, zoomLevel);
         var cornerTileFloatX = tile[0] - x / tileSize
         var cornerTileFloatY = tile[1] - y / tileSize
         cornerTileX = Math.floor(cornerTileFloatX);
@@ -530,40 +530,38 @@ Rectangle {
         var realY = y - map.offsetY
         var realTileX = cornerTileX + realX / tileSize;
         var realTileY = cornerTileY + realY / tileSize;
-        return num2deg(realTileX, realTileY);
+        return num2deg(realTileX, realTileY, zoomLevel);
     }
 */
 
     // shorter version without intermediate variables
     function getCoordFromScreenpoint(x, y) {
         return num2deg(cornerTileX + (x - map.offsetX) / tileSize,
-                       cornerTileY + (y - map.offsetY) / tileSize)
+                       cornerTileY + (y - map.offsetY) / tileSize,
+                       zoomLevel)
     }
 
-/*  longer & easier to read version
-
-    function getScreenpointFromCoord(lat, lon) {
-        var tile = deg2num(lat, lon)
-        var realX = (tile[0] - cornerTileX) * tileSize
-        var realY = (tile[1] - cornerTileY) * tileSize
-        var x = realX + map.rootX + map.offsetX
-        var y = realY + map.rootY + map.offsetY
-        return [x, y]
-    }
-*/
-
-    // shorter version with less intermediate variables
-    function getScreenpointFromCoord(lat, lon) {
-        var tile = deg2num(lat, lon)
-        return [((tile[0] - cornerTileX) * tileSize) + map.offsetX,
-                ((tile[1] - cornerTileY) * tileSize) + map.offsetY]
+    // shorter version without intermediate variables @ zoom level
+    function getCoordFromScreenpointAtZ(x, y, z) {
+        return num2deg(cornerTileX + (x - map.offsetX) / tileSize,
+                       cornerTileY + (y - map.offsetY) / tileSize,
+                       z)
     }
 
-
-/*  longer & easier to read version
-
+    // basically easier to discover equivalent to deg2num
     function getMappointFromCoord(lat, lon) {
-        var tile = deg2num(lat, lon)
+        return deg2num(lat, lon, zoomLevel)
+    }
+
+     function getMappointFromCoordAtZ(lat, lon, z) {
+        return deg2num(lat, lon, z)
+    }
+
+
+/*  longer & easier to read version
+
+    function getScreenpointFromCoord(lat, lon) {
+        var tile = deg2num(lat, lon, zoomLevel)
         var realX = ((tile[0] - cornerTileX) * tileSize) + map.offsetX
         var realY = ((tile[1] - cornerTileY) * tileSize) + map.offsetY
         return [realX, realY]
@@ -571,10 +569,44 @@ Rectangle {
 */
 
     // shorter version with less intermediate variables
-    function getMappointFromCoord(lat, lon) {
-        var tile = deg2num(lat, lon)
+    function getScreenpointFromCoord(lat, lon) {
+        var tile = deg2num(lat, lon, zoomLevel)
         return [((tile[0] - cornerTileX) * tileSize) + map.offsetX,
                 ((tile[1] - cornerTileY) * tileSize) + map.offsetY]
+    }
+
+    // short version with ability to specify zoomlevel
+    function getScreenpointFromCoordAtZ(lat, lon, z) {
+        var tile = deg2num(lat, lon, z)
+        return [((tile[0] - cornerTileX) * tileSize) + map.offsetX,
+                ((tile[1] - cornerTileY) * tileSize) + map.offsetY]
+    }
+
+    // The correction is needed when we need to convert map point coordinates
+    // for some zoomlevel to screen coordinates for the current zoom level.
+    // It's basically corner tile XY & zoom difference compensation.
+    // The conversion could of course be done in the map point -> screen point function,
+    // but the general idea is that a lot of points will be converted at once at the same zl
+    // (during route drawing, etc.), meaning that the correction values will be the same
+    // for the whole batch. So we just pre-compute the correction and then use it
+    // for the whole batch of conversions, saving use some computation and especially
+    // the upper left corner tile lookup, which would kinda ruin the whole concept
+    // of using map coordinates when drawing the tiles.
+    function getMappointCorrection(z) {
+        var cornerLL = getCoordFromScreenpoint(0, 0)
+        var cornerXY = getMappointFromCoordAtZ(cornerLL[0], cornerLL[1], z)
+        var zCorrection = Math.pow(2, (zoomLevel-z))
+        return [cornerXY[0], cornerXY[1], zCorrection]
+    }
+
+    // Get screen point for the given mappoint & correction.
+    // The expected use case is for batch conversion of precomputed map coordinates
+    // at some zoom level to screen coordinates for current viewport and zoom level.
+    // In such case the corner tile xy & zoom correction stay the same, so we use
+    // precomputed values via the correction array.
+    function getScreenpointFromMappointCorrected(x, y, correction) {
+        return [((x - correction[0]) * tileSize) * correction[2],
+                ((y - correction[1]) * tileSize) * correction[2]]
     }
 
     function getCenter() {
@@ -585,8 +617,8 @@ Rectangle {
         return (Math.pow(Math.E, aValue)-Math.pow(Math.E, -aValue))/2;
     }
 
-    function num2deg(xtile, ytile) {
-        var n = Math.pow(2, zoomLevel);
+    function num2deg(xtile, ytile, z) {
+        var n = Math.pow(2, z);
         var lon_deg = xtile / n * 360.0 - 180;
         var lat_rad = Math.atan(sinh(Math.PI * (1 - 2 * ytile / n)));
         var lat_deg = lat_rad * 180.0 / Math.PI;
@@ -850,7 +882,7 @@ Rectangle {
     Image {
         id: targetIndicator
         source: "image://python/icon/"+ rWin.theme.id +"/target-indicator-cross.png"
-        property var t: getMappointFromCoord(showTargetAtLat, showTargetAtLon)
+        property var t: getScreenpointFromCoord(showTargetAtLat, showTargetAtLon)
         x: map.x + t[0] - width/2
         y: map.y + t[1] - height/2
 
@@ -891,7 +923,7 @@ Rectangle {
             "file://" + rWin.platform.themesFolderPath + "/" + rWin.theme.id + "/" + iconName
         }
 
-        property var t: getMappointFromCoord(currentPositionLat, currentPositionLon)
+        property var t: getScreenpointFromCoord(currentPositionLat, currentPositionLon)
         x: map.x + t[0] - width/2
         y: map.y + t[1] - height + positionIndicator.width/2
         smooth: true
