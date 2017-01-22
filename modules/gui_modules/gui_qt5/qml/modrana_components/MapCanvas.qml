@@ -12,7 +12,7 @@ Canvas {
 
     onVisibleChanged : {
         if (canvas.visible) {
-            canvas.requestFullPaint()()
+            canvas.requestFullPaint()
         }
     }
 
@@ -65,13 +65,13 @@ Canvas {
     Connections {
             target: canvas.visible ? pinchmap : null
             onCenterSet: {
-                canvas.requestFullPaint()()
+                canvas.requestFullPaint()
             }
             onZoomLevelChanged: {
-                canvas.requestFullPaint()()
+                canvas.requestFullPaint()
             }
             onMapPanEnd: {
-                canvas.requestFullPaint()()
+                canvas.requestFullPaint()
             }
     }
 }
