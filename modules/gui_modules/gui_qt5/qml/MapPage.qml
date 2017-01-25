@@ -105,7 +105,9 @@ Page {
         // Drawing them would only result in weird artifacts &
         // needlessly degrades trace drawing performance.
         if (F.p2pDistance(lastTracePoint, point) > addToTraceThreshold) {
-            var pointDict = {"latitude" : point.latitude, "longitude": point.longitude}
+            var map_coords = pinchmap.getMappointFromCoordAtZ(point.latitude, point.longitude, 15)
+            var pointDict = {"latitude" : point.latitude, "longitude": point.longitude,
+                             "x" : map_coords[0], "y" : map_coords[1]}
             lastTracePoint = pointDict
             tracePoints.push(pointDict)
             if (tracePoints.length > maxTracePoints) {
@@ -252,6 +254,11 @@ Page {
             var offsetX = pinchmap.canvas.canvasWindow.x
             var offsetY = pinchmap.canvas.canvasWindow.y
             var thispos = (0,0,0)
+            // The correction array should be valid for this
+            // painting call, so we can pre compute it and use it
+            // for all the conversions instead computing it again
+            // for each map @ z15 -> screen coordinate conversion
+            var correction = pinchmap.getMappointCorrection(15)
             var m = rWin.c.style.m // DPI multiplier
             var messagePointDiameter = 10
             if (tabMap.routingEnabled) {
@@ -294,8 +301,9 @@ Page {
                 for (var i=0; i<routeMessages.count; i++) {
                     ctx.beginPath()
                     thispos = routeMessages.get(i)
-                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
-                    //ctx.ellipse(destipos[0]-messagePointDiameter,destipos[1]-messagePointDiameter, messagePointDiameter*2, messagePointDiameter*2)
+                    destipos = pinchmap.getScreenpointFromMappointCorrected(thispos.x,
+                                                                            thispos.y,
+                                                                            correction)
                     ctx.arc(destipos[0],destipos[1], 3 * m, 0, 2.0 * Math.PI)
                     ctx.stroke()
                 }
@@ -305,7 +313,9 @@ Page {
                 ctx.beginPath()
                 for (var i=0; i<routePoints.count; i++) {
                     thispos = routePoints.get(i)
-                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                    destipos = pinchmap.getScreenpointFromMappointCorrected(thispos.x,
+                                                                            thispos.y,
+                                                                            correction)
                     ctx.lineTo(destipos[0],destipos[1])
                 }
                 ctx.stroke()
@@ -317,7 +327,9 @@ Page {
                 for (var i=0; i<routeMessages.count; i++) {
                     ctx.beginPath()
                     thispos = routeMessages.get(i)
-                    destipos = pinchmap.getScreenpointFromCoord(thispos.lat,thispos.lon)
+                    destipos = pinchmap.getScreenpointFromMappointCorrected(thispos.x,
+                                                                            thispos.y,
+                                                                            correction)
                     ctx.beginPath()
                     ctx.arc(destipos[0],destipos[1], 2 * m, 0, 2.0 * Math.PI)
                     ctx.stroke()
@@ -414,15 +426,36 @@ Page {
         }
 
         Component.onCompleted: {
+            // maybe move to a worker script in the future ?
             rWin.python.setHandler("routeReceived", function(route, routeMessagePoints){
+                // lets declare the coord variables variable only once
+                // outside of the for loops and then reuse them
+                // - maybe that's faster ? ;-)
+                var ll_coords = (0, 0)
+                var map_coords = (0, 0)
+
                 // clear old route first
                 routePoints.clear()
                 routeMessages.clear()
+                // We also cache map coordinates of the points (at the rather arbitrarily
+                // selected zoom level 15) as map -> screen coordinate conversion *should*
+                // be in general faster than geo -> screen coordinate conversion.
+
                 for (var i=0; i<route.length; i++) {
-                    routePoints.append({"lat": route[i][0], "lon": route[i][1]});
+                    ll_coords = route[i]
+                    // also compute map coordinates for the points for faster drawing
+                    map_coords = pinchmap.getMappointFromCoordAtZ(ll_coords[0], ll_coords[1], 15)
+                    routePoints.append({"lat": ll_coords[0], "lon": ll_coords[1],
+                                        "x": map_coords[0], "y": map_coords[1]})
+
                 }
                 for (var i=0; i<routeMessagePoints.length; i++) {
-                    routeMessages.append({"lat": routeMessagePoints[i][0], "lon": routeMessagePoints[i][1], "message": routeMessagePoints[i][3]})
+                    ll_coords = ([routeMessagePoints[i][0], routeMessagePoints[i][1]])
+                    // also compute map coordinates for the points for faster drawing
+                    map_coords = pinchmap.getMappointFromCoordAtZ(ll_coords[0], ll_coords[1], 15)
+                    routeMessages.append({"lat": ll_coords[0], "lon": ll_coords[1],
+                                          "x": map_coords[0], "y": map_coords[1],
+                                          "message": routeMessagePoints[i][3]})
                 }
                 pinchmap.canvas.requestFullPaint()
             })
@@ -433,13 +466,23 @@ Page {
         id : tracklogs
         function paintTrace(ctx) {
             if (drawTracklogTrace) {
+                // The correction array should be valid for this
+                // painting call, so we can pre compute it and use it
+                // for all the conversions instead computing it again
+                // for each map @ z15 -> screen coordinate conversion
+                var correction = pinchmap.getMappointCorrection(15)
+                // declare the xy variable otuside of the loop
+                var xyPoint = (0, 0)
                 // draw the track logging trace
                 ctx.lineWidth = rWin.c.style.map.tracklogTrace.width
                 ctx.strokeStyle = rWin.c.style.map.tracklogTrace.color
                 ctx.beginPath()
                 //for (var i=0; i<tracePoints.length; i++) {
-                tracePoints.forEach(function (llPoint, pointIndex) {
-                    var xyPoint = pinchmap.getScreenpointFromCoord(llPoint.latitude,llPoint.longitude)
+                tracePoints.forEach(function (tracePoint, pointIndex) {
+                    xyPoint = pinchmap.getScreenpointFromMappointCorrected(tracePoint.x,
+                                                                           tracePoint.y,
+                                                                           correction)
+                    //var xyPoint = pinchmap.getScreenpointFromCoord(llPoint.latitude,llPoint.longitude)
                     ctx.lineTo(xyPoint[0],xyPoint[1])
                 })
                 ctx.stroke()
