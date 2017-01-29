@@ -192,6 +192,15 @@ class LoadTracklogs(RanaModule):
             else: # something went wrong, return None
                 return None
 
+    def get_tracklog_points_for_path(self, path):
+        # used by Qt 5 UI - let's ignore the clusters for now
+        #                   and just return full list of points
+
+        # this should be ideally done better in the future
+        track = self.get_tracklog_for_path(path)
+        track_points = [{'latitude': point.latitude, 'longitude': point.longitude} for point in track.trackpointsList[0]]
+        return track_points
+
     def get_tracklog_list(self):
         if self._tracklog_list:
             return self._tracklog_list
@@ -270,6 +279,31 @@ class LoadTracklogs(RanaModule):
         if not self._category_list:
             self.list_available_tracklogs()
         return self._category_list
+
+    def get_category_dict_list(self):
+        # get dictionary describing tracklog categories
+        category_dict_list = []
+
+        tracklog_folder = self.modrana.paths.getTracklogsFolderPath()
+        for category in self.get_category_list():
+            tracklog_count = 0
+            for item in os.listdir(os.path.join(tracklog_folder, category)):
+                item_path = os.path.join(tracklog_folder, category, item)
+                if os.path.isfile(item_path) and os.path.splitext(item_path)[1].lower() == ".gpx":
+                    tracklog_count += 1
+            category_dict_list.append({"name": category,
+                                       "tracklog_count": tracklog_count})
+        return category_dict_list
+
+    def get_tracklogs_list_for_category(self, category_name):
+        # get list of dictionaries describing tracklogs in a category
+        tracklogs = []
+        for tracklog_dict in self.get_tracklog_paths_for_category(category_name):
+            tracklogs.append({"name" : tracklog_dict["filename"],
+                              "path" : tracklog_dict["path"],
+                              "size" : tracklog_dict["size"]
+                              })
+        return tracklogs
 
     def get_tracklog_paths_for_category(self, cat):
         """Return a list of tracklogs in a given category."""
@@ -401,11 +435,12 @@ class LoadTracklogs(RanaModule):
 
             type = "GPX" #TODO: more formats support
 
-            self.tracklogs[path] = GPXTracklog(track, path, type, self.cache, self.save)
-
+            track = GPXTracklog(track, path, type, self.cache, self.save)
+            self.tracklogs[path] = track
             self.log.info("Loading tracklog \n%s\ntook %1.2f ms", path, (1000 * (clock() - start)))
             if notify:
                 self.sendMessage('notification:loaded in %1.2f ms' % (1000 * (clock() - start)))
+            return track
         else:
             self.log.info("No tracklog file")
 
