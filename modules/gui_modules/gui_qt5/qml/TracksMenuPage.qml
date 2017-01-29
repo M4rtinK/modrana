@@ -12,5 +12,11 @@ IconGridPage {
             icon : "log.png"
             menu : "TracksRecord"
         }
+        ListElement {
+            caption : "List"
+            icon : "list_logs.png"
+            menu : "TracksCategoryList"
+        }
+
     }
 }

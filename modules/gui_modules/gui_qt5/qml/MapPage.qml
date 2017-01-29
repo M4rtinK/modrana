@@ -125,6 +125,33 @@ Page {
        lastTracePoint = null
     }
 
+    // tracklog drawing related stuff
+    property var tracklogPoints : []
+
+    function showTracklog(tracklog) {
+        if (tracklog) {
+            // clear any previous points
+            tracklogPoints = []
+
+            var firstPoint = tracklog[0]
+            // often used variables declared once outside loop
+            var ll_coords = (0, 0)
+            var map_coords = (0, 0)
+            for (var i=0; i<tracklog.length; i++) {
+                ll_coords = tracklog[i]
+                // also compute map coordinates for the points for faster drawing
+                map_coords = pinchmap.getMappointFromCoordAtZ(ll_coords.latitude, ll_coords.longitude, 15)
+                tracklogPoints.push({"x": map_coords[0], "y": map_coords[1]})
+
+                // center the map on the first point of the tracklog
+                showOnMap(firstPoint.latitude, firstPoint.longitude)
+
+                // make sure the tracklog is drawn on the canvas
+                pinchmap.canvas.requestFullPaint()
+            }
+        }
+    }
+
     Component.onCompleted : {
         rWin.log.info("map page: loaded, loading layers")
         pinchmap.loadLayers()
@@ -169,8 +196,9 @@ Page {
                 layerOpacity: 1.0
             }
     }
-        canvas.visible : tabMap.routingEnabled || tabMap.drawTracklogTrace
+        canvas.visible : tabMap.routingEnabled || tabMap.drawTracklogTrace || tabMap.tracePoints
         canvas.onFullPaint : {
+            tracklogs.paintTracklog(ctx)
             tracklogs.paintTrace(ctx)
             routing.paintRoute(ctx)
         }
@@ -464,6 +492,32 @@ Page {
 
     Item {
         id : tracklogs
+
+        function paintTracklog(ctx) {
+            if (tracklogPoints) {
+                // The correction array should be valid for this
+                // painting call, so we can pre compute it and use it
+                // for all the conversions instead computing it again
+                // for each map @ z15 -> screen coordinate conversion
+                var correction = pinchmap.getMappointCorrection(15)
+                // declare the xy variable outside of the loop
+                var xyPoint = (0, 0)
+                // draw the tracklog
+                // TODO: separate style for tracklog drawing
+                ctx.lineWidth = rWin.c.style.map.tracklogTrace.width
+                //ctx.strokeStyle = rWin.c.style.map.tracklogTrace.color
+                ctx.strokeStyle = "red"
+                ctx.beginPath()
+                tracklogPoints.forEach(function (trackPoint, pointIndex) {
+                    xyPoint = pinchmap.getScreenpointFromMappointCorrected(trackPoint.x,
+                                                                           trackPoint.y,
+                                                                           correction)
+                    ctx.lineTo(xyPoint[0],xyPoint[1])
+                })
+                ctx.stroke()
+            }
+        }
+
         function paintTrace(ctx) {
             if (drawTracklogTrace) {
                 // The correction array should be valid for this
