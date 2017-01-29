@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Sample of a Rana module.
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Copyright 2007, Oliver White
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 from core import geo
 from core import utils
@@ -25,9 +25,9 @@ import os
 import glob
 
 try:
-    import cPickle as pickle # Python 2
+    import cPickle as pickle  # Python 2
 except ImportError:
-    import pickle # Python 3
+    import pickle  # Python 3
 import shutil
 from time import clock
 from time import gmtime, strftime
@@ -44,8 +44,7 @@ class LoadTracklogs(RanaModule):
 
     def __init__(self, *args, **kwargs):
         RanaModule.__init__(self, *args, **kwargs)
-        self.tracklogs = {} # dictionary of all loaded tracklogs, path is the key
-        #self.set('tracklogs', self.tracklogs) # now we make the list easily acessible to other modules
+        self.tracklogs = {}  # dictionary of all loaded tracklogs, path is the key
         self.cache = {}
         self._tracklog_list = []
         self._tracklog_path_list = []
@@ -96,7 +95,7 @@ class LoadTracklogs(RanaModule):
         tracklogFolderPath = self.modrana.paths.getTracklogsFolderPath()
         if tracklogFolderPath is None:
             self.log.error("can't get tracklog sub path - tracklog folder path is unknown")
-            return None # tracklog folder path is unknown
+            return None  # tracklog folder path is unknown
         else:
             TFSubPath = os.path.join(tracklogFolderPath, subPath)
             utils.createFolderPath(TFSubPath)
@@ -187,9 +186,9 @@ class LoadTracklogs(RanaModule):
         else:
             # try to load the track
             track = self.load_tracklog(path)
-            if track: # return the loaded track
+            if track:  # return the loaded track
                 return track
-            else: # something went wrong, return None
+            else:  # something went wrong, return None
                 return None
 
     def get_tracklog_points_for_path(self, path):
@@ -230,19 +229,17 @@ class LoadTracklogs(RanaModule):
         tf = self.modrana.paths.getTracklogsFolderPath()
         # does the tracklog folder exist ?
         if tf is None or not os.path.exists(tf):
-            return # no tracklog folder, nothing to list
+            return  # no tracklog folder, nothing to list
             # get the available directories,
         # each directory represents a category
         currentFolders = os.listdir(tf)
         # leave just folders (that are not hidden)
-        currentFolders = list(filter(lambda x:
-                                os.path.isdir(os.path.join(tf, x)) and not x.startswith('.'),
-                                currentFolders))
+        currentFolders = list(filter(lambda x: os.path.isdir(os.path.join(tf, x)) and not x.startswith('.'), currentFolders))
         # add files from all available folders
         availableFiles = []
         pathList = []
         for folder in currentFolders:
-            #TODO: support other tracklogs
+            # TODO: support other tracklogs
             folderFiles = glob.glob(os.path.join(tf, folder, '*.gpx'))
             folderFiles.extend(glob.glob(os.path.join(tf, folder, '*.GPX')))
             # remove possible folders
@@ -260,8 +257,7 @@ class LoadTracklogs(RanaModule):
                         'lastModified': lastModified,
                         'size': size,
                         'type': extension[1:],
-                        'cat': cat
-                }
+                        'cat': cat}
                 availableFiles.append(item)
             pathList.extend(folderFiles)
 
@@ -299,9 +295,9 @@ class LoadTracklogs(RanaModule):
         # get list of dictionaries describing tracklogs in a category
         tracklogs = []
         for tracklog_dict in self.get_tracklog_paths_for_category(category_name):
-            tracklogs.append({"name" : tracklog_dict["filename"],
-                              "path" : tracklog_dict["path"],
-                              "size" : tracklog_dict["size"]
+            tracklogs.append({"name": tracklog_dict["filename"],
+                              "path": tracklog_dict["path"],
+                              "size": tracklog_dict["size"]
                               })
         return tracklogs
 
@@ -310,7 +306,6 @@ class LoadTracklogs(RanaModule):
         if not self._tracklog_list:
             self.list_available_tracklogs()
         return list(filter(lambda x: x['cat'] == cat, self._tracklog_list))
-
 
     def setTracklogPathCategory(self, path, category):
         pass
@@ -393,7 +388,6 @@ class LoadTracklogs(RanaModule):
         self._clean_cache()
         self.sendMessage('notification:%d tracks loaded in %1.2f ms#1' % (count, elapsed))
 
-
     def load_tracklog(self, path, notify=True):
         """Load a GPX file to datastructure."""
         # is the cache loaded
@@ -418,14 +412,14 @@ class LoadTracklogs(RanaModule):
         if notify:
             self.sendMessage('notification:loading %s#1' % path)
 
-        if file: # TODO: add handling of other than GPX files
+        if file:  # TODO: add handling of other than GPX files
             # import the GPX module only when really needed
             from upoints import gpx
 
-            track = gpx.Trackpoints() # create new Trackpoints object
+            track = gpx.Trackpoints()  # create new Trackpoints object
             # lets assume we have only GPX 1.1 files TODO: 1.1 and 1.0
             try:
-                track.import_locations(file, "1.1") # load a gpx file into it
+                track.import_locations(file, "1.1")  # load a gpx file into it
             except Exception:
                 self.log.exception("loading tracklog failed")
                 if notify:
@@ -433,7 +427,7 @@ class LoadTracklogs(RanaModule):
                 return
             file.close()
 
-            type = "GPX" #TODO: more formats support
+            type = "GPX"  # TODO: more formats support
 
             track = GPXTracklog(track, path, type, self.cache, self.save)
             self.tracklogs[path] = track
@@ -470,7 +464,6 @@ class LoadTracklogs(RanaModule):
         # TODO: store to more formats ?
         return self.store_tracklog(newTracklog, filename, cat, "GPX")
 
-
     def store_tracklog(self, tracklog, filename, cat, type, refresh="True"):
         """Store tracklog and return the resulting path."""
         folder = self.modrana.paths.getTracklogsFolderPath()
@@ -491,9 +484,6 @@ class LoadTracklogs(RanaModule):
                 xmlTree.write(f)
                 f.close()
             except Exception:
-                import sys
-
-                e = sys.exc_info()[1]
                 self.log.exception("saving tracklog failed")
                 self.sendMessage('notification:Error: saving tracklog failed#3')
                 return None
@@ -553,15 +543,15 @@ class Tracklog():
     """A basic class representing a tracklog."""
 
     def __init__(self, trackpointsList, filename, type):
-        self.trackpointsList = trackpointsList # here will be the actual list of trackpoints
-        self.filename = filename # the filename as used when loading the list from file
+        self.trackpointsList = trackpointsList  # here will be the actual list of trackpoints
+        self.filename = filename  # the filename as used when loading the list from file
         self.type = type
         # tracklog types: (for now)
         # 'gpx'= a GPX tracklog
         # 'kml'= a KML tracklog
         # 'nmea' = a NMEA log file
-        self.tracklogName = filename # custom name for the tracklog, by default the filename
-        self.tracklogDescription = "" # description of the tracklog
+        self.tracklogName = filename  # custom name for the tracklog, by default the filename
+        self.tracklogDescription = ""  # description of the tracklog
 
     def getFilename(self):
         return self.filename
@@ -590,16 +580,13 @@ class Tracklog():
         """return length of the tracklog if known, None else"""
         return None
 
-import logging
-log = logging.getLogger("GPXTracklog")
-
 class GPXTracklog(Tracklog):
     """A class representing a GPX tracklog."""
 
     def __init__(self, trackpointsList, filename, type, cache, save):
         Tracklog.__init__(self, trackpointsList, filename, type)
         Tracklog.type = 'GPX'
-        self.routeInfo = None # a dictionary for storing route information
+        self.routeInfo = None  # a dictionary for storing route information
         # TODO: set this automatically
 
         filename = self.filename
@@ -628,38 +615,37 @@ class GPXTracklog(Tracklog):
 
         else:
             gpx_log.info("* creating clusters,routeInfo and perElevList: %s", filename)
-            clusterDistance = 5 # cluster points to clusters about 5 kilometers in diameter
+            clusterDistance = 5  # cluster points to clusters about 5 kilometers in diameter
             self.clusters = []
 
             try:
-                rawClusters = geo.clusterTrackpoints(trackpointsList, clusterDistance) # we cluster the points
-                for cluster in rawClusters: # now we find for each cluster a circle encompassing all points
+                rawClusters = geo.clusterTrackpoints(trackpointsList, clusterDistance)  # we cluster the points
+                for cluster in rawClusters:  # now we find for each cluster a circle encompassing all points
                     (centreX, centreY, radius) = geo.circleAroundPointCluster(cluster)
                     self.clusters.append(ClusterOfPoints(cluster, centreX, centreY, radius))
 
                 self.checkElevation()
 
-                if self.elevation == True:
+                if self.elevation is True:
                     self.getPerElev()
                 else:
                     self.perElevList = None
             except Exception:
-                log.exception("tracklog post-processing failed")
+                gpx_log.exception("tracklog post-processing failed")
 
             ci = CacheItem(self.clusters, self.routeInfo, self.perElevList)
             cache[filename] = ci
 
-
     def modified(self):
         """the tracklog has been modified, recount all the statistics and clusters"""
         # TODO: implement this ? :D
-        self.checkElevation() # update the elevation statistics
-        if self.elevation == True:
-            self.getPerElev() # update the periodic elevation data
+        self.checkElevation()  # update the elevation statistics
+        if self.elevation is True:
+            self.getPerElev()  # update the periodic elevation data
 
     def checkElevation(self):
         pointsWithElevation = list(filter(lambda x: x.elevation is not None, self.trackpointsList[0]))
-        if pointsWithElevation: # do we have some points with known elevation ?
+        if pointsWithElevation:  # do we have some points with known elevation ?
             self.elevation = True
             self.routeInfo = {}
             # there we have the points, that contain the highest, lowest, first and last point
@@ -695,13 +681,12 @@ class GPXTracklog(Tracklog):
         this can also mean, that some info that we didn't load to the tree will be lost
         also attributes that were changed after the initial load will be written in the current (changed) state
         """
-        f = open(self.filename, "w") # open the old file
-        xmlTree = self.trackpointsList.export_gpx_file() # get the element tree
-        xmlTree.write(f) # overwrite the old file with the new structure
+        f = open(self.filename, "w")  # open the old file
+        xmlTree = self.trackpointsList.export_gpx_file()  # get the element tree
+        xmlTree.write(f)  # overwrite the old file with the new structure
         gpx_log.info("%s has been replaced by the current in memory version", self.filename)
-        del self.cache[self.filename] # the file has been modified, so it must be cached again
-        self.save() # save the cache to disk
-
+        del self.cache[self.filename]  # the file has been modified, so it must be cached again
+        self.save()  # save the cache to disk
 
     def getPerElev(self):
         self.perElevList = geo.perElevList(self.trackpointsList)
@@ -720,8 +705,8 @@ class ClusterOfPoints():
     """A basic class representing a cluster of nearby points."""
 
     def __init__(self, pointsList, centreX, centreY, radius):
-        self.pointsList = pointsList # points in the cluster
+        self.pointsList = pointsList  # points in the cluster
         """coordinates of the circle encompassing all points"""
         self.centreX = centreX
         self.centreY = centreY
-        self.radius = radius #radius of the circle
+        self.radius = radius  # radius of the circle
