@@ -136,7 +136,7 @@ class LoadTracklogs(RanaModule):
         self.log.info("** Loading tracklog cache")
         start = clock()
         try:
-            f = open(self.get_tracklog_cache_path(), 'r')
+            f = open(self.get_tracklog_cache_path(), 'rb')
             self.cache = pickle.load(f)
             f.close()
         except Exception:
@@ -226,9 +226,9 @@ class LoadTracklogs(RanaModule):
         # each directory represents a category
         currentFolders = os.listdir(tf)
         # leave just folders (that are not hidden)
-        currentFolders = filter(lambda x:
+        currentFolders = list(filter(lambda x:
                                 os.path.isdir(os.path.join(tf, x)) and not x.startswith('.'),
-                                currentFolders)
+                                currentFolders))
         # add files from all available folders
         availableFiles = []
         pathList = []
@@ -275,7 +275,7 @@ class LoadTracklogs(RanaModule):
         """Return a list of tracklogs in a given category."""
         if not self._tracklog_list:
             self.list_available_tracklogs()
-        return filter(lambda x: x['cat'] == cat, self._tracklog_list)
+        return list(filter(lambda x: x['cat'] == cat, self._tracklog_list))
 
 
     def setTracklogPathCategory(self, path, category):
@@ -377,7 +377,7 @@ class LoadTracklogs(RanaModule):
         file = None
 
         try:
-            file = open(path, 'r')
+            file = open(path, 'rt')
         except Exception:
             self.log.exception("loading tracklog failed: %s", path)
 
@@ -555,6 +555,8 @@ class Tracklog():
         """return length of the tracklog if known, None else"""
         return None
 
+import logging
+log = logging.getLogger("GPXTracklog")
 
 class GPXTracklog(Tracklog):
     """A class representing a GPX tracklog."""
@@ -594,17 +596,20 @@ class GPXTracklog(Tracklog):
             clusterDistance = 5 # cluster points to clusters about 5 kilometers in diameter
             self.clusters = []
 
-            rawClusters = geo.clusterTrackpoints(trackpointsList, clusterDistance) # we cluster the points
-            for cluster in rawClusters: # now we find for each cluster a circle encompassing all points
-                (centreX, centreY, radius) = geo.circleAroundPointCluster(cluster)
-                self.clusters.append(ClusterOfPoints(cluster, centreX, centreY, radius))
+            try:
+                rawClusters = geo.clusterTrackpoints(trackpointsList, clusterDistance) # we cluster the points
+                for cluster in rawClusters: # now we find for each cluster a circle encompassing all points
+                    (centreX, centreY, radius) = geo.circleAroundPointCluster(cluster)
+                    self.clusters.append(ClusterOfPoints(cluster, centreX, centreY, radius))
 
-            self.checkElevation()
+                self.checkElevation()
 
-            if self.elevation == True:
-                self.getPerElev()
-            else:
-                self.perElevList = None
+                if self.elevation == True:
+                    self.getPerElev()
+                else:
+                    self.perElevList = None
+            except Exception:
+                log.exception("tracklog post-processing failed")
 
             ci = CacheItem(self.clusters, self.routeInfo, self.perElevList)
             cache[filename] = ci
@@ -618,7 +623,7 @@ class GPXTracklog(Tracklog):
             self.getPerElev() # update the periodic elevation data
 
     def checkElevation(self):
-        pointsWithElevation = filter(lambda x: x.elevation is not None, self.trackpointsList[0])
+        pointsWithElevation = list(filter(lambda x: x.elevation is not None, self.trackpointsList[0]))
         if pointsWithElevation: # do we have some points with known elevation ?
             self.elevation = True
             self.routeInfo = {}
