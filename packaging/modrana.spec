@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.53.5
+Version: 0.54.1
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -125,6 +125,44 @@ fi
 %endif
 
 %changelog
+* Mon Jan 30 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.1-1
+- Add support for showing GPX tracklogs (martin.kolman)
+- Refactoring and cleanup (martin.kolman)
+- Add getters for the Qt 5 GUI (martin.kolman)
+- Some loadTracklog fixes (martin.kolman)
+- Add the list_logs icon (martin.kolman)
+- Use map coordinates when drawing route and logging traces (martin.kolman)
+- Improve coordinate conversion functions (martin.kolman)
+- Fix some typos (martin.kolman)
+- Scale also POI label text size according to DPI (martin.kolman)
+- Scale POI markers according to DPI (martin.kolman)
+- DPI scaling for the position indicator (martin.kolman)
+- Add support for map canvas redraw debugging (martin.kolman)
+- Actually stop drawing the trace when logging is stopped (martin.kolman)
+- Disable a debug log message (martin.kolman)
+- Repaint canvas once route clear button is pressed (martin.kolman)
+- Filter logging trace points before drawing (martin.kolman)
+- Pause trace drawing when track recording is paused (martin.kolman)
+- Refactor the loadTracklogs module a bit (martin.kolman)
+- Merge branch 'master-draw_track_logging_trace' (martin.kolman)
+- Add support for tracklog trace drawing (martin.kolman)
+- Fix formatting of the GUI style constants dictionary (martin.kolman)
+- Fixup the README a bit (martin.kolman)
+- Fix layout of the Bitcoin page (martin.kolman)
+- Show modRana version in page header (martin.kolman)
+- Fix various high DPI issues (martin.kolman)
+- Fix high DPI mode style constants (martin.kolman)
+- Report screen size from QML to Python (martin.kolman)
+- Fix Sailfish OS detection (martin.kolman)
+- Merge branch 'master-better_tile_display' (martin.kolman)
+- Fix coordinate conversion functions (martin.kolman)
+- Update tiles when panning (martin.kolman)
+- Fix offset computation that runs when pan ends (martin.kolman)
+- Work around a bug in the Sailfish OS version of Qt5 (martin.kolman)
+- Comment out the position error indicator for now (martin.kolman)
+- Improved tile display in Qt 5 GUI (martin.kolman)
+- Use proper tile download status indication constant (martin.kolman)
+
 * Wed Jan 04 2017 Martin Kolman <martin.kolman@gmail.com> - 0.53.5-1
 - Use a slightly lighter background for the Sailfish OS icon (martin.kolman)
 
