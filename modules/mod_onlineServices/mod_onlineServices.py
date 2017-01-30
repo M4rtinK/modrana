@@ -108,8 +108,13 @@ class OnlineServices(RanaModule):
                                radius=radius)
 
     def localSearchAsync(self, term, callback, around=None, maxResults=20, sensor='false'):
-        provider = online_providers.GoogleLocalSearch()
-        # we use the Google Local Search backend at the moment
+        if self.get("localSearchGoogleEnabled"):
+            provider = online_providers.GoogleLocalSearch()
+        elif self.get("localSearchOSMScoutServerEnabled"):
+            provider = offline_providers.OSMScoutServerLocalSearch()
+        else:
+            provider = online_providers.GoogleLocalSearch()
+
         radius = int(self.get("localSearchRadius", constants.DEFAULT_LOCAL_SEARCH_RADIUS))
         provider.searchAsync(callback, term=term, around=around, maxResults=maxResults,
                              sensor=sensor, radius=radius)

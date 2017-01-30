@@ -34,5 +34,30 @@ BasePage {
                 }
             }
         }
+        Label {
+            text : qsTr("Local search")
+        }
+        KeyTextSwitch {
+            id : googleLocalSearchSwitch
+            text : qsTr("Google")
+            key : "localSearchGoogleEnabled"
+            defaultValue : false
+            onCheckedChanged : {
+                if (checkedValid) {
+                    osmScoutServerLocalSearchSwitch.checked = !checked
+                }
+            }
+        }
+        KeyTextSwitch {
+            id: osmScoutServerLocalSearchSwitch
+            text : qsTr("OSM Scout Server")
+            key : "localSearchOSMScoutServerEnabled"
+            defaultValue : false
+            onCheckedChanged : {
+                if (checkedValid) {
+                    googleLocalSearchSwitch.checked = !checked
+                }
+            }
+        }
     }
 }
