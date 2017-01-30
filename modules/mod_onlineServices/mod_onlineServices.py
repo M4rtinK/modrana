@@ -30,6 +30,7 @@ from . import geocoding
 from . import geonames
 from . import local_search
 from . import online_providers
+from . import offline_providers
 
 import logging
 log = logging.getLogger("mod.onlineServices")
@@ -75,7 +76,13 @@ class OnlineServices(RanaModule):
 
     def geocodeAsync(self, address, callback):
         """Asynchronous geocoding"""
-        provider = online_providers.GeocodingNominatim()
+        # get appropriate provider
+        if self.get("placeSearchNominatimEnabled"):
+            provider = online_providers.GeocodingNominatim()
+        elif self.get("placeSearchOSMScoutServerEnabled"):
+            provider = offline_providers.GeocodingOSMScoutServer()
+        else:
+            provider = online_providers.GeocodingNominatim()
         #provider = online_providers.TestingProvider()
 
         provider.searchAsync(callback, term=address)
