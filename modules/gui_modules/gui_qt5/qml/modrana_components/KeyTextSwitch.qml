@@ -16,6 +16,7 @@ import UC 1.0
 TextSwitch {
     property string key
     property bool defaultValue : null
+    property bool checkedValid : true
 
     id : keyTextSwitch
 
@@ -27,11 +28,13 @@ TextSwitch {
             rWin.log.warning("KeyTextSwitch for " + keyTextSwitch.key + " has no default value")
         }
         rWin.get(keyTextSwitch.key, keyTextSwitch.defaultValue, function(value) {
+            checkedValid = false
             if (value) {
                 keyTextSwitch.checked = true
             } else {
                 keyTextSwitch.checked = false
             }
+            checkedValid = true
         })
     }
 
