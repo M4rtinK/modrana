@@ -7,4 +7,57 @@ import "modrana_components"
 BasePage {
     id: poiPage
     headerText : "POI"
+
+    content : ContentColumn {
+        Label {
+            text : qsTr("Place search")
+        }
+        KeyTextSwitch {
+            id : nominatimSwitch
+            text : qsTr("Nominatim")
+            key : "placeSearchNominatimEnabled"
+            defaultValue : false
+            onCheckedChanged : {
+                if (checkedValid) {
+                    osmScoutServerSwitch.checked = !checked
+                }
+            }
+        }
+        KeyTextSwitch {
+            id: osmScoutServerSwitch
+            text : qsTr("OSM Scout Server")
+            key : "placeSearchOSMScoutServerEnabled"
+            defaultValue : false
+            onCheckedChanged : {
+                if (checkedValid) {
+                    nominatimSwitch.checked = !checked
+                }
+            }
+        }
+        Label {
+            text : qsTr("Local search")
+        }
+        KeyTextSwitch {
+            id : googleLocalSearchSwitch
+            text : qsTr("Google")
+            key : "localSearchGoogleEnabled"
+            defaultValue : false
+            onCheckedChanged : {
+                if (checkedValid) {
+                    osmScoutServerLocalSearchSwitch.checked = !checked
+                }
+            }
+        }
+        KeyTextSwitch {
+            id: osmScoutServerLocalSearchSwitch
+            text : qsTr("OSM Scout Server")
+            key : "localSearchOSMScoutServerEnabled"
+            defaultValue : false
+            onCheckedChanged : {
+                if (checkedValid) {
+                    googleLocalSearchSwitch.checked = !checked
+                }
+            }
+        }
+    }
 }
