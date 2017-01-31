@@ -49,6 +49,7 @@ THREAD_REVERSE_GEOCODING = "modRanaReverseGeocoding"
 THREAD_LOCAL_SEARCH_GOOGLE = "modRanaLocalSearchGoogle"
 THREAD_ROUTING_ONLINE_GOOGLE = "modRanaRoutingOnlineGoogle"
 THREAD_ROUTING_OFFLINE_MONAV = "modRanaRoutingOfflineMonav"
+THREAD_ROUTING_OFFLINE_OSM_SCOUT_SERVER = "modRanaRoutingOfflineOSMScoutServer"
 THREAD_GPSD_CONSUMER = "modRanaGPSDConsumer"
 # tile down-/loading
 THREAD_TILE_DOWNLOAD_MANAGER = "modRanaTileDownloadManager"
@@ -111,6 +112,7 @@ ROUTING_PROVIDER_GOOGLE = "GoogleDirections"
 ROUTING_PROVIDER_MONAV_SERVER = "MonavServer"
 ROUTING_PROVIDER_MONAV_LIGHT = "MonavLight"
 ROUTING_PROVIDER_ROUTINO = "Routino"
+ROUTING_PROVIDER_OSM_SCOUT = "OSMScoutServer"
 
 ROUTING_PROVIDER_NAMES = {
     ROUTING_PROVIDER_GOOGLE : "Google Directions",

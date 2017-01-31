@@ -27,6 +27,10 @@ BasePage {
                     text : "Monav - on device"
                     value : "MonavLight"
                 }
+                ListElement {
+                    text : "OSM Scout Server - on device"
+                    value : "OSMScoutServer"
+                }
             }
             onItemChanged : {
                 rWin.log.info("setting routing provider: " + routingProviderCb.item.value)

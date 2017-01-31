@@ -481,6 +481,13 @@ class Route(RanaModule):
                 waypoints,
                 route_params=route_params
             )
+        elif provider_id == constants.ROUTING_PROVIDER_OSM_SCOUT:
+            provider = routing_providers.OSMScoutServerRouting()
+            provider.searchAsync(
+                callback,
+                waypoints,
+                route_params=route_params
+            )
         else:
             self.log.error("unknown routing provider ID: %s", provider_id)
 
