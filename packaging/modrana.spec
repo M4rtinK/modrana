@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.54.1
+Version: 0.54.2
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -125,6 +125,16 @@ fi
 %endif
 
 %changelog
+* Tue Jan 31 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.2-1
+- Rename Address search to Place search (martin.kolman)
+- Merge branch 'master-osm_scout_server_routing' (martin.kolman)
+- Add support for using the OSM Scout Server for routing (martin.kolman)
+- Add support for converting OSM Scout Server routing result JSON to a way (martin.kolman)
+- Merge branch 'master-osm_scout_server_POI_search' (martin.kolman)
+- Add OSM Scout Server local search support (martin.kolman)
+- Add support for OSM Scout based place search (martin.kolman)
+- Automatic/user triggered changed signal differentiation (martin.kolman)
+
 * Mon Jan 30 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.1-1
 - Add support for showing GPX tracklogs (martin.kolman)
 - Refactoring and cleanup (martin.kolman)
