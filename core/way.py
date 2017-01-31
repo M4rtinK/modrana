@@ -4,6 +4,7 @@ from __future__ import with_statement # for python 2.5
 import csv
 import os
 import threading
+import itertools
 import core.exceptions
 import core.paths
 from core import geo
@@ -447,6 +448,30 @@ class Way(object):
         else:
             return None
 
+    @classmethod
+    def from_osm_scout_json(cls, result):
+        """Convert OSM Scout Server routig result json to a way"""
+        if result:
+            routePoints = []
+            # get route as (lat, lon, None)
+            route_lle_tuples = list(itertools.zip_longest(result["lat"], result["lng"], [None]))
+            # create a way from the lle tuples
+            way = cls(route_lle_tuples)
+
+            way.duration = result["summary"]["time"]
+            way._setLength(result["summary"]["length"])
+
+            # get turns from the json result
+            turns = []
+            for maneuver in result.get("maneuvers", []):
+                lat = maneuver["lat"]
+                lon = maneuver["lng"]
+                description = maneuver.get("verbal_pre_transition_instruction", "")
+                turns.append(TurnByTurnPoint(lat, lon, message=description))
+            way.add_message_points(turns)
+            return way
+        else:
+            return None
 
 class AppendOnlyWay(Way):
     """A way subclass that is optimized for efficient incremental file storage

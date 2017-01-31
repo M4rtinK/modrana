@@ -5,6 +5,14 @@ from core import constants
 from core.way import Way
 from core.backports import six
 
+try:  # Python 2
+    from urllib import urlencode
+    from urllib2 import urlopen, Request, HTTPError, URLError
+except ImportError:  # Python 3
+    from urllib.request import urlopen, Request
+    from urllib.parse import urlencode
+    from urllib.error import HTTPError, URLError
+
 try:
     import json
 except ImportError:
@@ -14,6 +22,8 @@ import logging
 log = logging.getLogger("mod.routing.providers")
 
 from core.providers import RoutingProvider, DummyController, RouteParameters, RoutingResult
+
+OSM_SCOUT_SERVER_ROUTING_URL = "http://localhost:8553/v1/route?"
 
 class MonavServerRouting(RoutingProvider):
     """Provider that does offline point to point routing
@@ -278,20 +288,51 @@ def _googleDirections(start, destination, waypoints, params):
             route = None
         return route, returnCode, errorMessage
 
+class OSMScoutServerRouting(RoutingProvider):
+    """Provider that does offline point to point routing
+       using the Monav offline routing server API.
+    """
 
+    def __init__(self):
+        threadName = constants.THREAD_ROUTING_OFFLINE_OSM_SCOUT_SERVER
+        RoutingProvider.__init__(self, threadName=threadName)
 
+    def search(self, waypoints, route_params=None, controller=DummyController()):
+        routingStart = time.time()
+        controller.status = "OSM Scout Server routing"
+        try:
+            route_type = "car" # car directions are the default
+            if route_params.routeMode == constants.ROUTE_BIKE:
+                route_type = "bicycle"
+            elif route_params.routeMode == constants.ROUTE_PEDESTRIAN:
+                route_type = "foot"
 
+            # TODO: support for middle points
+            start = waypoints[0]
+            destination = waypoints[-1]
 
-
-
-
-
-
-
-
-
-
-
+            params = {
+                'type': route_type,
+                'p[0][lat]': "%f" % start.lat,
+                'p[0][lng]': "%f" % start.lon,
+                'p[1][lat]': "%f" % destination.lat,
+                'p[1][lng]': "%f" % destination.lon,
+                'radius': 10000,  #TODO: make this configurable
+                'gpx' : '0',
+            }
+            queryUrl = OSM_SCOUT_SERVER_ROUTING_URL + urlencode(params)
+            reply = urlopen(queryUrl)
+            if reply:
+                # json in Python 3 really needs it encoded like this
+                replyData = reply.read().decode("utf-8")
+                jsonReply = json.loads(replyData)
+                route = Way.from_osm_scout_json(jsonReply)
+                return RoutingResult(route,
+                                     route_params,
+                                     constants.ROUTING_SUCCESS,
+                                     lookupDuration=time.time() - routingStart)
+        except Exception:
+            log.exception("OSM Scout Server routing: failed with exception")
 
 
 
