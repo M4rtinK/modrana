@@ -12,7 +12,7 @@ IconGridPage {
         ListElement {
             caption : "Address"
             icon : "signpost.png"
-            menu : "Address"
+            menu : "Place"
         }
         ListElement {
             caption : "Wikipedia"
