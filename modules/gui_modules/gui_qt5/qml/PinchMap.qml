@@ -176,6 +176,8 @@ Rectangle {
 
     WorkerScript {
         id : updateTilesModelWorker
+        property bool workerInitialized: false
+        property var replayMessages : []
         source : "workers/update_tiles_model.js"
         onMessage: {
             // update the shouldBeOnScreen dict with data based
@@ -201,6 +203,21 @@ Rectangle {
             }
         }
 
+        Component.onCompleted: {
+            rWin.log.debug("Tile model worker script has been initialized.")
+            updateTilesModelWorker.workerInitialized = true
+            // Try to replay a messages that might have been
+            // stored due to worker script not being initialized yet.
+            // Ignoring such messages might result in no map tiles being shown.
+            if (replayMessages != []) {
+                rWin.log.debug("Replaying deferred messages to tile model worker script.")
+                for (var i=0; i<replayMessages.length; i++) {
+                    rWin.log.debug("Replaying message nr.: " + (i+1))
+                    updateTilesModelWorker.sendMessage(replayMessages[i])
+                }
+                replayMessages = []
+            }
+        }
     }
 
     function updateTilesModel() {
@@ -216,16 +233,28 @@ Rectangle {
             tileRequestTimer.stop()
             tileRequestTimerPause = true
             // start the asynchronous tile model update
-            updateTilesModelWorker.sendMessage(
-                {
+            if (updateTilesModelWorker.workerInitialized) {
+                updateTilesModelWorker.sendMessage(
+                    {
+                        cornerX : pinchmap.cornerTileX,
+                        cornerY : pinchmap.cornerTileY,
+                        tilesX : pinchmap.numTilesX,
+                        tilesY : pinchmap.numTilesY,
+                        tilesModel : pinchmap.tilesModel,
+                        shouldBeOnScreen : pinchmap.shouldBeOnScreen
+                    }
+                )
+            } else {
+                rWin.log.debug("Worker script not yet initialized.")
+                updateTilesModelWorker.replayMessages.push({
                     cornerX : pinchmap.cornerTileX,
                     cornerY : pinchmap.cornerTileY,
                     tilesX : pinchmap.numTilesX,
                     tilesY : pinchmap.numTilesY,
                     tilesModel : pinchmap.tilesModel,
                     shouldBeOnScreen : pinchmap.shouldBeOnScreen
-                }
-            )
+                })
+            }
         }
     }
 
