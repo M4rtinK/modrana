@@ -10,9 +10,9 @@ IconGridPage {
     model : ListModel {
         id : testModel
         ListElement {
-            caption : "Address"
+            caption : "Place"
             icon : "signpost.png"
-            menu : "Place"
+            menu : "Address"
         }
         ListElement {
             caption : "Wikipedia"
