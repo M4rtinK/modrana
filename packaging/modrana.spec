@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.54.2
+Version: 0.54.3
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -125,6 +125,10 @@ fi
 %endif
 
 %changelog
+* Wed Feb 01 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.3-1
+- Possible fix for no tiles being shown at startup (martin.kolman)
+- Fix place search (martin.kolman)
+
 * Tue Jan 31 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.2-1
 - Rename Address search to Place search (martin.kolman)
 - Merge branch 'master-osm_scout_server_routing' (martin.kolman)
