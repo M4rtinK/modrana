@@ -169,8 +169,15 @@ Rectangle {
     //   handlers it should not slow down Python -> QML message
     //   handling
     Component.onCompleted: {
+        rWin.log.debug("PINCHMAP COMPLETED")
+        rWin.log.debug(pinchmap.width)
+        rWin.log.debug(pinchmap.height)
+        rWin.log.debug(pinchmap.numTilesX)
+        rWin.log.debug(pinchmap.numTilesY)
+
         rWin.python.setHandler("tileDownloaded:" + pinchmap.name, pinchmap.tileDownloadedCB)
         // instantiate the nested backing data model for tiles
+        rWin.log.debug("tile downloaded - update tiles model")
         updateTilesModel()
     }
 
@@ -180,6 +187,7 @@ Rectangle {
         property var replayMessages : []
         source : "workers/update_tiles_model.js"
         onMessage: {
+            rWin.log.debug("message from worker script")
             // update the shouldBeOnScreen dict with data based
             // on the tiles model update
             pinchmap.shouldBeOnScreen = messageObject.shouldBeOnScreen
@@ -198,6 +206,7 @@ Rectangle {
                 // just in case that the screen & map geometry
                 // changed since this asynchronous tile model
                 // update has been triggered
+                rWin.log.debug("another update needed - update tiles model")
                 pinchmap.updateTilesModel()
                 anotherTilesModelUpdateNeeded = false
             }
@@ -222,11 +231,13 @@ Rectangle {
 
     function updateTilesModel() {
         // trigger asynchronous tile model update
+        rWin.log.debug("update tiles model")
         if (tilesModelUpdateRunning) {
             // skip duplicate update requests but remember at least
             // one has been requested and run one mor asynchronous tile model
             // update once the current one finishes
             anotherTilesModelUpdateNeeded = true
+            rWin.log.debug("update tiles model - already running")
         } else {
             tilesModelUpdateRunning = true
             // turn off the tile requests timer until the tiles model update is done
@@ -234,6 +245,7 @@ Rectangle {
             tileRequestTimerPause = true
             // start the asynchronous tile model update
             if (updateTilesModelWorker.workerInitialized) {
+                rWin.log.debug("update tiles model - sending message to worker")
                 updateTilesModelWorker.sendMessage(
                     {
                         cornerX : pinchmap.cornerTileX,
@@ -313,10 +325,12 @@ Rectangle {
     }
 
     onCornerTileXChanged: {
+        rWin.log.debug("CTX - update tiles model")
         updateTilesModel()
     }
 
     onCornerTileYChanged: {
+        rWin.log.debug("CTY - update tiles model")
         updateTilesModel()
     }
 
@@ -535,6 +549,7 @@ Rectangle {
         } else {
             updateCenter();
         }
+        rWin.log.debug("set lat lon - update tiles model")
         updateTilesModel()
     }
 

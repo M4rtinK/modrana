@@ -13,7 +13,7 @@ WorkerScript.onMessage = function(message) {
     var maxCornerX = cornerX + tilesX - 1
     var maxCornerY = cornerY + tilesY - 1
 
-    /*
+
     console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     console.log("UPDATE TILES MODEL")
     console.log("COUNT: " + message.tilesModel.count)
@@ -24,7 +24,7 @@ WorkerScript.onMessage = function(message) {
     console.log("maxCornerX: " + maxCornerX)
     console.log("maxCornerY: " + maxCornerY)
     console.log("INITIAL COUNT: " + message.tilesModel.count)
-    */
+
 
     // tiles that should be on the screen due to the new coordinate update
     var newScreenContent = {}
@@ -32,17 +32,17 @@ WorkerScript.onMessage = function(message) {
     // were updated)
     var newTiles = []
     // find what new tiles are needed
-    //var newSCCount = 0
-    //var newTilesCount = 0
+    var newSCCount = 0
+    var newTilesCount = 0
     for (var cx = cornerX; cx<=maxCornerX; cx++) {
         for (var cy = cornerY; cy<=maxCornerY; cy++) {
             var tileId = cx + "/" + cy
             newScreenContent[tileId] = true
-            //newSCCount++
+            newSCCount++
             if (!(tileId in message.shouldBeOnScreen)) {
                 // this a new tile that was not on screen before the coordinate update
                 newTiles.push({"x" : cx, "y" : cy, "id" : tileId})
-                //newTilesCount++
+                newTilesCount++
             }
         }
     }
@@ -57,29 +57,29 @@ WorkerScript.onMessage = function(message) {
     //      the tile item & it's delegate instead of destroying it and creating a new one
     //   2) if newTiles is empty just remove the item, which also destroys the delegate
 
-    //var iterations = 0
-    //var removed = 0
-    //var recycledCount = 0
+    var iterations = 0
+    var removed = 0
+    var recycledCount = 0
 
     for (var i=0;i<message.tilesModel.count;i++){
-        //iterations++
+        iterations++
         var tile = message.tilesModel.get(i)
         if (tile != null) {
             if (!(tile.tile_coords.id in newScreenContent)) {
                 // check if we can recycle this tile by recycling it into one
                 // of the new tiles that should be displayed
                 var newTile = newTiles.pop()
-                //console.log("RECYCLING: " + tile.tile_coords.id + " to " + newTile.id)
+                console.log("RECYCLING: " + tile.tile_coords.id + " to " + newTile.id)
                 if (newTile) {
-                    //recycledCount++
+                    recycledCount++
                     // recycle the tile by setting the coordinates to values for a new tile
                     message.tilesModel.set(i, {"tile_coords" : newTile})
                 } else {
                     // no tiles to recycle into, so just remove the tile
                     message.tilesModel.remove(i)
                     i--
-                    //console.log("REMOVING: " + tile.tile_coords)
-                    //removed++
+                    console.log("REMOVING: " + tile.tile_coords)
+                    removed++
                 }
             }
         }
@@ -90,11 +90,11 @@ WorkerScript.onMessage = function(message) {
     // - the viewport has been enlarged and more tiles in total are now visible than before
     // If no new tiles are added to the tilesMode, it usually means that the viewport is the
     // same (all tiles are recycled) or has even been shrunk.
-    //var tilesAdded = 0
+    var tilesAdded = 0
     for (var i=0; i < newTiles.length; i++){
         newTile = newTiles[i]
         message.tilesModel.append({"tile_coords" : newTile})
-        //tilesAdded++
+        tilesAdded++
     }
 
     // send the changes to the tiles model in the main QML context by
@@ -103,7 +103,7 @@ WorkerScript.onMessage = function(message) {
     // notify the main QML context that we are done
     WorkerScript.sendMessage({shouldBeOnScreen : message.shouldBeOnScreen})
 
-    /*
+
     console.log("NEW SCREEN CONTENT: " + newSCCount)
     console.log("NEW TILES: " + newTilesCount)
     console.log("ITERATIONS: " + iterations)
@@ -113,5 +113,5 @@ WorkerScript.onMessage = function(message) {
     console.log("UPDATE TILES MODEL DONE")
     console.log("TILE MODEL COUNT: " + message.tilesModel.count)
     console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    */
+
 }
