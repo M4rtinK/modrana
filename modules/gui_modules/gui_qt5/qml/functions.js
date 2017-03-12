@@ -103,16 +103,7 @@ function p2pDistanceString(point1, point2) {
    var lon1 = point1.longitude
    var lat2 = point2.latitude
    var lon2 = point2.longitude
-   var mDistance = getDistanceTo(lat1, lon1, lat2, lon2)
-
-   //TODO: imperial units
-
-   if (mDistance >= 1000) {
-        var kmDistance = mDistance/1000.0
-        return kmDistance.toFixed(0) + " km"
-   } else {
-        return mDistance.toFixed(0) + " m"
-   }
+   return formatDistance(getDistanceTo(lat1, lon1, lat2, lon2), 1)
 }
 
 String.prototype.trunc =
