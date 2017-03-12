@@ -3,6 +3,7 @@
 import QtQuick 2.0
 import UC 1.0
 import ".."
+import "../modrana_components"
 import "../functions.js" as F
 
 HeaderPage {
@@ -43,6 +44,13 @@ HeaderPage {
             for (var i=0; i<results.length; i++) {
                 pointLW.model.append(results[i]);
             }
+            // first set distance for all results
+            pointLW.setDistance()
+            // then sort them by the distance
+            pointLW.model.sort()
+            // TODO: we might want to re-do the sort
+            //       when position changes or when the
+            //       results screen is re-visited
             searchPage._searchInProgress = false
         })
     }
@@ -146,17 +154,33 @@ HeaderPage {
         anchors.rightMargin : rWin.c.style.main.spacing/2.0
         height : searchPage.availableHeight
         spacing : rWin.c.style.listView.spacing
-        model : ListModel {
+        model : SortableListModel {
            id : resultsModel
+           // we want to sort the search results by distance
+           // TODO: maybe an option to turn this OFF and use the
+           //       ordering from the search provider ?
+           //       In some cases that could be the preferred option.
+           //       Or maybe a UI option in on the page to switch
+           //       how the results are sorted.
+           sortKeyName : "mDistance"
         }
         clip : true
         VerticalScrollDecorator {}
+
+        function setDistance(result) {
+            // set distance from current position for all results in the list
+            for (var i=0; i<model.count; i++) {
+                model.setProperty(i, "mDistance", F.p2pDistance(model.get(i),
+                                                  rWin.lastGoodPos))
+            }
+        }
+
         delegate : ThemedBackgroundRectangle {
             id : resultDelegate
             width : pointLW.width
             height : contentC.height + rWin.c.style.listView.itemBorder
             // a string describing distance from current position to the result
-            property string distanceString : F.p2pDistanceString(model, rWin.lastGoodPos)
+            property string distanceString : F.formatDistance(model.mDistance, 1)
 
             onClicked : {
                 rWin.log.info("search:" + model.name + " clicked")
