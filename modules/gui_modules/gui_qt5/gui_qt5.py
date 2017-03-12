@@ -70,7 +70,8 @@ def point2dict(point):
         "latitude" : point.lat,
         "longitude" : point.lon,
         "elevation" : point.elevation,
-        "highlight" : False
+        "highlight" : False,
+        "mDistance" : 0  # will be filled in on QML side
     }
 
 
@@ -459,17 +460,6 @@ class Search(object):
 
         :param list results: address search results
         """
-        # try to sort local search results by distance
-        # TODO: make this configurable
-        if searchId == "local":
-            pos = self.gui.get("pos", None)
-            if pos:
-                distanceList = []
-                for result in results:
-                    distanceList.append((geo.distanceP2LL(result,pos[0], pos[1]), result))
-                distanceList.sort()
-                results = map(lambda x: x[1], distanceList)
-        # covert the Points in the results to a list of dicts
         resultList = []
         for result in results:
             resultList.append(point2dict(result))
