@@ -78,12 +78,12 @@ class MonavServerRouting(RoutingProvider):
             elif result.type == result.LOOKUP_FAILED:
                 return RoutingResult(None, route_params, constants.ROUTING_LOOKUP_FAILED)
             elif result.type == result.ROUTE_FAILED:
-                RoutingResult(None, route_params, constants.ROUTING_ROUTE_FAILED)
+                return RoutingResult(None, route_params, constants.ROUTING_ROUTE_FAILED)
             else:
                 return RoutingResult(None, route_params)
         else:
             log.error("no Monav routing data - can't route")
-            RoutingResult(None, route_params, constants.ROUTING_NO_DATA)
+            return RoutingResult(None, route_params, constants.ROUTING_NO_DATA)
 
 
 class MonavLightRouting(RoutingProvider):
@@ -141,12 +141,12 @@ class MonavLightRouting(RoutingProvider):
             elif result.type == result.TARGET_LOOKUP_FAILED:
                 return RoutingResult(None, route_params, constants.ROUTING_TARGET_LOOKUP_FAILED)
             elif result.type == result.ROUTE_FAILED:
-                RoutingResult(None, route_params, constants.ROUTING_ROUTE_FAILED)
+                return RoutingResult(None, route_params, constants.ROUTING_ROUTE_FAILED)
             else:
                 return RoutingResult(None, route_params)
         else:
             log.error("no Monav routing data - can't route")
-            RoutingResult(None, route_params, constants.ROUTING_NO_DATA)
+            return RoutingResult(None, route_params, constants.ROUTING_NO_DATA)
 
 
 class GoogleRouting(RoutingProvider):
