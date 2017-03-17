@@ -577,6 +577,7 @@ class Route(RanaModule):
         if result.route and result.returnCode == constants.ROUTING_SUCCESS:
             # process and save routing results
             self._route_lookup_duration = result.lookupDuration
+            self.log.info("routing finished succesfully in %1.2f s", self._route_lookup_duration)
 
             # set start and destination
             start = result.route.get_point_by_index(0)
