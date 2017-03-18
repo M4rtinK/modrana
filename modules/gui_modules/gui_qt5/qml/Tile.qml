@@ -9,12 +9,12 @@ Item {
     property real tileOpacity : 1.0
     property alias source : img.source
     property var tileXY : ""
-    property string tileId : mapInstance.name+"/"+tile.layerId+"/"+pinchmap.zoomLevel+"/"+tileXY
+    property string tileId : mapInstance.name+"/"+tile.mapLayerId+"/"+pinchmap.zoomLevel+"/"+tileXY
     property string oldTileId : ""
     property int retryCount : 0
     property bool error : false
-    property string layerId : ""
-    property string layerName : ""
+    property string mapLayerId : ""
+    property string mapLayerName : ""
     property bool downloading : false
     property bool available : false
     property int zoomLevel : 15
@@ -126,7 +126,7 @@ Item {
         // TODO: use a constant ?
         property string retryString : tile.retryCount ? "Downloading... (" + tile.retryCount + "/5)" : "Downloading..."
         property string statusString : tile.error == true ? "dl failed" : retryString
-        text : tile.layerName + " : " + statusString
+        text : tile.mapLayerName + " : " + statusString
     }
     // debug status text
     /*

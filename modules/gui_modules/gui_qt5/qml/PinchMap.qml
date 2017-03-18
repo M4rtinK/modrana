@@ -425,8 +425,8 @@ Rectangle {
 
     function setLayerById(layerNumber, newLayerId) {
         // set layer ID and name
-        rWin.log.debug("pinchmap: setting layer by id " + layerNumber + " to " + newLayerId + "/" + newLayerName)
         var newLayerName = rWin.layerDict[newLayerId].label
+        rWin.log.debug("pinchmap: setting layer by id " + layerNumber + " to " + newLayerId + "/" + newLayerName)
         layers.setProperty(layerNumber, "layerId", newLayerId)
         layers.setProperty(layerNumber, "layerName", newLayerName)
         saveLayers()
@@ -862,8 +862,8 @@ Rectangle {
                         zoomLevel : pinchmap.zoomLevel
                         mapInstance : pinchmap
                         tileXY : tileID
-                        layerId : pinchmap.layers.get(index).layerId
-                        layerName : pinchmap.layers.get(index).layerName
+                        mapLayerId : layerId
+                        mapLayerName : layerName
                     }
                 }
             }
