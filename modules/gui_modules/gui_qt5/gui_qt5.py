@@ -45,6 +45,7 @@ from core import utils
 from core import paths
 
 import logging
+no_prefix_log = logging.getLogger()
 log = logging.getLogger("mod.gui.qt5")
 qml_log = logging.getLogger("mod.gui.qt5.qml")
 
@@ -120,6 +121,11 @@ class QMLGUI(GUIModule):
             "icon" : IconImageProvider(self),
             "tile" : TileImageProvider(self),
         }
+
+        # log what version of PyOtherSide we are using
+        # - we log this without prefix as this shows up early
+        #   during startup, so it looks nicer that way :-)
+        no_prefix_log.info("using PyOtherSide %s", pyotherside.version)
 
         ## register the actual callback, that
         ## will call the appropriate provider base on
