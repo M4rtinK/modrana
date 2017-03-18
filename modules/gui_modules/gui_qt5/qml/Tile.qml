@@ -109,8 +109,7 @@ Item {
         id: img
         width: tile.tileSize
         height: tile.tileSize
-        //opacity: tile.downloading ? 0.0 : tile.tileOpacity
-        //opacity: img.source == "" ? 0.0 : tile.tileOpacity
+        opacity: tile.downloading ? 0.0 : tile.tileOpacity
         asynchronous : true
     }
 
