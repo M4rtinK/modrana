@@ -14,7 +14,7 @@ BasePage {
         }
         KeyTextSwitch {
             id : nominatimSwitch
-            text : qsTr("Nominatim")
+            text : qsTr("Nominatim (online)")
             key : "placeSearchNominatimEnabled"
             defaultValue : false
             onCheckedChanged : {
@@ -25,7 +25,7 @@ BasePage {
         }
         KeyTextSwitch {
             id: osmScoutServerSwitch
-            text : qsTr("OSM Scout Server")
+            text : qsTr("OSM Scout Server (on device)")
             key : "placeSearchOSMScoutServerEnabled"
             defaultValue : false
             onCheckedChanged : {
@@ -39,7 +39,7 @@ BasePage {
         }
         KeyTextSwitch {
             id : googleLocalSearchSwitch
-            text : qsTr("Google")
+            text : qsTr("Google (online)")
             key : "localSearchGoogleEnabled"
             defaultValue : false
             onCheckedChanged : {
@@ -50,7 +50,7 @@ BasePage {
         }
         KeyTextSwitch {
             id: osmScoutServerLocalSearchSwitch
-            text : qsTr("OSM Scout Server")
+            text : qsTr("OSM Scout Server (on device)")
             key : "localSearchOSMScoutServerEnabled"
             defaultValue : false
             onCheckedChanged : {
