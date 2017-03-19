@@ -105,8 +105,9 @@ Properties
     This property reports if the given page is the current active page - it is visible 
     and can be interacted with.
     A few things to note about the **isActive** property:
-    * stays true even if device screen is turned off with Silica backend
-    * currently always true with the Controls backend.
+
+    - stays true even if device screen is turned off with Silica backend
+    - currently always true with the Controls backend.
 
     If you want stop processing when *the application* is not active, use the
     *Qt.application.state* property, possibly combined with the **isActive**
@@ -567,18 +568,18 @@ Adding a new element
 
 When a new element is to be added to Universal Components, the following actions should be done:
 
-* add the element to all backends or at least to as many as possible
-* add the element the **qmldir** files for all backend where it was added
-* add the element specification to this document, but only if supported by all non-experimental backends
+- add the element to all backends or at least to as many as possible
+- add the element the **qmldir** files for all backend where it was added
+- add the element specification to this document, but only if supported by all non-experimental backends
 
 Backends currently considered non-experimental:
 
-* Controls
-* Silica
+- Controls
+- Silica
 
 Experimental backends:
 
-* Glacier
+- Glacier
 
 
 Adding a new element property/signal/method
