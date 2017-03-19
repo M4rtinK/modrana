@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.54.3
+Version: 0.54.4
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -125,6 +125,51 @@ fi
 %endif
 
 %changelog
+* Sun Mar 19 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.4-1
+- Switch README to rst & fix formatting (martin.kolman)
+- Clear on-map point menus when map is clicked (martin.kolman)
+- Fix map canvas debug option not being persistent (martin.kolman)
+- Make top level elements rotate correctly on Sailfish OS (martin.kolman)
+- Improve the application window orientation API (martin.kolman)
+- List Ubuntu Components as an experimental backend (martin.kolman)
+- Fix bullet point formatting (martin.kolman)
+- Merge commit '7c81795d2c27b96730c606b5c88ec880d18c5773' (martin.kolman)
+- Note POI search method types (martin.kolman)
+- Log PyOtherSide version during startup (martin.kolman)
+- Fix layer opacity setting (martin.kolman)
+- Fix map layer switching (martin.kolman)
+- Log how long it took to find a route (martin.kolman)
+- Fix returning of results for Monav-based offline routing (martin.kolman)
+- Merge branch 'master-sort_search_results_by_distance' (martin.kolman)
+- Sort search results by distance (martin.kolman)
+- Accommodate QML side sorting by distance (martin.kolman)
+- Use formatDistance instead of custom implementation (martin.kolman)
+- Add sortable QML ListModel element variant (martin.kolman)
+- Merge pull request #4 from r0kk3rz/master (martin.kolman)
+- Preliminary Ubuntu Touch Support (r0kk3rz)
+- Fix method markup in the docs (martin.kolman)
+- Add a note about the API spec to the README (martin.kolman)
+- reduce TOC depth (martin.kolman)
+- Remove the Authors section (martin.kolman)
+- Fix the table of contents (martin.kolman)
+- Add Authors section to the API spec (martin.kolman)
+- Add Universal Components API specification document (martin.kolman)
+- Remove a leftover modRana reference (martin.kolman)
+- Add the Tensor application to the list of Universal Component users (martin.kolman)
+- Update TODO (martin.kolman)
+- Fix a typo (martin.kolman)
+- Highlight QML code example (martin.kolman)
+- Add the TopMenu element (martin.kolman)
+- Add PlatformFlickable and PlatformListView elements (martin.kolman)
+- Add a Popup component (martin.kolman)
+- Remove remaining modRana rWin dependencies (martin.kolman)
+- Convert all variant usage to var in UC (martin.kolman)
+- Fix the animate argument semantics (martin.kolman)
+- Correctly report window portrait status with Controls backend (martin.kolman)
+- Remove a debugging message (martin.kolman)
+- Show the content of the ComboBox description property (martin.kolman)
+- Add the description property for ComboBox with Controls backend (martin.kolman)
+
 * Wed Feb 01 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.3-1
 - Possible fix for no tiles being shown at startup (martin.kolman)
 - Fix place search (martin.kolman)
