@@ -240,65 +240,114 @@ ApplicationWindow {
         }
     }
 
-    Button {
-        anchors.top : parent.top
-        anchors.right : parent.right
-        visible : rWin.showDebugButton
-        text : "debug"
-        onClicked : {
-            rWin.log.info("# starting the Python Debugger (PDB) shell")
-            rWin.log.info("# to continue program execution, press c")
-            // make sure the pdb module is imported
-            python.importModule_sync('pdb')
-            // start debugging
-            python.call_sync('pdb.set_trace', [])
+    Item {
+        id: rotator
+        // Why is this needed ?
+        //
+        // Because on some platforms, such as Sailfish OS with Silica components as a backend
+        // the ApplicationWindow does not rotate when device orientation changes, only the
+        // page stack & pages on the stack do. Ony the other hand the ApplicationWindow
+        // provided by Qt Quick Controls *does* rotate on device orientation change - well,
+        // at least on Android it does. :P
+        //
+        // So we basically have to rotate the top-level content manually when running with Silica,
+        // but still keep things working correctly everywhere else. Yay. :D
+
+        // just fill the parent if no rotation is needed
+        width : rWin.rotatesOnOrientationChange ? parent.width : _rWidth
+        height: rWin.rotatesOnOrientationChange ? parent.height : _rHeight
+
+        // This expects that the non-rotating ApplicationWindow is always in portrait,
+        // so if there ever is a non-portrait non-rotating ApplicationWindow there
+        // might be need to extend this code to handle it as well.
+        property int _rWidth : rWin.inPortrait ? parent.width : parent.height
+        property int _rHeight : rWin.inPortrait ? parent.height : parent.width
+        anchors.centerIn: parent
+        property alias timeout : notification.timeout
+        function notify(message) {
+            notification.notify(message)
+        }
+
+        function _rotationAngle(isPortrait, isInverted) {
+            if (isPortrait) {
+                if (isInverted) {
+                    return 180
+                } else {
+                    return 0
+                }
+            } else {
+                if (isInverted) {
+                    return 270
+                } else {
+                    return 90
+                }
+            }
 
         }
-    }
 
-    Label {
-        id : startupLabel
-        anchors.horizontalCenter : parent.horizontalCenter
-        anchors.verticalCenter : parent.verticalCenter
-        font.pixelSize : 32
-        text: "<b>starting modRana...</b>"
-        horizontalAlignment : Text.AlignHCenter
-        verticalAlignment : Text.AlignVCenter
-        visible : opacity != 0
-        opacity : 0
-        Behavior on opacity {
-            NumberAnimation { duration: 250*rWin.animate }
-        }
-        Component.onCompleted : {
-                opacity = 1
-        }
-    }
-    ProgressBar {
-        anchors.horizontalCenter : parent.horizontalCenter
-        anchors.top : startupLabel.bottom
-        width : parent.width * 0.8
-        indeterminate : true
-        opacity : startupLabel.opacity
-        visible : startupLabel.visible
-    }
+        // only rotate on platforms where it is needed
+        rotation : rWin.rotatesOnOrientationChange ? 0 : _rotationAngle(rWin.inPortrait, rWin.inverted)
 
-    // TODO: instantiating the popup here might prevent the correct UC style
-    //       from being set, making the popup use non-hiDPI style on hiDPI
-    //       devices - we should probably doe something about that once this
-    //       is actually encountered somewhere
-    Popup {
-        anchors.top : parent.top
-        id : notification
+        Label {
+            id : startupLabel
+            anchors.horizontalCenter : parent.horizontalCenter
+            anchors.verticalCenter : parent.verticalCenter
+            font.pixelSize : 32
+            text: "<b>starting modRana...</b>"
+            horizontalAlignment : Text.AlignHCenter
+            verticalAlignment : Text.AlignVCenter
+            visible : opacity != 0
+            opacity : 0
+            Behavior on opacity {
+                NumberAnimation { duration: 250*rWin.animate }
+            }
+            Component.onCompleted : {
+                    opacity = 1
+            }
+        }
+        ProgressBar {
+            anchors.horizontalCenter : parent.horizontalCenter
+            anchors.top : startupLabel.bottom
+            width : parent.width * 0.8
+            indeterminate : true
+            opacity : startupLabel.opacity
+            visible : startupLabel.visible
+        }
+        Button {
+            anchors.top : parent.top
+            anchors.right : parent.right
+            visible : rWin.showDebugButton
+            text : "debug"
+            onClicked : {
+                rWin.log.info("# starting the Python Debugger (PDB) shell")
+                rWin.log.info("# to continue program execution, press c")
+                // make sure the pdb module is imported
+                python.importModule_sync('pdb')
+                // start debugging
+                python.call_sync('pdb.set_trace', [])
+
+            }
+        }
+
+        // TODO: instantiating the popup here might prevent the correct UC style
+        //       from being set, making the popup use non-hiDPI style on hiDPI
+        //       devices - we should probably doe something about that once this
+        //       is actually encountered somewhere
+
+        Popup {
+            anchors.top : parent.top
+            id : notification
+        }
     }
 
     function notify(message, timeout) {
         if (timeout) {
-            notification.timeout = timeout
+            rotator.timeout = timeout
         } else {
             // make sure the timeout is reset back to default if not specified
-            notification.timeout = 5000
+            rotator.timeout = 5000
         }
-        notification.notify(message)
+        rotator.notify(message)
     }
 
     function __import_modRana() {
