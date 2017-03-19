@@ -40,7 +40,6 @@ All platform specific functionality that is deemed worthwhile & doable
 is reimplemented in the other backends so that it can be part of the
 unified interface.
 
-
 Usage
 -----
 
@@ -55,6 +54,11 @@ UC plugin directly:
 
 import "./UC"
 
+API Documentation
+-----------------
+
+Universal Components API documentation is available in the [docs/api_spec.rst](docs/api_spec.rst)
+file.
 
 Component usage notes
 ---------------------
@@ -109,6 +113,7 @@ Applications using Universal Components
 -------------------------------------
 
 * [modRana flexible navigation system](https://github.com/M4rtinK/modrana)
+* [the Tensor Matrix client](https://github.com/davidar/tensor)
 
 
 TODO
