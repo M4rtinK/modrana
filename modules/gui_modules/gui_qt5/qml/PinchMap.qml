@@ -320,6 +320,10 @@ Rectangle {
         updateTilesModel()
     }
 
+    onMapClicked: {
+        clearPointMenus()
+    }
+
     function setZoomLevel(z) {
         setZoomLevelPoint(z, pinchmap.width/2, pinchmap.height/2);
     }
@@ -720,7 +724,10 @@ Rectangle {
             anchors.fill : parent;
 
             onClicked: {
-                mapClicked(Math.round(mouse.x), Math.round(mouse.y))
+                // prevent map panning from triggering clicks
+                if (__wasClick) {
+                    mapClicked(Math.round(mouse.x), Math.round(mouse.y))
+                }
             }
 
             onDoubleClicked: {
