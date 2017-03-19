@@ -580,6 +580,7 @@ Backends currently considered non-experimental:
 Experimental backends:
 
 - Glacier
+- Ubuntu Components
 
 
 Adding a new element property/signal/method
