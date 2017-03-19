@@ -426,7 +426,7 @@ ApplicationWindow {
         showDebugButtonProp.key = "showQt5GUIDebugButton"
         showUnfinishedFeaturesProp.key = "showQt5GUIUnfinishedFeatures"
         tileDebugProperty.key = "showQt5TileDebug"
-        pinchmapCanvasDebug.key = "pinchmapCanvasDebug"
+        pinchmapCanvasDebugProp.key = "pinchmapCanvasDebug"
         tileStorageDebugProperty.key = "tileLoadingDebug"
         locationDebugProp.key = "gpsDebugEnabled"
         keepScreenOnProp.key = "screenBlankingMode"
