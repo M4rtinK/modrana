@@ -73,6 +73,19 @@ Properties
 **inProtrait** : bool
     True if the application window is in portrait, else false (landscape).
 
+**inverted** : bool
+    True if the application window is in inverted portrait or inverted landscape, else false.
+
+**rotatesOnOrientationChange** : bool
+    True if the *ApplicationWindow* itself rotates on device orientation change, else not.
+
+    In general even if the *ApplicationWindow* does not rotate, the page stack and it's content does.
+
+    At the moment:
+
+    - QtQuick Controls *ApplicationWindow* rotates
+    - Sailfish silica *ApplicationWindow* does not rotate
+
 **pageStack** : native page stack
     This property provides access to the native page stack - currently *StackView*
     for the Controls backend and *PageStack* for the Silica backend.
