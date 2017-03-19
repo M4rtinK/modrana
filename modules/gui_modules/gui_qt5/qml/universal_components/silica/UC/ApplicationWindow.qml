@@ -1,39 +1,41 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 ApplicationWindow{
-    property bool inPortrait : _setOrientation(deviceOrientation)
+    property bool inPortrait : deviceOrientation == Orientation.Portrait ||
+                               deviceOrientation == Orientation.PortraitInverted
+    property bool inverted : deviceOrientation == Orientation.PortraitInverted ||
+                             deviceOrientation == Orientation.LandscapeInverted
 
-    onDeviceOrientationChanged : {
-        _setOrientation(deviceOrientation)
-    }
+    // The whole Silica ApplicationWindow does not rotate on orientation change.
+    // This is a difference from for example the Qt Quick Controls ApplicationWindow,
+    // where the whole Window rotates.
+    property bool rotatesOnOrientationChange : false
 
     cover : null
 
-    // this property is provided for API compatibility
-    // as the Silica UC backend uses the Silica built-in
-    // element sizing
-    property int hiDPI : 0
-
-    // this property is provided for API compatibility
-    // as the Silica UC backend uses the Silica built-in
-    // element sizing
-    property int hiDPI : 0
-
-    function _setOrientation(dOrient) {
-        if (dOrient == Orientation.Portrait ||
-            dOrient == Orientation.PortraitInverted) {
-            inPortrait = true
-        } else {
-            inPortrait = false
+    function orientationToString(o) {
+        switch (o) {
+        case Orientation.Portrait:
+            return "portrait"
+        case Orientation.Landscape:
+            return "landscape"
+        case Orientation.PortraitInverted:
+            return "inverted portrait"
+        case Orientation.LandscapeInverted:
+            return "inverted landscape"
         }
-
-        console.log("device orientation changed: " + deviceOrientation)
-
-        /* BTW, other orientations are:
-        Orientation.Landscape
-        Orientation.LandscapeInverted
-        */
+        return "unknown"
     }
+
+    onDeviceOrientationChanged : {
+        var orientationName = orientationToString(deviceOrientation)
+        console.log("device orientation changed to: " + orientationName + " (" + deviceOrientation + ")")
+    }
+
+    // this property is provided for API compatibility
+    // as the Silica UC backend uses the Silica built-in
+    // element sizing
+    property int hiDPI : 0
 
     // the Silica ApplicationWindow
     // does not inherit the Window element,

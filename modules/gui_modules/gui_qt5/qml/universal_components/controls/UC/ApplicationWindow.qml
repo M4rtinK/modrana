@@ -1,12 +1,23 @@
 import QtQuick.Controls 1.0
+import QtQuick.Window 2.0
 
 import "style.js" as S
 
 ApplicationWindow {
     id : appWindow
-    // for now, we are in landscape when using Controls
-    property bool inPortrait : appWindow.width < appWindow.height
-    //property bool inPortrait : false
+    // report if the application wide window is in portrait
+    property bool inPortrait : Screen.orientation == Qt.PortraitOrientation ||
+                               Screen.orientation == Qt.InvertedPortraitOrientation
+
+    // report if the application wide window is in an inverted orientation
+    property bool inverted : Screen.orientation == Qt.InvertedPortraitOrientation ||
+                             Screen.orientation == Qt.InvertedLandscape
+
+    // The whole QtQuick Controls ApplicationWindow rotates on orientation change.
+    // This is a difference from for example the Sailfish Silica ApplicationWindow,
+    // where only the pages on the stack rotate, which creates some serious difficulties
+    // for implementation of top level content, such as notification bubbles.
+    property bool rotatesOnOrientationChange : true
 
     //property alias initialPage : pageStack.initialItem
     property alias pageStack : pageStack
