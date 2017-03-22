@@ -195,7 +195,7 @@ Page {
                 layerId: "mapnik"
                 layerOpacity: 1.0
             }
-    }
+        }
         canvas.visible : tabMap.routingEnabled || tabMap.drawTracklogTrace || tabMap.tracePoints
         canvas.onFullPaint : {
             tracklogs.paintTracklog(ctx)
