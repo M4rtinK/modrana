@@ -14,6 +14,13 @@ Page {
                                          function(v){tabMap.showCompass=v})
     property real compassOpacity : rWin.get("qt5GUIMapCompassOpacity", 0.7,
                                          function(v){tabMap.compassOpacity=v})
+    property real routeOpacity : rWin.get("qt5GUIRouteOpacity", 1.0,
+                                         function(v){tabMap.routeOpacity=v})
+
+    onRouteOpacityChanged : {
+                pinchmap.canvas.requestFullPaint()
+    }
+
 
     function showOnMap(lat, lon) {
         pinchmap.setCenterLatLon(lat, lon);
@@ -337,6 +344,7 @@ Page {
                 }
 
                 // draw the route
+                ctx.globalAlpha = tabMap.routeOpacity
                 ctx.lineWidth = 10 * m
                 ctx.beginPath()
                 for (var i=0; i<routePoints.count; i++) {
@@ -347,6 +355,8 @@ Page {
                     ctx.lineTo(destipos[0],destipos[1])
                 }
                 ctx.stroke()
+                // restore global opacity back to default
+                ctx.globalAlpha = 1.0
 
                 // draw the step points
                 ctx.lineWidth = 7 * m
