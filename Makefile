@@ -144,6 +144,13 @@ bumpver:
 	mv packaging/modrana.spec.new packaging/modrana.spec ; rm -f speclog ; \
 	sed -i "s/Version: $(VERSION)/Version: $$NEWVERSION/" packaging/modrana.spec ; \
 
+release:
+	git add packaging/modrana.spec
+	echo "New modRana version $(VERSION)" > commit_template.txt
+	git commit --template=commit_template.txt
+	rm commit_template.txt
+	@make archive
+
 .PHONY: clean install tag archive local
 
 test:
