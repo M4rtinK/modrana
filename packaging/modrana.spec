@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.54.4
+Version: 0.54.5
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -125,6 +125,13 @@ fi
 %endif
 
 %changelog
+* Sat Mar 25 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.5-1
+- Add a release target to makefile (martin.kolman)
+- Fix a typo (martin.kolman)
+- Make it possible to set logging trace and tracklog opacity (martin.kolman)
+- Make it possible to set route opacity (martin.kolman)
+- Fix indentation (martin.kolman)
+
 * Sun Mar 19 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.4-1
 - Switch README to rst & fix formatting (martin.kolman)
 - Clear on-map point menus when map is clicked (martin.kolman)
