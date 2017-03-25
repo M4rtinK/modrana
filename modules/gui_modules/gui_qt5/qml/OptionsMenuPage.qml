@@ -33,6 +33,11 @@ IconGridPage {
             icon : "navigation.png"
             menu : "NavigationPage"
         }
+         ListElement {
+            caption : "Tracks"
+            icon : "tracklogs.png"
+            menu : "TracksPage"
+        }
         ListElement {
             caption : "Network"
             icon : "network.png"

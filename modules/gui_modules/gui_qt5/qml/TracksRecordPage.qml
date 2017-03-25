@@ -197,6 +197,30 @@ BasePage {
                 rWin.mapPage.drawTracklogTrace = checked
             }
         }
+        Label {
+            text : qsTr("Trace opacity")
+            visible : drawTraceSwitch.checked
+        }
+        Slider {
+            id : traceOpacitySlider
+            width : parent.width
+            stepSize : 0.1
+            maximumValue : 1.0
+            minimumValue : 0.0
+            value : rWin.mapPage.tracklogTraceOpacity
+            valueText : ""
+            visible : drawTraceSwitch.checked
+            onPressedChanged : {
+                // set the value once users
+                // stops interacting with the slider
+                if (pressed == false) {
+                    rWin.mapPage.tracklogTraceOpacity = value
+                    rWin.set("qt5GUITracklogTraceOpacity", value)
+                }
+            }
+        }
+
+
     }
 
     Component.onCompleted : {

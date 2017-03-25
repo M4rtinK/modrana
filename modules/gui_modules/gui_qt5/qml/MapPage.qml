@@ -16,11 +16,23 @@ Page {
                                          function(v){tabMap.compassOpacity=v})
     property real routeOpacity : rWin.get("qt5GUIRouteOpacity", 1.0,
                                          function(v){tabMap.routeOpacity=v})
+    // opacity of the tracklog logging trace
+    property real tracklogTraceOpacity : rWin.get("qt5GUITracklogTraceOpacity", 1.0,
+                                         function(v){tabMap.tracklogTraceOpacity=v})
+    // opacity of stored tracklogs when shown on the map
+    property real tracklogOpacity : rWin.get("qt5GUITracklogOpacity", 1.0,
+                                         function(v){tabMap.tracklogOpacity=v})
 
+    // redraw the canvas on opacity value change
     onRouteOpacityChanged : {
                 pinchmap.canvas.requestFullPaint()
     }
-
+    onTracklogTraceOpacityChanged : {
+                pinchmap.canvas.requestFullPaint()
+    }
+    onTracklogOpacityChanged : {
+                pinchmap.canvas.requestFullPaint()
+    }
 
     function showOnMap(lat, lon) {
         pinchmap.setCenterLatLon(lat, lon);
@@ -517,6 +529,7 @@ Page {
                 ctx.lineWidth = rWin.c.style.map.tracklogTrace.width
                 //ctx.strokeStyle = rWin.c.style.map.tracklogTrace.color
                 ctx.strokeStyle = "red"
+                ctx.globalAlpha = tabMap.tracklogOpacity
                 ctx.beginPath()
                 tracklogPoints.forEach(function (trackPoint, pointIndex) {
                     xyPoint = pinchmap.getScreenpointFromMappointCorrected(trackPoint.x,
@@ -525,6 +538,9 @@ Page {
                     ctx.lineTo(xyPoint[0],xyPoint[1])
                 })
                 ctx.stroke()
+                // restore global opacity back to default
+                ctx.globalAlpha = 1.0
+
             }
         }
 
@@ -539,6 +555,7 @@ Page {
                 var xyPoint = (0, 0)
                 // draw the track logging trace
                 ctx.lineWidth = rWin.c.style.map.tracklogTrace.width
+                ctx.globalAlpha = tabMap.tracklogTraceOpacity
                 ctx.strokeStyle = rWin.c.style.map.tracklogTrace.color
                 ctx.beginPath()
                 //for (var i=0; i<tracePoints.length; i++) {
@@ -550,6 +567,9 @@ Page {
                     ctx.lineTo(xyPoint[0],xyPoint[1])
                 })
                 ctx.stroke()
+                // restore global opacity back to default
+                ctx.globalAlpha = 1.0
+
             }
         }
     }
