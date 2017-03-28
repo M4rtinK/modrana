@@ -21,6 +21,9 @@
 #---------------------------------------------------------------------------
 from modules.device_modules.base_device_module import DeviceModule
 from core.constants import DEVICE_TYPE_DESKTOP
+from core import constants
+
+import os
 
 def getModule(*args, **kwargs):
     return DevicePC(*args, **kwargs)
@@ -52,3 +55,14 @@ class DevicePC(DeviceModule):
 
     def getDeviceType(self):
         return DEVICE_TYPE_DESKTOP
+
+    @property
+    def offline_routing_providers(self):
+        # report OSM Scout Server as always available
+        # as we will do checking if it is running before
+        # trying to send it a request
+        providers = [constants.ROUTING_PROVIDER_OSM_SCOUT]
+        # check if we also have Monav Light installed
+        if os.path.isfile(self.monav_light_binary_path):
+            providers.append(constants.ROUTING_PROVIDER_MONAV_LIGHT)
+        return providers

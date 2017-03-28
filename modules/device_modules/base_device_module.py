@@ -350,14 +350,14 @@ class DeviceModule(RanaModule):
         return constants.DEFAULT_TILE_STORAGE_TYPE
 
     # offline routing
-
     @property
-    def offline_routing_available(self):
-        return os.path.exists(self.monav_light_binary_path)
+    def offline_routing_providers(self):
+        """Offline routing providers available on the platform.
 
-    @property
-    def offline_routing_provider(self):
-        return constants.ROUTING_PROVIDER_MONAV_LIGHT
+        :returns: list of available offline routing providers
+        :rtype: list
+        """
+        return []
 
     @property
     def monav_light_binary_path(self):
