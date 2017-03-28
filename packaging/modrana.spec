@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.54.5
+Version: 0.54.6
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -125,6 +125,15 @@ fi
 %endif
 
 %changelog
+* Wed Mar 29 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.6-1
+- Fix Monav Server based routing (martin.kolman)
+- Add fallback for json import (martin.kolman)
+- Handle unneeded import in protobuf code (martin.kolman)
+- Display correct routing providers in GTK GUI options (martin.kolman)
+- Support multiple offline routing providers per platform (martin.kolman)
+- Add a list of supported online routing providers (martin.kolman)
+- Add a list of offline routing providers (martin.kolman)
+
 * Sat Mar 25 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.5-1
 - Add a release target to makefile (martin.kolman)
 - Fix a typo (martin.kolman)
