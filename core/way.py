@@ -295,13 +295,13 @@ class Way(object):
             mLength = 0 # in meters
             if result.nodes:
                 firstNode = result.nodes[0]
-                prevLat, prevLon = firstNode.lat, firstNode.lon
+                prevLat, prevLon = firstNode.latitude, firstNode.longitude
                 # there is one from first to first calculation on start,
                 # but as it should return 0, it should not be an issue
                 for node in result.nodes:
-                    routePoints.append((node.lat, node.lon, None))
-                    mLength += geo.distance(prevLat, prevLon, node.lat, node.lon) * 1000
-                    prevLat, prevLon = node.lat, node.lon
+                    routePoints.append((node.latitude, node.longitude, None))
+                    mLength += geo.distance(prevLat, prevLon, node.latitude, node.longitude) * 1000
+                    prevLat, prevLon = node.latitude, node.longitude
 
             way = cls(routePoints)
             way.duration = result.seconds

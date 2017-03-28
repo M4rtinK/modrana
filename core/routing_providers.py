@@ -57,7 +57,7 @@ class MonavServerRouting(RoutingProvider):
                     self._monav.start_server()
                 controller.status = "Monav offline routing in progress"
                 log.info(route_params)
-                result = self._monav.get_monav_directions(waypoints)
+                result = self._monav.get_monav_directions(waypoints, route_params)
                 controller.status = "Monav offline routing done"
             except Exception:
                 log.exception('Monav route lookup failed')

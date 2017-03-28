@@ -113,15 +113,15 @@ def detect_monav_turns(result):
                         # NOTE: if the turn consists
                         # from many segments, taking more points into
                         # account might be needed
-                        first = prevNode.lat, prevNode.lon
-                        middle = node.lat, node.lon
-                        last = nextNode.lat, nextNode.lon
+                        first = prevNode.latitude, prevNode.longitude
+                        middle = node.latitude, node.longitude
+                        last = nextNode.latitude, nextNode.longitude
                         angle = geo.turnAngle(first, middle, last)
 
                         turnDescription = _get_turn_description(angle, name=name)
                         # get the corresponding node
 
-                        turns.append(TurnByTurnPoint(node.lat, node.lon, message=turnDescription))
+                        turns.append(TurnByTurnPoint(node.latitude, node.longitude, message=turnDescription))
                         # DEBUG
                         # turns.append(TurnByTurnPoint(prevNode.latitude, prevNode.longitude, message="prev"))
                         # turns.append(TurnByTurnPoint(nextNode.latitude, nextNode.longitude, message="next"))
