@@ -742,11 +742,25 @@ class Options(RanaModule):
         # ** online routing submenu
         group = addGroup("Routing", "routing", catNavigation, "generic")
 
-        routing_providers = [(constants.ROUTING_PROVIDER_GOOGLE, "Google - <b>online</b>")]
-        if self.modrana.dmod.offline_routing_available:
-            provider = self.modrana.dmod.offline_routing_provider
-            provider_name = constants.ROUTING_PROVIDER_NAMES.get(provider, "unknown provider")
-            routing_providers.append((provider, "%s - <b>on device</b>" % provider_name))
+        # first add the online routing providers
+        # - online routing providers are expected to be available on all platforms
+        routing_providers = [(p,
+                              "%s - <b>online</b>" % constants.ROUTING_PROVIDER_NAMES.get(p, "unknown provider"))
+                             for p in constants.ONLINE_ROUTING_PROVIDERS]
+        # then add the offline routing providers
+        for provider_id in self.modrana.dmod.offline_routing_providers:
+            provider_name = constants.ROUTING_PROVIDER_NAMES.get(provider_id, "unknown provider")
+            routing_providers.append((provider_id, "%s - <b>on device</b>" % provider_name))
+
+        # make sure currently set routing provider is is valid
+        provider_ids = [pt[0] for pt in routing_providers]
+        current_provider_id = self.get("routingProvider", None)
+        if current_provider_id not in provider_ids and current_provider_id is not None:
+            # the provider id is not None, but is set to an unknown value
+            self.log.warning("incorrect routing provider id detected: %s", current_provider_id)
+            self.log.warning("resetting routing provider id back to default: %s", constants.DEFAULT_ROUTING_PROVIDER)
+            # so lets fix that :)
+            self.set("routingProvider", constants.DEFAULT_ROUTING_PROVIDER)
 
         addOpt("Routing provider", "routingProvider",
                routing_providers,
