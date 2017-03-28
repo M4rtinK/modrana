@@ -22,7 +22,12 @@ from threading import Thread
 import time
 import subprocess
 import signal
-import json
+
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 from core.singleton import modrana
 from core.point import Point
 
