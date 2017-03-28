@@ -3,7 +3,7 @@
 from __google.protobuf import descriptor
 from __google.protobuf import message
 from __google.protobuf import reflection
-from __google.protobuf import descriptor_pb2
+#from __google.protobuf import descriptor_pb2
 # @@protoc_insertion_point(imports)
 
 
