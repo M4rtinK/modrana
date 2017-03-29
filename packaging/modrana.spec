@@ -114,7 +114,7 @@ fi
 /usr/share/icons/hicolor/128x128/apps/*
 /usr/share/icons/hicolor/256x256/apps/*
 %else
-%doc README.md
+%doc README.rst
 %license COPYING.txt
 /usr/bin/*
 /usr/share/modrana
