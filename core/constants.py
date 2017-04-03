@@ -53,6 +53,8 @@ THREAD_LOCAL_SEARCH_GOOGLE = "modRanaLocalSearchGoogle"
 THREAD_ROUTING_ONLINE_GOOGLE = "modRanaRoutingOnlineGoogle"
 THREAD_ROUTING_OFFLINE_MONAV = "modRanaRoutingOfflineMonav"
 THREAD_ROUTING_OFFLINE_OSM_SCOUT_SERVER = "modRanaRoutingOfflineOSMScoutServer"
+# turn-by-turn navigation
+THREAD_TBT_WORKER = "modRanaTurnByTurnWorker"
 # location
 THREAD_GPSD_CONSUMER = "modRanaGPSDConsumer"
 # tile down-/loading

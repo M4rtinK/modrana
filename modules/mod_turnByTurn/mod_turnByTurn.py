@@ -17,11 +17,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
+from __future__ import with_statement
+
 from modules.base_module import RanaModule
 from core import geo
-from threading import Thread
+from core import threads
+from core import constants
 import math
 import time
+from threading import RLock
 
 REROUTE_CHECK_INTERVAL = 5000 # in ms
 #in m/s, about 46 km/h - if this speed is reached, the rerouting threshold is multiplied
@@ -57,7 +61,7 @@ class TurnByTurn(RanaModule):
         # initial colors
         self.navigationBoxBackground = (0, 0, 1, 0.3) # very transparent blue
         self.navigationBoxText = (1, 1, 1, 1) # non-transparent white
-        self._tbt_worker = None
+        self._tbt_worker_lock = RLock()
         self._tbt_worker_enabled = False
         self._go_to_initial_state()
         self._automatic_reroute_counter = 0 # counts consecutive automatic reroutes
@@ -767,25 +771,35 @@ class TurnByTurn(RanaModule):
             return min_distance * 1000 < threshold
 
     def _start_tbt_worker(self):
-        self.log.info("starting worker thread")
-        start_thread = True
-        if not self._tbt_worker: # reuse previous thread or start new one
-            self._tbt_worker_enabled = True
-            t = Thread(target=self._tbt_worker)
-            t.daemon = True
-            t.start()
-            self._tbt_worker = t
-        else:
-            self.log.info("reusing worker thread")
+        with self._tbt_worker_lock:
+            # reuse previous thread or start new one
+            if self._tbt_worker_enabled:
+                self.log.info("reusing TBT worker thread")
+            else:
+                self.log.info("starting new TBT worker thread")
+                t = threads.ModRanaThread(name=constants.THREAD_TBT_WORKER,
+                                          target=self._tbt_worker)
+                threads.threadMgr.add(t)
+                self._tbt_worker_enabled = True
 
     def _stop_tbt_worker(self):
-        self._tbt_worker_enabled = False
-        self._tbt_worker = None
+        with self._tbt_worker_lock:
+            self.log.info("stopping the TBT worker thread")
+            self._tbt_worker_enabled = False
 
     def _tbt_worker(self):
         """This function runs in its own thread and checks if we are still following the route."""
         self.log.info("TBTWorker: started")
-        while self._route and self._tbt_worker_enabled:
+        # The _tbt_worker_enabled variable is needed as once the end of the route is reached
+        # there will be a route set but further rerouting should not be performed.
+        while True:
+            with self._tbt_worker_lock:
+                # Either tbt has been shut down (no route is set)
+                # or rerouting is no longer needed.
+                if not self._route or not self._tbt_worker_enabled:
+                    self.log.info("TBTWorker: shutting down")
+                    break
+
             # first make sure automatic rerouting is enabled
             # eq. reroutingThreshold != None
             if self._automatic_rerouting_enabled():
@@ -809,7 +823,6 @@ class TurnByTurn(RanaModule):
                             self.log.debug('TBTWorker: increasing divergence counter (%d)',
                                            self._rerouting_threshold_crossed_counter)
             time.sleep(REROUTE_CHECK_INTERVAL / 1000.0)
-        self.log.info("TBTWorker: shutting down")
 
     def shutdown(self):
         # cleanup
