@@ -42,23 +42,27 @@ PANGO_ON = '<span color="green">ON</span>'
 PANGO_OFF = '<span color="red">OFF</span>'
 
 # threads
+
+# search
 THREAD_POI_SEARCH = "modRanaPOISearch"
 THREAD_ADDRESS_SEARCH = "modRanaAddressSearch"
 THREAD_WIKIPEDIA_SEARCH_NOMINATIM = "modRanaWikipediaSearchNominatim"
 THREAD_REVERSE_GEOCODING = "modRanaReverseGeocoding"
 THREAD_LOCAL_SEARCH_GOOGLE = "modRanaLocalSearchGoogle"
+# routing
 THREAD_ROUTING_ONLINE_GOOGLE = "modRanaRoutingOnlineGoogle"
 THREAD_ROUTING_OFFLINE_MONAV = "modRanaRoutingOfflineMonav"
 THREAD_ROUTING_OFFLINE_OSM_SCOUT_SERVER = "modRanaRoutingOfflineOSMScoutServer"
+# location
 THREAD_GPSD_CONSUMER = "modRanaGPSDConsumer"
 # tile down-/loading
 THREAD_TILE_DOWNLOAD_MANAGER = "modRanaTileDownloadManager"
 THREAD_TILE_DOWNLOAD_WORKER = "modRanaTileDownloadWorker"
 THREAD_TILE_STORAGE_LOADER = "modRanaTileStorageLoader"
-
+# resource checking
 THREAD_CONNECTIVITY_CHECK = "modRanaConnectivityCheck"
 THREAD_LOCATION_CHECK = "modRanaCurrentPositionCheck"
-
+# testing
 THREAD_TESTING_PROVIDER = "modRanaTestingProvider"
 
 # thread pools
