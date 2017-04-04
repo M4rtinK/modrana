@@ -72,7 +72,7 @@ class TurnByTurn(RanaModule):
     def _go_to_initial_state(self):
         """restore initial state"""
         self._route = None
-        self._current_step_index = 0
+        self._current_step_index_value = 0
         self._current_step_indicator = None
         self._espeak_first_and_half_trigger = False
         self._espeak_first_trigger = False
@@ -115,9 +115,8 @@ class TurnByTurn(RanaModule):
         elif message == "switchToNextTurn":
             self.switch_to_next_step()
         elif message == "showMessageInsideNotification":
-            currentStep = self.get_current_step()
-            if currentStep:
-                message = "<i>turn description:</i>\n%s" % currentStep.description
+            if self.current_step:
+                message = "<i>turn description:</i>\n%s" % self.current_step.description
                 if self.dmod.hasNotificationSupport():
                     self.dmod.notify(message, 7000)
                     #TODO: add support for modRana notifications once they support line wrapping
@@ -173,11 +172,10 @@ class TurnByTurn(RanaModule):
     def drawMapOverlay(self, cr):
         if self._route:
             # get current step
-            currentStep = self.get_current_step()
             proj = self.m.get('projection', None)
             # draw the current step indicator circle
-            if currentStep and proj:
-                (lat, lon) = currentStep.getLL()
+            if self.current_step and proj:
+                (lat, lon) = self.current_step.getLL()
                 (pointX, pointY) = proj.ll2xy(lat, lon)
                 cr.set_source_rgb(1, 0, 0)
                 cr.set_line_width(4)
@@ -187,10 +185,6 @@ class TurnByTurn(RanaModule):
 
     def drawScreenOverlay(self, cr):
         if self._route: # is there something relevant to draw ?
-
-            # get current step
-            current_step = self.get_current_step()
-
             # draw the routing message box
 
             # we need to have the viewport available
@@ -223,14 +217,14 @@ class TurnByTurn(RanaModule):
                     layout = pg.create_layout()
 
                     # get the current turn message
-                    message = current_step.description
+                    message = self.current_step.description
 
                     # display current distance to the next point & other unit conversions
                     units = self.m.get('units', None)
                     if units and self._current_distance:
                         distString = units.m2CurrentUnitString(self._current_distance, 1, True)
-                        if current_step.distanceFromStart:
-                            current_dist_string = units.m2CurrentUnitString(current_step.distanceFromStart, 1, True)
+                        if self.current_step.distanceFromStart:
+                            current_dist_string = units.m2CurrentUnitString(self.current_step.distanceFromStart, 1, True)
                         else:
                             current_dist_string = "?"
                         route_length_string = units.m2CurrentUnitString(self._m_route_length, 1, True)
@@ -302,12 +296,12 @@ class TurnByTurn(RanaModule):
 
                     # use the bottom of the infobox to display info
                     (bottomX, bottomY) = (bx, by + bh - 6 * border)
-                    if self._route_reached and self._automatic_rerouting_enabled():
+                    if self._route_reached and self.automatic_rerouting_enabled:
                         ar_string = "automatic rerouting enabled"
                     else:
                         ar_string = "tap this box to reroute"
                     note = "%s/%s, %d/%d   <sub> %s</sub>" % (
-                        current_dist_string, route_length_string, self._current_step_index + 1, self._get_max_step_index() + 1,
+                        current_dist_string, route_length_string, self._current_step_index + 1, self._max_step_index + 1,
                         ar_string)
                     menus.drawText(cr, "%s" % note, bottomX, bottomY, bw, 6 * border, 0,
                                    rgbaColor=self.navigationBoxText)
@@ -331,7 +325,17 @@ class TurnByTurn(RanaModule):
                     menus.drawButton(cr, bx + 2 * switch_button_width, by, hide_button_width, button_strip_offset, "",
                                      "center:hide;0.1>%s" % background, "turnByTurn:toggleBoxHiding")
 
-    def _automatic_rerouting_enabled(self):
+    @property
+    def automatic_rerouting_enabled(self):
+        """Report if automatic rerouting is enabled.
+
+        Automatic rerouting is considered to be enabled if the reroutingThreshold key
+        holds a value that is not None (in general a string representation of a floating
+        point number).
+
+        :return: if automatic rerouting is enabled
+        :rtype: bool
+        """
         return self.get('reroutingThreshold', REROUTING_DEFAULT_THRESHOLD)
 
     def _say_turn(self, message, distanceInMeters, force_language_code=False):
@@ -368,7 +372,8 @@ class TurnByTurn(RanaModule):
                 espeak_language_code = self.get('directionsLanguage', 'en en').split(" ")[0]
             return voice.say(text, espeak_language_code)
 
-    def _get_max_step_index(self):
+    @property
+    def _max_step_index(self):
         return self._route.message_point_count - 1
 
     def _get_starting_step(self, which='first'):
@@ -394,38 +399,42 @@ class TurnByTurn(RanaModule):
 
     def _get_step(self, index):
         """Return steps for valid index, None otherwise."""
-        max_index = self._get_max_step_index()
+        max_index = self._max_step_index
         if index > max_index or index < -(max_index + 1):
             self.log.error("wrong turn index: %d, max index is: %d", index, max_index)
             return None
         else:
             return self._route.get_message_point_by_index(index)
 
-    def _set_step_as_current(self, step):
-        """Set a given step as current step."""
-        mpId = self._route.get_message_point_index(step)
-        self._set_current_step_index(mpId)
+    def _get_step_index(self, step):
+        return self._route.get_message_point_index(step)
 
-    def get_current_step(self):
+    @property
+    def current_step(self):
         """Return current step."""
         return self._route.get_message_point_by_index(self._current_step_index)
 
-    def _get_step_id(self, step):
-        return self._route.get_message_point_index(step)
+    @current_step.setter
+    def current_step(self, step):
+        """Set a given step as current step."""
+        mp_index = self._route.get_message_point_index(step)
+        self._current_step_index = mp_index
 
-    def _get_current_step_visit_status(self):
-        """Report visit status for current step."""
-        return self.get_current_step().visited
+    @property
+    def _current_step_index(self):
+        return self._current_step_index_value
 
-    def _mark_current_step_as_visited(self):
-        """Mark current step as visited."""
-        self.get_current_step().visited = True
+    @_current_step_index.setter
+    def _current_step_index(self, index):
+        self._current_step_index_value = index
+        # trigger a navigation update every time current step index is set
+        self._do_navigation_update()
 
     def switch_to_previous_step(self):
         """Switch to previous step and clean up."""
         next_index = self._current_step_index - 1
         if next_index >= 0:
-            self._set_current_step_index(next_index)
+            self._current_step_index = next_index
             self._espeak_first_trigger = False
             self._espeak_second_trigger = False
             self.log.info("switching to previous step")
@@ -434,10 +443,10 @@ class TurnByTurn(RanaModule):
 
     def switch_to_next_step(self):
         """Switch to next step and clean up."""
-        max_index = self._get_max_step_index()
+        max_index = self._max_step_index
         next_index = self._current_step_index + 1
         if next_index <= max_index:
-            self._set_current_step_index(next_index)
+            self._current_step_index = next_index
             self._espeak_first_and_half_trigger = False
             self._espeak_first_trigger = False
             self._espeak_second_trigger = False
@@ -453,9 +462,6 @@ class TurnByTurn(RanaModule):
         # automatic rerouting needs to be disabled to prevent rerouting
         # once the destination was reached
 
-    def _set_current_step_index(self, index):
-        self._current_step_index = index
-        self._do_navigation_update()
 
     def enabled(self):
         """Return if Turn by Turn navigation is enabled."""
@@ -496,13 +502,12 @@ class TurnByTurn(RanaModule):
                     # the duration of the road lookup and other variables are currently not used
                 # in the heuristics but might be added later to make the heuristics more robust
 
-
                 # now we decide if we use the closest turn, or the next one,
                 # as we might be already past it and on our way to the next turn
                 cs = self._get_closest_step() # get geographically closest step
                 pos = self.get('pos', None) # get current position
                 p_reached_dist = int(self.get('pointReachedDistance', 30)) # get the trigger distance
-                next_turn_id = self._get_step_id(cs) + 1
+                next_turn_id = self._get_step_index(cs) + 1
                 next_step = self._get_step(next_turn_id)
                 # check if we have all the data needed for our heuristics
                 self.log.info("trying to guess correct step to start navigation")
@@ -529,7 +534,7 @@ class TurnByTurn(RanaModule):
                             # we are mostly probably already past the closest step,
                             # so we switch to the next step at once
                             self.log.debug("already past closest turn, switching to next turn")
-                            self._set_step_as_current(next_step)
+                            self.current_step = next_step
                             # we play the message for the next step,
                             # with current distance to this step,
                             # to assure there is some voice output immediately after
@@ -540,7 +545,7 @@ class TurnByTurn(RanaModule):
                             # we have probably not yet reached the closest step,
                             # so we start navigation from it
                             self.log.debug("closest turn not yet reached")
-                            self._set_step_as_current(cs)
+                            self.current_step = cs
 
                     else:
                         # we are inside the  "capture circle" of the closest step,
@@ -548,14 +553,14 @@ class TurnByTurn(RanaModule):
                         # and correctly switch to next step
                         # -> no need to switch to next step from here
                         self.log.debug("inside reach distance of closest turn")
-                        self._set_step_as_current(cs)
+                        self.current_step = cs
 
                 else:
                     # we dont have some of the data, that is needed to decide
                     # if we start the navigation from the closest step of from the step that is after it
                     # -> we just start from the closest step
                     self.log.debug("not enough data to decide, using closest turn")
-                    self._set_step_as_current(cs)
+                    self.current_step = cs
         self._do_navigation_update() # run a first time navigation update
         self._location_watch_id = self.watch('locationUpdated', self.location_update_cb)
         self.log.info("started and ready")
@@ -565,7 +570,7 @@ class TurnByTurn(RanaModule):
         # remove location watch
         if self._location_watch_id:
             self.removeWatch(self._location_watch_id)
-            # cleanup
+        # cleanup
         self._go_to_initial_state()
         self._stop_tbt_worker()
         self.log.info("stopped")
@@ -590,9 +595,8 @@ class TurnByTurn(RanaModule):
             return
 
         # get/compute/update necessary the values
-        (lat1, lon1) = pos
-        current_step = self.get_current_step()
-        lat2, lon2 = current_step.getLL()
+        lat1, lon1 = pos
+        lat2, lon2 = self.current_step.getLL()
         current_distance = geo.distance(lat1, lon1, lat2, lon2) * 1000 # km to m
         self._current_distance = current_distance # update current distance
 
@@ -685,10 +689,10 @@ class TurnByTurn(RanaModule):
                 if self._espeak_second_trigger == False:
                     self.log.debug("triggering espeak nr. 2")
                     # say the message without distance
-                    plaintextMessage = current_step.ssmlMessage
+                    plaintextMessage = self.current_step.ssmlMessage
                     # consider turn said even if it was skipped (ignore errors)
                     self._say_turn(plaintextMessage, 0)
-                    self._mark_current_step_as_visited() # mark this point as visited
+                    self.current_step.visited = True # mark this point as visited
                     self._espeak_first_trigger = True # everything has been said, again :D
                     self._espeak_second_trigger = True # everything has been said, again :D
                 self.switch_to_next_step() # switch to next step
@@ -697,14 +701,14 @@ class TurnByTurn(RanaModule):
                     # this means we reached an optimal distance for saying the message"""
                     if self._espeak_first_trigger == False:
                         self.log.debug("triggering espeak nr. 1")
-                        plaintextMessage = current_step.ssmlMessage
+                        plaintextMessage = self.current_step.ssmlMessage
                         if self._say_turn(plaintextMessage, current_distance):
                             self._espeak_first_trigger = True # first message done
                 if self._espeak_first_and_half_trigger == False and warn_time > 30:
                     if current_distance <= (20.0 * meters_per_sec_speed):
                         # in case that the warning time gets too big, add an intermediate warning at 20 seconds
                         # NOTE: this means it is said after the first trigger
-                        plaintextMessage = current_step.ssmlMessage
+                        plaintextMessage = self.current_step.ssmlMessage
                         if self._say_turn(plaintextMessage, current_distance):
                             self._espeak_first_and_half_trigger = True # intermediate message done
 
@@ -712,7 +716,7 @@ class TurnByTurn(RanaModule):
 
             # is automatic rerouting enabled from options
             # enabled == threshold that is not not None
-            if self._automatic_rerouting_enabled():
+            if self.automatic_rerouting_enabled:
                 # rerouting is enabled only once the route is reached for the first time
                 if self._on_route and not self._route_reached:
                     self._route_reached = True
@@ -802,7 +806,7 @@ class TurnByTurn(RanaModule):
 
             # first make sure automatic rerouting is enabled
             # eq. reroutingThreshold != None
-            if self._automatic_rerouting_enabled():
+            if self.automatic_rerouting_enabled:
             # check if we are still following the route
             #        self.log.debug('TBTWorker: checking divergence from route')
                 self._on_route = self._following_route()
