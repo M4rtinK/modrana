@@ -23,6 +23,7 @@ from modules.base_module import RanaModule
 from core import geo
 from core import threads
 from core import constants
+from core.signal import Signal
 from core import gs
 import math
 import time
@@ -67,6 +68,12 @@ class TurnByTurn(RanaModule):
         self._last_automatic_reroute_timestamp = time.time()
         # reroute even though the route was not yet reached (for special cases)
         self._override_route_reached = False
+        # signals
+        self.navigation_started = Signal()
+        self.navigation_stopped = Signal()
+        self.destination_reached = Signal()
+        self.rerouting_triggered = Signal()
+        self.current_step_changed = Signal()
 
     def _go_to_initial_state(self):
         """restore initial state"""
@@ -155,6 +162,7 @@ class TurnByTurn(RanaModule):
 
         # trigger rerouting
         self._reroute()
+        self.rerouting_triggered()
 
     def _reroute(self):
         # 1. say rerouting is in progress
@@ -418,6 +426,7 @@ class TurnByTurn(RanaModule):
         """Set a given step as current step."""
         mp_index = self._route.get_message_point_index(step)
         self._current_step_index = mp_index
+        self.current_step_changed(step)
 
     @property
     def _current_step_index(self):
@@ -460,6 +469,7 @@ class TurnByTurn(RanaModule):
         self._stop_tbt_worker()
         # automatic rerouting needs to be disabled to prevent rerouting
         # once the destination was reached
+        self.destination_reached()
 
     def enabled(self):
         """Return if Turn by Turn navigation is enabled."""
@@ -562,6 +572,8 @@ class TurnByTurn(RanaModule):
         self._do_navigation_update()  # run a first time navigation update
         self._location_watch_id = self.watch('locationUpdated', self.location_update_cb)
         self.log.info("started and ready")
+        # trigger the navigation-started signal
+        self.navigation_started()
 
     def stop_tbt(self):
         """Stop Turn-by-Turn navigation."""
@@ -572,6 +584,7 @@ class TurnByTurn(RanaModule):
         self._go_to_initial_state()
         self._stop_tbt_worker()
         self.log.info("stopped")
+        self.navigation_stopped()
 
     def location_update_cb(self, key, newValue, oldValue):
         """Position changed, do a tbt navigation update."""
