@@ -62,6 +62,10 @@ Page {
     property bool routingRequestChanged : false
     property bool routingEnabled: false
     property bool routingP2P: true
+    property bool routeAvailable : routing.routePoints.count >= 2
+
+    // navigation
+    property bool navigationEnabled : false
 
     function enableRoutingUI(p2p) {
         // enable the routing UI (currently just the 1-3 buttons)
@@ -664,7 +668,7 @@ Page {
             height: rWin.c.style.map.button.size
             checked : selectRoutingStart
             toggledColor : Qt.rgba(1, 0, 0, 0.7)
-            visible: tabMap.routingEnabled && tabMap.routingP2P
+            visible: tabMap.routingEnabled && tabMap.routingP2P && !tabMap.navigationEnabled
             onClicked: {
                 selectRoutingStart = !selectRoutingStart
                 selectRoutingDestination = false
@@ -677,10 +681,26 @@ Page {
             height: rWin.c.style.map.button.size
             checked : selectRoutingDestination
             toggledColor : Qt.rgba(0, 1, 0, 0.7)
-            visible: tabMap.routingEnabled && tabMap.routingP2P
+            visible: tabMap.routingEnabled && tabMap.routingP2P && !tabMap.navigationEnabled
             onClicked: {
                 selectRoutingStart = false
                 selectRoutingDestination = !selectRoutingDestination
+            }
+        }
+        MapButton {
+            id: navigateButton
+            checkable : true
+            visible: tabMap.routingEnabled && tabMap.routeAvailable
+            text: qsTr("<b>navigate</b>")
+            width: rWin.c.style.map.button.size * 1.25
+            height: rWin.c.style.map.button.size
+            onClicked: {
+                if (tabMap.navigationEnabled) {
+                    rWin.log.info("stopping navigation")
+                } else {
+                    rWin.log.info("starting navigation")
+                }
+                tabMap.navigationEnabled = !tabMap.navigationEnabled
             }
         }
         MapButton {
