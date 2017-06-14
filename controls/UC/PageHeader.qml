@@ -6,6 +6,7 @@ Label {
     id : headerLabel
     property string title : ""
     text : title
+    property int titlePixelSize : 48 * S.style.m
     property int headerHeight : height/8.0
     property real backButtonW : menu ? headerHeight * 0.8 : headerHeight * 0.8 * 2
     property bool _fitsIn : (paintedWidth <= (parent.width-backButtonW+(40 * S.style.m)))
@@ -15,7 +16,7 @@ Label {
     anchors.right : parent.right
     anchors.topMargin : S.style.main.spacing
     anchors.bottomMargin : S.style.main.spacing
-    font.pixelSize : 48 * S.style.m
+    font.pixelSize : titlePixelSize
     textFormat : Text.StyledText
     wrapMode : Text.NoWrap
     horizontalAlignment : _fitsIn ? Text.AlignHCenter : Text.AlignLeft
