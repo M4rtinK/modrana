@@ -138,6 +138,19 @@ Properties
 **title** : string
     The text to display in the header.
 
+**color** : color
+    Header color.
+
+**titlePixelSize** : int
+    Pixel size of the title text.
+
+**headerHeight**: int
+    Height of the header in pixels.
+
+NOTE: The **color**, **headerHeight** and **titlePixelSize** properties currently
+don't do anything effect with the Silica backend and are provided for compatibility 
+with the Controls backed PageHeader, where all these properties are effective.
+
 
 Screen 
 ------
