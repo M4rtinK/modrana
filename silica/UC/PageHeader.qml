@@ -11,10 +11,7 @@ PageHeader {
     property color color
     property int headerHeight
     property int titlePixelSize
-    property alias menu : gridView.children
-
-    SilicaGridView {
-        id : gridView
-        anchors.fill : parent
-    }
+    // NOTE: The PageHeader needs to be placed in a PlatformFlickable
+    //       or PlatformListView for the menu to work correctly.
+    property alias menu : pageHeader.children
 }

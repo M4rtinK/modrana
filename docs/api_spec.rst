@@ -444,23 +444,25 @@ at the top of a Page using the appropriate native presentation method.
 Currently this translates to a **PullDownMenu** with with the Silica backend and to a Menu in popup
 mode with Controls. In the future the advanced Glacier pull down menu should also be supported.
 
-The easiest way to use the **TopMenu** is to place **PageHeader** on top of your **Page** and assign 
-the **TopMenu** into its menu property:
+The easiest way to use the **TopMenu** is to place **PageHeader** into a **PlatformFlickable** or
+**PlatformListView** in your **Page** and assign the **TopMenu** into its menu property:
 
 ::
 
     import UC 1.0
     Page {
-        PageHeader {
-            anchors.top : parent.top
-            menu : TopMenu {
-                MenuItem {
-                    text : "option 1"
-                    onClicked : {console.log("1 clicked!")}
-                }
-                MenuItem {
-                    text : "option 2"
-                    onClicked : {console.log("2 clicked!")}
+        PlatformFlickable {
+            PageHeader {
+                anchors.top : parent.top
+                menu : TopMenu {
+                    MenuItem {
+                        text : "option 1"
+                        onClicked : {console.log("1 clicked!")}
+                    }
+                    MenuItem {
+                        text : "option 2"
+                        onClicked : {console.log("2 clicked!")}
+                    }
                 }
             }
         }
@@ -470,7 +472,7 @@ The top menu makes sure that the **TopMenu** can be activated when needed,
 either in a platform specific way (pull down gesture with Silica) or by showing a 
 button (with Controls).
 
-The **TopMenu** can be also used inside the **PlatformFlickable** or **PlatformListView**,
+The **TopMenu** can be also used inside a standalone **PlatformFlickable** or **PlatformListView**,
 but users will need to provide custom triggering for the **TopMenu** (calling its popup() method)
 when not using the Silica backend.
 
