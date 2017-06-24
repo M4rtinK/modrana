@@ -4,9 +4,10 @@ MouseArea {
     id : bMouse
     property color highlightedColor: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
     property string normalColor : "transparent"
-    property int cornerRadius : S.style.listView.cornerRadius
+    property alias cornerRadius : bRectangle.radius
     implicitHeight: Theme.itemSizeSmall
     Rectangle {
+        id :bRectangle
         anchors.fill : parent
         property bool clickable : false
         color: bMouse.pressed ? highlightedColor : normalColor
