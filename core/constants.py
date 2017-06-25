@@ -26,6 +26,7 @@ DEFAULT_THEME_NAME = "Default"
 
 LOCATION_TIMEOUT = 30 # in seconds
 INTERNET_CONNECTIVITY_TIMEOUT = 30 # in seconds
+TILE_DOWNLOAD_TIMEOUT = 10 # in seconds
 
 ONLINE = True
 OFFLINE = False

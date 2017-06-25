@@ -238,7 +238,7 @@ class MapTiles(RanaModule):
         tileUrl = tiles.getTileUrl(lzxy)
         # self.log.debug("GET TILE")
         # self.log.debug(tileUrl)
-        response = self._getConnPool(lzxy[0].id, tileUrl).request('GET', tileUrl)
+        response = self._getConnPool(lzxy[0], tileUrl).request('GET', tileUrl)
         # self.log.debug("RESPONSE")
         # self.log.debug(response)
         tileData = response.data
@@ -259,7 +259,7 @@ class MapTiles(RanaModule):
         else:
             return None
 
-    def _getConnPool(self, layerId, baseUrl):
+    def _getConnPool(self, layer, baseUrl):
         """Get a connection pool for the given layer id
         Each layer ID has it's own connection pool
         (as each connection pool handles only one base URL)
@@ -270,15 +270,29 @@ class MapTiles(RanaModule):
         :param str baseUrl: a URL used to initialize the connection pool
                            (basically just the domain name needs to be correct)
         """
-        pool = self.connPools.get(layerId, None)
+        pool = self.connPools.get(layer.id, None)
         if pool:
             return pool
         else: # create pool
             #headers = { 'User-Agent' : "Mozilla/5.0 (compatible; MSIE 5.5; Linux)" }
             userAgent = self.modrana.configs.user_agent
             headers = {'User-Agent': userAgent}
-            newPool = urllib3.connection_from_url(url=baseUrl, headers=headers, maxsize=10, timeout=10, block=False)
-            self.connPools[layerId] = newPool
+            connection_timeout = constants.TILE_DOWNLOAD_TIMEOUT
+            if layer.connection_timeout is not None:  # some value was set in the config
+                if layer.connection_timeout < 0:  # -1 == no timeout
+                    connection_timeout = None  # None means no timeout for Urllib 3 connection pools
+                else:
+                    connection_timeout = layer.connection_timeout
+            if connection_timeout is None:
+                self.log.debug("creating tile download pool for %s without a connection timeout", layer.id)
+            else:
+                self.log.debug("creating tile download pool for %s with connection timeout %s s", layer.id, connection_timeout)
+            newPool = urllib3.connection_from_url(url=baseUrl,
+                                                  headers=headers,
+                                                  maxsize=10,
+                                                  timeout=connection_timeout,
+                                                  block=False)
+            self.connPools[layer.id] = newPool
             return newPool
 
     def addTileDownloadRequest(self, lzxy, tag=None):
