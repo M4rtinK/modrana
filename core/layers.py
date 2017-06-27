@@ -119,6 +119,26 @@ class MapLayer(object):
             return tile_timeout
 
     @property
+    def connection_timeout(self):
+        """How long should we wait for tile to be download for this layer.
+        
+        This can be of a bigger importance for local host tile rendering
+        servers that might take longer to render a tile but unlike a remote
+        tile server that might never reply due to connection interruption
+        the local rendering tileserver should almost always eventually
+        send back the tile.
+
+        :returns: connection timeout (in seconds)
+        :rtype: int or None
+        """
+        tile_connection_timeout = self.config.get('connection_timeout', None)
+        if tile_connection_timeout is not None:
+            return int(tile_connection_timeout)
+        else:
+            return tile_connection_timeout
+
+
+    @property
     def dict(self):
         """ Return a dictionary representing the layer
 
@@ -136,7 +156,8 @@ class MapLayer(object):
             "coordinates" : self.coordinates,
             "group_id" : self.group_id,
             "icon" : self.icon,
-            "timeout" : self.timeout
+            "timeout" : self.timeout,
+            "connection_timeout" : self.connection_timeout
         }
 
     def __repr__(self):
