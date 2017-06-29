@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.54.6
+Version: 0.54.7
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -125,6 +125,14 @@ fi
 %endif
 
 %changelog
+* Thu Jun 29 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.7-1
+- Document that -1 disables the connection timeout for a layer (martin.kolman)
+- Make it possible to set per-layer connection timeout (martin.kolman)
+- Turn getters and setters to properties (martin.kolman)
+- Fix turn by turn worker thread startup (martin.kolman)
+- Categorize thread name constants a bit (martin.kolman)
+- Refactor the turn-by-turn module (martin.kolman)
+
 * Wed Mar 29 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.6-1
 - Fix Monav Server based routing (martin.kolman)
 - Add fallback for json import (martin.kolman)
