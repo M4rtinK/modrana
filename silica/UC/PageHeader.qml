@@ -11,6 +11,7 @@ PageHeader {
     property color color
     property int headerHeight
     property int titlePixelSize
+    property bool menuButtonEnabled : true
     // NOTE: The PageHeader needs to be placed in a PlatformFlickable
     //       or PlatformListView for the menu to work correctly.
     property alias menu : pageHeader.children

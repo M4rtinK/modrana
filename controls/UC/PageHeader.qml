@@ -21,9 +21,10 @@ Label {
     wrapMode : Text.NoWrap
     horizontalAlignment : _fitsIn ? Text.AlignHCenter : Text.AlignLeft
     property var menu : null
+    property bool menuButtonEnabled : true
     signal _openMenu
     Button {
-        visible : headerLabel.menu
+        visible : menuButtonEnabled && headerLabel.menu
         anchors.right : parent.right
         anchors.rightMargin : 8 * S.style.m
         anchors.verticalCenter : parent.verticalCenter
