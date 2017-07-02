@@ -8,7 +8,7 @@ Markers {
             Bubble {
                 anchors.horizontalCenter : pointMarker.horizontalCenter
                 anchors.bottom : pointMarker.top
-                anchors.bottomMargin : 8
+                anchors.bottomMargin : 8 * rWin.c.style.m
                 z: 2000
                 bubbleWidth : childrenRect.width + rWin.c.style.map.button.margin*2
                 bubbleHeight : childrenRect.height + rWin.c.style.map.button.margin*2
