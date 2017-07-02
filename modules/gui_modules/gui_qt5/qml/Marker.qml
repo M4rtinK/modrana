@@ -11,19 +11,4 @@ Rectangle {
     border.width: 3 * rWin.c.style.m
     border.color: point.highlight ? "red" : "blue"
     radius: 7 * rWin.c.style.m
-    // the "simple mode" is used usually on higher zoom
-    // levels to avoid label clutter as only the the marker
-    // and not the label is drawn when it is enabled
-    property bool simple : false
-    Text {
-        id: label
-        visible: !marker.simple
-        anchors.left: parent.right
-        anchors.leftMargin: 12 * rWin.c.style.m
-        anchors.verticalCenter : parent.verticalCenter
-        text: point.name
-        style: Text.Outline
-        styleColor: "white"
-        font.pixelSize: 24 * rWin.c.style.m
-    }
 }
