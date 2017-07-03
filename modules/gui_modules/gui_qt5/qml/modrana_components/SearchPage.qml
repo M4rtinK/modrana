@@ -58,7 +58,9 @@ HeaderPage {
     Item {
         id : progressInfo
         anchors.left : parent.left
+        anchors.leftMargin : rWin.c.style.main.spacing
         anchors.right : parent.right
+        anchors.rightMargin : rWin.c.style.main.spacing
         opacity : 0.0
         state : searchPage._searchInProgress ? "ON" : "OFF"
         height : 0
@@ -66,20 +68,32 @@ HeaderPage {
 
         Row {
             spacing : rWin.c.style.main.spacing
-            TextButton {
-                text : searchPage._searchStatus
-                height : progressInfo.height
+            ThemedBackgroundRectangle {
                 width : progressInfo.width * 3/4
+                height : progressInfo.height
+                Label {
+                    text : searchPage._searchStatus
+                    fontSizeMode: Text.HorizontalFit
+                    horizontalAlignment : Text.AlignHCenter
+                    anchors.verticalCenter : parent.verticalCenter
+                    anchors.left : parent.left
+                    anchors.leftMargin : rWin.c.style.main.spacing
+                    anchors.right : parent.right
+                    anchors.rightMargin : rWin.c.style.main.spacing
+                }
             }
-            TextButton {
-                text : "Cancel"
+            Button {
+                id : cancelButton
+                text : qsTr("Cancel")
                 height : progressInfo.height
                 width : progressInfo.width * 1/4 - rWin.c.style.main.spacing
                 onClicked : {
                     rWin.log.info("search: cancel pressed")
                     rWin.python.call("modrana.gui.search.cancelSearch",
                                      [searchPage._searchThreadId],
-                                     function(){})
+                                     function(){
+                                        searchPage._searchInProgress = false
+                                     })
                 }
             }
         }
