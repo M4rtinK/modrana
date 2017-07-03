@@ -107,15 +107,21 @@ class OnlineServices(RanaModule):
         return provider.search(term=term, around=around, maxResults=maxResults,
                                radius=radius)
 
-    def localSearchAsync(self, term, callback, around=None, maxResults=20, sensor='false'):
+    def localSearchAsync(self, term, callback, around=None, maxResults=32, sensor='false'):
+        radius = int(self.get("localSearchRadius", constants.DEFAULT_LOCAL_SEARCH_RADIUS))
         if self.get("localSearchGoogleEnabled"):
             provider = online_providers.GoogleLocalSearch()
         elif self.get("localSearchOSMScoutServerEnabled"):
             provider = offline_providers.OSMScoutServerLocalSearch()
+            # OSM Scout Server currently has some issues with returning nearby
+            # results if a big search radius is specified:
+            # https://github.com/rinigus/osmscout-server/issues/161
+            # so use a smaller radius until the issues fixed or until
+            # separate local search radius can be set for OSM Scout Server (ideally both)
+            radius = 2000
         else:
             provider = online_providers.GoogleLocalSearch()
 
-        radius = int(self.get("localSearchRadius", constants.DEFAULT_LOCAL_SEARCH_RADIUS))
         provider.searchAsync(callback, term=term, around=around, maxResults=maxResults,
                              sensor=sensor, radius=radius)
 
