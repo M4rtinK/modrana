@@ -38,7 +38,7 @@ class GeocodingOSMScoutServer(POIProvider):
             log.error("OSMScoutServerSearch: term is None")
             return []
         results = []
-        controller.status = "starting OSM Scout Server place search"
+        controller.status = "OSM Scout Server place search"
         try:
             term = term.encode("utf-8")
             params = {
@@ -112,7 +112,7 @@ class OSMScoutServerLocalSearch(POIProvider):
         controller.status = "OSM Scout Server local search"
 
         results = []
-        controller.status = "starting OSM Scout Server local search"
+        controller.status = "OSM Scout Server local search"
         try:
             point_type = "amenity"
             # check if type override has been specified by prefix
