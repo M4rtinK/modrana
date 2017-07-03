@@ -50,6 +50,7 @@ THREAD_ADDRESS_SEARCH = "modRanaAddressSearch"
 THREAD_WIKIPEDIA_SEARCH_NOMINATIM = "modRanaWikipediaSearchNominatim"
 THREAD_REVERSE_GEOCODING = "modRanaReverseGeocoding"
 THREAD_LOCAL_SEARCH_GOOGLE = "modRanaLocalSearchGoogle"
+THREAD_LOCAL_SEARCH_OSM_SCOUT = "modRanaLocalSearchOSMScoutServer"
 # routing
 THREAD_ROUTING_ONLINE_GOOGLE = "modRanaRoutingOnlineGoogle"
 THREAD_ROUTING_OFFLINE_MONAV = "modRanaRoutingOfflineMonav"

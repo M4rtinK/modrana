@@ -86,7 +86,7 @@ class GeocodingOSMScoutServer(POIProvider):
 
 class OSMScoutServerLocalSearch(POIProvider):
     def __init__(self):
-        POIProvider.__init__(self, threadName=constants.THREAD_LOCAL_SEARCH_GOOGLE)
+        POIProvider.__init__(self, threadName=constants.THREAD_LOCAL_SEARCH_OSM_SCOUT)
 
     # first check if around is provided and enable GPS if not
     # as current position "becomes" around
@@ -123,15 +123,16 @@ class OSMScoutServerLocalSearch(POIProvider):
 
             term = term.encode("utf-8")
             params = {
-                'limit': 16,  # TODO: make this configurable
-                'search': term,
+                'limit': maxResults,
+                'query': term,
                 'radius': radius,
-                'type' : point_type,
                 'lat' : around.lat,
                 'lng' : around.lon
             }
-            queryUrl = OSM_SCOUT_SERVER_LOCAL_SEARCH_URL + urlencode(params)
-            reply = urlopen(queryUrl)
+            query_url = OSM_SCOUT_SERVER_LOCAL_SEARCH_URL + urlencode(params)
+            log.debug("OSM Scout Server local search query URL:")
+            log.debug(query_url)
+            reply = urlopen(query_url)
             if reply:
                 # json in Python 3 really needs it encoded like this
                 replyData = reply.read().decode("utf-8")
