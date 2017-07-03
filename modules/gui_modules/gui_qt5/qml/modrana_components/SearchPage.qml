@@ -23,9 +23,9 @@ HeaderPage {
     property bool showNavigationIndicator : false
 
     function search (query) {
-        rWin.python.call("modrana.gui.search.search", [searchPage.searchId, query], function(v) {
+        rWin.python.call("modrana.gui.search.search", [searchPage.searchId, query], function(threadId) {
             rWin.log.info("searching for: " + query + " using " + searchPage.searchId)
-            searchPage._searchThreadId = v
+            searchPage._searchThreadId = threadId
             searchPage._searchInProgress = true
         })
     }
