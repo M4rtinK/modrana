@@ -32,7 +32,7 @@ Item {
         // all platforms so we need to handle import failure
         // (real conditional imports would be nice, wouldn't they ;))
         // TODO: handle also other platforms than Sailfish OS
-        var sailfishKeepAliveInstance = rWin.loadQMLFile("sailfish_specific/SailfishKeepAlive.qml", true)
+        var sailfishKeepAliveInstance = rWin.loadQMLFile("sailfish_specific/SailfishKeepAlive.qml", {}, true)
         if (sailfishKeepAliveInstance) {
             rWin.log.info("KeepAlive: keep alive control initialized")
             stillAlive.keepAliveInstance = sailfishKeepAliveInstance

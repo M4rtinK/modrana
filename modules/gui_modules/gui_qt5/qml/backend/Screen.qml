@@ -28,7 +28,7 @@ Item {
         // all platforms so we need to handle import failure
         // (real conditional imports would be nice, wouldn't they ;))
         // TODO: handle also other platforms than Sailfish OS
-        var sailfishScreenInstance = rWin.loadQMLFile("sailfish_specific/SailfishScreen.qml", true)
+        var sailfishScreenInstance = rWin.loadQMLFile("sailfish_specific/SailfishScreen.qml", {}, true)
         if (sailfishScreenInstance) {
             rWin.log.info("Screen: screen blanking control initialized")
             screen.screenInstance = sailfishScreenInstance
