@@ -4,6 +4,7 @@ import "modrana_components"
 
 Markers {
     id : markers
+    signal poiClicked(var point)
     delegate: Component {
         Marker {
             id : poiMarker
@@ -31,7 +32,7 @@ Markers {
                     anchors.top : parent.top
                     anchors.topMargin : rWin.c.style.map.button.margin / 2.0
                     onClicked: {
-                        rWin.log.info("POI clicked: " + model.name)
+                        markers.poiClicked(model)
                     }
                 }
             }
