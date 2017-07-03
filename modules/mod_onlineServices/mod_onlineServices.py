@@ -96,6 +96,7 @@ class OnlineServices(RanaModule):
         """Asynchronous reverse geocoding"""
         provider = online_providers.ReverseGeocodingNominatim()
         provider.searchAsync(callback, term=searchPoint)
+        return provider.threadName
 
     def localSearch(self, term, around=None, maxResults=8):
         """Synchronous generic local search query
@@ -124,6 +125,7 @@ class OnlineServices(RanaModule):
 
         provider.searchAsync(callback, term=term, around=around, maxResults=maxResults,
                              sensor=sensor, radius=radius)
+        return provider.threadName
 
     # ** OSM static map URL **
 
@@ -201,6 +203,7 @@ class OnlineServices(RanaModule):
         """
         provider = online_providers.WikipediaSearchNominatim()
         provider.searchAsync(callback, term=query)
+        return provider.threadName
 
     # ** Background processing **
 
