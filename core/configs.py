@@ -67,6 +67,14 @@ class Configs(object):
 
         return existing_configs
 
+    def _safe_parse(self, config_path):
+        parsed_config = None
+        try:
+            parsed_config = ConfigObj(config_path)
+        except:
+            log.exception("parsing of config file failed: %s", config_path)
+        return parsed_config
+
     def upgrade_config_files(self):
         """Upgrade config files (if needed)."""
         upgrade_count = 0
@@ -79,8 +87,17 @@ class Configs(object):
             default_config_path = os.path.join(self._default_configs_dir, config)
             config_path = os.path.join(self._configs_dir, config)
             try:
-                default_rev = int(ConfigObj(default_config_path).get("revision", 0))
-                installed_rev = int(ConfigObj(config_path).get("revision", 0))
+                # revision of default config
+                default_config = self._safe_parse(default_config_path)
+                default_rev = 0
+                if default_config is not None:
+                    default_rev = int(default_config.get("revision", 0))
+
+                # revision of installed config
+                installed_config = self._safe_parse(config_path)
+                installed_rev = 0
+                if installed_config is not None:
+                    installed_rev = int(installed_config.get("revision", 0))
 
                 if default_rev > installed_rev:  # is the installed config outdated ?
                     log.info('config file %s is outdated, upgrading', config)
@@ -165,20 +182,20 @@ class Configs(object):
             return True
 
         map_config_path = os.path.join(self._configs_dir, MAP_CONFIG_FILE)
+        default_map_config_path = os.path.join(DEFAULT_CONFIGS_DIR, MAP_CONFIG_FILE)
+        map_config = None
         # check if the map configuration file is installed
-        if not os.path.exists(map_config_path):
-            # nothing in profile folder -> try to use the default config
-            log.info("no config in profile folder, using default map layer configuration file")
-            map_config_path = os.path.join(DEFAULT_CONFIGS_DIR, MAP_CONFIG_FILE)
-            if not os.path.exists(map_config_path):
-                # no map layer config available
-                log.info("map layer configuration file not available")
-                return False
-        try:
-            self._map_config = ConfigObj(map_config_path)
+        if os.path.exists(map_config_path):
+            map_config = self._safe_parse(map_config_path)
+        # installed config missing or invalid -> try to use the default config
+        if map_config is None:
+            log.error("installed map_config.conf unusable, falling back to default map_config.conf")
+            map_config = self._safe_parse(default_map_config_path)
+        if map_config:
+            self._map_config = map_config
             return True
-        except Exception:
-            log.exception("loading map_config.conf failed")
+        else:
+            log.critical("even default map_config.conf is missing or invalid")
             return False
 
     @property
