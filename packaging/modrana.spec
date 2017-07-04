@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.54.7
+Version: 0.54.8
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -125,6 +125,25 @@ fi
 %endif
 
 %changelog
+* Tue Jul 04 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.8-1
+- Fix nosetests runner (martin.kolman)
+- Make map config parsing more robust (martin.kolman)
+- Fix a typo in the map configuration file (martin.kolman)
+- Fix search progress indicator (martin.kolman)
+- Drop the "starting" prefix (martin.kolman)
+- Use better variable name for the thread id (martin.kolman)
+- Return thread name for synchronous search calls where applicable (martin.kolman)
+- Tweaks for OSM Scout Server local search (martin.kolman)
+- Fix OSM Scout Server local search provider (martin.kolman)
+- Show POI search result details when POI marker is clicked (martin.kolman)
+- Make it possible to assign properties when dynamically loading QML files (martin.kolman)
+- Add MapTextButton (martin.kolman)
+- Use the POIMarkers element to display POI search results (martin.kolman)
+- Remove the marker simplification logic from the Marker element (martin.kolman)
+- Make it possible to also show the bubble from the right from a marker (martin.kolman)
+- Add initial POIMarkers element (martin.kolman)
+- Account for DPI scaling for point menu bubble margin (martin.kolman)
+
 * Thu Jun 29 2017 Martin Kolman <martin.kolman@gmail.com> - 0.54.7-1
 - Document that -1 disables the connection timeout for a layer (martin.kolman)
 - Make it possible to set per-layer connection timeout (martin.kolman)
