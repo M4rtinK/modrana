@@ -32,11 +32,12 @@ Page {
     }
     */
 
+    /*
     Rectangle {
         id : background
         color : rWin.theme.color.list_view_background
         anchors.fill : parent
-    }
+    }*/
 
     PlatformFlickable {
         id : pageFlickable
