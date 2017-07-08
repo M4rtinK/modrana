@@ -1,9 +1,12 @@
 """A modRana POI database class"""
 
 import os
+import sys
 import sqlite3
 from core.point import POI
 from core.backports.six import u
+
+PYTHON3 = sys.version_info[0] > 2
 
 import logging
 log = logging.getLogger("core.poi_db")
@@ -100,12 +103,19 @@ class POIDatabase(object):
         :returns: POI object values tuple for storage in database order
         :rtype: tuple
         """
+        if PYTHON3:
+            name = poi.name
+            description = poi.description
+        else:
+            name = poi.name.decode("utf-8")
+            description = poi.description.decode("utf-8")
+
         return (
             poi.db_index,
             poi.lat,
             poi.lon,
-            poi.name.decode("utf-8"),
-            poi.description.decode("utf-8"),
+            name,
+            description,
             poi.db_category_index
         )
 
