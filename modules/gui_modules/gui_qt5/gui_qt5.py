@@ -73,9 +73,10 @@ def point2dict(point):
         "longitude" : point.lon,
         "elevation" : point.elevation,
         "highlight" : False,
-        "mDistance" : 0  # will be filled in on QML side
+        "mDistance" : 0,  # will be filled in on QML side
+        "db_id" : getattr(point, "db_index", None),
+        "category_id" : getattr(point, "db_category_index", None)
     }
-
 
 class QMLGUI(GUIModule):
     """A Qt + QML GUI module"""
@@ -455,7 +456,6 @@ class POI(object):
             })
         return cat_list
 
-
     def store_poi(self, point_dict):
         success = False
         db = self.gui.modules.storePOI.db
@@ -487,6 +487,16 @@ class POI(object):
         else:
             self.gui.log.error("cant's save poi, missing name or coordinates: %s", point_dict)
         return success
+
+    def get_all_poi_from_category(self, category_id):
+        db = self.gui.modules.storePOI.db
+        poi_list = []
+        for poi_tuple in db.get_all_poi_from_category(category_id):
+            # TODO: to this already in poi_db
+            (name, desc, lat, lon, poi_id) = poi_tuple
+            poi_dict = point2dict(point.POI(name, desc, lat, lon, category_id, poi_id))
+            poi_list.append(poi_dict)
+        return poi_list
 
 
 class Search(object):
