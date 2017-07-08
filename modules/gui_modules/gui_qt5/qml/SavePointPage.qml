@@ -6,13 +6,13 @@ import "modrana_components"
 
 BasePage {
     id: savePointPage
-    headerText : qsTr("Save point")
+    headerText : qsTr("Save POI")
     property var point
     property int categoryId : 11
 
     headerMenu : TopMenu {
         MenuItem {
-            text : qsTr("Confirm & save")
+            text : qsTr("Confirm and save")
             onClicked : {
                 rWin.log.debug("saving point: " + point.name)
                 var pointDict = {
@@ -25,9 +25,9 @@ BasePage {
                 python.call("modrana.gui.POI.store_poi", [pointDict], function(success) {
                     rWin.pop()
                     if (success) {
-                        rWin.notify(qsTr("Point saved"), 3000)
+                        rWin.notify(qsTr("POI saved"), 3000)
                     } else {
-                        rWin.notify(qsTr("Point could not be saved"), 3000)
+                        rWin.notify(qsTr("POI could not be saved"), 3000)
                     }
 
                 })
