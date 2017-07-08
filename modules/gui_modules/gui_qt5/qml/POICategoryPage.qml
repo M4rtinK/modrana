@@ -5,16 +5,18 @@ import UC 1.0
 import "modrana_components"
 
 BasePage {
-    id: pclPage
+    id: pcPage
+    property string categoryName
+    property int categoryId
 
-    headerText : qsTr("POI Categories")
+    headerText : categoryName
 
     content : ContentColumn {
         ListView {
             id : itemsLW
             anchors.left : parent.left
             anchors.right : parent.right
-            height : pclPage.availableHeight
+            height : pcPage.availableHeight
             spacing : rWin.c.style.listView.spacing
             model : ListModel {
                id : resultsModel
@@ -30,9 +32,9 @@ BasePage {
                     rWin.log.info("POI category list: " + model.name + " clicked")
 
                     // switch to page listing tracklogs for the given category
-                    var categoryPage = rWin.getPage("POICategory")
-                    categoryPage.categoryId = model.category_id
-                    rWin.pushPageInstance(categoryPage)
+                    var poiPage = rWin.getPage("POI")
+                    poiPage.point = model
+                    rWin.pushPageInstance(poiPage)
                 }
                 Column {
                     id : contentC
@@ -44,9 +46,10 @@ BasePage {
                         text : "<b>" + model.name + "</b>"
                     }
                     Label {
-                        text : model.poi_count + " " + qsTr("POIs")
-                        wrapMode : Text.WordWrap
-                        width : resultDelegate.width - rWin.c.style.main.spacingBig*2
+                        text : "latitude: " + model.latitude
+                    }
+                    Label {
+                        text : "longitude: " + model.longitude
                     }
                 }
             }
@@ -54,11 +57,11 @@ BasePage {
     }
 
     // TODO: move somewhere else & execute earlier
-    Component.onCompleted : {
-        rWin.python.call("modrana.gui.POI.list_used_categories", [], function(categories){
+    onCategoryIdChanged : {
+        rWin.python.call("modrana.gui.POI.get_all_poi_from_category", [pcPage.categoryId], function(poiList){
             itemsLW.model.clear()
-            for (var i=0; i<categories.length; i++) {
-                itemsLW.model.append(categories[i]);
+            for (var i=0; i<poiList.length; i++) {
+                itemsLW.model.append(poiList[i]);
             }
         })
     }
