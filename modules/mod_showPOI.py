@@ -170,7 +170,7 @@ class ShowPOI(RanaModule):
                     # convert the output to a listable menu compatible state
                     i = 0
                     for item in poiFromCategory:
-                        (label, lat, lon, poi_id) = item
+                        (label, _desc, lat, lon, poi_id) = item
                         subText = "lat: %f, lon: %f" % (lat, lon)
                         buttonAction = "ms:showPOI:setActivePOI:%d|%s" % (poi_id, action)
                         poiFromCategory[i] = (label, subText, buttonAction)
@@ -359,7 +359,7 @@ class ShowPOI(RanaModule):
             catPOI = store.db.get_all_poi_from_category(cat_id)
             count += len(catPOI)
             for item in catPOI:
-                (label, lat, lon, poi_id) = item
+                (label, _desc, lat, lon, poi_id) = item
                 _makePOIVisible(store.db.get_poi(poi_id))
         self.saveVisibleIDs()
         self.drawPOI()

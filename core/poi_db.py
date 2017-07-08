@@ -210,7 +210,7 @@ class POIDatabase(object):
         :rtype: list of POI objects or None
         """
         if self.connected:
-            result = self._db.execute('select label,lat,lon,poi_id from poi where cat_id=?', [category_db_index]).fetchall()
+            result = self._db.execute('select label,desc,lat,lon,poi_id from poi where cat_id=?', [category_db_index]).fetchall()
             return result
         else:
             return None
