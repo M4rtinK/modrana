@@ -5,7 +5,7 @@ Page {
     id : iconGP
     //signal buttonClicked(string menu)
     property alias model : gridView.model
-    property int headerHeight : rWin.platform.needsBackButton ? 0 : 100
+    property int headerHeight : rWin.platform.needs_back_button ? 0 : 100
     property int hIcons : rWin.inPortrait ? 2 : 4
     property double iconMargin : width/(hIcons*10)
     property double iconSize : (width-2)/hIcons
@@ -17,7 +17,7 @@ Page {
     Rectangle {
         anchors.fill : parent
         color : rWin.theme.color.page_background
-        visible : rWin.platform.needsPageBackground
+        visible : rWin.platform.needs_page_background
     }
 
     function getPage(menu) {

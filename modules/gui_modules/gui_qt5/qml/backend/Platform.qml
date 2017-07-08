@@ -3,11 +3,11 @@ import QtQuick 2.0
 Item {
     property bool valid : false
     property string modRanaVersion : "unknown"
-    property bool showQuitButton : true
-    property bool fullscreenOnly : false
-    property bool shouldStartInFullscreen : false
-    property bool needsBackButton : true
-    property bool needsPageBackground : false
+    property bool show_quit_button : true
+    property bool fullscreen_only : false
+    property bool should_start_in_fullscreen : false
+    property bool needs_back_button : true
+    property bool needs_page_background : false
     // location specific
     property var lastKnownPos : null
     property bool gpsEnabled : true
@@ -18,11 +18,11 @@ Item {
 
     function setValuesFromPython(values) {
         modRanaVersion = values.modRanaVersion
-        showQuitButton = values.showQuitButton
-        fullscreenOnly = values.fullscreenOnly
-        shouldStartInFullscreen = values.shouldStartInFullscreen
-        needsBackButton = values.needsBackButton
-        needsPageBackground = values.needsPageBackground
+        show_quit_button = values.show_quit_button
+        fullscreen_only = values.fullscreen_only
+        should_start_in_fullscreen = values.should_start_in_fullscreen
+        needs_back_button = values.needs_back_button
+        needs_page_background = values.needs_page_background
         lastKnownPos = values.lastKnownPos
         gpsEnabled = values.gpsEnabled
         posFromFile = values.posFromFile

@@ -388,11 +388,11 @@ class QMLGUI(GUIModule):
         values = {
             "modRanaVersion" : self.getModRanaVersion(),
             "constants" : self.getConstants(),
-            "showQuitButton": self.showQuitButton(),
-            "fullscreenOnly": self.modrana.dmod.fullscreenOnly(),
-            "shouldStartInFullscreen": self.shouldStartInFullscreen(),
-            "needsBackButton": self.modrana.dmod.needsBackButton(),
-            "needsPageBackground": self.modrana.dmod.needsPageBackground(),
+            "show_quit_button": self.showQuitButton(),
+            "fullscreen_only": self.modrana.dmod.fullscreenOnly(),
+            "should_start_in_fullscreen": self.shouldStartInFullscreen(),
+            "needs_back_button": self.modrana.dmod.needsBackButton(),
+            "needs_page_background": self.modrana.dmod.needsPageBackground(),
             "lastKnownPos" : self.get("pos", None),
             "gpsEnabled" : self.get("GPSEnabled", True),
             "posFromFile" : self.get("posFromFile", None),
@@ -401,7 +401,8 @@ class QMLGUI(GUIModule):
             "dictOfLayerDicts" : self.modules.mapLayers.getDictOfLayerDicts(),
             "themesFolderPath" : os.path.abspath(self.modrana.paths.getThemesFolderPath()),
             "sailfish" : self.dmod.getDeviceIDString() == "jolla",
-            "hiDPI" : self.highDPI,
+    	    "device_type" : self.modrana.dmod.getDeviceType(),
+            "highDPI" : self.highDPI,
             "defaultTileStorageType" : self.modrana.dmod.defaultTileStorageType
         }
         return values
@@ -828,11 +829,13 @@ class Theme(object):
             "name" : theme.name,
             "color" : {
                 "main_fill" : theme.getColor("main_fill", "#92aaf3"),
+                "main_highlight_fill" : theme.getColor("main_highlight_fill", "#f5f5f5"),
                 "icon_grid_toggled" : theme.getColor("icon_grid_toggled", "#c6d1f3"),
                 "icon_button_normal" : theme.getColor("icon_button_normal", "#c6d1f3"),
                 "icon_button_toggled" : theme.getColor("icon_button_toggled", "#3c60fa"),
                 "icon_button_text" : theme.getColor("icon_button_text", "black"),
                 "page_background" : theme.getColor("page_background", "black"),
+                "list_view_background" : theme.getColor("list_view_background", "#d2d2d2d"),
                 "page_header_text" : theme.getColor("page_header_text", "black"),
             }
         }

@@ -730,7 +730,7 @@ Page {
         MapButton {
             iconName : "minimize_small.png"
             checkable : true
-            visible: !rWin.platform.fullscreenOnly
+            visible: !rWin.platform.fullscreen_only
             onClicked: {
                 rWin.toggleFullscreen()
             }

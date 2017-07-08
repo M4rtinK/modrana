@@ -30,7 +30,7 @@ ApplicationWindow {
     property alias showBackButton : showBackButtonProperty.value
     OptProp {
         id : showBackButtonProperty
-        value : rWin.platform.needsBackButton
+        value : rWin.platform.needs_back_button
     }
 
     // debugging
@@ -56,8 +56,10 @@ ApplicationWindow {
     // logging
     property var log : PythonLog {}
 
-    property int _landscapeDivider : rWin.platform.needsBackButton ? 5.5 : 8.0
-    property int headerHeight : rWin.inPortrait ? height/8.0 : height/_landscapeDivider
+    property real mainDivider : rWin.isSmartphone ? 8.0 : 14.0
+    property real backButtonDivider : rWin.isSmartphone ? 5.5 : 9.5
+    property int _landscapeDivider : rWin.platform.needs_back_button ? backButtonDivider : mainDivider
+    property int headerHeight : rWin.inPortrait ? height/mainDivider : height/_landscapeDivider
 
     property var c
 
@@ -125,6 +127,16 @@ ApplicationWindow {
 
     // theme
     property var theme
+
+    // device type
+    //
+    // desktop == 1
+    // smartphone == 2
+    // tablet == 3
+    property int deviceType : 2  // consider smartphone as default device
+    property bool isDesktop : deviceType == 1
+    property bool isSmartphone : deviceType == 2
+    property bool isTablet : deviceType == 3
 
     // map layers
     property var layerTree : ListModel {}
@@ -394,6 +406,10 @@ ApplicationWindow {
             rWin.log.info("redirecting QML log to the Python log")
         })
 
+        python.setHandler("openURL", function(url) {
+            rWin.openURL(url)
+        })
+
         // get the argv & remove the qml launcher
         // & qml file name from it (args nr. 0 and 1)
         var argv = Qt.application.arguments.slice(2)
@@ -448,7 +464,10 @@ ApplicationWindow {
         // our Python backend returned the values we needed
 
         // set normal/hiDPI mode
-        rWin.hiDPI = values.hiDPI
+        rWin.hiDPI = values.highDPI
+
+        // set device type
+        rWin.deviceType = values.device_type
 
         // assign to constants
         rWin.c = values.constants
@@ -466,15 +485,15 @@ ApplicationWindow {
         rWin.log.debug("handling fullscreen state")
         // if on a platform that is not fullscreen-only,
         // set some reasonable default size for the window
-        if (!rWin.platform.fullscreenOnly) {
+        if (!rWin.platform.fullscreen_only) {
             rWin.width = 640
             rWin.height = 480
         }
 
-        if (!rWin.platform.fullscreenOnly) {
+        if (!rWin.platform.fullscreen_only) {
             // no need to trigger fullscreen if the
             // platform is fullscreen only
-            if (rWin.platform.shouldStartInFullscreen) {
+            if (rWin.platform.should_start_in_fullscreen) {
                 rWin.setFullscreen(5) // 5 == fullscreen
             }
         }
@@ -492,13 +511,10 @@ ApplicationWindow {
         mapPageLoader.source = "MapPage.qml"
     }
 
-    function loadQMLFile(filename, properties, quiet) {
-        if (!properties) {
-            properties = {}
-        }
+    function loadQMLFile(filename, quiet) {
         var component = Qt.createComponent(filename);
         if (component.status == Component.Ready) {
-            return component.createObject(rWin, properties);
+            return component.createObject(rWin);
         } else {
             if (!quiet) {
                 rWin.log.error("loading QML file failed: " + filename)
@@ -508,9 +524,9 @@ ApplicationWindow {
         }
     }
 
-    function loadPage(pageName, properties) {
+    function loadPage(pageName) {
         rWin.log.info("loading page: " + pageName)
-        return loadQMLFile(pageName + ".qml", properties)
+        return loadQMLFile(pageName + ".qml")
     }
     /*
     function loadPage(pageName) {
@@ -587,6 +603,14 @@ ApplicationWindow {
             rWin.pageStack.pop(rWin.mapPage, !animate)
         }
     }
+
+    function pop() {
+        // pop a page from the stack
+        // TODO: prevent the stack from becoming empty
+        //      (keep the stream list page as the default page)
+        rWin.pageStack.pop(undefined, !rWin.animate)
+    }
+
 
     // Working with options
     function get(key, default_value, callback) {
@@ -690,6 +714,11 @@ ApplicationWindow {
         //TODO: value checking :D
         rWin.visibility = value
         rWin._lastVisibility = rWin.visibility
+    }
+
+    function openURL(url) {
+        rWin.log.debug("opening URL: " + url)
+        Qt.openUrlExternally(url)
     }
 }
 

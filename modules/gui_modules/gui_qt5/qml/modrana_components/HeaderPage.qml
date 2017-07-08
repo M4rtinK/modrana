@@ -16,7 +16,10 @@ Page {
     property alias headerContent : hContent.children
     property alias headerWidth : header.width
     property alias headerOpacity : header.opacity
+    property alias headerVisible : header.visible
     property alias backButtonWidth : backButton.width
+    property alias backButtonVisible : backButton.visible
+    property alias topLevelContent : topLevel.children
     property int headerHeight : rWin.headerHeight
     property int bottomPadding : 0
     property real availableHeight : parent.height - bottomPadding - headerHeight
@@ -29,20 +32,16 @@ Page {
     }
     */
 
-    /*
     Rectangle {
         id : background
-        color : "white"
+        color : rWin.theme.color.list_view_background
         anchors.fill : parent
-        //visible : false
     }
-    */
 
-    Flickable {
+    PlatformFlickable {
         id : pageFlickable
         anchors.fill: parent
         contentWidth: parent.width
-        contentHeight: (headerHeight + contentField.childrenRect.height + bottomPadding)
         //flickableDirection: Flickable.VerticalFlick
         VerticalScrollDecorator {}
         Item {
@@ -57,7 +56,7 @@ Page {
             id : header
             Item {
                 id : hContent
-                width : rWin.platform.needsBackButton ?
+                width : rWin.platform.needs_back_button ?
                 headerWidth - backButton.width - rWin.c.style.main.spacingBig :
                 headerWidth
                 anchors.right : parent.right
@@ -66,13 +65,20 @@ Page {
             }
         }
     }
+    // Top level content is above the flickable and the header,
+    // but still bellow the back button (if any).
+
+    Item {
+        id : topLevel
+        anchors.fill: parent
+    }
     MIconButton {
         id : backButton
         width : headerHeight * 0.8
         height : headerHeight * 0.8
         anchors.top : parent.top
         anchors.left : parent.left
-        anchors.topMargin : rWin.c.style.main.spacing
+        anchors.topMargin : (headerHeight - height) / 2.0
         anchors.leftMargin : rWin.c.style.main.spacingBig
         iconName : "left_thin.png"
         //iconSource : "image://icons/"+ rWin.theme_id +"/back_small.png"

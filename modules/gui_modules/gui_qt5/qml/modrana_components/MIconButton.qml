@@ -20,12 +20,10 @@ Rectangle {
 
     color : normalColor
 
-    // "#c6d1f3" QML toggled
-    // modRana theme:
-    // #3c60fa outline
-    // "#92aaf3" fill
-    // "#00004d" main text
-    radius : 10 * rWin.c.style.m
+    border.width : 1 * rWin.c.style.m
+    border.color : "black"
+
+    radius : 4 * rWin.c.style.m
     smooth : true
     signal clicked
     signal pressAndHold

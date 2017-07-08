@@ -64,7 +64,7 @@ BasePage {
             // only show this switch on platforms that don't
             // require the back button, so that users don't
             // easily "luck themselves out"
-            visible : !rWin.platform.needsBackButton
+            visible : !rWin.platform.needs_back_button
         }
         Label {
             text : qsTr("Screen")
