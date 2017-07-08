@@ -6,11 +6,12 @@ MouseArea {
     id : bMouse
     property string highlightedColor: "darkblue"
     property string normalColor : "#92aaf3"
+    property int cornerRadius : S.style.listView.cornerRadius
     implicitHeight: S.style.dialog.item.height
     Rectangle {
         anchors.fill : parent
         property bool clickable : false
         color: bMouse.pressed ? highlightedColor : normalColor
-        radius : S.style.listView.cornerRadius
+        radius : cornerRadius
     }
 }
