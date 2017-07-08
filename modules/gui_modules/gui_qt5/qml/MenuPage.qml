@@ -24,16 +24,6 @@ IconGridPage {
             icon : "search.png"
             menu : "SearchMenu"
         }
-
-        // TODO: un-comment once implemented
-        /*
-        ListElement {
-            caption : "POI"
-            icon : "poi.png"
-            menu : "PoiMenu"
-        }
-        */
-
         ListElement {
             caption : "Route"
             icon : "route.png"
@@ -55,7 +45,11 @@ IconGridPage {
             menu : "ModeMenu"
         }
         */
-
+        ListElement {
+            caption : "POI"
+            icon : "poi.png"
+            menu : "POICategoryList"
+        }
         ListElement {
             caption : "Tracks"
             icon : "tracklogs.png"

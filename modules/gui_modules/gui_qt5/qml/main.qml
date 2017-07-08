@@ -511,10 +511,13 @@ ApplicationWindow {
         mapPageLoader.source = "MapPage.qml"
     }
 
-    function loadQMLFile(filename, quiet) {
+    function loadQMLFile(filename, properties, quiet) {
+        if (!properties) {
+            properties = {}
+        }
         var component = Qt.createComponent(filename);
         if (component.status == Component.Ready) {
-            return component.createObject(rWin);
+            return component.createObject(rWin, properties);
         } else {
             if (!quiet) {
                 rWin.log.error("loading QML file failed: " + filename)
@@ -524,9 +527,9 @@ ApplicationWindow {
         }
     }
 
-    function loadPage(pageName) {
+    function loadPage(pageName, properties) {
         rWin.log.info("loading page: " + pageName)
-        return loadQMLFile(pageName + ".qml")
+        return loadQMLFile(pageName + ".qml", properties)
     }
     /*
     function loadPage(pageName) {

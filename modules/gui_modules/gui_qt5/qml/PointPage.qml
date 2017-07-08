@@ -9,6 +9,17 @@ BasePage {
     headerText : point.name
     property var point
 
+    headerMenu : TopMenu {
+        MenuItem {
+            text : "Save"
+            onClicked : {
+                rWin.log.info("Save POI: " + point.name)
+                var pointPage = rWin.loadPage("SavePointPage", {"point" : point})
+                rWin.pushPageInstance(pointPage)
+            }
+        }
+    }
+
     content : ContentColumn {
         Label {
             text : point.description
