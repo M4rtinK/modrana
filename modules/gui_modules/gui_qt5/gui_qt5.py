@@ -43,6 +43,7 @@ from core import geo
 from core import modrana_log
 from core import utils
 from core import paths
+from core import point
 
 import logging
 no_prefix_log = logging.getLogger()
@@ -150,6 +151,9 @@ class QMLGUI(GUIModule):
 
         # search functionality for the QML context
         self.search = Search(self)
+
+        # POI handling for the QML context
+        self.POI = POI(self)
 
         # make the log manager easily accessible
         self.log_manager = modrana_log.log_manager
@@ -431,6 +435,58 @@ class Modules(object):
 
     def __getattr__(self, moduleName):
         return self.gui.m.get(moduleName, None)
+
+class POI(object):
+    """An easy to use POI interface for the QML context"""
+    def __init__(self, gui):
+        self.gui = gui
+
+    def list_used_categories(self):
+        db = self.gui.modules.storePOI.db
+        cat_list = []
+        for category in db.list_used_categories():
+            category_id = category[2]
+            poi_count = len(db.get_all_poi_from_category(category_id))  # do this more efficiently
+            cat_list.append({
+                "name" : category[0],
+                "description" : category[1],
+                "poi_count" : poi_count,
+                "category_id" : category_id
+            })
+        return cat_list
+
+
+    def store_poi(self, point_dict):
+        success = False
+        db = self.gui.modules.storePOI.db
+        name = point_dict.get("name")
+        description = point_dict.get("description", "")
+        lat = point_dict.get("lat")
+        lon = point_dict.get("lon")
+        category_id = point_dict.get("category_id")
+        # make sure lat & lon is a floating point number
+        try:
+            lat = float(lat)
+            lon = float(lon)
+        except Exception:
+            self.gui.log.exception("can't save POI: lat or lon not float")
+        # default to "Other" if no category is provided
+        if category_id is None:
+            category_id = 11  # TODO: this should ge dynamically queried from the database
+        # sanity check
+        if name and lon is not None and lat is not None:
+            poi = point.POI(name=name,
+                            description=description,
+                            lat=lat,
+                            lon=lon,
+                            db_cat_id=category_id)
+            self.gui.log.info("saving POI: %s", poi)
+            db.store_poi(poi)
+            self.gui.log.info("POI saved")
+            success = True
+        else:
+            self.gui.log.error("cant's save poi, missing name or coordinates: %s", point_dict)
+        return success
 
 
 class Search(object):
