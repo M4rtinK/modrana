@@ -26,5 +26,13 @@ BasePage {
             width : parent.width
             wrapMode : Text.WordWrap
         }
+        SmartGrid {
+            Label {
+                text : "<b>latitude:</b> " + point.latitude
+            }
+            Label {
+                text : "<b>longitude:</b> " + point.longitude
+            }
+        }
    }
 }
