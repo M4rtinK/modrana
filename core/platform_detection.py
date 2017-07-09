@@ -39,6 +39,13 @@ def _check():
     if qrc.is_qrc:
         return "android"
 
+    try:
+        import platform
+        if platform.node() == "Sailfish":
+            return "jolla"
+    except:
+        log.exception("the Python stdlib platform module is apparently unusable on this platform")
+
     # check CPU architecture
     import subprocess
 
@@ -51,12 +58,6 @@ def _check():
         log.info("* BlackBerry 10 device detected")
         return "bb10"
 
-    try:
-        import platform
-        if platform.node() == "Sailfish":
-            return "jolla"
-    except:
-        log.exception("the Python stdlib platform module is apparently unusable on this platform")
 
     # check procFS
     if os.path.exists("/proc/cpuinfo"):
