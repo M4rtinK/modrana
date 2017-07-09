@@ -43,6 +43,7 @@ Rectangle {
     
     property alias angle: rot.angle
     property var searchMarkerModel : null
+    property var poiMarkerModel : ListModel {}
 
     // a dictionary of tile coordinates that should be current visible
     property var shouldBeOnScreen : {"foo" : true}
@@ -875,7 +876,17 @@ Rectangle {
                 }
             }
         }
+        POIMarkers {
+            id: poiMarkers
+            model : pinchmap.poiMarkerModel
+            mapInstance : pinchmap
 
+            onPoiClicked : {
+                rWin.log.info("POI clicked: " + point.name)
+                var poiPage = rWin.loadPage("POIPage", {"point" : point})
+                rWin.pushPageInstance(poiPage)
+            }
+        }
         SearchMarkers {
             id: markers
             model : pinchmap.searchMarkerModel
