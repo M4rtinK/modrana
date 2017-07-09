@@ -40,17 +40,16 @@ BasePage {
             width : parent.width
             wrapMode : Text.WordWrap
         }
-        TextInput {
+        TextField {
             text : point.name
             width : parent.width
-            wrapMode : TextInput.WordWrap
         }
         Label {
             text : qsTr("Description")
             width : parent.width
             wrapMode : Text.WordWrap
         }
-        TextInput {
+        TextArea {
             text : point.description
             width : parent.width
             wrapMode : TextInput.WordWrap
