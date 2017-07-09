@@ -46,10 +46,7 @@ BasePage {
                         text : "<b>" + model.name + "</b>"
                     }
                     Label {
-                        text : "latitude: " + model.latitude
-                    }
-                    Label {
-                        text : "longitude: " + model.longitude
+                        text : model.latitude + ", " + model.latitude
                     }
                 }
             }
