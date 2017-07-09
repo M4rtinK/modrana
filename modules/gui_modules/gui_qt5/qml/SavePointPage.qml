@@ -42,6 +42,9 @@ BasePage {
         }
         TextField {
             text : point.name
+            onTextChanged : {
+                point.name = text
+            }
             width : parent.width
         }
         Label {
@@ -51,6 +54,9 @@ BasePage {
         }
         TextArea {
             text : point.description
+            onTextChanged : {
+                point.description = text
+            }
             width : parent.width
             wrapMode : TextInput.WordWrap
         }
