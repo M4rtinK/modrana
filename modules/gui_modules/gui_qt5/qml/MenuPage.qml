@@ -10,6 +10,9 @@ IconGridPage {
             rWin.mapPage.enableRoutingUI(true)
             rWin.getPage(null)
             rWin.notify("Routing mode enabled", 3000)
+        } else if (menu == "POIMenu") {
+            // make sure poi listing is always reloaded on entry
+            return rWin.loadPage("POICategoryListPage")
 
         } else {
             // just do the normal thing
@@ -48,7 +51,7 @@ IconGridPage {
         ListElement {
             caption : "POI"
             icon : "poi.png"
-            menu : "POICategoryList"
+            menu : "POIMenu"
         }
         ListElement {
             caption : "Tracks"
