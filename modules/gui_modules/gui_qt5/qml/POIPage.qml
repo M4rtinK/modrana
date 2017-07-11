@@ -10,6 +10,14 @@ BasePage {
     property var point
     headerMenu : TopMenu {
         MenuItem {
+            text : qsTr("Local search")
+            onClicked : {
+                rWin.log.info("Local search: " + point.latitude + "," + point.longitude)
+                var searchPage = rWin.loadPage("SearchLocalPage", {"searchPoint" : point})
+                rWin.pushPageInstance(searchPage)
+            }
+        }
+        MenuItem {
             text : "Show on map"
             onClicked : {
                 rWin.log.info("Show POI on map: " + point.name)

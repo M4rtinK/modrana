@@ -11,7 +11,15 @@ BasePage {
 
     headerMenu : TopMenu {
         MenuItem {
-            text : "Save"
+            text : qsTr("Local search")
+            onClicked : {
+                rWin.log.info("Local search: " + point.latitude + "," + point.longitude)
+                var searchPage = rWin.loadPage("SearchLocalPage", {"searchPoint" : point})
+                rWin.pushPageInstance(searchPage)
+            }
+        }
+        MenuItem {
+            text : qsTr("Save")
             onClicked : {
                 rWin.log.info("Save POI: " + point.name)
                 var pointPage = rWin.loadPage("SavePointPage", {"point" : point})
