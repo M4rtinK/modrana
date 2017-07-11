@@ -13,6 +13,7 @@ HeaderPage {
     property string pageHeader : ""
     property string _searchResultId : "search:result:"  + searchId
     property string _searchStatusId : "search:status:" + searchId
+    property var searchPoint: null
     // persistent dict key that should be used to store and retrieve
     // last used search query
     height : rWin.c.style.button.generic.height
@@ -23,7 +24,7 @@ HeaderPage {
     property bool showNavigationIndicator : false
 
     function search (query) {
-        rWin.python.call("modrana.gui.search.search", [searchPage.searchId, query], function(threadId) {
+        rWin.python.call("modrana.gui.search.search", [searchPage.searchId, query, searchPoint], function(threadId) {
             rWin.log.info("searching for: " + query + " using " + searchPage.searchId)
             searchPage._searchThreadId = threadId
             searchPage._searchInProgress = true

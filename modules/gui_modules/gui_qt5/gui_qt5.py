@@ -508,7 +508,7 @@ class Search(object):
         # register the thread status changed callback
         threadMgr.threadStatusChanged.connect(self._threadStatusCB)
 
-    def search(self, searchId, query):
+    def search(self, searchId, query, searchPoint=None):
         """Trigger an asynchronous search (specified by search id)
         for the given term
 
@@ -524,7 +524,11 @@ class Search(object):
             # so we can use it to track search progress
             # (there might be more searches in progress so we
             #  need to know the unique search thread id)
-            threadId = searchFunction(query, callback)
+            if searchId == "local" and searchPoint:
+                pointInstance = point.Point(searchPoint.latitude, searchPoint.longitude)
+                threadId = searchFunction(query, callback, around=pointInstance)
+            else:
+                threadId = searchFunction(query, callback)
             self._threadsInProgress[threadId] = searchId
             return threadId
 
