@@ -23,7 +23,7 @@ log = logging.getLogger("mod.routing.providers")
 
 from core.providers import RoutingProvider, DummyController, RouteParameters, RoutingResult
 
-OSM_SCOUT_SERVER_ROUTING_URL = "http://localhost:8553/v1/route?"
+OSM_SCOUT_SERVER_ROUTING_URL = "http://localhost:8553/v2/route?"
 
 class MonavServerRouting(RoutingProvider):
     """Provider that does offline point to point routing
@@ -301,32 +301,35 @@ class OSMScoutServerRouting(RoutingProvider):
         routingStart = time.time()
         controller.status = "OSM Scout Server routing"
         try:
-            route_type = "car" # car directions are the default
+            route_type = "auto" # car directions are the default
             if route_params.routeMode == constants.ROUTE_BIKE:
                 route_type = "bicycle"
             elif route_params.routeMode == constants.ROUTE_PEDESTRIAN:
-                route_type = "foot"
+                route_type = "pedestrian"
 
-            # TODO: support for middle points
-            start = waypoints[0]
-            destination = waypoints[-1]
+            locations = []
+            for point in waypoints:
+                locations.append( {'lat': point.lat, 'lon': point.lon } )
+            # TODO: heading direction can be added as locations[0]['heading']
 
             params = {
-                'type': route_type,
-                'p[0][lat]': "%f" % start.lat,
-                'p[0][lng]': "%f" % start.lon,
-                'p[1][lat]': "%f" % destination.lat,
-                'p[1][lng]': "%f" % destination.lon,
-                'radius': 10000,  #TODO: make this configurable
-                'gpx' : '0',
+                'costing': route_type,
+                'directions_options': { 'language': route_params.language },
+                'locations': locations
             }
-            queryUrl = OSM_SCOUT_SERVER_ROUTING_URL + urlencode(params)
+            queryUrl = OSM_SCOUT_SERVER_ROUTING_URL + "json=" + json.dumps(params)
+            print(queryUrl)
             reply = urlopen(queryUrl)
+            
             if reply:
                 # json in Python 3 really needs it encoded like this
                 replyData = reply.read().decode("utf-8")
+                print(replyData)
                 jsonReply = json.loads(replyData)
-                route = Way.from_osm_scout_json(jsonReply)
+                if "API version" in jsonReply and jsonReply['API version'] == "libosmscout V1":
+                    route = Way.from_osm_scout_json(jsonReply)
+                else:
+                    route = Way.from_valhalla(jsonReply)
                 return RoutingResult(route,
                                      route_params,
                                      constants.ROUTING_SUCCESS,

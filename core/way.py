@@ -473,6 +473,34 @@ class Way(object):
         else:
             return None
 
+    @classmethod
+    def from_valhalla(cls, result):
+        """Convert Valhalla routing result json to a way"""
+        if result:
+            route = []
+            turns = []
+            for leg in result['trip']['legs']:
+                poly = decode_valhalla(leg['shape'])
+
+                mans = []
+                for m in leg['maneuvers']:
+                    mans.append( TurnByTurnPoint(poly[m['begin_shape_index']][0],
+                                                 poly[m['begin_shape_index']][1],
+                                                 message=m['instruction']) )
+                    
+                route.extend( poly )
+                turns.extend( mans )
+                
+            way = cls(route)
+            
+            way.duration = result['trip']['summary']['time']
+            way._setLength(result['trip']["summary"]["length"])
+            
+            way.add_message_points(turns)
+            return way
+        else:
+            return None
+        
 class AppendOnlyWay(Way):
     """A way subclass that is optimized for efficient incremental file storage
     -> points can be only appended or completely replaced, no insert support at he moment
@@ -657,6 +685,39 @@ def decode_polyline(encoded):
         array.append((lat * 1e-5, lng * 1e-5, None))
 
     return array
+
+def decode_valhalla(encoded):
+    """ Decode polyline encoded by Valhalla
+
+    Decoder taken from https://mapzen.com/documentation/mobility/decoding/
+    """
+    #six degrees of precision in valhalla
+    inv = 1.0 / 1e6;
+    decoded = []
+    previous = [0,0]
+    i = 0
+    #for each byte
+    while i < len(encoded):
+        #for each coord (lat, lon)
+        ll = [0,0]
+        for j in [0, 1]:
+            shift = 0
+            byte = 0x20
+            #keep decoding bytes until you have this coord
+            while byte >= 0x20:
+                byte = ord(encoded[i]) - 63
+                i += 1
+                ll[j] |= (byte & 0x1f) << shift
+                shift += 5
+            #get the final value adding the previous offset and remember it for the next
+            ll[j] = previous[j] + (~(ll[j] >> 1) if ll[j] & 1 else (ll[j] >> 1))
+            previous[j] = ll[j]
+
+        # scale by the precision and add as lat,lon. None added for
+        # LLE tuple compatibility
+        decoded.append((float('%.6f' % (ll[0] * inv)), float('%.6f' % (ll[1] * inv)), None))
+    #hand back the list of coordinates
+    return decoded
 
 
     #class Ways(object):
