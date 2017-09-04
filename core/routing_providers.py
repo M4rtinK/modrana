@@ -318,13 +318,11 @@ class OSMScoutServerRouting(RoutingProvider):
                 'locations': locations
             }
             queryUrl = OSM_SCOUT_SERVER_ROUTING_URL + "json=" + json.dumps(params)
-            print(queryUrl)
             reply = urlopen(queryUrl)
             
             if reply:
                 # json in Python 3 really needs it encoded like this
                 replyData = reply.read().decode("utf-8")
-                print(replyData)
                 jsonReply = json.loads(replyData)
                 if "API version" in jsonReply and jsonReply['API version'] == "libosmscout V1":
                     route = Way.from_osm_scout_json(jsonReply)
