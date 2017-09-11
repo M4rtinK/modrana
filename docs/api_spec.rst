@@ -525,6 +525,8 @@ Properties
 **normalcolor** : color
     Color used when the background rectangle is not pressed.
 
+**pressed_override** : bool
+    Makes it possible to simulate pressed state even if background rectangle is not physically pressed.
 
 VerticalScrollDecorator 
 -----------------------
