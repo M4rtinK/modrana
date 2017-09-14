@@ -835,11 +835,11 @@ class Menus(RanaModule):
             return mainText, secText, action
 
         def drawItemMenu(self, cr, index):
-            item = self.container.getItem(index)
+            item = self.container.get_item(index)
             self.drawItemMenuFunction(cr, item, self._getBackToListAction(index), self.getName(), index)
 
         def drawItemToolsMenu(self, cr, index):
-            item = self.container.getItem(index)
+            item = self.container.get_item(index)
             self.drawItemToolsMenuFunction(cr, item, self, self._getBackToListDetailAction(index))
 
         def _getBackToListAction(self, index):
@@ -854,7 +854,7 @@ class Menus(RanaModule):
                 descFunction = self.descFunction
 
             # * get the data for this button
-            indexString = "%d/%d" % (index + 1, self.container.getLength())
+            indexString = "%d/%d" % (index + 1, self.container.get_length())
 
             (mainText, secText, action) = descFunction(item, index, self.name)
             # * draw the background
@@ -895,7 +895,7 @@ class Menus(RanaModule):
                 nrItems = self.displayedItems # use the default value
             else:
                 nrItems = int(globalCount) # use the global one
-            visibleItems = self.container.getItemsInRange(index, (index + nrItems))
+            visibleItems = self.container.get_items_in_range(index, (index + nrItems))
             if len(visibleItems): # there must be a nonzero amount of items to avoid a division by zero
                 # compute item sizes
                 itemBoxW = w - x4
@@ -914,7 +914,7 @@ class Menus(RanaModule):
 
         def scrollDown(self):
             # TODO: handle containers with unknown length
-            if (self.index + 1) < self.container.getLength():
+            if (self.index + 1) < self.container.get_length():
                 self.index += 1
                 self.menus.needRedraw()
 
@@ -922,7 +922,7 @@ class Menus(RanaModule):
             self.index = 0
 
         def setIndex(self, index):
-            if 0 <= index < self.container.getLength():
+            if 0 <= index < self.container.get_length():
                 self.index = index
             else:
                 self.menus.log.error("listable menu %s: invalid index: %d", self.getName(), index)
@@ -941,7 +941,7 @@ class Menus(RanaModule):
             return False
 
         def getItem(self, index):
-            return self.container.getItem(index)
+            return self.container.get_item(index)
 
     def getList(self, listName):
         """Get a list by name, return None if no list is found"""

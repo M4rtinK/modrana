@@ -36,45 +36,45 @@ class SynchronizedCircularStack(object):
     * once the size limit is reached, items re discarded,
       starting by the oldest ones
     * thread safe using a mutex
-    maxItems sets the maximum number of items, 0=infinite size
+    _max_items sets the maximum number of items, 0=infinite size
     """
 
-    def __init__(self, maxItems=0):
+    def __init__(self, max_items=0):
         self.list = []
-        self.listLock = threading.Lock()
-        self.maxItems = maxItems
+        self._list_lock = threading.Lock()
+        self._max_items = max_items
 
     def push(self, item):
         """add a new item to the stack, make sure the size stays in bounds"""
-        with self.listLock:
+        with self._list_lock:
             self.list.append(item)
             # check list size
-            if self.maxItems:
+            if self._max_items:
                 # discard oldest items to get back to the limit
-                while len(self.list) > self.maxItems:
+                while len(self.list) > self._max_items:
                     del self.list[0]
 
-    def batchPush(self, itemList):
+    def push_batch(self, item_list):
         """batch push items in a smart way"""
-        with self.listLock:
+        with self._list_lock:
             # reverse the input list to simulate stack pushes
             # then combine the old list and the new one
             # and finally slice it to fit to the size limit
-            itemList.reverse()
-            self.list.extend(itemList)
-            self.list = self.list[-self.maxItems:]
+            item_list.reverse()
+            self.list.extend(item_list)
+            self.list = self.list[-self._max_items:]
 
     def pop(self):
         """
         NOTE: when the queue is empty, the Empty exception is raised
         """
-        with self.listLock:
+        with self._list_lock:
             if len(self.list) == 0:
                 raise Empty
             else:
                 return self.list.pop()
 
-    def popValid(self):
+    def pop_valid(self):
         """
         if the stack is not empty and the item is valid, return
         (popped_item, True)
@@ -85,15 +85,15 @@ class SynchronizedCircularStack(object):
         th queue without having to handle the
         Empty exception
         """
-        with self.listLock:
+        with self._list_lock:
             if len(self.list) == 0:
                 return None, False
             else:
                 return self.list.pop(), True
 
-    def isIn(self, item):
+    def is_in(self, item):
         """item existence testing"""
-        with self.listLock:
+        with self._list_lock:
             return item in self.list
 
 #  def isInNonSync(self, item):
@@ -107,15 +107,15 @@ class ListContainer(object):
     def __init__(self):
         pass
 
-    def getItem(self, index):
+    def get_item(self, index):
         """return item with a given index"""
         pass
 
-    def getItemsInRange(self, startIndex, stopIndex):
+    def get_items_in_range(self, startIndex, stopIndex):
         """return all items in range"""
         pass
 
-    def getLength(self):
+    def get_length(self):
         """-1 indicates unknown item count"""
         pass
 
@@ -126,13 +126,13 @@ class SimpleListContainer(ListContainer):
         ListContainer.__init__(self)
         self.items = items
 
-    def getItem(self, index):
+    def get_item(self, index):
         return self.items[index]
 
-    def getItemsInRange(self, startIndex, stopIndex):
+    def get_items_in_range(self, startIndex, stopIndex):
         return self.items[startIndex:stopIndex]
 
-    def getLength(self):
+    def get_length(self):
         return len(self.items)
 
 
@@ -142,13 +142,13 @@ class PointListContainer(ListContainer):
         ListContainer.__init__(self)
         self.points = points
 
-    def getItem(self, index):
+    def get_item(self, index):
         return self.points[index]
 
-    def getItemsInRange(self, startIndex, stopIndex):
+    def get_items_in_range(self, startIndex, stopIndex):
         return self.points[startIndex:stopIndex]
 
-    def getLength(self):
+    def get_length(self):
         return len(self.points)
 
 
