@@ -877,7 +877,7 @@ class ModRana(object):
         userHomePath = os.getenv("HOME", "")
         profileFolderPath = os.path.join(userHomePath, modRanaProfileFolderName)
         # make sure it exists
-        utils.createFolderPath(profileFolderPath)
+        utils.create_folder_path(profileFolderPath)
         # return it
         return profileFolderPath
 

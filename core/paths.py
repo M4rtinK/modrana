@@ -191,7 +191,7 @@ class Paths(object):
         else:
             self._profileFolderPath = self.modrana.getProfilePath()
         # check the profile path and create the folders if necessary
-        utils.createFolderPath(self._profileFolderPath)
+        utils.create_folder_path(self._profileFolderPath)
 
         # load version string
         self.versionString = None
@@ -202,7 +202,7 @@ class Paths(object):
     def getProfilePath(self):
         """return path to the profile folder"""
         # check if the path exists and create it if not
-        utils.createFolderPath(self._profileFolderPath)
+        utils.create_folder_path(self._profileFolderPath)
         return self._profileFolderPath
 
     def getOptionsFilePath(self):
@@ -356,5 +356,5 @@ class Paths(object):
     def _assurePath(self, path):
         """assure path exists and return it back"""
         # check if the path exists and create it if not
-        utils.createFolderPath(path)
+        utils.create_folder_path(path)
         return path

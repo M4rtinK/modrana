@@ -130,9 +130,9 @@ class LogManager(object):
 
     def _get_log_filename(self, compression=False):
         if compression:
-            return "modrana_%s.log.gz" % utils.getTimeHashString()
+            return "modrana_%s.log.gz" % utils.get_time_hash_string()
         else:
-            return "modrana_%s.log" % utils.getTimeHashString()
+            return "modrana_%s.log" % utils.get_time_hash_string()
 
     def clear_early_log(self):
         """ModRana stores early log messages in a MemoryHandler to have a complete log file
@@ -175,7 +175,7 @@ class LogManager(object):
                 return
 
             # first try to make sure the logging folder actually exists
-            if not utils.createFolderPath(self.log_folder_path):
+            if not utils.create_folder_path(self.log_folder_path):
                 self._root_modrana_logger.error("failed to create logging folder in: %s",
                                                 self.log_folder_path)
                 return

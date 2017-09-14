@@ -411,26 +411,26 @@ class MapData(RanaModule):
         if self.downloadPool.ended \
             and self.requestCount == 0 \
             and self._downloadPool.downloadedDataSize:
-            prettyMB = utils.bytes2PrettyUnitString(self.downloadPool.downloadedDataSize)
+            prettyMB = utils.bytes_to_pretty_unit_string(self.downloadPool.downloadedDataSize)
             return "%s has been downloaded" % prettyMB
         elif self.running:
             if self.checkSizeRunning:
-                prettyMB = utils.bytes2PrettyUnitString(self._checkPool.downloadSize)
+                prettyMB = utils.bytes_to_pretty_unit_string(self._checkPool.downloadSize)
                 return "batch size is ~%s, %d tiles found locally" % (prettyMB, self._checkPool.foundLocally)
             elif self.batchDownloadRunning:
-                prettyMB = utils.bytes2PrettyUnitString(self._downloadPool.downloadedDataSize)
+                prettyMB = utils.bytes_to_pretty_unit_string(self._downloadPool.downloadedDataSize)
                 if self._checkPool.downloadSize:
-                    estimatedSizePrettyMB = utils.bytes2PrettyUnitString(self._checkPool.downloadSize)
+                    estimatedSizePrettyMB = utils.bytes_to_pretty_unit_string(self._checkPool.downloadSize)
                     prettyMB = "%s/~%s" % (prettyMB, estimatedSizePrettyMB)
                 else:
                     approxDlSize = self.approxDownloadSize
                     if approxDlSize >= 0:
-                        prettyMB = "%s/~%s" % (prettyMB, utils.bytes2PrettyUnitString(approxDlSize))
+                        prettyMB = "%s/~%s" % (prettyMB, utils.bytes_to_pretty_unit_string(approxDlSize))
                 return "%s downloaded" % prettyMB
         else:
             if self._checkPool.ended:
                 if self._checkPool.downloadSize:
-                    prettyMB = utils.bytes2PrettyUnitString(self._checkPool.downloadSize)
+                    prettyMB = utils.bytes_to_pretty_unit_string(self._checkPool.downloadSize)
                     return "Total size is ~%s (<i>click to recheck</i>)." % prettyMB
                 else:
                     return ""
@@ -560,9 +560,9 @@ class MapData(RanaModule):
         :rtype: str
         """
         path = self.modrana.paths.getMapFolderPath()
-        free_space = utils.freeSpaceInPath(path)
+        free_space = utils.free_space_in_path(path)
         if free_space is not None:
-            prettySpace = utils.bytes2PrettyUnitString(utils.freeSpaceInPath(path))
+            prettySpace = utils.bytes_to_pretty_unit_string(utils.free_space_in_path(path))
             return prettySpace
         else:
             return "unknown"

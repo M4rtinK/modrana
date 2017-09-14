@@ -59,7 +59,7 @@ class JSONDict(dict):
         # the JSON file exists
         with self._mutex:
             success = False
-            if utils.createFolderPath(os.path.dirname(filePath)):
+            if utils.create_folder_path(os.path.dirname(filePath)):
                 try:
                     # the Python JSON module has some issues with serializing
                     # unicode strings, so we need to make it dump the dict to

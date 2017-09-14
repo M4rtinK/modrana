@@ -152,9 +152,15 @@ class PointListContainer(ListContainer):
         return len(self.points)
 
 
-def isTheStringAnImage(s):
-    """test if the string contains an image
-    by reading its magic number"""
+def is_the_string_an_image(s):
+    """Test if the string contains an image.
+
+    By reading its magic number.
+
+    :param str s: string to be checked
+    :returns: True is string is likely an image, False otherwise
+    :rtype: bool
+    """
 
     if PYTHON3: # in Python 3 we directly get bytes
         h = s
@@ -180,30 +186,35 @@ def isTheStringAnImage(s):
     else: # probably not an image file
         return False
 
+def create_folder_path(new_path):
+    """Create a path for a directory and all needed parent folders.
 
-def createFolderPath(newPath):
-    """Create a path for a directory and all needed parent folders
     -> parent directories will be created
     -> if directory already exists, then do nothing
     -> if there is another filesystem object (like a file)
-    with the same name, raise an exception"""
-    if not newPath:
+       with the same name, raise an exception
+
+    :param str new_path: path to be created
+    :return: True on success, False otherwise
+    :rtype: bool
+    """
+    if not new_path:
         log.error("cannot create folder, wrong path:")
-        log.error(newPath)
+        log.error(new_path)
         return False
-    if os.path.isdir(newPath):
+    if os.path.isdir(new_path):
         return True
-    elif os.path.isfile(newPath):
-        log.error("cannot create directory, file already exists: %s", newPath)
+    elif os.path.isfile(new_path):
+        log.error("cannot create directory, file already exists: %s", new_path)
         return False
     else:
-        log.info("creating path: %s", newPath)
+        log.info("creating path: %s", new_path)
         try:
-            head, tail = os.path.split(newPath)
+            head, tail = os.path.split(new_path)
             if head and not os.path.isdir(head):
                 os.makedirs(head)
             if tail:
-                os.mkdir(newPath)
+                os.mkdir(new_path)
             return True
         except Exception:
             log.exception("path creation failed")
@@ -212,17 +223,28 @@ def createFolderPath(newPath):
 #from
 # http://stackoverflow.com/questions/3167154/
 # how-to-split-a-dos-path-into-its-components-in-python
-def SplitPath(split_path):
-    pathSplit_lst = []
-    while os.path.basename(split_path):
-        pathSplit_lst.append(os.path.basename(split_path))
-        split_path = os.path.dirname(split_path)
-    pathSplit_lst.reverse()
-    return pathSplit_lst
+def split_path(path):
+    """Split a filesystem path to a list of components.
+
+    :param str: filesystem path
+    :returns: paths split to components
+    :rtype: list
+    """
+    path_split_list = []
+    while os.path.basename(path):
+        path_split_list.append(os.path.basename(path))
+        path = os.path.dirname(path)
+    path_split_list.reverse()
+    return path_split_list
 
 # from:
 # http://www.5dollarwhitebox.org/drupal/node/84
-def bytes2PrettyUnitString(bytes):
+def bytes_to_pretty_unit_string(bytes):
+    """Convert a value in bytes into a pretty human readbale string.
+
+    :returns: a human readable representation of a number of bytes
+    :rtype: str
+    """
     bytes = float(bytes)
     if bytes >= 1099511627776:
         terabytes = bytes / 1099511627776
@@ -240,7 +262,7 @@ def bytes2PrettyUnitString(bytes):
         size = '%.2fb' % bytes
     return size
 
-def freeSpaceInPath(path):
+def free_space_in_path(path):
     """Return free space in the given path in bytes
 
     :param string path: path to check
@@ -270,14 +292,15 @@ def freeSpaceInPath(path):
             mega_bytes_available_string = int(mega_bytes_available_string)*1024
         return mega_bytes_available_string
     except Exception:
-        log.exception("calling df also failed")
+        log.exception("calling df also failed, yay! :P")
         return None
 
-def createConnectionPool(url, maxThreads=1):
+def create_connection_pool(url, max_threads=1):
     """Create the connection pool -> to facilitate socket reuse
 
     :param string url: root URL for the threadpool
-    :param int maxThreads: pool capacity
+    :param int max_threads: pool capacity
+    :returns: connection pool instance
     """
     # only import urllib3 once needed
     if sys.version_info[:2] <= (2, 5):
@@ -285,8 +308,13 @@ def createConnectionPool(url, maxThreads=1):
     else:
         import urllib3
     return urllib3.connection_from_url(url, timeout=constants.INTERNET_CONNECTIVITY_TIMEOUT,
-                                       maxsize=maxThreads, block=False)
-def getTimeHashString():
+                                       maxsize=max_threads, block=False)
+def get_time_hash_string():
+    """Get a "hash" like time based string useable for use in file names.
+
+    :returns: a time based has string
+    :rtype: str
+    """
     return time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
 
 def get_elapsed_time_string(start_timestamp):

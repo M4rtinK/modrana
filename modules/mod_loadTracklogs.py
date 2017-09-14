@@ -98,7 +98,7 @@ class LoadTracklogs(RanaModule):
             return None  # tracklog folder path is unknown
         else:
             TFSubPath = os.path.join(tracklogFolderPath, subPath)
-            utils.createFolderPath(TFSubPath)
+            utils.create_folder_path(TFSubPath)
             return TFSubPath
 
     def _create_basic_folder_structure(self):
@@ -114,7 +114,7 @@ class LoadTracklogs(RanaModule):
         tfp = self.modrana.paths.getTracklogsFolderPath()
         examplesDestinationPath = os.path.join(tfp, 'examples')
         if not os.path.exists(examplesDestinationPath):
-            utils.createFolderPath(examplesDestinationPath)
+            utils.create_folder_path(examplesDestinationPath)
             self.log.info(' ** copying example tracklogs')
             try:
                 examplesSourcePath = 'data/tracklog_examples'
@@ -249,7 +249,7 @@ class LoadTracklogs(RanaModule):
                 filename = os.path.split(file)[1]
                 lastModifiedEpochSecs = os.path.getmtime(path)
                 lastModified = strftime("%d.%m.%Y %H:%M:%S", gmtime(lastModifiedEpochSecs))
-                size = utils.bytes2PrettyUnitString(os.path.getsize(path))
+                size = utils.bytes_to_pretty_unit_string(os.path.getsize(path))
                 extension = os.path.splitext(path)[1]
                 cat = folder
                 item = {'path': path,

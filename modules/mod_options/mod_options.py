@@ -40,7 +40,7 @@ class Options(RanaModule):
         # profile folder
         self.profileFolderPath = self.modrana.paths.getProfilePath()
         # check the profile path and create the folders if necessary
-        utils.createFolderPath(self.profileFolderPath)
+        utils.create_folder_path(self.profileFolderPath)
 
         # items menu cache
         self.itemMenus = {}

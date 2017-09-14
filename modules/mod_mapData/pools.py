@@ -214,7 +214,7 @@ class TileBatchPool(BatchPool):
         if self.layer is None:
             log.error("tile batch pool: layer is None, aborting")
             return
-        self._connPool = utils.createConnectionPool(getAnUrl(self._batch, self._layer))
+        self._connPool = utils.create_connection_pool(getAnUrl(self._batch, self._layer))
 
 class BatchSizeCheckPool(TileBatchPool):
     def __init__(self):
@@ -401,7 +401,7 @@ class BatchTileDownloadPool(TileBatchPool):
             # and if is not an image we raise the TileNotImageException.
 
             # TODO: does someone supply non-bitmap/SVG tiles ?
-            if utils.isTheStringAnImage(content):
+            if utils.is_the_string_an_image(content):
                 #its an image, save it
                 self._storeTiles.store_tile_data(lzxy, content)
             else:

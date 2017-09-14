@@ -244,7 +244,7 @@ class MapTiles(RanaModule):
         tileData = response.data
         if tileData:
             # check if the data is actually an image, and not an error page
-            if utils.isTheStringAnImage(tileData):
+            if utils.is_the_string_an_image(tileData):
                 self._storeTiles.store_tile_data(lzxy, tileData)
                 #        self.log.debug("STORED")
                 return tileData
