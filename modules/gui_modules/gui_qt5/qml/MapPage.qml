@@ -601,7 +601,7 @@ Page {
 
     Image {
         id: compassImage
-        visible : tabMap.showCompass
+        visible : tabMap.showCompass && !tabMap.navigationEnabled
         opacity : tabMap.compassOpacity
         // TODO: investigate how to replace this by an image loader
         // what about rendered size ?
@@ -705,7 +705,7 @@ Page {
         }
         MapButton {
             id: endRouting
-            visible: tabMap.routingEnabled
+            visible: tabMap.routingEnabled && !tabMap.navigationEnabled
             text: qsTr("<b>clear</b>")
             width: rWin.c.style.map.button.size * 1.25
             height: rWin.c.style.map.button.size
