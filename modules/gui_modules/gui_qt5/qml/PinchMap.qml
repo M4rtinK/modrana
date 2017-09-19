@@ -3,6 +3,7 @@ import "functions.js" as F
 //import "./qtc/PageStatus.js" as PageStatus
 import UC 1.0
 import "modrana_components"
+import "pinchmap"
 
 Rectangle {
     id: pinchmap;
@@ -984,27 +985,13 @@ Rectangle {
         }
     }
 
-    Rectangle {
+    ScaleBar {
         id: scaleBar
         anchors.right: parent.right
         anchors.rightMargin: rWin.c.style.main.spacingBig
         anchors.topMargin: rWin.c.style.main.spacingBig
         anchors.top: parent.top
-        color: "black"
-        border.width: rWin.c.style.map.scaleBar.border
-        border.color: "white"
-        smooth: false
-        height: rWin.c.style.map.scaleBar.height
-        width: scaleBarLength[0]
-    }
-
-    Text {
-        text: F.formatDistance(scaleBarLength[1], pinchmap.tileScale)
-        anchors.horizontalCenter: scaleBar.horizontalCenter
-        anchors.top: scaleBar.bottom
-        anchors.topMargin: rWin.c.style.main.spacing
-        style: Text.Outline
-        styleColor: "white"
-        font.pixelSize: rWin.c.style.map.scaleBar.fontSize
+        lengthPixels : scaleBarLength[0]
+        lengthMeters : scaleBarLength[1]
     }
 }
