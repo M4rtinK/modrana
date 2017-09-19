@@ -40,6 +40,9 @@ Rectangle {
 
     property double latitude: 0
     property double longitude: 0
+
+    // scale bar
+    property real scaleBarTopOffset : 0
     property var scaleBarLength: getScaleBarLength(latitude);
     
     property alias angle: rot.angle
@@ -989,7 +992,7 @@ Rectangle {
         id: scaleBar
         anchors.right: parent.right
         anchors.rightMargin: rWin.c.style.main.spacingBig
-        anchors.topMargin: rWin.c.style.main.spacingBig
+        anchors.topMargin: rWin.c.style.main.spacingBig + scaleBarTopOffset
         anchors.top: parent.top
         lengthPixels : scaleBarLength[0]
         lengthMeters : scaleBarLength[1]

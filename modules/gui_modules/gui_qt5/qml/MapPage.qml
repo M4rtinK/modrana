@@ -66,6 +66,7 @@ Page {
 
     // navigation
     property bool navigationEnabled : false
+    property real navigationOverlayHeight : height * 0.3
 
     function enableRoutingUI(p2p) {
         // enable the routing UI (currently just the 1-3 buttons)
@@ -203,6 +204,9 @@ Page {
         anchors.fill : parent
         property bool initialized : false
         zoomLevel: rWin.get("z", 11, setInitialZ)
+
+        // shift the scale bar down when the navigation overlay is active
+        scaleBarTopOffset : navigationEnabled ? navigationOverlayHeight : 0
 
         function setInitialZ (initialZ) {
             zoomLevel = initialZ
@@ -791,6 +795,15 @@ Page {
             }
         }
     }
+    NavigationOverlay {
+        id : navigationOverlay
+        visible : tabMap.navigationEnabled
+        anchors.top : parent.top
+        anchors.left : parent.left
+        anchors.right : parent.right
+        height : navigationOverlayHeight
+    }
+
     /*
     ProgressBar {
         id: zoomBar
