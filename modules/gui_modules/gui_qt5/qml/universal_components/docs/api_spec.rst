@@ -525,6 +525,8 @@ Properties
 **normalcolor** : color
     Color used when the background rectangle is not pressed.
 
+**pressed_override** : bool
+    Makes it possible to simulate pressed state even if background rectangle is not physically pressed.
 
 VerticalScrollDecorator 
 -----------------------
@@ -543,6 +545,34 @@ Example:
          VerticalScrollDecorator {}
     }
 
+Scrollbar
+---------
+
+Adds a vertical scroll decorator to flickables and list views.
+
+NOTE: Currently only provides functional scroll bar with the Controls backend,
+      the Silica implementation is just an API compatible shim without any functionality.
+
+Example:
+
+::
+
+    ListView {
+        id: listView
+        model: myModel
+        delegate: myDelegate
+
+         VerticalScrollDecorator {}
+    }
+
+Properties
+^^^^^^^^^^
+
+**horizontal** : Scrollbar
+    Used to automatically attach a horizontal Scrollbar to a Flickable.
+
+**vertical** : Scrollbar
+    Used to automatically attach a horizontal Scrollbar to a Flickable.
 
 Popup 
 -----
