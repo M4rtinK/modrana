@@ -14,11 +14,11 @@ reasonably good.
 Backends
 --------
 
-* QtQuick Controls - fully supported
+* QtQuick Controls 2 - fully supported
 
-The QtQuick Controls are part of Qt 5 since 5.1 and are a 
+The QtQuick Controls are part of Qt 5 since 5.7 and are a
 fully supported UC backend. Therefore any application
-using UC should run with just Qt 5.1+ being available.
+using UC should run with just Qt 5.7+ being available.
 
 * Sailfish Silica - fully supported
 

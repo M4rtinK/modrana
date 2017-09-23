@@ -1,4 +1,4 @@
-import QtQuick.Controls 1.1 // needs Qt 5.2
+import QtQuick.Controls 2.0 // needs Qt 5.2
 
 Switch{
 }
