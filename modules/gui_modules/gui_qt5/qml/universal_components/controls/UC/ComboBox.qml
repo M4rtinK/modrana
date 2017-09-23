@@ -22,6 +22,7 @@ Column {
         }
         ComboBox {
             id : cBox
+            textRole : "text"
             anchors.verticalCenter : comboLabel.verticalCenter
             // selected item, only assigned if user
             // clicks on an item in the context menu,
