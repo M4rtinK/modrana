@@ -33,7 +33,9 @@ BasePage {
                     }
                 }
                 onItemChanged : {
-                    rWin.log.info("setting theme: " + themeCb.item.value)
+                    if (themeCb.item) {
+                        rWin.log.info("setting theme: " + themeCb.item.value)
+                    }
                 }
             }
         }
@@ -97,8 +99,6 @@ BasePage {
             id : compassOpacitySlider
             width : parent.width
             stepSize : 0.1
-            maximumValue : 1.0
-            minimumValue : 0.0
             value : rWin.mapPage.compassOpacity
             valueText : ""
             onPressedChanged : {

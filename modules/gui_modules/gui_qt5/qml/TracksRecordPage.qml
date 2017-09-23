@@ -205,8 +205,6 @@ BasePage {
             id : traceOpacitySlider
             width : parent.width
             stepSize : 0.1
-            maximumValue : 1.0
-            minimumValue : 0.0
             value : rWin.mapPage.tracklogTraceOpacity
             valueText : ""
             visible : drawTraceSwitch.checked

@@ -37,6 +37,7 @@ ComboBox {
         // function in GUI module & rWin, that only runs the callback
         // if the key exists in the dictionary)
         rWin.get(keyCombo.key, keyCombo.defaultValue, function(value) {
+            var foundMatch = false
             for(var i = 0; keyCombo.model.count; i++) {
                 // check if the element has the
                 // value we got from the persistent dict
@@ -44,18 +45,21 @@ ComboBox {
                     // matching value found, set index & return
                     keyCombo.currentIndex = i
                     keyCombo.value = value
+                    foundMatch = true
                     break
                     return
                 }
             }
             // we went over all elements without finding a match,
             // set currentIndex to null
-            keyCombo.currentIndex = null
+            if (!foundMatch) {
+                keyCombo.currentIndex = -1
+            }
         })
     }
 
     onItemChanged : {
-        if (keyCombo.setValue && keyCombo.key) {
+        if (keyCombo.setValue && keyCombo.key && item) {
             // set the value of the persistent dictionary key
             // to the value of the selected item
             rWin.set(keyCombo.key, item.value)
