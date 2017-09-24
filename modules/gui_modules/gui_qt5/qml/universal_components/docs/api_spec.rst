@@ -269,6 +269,17 @@ Properties
 **text** : string
     Text to be displayed on the label.
 
+SectionHeader
+-------------
+
+Heading text for the start of a section on a page. Uses the **SectionHeader** element with Silica backend
+and a bold horizontally centered **Label** with the Controls backend.
+
+Properties
+^^^^^^^^^^
+
+**text** : string
+    Text to be displayed on the section header.
 
 TextArea 
 --------

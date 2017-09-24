@@ -25,3 +25,4 @@ Popup 1.0 Popup.qml
 PlatformFlickable 1.0 PlatformFlickable.qml
 PlatformListView 1.0 PlatformListView.qml
 ScrollBar 1.0 ScrollBar.qml
+SectionHeader 1.0 SectionHeader.qml
