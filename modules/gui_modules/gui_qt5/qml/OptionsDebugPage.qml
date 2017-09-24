@@ -7,7 +7,7 @@ import "backend"
 
 BasePage {
     id: debugPage
-    headerText : "Debug"
+    headerText : qsTr("Debug")
 
     property alias logFileEnabled: logFileEnabledProp.value
     OptProp {id: logFileEnabledProp; key : "loggingStatus"; value : false}
@@ -29,6 +29,9 @@ BasePage {
    }
 
     content : ContentColumn {
+        SectionHeader {
+            text : qsTr("Debugging messages")
+        }
         TextSwitch {
             text : qsTr("Show debug button")
             checked : rWin.showDebugButton
@@ -71,8 +74,8 @@ BasePage {
                 rWin.pinchmapCanvasDebug = checked
             }
         }
-        Label {
-            text : "Logging"
+        SectionHeader {
+            text : qsTr("Logging")
         }
         TextSwitch {
             text : qsTr("Log file")
@@ -93,19 +96,19 @@ BasePage {
             wrapMode : Text.WrapAnywhere
             width : parent.width
         }
-        Label {
-            text : "Notifications"
+        SectionHeader {
+            text : qsTr("Notifications")
         }
         Button {
-            text : "Notify"
+            text : qsTr("Notify")
             onClicked : {
-                rWin.notify("Hello world!")
+                rWin.notify(qsTr("Hello world!"))
             }
         }
         Button {
-            text : "Notify long"
+            text : qsTr("Notify long")
             onClicked : {
-                rWin.notify("ModRana is a flexible navigation software for (not only) mobile Linux devices.")
+                rWin.notify(qsTr("ModRana is a flexible navigation software for (not only) mobile Linux devices."))
             }
         }
     }

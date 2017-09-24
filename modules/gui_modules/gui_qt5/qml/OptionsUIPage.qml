@@ -8,34 +8,35 @@ BasePage {
     id: optionsUIPage
     headerText : "UI"
     content : ContentColumn {
-        Column {
-            spacing : rWin.c.style.main.spacing
-            anchors.left : parent.left
-            anchors.right : parent.right
-            KeyComboBox {
-                id : themeCb
-                label : qsTr("Theme")
-                key : "theme"
-                defaultValue : rWin.c.default.theme
-                model : ListModel {
-                    id : cbMenu
-                    ListElement {
-                        text : "Silica"
-                        value : "silica"
-                    }
-                    ListElement {
-                        text : "classic"
-                        value : "default"
-                    }
-                    ListElement {
-                        text : "night"
-                        value : "night"
-                    }
+        spacing : rWin.c.style.main.spacing
+        Item {
+            id : spacer
+            width : 1
+            height : rWin.c.style.main.spacing
+        }
+        KeyComboBox {
+            id : themeCb
+            label : qsTr("Theme")
+            key : "theme"
+            defaultValue : rWin.c.default.theme
+            model : ListModel {
+                id : cbMenu
+                ListElement {
+                    text : QT_TR_NOOP("Silica")
+                    value : "silica"
                 }
-                onItemChanged : {
-                    if (themeCb.item) {
-                        rWin.log.info("setting theme: " + themeCb.item.value)
-                    }
+                ListElement {
+                    text : QT_TR_NOOP("classic")
+                    value : "default"
+                }
+                ListElement {
+                    text : QT_TR_NOOP("night")
+                    value : "night"
+                }
+            }
+            onItemChanged : {
+                if (themeCb.item) {
+                    rWin.log.info("setting theme: " + themeCb.item.value)
                 }
             }
         }
@@ -68,7 +69,7 @@ BasePage {
             // easily "luck themselves out"
             visible : !rWin.platform.needs_back_button
         }
-        Label {
+        SectionHeader {
             text : qsTr("Screen")
             visible : keepScreenOnSwitch.visible
         }
@@ -81,7 +82,7 @@ BasePage {
                  rWin.keepScreenOn = checked
             }
         }
-        Label {
+        SectionHeader {
             text : qsTr("Map screen")
         }
         TextSwitch {

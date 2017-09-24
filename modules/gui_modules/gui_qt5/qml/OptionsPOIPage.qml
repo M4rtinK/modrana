@@ -9,7 +9,7 @@ BasePage {
     headerText : "POI"
 
     content : ContentColumn {
-        Label {
+        SectionHeader {
             text : qsTr("Place search")
         }
         KeyTextSwitch {
@@ -34,7 +34,7 @@ BasePage {
                 }
             }
         }
-        Label {
+        SectionHeader {
             text : qsTr("Local search")
         }
         KeyTextSwitch {

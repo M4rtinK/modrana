@@ -6,7 +6,7 @@ import "modrana_components"
 
 BasePage {
     id: mapOptionsPage
-    headerText : "Map"
+    headerText : qsTr("Map")
     bottomPadding : 0
     property string mapFolderPath : rWin.dcall("modrana.gui.modrana.paths.getMapFolderPath", [],
     qsTr("path lookup in progress"), function(v){mapFolderPath=v})
@@ -14,26 +14,9 @@ BasePage {
     qsTr("unknown"), function(v){freeSpace=v})
 
     content : ContentColumn {
-        KeyComboBox {
-            width : parent.width
-            label : qsTr("Store map tiles in")
-            defaultValue : rWin.startupValues.defaultTileStorageType
-            model : ListModel {
-                ListElement {
-                    text : "files"
-                    value : "files"
-
-                }
-                ListElement {
-                    text : "Sqlite"
-                    value : "sqlite"
-                }
-                }
-            Component.onCompleted : {
-                key = "tileStorageType"
-            }
+        SectionHeader {
+            text : qsTr("Scaling")
         }
-
         KeyComboBox {
             label : qsTr("Map scaling")
             key : "mapScale"
@@ -54,6 +37,28 @@ BasePage {
             onItemChanged : {
                 rWin.log.info("map scale changed to: " + item.value)
                 rWin.mapPage.mapTileScale = item.value
+            }
+        }
+        SectionHeader {
+            text : qsTr("Tile storage")
+        }
+        KeyComboBox {
+            width : parent.width
+            label : qsTr("Store map tiles in")
+            defaultValue : rWin.startupValues.defaultTileStorageType
+            model : ListModel {
+                ListElement {
+                    text : "files"
+                    value : "files"
+
+                }
+                ListElement {
+                    text : "Sqlite"
+                    value : "sqlite"
+                }
+                }
+            Component.onCompleted : {
+                key = "tileStorageType"
             }
         }
         Label {

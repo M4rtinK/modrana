@@ -1,4 +1,4 @@
-//OptionsTracklogsPage.qml
+//OptionsTracksPage.qml
 
 import QtQuick 2.0
 import UC 1.0
@@ -6,10 +6,10 @@ import "modrana_components"
 
 BasePage {
     id: tracksPage
-    headerText : "Tracks"
+    headerText : qsTr("Tracks")
 
     content : ContentColumn {
-       Label {
+        Label {
             text : qsTr("Tracklog opacity")
         }
         Slider {
@@ -27,7 +27,5 @@ BasePage {
                 }
             }
         }
-
-
     }
 }

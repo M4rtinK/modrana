@@ -9,7 +9,7 @@ BasePage {
     headerText : "Navigation"
 
     content : ContentColumn {
-        Label {
+        SectionHeader {
             text : qsTr("Routing")
         }
         KeyComboBox {
@@ -20,15 +20,15 @@ BasePage {
             model : ListModel {
                 id : cbMenu
                 ListElement {
-                    text : "Google - online"
+                    text : QT_TR_NOOP("Google - online")
                     value : "GoogleDirections"
                 }
                 ListElement {
-                    text : "Monav - on device"
+                    text : QT_TR_NOOP("Monav - on device")
                     value : "MonavLight"
                 }
                 ListElement {
-                    text : "OSM Scout Server - on device"
+                    text : QT_TR_NOOP("OSM Scout Server - on device")
                     value : "OSMScoutServer"
                 }
             }
@@ -44,15 +44,15 @@ BasePage {
             // TODO: use values from modRana constants
             model : ListModel {
                 ListElement {
-                    text : "Car"
+                    text : QT_TR_NOOP("Car")
                     value : 3
                 }
                 ListElement {
-                    text : "Walking"
+                    text : QT_TR_NOOP("Walking")
                     value : 1
                 }
                 ListElement {
-                    text : "Cycling"
+                    text : QT_TR_NOOP("Cycling")
                     value : 2
                 }
             }
@@ -88,7 +88,5 @@ BasePage {
                 }
             }
         }
-
-
     }
 }
