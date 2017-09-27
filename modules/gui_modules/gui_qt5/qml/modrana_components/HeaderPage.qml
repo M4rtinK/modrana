@@ -93,4 +93,14 @@ Page {
             rWin.pageStack.pop(null, !rWin.animate)
         }
     }
+    MouseArea {
+        anchors.fill : parent
+        acceptedButtons: Qt.BackButton
+        onClicked: {
+            rWin.pageStack.pop(undefined, !rWin.animate)
+        }
+        onPressAndHold : {
+            rWin.pageStack.pop(null, !rWin.animate)
+        }
+    }
 }
