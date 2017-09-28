@@ -192,6 +192,16 @@ Properties
 **value** : real
     The current value of the progress bar.
 
+BusyIndicator
+-------------
+
+Indicates background activity, for example, while content is being loaded.
+
+Properties
+^^^^^^^^^^
+
+**running** : bool
+    This property holds whether the busy indicator is currently indicating activity.
 
 Slider 
 ------
