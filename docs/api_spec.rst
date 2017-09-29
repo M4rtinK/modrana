@@ -120,12 +120,20 @@ Properties
     A few things to note about the **isActive** property:
 
     - stays true even if device screen is turned off with Silica backend
-    - currently always true with the Controls backend.
+    - it has not yet been tested if the same thing happens with Controls 2 on Android
 
     If you want stop processing when *the application* is not active, use the
     *Qt.application.state* property, possibly combined with the **isActive**
     page property.
 
+**isInactive** : bool
+    If true the page is not the active page, is not visible and can't be interacted with.
+
+**isActivating** : bool
+    If true the page is about to become the currently active page.
+
+**isDeactivating** : bool
+    If true the page is about to become inactive.
 
 PageHeader 
 ----------
