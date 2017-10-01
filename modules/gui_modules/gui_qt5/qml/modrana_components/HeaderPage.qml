@@ -21,8 +21,6 @@ Page {
     property alias backButtonVisible : backButton.visible
     property alias topLevelContent : topLevel.children
     property int headerHeight : rWin.headerHeight
-    property int bottomPadding : 0
-    property real availableHeight : parent.height - bottomPadding - headerHeight
     property alias isFlickable :  pageFlickable.interactive
     // TODO: reenable scroll decorator
     /*
