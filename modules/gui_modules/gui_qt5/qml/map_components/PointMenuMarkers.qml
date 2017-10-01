@@ -1,6 +1,5 @@
 import QtQuick 2.0
-import "map_components"
-import "modrana_components"
+import "../modrana_components"
 
 Markers {
     id : markers
