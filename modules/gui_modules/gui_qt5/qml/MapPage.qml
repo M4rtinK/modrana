@@ -62,6 +62,11 @@ Page {
     property bool routingRequestChanged : false
     property bool routingEnabled: false
     property bool routingP2P: true
+    property bool routeAvailable : routing.routePoints.count >= 2
+
+    // navigation
+    property bool navigationEnabled : false
+    property real navigationOverlayHeight : height * 0.3
 
     function enableRoutingUI(p2p) {
         // enable the routing UI (currently just the 1-3 buttons)
@@ -199,6 +204,9 @@ Page {
         anchors.fill : parent
         property bool initialized : false
         zoomLevel: rWin.get("z", 11, setInitialZ)
+
+        // shift the scale bar down when the navigation overlay is active
+        scaleBarTopOffset : navigationEnabled ? navigationOverlayHeight : 0
 
         function setInitialZ (initialZ) {
             zoomLevel = initialZ
@@ -597,7 +605,7 @@ Page {
 
     Image {
         id: compassImage
-        visible : tabMap.showCompass
+        visible : tabMap.showCompass && !tabMap.navigationEnabled
         opacity : tabMap.compassOpacity
         // TODO: investigate how to replace this by an image loader
         // what about rendered size ?
@@ -664,7 +672,7 @@ Page {
             height: rWin.c.style.map.button.size
             checked : selectRoutingStart
             toggledColor : Qt.rgba(1, 0, 0, 0.7)
-            visible: tabMap.routingEnabled && tabMap.routingP2P
+            visible: tabMap.routingEnabled && tabMap.routingP2P && !tabMap.navigationEnabled
             onClicked: {
                 selectRoutingStart = !selectRoutingStart
                 selectRoutingDestination = false
@@ -677,15 +685,31 @@ Page {
             height: rWin.c.style.map.button.size
             checked : selectRoutingDestination
             toggledColor : Qt.rgba(0, 1, 0, 0.7)
-            visible: tabMap.routingEnabled && tabMap.routingP2P
+            visible: tabMap.routingEnabled && tabMap.routingP2P && !tabMap.navigationEnabled
             onClicked: {
                 selectRoutingStart = false
                 selectRoutingDestination = !selectRoutingDestination
             }
         }
         MapButton {
+            id: navigateButton
+            checkable : true
+            visible: tabMap.routingEnabled && tabMap.routeAvailable
+            text: qsTr("<b>navigate</b>")
+            width: rWin.c.style.map.button.size * 1.25
+            height: rWin.c.style.map.button.size
+            onClicked: {
+                if (tabMap.navigationEnabled) {
+                    rWin.log.info("stopping navigation")
+                } else {
+                    rWin.log.info("starting navigation")
+                }
+                tabMap.navigationEnabled = !tabMap.navigationEnabled
+            }
+        }
+        MapButton {
             id: endRouting
-            visible: tabMap.routingEnabled
+            visible: tabMap.routingEnabled && !tabMap.navigationEnabled
             text: qsTr("<b>clear</b>")
             width: rWin.c.style.map.button.size * 1.25
             height: rWin.c.style.map.button.size
@@ -771,6 +795,15 @@ Page {
             }
         }
     }
+    NavigationOverlay {
+        id : navigationOverlay
+        visible : tabMap.navigationEnabled
+        anchors.top : parent.top
+        anchors.left : parent.left
+        anchors.right : parent.right
+        height : navigationOverlayHeight
+    }
+
     /*
     ProgressBar {
         id: zoomBar
