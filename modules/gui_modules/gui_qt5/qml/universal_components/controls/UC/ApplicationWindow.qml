@@ -27,6 +27,12 @@ ApplicationWindow {
     StackView {
         anchors.fill : parent
         id : pageStack
+
+
+        onCurrentItemChanged: {
+            //currentItem.forceActiveFocus()
+            currentItem.focus = true
+        }
     }
 
     function pushPage(pageInstance, pageProperties, animate) {
