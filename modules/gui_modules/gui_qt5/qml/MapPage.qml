@@ -3,26 +3,11 @@ import "functions.js" as F
 import UC 1.0
 import "modrana_components"
 import "map_components"
-import QtSensors 5.0 as Sensors
 
-Page {
-    id: tabMap
-    property int buttonSize: 72
+BaseMapPage {
+    id: pinchmapPage
     property int mapTileScale : rWin.get(
     "mapScale", 1, function(v){mapTileScale=v})
-
-    property bool showCompass : rWin.get("showQt5GUIMapCompass", true,
-                                         function(v){tabMap.showCompass=v})
-    property real compassOpacity : rWin.get("qt5GUIMapCompassOpacity", 0.7,
-                                         function(v){tabMap.compassOpacity=v})
-    property real routeOpacity : rWin.get("qt5GUIRouteOpacity", 1.0,
-                                         function(v){tabMap.routeOpacity=v})
-    // opacity of the tracklog logging trace
-    property real tracklogTraceOpacity : rWin.get("qt5GUITracklogTraceOpacity", 1.0,
-                                         function(v){tabMap.tracklogTraceOpacity=v})
-    // opacity of stored tracklogs when shown on the map
-    property real tracklogOpacity : rWin.get("qt5GUITracklogOpacity", 1.0,
-                                         function(v){tabMap.tracklogOpacity=v})
 
     // redraw the canvas on opacity value change
     onRouteOpacityChanged : {
@@ -35,16 +20,13 @@ Page {
                 pinchmap.canvas.requestFullPaint()
     }
 
-    function showOnMap(lat, lon) {
-        pinchmap.setCenterLatLon(lat, lon);
-        // show on map moves map center and
-        // and thus disables centering
-        center = false
-    }
-
-    property bool center : true
     property bool showModeOnMenuButton : rWin.get("showModeOnMenuButton", false,
     function(v){showModeOnMenuButton=v})
+
+    // zoom level
+    property alias zoomLevel : pinchmap.zoomLevel
+    property alias minZoomLevel : pinchmap.minZoomLevel
+    property alias maxZoomLevel : pinchmap.maxZoomLevel
 
     property var pinchmap
 
@@ -52,58 +34,16 @@ Page {
 
     // routing related stuff
     property alias routing : routing
-    property bool selectRoutingStart : false
-    property bool selectRoutingDestination : false
-    property bool routingStartSet: false
-    property bool routingDestinationSet: false
-    property real routingStartLat: 0.
-    property real routingStartLon: 0.
-    property real routingDestinationLat: 0.
-    property real routingDestinationLon: 0.
-    property bool routingRequestChanged : false
-    property bool routingEnabled: false
-    property bool routingP2P: true
     property bool routeAvailable : routing.routePoints.count >= 2
 
-    // navigation
-    property bool navigationEnabled : false
-    property real navigationOverlayHeight : height * 0.3
-
-    function enableRoutingUI(p2p) {
-        // enable the routing UI (currently just the 1-3 buttons)
-        if (p2p == null) {
-            p2p = true
-        }
-        routingP2P = p2p
-        routingEnabled = true
+    onClearRoute : {
+        // clear the route from the map
+        // - the needed booleans have already been set,
+        //   so just redraw the canvas to clear the route
+        pinchmap.canvas.requestFullPaint()
     }
 
-    function disableRoutingUI() {
-        // disable the routing UI & hide the route
-        routingEnabled = false
-        routingP2P = false
-    }
-
-    function setRoutingStart(lat, lon) {
-        rWin.routingStartPos.latitude = lat
-        rWin.routingStartPos.longitude = lon
-        rWin.routingStartPos.isValid = true
-        routingStartLat = lat
-        routingStartLon = lon
-        routingStartSet = true
-    }
-
-    function setRoutingDestination(lat, lon) {
-        rWin.routingDestinationPos.latitude = lat
-        rWin.routingDestinationPos.longitude = lon
-        rWin.routingDestinationPos.isValid = true
-        routingDestinationLat = lat
-        routingDestinationLon = lon
-        routingDestinationSet = true
-    }
-
-    // tracklog trace related stuff
-    property bool drawTracklogTrace : false
+    // tracklogs and trace display
     onDrawTracklogTraceChanged : {
         // clear trace points once drawing is turned off
         if (drawTracklogTrace) {
@@ -115,7 +55,6 @@ Page {
             trackRecordingPaused = false
         }
     }
-    property bool trackRecordingPaused : false
     property var tracePoints : []
     property var lastTracePoint : null
     property int maxTracePoints : 1000
@@ -189,11 +128,24 @@ Page {
         rWin.firstPageLoaded = true
     }
 
-    // if the page becomes active, activate the media keys so they can be used
-    // for zooming; if the page is deactivated, deactivate them
+    // general functions
+    function showOnMap(lat, lon) {
+        pinchmap.setCenterLatLon(lat, lon);
+        // show on map moves map center and
+        // and thus disables centering
+        center = false
+    }
 
-    onIsActiveChanged: {
-        rWin.actions.mediaKeysEnabled = tabMap.isActive
+    function centerMapOnCurrentPosition() {
+        pinchmap.setCenterLatLon(rWin.pos.latitude, rWin.pos.longitude);
+    }
+
+    function zoomIn() {
+        pinchmap.zoomIn()
+    }
+
+    function zoomOut() {
+        pinchmap.zoomOut()
     }
 
     function getMap() {
@@ -202,6 +154,8 @@ Page {
 
     PinchMap {
         id: pinchmap
+        // make sure the pinch map is under UI elements
+        z : -1
         anchors.fill : parent
         property bool initialized : false
         zoomLevel: rWin.get("z", 11, setInitialZ)
@@ -214,7 +168,7 @@ Page {
             initialized = true
         }
 
-        tileScale : tabMap.mapTileScale
+        tileScale : pinchmapPage.mapTileScale
         name : "mainMap"
 
         layers : ListModel {
@@ -224,13 +178,12 @@ Page {
                 layerOpacity: 1.0
             }
         }
-        canvas.visible : tabMap.routingEnabled || tabMap.drawTracklogTrace || tabMap.tracePoints
+        canvas.visible : pinchmapPage.routingEnabled || pinchmapPage.drawTracklogTrace || pinchmapPage.tracePoints
         canvas.onFullPaint : {
             tracklogs.paintTracklog(ctx)
             tracklogs.paintTrace(ctx)
             routing.paintRoute(ctx)
         }
-
         onZoomLevelChanged : {
             // save zoom level
             if (pinchmap.initialized) {
@@ -240,17 +193,16 @@ Page {
                 rWin.set("z", parseInt(zoomLevel))
             }
         }
-
         Connections {
             target: rWin
             onPosChanged: {
                 //rWin.log.debug("map page: fix changed")
                 // this callback is used to keep the map centered when the current position changes
-                if (tabMap.center && ! updateTimer.running) {
+                if (pinchmapPage.center && ! updateTimer.running) {
                     //rWin.log.debug("map page: Update from GPS position")
                     pinchmap.setCenterLatLon(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude);
                     updateTimer.start();
-                } else if (tabMap.center) {
+                } else if (pinchmapPage.center) {
                     rWin.log.debug("map page: Update timer preventing another update.");
                 }
                 if (drawTracklogTrace && !trackRecordingPaused) {
@@ -273,7 +225,7 @@ Page {
 
         onDrag : {
             // disable map centering once drag is detected
-            tabMap.center = false
+            pinchmapPage.center = false
         }
 
         Timer {
@@ -317,7 +269,7 @@ Page {
             var correction = pinchmap.getMappointCorrection(15)
             var m = rWin.c.style.m // DPI multiplier
             var messagePointDiameter = 10
-            if (tabMap.routingEnabled) {
+            if (pinchmapPage.routingEnabled) {
                 ctx.lineWidth = 10 * m
                 ctx.strokeStyle = Qt.rgba(0, 0, 0.5, 0.45)
                 if(rWin.routingStartPos.isValid) {
@@ -365,7 +317,7 @@ Page {
                 }
 
                 // draw the route
-                ctx.globalAlpha = tabMap.routeOpacity
+                ctx.globalAlpha = pinchmapPage.routeOpacity
                 ctx.lineWidth = 10 * m
                 ctx.beginPath()
                 for (var i=0; i<routePoints.count; i++) {
@@ -538,7 +490,7 @@ Page {
                 ctx.lineWidth = rWin.c.style.map.tracklogTrace.width
                 //ctx.strokeStyle = rWin.c.style.map.tracklogTrace.color
                 ctx.strokeStyle = "red"
-                ctx.globalAlpha = tabMap.tracklogOpacity
+                ctx.globalAlpha = pinchmapPage.tracklogOpacity
                 ctx.beginPath()
                 tracklogPoints.forEach(function (trackPoint, pointIndex) {
                     xyPoint = pinchmap.getScreenpointFromMappointCorrected(trackPoint.x,
@@ -564,7 +516,7 @@ Page {
                 var xyPoint = (0, 0)
                 // draw the track logging trace
                 ctx.lineWidth = rWin.c.style.map.tracklogTrace.width
-                ctx.globalAlpha = tabMap.tracklogTraceOpacity
+                ctx.globalAlpha = pinchmapPage.tracklogTraceOpacity
                 ctx.strokeStyle = rWin.c.style.map.tracklogTrace.color
                 ctx.beginPath()
                 //for (var i=0; i<tracePoints.length; i++) {
@@ -578,252 +530,7 @@ Page {
                 ctx.stroke()
                 // restore global opacity back to default
                 ctx.globalAlpha = 1.0
-
             }
         }
     }
-
-    Sensors.Compass {
-        id : compass
-        dataRate : 50
-        active : tabMap.isActive && tabMap.showCompass
-        property int old_value: 0
-        onReadingChanged : {
-            // fix for the "northern wiggle" originally
-            // from Sailcompass by THP - Thanks! :)
-            var new_value = -1.0 * compass.reading.azimuth
-            if (Math.abs(old_value-new_value)>270){
-                if (old_value > new_value){
-                    new_value += 360.0
-                }else{
-                    new_value -= 360.0
-                }
-            }
-            old_value = new_value
-            compassImage.rotation = new_value
-        }
-    }
-
-    Image {
-        id: compassImage
-        visible : tabMap.showCompass && !tabMap.navigationEnabled
-        opacity : tabMap.compassOpacity
-        // TODO: investigate how to replace this by an image loader
-        // what about rendered size ?
-        // also why are the edges of the image so jarred ?
-
-        property string rosePath : if (rWin.qrc) {
-            "qrc:/themes/" + rWin.theme.id +"/windrose-simple.svg"
-        } else {
-            "file://" + rWin.platform.themesFolderPath + "/" + rWin.theme.id +"/windrose-simple.svg"
-        }
-
-        //source: "qrc:/themes/" + rWin.theme.id +"/windrose-simple.svg"
-        //source: "file://" + rWin.platform.themesFolderPath + "/" + rWin.theme.id +"/windrose-simple.svg"
-        source : compassImage.rosePath
-        transformOrigin: Item.Center
-
-        Behavior on rotation {
-            SmoothedAnimation{ velocity: -1; duration:100;maximumEasingTime: 100 }
-        }
-
-
-        anchors.left: tabMap.left
-        anchors.leftMargin: rWin.c.style.main.spacingBig
-        anchors.top: tabMap.top
-        anchors.topMargin: rWin.c.style.main.spacingBig
-        smooth: true
-        width: Math.min(tabMap.width/4, tabMap.height/4)
-        fillMode: Image.PreserveAspectFit
-        z: 2
-
-//        Image {
-//            //property int angle: gps.targetBearing || 0
-//            property int angle: 0
-//            property int outerMargin: 0
-//            id: arrowImage
-//            //visible: (gps.targetValid && gps.lastGoodFix.valid)
-//
-//            // TODO: investigate how to replace this by an image loader
-//            // what about rendered size ?
-//            source: "../../../../themes/"+ rWin.theme.id +"/arrow_target.svg"
-//            width: (compassImage.paintedWidth / compassImage.sourceSize.width)*sourceSize.width
-//            fillMode: Image.PreserveAspectFit
-//            x: compassImage.width/2 - width/2
-//            y: arrowImage.outerMargin
-//            z: 3
-//            transform: Rotation {
-//                origin.y: compassImage.height/2 - arrowImage.outerMargin
-//                origin.x: arrowImage.width/2
-//                angle: arrowImage.angle
-//            }
-//        }
-    }
-    Column {
-        anchors.bottom: buttonsRight.top
-        anchors.bottomMargin: rWin.c.style.map.button.margin * 2
-        anchors.right: pinchmap.right
-        anchors.rightMargin: rWin.c.style.map.button.margin
-        spacing: rWin.c.style.map.button.spacing
-        visible: tabMap.routingEnabled
-        MapButton {
-            id: routingStart
-            text: qsTr("<b>start</b>")
-            width: rWin.c.style.map.button.size * 1.25
-            height: rWin.c.style.map.button.size
-            checked : selectRoutingStart
-            toggledColor : Qt.rgba(1, 0, 0, 0.7)
-            visible: tabMap.routingEnabled && tabMap.routingP2P && !tabMap.navigationEnabled
-            onClicked: {
-                selectRoutingStart = !selectRoutingStart
-                selectRoutingDestination = false
-            }
-        }
-        MapButton {
-            id: routingEnd
-            text: qsTr("<b>end</b>")
-            width: rWin.c.style.map.button.size * 1.25
-            height: rWin.c.style.map.button.size
-            checked : selectRoutingDestination
-            toggledColor : Qt.rgba(0, 1, 0, 0.7)
-            visible: tabMap.routingEnabled && tabMap.routingP2P && !tabMap.navigationEnabled
-            onClicked: {
-                selectRoutingStart = false
-                selectRoutingDestination = !selectRoutingDestination
-            }
-        }
-        MapButton {
-            id: navigateButton
-            checkable : true
-            visible: tabMap.routingEnabled && tabMap.routeAvailable
-            text: qsTr("<b>navigate</b>")
-            width: rWin.c.style.map.button.size * 1.25
-            height: rWin.c.style.map.button.size
-            onClicked: {
-                if (tabMap.navigationEnabled) {
-                    rWin.log.info("stopping navigation")
-                } else {
-                    rWin.log.info("starting navigation")
-                }
-                tabMap.navigationEnabled = !tabMap.navigationEnabled
-            }
-        }
-        MapButton {
-            id: endRouting
-            visible: tabMap.routingEnabled && !tabMap.navigationEnabled
-            text: qsTr("<b>clear</b>")
-            width: rWin.c.style.map.button.size * 1.25
-            height: rWin.c.style.map.button.size
-            onClicked: {
-                selectRoutingStart = false
-                selectRoutingDestination = false
-                tabMap.routingEnabled = false
-
-                pinchmap.canvas.requestFullPaint()
-            }
-        }
-    }
-    Row {
-        id: buttonsRight
-        anchors.bottom: pinchmap.bottom
-        anchors.bottomMargin: rWin.c.style.map.button.margin
-        anchors.right: pinchmap.right
-        anchors.rightMargin: rWin.c.style.map.button.margin
-        spacing: rWin.c.style.map.button.spacing
-        MapButton {
-            iconName: "plus_small.png"
-            onClicked: {pinchmap.zoomIn() }
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
-            enabled : pinchmap.zoomLevel != pinchmap.maxZoomLevel
-        }
-        MapButton {
-            iconName: "minus_small.png"
-            onClicked: {pinchmap.zoomOut() }
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
-            enabled : pinchmap.zoomLevel != pinchmap.minZoomLevel
-        }
-    }
-    Column {
-        id: buttonsLeft
-        anchors.bottom: pinchmap.bottom
-        anchors.bottomMargin: rWin.c.style.map.button.margin
-        anchors.left: pinchmap.left
-        anchors.leftMargin: rWin.c.style.map.button.margin
-        spacing: rWin.c.style.map.button.spacing
-        MapButton {
-            iconName : "minimize_small.png"
-            checkable : true
-            visible: !rWin.platform.fullscreen_only
-            onClicked: {
-                rWin.toggleFullscreen()
-            }
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
-        }
-        MapButton {
-            id: followPositionButton
-            iconName : "center_small.png"
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
-            checked : tabMap.center
-            /*
-            checked is bound to tabMap.center, no need to toggle
-            it's value when the button is pressed
-            */
-            checkable: false
-            onClicked: {
-                // toggle map centering
-                if (tabMap.center) {
-                    tabMap.center = false // disable
-                } else {
-                    tabMap.center = true // enable
-                    if (rWin.llValid) { // recenter at once (TODO: validation ?)
-                        pinchmap.setCenterLatLon(rWin.pos.latitude, rWin.pos.longitude);
-                    }
-                }
-            }
-        }
-        MapButton {
-            id: mainMenuButton
-            iconName: showModeOnMenuButton ? rWin.mode  + "_small.png" : "menu_small.png"
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
-            onClicked: {
-                rWin.log.debug("map page: Menu pushed!")
-                rWin.push("Menu", undefined, !rWin.animate)
-            }
-        }
-    }
-    NavigationOverlay {
-        id : navigationOverlay
-        visible : tabMap.navigationEnabled
-        anchors.top : parent.top
-        anchors.left : parent.left
-        anchors.right : parent.right
-        height : navigationOverlayHeight
-    }
-
-    /*
-    ProgressBar {
-        id: zoomBar
-        anchors.top: pinchmap.top;
-        anchors.topMargin: 1
-        anchors.left: pinchmap.left;
-        anchors.right: pinchmap.right;
-        maximumValue: pinchmap.maxZoomLevel;
-        minimumValue: pinchmap.minZoomLevel;
-        value: pinchmap.zoomLevel;
-        visible: false
-        Behavior on value {
-            SequentialAnimation {
-                PropertyAction { target: zoomBar; property: "visible"; value: true }
-                NumberAnimation { duration: 100; }
-                PauseAnimation { duration: 750; }
-                PropertyAction { target: zoomBar; property: "visible"; value: false }
-            }
-        }
-    }*/
-
 }
