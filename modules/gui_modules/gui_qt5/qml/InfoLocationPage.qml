@@ -79,7 +79,6 @@ BasePage {
                 property string valueString : lGrid.lat ? lGrid.lat + " " + validString : lGrid.unknownString
                 text: "<b>latitude:</b> " + valueString
                 width : lGrid.cellWidth
-                font.pixelSize : rWin.c.style.main.spacing*3
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
@@ -87,7 +86,6 @@ BasePage {
                 property string valueString : lGrid.lon ? lGrid.lon + " " + validString : lGrid.unknownString
                 text: "<b>longitude:</b> " + valueString
                 width : lGrid.cellWidth
-                font.pixelSize : rWin.c.style.main.spacing*3
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
@@ -95,7 +93,6 @@ BasePage {
                 property string valueString : lGrid.altitude ? lGrid.altitude : lGrid.unknownString
                 text: "<b>altitude:</b> " + valueString + " m " + validString
                 width : lGrid.cellWidth
-                font.pixelSize : rWin.c.style.main.spacing*3
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
@@ -105,14 +102,12 @@ BasePage {
                                                                                  lGrid.unknownString
                 text: "<b>speed:</b> " + valueString
                 width : lGrid.cellWidth
-                font.pixelSize : rWin.c.style.main.spacing*3
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string valueString : rWin.bearing ? rWin.bearing.toPrecision(3) + "° to true north": lGrid.unknownString
                 text: "<b>bearing:</b> " + valueString
                 width : lGrid.cellWidth
-                font.pixelSize : rWin.c.style.main.spacing*3
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
@@ -120,7 +115,6 @@ BasePage {
                 property string valueString : lGrid.horizontalAccuracy ? lGrid.horizontalAccuracy : lGrid.unknownString
                 text: "<b>horizontal accuracy:</b> " + valueString + " m " + validString
                 width : lGrid.cellWidth
-                font.pixelSize : rWin.c.style.main.spacing*3
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
@@ -128,14 +122,12 @@ BasePage {
                 property string valueString : lGrid.verticalAccuracy ? lGrid.verticalAccuracy : lGrid.unknownString
                 text: "<b>vertical accuracy:</b> " + valueString + " m " + validString
                 width : lGrid.cellWidth
-                font.pixelSize : rWin.c.style.main.spacing*3
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string valueString : lGrid.fixTimestamp ? lGrid.fixTimestamp : lGrid.unknownString
                 text: "<b>fix timestamp:</b> " + valueString
                 width : lGrid.cellWidth
-                font.pixelSize : rWin.c.style.main.spacing*3
             }
 
             /*
