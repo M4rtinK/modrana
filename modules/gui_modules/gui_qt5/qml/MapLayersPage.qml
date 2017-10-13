@@ -5,7 +5,6 @@ import "modrana_components"
 BasePage {
     id: layersPage
     headerText : "Overlays"
-    bottomPadding : rWin.c.style.main.spacingBig * 2
     isFlickable : false
     property var model
 

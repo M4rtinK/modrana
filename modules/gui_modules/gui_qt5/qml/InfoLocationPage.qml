@@ -18,8 +18,6 @@ BasePage {
         'Location'
     }
 
-    bottomPadding : rWin.c.style.main.spacingBig*2
-
     content : Item {
         id : fixWrapper
         anchors.top : parent.top

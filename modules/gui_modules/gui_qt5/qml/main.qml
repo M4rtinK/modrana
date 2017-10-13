@@ -304,7 +304,6 @@ ApplicationWindow {
             id : startupLabel
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.verticalCenter : parent.verticalCenter
-            font.pixelSize : 32
             text: "<b>starting modRana...</b>"
             horizontalAlignment : Text.AlignHCenter
             verticalAlignment : Text.AlignVCenter

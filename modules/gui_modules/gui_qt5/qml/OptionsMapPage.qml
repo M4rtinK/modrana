@@ -7,7 +7,6 @@ import "modrana_components"
 BasePage {
     id: mapOptionsPage
     headerText : qsTr("Map")
-    bottomPadding : 0
     property string mapFolderPath : rWin.dcall("modrana.gui.modrana.paths.getMapFolderPath", [],
     qsTr("path lookup in progress"), function(v){mapFolderPath=v})
     property string freeSpace : rWin.dcall("modrana.gui.modules.mapData.getFreeSpaceString", [],

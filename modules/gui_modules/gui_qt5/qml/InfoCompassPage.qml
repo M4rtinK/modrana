@@ -8,6 +8,5 @@ import "modrana_components"
 BasePage {
     id: compassPage
     headerText : "Compass"
-    bottomPadding : 0
     isFlickable : false
 }
