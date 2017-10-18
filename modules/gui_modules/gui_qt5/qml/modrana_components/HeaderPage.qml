@@ -22,7 +22,9 @@ Page {
     property alias backButtonVisible : backButton.visible
     property alias topLevelContent : topLevel.children
     property int headerHeight : rWin.headerHeight
-    property int contentBottomPadding : rWin.c.style.main.spacing
+    property int pageBottomPadding : rWin.c.style.main.spacing
+    property int maxContentHeight : parent.height - pageBottomPadding - headerHeight
+
     property alias isFlickable :  pageFlickable.interactive
 
     PlatformFlickable {
@@ -30,7 +32,7 @@ Page {
         anchors.fill: parent
         contentWidth: parent.width
         contentHeight : contentField.childrenRect.height + headerHeight +
-                        rWin.c.style.main.spacing + contentBottomPadding
+                        rWin.c.style.main.spacing + pageBottomPadding
         Item {
             id : contentField
             anchors.top : header.bottom

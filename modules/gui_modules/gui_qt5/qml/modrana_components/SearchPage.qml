@@ -167,7 +167,7 @@ HeaderPage {
         anchors.leftMargin : rWin.c.style.main.spacing/2.0
         anchors.right : parent.right
         anchors.rightMargin : rWin.c.style.main.spacing/2.0
-        height : searchPage.availableHeight
+        height : searchPage.maxContentHeight
         spacing : rWin.c.style.listView.spacing
         model : SortableListModel {
            id : resultsModel

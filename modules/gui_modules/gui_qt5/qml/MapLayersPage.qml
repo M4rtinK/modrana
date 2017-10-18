@@ -14,7 +14,7 @@ BasePage {
         anchors.left : parent.left
         anchors.right : parent.right
         id : layersLW
-        height : layersPage.availableHeight
+        height : layersPage.maxContentHeight
         spacing : rWin.c.style.listView.spacing
 
         contentWidth: parent.width

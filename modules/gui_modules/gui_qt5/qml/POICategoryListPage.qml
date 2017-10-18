@@ -14,7 +14,7 @@ BasePage {
             id : itemsLW
             anchors.left : parent.left
             anchors.right : parent.right
-            height : pclPage.availableHeight
+            height : pclPage.maxContentHeight
             spacing : rWin.c.style.listView.spacing
             model : ListModel {
                id : resultsModel
