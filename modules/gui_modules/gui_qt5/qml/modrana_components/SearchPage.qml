@@ -135,9 +135,9 @@ HeaderPage {
         anchors.leftMargin : rWin.showBackButton ? backButtonWidth + 24 * rWin.c.style.m : rWin.c.style.main.spacingBig
         anchors.right : parent.right
         anchors.rightMargin : rWin.c.style.main.spacingBig
-        anchors.top : searchPage.top
-        anchors.topMargin : rWin.c.style.main.spacingBig
-        height : rWin.headerHeight - rWin.c.style.main.spacingBig*2
+        anchors.top : parent.top
+        anchors.topMargin : rWin.c.style.main.spacing
+        height : rWin.headerHeight - rWin.c.style.main.spacing*2
         placeholderText: qsTrId("enter your search query")
         Component.onCompleted : {
             selectAll()
