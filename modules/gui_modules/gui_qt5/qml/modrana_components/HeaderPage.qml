@@ -24,20 +24,6 @@ Page {
     property int headerHeight : rWin.headerHeight
     property int contentBottomPadding : rWin.c.style.main.spacing
     property alias isFlickable :  pageFlickable.interactive
-    // TODO: reenable scroll decorator
-    /*
-    ScrollDecorator {
-         id: scrolldecorator
-         flickableItem: pageFlickable
-    }
-    */
-
-    /*
-    Rectangle {
-        id : background
-        color : rWin.theme.color.list_view_background
-        anchors.fill : parent
-    }*/
 
     PlatformFlickable {
         id : pageFlickable
@@ -45,11 +31,9 @@ Page {
         contentWidth: parent.width
         contentHeight : contentField.childrenRect.height + headerHeight +
                         rWin.c.style.main.spacing + contentBottomPadding
-        //flickableDirection: Flickable.VerticalFlick
         Item {
             id : contentField
             anchors.top : header.bottom
-            //height : childrenRect.height
             anchors.bottom : parent.bottom
             anchors.left : parent.left
             anchors.right : parent.right
@@ -84,7 +68,6 @@ Page {
         anchors.topMargin : (headerHeight - height) / 2.0
         anchors.leftMargin : rWin.c.style.main.spacingBig
         iconName : "left_thin.png"
-        //iconSource : "image://icons/"+ rWin.theme_id +"/back_small.png"
         opacity : pageFlickable.atYBeginning ? 1.0 : 0.55
         visible : rWin.showBackButton
         onClicked : {
