@@ -42,6 +42,9 @@ Page {
     property bool routingEnabled: false
     property bool routingP2P: true
 
+    property int mapButtonSize : Math.min(width/8.0, height/8.0)
+    property int mapButtonSpacing : mapButtonSize / 50
+
     function enableRoutingUI(p2p) {
         // enable the routing UI (currently just the 1-3 buttons)
         if (p2p == null) {
@@ -187,8 +190,8 @@ Page {
         MapButton {
             id: routingStart
             text: qsTr("<b>start</b>")
-            width: rWin.c.style.map.button.size * 1.25
-            height: rWin.c.style.map.button.size
+            width: mapButtonSize * 1.25
+            height: mapButtonSize
             checked : selectRoutingStart
             toggledColor : Qt.rgba(1, 0, 0, 0.7)
             visible: baseMapPage.routingEnabled && baseMapPage.routingP2P && !baseMapPage.navigationEnabled
@@ -200,8 +203,8 @@ Page {
         MapButton {
             id: routingEnd
             text: qsTr("<b>end</b>")
-            width: rWin.c.style.map.button.size * 1.25
-            height: rWin.c.style.map.button.size
+            width: mapButtonSize * 1.25
+            height: mapButtonSize
             checked : selectRoutingDestination
             toggledColor : Qt.rgba(0, 1, 0, 0.7)
             visible: baseMapPage.routingEnabled && baseMapPage.routingP2P && !baseMapPage.navigationEnabled
@@ -215,8 +218,8 @@ Page {
             checkable : true
             visible: baseMapPage.routingEnabled && baseMapPage.routeAvailable
             text: qsTr("<b>navigate</b>")
-            width: rWin.c.style.map.button.size * 1.25
-            height: rWin.c.style.map.button.size
+            width: mapButtonSize * 1.25
+            height: mapButtonSize
             onClicked: {
                 if (baseMapPage.navigationEnabled) {
                     rWin.log.info("stopping navigation")
@@ -230,8 +233,8 @@ Page {
             id: clearRouting
             visible: baseMapPage.routingEnabled && !baseMapPage.navigationEnabled
             text: qsTr("<b>clear</b>")
-            width: rWin.c.style.map.button.size * 1.25
-            height: rWin.c.style.map.button.size
+            width: mapButtonSize * 1.25
+            height: mapButtonSize
             onClicked: {
                 selectRoutingStart = false
                 selectRoutingDestination = false
@@ -253,8 +256,8 @@ Page {
             onClicked: {
                 baseMapPage.zoomIn()
             }
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
+            width: mapButtonSize
+            height: mapButtonSize
             enabled : baseMapPage.zoomLevel != baseMapPage.maxZoomLevel
         }
         MapButton {
@@ -262,8 +265,8 @@ Page {
             onClicked: {
                 baseMapPage.zoomOut()
             }
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
+            width: mapButtonSize
+            height: mapButtonSize
             enabled : baseMapPage.zoomLevel != baseMapPage.minZoomLevel
         }
     }
@@ -273,7 +276,7 @@ Page {
         anchors.bottomMargin: rWin.c.style.map.button.margin
         anchors.left: parent.left
         anchors.leftMargin: rWin.c.style.map.button.margin
-        spacing: rWin.c.style.map.button.spacing
+        spacing: mapButtonSpacing
         MapButton {
             iconName : "minimize_small.png"
             checkable : true
@@ -281,14 +284,14 @@ Page {
             onClicked: {
                 rWin.toggleFullscreen()
             }
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
+            width: mapButtonSize
+            height: mapButtonSize
         }
         MapButton {
             id: followPositionButton
             iconName : "center_small.png"
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
+            width: mapButtonSize
+            height: mapButtonSize
             checked : baseMapPage.center
             /*
             checked is bound to baseMapPage.center, no need to toggle
@@ -310,8 +313,8 @@ Page {
         MapButton {
             id: mainMenuButton
             iconName: showModeOnMenuButton ? rWin.mode  + "_small.png" : "menu_small.png"
-            width: rWin.c.style.map.button.size
-            height: rWin.c.style.map.button.size
+            width: mapButtonSize
+            height: mapButtonSize
             onClicked: {
                 rWin.log.debug("map page: Menu pushed!")
                 rWin.push("Menu", undefined, !rWin.animate)
