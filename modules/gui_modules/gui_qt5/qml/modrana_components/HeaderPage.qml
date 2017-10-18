@@ -11,6 +11,7 @@ import UC 1.0
 */
 
 Page {
+    id : headerPage
     property alias content : contentField.children
     property alias contentParent : contentField
     property alias headerContent : hContent.children
@@ -21,6 +22,7 @@ Page {
     property alias backButtonVisible : backButton.visible
     property alias topLevelContent : topLevel.children
     property int headerHeight : rWin.headerHeight
+    property int contentBottomPadding : rWin.c.style.main.spacing
     property alias isFlickable :  pageFlickable.interactive
     // TODO: reenable scroll decorator
     /*
@@ -41,8 +43,9 @@ Page {
         id : pageFlickable
         anchors.fill: parent
         contentWidth: parent.width
+        contentHeight : contentField.childrenRect.height + headerHeight +
+                        rWin.c.style.main.spacing + contentBottomPadding
         //flickableDirection: Flickable.VerticalFlick
-        VerticalScrollDecorator {}
         Item {
             id : contentField
             anchors.top : header.bottom
@@ -63,6 +66,7 @@ Page {
                 height : headerHeight
             }
         }
+        VerticalScrollDecorator {}
     }
     // Top level content is above the flickable and the header,
     // but still bellow the back button (if any).
