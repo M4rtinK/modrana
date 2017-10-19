@@ -171,6 +171,9 @@ class QMLGUI(GUIModule):
         #routing
         self.routing = Routing(self)
 
+        # turn by turn navigation
+        self.navigation = Navigation(self)
+
     def firstTime(self):
         # trigger the first time signal
         self.firstTimeSignal()
@@ -1006,3 +1009,50 @@ class Routing(object):
         else:
             error_message = constants.ROUTING_FAILURE_MESSAGES.get(result.returnCode, "Routing failed.")
             self.gui.log.debug(error_message)
+
+
+class Navigation(object):
+    """Qt 5 GUI specific stuff for turn by turn navigation support"""
+
+    def __init__(self, gui):
+        self.gui = gui
+        self.gui.firstTimeSignal.connect(self._firstTimeCB)
+        self.tbt = None
+
+    def _firstTimeCB(self):
+        # the module machinery is not yet really setup at init time,
+        # so we need to do stuff involving modRana modules only
+        # at the first time signal
+        self.tbt = self.gui.modules.turnByTurn
+        # connect to signals
+        self.tbt.navigation_started.connect(self._navigation_started_cb)
+        self.tbt.navigation_stopped.connect(self._navigation_stopped_cb)
+        self.tbt.destination_reached.connect(self._destination_reached_cb)
+        self.tbt.rerouting_triggered.connect(self._rerouting_triggered_cb)
+        self.tbt.current_step_changed.connect(self._current_step_changed_cb)
+
+    def _navigation_started_cb(self):
+        pyotherside.send("navigationStarted")
+
+    def _navigation_stopped_cb(self):
+        pyotherside.send("navigationStopped")
+
+    def _destination_reached_cb(self):
+        pyotherside.send("navigationDestionationReached")
+
+    def _rerouting_triggered_cb(self):
+        pyotherside.send("navigationReroutingTriggered")
+
+    def _current_step_changed_cb(self, step_point):
+        step_dict = {
+            "message" : step_point.description,
+            "latitude" : step_point.latitude,
+            "longitude" : step_point.longitude,
+        }
+        pyotherside.send("navigationCurrentStepChanged", step_dict)
+
+    def start(self):
+        self.tbt.start_tbt()
+
+    def stop(self):
+        self.tbt.stop_tbt()
