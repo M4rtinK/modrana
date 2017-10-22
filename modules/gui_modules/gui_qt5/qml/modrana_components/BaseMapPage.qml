@@ -44,7 +44,7 @@ Page {
     property bool routingP2P: true
 
     property int mapButtonSize : Math.min(width/8.0, height/8.0)
-    property int mapButtonSpacing : mapButtonSize / 50
+    property int mapButtonSpacing : mapButtonSize / 4
 
     function enableRoutingUI(p2p) {
         // enable the routing UI (currently just the 1-3 buttons)
@@ -187,7 +187,7 @@ Page {
         anchors.bottomMargin: rWin.c.style.map.button.margin * 2
         anchors.right: parent.right
         anchors.rightMargin: rWin.c.style.map.button.margin
-        spacing: rWin.c.style.map.button.spacing
+        spacing: mapButtonSpacing
         visible: baseMapPage.routingEnabled
         MapButton {
             id: routingStart
@@ -246,13 +246,14 @@ Page {
             }
         }
     }
+    // zoom up  & down buttons
     Row {
         id: buttonsRight
         anchors.bottom: parent.bottom
         anchors.bottomMargin: rWin.c.style.map.button.margin
         anchors.right: parent.right
         anchors.rightMargin: rWin.c.style.map.button.margin
-        spacing: rWin.c.style.map.button.spacing
+        spacing: mapButtonSpacing
         MapButton {
             iconName: "plus_small.png"
             onClicked: {
@@ -272,6 +273,7 @@ Page {
             enabled : baseMapPage.zoomLevel != baseMapPage.minZoomLevel
         }
     }
+    // menu, centering & full screen buttons
     Column {
         id: buttonsLeft
         anchors.bottom: parent.bottom
