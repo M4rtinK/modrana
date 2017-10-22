@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import QtSensors 5.0 as Sensors
 import UC 1.0
 import "../map_components"
@@ -179,8 +180,9 @@ Page {
         z: 2
     }
 
-    // buttons
-    Column {
+    // routing and navigation buttons
+    ColumnLayout {
+        layoutDirection : Qt.RightToLeft
         anchors.bottom: buttonsRight.top
         anchors.bottomMargin: rWin.c.style.map.button.margin * 2
         anchors.right: parent.right
@@ -218,7 +220,7 @@ Page {
             checkable : true
             visible: baseMapPage.routingEnabled && baseMapPage.routeAvailable
             text: qsTr("<b>navigate</b>")
-            width: mapButtonSize * 1.25
+            width: mapButtonSize * 1.6
             height: mapButtonSize
             onClicked: {
                 if (baseMapPage.navigationEnabled) {
