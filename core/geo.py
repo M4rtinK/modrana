@@ -200,9 +200,9 @@ def lle2radians(lat, lon, elevation):
 def lleTuples2radians(lleTuples, discardElevation=False):
     """converts (lat, lon, elevation) tuples from degrees to radians"""
     if discardElevation:
-        return map(lambda x: (radians(x[0]), radians(x[1])), lleTuples)
+        return list(map(lambda x: (radians(x[0]), radians(x[1])), lleTuples))
     else:
-        return map(lambda x: (radians(x[0]), radians(x[1]), x[2]), lleTuples)
+        return list(map(lambda x: (radians(x[0]), radians(x[1]), x[2]), lleTuples))
 
 
 def timestampUTC():
