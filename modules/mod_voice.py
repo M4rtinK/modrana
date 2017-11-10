@@ -169,6 +169,8 @@ class Voice(RanaModule):
         except TypeError:
             self.log.error("voice output failed - most probably due to the message containing unicode characters and your shell improperly supported unicode")
             return None
+        except:
+            self.log.exception("attempt to use espeak failed")
 
 
     def speaking(self):
