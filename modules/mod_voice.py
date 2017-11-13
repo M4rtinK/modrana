@@ -141,11 +141,11 @@ class Voice(RanaModule):
                     self.log.info("resulting custom voice string:\n%s", voiceString)
                 except UnicodeEncodeError:
                     self.log.error("logging the current message failed due to unicode conversion error")
-                self.espaekProcess = self._startSubprocess(voiceString, shell=True)
+                self.espaekProcess = self._start_espeak_subprocess(voiceString, shell=True)
         else:
             languageParam = '-v%s' % languageCode
             args = ['espeak', languageParam, '-s 120', '-a', '%s' % volume, '-m', '"%s"' % message]
-            self.espaekProcess = self._startSubprocess(args)
+            self.espaekProcess = self._start_espeak_subprocess(args)
 
     def _getEspeakVolumeValue(self):
         """get espeak volume value
@@ -162,13 +162,15 @@ class Voice(RanaModule):
         else:
             return voiceVolumePercent
 
-    def _startSubprocess(self, args, shell=False):
+    def _start_espeak_subprocess(self, args, shell=False):
         """start the voice output using the subprocess module and check for exceptions"""
         try:
             return subprocess.Popen(args, shell=shell)
         except TypeError:
             self.log.error("voice output failed - most probably due to the message containing unicode characters and your shell improperly supported unicode")
             return None
+        except FileNotFoundError:
+            self.log.error("espeak binary not found")
         except:
             self.log.exception("attempt to use espeak failed")
 
