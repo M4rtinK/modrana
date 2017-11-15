@@ -1,6 +1,6 @@
 """The universal class representing a point and derived classes"""
 
-
+from core import constants
 from core.singleton import modrana
 from core.backports.six import u
 
@@ -186,12 +186,15 @@ class POI(Point):
                 )
 
 class TurnByTurnPoint(Point):
-    def __init__(self, lat, lon, elevation=None, message=None, ssml_message=None):
+    def __init__(self, lat, lon, elevation=None,
+                 message=None, ssml_message=None,
+                 icon=constants.DEFAULT_NAVIGATION_STEP_ICON):
         Point.__init__(self, lat, lon, elevation=elevation, message=message)
         self._current_distance = None # in meters
         self._distance_from_start = None # in meters
         self._visited = False
         self._ssml_message = ssml_message
+        self._icon = icon
 
     @property
     def currentDistance(self):
@@ -224,3 +227,11 @@ class TurnByTurnPoint(Point):
     @ssmlMessage.setter
     def ssmlMessage(self, message):
         self._ssml_message = message
+
+    @property
+    def icon(self):
+        return self._icon
+
+    @property
+    def llemi(self):
+        return self.lat, self.lon, self.elevation, self._message, self._icon
