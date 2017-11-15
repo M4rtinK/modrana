@@ -173,6 +173,9 @@ ROUTE_PEDESTRIAN = 1
 ROUTE_BIKE = 2
 ROUTE_CAR = 3
 
+# navigation
+DEFAULT_NAVIGATION_STEP_ICON = "flag"
+
 # local search
 DEFAULT_LOCAL_SEARCH_RADIUS=10000  # in meters
 
