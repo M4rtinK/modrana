@@ -8,9 +8,52 @@ import itertools
 import core.exceptions
 import core.paths
 from core import geo
+from core import constants
 from upoints import gpx
 from core.point import Point, TurnByTurnPoint
 from core.instructions_generator import detect_monav_turns
+
+# Valhalla maneuver type -> icon id map
+# - originally from PoorMaps - thanks! :)
+VALHALLA_TYPE_ICON_MAP = {
+     0: "flag",
+     1: "depart",
+     2: "depart-right",
+     3: "depart-left",
+     4: "arrive",
+     5: "arrive-right",
+     6: "arrive-left",
+     7: "continue",
+     8: "continue",
+     9: "turn-slight-right",
+    10: "turn-right",
+    11: "turn-sharp-right",
+    12: "uturn",
+    13: "uturn",
+    14: "turn-sharp-left",
+    15: "turn-left",
+    16: "turn-slight-left",
+    17: "continue",
+    18: "off-ramp-slight-right",
+    19: "off-ramp-slight-left",
+    20: "off-ramp-slight-right",
+    21: "off-ramp-slight-left",
+    22: "fork-straight",
+    23: "fork-slight-right",
+    24: "fork-slight-left",
+    25: "merge-slight-left",
+    26: "roundabout",
+    27: "off-ramp-slight-right",
+    28: "ferry",
+    29: "depart",
+    30: "flag",
+    31: "flag",
+    32: "flag",
+    33: "flag",
+    34: "flag",
+    35: "flag",
+    36: "flag",
+}
 
 import logging
 log = logging.getLogger("core.way")
@@ -187,7 +230,7 @@ class Way(object):
                     name = ""
                     if turns:
                         name = "Turn %d/%d" % (index, mpCount)
-                    lat, lon, elev, message = mp.getLLEM()
+                    lat, lon, elev, message = mp.get_llmi()
                     routepoints.append(gpx.Routepoint(lat, lon, name, message, elev, None))
                     index += 1
                 log.info('%d points, %d routepoints saved to %s in GPX format',
@@ -198,7 +241,7 @@ class Way(object):
                     name = ""
                     if turns:
                         name = "Turn %d/%d" % (index, mpCount)
-                    lat, lon, elev, message = mp.getLLEM()
+                    lat, lon, elev, message = mp.get_llmi()
                     waypoints.append(gpx.Routepoint(lat, lon, name, message, elev, None))
                     index += 1
                 log.info('%d points, %d waypoints saved to %s in GPX format',
@@ -481,15 +524,16 @@ class Way(object):
             turns = []
             for leg in result['trip']['legs']:
                 poly = decode_valhalla(leg['shape'])
-
-                mans = []
+                maneuvers = []
                 for m in leg['maneuvers']:
-                    mans.append( TurnByTurnPoint(poly[m['begin_shape_index']][0],
-                                                 poly[m['begin_shape_index']][1],
-                                                 message=m['instruction']) )
-                    
-                route.extend( poly )
-                turns.extend( mans )
+                    icon_id = VALHALLA_TYPE_ICON_MAP.get(m["type"], constants.DEFAULT_NAVIGATION_STEP_ICON)
+                    maneuvers.append(TurnByTurnPoint(poly[m['begin_shape_index']][0],
+                                                     poly[m['begin_shape_index']][1],
+                                                     message=m['instruction'],
+                                                     icon=icon_id)
+                                     )
+                route.extend(poly)
+                turns.extend(maneuvers)
                 
             way = cls(route)
             
