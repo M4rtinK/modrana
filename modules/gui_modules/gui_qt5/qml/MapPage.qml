@@ -436,9 +436,10 @@ BaseMapPage {
             return true
         }
 
-        Component.onCompleted: {
+        Connections {
             // maybe move to a worker script in the future ?
-            rWin.python.setHandler("routeReceived", function(route, routeMessagePoints){
+            target : pinchmapPage
+            onNewRouteAvailable: {
                 // lets declare the coord variables variable only once
                 // outside of the for loops and then reuse them
                 // - maybe that's faster ? ;-)
@@ -446,30 +447,30 @@ BaseMapPage {
                 var map_coords = (0, 0)
 
                 // clear old route first
-                routePoints.clear()
-                routeMessages.clear()
+                routing.routePoints.clear()
+                routing.routeMessages.clear()
                 // We also cache map coordinates of the points (at the rather arbitrarily
                 // selected zoom level 15) as map -> screen coordinate conversion *should*
                 // be in general faster than geo -> screen coordinate conversion.
 
-                for (var i=0; i<route.length; i++) {
-                    ll_coords = route[i]
+                for (var i=0; i<route.points.length; i++) {
+                    ll_coords = route.points[i]
                     // also compute map coordinates for the points for faster drawing
                     map_coords = pinchmap.getMappointFromCoordAtZ(ll_coords[0], ll_coords[1], 15)
-                    routePoints.append({"lat": ll_coords[0], "lon": ll_coords[1],
+                    routing.routePoints.append({"lat": ll_coords[0], "lon": ll_coords[1],
                                         "x": map_coords[0], "y": map_coords[1]})
 
                 }
-                for (var i=0; i<routeMessagePoints.length; i++) {
-                    ll_coords = ([routeMessagePoints[i][0], routeMessagePoints[i][1]])
+                for (var i=0; i<route.messagePoints.length; i++) {
+                    ll_coords = ([route.messagePoints[i][0], route.messagePoints[i][1]])
                     // also compute map coordinates for the points for faster drawing
                     map_coords = pinchmap.getMappointFromCoordAtZ(ll_coords[0], ll_coords[1], 15)
-                    routeMessages.append({"lat": ll_coords[0], "lon": ll_coords[1],
+                    routing.routeMessages.append({"lat": ll_coords[0], "lon": ll_coords[1],
                                           "x": map_coords[0], "y": map_coords[1],
-                                          "message": routeMessagePoints[i][3]})
+                                          "message": route.messagePoints[i][3]})
                 }
                 pinchmap.canvas.requestFullPaint()
-            })
+            }
         }
     }
 

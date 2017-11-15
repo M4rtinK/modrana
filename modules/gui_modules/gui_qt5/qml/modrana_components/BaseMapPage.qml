@@ -4,6 +4,7 @@ import QtSensors 5.0 as Sensors
 import UC 1.0
 import "../map_components"
 import "../functions.js" as F
+import "../backend"
 
 Page {
     id : baseMapPage
@@ -30,6 +31,7 @@ Page {
     property int maxZoomLevel : 17
 
     // routing
+    signal newRouteAvailable(var route)
     signal clearRoute
     property bool selectRoutingStart : false
     property bool selectRoutingDestination : false
@@ -81,7 +83,13 @@ Page {
 
     // navigation
     property bool navigationEnabled : false
-    property real navigationOverlayHeight : height * 0.3
+    property real navigationOverlayHeight : rWin.inPortrait ? height * 0.2 : height * 0.3
+    property string currentStepMessage : ""
+    property string currentStepIconId : ""
+    property var currentStepCoord : Coordinate {
+        latitude : 0.0
+        longitude : 0.0
+    }
 
     // track logging & drawing
     property bool drawTracklogTrace : false
@@ -225,8 +233,10 @@ Page {
             onClicked: {
                 if (baseMapPage.navigationEnabled) {
                     rWin.log.info("stopping navigation")
+                    rWin.python.call("modrana.gui.navigation.stop", [], function(){})
                 } else {
                     rWin.log.info("starting navigation")
+                    rWin.python.call("modrana.gui.navigation.start", [], function(){})
                 }
                 baseMapPage.navigationEnabled = !baseMapPage.navigationEnabled
             }
@@ -326,14 +336,77 @@ Page {
         }
     }
 
+    // update distance from current step if in navigation mode
+    Connections {
+        target: baseMapPage.navigationEnabled ? rWin : null
+        onPosChanged: {
+            navigationOverlay.distanceFromStep = F.p2pDistance(
+                baseMapPage.currentStepCoord,
+                rWin.pos
+            )
+        }
+    }
+
     // navigation overlay
     NavigationOverlay {
         id : navigationOverlay
         visible : baseMapPage.navigationEnabled
+        message : baseMapPage.currentStepMessage
+        iconId : baseMapPage.currentStepIconId
         anchors.top : parent.top
         anchors.left : parent.left
         anchors.right : parent.right
         height : navigationOverlayHeight
     }
 
+
+    Component.onCompleted : {
+        // connect to navigation signals
+
+        // route available
+
+        rWin.python.setHandler("routeReceived", function(route){
+            baseMapPage.newRouteAvailable(route)
+            if (baseMapPage.navigationEnabled) {
+                rWin.python.call("modrana.gui.navigation.start", [], function(){})
+            }
+        })
+        // started
+        rWin.python.setHandler("navigationStarted", function(){
+            if (!baseMapPage.navigationEnabled) {
+                rWin.notify(qsTr("Navigation started."), 1500)
+            }
+        })
+
+        // stopped
+        rWin.python.setHandler("navigationStopped", function(){
+            rWin.notify(qsTr("Navigation stopped."), 3000)
+        })
+
+        // destination reached
+        rWin.python.setHandler("navigationDestionationReached", function(){
+            rWin.notify(qsTr("Destination reached."), 3000)
+        })
+
+        // rerouting
+        rWin.python.setHandler("navigationReroutingTriggered", function(){
+            // set start indicator to current position when rerouting
+            baseMapPage.setRoutingStart(rWin.lastGoodPos.latitude,
+                                           rWin.lastGoodPos.longitude)
+            rWin.notify(qsTr("Rerouting."), 3000)
+        })
+
+
+        // step changed
+        rWin.python.setHandler("navigationCurrentStepChanged", function(step){
+            rWin.log.debug("navigation step changed")
+            rWin.log.debug(step.message)
+            rWin.log.debug(step.latitude)
+            rWin.log.debug(step.longitude)
+            baseMapPage.currentStepIconId = step.icon
+            baseMapPage.currentStepMessage = step.message
+            baseMapPage.currentStepCoord.latitude = step.latitude
+            baseMapPage.currentStepCoord.longitude = step.longitude
+        })
+    }
 }
