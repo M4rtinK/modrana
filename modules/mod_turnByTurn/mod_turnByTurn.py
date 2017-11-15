@@ -446,6 +446,7 @@ class TurnByTurn(RanaModule):
             self._espeak_first_trigger = False
             self._espeak_second_trigger = False
             self.log.info("switching to previous step")
+            self.current_step_changed(self.current_step)
         else:
             self.log.info("previous step reached")
 
@@ -459,6 +460,7 @@ class TurnByTurn(RanaModule):
             self._espeak_first_trigger = False
             self._espeak_second_trigger = False
             self.log.info("switching to next step")
+            self.current_step_changed(self.current_step)
         else:
             self.log.info("last step reached")
             self._last_step_reached()
@@ -495,8 +497,6 @@ class TurnByTurn(RanaModule):
                 # start rerouting watch
                 self._start_tbt_worker()
 
-                # show the warning message
-                self.sendMessage('ml:notification:m:use at own risk, watch for cliffs, etc.;3')
                 # for some reason the combined distance does not account for the last step
                 self._m_route_length = route.length
 
