@@ -33,6 +33,7 @@ from core.signal import Signal
 from core.way import Way
 from core.backports.six import u
 from core import routing_providers
+from core import gs
 
 
 DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
@@ -77,6 +78,18 @@ class Route(RanaModule):
 
         # signals
         self.routing_done = Signal()
+
+    def firstTime(self):
+        # make sure to show the warning message if we are rnning with the GTK GUI
+        # - other GUIs handle this in another way
+        if gs.GUIString == "GTK":
+            tbt = self.m.get("turnByTurn")
+            if tbt:
+                tbt.navigation_started.connect(self._navigation_started_cb)
+
+    def _navigation_started_cb(self):
+        self.notify("use at own risk, watch for cliffs, etc.", 3000)
+
 
     def _go_to_initial_state(self):
         """restorer initial routing state
