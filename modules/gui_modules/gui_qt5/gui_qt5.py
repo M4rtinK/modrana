@@ -993,19 +993,26 @@ class Routing(object):
 
     def _routing_done_cb(self, result):
         if result and result.returnCode == constants.ROUTING_SUCCESS:
-            routePoints = result.route.points_lle
-            messagePoints = result.route.message_points
-            messagePointsLLEM = []
-            for mp in messagePoints:
-                messagePointsLLEM.append(mp.getLLEM())
+            route_points = result.route.points_lle
+            message_points = result.route.message_points
+            message_points_llemi = []
+            for mp in message_points:
+                message_points_llemi.append(mp.llemi)
             # also add a point for the route end
-            if routePoints:
-                lastPoint = routePoints[-1]
+            if route_points:
+                lastPoint = route_points[-1]
                 lastPointMessage = "You <b>should</b> be near the destination."
-                messagePointsLLEM.append((lastPoint[0], lastPoint[1],
-                                          lastPoint[2], lastPointMessage))
+                message_points_llemi.append((lastPoint[0], lastPoint[1],
+                                            lastPoint[2], lastPointMessage))
+
+            # TODO: this should really be done in the route module itself somehow
+            self.gui.modules.route.process_and_save_directions(result.route)
+
             self.gui.log.debug("routing successful")
-            pyotherside.send("routeReceived", routePoints, messagePointsLLEM)
+            pyotherside.send("routeReceived",
+                             {"points" : route_points,
+                              "messagePoints" : message_points_llemi}
+                             )
         else:
             error_message = constants.ROUTING_FAILURE_MESSAGES.get(result.returnCode, "Routing failed.")
             self.gui.log.debug(error_message)
@@ -1046,8 +1053,9 @@ class Navigation(object):
     def _current_step_changed_cb(self, step_point):
         step_dict = {
             "message" : step_point.description,
-            "latitude" : step_point.latitude,
-            "longitude" : step_point.longitude,
+            "latitude" : step_point.lat,
+            "longitude" : step_point.lon,
+            "icon" : step_point.icon,
         }
         pyotherside.send("navigationCurrentStepChanged", step_dict)
 
