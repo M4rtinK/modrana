@@ -142,6 +142,13 @@ class Voice(RanaModule):
                 except UnicodeEncodeError:
                     self.log.error("logging the current message failed due to unicode conversion error")
                 self.espaekProcess = self._start_espeak_subprocess(voiceString, shell=True)
+
+        # temporary hack to get some TTS output from espaek,
+        # to be replaced by TTS handling code from Rinigius
+        elif self.dmod.getDeviceIDString() == "jolla":
+            languageParam = '-v%s' % languageCode
+            args = 'espeak --stdout %s -s 120 -a %s -m "%s" | gst-launch-1.0 -v fdsrc ! wavparse ! audioconvert ! autoaudiosink > /dev/null' % (languageParam, volume, message)
+            self.espaekProcess = self._start_espeak_subprocess(args, shell=True)
         else:
             languageParam = '-v%s' % languageCode
             args = ['espeak', languageParam, '-s 120', '-a', '%s' % volume, '-m', '"%s"' % message]
