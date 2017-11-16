@@ -316,7 +316,21 @@ BaseMapPage {
                     ctx.stroke()
                 }
 
+                // draw the current step indicator when navigation is enabled
+                if (pinchmapPage.navigationEnabled) {
+                    var currentStep = pinchmap.getScreenpointFromCoord(pinchmapPage.currentStepCoord.latitude,
+                                                                       pinchmapPage.currentStepCoord.longitude)
+                    var currentStepX = currentStep[0]+offsetX
+                    var currentStepY = currentStep[1]+offsetY
+                    ctx.lineWidth = 4 * m
+                    ctx.beginPath()
+                    ctx.strokeStyle = Qt.rgba(1, 0, 0, 0.95)
+                    ctx.arc(currentStepX, currentStepY, 15 * m, 0, 2.0 * Math.PI)
+                    ctx.stroke()
+                }
+
                 // draw the route
+                ctx.strokeStyle = Qt.rgba(0, 0, 0.5, 1.0)
                 ctx.globalAlpha = pinchmapPage.routeOpacity
                 ctx.lineWidth = 10 * m
                 ctx.beginPath()
@@ -469,6 +483,15 @@ BaseMapPage {
                                           "x": map_coords[0], "y": map_coords[1],
                                           "message": route.messagePoints[i][3]})
                 }
+                pinchmap.canvas.requestFullPaint()
+            }
+            onNavigationStepChanged: {
+                // request repaint if navigation step changes to that
+                // current step indicator is in correct place
+                pinchmap.canvas.requestFullPaint()
+            }
+            onNavigationEnabledChanged: {
+                // we need to show/hide current step indicator when navigation is turned on/off
                 pinchmap.canvas.requestFullPaint()
             }
         }

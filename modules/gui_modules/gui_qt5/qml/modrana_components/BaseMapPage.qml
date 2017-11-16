@@ -32,6 +32,7 @@ Page {
 
     // routing
     signal newRouteAvailable(var route)
+    signal navigationStepChanged(var step)
     signal clearRoute
     property bool selectRoutingStart : false
     property bool selectRoutingDestination : false
@@ -407,6 +408,7 @@ Page {
             baseMapPage.currentStepMessage = step.message
             baseMapPage.currentStepCoord.latitude = step.latitude
             baseMapPage.currentStepCoord.longitude = step.longitude
+            baseMapPage.navigationStepChanged(step)
         })
     }
 }
