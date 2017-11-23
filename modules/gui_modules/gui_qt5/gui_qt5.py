@@ -988,6 +988,17 @@ class Routing(object):
         self.gui.firstTimeSignal.connect(self._first_time_cb)
         self._sendUpdates = True
 
+    def request_route(self, route_request):
+        waypoints = []
+        self.gui.log.debug("REQUEST:")
+        self.gui.log.debug(route_request)
+        for waypoint_dict in route_request["waypoints"]:
+            waypoint = point.Waypoint(lat=waypoint_dict["latitude"],
+                                      lon=waypoint_dict["longitude"],
+                                      heading=waypoint_dict["heading"])
+            waypoints.append(waypoint)
+            self.gui.modules.route.waypoints_route(waypoints)
+
     def _first_time_cb(self):
         self.gui.modules.route.routing_done.connect(self._routing_done_cb)
 

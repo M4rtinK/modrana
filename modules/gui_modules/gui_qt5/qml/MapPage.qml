@@ -431,7 +431,7 @@ BaseMapPage {
             }
         }
 
-        function requestRoute() {
+        function requestRoute(startWithHeading) {
             // request route for the current start and destination
             if (!routingStartSet) {
                 rWin.log.error("can't get route: start not set")
@@ -445,7 +445,24 @@ BaseMapPage {
                 rWin.log.error("can't get route: start and destination not set")
                 return false
             }
-            rWin.python.call("modrana.gui.modules.route.llRoute", [[routingStartLat,routingStartLon], [routingDestinationLat, routingDestinationLon]])
+
+            var startHeading = null
+
+            // include current heading when requested
+            if (startWithHeading) {
+                startHeading = rWin.bearing
+            }
+            var route_request = {
+                "waypoints" : [
+                    {"latitude" : routingStartLat,
+                     "longitude" : routingStartLon,
+                     "heading" : startHeading},
+                     {"latitude" : routingDestinationLat,
+                     "longitude" : routingDestinationLon,
+                     "heading" : null}
+                ]
+            }
+            rWin.python.call("modrana.gui.routing.request_route", [route_request])
             rWin.log.info("route requested")
             return true
         }
