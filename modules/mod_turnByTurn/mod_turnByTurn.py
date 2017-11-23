@@ -171,8 +171,11 @@ class TurnByTurn(RanaModule):
         if voice:
             voice.say(voiceMessage, "en")  # make sure rerouting said with english voice
         time.sleep(2)  # TODO: improve this
-        # 2. get a new route from current position to destination
-        self.sendMessage("ms:route:reroute:fromPosToDest")
+
+        route = self.m.get('route', None)
+        if route:
+            # 2. get a new route from current position to destination
+            route.reroute()
         # 3. restart routing for to this new route from the closest point
         self.sendMessage("ms:turnByTurn:start:closest")
 

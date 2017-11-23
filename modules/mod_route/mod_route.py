@@ -28,7 +28,7 @@ import unicodedata
 import time
 import threading
 from core import constants
-from core.point import Point, TurnByTurnPoint
+from core.point import Waypoint, TurnByTurnPoint
 from core.signal import Signal
 from core.way import Way
 from core.backports.six import u
@@ -173,7 +173,7 @@ class Route(RanaModule):
                 # occur when converting to lat lon coordinates
                 (lat, lon) = proj.xy2ll(x, y)
                 self.set('startPos', (lat, lon))
-                self._start = Point(lat, lon)
+                self._start = Waypoint(lat, lon)
                 self._destination = None # clear destination
 
             self._expect_start = False
@@ -216,7 +216,7 @@ class Route(RanaModule):
                 # occur when converting to lat lon coordinates
                 (lat, lon) = proj.xy2ll(x, y)
                 self.set('endPos', (lat, lon))
-                self._destination = Point(lat, lon)
+                self._destination = Waypoint(lat, lon)
                 self._start = None # clear start
 
             self._expect_end = False
@@ -413,19 +413,6 @@ class Route(RanaModule):
                 self._destination_address = posString # set as current address
                 self.set('destinationAddress', posString) # also store in the persistent dictionary
 
-        elif message == 'reroute':
-            if messageType == 'ms' and args == "fromPosToDest" and self._select_many_points == False: # handmade
-                # reroute from current position to destination
-
-                # is there a destination and valid position ?
-                self.log.info("rerouting from current position to last destination")
-                pos = self.get('pos', None)
-                if self._destination and pos:
-                    start = Point(*pos)
-                    self._do_route([start, self._destination])
-                    self._start = None
-                    self.set('needRedraw', True)
-
         elif messageType == 'ms' and message == 'addressRouteMenu':
             if args == 'swap':
                 # get current values
@@ -440,6 +427,19 @@ class Route(RanaModule):
         elif messageType == "ms" and message == "setOSDState":
             self._osd_menu_state = int(args)
             self.set('needRedraw', True) # show the new menu
+
+    def reroute(self):
+        """Reroute from current position to destination."""
+
+        # is there a destination and valid position ?
+        self.log.info("rerouting from current position to last destination")
+        pos = self.get('pos', None)
+        bearing = self.get('bearing', None)
+        if self._destination and pos:
+            start = Waypoint(lat=pos[0], lon=pos[1], heading=bearing)
+            self.waypoints_route([start, self._destination])
+            self._start = None
+            self.set('needRedraw', True)
 
     def routeAsync(self, callback, waypoints, route_params=None):
         """Asynchronous routing
@@ -533,18 +533,22 @@ class Route(RanaModule):
         if not middlePoints: middlePoints = []
 
         # tuples -> Points
-        start = Point(*start)
-        destination = Point(*destination)
+        start = Waypoint(*start)
+        destination = Waypoint(*destination)
 
         # list of tuples -> list of Points
         #middlePoints = list(map(lambda x: Point(x[0], x[1]), middlePoints))
         waypoints = [start]
         for mpTuple in middlePoints:
-            waypoints.append(Point(mpTuple[0], mpTuple[1]))
+            waypoints.append(Waypoint(mpTuple[0], mpTuple[1]))
         waypoints.append(destination)
         self.log.info("Routing %s to %s through %d waypoints",
               start, destination, len(middlePoints))
         # TODO: wait message (would it be needed when using internet routing ?)
+        self._do_route(waypoints)
+
+    def waypoints_route(self, waypoints):
+        """Request a route following a list of waypoints."""
         self._do_route(waypoints)
 
     def addressRoute(self, start, destination):
