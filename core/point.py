@@ -126,6 +126,27 @@ class Point(object):
         return []
 
 
+class Waypoint(Point):
+    """A waypoint class to be mainly used as input for routing requests.
+
+    At the moment basically just adds the additional heading property.
+    """
+    def __init__(self,  lat, lon, elevation=None, name=None, summary=None,
+                 message=None, heading=None):
+        Point.__init__(self, lat, lon, elevation=elevation, name=name,
+                       summary=summary, message=message)
+        self._heading = heading
+
+    @property
+    def heading(self):
+        """Current heading in degrees from the north."""
+        return self._heading
+
+    @heading.setter
+    def heading(self, new_heading):
+        self._heading = new_heading
+
+
 class POI(Point):
     """This class represents a POI"""
 
