@@ -308,9 +308,12 @@ class OSMScoutServerRouting(RoutingProvider):
                 route_type = "pedestrian"
 
             locations = []
-            for point in waypoints:
-                locations.append( {'lat': point.lat, 'lon': point.lon } )
-            # TODO: heading direction can be added as locations[0]['heading']
+            for waypoint in waypoints:
+                location_dict = {'lat': waypoint.lat, 'lon': waypoint.lon}
+                # include heading when available
+                if waypoint.heading is not None:
+                    location_dict["heading"] = waypoint.heading
+                locations.append(location_dict)
 
             params = {
                 'costing': route_type,
