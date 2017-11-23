@@ -393,7 +393,7 @@ Page {
         rWin.python.setHandler("navigationReroutingTriggered", function(){
             // set start indicator to current position when rerouting
             baseMapPage.setRoutingStart(rWin.lastGoodPos.latitude,
-                                           rWin.lastGoodPos.longitude)
+                                        rWin.lastGoodPos.longitude)
             rWin.notify(qsTr("Rerouting."), 3000)
         })
 
