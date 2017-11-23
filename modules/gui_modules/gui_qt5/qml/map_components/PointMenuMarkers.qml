@@ -41,7 +41,7 @@ Markers {
                             rWin.log.info("routing from last good position to a point on the map")
                             rWin.mapPage.setRoutingStart(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude)
                             rWin.mapPage.setRoutingDestination(model.latitude, model.longitude)
-                            rWin.mapPage.routing.requestRoute()
+                            rWin.mapPage.routing.requestRoute(true)
                             rWin.mapPage.enableRoutingUI(false)
                             rWin.mapPage.getMap().clearPointMenus()
                         }
