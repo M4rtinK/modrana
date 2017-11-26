@@ -583,6 +583,11 @@ class Route(RanaModule):
         # use offline routing methods
         # TODO: notify user if no offline routing data is available for the current area
 
+        # set start and destination based on waypoints
+        if waypoints:
+            self._start = waypoints[0]
+            self._destination = waypoints[-1]
+
         self.routeAsync(self._handle_routing_result_cb, waypoints)
 
     def _handle_routing_result_cb(self, result):
@@ -598,7 +603,11 @@ class Route(RanaModule):
 
             # set start and destination
             start = result.route.get_point_by_index(0)
+            start = Waypoint(start.lat, start.lon)
+            # make sure start and destination are waypoints or else
+            # rerouting will fail
             destination = result.route.get_point_by_index(-1)
+            destination = Waypoint(destination.lat, destination.lon)
             # use coordinates for start dest or use first/last point from the route
             # if start/dest coordinates are unknown (None)
             if self._start is None:
