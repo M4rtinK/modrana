@@ -34,9 +34,13 @@ rm -rf ${PATH_TO_SOURCE}/qml/universal_components/
 
 ## thanks to sailfish-qml I have been able to learn all these nice
 ## bash & sed commands :)
-function replace_import1 {
-    patern=${PATH_TO_SOURCE}/qml/modrana_components/
-    if [[ $1 = $patern* ]]
+function replace_import {
+    patern1=${PATH_TO_SOURCE}/qml/modrana_components/
+    patern2=${PATH_TO_SOURCE}/qml/backend/
+    patern3=${PATH_TO_SOURCE}/qml/sailfish_specific/
+    patern4=${PATH_TO_SOURCE}/qml/pinchmap/
+    patern5=${PATH_TO_SOURCE}/qml/map_components/
+    if [[ $1 = $patern1* ]] || [[ $1 = $patern2* ]] || [[ $1 = $patern3* ]] || [[ $1 = $patern4* ]] || [[ $1 = $patern5* ]]
     then
         sed -i 's/import UC 1\.0/import "\..\/UC"/g' $1
     else
@@ -44,34 +48,9 @@ function replace_import1 {
     fi
 
 }
-function replace_import2 {
-    patern=${PATH_TO_SOURCE}/qml/backend/
-    if [[ $1 = $patern* ]]
-    then
-        sed -i 's/import UC 1\.0/import "\..\/UC"/g' $1
-    else
-        sed -i 's/import UC 1\.0/import "\.\/UC"/g' $1
-    fi
+export -f replace_import
 
-}
-function replace_import3 {
-    patern=${PATH_TO_SOURCE}/qml/sailfish_specific/
-    if [[ $1 = $patern* ]]
-    then
-        sed -i 's/import UC 1\.0/import "\..\/UC"/g' $1
-    else
-        sed -i 's/import UC 1\.0/import "\.\/UC"/g' $1
-    fi
-
-}
-
-export -f replace_import1
-export -f replace_import2
-export -f replace_import3
-
-find ${PATH_TO_SOURCE}/qml -type f -exec bash -c 'replace_import1 "$0"' {} \;
-find ${PATH_TO_SOURCE}/qml -type f -exec bash -c 'replace_import2 "$0"' {} \;
-find ${PATH_TO_SOURCE}/qml -type f -exec bash -c 'replace_import3 "$0"' {} \;
+find ${PATH_TO_SOURCE}/qml -type f -exec bash -c 'replace_import "$0"' {} \;
 
 ## tell the main QML script the platform id so that we don't have to run
 ## platform detection
