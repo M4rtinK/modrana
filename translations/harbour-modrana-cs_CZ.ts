@@ -53,9 +53,203 @@
 <context>
     <name>BitcoinPage</name>
     <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="8"/>
+        <source>Bitcoin address</source>
+        <translation>Bitcoin adresa</translation>
+    </message>
+    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="32"/>
         <source>Copy to clipboard</source>
         <translation>Uložit do schránky</translation>
+    </message>
+</context>
+<context>
+    <name>ComboBox</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="23"/>
+        <source>Google - online</source>
+        <translation>Google - online</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="27"/>
+        <source>Monav - on device</source>
+        <translation>Monav - na zařízení</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="31"/>
+        <source>OSM Scout Server - on device</source>
+        <translation>OSM Scout Server - na zařízení</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="47"/>
+        <source>Car</source>
+        <translation>Autem</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="51"/>
+        <source>Walking</source>
+        <translation>Pěšky</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="55"/>
+        <source>Cycling</source>
+        <translation>Na kole</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="29"/>
+        <source>Full</source>
+        <translation>Plné</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="33"/>
+        <source>Minimal</source>
+        <translation>Minimální</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="53"/>
+        <source>1 (serial)</source>
+        <translation>1 (sériové)</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="57"/>
+        <source>2</source>
+        <translation>2</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="61"/>
+        <source>4</source>
+        <translation>4</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="65"/>
+        <source>10 (default)</source>
+        <translation>10 (výchozí)</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="69"/>
+        <source>20</source>
+        <translation>20</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="73"/>
+        <source>50</source>
+        <translation>50</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="25"/>
+        <source>Silica</source>
+        <translation>Silica</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="29"/>
+        <source>classic</source>
+        <translation>classic</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="33"/>
+        <source>night</source>
+        <translation>noční</translation>
+    </message>
+</context>
+<context>
+    <name>IconGridPage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="24"/>
+        <source>Speed</source>
+        <translation>Rychlost</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="31"/>
+        <source>Location</source>
+        <translation>Pozice</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="36"/>
+        <source>About</source>
+        <translation>O aplikaci</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="20"/>
+        <source>Main map</source>
+        <translation>Hlavní vrstva</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="26"/>
+        <source>Overlays</source>
+        <translation>Překryvové vrstvy</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="26"/>
+        <source>Search</source>
+        <translation>Hledat</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="31"/>
+        <source>Route</source>
+        <translation>Routování</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="37"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="17"/>
+        <source>Map</source>
+        <translation>Mapa</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="52"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="27"/>
+        <source>POI</source>
+        <translation>Body zájmu</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="57"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="37"/>
+        <source>Tracks</source>
+        <translation>Tracklogy</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="62"/>
+        <source>Info</source>
+        <translation>Info</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="67"/>
+        <source>Options</source>
+        <translation>Možnosti</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="22"/>
+        <source>UI</source>
+        <translation>Rozrhaní</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="32"/>
+        <source>Navigation</source>
+        <translation>Navigace</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="42"/>
+        <source>Network</source>
+        <translation>Síť</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="47"/>
+        <source>Debug</source>
+        <translation>Ladění</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="13"/>
+        <source>Place</source>
+        <translation>Místo</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="18"/>
+        <source>Wikipedia</source>
+        <translation>Wikipedia</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="23"/>
+        <source>Local</source>
+        <translation>Místní</translation>
     </message>
 </context>
 <context>
@@ -63,7 +257,15 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="53"/>
         <source>&lt;h3&gt;Dou you like modRana ? &lt;b&gt;Donate !&lt;/b&gt;&lt;/h3&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;h3&gt;Máte rádi modRanu ? &lt;b&gt;Přizpějte !&lt;/b&gt;&lt;/h3&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>InfoCompassPage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoCompassPage.qml" line="10"/>
+        <source>Compass</source>
+        <translation>Kompas</translation>
     </message>
 </context>
 <context>
@@ -71,144 +273,88 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="78"/>
         <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;šířka:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="85"/>
         <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;délka:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="92"/>
         <source>&lt;b&gt;altitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;výška:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="101"/>
         <source>&lt;b&gt;speed:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;rychlost:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="107"/>
         <source>&lt;b&gt;bearing:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;azimut:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="114"/>
         <source>&lt;b&gt;horizontal accuracy:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;horizontální přesnost:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="121"/>
         <source>&lt;b&gt;vertical accuracy:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;vertikální přesnost:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="127"/>
         <source>&lt;b&gt;fix timestamp:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;časová značka:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="199"/>
         <source>&lt;font color=&quot;red&quot;&gt;unknown&lt;/font&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;font color=&quot;red&quot;&gt;neznámý&lt;/font&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="216"/>
         <source>fix in progress</source>
-        <translation type="unfinished"/>
+        <translation>zaměřuji polohu</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="216"/>
         <source>location usage disabled&lt;br&gt;(you can enable it from &lt;i&gt;Options-&gt;Location&lt;/i&gt;</source>
-        <translation type="unfinished"/>
-    </message>
-</context>
-<context>
-    <name>InfoMenuPage</name>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="24"/>
-        <source>Speed</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="31"/>
-        <source>Location</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="36"/>
-        <source>About</source>
-        <translation type="unfinished"/>
+        <translation>zaměřování polohy je vypnuto &lt;br&gt;(zaměření polohy můžete zapnout z &lt;i&gt;Možnosti-&gt;Poloha&lt;/i&gt;</translation>
     </message>
 </context>
 <context>
     <name>InfoSpeedPage</name>
     <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="9"/>
+        <source>Speed</source>
+        <translation>Rychlost</translation>
+    </message>
+    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="11"/>
         <source>unknown</source>
-        <translation type="unfinished"/>
+        <translation>neznámý</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="34"/>
         <source>maximum</source>
-        <translation type="unfinished"/>
+        <translation>maximum</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="34"/>
         <source>average</source>
-        <translation type="unfinished"/>
+        <translation>průměr</translation>
     </message>
 </context>
 <context>
-    <name>MapMenuPage</name>
+    <name>MapLayerSelector</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="20"/>
-        <source>Main map</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="26"/>
-        <source>Overlays</source>
-        <translation type="unfinished"/>
-    </message>
-</context>
-<context>
-    <name>MenuPage</name>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="26"/>
-        <source>Search</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="31"/>
-        <source>Route</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="37"/>
-        <source>Map</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="52"/>
-        <source>POI</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="57"/>
-        <source>Tracks</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="62"/>
-        <source>Info</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="67"/>
-        <source>Options</source>
-        <translation type="unfinished"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/MapLayerSelector.qml" line="7"/>
+        <source>Select map layer</source>
+        <translation>Vyberte mapovou vrstvu</translation>
     </message>
 </context>
 <context>
@@ -348,44 +494,6 @@
     </message>
 </context>
 <context>
-    <name>OptionsMenuPage</name>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="17"/>
-        <source>Map</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="22"/>
-        <source>UI</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="27"/>
-        <source>POI</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="32"/>
-        <source>Navigation</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="37"/>
-        <source>Tracks</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="42"/>
-        <source>Network</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="47"/>
-        <source>Debug</source>
-        <translation type="unfinished"/>
-    </message>
-</context>
-<context>
     <name>OptionsNavigationPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="13"/>
@@ -398,39 +506,9 @@
         <translation>Poskytovatelé routování</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="23"/>
-        <source>Google - online</source>
-        <translation>Google - online</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="27"/>
-        <source>Monav - on device</source>
-        <translation>Monav - na zařízení</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="31"/>
-        <source>OSM Scout Server - on device</source>
-        <translation>OSM Scout Server - lokální</translation>
-    </message>
-    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="41"/>
         <source>Routing mode</source>
         <translation>Režim hledání cesty</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="47"/>
-        <source>Car</source>
-        <translation>Autem</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="51"/>
-        <source>Walking</source>
-        <translation>Pěšky</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="55"/>
-        <source>Cycling</source>
-        <translation>Na kole</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="64"/>
@@ -466,16 +544,6 @@
         <translation>V režimu &lt;b&gt;plného&lt;/b&gt; využití sítě není přistup k síti nijak omezen.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="29"/>
-        <source>Full</source>
-        <translation>Plné</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="33"/>
-        <source>Minimal</source>
-        <translation>Minimální</translation>
-    </message>
-    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="42"/>
         <source>Tile download</source>
         <translation>Stahování dlaždic</translation>
@@ -486,36 +554,6 @@
         <translation>Počet vláken pro automatické stahování dlaždic</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="53"/>
-        <source>1 (serial)</source>
-        <translation>1 (sériové)</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="57"/>
-        <source>2</source>
-        <translation>2</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="61"/>
-        <source>4</source>
-        <translation>4</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="65"/>
-        <source>10 (default)</source>
-        <translation>10 (výchozí)</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="69"/>
-        <source>20</source>
-        <translation>20</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="73"/>
-        <source>50</source>
-        <translation>50</translation>
-    </message>
-    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="82"/>
         <source>You need to restart modRana for the thread number change to take effect.</source>
         <translation>Je třeba ukončit a znovu spustit modRanu aby se změna počtu vláken projevila.</translation>
@@ -523,6 +561,11 @@
 </context>
 <context>
     <name>OptionsPOIPage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="9"/>
+        <source>POI</source>
+        <translation>Body zájmu</translation>
+    </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="13"/>
         <source>Place search</source>
@@ -571,19 +614,9 @@
         <translation>Téma</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="25"/>
-        <source>Silica</source>
-        <translation>Silica</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="29"/>
-        <source>classic</source>
-        <translation>classic</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="33"/>
-        <source>night</source>
-        <translation>noční</translation>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="9"/>
+        <source>UI</source>
+        <translation>Rozhraní</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="55"/>
@@ -641,6 +674,16 @@
         <source>Local search</source>
         <translation>Lokální vyhledávání</translation>
     </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="63"/>
+        <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
+        <translation>&lt;b&gt;šířka:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="66"/>
+        <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
+        <translation>&lt;b&gt;délka:&lt;/b&gt;</translation>
+    </message>
 </context>
 <context>
     <name>PointMenuMarkers</name>
@@ -666,6 +709,16 @@
         <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="22"/>
         <source>Save</source>
         <translation>Uložit</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="39"/>
+        <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
+        <translation>&lt;b&gt;šířka:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="42"/>
+        <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
+        <translation>&lt;b&gt;délka:&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -762,24 +815,6 @@
     </message>
 </context>
 <context>
-    <name>SearchMenuPage</name>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="13"/>
-        <source>Place</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="18"/>
-        <source>Wikipedia</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="23"/>
-        <source>Local</source>
-        <translation type="unfinished"/>
-    </message>
-</context>
-<context>
     <name>SearchPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/SearchPage.qml" line="88"/>
@@ -802,6 +837,11 @@
 </context>
 <context>
     <name>TracksCategoryPage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryPage.qml" line="10"/>
+        <source>unknown</source>
+        <translation>neznámá</translation>
+    </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryPage.qml" line="50"/>
         <source>kB</source>
@@ -851,6 +891,36 @@
         <translation>pozastavit</translation>
     </message>
     <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="129"/>
+        <source>&lt;b&gt;current speed:&lt;/b&gt;</source>
+        <translation>&lt;b&gt;současná rychlost:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="133"/>
+        <source>&lt;b&gt;average speed:&lt;/b&gt;</source>
+        <translation>&lt;b&gt;průměrná rychlost:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="137"/>
+        <source>&lt;b&gt;max speed:&lt;/b&gt;</source>
+        <translation>&lt;b&gt;maximální rychlost:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="141"/>
+        <source>&lt;b&gt;distance:&lt;/b&gt;</source>
+        <translation>&lt;b&gt;vzdálenost:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="145"/>
+        <source>&lt;b&gt;elapsed time:&lt;/b&gt;</source>
+        <translation>&lt;b&gt;uplynulý čas:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="149"/>
+        <source>&lt;b&gt;points:&lt;/b&gt;</source>
+        <translation>&lt;b&gt;počet bodů:&lt;/b&gt;</translation>
+    </message>
+    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="155"/>
         <source>Recorded tracklogs folder:</source>
         <translation>Složka zaznamenaných tracklogů:</translation>
@@ -869,6 +939,19 @@
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="201"/>
         <source>Trace opacity</source>
         <translation>Průhlednost logovací stopy</translation>
+    </message>
+</context>
+<context>
+    <name>main</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="307"/>
+        <source>&lt;b&gt;starting modRana...&lt;/b&gt;</source>
+        <translation>&lt;b&gt;startuji modRanu...&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="331"/>
+        <source>debug</source>
+        <translation>ladění</translation>
     </message>
 </context>
 </TS>

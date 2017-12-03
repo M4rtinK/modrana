@@ -10,41 +10,42 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-12-03 22:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Language-Team: French (France) (https://www.transifex.com/martink/teams/81256/fr_FR/)\n"
+"Last-Translator: MartinK <martin.kolman@gmail.com>, 2017\n"
+"Language-Team: Swedish (https://www.transifex.com/martink/teams/81256/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fr_FR\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Language: sv\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: core/instructions_generator.py:49
 msgid "turn slightly left"
-msgstr ""
+msgstr "sväng lätt vänster"
 
 #: core/instructions_generator.py:50
 msgid "turn left"
-msgstr ""
+msgstr "sväng vänster"
 
 #: core/instructions_generator.py:51
 msgid "turn sharply left"
-msgstr ""
+msgstr "sväng skarpt vänster"
 
 #: core/instructions_generator.py:52
 msgid "make a U-turn"
-msgstr ""
+msgstr "gör en u-sväng"
 
 #: core/instructions_generator.py:53
 msgid "turn sharply right"
-msgstr ""
+msgstr "sväng skarpt höger"
 
 #: core/instructions_generator.py:54
 msgid "turn right"
-msgstr ""
+msgstr "sväng höger"
 
 #: core/instructions_generator.py:55
 msgid "turn slightly right"
-msgstr ""
+msgstr "sväng lätt vänster"
 
 #: core/instructions_generator.py:56
 msgid "head straightforward"
-msgstr ""
+msgstr "fortsätt rakt fram"

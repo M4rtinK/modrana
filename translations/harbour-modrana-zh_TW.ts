@@ -53,8 +53,202 @@
 <context>
     <name>BitcoinPage</name>
     <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="8"/>
+        <source>Bitcoin address</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="32"/>
         <source>Copy to clipboard</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
+<context>
+    <name>ComboBox</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="23"/>
+        <source>Google - online</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="27"/>
+        <source>Monav - on device</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="31"/>
+        <source>OSM Scout Server - on device</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="47"/>
+        <source>Car</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="51"/>
+        <source>Walking</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="55"/>
+        <source>Cycling</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="29"/>
+        <source>Full</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="33"/>
+        <source>Minimal</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="53"/>
+        <source>1 (serial)</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="57"/>
+        <source>2</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="61"/>
+        <source>4</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="65"/>
+        <source>10 (default)</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="69"/>
+        <source>20</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="73"/>
+        <source>50</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="25"/>
+        <source>Silica</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="29"/>
+        <source>classic</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="33"/>
+        <source>night</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
+<context>
+    <name>IconGridPage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="24"/>
+        <source>Speed</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="31"/>
+        <source>Location</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="36"/>
+        <source>About</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="20"/>
+        <source>Main map</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="26"/>
+        <source>Overlays</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="26"/>
+        <source>Search</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="31"/>
+        <source>Route</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="37"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="17"/>
+        <source>Map</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="52"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="27"/>
+        <source>POI</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="57"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="37"/>
+        <source>Tracks</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="62"/>
+        <source>Info</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="67"/>
+        <source>Options</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="22"/>
+        <source>UI</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="32"/>
+        <source>Navigation</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="42"/>
+        <source>Network</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="47"/>
+        <source>Debug</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="13"/>
+        <source>Place</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="18"/>
+        <source>Wikipedia</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="23"/>
+        <source>Local</source>
         <translation type="unfinished"/>
     </message>
 </context>
@@ -63,6 +257,14 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="53"/>
         <source>&lt;h3&gt;Dou you like modRana ? &lt;b&gt;Donate !&lt;/b&gt;&lt;/h3&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
+<context>
+    <name>InfoCompassPage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoCompassPage.qml" line="10"/>
+        <source>Compass</source>
         <translation type="unfinished"/>
     </message>
 </context>
@@ -125,25 +327,12 @@
     </message>
 </context>
 <context>
-    <name>InfoMenuPage</name>
+    <name>InfoSpeedPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="24"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="9"/>
         <source>Speed</source>
         <translation type="unfinished"/>
     </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="31"/>
-        <source>Location</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="36"/>
-        <source>About</source>
-        <translation type="unfinished"/>
-    </message>
-</context>
-<context>
-    <name>InfoSpeedPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="11"/>
         <source>unknown</source>
@@ -161,53 +350,10 @@
     </message>
 </context>
 <context>
-    <name>MapMenuPage</name>
+    <name>MapLayerSelector</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="20"/>
-        <source>Main map</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="26"/>
-        <source>Overlays</source>
-        <translation type="unfinished"/>
-    </message>
-</context>
-<context>
-    <name>MenuPage</name>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="26"/>
-        <source>Search</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="31"/>
-        <source>Route</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="37"/>
-        <source>Map</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="52"/>
-        <source>POI</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="57"/>
-        <source>Tracks</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="62"/>
-        <source>Info</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="67"/>
-        <source>Options</source>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/MapLayerSelector.qml" line="7"/>
+        <source>Select map layer</source>
         <translation type="unfinished"/>
     </message>
 </context>
@@ -348,44 +494,6 @@
     </message>
 </context>
 <context>
-    <name>OptionsMenuPage</name>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="17"/>
-        <source>Map</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="22"/>
-        <source>UI</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="27"/>
-        <source>POI</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="32"/>
-        <source>Navigation</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="37"/>
-        <source>Tracks</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="42"/>
-        <source>Network</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="47"/>
-        <source>Debug</source>
-        <translation type="unfinished"/>
-    </message>
-</context>
-<context>
     <name>OptionsNavigationPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="13"/>
@@ -398,38 +506,8 @@
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="23"/>
-        <source>Google - online</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="27"/>
-        <source>Monav - on device</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="31"/>
-        <source>OSM Scout Server - on device</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="41"/>
         <source>Routing mode</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="47"/>
-        <source>Car</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="51"/>
-        <source>Walking</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="55"/>
-        <source>Cycling</source>
         <translation type="unfinished"/>
     </message>
     <message>
@@ -466,16 +544,6 @@
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="29"/>
-        <source>Full</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="33"/>
-        <source>Minimal</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="42"/>
         <source>Tile download</source>
         <translation type="unfinished"/>
@@ -486,36 +554,6 @@
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="53"/>
-        <source>1 (serial)</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="57"/>
-        <source>2</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="61"/>
-        <source>4</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="65"/>
-        <source>10 (default)</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="69"/>
-        <source>20</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="73"/>
-        <source>50</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="82"/>
         <source>You need to restart modRana for the thread number change to take effect.</source>
         <translation type="unfinished"/>
@@ -523,6 +561,11 @@
 </context>
 <context>
     <name>OptionsPOIPage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="9"/>
+        <source>POI</source>
+        <translation type="unfinished"/>
+    </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="13"/>
         <source>Place search</source>
@@ -571,18 +614,8 @@
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="25"/>
-        <source>Silica</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="29"/>
-        <source>classic</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="33"/>
-        <source>night</source>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="9"/>
+        <source>UI</source>
         <translation type="unfinished"/>
     </message>
     <message>
@@ -641,6 +674,16 @@
         <source>Local search</source>
         <translation type="unfinished"/>
     </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="63"/>
+        <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="66"/>
+        <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 <context>
     <name>PointMenuMarkers</name>
@@ -665,6 +708,16 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="22"/>
         <source>Save</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="39"/>
+        <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="42"/>
+        <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
         <translation type="unfinished"/>
     </message>
 </context>
@@ -762,24 +815,6 @@
     </message>
 </context>
 <context>
-    <name>SearchMenuPage</name>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="13"/>
-        <source>Place</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="18"/>
-        <source>Wikipedia</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="23"/>
-        <source>Local</source>
-        <translation type="unfinished"/>
-    </message>
-</context>
-<context>
     <name>SearchPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/SearchPage.qml" line="88"/>
@@ -802,6 +837,11 @@
 </context>
 <context>
     <name>TracksCategoryPage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryPage.qml" line="10"/>
+        <source>unknown</source>
+        <translation type="unfinished"/>
+    </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryPage.qml" line="50"/>
         <source>kB</source>
@@ -851,6 +891,36 @@
         <translation type="unfinished"/>
     </message>
     <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="129"/>
+        <source>&lt;b&gt;current speed:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="133"/>
+        <source>&lt;b&gt;average speed:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="137"/>
+        <source>&lt;b&gt;max speed:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="141"/>
+        <source>&lt;b&gt;distance:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="145"/>
+        <source>&lt;b&gt;elapsed time:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="149"/>
+        <source>&lt;b&gt;points:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="155"/>
         <source>Recorded tracklogs folder:</source>
         <translation type="unfinished"/>
@@ -868,6 +938,19 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="201"/>
         <source>Trace opacity</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
+<context>
+    <name>main</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="307"/>
+        <source>&lt;b&gt;starting modRana...&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="331"/>
+        <source>debug</source>
         <translation type="unfinished"/>
     </message>
 </context>
