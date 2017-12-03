@@ -444,6 +444,29 @@ Example:
         onCurrentIndexChanged: console.debug(cbItems.get(currentIndex).text + ", " + cbItems.get(currentIndex).color)
     }
 
+The Universal Components **ComboBox** also supports localization via the *QT_TRANSLATE_NOOP* macro
+with a *"ComboBox"* context. Using just the *QT_TR_NOOP* macro would give the string context
+of the file where it has been found, which would not work as the **ComboBox** element is defined
+in a different file.
+
+**ComboBox** localization example:
+
+::
+
+    ComboBox {
+        currentIndex: 1
+        model: ListModel {
+            id: cbItems
+            ListElement { text: QT_TRANSLATE_NOOP("ComboBox", "foo"); color: "white" }
+            ListElement { text: QT_TRANSLATE_NOOP("ComboBox", "bar"); color: "black" }
+        }
+        width: 200
+        onCurrentIndexChanged: console.debug(cbItems.get(currentIndex).text + ", " + cbItems.get(currentIndex).color)
+    }
+
+Two strings - "foo" and "bar" will be marked for translation with the *"ComboBox"* context,
+which makes sure the qsTranslate() call in the **ComboBox** implementation matches them correctly.
+
 Properties
 ^^^^^^^^^^
 

@@ -23,7 +23,7 @@ Column {
         ComboBox {
             id : cBox
             textRole : "text"
-            displayText : qsTr(currentText)
+            displayText : qsTranslate("ComboBox", currentText)
             anchors.verticalCenter : comboLabel.verticalCenter
             // selected item, only assigned if user
             // clicks on an item in the context menu,

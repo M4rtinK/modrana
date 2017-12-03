@@ -15,7 +15,7 @@ ComboBox {
             id : cRepeater
             model : cBox.model
             MenuItem {
-                text : model.text
+                text : qsTranslate("ComboBox", model.text)
                 onClicked : {
                     cBox.currentItem = model
                 }
