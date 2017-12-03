@@ -1,0 +1,14 @@
+[main]
+host = https://www.transifex.com
+
+[modrana.qt5_gui]
+type = QT
+file_filter = harbour-modrana-<lang>.ts
+source_file = modrana.ts
+source_lang = en
+
+[modrana.python_backend]
+type = PO
+file_filter = <lang>.po
+source_file = modrana.pot
+source_lang = en

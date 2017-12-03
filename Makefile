@@ -18,6 +18,11 @@ EXCLUDEHARBOUR=packaging/sailfish/exclude_harbour.txt
 
 DESTDIR=/
 
+# l10n
+TRANSLATIONS_DIR = translations
+TS_FILE = $(TRANSLATIONS_DIR)/modrana.ts
+POT_FILE = $(TRANSLATIONS_DIR)/modrana.pot
+
 default: all
 
 all:
@@ -134,6 +139,33 @@ ChangeLog:
 VersionFile:
 	echo $(VERSION) > version.txt
 
+tx-pull:
+	cd $(TRANSLATIONS_DIR);tx pull -a
+	@make lrelease
+
+tx-push: lupdate pot
+	cd $(TRANSLATIONS_DIR);tx push -s
+
+tx-all: tx-push tx-pull
+
+lupdate:
+	lupdate-qt5 modules/gui_modules/gui_qt5/qml/ -ts $(TS_FILE)
+
+lrelease:
+	lrelease-qt5 $(TRANSLATIONS_DIR)/*modrana-*.ts
+pot:
+	truncate -s0 $(POT_FILE)
+	xgettext \
+	 --output=$(POT_FILE) \
+	 --language=Python \
+	 --from-code=UTF-8 \
+	 --join-existing \
+	 --keyword=_ \
+	 --add-comments=TRANSLATORS: \
+	 --no-wrap \
+	 core/*.py \
+	 modules/*/*.py \
+	 
 bumpver:
 	@NEWSUBVER=$$((`echo $(VERSION) |cut -d . -f 3` + 1)) ; \
 	NEWVERSION=`echo $(VERSION).$$NEWSUBVER |cut -d . -f 1,2,4` ; \
