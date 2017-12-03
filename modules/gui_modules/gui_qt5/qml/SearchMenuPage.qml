@@ -10,17 +10,17 @@ IconGridPage {
     model : ListModel {
         id : testModel
         ListElement {
-            caption : QT_TR_NOOP("Place")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Place")
             icon : "signpost.png"
             menu : "Address"
         }
         ListElement {
-            caption : QT_TR_NOOP("Wikipedia")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Wikipedia")
             icon : "wikipedia.png"
             menu : "Wikipedia"
         }
         ListElement {
-            caption : QT_TR_NOOP("Local")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Local")
             icon : "local_search.png"
             menu : "Local"
         }

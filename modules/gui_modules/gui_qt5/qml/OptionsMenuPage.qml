@@ -14,37 +14,37 @@ IconGridPage {
     model : ListModel {
         id : testModel
         ListElement {
-            caption : QT_TR_NOOP("Map")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Map")
             icon : "map.png"
             menu : "MapPage"
         }
         ListElement {
-            caption : QT_TR_NOOP("UI")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "UI")
             icon : "n900.png"
             menu : "UIPage"
         }
         ListElement {
-            caption : QT_TR_NOOP("POI")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "POI")
             icon : "poi.png"
             menu : "POIPage"
         }
         ListElement {
-            caption : QT_TR_NOOP("Navigation")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Navigation")
             icon : "navigation.png"
             menu : "NavigationPage"
         }
          ListElement {
-            caption : QT_TR_NOOP("Tracks")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Tracks")
             icon : "tracklogs.png"
             menu : "TracksPage"
         }
         ListElement {
-            caption : QT_TR_NOOP("Network")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Network")
             icon : "network.png"
             menu : "NetworkPage"
         }
         ListElement {
-            caption : QT_TR_NOOP("Debug")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Debug")
             icon : "debug.png"
             menu : "DebugPage"
         }

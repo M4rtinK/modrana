@@ -17,13 +17,13 @@ IconGridPage {
     model : ListModel {
         id : testModel
         ListElement {
-            caption : QT_TR_NOOP("Main map")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Main map")
             icon : "map.png"
             //menu : "mapDialog"
             menu : "LayerPage"
         }
         ListElement {
-            caption : QT_TR_NOOP("Overlays")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Overlays")
             icon : "map_layers.png"
             menu : "LayersPage"
         }

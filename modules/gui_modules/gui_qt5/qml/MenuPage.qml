@@ -23,18 +23,18 @@ IconGridPage {
     model : ListModel {
         id : testModel
         ListElement {
-            caption : QT_TR_NOOP("Search")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Search")
             icon : "search.png"
             menu : "SearchMenu"
         }
         ListElement {
-            caption : QT_TR_NOOP("Route")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Route")
             icon : "route.png"
             menu : "RouteMenu"
         }
 
         ListElement {
-            caption : QT_TR_NOOP("Map")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Map")
             icon : "map.png"
             menu : "MapMenu"
         }
@@ -49,22 +49,22 @@ IconGridPage {
         }
         */
         ListElement {
-            caption : QT_TR_NOOP("POI")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "POI")
             icon : "poi.png"
             menu : "POIMenu"
         }
         ListElement {
-            caption : QT_TR_NOOP("Tracks")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Tracks")
             icon : "tracklogs.png"
             menu : "TracksMenu"
         }
         ListElement {
-            caption : QT_TR_NOOP("Info")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Info")
             icon : "info.png"
             menu : "InfoMenu"
         }
         ListElement {
-            caption : QT_TR_NOOP("Options")
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Options")
             icon : "3gears.png"
             menu : "OptionsMenu"
         }

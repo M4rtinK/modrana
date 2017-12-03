@@ -42,7 +42,7 @@ Page {
             // handle place-holders
             visible : icon != ""
             iconName : icon
-            text : qsTr(caption)
+            text : qsTranslate("IconGridPage", caption)
             iconSize : iconGP.iconSize
             margin : iconGP.iconMargin
             onClicked : {
