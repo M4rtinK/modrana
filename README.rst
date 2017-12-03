@@ -79,5 +79,6 @@ Resources
 - `modRana project website <http://www.modrana.org>`_
 - `discussion thread on talk.maemo.org <http://talk.maemo.org/showthread.php?t=58861>`_
 - `main source code repository <https://github.com/M4rtinK/modrana>`_
+- `translation project on Transifex <https://www.transifex.com/martink/modrana>`_
 - `Sailfish OS package on OpenRepos <https://openrepos.net/content/martink/modrana-0>`_
 - `nightly packages for Fedora <https://copr.fedorainfracloud.org/coprs/m4rtink/modrana-nightly>`_
