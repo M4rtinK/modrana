@@ -21,19 +21,19 @@ IconGridPage {
         */
 
         ListElement {
-            caption : "Speed"
+            caption : QT_TR_NOOP("Speed")
             icon : "speedometer.png"
             menu : "SpeedPage"
         }
 
 
         ListElement {
-            caption : "Location"
+            caption : QT_TR_NOOP("Location")
             icon : "satellite.png"
             menu : "LocationPage"
         }
         ListElement {
-            caption : "About"
+            caption : QT_TR_NOOP("About")
             icon : "info.png"
             menu : "AboutPage"
         }

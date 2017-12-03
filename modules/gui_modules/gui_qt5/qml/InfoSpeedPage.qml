@@ -8,7 +8,7 @@ BasePage {
     id: speedPage
     headerText : "Speed"
     isFlickable : false
-    property string currentSpeedString : "unknown"
+    property string currentSpeedString : qsTr("unknown")
     property string speedStatsString : ""
 
     Label {
@@ -31,7 +31,7 @@ BasePage {
 
     function setSpeeds(speeds) {
         speedPage.currentSpeedString = speeds.current;
-        speedPage.speedStatsString = "maximum: " + speeds.max + "   average: " + speeds.avg
+        speedPage.speedStatsString = qsTr("maximum") + ": " + speeds.max + "   " + qsTr("average") + ": " + speeds.avg
     }
 
     Connections {

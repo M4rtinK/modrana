@@ -50,7 +50,7 @@ BasePage {
         Label {
             id : donateLabel
             anchors.horizontalCenter : parent.horizontalCenter
-            text : "<h3>Dou you like modRana ? <b>Donate !</b></h3>"
+            text : qsTr("<h3>Dou you like modRana ? <b>Donate !</b></h3>")
         }
         Column {
             anchors.horizontalCenter : parent.horizontalCenter

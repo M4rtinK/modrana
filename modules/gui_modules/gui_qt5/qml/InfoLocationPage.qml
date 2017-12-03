@@ -75,21 +75,21 @@ BasePage {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.latValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.lat ? lGrid.lat + " " + validString : lGrid.unknownString
-                text: "<b>latitude:</b> " + valueString
+                text: qsTr("<b>latitude:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.lonValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.lon ? lGrid.lon + " " + validString : lGrid.unknownString
-                text: "<b>longitude:</b> " + valueString
+                text: qsTr("<b>longitude:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.altitudeValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.altitude ? lGrid.altitude : lGrid.unknownString
-                text: "<b>altitude:</b> " + valueString + " m " + validString
+                text: qsTr("<b>altitude:</b>") + " " + valueString + " m " + validString
                 width : lGrid.cellWidth
             }
             Label {
@@ -98,33 +98,33 @@ BasePage {
                 property string valueString : lGrid.speed ? lGrid.speed + " m/s " + validString :
                                                             (lGrid.speed == 0) ? "not moving" :
                                                                                  lGrid.unknownString
-                text: "<b>speed:</b> " + valueString
+                text: qsTr("<b>speed:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string valueString : rWin.bearing ? rWin.bearing.toPrecision(3) + "° to true north": lGrid.unknownString
-                text: "<b>bearing:</b> " + valueString
+                text: qsTr("<b>bearing:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.horizontalAccuracyValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.horizontalAccuracy ? lGrid.horizontalAccuracy : lGrid.unknownString
-                text: "<b>horizontal accuracy:</b> " + valueString + " m " + validString
+                text: qsTr("<b>horizontal accuracy:</b>") + " " + valueString + " m " + validString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.verticalAccuracyValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.verticalAccuracy ? lGrid.verticalAccuracy : lGrid.unknownString
-                text: "<b>vertical accuracy:</b> " + valueString + " m " + validString
+                text: qsTr("<b>vertical accuracy:</b>") + " " + valueString + " m " + validString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string valueString : lGrid.fixTimestamp ? lGrid.fixTimestamp : lGrid.unknownString
-                text: "<b>fix timestamp:</b> " + valueString
+                text: qsTr("<b>fix timestamp:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
 
@@ -196,7 +196,7 @@ BasePage {
 
     function checkPositiveNumber(number) {
         if (number < 0) {
-            return '<font color="red">unknown</font>'
+            return qsTr('<font color="red">unknown</font>')
         } else {
             return number
         }
@@ -213,6 +213,6 @@ BasePage {
         font.pixelSize : 64 * rWin.c.style.main.multiplier
         //TODO: handle location usage being disabled by the user
         //text : gps.hasFix ? "NO FIX" : "fix in progress"
-        text : rWin.location.enabled ? "fix in progress" : "location usage disabled<br>(you can enable it from <i>Options->Location</i>"
+        text : rWin.location.enabled ? qsTr("fix in progress") : qsTr("location usage disabled<br>(you can enable it from <i>Options->Location</i>")
     }
 }
