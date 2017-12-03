@@ -1,0 +1,51 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-03 00:14+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: MartinK <martin.kolman@gmail.com>, 2017\n"
+"Language-Team: Czech (Czech Republic) (https://www.transifex.com/martink/teams/81256/cs_CZ/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: cs_CZ\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#: core/instructions_generator.py:49
+msgid "turn slightly left"
+msgstr "zabočte mírně doleva"
+
+#: core/instructions_generator.py:50
+msgid "turn left"
+msgstr "zabočte doleva"
+
+#: core/instructions_generator.py:51
+msgid "turn sharply left"
+msgstr "zabočte ostře doleva"
+
+#: core/instructions_generator.py:52
+msgid "make a U-turn"
+msgstr "otočte se zpět"
+
+#: core/instructions_generator.py:53
+msgid "turn sharply right"
+msgstr "zabočte ostře doprava"
+
+#: core/instructions_generator.py:54
+msgid "turn right"
+msgstr "zabočte doprava"
+
+#: core/instructions_generator.py:55
+msgid "turn slightly right"
+msgstr "zabočte mírně doprava"
+
+#: core/instructions_generator.py:56
+msgid "head straightforward"
+msgstr "jeďte rovně"
