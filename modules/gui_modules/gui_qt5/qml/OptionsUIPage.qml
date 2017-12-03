@@ -6,7 +6,7 @@ import "modrana_components"
 
 BasePage {
     id: optionsUIPage
-    headerText : "UI"
+    headerText : qsTr("UI")
     content : ContentColumn {
         spacing : rWin.c.style.main.spacing
         Item {
@@ -22,15 +22,15 @@ BasePage {
             model : ListModel {
                 id : cbMenu
                 ListElement {
-                    text : QT_TR_NOOP("Silica")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "Silica")
                     value : "silica"
                 }
                 ListElement {
-                    text : QT_TR_NOOP("classic")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "classic")
                     value : "default"
                 }
                 ListElement {
-                    text : QT_TR_NOOP("night")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "night")
                     value : "night"
                 }
             }

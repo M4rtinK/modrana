@@ -20,15 +20,15 @@ BasePage {
             model : ListModel {
                 id : cbMenu
                 ListElement {
-                    text : QT_TR_NOOP("Google - online")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "Google - online")
                     value : "GoogleDirections"
                 }
                 ListElement {
-                    text : QT_TR_NOOP("Monav - on device")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "Monav - on device")
                     value : "MonavLight"
                 }
                 ListElement {
-                    text : QT_TR_NOOP("OSM Scout Server - on device")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "OSM Scout Server - on device")
                     value : "OSMScoutServer"
                 }
             }
@@ -44,15 +44,15 @@ BasePage {
             // TODO: use values from modRana constants
             model : ListModel {
                 ListElement {
-                    text : QT_TR_NOOP("Car")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "Car")
                     value : 3
                 }
                 ListElement {
-                    text : QT_TR_NOOP("Walking")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "Walking")
                     value : 1
                 }
                 ListElement {
-                    text : QT_TR_NOOP("Cycling")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "Cycling")
                     value : 2
                 }
             }

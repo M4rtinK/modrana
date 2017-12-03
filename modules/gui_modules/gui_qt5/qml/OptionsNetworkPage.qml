@@ -26,11 +26,11 @@ BasePage {
             model : ListModel {
                 id : network
                 ListElement {
-                    text : QT_TR_NOOP("Full")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "Full")
                     value : "full"
                 }
                 ListElement {
-                    text : QT_TR_NOOP("Minimal")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "Minimal")
                     value : "minimal"
                 }
             }
@@ -50,27 +50,27 @@ BasePage {
             model : ListModel {
                 id : maxAutoDownloadThreads2
                 ListElement {
-                    text : QT_TR_NOOP("1 (serial)")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "1 (serial)")
                     value : "1"
                 }
                 ListElement {
-                    text : QT_TR_NOOP("2")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "2")
                     value : "2"
                 }
                  ListElement {
-                    text : QT_TR_NOOP("4")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "4")
                     value : "4"
                 }
                 ListElement {
-                    text : QT_TR_NOOP("10 (default)")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "10 (default)")
                     value : "10"
                 }
                 ListElement {
-                    text : QT_TR_NOOP("20")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "20")
                     value : "20"
                 }
                 ListElement {
-                    text : QT_TR_NOOP("50")
+                    text : QT_TRANSLATE_NOOP("ComboBox", "50")
                     value : "50"
                 }
             }

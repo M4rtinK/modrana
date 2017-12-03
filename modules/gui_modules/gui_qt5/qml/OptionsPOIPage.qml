@@ -6,7 +6,7 @@ import "modrana_components"
 
 BasePage {
     id: poiPage
-    headerText : "POI"
+    headerText : qsTr("POI")
 
     content : ContentColumn {
         SectionHeader {
