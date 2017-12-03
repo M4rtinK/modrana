@@ -4,7 +4,7 @@ import ".."
 
 BasePage {
     id: layerSelectP
-    headerText: "Select map layer"
+    headerText: qsTr("Select map layer")
 
     signal layerSelected (string layerId)
 

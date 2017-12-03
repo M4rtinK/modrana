@@ -7,6 +7,6 @@ import "modrana_components"
 
 BasePage {
     id: compassPage
-    headerText : "Compass"
+    headerText : qsTr("Compass")
     isFlickable : false
 }

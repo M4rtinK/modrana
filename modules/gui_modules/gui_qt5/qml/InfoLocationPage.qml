@@ -31,7 +31,7 @@ BasePage {
             anchors.topMargin : rWin.c.style.main.spacing*3
             anchors.top : parent.top
             anchors.left : parent.left
-            text: "copy coordinates"
+            text: qsTr("copy coordinates")
             width : 300 * rWin.c.style.main.multiplier
         }
         */

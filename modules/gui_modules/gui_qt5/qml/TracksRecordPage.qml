@@ -126,27 +126,27 @@ BasePage {
             id : statusGrid
             visible : rtPage.statusValid
             Label {
-                text: "<b>current speed:</b> " + rtPage.currentStatus.speed.current
+                text: qsTr("<b>current speed:</b>") + " " + rtPage.currentStatus.speed.current
                 width : statusGrid.cellWidth
             }
             Label {
-                text: "<b>average speed:</b> " + rtPage.currentStatus.speed.avg
+                text: qsTr("<b>average speed:</b>") + " " + rtPage.currentStatus.speed.avg
                 width : statusGrid.cellWidth
             }
             Label {
-                text: "<b>max speed:</b> " + rtPage.currentStatus.speed.max
+                text: qsTr("<b>max speed:</b>") + " " + rtPage.currentStatus.speed.max
                 width : statusGrid.cellWidth
             }
             Label {
-                text: "<b>distance:</b> " + rtPage.currentStatus.distance
+                text: qsTr("<b>distance:</b>") + " " + rtPage.currentStatus.distance
                 width : statusGrid.cellWidth
             }
             Label {
-                text: "<b>elapsed time:</b> " + rtPage.currentStatus.elapsedTime
+                text: qsTr("<b>elapsed time:</b>") + " " + rtPage.currentStatus.elapsedTime
                 width : statusGrid.cellWidth
             }
             Label {
-                text: "<b>points:</b> " + rtPage.currentStatus.pointCount
+                text: qsTr("<b>points:</b>") + " " + rtPage.currentStatus.pointCount
                 width : statusGrid.cellWidth
             }
         }

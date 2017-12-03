@@ -6,7 +6,7 @@ import "modrana_components"
 
 BasePage {
     id: speedPage
-    headerText : "Speed"
+    headerText : qsTr("Speed")
     isFlickable : false
     property string currentSpeedString : qsTr("unknown")
     property string speedStatsString : ""

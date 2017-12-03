@@ -9,7 +9,7 @@ BasePage {
     property string categoryName
     property int categoryId
 
-    headerText : categoryName
+    headerText : qsTr(categoryName)
 
     content : ContentColumn {
         ListView {

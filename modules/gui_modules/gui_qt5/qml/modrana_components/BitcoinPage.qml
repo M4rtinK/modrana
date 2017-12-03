@@ -5,7 +5,7 @@ import UC 1.0
 
 BasePage {
     id : bitcoinPage
-    headerText: "Bitcoin address"
+    headerText: qsTr("Bitcoin address")
     property string url : ""
     content : ContentColumn {
         id: dialogContent

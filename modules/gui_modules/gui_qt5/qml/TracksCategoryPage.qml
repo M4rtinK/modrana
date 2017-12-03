@@ -7,7 +7,7 @@ import "modrana_components"
 BasePage {
     id: tcPage
 
-    property string categoryName : "unknown"
+    property string categoryName : qsTr("unknown")
 
     headerText : categoryName
 

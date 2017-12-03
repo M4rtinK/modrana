@@ -36,10 +36,10 @@ BasePage {
         }
         SmartGrid {
             Label {
-                text : "<b>latitude:</b> " + point.latitude
+                text : qsTr("<b>latitude:</b>") + " " + point.latitude
             }
             Label {
-                text : "<b>longitude:</b> " + point.longitude
+                text : qsTr("<b>longitude:</b>") + " " + point.longitude
             }
         }
    }
