@@ -118,9 +118,7 @@ tag:
 	git tag -a -m "Tag as $(TAG)" -f $(TAG)
 	@echo "Tagged as $(TAG)"
 
-archive: tag local
-
-local:
+archive:
 	@rm -f ChangeLog
 	@make ChangeLog
 	@make VersionFile
@@ -169,7 +167,7 @@ pot:
 	 --no-wrap \
 	 core/*.py \
 	 modules/*/*.py \
-	 
+
 bumpver:
 	@NEWSUBVER=$$((`echo $(VERSION) |cut -d . -f 3` + 1)) ; \
 	NEWVERSION=`echo $(VERSION).$$NEWSUBVER |cut -d . -f 1,2,4` ; \
@@ -180,14 +178,26 @@ bumpver:
 	mv packaging/modrana.spec.new packaging/modrana.spec ; rm -f speclog ; \
 	sed -i "s/Version: $(VERSION)/Version: $$NEWVERSION/" packaging/modrana.spec ; \
 
-release:
-	git add packaging/modrana.spec
+commit:
 	echo "New modRana version $(VERSION)" > commit_template.txt
 	git commit --template=commit_template.txt
 	rm commit_template.txt
+
+release:
+	@make tx-all
+	# stage all changed/added gettext files
+	git add $(TRANSLATIONS_DIR)/*.pot
+	git add $(TRANSLATIONS_DIR)/*.po
+	# stage all Qt translation files
+	git add $(TRANSLATIONS_DIR)/*.ts
+	git add $(TRANSLATIONS_DIR)/*.qm
+	@make bumpver
+	git add packaging/modrana.spec
+	@make commit
+	@make tag
 	@make archive
 
-.PHONY: clean install tag archive local
+.PHONY: clean install tag archive
 
 test:
 	# use a nested shell to resolve path to nosetests and run the path with python3
