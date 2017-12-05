@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.1
+Version: 0.55.2
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -129,6 +129,25 @@ fi
 %endif
 
 %changelog
+* Tue Dec 05 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.2-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Use explicit translation context in main.qml (martin.kolman)
+- Do everything needed in the release target (martin.kolman)
+- Include translations directory in the tarball (martin.kolman)
+- Update translations (martin.kolman)
+- Mark some more strings for translation (martin.kolman)
+- Add translation context for combo box items (martin.kolman)
+- Fix icon grid page translation (martin.kolman)
+- Fix ComboBox localization (martin.kolman)
+- Merge pull request #230 from eson57/patch-1 (martin.kolman)
+- Create sv_SE.po (eson57)
+- Create harbour-modrana-sv_SE.ts (eson57)
+- Add link to Transifex projet to README (martin.kolman)
+- Fix strings not marked for translation (martin.kolman)
+- Translation update (martin.kolman)
+- Add translation support (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Mon Nov 27 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.1-1
 - Fix quoting in temporary espeak hack (martin.kolman)
 - Make sure routing start & destination are always Waypoints (martin.kolman)

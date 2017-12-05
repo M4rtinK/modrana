@@ -8,8 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-03 22:51+0100\n"
+"POT-Creation-Date: 2017-12-05 02:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Sagittarii <zeta@sagittarii.fr>, 2017\n"
 "Language-Team: French (France) (https://www.transifex.com/martink/teams/81256/fr_FR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
@@ -19,32 +20,32 @@ msgstr ""
 
 #: core/instructions_generator.py:49
 msgid "turn slightly left"
-msgstr ""
+msgstr "tourner légèrement à gauche"
 
 #: core/instructions_generator.py:50
 msgid "turn left"
-msgstr ""
+msgstr "tourner à gauche"
 
 #: core/instructions_generator.py:51
 msgid "turn sharply left"
-msgstr ""
+msgstr "virage serré à gauche"
 
 #: core/instructions_generator.py:52
 msgid "make a U-turn"
-msgstr ""
+msgstr "faites demi-tour"
 
 #: core/instructions_generator.py:53
 msgid "turn sharply right"
-msgstr ""
+msgstr "virage serré à droite"
 
 #: core/instructions_generator.py:54
 msgid "turn right"
-msgstr ""
+msgstr "tourner à droite"
 
 #: core/instructions_generator.py:55
 msgid "turn slightly right"
-msgstr ""
+msgstr "tourner légèrement à droite"
 
 #: core/instructions_generator.py:56
 msgid "head straightforward"
-msgstr ""
+msgstr "tout droit"
