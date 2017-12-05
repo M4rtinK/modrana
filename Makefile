@@ -30,11 +30,15 @@ all:
 	rm -rf $(BUILDDIR)
 	mkdir $(SOURCEDIR)
 	mkdir $(BUILDDIR)
+	# The following decides what will be the
+	# input for the rsync targets that run on 
+	# the content we copy here to the sourcedir.
 	cp -r core $(SOURCEDIR)
 	cp -r data $(SOURCEDIR)
 	cp -r modules $(SOURCEDIR)
 	cp -r run $(SOURCEDIR)
 	cp -r themes $(SOURCEDIR)
+	cp -r translations $(SOURCEDIR)
 	cp -r modrana.py $(SOURCEDIR)
 	cp -r version.txt $(SOURCEDIR)
 

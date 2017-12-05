@@ -63,7 +63,11 @@ See the project homepage at http://www.modrana.org for more information.
 
 
 %build
+# start by populating the input directory
+# with an initial set of files and folders
 make
+# then in the next step, based on the build environment,
+# we filter the files that will actually reach the package
 %if 0%{with_sailfish}
 %if 0%{with_harbour}
 make rsync-harbour # run the more strinc rsync for a Harbour package
