@@ -4,7 +4,7 @@ import "modrana_components"
 
 BasePage {
     id: layersPage
-    headerText : "Overlays"
+    headerText : qsTr("Overlays")
     isFlickable : false
     property var model
 
@@ -54,8 +54,8 @@ BasePage {
                         width : parent.width
                         elide : Text.ElideRight
                         anchors.verticalCenter : parent.verticalCenter
-                        property string label : layerId == "" ? "<i>not selected</i>" : "<b>" + layerName + "</b>"
-                        property string prefix : index == 0 ? "map : " : index + " : "
+                        property string label : layerId == "" ? qsTr("<i>not selected</i>") : "<b>" + layerName + "</b>"
+                        property string prefix : index == 0 ? qsTr("map") + " : " : index + " : "
                         text : prefix + label
                     }
                     MouseArea {
@@ -108,7 +108,7 @@ BasePage {
                 Button {
                     width : actionGrid.cellWidth
                     height : isLastItem ? lGrid.height : 0
-                    text : "<b>add</b>"
+                    text : qsTr("<b>add</b>")
                     onClicked : {
                         rWin.log.info("add layer")
                         rWin.mapPage.getMap().appendLayer("openptmap_overlay", "OSM Transit Overlay", 1.0)
@@ -118,7 +118,7 @@ BasePage {
                     width : actionGrid.cellWidth
                     height : isLastItem ? lGrid.height : 0
                     visible : layersLW.model.count > 1
-                    text : "<b>remove</b>"
+                    text : qsTr("<b>remove</b>")
                     onClicked : {
                         rWin.log.info("remove layer")
                         // remove the last layer
