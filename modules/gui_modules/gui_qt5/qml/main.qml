@@ -304,7 +304,7 @@ ApplicationWindow {
             id : startupLabel
             anchors.horizontalCenter : parent.horizontalCenter
             anchors.verticalCenter : parent.verticalCenter
-            text: qsTr("<b>starting modRana...</b>")
+            text: qsTranslate("main", "<b>starting modRana...</b>")
             horizontalAlignment : Text.AlignHCenter
             verticalAlignment : Text.AlignVCenter
             visible : opacity != 0
@@ -328,7 +328,7 @@ ApplicationWindow {
             anchors.top : parent.top
             anchors.right : parent.right
             visible : rWin.showDebugButton
-            text : qsTr("debug")
+            text : qsTranslate("main", "debug")
             onClicked : {
                 rWin.log.info("# starting the Python Debugger (PDB) shell")
                 rWin.log.info("# to continue program execution, press c")
