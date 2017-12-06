@@ -254,12 +254,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksMenuPage.qml" line="11"/>
         <source>Record</source>
-        <translation type="unfinished"/>
+        <translation>Nahrát</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksMenuPage.qml" line="16"/>
         <source>List</source>
-        <translation type="unfinished"/>
+        <translation>Seznam</translation>
     </message>
 </context>
 <context>
@@ -372,27 +372,27 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="7"/>
         <source>Overlays</source>
-        <translation type="unfinished"/>
+        <translation>Vrstvy</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="57"/>
         <source>&lt;i&gt;not selected&lt;/i&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;i&gt;nevybráno&lt;/i&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="58"/>
         <source>map</source>
-        <translation type="unfinished"/>
+        <translation>mapa</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="111"/>
         <source>&lt;b&gt;add&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;přidat&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="121"/>
         <source>&lt;b&gt;remove&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;odebrat&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -400,17 +400,17 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="25"/>
         <source>off (1x)</source>
-        <translation type="unfinished"/>
+        <translation>vypnuto (1x)</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="29"/>
         <source>2x</source>
-        <translation type="unfinished"/>
+        <translation>2x</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="33"/>
         <source>4x</source>
-        <translation type="unfinished"/>
+        <translation>4x</translation>
     </message>
 </context>
 <context>
@@ -443,7 +443,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="33"/>
         <source>Show what is hidden</source>
-        <translation type="unfinished"/>
+        <translation>Ukázat co je skryté</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="43"/>
@@ -516,47 +516,47 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="9"/>
         <source>Map</source>
-        <translation type="unfinished"/>
+        <translation>Mapa</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="11"/>
         <source>path lookup in progress</source>
-        <translation type="unfinished"/>
+        <translation>vyhledávám cestu</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="13"/>
         <source>unknown</source>
-        <translation type="unfinished"/>
+        <translation>neznámý</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="17"/>
         <source>Scaling</source>
-        <translation type="unfinished"/>
+        <translation>Škálování</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="20"/>
         <source>Map scaling</source>
-        <translation type="unfinished"/>
+        <translation>Škálování mapy</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="43"/>
         <source>Tile storage</source>
-        <translation type="unfinished"/>
+        <translation>Ukládání dlaždic</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="47"/>
         <source>Store map tiles in</source>
-        <translation type="unfinished"/>
+        <translation>Uložit mapové dlaždice v</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="66"/>
         <source>Map folder path:</source>
-        <translation type="unfinished"/>
+        <translation>Cesta k mapovému adresáři:</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="72"/>
         <source>Free space available</source>
-        <translation type="unfinished"/>
+        <translation>Volné místo</translation>
     </message>
 </context>
 <context>
@@ -738,57 +738,57 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="75"/>
         <source>Service station</source>
-        <translation type="unfinished"/>
+        <translation>Autoservis</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="76"/>
         <source>Residence</source>
-        <translation type="unfinished"/>
+        <translation>Sídlo</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="77"/>
         <source>Restaurant</source>
-        <translation type="unfinished"/>
+        <translation>Restaurace</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="78"/>
         <source>Shopping/Services</source>
-        <translation type="unfinished"/>
+        <translation>Nakupování/Služby</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="79"/>
         <source>Recreation</source>
-        <translation type="unfinished"/>
+        <translation>Rekreace</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="80"/>
         <source>Transportation</source>
-        <translation type="unfinished"/>
+        <translation>Doprava</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="81"/>
         <source>Lodging</source>
-        <translation type="unfinished"/>
+        <translation>Ubytování</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="82"/>
         <source>School</source>
-        <translation type="unfinished"/>
+        <translation>Škola</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="83"/>
         <source>Business</source>
-        <translation type="unfinished"/>
+        <translation>Podnik</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="84"/>
         <source>Landmark</source>
-        <translation type="unfinished"/>
+        <translation>Orientační bod</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="85"/>
         <source>Other</source>
-        <translation type="unfinished"/>
+        <translation>Jiné</translation>
     </message>
 </context>
 <context>
@@ -896,12 +896,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="52"/>
         <source>files</source>
-        <translation type="unfinished"/>
+        <translation>soubory</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="57"/>
         <source>Sqlite</source>
-        <translation type="unfinished"/>
+        <translation>Sqlite</translation>
     </message>
 </context>
 <context>

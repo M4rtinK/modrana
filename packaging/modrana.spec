@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.3
+Version: 0.55.4
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -129,6 +129,11 @@ fi
 %endif
 
 %changelog
+* Wed Dec 06 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.4-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- List top level modRana modules explicitely (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Wed Dec 06 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.3-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Use the i18n module (martin.kolman)

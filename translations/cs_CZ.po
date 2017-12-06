@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-06 02:45+0100\n"
+"POT-Creation-Date: 2017-12-06 03:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: MartinK <martin.kolman@gmail.com>, 2017\n"
 "Language-Team: Czech (Czech Republic) (https://www.transifex.com/martink/teams/81256/cs_CZ/)\n"
@@ -49,3 +49,23 @@ msgstr "zabočte mírně doprava"
 #: core/instructions_generator.py:45
 msgid "head straightforward"
 msgstr "jeďte rovně"
+
+#: modules/mod_info.py:65
+msgid "talk.maemo.org thread"
+msgstr "vlákno na talk.maemo.org"
+
+#: modules/mod_info.py:93
+msgid "main developer"
+msgstr "hlavní vývojář"
+
+#: modules/mod_info.py:96
+msgid "source code"
+msgstr "zdrojový kód"
+
+#: modules/mod_info.py:97
+msgid "discussion"
+msgstr "diskuze"
+
+#: modules/mod_info.py:97
+msgid "check"
+msgstr "koukněte na"

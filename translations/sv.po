@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-06 02:45+0100\n"
+"POT-Creation-Date: 2017-12-06 03:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: MartinK <martin.kolman@gmail.com>, 2017\n"
 "Language-Team: Swedish (https://www.transifex.com/martink/teams/81256/sv/)\n"
@@ -49,3 +49,23 @@ msgstr "sväng lätt vänster"
 #: core/instructions_generator.py:45
 msgid "head straightforward"
 msgstr "fortsätt rakt fram"
+
+#: modules/mod_info.py:65
+msgid "talk.maemo.org thread"
+msgstr ""
+
+#: modules/mod_info.py:93
+msgid "main developer"
+msgstr ""
+
+#: modules/mod_info.py:96
+msgid "source code"
+msgstr ""
+
+#: modules/mod_info.py:97
+msgid "discussion"
+msgstr ""
+
+#: modules/mod_info.py:97
+msgid "check"
+msgstr ""
