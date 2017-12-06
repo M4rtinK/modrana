@@ -167,6 +167,7 @@ pot:
 	 --add-comments=TRANSLATORS: \
 	 --no-wrap \
 	 core/*.py \
+	 modules/*.py \
 	 modules/*/*.py \
 
 mo:
