@@ -144,6 +144,7 @@ VersionFile:
 tx-pull:
 	cd $(TRANSLATIONS_DIR);tx pull -a
 	@make lrelease
+	@make mo
 
 tx-push: lupdate pot
 	cd $(TRANSLATIONS_DIR);tx push -s
@@ -168,6 +169,9 @@ pot:
 	 core/*.py \
 	 modules/*/*.py \
 
+mo:
+	cd $(TRANSLATIONS_DIR);./generate_mo_files.py
+
 bumpver:
 	@NEWSUBVER=$$((`echo $(VERSION) |cut -d . -f 3` + 1)) ; \
 	NEWVERSION=`echo $(VERSION).$$NEWSUBVER |cut -d . -f 1,2,4` ; \
@@ -188,6 +192,7 @@ release:
 	# stage all changed/added gettext files
 	git add $(TRANSLATIONS_DIR)/*.pot
 	git add $(TRANSLATIONS_DIR)/*.po
+	git add $(TRANSLATIONS_DIR)/mo
 	# stage all Qt translation files
 	git add $(TRANSLATIONS_DIR)/*.ts
 	git add $(TRANSLATIONS_DIR)/*.qm
