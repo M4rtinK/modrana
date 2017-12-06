@@ -21,18 +21,7 @@
 from core import geo
 from core.point import TurnByTurnPoint
 
-# import gettext
-# import locale
-# import core.i18n as i18n
-# _ = i18n.language.gettext
-def foo(bar):
-    return bar
-
-
-_ = foo
-#TODO: actually use i18n and make it
-# work on both Python 2.5 and 3
-
+from core.i18n import _
 
 TURN_SLIGHTLY_LEFT = 7
 TURN_LEFT = 6

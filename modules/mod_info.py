@@ -21,6 +21,7 @@ from modules.base_module import RanaModule
 from core.point import Point
 import math
 from core import geo
+from core.i18n import _
 
 def getModule(*args, **kwargs):
     return Info(*args, **kwargs)
@@ -61,7 +62,7 @@ class Info(RanaModule):
         """
         return a list of modRana-relevant discussions, with the most relevant discussion on top
         """
-        return [("http://talk.maemo.org/showthread.php?t=58861", "talk.maemo.org thread")]
+        return [("http://talk.maemo.org/showthread.php?t=58861", _("talk.maemo.org thread"))]
 
     def getMainDiscussionUrl(self):
         """
@@ -89,11 +90,11 @@ class Info(RanaModule):
         email = self.getEmailAddress()
         source = self.getSourceRepositoryUrl()
         discussion, name = self.getDiscussionUrls()[0]
-        text = "<p><b>main developer:</b> Martin Kolman</p>"
+        text = '<p><b>' + _('main developer') + ":</b> Martin Kolman</p>"
         text += '<p><b>email</b>: <a href="mailto:%s">%s</a></p>' % (email, email)
         text += '<p><b>www</b>: <a href="%s">%s</a></p>' % (www, www)
-        text += '<p><b>source</b>:\n<a href="%s">%s</a></p>' % (source, source)
-        text += '<p><b>discussion</b>: check <a href="%s">%s</a></p>' % (discussion, name)
+        text += '<p><b>' + _('source code') + '</b>:\n<a href="%s">%s</a></p>' % (source, source)
+        text += '<p><b>' + _('discussion') + '</b>: ' + _('check') + '<a href="%s">%s</a></p>' % (discussion, name)
         return text
 
     def drawMenu(self, cr, menuName, args=None):
