@@ -30,7 +30,7 @@ BasePage {
 
     content : ContentColumn {
         SectionHeader {
-            text : qsTr("Debugging messages")
+            text : qsTr("Show what is hidden")
         }
         TextSwitch {
             text : qsTr("Show debug button")
@@ -45,6 +45,9 @@ BasePage {
             onCheckedChanged : {
                 rWin.showUnfinishedFeatures = checked
             }
+        }
+        SectionHeader {
+            text : qsTr("Debugging messages")
         }
         TextSwitch {
             text : qsTr("Tile display debugging")
