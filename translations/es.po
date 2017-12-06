@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-05 02:19+0100\n"
+"POT-Creation-Date: 2017-12-06 02:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Carmen Fernández B. <carmenfdezb@mail.com>, 2017\n"
 "Language-Team: Spanish (https://www.transifex.com/martink/teams/81256/es/)\n"
@@ -18,34 +18,34 @@ msgstr ""
 "Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: core/instructions_generator.py:49
+#: core/instructions_generator.py:38
 msgid "turn slightly left"
 msgstr "gira ligeramente a la izquierda"
 
-#: core/instructions_generator.py:50
+#: core/instructions_generator.py:39
 msgid "turn left"
 msgstr "gira a la izquierda"
 
-#: core/instructions_generator.py:51
+#: core/instructions_generator.py:40
 msgid "turn sharply left"
 msgstr "gira bruscamente a la izquierda"
 
-#: core/instructions_generator.py:52
+#: core/instructions_generator.py:41
 msgid "make a U-turn"
 msgstr "haz un cambio de sentido"
 
-#: core/instructions_generator.py:53
+#: core/instructions_generator.py:42
 msgid "turn sharply right"
 msgstr "gira bruscamente a la derecha"
 
-#: core/instructions_generator.py:54
+#: core/instructions_generator.py:43
 msgid "turn right"
 msgstr "gira a la derecha"
 
-#: core/instructions_generator.py:55
+#: core/instructions_generator.py:44
 msgid "turn slightly right"
 msgstr "gira ligeramente a la derecha"
 
-#: core/instructions_generator.py:56
+#: core/instructions_generator.py:45
 msgid "head straightforward"
 msgstr "sigue recto"

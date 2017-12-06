@@ -253,6 +253,16 @@
         <source>Local</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksMenuPage.qml" line="11"/>
+        <source>Record</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksMenuPage.qml" line="16"/>
+        <source>List</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>InfoAboutPage</name>
@@ -360,6 +370,52 @@
     </message>
 </context>
 <context>
+    <name>MapLayersPage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="7"/>
+        <source>Overlays</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="57"/>
+        <source>&lt;i&gt;not selected&lt;/i&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="58"/>
+        <source>map</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="111"/>
+        <source>&lt;b&gt;add&lt;/b&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="121"/>
+        <source>&lt;b&gt;remove&lt;/b&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>MapScalingComboBox</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="25"/>
+        <source>off (1x)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="29"/>
+        <source>2x</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="33"/>
+        <source>4x</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>OptionsDebugPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="10"/>
@@ -377,7 +433,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="33"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="50"/>
         <source>Debugging messages</source>
         <translation type="unfinished"></translation>
     </message>
@@ -387,67 +443,72 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="33"/>
+        <source>Show what is hidden</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="43"/>
         <source>Show unfinished features</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="50"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="53"/>
         <source>Tile display debugging</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="57"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="60"/>
         <source>Tile storage debugging</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="64"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="67"/>
         <source>Location debugging</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="71"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="74"/>
         <source>Map canvas debugging</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="78"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="81"/>
         <source>Logging</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="81"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="84"/>
         <source>Log file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="88"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="91"/>
         <source>Log file compression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="100"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="103"/>
         <source>Notifications</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="103"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="106"/>
         <source>Notify</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="105"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="108"/>
         <source>Hello world!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="109"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="112"/>
         <source>Notify long</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="111"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="114"/>
         <source>ModRana is a flexible navigation software for (not only) mobile Linux devices.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -480,18 +541,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="42"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="43"/>
         <source>Tile storage</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="46"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="47"/>
         <source>Store map tiles in</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="64"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="66"/>
         <source>Map folder path:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="72"/>
+        <source>Free space available</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -664,8 +730,66 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="47"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="49"/>
         <source>POIs</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>POICategoryName</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="75"/>
+        <source>Service station</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="76"/>
+        <source>Residence</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="77"/>
+        <source>Restaurant</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="78"/>
+        <source>Shopping/Services</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="79"/>
+        <source>Recreation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="80"/>
+        <source>Transportation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="81"/>
+        <source>Lodging</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="82"/>
+        <source>School</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="83"/>
+        <source>Business</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="84"/>
+        <source>Landmark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="85"/>
+        <source>Other</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -760,67 +884,25 @@
         <source>Category</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="74"/>
-        <source>Service station</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="75"/>
-        <source>Residence</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="76"/>
-        <source>Restaurant</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="77"/>
-        <source>Shopping/Services</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="78"/>
-        <source>Recreation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="79"/>
-        <source>Transportation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="80"/>
-        <source>Lodging</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="81"/>
-        <source>School</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="82"/>
-        <source>Business</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="83"/>
-        <source>Landmark</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="84"/>
-        <source>Other</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>SearchPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/SearchPage.qml" line="88"/>
         <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TileStorageComboBox</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="52"/>
+        <source>files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="57"/>
+        <source>Sqlite</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

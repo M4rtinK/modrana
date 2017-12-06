@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.2
+Version: 0.55.3
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -129,6 +129,19 @@ fi
 %endif
 
 %changelog
+* Wed Dec 06 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.3-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Use the i18n module (martin.kolman)
+- Get the i18n core module to a useable state (martin.kolman)
+- Add support for mo file creation (martin.kolman)
+- Make sure POI categories are translated via translation context magic (martin.kolman)
+- Improve the structure of the debugging options menu (martin.kolman)
+- Mark OptionMapPage ComboBox items for translation (martin.kolman)
+- Add support for custom ComboBox translation context (martin.kolman)
+- Mark strings for translation on TracksMenuPage (martin.kolman)
+- Mark strings for translation on MapLayersPage (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Tue Dec 05 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.2-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Use explicit translation context in main.qml (martin.kolman)
