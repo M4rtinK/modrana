@@ -8,6 +8,7 @@ ComboBox {
     // clicks on an item in the context menu,
     // not if changing the current item index
     property var item
+    property string translationContext : "ComboBox"
 
     menu : ContextMenu {
         id : cMenu
@@ -15,7 +16,7 @@ ComboBox {
             id : cRepeater
             model : cBox.model
             MenuItem {
-                text : qsTranslate("ComboBox", model.text)
+                text : qsTranslate(translationContext, model.text)
                 onClicked : {
                     cBox.currentItem = model
                 }

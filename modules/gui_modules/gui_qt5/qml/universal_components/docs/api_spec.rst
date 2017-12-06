@@ -445,7 +445,11 @@ Example:
     }
 
 The Universal Components **ComboBox** also supports localization via the *QT_TRANSLATE_NOOP* macro
-with a *"ComboBox"* context. Using just the *QT_TR_NOOP* macro would give the string context
+with a default *"ComboBox"* context. The translation context can be overridden via the **translationContext**
+property as long as the corresponding *QT_TRANSLATE_NOOP macros use the same custom context.
+
+
+Using just the *QT_TR_NOOP* macro would give the string context
 of the file where it has been found, which would not work as the **ComboBox** element is defined
 in a different file.
 
@@ -455,10 +459,11 @@ in a different file.
 
     ComboBox {
         currentIndex: 1
+        translationContext : "FooComboBox"
         model: ListModel {
             id: cbItems
-            ListElement { text: QT_TRANSLATE_NOOP("ComboBox", "foo"); color: "white" }
-            ListElement { text: QT_TRANSLATE_NOOP("ComboBox", "bar"); color: "black" }
+            ListElement { text: QT_TRANSLATE_NOOP("FooComboBox", "foo"); color: "white" }
+            ListElement { text: QT_TRANSLATE_NOOP("FooComboBox", "bar"); color: "black" }
         }
         width: 200
         onCurrentIndexChanged: console.debug(cbItems.get(currentIndex).text + ", " + cbItems.get(currentIndex).color)
@@ -487,6 +492,8 @@ Properties
 **currentItem** : var
     Currently selected item.
 
+**translationContext** : str
+    Translation context combo box item text properties. "ComboBox" by default.
 
 TopMenu 
 -------

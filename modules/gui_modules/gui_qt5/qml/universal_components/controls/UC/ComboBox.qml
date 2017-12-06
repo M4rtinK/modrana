@@ -10,6 +10,7 @@ Column {
     property alias currentItem : cBox.currentItem
     property alias currentIndex : cBox.currentIndex
     property string description : ""
+    property string translationContext : "ComboBox"
     width : parent.width
 
     Row {
@@ -23,7 +24,7 @@ Column {
         ComboBox {
             id : cBox
             textRole : "text"
-            displayText : qsTranslate("ComboBox", currentText)
+            displayText : qsTranslate(translationContext, currentText)
             anchors.verticalCenter : comboLabel.verticalCenter
             // selected item, only assigned if user
             // clicks on an item in the context menu,
