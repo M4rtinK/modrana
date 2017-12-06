@@ -41,7 +41,9 @@ BasePage {
                     anchors.verticalCenter : parent.verticalCenter
                     spacing : rWin.c.style.main.spacing
                     Label {
-                        text : "<b>" + model.name + "</b>"
+                        // The category names are marked for translation in SavePointPage
+                        // via a macro with the POICategoryName translation context.
+                        text : "<b>" + qsTranslate("POICategoryName", model.name) + "</b>"
                     }
                     Label {
                         text : model.poi_count + " " + qsTr("POIs")

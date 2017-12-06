@@ -67,21 +67,22 @@ BasePage {
         }
         ComboBox {
             id : catCombo
+            translationContext : "POICategoryName"
             width : parent.width
             currentIndex: 10
             model: ListModel {
                 id: cbItems // TODO: load categories dynamically
-                    ListElement { text: qsTr("Service station"); category_id: 1 }
-                    ListElement { text: qsTr("Residence"); category_id: 2 }
-                    ListElement { text: qsTr("Restaurant"); category_id: 3 }
-                    ListElement { text: qsTr("Shopping/Services"); category_id: 4 }
-                    ListElement { text: qsTr("Recreation"); category_id: 5 }
-                    ListElement { text: qsTr("Transportation"); category_id: 6 }
-                    ListElement { text: qsTr("Lodging"); category_id: 7 }
-                    ListElement { text: qsTr("School"); category_id: 8 }
-                    ListElement { text: qsTr("Business"); category_id: 9 }
-                    ListElement { text: qsTr("Landmark"); category_id: 10 }
-                    ListElement { text: qsTr("Other"); category_id: 11 }
+                    ListElement { text: QT_TRANSLATE_NOOP("POICategoryName", "Service station"); category_id: 1 }
+                    ListElement { text: QT_TRANSLATE_NOOP("POICategoryName", "Residence"); category_id: 2 }
+                    ListElement { text: QT_TRANSLATE_NOOP("POICategoryName", "Restaurant"); category_id: 3 }
+                    ListElement { text: QT_TRANSLATE_NOOP("POICategoryName", "Shopping/Services"); category_id: 4 }
+                    ListElement { text: QT_TRANSLATE_NOOP("POICategoryName", "Recreation"); category_id: 5 }
+                    ListElement { text: QT_TRANSLATE_NOOP("POICategoryName", "Transportation"); category_id: 6 }
+                    ListElement { text: QT_TRANSLATE_NOOP("POICategoryName", "Lodging"); category_id: 7 }
+                    ListElement { text: QT_TRANSLATE_NOOP("POICategoryName", "School"); category_id: 8 }
+                    ListElement { text: QT_TRANSLATE_NOOP("POICategoryName", "Business"); category_id: 9 }
+                    ListElement { text: QT_TRANSLATE_NOOP("POICategoryName", "Landmark"); category_id: 10 }
+                    ListElement { text: QT_TRANSLATE_NOOP("POICategoryName", "Other"); category_id: 11 }
             }
             onCurrentIndexChanged: {
                 rWin.log.debug(cbItems.get(currentIndex).text + ", " + cbItems.get(currentIndex).category_id)
