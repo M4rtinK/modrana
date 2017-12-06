@@ -18,18 +18,19 @@ BasePage {
         }
         KeyComboBox {
             label : qsTr("Map scaling")
+            translationContext : "MapScalingComboBox"
             key : "mapScale"
             model : ListModel {
                 ListElement {
-                    text : "off (1x)"
+                    text : QT_TRANSLATE_NOOP("MapScalingComboBox", "off (1x)")
                     value : 1
                 }
                 ListElement {
-                    text : "2x"
+                    text : QT_TRANSLATE_NOOP("MapScalingComboBox", "2x")
                     value : 2
                 }
                 ListElement {
-                    text : "4x"
+                    text : QT_TRANSLATE_NOOP("MapScalingComboBox", "4x")
                     value : 4
                 }
             }
@@ -44,15 +45,16 @@ BasePage {
         KeyComboBox {
             width : parent.width
             label : qsTr("Store map tiles in")
+            translationContext : "TileStorageComboBox"
             defaultValue : rWin.startupValues.defaultTileStorageType
             model : ListModel {
                 ListElement {
-                    text : "files"
+                    text : QT_TRANSLATE_NOOP("TileStorageComboBox", "files")
                     value : "files"
 
                 }
                 ListElement {
-                    text : "Sqlite"
+                    text : QT_TRANSLATE_NOOP("TileStorageComboBox", "Sqlite")
                     value : "sqlite"
                 }
                 }
@@ -67,7 +69,7 @@ BasePage {
             width : parent.width
         }
         Label {
-            text : qsTr("Free space available: <b>" + mapOptionsPage.freeSpace + "</b>")
+            text : qsTr("Free space available") + ": <b>" + mapOptionsPage.freeSpace + "</b>"
             wrapMode : Text.Wrap
             width : parent.width
         }
