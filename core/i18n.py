@@ -4,15 +4,16 @@ import os, sys
 import locale
 import gettext
 
+__all__ = ["_"]
+
 # Change this variable to your app name!
 #  The translation files will be under
 #  @LOCALE_DIR@/@LANGUAGE@/LC_MESSAGES/@APP_NAME@.mo
-APP_NAME = "modRana"
+APP_NAME = "modrana"
 APP_DIR = "."
 
-# This is ok for maemo. Not sure in a regular desktop:
-#APP_DIR = os.path.join (sys.prefix, 'share')
-LOCALE_DIR = os.path.join(APP_DIR, 'i18n') # .mo files will then be located in APP_Dir/i18n/LANGUAGECODE/LC_MESSAGES/
+# .mo files will then be located in APP_DIR/translations/mo/LANGUAGECODE/LC_MESSAGES/
+LOCALE_DIR = os.path.join(APP_DIR, 'translations', 'mo')
 
 # Now we need to choose the language. We will provide a list, and gettext
 # will use the first translation available in the list
@@ -35,12 +36,16 @@ mo_location = LOCALE_DIR
 
 # Lets tell those details to gettext
 #  (nothing to change here for you)
-# gettext.install(True, localedir=None, unicode=1)
+#gettext.install(True, localedir=None, unicode=1)
 #
-# gettext.find(APP_NAME, mo_location)
+gettext.find(APP_NAME, mo_location)
 #
-# gettext.textdomain(APP_NAME)
+gettext.textdomain(APP_NAME)
 #
-# gettext.bind_textdomain_codeset(APP_NAME, "UTF-8")
+gettext.bind_textdomain_codeset(APP_NAME, "UTF-8")
 #
-# language = gettext.translation(APP_NAME, mo_location, languages=languages, fallback=True)
+language = gettext.translation(APP_NAME, mo_location,
+                                  languages=languages,
+                                  fallback=True)
+# the actual translation function
+_ = lambda x: language.gettext(x) if x != "" else ""
