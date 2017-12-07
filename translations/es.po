@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-06 03:01+0100\n"
+"POT-Creation-Date: 2017-12-07 01:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Carmen Fernández B. <carmenfdezb@mail.com>, 2017\n"
 "Language-Team: Spanish (https://www.transifex.com/martink/teams/81256/es/)\n"
@@ -50,22 +50,22 @@ msgstr "gira ligeramente a la derecha"
 msgid "head straightforward"
 msgstr "sigue recto"
 
-#: modules/mod_info.py:65
+#: modules/mod_info.py:67
 msgid "talk.maemo.org thread"
-msgstr ""
+msgstr "hilo en talk.maemo.org"
 
-#: modules/mod_info.py:93
+#: modules/mod_info.py:99
 msgid "main developer"
-msgstr ""
+msgstr "desarrollador principal"
 
-#: modules/mod_info.py:96
+#: modules/mod_info.py:102
 msgid "source code"
-msgstr ""
+msgstr "código fuente"
 
-#: modules/mod_info.py:97
+#: modules/mod_info.py:103
 msgid "discussion"
-msgstr ""
+msgstr "debate"
 
-#: modules/mod_info.py:97
+#: modules/mod_info.py:103
 msgid "check"
-msgstr ""
+msgstr "consulta"

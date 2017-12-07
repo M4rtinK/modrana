@@ -265,9 +265,34 @@
 <context>
     <name>InfoAboutPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="53"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="46"/>
         <source>&lt;h3&gt;Dou you like modRana ? &lt;b&gt;Donate !&lt;/b&gt;&lt;/h3&gt;</source>
         <translation>&lt;h3&gt;Máte rádi modRanu ? &lt;b&gt;Přizpějte !&lt;/b&gt;&lt;/h3&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="85"/>
+        <source>main developer</source>
+        <translation>hlavní vývojář</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="101"/>
+        <source>website</source>
+        <translation>webová stránka</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="111"/>
+        <source>source code</source>
+        <translation>zdrojový kód</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="121"/>
+        <source>discussion</source>
+        <translation>diskuze</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="131"/>
+        <source>translation project</source>
+        <translation>překladový projekt</translation>
     </message>
 </context>
 <context>

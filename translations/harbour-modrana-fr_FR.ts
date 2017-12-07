@@ -265,9 +265,34 @@
 <context>
     <name>InfoAboutPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="53"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="46"/>
         <source>&lt;h3&gt;Dou you like modRana ? &lt;b&gt;Donate !&lt;/b&gt;&lt;/h3&gt;</source>
         <translation>&lt;h3&gt;Aimez vous modRana ?&lt;b&gt;Faites un don !&lt;/b&gt;&lt;/h3&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="85"/>
+        <source>main developer</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="101"/>
+        <source>website</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="111"/>
+        <source>source code</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="121"/>
+        <source>discussion</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="131"/>
+        <source>translation project</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
