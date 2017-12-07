@@ -45,51 +45,57 @@ class Info(RanaModule):
             lat, lon = dirPoint
             self._dirPoint = Point(lat, lon)
 
-
-    def getPayPalUrl(self):
+    @property
+    def pay_pal_url(self):
         return "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=martin%2ekolman%40gmail%2ecom&lc=CZ&item_name=The%20modRana%20project&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted"
 
-    def getFlattrUrl(self):
+    @property
+    def flattr_url(self):
         return "https://flattr.com/thing/678708/modRana-flexible-GPS-navigation-system"
 
-    def getGratipayUrl(self):
+    @property
+    def gratipay_url(self):
         return "https://gratipay.com/M4rtinK"
 
-    def getBitcoinAddress(self):
+    @property
+    def bitcoin_address(self):
         return "14DXzkqqYCfSG5vZNYPnPiZzg3wW2hXsE8"
 
-    def getDiscussionUrls(self):
-        """
-        return a list of modRana-relevant discussions, with the most relevant discussion on top
-        """
+    @property
+    def discussions(self):
+        """List of modRana-relevant discussions, with the most relevant discussion on top."""
         return [("http://talk.maemo.org/showthread.php?t=58861", _("talk.maemo.org thread"))]
 
-    def getMainDiscussionUrl(self):
-        """
-        return Url to the most relevant modRana discussion
-        """
-        return self.getDiscussionUrls()[0]
+    @property
+    def main_discussion(self):
+        """Url for the most relevant modRana discussion."""
+        return self.discussions[0]
 
-    def getWebsiteUrl(self):
-        """
-        return Url to the modRana website
-        """
+    @property
+    def website_url(self):
+        """Url to the modRana homepage."""
         return "http://www.modrana.org"
 
-    def getSourceRepositoryUrl(self):
+    @property
+    def source_repository_url(self):
+        """Link to the modRana source code."""
         return "https://github.com/M4rtinK/modrana"
 
-    def getEmailAddress(self):
-        """
-        return the project email address
-        """
+    @property
+    def translation_url(self):
+        """Url for the modRana translation project."""
+        return "https://www.transifex.com/martink/modrana"
+
+    @property
+    def email_address(self):
+        """ModRana project email address."""
         return "modrana@gmail.com"
 
     def getAboutText(self):
-        www = self.getWebsiteUrl()
-        email = self.getEmailAddress()
-        source = self.getSourceRepositoryUrl()
-        discussion, name = self.getDiscussionUrls()[0]
+        www = self.website_url
+        email = self.email_address
+        source = self.source_repository_url
+        discussion, name = self.discussions[0]
         text = '<p><b>' + _('main developer') + ":</b> Martin Kolman</p>"
         text += '<p><b>email</b>: <a href="mailto:%s">%s</a></p>' % (email, email)
         text += '<p><b>www</b>: <a href="%s">%s</a></p>' % (www, www)
@@ -101,8 +107,8 @@ class Info(RanaModule):
         if menuName == 'infoAbout':
             menus = self.m.get('menu', None)
             if menus:
-                button1 = ('Discussion', 'generic', "ms:menu:openUrl:%s" % self.getDiscussionUrls()[0][0])
-                button2 = ('Donate', 'generic', "ms:menu:openUrl:%s" % self.getPayPalUrl())
+                button1 = ('Discussion', 'generic', "ms:menu:openUrl:%s" % self.discussions[0][0])
+                button2 = ('Donate', 'generic', "ms:menu:openUrl:%s" % self.pay_pal_url)
                 web = " <u>www.modrana.org</u> "
                 email = " modrana@gmail.com "
                 text = "modRana version:\n\n%s\n\n\n\nFor questions or feedback,\n\ncontact the <b>modRana</b> project:\n\n%s\n\n%s\n\n" % (
