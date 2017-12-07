@@ -33,7 +33,7 @@ BasePage {
             onClicked: {
                 urlField.selectAll()
                 urlField.copy()
-                rWin.notify("Bitcoin address copied to clipboard", 3000)
+                rWin.notify(qsTr("Bitcoin address copied to clipboard"), 3000)
             }
         }
     }
