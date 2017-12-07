@@ -9,7 +9,7 @@ IconGridPage {
             // a simplified routing mode right away :)
             rWin.mapPage.enableRoutingUI(true)
             rWin.getPage(null)
-            rWin.notify("Routing mode enabled", 3000)
+            rWin.notify(qsTr("Routing mode enabled"), 3000)
         } else if (menu == "POIMenu") {
             // make sure poi listing is always reloaded on entry
             return rWin.loadPage("POICategoryListPage")
