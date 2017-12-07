@@ -72,9 +72,6 @@ IconGridPage {
         Component.onCompleted : {
             if (rWin.showUnfinishedFeatures) {
                 testModel.append(
-                    {"caption": "POI", "icon":"poi.png", "menu":""}
-                )
-                testModel.append(
                     {"caption": "Data", "icon":"download.png", "menu":""}
                 )
             }
