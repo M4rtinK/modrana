@@ -411,7 +411,9 @@ class QMLGUI(GUIModule):
             "sailfish" : self.dmod.getDeviceIDString() == "jolla",
     	    "device_type" : self.modrana.dmod.getDeviceType(),
             "highDPI" : self.highDPI,
-            "defaultTileStorageType" : self.modrana.dmod.defaultTileStorageType
+            "defaultTileStorageType" : self.modrana.dmod.defaultTileStorageType,
+            "aboutModrana" : self._get_about_info()
+
         }
         return values
 
@@ -422,6 +424,20 @@ class QMLGUI(GUIModule):
         :type screen_size: a tuple of integers
         """
         self._screen_size = screen_size
+
+    def _get_about_info(self):
+        info = self.modules.info
+        return {
+            "email_address" : info.email_address,
+            "website_url" : info.website_url,
+            "source_repository_url" : info.source_repository_url,
+            "discussion_url" : info.main_discussion[0],
+            "translation_url" : info.translation_url,
+            "pay_pal_url" : info.pay_pal_url,
+            "flattr_url" : info.flattr_url,
+            "gratipay_url" : info.gratipay_url,
+            "bitcoin_address" : info.bitcoin_address
+        }
 
 
 class Modules(object):
