@@ -6,22 +6,15 @@ BasePage {
     id: aboutPage
     headerText : "modRana " + rWin.platform.modRanaVersion
 
-    // asynchronously assign properties
-    property string payPalUrl : rWin.dcall(
-    "modrana.gui.modules.info.getPayPalUrl", [], "", function(v){payPalUrl=v})
-
-    property string flattrUrl : rWin.dcall(
-    "modrana.gui.modules.info.getFlattrUrl", [], "", function(v){flattrUrl=v})
-
-    property string gratipayUrl : rWin.dcall(
-    "modrana.gui.modules.info.getGratipayUrl", [], "", function(v){gratipayUrl=v})
-
-    property string bitcoinAddress : rWin.dcall(
-    "modrana.gui.modules.info.getBitcoinAddress", [], "", function(v){bitcoinAddress=v})
-
-    property string aboutText : rWin.dcall(
-    "modrana.gui.modules.info.getAboutText", [], "", function(v){aboutText=v})
-
+    property string payPalUrl : rWin.startupValues.aboutModrana.pay_pal_url
+    property string flattrUrl : rWin.startupValues.aboutModrana.flattr_url
+    property string gratipayUrl : rWin.startupValues.aboutModrana.gratipay_url
+    property string bitcoinAddress : rWin.startupValues.aboutModrana.bitcoin_address
+    property string emailAddress: rWin.startupValues.aboutModrana.email_address
+    property string websiteUrl: rWin.startupValues.aboutModrana.website_url
+    property string sourceRepositoryUrl: rWin.startupValues.aboutModrana.source_repository_url
+    property string discussionUrl: rWin.startupValues.aboutModrana.discussion_url
+    property string translationUrl: rWin.startupValues.aboutModrana.translation_url
     content : ContentColumn {
         Image {
             width : 120 * rWin.c.style.m
@@ -43,7 +36,7 @@ BasePage {
             }
             source : modRanaIconPath
             onSourceChanged  : {
-                rWin.log.debug("ICON SOURCE: " + source)
+                rWin.log.debug("modRana icon source: " + source)
             }
         }
 
@@ -86,16 +79,59 @@ BasePage {
                 }
             }
         }
-
         Label {
-            id : contactInfo
-            height : paintedHeight + rWin.c.style.main.spacingBig*2 - 1
+            id : mainDeveloperLabel
             width : parent.width
-            text: aboutPage.aboutText
+            text: "<b>" + qsTr("main developer") + "</b>: Martin Kolman"
+            wrapMode : Text.WordWrap
+        }
+        Label {
+            id : emailLabel
+            width : parent.width
+            text: '<b>email</b>: <a href="mailto:' + aboutPage.emailAddress + '">' + aboutPage.emailAddress + '</a>'
             wrapMode : Text.WordWrap
             onLinkActivated : {
-                rWin.log.info('about text link clicked: ' + link)
-                //rWin.notify("Opening:<br><b>"+link+"</b>", 5000)
+                rWin.log.info('email link clicked: ' + link)
+                Qt.openUrlExternally(link)
+            }
+        }
+        Label {
+            id : websiteLabel
+            width : parent.width
+            text: '<b>' + qsTr('website') + '</b>: <a href="' + aboutPage.websiteUrl + '">' + aboutPage.websiteUrl + '</a>'
+            wrapMode : Text.WordWrap
+            onLinkActivated : {
+                rWin.log.info('website link clicked: ' + link)
+                Qt.openUrlExternally(link)
+            }
+        }
+        Label {
+            id : sourceCodeLabel
+            width : parent.width
+            text: '<b>' + qsTr('source code') + '</b>: <a href="' + aboutPage.sourceRepositoryUrl + '">' + aboutPage.sourceRepositoryUrl + '</a>'
+            wrapMode : Text.WordWrap
+            onLinkActivated : {
+                rWin.log.info('source code link clicked: ' + link)
+                Qt.openUrlExternally(link)
+            }
+        }
+        Label {
+            id : discussionLabel
+            width : parent.width
+            text: '<b>' + qsTr('discussion') + '</b>: <a href="' + aboutPage.discussionUrl + '">' + aboutPage.discussionUrl + '</a>'
+            wrapMode : Text.WordWrap
+            onLinkActivated : {
+                rWin.log.info('discussion link clicked: ' + link)
+                Qt.openUrlExternally(link)
+            }
+        }
+        Label {
+            id : translationLabel
+            width : parent.width
+            text: '<b>' + qsTr('translation project') + '</b>: <a href="' + aboutPage.translationUrl + '">' + aboutPage.translationUrl + '</a>'
+            wrapMode : Text.WordWrap
+            onLinkActivated : {
+                rWin.log.info('translation link clicked: ' + link)
                 Qt.openUrlExternally(link)
             }
         }
