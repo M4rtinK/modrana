@@ -617,7 +617,7 @@ class Tracklog(RanaModule):
                 if units:
                     currentSpeedString = units.km2CurrentUnitPerHourString(currentSpeed)
                 else:
-                    currentSpeedString = "%f kmh" % currentSpeed
+                    currentSpeedString = "%f km/h" % currentSpeed
                 text += "\n\ncurrent speed: <span foreground='yellow'>%s</span>" % currentSpeedString
             else:
                 text += '\n\ncurrent speed <span foreground="red">unknown</span>'
@@ -627,8 +627,8 @@ class Tracklog(RanaModule):
                     avgString = units.km2CurrentUnitPerHourString(self.avgSpeed)
                     maxString = units.km2CurrentUnitPerHourString(self.maxSpeed)
                 else:
-                    avgString = "%f kmh" % self.avgSpeed
-                    maxString = "%f kmh" % self.maxSpeed
+                    avgString = "%f km/h" % self.avgSpeed
+                    maxString = "%f km/h" % self.maxSpeed
                 text += "\n\nmax: %s, average: %s" % (maxString, avgString)
 
             if self.distance:

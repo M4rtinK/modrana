@@ -148,7 +148,7 @@ class Units(RanaModule):
     def km2CurrentUnitPerHourString(self, km, dp=None, short=True):
         """return a string with the speed rounded to the current unit
            %f1.2 speed_unit_per_hour
-           example: 5.25 kmh
+           example: 5.25 km/h
            """
 
         unitType = self.get("unitType", "km")
@@ -172,7 +172,7 @@ class Units(RanaModule):
         # short/long unit description
         if unitType == 'km':
             if short:
-                unitString = "kmh"
+                unitString = "km/h"
             else:
                 unitString = "kilometers per hour"
 
@@ -188,18 +188,18 @@ class Units(RanaModule):
     def km2CurrentUnitPerHourStringTwoDP(self, km):
         """return a string with the speed rounded to two decimal places with the current unit
            %f1.2 speed_unit_per_hour
-           example: 5.25 kmh
+           example: 5.25 km/h
            """
         unitType = self.get("unitType", "km")
         if unitType == 'km':
-            return "%1.0f kmh" % km
+            return "%1.0f km/h" % km
         else:
             return "%1.0f mph" % self.km2Miles(km)
 
     def currentUnitPerHourString(self):
         unitType = self.get("unitType", "km")
         if unitType == 'km':
-            return "kmh"
+            return "km/h"
         else:
             return "mph"
 
