@@ -34,6 +34,8 @@ Item {
             rWin.log.debug("== Position update ==")
             rWin.log.debug("Coordinate:", coord.longitude, coord.latitude)
             rWin.log.debug("Speed:", position.speed)
+            rWin.log.debug("Vertical speed:", position.verticalSpeed)
+            rWin.log.debug("direction:", position.direction)
             rWin.log.debug("h/v accuracy:", position.horizontalAccuracy, position.verticalAccuracy)
             rWin.log.debug("timestamp: ", position.timestamp)
         }
@@ -178,6 +180,10 @@ Item {
             _pythonSource.position.horizontalAccuracy = update.horizontalAccuracy
             _pythonSource.position.verticalAccuracy = update.verticalAccuracy
             _pythonSource.position.speed = update.speed
+            _pythonSource.position.verticalSpeed = update.verticalSpeed
+            _pythonSource.position.direction = update.direction
+            _pythonSource.position.magneticVariation = update.magneticVariation
+            _pythonSource.position.magneticVariationValid = update.magneticVariationValid
             _pythonSource.position.timestamp = update.timestamp
             positionUpdate(_pythonSource)
         })

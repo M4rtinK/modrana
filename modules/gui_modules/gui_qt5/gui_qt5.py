@@ -292,14 +292,25 @@ class QMLGUI(GUIModule):
         if fix.position:
             (lat, lon) = fix.position
         else:
-            (lat, lon) = None
+            (lat, lon) = None, None
+
+        # magnetic variation might sometimes not be set
+        magnetic_variation = 0.0
+        magnetic_variation_valid = False
+        if fix.magnetic_variation is not None:
+            magnetic_variation = fix.magnetic_variation
+            magnetic_variation_valid = True
         pyotherside.send("pythonPositionUpdate", {
             "latitude" : lat,
             "longitude" : lon,
             "altitude" : fix.altitude,
             "speed" : fix.speed,
+            "verticalSpeed" : fix.climb,
             "horizontalAccuracy" : fix.horizontal_accuracy,
             "verticalAccuracy" : fix.vertical_accuracy,
+            "direction" : fix.bearing,
+            "magneticVariation" : magnetic_variation,
+            "magneticVariationValid" : magnetic_variation_valid,
             "timestamp" : fix.timestamp,
             "valid" : bool(fix.position)
         })

@@ -24,6 +24,12 @@ Item {
         property bool longitudeValid : true
         property real speed: 0.0
         property bool speedValid : true
+        property real verticalSpeed : 0.0
+        property bool verticalSpeedValid : true
+        property real direction : 0.0
+        property bool directionValid : false
+        property real magneticVariation : 0.0
+        property bool magneticVariationValid : true
         property date timestamp
         property real verticalAccuracy : 0.0
         property bool verticalAccuracyValid : true
