@@ -62,6 +62,11 @@
         <source>Copy to clipboard</source>
         <translation>Uložit do schránky</translation>
     </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="36"/>
+        <source>Bitcoin address copied to clipboard</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 <context>
     <name>ComboBox</name>
@@ -275,6 +280,11 @@
         <translation>hlavní vývojář</translation>
     </message>
     <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="91"/>
+        <source>email</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="101"/>
         <source>website</source>
         <translation>webová stránka</translation>
@@ -307,56 +317,106 @@
     <name>InfoLocationPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="78"/>
+        <source>not valid</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="79"/>
+        <source>unknown</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="80"/>
+        <source>not moving</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="81"/>
+        <source>m</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="82"/>
+        <source>m/s</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="83"/>
+        <source>° to true north</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="91"/>
         <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
         <translation>&lt;b&gt;šířka:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="85"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="98"/>
         <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
         <translation>&lt;b&gt;délka:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="92"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="105"/>
         <source>&lt;b&gt;altitude:&lt;/b&gt;</source>
         <translation>&lt;b&gt;nadmořská výška:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="101"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="114"/>
         <source>&lt;b&gt;speed:&lt;/b&gt;</source>
         <translation>&lt;b&gt;rychlost:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="107"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="123"/>
+        <source>&lt;b&gt;vertical speed:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="130"/>
         <source>&lt;b&gt;bearing:&lt;/b&gt;</source>
         <translation>&lt;b&gt;azimut:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="114"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="137"/>
+        <source>&lt;b&gt;direction:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="142"/>
+        <source>°</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="144"/>
+        <source>&lt;b&gt;magnetic variation:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="151"/>
         <source>&lt;b&gt;horizontal accuracy:&lt;/b&gt;</source>
         <translation>&lt;b&gt;horizontální přesnost:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="121"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="158"/>
         <source>&lt;b&gt;vertical accuracy:&lt;/b&gt;</source>
         <translation>&lt;b&gt;vertikální přesnost:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="127"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="164"/>
         <source>&lt;b&gt;fix timestamp:&lt;/b&gt;</source>
         <translation>&lt;b&gt;časová značka:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="199"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="236"/>
         <source>&lt;font color=&quot;red&quot;&gt;unknown&lt;/font&gt;</source>
         <translation>&lt;font color=&quot;red&quot;&gt;neznámý&lt;/font&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="216"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
         <source>fix in progress</source>
         <translation>zaměřuji polohu</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="216"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
         <source>location usage disabled&lt;br&gt;(you can enable it from &lt;i&gt;Options-&gt;Location&lt;/i&gt;</source>
         <translation>zaměřování polohy je vypnuto &lt;br&gt;(zaměření polohy můžete zapnout z &lt;i&gt;Možnosti-&gt;Poloha&lt;/i&gt;</translation>
     </message>
@@ -436,6 +496,14 @@
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="33"/>
         <source>4x</source>
         <translation>4x</translation>
+    </message>
+</context>
+<context>
+    <name>MenuPage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="12"/>
+        <source>Routing mode enabled</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>

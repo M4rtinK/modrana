@@ -8,8 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-07 01:19+0100\n"
+"POT-Creation-Date: 2017-12-13 00:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: olf <olf@fsamson.de>, 2017\n"
 "Language-Team: German (Germany) (https://www.transifex.com/martink/teams/81256/de_DE/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
@@ -19,52 +20,52 @@ msgstr ""
 
 #: core/instructions_generator.py:38
 msgid "turn slightly left"
-msgstr ""
+msgstr "leicht links abbiegen"
 
 #: core/instructions_generator.py:39
 msgid "turn left"
-msgstr ""
+msgstr "links abbiegen"
 
 #: core/instructions_generator.py:40
 msgid "turn sharply left"
-msgstr ""
+msgstr "scharf links abbiegen"
 
 #: core/instructions_generator.py:41
 msgid "make a U-turn"
-msgstr ""
+msgstr "wenden"
 
 #: core/instructions_generator.py:42
 msgid "turn sharply right"
-msgstr ""
+msgstr "scharf rechts abbiegen"
 
 #: core/instructions_generator.py:43
 msgid "turn right"
-msgstr ""
+msgstr "rechts abbiegen"
 
 #: core/instructions_generator.py:44
 msgid "turn slightly right"
-msgstr ""
+msgstr "leicht rechts abbiegen"
 
 #: core/instructions_generator.py:45
 msgid "head straightforward"
-msgstr ""
+msgstr "geradeaus"
 
 #: modules/mod_info.py:67
 msgid "talk.maemo.org thread"
-msgstr ""
+msgstr "Diskussionsfaden auf talk.maemo.org"
 
 #: modules/mod_info.py:99
 msgid "main developer"
-msgstr ""
+msgstr "Hauptentwickler"
 
 #: modules/mod_info.py:102
 msgid "source code"
-msgstr ""
+msgstr "Quelltext"
 
 #: modules/mod_info.py:103
 msgid "discussion"
-msgstr ""
+msgstr "Forum"
 
 #: modules/mod_info.py:103
 msgid "check"
-msgstr ""
+msgstr "Siehe"

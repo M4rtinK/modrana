@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-07 01:19+0100\n"
+"POT-Creation-Date: 2017-12-13 00:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Åke Engelbrektson <eson@svenskasprakfiler.se>, 2017\n"
 "Language-Team: Swedish (https://www.transifex.com/martink/teams/81256/sv/)\n"
@@ -44,7 +44,7 @@ msgstr "sväng höger"
 
 #: core/instructions_generator.py:44
 msgid "turn slightly right"
-msgstr "sväng lätt vänster"
+msgstr "sväng lätt höger"
 
 #: core/instructions_generator.py:45
 msgid "head straightforward"
