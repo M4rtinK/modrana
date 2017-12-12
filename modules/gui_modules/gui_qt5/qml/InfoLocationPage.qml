@@ -58,16 +58,29 @@ BasePage {
 
             property real speed : rWin.position.speed
             property bool speedValid : rWin.position.speedValid
+            property real verticalSpeed : rWin.position.verticalSpeed
+            property bool verticalSpeedValid : rWin.position.verticalSpeedValid
 
             property real horizontalAccuracy : rWin.position.horizontalAccuracy
             property real verticalAccuracy : rWin.position.verticalAccuracy
             property real horizontalAccuracyValid : rWin.position.horizontalAccuracyValid
             property real verticalAccuracyValid : rWin.position.verticalAccuracyValid
 
+            property real direction : rWin.position.direction
+            property real directionValid : rWin.position.directionValid
+
+            property real magneticVariation : rWin.position.magneticVariation
+            property real magneticVariationValid : rWin.position.magneticVariationValid
+
             property date fixTimestamp : rWin.position.timestamp
 
-            property string notValidString : '<font color="red">(not valid)</font>'
-            property string unknownString : '<font color="red">unknown</font>'
+            // string "constants"
+            property string notValidString : '<font color="red">(' + qsTr('not valid') + ')</font>'
+            property string unknownString : '<font color="red">' + qsTr('unknown') + '</font>'
+            property string notMovingString : qsTr("not moving")
+            property string metersString : qsTr("m")
+            property string metersPerSecondString : qsTr("m/s")
+            property string degreesToTrueNorthString : qsTr("° to true north")
 
             // TODO: translations! :)
 
@@ -89,36 +102,60 @@ BasePage {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.altitudeValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.altitude ? lGrid.altitude : lGrid.unknownString
-                text: qsTr("<b>altitude:</b>") + " " + valueString + " m " + validString
+                text: qsTr("<b>altitude:</b>") + " " + valueString + " " + lGrid.metersString + " " + validString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.speedValid ? "" : lGrid.notValidString
-                property string valueString : lGrid.speed ? lGrid.speed + " m/s " + validString :
-                                                            (lGrid.speed == 0) ? "not moving" :
+                property string valueString : lGrid.speed ? lGrid.speed + " " + lGrid.metersPerSecondString + " " + validString :
+                                                            (lGrid.speed == 0) ? lGrid.notMovingString :
                                                                                  lGrid.unknownString
                 text: qsTr("<b>speed:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
-                property string valueString : rWin.bearing ? rWin.bearing.toPrecision(3) + "° to true north": lGrid.unknownString
+                property string validString : lGrid.verticalSpeedValid ? "" : lGrid.notValidString
+                property string valueString : lGrid.verticalSpeed ? lGrid.verticalSpeed + " " + lGrid.metersPerSecondString + " " + validString :
+                                                            (lGrid.verticalSpeed == 0) ? lGrid.notMovingString :
+                                                                                 lGrid.unknownString
+                text: qsTr("<b>vertical speed:</b>") + " " + valueString
+                width : lGrid.cellWidth
+            }
+
+            Label {
+                anchors.topMargin : rWin.c.style.main.spacing*3
+                property string valueString : rWin.bearing ? rWin.bearing.toPrecision(3) + lGrid.degreesToTrueNorthString: lGrid.unknownString
                 text: qsTr("<b>bearing:</b>") + " " + valueString
+                width : lGrid.cellWidth
+            }
+            Label {
+                anchors.topMargin : rWin.c.style.main.spacing*3
+                property string validString : lGrid.directionValid ? "" : lGrid.notValidString
+                property string valueString : lGrid.direction ? lGrid.direction : lGrid.unknownString
+                text: qsTr("<b>direction:</b>") + " " + valueString + " " + lGrid.degreesToTrueNorthString + " " + validString
+                width : lGrid.cellWidth
+            }
+            Label {
+                anchors.topMargin : rWin.c.style.main.spacing*3
+                property string validString : lGrid.magneticVariationValid ? qsTr("°") : lGrid.notValidString
+                property string valueString : lGrid.magneticVariation ? lGrid.magneticVariation : lGrid.unknownString
+                text: qsTr("<b>magnetic variation:</b>") + " " + valueString + " " + validString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.horizontalAccuracyValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.horizontalAccuracy ? lGrid.horizontalAccuracy : lGrid.unknownString
-                text: qsTr("<b>horizontal accuracy:</b>") + " " + valueString + " m " + validString
+                text: qsTr("<b>horizontal accuracy:</b>") + " " + valueString + " " + lGrid.metersString + " " + validString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.verticalAccuracyValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.verticalAccuracy ? lGrid.verticalAccuracy : lGrid.unknownString
-                text: qsTr("<b>vertical accuracy:</b>") + " " + valueString + " m " + validString
+                text: qsTr("<b>vertical accuracy:</b>") + " " + valueString + " " + lGrid.metersString + " " + validString
                 width : lGrid.cellWidth
             }
             Label {
