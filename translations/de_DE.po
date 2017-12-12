@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-13 00:01+0100\n"
+"POT-Creation-Date: 2017-12-13 00:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: olf <olf@fsamson.de>, 2017\n"
 "Language-Team: German (Germany) (https://www.transifex.com/martink/teams/81256/de_DE/)\n"
@@ -53,19 +53,3 @@ msgstr "geradeaus"
 #: modules/mod_info.py:67
 msgid "talk.maemo.org thread"
 msgstr "Diskussionsfaden auf talk.maemo.org"
-
-#: modules/mod_info.py:99
-msgid "main developer"
-msgstr "Hauptentwickler"
-
-#: modules/mod_info.py:102
-msgid "source code"
-msgstr "Quelltext"
-
-#: modules/mod_info.py:103
-msgid "discussion"
-msgstr "Forum"
-
-#: modules/mod_info.py:103
-msgid "check"
-msgstr "Siehe"

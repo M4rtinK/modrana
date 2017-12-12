@@ -271,38 +271,38 @@
     <name>InfoAboutPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="46"/>
-        <source>&lt;h3&gt;Dou you like modRana ? &lt;b&gt;Donate !&lt;/b&gt;&lt;/h3&gt;</source>
-        <translation>&lt;h3&gt;Gillar du modRana? &lt;b&gt;Donera!&lt;/b&gt;&lt;/h3&gt;</translation>
+        <source>&lt;h3&gt;Dou you like modRana? &lt;b&gt;Donate:&lt;/b&gt;&lt;/h3&gt;</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="85"/>
-        <source>main developer</source>
-        <translation>huvudutvecklare</translation>
+        <source>Main developer</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="91"/>
-        <source>email</source>
+        <source>Email</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="101"/>
-        <source>website</source>
-        <translation>webbsida</translation>
+        <source>Website</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="111"/>
-        <source>source code</source>
-        <translation>källkod</translation>
+        <source>Source code</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="121"/>
-        <source>discussion</source>
-        <translation>diskussion</translation>
+        <source>Forum</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="131"/>
-        <source>translation project</source>
-        <translation>översättningsprojekt</translation>
+        <source>Translation project</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -347,63 +347,68 @@
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="91"/>
-        <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;latitud:&lt;/b&gt;</translation>
+        <source>&lt;b&gt;Latitude:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="98"/>
-        <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;longitud:&lt;/b&gt;</translation>
+        <source>&lt;b&gt;Longitude:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="105"/>
-        <source>&lt;b&gt;altitude:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;altitud:&lt;/b&gt;</translation>
+        <source>&lt;b&gt;Altitude:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="114"/>
-        <source>&lt;b&gt;speed:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;hastighet:&lt;/b&gt;</translation>
+        <source>&lt;b&gt;Speed:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="123"/>
-        <source>&lt;b&gt;vertical speed:&lt;/b&gt;</source>
+        <source>&lt;b&gt;Vertical speed:&lt;/b&gt;</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="130"/>
-        <source>&lt;b&gt;bearing:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;riktning:&lt;/b&gt;</translation>
+        <source>&lt;b&gt;Bearing:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="137"/>
-        <source>&lt;b&gt;direction:&lt;/b&gt;</source>
+        <source>&lt;b&gt;Direction:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="144"/>
+        <source>&lt;b&gt;Magnetic variation:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="151"/>
+        <source>&lt;b&gt;Horizontal accuracy:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="158"/>
+        <source>&lt;b&gt;Vertical accuracy:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="164"/>
+        <source>&lt;b&gt;Fix timestamp:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
+        <source>Location usage disabled&lt;br&gt;(You can enable it from &lt;i&gt;Options --&gt; Location&lt;/i&gt;)</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="142"/>
         <source>°</source>
         <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="144"/>
-        <source>&lt;b&gt;magnetic variation:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="151"/>
-        <source>&lt;b&gt;horizontal accuracy:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;horisontell noggrannhet:&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="158"/>
-        <source>&lt;b&gt;vertical accuracy:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;vertikal noggrannhet:&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="164"/>
-        <source>&lt;b&gt;fix timestamp:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;tidsstämpel:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="236"/>
@@ -414,11 +419,6 @@
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
         <source>fix in progress</source>
         <translation>fixering pågår</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
-        <source>location usage disabled&lt;br&gt;(you can enable it from &lt;i&gt;Options-&gt;Location&lt;/i&gt;</source>
-        <translation>lokalisering inaktiverad&lt;br&gt;(du kan aktivera det från &lt;i&gt;Alternativ-&gt;Plats&lt;/i&gt;</translation>
     </message>
 </context>
 <context>
@@ -600,8 +600,8 @@
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="114"/>
-        <source>ModRana is a flexible navigation software for (not only) mobile Linux devices.</source>
-        <translation>ModRana är ett flexibelt navigationsprogram för (inte enbart) mobila Linux-enheter.</translation>
+        <source>This is modRana - a flexible navigation software for (not only) mobile Linux devices!</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-13 00:01+0100\n"
+"POT-Creation-Date: 2017-12-13 00:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/martink/teams/81256/zh_CN/)\n"
 "MIME-Version: 1.0\n"
@@ -51,20 +51,4 @@ msgstr ""
 
 #: modules/mod_info.py:67
 msgid "talk.maemo.org thread"
-msgstr ""
-
-#: modules/mod_info.py:99
-msgid "main developer"
-msgstr ""
-
-#: modules/mod_info.py:102
-msgid "source code"
-msgstr ""
-
-#: modules/mod_info.py:103
-msgid "discussion"
-msgstr ""
-
-#: modules/mod_info.py:103
-msgid "check"
 msgstr ""
