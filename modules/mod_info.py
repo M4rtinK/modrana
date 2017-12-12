@@ -91,18 +91,6 @@ class Info(RanaModule):
         """ModRana project email address."""
         return "modrana@gmail.com"
 
-    def getAboutText(self):
-        www = self.website_url
-        email = self.email_address
-        source = self.source_repository_url
-        discussion, name = self.discussions[0]
-        text = '<p><b>' + _('main developer') + ":</b> Martin Kolman</p>"
-        text += '<p><b>email</b>: <a href="mailto:%s">%s</a></p>' % (email, email)
-        text += '<p><b>www</b>: <a href="%s">%s</a></p>' % (www, www)
-        text += '<p><b>' + _('source code') + '</b>:\n<a href="%s">%s</a></p>' % (source, source)
-        text += '<p><b>' + _('discussion') + '</b>: ' + _('check') + '<a href="%s">%s</a></p>' % (discussion, name)
-        return text
-
     def drawMenu(self, cr, menuName, args=None):
         if menuName == 'infoAbout':
             menus = self.m.get('menu', None)
