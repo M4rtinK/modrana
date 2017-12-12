@@ -88,7 +88,7 @@ BasePage {
         Label {
             id : emailLabel
             width : parent.width
-            text: '<b>email</b>: <a href="mailto:' + aboutPage.emailAddress + '">' + aboutPage.emailAddress + '</a>'
+            text: '<b>' + qsTr("email") + '</b>: <a href="mailto:' + aboutPage.emailAddress + '">' + aboutPage.emailAddress + '</a>'
             wrapMode : Text.WordWrap
             onLinkActivated : {
                 rWin.log.info('email link clicked: ' + link)
