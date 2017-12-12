@@ -111,7 +111,7 @@ BasePage {
         Button {
             text : qsTr("Notify long")
             onClicked : {
-                rWin.notify(qsTr("ModRana is a flexible navigation software for (not only) mobile Linux devices."))
+                rWin.notify(qsTr("This is modRana - a flexible navigation software for (not only) mobile Linux devices!"))
             }
         }
     }

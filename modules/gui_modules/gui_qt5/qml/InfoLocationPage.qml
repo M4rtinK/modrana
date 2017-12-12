@@ -88,21 +88,21 @@ BasePage {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.latValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.lat ? lGrid.lat + " " + validString : lGrid.unknownString
-                text: qsTr("<b>latitude:</b>") + " " + valueString
+                text: qsTr("<b>Latitude:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.lonValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.lon ? lGrid.lon + " " + validString : lGrid.unknownString
-                text: qsTr("<b>longitude:</b>") + " " + valueString
+                text: qsTr("<b>Longitude:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.altitudeValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.altitude ? lGrid.altitude : lGrid.unknownString
-                text: qsTr("<b>altitude:</b>") + " " + valueString + " " + lGrid.metersString + " " + validString
+                text: qsTr("<b>Altitude:</b>") + " " + valueString + " " + lGrid.metersString + " " + validString
                 width : lGrid.cellWidth
             }
             Label {
@@ -111,7 +111,7 @@ BasePage {
                 property string valueString : lGrid.speed ? lGrid.speed + " " + lGrid.metersPerSecondString + " " + validString :
                                                             (lGrid.speed == 0) ? lGrid.notMovingString :
                                                                                  lGrid.unknownString
-                text: qsTr("<b>speed:</b>") + " " + valueString
+                text: qsTr("<b>Speed:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
             Label {
@@ -120,48 +120,48 @@ BasePage {
                 property string valueString : lGrid.verticalSpeed ? lGrid.verticalSpeed + " " + lGrid.metersPerSecondString + " " + validString :
                                                             (lGrid.verticalSpeed == 0) ? lGrid.notMovingString :
                                                                                  lGrid.unknownString
-                text: qsTr("<b>vertical speed:</b>") + " " + valueString
+                text: qsTr("<b>Vertical speed:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
 
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string valueString : rWin.bearing ? rWin.bearing.toPrecision(3) + lGrid.degreesToTrueNorthString: lGrid.unknownString
-                text: qsTr("<b>bearing:</b>") + " " + valueString
+                text: qsTr("<b>Bearing:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.directionValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.direction ? lGrid.direction : lGrid.unknownString
-                text: qsTr("<b>direction:</b>") + " " + valueString + " " + lGrid.degreesToTrueNorthString + " " + validString
+                text: qsTr("<b>Direction:</b>") + " " + valueString + " " + lGrid.degreesToTrueNorthString + " " + validString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.magneticVariationValid ? qsTr("°") : lGrid.notValidString
                 property string valueString : lGrid.magneticVariation ? lGrid.magneticVariation : lGrid.unknownString
-                text: qsTr("<b>magnetic variation:</b>") + " " + valueString + " " + validString
+                text: qsTr("<b>Magnetic variation:</b>") + " " + valueString + " " + validString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.horizontalAccuracyValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.horizontalAccuracy ? lGrid.horizontalAccuracy : lGrid.unknownString
-                text: qsTr("<b>horizontal accuracy:</b>") + " " + valueString + " " + lGrid.metersString + " " + validString
+                text: qsTr("<b>Horizontal accuracy:</b>") + " " + valueString + " " + lGrid.metersString + " " + validString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string validString : lGrid.verticalAccuracyValid ? "" : lGrid.notValidString
                 property string valueString : lGrid.verticalAccuracy ? lGrid.verticalAccuracy : lGrid.unknownString
-                text: qsTr("<b>vertical accuracy:</b>") + " " + valueString + " " + lGrid.metersString + " " + validString
+                text: qsTr("<b>Vertical accuracy:</b>") + " " + valueString + " " + lGrid.metersString + " " + validString
                 width : lGrid.cellWidth
             }
             Label {
                 anchors.topMargin : rWin.c.style.main.spacing*3
                 property string valueString : lGrid.fixTimestamp ? lGrid.fixTimestamp : lGrid.unknownString
-                text: qsTr("<b>fix timestamp:</b>") + " " + valueString
+                text: qsTr("<b>Fix timestamp:</b>") + " " + valueString
                 width : lGrid.cellWidth
             }
 
@@ -250,6 +250,6 @@ BasePage {
         font.pixelSize : 64 * rWin.c.style.main.multiplier
         //TODO: handle location usage being disabled by the user
         //text : gps.hasFix ? "NO FIX" : "fix in progress"
-        text : rWin.location.enabled ? qsTr("fix in progress") : qsTr("location usage disabled<br>(you can enable it from <i>Options->Location</i>")
+        text : rWin.location.enabled ? qsTr("fix in progress") : qsTr("Location usage disabled<br>(You can enable it from <i>Options --> Location</i>)")
     }
 }
