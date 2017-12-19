@@ -32,6 +32,7 @@ Requires: pyotherside-qml-plugin-python3-qt5
 Requires: libsailfishapp-launcher
 Requires: qt5-qtdeclarative-import-positioning
 Requires: qt5-qtpositioning
+Requires: qt5-qtquickcontrols-layouts
 %else
 Requires: pyotherside
 Requires: qt5-qtlocation
