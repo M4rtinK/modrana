@@ -272,37 +272,37 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="46"/>
         <source>&lt;h3&gt;Dou you like modRana? &lt;b&gt;Donate:&lt;/b&gt;&lt;/h3&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;h3&gt;¿Te gusta modRana? &lt;b&gt;Dona:&lt;/b&gt;&lt;/h3&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="85"/>
         <source>Main developer</source>
-        <translation type="unfinished"/>
+        <translation>Desarrollador principal</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="91"/>
         <source>Email</source>
-        <translation type="unfinished"/>
+        <translation>Correo</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="101"/>
         <source>Website</source>
-        <translation type="unfinished"/>
+        <translation>Sitio Web</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="111"/>
         <source>Source code</source>
-        <translation type="unfinished"/>
+        <translation>Código fuente</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="121"/>
         <source>Forum</source>
-        <translation type="unfinished"/>
+        <translation>Foro</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="131"/>
         <source>Translation project</source>
-        <translation type="unfinished"/>
+        <translation>Traducción</translation>
     </message>
 </context>
 <context>
@@ -318,97 +318,97 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="78"/>
         <source>not valid</source>
-        <translation type="unfinished"/>
+        <translation>no válido</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="79"/>
         <source>unknown</source>
-        <translation type="unfinished"/>
+        <translation>desconocido</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="80"/>
         <source>not moving</source>
-        <translation type="unfinished"/>
+        <translation>sin movimiento</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="81"/>
         <source>m</source>
-        <translation type="unfinished"/>
+        <translation>m</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="82"/>
         <source>m/s</source>
-        <translation type="unfinished"/>
+        <translation>m/s</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="83"/>
         <source>° to true north</source>
-        <translation type="unfinished"/>
+        <translation>º al norte geográfico</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="91"/>
         <source>&lt;b&gt;Latitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Latitud:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="98"/>
         <source>&lt;b&gt;Longitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Longitud:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="105"/>
         <source>&lt;b&gt;Altitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Altitud:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="114"/>
         <source>&lt;b&gt;Speed:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Velocidad:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="123"/>
         <source>&lt;b&gt;Vertical speed:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Velocidad vertical:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="130"/>
         <source>&lt;b&gt;Bearing:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Rumbo:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="137"/>
         <source>&lt;b&gt;Direction:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Dirección:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="144"/>
         <source>&lt;b&gt;Magnetic variation:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Declinación magnética:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="151"/>
         <source>&lt;b&gt;Horizontal accuracy:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Precisión horizontal:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="158"/>
         <source>&lt;b&gt;Vertical accuracy:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Precisión vertical:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="164"/>
         <source>&lt;b&gt;Fix timestamp:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Hora del ajuste:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
         <source>Location usage disabled&lt;br&gt;(You can enable it from &lt;i&gt;Options --&gt; Location&lt;/i&gt;)</source>
-        <translation type="unfinished"/>
+        <translation>Uso de ubicación desactivado&lt;br&gt;(Puedes activarlo en &lt;i&gt;Configuración-&gt;Ubicación&lt;/i&gt;)</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="142"/>
         <source>°</source>
-        <translation type="unfinished"/>
+        <translation>°</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="236"/>
@@ -601,7 +601,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="114"/>
         <source>This is modRana - a flexible navigation software for (not only) mobile Linux devices!</source>
-        <translation type="unfinished"/>
+        <translation>Esto es modRana - ¡un programa de navegación flexible para (no sólo) dispositivos móviles con Linux!</translation>
     </message>
 </context>
 <context>

@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.5
+Version: 0.55.6
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,24 @@ fi
 %endif
 
 %changelog
+* Tue Dec 19 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.6-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Bump QtQuick Controls dependency (martin.kolman)
+- Add missing dependency on qt5-qtquickcontrols-layouts (martin.kolman)
+- Update translations (martin.kolman)
+- Further translation fixes (martin.kolman)
+- kmh -> km/h (martin.kolman)
+- Drop the getAboutText() method (martin.kolman)
+- Update translations (martin.kolman)
+- Make the "email" string translatable (martin.kolman)
+- Improve the location info page (martin.kolman)
+- Handle new QtPositioning values from the Python side (martin.kolman)
+- Remove the sv_SE translation variant (martin.kolman)
+- Make the "routing enabled" notification translatable (martin.kolman)
+- Drop POI menu from list of unfinished features (martin.kolman)
+- Make the clipboard notification translatable (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Thu Dec 07 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.5-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Dictionary based about page (martin.kolman)

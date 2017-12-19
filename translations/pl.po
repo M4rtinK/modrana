@@ -10,45 +10,46 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-12-19 01:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Language-Team: Finnish (Finland) (https://www.transifex.com/martink/teams/81256/fi_FI/)\n"
+"Last-Translator: A <hucul@o2.pl>, 2017\n"
+"Language-Team: Polish (https://www.transifex.com/martink/teams/81256/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fi_FI\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: pl\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 
 #: core/instructions_generator.py:38
 msgid "turn slightly left"
-msgstr ""
+msgstr "delikatnie skręć w lewo"
 
 #: core/instructions_generator.py:39
 msgid "turn left"
-msgstr ""
+msgstr "skręć w lewo"
 
 #: core/instructions_generator.py:40
 msgid "turn sharply left"
-msgstr ""
+msgstr "ostro skręć w lewo"
 
 #: core/instructions_generator.py:41
 msgid "make a U-turn"
-msgstr ""
+msgstr "zawróć"
 
 #: core/instructions_generator.py:42
 msgid "turn sharply right"
-msgstr ""
+msgstr "ostro skręć w prawo"
 
 #: core/instructions_generator.py:43
 msgid "turn right"
-msgstr ""
+msgstr "skręć w prawo"
 
 #: core/instructions_generator.py:44
 msgid "turn slightly right"
-msgstr ""
+msgstr "delikatnie skręć w prawo"
 
 #: core/instructions_generator.py:45
 msgid "head straightforward"
-msgstr ""
+msgstr "jedź prosto"
 
 #: modules/mod_info.py:67
 msgid "talk.maemo.org thread"
-msgstr ""
+msgstr "wątek na talk.maemo.org"
