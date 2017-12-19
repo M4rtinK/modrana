@@ -38,7 +38,7 @@ Requires: pyotherside
 Requires: qt5-qtlocation
 # qmlscene is in the qt5-qtdeclarative package
 Requires: qt5-qtdeclarative-devel
-Requires: qt5-qtquickcontrols
+Requires: qt5-qtquickcontrols2
 Requires: qt5-qtsensors
 # pygtk2 is needed for the GTK GUI
 Requires: pygtk2
