@@ -43,7 +43,7 @@ BasePage {
         Label {
             id : donateLabel
             anchors.horizontalCenter : parent.horizontalCenter
-            text : qsTr("<h3>Dou you like modRana? <b>Donate:</b></h3>")
+            text : qsTr("<h3>Do you like modRana? <b>Donate:</b></h3>")
         }
         Column {
             anchors.horizontalCenter : parent.horizontalCenter
@@ -82,13 +82,13 @@ BasePage {
         Label {
             id : mainDeveloperLabel
             width : parent.width
-            text: "<b>" + qsTr("Main developer") + "</b>: Martin Kolman"
+            text : "<b>" + qsTr("Main developer") + "</b>: Martin Kolman"
             wrapMode : Text.WordWrap
         }
         Label {
             id : emailLabel
             width : parent.width
-            text: '<b>' + qsTr("Email") + '</b>: <a href="mailto:' + aboutPage.emailAddress + '">' + aboutPage.emailAddress + '</a>'
+            text : '<b>' + qsTr("Email") + '</b>: <a href="mailto:' + aboutPage.emailAddress + '">' + aboutPage.emailAddress + '</a>'
             wrapMode : Text.WordWrap
             onLinkActivated : {
                 rWin.log.info('email link clicked: ' + link)
@@ -98,7 +98,7 @@ BasePage {
         Label {
             id : websiteLabel
             width : parent.width
-            text: '<b>' + qsTr('Website') + '</b>: <a href="' + aboutPage.websiteUrl + '">' + aboutPage.websiteUrl + '</a>'
+            text : '<b>' + qsTr('Website') + '</b>: <a href="' + aboutPage.websiteUrl + '">' + aboutPage.websiteUrl + '</a>'
             wrapMode : Text.WordWrap
             onLinkActivated : {
                 rWin.log.info('website link clicked: ' + link)
@@ -108,7 +108,7 @@ BasePage {
         Label {
             id : sourceCodeLabel
             width : parent.width
-            text: '<b>' + qsTr('Source code') + '</b>: <a href="' + aboutPage.sourceRepositoryUrl + '">' + aboutPage.sourceRepositoryUrl + '</a>'
+            text : '<b>' + qsTr('Source code') + '</b>: <a href="' + aboutPage.sourceRepositoryUrl + '">' + aboutPage.sourceRepositoryUrl + '</a>'
             wrapMode : Text.WordWrap
             onLinkActivated : {
                 rWin.log.info('source code link clicked: ' + link)
@@ -118,7 +118,7 @@ BasePage {
         Label {
             id : discussionLabel
             width : parent.width
-            text: '<b>' + qsTr('Forum') + '</b>: <a href="' + aboutPage.discussionUrl + '">' + aboutPage.discussionUrl + '</a>'
+            text : '<b>' + qsTr('Forum') + '</b>: <a href="' + aboutPage.discussionUrl + '">' + aboutPage.discussionUrl + '</a>'
             wrapMode : Text.WordWrap
             onLinkActivated : {
                 rWin.log.info('forum link clicked: ' + link)
@@ -128,7 +128,7 @@ BasePage {
         Label {
             id : translationLabel
             width : parent.width
-            text: '<b>' + qsTr('Translation project') + '</b>: <a href="' + aboutPage.translationUrl + '">' + aboutPage.translationUrl + '</a>'
+            text : '<b>' + qsTr('Translation project') + '</b>: <a href="' + aboutPage.translationUrl + '">' + aboutPage.translationUrl + '</a>'
             wrapMode : Text.WordWrap
             onLinkActivated : {
                 rWin.log.info('translation link clicked: ' + link)
