@@ -2,6 +2,6 @@ language: python
 python:
   - "3.4"
   - "3.6"
-install: apt-get install python3-nose
+install: sudo apt-get install python3-nose
 script:
   - nosetests3 -w tests -v
