@@ -9,6 +9,8 @@ PYTHON=$(PYTHON2)
 
 RSYNC=rsync
 
+NOSETESTS="nosetests-3"
+
 SOURCEDIR=modrana_source
 BUILDDIR=modrana_build
 EXCLUDEFILE=packaging/fedora/exclude.txt
@@ -206,7 +208,4 @@ release:
 .PHONY: clean install tag archive
 
 test:
-	# use a nested shell to resolve path to nosetests and run the path with python3
-	# so that we don't need to change the executable name every time major version
-	# of Python changes in the distro
-	nosetests-3 -w tests -v
+	PYTHONPATH=core/bundle $(NOSETESTS) -w tests -v

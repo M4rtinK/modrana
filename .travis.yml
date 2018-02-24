@@ -4,4 +4,4 @@ python:
   - "3.6"
 install: sudo apt-get install python3-nose
 script:
-  - nosetests3 -w tests -v
+  - make test NOSETESTS=nosetests3
