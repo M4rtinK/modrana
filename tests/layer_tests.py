@@ -22,6 +22,7 @@ revision=1
   group="osm"
   icon="mapnik"
   timeout=240.5
+  connection_timeout=30
 
 [[osm_landscape]]
   label=Landscape
@@ -70,6 +71,7 @@ class MapLayerTests(unittest.TestCase):
             "coordinates": "osm",
             "group_id": "osm",
             "icon": "mapnik",
-            "timeout": 240.5
+            "timeout": 240.5,
+            "connection_timeout": 30
         }
         self.assertDictEqual(layer.dict, expected_dict)
