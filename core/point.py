@@ -222,7 +222,7 @@ class TurnByTurnPoint(Point):
         """Current distance from the step in meters.
 
         :returns: distance from step in meters
-        :rtype: int
+        :rtype: int or None
         """
         return self._current_distance
 
@@ -235,7 +235,7 @@ class TurnByTurnPoint(Point):
         """Distance of the point from the start of the route in meters.
 
         :returns: distance from start of the route in meters
-        :rtype: int
+        :rtype: int or None
         """
         return self._distance_from_start
 

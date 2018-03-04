@@ -1,5 +1,6 @@
 import unittest
 from core.point import Point
+from core.point import TurnByTurnPoint
 
 class PointTests(unittest.TestCase):
     def basic_point_test(self):
@@ -35,3 +36,32 @@ class PointTests(unittest.TestCase):
         point.setLLE(5.0, 6.0, 200.5)
         self.assertEqual(point.getLLE(), (5.0, 6.0, 200.5))
         self.assertEqual(point.getLLEM(), (5.0, 6.0, 200.5, "baz message"))
+
+
+class turnByTurnPointTests(unittest.TestCase):
+
+    def basic_test(self):
+        """Test basic TurnByTurn point functionality"""
+        point = TurnByTurnPoint(1.0, 2.0, elevation=123.45,
+                                message="foo message",
+                                ssml_message="ssml message",
+                                icon="some_icon_id")
+
+        # distances should be None by default
+        self.assertIsNone(point.current_distance)
+        self.assertIsNone(point.distance_from_start)
+
+        # visited should be False as well
+        self.assertFalse(point.visited)
+
+        self.assertEqual(point.ssml_message, "ssml message")
+        self.assertEqual(point.icon, "some_icon_id")
+
+        # check if the LLEMI tuple is correct as well
+        self.assertEqual(point.llemi, (1.0, 2.0, 123.45, "foo message", "some_icon_id"))
+
+        # try setting the distances
+        point.current_distance = 200
+        point.distance_from_start = 300
+        self.assertEqual(point.current_distance, 200)
+        self.assertEqual(point.distance_from_start, 300)
