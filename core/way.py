@@ -318,7 +318,7 @@ class Way(object):
             lon = step['start_location']['lng']
             #TODO: end location ?
             point = TurnByTurnPoint(lat, lon, message=message)
-            point.distanceFromStart = mDistanceFromStart
+            point.distance_from_start = mDistanceFromStart
             # store point to temporary list
             messagePoints.append(point)
             # update distance for next point
@@ -476,7 +476,7 @@ class Way(object):
                 routePoints.append((lat, lon, elevation))
                 if message != "": # is it a message point ?
                     point = TurnByTurnPoint(lat, lon, elevation, message)
-                    point.distanceFromStart = mLength
+                    point.distance_from_start = mLength
                     messagePoints.append(point)
                 lastLat, lastLon = lat, lon
             routePoints.append((destination[0], destination[1], None))

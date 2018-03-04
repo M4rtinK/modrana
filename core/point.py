@@ -218,23 +218,38 @@ class TurnByTurnPoint(Point):
         self._icon = icon
 
     @property
-    def currentDistance(self):
+    def current_distance(self):
+        """Current distance from the step in meters.
+
+        :returns: distance from step in meters
+        :rtype: int
+        """
         return self._current_distance
 
-    @currentDistance.setter
-    def currentDistance(self, distance_in_meters):
+    @current_distance.setter
+    def current_distance(self, distance_in_meters):
         self._current_distance = distance_in_meters
 
     @property
-    def distanceFromStart(self):
+    def distance_from_start(self):
+        """Distance of the point from the start of the route in meters.
+
+        :returns: distance from start of the route in meters
+        :rtype: int
+        """
         return self._distance_from_start
 
-    @distanceFromStart.setter
-    def distanceFromStart(self, distance_from_start):
+    @distance_from_start.setter
+    def distance_from_start(self, distance_from_start):
         self._distance_from_start = distance_from_start
 
     @property
     def visited(self):
+        """Has the point been visited ?
+
+        :returns: True is the point has already been visited, False otherwise
+        :rtype: bool
+        """
         return self._visited
 
     @visited.setter
@@ -242,17 +257,28 @@ class TurnByTurnPoint(Point):
         self._visited = value
 
     @property
-    def ssmlMessage(self):
+    def ssml_message(self):
+        """SSML message for TTS corresponding to the turn.
+
+        :returns: SSML message describing the turn
+        :rtype: str
+        """
         return self._ssml_message
 
-    @ssmlMessage.setter
-    def ssmlMessage(self, message):
+    @ssml_message.setter
+    def ssml_message(self, message):
         self._ssml_message = message
 
     @property
     def icon(self):
+        """Icon id corresponding to the turn.
+
+        :returns: turn icon id
+        :rtype: str
+        """
         return self._icon
 
     @property
     def llemi(self):
+        """Latitude, longitude, elevation, message, icon id tuple."""
         return self.lat, self.lon, self.elevation, self._message, self._icon

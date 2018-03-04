@@ -233,8 +233,8 @@ class TurnByTurn(RanaModule):
                     units = self.m.get('units', None)
                     if units and self._current_distance:
                         distString = units.m2CurrentUnitString(self._current_distance, 1, True)
-                        if self.current_step.distanceFromStart:
-                            current_dist_string = units.m2CurrentUnitString(self.current_step.distanceFromStart, 1, True)
+                        if self.current_step.distance_from_start:
+                            current_dist_string = units.m2CurrentUnitString(self.current_step.distance_from_start, 1, True)
                         else:
                             current_dist_string = "?"
                         route_length_string = units.m2CurrentUnitString(self._m_route_length, 1, True)
@@ -402,8 +402,8 @@ class TurnByTurn(RanaModule):
             temp_steps = self._route.message_points
             for step in temp_steps:
                 (lat2, lon2) = step.getLL()
-                step.currentDistance = geo.distance(lat1, lon1, lat2, lon2) * 1000  # km to m
-            closest_step = sorted(temp_steps, key=lambda x: x.currentDistance)[0]
+                step.current_distance = geo.distance(lat1, lon1, lat2, lon2) * 1000  # km to m
+            closest_step = sorted(temp_steps, key=lambda x: x.current_distance)[0]
 
             return closest_step
 
@@ -550,7 +550,7 @@ class TurnByTurn(RanaModule):
                             # with current distance to this step,
                             # to assure there is some voice output immediately after
                             # getting a new route or rerouting"""
-                            plaintextMessage = next_step.ssmlMessage
+                            plaintextMessage = next_step.ssml_message
                             self._say_turn(plaintextMessage, pos2next_step)
                         else:
                             # we have probably not yet reached the closest step,
@@ -703,7 +703,7 @@ class TurnByTurn(RanaModule):
                 if self._espeak_second_trigger is False:
                     self.log.debug("triggering espeak nr. 2")
                     # say the message without distance
-                    plaintextMessage = self.current_step.ssmlMessage
+                    plaintextMessage = self.current_step.ssml_message
                     # consider turn said even if it was skipped (ignore errors)
                     self._say_turn(plaintextMessage, 0)
                     self.current_step.visited = True  # mark this point as visited
@@ -715,14 +715,14 @@ class TurnByTurn(RanaModule):
                     # this means we reached an optimal distance for saying the message"""
                     if self._espeak_first_trigger is False:
                         self.log.debug("triggering espeak nr. 1")
-                        plaintextMessage = self.current_step.ssmlMessage
+                        plaintextMessage = self.current_step.ssml_message
                         if self._say_turn(plaintextMessage, current_distance):
                             self._espeak_first_trigger = True  # first message done
                 if self._espeak_first_and_half_trigger is False and warn_time > 30:
                     if current_distance <= (20.0 * meters_per_sec_speed):
                         # in case that the warning time gets too big, add an intermediate warning at 20 seconds
                         # NOTE: this means it is said after the first trigger
-                        plaintextMessage = self.current_step.ssmlMessage
+                        plaintextMessage = self.current_step.ssml_message
                         if self._say_turn(plaintextMessage, current_distance):
                             self._espeak_first_and_half_trigger = True  # intermediate message done
 
