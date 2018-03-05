@@ -38,7 +38,7 @@ class PointTests(unittest.TestCase):
         self.assertEqual(point.getLLEM(), (5.0, 6.0, 200.5, "baz message"))
 
 
-class turnByTurnPointTests(unittest.TestCase):
+class TurnByTurnPointTests(unittest.TestCase):
 
     def basic_test(self):
         """Test basic TurnByTurn point functionality"""
