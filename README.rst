@@ -2,6 +2,9 @@
 modRana
 =======
 
+.. image:: https://travis-ci.org/M4rtinK/modrana.svg?branch=master
+    :target: https://travis-ci.org/M4rtinK/modrana
+
 ModRana is a flexible GPS navigation system for mobile Linux devices.
 
 Development
