@@ -228,8 +228,8 @@ class Tracklog(RanaModule):
         # try to export the log to GPX
         self.notify("saving tracklog", 3000)
         # first from the primary log
-        if not self.log1.saveToGPX(self.logPath):
-            self.log2.saveToGPX(self.logPath) # try the secondary log
+        if not self.log1.save_to_GPX(self.logPath):
+            self.log2.save_to_GPX(self.logPath) # try the secondary log
             # TODO: check if the GPX file is loadable and retry ?
 
         # cleanup
@@ -728,7 +728,7 @@ class Tracklog(RanaModule):
                         # (eq. caused by a crash during saving the GPX file)
                         if os.path.exists(exportPath): # save to backup path
                             exportPath = "%s_1.gpx" % os.path.splitext(logPath)[0]
-                        w1.saveToGPX(exportPath)
+                        w1.save_to_GPX(exportPath)
                         self.log.info('GPX export of unsaved primary tracklog successful')
                         # success, delete temporary files
 
@@ -771,7 +771,7 @@ class Tracklog(RanaModule):
                         # (eq. caused by a crash during saving the GPX file)
                         if os.path.exists(exportPath): # save to backup path
                             exportPath = "%s_2.gpx" % os.path.splitext(logPath)[0]
-                        w2.saveToGPX(exportPath)
+                        w2.save_to_GPX(exportPath)
                         self.log.info('GPX export of unsaved secondary tracklog successful')
                         # success, delete temporary file
 

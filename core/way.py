@@ -85,17 +85,30 @@ class Way(object):
         self._update_cache()
 
     def get_point_by_index(self, index):
+        """Get a regular point by index.
+
+        :param int: point index
+        """
         p = self._points[index]
         (lat, lon, elevation) = (p[0], p[1], p[2])
         return Point(lat, lon, elevation)
 
     @property
     def points_lle(self):
-        """Return the way points as LLE tuples"""
+        """Return the way points as LLE tuples.
+
+        :return: way as LLE tuples
+        :rtype: list of tuples
+        """
         return self._points
 
     def get_points_lle_radians(self, drop_elevation=False):
-        """Return the way as LLE tuples in radians"""
+        """Return the way as LLE tuples in radians.
+
+        :param bool drop_elevation: drop elevation from the tuples
+        :return: LLE tuples
+        :rtype: list of tuples
+        """
         # do we have cached radians version of the LLE tuples ?
         if self._points_in_radians is not None:
             return self._points_in_radians
@@ -105,23 +118,47 @@ class Way(object):
             return radians
 
     def add_point(self, point):
+        """Add regular point to the end of the route.
+
+        :param point: a Point class instance
+        """
         lat, lon, elevation = point.getLLE()
         self._points.append((lat, lon, elevation))
 
     def add_point_lle(self, lat, lon, elevation=None):
+        """Add regular point from coordinates.
+
+        :param float lat: latitude
+        :param float lon: longitude
+        :param elevation: elevation
+        :type elevation: float or None
+        """
         self._points.append((lat, lon, elevation))
 
     @property
     def point_count(self):
+        """Count of all regular points.
+
+        Note that this does not include message points.
+
+        :return: regular point count
+        :rtype: int
+        """
         return len(self._points)
 
-    # Duration specifies how long it takes to travel a route
-    # it can either come from logging (it took this many seconds
-    # to record this way) or from routing (it is expected that
-    # traveling this route with this travel mode takes this seconds)
 
     @property
     def duration(self):
+        """Expected duration of the route in seconds,
+
+        Duration specifies how long it takes to travel a route
+        it can either come from logging (it took this many seconds
+        to record this way) or from routing (it is expected that
+        traveling this route with this travel mode takes this seconds)
+
+        :return: route duration in sconds
+        :rtype: int
+        """
         return self._duration
 
     @duration.setter
@@ -140,23 +177,47 @@ class Way(object):
         self._message_points_lle = mpLLE
 
     def add_message_point(self, point):
+        """Add a message point to the way.
+
+        :param point: message point to add
+        """
         self._message_points.append(point)
         self._update_cache()
 
     def add_message_points(self, points):
+        """Add multiple message points.
+
+        :param points: a list of message points
+        """
         self._message_points.extend(points)
         self._update_cache()
 
-    def set_message_point_by_index(self, index, mPoint):
-        self._message_points[index] = mPoint
+    def set_message_point_by_index(self, index, point):
+        """Set a message point given by index to a different one.
+
+        :param int index: message point index
+        :param point: a message point
+        """
+        self._message_points[index] = point
         self._update_cache()
 
     def get_message_point_by_index(self, index):
+        """Get a message point by index.
+
+        :param int index: message point index
+        """
         return self._message_points[index]
 
     def get_message_point_index(self, point):
-        """Return the index of a given message point or None
-        if the given point doesn't exist in the message point list
+        """Get index of given message point or None.
+
+        Return the index of a given message point or None
+        if the given point doesn't exist in the message point list.
+
+        :param point: message point instance
+
+        :return: index of the message point or None
+        :rtype: int or None
         """
         try:
             return self._message_points.index(point)
@@ -165,40 +226,61 @@ class Way(object):
 
     @property
     def message_points(self):
-        """Return a list of message point objects"""
+        """Return a list of message point objects.
+
+        :return: list of message point objects
+        :rtype: list
+        """
         return self._message_points
 
     @property
     def message_points_lle(self):
-        """Return a list of message point LLE tuples"""
+        """Return a list of message point LLE tuples.
+
+        :return: message point LLE tuples
+        :rtype: list
+        """
         return self._message_points_lle
 
     def clear_message_points(self):
-        """Clear all message points"""
+        """Clear all message points."""
         self._message_points = []
         self._update_cache()
 
     @property
     def message_point_count(self):
+        """Message point count.
+
+        :return: message point count
+        :rtype: int
+        """
         return len(self._message_points)
 
     @property
     def length(self):
-        """Way length in meters"""
+        """Way length in meters.
+
+        :return: way length in meters
+        :rtype: int
+        """
         return self._length
 
-    def _setLength(self, mLength):
+    def _set_length(self, mLength):
         """For use if the length on of the way is reliably known from
-           external sources"""
+           external sources."""
         self._length = mLength
 
 
     # GPX export
 
-    def saveToGPX(self, path, turns=False):
-        """Save way to GPX file
-        points are saved as trackpoints,
-        message points as routepoints with turn description in the <desc> field
+    def save_to_GPX(self, path, turns=False):
+        """Save way to GPX file.
+
+        :param str path: file path for the new GPX file
+        :param bool turns: specifies that message points contain turn descriptions
+
+        Points are saved as trackpoints, message points as routepoints
+        with turn description in the <desc> field.
         """
         try: # first check if we cant open the file for writing
             f = open(path, "wb")
@@ -221,12 +303,12 @@ class Way(object):
             # is it as easy just dumping the segment lists to Trackpoints ?
 
             # message is stored in <desc>
-            messagePoints = self.message_points
+            message_points = self.message_points
             index = 1
-            mpCount = len(messagePoints)
+            mpCount = len(message_points)
             if turns: # message points contain Turn-By-Turn directions
                 routepoints = gpx.Routepoints()
-                for mp in messagePoints:
+                for mp in message_points:
                     name = ""
                     if turns:
                         name = "Turn %d/%d" % (index, mpCount)
@@ -237,7 +319,7 @@ class Way(object):
                          path, len(trackpoints), len(routepoints))
             else:
                 waypoints = []
-                for mp in messagePoints:
+                for mp in message_points:
                     name = ""
                     if turns:
                         name = "Turn %d/%d" % (index, mpCount)
@@ -249,8 +331,8 @@ class Way(object):
 
             # write the GPX tree to file
             # TODO: waypoints & routepoints support
-            xmlTree = trackpoints.export_gpx_file()
-            xmlTree.write(f)
+            xml_tree = trackpoints.export_gpx_file()
+            xml_tree.write(f)
             # close the file
             f.close()
             return True
@@ -260,7 +342,7 @@ class Way(object):
 
     # CSV  export
 
-    def saveToCSV(self, path, append=False):
+    def save_to_CSV(self, path, append=False):
         """Save all points to a CSV file
         NOTE: message points are not (yet) handled
         TODO: message point support
@@ -280,34 +362,37 @@ class Way(object):
             return False
 
     def __str__(self):
-        pCount = self.point_count
-        mpCount = self.message_point_count
-        return "segment: %d points and %d message points" % (pCount, mpCount)
+        p_count = self.point_count
+        mp_count = self.message_point_count
+        return "segment: %d points and %d message points" % (p_count, mp_count)
 
     @classmethod
-    def from_google_directions_result(cls, gResult):
-        """Convert Google Directions result to a way object"""
-        leg = gResult['routes'][0]['legs'][0]
+    def from_google_directions_result(cls, gd_result):
+        """Convert Google Directions result to a way object.
+
+        :param gd_result: Google Directions result
+        """
+        leg = gd_result['routes'][0]['legs'][0]
         steps = leg['steps']
 
-        points = decode_polyline(gResult['routes'][0]['overview_polyline']['points'])
+        points = decode_polyline(gd_result['routes'][0]['overview_polyline']['points'])
         # length of the route can computed from its metadata
         if 'distance' in leg: # this field might not be present
-            mLength = leg['distance']['value']
+            m_length = leg['distance']['value']
         else:
-            mLength = None
+            m_length = None
         # the route also contains the expected duration in seconds
         if 'duration' in leg: # this field might not be present
-            sDuration = leg['duration']['value']
+            s_duration = leg['duration']['value']
         else:
-            sDuration = None
+            s_duration = None
 
         way = cls(points)
-        way._setLength(mLength)
-        way.duration = sDuration
-        messagePoints = []
+        way._set_length(m_length)
+        way.duration = s_duration
+        message_points = []
 
-        mDistanceFromStart = 0
+        m_distance_from_start = 0
 
         for step in steps:
             # TODO: abbreviation filtering
@@ -318,41 +403,44 @@ class Way(object):
             lon = step['start_location']['lng']
             #TODO: end location ?
             point = TurnByTurnPoint(lat, lon, message=message)
-            point.distance_from_start = mDistanceFromStart
+            point.distance_from_start = m_distance_from_start
             # store point to temporary list
-            messagePoints.append(point)
+            message_points.append(point)
             # update distance for next point
             mDistanceFromLast = step["distance"]['value']
-            mDistanceFromStart = mDistanceFromStart + mDistanceFromLast
+            m_distance_from_start = m_distance_from_start + mDistanceFromLast
 
-        way.add_message_points(messagePoints)
+        way.add_message_points(message_points)
         return way
 
     @classmethod
-    def from_monav_result(cls, result):
-        """Convert route nodes from the Monav routing result"""
+    def from_monav_result(cls, monav_result):
+        """Convert route nodes from the Monav routing result.
+
+        :param monav_result: Monav routing result
+        """
         # to (lat, lon) tuples
-        if result:
+        if monav_result:
             # route points
-            routePoints = []
-            mLength = 0 # in meters
-            if result.nodes:
-                firstNode = result.nodes[0]
-                prevLat, prevLon = firstNode.latitude, firstNode.longitude
+            route_points = []
+            m_length = 0 # in meters
+            if monav_result.nodes:
+                first_node = monav_result.nodes[0]
+                prev_lat, prev_lon = first_node.latitude, first_node.longitude
                 # there is one from first to first calculation on start,
                 # but as it should return 0, it should not be an issue
-                for node in result.nodes:
-                    routePoints.append((node.latitude, node.longitude, None))
-                    mLength += geo.distance(prevLat, prevLon, node.latitude, node.longitude) * 1000
-                    prevLat, prevLon = node.latitude, node.longitude
+                for node in monav_result.nodes:
+                    route_points.append((node.latitude, node.longitude, None))
+                    m_length += geo.distance(prev_lat, prev_lon, node.latitude, node.longitude) * 1000
+                    prev_lat, prev_lon = node.latitude, node.longitude
 
-            way = cls(routePoints)
-            way.duration = result.seconds
-            way._setLength(mLength)
+            way = cls(route_points)
+            way.duration = monav_result.seconds
+            way._set_length(m_length)
 
             # detect turns
-            messagePoints = detect_monav_turns(result)
-            way.add_message_points(messagePoints)
+            message_points = detect_monav_turns(monav_result)
+            way.add_message_points(message_points)
             return way
         else:
             return None
@@ -364,16 +452,21 @@ class Way(object):
         pass
 
     @classmethod
-    def from_csv(cls, path, delimiter=',', fieldCount=None):
+    def from_csv(cls, path, delimiter=',', field_count=None):
         """Create a way object from a CSV file specified by path
+
+        :param str path: path to a CSV file
+        :param str delimiter: delimiter used in the file
+        :param int field_count: expected filed count
+
         Assumed field order:
         lat,lon,elevation,timestamp
 
-        If the fieldCount parameter is set, modRana assumes that the file has exactly the provided number
+        If the field_count parameter is set, modRana assumes that the file has exactly the provided number
         of fields. As a result, content of any additional fields on a line will be dropped and
-        if any line has less fields than fieldCount, parsing will fail.
+        if any line has less fields than field_count, parsing will fail.
 
-       If the fieldCount parameter is not set, modRana checks the field count for every filed and tries to get usable
+        If the field_count parameter is not set, modRana checks the field count for every filed and tries to get usable
         data from it. Lines that fail to parse (have too 0 or 1 fields or fail at float parsing) are dropped. In this mode,
         a list of LLET tuples is returned.
 
@@ -393,17 +486,17 @@ class Way(object):
                 f.close()
 
         points = []
-        parsingErrorCount = 0
+        parsing_error_count = 0
 
         reader = csv.reader(f, delimiter=delimiter)
 
-        if fieldCount:  # assume fixed field count
+        if field_count:  # assume fixed field count
             try:
-                if fieldCount == 2: # lat, lon
+                if field_count == 2: # lat, lon
                     points = [(x[0], x[1]) for x in reader]
-                elif fieldCount == 3: # lat, lon, elevation
+                elif field_count == 3: # lat, lon, elevation
                     points = [(x[0], x[1], x[2]) for x in reader]
-                elif fieldCount == 4: # lat, lon, elevation, timestamp
+                elif field_count == 4: # lat, lon, elevation, timestamp
                     points = [(x[0], x[1], x[2], x[3]) for x in reader]
                 else:
                     log.error("wrong field count - use 2, 3 or 4")
@@ -413,10 +506,10 @@ class Way(object):
                 f.close()
                 return None
         else:
-            parsingErrorCount = 0
-            lineNumber = 1
+            parsing_error_count = 0
+            line_number = 1
 
-            def eFloat(item):
+            def e_float(item):
                 if item:  # 0 would still be '0' -> nonempty string
                     try:
                         return float(item)
@@ -438,54 +531,59 @@ class Way(object):
                     # so we use float far lat and lon
                     # (which means that the line will error out if lat or lon
                     # is missing or corrupted)
-                    # but use eFloat for elevation (we can live with missing elevation)
+                    # but use e_float for elevation (we can live with missing elevation)
                     if fields >= 4:
-                        points.append((float(r[0]), float(r[1]), eFloat(r[2]), r[3]))
+                        points.append((float(r[0]), float(r[1]), e_float(r[2]), r[3]))
                     elif fields == 3:
-                        points.append((float(r[0]), float(r[1]), eFloat(r[2]), None))
+                        points.append((float(r[0]), float(r[1]), e_float(r[2]), None))
                     elif fields == 2:
                         points.append((float(r[0]), float(r[1]), None, None))
                     else:
                         log.error('line %d has 1 or 0 fields, needs at least 2 (lat, lon):\n%r',
                               reader.line_no, r)
-                        parsingErrorCount += 1
+                        parsing_error_count += 1
                 except Exception:
-                    log.exception('parsing CSV line %d failed', lineNumber)
-                    parsingErrorCount += 1
-                lineNumber += 1
+                    log.exception('parsing CSV line %d failed', line_number)
+                    parsing_error_count += 1
+                line_number += 1
 
         # close the file
         f.close()
         log.info('CSV file parsing finished, %d points added with %d errors',
-                 len(points), parsingErrorCount)
+                 len(points), parsing_error_count)
         return cls(points)
 
     @classmethod
-    def from_handmade(cls, start, middlePoints, destination):
-        """Convert hand-made route data to a way """
+    def from_handmade(cls, start, middle_points, destination):
+        """Convert hand-made route data to a way.
+
+        :param start: starting point
+        :param middle_points: list of middle points (if any)
+        :param destination: destination point
+        """
         if start and destination:
             # route points & message points are generated at once
             # * empty string as message => no message point, just route point
-            routePoints = [(start[0], start[1], None)]
-            messagePoints = []
-            mLength = 0 # in meters
-            lastLat, lastLon = start[0], start[1]
-            for point in middlePoints:
+            route_points = [(start[0], start[1], None)]
+            message_points = []
+            m_length = 0 # in meters
+            last_lat, last_lon = start[0], start[1]
+            for point in middle_points:
                 lat, lon, elevation, message = point
-                mLength += geo.distance(lastLat, lastLon, lat, lon) * 1000
-                routePoints.append((lat, lon, elevation))
+                m_length += geo.distance(last_lat, last_lon, lat, lon) * 1000
+                route_points.append((lat, lon, elevation))
                 if message != "": # is it a message point ?
                     point = TurnByTurnPoint(lat, lon, elevation, message)
-                    point.distance_from_start = mLength
-                    messagePoints.append(point)
-                lastLat, lastLon = lat, lon
-            routePoints.append((destination[0], destination[1], None))
-            way = cls(routePoints)
-            way.add_message_points(messagePoints)
+                    point.distance_from_start = m_length
+                    message_points.append(point)
+                last_lat, last_lon = lat, lon
+            route_points.append((destination[0], destination[1], None))
+            way = cls(route_points)
+            way.add_message_points(message_points)
             # huge guestimation (avg speed 60 km/h = 16.7 m/s)
-            seconds = mLength / 16.7
+            seconds = m_length / 16.7
             way.duration = seconds
-            way._setLength(mLength)
+            way._set_length(m_length)
             # done, return the result
             return way
         else:
@@ -493,7 +591,10 @@ class Way(object):
 
     @classmethod
     def from_osm_scout_json(cls, result):
-        """Convert OSM Scout Server routig result json to a way"""
+        """Convert OSM Scout Server routing result JSON to a way.
+
+        :param result: OSM Scout Server processed JSON routing result
+        """
         if result:
             routePoints = []
             # get route as (lat, lon, None)
@@ -502,7 +603,7 @@ class Way(object):
             way = cls(route_lle_tuples)
 
             way.duration = result["summary"]["time"]
-            way._setLength(result["summary"]["length"])
+            way._set_length(result["summary"]["length"])
 
             # get turns from the json result
             turns = []
@@ -518,7 +619,10 @@ class Way(object):
 
     @classmethod
     def from_valhalla(cls, result):
-        """Convert Valhalla routing result json to a way"""
+        """Convert Valhalla routing result json to a way.
+
+        :result: Valhall routing result in processed JSON format
+        """
         if result:
             route = []
             turns = []
@@ -538,7 +642,7 @@ class Way(object):
             way = cls(route)
             
             way.duration = result['trip']['summary']['time']
-            way._setLength(result['trip']["summary"]["length"])
+            way._set_length(result['trip']["summary"]["length"])
             
             way.add_message_points(turns)
             return way
@@ -546,7 +650,8 @@ class Way(object):
             return None
         
 class AppendOnlyWay(Way):
-    """A way subclass that is optimized for efficient incremental file storage
+    """A way subclass that is optimized for efficient incremental file storage.
+
     -> points can be only appended or completely replaced, no insert support at he moment
     -> only CSV storage is supported at the moment
     -> call openCSV(path) to start incremental file storage
@@ -573,7 +678,7 @@ class AppendOnlyWay(Way):
         self._points = [] # stored as (lat, lon, elevation, timestamp) tuples
         self.increment = [] # not yet saved increment, also LLET
         self.file = None
-        self.filePath = None
+        self._file_path = None
         self.writer = None
 
         if points:
@@ -620,13 +725,14 @@ class AppendOnlyWay(Way):
 
     @property
     def file_path(self):
-        return self.filePath
+        return self._file_path
 
     def start_writing_csv(self, path):
+        """Open the backing CSV file for writing."""
         try:
             self.file = open(path, "w")
             self.writer = csv.writer(self.file)
-            self.filePath = path
+            self._file_path = path
             # flush any pending points
             self.flush()
             aoLog.info('started writing to: %s' % path)
@@ -636,7 +742,7 @@ class AppendOnlyWay(Way):
             return False
 
     def flush(self):
-        """Flush all points that are only in memory to storage"""
+        """Flush all points that are only in memory to storage."""
         # get the pointsLock, the current increment to local variable and clear the original
         # we release the lock afterwards so that other threads can start adding more points right away
         with self._points_lock:
@@ -654,13 +760,13 @@ class AppendOnlyWay(Way):
             self.flush()
             # close the file
         self.file.close()
-        aoLog.info('file closed: %s', self.filePath)
+        aoLog.info('file closed: %s', self._file_path)
         # cleanup
         self._cleanup()
 
     def delete_file(self):
         """Delete the currently open file"""
-        path = self.filePath
+        path = self._file_path
         if self.file:
             try:
                 self.close()  # close it
@@ -673,13 +779,18 @@ class AppendOnlyWay(Way):
     def _cleanup(self):
         self.file = None
         self.writer = None
-        self.filePath = None
+        self._file_path = None
         self.increment = []
 
 
 #from: http://seewah.blogspot.com/2009/11/gpolyline-decoding-in-python.html
 def decode_polyline(encoded):
     """Decodes a polyline that was encoded using the Google Maps method.
+
+    :param str encoded: string encoded polyline
+
+    :return: list of coordinate tuples (latitude, longitude, None)
+    :rtype : list of tuples
 
     See http://code.google.com/apis/maps/documentation/polylinealgorithm.html
 
@@ -708,8 +819,8 @@ def decode_polyline(encoded):
             if b < 0x20:
                 break
 
-        dLat = ~(result >> 1) if result & 1 else result >> 1
-        lat += dLat
+        d_lat = ~(result >> 1) if result & 1 else result >> 1
+        lat += d_lat
 
         shift = 0
         result = 0
@@ -722,8 +833,8 @@ def decode_polyline(encoded):
             if b < 0x20:
                 break
 
-        dLng = ~(result >> 1) if result & 1 else result >> 1
-        lng += dLng
+        d_lng = ~(result >> 1) if result & 1 else result >> 1
+        lng += d_lng
 
         # append empty width for LLE tuple compatibility
         array.append((lat * 1e-5, lng * 1e-5, None))
@@ -732,6 +843,11 @@ def decode_polyline(encoded):
 
 def decode_valhalla(encoded):
     """ Decode polyline encoded by Valhalla
+
+    :param str encoded: string encoded polyline
+
+    :return: list of coordinate tuples (latitude, longitude, None)
+    :rtype : list of tuples
 
     Decoder taken from https://mapzen.com/documentation/mobility/decoding/
     """
@@ -762,7 +878,6 @@ def decode_valhalla(encoded):
         decoded.append((float('%.6f' % (ll[0] * inv)), float('%.6f' % (ll[1] * inv)), None))
     #hand back the list of coordinates
     return decoded
-
 
     #class Ways(object):
     #  """a way consisting of one or more segments"""
