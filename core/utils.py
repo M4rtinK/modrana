@@ -393,24 +393,24 @@ def internal_get_file_contents(path):
         with open(path, 'rb') as f:
             return bytearray(f.read())
 
- def requirement_found(name):
-    """Look for various requirements (utilities or paths).
+def requirement_found(name):
+     """Look for various requirements (utilities or paths).
 
-    :param str name: requirement to look for
+     :param str name: requirement to look for
 
-    Return ``True`` if `name` can be found on the system.
+     Return ``True`` if `name` can be found on the system.
 
-    `name` can be either a command, in which case it needs to be found in $PATH
-    and it needs to be executable, or it can be a full absolute path to a file
-    or a directory, in which case it needs to exist.
-    """
-    if os.path.isabs(name):
-        return os.path.exists(name)
-    return shutil.which(name) is not None
+     `name` can be either a command, in which case it needs to be found in $PATH
+     and it needs to be executable, or it can be a full absolute path to a file
+     or a directory, in which case it needs to exist.
+     """
+     if os.path.isabs(name):
+         return os.path.exists(name)
+     return shutil.which(name) is not None
 
- def path2uri(path):
-    """Convert local filepath to URI.
+def path2uri(path):
+     """Convert local filepath to URI.
 
-    :param str path: local file path
-    """
-    return "file://{}".format(urllib.parse.quote(path))
+     :param str path: local file path
+     """
+     return "file://{}".format(urllib.parse.quote(path))
