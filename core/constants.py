@@ -68,6 +68,8 @@ THREAD_CONNECTIVITY_CHECK = "modRanaConnectivityCheck"
 THREAD_LOCATION_CHECK = "modRanaCurrentPositionCheck"
 # testing
 THREAD_TESTING_PROVIDER = "modRanaTestingProvider"
+# voice/TTS
+THREAD_VOICE_WORKER = "modRanaVoiceWorker"
 
 # thread pools
 THREAD_POOL_AUTOMATIC_TILE_DOWNLOAD = "automaticTileDownload"

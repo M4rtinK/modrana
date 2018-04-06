@@ -26,6 +26,8 @@ import tempfile
 import threading
 
 from core import utils
+from core import constants
+from core.threads import ModRanaThread
 
 __all__ = ("VoiceGenerator",)
 
@@ -187,12 +189,16 @@ class VoiceEnginePicoTTS(VoiceEngine):
 
 def voice_worker(task_queue, result_queue, engine, tmpdir):
     """Worker thread to generate WAV files in `task_queue`."""
+    log.debug("voice worker starting")
     while True:
         text = task_queue.get()
-        if text is None: break
+        if text is None:
+            log.debug("voice worker shutting down")
+            break
         handle, fname = tempfile.mkstemp(suffix=".wav", dir=tmpdir)
         success = engine.make_wav(text, fname)
-        if not success: fname = None
+        if not success:
+            fname = None
         result_queue.put((text, fname))
         task_queue.task_done()
 
@@ -228,6 +234,7 @@ class VoiceGenerator:
 
     def clean(self):
         """Terminate the worker thread and purge generated files."""
+        log.debug("performing voice generator cleanup")
         self._clean_worker()
         for text in list(self._cache):
             self._purge(text)
@@ -243,7 +250,8 @@ class VoiceGenerator:
 
     def _clean_worker(self):
         """Terminate the worker thread."""
-        if self._worker_thread is None: return
+        if self._worker_thread is None:
+            return
         self._task_queue.put(None)
         self._worker_thread.join()
         self._worker_thread = None
@@ -252,7 +260,8 @@ class VoiceGenerator:
 
     def _find_engine(self, language, gender="male"):
         """Return TTS engine instance for `language` and `gender`."""
-        if language is None: return None
+        if language is None:
+            return None
         for engine in self.engines:
             if engine.supports(language):
                 return engine(language, gender)
@@ -270,12 +279,14 @@ class VoiceGenerator:
     def get_uri(self, text):
         """Return the WAV file URI for `text`."""
         fname = self.get(text)
-        if fname is None: return None
+        if fname is None:
+            return None
         return utils.path2uri(fname)
 
     def make(self, text):
         """Queue `text` for WAV file generation."""
-        if self._engine is None: return
+        if self._engine is None:
+            return
         self._update_cache()
         if text in self._cache:
             # WAV file already generated, just update
@@ -286,13 +297,13 @@ class VoiceGenerator:
         if self._worker_thread is None:
             self._result_queue = queue.Queue()
             self._task_queue = queue.Queue()
-            self._worker_thread = threading.Thread(
+            self._worker_thread = ModRanaThread(
+                name=constants.THREAD_VOICE_WORKER,
                 target=voice_worker,
                 kwargs=dict(task_queue=self._task_queue,
                             result_queue=self._result_queue,
                             engine=self._engine,
                             tmpdir=self._tmpdir),
-
                 daemon=True)
             self._worker_thread.start()
         # Add an empty element into cache to ensure that we don't
@@ -316,6 +327,7 @@ class VoiceGenerator:
 
     def quit(self):
         """Terminate the worker thread and purge generated files."""
+        log.debug("voice generator shutting down")
         self._clean_worker()
         try:
             shutil.rmtree(self._tmpdir)
@@ -336,7 +348,8 @@ class VoiceGenerator:
 
     def _update_cache(self):
         """Update the WAV file cache."""
-        if self._result_queue is None: return
+        if self._result_queue is None:
+            return
         while not self._result_queue.empty():
             text, fname = self._result_queue.get_nowait()
             self._result_queue.task_done()
