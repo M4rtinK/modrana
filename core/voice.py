@@ -31,6 +31,7 @@ __all__ = ("VoiceGenerator",)
 
 import logging
 log = logging.getLogger("core.voice")
+call_log = logging.getLogger("core.voice.call")
 
 class VoiceEngine:
 
@@ -52,12 +53,12 @@ class VoiceEngine:
             message = " ".join(args)
             message = message.encode("ascii", errors="replace")
             message = message.decode("ascii")
-            print(message, end=" ")
+            call_log.debug(message)
             rvalue = subprocess.call(args, **kwargs)
-            print(str(rvalue))
+            call_log.debug(str(rvalue))
             return rvalue
-        except Exception as error:
-            print("1:\n{}".format(str(error)))
+        except Exception:
+            call_log.exception("call exception")
             return 1
 
     def make_wav(self, text, fname):
