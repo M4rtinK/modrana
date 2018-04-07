@@ -38,6 +38,7 @@ class VoiceEngine:
 
     """Base class for text-to-speech (TTS) engines."""
 
+    name = ""  # human readable engine name
     commands = []
     voices = {}
 
@@ -65,6 +66,14 @@ class VoiceEngine:
     def make_wav(self, text, fname):
         """Generate voice output to WAV file `fname`."""
         raise NotImplementedError
+
+    @classmethod
+    def available(cls):
+        """Report if the given engine seems to be available."""
+        for command in cls.commands:
+            if utils.requirement_found(command):
+                return True
+        return False
 
     @classmethod
     def supports(cls, language):
@@ -98,6 +107,7 @@ class VoiceEngineEspeak(VoiceEngine):
 
     """Text-to-speech (TTS) using eSpeak."""
 
+    name = "Espeak"
     commands = ["espeak", "harbour-espeak"]
     voices = {
         "ca":    {"male": "catalan"},
@@ -128,6 +138,7 @@ class VoiceEngineFlite(VoiceEngine):
 
     """Text-to-speech (TTS) using CMU Flite (festival-lite)."""
 
+    name = "Flite"
     commands = ["flite", "harbour-flite"]
     voices = {
         "en":    {"male": "kal16", "female": "slt"},
@@ -147,6 +158,7 @@ class VoiceEngineMimic(VoiceEngine):
 
     """Text-to-speech (TTS) using Mimic (The Mycroft TTS Engine)."""
 
+    name = "Mimic"
     commands = ["mimic", "harbour-mimic"]
     voices = {
         "en":    {"male": "ap", "female": "slt"},
@@ -166,6 +178,7 @@ class VoiceEnginePicoTTS(VoiceEngine):
 
     """Text-to-speech (TTS) using PicoTTS."""
 
+    name = "PicoTTS"
     commands = ["pico2wave", "harbour-pico2wave"]
     voices = {
         "de":    {"female": "de-DE"},
@@ -269,6 +282,11 @@ class VoiceGenerator:
             language = language.split("_")[0]
             return self._find_engine(language, gender)
         return None
+
+    @property
+    def available_engines(self):
+        """Report which TTS engines seem to be available."""
+        return [engine for engine in self.engines if engine.available()]
 
     def get(self, text):
         """Return the WAV filename for `text`."""
