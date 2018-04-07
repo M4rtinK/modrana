@@ -23,11 +23,10 @@ import queue
 import shutil
 import subprocess
 import tempfile
-import threading
 
 from core import utils
 from core import constants
-from core.threads import ModRanaThread
+from core import threads
 
 __all__ = ("VoiceGenerator",)
 
@@ -297,15 +296,15 @@ class VoiceGenerator:
         if self._worker_thread is None:
             self._result_queue = queue.Queue()
             self._task_queue = queue.Queue()
-            self._worker_thread = ModRanaThread(
+            self._worker_thread = threads.ModRanaThread(
                 name=constants.THREAD_VOICE_WORKER,
-                target=voice_worker,
-                kwargs=dict(task_queue=self._task_queue,
-                            result_queue=self._result_queue,
-                            engine=self._engine,
-                            tmpdir=self._tmpdir),
+                target=lambda: voice_worker
+                (task_queue=self._task_queue,
+                 result_queue=self._result_queue,
+                 engine=self._engine,
+                 tmpdir=self._tmpdir),
                 daemon=True)
-            self._worker_thread.start()
+            threads.threadMgr.add(self._worker_thread)
         # Add an empty element into cache to ensure that we don't
         # run the same voice direction twice through the engine.
         self._cache[text] = None
