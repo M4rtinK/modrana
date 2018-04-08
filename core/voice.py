@@ -150,8 +150,8 @@ class VoiceEngineFlite(VoiceEngine):
         text = self.transform_text(text)
         return self.call([self.command,
                           "-t", text,
-                          "-o", fname,
-                          "-voice", self.voice_name]) == 0
+                          "-voice", self.voice_name,
+                          "-o", fname]) == 0
 
 
 class VoiceEngineMimic(VoiceEngine):
