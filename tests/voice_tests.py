@@ -21,21 +21,42 @@ import time
 import unittest
 
 from core import voice
+from core import threads
+threads.initThreading()
 
 class TestVoiceGenerator(unittest.TestCase):
 
     def setUp(self):
         self.generator = voice.VoiceGenerator()
 
-    @unittest.skip("enable this after engine lookup is fixed")
-    def engines_test(self):
-        """Test individual voice engines"""
-        for engine in self.generator.engines:
-            if not engine.supports("en"): continue
-            handle, fname = tempfile.mkstemp(dir=self.generator._tmpdir)
-            engine("en").make_wav("just testing", fname)
-            self.assertTrue(os.path.isfile(fname))
-            self.assertTrue(os.path.getsize(fname) > 256)
+    def _test_an_engine(self, engine):
+        """Test individual voice engines."""
+        if not engine.supports("en"):
+            return
+        handle, fname = tempfile.mkstemp(dir=self.generator._tmpdir)
+        engine("en").make_wav("just testing", fname)
+        self.assertTrue(os.path.isfile(fname))
+        self.assertTrue(os.path.getsize(fname) > 256)
+
+    @unittest.skipUnless(voice.VoiceEngineMimic.available(), "Mimic not installed")
+    def mimic_test(self):
+        """Test using the Mimic TTS engine"""
+        self._test_an_engine(engine=voice.VoiceEngineMimic)
+
+    @unittest.skipUnless(voice.VoiceEngineFlite.available(), "Flite not installed")
+    def flite_test(self):
+        """Test using the Flite TTS engine"""
+        self._test_an_engine(engine=voice.VoiceEngineFlite)
+
+    @unittest.skipUnless(voice.VoiceEnginePicoTTS.available(), "PicoTTS not installed")
+    def picotts_test(self):
+        """Test using the PicoTTS engine"""
+        self._test_an_engine(engine=voice.VoiceEnginePicoTTS)
+
+    @unittest.skipUnless(voice.VoiceEngineEspeak.available(), "Espeak not installed")
+    def espeak_test(self):
+        """Test using the Espeak TTS engine"""
+        self._test_an_engine(engine=voice.VoiceEngineEspeak)
 
     def clean_test(self):
         """Test voice generator cleanup"""
