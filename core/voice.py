@@ -249,7 +249,7 @@ class VoiceGenerator:
         log.debug("performing voice generator cleanup")
         self._clean_worker()
         for text in list(self._cache):
-            self._purge(text)
+            self.clean_text(text)
 
     def _clean_outdated_cache(self):
         """Remove oldest generated WAV files from cache."""
@@ -258,7 +258,7 @@ class VoiceGenerator:
         items = [x for x in items if x[1] is not None]
         items.sort(key=lambda x: os.path.getmtime(x[1]))
         for text, fname in items[:-100]:
-            self._purge(text)
+            self.clean_text(text)
 
     def _clean_worker(self):
         """Terminate the worker thread."""
@@ -329,18 +329,18 @@ class VoiceGenerator:
         self._task_queue.put(text)
         self._clean_outdated_cache()
 
-    def _purge(self, text):
-        """Remove generated WAV file from cache."""
+    def clean_text(self, text):
+        """Remove generated WAV file for the text from cache."""
         try:
             if self._cache[text] is not None:
                 os.remove(self._cache[text])
         except:
-            log.exception("WAV file cleanup failed")
+            log.exception("WAV file cleanup failed for %s", text)
 
         try:
             del self._cache[text]
         except:
-            log.exception("cache cleanup failed")
+            log.exception("cache cleanup failed for %s", text)
 
     def quit(self):
         """Terminate the worker thread and purge generated files."""
