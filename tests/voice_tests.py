@@ -62,7 +62,10 @@ class TestVoiceGenerator(unittest.TestCase):
         """Test voice generator cleanup"""
         self.generator.set_voice("en")
         self.generator.make("just testing")
-        time.sleep(1)
+        # this is a little dirty but rather join the
+        # task queue rather than to introduce an arbitrary
+        # waiting for the worker thread to finish
+        self.generator._task_queue.join()
         self.generator.clean()
         self.assertFalse(os.listdir(self.generator._tmpdir))
 
@@ -71,7 +74,10 @@ class TestVoiceGenerator(unittest.TestCase):
         self.generator.set_voice("en")
         if not self.generator.active: return
         self.generator.make("just testing")
-        time.sleep(1)
+        # this is a little dirty but rather join the
+        # task queue rather than to introduce an arbitrary
+        # waiting for the worker thread to finish
+        self.generator._task_queue.join()
         fname = self.generator.get("just testing")
         self.assertTrue(os.path.isfile(fname))
         self.assertTrue(os.path.getsize(fname) > 256)
@@ -80,13 +86,19 @@ class TestVoiceGenerator(unittest.TestCase):
         """Test voice sample creation"""
         self.generator.set_voice("en")
         self.generator.make("just testing")
-        time.sleep(1)
+        # this is a little dirty but rather join the
+        # task queue rather than to introduce an arbitrary
+        # waiting for the worker thread to finish
+        self.generator._task_queue.join()
 
     def quit_test(self):
         """Check voice generator shutdown"""
         self.generator.set_voice("en")
         self.generator.make("just testing")
-        time.sleep(1)
+        # this is a little dirty but rather join the
+        # task queue rather than to introduce an arbitrary
+        # waiting for the worker thread to finish
+        self.generator._task_queue.join()
         self.generator.quit()
         self.assertFalse(os.path.isdir(self.generator._tmpdir))
 
