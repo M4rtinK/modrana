@@ -72,7 +72,8 @@ class Way(object):
     def __init__(self, points=None):
         if not points: points = []
         self._points = points # stored as LLE tuples
-        self._points_in_radians = None
+        self._points_radians_ll = None
+        self._points_radians_lle = None
         self._message_points = []
         self._message_points_lle = []
         self._length = None # in meters
@@ -102,6 +103,34 @@ class Way(object):
         """
         return self._points
 
+    @property
+    def points_radians_ll(self):
+        """Return list of route points as (latitude, longitude) tuples in radians.
+
+        Caching is used and the radian points cache is initialized when
+        the property is requested for the first time.
+
+        :return: way as LL tuples in radians
+        :rtype: list of tuples
+        """
+        if self._points_radians_ll is None:
+            self._points_radians_ll = self.get_points_lle_radians(drop_elevation=True)
+        return self._points_radians_ll
+
+    @property
+    def points_radians_lle(self):
+        """Return list of route points as (latitude, longitude, elevation) tuples in radians.
+
+        Caching is used and the radian points cache is initialized when
+        the property is requested for the first time.
+
+        :return: way as LLE tuples in radians (elevation is of course still in meters)
+        :rtype: list of tuples
+        """
+        if self._points_radians_lle is None:
+            self._points_radians_lle = self.get_points_lle_radians(drop_elevation=False)
+        return self._points_radians_lle
+
     def get_points_lle_radians(self, drop_elevation=False):
         """Return the way as LLE tuples in radians.
 
@@ -109,13 +138,8 @@ class Way(object):
         :return: LLE tuples
         :rtype: list of tuples
         """
-        # do we have cached radians version of the LLE tuples ?
-        if self._points_in_radians is not None:
-            return self._points_in_radians
-        else:
-            radians = geo.lleTuples2radians(self._points, drop_elevation)
-            self._points_in_radians = radians
-            return radians
+        radians = geo.lleTuples2radians(self._points, drop_elevation)
+        return radians
 
     def add_point(self, point):
         """Add regular point to the end of the route.
