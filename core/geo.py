@@ -496,6 +496,27 @@ def parse_geo_coords(geo_coords_string):
             result = float(split2[0]), float(split2[1])
     return result
 
+def get_closest_point(point, points):
+    """Get closest point to a point from a list of points.
+
+    :param point: a point
+    :param points: a list of points
+
+    :returns: the closest point or None if points list is empty
+    :rtype: point instance or None
+    """
+    if not points:
+        return None
+
+    # create a list of all message points with distance
+    # from the given point
+    points_with_distance = []
+    for some_point in points:
+        distance_to_point = distanceP2P(point, some_point)
+        points_with_distance.append((distance_to_point, some_point))
+    # sort the list and return the closest point
+    return sorted(points_with_distance, key=lambda x: x[0])[0][1]
+
 def distanceBenchmark(LLE, sampleSize=None):
     """geographic distance measurement method benchmark"""
 
