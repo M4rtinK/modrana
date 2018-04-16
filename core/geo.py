@@ -517,6 +517,33 @@ def get_closest_point(point, points):
     # sort the list and return the closest point
     return sorted(points_with_distance, key=lambda x: x[0])[0][1]
 
+def get_closest_lle(lle, lle_list):
+    """Get closest point to a point from a list of points.
+
+    In some cases, such as long polylines there could be thousands of
+    points used to define the given polyline, so it likely makes sense to
+    handle the points as a list of lle tuples rather than thousands of regular
+    Point instances. For this reason we need to have functions that
+    can work on lists of lle tuples as this one.
+
+    :param lle: (latitude, longitude, elevation) tuple
+    :param lle_list: a list of lle tuples
+
+    :returns: the closest lle tuple or None if lle list is empty
+    :rtype: lle tuple or None
+    """
+    if not lle_list:
+        return None
+
+    # create a list of all message lle tuples with distance
+    # from the given lle tuple
+    lle_tuples_with_distance = []
+    for some_lle in lle_list:
+        distance_to_lle = distance(lat1=some_lle[0], lon1=some_lle[1], lat2=lle[0], lon2=lle[1])
+        lle_tuples_with_distance.append((distance_to_lle, some_lle))
+    # sort the list and return the closest lle tuple
+    return sorted(lle_tuples_with_distance, key=lambda x: x[0])[0][1]
+
 def distanceBenchmark(LLE, sampleSize=None):
     """geographic distance measurement method benchmark"""
 
