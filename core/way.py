@@ -5,6 +5,7 @@ import csv
 import os
 import threading
 import itertools
+import functools
 import core.exceptions
 import core.paths
 from core import geo
@@ -59,14 +60,34 @@ import logging
 log = logging.getLogger("core.way")
 aoLog = logging.getLogger("core.way.ao")
 
+def update_cache(wrapped):
+    """A cache-update decorator for functions that change way internal state."""
+
+    @functools.wraps(wrapped)
+    def _wrapper(self, *args, **kwargs):
+        # run the state changing method, save result
+        result = wrapped(self, *args, **kwargs)
+        # run cache update
+        self._update_cache()
+        # return the result
+        return result
+    return _wrapper
+
+
 class Way(object):
-    """A segment of a way
-        * points denote the way
-        * message points are currently mainly used for t-b-t routing announcements
-        * points can be returned either as Point objects or a lists of
-          (lat,lon) tuples for the whole segment
-        * by default, message points are stored and returned separately from non-message
-          points (similar to trackpoints vs waypoints in GPX)
+    """A points sequence supporting two types of points.
+
+    - points denote the way
+    - message points are currently mainly used for t-b-t routing announcements
+    - points can be returned either as Point objects or a lists of
+      (latitude, longitude, elevation) tuples for the way
+    - message points are stored and returned separately from non-message
+      points (similar to trackpoints vs waypoints in GPX)
+
+    Note about how points and message points are stored:
+    - regular points are stored as (latitude, longitude, elevation) tuples for performance reasons
+    - message points are stored as Point objects with the expectation there will generally
+      be less of them than regular points, so performance should be good enough
     """
 
     def __init__(self, points=None):
@@ -75,24 +96,9 @@ class Way(object):
         self._points_radians_ll = None
         self._points_radians_lle = None
         self._message_points = []
-        self._message_points_lle = []
+        self._message_points_lle = None
         self._length = None # in meters
         self._duration = None # in seconds
-        self._points_lock = threading.RLock()
-
-        # caching
-        self._cache_dirty = False # signalizes that cached data needs to be updated
-        # now update the cache
-        self._update_cache()
-
-    def get_point_by_index(self, index):
-        """Get a regular point by index.
-
-        :param int: point index
-        """
-        p = self._points[index]
-        (lat, lon, elevation) = (p[0], p[1], p[2])
-        return Point(lat, lon, elevation)
 
     @property
     def points_lle(self):
@@ -141,6 +147,19 @@ class Way(object):
         radians = geo.lleTuples2radians(self._points, drop_elevation)
         return radians
 
+    def get_point_by_index(self, index):
+        """Get a regular point by index.
+
+        :param int: point index
+        :return: a point with the given index
+        :rtype: a point instance
+        :raises: IndexError
+        """
+        p = self._points[index]
+        (lat, lon, elevation) = (p[0], p[1], p[2])
+        return Point(lat, lon, elevation)
+
+    @update_cache
     def add_point(self, point):
         """Add regular point to the end of the route.
 
@@ -149,6 +168,7 @@ class Way(object):
         lat, lon, elevation = point.getLLE()
         self._points.append((lat, lon, elevation))
 
+    @update_cache
     def add_point_lle(self, lat, lon, elevation=None):
         """Add regular point from coordinates.
 
@@ -170,6 +190,10 @@ class Way(object):
         """
         return len(self._points)
 
+    @update_cache
+    def clear(self):
+        """Clear are regular way points."""
+        self._points = []
 
     @property
     def duration(self):
@@ -185,37 +209,35 @@ class Way(object):
         """
         return self._duration
 
-    @duration.setter
-    def duration(self, seconds_duration):
+    def _set_duration(self, seconds_duration):
         self._duration = seconds_duration
-
-        # * message points
 
     def _update_cache(self):
         """Update the various caches"""
 
-        # update message point LLE cache
-        mpLLE = []
-        for point in self._message_points:
-            mpLLE.append(point.getLLE())
-        self._message_points_lle = mpLLE
+        # drop the radian & message point caches,
+        # they will be regenerated once requested again
+        self._message_points_lle = None
+        self._points_radians_ll = None
+        self._points_radians_lle = None
 
+    @update_cache
     def add_message_point(self, point):
         """Add a message point to the way.
 
         :param point: message point to add
         """
         self._message_points.append(point)
-        self._update_cache()
 
+    @update_cache
     def add_message_points(self, points):
         """Add multiple message points.
 
         :param points: a list of message points
         """
         self._message_points.extend(points)
-        self._update_cache()
 
+    @update_cache
     def set_message_point_by_index(self, index, point):
         """Set a message point given by index to a different one.
 
@@ -223,7 +245,6 @@ class Way(object):
         :param point: a message point
         """
         self._message_points[index] = point
-        self._update_cache()
 
     def get_message_point_by_index(self, index):
         """Get a message point by index.
@@ -264,12 +285,17 @@ class Way(object):
         :return: message point LLE tuples
         :rtype: list
         """
+        if self._message_points_lle is None:
+            mpLLE = []
+            for point in self._message_points:
+                mpLLE.append(point.getLLE())
+            self._message_points_lle = mpLLE
         return self._message_points_lle
 
+    @update_cache
     def clear_message_points(self):
         """Clear all message points."""
         self._message_points = []
-        self._update_cache()
 
     @property
     def message_point_count(self):
@@ -279,6 +305,24 @@ class Way(object):
         :rtype: int
         """
         return len(self._message_points)
+
+    def get_closest_point(self, point):
+        """Get the geographically closest way point to a point."""
+        if self.points_lle:
+            result = geo.get_closest_lle(point.getLLE(), self.points_lle)
+            if result:
+                return Point(lat=result[0], lon=result[1], elevation=result[2])
+            else:
+                return None
+        else:
+            return None
+
+    def get_closest_message_point(self, point):
+        """Get the geographically closest message point to a point."""
+        if self.message_points:
+            return geo.get_closest_point(point, self.message_points)
+        else:
+            return None
 
     @property
     def length(self):
@@ -413,7 +457,7 @@ class Way(object):
 
         way = cls(points)
         way._set_length(m_length)
-        way.duration = s_duration
+        way._set_duration(s_duration)
         message_points = []
 
         m_distance_from_start = 0
@@ -459,7 +503,7 @@ class Way(object):
                     prev_lat, prev_lon = node.latitude, node.longitude
 
             way = cls(route_points)
-            way.duration = monav_result.seconds
+            way._set_duration(monav_result.seconds)
             way._set_length(m_length)
 
             # detect turns
@@ -606,7 +650,7 @@ class Way(object):
             way.add_message_points(message_points)
             # huge guestimation (avg speed 60 km/h = 16.7 m/s)
             seconds = m_length / 16.7
-            way.duration = seconds
+            way._set_duration(seconds)
             way._set_length(m_length)
             # done, return the result
             return way
@@ -626,7 +670,7 @@ class Way(object):
             # create a way from the lle tuples
             way = cls(route_lle_tuples)
 
-            way.duration = result["summary"]["time"]
+            way._set_duration(result["summary"]["time"])
             way._set_length(result["summary"]["length"])
 
             # get turns from the json result
@@ -665,7 +709,7 @@ class Way(object):
                 
             way = cls(route)
             
-            way.duration = result['trip']['summary']['time']
+            way._set_duration(result['trip']['summary']['time'])
             way._set_length(result['trip']["summary"]["length"])
             
             way.add_message_points(turns)
@@ -704,6 +748,7 @@ class AppendOnlyWay(Way):
         self.file = None
         self._file_path = None
         self.writer = None
+        self._points_lock = threading.RLock()
 
         if points:
             with self._points_lock:
