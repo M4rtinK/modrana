@@ -139,8 +139,17 @@ def distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon):
 
 
 def distance(lat1, lon1, lat2, lon2):
-    """computes geographic distance
-    -> based on C++ code from Marble"""
+    """Computes geographic distance in kilometers.
+
+    :param float lat1: latitude of the first point
+    :param float lon1: longitude of first point
+    :param float lat2: latitude of the second point
+    :param float lon2: longitude of second point
+    :return: distance between the points in kilometers
+    :rtype: float
+    """
+
+    #Based on C++ code from Marble
     lat1 = radians(lat1)
     lon1 = radians(lon1)
     lat2 = radians(lat2)
@@ -150,19 +159,46 @@ def distance(lat1, lon1, lat2, lon2):
     d = h1 * h1 + cos(lat1) * cos(lat2) * h2 * h2
     return 2.0 * atan2(sqrt(d), sqrt(1.0 - d)) * EARTH_RADIUS
 
+
 def distanceP2P(point1, point2):
-    """Compute distance between two point objects"""
+    """Compute distance between two Point objects.
+
+    :param point1: the first point
+    :param point2: the second point
+    :return: distance between the points in kilometers
+    :rtype: float
+    """
     return distance(point1.lat, point1.lon, point2.lat, point2.lon)
 
+
 def distanceP2LL(point1, lat, lon):
-    """Compute distance between a point and lat lon pair"""
+    """Compute distance between a point and a lat lon pair.
+
+    :param point1: the first point
+    :param lat: latitude of the second point
+    :param lon: longitude of the second point
+
+    :return: distance between the points in kilometers
+    :rtype: float
+    """
     return distance(point1.lat, point1.lon, lat, lon)
 
+
 def distanceApprox(lat1, lon1, lat2, lon2):
-    """This method roughly calculates the shortest distance between two points on a sphere.
-        It's probably faster than distanceSphere(...) but for 7 significant digits only has
-        accuracy of about 1 arcminute
-        -> based on C++ code from Marble"""
+    """Roughly calculates shortest distance in kilometers between two points on a sphere.
+
+    It's probably faster than normal distance functions but for 7 significant digits only has
+    accuracy of about 1 arcminute.
+
+    :param float lat1: latitude of the first point
+    :param float lon1: longitude of first point
+    :param float lat2: latitude of the second point
+    :param float lon2: longitude of second point
+    :return: approximate distance between the points in kilometers
+    :rtype: float
+    """
+
+    # based on C++ code from Marble
     lat1 = radians(lat1)
     lon1 = radians(lon1)
     lat2 = radians(lat2)
@@ -171,8 +207,21 @@ def distanceApprox(lat1, lon1, lat2, lon2):
 
 
 def distanceRadians(lat1, lon1, lat2, lon2):
-    """computes geographic distance
-    -> based on C++ code from Marble"""
+    """Computes geographic distance from points defined as radians.
+
+    The difference from the normal distance computation method is basically
+    that the coordinates are already defined in radians and we can thus
+    ship the radian conversion step, which could possibly make a
+    difference when working with a big number of coordinates.
+
+    :param float lat1: latitude of the first point in radians
+    :param float lon1: longitude of first point in radians
+    :param float lat2: latitude of the second point in radians
+    :param float lon2: longitude of second point in radians
+    :return: distance between the points in kilometers
+    :rtype: float
+    """
+    # based on C++ code from Marble
     h1 = sin(0.5 * ( lat2 - lat1 ))
     h2 = sin(0.5 * ( lon2 - lon1 ))
     d = h1 * h1 + cos(lat1) * cos(lat2) * h2 * h2
@@ -180,10 +229,20 @@ def distanceRadians(lat1, lon1, lat2, lon2):
 
 
 def distanceApproxRadians(lat1, lon1, lat2, lon2):
-    """This method roughly calculates the shortest distance between two points on a sphere.
-        It's probably faster than distanceSphere(...) but for 7 significant digits only has
-        accuracy of about 1 arcminute
-        -> based on C++ code from Marble"""
+    """Roughly calculates shortest distance in kilometers between two points defined in radians on a sphere.
+
+    It's probably faster than normal distance functions but for 7 significant digits only has
+    accuracy of about 1 arcminute.
+
+    :param float lat1: latitude of the first point in radians
+    :param float lon1: longitude of first point in radians
+    :param float lat2: latitude of the second point in radians
+    :param float lon2: longitude of second point in radians
+    :return: approximate distance between the points in kilometers
+    :rtype: float
+    """
+
+    #    -> based on C++ code from Marble
     return acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2)) * EARTH_RADIUS
 
 
