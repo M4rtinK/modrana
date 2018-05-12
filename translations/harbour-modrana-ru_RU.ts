@@ -1,10 +1,10 @@
 <?xml version="1.0" ?><!DOCTYPE TS><TS language="ru_RU" version="2.1">
 <context>
-    <name></name>
+    <name/>
     <message id="enter your search query">
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/SearchPage.qml" line="141"/>
-        <source></source>
-        <translation></translation>
+        <source/>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
