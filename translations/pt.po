@@ -1,0 +1,54 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-05-16 23:25+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: Portuguese (https://www.transifex.com/martink/teams/81256/pt/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: pt\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: core/instructions_generator.py:38
+msgid "turn slightly left"
+msgstr ""
+
+#: core/instructions_generator.py:39
+msgid "turn left"
+msgstr ""
+
+#: core/instructions_generator.py:40
+msgid "turn sharply left"
+msgstr ""
+
+#: core/instructions_generator.py:41
+msgid "make a U-turn"
+msgstr ""
+
+#: core/instructions_generator.py:42
+msgid "turn sharply right"
+msgstr ""
+
+#: core/instructions_generator.py:43
+msgid "turn right"
+msgstr ""
+
+#: core/instructions_generator.py:44
+msgid "turn slightly right"
+msgstr ""
+
+#: core/instructions_generator.py:45
+msgid "head straightforward"
+msgstr ""
+
+#: modules/mod_info.py:67
+msgid "talk.maemo.org thread"
+msgstr ""

@@ -271,7 +271,7 @@
     <name>InfoAboutPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="46"/>
-        <source>&lt;h3&gt;Dou you like modRana? &lt;b&gt;Donate:&lt;/b&gt;&lt;/h3&gt;</source>
+        <source>&lt;h3&gt;Do you like modRana? &lt;b&gt;Donate:&lt;/b&gt;&lt;/h3&gt;</source>
         <translation type="unfinished"/>
     </message>
     <message>

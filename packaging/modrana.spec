@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.6
+Version: 0.55.7
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,48 @@ fi
 %endif
 
 %changelog
+* Wed May 16 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.7-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Add Travis dependencies for TTS testing (martin.kolman)
+- Add python3-six dependency for Travis testing (martin.kolman)
+- Add documentation for point to point distance functions (martin.kolman)
+- Refactor and improve the Way class (martin.kolman)
+- Add the get_closest_lle() function (martin.kolman)
+- Add the get_closest_point() functions (martin.kolman)
+- Improved handling or way points in radians (martin.kolman)
+- Make text cleanup function public (martin.kolman)
+- Remove fixed delays from the voice unit test (martin.kolman)
+- Test individual TTS engines if available (martin.kolman)
+- Put the filename parameter last for flite (martin.kolman)
+- Easy checking if TTS engines are available (martin.kolman)
+- Fix modRana thread usage (martin.kolman)
+- Change tempdir prefix (martin.kolman)
+- Some more modRana adaptation for the voice module (martin.kolman)
+- Log program calls (martin.kolman)
+- Port tests for the voice module from WhoGo maps (martin.kolman)
+- Fix indentation (martin.kolman)
+- Add the voice module, originally from whogo-maps (martin.kolman)
+- Refactor the way module (martin.kolman)
+- Add the Travis CI badge to README.rst (martin.kolman)
+- Fix test class name (martin.kolman)
+- Unit test for TurnByTurnPoint (martin.kolman)
+- PEP8 for the TurnByturnPoint (martin.kolman)
+- Remove the obsolete pyroute and prender libraries (martin.kolman)
+- Delete obsolete unused modRana modules (martin.kolman)
+- Fix layer parsing test (martin.kolman)
+- Clarify that connection_timeout is specified in seconds (martin.kolman)
+- More testing improvements (martin.kolman)
+- Add sudo to Travis install line (martin.kolman)
+- Another try with nosetests (martin.kolman)
+- Add Nose dependency for Travis (martin.kolman)
+- Initial Travis CI support (martin.kolman)
+- Merge pull request #235 from Olf0/master (martin.kolman)
+- Bump map config file revision (martin.kolman)
+- Merge pull request #236 from DerDakon/https-tiles (martin.kolman)
+- switch many tileserver URLs to HTTPS (eike)
+- Modrana minimal source strings adaption (#1) (Olf0)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Tue Dec 19 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.6-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Bump QtQuick Controls dependency (martin.kolman)

@@ -8,8 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-19 01:45+0100\n"
+"POT-Creation-Date: 2018-05-16 23:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Вячеслав Диконов <sdiconov@mail.ru>, 2018\n"
 "Language-Team: Russian (Russia) (https://www.transifex.com/martink/teams/81256/ru_RU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
@@ -19,36 +20,36 @@ msgstr ""
 
 #: core/instructions_generator.py:38
 msgid "turn slightly left"
-msgstr ""
+msgstr "возьмите левее"
 
 #: core/instructions_generator.py:39
 msgid "turn left"
-msgstr ""
+msgstr "поверните налево"
 
 #: core/instructions_generator.py:40
 msgid "turn sharply left"
-msgstr ""
+msgstr "резко поверните налево"
 
 #: core/instructions_generator.py:41
 msgid "make a U-turn"
-msgstr ""
+msgstr "развернитесь"
 
 #: core/instructions_generator.py:42
 msgid "turn sharply right"
-msgstr ""
+msgstr "резко поверните направо"
 
 #: core/instructions_generator.py:43
 msgid "turn right"
-msgstr ""
+msgstr "поверните направо"
 
 #: core/instructions_generator.py:44
 msgid "turn slightly right"
-msgstr ""
+msgstr "возьмите правее"
 
 #: core/instructions_generator.py:45
 msgid "head straightforward"
-msgstr ""
+msgstr "двигайтесь вперед"
 
 #: modules/mod_info.py:67
 msgid "talk.maemo.org thread"
-msgstr ""
+msgstr "обсуждение на talk.maemo.org"

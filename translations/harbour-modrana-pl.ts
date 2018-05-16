@@ -4,7 +4,7 @@
     <message id="enter your search query">
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/SearchPage.qml" line="141"/>
         <source/>
-        <translation type="unfinished"/>
+        <translation>wprowadź zapytanie</translation>
     </message>
 </context>
 <context>
@@ -47,7 +47,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="397"/>
         <source>Rerouting.</source>
-        <translation type="unfinished"/>
+        <translation>Zmiana trasy.</translation>
     </message>
 </context>
 <context>
@@ -181,7 +181,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="26"/>
         <source>Overlays</source>
-        <translation type="unfinished"/>
+        <translation>Nakładki</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="26"/>
@@ -259,7 +259,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksMenuPage.qml" line="11"/>
         <source>Record</source>
-        <translation type="unfinished"/>
+        <translation>Nagraj</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksMenuPage.qml" line="16"/>
@@ -271,8 +271,8 @@
     <name>InfoAboutPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="46"/>
-        <source>&lt;h3&gt;Dou you like modRana? &lt;b&gt;Donate:&lt;/b&gt;&lt;/h3&gt;</source>
-        <translation>&lt;h3&gt;Lubisz modRana?&lt;b&gt;Wspomóż:&lt;/b&gt;&lt;/h3&gt;</translation>
+        <source>&lt;h3&gt;Do you like modRana? &lt;b&gt;Donate:&lt;/b&gt;&lt;/h3&gt;</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="85"/>
@@ -418,7 +418,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
         <source>fix in progress</source>
-        <translation type="unfinished"/>
+        <translation>ustalanie pozycji</translation>
     </message>
 </context>
 <context>
@@ -457,7 +457,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="7"/>
         <source>Overlays</source>
-        <translation type="unfinished"/>
+        <translation>Nakładki</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="57"/>
@@ -503,7 +503,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="12"/>
         <source>Routing mode enabled</source>
-        <translation type="unfinished"/>
+        <translation>Tryb wytyczania trasy włączony</translation>
     </message>
 </context>
 <context>
@@ -657,17 +657,17 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="13"/>
         <source>Routing</source>
-        <translation type="unfinished"/>
+        <translation>Wytyczanie trasy</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="17"/>
         <source>Routing provider</source>
-        <translation type="unfinished"/>
+        <translation>Dostawca usługi wytyczania trasy</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="41"/>
         <source>Routing mode</source>
-        <translation type="unfinished"/>
+        <translation>Tryb wytyczania trasy</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="64"/>
@@ -682,7 +682,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="74"/>
         <source>Route opacity</source>
-        <translation type="unfinished"/>
+        <translation>Przezroczystość trasy</translation>
     </message>
 </context>
 <context>
@@ -728,12 +728,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="13"/>
         <source>Place search</source>
-        <translation type="unfinished"/>
+        <translation>Szukanie miejsc</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="17"/>
         <source>Nominatim (online)</source>
-        <translation type="unfinished"/>
+        <translation>Według nazwy (online)</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="28"/>
@@ -744,7 +744,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="38"/>
         <source>Local search</source>
-        <translation type="unfinished"/>
+        <translation>Wyszukiwanie lokalne</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="42"/>
@@ -762,7 +762,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsTracksPage.qml" line="13"/>
         <source>Tracklog opacity</source>
-        <translation type="unfinished"/>
+        <translation>Przezroczystość tracklogu</translation>
     </message>
 </context>
 <context>
@@ -785,7 +785,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="62"/>
         <source>Show back button</source>
-        <translation type="unfinished"/>
+        <translation>Pokaż przycisk powrotu</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="73"/>
@@ -795,12 +795,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="78"/>
         <source>Keep screen on</source>
-        <translation type="unfinished"/>
+        <translation>Zachowaj włączony ekran </translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="86"/>
         <source>Map screen</source>
-        <translation type="unfinished"/>
+        <translation>Ekran mapy</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="89"/>
@@ -810,7 +810,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="97"/>
         <source>Compass opacity</source>
-        <translation type="unfinished"/>
+        <translation>Przezroczystość kompasu</translation>
     </message>
 </context>
 <context>
@@ -912,7 +912,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="37"/>
         <source>&lt;b&gt;Route here&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Trasa do tego miejsca&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -1007,7 +1007,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryListPage.qml" line="47"/>
         <source>tracklogs</source>
-        <translation type="unfinished"/>
+        <translation>tracklogi</translation>
     </message>
 </context>
 <context>
@@ -1028,22 +1028,22 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="10"/>
         <source>Record a tracklog</source>
-        <translation type="unfinished"/>
+        <translation>Nagrywaj tracklog</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="17"/>
         <source>Tracklog recording paused</source>
-        <translation type="unfinished"/>
+        <translation>Nagrywanie tracklogu wstrzymane</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="17"/>
         <source>Recording a tracklog</source>
-        <translation type="unfinished"/>
+        <translation>Nagrywanie tracklogu</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="93"/>
         <source>Enter tracklog name here!</source>
-        <translation type="unfinished"/>
+        <translation>Wprowadź nazwę tracklogu tutaj!</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="111"/>
@@ -1098,7 +1098,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="155"/>
         <source>Recorded tracklogs folder:</source>
-        <translation type="unfinished"/>
+        <translation>Katalog z nagranymi tracklogami:</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="165"/>

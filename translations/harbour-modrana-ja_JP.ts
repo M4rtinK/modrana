@@ -4,7 +4,7 @@
     <message id="enter your search query">
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/SearchPage.qml" line="141"/>
         <source/>
-        <translation type="unfinished"/>
+        <translation>検索するテキストを入力</translation>
     </message>
 </context>
 <context>
@@ -12,42 +12,42 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="203"/>
         <source>&lt;b&gt;start&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;開始&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="216"/>
         <source>&lt;b&gt;end&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;終了&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="231"/>
         <source>&lt;b&gt;navigate&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;経路&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="248"/>
         <source>&lt;b&gt;clear&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;消去&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="378"/>
         <source>Navigation started.</source>
-        <translation type="unfinished"/>
+        <translation>案内開始</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="384"/>
         <source>Navigation stopped.</source>
-        <translation type="unfinished"/>
+        <translation>案内終了</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="389"/>
         <source>Destination reached.</source>
-        <translation type="unfinished"/>
+        <translation>目的地に到着</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="397"/>
         <source>Rerouting.</source>
-        <translation type="unfinished"/>
+        <translation>経路</translation>
     </message>
 </context>
 <context>
@@ -55,17 +55,17 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="8"/>
         <source>Bitcoin address</source>
-        <translation type="unfinished"/>
+        <translation>ビットコインアドレス</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="32"/>
         <source>Copy to clipboard</source>
-        <translation type="unfinished"/>
+        <translation>クリップボードにコピー</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="36"/>
         <source>Bitcoin address copied to clipboard</source>
-        <translation type="unfinished"/>
+        <translation>ビットコインアドレスをクリップボードにコピーしました</translation>
     </message>
 </context>
 <context>
@@ -73,77 +73,77 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="23"/>
         <source>Google - online</source>
-        <translation type="unfinished"/>
+        <translation>Google - online</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="27"/>
         <source>Monav - on device</source>
-        <translation type="unfinished"/>
+        <translation>Monav - on device</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="31"/>
         <source>OSM Scout Server - on device</source>
-        <translation type="unfinished"/>
+        <translation>OSM Scout Server - on device</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="47"/>
         <source>Car</source>
-        <translation type="unfinished"/>
+        <translation>車</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="51"/>
         <source>Walking</source>
-        <translation type="unfinished"/>
+        <translation>徒歩</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="55"/>
         <source>Cycling</source>
-        <translation type="unfinished"/>
+        <translation>自転車</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="29"/>
         <source>Full</source>
-        <translation type="unfinished"/>
+        <translation>フル</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="33"/>
         <source>Minimal</source>
-        <translation type="unfinished"/>
+        <translation>ミニマム</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="53"/>
         <source>1 (serial)</source>
-        <translation type="unfinished"/>
+        <translation>1(順次)</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="57"/>
         <source>2</source>
-        <translation type="unfinished"/>
+        <translation>2</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="61"/>
         <source>4</source>
-        <translation type="unfinished"/>
+        <translation>4</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="65"/>
         <source>10 (default)</source>
-        <translation type="unfinished"/>
+        <translation>10(初期値)</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="69"/>
         <source>20</source>
-        <translation type="unfinished"/>
+        <translation>20</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="73"/>
         <source>50</source>
-        <translation type="unfinished"/>
+        <translation>50</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="25"/>
         <source>Silica</source>
-        <translation type="unfinished"/>
+        <translation>Silica</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="29"/>
@@ -176,70 +176,70 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="20"/>
         <source>Main map</source>
-        <translation type="unfinished"/>
+        <translation>メインマップ</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="26"/>
         <source>Overlays</source>
-        <translation type="unfinished"/>
+        <translation>オーバーレイ</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="26"/>
         <source>Search</source>
-        <translation type="unfinished"/>
+        <translation>検索</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="31"/>
         <source>Route</source>
-        <translation type="unfinished"/>
+        <translation>経路</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="37"/>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="17"/>
         <source>Map</source>
-        <translation type="unfinished"/>
+        <translation>地図</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="52"/>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="27"/>
         <source>POI</source>
-        <translation type="unfinished"/>
+        <translation>スポット</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="57"/>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="37"/>
         <source>Tracks</source>
-        <translation type="unfinished"/>
+        <translation>追跡</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="62"/>
         <source>Info</source>
-        <translation type="unfinished"/>
+        <translation>情報</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="67"/>
         <source>Options</source>
-        <translation type="unfinished"/>
+        <translation>オプション</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="22"/>
         <source>UI</source>
-        <translation type="unfinished"/>
+        <translation>UI</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="32"/>
         <source>Navigation</source>
-        <translation type="unfinished"/>
+        <translation>ナビゲーション</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="42"/>
         <source>Network</source>
-        <translation type="unfinished"/>
+        <translation>ネットワーク</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="47"/>
         <source>Debug</source>
-        <translation type="unfinished"/>
+        <translation>デバッグ</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="13"/>
@@ -249,7 +249,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="18"/>
         <source>Wikipedia</source>
-        <translation type="unfinished"/>
+        <translation>Wikipedia</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="23"/>
@@ -271,38 +271,38 @@
     <name>InfoAboutPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="46"/>
-        <source>&lt;h3&gt;Dou you like modRana? &lt;b&gt;Donate:&lt;/b&gt;&lt;/h3&gt;</source>
+        <source>&lt;h3&gt;Do you like modRana? &lt;b&gt;Donate:&lt;/b&gt;&lt;/h3&gt;</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="85"/>
         <source>Main developer</source>
-        <translation type="unfinished"/>
+        <translation>メイン開発者</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="91"/>
         <source>Email</source>
-        <translation type="unfinished"/>
+        <translation>Email</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="101"/>
         <source>Website</source>
-        <translation type="unfinished"/>
+        <translation>Website</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="111"/>
         <source>Source code</source>
-        <translation type="unfinished"/>
+        <translation>ソースコード</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="121"/>
         <source>Forum</source>
-        <translation type="unfinished"/>
+        <translation>フォーラム</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="131"/>
         <source>Translation project</source>
-        <translation type="unfinished"/>
+        <translation>翻訳プロジェクト</translation>
     </message>
 </context>
 <context>
@@ -333,12 +333,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="81"/>
         <source>m</source>
-        <translation type="unfinished"/>
+        <translation>m</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="82"/>
         <source>m/s</source>
-        <translation type="unfinished"/>
+        <translation>m/s</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="83"/>
@@ -348,27 +348,27 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="91"/>
         <source>&lt;b&gt;Latitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;緯度:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="98"/>
         <source>&lt;b&gt;Longitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;経度:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="105"/>
         <source>&lt;b&gt;Altitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;高度:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="114"/>
         <source>&lt;b&gt;Speed:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;速度:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="123"/>
         <source>&lt;b&gt;Vertical speed:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;垂直速度:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="130"/>
@@ -378,22 +378,22 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="137"/>
         <source>&lt;b&gt;Direction:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;方位:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="144"/>
         <source>&lt;b&gt;Magnetic variation:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;磁気偏角:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="151"/>
         <source>&lt;b&gt;Horizontal accuracy:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;水平精度:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="158"/>
         <source>&lt;b&gt;Vertical accuracy:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;垂直精度:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="164"/>
@@ -408,7 +408,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="142"/>
         <source>°</source>
-        <translation type="unfinished"/>
+        <translation>°</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="236"/>
@@ -418,7 +418,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
         <source>fix in progress</source>
-        <translation type="unfinished"/>
+        <translation>補正中</translation>
     </message>
 </context>
 <context>
@@ -426,7 +426,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="9"/>
         <source>Speed</source>
-        <translation type="unfinished"/>
+        <translation>速度</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="11"/>
@@ -436,12 +436,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="34"/>
         <source>maximum</source>
-        <translation type="unfinished"/>
+        <translation>最大</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="34"/>
         <source>average</source>
-        <translation type="unfinished"/>
+        <translation>平均</translation>
     </message>
 </context>
 <context>
@@ -449,7 +449,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/MapLayerSelector.qml" line="7"/>
         <source>Select map layer</source>
-        <translation type="unfinished"/>
+        <translation>マップレイヤーを選択</translation>
     </message>
 </context>
 <context>
@@ -457,27 +457,27 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="7"/>
         <source>Overlays</source>
-        <translation type="unfinished"/>
+        <translation>オーバーレイ</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="57"/>
         <source>&lt;i&gt;not selected&lt;/i&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;i&gt;未選択&lt;/i&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="58"/>
         <source>map</source>
-        <translation type="unfinished"/>
+        <translation>マップ</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="111"/>
         <source>&lt;b&gt;add&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;追加&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapLayersPage.qml" line="121"/>
         <source>&lt;b&gt;remove&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;削除&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -485,17 +485,17 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="25"/>
         <source>off (1x)</source>
-        <translation type="unfinished"/>
+        <translation>オフ(等倍)</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="29"/>
         <source>2x</source>
-        <translation type="unfinished"/>
+        <translation>2倍</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="33"/>
         <source>4x</source>
-        <translation type="unfinished"/>
+        <translation>4倍</translation>
     </message>
 </context>
 <context>
@@ -503,7 +503,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="12"/>
         <source>Routing mode enabled</source>
-        <translation type="unfinished"/>
+        <translation>経路案内モード有効</translation>
     </message>
 </context>
 <context>
@@ -511,27 +511,27 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="10"/>
         <source>Debug</source>
-        <translation type="unfinished"/>
+        <translation>デバッグ</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="25"/>
         <source>log file disabled</source>
-        <translation type="unfinished"/>
+        <translation>ログファイル無効</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="28"/>
         <source>log path unknown</source>
-        <translation type="unfinished"/>
+        <translation>ログファイルのパスが不明</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="50"/>
         <source>Debugging messages</source>
-        <translation type="unfinished"/>
+        <translation>デバッグメッセージ</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="36"/>
         <source>Show debug button</source>
-        <translation type="unfinished"/>
+        <translation>デバッグボタンを表示</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="33"/>
@@ -541,7 +541,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="43"/>
         <source>Show unfinished features</source>
-        <translation type="unfinished"/>
+        <translation>未完了の機能を表示</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="53"/>
@@ -571,22 +571,22 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="84"/>
         <source>Log file</source>
-        <translation type="unfinished"/>
+        <translation>ログファイル</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="91"/>
         <source>Log file compression</source>
-        <translation type="unfinished"/>
+        <translation>ログファイル圧縮</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="103"/>
         <source>Notifications</source>
-        <translation type="unfinished"/>
+        <translation>通知</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="106"/>
         <source>Notify</source>
-        <translation type="unfinished"/>
+        <translation>通知</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="108"/>
@@ -601,7 +601,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="114"/>
         <source>This is modRana - a flexible navigation software for (not only) mobile Linux devices!</source>
-        <translation type="unfinished"/>
+        <translation>modRana - モバイルLinuxデバイス(だけじゃない)用のフレキシブルなナビゲーションアプリです</translation>
     </message>
 </context>
 <context>
@@ -609,7 +609,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="9"/>
         <source>Map</source>
-        <translation type="unfinished"/>
+        <translation>マップ</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="11"/>
@@ -624,12 +624,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="17"/>
         <source>Scaling</source>
-        <translation type="unfinished"/>
+        <translation>スケーリング</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="20"/>
         <source>Map scaling</source>
-        <translation type="unfinished"/>
+        <translation>マップスケーリング</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="43"/>
