@@ -8,8 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-19 01:45+0100\n"
+"POT-Creation-Date: 2018-05-17 10:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: helicalgear, 2018\n"
 "Language-Team: Japanese (Japan) (https://www.transifex.com/martink/teams/81256/ja_JP/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
@@ -19,36 +20,36 @@ msgstr ""
 
 #: core/instructions_generator.py:38
 msgid "turn slightly left"
-msgstr ""
+msgstr "左斜め前方へ"
 
 #: core/instructions_generator.py:39
 msgid "turn left"
-msgstr ""
+msgstr "左方向へ"
 
 #: core/instructions_generator.py:40
 msgid "turn sharply left"
-msgstr ""
+msgstr "左手前方向へ"
 
 #: core/instructions_generator.py:41
 msgid "make a U-turn"
-msgstr ""
+msgstr "Uターン"
 
 #: core/instructions_generator.py:42
 msgid "turn sharply right"
-msgstr ""
+msgstr "右手前方向へ"
 
 #: core/instructions_generator.py:43
 msgid "turn right"
-msgstr ""
+msgstr "右方向へ"
 
 #: core/instructions_generator.py:44
 msgid "turn slightly right"
-msgstr ""
+msgstr "右斜め前方へ"
 
 #: core/instructions_generator.py:45
 msgid "head straightforward"
-msgstr ""
+msgstr "直進方向へ"
 
 #: modules/mod_info.py:67
 msgid "talk.maemo.org thread"
-msgstr ""
+msgstr "talk.maemo.orgのスレッド"

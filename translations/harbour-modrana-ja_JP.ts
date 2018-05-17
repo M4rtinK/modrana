@@ -148,12 +148,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="29"/>
         <source>classic</source>
-        <translation type="unfinished"/>
+        <translation>Classic</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="33"/>
         <source>night</source>
-        <translation type="unfinished"/>
+        <translation>Night</translation>
     </message>
 </context>
 <context>
@@ -161,17 +161,17 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="24"/>
         <source>Speed</source>
-        <translation type="unfinished"/>
+        <translation>速度</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="31"/>
         <source>Location</source>
-        <translation type="unfinished"/>
+        <translation>場所</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="36"/>
         <source>About</source>
-        <translation type="unfinished"/>
+        <translation>このアプリについて</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="20"/>
@@ -254,17 +254,17 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="23"/>
         <source>Local</source>
-        <translation type="unfinished"/>
+        <translation>地域</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksMenuPage.qml" line="11"/>
         <source>Record</source>
-        <translation type="unfinished"/>
+        <translation>記録</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksMenuPage.qml" line="16"/>
         <source>List</source>
-        <translation type="unfinished"/>
+        <translation>リスト</translation>
     </message>
 </context>
 <context>
@@ -272,7 +272,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="46"/>
         <source>&lt;h3&gt;Do you like modRana? &lt;b&gt;Donate:&lt;/b&gt;&lt;/h3&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;h3&gt;modRanaを気に入っていただけましたか? &lt;b&gt;寄付:&lt;/b&gt;&lt;/h3&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="85"/>
@@ -310,7 +310,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoCompassPage.qml" line="10"/>
         <source>Compass</source>
-        <translation type="unfinished"/>
+        <translation>コンパス</translation>
     </message>
 </context>
 <context>
@@ -318,17 +318,17 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="78"/>
         <source>not valid</source>
-        <translation type="unfinished"/>
+        <translation>無効</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="79"/>
         <source>unknown</source>
-        <translation type="unfinished"/>
+        <translation>不明</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="80"/>
         <source>not moving</source>
-        <translation type="unfinished"/>
+        <translation>停止中</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="81"/>
@@ -343,7 +343,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="83"/>
         <source>° to true north</source>
-        <translation type="unfinished"/>
+        <translation>° 真北から</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="91"/>
@@ -431,7 +431,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="11"/>
         <source>unknown</source>
-        <translation type="unfinished"/>
+        <translation>不明</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="34"/>
@@ -672,12 +672,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="64"/>
         <source>Avoid major highways</source>
-        <translation type="unfinished"/>
+        <translation>高速道路を回避</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="69"/>
         <source>Avoid toll roads</source>
-        <translation type="unfinished"/>
+        <translation>有料道路を回避</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="74"/>
@@ -968,12 +968,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="51"/>
         <source>Description</source>
-        <translation type="unfinished"/>
+        <translation>説明</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="64"/>
         <source>Category</source>
-        <translation type="unfinished"/>
+        <translation>カテゴリー</translation>
     </message>
 </context>
 <context>
@@ -981,7 +981,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/SearchPage.qml" line="88"/>
         <source>Cancel</source>
-        <translation type="unfinished"/>
+        <translation>キャンセル</translation>
     </message>
 </context>
 <context>
@@ -989,12 +989,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="52"/>
         <source>files</source>
-        <translation type="unfinished"/>
+        <translation>ファイル</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="57"/>
         <source>Sqlite</source>
-        <translation type="unfinished"/>
+        <translation>Sqlite</translation>
     </message>
 </context>
 <context>
@@ -1002,12 +1002,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryListPage.qml" line="10"/>
         <source>Categories</source>
-        <translation type="unfinished"/>
+        <translation>カテゴリー</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryListPage.qml" line="47"/>
         <source>tracklogs</source>
-        <translation type="unfinished"/>
+        <translation>追跡ログ</translation>
     </message>
 </context>
 <context>
@@ -1015,12 +1015,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryPage.qml" line="10"/>
         <source>unknown</source>
-        <translation type="unfinished"/>
+        <translation>不明</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryPage.qml" line="50"/>
         <source>kB</source>
-        <translation type="unfinished"/>
+        <translation>kB</translation>
     </message>
 </context>
 <context>
@@ -1028,67 +1028,67 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="10"/>
         <source>Record a tracklog</source>
-        <translation type="unfinished"/>
+        <translation>追跡ログを記録</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="17"/>
         <source>Tracklog recording paused</source>
-        <translation type="unfinished"/>
+        <translation>追跡ログ記録の一時停止</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="17"/>
         <source>Recording a tracklog</source>
-        <translation type="unfinished"/>
+        <translation>追跡ログ記録中</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="93"/>
         <source>Enter tracklog name here!</source>
-        <translation type="unfinished"/>
+        <translation>追跡ログの名称を入力してください！</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="111"/>
         <source>stop</source>
-        <translation type="unfinished"/>
+        <translation>停止</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="111"/>
         <source>start</source>
-        <translation type="unfinished"/>
+        <translation>開始</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="119"/>
         <source>unpause</source>
-        <translation type="unfinished"/>
+        <translation>ポーズ解除</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="119"/>
         <source>pause</source>
-        <translation type="unfinished"/>
+        <translation>ポーズ</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="129"/>
         <source>&lt;b&gt;current speed:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;現在の速度:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="133"/>
         <source>&lt;b&gt;average speed:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;平均速度:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="137"/>
         <source>&lt;b&gt;max speed:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;最大速度:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="141"/>
         <source>&lt;b&gt;distance:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;距離:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="145"/>
         <source>&lt;b&gt;elapsed time:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;予想時間:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="149"/>
@@ -1098,12 +1098,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="155"/>
         <source>Recorded tracklogs folder:</source>
-        <translation type="unfinished"/>
+        <translation>追跡ログ記録フォルダ:</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="165"/>
         <source>Symlink tracklogs to Documents</source>
-        <translation type="unfinished"/>
+        <translation>追跡ログをドキュメントにリンク</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="193"/>
@@ -1121,12 +1121,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="307"/>
         <source>&lt;b&gt;starting modRana...&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;modRana起動中...&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="331"/>
         <source>debug</source>
-        <translation type="unfinished"/>
+        <translation>デバッグ</translation>
     </message>
 </context>
 </TS>
