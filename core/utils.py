@@ -14,7 +14,7 @@ from core.backports.six import b
 from core.backports import six
 
 StringIO = six.moves.cStringIO
-from six.moves import urllib
+urllib_parse = six.moves.urllib.parse
 
 PYTHON3 = sys.version_info[0] > 2
 
@@ -413,4 +413,4 @@ def path2uri(path):
 
      :param str path: local file path
      """
-     return "file://{}".format(urllib.parse.quote(path))
+     return "file://{}".format(urllib_parse.quote(path))
