@@ -21,17 +21,17 @@ LOCALE_DIR = os.path.join(APP_DIR, 'translations', 'mo')
 #  In maemo it is in the LANG environment variable
 #  (on desktop is usually LANGUAGES)
 DEFAULT_LANGUAGES = os.environ.get('LANG', '').split(':')
-DEFAULT_LANGUAGES += ['en_US']
+DEFAULT_LANGUAGES.append('en_US')
 
 lc, encoding = locale.getdefaultlocale()
 if lc:
     languages = [lc]
 else:
-    languages = ('en_US')
+    languages = ['en_US']
 
 # Concat all languages (env + default locale),
 #  and here we have the languages and location of the translations
-languages += DEFAULT_LANGUAGES
+languages.extend(DEFAULT_LANGUAGES)
 mo_location = LOCALE_DIR
 
 # Lets tell those details to gettext
