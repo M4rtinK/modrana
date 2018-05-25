@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.8
+Version: 0.55.9
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,12 @@ fi
 %endif
 
 %changelog
+* Fri May 25 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.9-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Use custom urlparse resolving (martin.kolman)
+- Revert "Upgrade bundled six" (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Thu May 17 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.8-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix language list handling on Sailfish OS (martin.kolman)

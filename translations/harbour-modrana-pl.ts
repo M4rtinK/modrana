@@ -403,7 +403,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
         <source>Location usage disabled&lt;br&gt;(You can enable it from &lt;i&gt;Options --&gt; Location&lt;/i&gt;)</source>
-        <translation type="unfinished"/>
+        <translation>Określanie pozycji wyłączone&lt;br&gt;(Możesz to włączyć w &lt;i&gt;Opcje --&gt; Lokalizacja&lt;/i&gt;)</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="142"/>
@@ -601,7 +601,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="114"/>
         <source>This is modRana - a flexible navigation software for (not only) mobile Linux devices!</source>
-        <translation type="unfinished"/>
+        <translation>To jest modRana - elastyczne oprogramowanie do nawigacji nie tylko dla urządzeń z Linuksem!</translation>
     </message>
 </context>
 <context>
@@ -907,7 +907,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="23"/>
         <source>&lt;b&gt;Point info&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Informacje o punkcie&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="37"/>
