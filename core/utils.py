@@ -14,9 +14,13 @@ from core.backports.six import b
 from core.backports import six
 
 StringIO = six.moves.cStringIO
-urllib_parse = six.moves.urllib.parse
 
 PYTHON3 = sys.version_info[0] > 2
+
+if PYTHON3:
+    from urllib.parse import urlparse as urllib_parse
+else:
+    from urlparse import urlparse as urllib_parse
 
 if qrc.is_qrc:
     import pyotherside
