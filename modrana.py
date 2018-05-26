@@ -517,7 +517,7 @@ class ModRana(object):
         log.info("Shutting-down modules")
         for m in self.m.values():
             m.shutdown()
-        # trigger the shudown signal
+        # trigger the shutdown signal
         self.shutdown_signal()
         self._saveOptions()
         modrana_log.log_manager.disable_log_file()
