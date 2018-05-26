@@ -167,6 +167,9 @@ class ModRana(object):
             version = "unknown version"
         log.info("  %s" % version)
         log.info("  Python %s" % platform.python_version())
+        os_release = self._get_os_release()
+        if os_release:
+            log.info("  %s", os_release)
 
         # load the device module now as it might override
         # the default profile directory, so it needs to be
@@ -218,6 +221,26 @@ class ModRana(object):
         perform post upgrade checks
         """
         self.configs.upgrade_config_files()
+
+    def _get_os_release(self):
+        """Try to get a name of the current OS release.
+
+        This could be useful when debugging to look for issues
+        happening on certain (generally outdated) OS versions.
+
+        :return: pretty OS release name if possible, else None
+        :rtype: str or None
+        """
+        try:
+            from configobj import ConfigObj
+            os_release = ConfigObj("/etc/os-release")
+            os_version_name = os_release.get("PRETTY_NAME")
+            if os_version_name:
+                return os_version_name
+        except:
+            pass
+        # nothing found or OS release detection failed
+        return None
 
     ##  MODULE HANDLING ##
 
