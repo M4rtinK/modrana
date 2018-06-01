@@ -303,6 +303,8 @@ Rectangle {
     }
 
     onWidthChanged: {
+        // update canvas offset when pinchmap width changes
+        canvas.x = -pinchmap.width
         if (status != PageStatus.Active) {
             needsUpdate = true;
         } else {
@@ -311,6 +313,8 @@ Rectangle {
     }
 
     onHeightChanged: {
+        // update offset position when pinchmap height changes
+        canvas.y = -pinchmap.height
         if (status != PageStatus.Active) {
             needsUpdate = true;
         } else {
