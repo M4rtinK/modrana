@@ -272,7 +272,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="46"/>
         <source>&lt;h3&gt;Do you like modRana? &lt;b&gt;Donate:&lt;/b&gt;&lt;/h3&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;h3&gt;¿Te gusta modRana? &lt;b&gt;Dona:&lt;/b&gt;&lt;/h3&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="85"/>
@@ -918,24 +918,29 @@
 <context>
     <name>PointPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="14"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="16"/>
         <source>Local search</source>
         <translation>Búsqueda local</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="22"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="24"/>
         <source>Save</source>
         <translation>Guardar</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="39"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="41"/>
         <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
         <translation>&lt;b&gt;latitud:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="42"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="44"/>
         <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
         <translation>&lt;b&gt;longitud:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="48"/>
+        <source>&lt;b&gt;distance:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>

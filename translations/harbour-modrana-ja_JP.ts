@@ -244,7 +244,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="13"/>
         <source>Place</source>
-        <translation type="unfinished"/>
+        <translation>場所</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="18"/>
@@ -287,7 +287,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="101"/>
         <source>Website</source>
-        <translation>Website</translation>
+        <translation>ウェブサイト</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="111"/>
@@ -373,7 +373,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="130"/>
         <source>&lt;b&gt;Bearing:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;方位角:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="137"/>
@@ -398,7 +398,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="164"/>
         <source>&lt;b&gt;Fix timestamp:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;測位時刻:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
@@ -413,7 +413,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="236"/>
         <source>&lt;font color=&quot;red&quot;&gt;unknown&lt;/font&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;font color=&quot;red&quot;&gt;不明&lt;/font&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
@@ -546,22 +546,22 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="53"/>
         <source>Tile display debugging</source>
-        <translation type="unfinished"/>
+        <translation>Tile display debugging</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="60"/>
         <source>Tile storage debugging</source>
-        <translation type="unfinished"/>
+        <translation>Tile storage debugging</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="67"/>
         <source>Location debugging</source>
-        <translation type="unfinished"/>
+        <translation>Location debugging</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="74"/>
         <source>Map canvas debugging</source>
-        <translation type="unfinished"/>
+        <translation>Map canvas debugging</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="81"/>
@@ -591,12 +591,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="108"/>
         <source>Hello world!</source>
-        <translation type="unfinished"/>
+        <translation>Hello world!</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="112"/>
         <source>Notify long</source>
-        <translation type="unfinished"/>
+        <translation>長文通知</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsDebugPage.qml" line="114"/>
@@ -619,7 +619,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="13"/>
         <source>unknown</source>
-        <translation type="unfinished"/>
+        <translation>不明</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="17"/>
@@ -644,12 +644,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="66"/>
         <source>Map folder path:</source>
-        <translation type="unfinished"/>
+        <translation>マップデータのパス:</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMapPage.qml" line="72"/>
         <source>Free space available</source>
-        <translation type="unfinished"/>
+        <translation>利用可能な空き容量</translation>
     </message>
 </context>
 <context>
@@ -682,7 +682,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="74"/>
         <source>Route opacity</source>
-        <translation type="unfinished"/>
+        <translation>経路の不透過度</translation>
     </message>
 </context>
 <context>
@@ -690,32 +690,32 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="19"/>
         <source>Network usage</source>
-        <translation type="unfinished"/>
+        <translation>ネットワークの使用</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="22"/>
         <source>In &lt;b&gt;minimal&lt;/b&gt; network usage mode no map tiles are downloaded over the network, only previously cached tiles are used.</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;ミニマム&lt;/b&gt; ネットワーク使用モードでは、マップタイルはネットワーク経由でダウンロードされません。キャッシュ済みのタイルのみが使用されます。</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="24"/>
         <source>In &lt;b&gt;full&lt;/b&gt; network usage mode no network usage restrictions are in place.</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;フル&lt;/b&gt; ネットワーク使用モードでは、ネットワークの使用制限はありません。</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="42"/>
         <source>Tile download</source>
-        <translation type="unfinished"/>
+        <translation>マップタイルのダウンロード</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="46"/>
         <source>Number of automatic tile download threads</source>
-        <translation type="unfinished"/>
+        <translation>マップタイル自動ダウンロードのスレッド数</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="82"/>
         <source>You need to restart modRana for the thread number change to take effect.</source>
-        <translation type="unfinished"/>
+        <translation>スレッド数の変更を有効にするためにはmodRanaの再起動が必要です。</translation>
     </message>
 </context>
 <context>
@@ -723,33 +723,33 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="9"/>
         <source>POI</source>
-        <translation type="unfinished"/>
+        <translation>目的地</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="13"/>
         <source>Place search</source>
-        <translation type="unfinished"/>
+        <translation>場所の検索</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="17"/>
         <source>Nominatim (online)</source>
-        <translation type="unfinished"/>
+        <translation>Nominatim (オンライン)</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="28"/>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="53"/>
         <source>OSM Scout Server (on device)</source>
-        <translation type="unfinished"/>
+        <translation>OSM Scout Server (デバイス上)</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="38"/>
         <source>Local search</source>
-        <translation type="unfinished"/>
+        <translation>周辺を検索</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsPOIPage.qml" line="42"/>
         <source>Google (online)</source>
-        <translation type="unfinished"/>
+        <translation>Google (オンライン)</translation>
     </message>
 </context>
 <context>
@@ -757,12 +757,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsTracksPage.qml" line="9"/>
         <source>Tracks</source>
-        <translation type="unfinished"/>
+        <translation>追跡</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsTracksPage.qml" line="13"/>
         <source>Tracklog opacity</source>
-        <translation type="unfinished"/>
+        <translation>追跡記録の不透明度</translation>
     </message>
 </context>
 <context>
@@ -770,47 +770,47 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="19"/>
         <source>Theme</source>
-        <translation type="unfinished"/>
+        <translation>テーマ</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="9"/>
         <source>UI</source>
-        <translation type="unfinished"/>
+        <translation>ユーザーインターフェイス</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="55"/>
         <source>Animations</source>
-        <translation type="unfinished"/>
+        <translation>アニメーション</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="62"/>
         <source>Show back button</source>
-        <translation type="unfinished"/>
+        <translation>戻るボタンを表示</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="73"/>
         <source>Screen</source>
-        <translation type="unfinished"/>
+        <translation>スクリーン</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="78"/>
         <source>Keep screen on</source>
-        <translation type="unfinished"/>
+        <translation>画面を常に表示</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="86"/>
         <source>Map screen</source>
-        <translation type="unfinished"/>
+        <translation>マップスクリーン</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="89"/>
         <source>Show compass</source>
-        <translation type="unfinished"/>
+        <translation>コンパスを表示</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsUIPage.qml" line="97"/>
         <source>Compass opacity</source>
-        <translation type="unfinished"/>
+        <translation>コンパスの不透明度</translation>
     </message>
 </context>
 <context>
@@ -818,12 +818,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="10"/>
         <source>POI Categories</source>
-        <translation type="unfinished"/>
+        <translation>目的地の種類</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="49"/>
         <source>POIs</source>
-        <translation type="unfinished"/>
+        <translation>個の目的地</translation>
     </message>
 </context>
 <context>
@@ -831,57 +831,57 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="75"/>
         <source>Service station</source>
-        <translation type="unfinished"/>
+        <translation>給油所</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="76"/>
         <source>Residence</source>
-        <translation type="unfinished"/>
+        <translation>住宅</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="77"/>
         <source>Restaurant</source>
-        <translation type="unfinished"/>
+        <translation>レストラン</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="78"/>
         <source>Shopping/Services</source>
-        <translation type="unfinished"/>
+        <translation>ショッピング/サービス</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="79"/>
         <source>Recreation</source>
-        <translation type="unfinished"/>
+        <translation>娯楽施設</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="80"/>
         <source>Transportation</source>
-        <translation type="unfinished"/>
+        <translation>交通機関</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="81"/>
         <source>Lodging</source>
-        <translation type="unfinished"/>
+        <translation>宿泊施設</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="82"/>
         <source>School</source>
-        <translation type="unfinished"/>
+        <translation>学校</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="83"/>
         <source>Business</source>
-        <translation type="unfinished"/>
+        <translation>事業施設</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="84"/>
         <source>Landmark</source>
-        <translation type="unfinished"/>
+        <translation>ランドマーク</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="85"/>
         <source>Other</source>
-        <translation type="unfinished"/>
+        <translation>その他</translation>
     </message>
 </context>
 <context>
@@ -889,17 +889,17 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="13"/>
         <source>Local search</source>
-        <translation type="unfinished"/>
+        <translation>周辺を検索</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="63"/>
         <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;緯度:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="66"/>
         <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;経度:&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -907,34 +907,39 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="23"/>
         <source>&lt;b&gt;Point info&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;位置情報&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="37"/>
         <source>&lt;b&gt;Route here&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;経路&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
     <name>PointPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="14"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="16"/>
         <source>Local search</source>
-        <translation type="unfinished"/>
+        <translation>周辺を検索</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="22"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="24"/>
         <source>Save</source>
-        <translation type="unfinished"/>
+        <translation>保存</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="39"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="41"/>
         <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;緯度:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="42"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="44"/>
         <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
+        <translation>&lt;b&gt;経度:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="48"/>
+        <source>&lt;b&gt;distance:&lt;/b&gt;</source>
         <translation type="unfinished"/>
     </message>
 </context>
@@ -943,27 +948,27 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="9"/>
         <source>Save POI</source>
-        <translation type="unfinished"/>
+        <translation>目的地を保存</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="15"/>
         <source>Confirm and save</source>
-        <translation type="unfinished"/>
+        <translation>確認して保存</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="28"/>
         <source>POI saved</source>
-        <translation type="unfinished"/>
+        <translation>目的地を保存しました</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="30"/>
         <source>POI could not be saved</source>
-        <translation type="unfinished"/>
+        <translation>目的地を保存できませんでした</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="39"/>
         <source>Name</source>
-        <translation type="unfinished"/>
+        <translation>名称</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="51"/>
@@ -1108,12 +1113,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="193"/>
         <source>Draw logging trace</source>
-        <translation type="unfinished"/>
+        <translation>経路記録を描画</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="201"/>
         <source>Trace opacity</source>
-        <translation type="unfinished"/>
+        <translation>経路の不透明度</translation>
     </message>
 </context>
 <context>

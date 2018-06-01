@@ -918,23 +918,28 @@
 <context>
     <name>PointPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="14"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="16"/>
         <source>Local search</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="22"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="24"/>
         <source>Save</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="39"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="41"/>
         <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="42"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="44"/>
         <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="48"/>
+        <source>&lt;b&gt;distance:&lt;/b&gt;</source>
         <translation type="unfinished"/>
     </message>
 </context>
