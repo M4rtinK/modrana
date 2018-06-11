@@ -207,6 +207,10 @@ release:
 
 .PHONY: clean install tag archive
 
+test-in-docker:
+	# run tests in a Docker container
+	sudo docker build -f tests/Dockerfile.test .
+
 test: test-python test-qml
 
 test-python:

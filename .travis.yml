@@ -1,9 +1,7 @@
+sudo: required
 language: python
-python:
-  - "3.4"
-  - "3.6"
+services:
+  - docker
 
-dist: xenial
-install: sudo apt-get install python3-nose python3-six espeak flite qtdeclarative5-dev-tools qtdeclarative5-test-plugin pyotherside
 script:
-  - make test NOSETESTS=nosetests3
+  - make test-in-docker
