@@ -21,6 +21,11 @@ function formatDistance(d, scale) {
     }
 }
 
+function ms2kmh(ms){
+    // convert meters per second to kilometers per hour
+    return (ms * 3600) / 1000.0
+}
+
 function formatBearing(b) {
     return Math.round(b) + "°"
 }
