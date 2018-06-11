@@ -207,5 +207,12 @@ release:
 
 .PHONY: clean install tag archive
 
-test:
+test: test-python test-qml
+
+test-python:
+	# run tests for Python code
 	PYTHONPATH=core/bundle $(NOSETESTS) -w tests -v
+
+test-qml:
+	# run tests for QML code
+	qmltestrunner -input modules/gui_modules/gui_qt5/qml/tests/ 
