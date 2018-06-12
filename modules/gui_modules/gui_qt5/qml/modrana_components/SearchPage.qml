@@ -138,7 +138,7 @@ HeaderPage {
         anchors.top : parent.top
         anchors.topMargin : rWin.c.style.main.spacing
         height : rWin.headerHeight - rWin.c.style.main.spacing*2
-        placeholderText: qsTrId("enter your search query")
+        placeholderText: qsTr("enter your search query")
         Component.onCompleted : {
             selectAll()
         }

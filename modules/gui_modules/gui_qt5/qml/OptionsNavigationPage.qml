@@ -6,7 +6,7 @@ import "modrana_components"
 
 BasePage {
     id: navigationPage
-    headerText : "Navigation"
+    headerText : qsTr("Navigation")
 
     content : ContentColumn {
         SectionHeader {

@@ -6,7 +6,7 @@ import "modrana_components"
 
 BasePage {
     id: optionsNetworkPage
-    headerText : "Network"
+    headerText : qsTr("Network")
     content : ContentColumn {
         spacing : rWin.c.style.main.spacing
         Item {
