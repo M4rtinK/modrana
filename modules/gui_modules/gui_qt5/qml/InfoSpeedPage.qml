@@ -3,6 +3,7 @@
 import QtQuick 2.0
 import UC 1.0
 import "modrana_components"
+import "functions.js" as F
 
 BasePage {
     id: speedPage
@@ -30,8 +31,10 @@ BasePage {
     }
 
     function setSpeeds(speeds) {
-        speedPage.currentSpeedString = speeds.current;
-        speedPage.speedStatsString = qsTr("maximum") + ": " + speeds.max + "   " + qsTr("average") + ": " + speeds.avg
+        speedPage.currentSpeedString = F.formatSpeedKmh(speeds.current)
+        var maxSpeed = F.formatSpeedKmh(speeds.max)
+        var avgSpeed = F.formatSpeedKmh(speeds.avg)
+        speedPage.speedStatsString = qsTr("maximum") + ": " + maxSpeed + "   " + qsTr("average") + ": " + avgSpeed
     }
 
     Connections {

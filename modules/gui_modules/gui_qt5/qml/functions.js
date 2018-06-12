@@ -12,11 +12,11 @@ function formatDistance(d, scale) {
     //TODO: imperial unit handling
     if (1) {
         if (d >= 1000) {
-            return Math.round(d / 1000.0) + " km"
+            return Math.round(d / 1000.0) + " " + qsTr("km")
         } else if (d >= 100) {
-            return Math.round(d) + " m"
+            return Math.round(d) + " " + qsTr("m")
         } else {
-            return d.toFixed(1) + " m"
+            return d.toFixed(1) + " " + qsTr("m")
         }
     }
 }
@@ -24,6 +24,11 @@ function formatDistance(d, scale) {
 function ms2kmh(ms){
     // convert meters per second to kilometers per hour
     return (ms * 3600) / 1000.0
+}
+
+function formatSpeedKmh(speedKmh) {
+    // format kmh speed with l10n support
+    return speedKmh + " " + qsTr("km/h")
 }
 
 function formatBearing(b) {

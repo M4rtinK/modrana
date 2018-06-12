@@ -105,16 +105,48 @@ class Stats(RanaModule):
             speedString = "? %s" % units.currentUnitPerHourString()
         return speedString
 
+    @property
+    def current_speed(self):
+        """Return current speed in kmh.
+
+        :return: current speed in kmh
+        :rtype: float
+        """
+        return self.get('speed', -1)
+
+    @property
+    def average_speed(self):
+        """Return average speed in kmh.
+
+        :return: average speed in kmh
+        :rtype: float
+        """
+        return self.get('avgSpeed', -1)
+
+    @property
+    def max_speed(self):
+        """Return maximum recorded speed in kmh for this modRana session.
+
+        The maximum recorded speed is not stored, so a new value is
+        continuously established once modRana is started.
+
+        :return: maximum speed in kmh
+        :rtype: float
+        """
+
+        return self.get('maxSpeed', -1)
+
     def getSpeedStatsDict(self):
-        """Return a dictionary with speed stats
+        """Return a dictionary with speed stats.
+
         Like this, speed statistics can be displayed atomically.
+        We also round the values to zero decimal places.
 
         :returns: speed statistics dictionary
         :rtype: dict
         """
         return {
-            "current": self.getCurrentSpeedString(),
-            "avg": self.getAverageSpeedString(),
-            "max": self.getMaxSpeedString()
+            "current": int(round(self.current_speed, 0)),
+            "avg": int(round(self.average_speed)),
+            "max": int(round(self.max_speed))
         }
-
