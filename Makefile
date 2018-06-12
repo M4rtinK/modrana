@@ -40,9 +40,14 @@ all:
 	cp -r modules $(SOURCEDIR)
 	cp -r run $(SOURCEDIR)
 	cp -r themes $(SOURCEDIR)
-	cp -r translations $(SOURCEDIR)
 	cp -r modrana.py $(SOURCEDIR)
 	cp -r version.txt $(SOURCEDIR)
+	# translations
+	mkdir $(SOURCEDIR)/$(TRANSLATIONS_DIR)
+	cp $(TRANSLATIONS_DIR)/*.po $(SOURCEDIR)/$(TRANSLATIONS_DIR)/
+	cp $(TRANSLATIONS_DIR)/*.qm $(SOURCEDIR)/$(TRANSLATIONS_DIR)/
+	cp $(TRANSLATIONS_DIR)/*.ts $(SOURCEDIR)/$(TRANSLATIONS_DIR)/
+	cp -r $(TRANSLATIONS_DIR)/mo $(SOURCEDIR)/$(TRANSLATIONS_DIR)/
 
 rsync:
 	# cleanup the source tree
