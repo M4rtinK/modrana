@@ -687,7 +687,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="9"/>
         <source>Network</source>
-        <translation type="unfinished"/>
+        <translation>Сеть</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="19"/>
@@ -906,7 +906,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="72"/>
         <source>&lt;b&gt;distance:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;расстояние:&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -998,7 +998,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/SearchPage.qml" line="141"/>
         <source>enter your search query</source>
-        <translation type="unfinished"/>
+        <translation>Введите запрос</translation>
     </message>
 </context>
 <context>
@@ -1138,18 +1138,18 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/functions.js" line="15"/>
         <source>km</source>
-        <translation type="unfinished"/>
+        <translation>км</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/functions.js" line="17"/>
         <location filename="../modules/gui_modules/gui_qt5/qml/functions.js" line="19"/>
         <source>m</source>
-        <translation type="unfinished"/>
+        <translation>м</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/functions.js" line="31"/>
         <source>km/h</source>
-        <translation type="unfinished"/>
+        <translation>км/ч</translation>
     </message>
 </context>
 <context>
