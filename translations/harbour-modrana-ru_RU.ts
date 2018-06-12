@@ -1,13 +1,5 @@
 <?xml version="1.0" ?><!DOCTYPE TS><TS language="ru_RU" version="2.1">
 <context>
-    <name/>
-    <message id="enter your search query">
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/SearchPage.qml" line="141"/>
-        <source/>
-        <translation>Введите запрос</translation>
-    </message>
-</context>
-<context>
     <name>BaseMapPage</name>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="203"/>
@@ -103,12 +95,12 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="29"/>
         <source>Full</source>
-        <translation>Полный</translation>
+        <translation>полное</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="33"/>
         <source>Minimal</source>
-        <translation>Минимальный</translation>
+        <translation>минимальное</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="53"/>
@@ -249,7 +241,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="18"/>
         <source>Wikipedia</source>
-        <translation>Wikipedia</translation>
+        <translation>Википедия</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SearchMenuPage.qml" line="23"/>
@@ -272,7 +264,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="46"/>
         <source>&lt;h3&gt;Do you like modRana? &lt;b&gt;Donate:&lt;/b&gt;&lt;/h3&gt;</source>
-        <translation>&lt;h3&gt;Вам нравится modRana? &lt;b&gt;Пожертвовать:&lt;/b&gt;&lt;/h3&gt;</translation>
+        <translation>&lt;h3&gt;Нравится modRana? &lt;b&gt;Пожертвовать:&lt;/b&gt;&lt;/h3&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoAboutPage.qml" line="85"/>
@@ -343,7 +335,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="83"/>
         <source>° to true north</source>
-        <translation>° к истинному северу</translation>
+        <translation>°к северу</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="91"/>
@@ -383,7 +375,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="144"/>
         <source>&lt;b&gt;Magnetic variation:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Магнитное склонение:&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;Магн. склонение:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="151"/>
@@ -424,22 +416,22 @@
 <context>
     <name>InfoSpeedPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="9"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="10"/>
         <source>Speed</source>
         <translation>Скорость</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="11"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="12"/>
         <source>unknown</source>
         <translation>неизвестно</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="34"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="37"/>
         <source>maximum</source>
         <translation>максимальная</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="34"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoSpeedPage.qml" line="37"/>
         <source>average</source>
         <translation>средняя</translation>
     </message>
@@ -655,6 +647,11 @@
 <context>
     <name>OptionsNavigationPage</name>
     <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="9"/>
+        <source>Navigation</source>
+        <translation>Навигация</translation>
+    </message>
+    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNavigationPage.qml" line="13"/>
         <source>Routing</source>
         <translation>Построение маршрута</translation>
@@ -687,6 +684,11 @@
 </context>
 <context>
     <name>OptionsNetworkPage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="9"/>
+        <source>Network</source>
+        <translation type="unfinished"/>
+    </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsNetworkPage.qml" line="19"/>
         <source>Network usage</source>
@@ -887,19 +889,24 @@
 <context>
     <name>POIPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="13"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="15"/>
         <source>Local search</source>
         <translation>Поиск мест вокруг</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="63"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="65"/>
         <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
         <translation>&lt;b&gt;широта:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="66"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="68"/>
         <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
         <translation>&lt;b&gt;долгота:&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="72"/>
+        <source>&lt;b&gt;distance:&lt;/b&gt;</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -940,7 +947,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="48"/>
         <source>&lt;b&gt;distance:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>расстояние:&lt;/b&gt;</translation>
     </message>
 </context>
 <context>
@@ -987,6 +994,11 @@
         <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/SearchPage.qml" line="88"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/SearchPage.qml" line="141"/>
+        <source>enter your search query</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -1048,7 +1060,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="93"/>
         <source>Enter tracklog name here!</source>
-        <translation>Введите имя пути!</translation>
+        <translation>Имя новой записи</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="111"/>
@@ -1119,6 +1131,25 @@
         <location filename="../modules/gui_modules/gui_qt5/qml/TracksRecordPage.qml" line="201"/>
         <source>Trace opacity</source>
         <translation>Прозрачность линии</translation>
+    </message>
+</context>
+<context>
+    <name>functions</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/functions.js" line="15"/>
+        <source>km</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/functions.js" line="17"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/functions.js" line="19"/>
+        <source>m</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/functions.js" line="31"/>
+        <source>km/h</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>

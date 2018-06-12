@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.10
+Version: 0.55.12
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,11 @@ fi
 %endif
 
 %changelog
+* Wed Jun 13 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.12-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Sat Jun 02 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.10-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Update canvas offset when pinchmap size changes (martin.kolman)
