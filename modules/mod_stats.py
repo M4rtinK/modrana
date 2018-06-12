@@ -147,6 +147,6 @@ class Stats(RanaModule):
         """
         return {
             "current": int(round(self.current_speed, 0)),
-            "avg": int(round(self.average_speed)),
-            "max": int(round(self.max_speed))
+            "avg": int(round(self.average_speed, 0)),
+            "max": int(round(self.max_speed, 0))
         }
