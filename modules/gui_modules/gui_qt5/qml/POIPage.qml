@@ -3,11 +3,13 @@
 import QtQuick 2.0
 import UC 1.0
 import "modrana_components"
+import "functions.js" as F
 
 BasePage {
     id: poiPage
     headerText : point.name
     property var point
+    property real distanceToPoint : F.p2pDistance(poiPage.point, rWin.lastGoodPos)
     headerMenu : TopMenu {
         MenuItem {
             text : qsTr("Local search")
@@ -66,5 +68,8 @@ BasePage {
                 text : qsTr("<b>longitude:</b>") + " " + point.longitude
             }
         }
-   }
+        Label {
+            text : qsTr("<b>distance:</b>") + " " + F.formatDistance(poiPage.distanceToPoint, 1)
+        }
+    }
 }
