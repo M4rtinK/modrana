@@ -1,5 +1,7 @@
 # remove the GUI modules that don't run on Fedora
 modules/gui_modules/gui_qml
+# remove QML unit tests
+modules/gui_modules/gui_qt5/qml/tests
 # remove some bigger device modules that are not needed on sailfish
 modules/device_modules/device_n900.py
 modules/device_modules/device_n9.py
