@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.13
+Version: 0.55.14
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,11 @@ fi
 %endif
 
 %changelog
+* Wed Jun 13 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.14-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Unify speed stats rounding (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Wed Jun 13 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.13-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Only copy relevant translation files at build time (martin.kolman)
