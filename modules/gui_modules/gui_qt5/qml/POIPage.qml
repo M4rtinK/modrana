@@ -20,7 +20,7 @@ BasePage {
             }
         }
         MenuItem {
-            text : "Show on map"
+            text : qsTr("Show on map")
             onClicked : {
                 rWin.log.info("Show POI on map: " + point.name)
                 var poiModel = rWin.mapPage.getMap().poiMarkerModel
@@ -69,7 +69,7 @@ BasePage {
             }
         }
         Label {
-            text : qsTr("<b>distance:</b>") + " " + F.formatDistance(poiPage.distanceToPoint, 1)
+            text : "<b>" + qsTr("distance") + ":</b>") + " " + F.formatDistance(poiPage.distanceToPoint, 1)
         }
     }
 }

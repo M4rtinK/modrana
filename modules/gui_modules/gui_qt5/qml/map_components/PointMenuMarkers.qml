@@ -25,8 +25,8 @@ Markers {
                         height: rWin.c.style.map.button.size
                         onClicked: {
                             rWin.log.info("showing info for on-map point")
-                            model.name = "A point on the map"
-                            model.description = "An arbitrary point on the map."
+                            model.name = qsTr("A point on the map")
+                            model.description = qsTr("An arbitrary point on the map.")
                             var pointPage = rWin.loadPage("PointPage", {"point" : model})
                             rWin.pushPageInstance(pointPage)
                         }

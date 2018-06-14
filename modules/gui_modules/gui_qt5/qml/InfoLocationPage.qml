@@ -10,12 +10,12 @@ BasePage {
 
     headerText : if (rWin.position.coordinate.isValid) {
         if (rWin.position.altitudeValid) {
-            '3D fix'
+            qsTr('3D fix')
         } else {
-            '2D fix'
+            qsTr('2D fix')
         }
     } else {
-        'Location'
+        qsTr('Location')
     }
 
     content : Item {
@@ -233,7 +233,7 @@ BasePage {
 
     function checkPositiveNumber(number) {
         if (number < 0) {
-            return qsTr('<font color="red">unknown</font>')
+            return '<font color="red">' + qsTr("unknown") + '</font>'
         } else {
             return number
         }
