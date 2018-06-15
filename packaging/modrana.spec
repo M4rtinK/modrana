@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.14
+Version: 0.55.15
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,14 @@ fi
 %endif
 
 %changelog
+* Fri Jun 15 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.15-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Handle no/one/multiple tracklogs correctly (martin.kolman)
+- Use responsive layout for map buttons with text (martin.kolman)
+- Translation fixes (martin.kolman)
+- Don't include QML unit tests in package files (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Wed Jun 13 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.14-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Unify speed stats rounding (martin.kolman)

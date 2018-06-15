@@ -2,42 +2,42 @@
 <context>
     <name>BaseMapPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="203"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="204"/>
         <source>&lt;b&gt;start&lt;/b&gt;</source>
         <translation>&lt;b&gt;start&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="216"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="218"/>
         <source>&lt;b&gt;end&lt;/b&gt;</source>
         <translation>&lt;b&gt;mål&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="231"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="234"/>
         <source>&lt;b&gt;navigate&lt;/b&gt;</source>
         <translation>&lt;b&gt;navigera&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="248"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="252"/>
         <source>&lt;b&gt;clear&lt;/b&gt;</source>
         <translation>&lt;b&gt;rensa&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="378"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="382"/>
         <source>Navigation started.</source>
         <translation>Navigering startad.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="384"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="388"/>
         <source>Navigation stopped.</source>
         <translation>Navigering stoppad.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="389"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="393"/>
         <source>Destination reached.</source>
         <translation>Resmålet är nått.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="397"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="401"/>
         <source>Rerouting.</source>
         <translation>Omdirigerar.</translation>
     </message>
@@ -308,12 +308,28 @@
 <context>
     <name>InfoLocationPage</name>
     <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="13"/>
+        <source>3D fix</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="15"/>
+        <source>2D fix</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="18"/>
+        <source>Location</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="78"/>
         <source>not valid</source>
         <translation>ej giltig</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="79"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="236"/>
         <source>unknown</source>
         <translation>okänd</translation>
     </message>
@@ -401,11 +417,6 @@
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="142"/>
         <source>°</source>
         <translation>°</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="236"/>
-        <source>&lt;font color=&quot;red&quot;&gt;unknown&lt;/font&gt;</source>
-        <translation>&lt;font color=&quot;red&quot;&gt;okänd&lt;/font&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/InfoLocationPage.qml" line="253"/>
@@ -887,37 +898,24 @@
     </message>
 </context>
 <context>
-    <name>POIPage</name>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="15"/>
-        <source>Local search</source>
-        <translation>Lokal sökning</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="65"/>
-        <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;latitud:&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="68"/>
-        <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;longitud:&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="72"/>
-        <source>&lt;b&gt;distance:&lt;/b&gt;</source>
-        <translation>&lt;b&gt;distans:&lt;/b&gt;</translation>
-    </message>
-</context>
-<context>
     <name>PointMenuMarkers</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="23"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="26"/>
         <source>&lt;b&gt;Point info&lt;/b&gt;</source>
         <translation>&lt;b&gt;Punktinfo&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="37"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="31"/>
+        <source>A point on the map</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="32"/>
+        <source>An arbitrary point on the map.</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="41"/>
         <source>&lt;b&gt;Route here&lt;/b&gt;</source>
         <translation>&lt;b&gt;Ruttberäkna hit&lt;/b&gt;</translation>
     </message>
@@ -1022,7 +1020,17 @@
         <translation>Kategorier</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryListPage.qml" line="47"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryListPage.qml" line="49"/>
+        <source>no tracklogs</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryListPage.qml" line="51"/>
+        <source>tracklog</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/TracksCategoryListPage.qml" line="53"/>
         <source>tracklogs</source>
         <translation>spårloggar</translation>
     </message>
