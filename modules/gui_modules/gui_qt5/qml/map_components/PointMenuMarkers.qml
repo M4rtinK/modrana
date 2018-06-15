@@ -42,11 +42,8 @@ Markers {
                         height: mapButtonSize
                         margin: mapButtonSize * 0.2
                         onClicked: {
-                            rWin.log.info("routing from last good position to a point on the map")
-                            rWin.mapPage.setRoutingStart(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude)
-                            rWin.mapPage.setRoutingDestination(model.latitude, model.longitude)
-                            rWin.mapPage.routing.requestRoute(true)
-                            rWin.mapPage.enableRoutingUI(false)
+                            rWin.log.info("routing to a point on the map")
+                            rWin.mapPage.routeToPoint(model)
                             rWin.mapPage.getMap().clearPointMenus()
                         }
                     }

@@ -82,6 +82,14 @@ Page {
         routingDestinationSet = true
     }
 
+    function routeToPoint(point) {
+        // route from current position to a point
+        rWin.mapPage.setRoutingStart(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude)
+        rWin.mapPage.setRoutingDestination(point.latitude, point.longitude)
+        rWin.mapPage.routing.requestRoute(true)
+        rWin.mapPage.enableRoutingUI(false)
+    }
+
     // navigation
     property bool navigationEnabled : false
     property real navigationOverlayHeight : rWin.inPortrait ? height * 0.2 : height * 0.3
