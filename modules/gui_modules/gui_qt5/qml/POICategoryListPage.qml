@@ -46,7 +46,16 @@ BasePage {
                         text : "<b>" + qsTranslate("POICategoryName", model.name) + "</b>"
                     }
                     Label {
-                        text : model.poi_count + " " + qsTr("POIs")
+                        function getPOIString(tracklogCount) {
+                            if (tracklogCount <= 0) {
+                                return qsTr("no points")
+                            } else if (tracklogCount == 1) {
+                                return 1 + " " + qsTr("point")
+                            } else {
+                                return tracklogCount + " " + qsTr("points")
+                            }
+                        }
+                        text : getPOIString(model.poi_count)
                         wrapMode : Text.WordWrap
                         width : resultDelegate.width - rWin.c.style.main.spacingBig*2
                     }
