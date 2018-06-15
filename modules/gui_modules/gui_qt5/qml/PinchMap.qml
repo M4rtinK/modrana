@@ -53,6 +53,10 @@ Rectangle {
     // a dictionary of tile coordinates that should be current visible
     property var shouldBeOnScreen : {"foo" : true}
 
+
+    property int mapButtonSize : Math.min(width/8.0, height/8.0)
+    property int mapButtonSpacing : mapButtonSize / 4
+
     // tile status check request staging
     property var tileRequests : []
     property bool tileRequestTimerPause : false
@@ -904,6 +908,8 @@ Rectangle {
 
         PointMenuMarkers {
             id: pointMenuMarkers
+            mapButtonSize : pinchmap.mapButtonSize
+            mapButtonSpacing : pinchmap.mapButtonSpacing
             mapInstance : pinchmap
             Connections {
                 target : pinchmap

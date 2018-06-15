@@ -3,26 +3,29 @@ import "../modrana_components"
 
 Markers {
     id : markers
+    property real mapButtonSize : 80
+    property real mapButtonSpacing : 10
     delegate: Component {
         Item {
             Bubble {
                 anchors.horizontalCenter : pointMarker.horizontalCenter
                 anchors.bottom : pointMarker.top
-                anchors.bottomMargin : 8 * rWin.c.style.m
+                anchors.bottomMargin : mapButtonSpacing * 0.75
                 z: 2000
-                bubbleWidth : childrenRect.width + rWin.c.style.map.button.margin*2
-                bubbleHeight : childrenRect.height + rWin.c.style.map.button.margin*2
+                bubbleWidth : childrenRect.width + mapButtonSpacing * 2
+                bubbleHeight : childrenRect.height + mapButtonSpacing * 2
 
                 Column {
-                    spacing : 8 * rWin.c.style.m
+                    spacing : mapButtonSpacing * 0.75
                     x : rWin.c.style.map.button.margin
                     y : rWin.c.style.map.button.margin
-                    MapButton {
+                    MapTextButton {
                         id: pintInfo
                         z: 2000
+                        anchors.horizontalCenter : parent.horizontalCenter
                         text: qsTr("<b>Point info</b>")
-                        width: rWin.c.style.map.button.size * 2.5
-                        height: rWin.c.style.map.button.size
+                        height: mapButtonSize
+                        margin: mapButtonSize * 0.2
                         onClicked: {
                             rWin.log.info("showing info for on-map point")
                             model.name = qsTr("A point on the map")
@@ -31,12 +34,13 @@ Markers {
                             rWin.pushPageInstance(pointPage)
                         }
                     }
-                    MapButton {
+                    MapTextButton {
                         id: routeHere
                         z: 2000
+                        anchors.horizontalCenter : parent.horizontalCenter
                         text: qsTr("<b>Route here</b>")
-                        width: rWin.c.style.map.button.size * 2.5
-                        height: rWin.c.style.map.button.size
+                        height: mapButtonSize
+                        margin: mapButtonSize * 0.2
                         onClicked: {
                             rWin.log.info("routing from last good position to a point on the map")
                             rWin.mapPage.setRoutingStart(rWin.lastGoodPos.latitude, rWin.lastGoodPos.longitude)

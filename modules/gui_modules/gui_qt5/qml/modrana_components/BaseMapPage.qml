@@ -190,19 +190,20 @@ Page {
     }
 
     // routing and navigation buttons
-    ColumnLayout {
-        layoutDirection : Qt.RightToLeft
+    Column {
         anchors.bottom: buttonsRight.top
         anchors.bottomMargin: rWin.c.style.map.button.margin * 2
         anchors.right: parent.right
         anchors.rightMargin: rWin.c.style.map.button.margin
         spacing: mapButtonSpacing
         visible: baseMapPage.routingEnabled
-        MapButton {
+
+        MapTextButton {
             id: routingStart
+            anchors.right: parent.right
             text: qsTr("<b>start</b>")
-            width: mapButtonSize * 1.25
-            height: mapButtonSize
+            margin: mapButtonSize * 0.2
+            height: baseMapPage.mapButtonSize
             checked : selectRoutingStart
             toggledColor : Qt.rgba(1, 0, 0, 0.7)
             visible: baseMapPage.routingEnabled && baseMapPage.routingP2P && !baseMapPage.navigationEnabled
@@ -211,10 +212,11 @@ Page {
                 selectRoutingDestination = false
             }
         }
-        MapButton {
+        MapTextButton {
             id: routingEnd
+            anchors.right: parent.right
             text: qsTr("<b>end</b>")
-            width: mapButtonSize * 1.25
+            margin: mapButtonSize * 0.2
             height: mapButtonSize
             checked : selectRoutingDestination
             toggledColor : Qt.rgba(0, 1, 0, 0.7)
@@ -224,13 +226,14 @@ Page {
                 selectRoutingDestination = !selectRoutingDestination
             }
         }
-        MapButton {
+        MapTextButton {
             id: navigateButton
+            anchors.right: parent.right
             checkable : true
             visible: baseMapPage.routingEnabled && baseMapPage.routeAvailable
             text: qsTr("<b>navigate</b>")
-            width: mapButtonSize * 1.6
             height: mapButtonSize
+            margin: mapButtonSize * 0.2
             onClicked: {
                 if (baseMapPage.navigationEnabled) {
                     rWin.log.info("stopping navigation")
@@ -242,12 +245,13 @@ Page {
                 baseMapPage.navigationEnabled = !baseMapPage.navigationEnabled
             }
         }
-        MapButton {
+        MapTextButton {
             id: clearRouting
+            anchors.right: parent.right
             visible: baseMapPage.routingEnabled && !baseMapPage.navigationEnabled
             text: qsTr("<b>clear</b>")
-            width: mapButtonSize * 1.25
             height: mapButtonSize
+            margin: mapButtonSize * 0.2
             onClicked: {
                 selectRoutingStart = false
                 selectRoutingDestination = false
@@ -265,7 +269,7 @@ Page {
         anchors.right: parent.right
         anchors.rightMargin: rWin.c.style.map.button.margin
         spacing: mapButtonSpacing
-        MapButton {
+        MapIconButton {
             iconName: "plus_small.png"
             onClicked: {
                 baseMapPage.zoomIn()
@@ -274,7 +278,7 @@ Page {
             height: mapButtonSize
             enabled : baseMapPage.zoomLevel != baseMapPage.maxZoomLevel
         }
-        MapButton {
+        MapIconButton {
             iconName: "minus_small.png"
             onClicked: {
                 baseMapPage.zoomOut()
@@ -292,7 +296,7 @@ Page {
         anchors.left: parent.left
         anchors.leftMargin: rWin.c.style.map.button.margin
         spacing: mapButtonSpacing
-        MapButton {
+        MapIconButton {
             iconName : "minimize_small.png"
             checkable : true
             visible: !rWin.platform.fullscreen_only
@@ -302,7 +306,7 @@ Page {
             width: mapButtonSize
             height: mapButtonSize
         }
-        MapButton {
+        MapIconButton {
             id: followPositionButton
             iconName : "center_small.png"
             width: mapButtonSize
@@ -325,7 +329,7 @@ Page {
                 }
             }
         }
-        MapButton {
+        MapIconButton {
             id: mainMenuButton
             iconName: showModeOnMenuButton ? rWin.mode  + "_small.png" : "menu_small.png"
             width: mapButtonSize

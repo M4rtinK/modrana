@@ -1,4 +1,4 @@
-//MapButton.qml
+//MapIconButton.qml
 // A simple button with an icon in the middle used
 // on the map screen.
 // At the moment, the only real difference
