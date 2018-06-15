@@ -44,7 +44,16 @@ BasePage {
                         text : "<b>" + model.name + "</b>"
                     }
                     Label {
-                        text : model.tracklog_count + " " + qsTr("tracklogs")
+                        function getTracklogString(tracklogCount) {
+                            if (tracklogCount <= 0) {
+                                return qsTr("no tracklogs")
+                            } else if (tracklogCount == 1) {
+                                return 1 + " " + qsTr("tracklog")
+                            } else {
+                                return tracklogCount + " " + qsTr("tracklogs")
+                            }
+                        }
+                        text : getTracklogString(model.tracklog_count)
                         wrapMode : Text.WordWrap
                         width : resultDelegate.width - rWin.c.style.main.spacingBig*2
                     }
