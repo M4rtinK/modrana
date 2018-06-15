@@ -69,7 +69,7 @@ BasePage {
             }
         }
         Label {
-            text : "<b>" + qsTr("distance") + ":</b>") + " " + F.formatDistance(poiPage.distanceToPoint, 1)
+            text : "<b>" + qsTr("distance") + ":</b>" + " " + F.formatDistance(poiPage.distanceToPoint, 1)
         }
     }
 }
