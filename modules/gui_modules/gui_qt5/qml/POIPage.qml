@@ -12,14 +12,6 @@ BasePage {
     property real distanceToPoint : F.p2pDistance(poiPage.point, rWin.lastGoodPos)
     headerMenu : TopMenu {
         MenuItem {
-            text : qsTr("Local search")
-            onClicked : {
-                rWin.log.info("Local search: " + point.latitude + "," + point.longitude)
-                var searchPage = rWin.loadPage("SearchLocalPage", {"searchPoint" : point})
-                rWin.pushPageInstance(searchPage)
-            }
-        }
-        MenuItem {
             text : qsTr("Show on map")
             onClicked : {
                 rWin.log.info("Show POI on map: " + point.name)
@@ -50,6 +42,22 @@ BasePage {
                     })
                 }
                 rWin.mapPage.showOnMap(point.latitude, point.longitude)
+                rWin.push(null, !rWin.animate)
+            }
+        }
+        MenuItem {
+            text : qsTr("Local search")
+            onClicked : {
+                rWin.log.info("Local search: " + point.latitude + "," + point.longitude)
+                var searchPage = rWin.loadPage("SearchLocalPage", {"searchPoint" : point})
+                rWin.pushPageInstance(searchPage)
+            }
+        }
+        MenuItem {
+            text : qsTr("Route here")
+            onClicked : {
+                rWin.log.info("Route to POI: " + point.name + " " + point.latitude + "," + point.longitude)
+                rWin.mapPage.routeToPoint(point)
                 rWin.push(null, !rWin.animate)
             }
         }

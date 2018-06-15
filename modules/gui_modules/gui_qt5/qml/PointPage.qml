@@ -21,6 +21,14 @@ BasePage {
             }
         }
         MenuItem {
+            text : qsTr("Route here")
+            onClicked : {
+                rWin.log.info("Route to a point: " + point.name + " " + point.latitude + "," + point.longitude)
+                rWin.mapPage.routeToPoint(point)
+                rWin.push(null, !rWin.animate)
+            }
+        }
+        MenuItem {
             text : qsTr("Save")
             onClicked : {
                 rWin.log.info("Save POI: " + point.name)
