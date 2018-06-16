@@ -59,43 +59,43 @@ HeaderPage {
     Item {
         id : progressInfo
         anchors.left : parent.left
-        anchors.leftMargin : rWin.c.style.main.spacing
+        anchors.leftMargin : rWin.c.style.main.spacing/2.0
         anchors.right : parent.right
-        anchors.rightMargin : rWin.c.style.main.spacing
+        anchors.rightMargin : rWin.c.style.main.spacing/2.0
         opacity : 0.0
         state : searchPage._searchInProgress ? "ON" : "OFF"
-        height : 0
-        y : rWin.headerHeight + rWin.c.style.listView.spacing
+        y : rWin.headerHeight + rWin.c.style.listView.spacing / 2.0
 
-        Row {
-            spacing : rWin.c.style.main.spacing
-            ThemedBackgroundRectangle {
-                width : progressInfo.width * 3/4
-                height : progressInfo.height
-                Label {
-                    text : searchPage._searchStatus
-                    fontSizeMode: Text.HorizontalFit
-                    horizontalAlignment : Text.AlignHCenter
-                    anchors.verticalCenter : parent.verticalCenter
-                    anchors.left : parent.left
-                    anchors.leftMargin : rWin.c.style.main.spacing
-                    anchors.right : parent.right
-                    anchors.rightMargin : rWin.c.style.main.spacing
-                }
+        ThemedBackgroundRectangle {
+            anchors.left : parent.left
+            anchors.right : cancelButton.left
+            anchors.rightMargin : rWin.c.style.main.spacing
+            width : progressInfo.width - cancelButton.width - spacing * 2
+            height : progressInfo.height
+            Label {
+                text : searchPage._searchStatus
+                elide : Text.ElideRight
+                fontSizeMode: Text.HorizontalFit
+                horizontalAlignment : Text.AlignHCenter
+                anchors.verticalCenter : parent.verticalCenter
+                anchors.left : parent.left
+                anchors.leftMargin : rWin.c.style.main.spacing
+                anchors.right : parent.right
+                anchors.rightMargin : rWin.c.style.main.spacing
             }
-            Button {
-                id : cancelButton
-                text : qsTr("Cancel")
-                height : progressInfo.height
-                width : progressInfo.width * 1/4 - rWin.c.style.main.spacing
-                onClicked : {
-                    rWin.log.info("search: cancel pressed")
-                    rWin.python.call("modrana.gui.search.cancelSearch",
-                                     [searchPage._searchThreadId],
-                                     function(){
-                                        searchPage._searchInProgress = false
-                                     })
-                }
+        }
+        Button {
+            id : cancelButton
+            anchors.right : parent.right
+            text : qsTr("Cancel")
+            height : progressInfo.height
+            onClicked : {
+                rWin.log.info("search: cancel pressed")
+                rWin.python.call("modrana.gui.search.cancelSearch",
+                                 [searchPage._searchThreadId],
+                                 function(){
+                                    searchPage._searchInProgress = false
+                                 })
             }
         }
 
@@ -163,6 +163,7 @@ HeaderPage {
     ListView {
         id : pointLW
         anchors.top : progressInfo.bottom
+        anchors.topMargin : rWin.c.style.listView.spacing / 2.0
         anchors.left : parent.left
         anchors.leftMargin : rWin.c.style.main.spacing/2.0
         anchors.right : parent.right
