@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.16
+Version: 0.55.17
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,11 @@ fi
 %endif
 
 %changelog
+* Sat Jun 16 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.17-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Fix marker button sizing (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Sat Jun 16 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.16-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Enable wrapping for donation header text (martin.kolman)
