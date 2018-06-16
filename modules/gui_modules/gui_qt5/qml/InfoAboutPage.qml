@@ -42,8 +42,11 @@ BasePage {
 
         Label {
             id : donateLabel
+            width : parent.width
             anchors.horizontalCenter : parent.horizontalCenter
             text : qsTr("<h3>Do you like modRana? <b>Donate:</b></h3>")
+            horizontalAlignment : Text.AlignHCenter
+            wrapMode : Text.WordWrap
         }
         Column {
             anchors.horizontalCenter : parent.horizontalCenter
