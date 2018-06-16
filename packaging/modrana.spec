@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.15
+Version: 0.55.16
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,18 @@ fi
 %endif
 
 %changelog
+* Sat Jun 16 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.16-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Enable wrapping for donation header text (martin.kolman)
+- Only ship compiled translation files (martin.kolman)
+- Fix search-in-progress popup layout (martin.kolman)
+- Use smaller font for the "unknown" string on the speed info page (martin.kolman)
+- Add "Route here" action to point & POI detail pages (martin.kolman)
+- Add a function for easy routing from current position to a point (martin.kolman)
+- Fix POIPage (martin.kolman)
+- Handle singular/plural for POI category counters (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Fri Jun 15 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.15-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Handle no/one/multiple tracklogs correctly (martin.kolman)
