@@ -891,6 +891,8 @@ Rectangle {
         }
         POIMarkers {
             id: poiMarkers
+            mapButtonSize : pinchmap.mapButtonSize
+            mapButtonSpacing : pinchmap.mapButtonSpacing
             model : pinchmap.poiMarkerModel
             mapInstance : pinchmap
 
@@ -902,6 +904,8 @@ Rectangle {
         }
         SearchMarkers {
             id: markers
+            mapButtonSize : pinchmap.mapButtonSize
+            mapButtonSpacing : pinchmap.mapButtonSpacing
             model : pinchmap.searchMarkerModel
             mapInstance : pinchmap
         }
