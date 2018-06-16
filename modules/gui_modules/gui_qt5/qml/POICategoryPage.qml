@@ -3,6 +3,7 @@
 import QtQuick 2.0
 import UC 1.0
 import "modrana_components"
+import "functions.js" as F
 
 BasePage {
     id: pcPage
@@ -27,7 +28,7 @@ BasePage {
                 id : resultDelegate
                 width : itemsLW.width
                 height : contentC.height + rWin.c.style.listView.itemBorder
-
+                property string distanceString : F.formatDistance(F.p2pDistance(model, rWin.lastGoodPos), 1)
                 onClicked : {
                     rWin.log.info("POI category list: " + model.name + " clicked")
 
@@ -43,7 +44,7 @@ BasePage {
                     anchors.verticalCenter : parent.verticalCenter
                     spacing : rWin.c.style.main.spacing
                     Label {
-                        text : "<b>" + model.name + "</b>"
+                        text : "<b>" + model.name + "</b> (" + resultDelegate.distanceString + ")"
                     }
                     Label {
                         text : model.latitude + ", " + model.latitude
