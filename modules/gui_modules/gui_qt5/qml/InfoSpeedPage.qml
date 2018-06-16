@@ -9,28 +9,29 @@ BasePage {
     id: speedPage
     headerText : qsTr("Speed")
     isFlickable : false
+    property bool currentSpeedKnown : false
+    property int currentSpeedFontBaseSize : speedPage.currentSpeedKnown ? 96 : 48
     property string currentSpeedString : qsTr("unknown")
     property string speedStatsString : ""
 
     Label {
         id : currentSpeed
-        parent : contentParent
         anchors.verticalCenter : parent.verticalCenter
         anchors.horizontalCenter : parent.horizontalCenter
         text: currentSpeedString
-        font.pixelSize : 96 * rWin.c.style.main.multiplier
+        font.pixelSize : currentSpeedFontBaseSize * rWin.c.style.main.multiplier
     }
     Label {
         id : otherSpeed
-        parent : contentParent
         anchors.top : currentSpeed.bottom
-        anchors.topMargin : 96 * rWin.c.style.main.multiplier
+        anchors.topMargin : speedPage.currentSpeedFontBaseSize * rWin.c.style.main.multiplier
         anchors.horizontalCenter : parent.horizontalCenter
         text: speedStatsString
         font.pixelSize : 32 * rWin.c.style.main.multiplier
     }
 
     function setSpeeds(speeds) {
+        speedPage.currentSpeedKnown = true
         speedPage.currentSpeedString = F.formatSpeedKmh(speeds.current)
         var maxSpeed = F.formatSpeedKmh(speeds.max)
         var avgSpeed = F.formatSpeedKmh(speeds.avg)
