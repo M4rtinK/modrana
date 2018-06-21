@@ -29,7 +29,7 @@ IconGridPage {
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Clear")
-            icon : "debug.png"
+            icon : "clear.svg"
             menu : "ClearPage"
         }
         Component.onCompleted : {

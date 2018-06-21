@@ -30,7 +30,7 @@ IconGridPage {
         id : testModel
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "All")
-            icon : "debug.png"
+            icon : "clear.svg"
             menu : "all"
         }
         ListElement {
