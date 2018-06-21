@@ -116,6 +116,11 @@ BaseMapPage {
         }
     }
 
+    function clearTracklogs() {
+        // clear all tracklog displayed on the map
+        tracklogPoints = []
+    }
+
     Component.onCompleted : {
         rWin.log.info("map page: loaded, loading layers")
         pinchmap.loadLayers()
