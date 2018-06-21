@@ -639,6 +639,12 @@ class IconImageProvider(ImageProvider):
             # remove any Ambiance specific garbage appended by Silica
             splitPath[-1] = splitPath[-1].rsplit("?")[0]
             fullIconPath = os.path.join(themeFolder, *splitPath)
+            extension = os.path.splitext(fullIconPath)[1]
+            # set correct data format based on the extension
+            if extension.lower() == ".svg":
+                data_format = pyotherside.format_svg_data
+            else:
+                data_format = pyotherside.format_data
 
             if not utils.internal_isfile(fullIconPath):
                 if splitPath[0] == constants.DEFAULT_THEME_ID:
@@ -654,7 +660,10 @@ class IconImageProvider(ImageProvider):
                         log.error("Icon not found even in default theme:")
                         log.error(fullIconPath)
                         return None
-            return utils.internal_get_file_contents(fullIconPath), (-1,-1), pyotherside.format_data
+            # We only set height or else SVG icons would be squished if a square icon
+            # has been requested but the SVG icon is not square. If just height is
+            # we the clever SVG handling code (which I wrote ;-) ) will handle this correctly. :)
+            return utils.internal_get_file_contents(fullIconPath), (-1, requestedSize[1]), data_format
         except Exception:
             log.exception("icon image provider: loading icon failed, id:\n%s" % imageId)
 
