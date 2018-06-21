@@ -100,41 +100,51 @@ Page {
         longitude : 0.0
     }
 
+    // search markers
+    function clearSearchMarkers() {
+        rWin.log.error("clearSearchMarkers() is not implemented!")
+    }
+
+    // POI markers
+    function clearPOIMarkers() {
+        rWin.log.debug("clearPOIMarkers() is not implemented!")
+    }
+
     // track logging & drawing
     property bool drawTracklogTrace : false
     property bool trackRecordingPaused : false
 
     function addTracePoint(point) {
-        log.error("addTracePoint() is not implemented!")
+        rWin.log.error("addTracePoint() is not implemented!")
     }
 
     function clearTracePoints() {
-        log.error("clearTracePoints() is not implemented!")
+        rWin.log.error("clearTracePoints() is not implemented!")
     }
 
     function showTracklog(tracklog) {
-        log.error("showTracklog() is not implemented!")
+        rWin.log.error("showTracklog() is not implemented!")
     }
 
     // general functions
     function showOnMap(lat, lon) {
-        log.error("showOnMap() is not implemented!")
+        rWin.log.error("showOnMap() is not implemented!")
     }
 
     function centerMapOnCurrentPosition() {
-        log.error("centerMapOnCurrentPosition() is not implemented!")
+        rWin.log.error("centerMapOnCurrentPosition() is not implemented!")
     }
 
     function getMap() {
-        log.error("getMap() is not implemented!")
+        rWin.log.error("getMap() is not implemented!")
     }
 
     function zoomIn() {
-        log.error("zoomIn() is not implemented!")
+        rWin.log.error("zoomIn() is not implemented!")
     }
 
     function zoomOut() {
-        log.error("zoomOut() is not implemented!")
+        rWin.log.error("zoomOut() is not implemented!")
     }
 
     // signal handlers

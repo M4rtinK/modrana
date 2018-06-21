@@ -47,8 +47,18 @@ Rectangle {
     property var scaleBarLength: getScaleBarLength(latitude);
     
     property alias angle: rot.angle
+
+    // search
     property var searchMarkerModel : null
+    function clearSearchMarkers() {
+        searchMarkerModel = null
+    }
+
+    // POI
     property var poiMarkerModel : ListModel {}
+    function clearPOIMarkers() {
+        poiMarkerModel.clear()
+    }
 
     // a dictionary of tile coordinates that should be current visible
     property var shouldBeOnScreen : {"foo" : true}

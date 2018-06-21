@@ -133,6 +133,16 @@ BaseMapPage {
         rWin.firstPageLoaded = true
     }
 
+    // search markers
+    function clearSearchMarkers() {
+        pinchmap.clearSearchMarkers()
+    }
+
+    // POI markers
+    function clearPOIMarkers() {
+        pinchmap.clearPOIMarkers()
+    }
+
     // general functions
     function showOnMap(lat, lon) {
         pinchmap.setCenterLatLon(lat, lon);
