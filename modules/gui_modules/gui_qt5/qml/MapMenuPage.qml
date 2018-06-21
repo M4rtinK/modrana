@@ -27,6 +27,11 @@ IconGridPage {
             icon : "map_layers.png"
             menu : "LayersPage"
         }
+        ListElement {
+            caption : QT_TRANSLATE_NOOP("IconGridPage", "Clear")
+            icon : "debug.png"
+            menu : "ClearPage"
+        }
         Component.onCompleted : {
             if (rWin.showUnfinishedFeatures) {
                 testModel.append(
