@@ -8,6 +8,8 @@ Image {
     // TODO: proper slash,backslash,qUrl handling ?
 
     // handle place-holders
+    sourceSize.width : width
+    sourceSize.height : height
     source : iconName == "" ? "" : "image://python/icon/" + rWin.theme.id + "/" + iconName
     fillMode : Image.PreserveAspectFit
     smooth : true
