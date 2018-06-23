@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="6.8971581mm"
+   height="12.301415mm"
+   viewBox="0 0 6.8971581 12.301415"
+   version="1.1"
+   id="svg6157"
+   inkscape:version="0.92.2 2405546, 2018-03-11"
+   sodipodi:docname="poi.svg">
+  <defs
+     id="defs6151" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="11.2"
+     inkscape:cx="46.195488"
+     inkscape:cy="23.174268"
+     inkscape:document-units="mm"
+     inkscape:current-layer="icon_poi"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="1600"
+     inkscape:window-height="830"
+     inkscape:window-x="0"
+     inkscape:window-y="33"
+     inkscape:window-maximized="1"
+     inkscape:pagecheckerboard="true" />
+  <metadata
+     id="metadata6154">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(156.90691,-151.75405)">
+    <g
+       transform="matrix(0.26458333,0,0,0.26458333,-616.04921,43.167211)"
+       id="g39294">
+      <g
+         id="icon_poi"
+         inkscape:label="#g39298">
+        <path
+           id="asasasdasd"
+           d="m 1748.375,410.40697 c -7.1981,0 -13.034,5.83587 -13.034,13.034 0,7.19813 13.034,33.45954 13.034,33.45954 0,0 13.034,-26.26094 13.034,-33.45954 0,-7.1986 -5.8354,-13.034 -13.034,-13.034 z m 0,18.81919 c -3.1946,0 -5.7847,-2.59062 -5.7847,-5.78473 0,-3.19503 2.5901,-5.78472 5.7847,-5.78472 3.195,0 5.7847,2.58969 5.7847,5.78472 5e-4,3.19411 -2.5897,5.78473 -5.7847,5.78473 z"
+           inkscape:connector-curvature="0"
+           inkscape:label="#path9773"
+           style="fill:#ffffff" />
+      </g>
+    </g>
+  </g>
+</svg>

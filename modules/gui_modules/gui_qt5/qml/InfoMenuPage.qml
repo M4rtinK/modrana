@@ -11,30 +11,19 @@ IconGridPage {
     isMockup: false
     model : ListModel {
         id : testModel
-
-        /*
-        ListElement {
-            caption : "Compass"
-            icon : "compass.png"
-            menu : "CompassPage"
-        }
-        */
-
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Speed")
-            icon : "speedometer.png"
+            icon : "speedometer.svg"
             menu : "SpeedPage"
         }
-
-
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Location")
-            icon : "satellite.png"
+            icon : "satellite.svg"
             menu : "LocationPage"
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "About")
-            icon : "info.png"
+            icon : "info.svg"
             menu : "AboutPage"
         }
     }

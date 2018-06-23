@@ -35,17 +35,17 @@ IconGridPage {
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Search")
-            icon : "search.png"
+            icon : "search.svg"
             menu : "search"
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "POI")
-            icon : "poi.png"
+            icon : "poi.svg"
             menu : "POI"
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Tracklogs")
-            icon : "tracklogs.png"
+            icon : "tracklogs.svg"
             menu : "tracklogs"
         }
     }

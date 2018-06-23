@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Inkscape (http://www.inkscape.org/) and export_objects.py -->
+<svg xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" inkscape:export-ydpi="92" inkscape:export-xdpi="92" sodipodi:modified="TRUE" inkscape:output_extension="org.inkscape.output.svg.inkscape" sodipodi:docname="satellite1.svg" inkscape:version="0.92.3 (2405546, 2018-03-11)" sodipodi:version="0.32" id="svg2" width="31.608124px" height="32.431986px" viewBox="0 0 31.608124 32.431986"><sodipodi:namedview inkscape:window-height="830" inkscape:window-width="1600" inkscape:pageshadow="2" inkscape:pageopacity="0" guidetolerance="10.0" gridtolerance="1" objecttolerance="10" borderopacity="1.0" bordercolor="#666666" pagecolor="#ffffff" id="base" showgrid="true" inkscape:grid-points="false" inkscape:zoom="1" inkscape:cx="2019.9466" inkscape:cy="352.36491" inkscape:window-x="0" inkscape:window-y="33" inkscape:current-layer="svg2" inkscape:object-paths="true" inkscape:grid-bbox="false" inkscape:object-bbox="false" showguides="true" inkscape:guide-bbox="true" inkscape:window-maximized="1" inkscape:snap-to-guides="true" inkscape:snap-grids="true" inkscape:snap-center="true" inkscape:snap-object-midpoints="true" inkscape:snap-midpoints="false" inkscape:snap-bbox="false" inkscape:bbox-paths="true" inkscape:bbox-nodes="true" inkscape:snap-bbox-edge-midpoints="true" inkscape:snap-bbox-midpoints="true" inkscape:snap-global="true" inkscape:object-nodes="true" inkscape:snap-nodes="false" inkscape:pagecheckerboard="true">
+    <sodipodi:guide orientation="horizontal" position="32.975534" id="guide5056" inkscape:locked="false"/>
+    <inkscape:grid type="xygrid" id="grid5900" empspacing="5" visible="true" enabled="true" snapvisiblegridlinesonly="true"/>
+  </sodipodi:namedview>
+  <metadata id="metadata13">
+    <rdf:RDF>
+      <cc:Work rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+        <dc:title/>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g inkscape:groupmode="layer" inkscape:label="satellite" transform="matrix(1.000000,0.000000,0.000000,1.000000,-1859.195900,-513.784010)"><switch xmlns:i="http://ns.adobe.com/AdobeIllustrator/10.0/" id="icon_satellite" transform="matrix(0.39343927,0,0,0.39343927,1855.328,510.32804)" inkscape:label="1">
+    <foreignObject id="foreignObject8134" height="1" width="1" y="0" x="0" requiredExtensions="http://ns.adobe.com/AdobeIllustrator/10.0/"/>
+    <g id="g8136" i:extraneous="self">
+      <polygon id="polygon8138" points="14.591,18.402 33.721,37.534 38.175,39.398 45.241,32.332 43.337,27.919 24.207,8.784 "/>
+      <path id="path8140" d="M 69.22,44.566 54.38,29.727 c -1.103,-1.103 -2.907,-1.103 -4.009,0 L 35.533,44.566 c -1.103,1.103 -1.103,2.906 0,4.009 l 14.838,14.838 c 1.102,1.103 2.906,1.103 4.009,0.001 L 69.22,48.575 c 1.102,-1.103 1.102,-2.907 0,-4.009 z" inkscape:connector-curvature="0"/>
+      <polygon id="polygon8142" points="80.553,84.362 90.169,74.746 71.039,55.613 66.585,53.749 59.519,60.815 61.423,65.228 "/>
+      <path id="path8144" d="m 28.078,55.257 -6.055,0.594 C 23.113,68.132 32.778,77.936 45,79.225 l 0.591,-6.048 C 36.258,72.153 28.893,64.656 28.078,55.257 z" inkscape:connector-curvature="0"/>
+      <path id="path8146" d="M 15.883,56.541 9.831,57.13 c 1.667,18.059 16.031,32.43 34.084,34.086 l 0.591,-6.043 C 29.336,83.756 17.287,71.713 15.883,56.541 z" inkscape:connector-curvature="0"/>
+    </g>
+  </switch>
+  </g></svg>

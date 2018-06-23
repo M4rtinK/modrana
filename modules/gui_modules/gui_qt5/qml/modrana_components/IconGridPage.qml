@@ -85,7 +85,7 @@ Page {
         margin : iconGP.iconMargin
         anchors.top : gridView.top
         anchors.left : parent.left
-        iconName : "left_thin.png"
+        iconName : "left_thin.svg"
         text : "back"
         opacity : gridView.atYBeginning ? 1.0 : 0.55
         visible : rWin.showBackButton

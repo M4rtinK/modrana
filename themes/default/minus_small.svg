@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 14.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 43363)  -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="icon-m-common-remove-layer"
+   x="0px"
+   y="0px"
+   width="28.313"
+   height="8.25"
+   viewBox="0 0 28.313 8.25"
+   xml:space="preserve"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="minus_small.svg"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90"><metadata
+   id="metadata11377"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
+   id="defs11375"><filter
+     id="filter11404"
+     inkscape:label="Invert"
+     x="0"
+     y="0"
+     width="1"
+     height="1"
+     inkscape:menu="Color"
+     inkscape:menu-tooltip="Invert colors"
+     style="color-interpolation-filters:sRGB"><feColorMatrix
+       id="feColorMatrix11406"
+       type="saturate"
+       values="1"
+       result="fbSourceGraphic" /><feColorMatrix
+       id="feColorMatrix11408"
+       in="fbSourceGraphic"
+       values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0 " /></filter></defs><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1600"
+   inkscape:window-height="830"
+   id="namedview11373"
+   showgrid="false"
+   inkscape:zoom="9.8333333"
+   inkscape:cx="-32.510621"
+   inkscape:cy="4.176407"
+   inkscape:window-x="0"
+   inkscape:window-y="33"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="icon-m-common-remove_2_" />
+<g
+   id="icon-m-common-remove_2_"
+   transform="translate(-9.843,-19.5)">
+	<rect
+   style="fill:none"
+   width="48"
+   height="48"
+   id="rect11367"
+   x="0"
+   y="0" />
+	<path
+   style="fill:#cccccc;filter:url(#filter11404);fill-opacity:1"
+   d="M 38.156,27.75 H 9.843 V 19.5 h 28.313 z"
+   id="path11369"
+   inkscape:connector-curvature="0" />
+	
+</g>
+</svg>

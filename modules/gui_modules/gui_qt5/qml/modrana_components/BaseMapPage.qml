@@ -288,21 +288,24 @@ Page {
         anchors.rightMargin: rWin.c.style.map.button.margin
         spacing: mapButtonSpacing
         MapIconButton {
-            iconName: "plus_small.png"
+            iconName: "plus_small.svg"
             onClicked: {
                 baseMapPage.zoomIn()
             }
             width: mapButtonSize
             height: mapButtonSize
+            margin : mapButtonSize / 6.0
             enabled : baseMapPage.zoomLevel != baseMapPage.maxZoomLevel
         }
         MapIconButton {
-            iconName: "minus_small.png"
+            iconName: "minus_small.svg"
             onClicked: {
                 baseMapPage.zoomOut()
             }
             width: mapButtonSize
             height: mapButtonSize
+            margin : mapButtonSize / 3.0
+
             enabled : baseMapPage.zoomLevel != baseMapPage.minZoomLevel
         }
     }
@@ -315,7 +318,7 @@ Page {
         anchors.leftMargin: rWin.c.style.map.button.margin
         spacing: mapButtonSpacing
         MapIconButton {
-            iconName : "minimize_small.png"
+            iconName : "minimize_small.svg"
             checkable : true
             visible: !rWin.platform.fullscreen_only
             onClicked: {
@@ -323,12 +326,14 @@ Page {
             }
             width: mapButtonSize
             height: mapButtonSize
+            margin : mapButtonSize / 5.0
         }
         MapIconButton {
             id: followPositionButton
-            iconName : "center_small.png"
+            iconName : "center_small.svg"
             width: mapButtonSize
             height: mapButtonSize
+            margin : mapButtonSize / 7.0
             checked : baseMapPage.center
             /*
             checked is bound to baseMapPage.center, no need to toggle
@@ -349,7 +354,7 @@ Page {
         }
         MapIconButton {
             id: mainMenuButton
-            iconName: showModeOnMenuButton ? rWin.mode  + "_small.png" : "menu_small.png"
+            iconName: "menu_small.svg"
             width: mapButtonSize
             height: mapButtonSize
             onClicked: {

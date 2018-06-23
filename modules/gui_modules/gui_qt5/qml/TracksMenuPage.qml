@@ -9,12 +9,12 @@ IconGridPage {
         id : testModel
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Record")
-            icon : "log.png"
+            icon : "log.svg"
             menu : "TracksRecord"
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "List")
-            icon : "list_logs.png"
+            icon : "list_logs.svg"
             menu : "TracksCategoryList"
         }
     }

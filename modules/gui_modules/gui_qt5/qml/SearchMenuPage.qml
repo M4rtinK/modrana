@@ -11,17 +11,17 @@ IconGridPage {
         id : testModel
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Place")
-            icon : "signpost.png"
+            icon : "signpost.svg"
             menu : "Address"
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Wikipedia")
-            icon : "wikipedia.png"
+            icon : "wikipedia.svg"
             menu : "Wikipedia"
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Local")
-            icon : "local_search.png"
+            icon : "local_search.svg"
             menu : "Local"
         }
     }

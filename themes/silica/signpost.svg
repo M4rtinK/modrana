@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Inkscape (http://www.inkscape.org/) and export_objects.py -->
+<svg xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1" inkscape:export-ydpi="92" inkscape:export-xdpi="92" sodipodi:modified="TRUE" inkscape:output_extension="org.inkscape.output.svg.inkscape" sodipodi:docname="signpost2.svg" inkscape:version="0.92.2 2405546, 2018-03-11" sodipodi:version="0.32" id="svg2" width="74.0px" height="100.0px" viewBox="0 0 74.0 100.0"><sodipodi:namedview inkscape:window-height="830" inkscape:window-width="1600" inkscape:pageshadow="2" inkscape:pageopacity="0" guidetolerance="10.0" gridtolerance="1" objecttolerance="10" borderopacity="1.0" bordercolor="#666666" pagecolor="#ffffff" id="base" showgrid="true" inkscape:grid-points="false" inkscape:zoom="1" inkscape:cx="1819.9466" inkscape:cy="152.36491" inkscape:window-x="0" inkscape:window-y="33" inkscape:current-layer="svg2" inkscape:object-paths="true" inkscape:grid-bbox="false" inkscape:object-bbox="false" showguides="true" inkscape:guide-bbox="true" inkscape:window-maximized="1" inkscape:snap-to-guides="true" inkscape:snap-grids="true" inkscape:snap-center="true" inkscape:snap-object-midpoints="true" inkscape:snap-midpoints="false" inkscape:snap-bbox="false" inkscape:bbox-paths="true" inkscape:bbox-nodes="true" inkscape:snap-bbox-edge-midpoints="true" inkscape:snap-bbox-midpoints="true" inkscape:snap-global="true" inkscape:object-nodes="true" inkscape:snap-nodes="false" inkscape:pagecheckerboard="true">
+    <sodipodi:guide orientation="horizontal" position="32.975534" id="guide5056" inkscape:locked="false"/>
+    <inkscape:grid type="xygrid" id="grid5900" empspacing="5" visible="true" enabled="true" snapvisiblegridlinesonly="true"/>
+  </sodipodi:namedview>
+  <metadata id="metadata13">
+    <rdf:RDF>
+      <cc:Work rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+        <dc:title/>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g inkscape:groupmode="layer" inkscape:label="signpost" transform="matrix(1.000000,0.000000,0.000000,1.000000,-1936.573500,-165.000000)"><g id="mono_icon_signpost" inkscape:label="2" transform="translate(1936.5735,165)" style="fill:#ffffff">
+    <polygon id="polygon20159-2" points="32,0 32,16 8,16 0,22 8,28 66,28 66,16 38,16 38,0 " style="fill:#ffffff"/>
+    <polygon id="polygon20161-7" points="38,30 32,30 32,39 8,39 8,51 66,51 74,45 66,39 38,39 " style="fill:#ffffff"/>
+    <rect id="rect20163-2" height="47" width="6" y="53" x="32" style="fill:#ffffff"/>
+  </g>
+  </g></svg>

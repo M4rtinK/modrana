@@ -24,57 +24,39 @@ IconGridPage {
         id : testModel
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Search")
-            icon : "search.png"
+            icon : "search.svg"
             menu : "SearchMenu"
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Route")
-            icon : "route.png"
+            icon : "route.svg"
             menu : "RouteMenu"
         }
 
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Map")
-            icon : "map.png"
+            icon : "map.svg"
             menu : "MapMenu"
         }
-
-        // TODO: un-comment once
-        // mode does something
-        /*
-        ListElement {
-            caption : "Mode"
-            icon : "mode.png"
-            menu : "ModeMenu"
-        }
-        */
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "POI")
-            icon : "poi.png"
+            icon : "poi.svg"
             menu : "POIMenu"
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Tracks")
-            icon : "tracklogs.png"
+            icon : "tracklogs.svg"
             menu : "TracksMenu"
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Info")
-            icon : "info.png"
+            icon : "info.svg"
             menu : "InfoMenu"
         }
         ListElement {
             caption : QT_TRANSLATE_NOOP("IconGridPage", "Options")
-            icon : "3gears.png"
+            icon : "options.svg"
             menu : "OptionsMenu"
-        }
-
-        Component.onCompleted : {
-            if (rWin.showUnfinishedFeatures) {
-                testModel.append(
-                    {"caption": "Data", "icon":"download.png", "menu":""}
-                )
-            }
         }
     }
 }

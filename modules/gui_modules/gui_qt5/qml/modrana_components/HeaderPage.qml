@@ -69,7 +69,7 @@ Page {
         anchors.left : parent.left
         anchors.topMargin : (headerHeight - height) / 2.0
         anchors.leftMargin : rWin.c.style.main.spacingBig
-        iconName : "left_thin.png"
+        iconName : "left_thin.svg"
         opacity : pageFlickable.atYBeginning ? 1.0 : 0.55
         visible : rWin.showBackButton
         onClicked : {
