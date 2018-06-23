@@ -335,6 +335,7 @@ Page {
             height: mapButtonSize
             margin : mapButtonSize / 7.0
             checked : baseMapPage.center
+            toggledColor : "#3c60fa"
             /*
             checked is bound to baseMapPage.center, no need to toggle
             it's value when the button is pressed
