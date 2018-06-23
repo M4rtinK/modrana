@@ -2,42 +2,42 @@
 <context>
     <name>BaseMapPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="212"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="222"/>
         <source>&lt;b&gt;start&lt;/b&gt;</source>
         <translation>&lt;b&gt;beginnen&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="226"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="236"/>
         <source>&lt;b&gt;end&lt;/b&gt;</source>
         <translation>&lt;b&gt;b’eindigen&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="242"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="252"/>
         <source>&lt;b&gt;navigate&lt;/b&gt;</source>
         <translation>&lt;b&gt;navigeren&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="260"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="270"/>
         <source>&lt;b&gt;clear&lt;/b&gt;</source>
         <translation>&lt;b&gt;wissen&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="390"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="406"/>
         <source>Navigation started.</source>
         <translation>Navigatie begonnen.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="396"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="412"/>
         <source>Navigation stopped.</source>
         <translation>Navigatie b’eindigd.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="401"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="417"/>
         <source>Destination reached.</source>
         <translation>Bestemming bereikt.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="409"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="425"/>
         <source>Rerouting.</source>
         <translation>De route word herberekend.</translation>
     </message>
@@ -151,34 +151,50 @@
 <context>
     <name>IconGridPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="24"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="15"/>
         <source>Speed</source>
         <translation>Snelheid</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="31"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="20"/>
         <source>Location</source>
         <translation>Locatie</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="36"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/InfoMenuPage.qml" line="25"/>
         <source>About</source>
         <translation>Over</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="20"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="15"/>
         <source>Main map</source>
         <translation>Hoofdkaart</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="26"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="20"/>
         <source>Overlays</source>
         <translation>Overlays</translation>
     </message>
     <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="25"/>
+        <source>Clear</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapClearPage.qml" line="32"/>
+        <source>All</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapClearPage.qml" line="37"/>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="26"/>
         <source>Search</source>
         <translation>Zoeken</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapClearPage.qml" line="47"/>
+        <source>Tracklogs</source>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="31"/>
@@ -192,24 +208,25 @@
         <translation>Kaart</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="52"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapClearPage.qml" line="42"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="42"/>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="27"/>
         <source>POI</source>
         <translation>NP</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="57"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="47"/>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="37"/>
         <source>Tracks</source>
         <translation>Sporen</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="62"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="52"/>
         <source>Info</source>
         <translation>Informatie</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="67"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="57"/>
         <source>Options</source>
         <translation>Opties</translation>
     </message>
@@ -836,17 +853,17 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="51"/>
         <source>no points</source>
-        <translation type="unfinished"/>
+        <translation>geen punten</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="53"/>
         <source>point</source>
-        <translation type="unfinished"/>
+        <translation>punt</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="55"/>
         <source>points</source>
-        <translation type="unfinished"/>
+        <translation>punten</translation>
     </message>
 </context>
 <context>
@@ -912,32 +929,32 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="15"/>
         <source>Show on map</source>
-        <translation type="unfinished"/>
+        <translation>Tonen op kaart</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="49"/>
         <source>Local search</source>
-        <translation type="unfinished"/>
+        <translation>Lokaal zoeken</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="57"/>
         <source>Route here</source>
-        <translation type="unfinished"/>
+        <translation>Route naar hier</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="73"/>
         <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;breedtegraad:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="76"/>
         <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;lengtegraad:&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="80"/>
         <source>distance</source>
-        <translation type="unfinished"/>
+        <translation>afstand</translation>
     </message>
 </context>
 <context>
@@ -973,7 +990,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="24"/>
         <source>Route here</source>
-        <translation type="unfinished"/>
+        <translation>Route naar hier</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="32"/>

@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.17
+Version: 0.55.18
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,19 @@ fi
 %endif
 
 %changelog
+* Sun Jun 24 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.18-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Fix centering button toggle color (martin.kolman)
+- Replace all PNG icons with SVG icons (martin.kolman)
+- Use a new SVG icon for the clear action (martin.kolman)
+- Set source width & height for themed icon (martin.kolman)
+- Handle SVG icons files correctly in the image provider (martin.kolman)
+- Make it possible to clear items from on top of the map (martin.kolman)
+- Add functions for easy clearing of search result and POI markers (martin.kolman)
+- Add a function for easy clearing of all displayed tracklogs (martin.kolman)
+- Show distance on POI listing (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Sat Jun 16 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.17-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix marker button sizing (martin.kolman)
