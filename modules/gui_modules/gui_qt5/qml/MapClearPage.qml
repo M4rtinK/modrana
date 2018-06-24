@@ -5,11 +5,6 @@ import "modrana_components"
 IconGridPage {
     id : mapMenuPage
 
-    function setLayer(layerId) {
-        rWin.mapPage.getMap().setLayerById(0, layerId)
-        rWin.push(null, !rWin.animate)
-    }
-
     function getPage(menu){
         // we kinda miss-use this function there as we always go back to the map
         if (menu == "all") {
