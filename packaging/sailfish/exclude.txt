@@ -34,3 +34,8 @@ run/pc
 run/echo_qt5.sh
 # also we don't really need the test_geo.py script
 core/other/test_geo.py
+# remove any PNG icons from the themes (modRana now uses SVG icons exclusively)
+themes/default/*.png
+themes/silica/*.png
+themes/night/*.png
+themes/red/*.png
