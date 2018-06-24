@@ -11,8 +11,13 @@ BasePage {
         id: dialogContent
         Image {
             id : bitcoinQrCode
+            property real sizeRatio : rWin.inPortrait ? 0.5 : 0.25
+            width : parent.width * sizeRatio
+            height : parent.width * sizeRatio
             anchors.horizontalCenter : parent.horizontalCenter
-            source : "image://python/icon/" + rWin.theme.id + "/qrcode_bitcoin.png"
+            asynchronous : true
+            smooth: true
+            source : "image://python/icon/" + rWin.theme.id + "/qrcode_bitcoin.svg"
         }
         TextInput {
             id : urlField
