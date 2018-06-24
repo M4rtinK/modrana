@@ -507,7 +507,7 @@ ApplicationWindow {
         // and also once style and other constants
         // such as map layers are also loaded
         rWin.log.debug("loading map page")
-        mapPageLoader.source = "MapPage.qml"
+        mapPageLoader.source = "PinchMapPage.qml"
     }
 
     function loadQMLFile(filename, properties, quiet) {
