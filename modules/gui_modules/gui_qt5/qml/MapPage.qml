@@ -3,6 +3,7 @@ import "functions.js" as F
 import UC 1.0
 import "modrana_components"
 import "map_components"
+import "pinchmap"
 
 BaseMapPage {
     id: pinchmapPage

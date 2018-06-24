@@ -1,10 +1,8 @@
 import QtQuick 2.0
-import "functions.js" as F
-//import "./qtc/PageStatus.js" as PageStatus
 import UC 1.0
-import "map_components"
-import "modrana_components"
-import "pinchmap"
+import "../functions.js" as F
+import "../map_components"
+import "../modrana_components"
 
 Rectangle {
     id: pinchmap;
@@ -198,7 +196,7 @@ Rectangle {
         id : updateTilesModelWorker
         property bool workerInitialized: false
         property var replayMessages : []
-        source : "workers/update_tiles_model.js"
+        source : "../workers/update_tiles_model.js"
         onMessage: {
             // update the shouldBeOnScreen dict with data based
             // on the tiles model update
