@@ -102,11 +102,13 @@ Page {
 
     // search markers
     function clearSearchMarkers() {
+        // clear all search markers currently visible on the map
         rWin.log.error("clearSearchMarkers() is not implemented!")
     }
 
     // POI markers
     function clearPOIMarkers() {
+        // clear all POI markers currently visible on the map
         rWin.log.debug("clearPOIMarkers() is not implemented!")
     }
 
@@ -127,19 +129,24 @@ Page {
     property bool trackRecordingPaused : false
 
     function addTracePoint(point) {
+        // add a trace point to be displayed together
+        // with the other trace points (if any)
         rWin.log.error("addTracePoint() is not implemented!")
     }
 
     function clearTracePoints() {
+        // clear all trace point currently visible on the map
         rWin.log.error("clearTracePoints() is not implemented!")
     }
 
     // general functions
     function showOnMap(lat, lon) {
+        // center the map view to the given coordinates
         rWin.log.error("showOnMap() is not implemented!")
     }
 
     function centerMapOnCurrentPosition() {
+        // center the map view on current position
         rWin.log.error("centerMapOnCurrentPosition() is not implemented!")
     }
 
@@ -148,10 +155,12 @@ Page {
     }
 
     function zoomIn() {
+        // zoom the map out by one zoom level
         rWin.log.error("zoomIn() is not implemented!")
     }
 
     function zoomOut() {
+        // zoom the map in by one zoom level
         rWin.log.error("zoomOut() is not implemented!")
     }
 
