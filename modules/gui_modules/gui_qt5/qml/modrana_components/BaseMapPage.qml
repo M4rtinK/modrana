@@ -110,7 +110,19 @@ Page {
         rWin.log.debug("clearPOIMarkers() is not implemented!")
     }
 
-    // track logging & drawing
+
+    // arbitrary tracklog display
+    function showTracklog(tracklog) {
+        // show a tracklog on the map
+        rWin.log.error("showTracklog() is not implemented!")
+    }
+
+    function clearTracklogs() {
+        // clear all tracklog displayed on the map
+        rWin.log.error("clearTracklogs() is not implemented!")
+    }
+
+    // track logging & logging trace drawing
     property bool drawTracklogTrace : false
     property bool trackRecordingPaused : false
 
@@ -120,10 +132,6 @@ Page {
 
     function clearTracePoints() {
         rWin.log.error("clearTracePoints() is not implemented!")
-    }
-
-    function showTracklog(tracklog) {
-        rWin.log.error("showTracklog() is not implemented!")
     }
 
     // general functions

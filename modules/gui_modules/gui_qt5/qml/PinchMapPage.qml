@@ -98,6 +98,7 @@ BaseMapPage {
     property var tracklogPoints : []
 
     function showTracklog(tracklog) {
+        // show a tracklog on the map
         if (tracklog) {
             // clear any previous points
             tracklogPoints = []
