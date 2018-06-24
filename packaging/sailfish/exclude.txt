@@ -25,6 +25,7 @@ modules/mod_route/monav_i386
 # or not needed by the Qt 5 GUI
 core/bundle/simplejson
 core/bundle/pycha
+backports/urllib3_python25
 # startups scripts that are not needed
 run/fremantle_gtk
 run/fremantle_qml
