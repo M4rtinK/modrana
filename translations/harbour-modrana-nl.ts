@@ -2,42 +2,42 @@
 <context>
     <name>BaseMapPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="222"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="239"/>
         <source>&lt;b&gt;start&lt;/b&gt;</source>
         <translation>&lt;b&gt;beginnen&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="236"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="253"/>
         <source>&lt;b&gt;end&lt;/b&gt;</source>
         <translation>&lt;b&gt;beëindigen&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="252"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="269"/>
         <source>&lt;b&gt;navigate&lt;/b&gt;</source>
         <translation>&lt;b&gt;navigeren&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="270"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="287"/>
         <source>&lt;b&gt;clear&lt;/b&gt;</source>
         <translation>&lt;b&gt;wissen&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="406"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="423"/>
         <source>Navigation started.</source>
         <translation>Navigatie begonnen.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="412"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="429"/>
         <source>Navigation stopped.</source>
         <translation>Navigatie beëindigd.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="417"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="434"/>
         <source>Destination reached.</source>
         <translation>Bestemming bereikt.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="425"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="442"/>
         <source>Rerouting.</source>
         <translation>De route wordt herberekend.</translation>
     </message>
@@ -50,12 +50,12 @@
         <translation>Bitcoin-adres</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="32"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="37"/>
         <source>Copy to clipboard</source>
         <translation>Kopiëren naar klembord</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="36"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BitcoinPage.qml" line="41"/>
         <source>Bitcoin address copied to clipboard</source>
         <translation>Bitcoin-adres gekopieerd naar klembord</translation>
     </message>
@@ -178,23 +178,23 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapMenuPage.qml" line="25"/>
         <source>Clear</source>
-        <translation type="unfinished"/>
+        <translation>Wissen</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapClearPage.qml" line="27"/>
+        <source>All</source>
+        <translation>Alles</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MapClearPage.qml" line="32"/>
-        <source>All</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MapClearPage.qml" line="37"/>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="26"/>
         <source>Search</source>
         <translation>Zoeken</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MapClearPage.qml" line="47"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapClearPage.qml" line="42"/>
         <source>Tracklogs</source>
-        <translation type="unfinished"/>
+        <translation>Spoorlogs</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="31"/>
@@ -208,7 +208,7 @@
         <translation>Kaart</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/MapClearPage.qml" line="42"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/MapClearPage.qml" line="37"/>
         <location filename="../modules/gui_modules/gui_qt5/qml/MenuPage.qml" line="42"/>
         <location filename="../modules/gui_modules/gui_qt5/qml/OptionsMenuPage.qml" line="27"/>
         <source>POI</source>

@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.18
+Version: 0.55.19
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,18 @@ fi
 %endif
 
 %changelog
+* Sun Jun 24 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.19-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Don't ship PNG icons in the Sailfish OS package (martin.kolman)
+- Replace Bitcoin qrcode PNG with SVG (martin.kolman)
+- Fix removel of QML tests from Silfish OS package (martin.kolman)
+- Remove a redundant code for setting map layer (martin.kolman)
+- Document BaseMapPage API functions (martin.kolman)
+- Add tracklog handling to BaseMapPage API (martin.kolman)
+- Rename current MapPage to PinchMapPage (martin.kolman)
+- Move PinchMap.qml to the pinchmap folder (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Sun Jun 24 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.18-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix centering button toggle color (martin.kolman)
