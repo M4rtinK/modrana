@@ -100,6 +100,28 @@ Page {
         longitude : 0.0
     }
 
+    // map layers
+    function appendMapLayer(layerId, layerName, opacityValue) {
+        // add another map layer on top of existing map layers
+        // by name with the given opacity
+        rWin.log.error("appendMapLayer() is not implemented!")
+    }
+
+    function setMapLayerByIndex(index) {
+        // set map layer by index
+        rWin.log.error("setMapLayerByIndex() is not implemented!")
+    }
+
+    function removeMapLayerByIndex(index) {
+        // remove map layer by index
+        rWin.log.error("removeMapLayerByIndex() is not implemented!")
+    }
+
+    function setMapLayerOpacity(index, opacity) {
+        // set map layer opacity by index
+        rWin.log.error("setMapLayerOpacity() is not implemented!")
+    }
+
     // search markers
     function clearSearchMarkers() {
         // clear all search markers currently visible on the map

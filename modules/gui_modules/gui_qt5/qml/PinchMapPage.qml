@@ -48,6 +48,28 @@ BaseMapPage {
         pinchmap.canvas.requestFullPaint()
     }
 
+    // map layers
+    function appendMapLayer(layerId, layerName, opacityValue) {
+        // add another map layer on top of existing map layers
+        // by name with the given opacity
+        pinchmap.appendLayer(layerId, layerName, opacityValue)
+    }
+
+    function setMapLayerByIndex(index, layerId) {
+        // set map layer by index
+        pinchmap.setLayerById(index, layerId)
+    }
+
+    function removeMapLayerByIndex(index) {
+        // remove map layer by index
+        pinchmap.removeLayer(index)
+    }
+
+    function setMapLayerOpacity(index, opacity) {
+        // set map layer opacity by index
+        pinchmap.setLayerOpacity(index, opacity)
+    }
+
     // tracklogs and trace display
     onDrawTracklogTraceChanged : {
         // clear trace points once drawing is turned off

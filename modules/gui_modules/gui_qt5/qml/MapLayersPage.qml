@@ -87,7 +87,7 @@ BasePage {
                             // set the value once users
                             // stops interacting with the slider
                             if (pressed == false) {
-                                rWin.mapPage.getMap().setLayerOpacity(index, value)
+                                rWin.mapPage.setMapLayerOpacity(index, value)
                             }
                         }
                     }
@@ -111,7 +111,7 @@ BasePage {
                     text : qsTr("<b>add</b>")
                     onClicked : {
                         rWin.log.info("add layer")
-                        rWin.mapPage.getMap().appendLayer("openptmap_overlay", "OSM Transit Overlay", 1.0)
+                        rWin.mapPage.appendMapLayer("openptmap_overlay", "OSM Transit Overlay", 1.0)
                     }
                 }
                 Button {
@@ -122,7 +122,7 @@ BasePage {
                     onClicked : {
                         rWin.log.info("remove layer")
                         // remove the last layer
-                        rWin.mapPage.getMap().removeLayer(layersLW.model.count - 1)
+                        rWin.mapPage.removeMapLayerByIndex(layersLW.model.count - 1)
                     }
                 }
             }

@@ -7,7 +7,7 @@ MapLayerSelector {
     property bool returnToMap : true
     onLayerSelected : {
         rWin.set("layer", layerId)
-        rWin.mapPage.getMap().setLayerById(layerIndex, layerId)
+        rWin.mapPage.setMapLayerByIndex(layerIndex, layerId)
         if(returnToMap) {
             // flush the page stack & return to the map screen
             rWin.push(null, !rWin.animate)
