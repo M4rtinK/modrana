@@ -123,17 +123,26 @@ Page {
     }
 
     // search markers
+    function addSearchMarker(point) {
+        // add a search marker to the map
+        rWin.log.error("addSearchMarker() is not implemented!")
+    }
+
     function clearSearchMarkers() {
         // clear all search markers currently visible on the map
         rWin.log.error("clearSearchMarkers() is not implemented!")
     }
 
     // POI markers
+    function addPOIMarker(point) {
+        // add a POI marker to the map
+        rWin.log.debug("addPOIMarker() is not implemented!")
+    }
+
     function clearPOIMarkers() {
         // clear all POI markers currently visible on the map
         rWin.log.debug("clearPOIMarkers() is not implemented!")
     }
-
 
     // arbitrary tracklog display
     function showTracklog(tracklog) {
@@ -160,6 +169,10 @@ Page {
         // clear all trace point currently visible on the map
         rWin.log.error("clearTracePoints() is not implemented!")
     }
+
+    // point menu
+    // - a point related menu generally shown after a long press on the map
+    signal clearPointMenus
 
     // general functions
     function showOnMap(lat, lon) {

@@ -15,32 +15,7 @@ BasePage {
             text : qsTr("Show on map")
             onClicked : {
                 rWin.log.info("Show POI on map: " + point.name)
-                var poiModel = rWin.mapPage.getMap().poiMarkerModel
-                // first check if we already have the POI in the model
-                var alreadyAdded = false
-                for (var i=0; i<poiModel.count; i++) {
-                    if (poiModel.get(i).db_id == point.db_id) {
-                        alreadyAdded = true
-                        break
-                    }
-                }
-                if (!alreadyAdded) {
-                    rWin.log.debug("adding POI to map list model: " + point.name)
-                    // We need to create a new point instance like this,
-                    // or else the original point instance might get garbage collected,
-                    // causing issues later.
-                    poiModel.append({
-                        "name" : point.name,
-                        "description" : point.description,
-                        "latitude" : point.latitude,
-                        "longitude" : point.longitude,
-                        "elevation" : point.elevation,
-                        "highlight" : false,
-                        "mDistance" : 0,
-                        "db_id" : point.db_id,
-                        "category_id" : point.category_id
-                    })
-                }
+                rWin.mapPage.addPOIMarker(point)
                 rWin.mapPage.showOnMap(point.latitude, point.longitude)
                 rWin.push(null, !rWin.animate)
             }

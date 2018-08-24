@@ -44,7 +44,7 @@ Markers {
                         onClicked: {
                             rWin.log.info("routing to a point on the map")
                             rWin.mapPage.routeToPoint(model)
-                            rWin.mapPage.getMap().clearPointMenus()
+                            rWin.mapPage.clearPointMenus()
                         }
                     }
                 }

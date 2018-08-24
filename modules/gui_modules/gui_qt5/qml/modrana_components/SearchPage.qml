@@ -204,9 +204,12 @@ HeaderPage {
                 // is highlighted once it id displayed on the map
                 pointLW.model.setProperty(index, "highlight", true)
 
-                // set the current search result model as the marker
-                // display model
-                rWin.mapPage.getMap().searchMarkerModel = pointLW.model
+                // set the current search result model content
+                // for display on the map
+                rWin.mapPage.clearSearchMarkers()
+                for (var i=0; i<pointLW.model.count; i++) {
+                    rWin.mapPage.addSearchMarker(pointLW.model.get(i))
+                }
 
                 var lat = model.latitude
                 var lon = model.longitude

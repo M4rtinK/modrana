@@ -47,14 +47,53 @@ Rectangle {
     property alias angle: rot.angle
 
     // search
-    property var searchMarkerModel : null
+    property var searchMarkerModel : ListModel {}
+
+    function addSearchMarker(point) {
+        // add a search marker to the map
+        searchMarkerModel.append(point)
+    }
+
     function clearSearchMarkers() {
-        searchMarkerModel = null
+        // clear all search markers from the map
+        searchMarkerModel.clear()
     }
 
     // POI
     property var poiMarkerModel : ListModel {}
+
+    function addPOIMarker(point) {
+        // add a POI marker on the map
+
+        // first check if we already have the POI in the model
+        var alreadyAdded = false
+        for (var i=0; i<poiMarkerModel.count; i++) {
+            if (poiMarkerModel.get(i).db_id == point.db_id) {
+                alreadyAdded = true
+                break
+            }
+        }
+        if (!alreadyAdded) {
+            rWin.log.debug("adding POI to map list model: " + point.name)
+            // We need to create a new point instance like this,
+            // or else the original point instance might get garbage collected,
+            // causing issues later.
+            poiMarkerModel.append({
+                "name" : point.name,
+                "description" : point.description,
+                "latitude" : point.latitude,
+                "longitude" : point.longitude,
+                "elevation" : point.elevation,
+                "highlight" : false,
+                "mDistance" : 0,
+                "db_id" : point.db_id,
+                "category_id" : point.category_id
+            })
+        }
+    }
+
     function clearPOIMarkers() {
+        // clear all POI markers displayed on the map
         poiMarkerModel.clear()
     }
 

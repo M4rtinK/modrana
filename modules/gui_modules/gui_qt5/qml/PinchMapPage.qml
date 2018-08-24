@@ -162,11 +162,20 @@ BaseMapPage {
     }
 
     // search markers
+    function addSearchMarker(point) {
+        // add a search marker to the map
+        pinchmap.addSearchMarker(point)
+    }
+
     function clearSearchMarkers() {
         pinchmap.clearSearchMarkers()
     }
 
     // POI markers
+    function addPOIMarker(point) {
+        pinchmap.addPOIMarker(point)
+    }
+
     function clearPOIMarkers() {
         pinchmap.clearPOIMarkers()
     }
@@ -177,6 +186,11 @@ BaseMapPage {
         // show on map moves map center and
         // and thus disables centering
         center = false
+    }
+
+    // point menu control
+    onClearPointMenus : {
+        pinchmap.onClearPointMenus()
     }
 
     function centerMapOnCurrentPosition() {
