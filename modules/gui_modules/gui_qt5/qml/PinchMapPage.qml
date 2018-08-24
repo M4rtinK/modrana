@@ -205,10 +205,6 @@ BaseMapPage {
         pinchmap.zoomOut()
     }
 
-    function getMap() {
-        return pinchmap
-    }
-
     PinchMap {
         id: pinchmap
         // make sure the pinch map is under UI elements

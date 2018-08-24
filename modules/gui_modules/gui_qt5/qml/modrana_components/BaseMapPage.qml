@@ -185,10 +185,6 @@ Page {
         rWin.log.error("centerMapOnCurrentPosition() is not implemented!")
     }
 
-    function getMap() {
-        rWin.log.error("getMap() is not implemented!")
-    }
-
     function zoomIn() {
         // zoom the map out by one zoom level
         rWin.log.error("zoomIn() is not implemented!")
