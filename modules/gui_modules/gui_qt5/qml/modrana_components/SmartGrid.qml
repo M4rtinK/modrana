@@ -5,7 +5,8 @@
 import QtQuick 2.0
 
 Grid {
-    property real cellWidth : parent.width/columns
+    width : parent.width - rWin.c.style.main.spacing
+    property real cellWidth : width/columns
     // 2 columns in landscape, 1 in portrait
     columns : rWin.inPortrait ? 1 : 2
     spacing : rWin.c.style.main.spacing
