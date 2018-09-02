@@ -33,8 +33,8 @@ BasePage {
                     rWin.log.info("POI category list: " + model.name + " clicked")
 
                     // switch to page listing tracklogs for the given category
-                    var poiPage = rWin.getPage("POI")
-                    poiPage.point = model
+                    var poiPage = rWin.loadPage("POIPage", {"point" : model,
+                                                            "categoryPage" : pcPage})
                     rWin.pushPageInstance(poiPage)
                 }
                 Column {
@@ -54,13 +54,18 @@ BasePage {
         }
     }
 
-    // TODO: move somewhere else & execute earlier
-    onCategoryIdChanged : {
+    function reloadCategory() {
+        rWin.log.debug("reloading category " + pcPage.categoryId)
         rWin.python.call("modrana.gui.POI.get_all_poi_from_category", [pcPage.categoryId], function(poiList){
             itemsLW.model.clear()
             for (var i=0; i<poiList.length; i++) {
                 itemsLW.model.append(poiList[i]);
             }
         })
+    }
+
+    // TODO: move somewhere else & execute earlier
+    onCategoryIdChanged : {
+        reloadCategory()
     }
 }

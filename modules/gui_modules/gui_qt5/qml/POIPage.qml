@@ -9,6 +9,7 @@ BasePage {
     id: poiPage
     headerText : point.name
     property var point
+    property var categoryPage : null
     property real distanceToPoint : F.p2pDistance(poiPage.point, rWin.lastGoodPos)
     headerMenu : TopMenu {
         MenuItem {
@@ -53,6 +54,15 @@ BasePage {
         }
         Label {
             text : "<b>" + qsTr("distance") + ":</b>" + " " + F.formatDistance(poiPage.distanceToPoint, 1)
+        }
+        Button {
+            text : qsTr("Delete POI from database")
+            anchors.horizontalCenter : parent.horizontalCenter
+            onClicked : {
+                var deletePOIPage = rWin.loadPage("POIDeletePage", {"point" : point,
+                                                                    "categoryPage" : categoryPage})
+                rWin.pushPageInstance(deletePOIPage)
+            }
         }
     }
 }

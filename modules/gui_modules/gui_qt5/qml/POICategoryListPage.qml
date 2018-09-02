@@ -30,8 +30,7 @@ BasePage {
                     rWin.log.info("POI category list: " + model.name + " clicked")
 
                     // switch to page listing tracklogs for the given category
-                    var categoryPage = rWin.getPage("POICategory")
-                    categoryPage.categoryId = model.category_id
+                    var categoryPage = rWin.loadPage("POICategoryPage", {"categoryId" : model.category_id})
                     rWin.pushPageInstance(categoryPage)
                 }
                 Column {

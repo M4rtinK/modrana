@@ -528,6 +528,10 @@ class POI(object):
             poi_list.append(poi_dict)
         return poi_list
 
+    def delete_poi(self, poi_db_index):
+        log.debug("deleting POI with db index %s", poi_db_index)
+        db = self.gui.modules.storePOI.db
+        db.delete_poi(poi_db_index)
 
 class Search(object):
     """An easy to use search interface for the QML context"""
