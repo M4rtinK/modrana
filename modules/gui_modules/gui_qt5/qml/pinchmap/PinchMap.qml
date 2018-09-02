@@ -92,6 +92,26 @@ Rectangle {
         }
     }
 
+    function removePOIMarkerById(point) {
+        // remove a visible POI marked by its id
+        // (nothing happens if no such POI is visible)
+
+        // check if we have the POI in the model
+        var modelIndex = null
+        for (var i=0; i<poiMarkerModel.count; i++) {
+
+            if (poiMarkerModel.get(i).db_id == point.db_id) {
+                modelIndex = i
+                break
+            }
+        }
+        // if matching marker was found, delete it from the model
+        if (modelIndex != null) {
+            rWin.log.info("removing visible POI marker (db id " + point.db_id + ")")
+            poiMarkerModel.remove(modelIndex)
+        }
+    }
+
     function clearPOIMarkers() {
         // clear all POI markers displayed on the map
         poiMarkerModel.clear()

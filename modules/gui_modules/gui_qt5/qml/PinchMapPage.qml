@@ -176,6 +176,10 @@ BaseMapPage {
         pinchmap.addPOIMarker(point)
     }
 
+    function removePOIMarkerById(point) {
+        pinchmap.removePOIMarkerById(point)
+    }
+
     function clearPOIMarkers() {
         pinchmap.clearPOIMarkers()
     }

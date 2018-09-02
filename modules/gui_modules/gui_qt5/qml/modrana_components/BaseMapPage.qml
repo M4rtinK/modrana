@@ -139,6 +139,12 @@ Page {
         rWin.log.debug("addPOIMarker() is not implemented!")
     }
 
+    function removePOIMarkerById(point) {
+        // remove a visible POI marked by its id
+        // (nothing happens if no such POI is visible)
+        rWin.log.debug("removePOIMarkerById() is not implemented!")
+    }
+
     function clearPOIMarkers() {
         // clear all POI markers currently visible on the map
         rWin.log.debug("clearPOIMarkers() is not implemented!")
