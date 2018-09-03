@@ -150,6 +150,15 @@ Page {
         rWin.log.debug("clearPOIMarkers() is not implemented!")
     }
 
+    function poiClicked(point) {
+        // this function needs to be connected to the implementation
+        // specific mechanism which decides that a POI has been clicked
+        rWin.log.info("POI clicked: " + point.name)
+        var poiPage = rWin.loadPage("POIPage", {"point" : point,
+                                                "previousPage" : baseMapPage})
+        rWin.pushPageInstance(poiPage)
+    }
+
     // arbitrary tracklog display
     function showTracklog(tracklog) {
         // show a tracklog on the map

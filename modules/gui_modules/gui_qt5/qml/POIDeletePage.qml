@@ -6,7 +6,7 @@ import "modrana_components"
 TwoOptionPage {
     id : twoOptionPage
     property var point
-    property var categoryPage : null
+    property var pageAbovePOIPage : null
     headerText: twoOptionPage.point.name
     text : qsTr("Delete this POI ?")
     firstButtonText : qsTr("Delete POI")
@@ -27,12 +27,12 @@ TwoOptionPage {
         //       the database. We could likely also void this by caching the db_id value
         //       but this (ordering of actions) works as well. :)
 
-        if (categoryPage != null) {
-            categoryPage.reloadCategory()
-        }
         // go back & out of the POI detail page
-        rWin.pop()
-        rWin.pop()
+        if (pageAbovePOIPage != null) {
+            rWin.pop(pageAbovePOIPage)
+        } else {
+            rWin.pop()
+        }
     }
     secondButtonText : qsTr("Cancel")
     onSecondButtonClicked : {

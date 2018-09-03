@@ -488,6 +488,14 @@ BaseMapPage {
             }
         }
 
+        // connect to the POI clicked signals from pinchmap
+        Connections {
+            target : pinchmap
+            onPoiClicked : {
+                poiClicked(point)
+            }
+        }
+
         function requestRoute(startWithHeading) {
             // request route for the current start and destination
             if (!routingStartSet) {

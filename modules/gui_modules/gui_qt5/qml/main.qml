@@ -613,11 +613,15 @@ ApplicationWindow {
         }
     }
 
-    function pop() {
+    function pop(page) {
         // pop a page from the stack
         // TODO: prevent the stack from becoming empty
         //      (keep the stream list page as the default page)
-        rWin.pageStack.pop(undefined, !rWin.animate)
+        if (page != null) {
+            rWin.pageStack.pop(page, !rWin.animate)
+        } else {
+            rWin.pageStack.pop(undefined, !rWin.animate)
+        }
     }
 
 

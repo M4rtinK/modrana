@@ -61,6 +61,7 @@ Rectangle {
 
     // POI
     property var poiMarkerModel : ListModel {}
+    signal poiClicked(var point)
 
     function addPOIMarker(point) {
         // add a POI marker on the map
@@ -964,9 +965,8 @@ Rectangle {
             mapInstance : pinchmap
 
             onPoiClicked : {
-                rWin.log.info("POI clicked: " + point.name)
-                var poiPage = rWin.loadPage("POIPage", {"point" : point})
-                rWin.pushPageInstance(poiPage)
+                rWin.log.debug("POI CLICKED!")
+                pinchmap.poiClicked(point)
             }
         }
         SearchMarkers {

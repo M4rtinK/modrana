@@ -12,6 +12,15 @@ BasePage {
 
     headerText : qsTr(categoryName)
 
+    // make sure the category listing is reloaded
+    // when the POI database changes
+    Connections {
+        target : rWin
+        onPoiDatabaseChanged : {
+            reloadCategory()
+        }
+    }
+
     content : ContentColumn {
         ListView {
             id : itemsLW
@@ -34,7 +43,7 @@ BasePage {
 
                     // switch to page listing tracklogs for the given category
                     var poiPage = rWin.loadPage("POIPage", {"point" : model,
-                                                            "categoryPage" : pcPage})
+                                                            "previousPage" : pcPage})
                     rWin.pushPageInstance(poiPage)
                 }
                 Column {

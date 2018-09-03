@@ -9,7 +9,7 @@ BasePage {
     id: poiPage
     headerText : point.name
     property var point
-    property var categoryPage : null
+    property var previousPage : null
     property real distanceToPoint : F.p2pDistance(poiPage.point, rWin.lastGoodPos)
     headerMenu : TopMenu {
         MenuItem {
@@ -60,7 +60,7 @@ BasePage {
             anchors.horizontalCenter : parent.horizontalCenter
             onClicked : {
                 var deletePOIPage = rWin.loadPage("POIDeletePage", {"point" : point,
-                                                                    "categoryPage" : categoryPage})
+                                                                    "pageAbovePOIPage" : previousPage})
                 rWin.pushPageInstance(deletePOIPage)
             }
         }
