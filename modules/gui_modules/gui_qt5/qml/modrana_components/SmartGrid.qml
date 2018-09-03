@@ -5,9 +5,12 @@
 import QtQuick 2.0
 
 Grid {
-    width : parent.width - rWin.c.style.main.spacing
+    id : smartGrid
+    spacing : rWin.c.style.main.spacing
+    width : rWin.inPortrait ? parent.width : parent.width - smartGrid.spacing
     property real cellWidth : width/columns
     // 2 columns in landscape, 1 in portrait
     columns : rWin.inPortrait ? 1 : 2
-    spacing : rWin.c.style.main.spacing
+    rowSpacing : rWin.inPortrait ? smartGrid.spacing : 0
+    columnSpacing : rWin.inPortrait ? 0 : smartGrid.spacing
 }
