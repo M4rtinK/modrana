@@ -228,6 +228,9 @@ ApplicationWindow {
     // it without instantiating it themselves
     property alias python : python
 
+    // POI database notifications
+    signal poiDatabaseChanged
+
     Component.onCompleted: {
         // start the modRana Python part initialization only once the main Qt 5 GUI
         // element finishes loading so that we can show the "starting up" feedback
@@ -407,6 +410,10 @@ ApplicationWindow {
 
         python.setHandler("openURL", function(url) {
             rWin.openURL(url)
+        })
+
+        python.setHandler("poiDatabaseChanged", function() {
+            rWin.poiDatabaseChanged()
         })
 
         // get the argv & remove the qml launcher

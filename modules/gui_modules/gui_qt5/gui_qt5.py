@@ -486,6 +486,13 @@ class POI(object):
             })
         return cat_list
 
+    def _db_changed(self):
+        """Notify QML that the POI database has been changed.
+
+        This can be used to reload various caches and views.
+        """
+        pyotherside.send("poiDatabaseChanged")
+
     def store_poi(self, point_dict):
         success = False
         db = self.gui.modules.storePOI.db
@@ -516,6 +523,8 @@ class POI(object):
             success = True
         else:
             self.gui.log.error("cant's save poi, missing name or coordinates: %s", point_dict)
+        if success:
+            self._db_changed()
         return success
 
     def get_all_poi_from_category(self, category_id):
@@ -532,6 +541,7 @@ class POI(object):
         log.debug("deleting POI with db index %s", poi_db_index)
         db = self.gui.modules.storePOI.db
         db.delete_poi(poi_db_index)
+        self._db_changed()
 
 class Search(object):
     """An easy to use search interface for the QML context"""
