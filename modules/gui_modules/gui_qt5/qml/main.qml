@@ -230,6 +230,7 @@ ApplicationWindow {
 
     // POI database notifications
     signal poiDatabaseChanged
+    signal newPoiAddedToDatabase(var point)
 
     Component.onCompleted: {
         // start the modRana Python part initialization only once the main Qt 5 GUI
@@ -414,6 +415,10 @@ ApplicationWindow {
 
         python.setHandler("poiDatabaseChanged", function() {
             rWin.poiDatabaseChanged()
+        })
+
+        python.setHandler("newPoiAddedToDatabase", function(point) {
+            rWin.newPoiAddedToDatabase(point)
         })
 
         // get the argv & remove the qml launcher

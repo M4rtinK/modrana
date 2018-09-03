@@ -493,6 +493,10 @@ class POI(object):
         """
         pyotherside.send("poiDatabaseChanged")
 
+    def _new_poi_added(self, new_poi_dict):
+        """Notify QML that a new POI has been added"""
+        pyotherside.send("newPoiAddedToDatabase", new_poi_dict)
+
     def store_poi(self, point_dict):
         success = False
         db = self.gui.modules.storePOI.db
@@ -518,9 +522,16 @@ class POI(object):
                             lon=lon,
                             db_cat_id=category_id)
             self.gui.log.info("saving POI: %s", poi)
-            db.store_poi(poi)
+            poi_db_index = db.store_poi(poi)
             self.gui.log.info("POI saved")
             success = True
+            # notify QML a new POI was added
+            new_poi_dict = point2dict(point.POI(name,
+                                                description,
+                                                lat,
+                                                lon,
+                                                category_id, poi_db_index))
+            self._new_poi_added(new_poi_dict)
         else:
             self.gui.log.error("cant's save poi, missing name or coordinates: %s", point_dict)
         if success:

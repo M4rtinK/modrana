@@ -430,12 +430,21 @@ Page {
 
     // update distance from current step if in navigation mode
     Connections {
-        target: baseMapPage.navigationEnabled ? rWin : null
-        onPosChanged: {
+        target : baseMapPage.navigationEnabled ? rWin : null
+        onPosChanged : {
             navigationOverlay.distanceFromStep = F.p2pDistance(
                 baseMapPage.currentStepCoord,
                 rWin.pos
             )
+        }
+    }
+
+    // show markers for newly added POI on the map
+    Connections {
+        target : rWin
+        onNewPoiAddedToDatabase : {
+            rWin.log.debug("adding marker for newly added POI: " + point.name)
+            addPOIMarker(point)
         }
     }
 
