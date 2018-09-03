@@ -7,8 +7,11 @@ import "functions.js" as F
 
 BasePage {
     id: pointPage
-    headerText : point.name
+    headerText : namePlaceholder ? namePlaceholder : point.name
     property var point
+    property string namePlaceholder : ""
+    property string descriptionPlaceholder : ""
+    property bool returnToMapOnSave : false
     property real distanceToPoint : F.p2pDistance(pointPage.point, rWin.lastGoodPos)
 
     headerMenu : TopMenu {
@@ -32,7 +35,8 @@ BasePage {
             text : qsTr("Save")
             onClicked : {
                 rWin.log.info("Save POI: " + point.name)
-                var pointPage = rWin.loadPage("SavePointPage", {"point" : point})
+                var pointPage = rWin.loadPage("SavePointPage", {"point" : point,
+                                                                "returnToMap" : returnToMapOnSave})
                 rWin.pushPageInstance(pointPage)
             }
         }
@@ -40,7 +44,7 @@ BasePage {
 
     content : ContentColumn {
         Label {
-            text : point.description
+            text : descriptionPlaceholder ? descriptionPlaceholder : point.description
             width : parent.width
             wrapMode : Text.WordWrap
         }

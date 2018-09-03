@@ -8,12 +8,17 @@ BasePage {
     id: savePointPage
     headerText : qsTr("Save POI")
     property var point
+    property bool returnToMap : false
     property int categoryId : 11
 
     headerMenu : TopMenu {
         MenuItem {
             text : qsTr("Confirm and save")
             onClicked : {
+                if (!point.name) {
+                    rWin.notify(qsTr("POI name not set"), 3000)
+                    return
+                }
                 rWin.log.debug("saving point: " + point.name)
                 var pointDict = {
                     "name" : point.name,
@@ -23,7 +28,11 @@ BasePage {
                     "category_id" : savePointPage.categoryId
                 }
                 python.call("modrana.gui.POI.store_poi", [pointDict], function(success) {
-                    rWin.pop()
+                    if (returnToMap) {
+                        rWin.push(null)
+                    } else {
+                        rWin.pop()
+                    }
                     if (success) {
                         rWin.notify(qsTr("POI saved"), 3000)
                     } else {

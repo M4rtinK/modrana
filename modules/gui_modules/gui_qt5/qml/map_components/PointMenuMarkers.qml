@@ -28,9 +28,10 @@ Markers {
                         margin: mapButtonSize * 0.2
                         onClicked: {
                             rWin.log.info("showing info for on-map point")
-                            model.name = qsTr("A point on the map")
-                            model.description = qsTr("An arbitrary point on the map.")
-                            var pointPage = rWin.loadPage("PointPage", {"point" : model})
+                            var pointPage = rWin.loadPage("PointPage", {"point" : model,
+                                                                        "namePlaceholder" : qsTr("A point on the map"),
+                                                                        "descriptionPlaceholder" : qsTr("An arbitrary point on the map."),
+                                                                        "returnToMapOnSave" : true})
                             rWin.pushPageInstance(pointPage)
                         }
                     }
