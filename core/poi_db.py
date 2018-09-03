@@ -128,8 +128,11 @@ class POIDatabase(object):
         if self.connected:
             values = self._get_poi_db_order(poi)
             query = "replace into poi values(?,?,?,?,?,?)"
-            self._db.execute(query, values)
+            cursor = self._db.cursor()
+            cursor.execute(query, values)
+            db_id = cursor.lastrowid
             self._db.commit()
+            return db_id
         else:
             raise DatabaseNotConnected
 
