@@ -2,42 +2,42 @@
 <context>
     <name>BaseMapPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="239"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="285"/>
         <source>&lt;b&gt;start&lt;/b&gt;</source>
         <translation>&lt;b&gt;beginnen&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="253"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="299"/>
         <source>&lt;b&gt;end&lt;/b&gt;</source>
         <translation>&lt;b&gt;b’eindigen&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="269"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="315"/>
         <source>&lt;b&gt;navigate&lt;/b&gt;</source>
         <translation>&lt;b&gt;navigeren&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="287"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="333"/>
         <source>&lt;b&gt;clear&lt;/b&gt;</source>
         <translation>&lt;b&gt;wissen&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="423"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="478"/>
         <source>Navigation started.</source>
         <translation>Navigatie begonnen.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="429"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="484"/>
         <source>Navigation stopped.</source>
         <translation>Navigatie b’eindigd.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="434"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="489"/>
         <source>Destination reached.</source>
         <translation>Bestemming bereikt.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="442"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/modrana_components/BaseMapPage.qml" line="497"/>
         <source>Rerouting.</source>
         <translation>De route word herberekend.</translation>
     </message>
@@ -851,17 +851,17 @@
         <translation>NP-categorieën</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="51"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="50"/>
         <source>no points</source>
         <translation>geen punten</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="53"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="52"/>
         <source>point</source>
         <translation>punt</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="55"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POICategoryListPage.qml" line="54"/>
         <source>points</source>
         <translation>punten</translation>
     </message>
@@ -869,92 +869,115 @@
 <context>
     <name>POICategoryName</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="75"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="84"/>
         <source>Service station</source>
         <translation>Dienststation</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="76"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="85"/>
         <source>Residence</source>
         <translation>Woning</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="77"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="86"/>
         <source>Restaurant</source>
         <translation>Restaurant</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="78"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="87"/>
         <source>Shopping/Services</source>
         <translation>Winkel/diensten</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="79"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="88"/>
         <source>Recreation</source>
         <translation>Ontspanning</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="80"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="89"/>
         <source>Transportation</source>
         <translation>Transport</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="81"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="90"/>
         <source>Lodging</source>
         <translation>Accomodatie</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="82"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="91"/>
         <source>School</source>
         <translation>School</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="83"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="92"/>
         <source>Business</source>
         <translation>Bedrijf</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="84"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="93"/>
         <source>Landmark</source>
         <translation>Bezienswaardigheid</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="85"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="94"/>
         <source>Other</source>
         <translation>Overige</translation>
     </message>
 </context>
 <context>
+    <name>POIDeletePage</name>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIDeletePage.qml" line="11"/>
+        <source>Delete this POI ?</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIDeletePage.qml" line="12"/>
+        <source>Delete POI</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIDeletePage.qml" line="37"/>
+        <source>Cancel</source>
+        <translation type="unfinished"/>
+    </message>
+</context>
+<context>
     <name>POIPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="15"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="16"/>
         <source>Show on map</source>
         <translation>Tonen op kaart</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="49"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="25"/>
         <source>Local search</source>
         <translation>Lokaal zoeken</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="57"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="33"/>
         <source>Route here</source>
         <translation>Route naar hier</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="73"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="49"/>
         <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
         <translation>&lt;b&gt;breedtegraad:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="76"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="52"/>
         <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
         <translation>&lt;b&gt;lengtegraad:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="80"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="56"/>
         <source>distance</source>
         <translation>afstand</translation>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="59"/>
+        <source>Delete POI from database</source>
+        <translation type="unfinished"/>
     </message>
 </context>
 <context>
@@ -965,17 +988,17 @@
         <translation>&lt;b&gt;Puntinformatie&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="31"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="32"/>
         <source>A point on the map</source>
         <translation>Een punt op de kaart</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="32"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="33"/>
         <source>An arbitrary point on the map.</source>
         <translation>Een willekeurig punt op de kaart.</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="41"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/map_components/PointMenuMarkers.qml" line="42"/>
         <source>&lt;b&gt;Route here&lt;/b&gt;</source>
         <translation>&lt;b&gt;Route naar hier&lt;/b&gt;</translation>
     </message>
@@ -983,32 +1006,32 @@
 <context>
     <name>PointPage</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="16"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="19"/>
         <source>Local search</source>
         <translation>Lokaal zoeken</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="24"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="27"/>
         <source>Route here</source>
         <translation>Route naar hier</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="32"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="35"/>
         <source>Save</source>
         <translation>Opslaan</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="49"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="53"/>
         <source>&lt;b&gt;latitude:&lt;/b&gt;</source>
         <translation>&lt;b&gt;breedtegraad:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="52"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="56"/>
         <source>&lt;b&gt;longitude:&lt;/b&gt;</source>
         <translation>&lt;b&gt;lengtegraad:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="56"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/PointPage.qml" line="60"/>
         <source>&lt;b&gt;distance:&lt;/b&gt;</source>
         <translation>&lt;b&gt;afstand:&lt;/b&gt;</translation>
     </message>
@@ -1021,32 +1044,37 @@
         <translation>NP opslaan</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="15"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="16"/>
         <source>Confirm and save</source>
         <translation>Bevestigen en opslaan</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="28"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="19"/>
+        <source>POI name not set</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="37"/>
         <source>POI saved</source>
         <translation>NP opgeslagen</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="30"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="39"/>
         <source>POI could not be saved</source>
         <translation>NP kon nie worden opgeslagen</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="39"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="48"/>
         <source>Name</source>
         <translation>Naam</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="51"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="60"/>
         <source>Description</source>
         <translation>Beschrijving</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="64"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="73"/>
         <source>Category</source>
         <translation>Categorie</translation>
     </message>
@@ -1228,12 +1256,12 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="307"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="311"/>
         <source>&lt;b&gt;starting modRana...&lt;/b&gt;</source>
         <translation>&lt;b&gt;modRana word gestart…&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="331"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="335"/>
         <source>debug</source>
         <translation>debug</translation>
     </message>

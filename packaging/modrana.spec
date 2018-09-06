@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.19
+Version: 0.55.20
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,25 @@ fi
 %endif
 
 %changelog
+* Thu Sep 06 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.20-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Improve UX for arbitrary POI creation (martin.kolman)
+- Show marker for newly added POI (martin.kolman)
+- Return index for newly created POI (martin.kolman)
+- Improve the POI delete workflow (martin.kolman)
+- Trigger a signal when POI database changes (martin.kolman)
+- Tweak TwoOptionPage layout and button colors (martin.kolman)
+- Make it possible to correctly set spacing between SmartGrid elements (martin.kolman)
+- Add support for deleting stored POI (martin.kolman)
+- Add support for removing individual visible POI markers (martin.kolman)
+- Add the TwoOptionPage element (martin.kolman)
+- Fix right margin missing with SmartGrid (martin.kolman)
+- Remove the getMap() function (martin.kolman)
+- Add POI marker and search marker handling to BaseMapPage API (martin.kolman)
+- Add map layer handling to BaseMapPage API (martin.kolman)
+- Don't ship Python 2.5 version of bundled Urllib 3 in Sailfish OS package (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Sun Jun 24 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.19-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Don't ship PNG icons in the Sailfish OS package (martin.kolman)
