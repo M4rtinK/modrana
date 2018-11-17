@@ -108,7 +108,7 @@ class BatchPool(object):
         # (now==False) or the batch pool has been explicitly shutdown
         # (self._shutdown=True) in which case we tell the pool to shutdown
         # as quickly as possible (now==True)
-        self._pool.shutdown(now=self._shutdown, join=True, async=False,
+        self._pool.shutdown(now=self._shutdown, join=True, asynchronous=False,
                             callback=self._stoppedCallback)
         log.info("%s loader done", self.name)
 

@@ -745,7 +745,7 @@ class TileImageProvider(ImageProvider):
 
             # get the tile from the tile module
             tileData = self.gui.modules.mapTiles.getTile((layer, z, x, y),
-                                                         async=True, tag=imageId,
+                                                         asynchronous=True, tag=imageId,
                                                          download=False)
             imageSize = (256,256)
             if tileData is None:

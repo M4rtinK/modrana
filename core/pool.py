@@ -111,7 +111,7 @@ class ThreadPool(object):
         return self._handleLeakedItem(leakedItem)
 
 
-    def shutdown(self, now=False, join=False, async=True, callback=None):
+    def shutdown(self, now=False, join=False, asynchronous=True, callback=None):
         """Shutdown the lifo thread pool"""
         with self._shutdownLock:
             if self._shutdown:
@@ -128,7 +128,7 @@ class ThreadPool(object):
         # if the queue is bounded, the shutdown function may block
         # so run it in a thread by default, with the possibility of
         # triggering a callback once it is done
-        if async:
+        if asynchronous:
             call = lambda : self._shutdownWrapper(now, join, callback)
             t = threads.ModRanaThread(name=self.name+"Shutdown",
                                       target=call)

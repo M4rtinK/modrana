@@ -192,7 +192,7 @@ class MapTiles(RanaModule):
         if gs.GUIString == "GTK":
             self.m.get("mapData").downloadPool.batchDone.connect(self._batchDownloadCompleteDB)
 
-    def getTile(self, lzxy, async=False, tag=None, download=True):
+    def getTile(self, lzxy, asynchronous=False, tag=None, download=True):
         """Return a tile specified by layerID, z, x & y
         * first look if such a tile is available from cache
           or persistent storage
@@ -214,7 +214,7 @@ class MapTiles(RanaModule):
             # tile was available from storage
             return tileData
         if download:
-            if async:
+            if asynchronous:
                 # asynchronous download
                 #self.log.debug("DOWNLOADING tile asynchronously!")
                 self.addTileDownloadRequest(lzxy, tag)
