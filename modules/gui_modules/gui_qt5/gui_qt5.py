@@ -766,7 +766,7 @@ class TileImageProvider(ImageProvider):
             log.error("tile image provider: loading tile failed")
             log.error(imageId)
             log.error(requestedSize)
-            log.exception()
+            log.exception("tile image provider exception")
 
 class MapTiles(object):
     def __init__(self, gui):
