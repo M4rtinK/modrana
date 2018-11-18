@@ -44,7 +44,7 @@ USING_QRC = qrc.is_qrc
 qrc.handle_qrc()
 
 
-def setCorrectCWD():
+def set_correct_CWD():
     # change to folder where the main modRana file is located
     # * this enables to run modRana with absolute path without adverse
     # effect such as modRana not finding modules or
@@ -76,7 +76,7 @@ def setCorrectCWD():
 
 # before we start importing our stuff we need to correctly setup CWD
 # and Python import paths
-setCorrectCWD()
+set_correct_CWD()
 
 # import core modules/classes
 from core import startup
@@ -217,9 +217,7 @@ class ModRana(object):
         self._startupDone()
 
     def _postUpgradeCheck(self):
-        """
-        perform post upgrade checks
-        """
+        """Perform post upgrade checks."""
         self.configs.upgrade_config_files()
 
     def _get_os_release(self):
@@ -245,7 +243,7 @@ class ModRana(object):
     ##  MODULE HANDLING ##
 
     def _loadDeviceModule(self):
-        """Load the device module"""
+        """Load the device module."""
         if self.dmod:  # don't reload the module
             return
 
@@ -313,7 +311,7 @@ class ModRana(object):
             # order of preference as provided by the  device module
 
     def _loadGUIModule(self):
-        """load the GUI module"""
+        """Load the GUI module."""
 
         # add the GUI module folder to path
         GUIModulesPath = os.path.join(MAIN_MODULES_FOLDER, "gui_modules")
@@ -341,10 +339,10 @@ class ModRana(object):
         self.gui = gui
 
     def _loadModules(self):
-        """load all "normal" (other than device & GUI) modules"""
+        """Load all "normal" (other than device & GUI) modules."""
 
         log.info("importing modules:")
-        start = time.clock()
+        start_time = time.clock()
 
         # make shortcut for the loadModule function
         loadModule = self._loadModule
@@ -357,7 +355,7 @@ class ModRana(object):
             moduleName = moduleName.split('.')[0]
             loadModule(moduleName, moduleName[4:])
 
-        log.info("Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start)))
+        log.info("Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start_time)))
         self.addTime("all modules loaded")
 
         # make sure all modules have the device module and other variables before first time
@@ -368,30 +366,35 @@ class ModRana(object):
             # run what needs to be done before firstTime is called
         self._modulesLoadedPreFirstTime()
 
-        start = time.clock()
+        start_time = time.clock()
         for m in self.m.values():
             m.firstTime()
 
         # run what needs to be done after firstTime is called
         self._modulesLoadedPostFirstTime()
 
-        log.info( "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start)) )
+        log.info( "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start_time)) )
 
         # add last timing checkpoint
         self.addTime("all modules initialized")
 
     def _getModuleNamesFromFolder(self, folder, prefix='mod_'):
-        """list a given folder and find all possible module names
+        """List a given folder and find all possible module names.
+
         Module names:
+        -------------
         Module names start with the "mod_" and don't end with .pyc or .pyo.
+
         Consequences:
+        -------------
         Valid modules need to have an existing .py file or be folder-modules
         (don't name a folder module mod_foo.pyc :) ), even if they are
         actually loaded from the .pyc or .pyo in the end.
         This is done so that dangling .pyc/.pyo file from a module
         that was removed are not loaded by mistake.
         This situation shouldn't really happen if modRana is installed from a package,
-        as all .pyc files are purged during package upgrade and regenerated."""
+        as all .pyc files are purged during package upgrade and regenerated.
+        """
         if USING_QRC:
             # if we are running from qrc, we need to use the pyotherside function for enumerating
             # the modules stored in the qrc "bundle"
@@ -422,7 +425,7 @@ class ModRana(object):
         return self._getModuleNamesFromFolder(GUI_MODULES_FOLDER)
 
     def _loadModule(self, importName, moduleName):
-        """load a single module by name from path"""
+        """Load a single module by name from path."""
         startM = time.clock()
         fp = None
         try:
@@ -451,9 +454,7 @@ class ModRana(object):
                 fp.close()
 
     def _optionsLoaded(self):
-        """This is run after the persistent options dictionary is
-        loaded from storage
-        """
+        """This is run after the persistent options dictionary is loaded from storage."""
         # tell the log manager what where it should store log files
         modrana_log.log_manager.log_folder_path = self.paths.getLogFolderPath()
 
@@ -471,7 +472,7 @@ class ModRana(object):
         self.watch("loggingStatus", self._logFileCB)
 
     def _logFileCB(self, _key, _oldValue, newValue):
-        """Convenience function turning the log file on or off"""
+        """Convenience function turning the log file on or off."""
         if newValue:
             logCompression = self.get('compressLogFile', False)
             modrana_log.log_manager.enable_log_file(compression=logCompression)
@@ -479,8 +480,7 @@ class ModRana(object):
             modrana_log.log_manager.disable_log_file()
 
     def _modulesLoadedPreFirstTime(self):
-        """this is run after all the modules have been loaded,
-        but before their first time is called"""
+        """This is run after all the modules have been loaded, but before their first time is called."""
 
         # and mode change
         self.watch('mode', self._modeChangedCB)
@@ -493,8 +493,7 @@ class ModRana(object):
                 menus.addItem('main', 'Quit', 'quit', 'menu:askQuit')
 
     def _modulesLoadedPostFirstTime(self):
-        """this is run after all the modules have been loaded,
-        after before their first time is called"""
+        """This is run after all the modules have been loaded, after before their first time is called."""
 
         # check if redrawing time should be logged
         if 'showRedrawTime' in self.d and self.d['showRedrawTime'] == True:
@@ -504,22 +503,20 @@ class ModRana(object):
         self.startup.handlePostFirstTimeTasks()
 
     def getModule(self, name, default=None):
-        """
-        return a given module instance, return default if no instance
-        with given name is found
+        """Return a given module instance.
+
+        Return default if no instance with given name is found.
         """
         return self.m.get(name, default)
 
     def getModules(self):
-        """
-        return the dictionary of all loaded modules
-        """
+        """Return the dictionary of all loaded modules."""
         return self.m
 
     ## STARTUP AND SHUTDOWN ##
 
     def _startupDone(self):
-        """called when startup has been finished"""
+        """Called when startup has been finished."""
 
         # report startup time
         self.reportStartupTime()
@@ -532,10 +529,7 @@ class ModRana(object):
         self.gui.startMainLoop()
 
     def shutdown(self):
-        """
-        start shutdown cleanup and stop GUI main loop
-        when finished
-        """
+        """Start shutdown cleanup and stop GUI main loop when finished."""
         start_timestamp = time.clock()
         log.info("Shutting-down modules")
         for m in self.m.values():
@@ -549,7 +543,7 @@ class ModRana(object):
     ## OPTIONS SETTING AND WATCHING ##
 
     def get(self, name, default=None, mode=None):
-        """Get an item of data"""
+        """Get an item of data."""
 
         # check if the value depends on current mode
         if name in self.keyModifiers.keys():
@@ -568,9 +562,11 @@ class ModRana(object):
             return self.d.get(name, default)
 
     def set(self, name, value, save=False, mode=None):
-        """Set an item of data,
-        if there is a watch set for this key,
-        notify the watcher that its value has changed"""
+        """Set an item of data in persistent dictionary.
+
+        If there is a watch set for this key,
+        notify the watcher that its value has changed.
+        """
 
         oldValue = self.get(name, value)
 
@@ -600,12 +596,14 @@ class ModRana(object):
                 options.save()
 
     def optionsKeyExists(self, key):
-        """Report if a given key exists"""
+        """Report if a given key exists."""
         return key in self.d.keys()
 
     def purgeKey(self, key):
-        """remove a key from the persistent dictionary,
-        including possible key modifiers and alternate values"""
+        """Remove a key from the persistent dictionary.
+
+        This includes possible key modifiers and alternate values.
+        """
         if key in self.d:
             oldValue = self.get(key, None)
             del self.d[key]
@@ -623,8 +621,10 @@ class ModRana(object):
             log.error("can't purge a not-present key: %s", key)
 
     def watch(self, key, callback, args=None, runNow=False):
-        """add a callback on an options key
-        callback will get:
+        """Add a callback on an options key.
+
+        The callback will get:
+
         key, newValue, oldValue, *args
 
         NOTE: watch ids should be >0, so that they evaluate as True
@@ -645,7 +645,7 @@ class ModRana(object):
         return id
 
     def removeWatch(self, id):
-        """remove watch specified by the given watch id"""
+        """Remove watch specified by the given watch id."""
         (nrId, key) = id.split('_')
         if key in self.watches:
             remove = lambda x: x[0] == id
@@ -653,11 +653,13 @@ class ModRana(object):
         log.error("can't remove watch - key does not exist, watchId: %s", id)
 
     def _notifyWatcher(self, key, oldValue):
-        """run callbacks registered on an options key
-        HOW IT WORKS
-        * the watcher is notified before the key is written to the persistent
-        dictionary, so that it can react before the change is visible
-        * the watcher gets the key and both the new and old values
+        """Run callbacks registered on an options key.
+
+        HOW IT WORKS:
+
+        - the watcher is notified before the key is written to the persistent
+          dictionary, so that it can react before the change is visible
+        - the watcher gets the key and both the new and old values
         """
         callbacks = self.watches.get(key, None)
         if callbacks:
@@ -673,9 +675,11 @@ class ModRana(object):
                     log.error("invalid watcher callback :", callback)
 
     def addKeyModifier(self, key, modifier=None, mode=None, copyInitialValue=True):
-        """add a key modifier
+        """Add a key modifier.
+
         NOTE: currently only used to make value of some keys
-        dependent on the current mode"""
+              dependent on the current mode
+        """
         options = self.m.get('options', None)
         # remember the old value, if not se use default from options
         # if available
@@ -707,9 +711,11 @@ class ModRana(object):
         self._notifyWatcher(key, oldValue)
 
     def removeKeyModifier(self, key, mode=None):
-        """remove key modifier
+        """Remove key modifier.
+
         NOTE: currently this just makes the key independent
-        on the current mode"""
+              on the current mode
+        """
         # if no mode is provided, use the current one
         if mode is None:
             mode = self.d.get('mode', 'car')
@@ -744,11 +750,11 @@ class ModRana(object):
             return False
 
     def hasKeyModifier(self, key):
-        """return if a key has a key modifier"""
+        """Report if a key has a key modifier."""
         return key in self.keyModifiers.keys()
 
     def hasKeyModifierInMode(self, key, mode=None):
-        """return if a key has a key modifier"""
+        """Report if a key has a key modifier."""
         if mode is None:
             mode = self.d.get('mode', 'car')
         if key in self.keyModifiers.keys():
@@ -757,6 +763,7 @@ class ModRana(object):
             return False
 
     def notify(self, message, msTimeout=0, icon=""):
+        """Try to show a notification message to the user."""
         log.info("modRana notify: %s", message)
         # trigger the notification signal - this will
         # trigger an actual notification by one of the
@@ -779,7 +786,7 @@ class ModRana(object):
             log.error("No message handler, can't send message.")
 
     def getModes(self):
-        """return supported modes"""
+        """Return supported modes."""
         modes = {
             'cycle': 'Cycle',
             'walk': 'Foot',
@@ -790,7 +797,7 @@ class ModRana(object):
         return modes
 
     def getModeLabel(self, modeName):
-        """get a label for a given mode"""
+        """Get a label for a given mode."""
         try:
             return self.getModes()[modeName]
         except KeyError:
@@ -798,7 +805,8 @@ class ModRana(object):
             return None
 
     def _modeChangedCB(self, key=None, oldMode=None, newMode=None):
-        """handle mode change in regards to key modifiers and option key watchers"""
+        """Handle mode change in regards to key modifiers and option key watchers."""
+
         # get keys that have both a key modifier and a watcher
         keys = filter(lambda x: x in self.keyModifiers.keys(), self.watches.keys())
         # filter out only those keys that have a modifier for the new mode
@@ -823,10 +831,13 @@ class ModRana(object):
             self._notifyWatcher(key, oldValue)
 
     def _removeNonPersistentOptions(self, inputDict):
-        """keys that begin with # are not saved
-        (as they mostly contain data that is either time sensitive or is
+        """Keys that begin with # are not saved.
+
+        (They mostly contain data that is either time sensitive or is
         reloaded on startup)
-        ASSUMPTION: keys are strings of length>=1"""
+
+        ASSUMPTION: keys are strings of length>=1
+        """
         try:
             return dict((k, v) for k, v in six.iteritems(inputDict) if k[0] != '#')
         except Exception:
@@ -834,7 +845,7 @@ class ModRana(object):
             return self.d
 
     def _saveOptions(self):
-        """save the persistent dictionary to file"""
+        """Save the persistent dictionary to file."""
         log.info("saving options")
         try:
             f = open(self.paths.getOptionsFilePath(), "wb")
@@ -850,7 +861,7 @@ class ModRana(object):
             log.exception("saving options failed")
 
     def _loadOptions(self):
-        """load the persistent dictionary from file"""
+        """Load the persistent dictionary from file."""
         log.info("loading options")
         try:
             f = open(self.paths.getOptionsFilePath(), "rb")
@@ -869,7 +880,6 @@ class ModRana(object):
 
 
         except Exception:
-            e = sys.exc_info()[1]
             log.exception("exception while loading saved options")
             # TODO: a yes/no dialog for clearing (renaming with timestamp :) the corrupted options file (options.bin)
             success = False
@@ -878,9 +888,12 @@ class ModRana(object):
         return success
 
     def overrideOptions(self):
-        """
-        without this, there would not be any projection values at start,
-        because modRana does not know, what part of the map to show
+        """Override some options in the persistent dictionary.
+
+        Without this, there would not be any projection values at start,
+        because modRana does not know, what part of the map to show.
+
+        TODO: move projection out for peristent dictionary.
         """
         self.set('centred', True)  # set centering to True at start to get setView to run
         self.set('editBatchMenuActive', False)
@@ -888,12 +901,13 @@ class ModRana(object):
     ## PROFILE PATH ##
 
     def getProfilePath(self):
-        """return the profile folder (create it if it does not exist)
+        """Return the profile folder (create it if it does not exist).
+
         NOTE: this function is provided here in the main class as some
-        ordinary modRana modules need to know the profile folder path before the
-        option module that normally handles it is fully initialized
-        (for example the config module might need to copy default
-        configuration files to the profile folder in its init)
+              ordinary modRana modules need to know the profile folder path before the
+              option module that normally handles it is fully initialized
+              (for example the config module might need to copy default
+              configuration files to the profile folder in its init)
         """
         # get the path
         modRanaProfileFolderName = '.modrana'
@@ -907,15 +921,18 @@ class ModRana(object):
     ## STARTUP TIMING ##
 
     def addTime(self, message):
+        """Add a startup time event."""
         timestamp = time.time()
         self.timing.append((message, timestamp))
         return timestamp
 
     def addCustomTime(self, message, timestamp):
+        """Add a startup time event with custom timestamp."""
         self.timing.append((message, timestamp))
         return timestamp
 
     def reportStartupTime(self):
+        """Report results for startup timing into the log."""
         if self.timing:
             log.info("** modRana startup timing **")
 
@@ -947,6 +964,7 @@ gui = None
 
 def start(argv=None):
     """This function is used when starting modRana with PyOtherSide.
+
     When modRana is started from PyOtherSide there is no sys.argv,
     so QML needs to pass it from its side.
 
