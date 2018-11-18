@@ -69,7 +69,7 @@ class Startup(object):
             '-d', metavar="device ID", type=str,
             help="specify device type",
             default=None, action="store",
-            choices=self.modrana._listAvailableDeviceModulesByID()
+            choices=self.modrana._list_available_device_modules_by_id()
         )
         # GUI
         parser.add_argument(
@@ -240,7 +240,7 @@ class Startup(object):
         elif self._poi_subcommand_present:
             self._disableStdout()
 
-    def handleNonGUITasks(self):
+    def handle_non_gui_tasks(self):
         """Handle CLI arguments that can be handled before the general modRana startup,
         but require a loaded device module
         -> this usually means some "simple" tasks that return some results to
@@ -345,7 +345,7 @@ class Startup(object):
         self.modrana.dmod.enableInternetConnectivity()
 
         # load the online services module
-        online = self.modrana._loadModule("mod_onlineServices", "onlineServices")
+        online = self.modrana._load_module("mod_onlineServices", "onlineServices")
 
         query = self.args.local_search
         points = [] # points defining the result/s
@@ -391,7 +391,7 @@ class Startup(object):
         self._disableStdout()
         query = self.args.address_search
         # load the online services module
-        online = self.modrana._loadModule("mod_onlineServices", "onlineServices")
+        online = self.modrana._load_module("mod_onlineServices", "onlineServices")
         results = online.geocode(query)
         self._returnStaticMapUrl(results, online)
 
@@ -400,7 +400,7 @@ class Startup(object):
         self._disableStdout()
         query = self.args.wikipedia_search
         # load the online services module
-        online = self.modrana._loadModule("mod_onlineServices", "onlineServices")
+        online = self.modrana._load_module("mod_onlineServices", "onlineServices")
         results = online.wikipediaSearch(query)
         self._returnStaticMapUrl(results, online)
 
@@ -458,7 +458,7 @@ class Startup(object):
         else:
             from core.point import POI
             lat, lon = coords
-            store_poi = self.modrana._loadModule("mod_storePOI", "storePOI")
+            store_poi = self.modrana._load_module("mod_storePOI", "storePOI")
             cat_id, cat_name = self._find_category(store_poi, self.args.poi_category)
             if cat_id is None:
                 self._enableStdout()
@@ -479,7 +479,7 @@ class Startup(object):
     def _listCategories(self):
         """List POI database categories"""
         self._disableStdout()
-        store_poi = self.modrana._loadModule("mod_storePOI", "storePOI")
+        store_poi = self.modrana._load_module("mod_storePOI", "storePOI")
         categories = store_poi.db.list_categories()
         self._enableStdout()
         for name, description, index in categories:
@@ -587,7 +587,7 @@ class Startup(object):
         # we usually need to load it if we handle an early task that happens before regular startup
         if loadLocationModule:
             # load the location module
-            l = self.modrana._loadModule("mod_location", "location")
+            l = self.modrana._load_module("mod_location", "location")
             # register fix CB
             self.modrana.watch('fix', self._fixCB, [time.time(), l])
             log.info('location module loaded')
@@ -698,7 +698,7 @@ class Startup(object):
         from core import paths
         # options needs the paths class to know from where to load the options
         self.modrana.paths = paths.Paths(self.modrana)
-        self.modrana._loadOptions()
+        self.modrana._load_options()
 
     def _useLastKnownPos(self, location):
         return str.strip(location) == USE_LAST_KNOWN_POSITION_KEYWORD

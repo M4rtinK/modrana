@@ -174,7 +174,7 @@ class ModRana(object):
         # load the device module now as it might override
         # the default profile directory, so it needs to be
         # before ve init the core paths module
-        self._loadDeviceModule()
+        self._load_device_module()
 
         # initialize the paths handling core module
         self.paths = paths.Paths(self)
@@ -183,8 +183,8 @@ class ModRana(object):
         self.configs = configs.Configs(configs_dir=self.paths.getProfilePath())
 
         # load persistent options
-        self.optLoadingOK = self._loadOptions()
-        self._optionsLoaded()
+        self.optLoadingOK = self._load_options()
+        self._options_loaded()
 
         # check if upgrade took place
 
@@ -193,7 +193,7 @@ class ModRana(object):
             versionStringFromFile = paths.VERSION_STRING
             if savedVersionString != versionStringFromFile:
                 log.info("possible upgrade detected")
-                self._postUpgradeCheck()
+                self._post_upgrade_check()
 
         # save current version string
         self.set('modRanaVersionString', paths.VERSION_STRING)
@@ -205,18 +205,18 @@ class ModRana(object):
 
         # handle tasks that require the device
         # module but not GUI
-        self.startup.handleNonGUITasks()
+        self.startup.handle_non_gui_tasks()
 
         # then the GUI module
-        self._loadGUIModule()
+        self._load_gui_module()
 
         # and all other modules
-        self._loadModules()
+        self._load_modules()
 
         # startup done, log some statistics
-        self._startupDone()
+        self._startup_done()
 
-    def _postUpgradeCheck(self):
+    def _post_upgrade_check(self):
         """Perform post upgrade checks."""
         self.configs.upgrade_config_files()
 
@@ -242,7 +242,7 @@ class ModRana(object):
 
     ##  MODULE HANDLING ##
 
-    def _loadDeviceModule(self):
+    def _load_device_module(self):
         """Load the device module."""
         if self.dmod:  # don't reload the module
             return
@@ -283,12 +283,12 @@ class ModRana(object):
         # during init
         deviceModulesPath = os.path.join(MAIN_MODULES_FOLDER, "device_modules")
         sys.path.append(deviceModulesPath)
-        dmod_instance = self._loadModule("device_%s" % device, "device")
+        dmod_instance = self._load_module("device_%s" % device, "device")
         if dmod_instance is None:
             log.critical("!! device module failed to load !!\n"
                          "loading the Neo device module as fail-safe")
             device = "neo"
-            dmod_instance = self._loadModule("device_%s" % device, "device")
+            dmod_instance = self._load_module("device_%s" % device, "device")
         self.dmod = dmod_instance
 
         # if no GUIString was specified from CLI,
@@ -302,35 +302,35 @@ class ModRana(object):
                 self.GUIString = "GTK"  # fallback
                 # export the GUI string
                 # set the pre-import visible GUI string and subtype
-        splitGUIString = self.GUIString.split(":")
-        gs.GUIString = splitGUIString[0]
-        if len(splitGUIString) >= 2:
-            gs.GUISubtypeString = splitGUIString[1]
+        split_gui_string = self.GUIString.split(":")
+        gs.GUIString = split_gui_string[0]
+        if len(split_gui_string) >= 2:
+            gs.GUISubtypeString = split_gui_string[1]
 
             # TODO: if loading GUI module fails, retry other modules in
             # order of preference as provided by the  device module
 
-    def _loadGUIModule(self):
+    def _load_gui_module(self):
         """Load the GUI module."""
 
         # add the GUI module folder to path
-        GUIModulesPath = os.path.join(MAIN_MODULES_FOLDER, "gui_modules")
-        sys.path.append(GUIModulesPath)
+        gui_modules_path = os.path.join(MAIN_MODULES_FOLDER, "gui_modules")
+        sys.path.append(gui_modules_path)
         gui = None
         splitGUIString = self.GUIString.split(":")
 
-        GUIModuleId = splitGUIString[0]
+        gui_module_id = splitGUIString[0]
         if len(splitGUIString) > 1:
             subtypeId = splitGUIString[1]
         else:
             subtypeId = None
 
-        if GUIModuleId == "GTK":
-            gui = self._loadModule("gui_gtk", "gui")
-        elif GUIModuleId == "QML":
-            gui = self._loadModule("gui_qml", "gui")
-        elif GUIModuleId == "QT5":
-            gui = self._loadModule("gui_qt5", "gui")
+        if gui_module_id == "GTK":
+            gui = self._load_module("gui_gtk", "gui")
+        elif gui_module_id == "QML":
+            gui = self._load_module("gui_qml", "gui")
+        elif gui_module_id == "QT5":
+            gui = self._load_module("gui_qt5", "gui")
 
         # make device module available to the GUI module
         if gui:
@@ -338,22 +338,22 @@ class ModRana(object):
             gui.dmod = self.dmod
         self.gui = gui
 
-    def _loadModules(self):
+    def _load_modules(self):
         """Load all "normal" (other than device & GUI) modules."""
 
         log.info("importing modules:")
         start_time = time.clock()
 
-        # make shortcut for the loadModule function
-        loadModule = self._loadModule
+        # make shortcut for the load_module function
+        load_module = self._load_module
 
         # get possible module names
-        moduleNames = self._getModuleNamesFromFolder(MAIN_MODULES_FOLDER)
+        module_names = self._get_module_names_from_folder(MAIN_MODULES_FOLDER)
         # load if possible
-        for moduleName in moduleNames:
+        for module_name in module_names:
             # filter out .py
-            moduleName = moduleName.split('.')[0]
-            loadModule(moduleName, moduleName[4:])
+            module_name = module_name.split('.')[0]
+            load_module(module_name, module_name[4:])
 
         log.info("Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start_time)))
         self.addTime("all modules loaded")
@@ -364,21 +364,21 @@ class ModRana(object):
             m.dmod = self.dmod
 
             # run what needs to be done before firstTime is called
-        self._modulesLoadedPreFirstTime()
+        self._modules_loaded_pre_first_time()
 
         start_time = time.clock()
         for m in self.m.values():
             m.firstTime()
 
         # run what needs to be done after firstTime is called
-        self._modulesLoadedPostFirstTime()
+        self._modules_loaded_post_first_time()
 
         log.info( "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start_time)) )
 
         # add last timing checkpoint
         self.addTime("all modules initialized")
 
-    def _getModuleNamesFromFolder(self, folder, prefix='mod_'):
+    def _get_module_names_from_folder(self, folder, prefix='mod_'):
         """List a given folder and find all possible module names.
 
         Module names:
@@ -399,34 +399,34 @@ class ModRana(object):
             # if we are running from qrc, we need to use the pyotherside function for enumerating
             # the modules stored in the qrc "bundle"
             import pyotherside
-            moduleNames = filter(
+            module_names = filter(
                 lambda x: x[0:len(prefix)] == prefix, pyotherside.qrc_list_dir(os.path.join("/", folder))
             )
         else:
-            moduleNames = filter(
+            module_names = filter(
                 lambda x: x[0:len(prefix)] == prefix, os.listdir(folder)
             )
 
         # remove the extension
-        moduleNames = map(lambda x: os.path.splitext(x)[0], moduleNames)
+        module_names = map(lambda x: os.path.splitext(x)[0], module_names)
         # return a set of unique module names
         # * like this, two module names will not be returned if there are
         # both py and pyc files
-        return set(moduleNames)
+        return set(module_names)
 
-    def _listAvailableDeviceModulesByID(self):
-        moduleNames = self._getModuleNamesFromFolder(DEVICE_MODULES_FOLDER, prefix='device_')
+    def _list_available_device_modules_by_id(self):
+        module_names = self._get_module_names_from_folder(DEVICE_MODULES_FOLDER, prefix='device_')
         # remove the device_ prefix and return the results
-        # NOTE: .py, .pyc & .pyo should be removed already in _getModuleNamesFromFolder()
+        # NOTE: .py, .pyc & .pyo should be removed already in _get_module_names_from_folder()
         # also sort the module names alphabetically
-        return sorted(map(lambda x: x[7:], moduleNames))
+        return sorted(map(lambda x: x[7:], module_names))
 
-    def _listAvailableGUIModulesByID(self):
-        return self._getModuleNamesFromFolder(GUI_MODULES_FOLDER)
+    def _list_available_gui_modules_by_id(self):
+        return self._get_module_names_from_folder(GUI_MODULES_FOLDER)
 
-    def _loadModule(self, importName, moduleName):
+    def _load_module(self, importName, moduleName):
         """Load a single module by name from path."""
-        startM = time.clock()
+        start_m = time.clock()
         fp = None
         try:
             if USING_QRC:
@@ -443,7 +443,7 @@ class ModRana(object):
             log.info(" * %s: %s (%1.2f ms)",
                      moduleName,
                      self.m[moduleName].__doc__,
-                     (1000 * (time.clock() - startM))
+                     (1000 * (time.clock() - start_m))
                      )
             return module
         except Exception:
@@ -453,7 +453,7 @@ class ModRana(object):
             if fp:
                 fp.close()
 
-    def _optionsLoaded(self):
+    def _options_loaded(self):
         """This is run after the persistent options dictionary is loaded from storage."""
         # tell the log manager what where it should store log files
         modrana_log.log_manager.log_folder_path = self.paths.getLogFolderPath()
@@ -469,9 +469,9 @@ class ModRana(object):
 
         # add a watch on the loggingStatus key, so that log file can be enabled
         # and disabled at runtime with immediate effect
-        self.watch("loggingStatus", self._logFileCB)
+        self.watch("loggingStatus", self._log_file_cb)
 
-    def _logFileCB(self, _key, _oldValue, newValue):
+    def _log_file_cb(self, _key, _oldValue, newValue):
         """Convenience function turning the log file on or off."""
         if newValue:
             logCompression = self.get('compressLogFile', False)
@@ -479,11 +479,11 @@ class ModRana(object):
         else:
             modrana_log.log_manager.disable_log_file()
 
-    def _modulesLoadedPreFirstTime(self):
+    def _modules_loaded_pre_first_time(self):
         """This is run after all the modules have been loaded, but before their first time is called."""
 
         # and mode change
-        self.watch('mode', self._modeChangedCB)
+        self.watch('mode', self._mode_changed_cb)
         # cache key modifiers
         self.keyModifiers = self.d.get('keyModifiers', {})
         # check if own Quit button is needed
@@ -492,7 +492,7 @@ class ModRana(object):
             if menus:
                 menus.addItem('main', 'Quit', 'quit', 'menu:askQuit')
 
-    def _modulesLoadedPostFirstTime(self):
+    def _modules_loaded_post_first_time(self):
         """This is run after all the modules have been loaded, after before their first time is called."""
 
         # check if redrawing time should be logged
@@ -515,7 +515,7 @@ class ModRana(object):
 
     ## STARTUP AND SHUTDOWN ##
 
-    def _startupDone(self):
+    def _startup_done(self):
         """Called when startup has been finished."""
 
         # report startup time
@@ -536,7 +536,7 @@ class ModRana(object):
             m.shutdown()
         # trigger the shutdown signal
         self.shutdown_signal()
-        self._saveOptions()
+        self._save_options()
         modrana_log.log_manager.disable_log_file()
         log.info("Shutdown complete (%s)" % utils.get_elapsed_time_string(start_timestamp))
 
@@ -586,7 +586,7 @@ class ModRana(object):
         else:  # just save to the key as usual
             self.d[name] = value
 
-        self._notifyWatcher(name, oldValue)
+        self._notify_watcher(name, oldValue)
         # options are normally saved on shutdown,
         # but for some data we want to make sure they are stored and not
         # lost for example because of power outage/empty battery, etc.
@@ -615,7 +615,7 @@ class ModRana(object):
                 multiKey = "%s#multi" % key
                 if multiKey in self.d:
                     del self.d[multiKey]
-            self._notifyWatcher(key, oldValue)
+            self._notify_watcher(key, oldValue)
             return True
         else:
             log.error("can't purge a not-present key: %s", key)
@@ -630,29 +630,29 @@ class ModRana(object):
         NOTE: watch ids should be >0, so that they evaluate as True
         """
         if not args: args = []
-        nrId = self.maxWatchId + 1
-        id = "%d_%s" % (nrId, key)
-        self.maxWatchId = nrId  # TODO: recycle ids ? (alla PID)
+        nr_id = self.maxWatchId + 1
+        index = "%d_%s" % (nr_id, key)
+        self.maxWatchId = nr_id  # TODO: recycle ids ? (alla PID)
         if key not in self.watches:
             self.watches[key] = []  # create the initial list
-        self.watches[key].append((id, callback, args))
+        self.watches[key].append((index, callback, args))
         # should we now run the callback one ?
         # -> this is useful for modules that configure
         # themselves according to an options value at startup
         if runNow:
             currentValue = self.get(key, None)
             callback(key, currentValue, currentValue, *args)
-        return id
+        return index
 
     def removeWatch(self, id):
         """Remove watch specified by the given watch id."""
-        (nrId, key) = id.split('_')
+        (nr_id, key) = id.split('_')
         if key in self.watches:
             remove = lambda x: x[0] == id
             self.watches[key][:] = [x for x in self.watches[key] if not remove(x)]
         log.error("can't remove watch - key does not exist, watchId: %s", id)
 
-    def _notifyWatcher(self, key, oldValue):
+    def _notify_watcher(self, key, oldValue):
         """Run callbacks registered on an options key.
 
         HOW IT WORKS:
@@ -684,10 +684,10 @@ class ModRana(object):
         # remember the old value, if not se use default from options
         # if available
         if options:
-            defaultValue = options.getKeyDefault(key, None)
+            default_value = options.getKeyDefault(key, None)
         else:
-            defaultValue = None
-        oldValue = self.get(key, defaultValue)
+            default_value = None
+        oldValue = self.get(key, default_value)
         if mode is None:
             mode = self.d.get('mode', 'car')
         if key not in self.keyModifiers.keys():  # initialize
@@ -696,19 +696,19 @@ class ModRana(object):
             self.keyModifiers[key]['modes'][mode] = modifier
 
         # make sure the multi mode dictionary exists
-        multiKey = '%s#multi' % key
-        multiDict = self.d.get(multiKey, {})
-        self.d[multiKey] = multiDict
+        multi_key = '%s#multi' % key
+        multi_dict = self.d.get(multi_key, {})
+        self.d[multi_key] = multi_dict
 
         # if the modifier is set for the first time,
         # do we copy the value from the normal key or not ?
         if copyInitialValue:
             # check if the key is unset for this mode
-            if mode not in multiDict:
+            if mode not in multi_dict:
                 # set for first time, copy value
-                self.set(key, self.d.get(key, defaultValue), mode=mode)
+                self.set(key, self.d.get(key, default_value), mode=mode)
                 # notify watchers
-        self._notifyWatcher(key, oldValue)
+        self._notify_watcher(key, oldValue)
 
     def removeKeyModifier(self, key, mode=None):
         """Remove key modifier.
@@ -738,7 +738,7 @@ class ModRana(object):
                     # TODO: handle non-mode modifiers in the future
                     del self.keyModifiers[key]
                     # notify watchers
-                self._notifyWatcher(key, oldValue)
+                self._notify_watcher(key, oldValue)
                 # done
                 return True
             else:
@@ -804,7 +804,7 @@ class ModRana(object):
             log.error('mode %s does not exist and thus has no label' % modeName)
             return None
 
-    def _modeChangedCB(self, key=None, oldMode=None, newMode=None):
+    def _mode_changed_cb(self, key=None, oldMode=None, newMode=None):
         """Handle mode change in regards to key modifiers and option key watchers."""
 
         # get keys that have both a key modifier and a watcher
@@ -828,9 +828,9 @@ class ModRana(object):
                 defaultValue = None
             oldValue = self.get(key, defaultValue)
             # notify watchers
-            self._notifyWatcher(key, oldValue)
+            self._notify_watcher(key, oldValue)
 
-    def _removeNonPersistentOptions(self, inputDict):
+    def _remove_non_persistent_options(self, inputDict):
         """Keys that begin with # are not saved.
 
         (They mostly contain data that is either time sensitive or is
@@ -844,14 +844,14 @@ class ModRana(object):
             log.exception('options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1')
             return self.d
 
-    def _saveOptions(self):
+    def _save_options(self):
         """Save the persistent dictionary to file."""
         log.info("saving options")
         try:
             f = open(self.paths.getOptionsFilePath(), "wb")
             # remove keys marked as nonpersistent
             self.d['keyModifiers'] = self.keyModifiers
-            d = self._removeNonPersistentOptions(self.d)
+            d = self._remove_non_persistent_options(self.d)
             marshal.dump(d, f, 2)
             f.close()
             log.info("options successfully saved")
@@ -860,7 +860,7 @@ class ModRana(object):
         except Exception:
             log.exception("saving options failed")
 
-    def _loadOptions(self):
+    def _load_options(self):
         """Load the persistent dictionary from file."""
         log.info("loading options")
         try:
@@ -943,17 +943,17 @@ class ModRana(object):
                 log.info("# device: %s (%s)" % (deviceName, deviceString))
 
             tl = self.timing
-            startupTime = tl[0][1] * 1000
-            lastTime = startupTime
-            totalTime = (tl[-1][1] * 1000) - startupTime
+            startup_time = tl[0][1] * 1000
+            last_time = startup_time
+            total_time = (tl[-1][1] * 1000) - startup_time
             for i in tl:
                 (message, t) = i
                 t *= 1000  # convert to ms
-                timeSpent = t - lastTime
-                timeSinceStart = t - startupTime
-                log.info("* %s (%1.0f ms), %1.0f/%1.0f ms", message, timeSpent, timeSinceStart, totalTime)
-                lastTime = t
-            log.info("** whole startup: %1.0f ms **" % totalTime)
+                timeSpent = t - last_time
+                timeSinceStart = t - startup_time
+                log.info("* %s (%1.0f ms), %1.0f/%1.0f ms", message, timeSpent, timeSinceStart, total_time)
+                last_time = t
+            log.info("** whole startup: %1.0f ms **" % total_time)
         else:
             log.info("* timing list empty *")
 

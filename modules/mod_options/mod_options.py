@@ -1207,7 +1207,7 @@ class Options(RanaModule):
                 newIndex = index + 1
                 self.options[menuName][1] = newIndex
         elif message == "save":
-            self.modrana._saveOptions()
+            self.modrana._save_options()
 
         elif messageType == 'ml' and message == "go2ItemToolsMenu":
             (groupID, index, key) = args
