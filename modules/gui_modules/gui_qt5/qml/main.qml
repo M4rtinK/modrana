@@ -437,7 +437,7 @@ ApplicationWindow {
         }
         rWin.log.info('starting the modRana Python core')
         // start modRana
-        python.call('modrana.start', [argv], rWin.__init__)
+        python.call('modrana.start', [argv, true], rWin.__init__)
     }
 
     function __init__() {

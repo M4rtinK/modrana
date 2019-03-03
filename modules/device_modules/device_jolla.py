@@ -157,3 +157,14 @@ class Jolla(DeviceModule):
         if os.path.isfile(self.monav_light_binary_path):
             providers.append(constants.ROUTING_PROVIDER_MONAV_LIGHT)
         return providers
+
+    @property
+    def universal_components_backend(self):
+        """Path to a Universal Components backend suitable for the given platform.
+
+        We default to the Silica UC backend on Sailfish OS
+
+        :returns: path to suitable UC backend
+        :rtype: str
+        """
+        return "silica"

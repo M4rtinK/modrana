@@ -105,6 +105,8 @@ class ModRana(object):
     This is THE main modRana class.
     """
 
+    qt5_gui_running = False
+
     def __init__(self):
         singleton.modrana = self
 
@@ -316,27 +318,36 @@ class ModRana(object):
         # add the GUI module folder to path
         gui_modules_path = os.path.join(MAIN_MODULES_FOLDER, "gui_modules")
         sys.path.append(gui_modules_path)
-        gui = None
-        splitGUIString = self.GUIString.split(":")
+        gui_module = None
+        split_gui_string = self.GUIString.split(":")
 
-        gui_module_id = splitGUIString[0]
-        if len(splitGUIString) > 1:
-            subtypeId = splitGUIString[1]
+        gui_module_id = split_gui_string[0]
+        if len(split_gui_string) > 1:
+            subtypeId = split_gui_string[1]
         else:
             subtypeId = None
 
         if gui_module_id == "GTK":
-            gui = self._load_module("gui_gtk", "gui")
+            gui_module = self._load_module("gui_gtk", "gui")
         elif gui_module_id == "QML":
-            gui = self._load_module("gui_qml", "gui")
+            gui_module = self._load_module("gui_qml", "gui")
         elif gui_module_id == "QT5":
-            gui = self._load_module("gui_qt5", "gui")
+            # The QML part is not yet running, start it now
+            # and the Python backend will re-initialized
+            # from the QML side.
+            if not self.qt5_gui_running:
+                self._start_qt5_gui()
+                # This means the actual application run exited,
+                # so exit as well.
+                exit(0)
+            else:
+                gui_module = self._load_module("gui_qt5", "gui")
 
         # make device module available to the GUI module
-        if gui:
-            gui.setSubtypeId(subtypeId)
-            gui.dmod = self.dmod
-        self.gui = gui
+        if gui_module:
+            gui_module.setSubtypeId(subtypeId)
+            gui_module.dmod = self.dmod
+        self.gui = gui_module
 
     def _load_modules(self):
         """Load all "normal" (other than device & GUI) modules."""
@@ -527,6 +538,31 @@ class ModRana(object):
 
         # start the mainloop or equivalent
         self.gui.startMainLoop()
+
+    def _start_qt5_gui(self):
+        """Start the Qt 5 GUI.
+
+        This is actually a bit crazy as we basically start main.qml in qmlscene
+        and then exit - qmlscene then initializes the QtQuick 2 GUI, which
+        then instantiates the modRana class *again*, just without it
+        starting qmlscene again.
+
+        The qt5_gui_running class attribute is used during this to protect against
+        an infinite loop.
+        """
+
+        qml_main = "modules/gui_modules/gui_qt5/qml/main.qml"
+        # path to the component set
+        universal_components_path = "modules/gui_modules/gui_qt5/qml/universal_components/%s" % self.dmod.universal_components_backend
+
+        command = "%s %s -I %s" % (self.dmod.qmlscene_command,
+                                   qml_main,
+                                   universal_components_path)
+        log.debug("starting Qt 5 GUI process: %s" % command)
+        try:
+            subprocess.call(command, shell=True)
+        except:
+            log.exception("failed to start Qt 5 GUI process")
 
     def shutdown(self):
         """Start shutdown cleanup and stop GUI main loop when finished."""
@@ -962,7 +998,7 @@ dmod = None
 gui = None
 
 
-def start(argv=None):
+def start(argv=None, from_qml=False):
     """This function is used when starting modRana with PyOtherSide.
 
     When modRana is started from PyOtherSide there is no sys.argv,
@@ -981,6 +1017,10 @@ def start(argv=None):
     if argv:
         sys.argv.extend(argv)
         log.debug("full argv:\n%s", sys.argv)
+
+    # record if QML part is already running
+    if from_qml:
+        ModRana.qt5_gui_running = True
 
     global modrana
     global dmod
