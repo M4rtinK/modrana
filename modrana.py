@@ -327,9 +327,9 @@ class ModRana(object):
         else:
             subtypeId = None
 
-        if gui_module_id == "GTK":
+        if gui_module_id.upper() == "GTK":
             gui_module = self._load_module("gui_gtk", "gui")
-        elif gui_module_id == "QT5":
+        elif gui_module_id.lower() == "qt5":
             # The QML part is not yet running, start it now
             # and the Python backend will re-initialized
             # from the QML side.
