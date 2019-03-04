@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
-# A Neo FreeRunner modRana device-specific module.
-# It is a basic modRana module, that has some special features
-# and is loaded only on the correpsponding device.
+# An Android device-specific module.
 #----------------------------------------------------------------------------
 # Copyright 2010, Martin Kolman
 #
