@@ -419,7 +419,7 @@ class LoadTracklogs(RanaModule):
             track = gpx.Trackpoints()  # create new Trackpoints object
             # lets assume we have only GPX 1.1 files TODO: 1.1 and 1.0
             try:
-                track.import_locations(file, "1.1")  # load a gpx file into it
+                track.import_locations(file)  # load a gpx file into it
             except Exception:
                 self.log.exception("loading tracklog failed")
                 if notify:
