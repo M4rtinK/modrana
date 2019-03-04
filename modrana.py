@@ -257,7 +257,7 @@ class ModRana(object):
             # try to auto-detect the current device
             from core import platform_detection
 
-            device = platform_detection.getBestDeviceModuleId()
+            device = platform_detection.get_best_device_module_id()
 
         device = device.lower()  # convert to lowercase
 

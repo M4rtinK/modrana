@@ -1,6 +1,5 @@
 # modRana current-platform detection
 import os
-import sys
 
 from core import qrc
 
@@ -10,7 +9,7 @@ DEFAULT_GUI_MODULE_ID = "GTK"
 import logging
 log = logging.getLogger("core.platform_detection")
 
-def getBestDeviceModuleId():
+def get_best_device_module_id():
     log.info("** detecting current device **")
 
     result = _check()
@@ -25,7 +24,7 @@ def getBestDeviceModuleId():
     return deviceModuleId
 
 
-def getBestGUIModuleId():
+def get_best_gui_module_id():
     return DEFAULT_GUI_MODULE_ID
 
 
@@ -54,10 +53,6 @@ def _check():
     if ("i686" in arch) or ("x86_64" in arch):
         log.info("* PC detected")
         return "pc" # we are most probably on a PC
-    if sys.platform == "qnx6":
-        log.info("* BlackBerry 10 device detected")
-        return "bb10"
-
 
     # check procFS
     if os.path.exists("/proc/cpuinfo"):
@@ -67,26 +62,16 @@ def _check():
         if "Nokia RX-51" in cpuinfo: # N900
             log.info("* Nokia N900 detected")
             return "n900"
-        # N9 and N950 share the same device module
-        elif "Nokia RM-680" in cpuinfo: # N950
-            log.info("* Nokia N950 detected")
-            return "n9"
-        elif "Nokia RM-696" in cpuinfo: # N9
-            log.info("* Nokia N9 detected")
-            return "n9"
-        elif "GTA02" in cpuinfo: # N9
-            log.info("* Neo FreeRunner GTA02 detected")
-            return "neo"
 
     # check lsb_release
     try:
         proc = subprocess.Popen(['lsb_release', '-s', '-i'],
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
-        distributionId = proc.communicate()[0].decode("utf-8").lower().strip()
-        log.info("lsb_release distro id: %s ", distributionId)
+        distribution_id = proc.communicate()[0].decode("utf-8").lower().strip()
+        log.info("lsb_release distro id: %s ", distribution_id)
         # import pdb; pdb.set_trace()
-        if distributionId == 'mer':
+        if distribution_id == 'mer':
             # TODO: could be also Nemo mobile or other Mer based distro,
             # we should probably discern those two in the future
             log.info("* Jolla (or other Mer based device) detected")
