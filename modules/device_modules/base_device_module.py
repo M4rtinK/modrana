@@ -37,7 +37,8 @@ class DeviceModule(RanaModule):
         RanaModule.__init__(self, *args, **kwargs)
         self.internetConnectivityChanged = Signal()
 
-    def getDeviceIDString(self):
+    @property
+    def device_id(self):
         """
         return an unique string identifying the device module
         """

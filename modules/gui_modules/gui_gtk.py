@@ -79,7 +79,7 @@ class GTKGUI(GUIModule):
 
         # when on N900, use a hildon StackableWindow, which
         # enables app menu and other features on Maemo 5
-        if self.modrana.dmod.getDeviceIDString() == 'n900':
+        if self.modrana.dmod.device_id == 'n900':
             try:
                 import hildon
 

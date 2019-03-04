@@ -975,7 +975,7 @@ class ModRana(object):
             # log device identificator and name
             if self.dmod:
                 deviceName = self.dmod.getDeviceName()
-                deviceString = self.dmod.getDeviceIDString()
+                deviceString = self.dmod.device_id
                 log.info("# device: %s (%s)" % (deviceName, deviceString))
 
             tl = self.timing

@@ -312,7 +312,7 @@ class Paths(object):
 
     def getMonavServerBinaryPath(self):
         arch = None
-        deviceID = self.modrana.dmod.getDeviceIDString()
+        deviceID = self.modrana.dmod.device_id
         if deviceID == 'n900':
             arch = 'armv7'
         elif deviceID == 'pc':

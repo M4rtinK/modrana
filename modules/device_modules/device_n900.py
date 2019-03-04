@@ -165,7 +165,8 @@ class DeviceN900(DeviceModule):
         elif message == 'updateKeys':
             self._updateVolumeKeys()
 
-    def getDeviceIDString(self):
+    @property
+    def device_id(self):
         return "n900"
 
     def getDeviceName(self):

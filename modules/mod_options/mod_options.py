@@ -970,7 +970,7 @@ class Options(RanaModule):
         if self.dmod.getLocationType() == 'gpsd':
             knots = "knots per second"
             meters = "meters per second"
-            if self.dmod.getDeviceIDString() == 'neo':
+            if self.dmod.device_id == 'neo':
                 knots = "knots per second (old SHR)"
                 meters = "meters per second (new SHR)"
             addOpt("GPSD reports speed in", "gpsdSpeedUnit",

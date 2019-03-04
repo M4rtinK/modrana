@@ -277,7 +277,7 @@ class GUIModule(RanaModule):
         return style
 
     def getConstants(self):
-        if self.modrana.dmod.getDeviceIDString() == "jolla":
+        if self.modrana.dmod.device_id == "jolla":
             defaultTheme = "silica"
         else:
             defaultTheme = "default"

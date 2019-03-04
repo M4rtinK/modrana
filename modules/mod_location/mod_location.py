@@ -192,7 +192,7 @@ class Location(RanaModule):
                     # type is used
                     self.log.info("enabling device module location")
                     self.modrana.dmod.startLocation(startMainLoop=startMainLoop)
-            elif gs.GUIString == "qt5" and self.modrana.dmod.getDeviceIDString() != "pc":
+            elif gs.GUIString == "qt5" and self.modrana.dmod.device_id != "pc":
                 self.log.info("location is handled by Qt5 when using Qt5 GUI")
             elif self.provider:
                 self.log.info("enabling location")

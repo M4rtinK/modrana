@@ -33,7 +33,8 @@ class DeviceNetbook(DeviceModule):
     def __init__(self, *args, **kwargs):
         DeviceModule.__init__(self, *args, **kwargs)
 
-    def getDeviceIDString(self):
+    @property
+    def device_id(self):
         return "netbook"
 
     def getDeviceName(self):

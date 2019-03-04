@@ -48,7 +48,8 @@ class DeviceNemo(DeviceModule):
         # create the screen-saver controller
         self.qScreenSaver = QSystemScreenSaver()
 
-    def getDeviceIDString(self):
+    @property
+    def device_id(self):
         return "nemo"
 
     def getDeviceName(self):

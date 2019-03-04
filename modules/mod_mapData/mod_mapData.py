@@ -734,7 +734,7 @@ class MapData(RanaModule):
         # this currently happens only on the N900, not on PC (or I was simply not able to to reproduce it)
         # therefore, when on N900 with sqlite tile storage, use only simple single-threaded download
 
-        #      if self.dmod.getDeviceIDString() == 'n900':
+        #      if self.dmod.device_id == 'n900':
         #        storageType = self.get('tileStorageType', None)
         #        if storageType=='sqlite':
         #          mode='singleThreaded'

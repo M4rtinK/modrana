@@ -76,7 +76,7 @@ class StoreTiles(RanaModule):
         self._primary_tile_storage_type = constants.DEFAULT_TILE_STORAGE_TYPE
         self._stores = FlexibleDefaultDict(factory=self._get_existing_stores_for_layer)
 
-        self._prevent_media_indexing = self.dmod.getDeviceIDString() == "android"
+        self._prevent_media_indexing = self.dmod.device_id == "android"
 
         # the tile loading debug log function is no-op by default, but can be
         # redirected to the normal debug log by setting the "tileLoadingDebug"

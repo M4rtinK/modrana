@@ -145,7 +145,7 @@ class Voice(RanaModule):
 
         # temporary hack to get some TTS output from espaek,
         # to be replaced by TTS handling code from Rinigius
-        elif self.dmod.getDeviceIDString() == "jolla":
+        elif self.dmod.device_id == "jolla":
             languageParam = '-v%s' % languageCode
             args = "espeak --stdout %s -s 120 -a %s -m '%s' | gst-launch-1.0 -v fdsrc ! wavparse ! audioconvert ! autoaudiosink > /dev/null" % (languageParam, volume, message)
             self.espaekProcess = self._start_espeak_subprocess(args, shell=True)

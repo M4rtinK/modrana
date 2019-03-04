@@ -434,7 +434,7 @@ class Platform(QtCore.QObject):
         Hopefully, this can be removed once the themes are in better shape.
         """
         # the Fremantle theme is incomplete
-        return self.modrana.dmod.getDeviceIDString() == "n900"
+        return self.modrana.dmod.device_id == "n900"
 
 
 class Modules(QtCore.QObject):

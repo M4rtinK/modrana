@@ -41,7 +41,8 @@ class Android(DeviceModule):
         DeviceModule.__init__(self, *args, **kwargs)
         self.tempUnfullscreen = False
 
-    def getDeviceIDString(self):
+    @property
+    def device_id(self):
         return "android"
 
     def getDeviceName(self):

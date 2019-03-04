@@ -44,7 +44,8 @@ class Jolla(DeviceModule):
         # override the default profile name to harbour-modrana
         paths.setProfileName(SAILFISH_MODRANA_PROFILE_NAME)
 
-    def getDeviceIDString(self):
+    @property
+    def device_id(self):
         return "jolla"
 
     def getDeviceName(self):
