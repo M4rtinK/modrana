@@ -147,7 +147,7 @@ class ClickHandler(RanaModule):
                     self.modrana.gui.lockDrag()
                     self._messages.routeMessage(action)
                     self.set('needRedraw', True)
-                    self.ignoreNextClicks = self.dmod.lpSkipCount()
+                    self.ignoreNextClicks = self.dmod.long_press_click_skip_count
         return hit
 
     def registerDraggable(self, x1, y1, x2, y2, module):

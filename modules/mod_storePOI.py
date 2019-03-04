@@ -48,7 +48,7 @@ class StorePOI(RanaModule):
 
     def connect_to_database(self):
         """Connect to the POI database"""
-        db_path = self.modrana.paths.getPOIDatabasePath()
+        db_path = self.modrana.paths.poi_database_path
         return POIDatabase(db_path=db_path)
 
     def getEmptyPOI(self):
@@ -154,7 +154,7 @@ class StorePOI(RanaModule):
     def _dump_to_CSV(self):
         """Dump the database content as a CSV file"""
         units = self.m.get('units', None)
-        POIFolderPath = self.modrana.paths.getPOIFolderPath()
+        POIFolderPath = self.modrana.paths.poi_folder_path
         self.sendMessage('ml:notification:m:POI export starting;5')
         if units and self.db:
             try:

@@ -37,17 +37,22 @@ class DeviceNetbook(DeviceModule):
     def device_id(self):
         return "netbook"
 
-    def getDeviceName(self):
+    @property
+    def device_name(self):
         return "A generic netbook"
 
-    def getWinWH(self):
+    @property
+    def window_wh(self):
         return 1024, 600
 
-    def startInFullscreen(self):
+    @property
+    def start_in_fullscreen(self):
         return False
 
-    def getSupportedGUIModuleIds(self):
+    @property
+    def supported_gui_module_ids(self):
         return ["GTK", "QML"]
 
-    def getDeviceType(self):
+    @property
+    def device_type(self):
         return DEVICE_TYPE_DESKTOP

@@ -192,7 +192,7 @@ class GUIModule(RanaModule):
         screenWH = self.getScreenWH()
         if screenWH:
             size = max(screenWH)
-            deviceType = self.modrana.dmod.getDeviceType()
+            deviceType = self.modrana.dmod.device_type
             if size > 854 and deviceType == constants.DEVICE_TYPE_SMARTPHONE:
                 # high DPI smartphone
                 return True
@@ -334,9 +334,9 @@ class GUIModule(RanaModule):
         :rtype: bool
         """
         return any(
-            (self.modrana.dmod.startInFullscreen(),
+            (self.modrana.dmod.start_in_fullscreen,
                self.modrana.args.fullscreen,
-               self.get("startInFullscreen", False))
+               self.get("start_in_fullscreen", False))
         )
 
     def showQuitButton(self):
@@ -347,4 +347,4 @@ class GUIModule(RanaModule):
         :returns: if GUI should show quit button or not
         :rtype: bool
         """
-        return any((self.dmod.needsQuitButton(), self.get("showQuitButton", False)))
+        return any((self.dmod.needs_quit_button, self.get("showQuitButton", False)))

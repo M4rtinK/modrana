@@ -92,7 +92,7 @@ class LoadTracklogs(RanaModule):
 
         Also assure the patch exists before returning it.
         """
-        tracklogFolderPath = self.modrana.paths.getTracklogsFolderPath()
+        tracklogFolderPath = self.modrana.paths.tracklog_folder_path
         if tracklogFolderPath is None:
             self.log.error("can't get tracklog sub path - tracklog folder path is unknown")
             return None  # tracklog folder path is unknown
@@ -111,7 +111,7 @@ class LoadTracklogs(RanaModule):
         self._get_tf_sub_path("misc")
         # if there is no example folder, create it
         # and copy example tracklogs into it
-        tfp = self.modrana.paths.getTracklogsFolderPath()
+        tfp = self.modrana.paths.tracklog_folder_path
         examplesDestinationPath = os.path.join(tfp, 'examples')
         if not os.path.exists(examplesDestinationPath):
             utils.create_folder_path(examplesDestinationPath)
@@ -156,7 +156,7 @@ class LoadTracklogs(RanaModule):
             del self.cache[tracklogFile]
 
     def get_tracklog_cache_path(self):
-        return os.path.join(self.modrana.paths.getCacheFolderPath(), 'tracklog_cache.txt')
+        return os.path.join(self.modrana.paths.cache_folder_path, 'tracklog_cache.txt')
 
     # active tracklog
 
@@ -226,7 +226,7 @@ class LoadTracklogs(RanaModule):
     def list_available_tracklogs(self):
         self.log.info("** making a list of available tracklogs")
 
-        tf = self.modrana.paths.getTracklogsFolderPath()
+        tf = self.modrana.paths.tracklog_folder_path
         # does the tracklog folder exist ?
         if tf is None or not os.path.exists(tf):
             return  # no tracklog folder, nothing to list
@@ -264,7 +264,7 @@ class LoadTracklogs(RanaModule):
         self._category_list = currentFolders
 
         self.log.info("*  using this tracklog folder:")
-        self.log.info("* %s" % self.modrana.paths.getTracklogsFolderPath())
+        self.log.info("* %s" % self.modrana.paths.tracklog_folder_path)
         self.log.info("*  there are %d tracklogs available" % len(availableFiles))
         self.log.info("**")
         self._tracklog_path_list = pathList
@@ -280,7 +280,7 @@ class LoadTracklogs(RanaModule):
         # get dictionary describing tracklog categories
         category_dict_list = []
 
-        tracklog_folder = self.modrana.paths.getTracklogsFolderPath()
+        tracklog_folder = self.modrana.paths.tracklog_folder_path
         for category in self.get_category_list():
             tracklog_count = 0
             for item in os.listdir(os.path.join(tracklog_folder, category)):
@@ -466,7 +466,7 @@ class LoadTracklogs(RanaModule):
 
     def store_tracklog(self, tracklog, filename, cat, type, refresh="True"):
         """Store tracklog and return the resulting path."""
-        folder = self.modrana.paths.getTracklogsFolderPath()
+        folder = self.modrana.paths.tracklog_folder_path
         if folder is None:
             self.log.error("can't store tracklog - path to tracklog folder is unknown or unusable")
             return None

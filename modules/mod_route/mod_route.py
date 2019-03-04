@@ -472,7 +472,7 @@ class Route(RanaModule):
                     )
                 else:
                     provider = routing_providers.MonavServerRouting(
-                        monav_server_executable_path=self.modrana.paths.getMonavServerBinaryPath(),
+                        monav_server_executable_path=self.modrana.paths.monav_server_binary_path,
                         monav_data_path = self._get_monav_data_path()
                     )
                 self._offline_routing_provider = provider
@@ -644,7 +644,7 @@ class Route(RanaModule):
             """
             # basically just list all directories in the Monav data folder
             try:
-                main_monav_folder = self.modrana.paths.getMonavDataPath()
+                main_monav_folder = self.modrana.paths.monav_data_path
                 data_packs = os.listdir(main_monav_folder)
                 data_packs = filter(lambda x: os.path.isdir(os.path.join(main_monav_folder, x)), data_packs)
                 return sorted(data_packs)
@@ -675,7 +675,7 @@ class Route(RanaModule):
                 pack_name = sorted(data_packs)[0]
                 self.log.info("monav: no preferred pack set, "
                       "using first available:\n%s", preferred_pack)
-            main_monav_folder = self.modrana.paths.getMonavDataPath()
+            main_monav_folder = self.modrana.paths.monav_data_path
             monav_data_folder = os.path.abspath(os.path.join(main_monav_folder, pack_name, sub_folder))
             self.log.info('Monav data folder:\n%s', monav_data_folder)
             return monav_data_folder
@@ -1273,7 +1273,7 @@ class Route(RanaModule):
     def _geocodeStartAndDestination(self):
         """Get the address of start and destination coordinates by using geocoding"""
         online_module = self.m.get('onlineServices', None)
-        connectivity = (self.modrana.dmod.connectivityStatus in (constants.ONLINE, constants.CONNECTIVITY_UNKNOWN))
+        connectivity = (self.modrana.dmod.connectivity_status in (constants.ONLINE, constants.CONNECTIVITY_UNKNOWN))
         if connectivity and online_module:
             # set that address lookups are in progress
             # (this function should be called from "inside" the address lookup lock)

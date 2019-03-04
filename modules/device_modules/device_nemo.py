@@ -52,63 +52,71 @@ class DeviceNemo(DeviceModule):
     def device_id(self):
         return "nemo"
 
-    def getDeviceName(self):
+    @property
+    def device_name(self):
         return "Nemo Mobile device"
 
-    def getWinWH(self):
+    @property
+    def window_wh(self):
         """N9/N950 screen resolution"""
         #TODO: handle different Nemo devices ?
         return 854, 480
 
-    def startInFullscreen(self):
+    @property
+    def start_in_fullscreen(self):
         """
         non-fullscreen mode just draw some weird toolbar & status-bar
         on Harmattan
         """
         return True
 
-    def fullscreenOnly(self):
+    @property
+    def fullscreen_only(self):
         """
         basically no need to
         """
         return True
 
-    def screenBlankingControlSupported(self):
+    @property
+    def screen_blanking_control_supported(self):
         """
         Screen blanking support is handled through Qt Mobility
         """
         return QTM_IMPORT_SUCCESS
 
-    def pauseScreenBlanking(self):
+    def pause_screen_blanking(self):
         """
         inhibit screen blanking
         """
         QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
 
-    def getSupportedGUIModuleIds(self):
+    @property
+    def supported_gui_module_ids(self):
         return ["QML:harmattan", "QML:indep"]
 
     # as python-qtmobility currently segfaults
     # when asked for location info,
     # use the default (GPSD = no position) for now
-    #  def getLocationType(self):
+    #  def location_type(self):
     #    return "qt_mobility"
 
-    def hasButtons(self):
+    @property
+    def has_buttons(self):
         # TODO: support for volume buttons
         return False
 
 
     # ** LOCATION **
 
-    def handlesLocation(self):
+    @property
+    def handles_location(self):
         """using Qt Mobility"""
         return False
 
-    def startLocation(self):
+    def start_location(self):
         pass
 
-    def stopLocation(self):
+    def stop_location(self):
         pass
 
 
@@ -117,11 +125,12 @@ class DeviceNemo(DeviceModule):
     # as nemo currently doesn't have a MyDocs partition or
     # equivalent, just use the default paths in ~/.modrana
 
-    def needsQuitButton(self):
+    @property
+    def needs_quit_button(self):
         """No need for a separate Quit button thanks to the Nemo UI"""
         return False
 
     @property
-    def getDeviceType(self):
+    def device_type(self):
         # TODO: amend once some Nemo tablets show up
         return DEVICE_TYPE_SMARTPHONE

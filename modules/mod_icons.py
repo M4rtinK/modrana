@@ -59,7 +59,7 @@ class Icons(RanaModule):
         self.defaultColors = {} # default color set
         self.colors = {} # main combined color set
         defaultThemeConfig = os.path.join(
-            self.modrana.paths.getThemesFolderPath(),
+            self.modrana.paths.themes_folder_path,
             self.defaultTheme,
             'theme.conf'
         )
@@ -583,11 +583,11 @@ class Icons(RanaModule):
 
     def getCurrentThemePath(self):
         """returns path to currently active theme"""
-        return os.path.join(self.modrana.paths.getThemesFolderPath(), self.currentTheme)
+        return os.path.join(self.modrana.paths.themes_folder_path, self.currentTheme)
 
     def getDefaultThemePath(self):
         """returns path to currently active theme"""
-        return os.path.join(self.modrana.paths.getThemesFolderPath(), self.defaultTheme)
+        return os.path.join(self.modrana.paths.themes_folder_path, self.defaultTheme)
 
     def switchTheme(self, newTheme):
         """switch the current theme to another one"""

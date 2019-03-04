@@ -75,7 +75,7 @@ class Notification(RanaModule):
             self.tasksChanged.connect(self._doRefresh)
             # we handle notification only with the GTK GUI and when the device module does not
             # support showing them
-            if not self.modrana.dmod.hasNotificationSupport():
+            if not self.modrana.dmod.has_custom_notification_support:
                 self.modrana.notificationTriggered.connect(self._startCustomNotificationCB)
 
     def _doRefresh(self, ignore):

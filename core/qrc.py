@@ -89,7 +89,7 @@ def handle_qrc():
         # configs should always remain as separate files due to easier
         # change management
         qrc_version = _get_qrc_version()
-        local_version = paths.getVersionString()
+        local_version = paths.get_version_string()
         log.debug("versions:")
         log.debug("qrc: %s", qrc_version)
         log.debug("local: %s", local_version)

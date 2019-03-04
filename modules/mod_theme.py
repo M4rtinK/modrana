@@ -68,12 +68,12 @@ class ThemeModule(RanaModule):
         return self._theme
 
     def _getThemesPath(self):
-        return self.modrana.paths.getThemesFolderPath()
+        return self.modrana.paths.themes_folder_path
 
     def _themeChangedCB(self, key, oldValue, newValue):
         """Triggered by theme change"""
         if newValue is None: # default theme
-            defaultThemeId, defaultThemeName = self.modrana.dmod.defaultTheme
+            defaultThemeId, defaultThemeName = self.modrana.dmod.default_theme
             self._theme = Theme(defaultThemeId, self._getThemesPath(), defaultThemeName)
         else: # set the new theme
             self._theme = Theme(newValue, self._getThemesPath())
@@ -84,9 +84,9 @@ class ThemeModule(RanaModule):
         :returns: a list of available theme ids
         :rtype: a list of strings
         """
-        rawFolderContent = utils.internal_listdir(self.modrana.paths.getThemesFolderPath())
+        rawFolderContent = utils.internal_listdir(self.modrana.paths.themes_folder_path)
         # append the full path and filter out all dot-folders, such as .svn, .git & co
-        themesFolderPath = self.modrana.paths.getThemesFolderPath()
+        themesFolderPath = self.modrana.paths.themes_folder_path
         return filter(
             lambda x: os.path.isdir(
                 os.path.join(themesFolderPath, x)) and not x.startswith('.'),

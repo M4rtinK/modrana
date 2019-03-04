@@ -42,53 +42,62 @@ class Jolla(DeviceModule):
         DeviceModule.__init__(self, *args, **kwargs)
 
         # override the default profile name to harbour-modrana
-        paths.setProfileName(SAILFISH_MODRANA_PROFILE_NAME)
+        paths.set_profile_name(SAILFISH_MODRANA_PROFILE_NAME)
 
     @property
     def device_id(self):
         return "jolla"
 
-    def getDeviceName(self):
+    @property
+    def device_name(self):
         return "Jolla"
 
-    def getWinWH(self):
+    @property
+    def window_wh(self):
         """Jolla screen resolution"""
         return 960, 540
 
-    def startInFullscreen(self):
+    @property
+    def start_in_fullscreen(self):
         """
         non-fullscreen mode just draw some weird toolbar & status-bar
         on Harmattan
         """
         return True
 
-    def fullscreenOnly(self):
+    @property
+    def fullscreen_only(self):
         """
         Applications running on Sailfish@Jolla are fullscreen only.
         """
         return True
 
-    def screenBlankingControlSupported(self):
+    @property
+    def screen_blanking_control_supported(self):
         """ Screen blanking is not supported yet,
         might need to be handled from the QML context
         """
         return False
 
-    def getSupportedGUIModuleIds(self):
+    @property
+    def supported_gui_module_ids(self):
         return ["Qt5"]
 
-    def getLocationType(self):
+    @property
+    def location_type(self):
         """Location data is obtained through the QML context."""
         return "QML"
 
-    def hasButtons(self):
+    @property
+    def has_buttons(self):
         # TODO: support for volume buttons
         return False
 
 
     # ** LOCATION **
 
-    def handlesLocation(self):
+    @property
+    def handles_location(self):
         """through QtPositioning in the GUI module"""
         return True
 
@@ -99,52 +108,61 @@ class Jolla(DeviceModule):
     # so that they are easily accessible to users
 
     @property
-    def profilePath(self):
-        return paths.getXDGConfigPath()
+    def profile_path(self):
+        return paths.get_xdg_config_path()
 
-    def getMapFolderPath(self):
-        return paths.getXDGMapFolderPath()
+    @property
+    def map_folder_path(self):
+        return paths.get_xdg_map_folder_path()
 
-    def getRoutingDataFolderPath(self):
-        return paths.getXDGRoutingDataPath()
+    @property
+    def routing_data_folder_path(self):
+        return paths.get_xdg_routing_data_path()
 
-    def getTracklogFolderPath(self):
+    @property
+    def tracklog_folder_path(self):
         """We have an option for making a symlink to the Documents folder,
         so the XDG path for the actual tracklog storage is fine.
         """
-        return paths.getXDGTracklogFolderPath()
-
-    def getPOIFolderPath(self):
-        return paths.getXDGPOIFolderPath()
-
-    def getLogFolderPath(self):
-        return os.path.join(paths.getHOMEPath(), "Documents", "modrana_debug_logs")
+        return paths.get_xdg_tracklog_folder_path()
 
     @property
-    def cacheFolderPath(self):
-        return paths.getXDGCachePath()
+    def poi_folder_path(self):
+        return paths.get_xdg_poi_folder_path()
 
-    def needsQuitButton(self):
+    @property
+    def log_folder_path(self):
+        return os.path.join(paths.get_home_path(), "Documents", "modrana_debug_logs")
+
+    @property
+    def cache_folder_path(self):
+        return paths.get_xdg_cache_path()
+
+    @property
+    def needs_quit_button(self):
         """No need for a separate Quit button thanks
         to the the Sailfish UI
         """
         return False
 
-    def needsBackButton(self):
+    @property
+    def needs_back_button(self):
         return False
 
-    def needsPageBackground(self):
+    @property
+    def needs_page_background(self):
         return False
 
-    def getDeviceType(self):
+    @property
+    def device_type(self):
         return DEVICE_TYPE_SMARTPHONE
 
     @property
-    def defaultTheme(self):
+    def default_theme(self):
         return "silica", "Silica"
 
     @property
-    def connectivityStatus(self):
+    def connectivity_status(self):
         # TODO: actual connectivity tracking :)
         return True
 

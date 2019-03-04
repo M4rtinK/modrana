@@ -65,7 +65,7 @@ class Display(RanaModule):
 
         # there are currently no Qt 5 platforms where the current Python based
         # screen blanking control code works
-        if self.screenBlankingControlSupported() and gs.GUIString.lower() in ("qml", "gtk"):
+        if self.screenBlankingControlSupported and gs.GUIString.lower() in ("qml", "gtk"):
             # check the screen blanking mode on startup
             self.checkScreenBlankingMode()
             # register blanking check update
@@ -114,25 +114,25 @@ class Display(RanaModule):
 
     def screenBlankingControlSupported(self):
         """report if controlling the screen blanking is supported"""
-        return self.dmod.screenBlankingControlSupported()
+        return self.dmod.screen_blanking_control_supported
 
     def usesDashboard(self):
         """this reports if the device/OS uses a dashboard
         instead of minimizing the the window out of view
         the user might want that the window updates on the dashboard or not"""
-        return self.dmod.usesDashboard()
+        return self.dmod.uses_dashboard
 
 
     def pauseScreenBlanking(self):
         """pause screen blanking for 30 seconds"""
-        if self.dmod.screenBlankingControlSupported(): # make sure the device module really supports this
-            self.dmod.pauseScreenBlanking()
+        if self.dmod.screen_blanking_control_supported: # make sure the device module really supports this
+            self.dmod.pause_screen_blanking()
 
     def unlockScreen(self):
-        self.dmod.unlockScreen()
+        self.dmod.unlock_screen()
 
     def checkScreenBlankingMode(self):
-        if self.screenBlankingControlSupported(): # can we do this ?
+        if self.screenBlankingControlSupported: # can we do this ?
             mode = self.get('screenBlankingMode', 'always')
             if mode == 'always':
                 self.checkConditionsStop()

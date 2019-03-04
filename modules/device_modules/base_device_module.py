@@ -44,37 +44,42 @@ class DeviceModule(RanaModule):
         """
         return None
 
-    def getDeviceName(self):
+    @property
+    def device_name(self):
         """return a "human" name of the device"""
         return "unknown device"
 
-    def getWinWH(self):
+    @property
+    def window_wh(self):
         """
         return the preferred application window size in pixels
         """
         # we'll use VGA as a default value
         return 640, 480
 
-    def startInFullscreen(self):
+    @property
+    def start_in_fullscreen(self):
         """weather or not to start modRana in fullscreen
         NOTE: this is a default value and can be overridden by a
         user-set options key, etc."""
         return False
 
-    def fullscreenOnly(self):
+    @property
+    def fullscreen_only(self):
         """
         some platforms are basically fullscreen-only (Harmattan),
         as applications only switch between fullscreen and a task switcher
         """
         return False
 
-    def screenBlankingControlSupported(self):
+    @property
+    def screen_blanking_control_supported(self):
         """ there is no universal way to control screen blanking,
         so its off by default
         -> it can be implemented and enabled in the corresponding device module"""
         return False
 
-    def pauseScreenBlanking(self):
+    def pause_screen_blanking(self):
         """
         calling this method should pause screen blanking
         * on mobile devices, screen balking needs to be paused every n seconds
@@ -85,12 +90,14 @@ class DeviceModule(RanaModule):
         """
         pass
 
-    def usesDashboard(self):
+    @property
+    def uses_dashboard(self):
         """report if the device minimizes the windows into a dashboard instead of hiding
         them out of view - the user might want that the window redraws on the dashboard or not"""
         return False
 
-    def getSupportedGUIModuleIds(self):
+    @property
+    def supported_gui_module_ids(self):
         """supported GUI module IDs, ordered by preference from left to right
 
         THE ":" NOTATION
@@ -113,23 +120,26 @@ class DeviceModule(RanaModule):
         """
         return ["GTK", "QML"] # as default try GTK first and then QML
 
-
-    def handlesLocation(self):
+    @property
+    def handles_location(self):
         """report whether the device module handles position updates by itself"""
         return False
 
-    def getLocationType(self):
+    @property
+    def location_type(self):
         """modRana uses gpsd by default"""
         return 'gpsd'
 
-    def simpleMapDragging(self):
+    @property
+    def use_simple_map_dragging(self):
         """should we use a fast but less fluent
         or nice and but slow(-er) map dragging method ?
            by default, we use the nice method
         """
         return False
 
-    def lpSkipCount(self):
+    @property
+    def long_press_click_skip_count(self):
         """how many clicks to skip after a long press is detected and exercised
         * this might be device specific, as for example SHR on the Neo FreeRunner
         fires two clicks after lp, but Maemo on N900 fires just one
@@ -138,18 +148,19 @@ class DeviceModule(RanaModule):
         """
         return 1
 
-    def textEntryIminent(self):
+    def text_entry_imminent(self):
         """text entry box will be shown after this method finishes
            - on some platforms, there are some steps needed to make sure
            it is actually visible (like disabling fullscreen, etc.)"""
         pass
 
-    def textEntryDone(self):
+    def text_entry_done(self):
         """we are done with text entry, so all the needed steps can be reversed again
            (enable fullscreen, etc.)"""
         pass
 
-    def hasNotificationSupport(self):
+    @property
+    def has_custom_notification_support(self):
         """report if the device provides its own notification method"""
         return False
 
@@ -157,41 +168,39 @@ class DeviceModule(RanaModule):
         """send a notification"""
         pass
 
-    def hasKeyboard(self):
+    @property
+    def has_keyboard(self):
         """report if the device has a keyboard"""
         return True
 
-    def hasButtons(self):
+    @property
+    def has_buttons(self):
         """report if the device has some usable buttons other than keyboard"""
-        if self.hasVolumeKeys():
+        if self.has_volume_keys:
             return True
         else:
             return False
 
-    def hasVolumeKeys(self):
+    @property
+    def has_volume_keys(self):
         """report if the device has application-usable volume control keys or their
         equivalent - basically just two nearby button that can be used for zooming up/down,
         skipping to next/last and similar actions"""
         return False
 
-    def enableVolumeKeys(self):
+    def enable_volume_keys(self):
         pass
 
-    def hasKineticScrollingList(self):
-        """report if the device provides a native kinetic scrolling list
-        widget/dialog"""
-        return False
-
-    def startLocation(self, startMainLoop=False):
-        """start handling location - check handlesLocation if this is supported"""
+    def start_location(self, start_main_loop=False):
+        """start handling location - check handles_location if this is supported"""
         pass
 
-    def stopLocation(self):
-        """stop handling location - check handlesLocation if this is supported"""
+    def stop_location(self):
+        """stop handling location - check handles_location if this is supported"""
         pass
 
     @property
-    def profilePath(self):
+    def profile_path(self):
         """Return path to the main profile folder or None
         if default path should be used.
 
@@ -200,19 +209,23 @@ class DeviceModule(RanaModule):
         """
         return None
 
-    def getTracklogFolderPath(self):
+    @property
+    def tracklog_folder_path(self):
         """return device specific tracklog folder or None if default should be used"""
         return None
 
-    def getMapFolderPath(self):
+    @property
+    def map_folder_path(self):
         """return device specific map folder or None if default should be used"""
         return None
 
-    def getRoutingDataFolderPath(self):
+    @property
+    def routing_data_folder_path(self):
         """return device specific map folder or None if default should be used"""
         return None
 
-    def getPOIFolderPath(self):
+    @property
+    def poi_folder_path(self):
         """return device specific POI folder or None if default should be used"""
         return None
 
@@ -223,29 +236,34 @@ class DeviceModule(RanaModule):
         # result in a nice "mod.device.n900" logger hierarchy
         return logging.getLogger("mod.%s" % deviceModuleSuffix)
 
-    def getLogFolderPath(self):
+    @property
+    def log_folder_path(self):
         """default path is handled through the options module"""
         return None
 
     @property
-    def cacheFolderPath(self):
+    def cache_folder_path(self):
         """Return path to the cache folder or None to use default"""
         return None
 
-    def needsQuitButton(self):
+    @property
+    def needs_quit_button(self):
         """On some platforms (Android chroot) applications
         need to provide their own shutdown buttons"""
         return False
 
-    def needsBackButton(self):
+    @property
+    def needs_back_button(self):
         """Some platforms (Jolla) don't need a in-UI back button"""
         return True
 
-    def needsPageBackground(self):
+    @property
+    def needs_page_background(self):
         """Some platforms (Jolla) don't need a page background"""
         return True
 
-    def handlesUrlOpening(self):
+    @property
+    def handles_url_opening(self):
         """
         report if opening of URI is handled by the device module
         * for example, on the N900 a special DBUS command not available
@@ -253,14 +271,14 @@ class DeviceModule(RanaModule):
         """
         return False
 
-    def openUrl(self, url):
+    def open_url(self, url):
         """
         open an URL
         """
         pass
 
     @property
-    def connectivityStatus(self):
+    def connectivity_status(self):
         """report the current status of internet connectivity on the device
         None - status reporting not supported or status unknown
         True - connected to the Internet
@@ -289,21 +307,21 @@ class DeviceModule(RanaModule):
                         break
         return connected
 
-
-
-    def enableInternetConnectivity(self):
+    def enable_internet_connectivity(self):
         """try to make sure that the device connects to the internet"""
         # TODO: respect the modRana internet connectivity state
         pass
 
-    def getStartDragDistance(self):
+    @property
+    def start_drag_distance(self):
         """Distance in pixel for discerning drag from a click
         A correct start drag distance is important on high DPI screens
         as the default values don't work correctly on them.
         """
         return None
 
-    def getDeviceType(self):
+    @property
+    def device_type(self):
         """Returns type of the current device
 
         The device can currently be either a PC
@@ -324,7 +342,7 @@ class DeviceModule(RanaModule):
         return None
 
     @property
-    def defaultTheme(self):
+    def default_theme(self):
         """Some platforms might need a tweaked default theme,
         this property can be used to set it.
 

@@ -40,7 +40,7 @@ class TextEntry(RanaModule):
 
     def clearEntry(self):
         self.set('textEntry', None)
-        self.set('textEntryDone', False)
+        self.set('text_entry_done', False)
 
     def respondToTextEntry(self, entry, dialog, response, instance, key, persistentKey):
         self.respond(entry.get_text(), instance, key, persistentKey)
@@ -60,7 +60,7 @@ class TextEntry(RanaModule):
     def respond(self, result, instance, key, persistentKey=None):
         if persistentKey is not None:
             self.set(persistentKey, result)
-        self.dmod.textEntryDone()
+        self.dmod.text_entry_done()
         instance.handleTextEntryResult(key, result)
         self.entryBoxVisible = False
 
@@ -105,7 +105,7 @@ class TextEntry(RanaModule):
         (x, y, w, h) = self.get('viewport')
         dialog.resize(w, height) # resize the dialog to the width of the window and leave height the same
         dialog.set_keep_above(True)
-        self.dmod.textEntryIminent()
+        self.dmod.text_entry_imminent()
         self.entryBoxVisible = True
         dialog.show_all()
 

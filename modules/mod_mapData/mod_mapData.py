@@ -559,7 +559,7 @@ class MapData(RanaModule):
         :returns: string describing free space in tile folder
         :rtype: str
         """
-        path = self.modrana.paths.getMapFolderPath()
+        path = self.modrana.paths.map_folder_path
         free_space = utils.free_space_in_path(path)
         if free_space is not None:
             prettySpace = utils.bytes_to_pretty_unit_string(utils.free_space_in_path(path))

@@ -703,7 +703,7 @@ class Menus(RanaModule):
             #TODO: support more Urls
             url = urls[0]
             suffix = "\n\n <u>click to open %s</u> " % url[1]
-            boxAction = "ms:menu:openUrl:%s" % url[0]
+            boxAction = "ms:menu:open_url:%s" % url[0]
         else:
             suffix = ""
             boxAction = ""
@@ -1512,7 +1512,7 @@ class Menus(RanaModule):
             except Exception:
                 self.log.exception("setting list index failed")
 
-        elif messageType == "ms" and message == "openUrl":
+        elif messageType == "ms" and message == "open_url":
             url = args
             self.modrana.gui.openUrl(url)
 

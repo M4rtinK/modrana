@@ -150,10 +150,12 @@ class DeviceN900(DeviceModule):
         if self.conicConnection:
             self.conicConnection.set_property("automatic-connection-events", False)
 
-    def startInFullscreen(self):
+    @property
+    def start_in_fullscreen(self):
         return False
 
-    def fullscreenOnly(self):
+    @property
+    def fullscreen_only(self):
         return False
 
     def handleMessage(self, message, messageType, args):
@@ -169,13 +171,16 @@ class DeviceN900(DeviceModule):
     def device_id(self):
         return "n900"
 
-    def getDeviceName(self):
+    @property
+    def device_name(self):
         return "Nokia N900"
 
-    def getWinWH(self):
+    @property
+    def window_wh(self):
         return 800, 480
 
-    def getSupportedGUIModuleIds(self):
+    @property
+    def supported_gui_module_ids(self):
         return ["GTK", "QML:harmattan", "QML:indep"]
 
     def startAutorotation(self):
@@ -204,15 +209,17 @@ class DeviceN900(DeviceModule):
         elif rotationMode == "portrait":
             return 2
 
-    def screenBlankingControlSupported(self):
+    @property
+    def screen_blanking_control_supported(self):
         """it is possible to control screen blanking on the N900"""
         return True
 
-    def usesDashboard(self):
+    @property
+    def uses_dashboard(self):
         """the N900 uses a dashboard type task switcher"""
         return True
 
-    def pauseScreenBlanking(self):
+    def pause_screen_blanking(self):
         if gs.GUIString == "GTK":
         #      self.log.debug("pausing screen blanking in GTK GUI")
             self.mceRequest.req_display_blanking_pause()
@@ -220,7 +227,7 @@ class DeviceN900(DeviceModule):
         #      self.log.debug("pausing screen blanking in QML GUI")
             QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
 
-    def unlockScreen(self):
+    def unlock_screen(self):
         self.mceRequest.req_tklock_mode_change('unlocked')
 
     def windowIsActiveChangedCallback(self, window, event):
@@ -259,7 +266,8 @@ class DeviceN900(DeviceModule):
             elif state == "off":
                 display.disableRedraw(reason="N900 display blanked")
 
-    def hasNotificationSupport(self):
+    @property
+    def has_custom_notification_support(self):
         if gs.GUIString == "GTK":
             return True
         else:
@@ -286,7 +294,8 @@ class DeviceN900(DeviceModule):
         if msTimeout:
             banner.set_timeout(int(msTimeout))
 
-    def hasButtons(self):
+    @property
+    def has_buttons(self):
         """the N900 has the volume keys (2 buttons), the camera trigger (2 states)
         and the proximity sensor,
         other than that state of the camera cover and keyboard slider can be sensed
@@ -294,10 +303,11 @@ class DeviceN900(DeviceModule):
         """
         return True
 
-    def hasVolumeKeys(self):
+    @property
+    def has_volume_keys(self):
         return True
 
-    def enableVolumeKeys(self):
+    def enable_volume_keys(self):
         if self.topWindow.flags() & gtk.REALIZED:
             self.enable_volume_cb()
         else:
@@ -316,21 +326,22 @@ class DeviceN900(DeviceModule):
     def _updateVolumeKeys(self):
         """check if volume keys should be used or not"""
         if self.get('useVolumeKeys', True):
-            self.enableVolumeKeys()
+            self.enable_volume_keys()
         else:
             self.disableVolumeKeys()
 
 
     # ** Hildon App menu **
 
-    def handlesUrlOpening(self):
+    @property
+    def handles_url_opening(self):
         """
         PyGTK version on Maemo 5 is too old and does not have the gtk.open_uri() function,
         -> a platform specific implementation is needed
         """
         return True
 
-    def openUrl(self, url):
+    def open_url(self, url):
         """
         open a URL using the Maemo specific browser command
         """
@@ -395,35 +406,37 @@ class DeviceN900(DeviceModule):
         if self.soundToggleButton:
             self.soundToggleButton.set_active(self.get("soundEnabled", True))
 
-    def hasKineticScrollingList(self):
-        return True
-
     # ** PATHS **
-
-    def getTracklogFolderPath(self):
+    @property
+    def tracklog_folder_path(self):
         return TRACKLOGS_PATH
 
-    def getMapFolderPath(self):
+    @property
+    def map_folder_path(self):
         return MAP_FOLDER_PATH
 
-    def getPOIFolderPath(self):
+    @property
+    def poi_folder_path(self):
         return POI_FOLDER_PATH
 
-    def getLogFolderPath(self):
+    @property
+    def log_folder_path(self):
         # N900 specific log folder
         return DEBUG_LOG_FOLDER_PATH
 
-    def getRoutingDataFolderPath(self):
+    @property
+    def routing_data_folder_path(self):
         # routing data is on the N900 traditionally stored
         # directly in the map folder, by using the path from
         # the paths module, if the map folder is redirected
         # by a configuration file value, path to the
         # routing data folder will also be redirected
-        return self.modrana.paths.getMapFolderPath()
+        return self.modrana.paths.map_folder_path
 
     # ** LOCATION **
 
-    def handlesLocation(self):
+    @property
+    def handles_location(self):
         """on N900 location is handled through liblocation"""
         if gs.GUIString == "GTK":
             # use liblocation
@@ -431,7 +444,8 @@ class DeviceN900(DeviceModule):
         else:
             return False
 
-    def getLocationType(self):
+    @property
+    def location_type(self):
         """modRana uses liblocation on N900"""
         if gs.GUIString == "GTK":
             # use liblocation for GTK
@@ -440,17 +454,17 @@ class DeviceN900(DeviceModule):
             # use Qt Mobility for Qt
             return "qt_mobility"
 
-    def startLocation(self, startMainLoop=False):
+    def start_location(self, start_main_loop=False):
         """this will called by mod_location automatically"""
         self._libLocationStart()
-        if startMainLoop:
+        if start_main_loop:
             import gobject
 
             self.mainloop = gobject.MainLoop()
             self.log.info('location: starting headless mainloop')
             self.mainloop.run()
 
-    def stopLocation(self):
+    def stop_location(self):
         """this will called by mod_location automatically"""
         self._libLocationStop()
         if self.mainloop:
@@ -617,7 +631,7 @@ class DeviceN900(DeviceModule):
         # trigger the connectivity status changed signal
         self.internetConnectivityChanged(status)
 
-    def enableInternetConnectivity(self):
+    def enable_internet_connectivity(self):
         """Autoconnect to the Internet using DBUS"""
         # if connectivity is requested like this,
         # the callback will be called at once if we are online,
@@ -625,14 +639,15 @@ class DeviceN900(DeviceModule):
         self.conicConnection.request_connection(conic.CONNECT_FLAG_AUTOMATICALLY_TRIGGERED)
 
     @property
-    def connectivityStatus(self):
+    def connectivity_status(self):
         # The conic/ICD callback is called both once registered
         # and also when trying to enable connectivity, so we can use data
         # from the callback to represent the connectivity state,
-        # overriding the portable connectivityStatus implementation in base_device_module
+        # overriding the portable connectivity_status implementation in base_device_module
         return self._connectivityStatusICD
 
-    def getDeviceType(self):
+    @property
+    def device_type(self):
         return DEVICE_TYPE_SMARTPHONE
 
     @property

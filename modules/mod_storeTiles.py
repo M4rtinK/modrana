@@ -93,7 +93,7 @@ class StoreTiles(RanaModule):
         """
         start = time.clock()
         self._llog("looking for existing stores for layer %s" % layer)
-        layer_folder_path = os.path.join(self.modrana.paths.getMapFolderPath(), layer.folder_name)
+        layer_folder_path = os.path.join(self.modrana.paths.map_folder_path, layer.folder_name)
         store_tuples = []
         # check if the path contains a file based tile store
         if FileBasedTileStore.is_store(layer_folder_path):
@@ -133,7 +133,7 @@ class StoreTiles(RanaModule):
             if store is None:
                 start = time.clock()
                 self._llog("store type %s not found for layer %s" % (self._primary_tile_storage_type, layer))
-                layer_folder_path = os.path.join(self.modrana.paths.getMapFolderPath(), layer.folder_name)
+                layer_folder_path = os.path.join(self.modrana.paths.map_folder_path, layer.folder_name)
                 if self._primary_tile_storage_type == constants.TILE_STORAGE_FILES:
                     store_type = constants.TILE_STORAGE_FILES
                     store = FileBasedTileStore(

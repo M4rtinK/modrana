@@ -224,12 +224,12 @@ class MapLayers(RanaModule):
         :returns: list of available overlay group names
         :rtype: list
         """
-        candidates = os.listdir(self.modrana.paths.getOverlayGroupsFolderPath())
+        candidates = os.listdir(self.modrana.paths.overlay_groups_folder_path)
         return [n[0:-5] for n in candidates if n.endswith(".json")]
 
     def getOverlayGroup(self, name):
         filename = "%s.json" % name
-        filePath = os.path.join(self.modrana.paths.getOverlayGroupsFolderPath(), filename)
+        filePath = os.path.join(self.modrana.paths.overlay_groups_folder_path, filename)
         if os.path.isfile(filePath):
             return OverlayGroup(name, filePath)
         else:
@@ -248,7 +248,7 @@ class MapLayers(RanaModule):
 
     def setOverlayGroup(self, name, overlayList):
         filename = "%s.json" % name
-        filePath = os.path.join(self.modrana.paths.getOverlayGroupsFolderPath(), filename)
+        filePath = os.path.join(self.modrana.paths.overlay_groups_folder_path, filename)
         try:
             # the overlay group automatically saves any changes to persistent
             # storage so we don't have to explicitly call save() on it here

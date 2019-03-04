@@ -163,7 +163,7 @@ class ModRana(object):
         # as PWD might change after the paths module is
         # imported, for example when running
         # with the Qt 5 GUI)
-        paths.loadVersionString()
+        paths.load_version_string()
         version = paths.VERSION_STRING
         if version is None:
             version = "unknown version"
@@ -182,7 +182,7 @@ class ModRana(object):
         self.paths = paths.Paths(self)
 
         # add the configs handling core module
-        self.configs = configs.Configs(configs_dir=self.paths.getProfilePath())
+        self.configs = configs.Configs(configs_dir=self.paths.profile_path)
 
         # load persistent options
         self.optLoadingOK = self._load_options()
@@ -297,7 +297,7 @@ class ModRana(object):
         # get preferred GUI module strings from the device module
 
         if self.GUIString == "":
-            ids = self.dmod.getSupportedGUIModuleIds()
+            ids = self.dmod.getSupportedGUIModuleIds
             if ids:
                 self.GUIString = ids[0]
             else:
@@ -467,7 +467,7 @@ class ModRana(object):
     def _options_loaded(self):
         """This is run after the persistent options dictionary is loaded from storage."""
         # tell the log manager what where it should store log files
-        modrana_log.log_manager.log_folder_path = self.paths.getLogFolderPath()
+        modrana_log.log_manager.log_folder_path = self.paths.log_folder_path
 
         # check if logging to file should be enabled
         if self.get('loggingStatus', False):
@@ -884,7 +884,7 @@ class ModRana(object):
         """Save the persistent dictionary to file."""
         log.info("saving options")
         try:
-            f = open(self.paths.getOptionsFilePath(), "wb")
+            f = open(self.paths.options_file_path, "wb")
             # remove keys marked as nonpersistent
             self.d['keyModifiers'] = self.keyModifiers
             d = self._remove_non_persistent_options(self.d)
@@ -900,7 +900,7 @@ class ModRana(object):
         """Load the persistent dictionary from file."""
         log.info("loading options")
         try:
-            f = open(self.paths.getOptionsFilePath(), "rb")
+            f = open(self.paths.options_file_path, "rb")
             newData = marshal.load(f)
             f.close()
             purgeKeys = ["fix"]
@@ -936,7 +936,7 @@ class ModRana(object):
 
     ## PROFILE PATH ##
 
-    def getProfilePath(self):
+    def get_profile_path(self):
         """Return the profile folder (create it if it does not exist).
 
         NOTE: this function is provided here in the main class as some
@@ -974,7 +974,7 @@ class ModRana(object):
 
             # log device identificator and name
             if self.dmod:
-                deviceName = self.dmod.getDeviceName()
+                deviceName = self.dmod.device_name
                 deviceString = self.dmod.device_id
                 log.info("# device: %s (%s)" % (deviceName, deviceString))
 

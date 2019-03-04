@@ -96,7 +96,7 @@ class GTKGUI(GUIModule):
         self._registerCenteringShiftCallbacks()
 
         # resize it to preferred width x height
-        (w, h) = self.modrana.dmod.getWinWH()
+        (w, h) = self.modrana.dmod.window_wh
         self.resize(w, h)
         self.modrana.addTime("window created")
         # set title
@@ -146,8 +146,8 @@ class GTKGUI(GUIModule):
 
     def openUrl(self, url):
         # check if the device module handles URL opening
-        if self.modrana.dmod.handlesUrlOpening():
-            self.modrana.dmod.openUrl(url)
+        if self.modrana.dmod.handles_url_opening:
+            self.modrana.dmod.open_url(url)
         else:
             try:
                 gtk.show_uri(None, url, gtk.gdk.CURRENT_TIME)
@@ -312,7 +312,7 @@ class GTKGUI(GUIModule):
         are set and also once at startup"""
         # get the needed values
         # NOTE: some of them might have been updated just now
-        (fallbackW, fallbackH) = self.modrana.dmod.getWinWH()
+        (fallbackW, fallbackH) = self.modrana.dmod.window_wh
         (sx, sy, sw, sh) = self.get('viewport', (0, 0, fallbackW, fallbackH))
         shiftAmount = self.d.get('posShiftAmount', 0.75)
         shiftDirection = self.d.get('posShiftDirection', "down")

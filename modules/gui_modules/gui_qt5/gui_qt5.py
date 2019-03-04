@@ -247,7 +247,7 @@ class QMLGUI(GUIModule):
         """
         report current modRana version or None if version info is not available
         """
-        version = self.modrana.paths.getVersionString()
+        version = self.modrana.paths.version_string
         if version is None:
             return "unknown"
         else:
@@ -408,19 +408,19 @@ class QMLGUI(GUIModule):
             "modRanaVersion" : self.getModRanaVersion(),
             "constants" : self.getConstants(),
             "show_quit_button": self.showQuitButton(),
-            "fullscreen_only": self.modrana.dmod.fullscreenOnly(),
+            "fullscreen_only": self.modrana.dmod.fullscreen_only,
             "should_start_in_fullscreen": self.shouldStartInFullscreen(),
-            "needs_back_button": self.modrana.dmod.needsBackButton(),
-            "needs_page_background": self.modrana.dmod.needsPageBackground(),
+            "needs_back_button": self.modrana.dmod.needs_back_button,
+            "needs_page_background": self.modrana.dmod.needs_page_background,
             "lastKnownPos" : self.get("pos", None),
             "gpsEnabled" : self.get("GPSEnabled", True),
             "posFromFile" : self.get("posFromFile", None),
             "nmeaFilePath" : self.get("NMEAFilePath", None),
             "layerTree" : self.modules.mapLayers.getLayerTree(),
             "dictOfLayerDicts" : self.modules.mapLayers.getDictOfLayerDicts(),
-            "themesFolderPath" : os.path.abspath(self.modrana.paths.getThemesFolderPath()),
+            "themesFolderPath" : os.path.abspath(self.modrana.paths.themes_folder_path),
             "sailfish" : self.dmod.device_id == "jolla",
-    	    "device_type" : self.modrana.dmod.getDeviceType(),
+    	    "device_type" : self.modrana.dmod.device_type,
             "highDPI" : self.highDPI,
             "defaultTileStorageType" : self.modrana.dmod.defaultTileStorageType,
             "aboutModrana" : self._get_about_info()
@@ -656,7 +656,7 @@ class IconImageProvider(ImageProvider):
         #log.debug(imageId)
         try:
             #TODO: theme name caching ?
-            themeFolder = self.gui.modrana.paths.getThemesFolderPath()
+            themeFolder = self.gui.modrana.paths.themes_folder_path
             # fullIconPath = os.path.join(themeFolder, imageId)
             # the path is constructed like this in QML
             # so we can safely just split it like this
@@ -980,7 +980,7 @@ class Tracklogs(object):
     """Some tracklog specific functionality"""
 
     SAILFISH_TRACKLOGS_SYMLINK_NAME = "modrana_tracklogs"
-    SAILFISH_SYMLINK_PATH = os.path.join(paths.getHOMEPath(), "Documents", SAILFISH_TRACKLOGS_SYMLINK_NAME)
+    SAILFISH_SYMLINK_PATH = os.path.join(paths.get_home_path(), "Documents", SAILFISH_TRACKLOGS_SYMLINK_NAME)
 
     def __init__(self, gui):
         self.gui = gui
@@ -1024,7 +1024,7 @@ class Tracklogs(object):
             self.gui.log.warning("tracklogs: the Sailfish tracklogs symlink already exists")
         else:
             try:
-                os.symlink(self.gui.modrana.paths.getTracklogsFolderPath(), self.SAILFISH_SYMLINK_PATH)
+                os.symlink(self.gui.modrana.paths.tracklog_folder_path, self.SAILFISH_SYMLINK_PATH)
                 self.gui.log.info("tracklogs: sailfish tracklogs symlink created")
             except Exception:
                 self.gui.log.exception("tracklogs: sailfish tracklogs symlink creation failed")

@@ -44,16 +44,16 @@ VERSION_STRING = None
 
 _PROFILE_FOLDER_NAME = DEFAULT_PROFILE_FOLDER_NAME
 
-def loadVersionString():
+def load_version_string():
     """ Load version string from file"""
     # try to read the version file
-    versionString = getVersionString()
+    versionString = get_version_string()
     if versionString is not None:
         global VERSION_STRING
         VERSION_STRING = versionString
 
 
-def getVersionString():
+def get_version_string():
     """ Get version string from the default version file
 
     :returns: version string or None if unknown
@@ -77,7 +77,7 @@ def getVersionString():
 
 ## XDG path getters ##
 
-def getHOMEPath():
+def get_home_path():
     """Get the path specified by the $HOME variable
 
     :returns: path to current users home directory
@@ -88,7 +88,7 @@ def getHOMEPath():
     # to save the situation
     return os.environ.get("HOME", os.path.expanduser("~"))
 
-def getProfileName():
+def get_profile_name():
     """Get name of the modRana profile folder
 
     :returns: modRana profile folder name
@@ -96,7 +96,7 @@ def getProfileName():
     """
     return _PROFILE_FOLDER_NAME
 
-def setProfileName(name):
+def set_profile_name(name):
     """Set the name of the modRana profile folder
 
     :param str name: new profile name
@@ -104,7 +104,7 @@ def setProfileName(name):
     global _PROFILE_FOLDER_NAME
     _PROFILE_FOLDER_NAME = name
 
-def getXDGConfigPath():
+def get_xdg_config_path():
     """Check the contents of the $XDG_CONFIG_HOME/modrana variable and
     default to $HOME/.config/modrana if not set.
 
@@ -112,11 +112,11 @@ def getXDGConfigPath():
     :rtype: str
     """
     return os.path.join(
-        os.environ.get("$XDG_CONFIG_HOME", os.path.join(getHOMEPath(), ".config")),
-        getProfileName()
+        os.environ.get("$XDG_CONFIG_HOME", os.path.join(get_home_path(), ".config")),
+        get_profile_name()
     )
 
-def getXDGDataPath():
+def get_xdg_data_path():
     """Check the contents of the $XDG_DATA_HOME variable and
     default to "$HOME/.cache" if not set.
 
@@ -124,11 +124,11 @@ def getXDGDataPath():
     :rtype: str
     """
     return os.path.join(
-        os.environ.get("$XDG_DATA_HOME", os.path.join(getHOMEPath(), ".local/share")),
-        getProfileName()
+        os.environ.get("$XDG_DATA_HOME", os.path.join(get_home_path(), ".local/share")),
+        get_profile_name()
     )
 
-def getXDGCachePath():
+def get_xdg_cache_path():
     """Check the contents of the $XDG_CONFIG_HOME variable and
     default to "$HOME/.local/share" if not set.
 
@@ -136,36 +136,36 @@ def getXDGCachePath():
     :rtype: str
     """
     return os.path.join(
-        os.environ.get("$XDG_CACHE_HOME", os.path.join(getHOMEPath(), ".cache")),
-        getProfileName()
+        os.environ.get("$XDG_CACHE_HOME", os.path.join(get_home_path(), ".cache")),
+        get_profile_name()
     )
 
-def getXDGProfilePath():
+def get_xdg_profile_path():
     """Return XDG-compatible profile folder path
 
-    basically the same as getXDGConfigPath()
+    basically the same as get_xdg_config_path()
     """
-    return getXDGConfigPath()
+    return get_xdg_config_path()
 
-def getXDGMapFolderPath():
+def get_xdg_map_folder_path():
     """Return XDG-compatible map folder path"""
-    return os.path.join(getXDGDataPath(), MAPS_FOLDER_NAME)
+    return os.path.join(get_xdg_data_path(), MAPS_FOLDER_NAME)
 
-def getXDGTracklogFolderPath():
+def get_xdg_tracklog_folder_path():
     """Return XDG-compatible tracklog folder path"""
-    return os.path.join(getXDGDataPath(), TRACKLOG_FOLDER_NAME)
+    return os.path.join(get_xdg_data_path(), TRACKLOG_FOLDER_NAME)
 
-def getXDGPOIFolderPath():
+def get_xdg_poi_folder_path():
     """Return XDG-compatible POI folder path"""
-    return os.path.join(getXDGDataPath(), POI_FOLDER_NAME)
+    return os.path.join(get_xdg_data_path(), POI_FOLDER_NAME)
 
-def getXDGRoutingDataPath():
+def get_xdg_routing_data_path():
     """Return XDG-compatible routing data folder path"""
-    return os.path.join(getXDGDataPath(), ROUTING_DATA_FOLDER_NAME)
+    return os.path.join(get_xdg_data_path(), ROUTING_DATA_FOLDER_NAME)
 
-def getXDGDebugLogPath():
+def get_xdg_debug_log_path():
     """Return XDG-compatible debug log folder path"""
-    return os.path.join(getXDGDataPath(), DEBUG_LOGS_FOLDER_NAME)
+    return os.path.join(get_xdg_data_path(), DEBUG_LOGS_FOLDER_NAME)
 
 class Paths(object):
     """
@@ -186,10 +186,10 @@ class Paths(object):
 
         # get profile folder path
         # -> first check for device module override
-        if self.modrana.dmod.profilePath:
-            self._profileFolderPath = self.modrana.dmod.profilePath
+        if self.modrana.dmod.profile_path:
+            self._profileFolderPath = self.modrana.dmod.profile_path
         else:
-            self._profileFolderPath = self.modrana.getProfilePath()
+            self._profileFolderPath = self.modrana.get_profile_path()
         # check the profile path and create the folders if necessary
         utils.create_folder_path(self._profileFolderPath)
 
@@ -199,27 +199,31 @@ class Paths(object):
 
     ## Important modRana folders ##
 
-    def getProfilePath(self):
+    @property
+    def profile_path(self):
         """return path to the profile folder"""
         # check if the path exists and create it if not
         utils.create_folder_path(self._profileFolderPath)
         return self._profileFolderPath
 
-    def getOptionsFilePath(self):
+    @property
+    def options_file_path(self):
         """return path to the options store filename"""
-        return os.path.join(self.getProfilePath(), OPTIONS_FILENAME)
+        return os.path.join(self.profile_path, OPTIONS_FILENAME)
 
-    def getCacheFolderPath(self):
+    @property
+    def cache_folder_path(self):
         """return path to a folder used for various cache data"""
-        path = self.modrana.dmod.cacheFolderPath
+        path = self.modrana.dmod.cache_folder_path
         # if no path was provided by device module, use default,
         # which is a cache folder in the profile folder
         if path is None:
-            path = os.path.join(self.getProfilePath(), CACHE_FOLDER_NAME)
+            path = os.path.join(self.profile_path, CACHE_FOLDER_NAME)
 
         return self._assurePath(path)
 
-    def getTracklogsFolderPath(self):
+    @property
+    def tracklog_folder_path(self):
         """return path to a folder for storing tracklogs"""
         path = None
         # first check if the user overrode the tracklog folder path
@@ -229,15 +233,16 @@ class Paths(object):
         if path is None:
         # try to get the path from device module
             if self.modrana.dmod:
-                path = self.modrana.dmod.getTracklogFolderPath()
+                path = self.modrana.dmod.tracklog_folder_path
 
         if path is None: # this means there is no config or device path
             # use default path & assure it exists
-            return self._assurePathFolder(self.getProfilePath(), TRACKLOG_FOLDER_NAME)
+            return self._assurePathFolder(self.profile_path, TRACKLOG_FOLDER_NAME)
         else:
             return self._assurePath(path)
 
-    def getMapFolderPath(self):
+    @property
+    def map_folder_path(self):
         """return a path to folder for map data storage"""
         path = None
         # first check if the user overrode the map folder path
@@ -247,70 +252,78 @@ class Paths(object):
         if path is None:
         # try to get the path from device module
             if self.modrana.dmod:
-                path = self.modrana.dmod.getMapFolderPath()
+                path = self.modrana.dmod.map_folder_path
 
         if path is None: # this means there is no config or device path
             # use default path & assure it exists
-            return self._assurePathFolder(self.getProfilePath(), MAPS_FOLDER_NAME)
+            return self._assurePathFolder(self.profile_path, MAPS_FOLDER_NAME)
         else:
             return self._assurePath(path)
 
-    def getPOIFolderPath(self):
+    @property
+    def poi_folder_path(self):
         """return path to the POI folder"""
         if self.modrana.dmod:
-            path = self.modrana.dmod.getPOIFolderPath()
+            path = self.modrana.dmod.poi_folder_path
             if path is not None: # None means there is no device dependent path
                 return self._assurePath(path)
             else:
-                return self._assurePathFolder(self.getProfilePath(), POI_FOLDER_NAME)
+                return self._assurePathFolder(self.profile_path, POI_FOLDER_NAME)
         else:
-            return self._assurePathFolder(self.getProfilePath(), POI_FOLDER_NAME)
+            return self._assurePathFolder(self.profile_path, POI_FOLDER_NAME)
 
-    def getPOIDatabasePath(self):
+    @property
+    def poi_database_path(self):
         """return path to the POI database file"""
         POIDBFilename = self.modrana.get('POIDBFilename', POI_DB_FILENAME)
-        POIFolderPath = self.getPOIFolderPath()
+        POIFolderPath = self.poi_folder_path
         return os.path.join(POIFolderPath, POIDBFilename)
 
-    def getLogFolderPath(self):
+    @property
+    def log_folder_path(self):
         """return path to the POI folder"""
         if self.modrana.dmod:
-            path = self.modrana.dmod.getLogFolderPath()
+            path = self.modrana.dmod.log_folder_path
             if path is not None: # None means there is no device dependent path
                 return self._assurePath(path)
             else:
-                return self._assurePathFolder(self.getProfilePath(), DEBUG_LOGS_FOLDER_NAME)
+                return self._assurePathFolder(self.profile_path, DEBUG_LOGS_FOLDER_NAME)
         else:
-            return self._assurePathFolder(self.getProfilePath(), DEBUG_LOGS_FOLDER_NAME)
+            return self._assurePathFolder(self.profile_path, DEBUG_LOGS_FOLDER_NAME)
 
-
-    def getThemesFolderPath(self):
+    @property
+    def themes_folder_path(self):
         """Return path to the themes folder"""
         return THEMES_FOLDER_PATH
 
-    def getRoutingDataFolderPath(self):
+
+    @property
+    def routing_data_folder_path(self):
         """Return path to the routing data folder"""
-        path = self.modrana.dmod.getRoutingDataFolderPath()
+        path = self.modrana.dmod.routing_data_folder_path
         if path is not None:
             return self._assurePath(path)
         else:
-            return self._assurePath(os.path.join(self.getProfilePath(), ROUTING_DATA_FOLDER_NAME))
+            return self._assurePath(os.path.join(self.profile_path, ROUTING_DATA_FOLDER_NAME))
 
-    def getOverlayGroupsFolderPath(self):
+    @property
+    def overlay_groups_folder_path(self):
         """Return path to the folder where overlay groups are stored as JSON files"""
-        return self._assurePathFolder(self.getProfilePath(), OVERLAY_GROUPS_FOLDER_NAME)
+        return self._assurePathFolder(self.profile_path, OVERLAY_GROUPS_FOLDER_NAME)
 
     ## Monav ##
 
-    def getMonavDataPath(self):
+    @property
+    def monav_data_path(self):
         """return a path where the all the Monav routing data is stored,
         this path can be used both for manipulating the data (add,delete, update) &
         using the data for routing)
         """
-        path = os.path.join(self.getRoutingDataFolderPath(), MONAV_DATA_FOLDER_NAME)
+        path = os.path.join(self.routing_data_folder_path, MONAV_DATA_FOLDER_NAME)
         return self._assurePath(path)
 
-    def getMonavServerBinaryPath(self):
+    @property
+    def monav_server_binary_path(self):
         arch = None
         deviceID = self.modrana.dmod.device_id
         if deviceID == 'n900':
@@ -341,7 +354,8 @@ class Paths(object):
             # no known path to Monav binaries for this architecture
             return None
 
-    def getVersionString(self):
+    @property
+    def version_string(self):
         """
         return current version string or None if not available
         """

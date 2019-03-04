@@ -386,7 +386,7 @@ class Tracklog(RanaModule):
 
     def getLogFolderPath(self):
         """return path to the log folder"""
-        tracklogFolder = self.modrana.paths.getTracklogsFolderPath()
+        tracklogFolder = self.modrana.paths.tracklog_folder_path
         return os.path.join(tracklogFolder, self.category)
 
     def _startTimers(self):

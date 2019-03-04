@@ -38,7 +38,7 @@ class Options(RanaModule):
         self.keyDefault = {}
 
         # profile folder
-        self.profileFolderPath = self.modrana.paths.getProfilePath()
+        self.profileFolderPath = self.modrana.paths.profile_path
         # check the profile path and create the folders if necessary
         utils.create_folder_path(self.profileFolderPath)
 
@@ -522,7 +522,7 @@ class Options(RanaModule):
         # ** dragging
         group = addGroup("Dragging", "dragging", catMap, "generic")
         # check if we are on a powerful device or not and set the default accordingly
-        if self.dmod.simpleMapDragging():
+        if self.dmod.use_simple_map_dragging:
             defaultMode = "staticMapDrag"
         else:
             defaultMode = "default"
@@ -599,8 +599,8 @@ class Options(RanaModule):
         # if non-fullscreen mode is supported on the device, add a button
         # that enables starting in fullscreen
         # (requested by N900 users)
-        if not self.modrana.dmod.fullscreenOnly():
-            addBoolOpt("Start in fullscreen", "startInFullscreen", group, False)
+        if not self.modrana.dmod.fullscreen_only:
+            addBoolOpt("Start in fullscreen", "start_in_fullscreen", group, False)
 
         # if the quit button should be shown even if it is not needed on the
         # given platform
@@ -682,13 +682,13 @@ class Options(RanaModule):
                group,
                4)
 
-        if self.dmod.hasButtons():
+        if self.dmod.has_buttons:
             # TODO: change this once there are more options for key shortcuts
             # * the Keys category *
             catKeys = addCat("Keys", "keys", "keys")
             # * Device buttons
             group = addGroup("Device buttons", "device_buttons", catKeys, "n900")
-            if self.dmod.hasVolumeKeys():
+            if self.dmod.has_volume_keys:
                 addBoolOpt("Use volume keys for zooming", "useVolumeKeys", group, True, "device:updateKeys")
 
 
@@ -967,7 +967,7 @@ class Options(RanaModule):
         # ** GPS
         group = addGroup("GPS", "gps", catLocation, "generic")
         addBoolOpt("GPS", "GPSEnabled", group, True, "location:checkGPSEnabled")
-        if self.dmod.getLocationType() == 'gpsd':
+        if self.dmod.location_type == 'gpsd':
             knots = "knots per second"
             meters = "meters per second"
             if self.dmod.device_id == 'neo':
@@ -1136,7 +1136,7 @@ class Options(RanaModule):
         # ** gps
         group = self.addGroup("GPS", "gps", catDebug, "generic")
         # only show relevant
-        locationType = self.dmod.getLocationType()
+        locationType = self.dmod.location_type
         if locationType == 'liblocation':
             addBoolOpt("Show N900 GPS-fix", "n900GPSDebug", group, False)
         addBoolOpt("GPS debug messages", "gpsDebugEnabled", group, False)

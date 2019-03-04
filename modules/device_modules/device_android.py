@@ -45,54 +45,68 @@ class Android(DeviceModule):
     def device_id(self):
         return "android"
 
-    def getDeviceName(self):
+    @property
+    def device_name(self):
         return "Android device"
 
-    def getWinWH(self):
+    @property
+    def window_wh(self):
         #return 480, 800
         return None
 
-    def startInFullscreen(self):
+    @property
+    def start_in_fullscreen(self):
         return True
 
-    def fullscreenOnly(self):
+    @property
+    def fullscreen_only(self):
         return True
 
-    def getSupportedGUIModuleIds(self):
+    @property
+    def supported_gui_module_ids(self):
         return ["qt5"]
 
-    def getLocationType(self):
+    @property
+    def location_type(self):
         # TODO: get to location data on Android
         return None
 
-    def screenBlankingControlSupported(self):
+    @property
+    def screen_blanking_control_supported(self):
         """
         Screen blanking support is handled through Qt Mobility
         """
         return False
 
-    def needsQuitButton(self):
+    @property
+    def needs_quit_button(self):
         """due to no window decoration, own quit button
         might be needed so that users can quit modRana when
         they want to"""
         return False
 
-    def getMapFolderPath(self):
+    @property
+    def map_folder_path(self):
         return MAP_FOLDER_PATH
 
-    def getRoutingDataFolderPath(self):
+    @property
+    def routing_data_folder_path(self):
         return ROUTING_DATA_FOLDER_PATH
 
-    def getTracklogFolderPath(self):
+    @property
+    def tracklog_folder_path(self):
         return TRACKLOG_FOLDER_PATH
 
-    def getLogFolderPath(self):
+    @property
+    def log_folder_path(self):
         return DEBUG_LOG_FOLDER_PATH
-    
-    def getPOIFolderPath(self):
+
+    @property
+    def poi_folder_path(self):
         return POI_FOLDER_PATH
 
-    def getDeviceType(self):
+    @property
+    def device_type(self):
         # TODO: device type detection
         return None
 

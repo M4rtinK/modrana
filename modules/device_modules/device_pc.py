@@ -39,22 +39,28 @@ class DevicePC(DeviceModule):
     def device_id(self):
         return "pc"
 
-    def getDeviceName(self):
+    @property
+    def device_name(self):
         return "A generic Personal Computer"
 
-    def getWinWH(self):
+    @property
+    def window_wh(self):
         return 800, 480
 
-    def simpleMapDragging(self):
+    @property
+    def use_simple_map_dragging(self):
         return False
 
-    def startInFullscreen(self):
+    @property
+    def start_in_fullscreen(self):
         return False
 
-    def getSupportedGUIModuleIds(self):
+    @property
+    def supported_gui_module_ids(self):
         return ["GTK", "QML:indep"]
 
-    def getDeviceType(self):
+    @property
+    def device_type(self):
         return DEVICE_TYPE_DESKTOP
 
     @property

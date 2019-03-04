@@ -46,8 +46,8 @@ class Location(RanaModule):
         self.positionUpdate = Signal()
 
         # check if the device handles location by itself
-        if not self.modrana.dmod.handlesLocation():
-            method = self.modrana.dmod.getLocationType()
+        if not self.modrana.dmod.handles_location:
+            method = self.modrana.dmod.location_type
             if method == "qt_mobility":
                 self.log.info("using Qt Mobility")
                 from . import qt_mobility
@@ -64,7 +64,7 @@ class Location(RanaModule):
 
     def firstTime(self):
         # periodic screen redraw
-        if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
+        if self.modrana.dmod.location_type in ("gpsd", "liblocation"):
             self.log.info("starting GPSD 1 second timer")
             # start screen update 1 per second screen update
             # TODO: event based redrawing
@@ -184,14 +184,14 @@ class Location(RanaModule):
         # send the location start signal
         self.startSignal()
         if not self._enabled:
-            if self.modrana.dmod.handlesLocation():
-                locationType = self.modrana.dmod.getLocationType()
+            if self.modrana.dmod.handles_location:
+                locationType = self.modrana.dmod.location_type
                 if locationType != "QML":
                     # location startup is handled by the
                     # GUI module in if QML location
                     # type is used
                     self.log.info("enabling device module location")
-                    self.modrana.dmod.startLocation(startMainLoop=startMainLoop)
+                    self.modrana.dmod.start_location(start_main_loop=startMainLoop)
             elif gs.GUIString == "qt5" and self.modrana.dmod.device_id != "pc":
                 self.log.info("location is handled by Qt5 when using Qt5 GUI")
             elif self.provider:
@@ -206,8 +206,8 @@ class Location(RanaModule):
         # send the location stop signal
         self.stopSignal()
         self.log.info("location: disabling location")
-        if self.modrana.dmod.handlesLocation():
-            self.modrana.dmod.stopLocation()
+        if self.modrana.dmod.handles_location:
+            self.modrana.dmod.stop_location()
         # check if location provider is available,
         # if it is available, stop location
         elif self.provider:

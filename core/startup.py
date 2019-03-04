@@ -342,7 +342,7 @@ class Startup(object):
         # local search need Internet connectivity, trigger
         # Internet initialization now, the search function decorator
         # will wait for it to finish
-        self.modrana.dmod.enableInternetConnectivity()
+        self.modrana.dmod.enable_internet_connectivity()
 
         # load the online services module
         online = self.modrana._load_module("mod_onlineServices", "onlineServices")
@@ -516,7 +516,7 @@ class Startup(object):
         # -> Internet is needed for a quick fix & the search itself
         # -> if the device is offline, it might need this "nudge"
         # to reconnect
-        self.modrana.dmod.enableInternetConnectivity()
+        self.modrana.dmod.enable_internet_connectivity()
 
         # check if location was provided from CLI
         if self.args.local_search_location is not None:
@@ -578,7 +578,7 @@ class Startup(object):
         if stop:
         # quite the main loop so that _getCurrentPosition can finish
         #      main.quit()
-            location.stopLocation()
+            location.stop_location()
 
     def _getCurrentPosition(self, loadLocationModule=False, useLastKnown=False):
         """get current position on a system in early startup state"""
@@ -592,12 +592,12 @@ class Startup(object):
             self.modrana.watch('fix', self._fixCB, [time.time(), l])
             log.info('location module loaded')
             # start location
-            l.startLocation(startMainLoop=True)
+            l.start_location(start_main_loop=True)
             log.info('location started')
         else:
             l = self.modrana.m.get("location", None)
 
-        # calling l.startLocation(startMainLoop=True) will start the
+        # calling l.start_location(startMainLoop=True) will start the
         # main loop and block the execution of this function until the
         # main loop is killed by the fix watch
         #
@@ -617,7 +617,7 @@ class Startup(object):
         #      checkInterval = 0.1 # in seconds
         #      print("startup: trying to determine current position for at most %d s" % LOCAL_SEARCH_LOCATION_TIMEOUT)
         #      while timeout <= LOCAL_SEARCH_LOCATION_TIMEOUT:
-        #        if self.modrana.dmod.getLocationType() in ("gpsd", "liblocation"):
+        #        if self.modrana.dmod.location_type() in ("gpsd", "liblocation"):
         #          # GPSD and liblocation need a nudge
         #          # to update the fix when the GUI mainloop is not running
         #          #self.modrana.dmod._libLocationUpdateCB()
@@ -638,7 +638,7 @@ class Startup(object):
 
         if loadLocationModule:
         # properly stop location when done (for early tasks)
-            l.stopLocation()
+            l.stop_location()
 
         if pos is None: # as a last resort, try last known position, if available
             if not useLastKnown:

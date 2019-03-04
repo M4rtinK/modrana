@@ -33,7 +33,7 @@ class Info(RanaModule):
     def __init__(self, *args, **kwargs):
         RanaModule.__init__(self, *args, **kwargs)
         self.versionString = "unknown version"
-        currentVersionString = self.modrana.paths.getVersionString()
+        currentVersionString = self.modrana.paths.version_string
         if currentVersionString is not None:
             # check version string validity
             self.versionString = currentVersionString
@@ -95,13 +95,13 @@ class Info(RanaModule):
         if menuName == 'infoAbout':
             menus = self.m.get('menu', None)
             if menus:
-                button1 = ('Discussion', 'generic', "ms:menu:openUrl:%s" % self.discussions[0][0])
-                button2 = ('Donate', 'generic', "ms:menu:openUrl:%s" % self.pay_pal_url)
+                button1 = ('Discussion', 'generic', "ms:menu:open_url:%s" % self.discussions[0][0])
+                button2 = ('Donate', 'generic', "ms:menu:open_url:%s" % self.pay_pal_url)
                 web = " <u>www.modrana.org</u> "
                 email = " modrana@gmail.com "
                 text = "modRana version:\n\n%s\n\n\n\nFor questions or feedback,\n\ncontact the <b>modRana</b> project:\n\n%s\n\n%s\n\n" % (
                 self.versionString, web, email)
-                box = (text, "ms:menu:openUrl:http://www.modrana.org")
+                box = (text, "ms:menu:open_url:http://www.modrana.org")
                 menus.drawThreePlusOneMenu(cr, 'infoAbout', 'set:menu:info', button1, button2, box)
         elif menuName == "infoDirection":
             menus = self.m.get('menu', None)

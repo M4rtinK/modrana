@@ -123,7 +123,7 @@ class QMLGUI(GUIModule):
                 self.modrana.shutdown()
 
         self.app = QApplication(sys.argv)
-        startDragDistance = self.modrana.dmod.getStartDragDistance()
+        startDragDistance = self.modrana.dmod.start_drag_distance
         if startDragDistance:
             self.app.setStartDragDistance(startDragDistance)
 
@@ -257,7 +257,7 @@ class QMLGUI(GUIModule):
 
         #    print("QML starting main loop")
 
-        if self.modrana.dmod.startInFullscreen():
+        if self.modrana.dmod.start_in_fullscreen:
             self.toggleFullscreen()
 
         # Create an URL to the QML file
@@ -324,7 +324,7 @@ class QMLGUI(GUIModule):
         return
 
     def openUrl(self, url):
-        QDesktopServices.openUrl(url)
+        QDesktopServices.open_url(url)
 
     def _getTileserverPort(self):
         m = self.m.get("tileserver", None)
@@ -393,7 +393,7 @@ class Platform(QtCore.QObject):
         """
         report current modRana version or None if version info is not available
         """
-        version = self.modrana.paths.getVersionString()
+        version = self.modrana.paths.version_string
         if version is None:
             return "unknown"
         else:
@@ -417,14 +417,14 @@ class Platform(QtCore.QObject):
         Harmattan handles this by the Swype UI and
         on PC it is a custom to have the quit action in the main menu
         """
-        return self.modrana.dmod.needsQuitButton()
+        return self.modrana.dmod.needs_quit_button
 
     @QtCore.Slot(result=bool)
     def fullscreenOnly(self):
         """
         Harmattan doesn't need a minimize button
         """
-        return self.modrana.dmod.fullscreenOnly()
+        return self.modrana.dmod.fullscreen_only
 
     @QtCore.Slot(result=bool)
     def incompleteTheme(self):
@@ -501,7 +501,7 @@ class IconImageProvider(QDeclarativeImageProvider):
         try:
 
             #TODO: theme name caching ?
-            themeFolder = self.gui.modrana.paths.getThemesFolderPath()
+            themeFolder = self.gui.modrana.paths.themes_folder_path
             fullIconPath = os.path.join(themeFolder, iconPath)
 
             # the path is constructed like this in QML

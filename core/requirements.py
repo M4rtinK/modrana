@@ -51,7 +51,7 @@ def locateCurrentPosition(controller=None):
     if not location.enabled:
         # location usage has not be disabled but location
         # has not been started, so start location
-        location.startLocation()
+        location.start_location()
 
     # wait for the fix
     startTimestamp = time.time()
@@ -80,7 +80,7 @@ def checkConnectivity(controller=None):
     """Check for Internet connectivity - if no Internet connectivity is available,
     wait for up to 30 seconds and then fail (this is used to handle cases where
     the device was offline and the Internet connection is just being established)"""
-    status = modrana.dmod.connectivityStatus
+    status = modrana.dmod.connectivity_status
     if status is constants.CONNECTIVITY_UNKNOWN: # Connectivity status monitoring not supported
         return status # skip
     elif status is constants.ONLINE:
@@ -91,7 +91,7 @@ def checkConnectivity(controller=None):
         if controller:
             controller.status = "waiting for Internet connectivity"
         while elapsed < constants.INTERNET_CONNECTIVITY_TIMEOUT:
-            status = modrana.dmod.connectivityStatus
+            status = modrana.dmod.connectivity_status
             log.info('waiting for internet connectivity')
             log.info(status)
             if status == True or status is None:
@@ -153,7 +153,7 @@ def internet(function):
     def wrapper(*args, **kwargs):
         controller=kwargs.get("controller")
         # tell the device module we need Internet connectivity
-        modrana.dmod.enableInternetConnectivity()
+        modrana.dmod.enable_internet_connectivity()
         # check if it is available
         status = checkConnectivity(controller=controller)
         if status is constants.OFFLINE:
@@ -188,7 +188,7 @@ def startGPS(conditional=False):
             if start and gpsEnabled:
                 location = modrana.m.get('location')
                 if location:
-                    location.startLocation()
+                    location.start_location()
 
             return function(*args, **kwargs)
         return wrapper
@@ -200,7 +200,7 @@ def startInternet(function):
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
         # tell the device module we need Internet connectivity
-        modrana.dmod.enableInternetConnectivity()
+        modrana.dmod.enable_internet_connectivity()
 
         return function(*args, **kwargs)
     return wrapper
