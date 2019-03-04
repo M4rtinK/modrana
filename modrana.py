@@ -297,7 +297,7 @@ class ModRana(object):
         # get preferred GUI module strings from the device module
 
         if self.GUIString == "":
-            ids = self.dmod.getSupportedGUIModuleIds
+            ids = self.dmod.supported_gui_module_ids
             if ids:
                 self.GUIString = ids[0]
             else:
