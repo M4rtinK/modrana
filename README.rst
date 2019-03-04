@@ -37,19 +37,15 @@ GTK GUI
 - PyCairo
 - Python-Location (N900)
 
-Qt 4/QML GUI
-------------
-
-- PySide & Qt 4.7.4+
-- Qt Components
-- python-mobility
-
 Qt 5/QML GUI
 ------------
 
 - Qt 5.1+
 - Python 3.2+
 - PyOtherSide 1.3+
+- a supported Qt Quick components set
+  - Qt Quick Controls 2
+  - Sailfish Silica
 
 Ancestry
 ========

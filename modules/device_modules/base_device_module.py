@@ -107,18 +107,21 @@ class DeviceModule(RanaModule):
         are most suitable for the given platform
         -> the string starts with the module id prefix, is separated by : and
         continues with the subset id
-        EXAMPLE: ["QML:harmattan","QML:indep","GTK"]
-        -> QML GUI with Harmattan Qt Components is preferred,
-        QML GUI with platform independent Qt Components is less preferred
-        and the GTK GUI is set as a fallback if everything else fails
+
+        EXAMPLE:
+        ["qt5:silica","qt5:controls2","GTK"]
+        -> Qt 5 GUI with Silica Components is preferred,
+        -> Qt 5 GUI with Qt Quick Controls 2 is less preferred
+        -> the "classic" GTK 2 GUI is set as a fallback if everything else fails
+
+        NOTE: it's unlikely an real platform that can host both Silica,
+              Controls 2 & GTK2 GUI exists
+
         CURRENT USAGE
-        there are different incompatible native Qt Component sets
-        on various platforms (Harmattan QTC, Plasma Active QTC, Jolla QTC,...)
-        the QML GUI aims to support most of these components sets to provide
-        native look & feel and the subset id is used by the device module
-        to signal the GUI module which QTC component to use
+        Actually none since the QML UI was deprecated, but I guess it could be used
+        in the future to switch Universal Component backends.
         """
-        return ["GTK", "QML"] # as default try GTK first and then QML
+        return ["GTK", "qt5"] # as default try GTK first and then the Qt 5 GUI
 
     @property
     def handles_location(self):

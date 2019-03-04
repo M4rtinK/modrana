@@ -1,6 +1,0 @@
-Platform independent modRana GUI
---------------------------------
-This is a modRana GUI that is platform independent and should
-work in any environment where QtQuick 1.1 & modRana core runs.
-It has no native look and feel as it doesn't use any platform dependent
-components.

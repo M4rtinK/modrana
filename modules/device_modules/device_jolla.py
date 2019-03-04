@@ -81,7 +81,7 @@ class Jolla(DeviceModule):
 
     @property
     def supported_gui_module_ids(self):
-        return ["Qt5"]
+        return ["qt5"]
 
     @property
     def location_type(self):

@@ -92,7 +92,7 @@ class DeviceNemo(DeviceModule):
 
     @property
     def supported_gui_module_ids(self):
-        return ["QML:harmattan", "QML:indep"]
+        return ["qt5"]
 
     # as python-qtmobility currently segfaults
     # when asked for location info,

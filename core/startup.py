@@ -74,10 +74,10 @@ class Startup(object):
         # GUI
         parser.add_argument(
             '-u', metavar="GUI ID", type=str,
-            help='specify user interface type (GTK or QML)',
+            help='specify user interface type (GTK or qt5)',
             default=None,
             action="store"
-            #      choices=["GTK", "QML"]
+            #      choices=["GTK", "qt5"]
         )
         # local search
         parser.add_argument(

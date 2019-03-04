@@ -51,7 +51,7 @@ class DeviceNetbook(DeviceModule):
 
     @property
     def supported_gui_module_ids(self):
-        return ["GTK", "QML"]
+        return ["GTK", "qt5"]
 
     @property
     def device_type(self):

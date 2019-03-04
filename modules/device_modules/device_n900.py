@@ -28,20 +28,13 @@ import logging
 import dbus.glib
 
 from core import gs, constants
-# only import GTK, Hildon & Liblocation when using GTK GUI
-if gs.GUIString == "GTK":
-    import hildon
-    import location
-    import conic # provide by python-conic on Maemo 5
-    # NOTE: conic imports Glib & Gobject, which cause segfaults for the Qt based QML GUI
-    # therefore, it is important it is loaded only with fort the GTK GUI
-    #  import dbus.glib
-    import gtk
-    # why dbus.glib ?
-    # if you import only "dbus", it can't find its mainloop for callbacks
-elif gs.GUIString == "QML":
-    from QtMobility.SystemInfo import QSystemScreenSaver
-    # ^^ back-light control for QML GUI
+import hildon
+import location
+import conic # provide by python-conic on Maemo 5
+#  import dbus.glib
+import gtk
+# why dbus.glib ?
+# if you import only "dbus", it can't find its mainloop for callbacks
 
 TRACKLOGS_PATH = "/home/user/MyDocs/tracklogs"
 MAP_FOLDER_PATH = "/home/user/MyDocs/.maps/"
@@ -82,22 +75,17 @@ class DeviceN900(DeviceModule):
         # Mainloop for headless location support
         self.mainloop = None
 
-        if gs.GUIString == "GTK":
-            # liblocation
-            self.lControl = None
-            self.lDevice = None
-            # location startup is handled by mod_location
-            # in its firstTime call
+        # liblocation
+        self.lControl = None
+        self.lDevice = None
+        # location startup is handled by mod_location
+        # in its firstTime call
 
-            # libconic
-            self._conicConnect()
+        # libconic
+        self._conicConnect()
 
-            # we handle notifications only for the GTK GUI
-            self.modrana.notificationTriggered.connect(self._dispatchNotificationCB)
-
-        elif gs.GUIString == "QML":
-            self.log.info("N900 Qt screen saver controller created")
-            self.qScreenSaver = QSystemScreenSaver()
+        # we handle notifications only for the GTK GUI
+        self.modrana.notificationTriggered.connect(self._dispatchNotificationCB)
 
         # the old Python 2.5 based urllib3 has a bit different logging,
         # so we need to make it shut up here
@@ -111,8 +99,6 @@ class DeviceN900(DeviceModule):
             self.conicConnection = conic.Connection()
             self.conicConnection.connect("connection-event", self._connectionStateCB)
             self.conicConnection.set_property("automatic-connection-events", True)
-            #Todo: connectivity state monitoring for the QML GUI (Qt mobility probably does this ?)
-
 
     def firstTime(self):
         # setup window state callbacks
@@ -181,7 +167,7 @@ class DeviceN900(DeviceModule):
 
     @property
     def supported_gui_module_ids(self):
-        return ["GTK", "QML:harmattan", "QML:indep"]
+        return ["GTK"]
 
     def startAutorotation(self):
         """start the GUI automatic rotation feature"""
@@ -220,12 +206,8 @@ class DeviceN900(DeviceModule):
         return True
 
     def pause_screen_blanking(self):
-        if gs.GUIString == "GTK":
-        #      self.log.debug("pausing screen blanking in GTK GUI")
-            self.mceRequest.req_display_blanking_pause()
-        elif gs.GUIString == "QML":
-        #      self.log.debug("pausing screen blanking in QML GUI")
-            QSystemScreenSaver.setScreenSaverInhibit(self.qScreenSaver)
+    #      self.log.debug("pausing screen blanking in GTK GUI")
+        self.mceRequest.req_display_blanking_pause()
 
     def unlock_screen(self):
         self.mceRequest.req_tklock_mode_change('unlocked')
@@ -475,11 +457,7 @@ class DeviceN900(DeviceModule):
         """start the liblocation based location update method"""
         try:
             try:
-                # as the location module drags inside gobject related modules
-                # that make the QML GUI segfault, we need to make sure they are not
-                # the module is not loaded when running the QML GUI
-                if gs.GUIString != "QML":
-                    import location
+                import location
                 self.lControl = location.GPSDControl.get_default()
                 self.lDevice = location.GPSDevice()
             except Exception:
@@ -553,12 +531,7 @@ class DeviceN900(DeviceModule):
         * epc: Climb accuracy"""
         try:
             if device.fix:
-                # make sure the location module is imported, but not with QML GUI
-                # as the location module drags inside gobject related modules
-                # that make the QML GUI segfault, we need to make sure they are not
-                # the module is not loaded when running the QML GUI
-                if gs.GUIString != "QML":
-                    import location
+                import location
 
                 fix = device.fix
                 self.set('fix', fix[0])
