@@ -13,7 +13,7 @@ Name: modrana
 Release: 1%{?dist}
 %endif
 Url: http://modrana.org
-Version: 0.55.20
+Version: 0.56.1
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -130,6 +130,11 @@ fi
 %endif
 
 %changelog
+* Tue Mar 05 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.1-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Thu Sep 06 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.20-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Improve UX for arbitrary POI creation (martin.kolman)
