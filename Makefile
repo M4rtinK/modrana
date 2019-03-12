@@ -152,6 +152,26 @@ archive:
 	rm -rf $(PKGNAME)-$(VERSION)
 	@echo "The archive is in $(PKGNAME)-$(VERSION).tar.gz"
 
+scratch: 
+	# make archive from folder contents, not git
+	# - this is useful for debugging packaging issues to update the tarball quickly
+	# - this really includes *everything* other than top-level compressed tarballs
+	@rm -f ChangeLog
+	@make ChangeLog
+	@make VersionFile
+	mkdir -p /tmp/$(PKGNAME)-$(VERSION)
+	cp -r * /tmp/$(PKGNAME)-$(VERSION)
+	# prevent previous tarballs from being added
+	rm -f /tmp/$(PKGNAME)-$(VERSION)/*.tar.gz
+	# also exclude .git
+	rm -rf /tmp/$(PKGNAME)-$(VERSION)/.git
+	cp ChangeLog /tmp/$(PKGNAME)-$(VERSION)/
+	cp version.txt /tmp/$(PKGNAME)-$(VERSION)/
+	tar -cvf $(PKGNAME)-$(VERSION).tar -C /tmp $(PKGNAME)-$(VERSION)
+	gzip -9 $(PKGNAME)-$(VERSION).tar
+	rm -rf /tmp/$(PKGNAME)-$(VERSION)
+	@echo "The archive is in $(PKGNAME)-$(VERSION).tar.gz"
+
 rpmlog:
 	@git log --pretty="format:- %s (%ae)" $(TAG).. |sed -e 's/@.*)/)/'
 	@echo
