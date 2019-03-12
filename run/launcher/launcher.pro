@@ -53,7 +53,8 @@ DEFINES += UC_ROOT_PATH=\\\"$${PREFIX}/$${TARGET}/modules/gui_modules/gui_qt5/qm
 # define default Universal Components folder name
 DEFINES += UC_BACKEND_FOLDER_NAME=\\\"$${UC_BACKEND}\\\"
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+# deploy the resulting library into /usr/bin
+target.path = /usr/bin/
+target.files = $$TARGET
+
+INSTALLS += target
