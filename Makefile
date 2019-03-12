@@ -9,6 +9,8 @@ PYTHON=$(PYTHON2)
 
 RSYNC=rsync
 
+QMAKE=qmake-qt5
+
 NOSETESTS="nosetests-3"
 
 SOURCEDIR=modrana_source
@@ -102,6 +104,8 @@ install:
 	cp packaging/fedora/modrana $(DESTDIR)/usr/bin/
 	cp packaging/fedora/modrana-gtk $(DESTDIR)/usr/bin/
 	cp packaging/fedora/modrana-qt5 $(DESTDIR)/usr/bin/
+	# install the launcher
+	cp run/launcher/modrana $(DESTDIR)/usr/bin
 
 install-sailfish:
 	-mkdir -p $(DESTDIR)/usr/share/harbour-modrana
@@ -118,7 +122,19 @@ install-sailfish:
 	# install the desktop file
 	-mkdir -p $(DESTDIR)/usr/share/applications/
 	cp packaging/sailfish/harbour-modrana.desktop $(DESTDIR)/usr/share/applications/
-	
+	# install the sailfish version of the launcher
+	cp run/launcher/harbour-modrana $(DESTDIR)/usr/bin
+
+launcher:
+	# build the generic version of the Qt5/C++ native launcher
+	$(QMAKE) run/launcher/launcher.pro "PREFIX=/usr/share/modrana" -o run/launcher/Makefile
+	make -C run/launcher/
+
+launcher-sailfish:
+	# build the Sailfish OS specififc version of the Qt5/C++ native launcher
+	$(QMAKE) run/launcher/launcher.pro "PREFIX=/usr/share/modrana" "CONFIG+=sailfish" -o run/launcher/Makefile
+	make -C run/launcher/
+
 tag:
 	git tag -a -m "Tag as $(TAG)" -f $(TAG)
 	@echo "Tagged as $(TAG)"

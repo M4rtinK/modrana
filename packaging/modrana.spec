@@ -11,6 +11,11 @@ Release: 1
 %else
 Name: modrana
 Release: 1%{?dist}
+# debug package generation seems to get confused on Fedora:
+# "RPM build error: empty %files file debugfiles.list"
+# Maybe it's the Qt5/C++ launcher or switch to arch build ? 
+# Let's disable it for now.
+%global debug_package %{nil}
 %endif
 Url: http://modrana.org
 Version: 0.56.1
@@ -18,12 +23,12 @@ Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
 Group: Applications/Productivity
-BuildArch: noarch
 BuildRoot: %{_tmppath}/modrana-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: make
 BuildRequires: python3-devel
 BuildRequires: rsync
+BuildRequires: qt5-qtdeclarative-devel
 
 %if 0%{with_sailfish}
 Requires: sailfishsilica-qt5
@@ -74,10 +79,12 @@ make
 make rsync-harbour # run the more strinc rsync for a Harbour package
 %else
 make rsync-sailfish # run rsync with a Sailfish OS specific filtering
+make launcher-sailfish QMAKE=%qtc_qmake5 # build Sailfish OS specific native launcher
 %endif
 make bytecode-python3 # modRana is Python 3 only on Sailfish OS
 %else
 make rsync # run regular rsync
+make launcher QMAKE=%{qmake_qt5} # build regular native launcher
 # both the GTK (Python 2) and Qt 5 (Python 3) GUIs are available on Fedora
 make bytecode-python2
 make bytecode-python3
@@ -118,6 +125,7 @@ fi
 /usr/share/icons/hicolor/108x108/apps/*
 /usr/share/icons/hicolor/128x128/apps/*
 /usr/share/icons/hicolor/256x256/apps/*
+/usr/bin/harbour-modrana
 %else
 %doc README.rst
 %license COPYING.txt
