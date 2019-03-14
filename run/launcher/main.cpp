@@ -7,7 +7,7 @@
     #include <QScopedPointer>
 #endif
 
-#include <QtDebug>
+#include <QDebug>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickView>
