@@ -18,7 +18,7 @@ Release: 1%{?dist}
 %global debug_package %{nil}
 %endif
 Url: http://modrana.org
-Version: 0.56.1
+Version: 0.56.2
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -138,6 +138,14 @@ fi
 %endif
 
 %changelog
+* Thu Mar 14 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.2-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Add a scratch target to the makefile (martin.kolman)
+- Add support for building the launchers to Makefile and spec (martin.kolman)
+- Set some reasonable install target for the launcher (martin.kolman)
+- Add initial native launcher (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Tue Mar 05 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.1-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 
