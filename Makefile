@@ -127,12 +127,12 @@ install-sailfish:
 
 launcher:
 	# build the generic version of the Qt5/C++ native launcher
-	$(QMAKE) run/launcher/launcher.pro "PREFIX=/usr/share/modrana" -o run/launcher/Makefile
+	$(QMAKE) run/launcher/launcher.pro "PREFIX=/usr/share/" -o run/launcher/Makefile
 	make -C run/launcher/
 
 launcher-sailfish:
 	# build the Sailfish OS specififc version of the Qt5/C++ native launcher
-	$(QMAKE) run/launcher/launcher.pro "PREFIX=/usr/share/modrana" "CONFIG+=sailfish" -o run/launcher/Makefile
+	$(QMAKE) run/launcher/launcher.pro "PREFIX=/usr/share/" "CONFIG+=sailfish" -o run/launcher/Makefile
 	make -C run/launcher/
 
 tag:
