@@ -85,8 +85,8 @@ make
 make rsync-harbour # run the more strinc rsync for a Harbour package
 %else
 make rsync-sailfish # run rsync with a Sailfish OS specific filtering
-make launcher-sailfish QMAKE=qmake # build Sailfish OS specific native launcher
 %endif
+make launcher-sailfish QMAKE=qmake # build Sailfish OS specific native launcher
 make bytecode-python3 # modRana is Python 3 only on Sailfish OS
 %else
 make rsync # run regular rsync
