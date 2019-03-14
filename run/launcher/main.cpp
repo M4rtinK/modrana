@@ -5,12 +5,12 @@
 #ifdef SAILFISH
     #include <sailfishapp.h>
     #include <QScopedPointer>
-#else
-    #include <QtDebug>
-    #include <QGuiApplication>
-    #include <QQmlApplicationEngine>
-    #include <QQuickView>
 #endif
+
+#include <QtDebug>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQuickView>
 
 int main(int argc, char *argv[])
 {
