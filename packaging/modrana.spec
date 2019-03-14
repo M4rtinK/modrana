@@ -12,7 +12,7 @@ Release: 1
 Name: modrana
 Release: 1%{?dist}
 # debug package generation seems to get confused on Fedora:
-# "RPM build error: empty %files file debugfiles.list"
+# "RPM build error: empty _percent_ files file debugfiles.list"
 # Maybe it's the Qt5/C++ launcher or switch to arch build ? 
 # Let's disable it for now.
 %global debug_package %{nil}
@@ -31,6 +31,12 @@ BuildRequires: rsync
 BuildRequires: qt5-qtdeclarative-devel
 
 %if 0%{with_sailfish}
+BuildRequires: qt5-qmake
+BuildRequires: pkgconfig(Qt5Core)
+BuildRequires: pkgconfig(Qt5Gui)
+BuildRequires: pkgconfig(Qt5Qml)
+BuildRequires: pkgconfig(Qt5Quick)
+BuildRequires: pkgconfig(sailfishapp)
 Requires: sailfishsilica-qt5
 Requires: mapplauncherd-booster-silica-qt5
 Requires: pyotherside-qml-plugin-python3-qt5
@@ -79,7 +85,7 @@ make
 make rsync-harbour # run the more strinc rsync for a Harbour package
 %else
 make rsync-sailfish # run rsync with a Sailfish OS specific filtering
-make launcher-sailfish QMAKE=%qtc_qmake5 # build Sailfish OS specific native launcher
+make launcher-sailfish QMAKE=qmake # build Sailfish OS specific native launcher
 %endif
 make bytecode-python3 # modRana is Python 3 only on Sailfish OS
 %else
