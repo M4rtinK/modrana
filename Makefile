@@ -105,7 +105,7 @@ install:
 	cp packaging/fedora/modrana-gtk $(DESTDIR)/usr/bin/
 	cp packaging/fedora/modrana-qt5 $(DESTDIR)/usr/bin/
 	# install the launcher
-	cp run/launcher/modrana $(DESTDIR)/usr/bin
+	cp run/launcher/modrana $(DESTDIR)/usr/bin/
 
 install-sailfish:
 	-mkdir -p $(DESTDIR)/usr/share/harbour-modrana
@@ -123,7 +123,8 @@ install-sailfish:
 	-mkdir -p $(DESTDIR)/usr/share/applications/
 	cp packaging/sailfish/harbour-modrana.desktop $(DESTDIR)/usr/share/applications/
 	# install the sailfish version of the launcher
-	cp run/launcher/harbour-modrana $(DESTDIR)/usr/bin
+	-mkdir -p $(DESTDIR)/usr/bin
+	cp run/launcher/harbour-modrana $(DESTDIR)/usr/bin/
 
 launcher:
 	# build the generic version of the Qt5/C++ native launcher
