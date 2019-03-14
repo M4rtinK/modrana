@@ -18,7 +18,7 @@ Release: 1%{?dist}
 %global debug_package %{nil}
 %endif
 Url: http://modrana.org
-Version: 0.56.6
+Version: 0.56.7
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -144,6 +144,11 @@ fi
 %endif
 
 %changelog
+* Thu Mar 14 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.7-1
+make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
+- Fix Sailfish OS launcher building condition (martin.kolman)
+make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
+
 * Thu Mar 14 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.6-1
 make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix native launcher installation (martin.kolman)
