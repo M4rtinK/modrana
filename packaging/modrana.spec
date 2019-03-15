@@ -45,6 +45,9 @@ Requires: qt5-qtdeclarative-import-positioning
 Requires: qt5-qtpositioning
 Requires: qt5-qtquickcontrols-layouts
 %else
+# require pathfix so that we can still ship some scripts
+# with "universal" shebangs that run on both Python 2 & 3
+BuildRequires: /usr/bin/pathfix.py
 Requires: pyotherside
 Requires: qt5-qtlocation
 # qmlscene is in the qt5-qtdeclarative package
@@ -91,6 +94,8 @@ make bytecode-python3 # modRana is Python 3 only on Sailfish OS
 %else
 make rsync # run regular rsync
 make launcher QMAKE=%{qmake_qt5} # build regular native launcher
+# fix ambiguous shebangs for Fedora
+pathfix.py -pni "%{__python3} %{py3_shbang_opts}" .
 # both the GTK (Python 2) and Qt 5 (Python 3) GUIs are available on Fedora
 make bytecode-python2
 make bytecode-python3
