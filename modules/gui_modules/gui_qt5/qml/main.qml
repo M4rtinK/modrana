@@ -63,16 +63,6 @@ ApplicationWindow {
 
     property var c
 
-    // properties that can be assigned a value
-    // by packaging scripts for a given platform
-    // -> who would ever want to pass arguments when
-    //    running qml file, nonsense! :P
-    // tl;dr; If we could easily pass arguments
-    // to the QML file with qmlscene or sailfish-qml,
-    // hacks like this would not be needed.
-    property string _PYTHON_IMPORT_PATH_
-    property string _PLATFORM_ID_
-
     property var platform : Platform {}
 
     property alias mapPage : mapPageLoader.item
@@ -371,18 +361,14 @@ ApplicationWindow {
 
         // import and initialize modRana,
         // taking any import overrides in account
-        if (rWin._PYTHON_IMPORT_PATH_) {
-            python.addImportPath(rWin._PYTHON_IMPORT_PATH_)
+        if (rWin.qrc) {
+            // we are running on Android and using qrc so
+            // add the qrc root to import path
+            rWin.log.debug("running on Android")
+            rWin.log.debug("adding qrc:/ to Python import path")
+            python.addImportPath('qrc:/')
         } else {
-            if (rWin.qrc) {
-                // we are running on Android and using qrc so
-                // add the qrc root to import path
-                rWin.log.debug("running on Android")
-                rWin.log.debug("adding qrc:/ to Python import path")
-                python.addImportPath('qrc:/')
-            } else {
-                python.addImportPath('.')
-            }
+            python.addImportPath('.')
         }
         rWin.log.info("importing the modRana Python core")
         python.importModule('modrana', rWin.__start_modRana)
@@ -430,11 +416,6 @@ ApplicationWindow {
             argv = argv.concat(["-u", "qt5"])
         }
 
-        if (rWin._PLATFORM_ID_) {
-            if (argv.indexOf("-d") == -1) {
-                argv = argv.concat(["-d", rWin._PLATFORM_ID_])
-            }
-        }
         rWin.log.info('starting the modRana Python core')
         // start modRana
         python.call('modrana.start', [argv, true], rWin.__init__)

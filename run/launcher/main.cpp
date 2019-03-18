@@ -31,6 +31,14 @@ int main(int argc, char *argv[])
     // Load the QML file, append the import path and start the application and run the application.
     // This is generally platform specific.
     #ifdef SAILFISH
+    // start by adding "-d jolla" to argv so that modRana always started with the Jolla/Sailfish OS
+    // specific device module by default, skipping potentially fragile platform detection
+    std::vector<char*> new_argv(argv, argv + argc);
+    new_argv.push_back("-d");
+    new_argv.push_back("jolla");
+    argv = new_argv.data();
+    argc = argc + 2;
+    // instantiate the application and view
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
     QScopedPointer<QQuickView> view(SailfishApp::createView());
     // add controls folder to QML import path based on value from pro file
