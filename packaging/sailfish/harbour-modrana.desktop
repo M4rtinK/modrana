@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
 Name=modRana
-Exec=sailfish-qml harbour-modrana
+Exec=harbour-modrana
 Icon=harbour-modrana
 X-Nemo-Application-Type=silica-qt5

@@ -53,13 +53,12 @@ rsync:
 	# cleanup the source tree
 	$(RSYNC) -ar --exclude-from $(EXCLUDEFILE) $(SOURCEDIR)/ $(BUILDDIR)
 
-rsync-sailfish: sailfish-qml-mangle
+rsync-sailfish:
 	# cleanup the source tree for a Sailfish OS package
 	$(RSYNC) -ar --exclude-from $(EXCLUDESAILFISH) $(SOURCEDIR)/ $(BUILDDIR)
 
-rsync-harbour: sailfish-qml-mangle
+rsync-harbour:
 	# first mark modrana.py as not executable as Harbour RPM validator does not like that
-	# for some reason (not like you could not just run it with python3 modrana.py...)
 	chmod -x $(SOURCEDIR)/modrana.py
 	# also mark the startup scripts as not executable to make the Harbour RPM validator happy
 	chmod -x $(SOURCEDIR)/run/*
@@ -71,9 +70,6 @@ clean:
 	-rm *.tar.gz
 	rm -rf $(SOURCEDIR)
 	rm -rf $(BUILDDIR)
-
-sailfish-qml-mangle:
-	bash packaging/sailfish/sailfish_qml_mangle.sh $(SOURCEDIR)
 
 bytecode-python2:
 	-python2 -m compileall $(BUILDDIR)
