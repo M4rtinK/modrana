@@ -18,7 +18,7 @@ Release: 1%{?dist}
 %global debug_package %{nil}
 %endif
 Url: http://modrana.org
-Version: 0.56.9
+Version: 0.56.10
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -149,6 +149,9 @@ fi
 %endif
 
 %changelog
+* Tue Mar 19 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.10-1
+- Handle native launchers in QML argv processing (martin.kolman)
+
 * Tue Mar 19 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.9-1
 - Replace sed-based hacks in main.qml (martin.kolman)
 - Drop Sailfish OS specific QML source code mangling (martin.kolman)
