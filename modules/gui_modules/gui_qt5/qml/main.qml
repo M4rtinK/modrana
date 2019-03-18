@@ -10,6 +10,9 @@ ApplicationWindow {
 
     title : "modRana"
 
+    // report if we were started by a native launcher
+    property bool nativeLauncher : false
+
     property bool startupDone : false
     property bool firstPageLoaded : false
     onFirstPageLoadedChanged : {
@@ -407,9 +410,23 @@ ApplicationWindow {
             rWin.newPoiAddedToDatabase(point)
         })
 
-        // get the argv & remove the qml launcher
-        // & qml file name from it (args nr. 0 and 1)
-        var argv = Qt.application.arguments.slice(2)
+        rWin.log.debug("QML got argv:")
+        rWin.log.debug(Qt.application.arguments)
+        var programName = Qt.application.arguments[0]
+        // If we detect a native launcher is being used, we can skip
+        // our own argv manipulation as the launcher should take care
+        // of all that for us.
+        //
+        // modrana - generic native launcher
+        // harbour-modrana - Sailfish OS native launcher
+        if (programName == "modrana" || programName == "harbour-modrana") {
+            rWin.log.debug("QML started by native launcher")
+            var argv = Qt.application.arguments
+        } else {
+            // get the argv & remove the qml launcher
+            // & qml file name from it (args nr. 0 and 1)
+            var argv = Qt.application.arguments.slice(2)
+        }
 
         // add the GUI module id if not in argv
         if (argv.indexOf("-u") == -1) {
