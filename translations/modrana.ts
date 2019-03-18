@@ -1258,12 +1258,12 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="311"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="301"/>
         <source>&lt;b&gt;starting modRana...&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="335"/>
+        <location filename="../modules/gui_modules/gui_qt5/qml/main.qml" line="325"/>
         <source>debug</source>
         <translation type="unfinished"></translation>
     </message>

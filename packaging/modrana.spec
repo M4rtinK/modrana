@@ -18,7 +18,7 @@ Release: 1%{?dist}
 %global debug_package %{nil}
 %endif
 Url: http://modrana.org
-Version: 0.56.8
+Version: 0.56.9
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -149,6 +149,12 @@ fi
 %endif
 
 %changelog
+* Tue Mar 19 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.9-1
+- Replace sed-based hacks in main.qml (martin.kolman)
+- Drop Sailfish OS specific QML source code mangling (martin.kolman)
+- Prevent make from including its own log messages in RPM log (martin.kolman)
+- Remove make related noise from spec file (martin.kolman)
+
 * Fri Mar 15 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.8-1
 - Fix ambiguous Python shebangs for Fedora (martin.kolman)
 
