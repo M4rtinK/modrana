@@ -221,7 +221,7 @@ bumpver:
 	DATELINE="* `LANG=c date "+%a %b %d %Y"` `git config user.name` <`git config user.email`> - $$NEWVERSION-1"  ; \
 	cl=`grep -n %changelog packaging/modrana.spec |cut -d : -f 1` ; \
 	tail --lines=+$$(($$cl + 1)) packaging/modrana.spec > speclog ; \
-	(head -n $$cl packaging/modrana.spec ; echo "$$DATELINE" ; make --quiet rpmlog 2>/dev/null ; echo ""; cat speclog) > packaging/modrana.spec.new ; \
+	(head -n $$cl packaging/modrana.spec ; echo "$$DATELINE" ; make --quiet --no-print-directory rpmlog 2>/dev/null ; echo ""; cat speclog) > packaging/modrana.spec.new ; \
 	mv packaging/modrana.spec.new packaging/modrana.spec ; rm -f speclog ; \
 	sed -i "s/Version: $(VERSION)/Version: $$NEWVERSION/" packaging/modrana.spec ; \
 
