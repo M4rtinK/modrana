@@ -150,52 +150,34 @@ fi
 
 %changelog
 * Fri Mar 15 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.8-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix ambiguous Python shebangs for Fedora (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Thu Mar 14 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.7-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix Sailfish OS launcher building condition (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Thu Mar 14 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.6-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix native launcher installation (martin.kolman)
 - Remove extra / from launcher prefixes (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Thu Mar 14 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.5-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - More tweaks to make the natvie launcher build on Sailfish OS (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Thu Mar 14 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.4-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix includes for Sailfish OS (martin.kolman)
 - Fix spec file for Sailfish OS (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Thu Mar 14 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.3-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix prefix for native launcher (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Thu Mar 14 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.2-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Add a scratch target to the makefile (martin.kolman)
 - Add support for building the launchers to Makefile and spec (martin.kolman)
 - Set some reasonable install target for the launcher (martin.kolman)
 - Add initial native launcher (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Tue Mar 05 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.1-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
-
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Thu Sep 06 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.20-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Improve UX for arbitrary POI creation (martin.kolman)
 - Show marker for newly added POI (martin.kolman)
 - Return index for newly created POI (martin.kolman)
@@ -211,10 +193,8 @@ make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Add POI marker and search marker handling to BaseMapPage API (martin.kolman)
 - Add map layer handling to BaseMapPage API (martin.kolman)
 - Don't ship Python 2.5 version of bundled Urllib 3 in Sailfish OS package (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Sun Jun 24 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.19-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Don't ship PNG icons in the Sailfish OS package (martin.kolman)
 - Replace Bitcoin qrcode PNG with SVG (martin.kolman)
 - Fix removel of QML tests from Silfish OS package (martin.kolman)
@@ -223,10 +203,8 @@ make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Add tracklog handling to BaseMapPage API (martin.kolman)
 - Rename current MapPage to PinchMapPage (martin.kolman)
 - Move PinchMap.qml to the pinchmap folder (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Sun Jun 24 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.18-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix centering button toggle color (martin.kolman)
 - Replace all PNG icons with SVG icons (martin.kolman)
 - Use a new SVG icon for the clear action (martin.kolman)
@@ -236,15 +214,11 @@ make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Add functions for easy clearing of search result and POI markers (martin.kolman)
 - Add a function for easy clearing of all displayed tracklogs (martin.kolman)
 - Show distance on POI listing (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Sat Jun 16 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.17-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix marker button sizing (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Sat Jun 16 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.16-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Enable wrapping for donation header text (martin.kolman)
 - Only ship compiled translation files (martin.kolman)
 - Fix search-in-progress popup layout (martin.kolman)
@@ -253,54 +227,37 @@ make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Add a function for easy routing from current position to a point (martin.kolman)
 - Fix POIPage (martin.kolman)
 - Handle singular/plural for POI category counters (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Fri Jun 15 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.15-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Handle no/one/multiple tracklogs correctly (martin.kolman)
 - Use responsive layout for map buttons with text (martin.kolman)
 - Translation fixes (martin.kolman)
 - Don't include QML unit tests in package files (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Wed Jun 13 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.14-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Unify speed stats rounding (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Wed Jun 13 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.13-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Only copy relevant translation files at build time (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Wed Jun 13 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.12-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
-
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Sat Jun 02 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.10-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Update canvas offset when pinchmap size changes (martin.kolman)
 - Show distance to point on point detail pages (martin.kolman)
 - Log OS release at startup when possible (martin.kolman)
 - Fix a typo (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Fri May 25 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.9-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Use custom urlparse resolving (martin.kolman)
 - Revert "Upgrade bundled six" (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Thu May 17 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.8-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix language list handling on Sailfish OS (martin.kolman)
 - Fix six usage (martin.kolman)
 - Upgrade bundled six (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Wed May 16 2018 Martin Kolman <martin.kolman@gmail.com> - 0.55.7-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Add Travis dependencies for TTS testing (martin.kolman)
 - Add python3-six dependency for Travis testing (martin.kolman)
 - Add documentation for point to point distance functions (martin.kolman)
@@ -339,10 +296,8 @@ make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Merge pull request #236 from DerDakon/https-tiles (martin.kolman)
 - switch many tileserver URLs to HTTPS (eike)
 - Modrana minimal source strings adaption (#1) (Olf0)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Tue Dec 19 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.6-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Bump QtQuick Controls dependency (martin.kolman)
 - Add missing dependency on qt5-qtquickcontrols-layouts (martin.kolman)
 - Update translations (martin.kolman)
@@ -357,22 +312,16 @@ make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Make the "routing enabled" notification translatable (martin.kolman)
 - Drop POI menu from list of unfinished features (martin.kolman)
 - Make the clipboard notification translatable (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Thu Dec 07 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.5-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Dictionary based about page (martin.kolman)
 - Include information about modRana in startup values (martin.kolman)
 - Refactor the info module a bit (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Wed Dec 06 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.4-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - List top level modRana modules explicitely (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Wed Dec 06 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.3-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Use the i18n module (martin.kolman)
 - Get the i18n core module to a useable state (martin.kolman)
 - Add support for mo file creation (martin.kolman)
@@ -382,10 +331,8 @@ make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Add support for custom ComboBox translation context (martin.kolman)
 - Mark strings for translation on TracksMenuPage (martin.kolman)
 - Mark strings for translation on MapLayersPage (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Tue Dec 05 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.2-1
-make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Use explicit translation context in main.qml (martin.kolman)
 - Do everything needed in the release target (martin.kolman)
 - Include translations directory in the tarball (martin.kolman)
@@ -401,7 +348,6 @@ make[2]: Vstupuje se do adresáře „/home/melf-san/data/coding/gps/modrana“
 - Fix strings not marked for translation (martin.kolman)
 - Translation update (martin.kolman)
 - Add translation support (martin.kolman)
-make[2]: Opouští se adresář „/home/melf-san/data/coding/gps/modrana“
 
 * Mon Nov 27 2017 Martin Kolman <martin.kolman@gmail.com> - 0.55.1-1
 - Fix quoting in temporary espeak hack (martin.kolman)
