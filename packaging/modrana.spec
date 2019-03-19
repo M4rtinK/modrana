@@ -18,7 +18,7 @@ Release: 1%{?dist}
 %global debug_package %{nil}
 %endif
 Url: http://modrana.org
-Version: 0.56.13
+Version: 0.56.14
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -149,6 +149,9 @@ fi
 %endif
 
 %changelog
+* Tue Mar 19 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.14-1
+- Fix install target for 172x172 icon (martin.kolman)
+
 * Tue Mar 19 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.13-1
 - Add a 172x172 pixel icon for modRana on Sailfish OS (martin.kolman)
 
