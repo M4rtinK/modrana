@@ -18,7 +18,7 @@ Release: 1%{?dist}
 %global debug_package %{nil}
 %endif
 Url: http://modrana.org
-Version: 0.56.11
+Version: 0.56.12
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -148,6 +148,9 @@ fi
 %endif
 
 %changelog
+* Tue Mar 19 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.12-1
+- Fix hardware compatibility (martin.kolman)
+
 * Tue Mar 19 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.11-1
 - Fix QML & Python argv passing (martin.kolman)
 
