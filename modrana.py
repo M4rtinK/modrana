@@ -1013,6 +1013,10 @@ def start(argv=None, from_qml=False):
         sys.argv = ["modrana.py"]
     # only log full argv if it was extended
     if argv:
+        # drop the native launcher so that we don't have two program names
+        # in our argv
+        if argv[0] == "modrana" or argv[0] == "harbour-modrana":
+            argv = argv[1:]
         sys.argv.extend(argv)
         log.debug("full argv:\n%s", sys.argv)
 

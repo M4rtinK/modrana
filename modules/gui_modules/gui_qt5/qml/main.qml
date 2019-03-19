@@ -421,7 +421,8 @@ ApplicationWindow {
         // harbour-modrana - Sailfish OS native launcher
         if (programName == "modrana" || programName == "harbour-modrana") {
             rWin.log.debug("QML started by native launcher")
-            var argv = Qt.application.arguments
+            // just copy the array
+            var argv = Qt.application.arguments.slice(0)
         } else {
             // get the argv & remove the qml launcher
             // & qml file name from it (args nr. 0 and 1)
