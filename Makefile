@@ -85,12 +85,10 @@ install:
 	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/48x48/apps
 	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/64x64/apps
 	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/128x128/apps
-	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/172x172/apps
 	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/256x256/apps
 	cp packaging/icons/modrana/48x48/modrana.png $(DESTDIR)/usr/share/icons/hicolor/48x48/apps/
 	cp packaging/icons/modrana/64x64/modrana.png $(DESTDIR)/usr/share/icons/hicolor/64x64/apps/
 	cp packaging/icons/modrana/128x128/modrana.png $(DESTDIR)/usr/share/icons/hicolor/128x128/apps/
-	cp packaging/icons/modrana/172x172/modrana.png $(DESTDIR)/usr/share/icons/hicolor/172x172/apps/
 	cp packaging/icons/modrana/256x256/modrana.png $(DESTDIR)/usr/share/icons/hicolor/256x256/apps/
 	cp packaging/fedora/modrana-qml.png $(DESTDIR)/usr/share/icons/hicolor/64x64/apps/
 	# install the desktop file
@@ -112,10 +110,12 @@ install-sailfish:
 	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/86x86/apps/
 	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/108x108/apps/
 	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/128x128/apps/
+	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/172x172/apps
 	-mkdir -p $(DESTDIR)/usr/share/icons/hicolor/256x256/apps/
 	cp packaging/icons/modrana-sailfish/86x86/harbour-modrana.png $(DESTDIR)/usr/share/icons/hicolor/86x86/apps/
 	cp packaging/icons/modrana-sailfish/108x108/harbour-modrana.png $(DESTDIR)/usr/share/icons/hicolor/108x108/apps/
 	cp packaging/icons/modrana-sailfish/128x128/harbour-modrana.png $(DESTDIR)/usr/share/icons/hicolor/128x128/apps/
+	cp packaging/icons/modrana-sailfish/172x172/harbour-modrana.png $(DESTDIR)/usr/share/icons/hicolor/172x172/apps/
 	cp packaging/icons/modrana-sailfish/256x256/harbour-modrana.png $(DESTDIR)/usr/share/icons/hicolor/256x256/apps/
 	# install the desktop file
 	-mkdir -p $(DESTDIR)/usr/share/applications/
