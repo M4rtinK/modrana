@@ -40,7 +40,6 @@ BuildRequires: pkgconfig(sailfishapp)
 Requires: sailfishsilica-qt5
 Requires: mapplauncherd-booster-silica-qt5
 Requires: pyotherside-qml-plugin-python3-qt5
-Requires: libsailfishapp-launcher
 Requires: qt5-qtdeclarative-import-positioning
 Requires: qt5-qtpositioning
 Requires: qt5-qtquickcontrols-layouts

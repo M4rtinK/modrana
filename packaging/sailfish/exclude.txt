@@ -40,3 +40,11 @@ themes/default/*.png
 themes/silica/*.png
 themes/night/*.png
 themes/red/*.png
+# remove non-Silica backends from UC
+qml/universal_components/ubuntu
+qml/universal_components/controls
+qml/universal_components/glacier
+# remove UC docs
+qml/universal_components/docs
+# remove an executable UC utility script
+qml/universal_components/sync_qmldir.sh
