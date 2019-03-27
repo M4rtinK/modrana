@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     view->engine()->addImportPath(uc_backend_path);
     view->setSource(QUrl(modrana_main_qml));
     // tell QML that a native launcher is in use
-    QObject *root = view->rootObject();
+    QQuickItem *root = view->rootObject();
     root->setProperty("nativeLauncher", bool(1));
     view->show();
     return app->exec();
