@@ -11,6 +11,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickView>
+#include <QQuickItem>
 
 int main(int argc, char *argv[])
 {
