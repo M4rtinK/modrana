@@ -11,6 +11,9 @@ ApplicationWindow {
     title : "modRana"
 
     // report if we were started by a native launcher
+    // - this is generally set by the launcher C++ code
+    //   during early startup, before the QML main
+    //   loop is started
     property bool nativeLauncher : false
 
     property bool startupDone : false
@@ -416,10 +419,7 @@ ApplicationWindow {
         // If we detect a native launcher is being used, we can skip
         // our own argv manipulation as the launcher should take care
         // of all that for us.
-        //
-        // modrana - generic native launcher
-        // harbour-modrana - Sailfish OS native launcher
-        if (programName == "modrana" || programName == "harbour-modrana") {
+        if (rWin.nativeLauncher) {
             rWin.log.debug("QML started by native launcher")
             // just copy the array
             var argv = Qt.application.arguments.slice(0)
