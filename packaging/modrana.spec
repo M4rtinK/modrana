@@ -18,7 +18,7 @@ Release: 1%{?dist}
 %global debug_package %{nil}
 %endif
 Url: http://modrana.org
-Version: 0.56.15
+Version: 0.56.16
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -149,6 +149,9 @@ fi
 %endif
 
 %changelog
+* Wed Mar 27 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.16-1
+- Fix type for root object on Sailfish OS (martin.kolman)
+
 * Wed Mar 27 2019 Martin Kolman <martin.kolman@gmail.com> - 0.56.15-1
 - Fix native launcher detections (martin.kolman)
 
