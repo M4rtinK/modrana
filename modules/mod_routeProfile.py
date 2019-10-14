@@ -97,7 +97,7 @@ class RouteProfile(RanaModule):
             cr.stroke()
             cr.fill()
 
-        #      nearestPoint = tracklog.perElevList[nearestIndex] # get the nearest point
+        #      nearestPoint = tracklog.per_elev_list[nearestIndex] # get the nearest point
         #      proj = self.m.get('projection', None)
         #      (nLat,nLon) = (nearestPoint[2],nearestPoint[3])
         return

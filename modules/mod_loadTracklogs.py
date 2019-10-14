@@ -614,14 +614,14 @@ class GPXTracklog(Tracklog):
             self.perElevList = cache[filename].perElevList
 
         else:
-            gpx_log.info("* creating clusters,routeInfo and perElevList: %s", filename)
+            gpx_log.info("* creating clusters,routeInfo and per_elev_list: %s", filename)
             clusterDistance = 5  # cluster points to clusters about 5 kilometers in diameter
             self.clusters = []
 
             try:
-                rawClusters = geo.clusterTrackpoints(trackpointsList, clusterDistance)  # we cluster the points
+                rawClusters = geo.cluster_trackpoints(trackpointsList, clusterDistance)  # we cluster the points
                 for cluster in rawClusters:  # now we find for each cluster a circle encompassing all points
-                    (centreX, centreY, radius) = geo.circleAroundPointCluster(cluster)
+                    (centreX, centreY, radius) = geo.circle_around_point_cluster(cluster)
                     self.clusters.append(ClusterOfPoints(cluster, centreX, centreY, radius))
 
                 self.checkElevation()
@@ -689,7 +689,7 @@ class GPXTracklog(Tracklog):
         self.save()  # save the cache to disk
 
     def getPerElev(self):
-        self.perElevList = geo.perElevList(self.trackpointsList)
+        self.perElevList = geo.per_elev_list(self.trackpointsList)
 
 
 class CacheItem():

@@ -769,15 +769,15 @@ class TurnByTurn(RanaModule):
                 return False
             elif len(radians_ll) == 1:  # 1 point route
                 aLat, aLon = radians_ll[0]
-                min_distance = geo.distanceApproxRadians(pLat, pLon, aLat, aLon)
+                min_distance = geo.distance_approx_radians(pLat, pLon, aLat, aLon)
             else:  # 2+ points route
                 aLat, aLon = radians_ll[0]
                 bLat, bLon = radians_ll[1]
-                min_distance = geo.distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon)
+                min_distance = geo.distance_point_to_line_radians(pLat, pLon, aLat, aLon, bLat, bLon)
                 aLat, aLon = bLat, bLon
                 for point in radians_ll[1:]:
                     bLat, bLon = point
-                    dist = geo.distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon)
+                    dist = geo.distance_point_to_line_radians(pLat, pLon, aLat, aLon, bLat, bLon)
                     if dist < min_distance:
                         min_distance = dist
                     aLat, aLon = bLat, bLon

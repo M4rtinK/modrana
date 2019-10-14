@@ -105,7 +105,7 @@ def detect_monav_turns(result):
                         first = prevNode.latitude, prevNode.longitude
                         middle = node.latitude, node.longitude
                         last = nextNode.latitude, nextNode.longitude
-                        angle = geo.turnAngle(first, middle, last)
+                        angle = geo.turn_angle(first, middle, last)
 
                         turnDescription = _get_turn_description(angle, name=name)
                         # get the corresponding node

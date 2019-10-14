@@ -41,16 +41,16 @@ def simple_pythagorean_distance(x1, y1, x2, y2):
     return sqrt(dx ** 2 + dy ** 2)
 
 
-def combinedDistance(pointList):
+def combined_distance(pointList):
     """return combined distance for a list of ordered points
     NOTE: not tested yet !!"""
-    combinedDistance = 0
+    distance_sum = 0
     (lat1, lon1) = pointList[0]
     for point in pointList[1:]:
         (lat2, lon2) = point
-        combinedDistance += distance(lat1, lon1, lat2, lon2)
+        distance_sum += distance(lat1, lon1, lat2, lon2)
         (lat1, lon1) = (lat2, lon2)
-    return combinedDistance
+    return distance_sum
 
 
 def bearing(lat1, lon1, lat2, lon2):
@@ -66,7 +66,7 @@ def bearing(lat1, lon1, lat2, lon2):
     return bearing
 
 
-def simpleDistancePointToLine(x, y, x1, y1, x2, y2):
+def simple_distance_point_to_line(x, y, x1, y1, x2, y2):
     """distance from point to line in the plane"""
     # source: http://www.allegro.cc/forums/thread/589720
     A = x - x1
@@ -98,13 +98,13 @@ def simpleDistancePointToLine(x, y, x1, y1, x2, y2):
     return dist
 
 
-def distancePointToLine(pLat, pLon, aLat, aLon, bLat, bLon):
-    distancePointToLineRadians(radians(pLat), radians(pLon),
-                               radians(aLat), radians(aLon),
-                               radians(bLat), radians(bLon))
+def distance_point_to_line(pLat, pLon, aLat, aLon, bLat, bLon):
+    distance_point_to_line_radians(radians(pLat), radians(pLon),
+                                   radians(aLat), radians(aLon),
+                                   radians(bLat), radians(bLon))
 
 
-def distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon):
+def distance_point_to_line_radians(pLat, pLon, aLat, aLon, bLat, bLon):
     """compute distance between a point and a line on Earth
     -> based on C++ code from Marble"""
     y0 = pLat
@@ -122,16 +122,16 @@ def distancePointToLineRadians(pLat, pLon, aLat, aLon, bLat, bLon):
     len = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
     # handle zero-length lines
     if len == 0:
-        return distanceApproxRadians(pLat, pLon, aLat, aLon)
+        return distance_approx_radians(pLat, pLon, aLat, aLon)
         # for correct float division, one of the arguments needs to be a float
     t = (x01 * x21 + y01 * y21) / float(len)
 
     # NOTE: a version without the approximate distance might be needed in the future,
     # the 7 digit precision should be enough for now though
     if t < 0.0:
-        return distanceApproxRadians(pLat, pLon, aLat, aLon)
+        return distance_approx_radians(pLat, pLon, aLat, aLon)
     elif t > 1.0:
-        return distanceApproxRadians(pLat, pLon, bLat, bLon)
+        return distance_approx_radians(pLat, pLon, bLat, bLon)
     else:
         nom = abs(x21 * y10 - x10 * y21)
         den = sqrt(x21 * x21 + y21 * y21)
@@ -160,7 +160,7 @@ def distance(lat1, lon1, lat2, lon2):
     return 2.0 * atan2(sqrt(d), sqrt(1.0 - d)) * EARTH_RADIUS
 
 
-def distanceP2P(point1, point2):
+def distance_p2p(point1, point2):
     """Compute distance between two Point objects.
 
     :param point1: the first point
@@ -171,7 +171,7 @@ def distanceP2P(point1, point2):
     return distance(point1.lat, point1.lon, point2.lat, point2.lon)
 
 
-def distanceP2LL(point1, lat, lon):
+def distance_p2ll(point1, lat, lon):
     """Compute distance between a point and a lat lon pair.
 
     :param point1: the first point
@@ -184,7 +184,7 @@ def distanceP2LL(point1, lat, lon):
     return distance(point1.lat, point1.lon, lat, lon)
 
 
-def distanceApprox(lat1, lon1, lat2, lon2):
+def distance_approx(lat1, lon1, lat2, lon2):
     """Roughly calculates shortest distance in kilometers between two points on a sphere.
 
     It's probably faster than normal distance functions but for 7 significant digits only has
@@ -206,7 +206,7 @@ def distanceApprox(lat1, lon1, lat2, lon2):
     return acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon1 - lon2)) * EARTH_RADIUS
 
 
-def distanceRadians(lat1, lon1, lat2, lon2):
+def distance_radians(lat1, lon1, lat2, lon2):
     """Computes geographic distance from points defined as radians.
 
     The difference from the normal distance computation method is basically
@@ -228,7 +228,7 @@ def distanceRadians(lat1, lon1, lat2, lon2):
     return 2.0 * atan2(sqrt(d), sqrt(1.0 - d)) * EARTH_RADIUS
 
 
-def distanceApproxRadians(lat1, lon1, lat2, lon2):
+def distance_approx_radians(lat1, lon1, lat2, lon2):
     """Roughly calculates shortest distance in kilometers between two points defined in radians on a sphere.
 
     It's probably faster than normal distance functions but for 7 significant digits only has
@@ -256,7 +256,7 @@ def lle2radians(lat, lon, elevation):
     return radians(lat), radians(lon), elevation
 
 
-def lleTuples2radians(lleTuples, discardElevation=False):
+def lle_tuples2radians(lleTuples, discardElevation=False):
     """converts (lat, lon, elevation) tuples from degrees to radians"""
     if discardElevation:
         return list(map(lambda x: (radians(x[0]), radians(x[1])), lleTuples))
@@ -264,11 +264,11 @@ def lleTuples2radians(lleTuples, discardElevation=False):
         return list(map(lambda x: (radians(x[0]), radians(x[1]), x[2]), lleTuples))
 
 
-def timestampUTC():
+def timestamp_utc():
     return time.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-def turnAngle(first, middle, last):
+def turn_angle(first, middle, last):
     x1 = middle[0] - first[0] # a = (x1,y1)
     y1 = middle[1] - first[1]
     x2 = last[0] - middle[0] # b = (x2, y2 )
@@ -279,7 +279,7 @@ def turnAngle(first, middle, last):
     angle %= 360
     return angle
 
-#def turnAngle(first, middle, last):
+#def turn_angle(first, middle, last):
 #  """
 #  compute turn angle for a turn described by three points
 #  -> an alternative methods that unfortunately seems not to work
@@ -335,7 +335,7 @@ def turnAngle(first, middle, last):
 
 # found on:
 # http://www.quanative.com/2010/01/01/server-side-marker-clustering-for-google-maps-with-python/
-def clusterTrackpoints(trackpointsList, cluster_distance):
+def cluster_trackpoints(trackpointsList, cluster_distance):
     """
     Groups points that are less than cluster_distance pixels apart at
     a given zoom level into a cluster.
@@ -366,7 +366,7 @@ def clusterTrackpoints(trackpointsList, cluster_distance):
     return clusters
 
 
-def old_clusterTrackpoints(trackpointsList, cluster_distance):
+def old_cluster_trackpoints(trackpointsList, cluster_distance):
     """
     Groups points that are less than cluster_distance pixels apart at
     a given zoom level into a cluster.
@@ -396,7 +396,7 @@ def old_clusterTrackpoints(trackpointsList, cluster_distance):
     return clusters
 
 
-def circleAroundPointCluster(cluster):
+def circle_around_point_cluster(cluster):
     """Find a circle around a given point cluster and return its centre and radius"""
 
     """we get the most north, west, south, east points as a heuristics for the preliminary circle"""
@@ -431,7 +431,7 @@ def circleAroundPointCluster(cluster):
     return centreX, centreY, radius
 
 
-def perElevList(trackpointsList, numPoints=200):
+def per_elev_list(trackpointsList, numPoints=200):
     """determine elevation in regular interval, numPoints gives the number of intervals"""
     points = [{'lat': point.latitude, 'lon': point.longitude, 'elev': point.elevation} for point in trackpointsList[0]]
 
@@ -571,7 +571,7 @@ def get_closest_point(point, points):
     # from the given point
     points_with_distance = []
     for some_point in points:
-        distance_to_point = distanceP2P(point, some_point)
+        distance_to_point = distance_p2p(point, some_point)
         points_with_distance.append((distance_to_point, some_point))
     # sort the list and return the closest point
     return sorted(points_with_distance, key=lambda x: x[0])[0][1]
@@ -603,7 +603,7 @@ def get_closest_lle(lle, lle_list):
     # sort the list and return the closest lle tuple
     return sorted(lle_tuples_with_distance, key=lambda x: x[0])[0][1]
 
-def distanceBenchmark(LLE, sampleSize=None):
+def distance_benchmark(LLE, sampleSize=None):
     """geographic distance measurement method benchmark"""
 
     lat, lon = 49.2, 16.616667 # Brno
@@ -628,7 +628,7 @@ def distanceBenchmark(LLE, sampleSize=None):
 
     # Marble approximate
     start1 = time.clock()
-    l = map(lambda x: distanceApprox(lat, lon, x[0], x[1]), LLE)
+    l = map(lambda x: distance_approx(lat, lon, x[0], x[1]), LLE)
     print("%1.9f ms Marble approximate method" % (1000 * (time.clock() - start1)))
     if sampleSize:
         print(l[0:sampleSize - 1])
@@ -639,14 +639,14 @@ def distanceBenchmark(LLE, sampleSize=None):
     lon = radians(lon)
     # Marble method on radians
     start1 = time.clock()
-    l = map(lambda x: distanceRadians(lat, lon, x[0], x[1]), LLERadians)
+    l = map(lambda x: distance_radians(lat, lon, x[0], x[1]), LLERadians)
     print("%1.9f ms Marble method on radians" % (1000 * (time.clock() - start1)))
     if sampleSize:
         print(l[0:sampleSize - 1])
 
     # Marble approximate method on radians
     start1 = time.clock()
-    l = map(lambda x: distanceApproxRadians(lat, lon, x[0], x[1]), LLERadians)
+    l = map(lambda x: distance_approx_radians(lat, lon, x[0], x[1]), LLERadians)
     print("%1.9f ms Marble approximate method on radians" % (1000 * (time.clock() - start1)))
     if sampleSize:
         print(l[0:sampleSize - 1])

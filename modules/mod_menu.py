@@ -990,7 +990,7 @@ class Menus(RanaModule):
         # * near tracklog
         #  * start
         #  * end
-        #  * AROUND (is this doable ? maybe use points from perElevList...)
+        #  * AROUND (is this doable ? maybe use points from per_elev_list...)
         # * near address
         # * near POI (when POI rework is finished)
 

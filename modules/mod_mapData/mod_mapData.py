@@ -536,8 +536,8 @@ class MapData(RanaModule):
                 name = tracks[index]['filename']
                 desc = 'cat.: ' + track['cat'] + '   size:' + track['size'] + '   last modified:' + track[
                     'lastModified']
-                #        if track.perElevList:
-                #          length = track.perElevList[-1][0]
+                #        if track.per_elev_list:
+                #          length = track.per_elev_list[-1][0]
                 #          units = self.m.get('units', None)
                 #          desc+=", %s" % units.km2CurrentUnitString(length)
                 return name, desc, action

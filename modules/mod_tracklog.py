@@ -271,7 +271,7 @@ class Tracklog(RanaModule):
         """add current position at the end of the log"""
         pos = self.get('pos', None)
         if pos and not self.loggingPaused:
-            timestamp = geo.timestampUTC()
+            timestamp = geo.timestamp_utc()
             lat, lon = pos
             elevation = self.get('elevation', None)
             self.log1.add_point_llet(lat, lon, elevation, timestamp)
@@ -304,7 +304,7 @@ class Tracklog(RanaModule):
                     # (which was either the first point or also passed the test)
                     addToTrace = True
                     try:
-                        addToTrace = geo.distanceApprox(lat, lon, lat1, lon1) * 1000 >= DONT_ADD_TO_TRACE_THRESHOLD
+                        addToTrace = geo.distance_approx(lat, lon, lat1, lon1) * 1000 >= DONT_ADD_TO_TRACE_THRESHOLD
                     except Exception:
                         self.log.exception("measuring distance failed (yeah, really! :P), adding point anyway")
 

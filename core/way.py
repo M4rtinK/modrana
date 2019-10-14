@@ -144,7 +144,7 @@ class Way(object):
         :return: LLE tuples
         :rtype: list of tuples
         """
-        radians = geo.lleTuples2radians(self._points, drop_elevation)
+        radians = geo.lle_tuples2radians(self._points, drop_elevation)
         return radians
 
     def get_point_by_index(self, index):
@@ -415,7 +415,7 @@ class Way(object):
         NOTE: message points are not (yet) handled
         TODO: message point support
         """
-        timestamp = geo.timestampUTC()
+        timestamp = geo.timestamp_utc()
         try:
             f = open(path, "w")
             writer = csv.writer(f, dialect=csv.excel)
@@ -753,7 +753,7 @@ class AppendOnlyWay(Way):
         if points:
             with self._points_lock:
                 # mark all points added on startup with a single timestamp
-                timestamp = geo.timestampUTC()
+                timestamp = geo.timestamp_utc()
                 # convert to LLET
                 points = [(x[0], x[1], x[2], timestamp) for x in points]
 
@@ -779,13 +779,13 @@ class AppendOnlyWay(Way):
     def add_point(self, point):
         with self._points_lock:
             lat, lon, elevation = point.getLLE()
-            self._points.append((lat, lon, elevation, geo.timestampUTC()))
-            self.increment.append((lat, lon, elevation, geo.timestampUTC()))
+            self._points.append((lat, lon, elevation, geo.timestamp_utc()))
+            self.increment.append((lat, lon, elevation, geo.timestamp_utc()))
 
     def add_point_lle(self, lat, lon, elevation=None):
         with self._points_lock:
-            self._points.append((lat, lon, elevation, geo.timestampUTC()))
-            self.increment.append((lat, lon, elevation, geo.timestampUTC()))
+            self._points.append((lat, lon, elevation, geo.timestamp_utc()))
+            self.increment.append((lat, lon, elevation, geo.timestamp_utc()))
 
     def add_point_llet(self, lat, lon, elevation, timestamp):
         with self._points_lock:
