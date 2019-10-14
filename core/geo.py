@@ -35,7 +35,7 @@ def distanceOld(lat1, lon1, lat2, lon2):
     return 2 * atan2(sqrt(a), sqrt(1.0 - a)) * EARTH_RADIUS
 
 
-def simplePythagoreanDistance(x1, y1, x2, y2):
+def simple_pythagorean_distance(x1, y1, x2, y2):
     dx = x2 - x1
     dy = y2 - y1
     return sqrt(dx ** 2 + dy ** 2)

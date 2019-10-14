@@ -33,19 +33,14 @@ import gobject
 import gtk
 from gtk import gdk
 
+from core import geo
+
 from modules.gui_modules.base_gui_module import GUIModule
 
 CLICK_DRAG_THRESHOLD = 1024
 # Adjust this to the length^2 of a
 # gerfingerpoken on your touchscreen
 # (1024 is for Freerunner, since it's very high resolution)
-
-def simplePythagoreanDistance(x1, y1, x2, y2):
-    """convenience PyThagorean distance :)"""
-    dx = x2 - x1
-    dy = y2 - y1
-    return math.sqrt(dx ** 2 + dy ** 2)
-
 
 def getModule(*args, **kwargs):
     return GTKGUI(*args, **kwargs)
@@ -343,8 +338,8 @@ class GTKGUI(GUIModule):
             tileSide = mapTiles.tileSide
         tileSide *= scale# apply any possible scaling
         (centerX, centerY) = ((sw / 2.0), (sh / 2.0))
-        ulCenterDistance = simplePythagoreanDistance(0, 0, centerX, centerY)
-        centerLLDistance = simplePythagoreanDistance(centerX, centerY, sw, sh)
+        ulCenterDistance = geo.simple_pythagorean_distance(0, 0, centerX, centerY)
+        centerLLDistance = geo.simple_pythagorean_distance(centerX, centerY, sw, sh)
         diagonal = max(ulCenterDistance, centerLLDistance)
         add = int(math.ceil(float(diagonal) / tileSide))
         self.expandViewportTiles = add
