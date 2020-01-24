@@ -79,7 +79,7 @@ def point2dict(point):
     }
 
 class QMLGUI(GUIModule):
-    """A Qt + QML GUI module"""
+    """A Qt 5 + QtQuick 2 GUI module"""
 
     def __init__(self, *args, **kwargs):
         GUIModule.__init__(self, *args, **kwargs)

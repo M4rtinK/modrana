@@ -91,60 +91,6 @@ class Info(RanaModule):
         """ModRana project email address."""
         return "modrana@gmail.com"
 
-    def drawMenu(self, cr, menuName, args=None):
-        if menuName == 'infoAbout':
-            menus = self.m.get('menu', None)
-            if menus:
-                button1 = ('Discussion', 'generic', "ms:menu:open_url:%s" % self.discussions[0][0])
-                button2 = ('Donate', 'generic', "ms:menu:open_url:%s" % self.pay_pal_url)
-                web = " <u>www.modrana.org</u> "
-                email = " modrana@gmail.com "
-                text = "modRana version:\n\n%s\n\n\n\nFor questions or feedback,\n\ncontact the <b>modRana</b> project:\n\n%s\n\n%s\n\n" % (
-                self.versionString, web, email)
-                box = (text, "ms:menu:open_url:http://www.modrana.org")
-                menus.drawThreePlusOneMenu(cr, 'infoAbout', 'set:menu:info', button1, button2, box)
-        elif menuName == "infoDirection":
-            menus = self.m.get('menu', None)
-            if menus:
-                button1 = ('set point', 'generic', "info:setPoint")
-                button2 = ('clear', 'generic', "info:clearPoint")
-                boxText = "no point selected"
-                if self._dirPoint:
-                    lat = self._dirPoint.lat
-                    lon = self._dirPoint.lon
-                    boxText= "lat: <b>%f</b> lon: <b>%f</b>" % (lat, lon)
-                    # if possible, add distance information
-                    units = self.m.get("units", None)
-                    pos = self.get("pos", None)
-                    if pos and units:
-                        lat1, lon1 = pos
-                        distance = geo.distance(lat, lon, lat1, lon1)*1000
-                        distance, shortUnit, longUnit = units.humanRound(distance)
-                        boxText+=" %s %s" % (str(distance), shortUnit)
-                box = (boxText, "")
-                # draw the buttons and main box background
-                menus.drawThreePlusOneMenu(cr, 'infoDirection', 'set:menu:info', button1, button2, box)
-                # get coordinates for the box
-                (e1, e2, e3, e4, alloc) = menus.threePlusOneMenuCoords()
-                # upper left corner XY
-                (x4, y4) = e4
-                # width and height
-                (w, h, dx, dy) = alloc
-                w4 = w - x4
-                h4 = h - y4
-
-                # draw the direction indicator
-                axisX = x4 + w4/2.0
-                axisY = y4 + h4/2.0
-                # shortest side
-                shortestSide = min(w4,h4)
-                # usable side - 10% border
-                side = shortestSide*0.7
-
-                angle = self._getDirectionAngle()
-
-                self._drawDirectionIndicator(cr, axisX, axisY, side, angle)
-
     def handleMessage(self, message, messageType, args):
         if message == "setPoint":
             # open the coordinates entry dialog
@@ -158,18 +104,6 @@ class Info(RanaModule):
         elif message == "clearPoint":
             self._dirPoint = None
             self.set("directionPointLatLon" ,None)
-
-    def handleTextEntryResult(self, key, result):
-        if key == 'directionPointCoordinates':
-            try:
-                lat, lon = result.split(",")
-                lat = float(lat)
-                lon = float(lon)
-                self.log.info("Direction coordinates %f,%f", lat, lon)
-                self._dirPoint = Point(lat, lon)
-                self.set("directionPointLatLon", (lat, lon))
-            except Exception:
-                self.log.exception("direction point coordinate parsing failed")
 
     # from SGTL
     # TODO: move to appropriate place

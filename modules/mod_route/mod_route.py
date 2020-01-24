@@ -33,7 +33,6 @@ from core.signal import Signal
 from core.way import Way
 from core.backports.six import u
 from core import routing_providers
-from core import gs
 
 
 DIRECTIONS_FILTER_CSV_PATH = 'data/directions_filter.csv'
@@ -79,17 +78,8 @@ class Route(RanaModule):
         # signals
         self.routing_done = Signal()
 
-    def firstTime(self):
-        # make sure to show the warning message if we are rnning with the GTK GUI
-        # - other GUIs handle this in another way
-        if gs.GUIString == "GTK":
-            tbt = self.m.get("turnByTurn")
-            if tbt:
-                tbt.navigation_started.connect(self._navigation_started_cb)
-
     def _navigation_started_cb(self):
         self.notify("use at own risk, watch for cliffs, etc.", 3000)
-
 
     def _go_to_initial_state(self):
         """restorer initial routing state
@@ -160,7 +150,6 @@ class Route(RanaModule):
 
         elif message == 'expectStart':
             self._expect_start = True
-            self.set('needRedraw', True) # we need to show the changed buttons
 
         elif message == 'setStart':
             if self._select_one_point:
@@ -177,11 +166,9 @@ class Route(RanaModule):
                 self._destination = None # clear destination
 
             self._expect_start = False
-            self.set('needRedraw', True) # refresh the screen to show the new point
 
         elif message == 'expectMiddle': # handmade
             self._expect_middle = True # handmade
-            self.set('needRedraw', True) # we need to show the changed buttons # handmade
 
         elif message == 'setMiddle': # handmade
             proj = self.m.get('projection', None)
@@ -199,11 +186,9 @@ class Route(RanaModule):
                 if self._handmade:
                     self.sendMessage('route:middleInput')
             self._expect_middle = False
-            self.set('needRedraw', True) # refresh the screen to show the new point
 
         elif message == 'expectEnd':
             self._expect_end = True
-            self.set('needRedraw', True) # we need to show the changed buttons
 
         elif message == 'setEnd':
             if self._select_one_point:
@@ -220,7 +205,6 @@ class Route(RanaModule):
                 self._start = None # clear start
 
             self._expect_end = False
-            self.set('needRedraw', True) # refresh the screen to show the new point
 
         elif message == "handmade":
             self.set('startPos', None)
@@ -258,7 +242,6 @@ class Route(RanaModule):
             if destination and start:
                 middle_points = self.get('middlePos', [])
                 self.llRoute(start, destination, middle_points)
-                self.set('needRedraw', True)
 
         elif message == "p2phmRoute": # simple route, from start to middle to end (handmade routing)
             start = self.get("startPos", None)
@@ -298,7 +281,6 @@ class Route(RanaModule):
             middle_points = self.get("middlePos", [])
             if start and destination:
                 self.llRoute(start, destination, middle_points)
-                self.set('needRedraw', True) # show the new route
 
         elif message == "route": # find a route
             if messageType == 'md': # message-list based unpack requires a string argument of length 4 routing
@@ -320,7 +302,6 @@ class Route(RanaModule):
                             self.llRoute(start, destination)
                         except Exception:
                             self.sendMessage('ml:notification:m:No route found;3')
-                            self.set('needRedraw', True)
                             self.log.exception("exception during routing")
                         if "show" in args:
                             # switch to map view and go to start/destination, if requested
@@ -330,7 +311,6 @@ class Route(RanaModule):
                             elif where == "destination":
                                 self.sendMessage('mapView:recentre %f %f|set:menu:None' % destination)
 
-                        self.set('needRedraw', True)
             else: # simple route, from here to selected point
                 # disable the point selection GUIs
                 self._select_many_points = False # handmade
@@ -342,7 +322,6 @@ class Route(RanaModule):
                 destination = [float(a) for a in destination.split(",")]
                 if start and destination:
                     self.llRoute(start, destination)
-                    self.set('needRedraw', True)
 
         elif message == 'store_route':
             load_tracklogs = self.m.get('loadTracklogs', None)
@@ -422,11 +401,9 @@ class Route(RanaModule):
                 self.set('startAddress', destination)
                 self.set('destinationAddress', start)
                 # redraw the screen to show the change
-                self.set('needRedraw', True)
 
         elif messageType == "ms" and message == "setOSDState":
             self._osd_menu_state = int(args)
-            self.set('needRedraw', True) # show the new menu
 
     def reroute(self):
         """Reroute from current position to destination."""
@@ -439,7 +416,6 @@ class Route(RanaModule):
             start = Waypoint(lat=pos[0], lon=pos[1], heading=bearing)
             self.waypoints_route([start, self._destination])
             self._start = None
-            self.set('needRedraw', True)
 
     def routeAsync(self, callback, waypoints, route_params=None):
         """Asynchronous routing
@@ -800,475 +776,10 @@ class Route(RanaModule):
             output_string += ' ' + cyrillic_string_temp
         return output_string
 
-    def drawScreenOverlay(self, cr):
-        showMenu = False
-        menus = self.m.get('menu', None)
-        if menus:
-            # check if the buttons should not be hidden
-            showMenu = not menus.buttonsHidingOn() and self._osd_menu_state is not None
-
-        if showMenu:
-            if self._osd_menu_state == OSD_EDIT:
-                self.drawRoutePlaningMenu(cr)
-            elif self._osd_menu_state == OSD_CURRENT_ROUTE: # current route info button
-                self.drawCurrentRouteButton(cr)
-            elif self._osd_menu_state == OSD_ROUTE_OPTIONS:
-                self.drawCurrentRouteOptionsMenu(cr)
-
-
-        #register clickable areas for manual point input
-        if self._expect_start:
-            clickHandler = self.m.get('clickHandler', None)
-            (x, y, w, h) = self.get('viewport')
-            if clickHandler is not None:
-                clickHandler.registerXYWH(x, y, x + w, y + h, 'route:setStart')
-        if self._expect_middle: # handmade
-            clickHandler = self.m.get('clickHandler', None)
-            (x, y, w, h) = self.get('viewport')
-            if clickHandler is not None:
-                clickHandler.registerXYWH(x, y, x + w, y + h, 'route:setMiddle')
-        if self._expect_end:
-            clickHandler = self.m.get('clickHandler', None)
-            (x, y, w, h) = self.get('viewport')
-            if clickHandler is not None:
-                clickHandler.registerXYWH(x, y, x + w, y + h, 'route:setEnd')
-
-    def drawMapOverlay(self, cr):
-        """Draw a route"""
-        #    start1 = clock()
-
-        if self._directions:
-            # Where is the map?
-            proj = self.m.get('projection', None)
-            if proj is None:
-                return
-            if not proj.isValid():
-                return
-
-            # get LLE tuples for message points
-            steps = self._directions.message_points_lle
-
-            # now we convert geographic coordinates to screen coordinates, so we dont need to do it twice
-            steps = map(lambda x: (proj.ll2xy(x[0], x[1])), steps)
-
-            if self._start:
-                start = proj.ll2xy(self._start.lat, self._start.lon)
-                # line from starting point to start of the route
-                (x, y) = start
-                (px1, py1) = self._pxpy_route[0]
-                (x1, y1) = proj.pxpyRel2xy(px1, py1)
-                cr.set_source_rgba(0, 0, 0.5, 0.45)
-                cr.set_line_width(10)
-                cr.move_to(x, y)
-                cr.line_to(x1, y1)
-                cr.stroke()
-
-            if self._destination:
-                destination = proj.ll2xy(self._destination.lat, self._destination.lon)
-                # line from the destination point to end of the route
-                (x, y) = destination
-                (px1, py1) = self._pxpy_route[-1]
-                (x1, y1) = proj.pxpyRel2xy(px1, py1)
-                cr.set_source_rgba(0, 0, 0.5, 0.45)
-                cr.set_line_width(10)
-                cr.move_to(x, y)
-                cr.line_to(x1, y1)
-                cr.stroke()
-
-            cr.fill()
-
-            # draw the step point background (under the polyline, it seems to look better this way)
-
-            cr.set_source_rgb(0, 0, 0)
-            cr.set_line_width(10)
-
-            for step in steps:
-                (x, y) = step
-                cr.arc(x, y, 3, 0, 2.0 * math.pi)
-                cr.stroke()
-
-            cr.fill()
-
-            cr.set_source_rgb(0, 0, 0.5)
-            cr.set_line_width(10)
-
-            # draw the points from the polyline as a polyline :)
-
-            (px, py) = self._pxpy_route[0]
-            (x, y) = proj.pxpyRel2xy(px, py)
-            cr.move_to(x, y)
-
-            # well, this SHOULD be faster and this is a performance critical section after all...
-            #    map(lambda x: cr.line_to(x[0],x[1]), route[1:]) # lambda drawing :)
-            # according to numerous sources, list comprehensions should be faster than for loops and map+lambda
-            # if its faster in this case too has not been determined
-
-            # routing result drawing algorithm
-            # adapted from TangoGPS source (tracks.c)
-            # works surprisingly good
-
-            z = proj.zoom
-            # these setting seem to work the best for routing results:
-            # (they have a different structure than logging traces,
-            # eq. long segments delimited by only two points, etc)
-            # basically, routing results have only the really needed points -> less points than traces
-            if self._handmade or len(self._pxpy_route) < 20:
-                # handmade routes usually have very few points and we don't want to skip any
-                # also handle very short routes that might have the same issue
-                modulo = 1
-            elif 16 > z > 10:
-                modulo = 2 ** (14 - z)
-            elif z <= 10:
-                modulo = 16
-            else:
-                modulo = 1
-
-                #    maxDraw = 300
-                #    drawCount = 0
-            counter = 0
-
-            for point in self._pxpy_route[1:]: #draw the track
-                counter += 1
-                if counter % modulo == 0:
-                #      if 1:
-                #        drawCount+=1
-                #        if drawCount>maxDraw:
-                #          break
-                    (px, py) = point
-                    (x, y) = proj.pxpyRel2xy(px, py)
-                    cr.line_to(x, y)
-
-                    # make a line to the last point (the modulo method sometimes skips the end of the track)
-                    #    [cr.line_to(x[0],x[1])for x in route[1:]] # list comprehension drawing :D
-
-                    #    self.log.debug(drawCount)
-                    #    self.log.debug(modulo)
-
-            # make sure the last point is connected
-            (px, py) = self._pxpy_route[-1]
-            (x, y) = proj.pxpyRel2xy(px, py)
-            cr.line_to(x, y)
-
-            cr.stroke()
-
-            # draw the step points over the polyline
-            cr.set_source_rgb(1, 1, 0)
-            cr.set_line_width(7)
-            for step in steps:
-                (x, y) = step
-                cr.arc(x, y, 2, 0, 2.0 * math.pi)
-                cr.stroke()
-            cr.fill()
-            # draw the the start/dest indicators over the route
-        if self._select_two_points:
-            self.drawPointSelectors(cr)
-
-            #    self.log.debug("Redraw took %1.9f ms" % (1000 * (clock() - start1)))
-
     def get_current_directions(self):
         """return the current route"""
         return self._directions
 
-    def drawCurrentRouteButton(self, cr):
-        """draw the info button for the current route on the map screen"""
-        (x, y, w, h) = self.get('viewport')
-        menus = self.m.get('menu', None)
-        dx = min(w, h) / 5.0
-        dy = dx
-        x1 = (x + w) - dx
-        y1 = (y - dy) + h
-        menus.drawButton(cr, x1, y1, dx, dy, 'tools#route', "generic:;0.5;;0.5;;",
-                         'ms:route:setOSDState:%d' % OSD_ROUTE_OPTIONS)
-
-    def drawCurrentRouteOptionsMenu(self, cr):
-        """draw the options for the current route on the map screen"""
-        (x, y, w, h) = self.get('viewport')
-        menus = self.m.get('menu', None)
-        dx = min(w, h) / 5.0
-        dy = dx
-        x1 = (x + w) - dx
-        y1 = (y - dy) + h
-        menus.drawButton(cr, x1 - dx, y1, dx, dy,
-                         'edit', "above:edit>generic:;0.5;;0.5;;", 'ms:route:setOSDState:%d' % OSD_EDIT)
-        menus.drawButton(cr, x1, y1, dx, dy,
-                         'info', "above:info>generic:;0.5;;0.5;;",
-                         'set:menu:route#currentRouteBackToMap|ms:route:setOSDState:%d' % OSD_CURRENT_ROUTE)
-
-    def drawRoutePlaningMenu(self, cr):
-        """draw the onscreen menu for route planing"""
-        (x, y, w, h) = self.get('viewport')
-        dx = min(w, h) / 5.0
-        dy = dx
-        menus = self.m.get('menu', None)
-        x1 = (x + w) - dx
-        y1 = (y - dy) + h
-
-        startIcon = "generic:;0.5;;0.5;;"
-        middleIcon = "generic:;0.5;;0.5;;"
-        endIcon = "generic:;0.5;;0.5;;"
-        if self._expect_start:
-            startIcon = "generic:red;0.5;red;0.5;;"
-        if self._expect_middle:
-            middleIcon = "generic:blue;0.5;blue;0.5;;"
-        if self._expect_end:
-            endIcon = "generic:green;0.5;green;0.5;;"
-
-        routingAction = 'route:p2pRoute'
-        if self._select_one_point:
-            routingAction = 'route:p2posRoute'
-        if self._handmade: # handmade
-            routingAction = 'route:p2phmRoute'
-
-        menus.drawButton(cr, x1 - dx, y1, dx, dy, 'start', startIcon, "route:expectStart")
-        # Monav currently has a bug preventing waypoint routing
-        routingProvider = self.get('routingProvider', constants.DEFAULT_ROUTING_PROVIDER)
-        # TODO: find if Monav/Routino can handle middle points ?
-        if self._handmade or routingProvider == constants.ROUTING_PROVIDER_GOOGLE:
-            menus.drawButton(cr, x1 - dx, y1 - dy, dx, dy, 'middle', middleIcon, "route:expectMiddle") # handmade
-        menus.drawButton(cr, x1, y1 - dy, dx, dy, 'end', endIcon, "route:expectEnd")
-        menus.drawButton(cr, x1, y1, dx, dy, 'route', "generic:;0.5;;0.5;;", routingAction)
-
-        # "flush" cairo operations
-        cr.stroke()
-        cr.fill()
-
-    def drawPointSelectors(self, cr):
-        # draw point selectors
-        proj = self.m.get('projection', None)
-        fromPos = self.get('startPos', None)
-        middlePos = self.get('middlePos', None)
-        toPos = self.get('endPos', None)
-        if fromPos is not None:
-            cr.set_line_width(10)
-            cr.set_source_rgb(1, 0, 0)
-            (lat, lon) = fromPos
-
-            (x, y) = proj.ll2xy(lat, lon)
-
-            cr.arc(x, y, 3, 0, 2.0 * math.pi)
-            cr.stroke()
-            cr.fill()
-
-            cr.set_line_width(8)
-            cr.set_source_rgba(1, 0, 0, 0.95) # transparent red
-            cr.arc(x, y, 15, 0, 2.0 * math.pi)
-            cr.stroke()
-            cr.fill()
-
-        # only show middle point indicators in the
-        # edit menu mode at they might easily overlay the route otherwise
-        if middlePos and self._osd_menu_state == OSD_EDIT:
-            for point in middlePos:
-                (lat, lon) = point[0], point[1]
-                cr.set_line_width(10)
-                cr.set_source_rgb(0, 0, 1)
-                (x, y) = proj.ll2xy(lat, lon)
-                cr.arc(x, y, 2, 0, 2.0 * math.pi)
-                cr.stroke()
-                cr.fill()
-
-                cr.set_line_width(8)
-                cr.set_source_rgba(0, 0, 1, 0.95) # transparent blue
-                cr.arc(x, y, 15, 0, 2.0 * math.pi)
-                cr.stroke()
-                cr.fill()
-
-        if toPos is not None:
-            cr.set_line_width(10)
-            cr.set_source_rgb(0, 1, 0)
-            (lat, lon) = toPos
-            (x, y) = proj.ll2xy(lat, lon)
-            cr.arc(x, y, 2, 0, 2.0 * math.pi)
-            cr.stroke()
-            cr.fill()
-
-            cr.set_line_width(8)
-            cr.set_source_rgba(0, 1, 0, 0.95) # transparent green
-            cr.arc(x, y, 15, 0, 2.0 * math.pi)
-            cr.stroke()
-            cr.fill()
-
-    def handleTextEntryResult(self, key, result):
-        if key == 'start':
-            self._start_address = result
-            self.set('startAddress', result)
-        elif key == 'middle':
-            mpList = self.get('middlePos', [])
-            if mpList:
-                # replace the last added point by the same point with
-                # message user wrote to the entry box
-                lastMiddlePoint = mpList.pop()
-                (lat, lon, elev, message) = lastMiddlePoint
-                message = result
-                mpList.append((lat, lon, elev, message))
-                self.set('middlePos', mpList)
-        elif key == 'destination':
-            self._destination_address = result
-            self.set('destinationAddress', result)
-        self.set('needRedraw', True)
-
-    def drawMenu(self, cr, menuName, args=None):
-        if menuName == 'currentRoute' or menuName == 'currentRouteBackToMap':
-            menus = self.m.get("menu", None)
-            if menus is None:
-                self.log.error("no menu module, no menus will be drawn")
-                return
-
-            # if called from the osd menu, go back to map at escape
-            if menuName == 'currentRouteBackToMap':
-                parent = 'set:menu:None'
-            else:
-                parent = 'set:menu:route'
-
-            if self._directions:
-                (lat, lon) = self._directions.get_point_by_index(0).getLL()
-                action = "mapView:recentre %f %f|set:menu:None" % (lat, lon)
-
-            else:
-                action = "set:menu:None"
-
-            button1 = ("map#show on", "generic", action)
-            button2 = ("tools", "tools", "set:menu:currentRouteTools")
-
-            # re-render text if viewport aspect ratio changed
-            if self._text_portrait is not self.modrana.gui.portrait:
-                self._text = None
-
-            if not self._directions:
-                text = "There is currently no active route."
-            elif self._text is None: # the new text for the info-box only once
-                # record viewport type during text caching
-                self._text_portrait = self.modrana.gui.portrait
-
-
-                # check if start and destination geocoding is needed
-                if self._destination_address is None or self._start_address is None:
-                    with self._addressLookupLock:
-                        if not self._startLookup and not self._destinationLookup:
-                            self._geocodeStartAndDestination()
-
-                if self._duration_string:
-                    duration = self._duration_string # a string describing the estimated time to finish the route
-                else:
-                    duration = "? minutes"
-                units = self.m.get('units', None) # get the correct units
-                length = self._directions.length
-                if length:
-                    distance = units.m2CurrentUnitString(length, 1)
-                else:
-                    distance = "? km"
-                steps = self._directions.message_point_count  # number of steps
-
-                # TODO: do this cleaner with autowrap and elide
-
-                if self.modrana.gui.portrait:
-                    itemsPerLine = 2
-                else:
-                    itemsPerLine = 3
-
-                if self._start_address:
-                    start = ""
-                    index = 1
-                    for item in self._start_address.split(','):
-                        if index%itemsPerLine: # add newline after every second item
-                            start += " %s," % item
-                        else:
-                            start += "%s\n" % item
-                        index+=1
-                    start = start[1:-1]
-                else:
-                    start = "start address unknown"
-
-                if self._destination_address:
-                    destination = " \n\n\n"
-                    index = 1
-                    for item in self._destination_address.split(','):
-                        if index%itemsPerLine: # add newline after every second item
-                            destination += " %s," % item
-                        else:
-                            destination += "%s\n" % item
-                        index+=1
-                    # drop trailing ,
-                    destination = destination[1:-1]
-                else:
-                    destination = "\ndestination address unknown"
-
-                text = "%s" % start
-                text += "%s" % destination
-                text += "\n\n%s in about %s and %s steps" % (distance, duration, steps)
-                if self._start and self._destination:
-                    (lat1, lon1) = self._start.getLL()
-                    (lat2, lon2) = self._destination.getLL()
-                    text += "\n(%f,%f)->(%f,%f)" % (lat1, lon1, lat2, lon2)
-
-                self._text = text
-            else:
-                text = self._text
-
-            if self._once:
-                self._once = False
-
-            box = (text, "set:menu:route#currentRoute")
-            menus.drawThreePlusOneMenu(cr, menuName, parent, button1, button2, box)
-            menus.clearMenu('currentRouteTools', "set:menu:route#currentRoute")
-            menus.addItem('currentRouteTools', 'tracklog#save as', 'generic',
-                          'route:store_route|set:currentTracCat:online|set:menu:tracklogManager#tracklogInfo')
-
-            # add turn-by-turn navigation buttons
-            tbt = self.m.get('turnByTurn', None)
-            if tbt:
-                if tbt.enabled():
-                    menus.addItem('currentRouteTools', 'navigation#stop', 'generic', 'turnByTurn:stop|set:menu:None')
-                    menus.addItem('currentRouteTools', 'navigation#restart', 'generic',
-                                  'turnByTurn:stop|ms:turnByTurn:start:closest|set:menu:None')
-                else:
-                    menus.addItem('currentRouteTools', 'navigation#start', 'generic',
-                                  'ms:turnByTurn:start:enabled|set:menu:None')
-
-            menus.addItem('currentRouteTools', 'clear', 'generic', 'route:clear|set:menu:None')
-
-        if menuName == "showAddressRoute":
-            self._drawAddressRoutingMenu(cr)
-
-    def _drawAddressRoutingMenu(self, cr):
-        menus = self.m.get("menu", None)
-        if menus:
-            (e1, e2, e3, e4, alloc) = menus.threePlusOneMenuCoords()
-            (x1, y1) = e1
-            (x2, y2) = e2
-            (x3, y3) = e3
-            (x4, y4) = e4
-            (w1, h1, dx, dy) = alloc
-
-            # * draw "escape" button
-            menus.drawButton(cr, x1, y1, dx, dy, "", "back", "set:menu:main")
-            # * swap
-            menus.drawButton(cr, x2, y2, dx, dy, "swap", "generic", "ms:route:addressRouteMenu:swap")
-            # * route
-            menus.drawButton(cr, x3, y3, dx, dy, "route", "generic", "route:addressRoute")
-
-            menus.clearMenu('currentRouteTools', "set:menu:route#currentRoute")
-
-            menus.drawButton(cr, x4, y4, w1 - x4, dy, "start", "generic", "route:startInput")
-            menus.drawButton(cr, x4, y4 + 2 * dy, w1 - x4, dy, "destination", "generic", "route:destinationInput")
-            menus.drawButton(cr, x4, y4 + dy, (w1 - x4) / 2, dy, "as start#position", "generic",
-                             "route:posToStart|set:needRedraw:True")
-            menus.drawButton(cr, x4 + (w1 - x4) / 2, y4 + dy, (w1 - x4) / 2, dy, "as destination#position", "generic",
-                             "route:posToDestination|set:needRedraw:True")
-
-            # try to get last used addresses
-            startText = self.get('startAddress', None)
-            destinationText = self.get('destinationAddress', None)
-
-            # if there are no last used addresses, use defaults
-            if startText is None:
-                startText = "click to input starting address"
-
-            if destinationText is None:
-                destinationText = "click to input destination address"
-
-            menus.showText(cr, startText, x4 + w1 / 20, y4 + dy / 5, w1 - x4 - (w1 / 20) * 2)
-            menus.showText(cr, destinationText, x4 + w1 / 20, y4 + 2 * dy + dy / 5, w1 - x4 - (w1 / 20) * 2)
 
     def _geocodeStartAndDestination(self):
         """Get the address of start and destination coordinates by using geocoding"""
@@ -1307,7 +818,6 @@ class Route(RanaModule):
             self._startLookup = False
         # trigger route text update
         self._text = None
-        self.set('needRedraw', True)
 
     def _set_destination_address_cb(self, results):
         """Set destination address based on result from reverse geocoding
@@ -1321,4 +831,3 @@ class Route(RanaModule):
             self._destinationLookup = False
         # trigger route text update
         self._text = None
-        self.set('needRedraw', True)

@@ -20,12 +20,6 @@
 from modules.base_module import RanaModule
 import time
 
-# only import GKT libs if GTK GUI is used
-from core import gs
-
-if gs.GUIString == "GTK":
-    import gtk
-
 
 def getModule(*args, **kwargs):
     return Display(*args, **kwargs)
@@ -50,66 +44,6 @@ class Display(RanaModule):
         self.checkConditionsInterval = 5 # how often to check blanking conditions
         self.lastCheckConditions = time.time()
 
-    def firstTime(self):
-        if gs.GUIString.lower() == "gtk":
-            gui = self.modrana.gui
-            # connect to window state signals
-            gui.topWindow.connect('window-state-event', self.windowStateChangedCallback)
-            gui.topWindow.connect('visibility-notify-event', self.visibilityChangedCallback)
-        elif gs.GUIString.lower() in ("qml", "qt5"):
-            # QML (Qt4) and Qt5 handles redrawing & window state detection from inside
-            # the QML context.
-            pass
-        else:
-            self.log.warning("WARNING, unhandled GUI toolkit, redraw disable if not visible might not work")
-
-        # there are currently no Qt 5 platforms where the current Python based
-        # screen blanking control code works
-        if self.screenBlankingControlSupported and gs.GUIString.lower() in ("qml", "gtk"):
-            # check the screen blanking mode on startup
-            self.checkScreenBlankingMode()
-            # register blanking check update
-            cron = self.m.get('cron', None)
-            if cron:
-                # run the callback directly for the first time
-                cron.addTimeout(self._updateDisplayControlCB, self.msScreenBlankPauseIntervalMs, self,
-                                "screen blanking update")
-
-    def handleMessage(self, message, messageType, args):
-        if message == "blankingModeChanged":
-            self.checkScreenBlankingMode() # check if screen blanking changed
-        elif message == "checkShowRedrawTime":
-            state = self.get('showRedrawTime', False)
-            gui = self.modrana.gui
-            if gui and gui.getIDString() == "GTK":
-                self.modrana.gui.setShowRedrawTime(state)
-
-    def enableRedraw(self, reason="not given"):
-        """enable window redrawing"""
-        self.modrana.gui.setRedraw(True)
-        self.log.info("redraw ON (%s)" % reason)
-        self.set('needRedraw', True) # make sure the screen is refreshed
-
-    def disableRedraw(self, reason="not given"):
-        """disable window redrawing"""
-        self.modrana.gui.setRedraw(False)
-        self.log.info("redraw OFF (%s)" % reason)
-
-    def windowStateChangedCallback(self, window, event):
-        if event.new_window_state == gtk.gdk.WINDOW_STATE_ICONIFIED:
-            self.disableRedraw(reason="window minimised")
-        elif event.new_window_state == gtk.gdk.WINDOW_STATE_WITHDRAWN:
-            self.disableRedraw(reason="window is hidden")
-        else:
-            self.enableRedraw(reason="window not hidden or minimised")
-
-    def visibilityChangedCallback(self, window, event):
-        if event.state == gtk.gdk.VISIBILITY_FULLY_OBSCURED:
-            self.disableRedraw(reason="window is obscured")
-        else:
-            self.enableRedraw(reason="window is un-obscured or partially obscured")
-
-
     # * screen blanking control *
 
     def screenBlankingControlSupported(self):
@@ -121,7 +55,6 @@ class Display(RanaModule):
         instead of minimizing the the window out of view
         the user might want that the window updates on the dashboard or not"""
         return self.dmod.uses_dashboard
-
 
     def pauseScreenBlanking(self):
         """pause screen blanking for 30 seconds"""

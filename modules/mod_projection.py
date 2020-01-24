@@ -173,7 +173,6 @@ class Projection(RanaModule):
         self.zoom = int(zoom)
         #    self.limitZoom()
         self.findEdges()
-        self.set('needRedraw', True)
 
     def findEdges(self):
         """Update the projection meta-info based on its fundamental parameters"""
@@ -222,7 +221,6 @@ class Projection(RanaModule):
         """When the window resizes, set the view accordingly."""
         self.setView(0, 0, newW, newH) # set the screen to new resolution
         self.findEdges() # find edges for this new resolution
-        self.set('needRedraw', True)
 
     def screenPos(self, px, py):
         """Given a position on screen (where 0,0 is top-left and 1,1 is bottom right) get the coordinates"""

@@ -14,31 +14,18 @@
 
 from __future__ import with_statement
 
-try:  # Python 2
-    from urllib2 import urlopen, HTTPError, URLError
-except ImportError:  # Python 3
-    from urllib.request import urlopen
-    from urllib.error import HTTPError, URLError
+from urllib.error import HTTPError, URLError
 
 import threading
 import time
-import sys
-if sys.version_info[:2] <= (2, 5):
-    from core.backports import urllib3_python25 as urllib3
-else:
-    import urllib3
+import urllib3
 from core.pool import LifoThreadPool
 from core.singleton import modrana
 from core import tiles
-from core import gs
 from core import constants
 
 import logging
 log = logging.getLogger("mod.mapTiles.tile_downloader")
-
-# needed fro pixbuf handling
-if gs.GUIString == "GTK":
-    import gtk
 
 class Downloader(object):
     def __init__(self, maxThreads, taskBufferSize=0,
@@ -169,17 +156,9 @@ class Downloader(object):
             content = self._mapTiles._downloadTile(lzxy)
             if content is None:
                 raise urllib3.exceptions.HTTPError
-            if self._imageSurface:
-                pl = gtk.gdk.PixbufLoader()
-                pl.write(content)
-                pl.close() # this  blocks until the image is completely loaded
-                # http://www.ossramblings.com/loading_jpg_into_cairo_surface_python
-                surface = self._mapTiles._pixbuf2cairoImageSurface(pl.get_pixbuf())
-                self._mapTiles.storeInMemory(surface, lzxy)
-                # like this, corrupted tiles should not get past the pixbuf loader and be stored
-            else:
-                # cache the raw data
-                self._mapTiles.storeInMemory(content, lzxy)
+
+            # cache the raw data
+            self._mapTiles.storeInMemory(content, lzxy)
             self._storeTiles.store_tile_data(lzxy, content)
 
     def _downloadInProgress(self, lzxy):

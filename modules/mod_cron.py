@@ -21,15 +21,10 @@ from __future__ import with_statement # for python 2.5
 from modules.base_module import RanaModule
 import threading
 
-# only import GKT libs if GTK GUI is used
 from core import gs
 
-if gs.GUIString == "GTK":
-    import gobject
-elif gs.GUIString.lower() == "qt5":
+if gs.GUIString.lower() == "qt5":
     import pyotherside
-elif gs.GUIString.lower() == "qml":
-    from PySide import QtCore
 
 def getModule(*args, **kwargs):
     """
@@ -39,10 +34,6 @@ def getModule(*args, **kwargs):
     """
     if gs.GUIString.lower() == 'qt5':
         return CronQt5(*args, **kwargs)
-    if gs.GUIString == 'QML':
-        return CronQt(*args, **kwargs)
-    elif gs.GUIString == 'GTK': # GTK for now
-        return CronGTK(*args, **kwargs)
     else:
         return Cron(*args, **kwargs)
 
@@ -105,135 +96,6 @@ class Cron(RanaModule):
         """modify the duration of a timeout in progress"""
         pass
 
-
-class CronGTK(Cron):
-    """A GTK timing and scheduling module for modRana"""
-
-    def __init__(self, *args, **kwargs):
-        Cron.__init__(self, *args, **kwargs)
-        gui = self.modrana.gui
-
-        self.nextId = 0
-        # cronTab and activeIds should be in sync
-        self.cronTab = {"idle": {}, "timeout": {}}
-        self.dataLock = threading.RLock()
-
-    def _getID(self):
-        """get an unique id for timing related request that can be
-        returned to the callers and used as a handle
-        TODO: can int overflow in Python ?"""
-        timeoutId = self.nextId
-        self.nextId += 1
-        return timeoutId
-
-    def addIdle(self, callback, args):
-        """add a callback that is called once the main loop becomes idle"""
-        gobject.idle_add(callback, *args)
-
-    def addTimeout(self, callback, timeout, caller, description, args=None):
-        """the callback will be called timeout + time needed to execute the callback
-        and other events"""
-        if not args: args = []
-        timeoutId = self._getID()
-        realId = gobject.timeout_add(timeout, self._doTimeout, timeoutId, callback, args)
-        timeoutTuple = (callback, args, timeout, caller, description, realId)
-        with self.dataLock:
-            self.cronTab['timeout'][timeoutId] = timeoutTuple
-        return timeoutId
-
-    def removeTimeout(self, timeoutId):
-        """remove timeout with a given id"""
-        with self.dataLock:
-            if timeoutId in self.cronTab['timeout'].keys():
-                (callback, args, timeout, caller, description, realId) = self.cronTab['timeout'][timeoutId]
-                del self.cronTab['timeout'][timeoutId]
-                gobject.source_remove(realId)
-            else:
-                self.log.error("can't remove timeout, wrong id: %s", timeoutId)
-
-    def modifyTimeout(self, timeoutId, newTimeout):
-        """modify the duration of a timeout in progress"""
-        with self.dataLock:
-            if timeoutId in self.cronTab['timeout'].keys():
-                # load the timeout description
-                (callback, args, timeout, caller, description, realId) = self.cronTab['timeout'][timeoutId]
-                gobject.source_remove(realId) # remove the old timeout
-                realId = gobject.timeout_add(newTimeout, self._doTimeout, timeoutId, callback, args) # new timeout
-                # update the timeout description
-                self.cronTab['timeout'][timeoutId] = (callback, args, newTimeout, caller, description, realId)
-            else:
-                self.log.error("can't modify timeout, wrong id: %s", timeoutId)
-
-
-class CronQt(Cron):
-    """A Qt timing and scheduling module for modRana"""
-
-    def __init__(self, *args, **kwargs):
-        Cron.__init__(self, *args, **kwargs)
-        self.nextId = 0
-        # cronTab and activeIds should be in sync
-        self.cronTab = {"idle": {}, "timeout": {}}
-        self.dataLock = threading.RLock()
-
-    def _getID(self):
-        """get an unique id for timing related request that can be
-        returned to the callers and used as a handle
-        TODO: can int overflow in Python ?
-        TODO: id recycling ?"""
-        with self.dataLock:
-            timeoutId = self.nextId
-            self.nextId += 1
-            return timeoutId
-
-    def addIdle(self, callback, args):
-        """add a callback that is called once the main loop becomes idle"""
-        pass
-
-    def addTimeout(self, callback, timeout, caller, description, args=None):
-        """the callback will be called timeout + time needed to execute the callback
-        and other events
-        """
-        if not args: args = []
-        # create and configure the timer
-        timer = QtCore.QTimer()
-        #    timer.setInterval(timeout)
-        timeoutId = self._getID()
-        # create a new function that calls the callback processing function
-        # with thh provided arguments"""
-        handleThisTimeout = lambda: self._doTimeout(timeoutId, callback, args)
-        # connect this function to the timeout
-        timer.timeout.connect(handleThisTimeout)
-        # store timer data
-        timeoutTuple = (callback, args, timeout, caller, description, timeoutId, timer)
-        with self.dataLock:
-            self.cronTab['timeout'][timeoutId] = timeoutTuple
-            # start the timer
-        timer.start(timeout)
-        # return the id
-        return timeoutId
-
-    def removeTimeout(self, timeoutId):
-        """remove timeout with a given id"""
-        with self.dataLock:
-            if timeoutId in self.cronTab['timeout'].keys():
-                (callback, args, timeout, caller, description, timeoutId, timer) = self.cronTab['timeout'][timeoutId]
-                timer.stop()
-                del self.cronTab['timeout'][timeoutId]
-            else:
-                self.log.error("can't remove timeout, wrong id: %s", timeoutId)
-
-    def modifyTimeout(self, timeoutId, newTimeout):
-        """modify the duration of a timeout in progress"""
-        with self.dataLock:
-            if timeoutId in self.cronTab['timeout'].keys():
-                # load the timeout data
-                (callback, args, timeout, caller, description, timeoutId, timer) = self.cronTab['timeout'][timeoutId]
-                # reset the timeout duration
-                timer.setInterval(newTimeout)
-                # update the timeout data
-                self.cronTab['timeout'][timeoutId] = (callback, args, newTimeout, caller, description, timeoutId, timer)
-            else:
-                self.log.error("can't modify timeout, wrong id: %s", timeoutId)
 
 class CronQt5(Cron):
     """A Qt 5 timing and scheduling module for modRana"""

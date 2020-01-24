@@ -142,15 +142,6 @@ class StorePOI(RanaModule):
             self.set('menu', None)
             self._dump_to_CSV()
 
-    def handleTextEntryResult(self, key, result):
-        if key == 'onlineResultName':
-            # like this, the user can edit the name of the
-            # result before saving it to POI
-            self.tempOnlinePOI.name = result
-            self.sendMessage('ml:notification:m:Select a category for the new POI;3')
-            self.sendMessage('ml:showPOI:setupPOICategoryChooser:storePOI;setCatAndCommit')
-            self.set('menu', 'menu#list#POICategoryChooser')
-
     def _dump_to_CSV(self):
         """Dump the database content as a CSV file"""
         units = self.m.get('units', None)

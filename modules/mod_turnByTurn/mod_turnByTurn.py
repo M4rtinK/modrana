@@ -24,7 +24,6 @@ from core import geo
 from core import threads
 from core import constants
 from core.signal import Signal
-from core import gs
 import math
 import time
 from threading import RLock
@@ -42,12 +41,6 @@ REROUTING_TRIGGER_COUNT = 3
 
 MAX_CONSECUTIVE_AUTOMATIC_REROUTES = 3
 AUTOMATIC_REROUTE_COUNTER_EXPIRATION_TIME = 600  # in seconds
-
-# only import GKT libs if GTK GUI is used
-if gs.GUIString == "GTK":
-    import pango
-    import pangocairo
-
 
 def getModule(*args, **kwargs):
     return TurnByTurn(*args, **kwargs)
@@ -178,162 +171,6 @@ class TurnByTurn(RanaModule):
             route.reroute()
         # 3. restart routing for to this new route from the closest point
         self.sendMessage("ms:turnByTurn:start:closest")
-
-    def drawMapOverlay(self, cr):
-        if self._route:
-            # get current step
-            proj = self.m.get('projection', None)
-            # draw the current step indicator circle
-            if self.current_step and proj:
-                (lat, lon) = self.current_step.getLL()
-                (pointX, pointY) = proj.ll2xy(lat, lon)
-                cr.set_source_rgb(1, 0, 0)
-                cr.set_line_width(4)
-                cr.arc(pointX, pointY, 12, 0, 2.0 * math.pi)
-                cr.stroke()
-                cr.fill()
-
-    def drawScreenOverlay(self, cr):
-        if self._route:  # is there something relevant to draw ?
-            # draw the routing message box
-
-            # we need to have the viewport available
-            vport = self.get('viewport', None)
-            menus = self.m.get('menu', None)
-            if vport and menus:
-                (sx, sy, w, h) = vport
-                (bx, by, bw, bh) = (w * 0.15, h * 0.20, w * 0.7, h * 0.4)
-                button_strip_offset = 0.25 * bh
-
-                # construct parametric background for the cairo drawn buttons
-                background = "generic:;0;;1;5;0"
-
-                if self._navigation_box_hidden:
-                    # * show button
-                    show_button_width = bw * 0.2
-                    # the show button uses custom parameters
-                    parametric_icon_name = "center:show;0.1>%s" % background
-                    menus.drawButton(cr, bx + (bw - show_button_width), by, show_button_width, button_strip_offset, "",
-                                     parametric_icon_name, "turnByTurn:toggleBoxHiding")
-
-                else:
-                    # draw the info-box background
-                    cr.set_source_rgba(*self.navigationBoxBackground)
-                    cr.rectangle(bx, by + button_strip_offset, bw, bh - button_strip_offset)
-                    cr.fill()
-
-                    # create a layout for our drawing area
-                    pg = pangocairo.CairoContext(cr)
-                    layout = pg.create_layout()
-
-                    # get the current turn message
-                    message = self.current_step.description
-
-                    # display current distance to the next point & other unit conversions
-                    units = self.m.get('units', None)
-                    if units and self._current_distance:
-                        distString = units.m2CurrentUnitString(self._current_distance, 1, True)
-                        if self.current_step.distance_from_start:
-                            current_dist_string = units.m2CurrentUnitString(self.current_step.distance_from_start, 1, True)
-                        else:
-                            current_dist_string = "?"
-                        route_length_string = units.m2CurrentUnitString(self._m_route_length, 1, True)
-                    else:
-                        distString = ""
-                        current_dist_string = ""
-                        route_length_string = ""
-
-                    # TODO: find why there needs to be a newline on the end
-                    message = "%s : %s\n" % (distString, message)
-
-                    border = min(bw / 50.0, bh / 50.0)
-                    # compute how much space is actually available for the text
-                    usable_width = bw - 2 * border
-                    usable_height = bh - 6 * border - button_strip_offset
-                    layout.set_width(int(usable_width * pango.SCALE))
-                    layout.set_wrap(pango.WRAP_WORD)
-                    layout.set_markup(message)
-                    layout.set_font_description(pango.FontDescription("Sans Serif 24"))  # TODO: custom font size ?
-                    (lw, lh) = layout.get_size()
-                    if lw == 0 or lh == 0:
-                        # no need to draw a zero area layout
-                        return
-
-                    # get coordinates for the area available for text
-                    ulX, ulY = (bx + border, by + border + button_strip_offset)
-                    cr.move_to(ulX, ulY)
-                    cr.save()
-                    if lh > usable_height:  # is the rendered text larger than the usable area ?
-                        clip_height = 0
-                        # find last completely visible line
-                        cut = False
-                        for index in range(0, layout.get_line_count() - 1):
-                            lineHeight = layout.get_line(index).get_pixel_extents()[1][3]
-                            if clip_height + lineHeight <= usable_height:
-                                clip_height = clip_height + lineHeight
-                            else:
-                                cut = True  # signalize we cut off some lines
-                                break
-
-                        text_end_y = by + border + clip_height + button_strip_offset
-
-                        if cut:
-                            # notify the user that a part of the text was cut,
-                            # by drawing a red line and a scissors icon
-
-                            # draw the red line
-                            cr.set_source_rgb(1, 0, 0)
-                            cr.set_line_width(bh * 0.01)
-                            cr.move_to(bx, text_end_y)
-                            cr.line_to(bx + bw, text_end_y)
-                            cr.stroke()
-                            # draw the scissors icon
-                            cut_side = bw / 10
-                            menus.drawButton(cr, bx + bw, text_end_y - cut_side / 2.0, cut_side, cut_side, "",
-                                             "center:scissors_right;0>%s" % background,
-                                             "turnByTurn:showMessageInsideNotification")
-                            # TODO: show the whole message in a notifications after clicking the scissors
-                            #       (this needs line wrapping support in modRana notifications)
-
-                        # clip out the overflowing part of the text
-                        cr.rectangle(ulX, ulY, usable_width, clip_height)
-                        cr.translate(ulX, ulY)
-                        cr.clip()
-
-                    cr.set_source_rgba(*self.navigationBoxText)
-                    pg.show_layout(layout)
-                    cr.restore()
-
-                    # use the bottom of the infobox to display info
-                    (bottomX, bottomY) = (bx, by + bh - 6 * border)
-                    if self._route_reached and self.automatic_rerouting_enabled:
-                        ar_string = "automatic rerouting enabled"
-                    else:
-                        ar_string = "tap this box to reroute"
-                    note = "%s/%s, %d/%d   <sub> %s</sub>" % (
-                        current_dist_string, route_length_string, self._current_step_index + 1, self._max_step_index + 1,
-                        ar_string)
-                    menus.drawText(cr, "%s" % note, bottomX, bottomY, bw, 6 * border, 0,
-                                   rgbaColor=self.navigationBoxText)
-                    # make clickable
-                    clickHandler = self.m.get('clickHandler', None)
-                    if clickHandler:
-                        action = "turnByTurn:reroute"
-                        clickHandler.registerXYWH(bx, by + button_strip_offset, bw, bh - button_strip_offset, action)
-
-                    # draw the button strip
-                    hide_button_width = bw * 0.2
-                    switch_button_width = bw * 0.4
-
-                    # * previous turn button
-                    menus.drawButton(cr, bx, by, switch_button_width, button_strip_offset, "",
-                                     "center:less;0.1>%s" % background, "turnByTurn:switchToPreviousTurn")
-                    # * next turn button
-                    menus.drawButton(cr, bx + switch_button_width, by, switch_button_width, button_strip_offset, "",
-                                     "center:more;0.1>%s" % background, "turnByTurn:switchToNextTurn")
-                    # * hide button
-                    menus.drawButton(cr, bx + 2 * switch_button_width, by, hide_button_width, button_strip_offset, "",
-                                     "center:hide;0.1>%s" % background, "turnByTurn:toggleBoxHiding")
 
     @property
     def automatic_rerouting_enabled(self):
