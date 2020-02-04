@@ -104,23 +104,6 @@ class GUIModule(RanaModule):
         """
         pass
 
-    def enableDefaultDrag(self):
-        """
-        use the default map dragging implementation
-        """
-
-    pass
-
-    def enableStaticMapDrag(self):
-        """
-        enable static map dragging
-        eq. while dragging the map, only the area that is visible is dragged
-        and the rest is not updated until the drag is finished
-        (can lead to better dragging performance on slower devices at the cost of
-        some eyecandy)
-        """
-        pass
-
     def setCDDragThreshold(self, threshold):
         """set the threshold which needs to be reached to disable centering while dragging
         basically, larger threshold = longer drag is needed to disable centering

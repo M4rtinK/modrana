@@ -269,11 +269,6 @@ class ModRana(object):
                 self.GUIString = self.args.u.split(":")[0].upper()
             except Exception:
                 log.exception('splitting the GUI string failed')
-        else:  # no ID specified
-            # the N900 device module needs the GUIString
-            # at startup
-            if device == "n900":
-                self.GUIString = "GTK"
 
         # set the pre-import-visible GUIString
         # for the device module
@@ -301,7 +296,7 @@ class ModRana(object):
             if ids:
                 self.GUIString = ids[0]
             else:
-                self.GUIString = "GTK"  # fallback
+                self.GUIString = "Qt5"  # fallback
                 # export the GUI string
                 # set the pre-import visible GUI string and subtype
         split_gui_string = self.GUIString.split(":")
@@ -327,9 +322,7 @@ class ModRana(object):
         else:
             subtypeId = None
 
-        if gui_module_id.upper() == "GTK":
-            gui_module = self._load_module("gui_gtk", "gui")
-        elif gui_module_id.lower() == "qt5":
+        if gui_module_id.lower() == "qt5":
             # The QML part is not yet running, start it now
             # and the Python backend will re-initialized
             # from the QML side.

@@ -93,20 +93,6 @@ class Location(RanaModule):
                 self.log.warning("fix not valid")
                 self.log.info(fix)
 
-                # forced screen update is only needed by the GTK GUI
-
-                # the location update method which might run asynchronously in the
-                # device module also sends redraw requests
-                # -> no need to send a new one if there is already one pending
-                # --> there would not be a change position anyway until next the fix
-                # -> surplus redraw requests are actually harmful with map rotation enabled
-                # NOTE: this currently applies only to the GTK GUI
-        if gs.GUIString == "GTK":
-            # make sure the screen is updated at least once per second
-            sFromLastRequest = time() - self.modrana.gui.getLastFullRedrawRequest()
-            if sFromLastRequest > 0.85:
-                self.set('needRedraw', True)
-
     def _debugCB(self, key, oldValue, newValue):
         if self.provider:
             self.provider.setDebug(newValue)

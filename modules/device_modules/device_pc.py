@@ -57,7 +57,7 @@ class DevicePC(DeviceModule):
 
     @property
     def supported_gui_module_ids(self):
-        return ["GTK", "qt5"]
+        return ["qt5"]
 
     @property
     def device_type(self):

@@ -46,89 +46,6 @@ class ShowPOI(RanaModule):
         # restore the IDs of visible POI
         self.restoreVisibleIDs()
 
-    def makeMapClickable(self):
-        """make the whole map/screen clickable and send a specific message when clicked"""
-        clickHandler = self.m.get('clickHandler', None)
-        (x, y, w, h) = self.get('viewport')
-        if clickHandler:
-            clickHandler.registerXYWH(x, y, x + w, y + h, 'showPOI:stopExpecting|ms:showPOI:storePOI:fromMapDone')
-
-    def drawMenu(self, cr, menuName, args=None):
-        """make the POI Object draw the menu :D"""
-        if menuName == 'POIDetail':
-            self.activePOI.drawMenu(cr)
-
-    def drawMapOverlay(self, cr):
-        if self.expectPoint:
-            self.makeMapClickable()
-        if self.drawActivePOI:
-            proj = self.m.get('projection', None)
-            menus = self.m.get('menu', None)
-            if proj and self.visiblePOI:
-                for POI in self.visiblePOI:
-                    poiID = POI.db_index
-                    lat = POI.lat
-                    lon = POI.lon
-                    name = POI.name
-                    hidePOICaptionZl = int(self.get("hideMarkerCaptionsBelowZl", 13))
-                    if int(self.get('z', 15)) > hidePOICaptionZl:
-                        distanceString = ""
-                        pos = self.get('pos', None)
-                        units = self.m.get('units', None)
-                        if pos and units:
-                            (lat1, lon1) = pos # current position coordinates
-                            kiloMetricDistance = geo.distance(lat, lon, lat1, lon1)
-                            unitString = units.km2CurrentUnitString(kiloMetricDistance, 0, True)
-                            distanceString = " (%s)" % unitString
-
-                        text = "" + name + distanceString
-
-                    (x, y) = proj.ll2xy(lat, lon) #   draw the highlighting circle
-                    cr.set_line_width(8)
-                    cr.set_source_rgba(0.1, 0.6, 0.1, 0.55) # highlight circle color
-                    cr.arc(x, y, 15, 0, 2.0 * math.pi)
-                    cr.stroke()
-                    cr.fill()
-
-                    # draw the point
-                    cr.set_source_rgb(0.0, 0.0, 0.0)
-                    cr.set_line_width(10)
-                    cr.arc(x, y, 3, 0, 2.0 * math.pi)
-                    cr.stroke()
-                    cr.set_source_rgb(0.0, 0.0, 1.0)
-                    cr.set_line_width(8)
-                    cr.arc(x, y, 2, 0, 2.0 * math.pi)
-                    cr.stroke()
-
-                    # draw a caption with transparent background
-                    if int(self.get('z', 15)) > hidePOICaptionZl:
-                        cr.set_font_size(25)
-                        extents = cr.text_extents(text) # get the text extents
-                        (w, h) = (extents[2], extents[3])
-                        border = 2
-                        cr.set_line_width(2)
-                        cr.set_source_rgba(0.1, 0.6, 0.1, 0.45) # transparent blue
-                        (rx, ry, rw, rh) = (x - border + 12, y + border + h * 0.2 + 6, w + 4 * border, -(h * 1.4))
-                        cr.rectangle(rx, ry, rw, rh) # create the transparent background rectangle
-                        cr.fill()
-
-                        # register clickable area
-                        click = self.m.get('clickHandler', None)
-                        if click:
-                            # make the POI caption clickable
-                            if poiID is not None: # new POI have id == None
-                                click.registerXYWH(rx, ry - (-rh), rw, -rh,
-                                                   "ms:showPOI:setActivePOI:%d|set:menu:showPOI#POIDetail" % poiID)
-                            else: # the last added POI is still set, no need to set the id
-                                click.registerXYWH(rx, ry - (-rh), rw, -rh, "set:menu:showPOI#POIDetail")
-                        cr.fill()
-
-                        # draw the actual text
-                        #        cr.set_source_rgba(1, 1, 0, 0.95) # slightly transparent white
-                        cr.set_source_rgba(1, 1, 1, 0.95) # slightly transparent white
-                        menus.drawText(cr, text, rx, ry - (-rh), rw, -rh, 0.05)
-                        cr.stroke()
-
     def handleMessage(self, message, messageType, args):
         # messages that need the store and/or menus go here
         store = self.m.get('storePOI', None)
@@ -205,7 +122,6 @@ class ShowPOI(RanaModule):
                         self.expectPoint = True # turn on registering the whole screen clickable
                     self.set('menu', None)
                     self.sendMessage('ml:notification:m:Tap on the map to add POI;3')
-                    self.set('needRedraw', True)
                 elif args == "fromMapDone": # this is after the point has been clicked
                     with self.expectLock:
                         if self.expectPoint == True:
@@ -301,7 +217,6 @@ class ShowPOI(RanaModule):
                 self.makePOIVisible(self.activePOI)
                 self.drawPOI()
                 self.set('menu', None)
-                self.set('needRedraw', True)
 
             elif message == 'drawActivePOI':
                 if self.activePOI: # only add valid poi
@@ -323,19 +238,6 @@ class ShowPOI(RanaModule):
                     self.notify("%d visible POI cleared" % count, 2000)
                 else:
                     self.notify("Nothing to clear", 2000)
-
-
-    def _setupPOICategoryChooser(self, menu, key):
-        menus = self.m.get('menu', None)
-        store = self.m.get('storePOI', None)
-        cats = store.db.list_categories()
-        i = 0
-        for cat in cats:
-            (label, desc, cat_id) = cat
-            action = "ms:%s:%s:%d" % (menu, key, cat_id)
-            cats[i] = (label, desc, action)
-            i += 1
-        menus.addListMenu('POICategoryChooser', "set:menu:poi", cats)
 
     def makePOIVisible(self, POI):
         """add a POI to the list of visible POI & save ID"""
@@ -396,104 +298,3 @@ class ShowPOI(RanaModule):
                 self.log.info("showPOI: %d visible POI restored", len(self.visiblePOI))
             else:
                 self.log.error("showPOI: can't restore visible, the storePOI module is not loaded")
-
-    def drawPOI(self):
-        """enable drawing of the active POI"""
-        self.drawActivePOI = True
-
-    def dontDrawPOI(self):
-        """disable drawing of the active POI"""
-        self.drawActivePOI = False
-
-    def handleTextEntryResult(self, key, result):
-        # TODO: add input checking
-        entry = self.m.get('textEntry', None)
-        if key == 'name':
-            self.activePOI.name = result
-            self.activePOI.commit()
-        elif key == 'description':
-            self.activePOI.description = result
-            self.activePOI.commit()
-        elif key == 'lat':
-            self.activePOI.lat = float(result)
-            self.activePOI.commit()
-        elif key == 'lon':
-            self.activePOI.lon = float(result)
-            self.activePOI.commit()
-
-        # New POI will be committed at the end, so we don't need to commit
-        # after each data entry.
-        # The events are also chained, so one entry box follows the other.
-        elif key == 'newName':
-            self.activePOI.name = result
-            entry.entryBox(self, 'newDescription', 'POI Description', "")
-        elif key == 'newDescription':
-            self.activePOI.description = result
-            entry.entryBox(self, 'newLat', 'POI Latitude', "")
-        elif key == 'newLat':
-            self.activePOI.lat = float(result)
-            entry.entryBox(self, 'newLon', 'POI Longitude', "")
-        elif key == 'newLon':
-            self.activePOI.lon = float(result)
-            # final step:
-            # * setup the category chooser menu,
-            # * make sure the POI is committed after a category is chosen
-            self._setupPOICategoryChooser('showPOI', 'setCatAndCommit')
-            self.set('menu', 'menu#list#POICategoryChooser')
-            self.sendMessage('ml:notification:m:Select a category for this POI;3')
-
-        # current position as a new POI" entry chain
-        elif key == 'newCurrentPositionName':
-            self.activePOI.name = result
-            entry.entryBox(self, 'newCurrentPositionDescription', 'POI Description', "")
-        elif key == 'newCurrentPositionDescription':
-            self.activePOI.description = result
-            # setup the category chooser
-            # (category selection will be the last step)
-            self._setupPOICategoryChooser('showPOI', 'setCatAndCommit')
-            self.set('menu', 'menu#list#POICategoryChooser')
-            self.sendMessage('ml:notification:m:Select a category for this POI;3')
-            self.set('needRedraw', True)
-
-
-class GTKPOI(POI):
-    """A POI wrapper with additional methods needed by the GTK GUI"""
-    def __init__(self, poi):
-        POI.__init__(self, name=poi.name, description=poi.description, lat=poi.lat, lon=poi.lon,
-                     db_cat_id=poi.db_category_index, db_poi_id=poi.db_index)
-
-    def drawMenu(self, cr):
-        menus = modrana.m.get('menu', None)
-        if menus:
-            button1 = ('map#show on', 'generic',
-                       'mapView:recentre %f %f|showPOI:drawActivePOI|set:menu:None' % (self.lat, self.lon))
-            button2 = ('tools', 'tools', 'showPOI:updateToolsMenu|set:menu:POIDetailTools')
-            if self.name is not None and self.lat is not None and self.lon is not None and self.description is not None:
-                text = "<big><b>%s</b></big>\n\n%s\n\nlat: <b>%f</b> lon: <b>%f</b>" % (
-                self.name, self.description, self.lat, self.lon)
-            else:
-                text = "POI is being initialized"
-            box = (text, '')
-            menus.drawThreePlusOneMenu(cr, 'POIDetail', 'showPOI:checkMenus|set:menu:menu#list#POIList', button1,
-                                       button2, box, wrap=True)
-    def updateToolsMenu(self):
-        # setup the tools submenu
-        menus = modrana.m.get('menu', None)
-        if menus:
-            menus.clearMenu('POIDetailTools', "set:menu:showPOI#POIDetail")
-            menus.addItem('POIDetailTools', 'here#route', 'generic', 'showPOI:routeToActivePOI')
-            menus.addItem('POIDetailTools', 'name#edit', 'generic', 'ms:showPOI:editActivePOI:name')
-            menus.addItem('POIDetailTools', 'description#edit', 'generic', 'ms:showPOI:editActivePOI:description')
-            menus.addItem('POIDetailTools', 'latitude#edit', 'generic', 'ms:showPOI:editActivePOI:lat')
-            menus.addItem('POIDetailTools', 'longitude#edit', 'generic', 'ms:showPOI:editActivePOI:lon')
-            menus.addItem('POIDetailTools', 'category#change', 'generic',
-                          'ml:showPOI:setupPOICategoryChooser:showPOI;setCatAndCommit|set:menu:menu#list#POICategoryChooser')
-            menus.addItem('POIDetailTools', 'position#set as', 'generic',
-                          'showPOI:centerOnActivePOI|ml:location:setPosLatLon:%f;%f' % (self.lat, self.lon))
-            # just after the point is stored and and its detail menu shows up for the first time,
-            # it cant be deleted from the database, because we don't know which index it got :D
-            # TODO: find a free index and then store the point on it
-            # (make sure no one writes to the database between getting the free index and writing the poi to it)
-            # then we would be able to delete even newly created points
-            if self.db_index:
-                menus.addItem('POIDetailTools', 'POI#delete', 'generic', 'showPOI:askDeleteActivePOI')

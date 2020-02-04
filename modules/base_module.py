@@ -64,26 +64,6 @@ class RanaModule(object):
         """Runs on application start (after all other modules are loaded)"""
         pass
 
-    def beforeDraw(self):
-        """Before a screen is redrawn (don't use this for regular updates)"""
-        pass
-
-    def drawMenu(self, cr, menuName, args=None):
-        """Drawing, in menu mode.  Only handle this if you know your menu is active"""
-        pass
-
-    def drawMap(self, cr):
-        """Draw the base map"""
-        pass
-
-    def drawMapOverlay(self, cr):
-        """Draw overlay that's part of the map"""
-        pass
-
-    def drawScreenOverlay(self, cr):
-        """Draw overlay that's on top of all maps"""
-        pass
-
     def handleMessage(self, message, messageType, args):
         """Handles a message from another module, or in response to user action"""
         pass

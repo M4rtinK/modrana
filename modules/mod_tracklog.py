@@ -25,11 +25,8 @@ import os
 from collections import deque
 from core import geo
 from core.way import Way, AppendOnlyWay
-from core import gs
 from core.signal import Signal
 
-if gs.GUIString == "GTK":
-    import gtk
 
 DONT_ADD_TO_TRACE_THRESHOLD = 1
 # if a point is less distant from the last
@@ -104,16 +101,13 @@ class Tracklog(RanaModule):
             elif self.loggingEnabled == True & self.loggingPaused == True:
                 self.log.info("resuming track logging")
                 self.loggingPaused = False
-            self.set('needRedraw', True)
 
         elif message == "pauseLogging":
             self.pauseLogging()
-            self.set('needRedraw', True)
 
         elif message == "stopLogging":
             self.log.info("stopping track logging")
             self.stopLogging()
-            self.set('needRedraw', True)
 
         elif message == 'nameInput':
             entry = self.m.get('textEntry', None)
@@ -125,7 +119,6 @@ class Tracklog(RanaModule):
             if logNameEntry:
                 entryText = logNameEntry
             entry.entryBox(self, 'logNameEntry', 'Write tracklog name', entryText)
-            self.set('needRedraw', True)
 
         elif message == 'clearTrace':
             self.clearTrace()
@@ -139,10 +132,6 @@ class Tracklog(RanaModule):
             # set the color from the color register
             colorName = self.get('distinctColorRegister', 'blue')
             self.traceColor = colorName
-
-    def handleTextEntryResult(self, key, result):
-        if key == 'logNameEntry':
-            self.set('logNameEntry', result)
 
     def startLogging(self, name="", logType='gpx'):
         """Start a new log file
@@ -498,206 +487,6 @@ class Tracklog(RanaModule):
     #    last_y = y
     #print("bod")
 
-    def initToolsMenu(self):
-        """initialize the tools submenu"""
-        menus = self.m.get('menu', None)
-        if menus:
-            # add the buttons
-
-            # * escape button
-            menus.clearMenu('tracklogTools', "set:menu:tracklog#tracklog")
-
-            # * logging interval button
-
-            baseAction = '|tracklog:setNewLoggingInterval'
-            textIconAction = [
-                ('1 s#log every', '', 'set:tracklogLogInterval:1' + baseAction),
-                ('2 s#log every', '', 'set:tracklogLogInterval:2' + baseAction),
-                ('5 s#log every', '', 'set:tracklogLogInterval:5' + baseAction),
-                ('10 s#log every', '', 'set:tracklogLogInterval10:' + baseAction),
-                ('20 s#log every', '', 'set:tracklogLogInterval:20' + baseAction),
-                ('30 s#log every', '', 'set:tracklogLogInterval:30' + baseAction),
-                ('1 min#log every', '', 'set:tracklogLogInterval:60' + baseAction),
-                ('2 min#log every', '', 'set:tracklogLogInterval:120' + baseAction)
-            ]
-            menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsLogInterval')
-
-            # * saving interval button
-            baseAction = '|tracklog:setNewSavingInterval'
-            textIconAction = [
-                ('10 s#save every', '', 'set:tracklogSaveInterval:10' + baseAction),
-                ('20 s#save every', '', 'set:tracklogSaveInterval:20' + baseAction),
-                ('30 s#save every', '', 'set:tracklogSaveInterval:30' + baseAction),
-                ('1 min#save every', '', 'set:tracklogSaveInterval:60' + baseAction),
-                ('2 min s#save every', '', 'set:tracklogSaveInterval:120' + baseAction),
-                ('5 min s#save every', '', 'set:tracklogSaveInterval:300' + baseAction),
-                ('10 min s#save every', '', 'set:tracklogSaveInterval:600' + baseAction)
-            ]
-            menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsSaveInterval')
-
-            #      # * elevation toggle
-            #      textIconAction = [
-            #                        ('OFF #elevation', '', 'set:tracklogLogElevation:False'),
-            #                        ('ON #elevation', '', 'set:tracklogLogElevation:True')
-            #                        ]
-            #      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsElevation')
-            #
-            #      # * time toggle
-            #      textIconAction = [
-            #                  ('OFF #time', '', 'set:tracklogLogeTime:False'),
-            #                  ('ON #time', '', 'set:tracklogLogTime:True')
-            #                  ]
-            #      menus.addToggleItem('tracklogTools', textIconAction, 0, None, 'tracklogToolsTime')
-            menus.addItem('tracklogTools', 'folder#go to', 'generic',
-                          'set:currentTracCat:logs|set:menu:tracklogManager#tracklogManager')
-            menus.addItem('tracklogTools', 'trace#clear', 'generic', 'tracklog:clearTrace|set:menu:None')
-            menus.addItem('tracklogTools', 'color#change', 'generic',
-                          'tracklog:setupColorMenu|set:menu:chooseDistColor')
-
-    def drawMenu(self, cr, menuName, args=None):
-        if menuName == 'tracklog':
-            # is the submenu initialized ?
-            if self.toolsMenuDone == False:
-                self.log.debug("setting up tracklogTools menu")
-                self.initToolsMenu()
-                self.toolsMenuDone = True
-
-            parentAction = 'set:menu:main'
-            # this is a a list of button parameters, all buttons can be toggleable
-            # it is in this form:
-            # [list of string-lists for toggling, index of string-list to show]
-            units = self.m.get('units', None)
-
-            # main status text
-
-            startButtonIndex = 0
-            text = ""
-            if self.loggingEnabled:
-                if self.loggingPaused:
-                    text += '<span foreground="cyan">logging is <i>PAUSED</i></span>'
-                    startButtonIndex = 2 # resume
-                else:
-                    text += '<span foreground="green">logging is ON</span>'
-                    startButtonIndex = 1 # pause
-            else:
-                text += '<span foreground="red">logging is OFF</span>'
-                startButtonIndex = 0 # start
-
-            # buttons
-
-            fiveButtons = [
-                [[
-                     ["start", "start", "tracklog:startLogging|set:needRedraw:True"],
-                     ["pause", "pause", "tracklog:pauseLogging|set:needRedraw:True"],
-                     ["resume", "start", "tracklog:startLogging|set:needRedraw:True"]
-                 ], startButtonIndex],
-                [[["stop", "stop", "tracklog:stopLogging"]], 0],
-                [[["split", "split", "tracklog:stopLogging|tracklog:startLogging"]], 0],
-                [[["name#edit", "generic", "tracklog:nameInput"]], 0],
-                [[["tools", "tools", "set:menu:tracklogTools"]], 0],
-            ]
-
-            text += "\n\n"
-
-            if not self.loggingEnabled:
-                text += "%s" % self.generateLogName(self.get('logNameEntry', ""))
-            else:
-                text += "%s" % self.logName
-
-            updateInterval = int(self.get('tracklogLogInterval', 1))
-            saveInterval = int(self.get('tracklogSaveInterval', 10))
-
-            text += "\n\nlogging interval %d s, saving every %d s" % (updateInterval, saveInterval)
-            if self.loggingStartTimestamp:
-                elapsedSeconds = (int(time.time()) - self.loggingStartTimestamp)
-                text += "\nelapsed time: %s" % time.strftime('%H:%M:%S', time.gmtime(elapsedSeconds))
-
-            currentSpeed = self.get('speed', 0)
-            if currentSpeed:
-                if units:
-                    currentSpeedString = units.km2CurrentUnitPerHourString(currentSpeed)
-                else:
-                    currentSpeedString = "%f km/h" % currentSpeed
-                text += "\n\ncurrent speed: <span foreground='yellow'>%s</span>" % currentSpeedString
-            else:
-                text += '\n\ncurrent speed <span foreground="red">unknown</span>'
-
-            if self.maxSpeed:
-                if units:
-                    avgString = units.km2CurrentUnitPerHourString(self.avgSpeed)
-                    maxString = units.km2CurrentUnitPerHourString(self.maxSpeed)
-                else:
-                    avgString = "%f km/h" % self.avgSpeed
-                    maxString = "%f km/h" % self.maxSpeed
-                text += "\n\nmax: %s, average: %s" % (maxString, avgString)
-
-            if self.distance:
-                if units:
-                    distanceString = units.km2CurrentUnitString(self.distance, 2)
-                else:
-                    distanceString = "%f km" % self.distance
-                text += "\ndistance traveled <span foreground='white'>%s</span>\n" % distanceString
-
-            box = (text, "set:menu:tracklog#tracklog")
-            menus = self.m.get("menu", None)
-            if menus:
-                menus.drawSixPlusOneMenu(cr, menuName, parentAction, fiveButtons, box)
-            else:
-                self.log.error('menus module is missing')
-
-        else:
-            return # we aren't the active menu so we dont do anything
-
-    def drawMapOverlay(self, cr):
-        proj = self.m.get('projection', None)
-        if proj and self.pxpyIndex:
-            cr.set_source_color(gtk.gdk.color_parse(self.traceColor))
-            cr.set_line_width(10)
-            # log trace drawing algorithm
-            # adapted from TangoGPS source (tracks.c)
-            # works surprisingly good :)
-            # TODO: use the modulo method for drawing stored tracklogs
-            posXY = proj.getCurrentPosXY()
-            if posXY and self.loggingEnabled and not self.loggingPaused:
-                cr.move_to(*posXY) # start drawing from current position
-            else:
-                (px, py, index) = self.pxpyIndex[0] # start drawing from first trace point
-                (x, y) = proj.pxpyRel2xy(px, py)
-                cr.move_to(x, y)
-
-            z = proj.zoom
-
-            if 16 > z > 10:
-                modulo = 2 ** (16 - z)
-            elif z <= 10:
-                modulo = 32
-            else:
-                modulo = 1
-
-            maxDraw = 300
-            drawCount = 0
-            counter = 0
-
-            #draw the track
-            for point in self.pxpyIndex:  # pypyIndex is already in reverse order
-                counter += 1
-                if counter % modulo == 0:
-                    drawCount += 1
-                    if drawCount > maxDraw:
-                        break
-                    (px, py, index) = point
-                    (x, y) = proj.pxpyRel2xy(px, py)
-                    cr.line_to(x, y)
-                    # TODO: don't iterate, just get items based on index
-
-                    # draw a track to current position (if known):
-
-                #      self.log.info(z, modulo)
-                #      self.log.info(counter, drawCount)
-
-            cr.stroke()
-            cr.fill()
-
     def _rescueLogs(self):
         """rescue any log files that were not exported to GPX previously"""
 
@@ -713,7 +502,6 @@ class Tracklog(RanaModule):
         if primaryLogs or secondaryLogs:
             self.log.info("unsaved temporary tracklogs detected")
             self.notify("exporting temporary tracklogs to GPX", 5000)
-            self.set('needRedraw', True)
 
             if primaryLogs:
                 self.log.info('exporting %d unsaved primary tracklog files to GPX', len(primaryLogs))
