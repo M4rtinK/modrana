@@ -18,8 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 import os
-import sys
-import traceback
 
 from modules.base_module import RanaModule
 from core.signal import Signal

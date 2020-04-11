@@ -20,21 +20,13 @@
 from __future__ import with_statement # for python 2.5
 from modules.base_module import RanaModule
 import threading
-import os
 import time
-import sys
-import traceback
 
-
-from urllib.request import urlopen
-from urllib.error import HTTPError, URLError
 import urllib3
 
 from core import utils
-from core import rectangles
 from core import tiles
 from core import constants
-from core.tilenames import *
 from core.backports import six
 from core.signal import Signal
 from core import threads

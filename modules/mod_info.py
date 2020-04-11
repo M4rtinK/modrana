@@ -20,7 +20,6 @@
 from modules.base_module import RanaModule
 from core.point import Point
 import math
-from core import geo
 from core.i18n import _
 
 def getModule(*args, **kwargs):

@@ -19,10 +19,6 @@
 #---------------------------------------------------------------------------
 from __future__ import with_statement # for python 2.5
 from modules.base_module import RanaModule
-from core import geo
-from core.point import POI
-from core.singleton import modrana
-import math
 import threading
 
 

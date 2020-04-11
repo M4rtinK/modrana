@@ -1,6 +1,3 @@
-import cairo
-
-
 class ListableMenu(object):
     def __init__(self, cr, x, y, w, h, clickHandler, offset):
         self.cr = cr

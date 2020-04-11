@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Online geodata providers
 import time
-import re
 from core import constants
 from core.point import Point
 from core import requirements

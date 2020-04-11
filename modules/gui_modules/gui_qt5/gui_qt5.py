@@ -39,7 +39,6 @@ import threading
 from core import signal
 from core import constants
 from core.threads import threadMgr
-from core import geo
 from core import modrana_log
 from core import utils
 from core import paths

@@ -24,7 +24,6 @@ from core.constants import DEVICE_TYPE_SMARTPHONE
 from core import constants
 from core import paths
 import os
-import sys
 
 # third party apps for Sailfish OS should use the harbour- prefix
 SAILFISH_MODRANA_PROFILE_NAME = "harbour-modrana"

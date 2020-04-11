@@ -20,7 +20,6 @@
 from core.point import Point
 from modules.base_module import RanaModule
 from core import geo
-import math
 import re
 
 try:  # Python 2.7+

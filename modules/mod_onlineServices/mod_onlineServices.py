@@ -18,17 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from core import constants
-from core import point
-from core import threads
 from modules.base_module import RanaModule
-import traceback
-import sys
-import re
 import threading
-import time
-from . import geocoding
 from . import geonames
-from . import local_search
 from . import online_providers
 from . import offline_providers
 

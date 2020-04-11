@@ -1,7 +1,5 @@
 # Base classes for the Tile Storage module
 
-import os
-
 import logging
 log = logging.getLogger("tile_storage.base")
 

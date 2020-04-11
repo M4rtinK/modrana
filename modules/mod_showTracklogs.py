@@ -18,8 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
-from core import geo
-import math
 
 
 def getModule(*args, **kwargs):
