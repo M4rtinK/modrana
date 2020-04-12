@@ -5,13 +5,7 @@ from core import constants
 from core.way import Way
 from core.backports import six
 
-try:  # Python 2
-    from urllib import urlencode
-    from urllib2 import urlopen, Request, HTTPError, URLError
-except ImportError:  # Python 3
-    from urllib.request import urlopen, Request
-    from urllib.parse import urlencode
-    from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
 
 try:
     import json

@@ -22,8 +22,6 @@
 # On Android with PyOtherSide modRana might be distributed using the qrc
 # mechanism and might need a few tweaks applied to work properly.
 #
-from __future__ import with_statement  # for Python 2.5
-
 import logging
 import shutil
 log = logging.getLogger("core.qrc")

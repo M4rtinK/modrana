@@ -36,9 +36,6 @@
 #
 # When looking for a tile in the database, the lookup database is checked first and if the coordinates
 # are found the corresponding storage database is queried for the actual data.
-
-from __future__ import with_statement
-
 import os
 import sqlite3
 import glob

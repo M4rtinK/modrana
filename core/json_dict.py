@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 # Load and store dictionaries as JSON files
-from __future__ import with_statement  # Python 2.5
-
 import os
 import shutil
 from threading import RLock

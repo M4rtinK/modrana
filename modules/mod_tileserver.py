@@ -22,17 +22,12 @@ import sys
 from threading import Thread
 from core.backports import six
 
+# TODO replace this with something Python 3 compatible
 SimpleHTTPServer = six.moves.SimpleHTTPServer
 SocketServer = six.moves.socketserver
 
-try:  # Python 2
-    from urllib2 import HTTPError
-except ImportError:  # Python 3
-    from urllib.error import HTTPError
-try:
-    from  cStringIO import StringIO # python 2
-except ImportError:
-    from io import StringIO # python 3
+from urllib.error import HTTPError
+from io import StringIO
 
 from modules.base_module import RanaModule
 from modules import tileserver_callback_proxy

@@ -22,11 +22,7 @@ from modules.base_module import RanaModule
 from core import geo
 import re
 
-try:  # Python 2.7+
-    from collections import OrderedDict as odict
-except ImportError:
-    from core.backports.odict import odict  # Python <2.7
-
+from collections import OrderedDict as odict
 
 def getModule(*args, **kwargs):
     return Search(*args, **kwargs)

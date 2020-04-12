@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # modRana - shared utility classes and methods
-from __future__ import with_statement # for python 2.5
 import threading
 import os
 import sys
@@ -15,12 +14,7 @@ from core.backports import six
 
 StringIO = six.moves.cStringIO
 
-PYTHON3 = sys.version_info[0] > 2
-
-if PYTHON3:
-    from urllib.parse import urlparse as urllib_parse
-else:
-    from urlparse import urlparse as urllib_parse
+from urllib.parse import urlparse as urllib_parse
 
 if qrc.is_qrc:
     import pyotherside
@@ -168,26 +162,16 @@ def is_the_string_an_image(s):
     :rtype: bool
     """
 
-    if PYTHON3: # in Python 3 we directly get bytes
-        h = s
-    else: # in Python <3 we get a string
-        # create a file-like object
-        f = StringIO(s)
-        # read the header from it
-        h = f.read(32)
-        # cleanup
-        f.close()
-
     # NOTE: magic numbers taken from imghdr source code
 
     # as most tiles are PNGs, check for PNG first
-    if h[:8] == b("\211PNG\r\n\032\n"):
+    if s[:8] == b("\211PNG\r\n\032\n"):
         return True
-    elif h[6:10] in (b('JFIF'), b('Exif')): # JPEG in JFIF or Exif format
+    elif s[6:10] in (b('JFIF'), b('Exif')): # JPEG in JFIF or Exif format
         return True
-    elif h[:6] in (b('GIF87a'), b('GIF89a')): # GIF ('87 and '89 variants)
+    elif s[:6] in (b('GIF87a'), b('GIF89a')): # GIF ('87 and '89 variants)
         return True
-    elif h[:2] in (b('MM'), b('II'), b('BM')): # tiff or BMP
+    elif s[:2] in (b('MM'), b('II'), b('BM')): # tiff or BMP
         return True
     else: # probably not an image file
         return False

@@ -1,4 +1,3 @@
-from __future__ import with_statement # for python 2.5
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # Store tiles in a single file.
@@ -36,10 +35,7 @@ import time
 from collections import defaultdict
 from threading import RLock
 
-try:  # Python 2.7+
-    from collections import OrderedDict as OrderedDict
-except ImportError:
-    from core.backports.odict import odict as OrderedDict  # Python <2.7
+from collections import OrderedDict
 
 from core import constants
 from core import utils

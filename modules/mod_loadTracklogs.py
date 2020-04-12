@@ -23,11 +23,7 @@ from core import utils
 import math
 import os
 import glob
-
-try:
-    import cPickle as pickle  # Python 2
-except ImportError:
-    import pickle  # Python 3
+import pickle
 import shutil
 from time import clock
 from time import gmtime, strftime

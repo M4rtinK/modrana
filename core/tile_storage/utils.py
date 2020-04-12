@@ -1,7 +1,6 @@
 """Various tile handling utility functions"""
 import six
 from six import b
-import sys
 import os
 import logging
 
@@ -9,21 +8,11 @@ from .tile_types import ID_TO_CLASS_MAP
 
 log = logging.getLogger("tile_storage.utils")
 
-PYTHON3 = sys.version_info[0] > 2
-
 def is_an_image(tile_data):
     """test if the string contains an image
     by reading its magic number"""
 
-    if PYTHON3: # in Python 3 we directly get bytes
-        h = tile_data
-    else: # in Python <3 we get a string
-        # create a file-like object
-        f = six.moves.StringIO(tile_data)
-        # read the header from it
-        h = f.read(32)
-        # cleanup
-        f.close()
+    h = tile_data
 
     # NOTE: magic numbers taken from imghdr source code
 

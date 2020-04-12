@@ -1,14 +1,6 @@
 """multi source geocoding"""
-import sys
-import traceback
-
-try:  # Python 2
-    from urllib import urlencode
-    from urllib2 import urlopen, Request, build_opener, HTTPError, URLError
-except ImportError:  # Python 3
-    from urllib.request import urlopen, Request, build_opener
-    from urllib.parse import urlencode
-    from urllib.error import HTTPError, URLError
+from urllib.request import urlopen, Request, build_opener
+from urllib.parse import urlencode
 
 import logging
 log = logging.getLogger("mod.onlineServices.geonames")

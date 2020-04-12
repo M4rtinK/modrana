@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 # Online geodata providers
-import time
-import re
 from core import constants
 from core.point import Point
 from core import requirements
@@ -13,13 +11,8 @@ except ImportError:
 
 from core.providers import POIProvider, DummyController
 
-try:  # Python 2
-    from urllib import urlencode
-    from urllib2 import urlopen, Request, HTTPError, URLError
-except ImportError:  # Python 3
-    from urllib.request import urlopen, Request
-    from urllib.parse import urlencode
-    from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
+from urllib.parse import urlencode
 
 OSM_SCOUT_SERVER_POI_SEARCH_URL = "http://localhost:8553/v1/search?"
 OSM_SCOUT_SERVER_LOCAL_SEARCH_URL = "http://localhost:8553/v1/guide?"

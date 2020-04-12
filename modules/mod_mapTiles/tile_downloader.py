@@ -11,10 +11,7 @@
 # * overwrite support - we want to download tiles for
 #   some layers even if they are already stored locally
 #   (traffic, weather overlay, etc.)
-
-from __future__ import with_statement
-
-from urllib.error import HTTPError, URLError
+from urllib.error import URLError
 
 import threading
 import time

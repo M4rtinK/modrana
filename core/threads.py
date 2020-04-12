@@ -26,7 +26,6 @@
 #log = logging.getLogger("modRana")
 # until modRana has a proper logging structure,
 # use a fake stdout log
-from __future__ import with_statement # for python 2.5
 import sys
 
 import threading

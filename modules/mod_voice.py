@@ -1,4 +1,3 @@
-from __future__ import with_statement # for python 2.5
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------
 # A module for handling handling text to speach.

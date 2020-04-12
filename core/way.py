@@ -1,6 +1,5 @@
 """a modRana class representing an unified tracklog or route"""
 # -*- coding: utf-8 -*-
-from __future__ import with_statement # for python 2.5
 import csv
 import os
 import threading

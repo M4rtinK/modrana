@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 # At the moment just a thread pool implementation
-from __future__ import with_statement  # Python 2.5
-
 import threading
 
 from core import threads

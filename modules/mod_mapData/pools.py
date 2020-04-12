@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # Tile checking & batch download pools
-from __future__ import with_statement
 
 import threading
 import time

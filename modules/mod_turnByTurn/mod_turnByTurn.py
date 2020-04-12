@@ -17,14 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-from __future__ import with_statement
-
 from modules.base_module import RanaModule
 from core import geo
 from core import threads
 from core import constants
 from core.signal import Signal
-import math
 import time
 from threading import RLock
 
