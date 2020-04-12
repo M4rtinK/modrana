@@ -1,10 +1,8 @@
 """A modRana POI database class"""
 
 import os
-import sys
 import sqlite3
 from core.point import POI
-from core.backports.six import u
 
 import logging
 log = logging.getLogger("core.poi_db")
@@ -69,17 +67,17 @@ class POIDatabase(object):
             'CREATE TABLE poi (poi_id integer PRIMARY KEY, lat real, lon real, label text, desc text, cat_id integer)')
         # load the predefined categories
         # (currently the same ones as in MaemoMapper)
-        defaultCats = [(1, u('Service Station'), u('Stations for purchasing fuel for vehicles.'), 1),
-                       (2, u('Residence'), u('Houses, apartments, or other residences of import.'), 1),
-                       (3, u('Restaurant'), u('Places to eat or drink.'), 1),
-                       (4, u('Shopping/Services'), u('Places to shop or acquire services.'), 1),
-                       (5, u('Recreation'), u('Indoor or Outdoor places to have fun.'), 1),
-                       (6, u('Transportation'), u('Bus stops, airports, train stations, etc.'), 1),
-                       (7, u('Lodging'), u('Places to stay temporarily or for the night.'), 1),
-                       (8, u('School'), u('Elementary schools, college campuses, etc.'), 1),
-                       (9, u('Business'), u('General places of business.'), 1),
-                       (10, u('Landmark'), u('General landmarks.'), 1),
-                       (11, u('Other'), u('Miscellaneous category for everything else.'), 1)]
+        defaultCats = [(1, u'Service Station', u'Stations for purchasing fuel for vehicles.', 1),
+                       (2, u'Residence', u'Houses, apartments, or other residences of import.', 1),
+                       (3, u'Restaurant', u'Places to eat or drink.', 1),
+                       (4, u'Shopping/Services', u'Places to shop or acquire services.', 1),
+                       (5, u'Recreation', u'Indoor or Outdoor places to have fun.', 1),
+                       (6, u'Transportation', u'Bus stops, airports, train stations, etc.', 1),
+                       (7, u'Lodging', u'Places to stay temporarily or for the night.', 1),
+                       (8, u'School', u'Elementary schools, college campuses, etc.', 1),
+                       (9, u'Business', u'General places of business.', 1),
+                       (10, u'Landmark', u'General landmarks.', 1),
+                       (11, u'Other', u'Miscellaneous category for everything else.', 1)]
         for cat in defaultCats:
             conn.execute('insert into category values(?,?,?,?)', cat)
             # commit the changes

@@ -29,7 +29,6 @@ from core import constants
 from core.point import Waypoint, TurnByTurnPoint
 from core.signal import Signal
 from core.way import Way
-from core.backports.six import u
 from core import routing_providers
 
 
@@ -130,8 +129,8 @@ class Route(RanaModule):
         self._directions_filter_rules = []
         for row in CSVReader:
             if row[0] != '#' and len(row) >= 2:
-                regex = re.compile(u(row[0]))
-                self._directions_filter_rules.append((regex, u(row[1])))
+                regex = re.compile(row[0])
+                self._directions_filter_rules.append((regex, row[1]))
         f.close()
         self._directions_filter_rules_loaded = True
         self.log.debug("directions filter loaded in %1.2f ms", (time.time() - start) * 1000)
@@ -743,7 +742,7 @@ class Route(RanaModule):
             # test if the word has any cyrillic characters (a single one is enough)
             for character in substring:
                 try: # there are probably some characters that dont have a known name
-                    unicode_name = unicodedata.name(u(character))
+                    unicode_name = unicodedata.name(character)
                     if unicode_name.find('CYRILLIC') != -1:
                         cyrillic_char_found = True
                         break

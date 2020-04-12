@@ -2,7 +2,6 @@
 
 from core import constants
 from core.singleton import modrana
-from core.backports.six import u
 
 import logging
 log = logging.getLogger("core.point")
@@ -153,8 +152,8 @@ class POI(Point):
     def __init__(self, name, description, lat, lon, db_cat_id, db_poi_id=None):
         self.id = db_poi_id
         # this probably handles some Unicode encoding issues
-        name = u('%s') % name
-        description = u('%s') % description
+        name = u'%s' % name
+        description = u'%s' % description
         Point.__init__(self, lat, lon, name=name, message=description)
         self._db_category_index = db_cat_id
 
