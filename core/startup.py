@@ -28,10 +28,7 @@ log = logging.getLogger("core.startup")
 
 from core import modrana_log
 
-try:
-    import argparse
-except ImportError:
-    import core.backports.argparse as argparse
+import argparse
 
 LOCAL_SEARCH_LOCATION_TIMEOUT = 30 # in seconds
 
