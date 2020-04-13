@@ -4,7 +4,6 @@
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
 import time, calendar, math
-from core.backports import six
 
 # some multipliers for interpreting GPS output
 METERS_TO_FEET	= 3.2808399	# Meters to U.S./British feet
@@ -61,7 +60,7 @@ def isotime(s):
         msec = s - date
         date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
         return date + "." + repr(msec)[3:]
-    elif type(s) == type("") or type(s) == type(six.u("")):
+    elif type(s) == type("") or type(s) == type(u""):
         if s[-1] == "Z":
             s = s[:-1]
         if "." in s:

@@ -19,18 +19,18 @@
 #---------------------------------------------------------------------------
 import random
 import sys
+
 from threading import Thread
-from core.backports import six
-
-# TODO replace this with something Python 3 compatible
-SimpleHTTPServer = six.moves.SimpleHTTPServer
-SocketServer = six.moves.socketserver
-
+from http.server import SimpleHTTPRequestHandler
+from socketserver import TCPServer
 from urllib.error import HTTPError
 from io import StringIO
 
 from modules.base_module import RanaModule
 from modules import tileserver_callback_proxy
+
+import logging
+server_log = logging.getLogger("mod.tileserver.server")
 
 
 def getModule(*args, **kwargs):
@@ -64,7 +64,7 @@ class Tileserver(RanaModule):
         #    self.tileserverPort = random.randint(8000,9000)
 
 
-        #    Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+        #    Handler = SimpleHTTPRequestHandler
 
 
         try:
@@ -109,17 +109,17 @@ class Tileserver(RanaModule):
         self.stopServer()
 
 
-class Server(SocketServer.TCPServer):
+class Server(TCPServer):
 #      def __init__(self, tuple, callback):
 #        SocketServer.TCPServer.init(tuple, "")
 #        self.callback = callback
 
-    class Proxy(SimpleHTTPServer.SimpleHTTPRequestHandler):
+    class Proxy(SimpleHTTPRequestHandler):
         def __init__(self, request, client_address):
             try:
-                SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
+                SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
             except:
-                SimpleHTTPServer.SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
+                SimpleHTTPRequestHandler.__init__(self, request, client_address, self)
 
         def do_GET(self):
             split = self.path.split("/")
@@ -127,8 +127,8 @@ class Server(SocketServer.TCPServer):
             z = int(split[2])
             x = int(split[3])
             y = int(split[4].split(".")[0])
-            self.log.debug(self.path)
-            self.log.debug(tileserver_callback_proxy.cb._mapTiles)
+            server_log.debug(self.path)
+            server_log.debug(tileserver_callback_proxy.cb._mapTiles)
             try:
                 tileData = tileserver_callback_proxy.cb._mapTiles.getTile(layer, z, x, y)
                 if tileData:
@@ -141,12 +141,12 @@ class Server(SocketServer.TCPServer):
                     #              self.send_header('Date', self.date_time_string())
                     self.end_headers()
 
-                    self.log.debug("GET returning file")
+                    server_log.debug("GET returning file")
 
                     self.wfile.write(StringIO(tileData).read())
                     return True
                 else:
-                    self.log.debug("GET tile not found")
+                    server_log.debug("GET tile not found")
                     return False
             except HTTPError:
                 e = sys.exc_info()[1]

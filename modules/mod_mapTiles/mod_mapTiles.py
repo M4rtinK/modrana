@@ -18,21 +18,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
+
 import threading
 import time
+
+from queue import Queue
 
 import urllib3
 
 from core import utils
 from core import tiles
 from core import constants
-from core.backports import six
 from core.signal import Signal
 from core import threads
 
 from .tile_downloader import Downloader
-
-StringIO = six.moves.cStringIO
 
 #import socket
 #timeout = 30 # this sets timeout for all sockets
@@ -109,7 +109,7 @@ class MapTiles(RanaModule):
 
         self._tileDownloaded = Signal()
 
-        self._dlRequestQueue = six.moves.queue.Queue()
+        self._dlRequestQueue = Queue()
         self._downloader = None
 
     @property

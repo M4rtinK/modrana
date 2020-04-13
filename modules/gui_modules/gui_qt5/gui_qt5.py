@@ -864,11 +864,6 @@ class _Search(object):
         self._addressSearchInProgress = False
         self._addressSignal.emit()
 
-    #addressStatus = QtCore.Property(six.text_type,
-    #    lambda x: x._addressSearchStatus, notify=_addressSignal)
-    #
-    #addressInProgress = QtCore.Property(bool,
-    #    lambda x: x._addressSearchInProgress, notify=_addressSignal)
 
 class ModRana(object):
     """

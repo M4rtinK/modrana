@@ -1,6 +1,4 @@
 """Various tile handling utility functions"""
-import six
-from six import b
 import os
 import logging
 
@@ -17,13 +15,13 @@ def is_an_image(tile_data):
     # NOTE: magic numbers taken from imghdr source code
 
     # as most tiles are PNGs, check for PNG first
-    if h[:8] == b("\211PNG\r\n\032\n"):
+    if h[:8] == b"\211PNG\r\n\032\n":
         return "png"
-    elif h[6:10] in (b('JFIF'), b('Exif')): # JPEG in JFIF or Exif format
+    elif h[6:10] in (b'JFIF', b'Exif'): # JPEG in JFIF or Exif format
         return "jpg"
-    elif h[:6] in (b('GIF87a'), b('GIF89a')): # GIF ('87 and '89 variants)
+    elif h[:6] in (b'GIF87a', b'GIF89a'): # GIF ('87 and '89 variants)
         return "gif"
-    elif h[:2] in (b('MM'), b('II'), b('BM')): # tiff or BMP
+    elif h[:2] in (b'MM', b'II', b'BM'): # tiff or BMP
         return "bmp"
     else: # probably not an image file
         return False

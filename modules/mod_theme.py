@@ -21,7 +21,6 @@ import os
 from modules.base_module import RanaModule
 
 from core.signal import Signal
-from core.backports import six
 from core import qrc
 
 from core import utils
@@ -165,7 +164,7 @@ class Theme(object):
         if 'colors' in config:
             colors = config['colors']
             colorObjects = {}
-            for key, color in six.iteritems(colors):
+            for key, color in colors.items():
                 if len(color) == 2: # hex color/color name and alpha as float 0-1
                     colorString = color[0]
                     colorObjects[key] = colorString

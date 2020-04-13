@@ -3,7 +3,6 @@
 import time
 from core import constants
 from core.way import Way
-from core.backports import six
 
 from urllib.request import urlopen
 
@@ -199,9 +198,9 @@ def _googleDirections(start, destination, waypoints, params):
 
         # check if start and destination are string,
         # otherwise convert to lat,lon strings from Points
-        if not isinstance(start, six.string_types):
+        if not isinstance(start, str):
             start = "%f,%f" % (start.lat, start.lon)
-        if not isinstance(destination, six.string_types):
+        if not isinstance(destination, str):
             destination = "%f,%f" % (destination.lat, destination.lon)
 
         if not waypoints: waypoints = []

@@ -21,7 +21,6 @@ import os
 
 from modules.base_module import RanaModule
 from core.signal import Signal
-from core.backports import six
 from core.layers import MapLayer, MapLayerGroup
 from .overlay_groups import OverlayGroup
 
@@ -167,7 +166,7 @@ class MapLayers(RanaModule):
         # check if there is at least one valid layer
 
         layerDefinitions = self.modrana.configs.map_config.get('layers', {})
-        for layerId, layerDefinition in six.iteritems(layerDefinitions):
+        for layerId, layerDefinition in layerDefinitions.items():
             if self._hasRequiredKeys(layerDefinition, MAP_LAYER_REQUIRED_KEYS):
                 self._layers[layerId] = MapLayer(layerId, layerDefinition)
             else:
@@ -184,7 +183,7 @@ class MapLayers(RanaModule):
         # configuration file has any
         if self.modrana.configs.map_config:
             groupsDict = self.modrana.configs.map_config.get('groups', {})
-            for groupId, groupDefinition in six.iteritems(groupsDict):
+            for groupId, groupDefinition in groupsDict.items():
                 if self._hasRequiredKeys(groupDefinition, MAP_LAYER_GROUP_REQUIRED_KEYS):
                     self._groups[groupId] = MapLayerGroup(self, groupId, groupDefinition)
 

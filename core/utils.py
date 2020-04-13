@@ -9,10 +9,6 @@ import shutil
 
 from core import constants
 from core import qrc
-from core.backports.six import b
-from core.backports import six
-
-StringIO = six.moves.cStringIO
 
 from urllib.parse import urlparse as urllib_parse
 
@@ -165,13 +161,13 @@ def is_the_string_an_image(s):
     # NOTE: magic numbers taken from imghdr source code
 
     # as most tiles are PNGs, check for PNG first
-    if s[:8] == b("\211PNG\r\n\032\n"):
+    if s[:8] == b"\211PNG\r\n\032\n":
         return True
-    elif s[6:10] in (b('JFIF'), b('Exif')): # JPEG in JFIF or Exif format
+    elif s[6:10] in (b'JFIF', b'Exif'): # JPEG in JFIF or Exif format
         return True
-    elif s[:6] in (b('GIF87a'), b('GIF89a')): # GIF ('87 and '89 variants)
+    elif s[:6] in (b'GIF87a', b'GIF89a'): # GIF ('87 and '89 variants)
         return True
-    elif s[:2] in (b('MM'), b('II'), b('BM')): # tiff or BMP
+    elif s[:2] in (b'MM', b'II', b'BM'): # tiff or BMP
         return True
     else: # probably not an image file
         return False

@@ -86,7 +86,6 @@ from core import configs
 from core import threads
 from core import gs
 from core import singleton
-from core.backports import six
 # record that imports-done timestamp
 importsDoneTimestamp = time.time()
 
@@ -866,7 +865,7 @@ class ModRana(object):
         ASSUMPTION: keys are strings of length>=1
         """
         try:
-            return dict((k, v) for k, v in six.iteritems(inputDict) if k[0] != '#')
+            return dict((k, v) for k, v in inputDict.items() if k[0] != '#')
         except Exception:
             log.exception('options: error while filtering options\nsome nonpersistent keys might have been left in\nNOTE: keys should be strings of length>=1')
             return self.d
