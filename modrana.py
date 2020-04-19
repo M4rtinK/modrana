@@ -343,7 +343,7 @@ class ModRana(object):
         """Load all "normal" (other than device & GUI) modules."""
 
         log.info("importing modules:")
-        start_time = time.clock()
+        start_time = time.perf_counter()
 
         # make shortcut for the load_module function
         load_module = self._load_module
@@ -356,7 +356,7 @@ class ModRana(object):
             module_name = module_name.split('.')[0]
             load_module(module_name, module_name[4:])
 
-        log.info("Loaded all modules in %1.2f ms, initialising" % (1000 * (time.clock() - start_time)))
+        log.info("Loaded all modules in %1.2f ms, initialising" % (1000 * (time.perf_counter() - start_time)))
         self.addTime("all modules loaded")
 
         # make sure all modules have the device module and other variables before first time
@@ -367,14 +367,14 @@ class ModRana(object):
             # run what needs to be done before firstTime is called
         self._modules_loaded_pre_first_time()
 
-        start_time = time.clock()
+        start_time = time.perf_counter()
         for m in self.m.values():
             m.firstTime()
 
         # run what needs to be done after firstTime is called
         self._modules_loaded_post_first_time()
 
-        log.info( "Initialization complete in %1.2f ms" % (1000 * (time.clock() - start_time)) )
+        log.info( "Initialization complete in %1.2f ms" % (1000 * (time.perf_counter() - start_time)) )
 
         # add last timing checkpoint
         self.addTime("all modules initialized")
@@ -427,7 +427,7 @@ class ModRana(object):
 
     def _load_module(self, importName, moduleName):
         """Load a single module by name from path."""
-        start_m = time.clock()
+        start_m = time.perf_counter()
         fp = None
         try:
             if USING_QRC:
@@ -444,7 +444,7 @@ class ModRana(object):
             log.info(" * %s: %s (%1.2f ms)",
                      moduleName,
                      self.m[moduleName].__doc__,
-                     (1000 * (time.clock() - start_m))
+                     (1000 * (time.perf_counter() - start_m))
                      )
             return module
         except Exception:
@@ -556,7 +556,7 @@ class ModRana(object):
 
     def shutdown(self):
         """Start shutdown cleanup and stop GUI main loop when finished."""
-        start_timestamp = time.clock()
+        start_timestamp = time.perf_counter()
         log.info("Shutting-down modules")
         for m in self.m.values():
             m.shutdown()

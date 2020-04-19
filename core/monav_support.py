@@ -187,7 +187,7 @@ class MonavServer(MonavBase):
         import monav_server
 
         log.info('monav server: starting route search')
-        start = time.clock()
+        start = time.perf_counter()
         tryNr = 0
         result = None
         while tryNr < RETRY_COUNT:
@@ -201,7 +201,7 @@ class MonavServer(MonavBase):
                 if tryNr < RETRY_COUNT:
                     log.info('retrying')
         if tryNr < RETRY_COUNT:
-            log.info('monav server: search finished in %1.2f ms and %d tries', 1000 * (time.clock() - start), tryNr)
+            log.info('monav server: search finished in %1.2f ms and %d tries', 1000 * (time.perf_counter() - start), tryNr)
             return result
         else:
             log.error('monav server: search failed after %d retries', tryNr)
@@ -307,7 +307,7 @@ class MonavLight(MonavBase):
         })
 
     def get_monav_directions(self, waypoints, route_params):
-        start = time.clock()
+        start = time.perf_counter()
         input_json = self._get_input_json(waypoints, route_params)
         log.info('monav light: starting route search')
         process = subprocess.Popen([self._monav_light_executable_path, input_json], stdout=subprocess.PIPE)
@@ -317,7 +317,7 @@ class MonavLight(MonavBase):
             result_dict = json.loads(stdout.decode("utf-8"))
             result = MonavLightResult(result_dict)
             if result.type == result.SUCCESS:
-                log.info('monav light: route search successful (%1.2f ms)', 1000 * (time.clock() - start))
+                log.info('monav light: route search successful (%1.2f ms)', 1000 * (time.perf_counter() - start))
             else:
                 log.error("monav light: routing failed: %s", result.status_message())
             return result

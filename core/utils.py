@@ -304,7 +304,7 @@ def get_time_hash_string():
     return time.strftime("%Y%m%d#%H-%M-%S", time.gmtime())
 
 def get_elapsed_time_string(start_timestamp):
-    return "%1.2f ms" % (1000 * (time.clock() - start_timestamp))
+    return "%1.2f ms" % (1000 * (time.perf_counter() - start_timestamp))
 
 # Note about the "internal" functions
 #

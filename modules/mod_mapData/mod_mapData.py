@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
-from time import clock
+import time
 import copy
 from core import geo
 from core import utils
@@ -160,7 +160,7 @@ class MapData(RanaModule):
         => for now, if we get tilesZ (called midZ in handle message) that is lower than 15,
         we set it to the lowest zoomlevel, so we get don't get too much unneeded tiles when splitting
         """
-        start = clock()
+        start = time.perf_counter()
         extendedTiles = tiles.copy()
 
         # start of the tile splitting code
@@ -215,7 +215,7 @@ class MapData(RanaModule):
             previousZoomlevelTiles = newTilesFromRounding # set the new tiles s as prev. tiles for next iteration
 
             self.log.info("nr of tiles after extend: %d", len(extendedTiles))
-        self.log.info("Extend took %1.2f ms", 1000 * (clock() - start))
+        self.log.info("Extend took %1.2f ms", 1000 * (time.perf_counter() - start))
 
         del tiles
 
@@ -290,7 +290,7 @@ class MapData(RanaModule):
             # because we don't care about what order are the points in this case,
         # we just add the interpolated points to the end
         route.extend(interpolatedPoints)
-        start = clock()
+        start = time.perf_counter()
         tilesToDownload = set()
         for point in route: #now we iterate over all points of the route
             lat, lon = point[0], point[1]
@@ -303,7 +303,7 @@ class MapData(RanaModule):
             # so we will save only unique tiles
             outputSet = set(map(lambda x: tuple(x), currentPointTiles))
             tilesToDownload.update(outputSet)
-        self.log.info("Listing tiles took %1.2f ms", 1000 * (clock() - start))
+        self.log.info("Listing tiles took %1.2f ms", 1000 * (time.perf_counter() - start))
         self.log.info("unique tiles %d", len(tilesToDownload))
         return tilesToDownload
 

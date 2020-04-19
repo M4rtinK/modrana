@@ -613,23 +613,23 @@ def distance_benchmark(LLE, sampleSize=None):
     # first test on classic lat, lon, elevation tuples with coordinates in degrees
 
     # Classic modRana method
-    start1 = time.clock()
+    start1 = time.perf_counter()
     l = map(lambda x: distanceOld(lat, lon, x[0], x[1]), LLE)
-    print("%1.9f ms Classic modRana method" % (1000 * (time.clock() - start1)))
+    print("%1.9f ms Classic modRana method" % (1000 * (time.perf_counter() - start1)))
     if sampleSize:
         print(l[0:sampleSize - 1])
 
     # Marble method
-    start1 = time.clock()
+    start1 = time.perf_counter()
     l = map(lambda x: distance(lat, lon, x[0], x[1]), LLE)
-    print("%1.9f ms Marble method" % (1000 * (time.clock() - start1)))
+    print("%1.9f ms Marble method" % (1000 * (time.perf_counter() - start1)))
     if sampleSize:
         print(l[0:sampleSize - 1])
 
     # Marble approximate
-    start1 = time.clock()
+    start1 = time.perf_counter()
     l = map(lambda x: distance_approx(lat, lon, x[0], x[1]), LLE)
-    print("%1.9f ms Marble approximate method" % (1000 * (time.clock() - start1)))
+    print("%1.9f ms Marble approximate method" % (1000 * (time.perf_counter() - start1)))
     if sampleSize:
         print(l[0:sampleSize - 1])
 
@@ -638,16 +638,16 @@ def distance_benchmark(LLE, sampleSize=None):
     lat = radians(lat)
     lon = radians(lon)
     # Marble method on radians
-    start1 = time.clock()
+    start1 = time.perf_counter()
     l = map(lambda x: distance_radians(lat, lon, x[0], x[1]), LLERadians)
-    print("%1.9f ms Marble method on radians" % (1000 * (time.clock() - start1)))
+    print("%1.9f ms Marble method on radians" % (1000 * (time.perf_counter() - start1)))
     if sampleSize:
         print(l[0:sampleSize - 1])
 
     # Marble approximate method on radians
-    start1 = time.clock()
+    start1 = time.perf_counter()
     l = map(lambda x: distance_approx_radians(lat, lon, x[0], x[1]), LLERadians)
-    print("%1.9f ms Marble approximate method on radians" % (1000 * (time.clock() - start1)))
+    print("%1.9f ms Marble approximate method on radians" % (1000 * (time.perf_counter() - start1)))
     if sampleSize:
         print(l[0:sampleSize - 1])
 

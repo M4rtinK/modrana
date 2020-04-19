@@ -588,7 +588,7 @@ class TurnByTurn(RanaModule):
 
     def _following_route(self):
         """Are we still following the route or is rerouting needed ?"""
-        start1 = time.clock()
+        start1 = time.perf_counter()
         pos = self.get('pos', None)
         proj = self.m.get('projection', None)
         if pos and proj:
@@ -619,7 +619,7 @@ class TurnByTurn(RanaModule):
             threshold = float(
                 self.get('reroutingThreshold', REROUTING_DEFAULT_THRESHOLD)) * self._rerouting_threshold_multiplier
             self.log.debug("Divergence from route: %1.2f/%1.2f m computed in %1.0f ms",
-            min_distance * 1000, float(threshold), (1000 * (time.clock() - start1)))
+            min_distance * 1000, float(threshold), (1000 * (time.perf_counter() - start1)))
             return min_distance * 1000 < threshold
 
     def _start_tbt_worker(self):

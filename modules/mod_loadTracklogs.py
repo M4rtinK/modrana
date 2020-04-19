@@ -25,7 +25,7 @@ import os
 import glob
 import pickle
 import shutil
-from time import clock
+import time
 from time import gmtime, strftime
 
 import logging
@@ -129,7 +129,7 @@ class LoadTracklogs(RanaModule):
     def _load_cache(self):
         """Unpickle the cache from file."""
         self.log.info("** Loading tracklog cache")
-        start = clock()
+        start = time.perf_counter()
         try:
             f = open(self.get_tracklog_cache_path(), 'rb')
             self.cache = pickle.load(f)
@@ -137,7 +137,7 @@ class LoadTracklogs(RanaModule):
         except Exception:
             self.log.exception("loading cache from file failed")
             self.cache = {}
-        self.log.info("** Loading tracklog cache took %1.2f ms", 1000 * (clock() - start))
+        self.log.info("** Loading tracklog cache took %1.2f ms", 1000 * (time.perf_counter() - start))
 
     def _clean_cache(self):
         """Remove files that are not present from the cache."""
@@ -326,7 +326,7 @@ class LoadTracklogs(RanaModule):
 
 
     #  def load(self):
-    #    start = clock()
+    #    start = time.perf_counter()
     #
     #    try:
     #      f = open(self.cachePath, 'r')
@@ -337,7 +337,7 @@ class LoadTracklogs(RanaModule):
     #      print("loadTracklogs: loading cache from file failed")
     #      self.cache = {}
     #
-    #    print("Loading from cache took %1.2f ms" % (1000 * (clock() - start)))
+    #    print("Loading from cache took %1.2f ms" % (1000 * (time.perf_counter() - start)))
     #
     #    files = []
     #    if os.path.exists(self.tracklogFolder):
@@ -355,7 +355,7 @@ class LoadTracklogs(RanaModule):
     #
     #    self._clean_cache(files)
     #    self.save()
-    #    print("Loading tracklogs took %1.2f ms" % (1000 * (clock() - start)))
+    #    print("Loading tracklogs took %1.2f ms" % (1000 * (time.perf_counter() - start)))
 
     def save(self):
         try:
@@ -369,7 +369,7 @@ class LoadTracklogs(RanaModule):
 
     def loadPathList(self, pathList):
         self.log.info("** Loading tracklogs list")
-        start = clock()
+        start = time.perf_counter()
         count = len(pathList)
         index = 1
         self.sendMessage('notification:loading %d tracklogs#1' % count)
@@ -378,7 +378,7 @@ class LoadTracklogs(RanaModule):
             self.sendMessage('notification:%d of %d loaded#1' % (index, count))
             index += 1
 
-        elapsed = (1000 * (clock() - start))
+        elapsed = (1000 * (time.perf_counter() - start))
         self.log.info("** Loading tracklogs took %1.2f ms", elapsed)
         self.save()
         self._clean_cache()
@@ -395,7 +395,7 @@ class LoadTracklogs(RanaModule):
         if self._tracklog_list == []:
             self.list_available_tracklogs()
 
-        start = clock()
+        start = time.perf_counter()
         self.filename = path
 
         file = None
@@ -427,9 +427,9 @@ class LoadTracklogs(RanaModule):
 
             track = GPXTracklog(track, path, type, self.cache, self.save)
             self.tracklogs[path] = track
-            self.log.info("Loading tracklog \n%s\ntook %1.2f ms", path, (1000 * (clock() - start)))
+            self.log.info("Loading tracklog \n%s\ntook %1.2f ms", path, (1000 * (time.perf_counter() - start)))
             if notify:
-                self.sendMessage('notification:loaded in %1.2f ms' % (1000 * (clock() - start)))
+                self.sendMessage('notification:loaded in %1.2f ms' % (1000 * (time.perf_counter() - start)))
             return track
         else:
             self.log.info("No tracklog file")

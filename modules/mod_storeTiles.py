@@ -87,7 +87,7 @@ class StoreTiles(RanaModule):
         """Check for any existing stores for the given layer in persistent storage
            and return a dictionary with the found stores under file storage type keys.
         """
-        start = time.clock()
+        start = time.perf_counter()
         self._llog("looking for existing stores for layer %s" % layer)
         layer_folder_path = os.path.join(self.modrana.paths.map_folder_path, layer.folder_name)
         store_tuples = []
@@ -127,7 +127,7 @@ class StoreTiles(RanaModule):
         with self._tile_storage_management_lock:
             store = self._stores[layer].get(self._primary_tile_storage_type)
             if store is None:
-                start = time.clock()
+                start = time.perf_counter()
                 self._llog("store type %s not found for layer %s" % (self._primary_tile_storage_type, layer))
                 layer_folder_path = os.path.join(self.modrana.paths.map_folder_path, layer.folder_name)
                 if self._primary_tile_storage_type == constants.TILE_STORAGE_FILES:
@@ -171,7 +171,7 @@ class StoreTiles(RanaModule):
             self._stores[layer] = OrderedDict(store_tuples)
 
     def _primary_tile_storage_type_changed_cb(self, key, oldValue, newValue):
-        start = time.clock()
+        start = time.perf_counter()
         # primary tile storage type has been changed, update internal variables accordingly
         with self._tile_storage_management_lock:
             self._llog("primary tile storage type changed to: %s" % newValue)
@@ -203,7 +203,7 @@ class StoreTiles(RanaModule):
         pass
 
     def get_tile_data(self, lzxy):
-        start = time.clock()
+        start = time.perf_counter()
         layer = lzxy[0]
         self._llog("tile requested: %s" % str(lzxy))
         with self._tile_storage_management_lock:
@@ -238,7 +238,7 @@ class StoreTiles(RanaModule):
         return None
 
     def tile_is_stored(self, lzxy):
-        start = time.clock()
+        start = time.perf_counter()
         self._llog("do we have tile: %s ?" % str(lzxy))
         layer = lzxy[0]
         with self._tile_storage_management_lock:
@@ -272,7 +272,7 @@ class StoreTiles(RanaModule):
         return False
 
     def store_tile_data(self, lzxy, tile_data):
-        start = time.clock()
+        start = time.perf_counter()
         self._llog("store tile data for: %s" % str(lzxy))
         store = self._get_store_for_writing(lzxy[0])
         self._llog("store tile data for: %s into %s" % (str(lzxy), store))
@@ -280,7 +280,7 @@ class StoreTiles(RanaModule):
         self._llog("stored tile data for: %s" % str(lzxy), start)
 
     def shutdown(self):
-        start = time.clock()
+        start = time.perf_counter()
         # close all stores
         self.log.debug("closing tile stores")
         layer_count = 0
