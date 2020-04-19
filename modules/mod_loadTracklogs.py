@@ -36,7 +36,7 @@ def getModule(*args, **kwargs):
 
 
 class LoadTracklogs(RanaModule):
-    """A sample pyroute module"""
+    """Tracklog file loading"""
 
     def __init__(self, *args, **kwargs):
         RanaModule.__init__(self, *args, **kwargs)
