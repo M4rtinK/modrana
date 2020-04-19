@@ -18,7 +18,7 @@ Release: 1%{?dist}
 %global debug_package %{nil}
 %endif
 Url: http://modrana.org
-Version: 0.57.1
+Version: 0.57.2
 Source0: modrana-%{version}.tar.gz
 
 License: GPLv3+
@@ -149,6 +149,9 @@ fi
 %endif
 
 %changelog
+* Sun Apr 19 2020 Martin Kolman <martin.kolman@gmail.com> - 0.57.2-1
+- Remove absolute export paths from SVG files (martin.kolman)
+
 * Sun Apr 19 2020 Martin Kolman <martin.kolman@gmail.com> - 0.57.1-1
 
 
