@@ -44,7 +44,7 @@ import logging
 log = logging.getLogger("mod.routing.monav_support")
 
 # Marble stores monav data like this on the N900:
-# /home/user/MyDocs/.local/share/marble/maps/earth/monav/motorcar/europe/czech_republic
+# ~/MyDocs/.local/share/marble/maps/earth/monav/motorcar/europe/czech_republic
 
 class MonavBase(object):
     def __init__(self, data_path):
