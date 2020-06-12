@@ -58,4 +58,4 @@ class Fix():
             self.timestamp = timestamp
 
     def __str__(self):
-        return 'mode:' + self.mode + 'lat,lon:' + self.position + 'elev:' + self.altitude
+        return 'mode:' + str(self.mode) + 'lat,lon:' + self.position + 'elev:' + str(self.altitude)
