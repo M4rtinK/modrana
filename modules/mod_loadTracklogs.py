@@ -495,12 +495,6 @@ class LoadTracklogs(RanaModule):
 
     # helper functions
 
-    # TODO: move this to the geo module ?
-    def simple_pythagorean_distance(self, x1, y1, x2, y2):
-        dx = x2 - x1
-        dy = y2 - y1
-        return math.sqrt(dx ** 2 + dy ** 2)
-
     # found on:
     # http://www.quanative.com/2010/01/01/server-side-marker-clustering-for-google-maps-with-python/
     def cluster_trackpoints(self, trackpointsList, cluster_distance):
