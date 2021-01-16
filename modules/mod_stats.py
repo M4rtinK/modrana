@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
-from time import *
+import time
 
 
 def getModule(*args, **kwargs):
@@ -30,79 +30,88 @@ class Stats(RanaModule):
 
     def __init__(self, *args, **kwargs):
         RanaModule.__init__(self, *args, **kwargs)
-        self.minimalSpeed = 2 #  in kmh, we don't update the avg speed if the current speed is like this
+        self.minimal_speed = 2 #  in kmh, we don't update the avg speed if the current speed is like this
         self.lastT = None
-        self.maxSpeed = 0
+        self._max_speed = 0
         self.avg1 = 0
         self.avg2 = 0
         # update stats once new position info is available
-        self.modrana.watch('locationUpdated', self.updateStatsCB)
+        self.modrana.watch('locationUpdated', self.update_stats_cb)
 
 
-    def updateStatsCB(self, *args):
-        # Run scheduledUpdate every second
-        t = time()
+    def update_stats_cb(self, *args):
+        # Run scheduled_update every second
+        t = time.time()
         if self.lastT is None:
-            self.scheduledUpdate(t, 1, True) # dt should not be 0 because we use it for division
+            self.scheduled_update(1, True) # dt should not be 0 because we use it for division
             self.lastT = t
         else:
             dt = t - self.lastT
             if dt > 1:
-                self.scheduledUpdate(t, dt)
+                self.scheduled_update(dt)
                 self.lastT = t
 
-    def scheduledUpdate(self, t, dt, firstTime=False):
-        """Called every dt seconds"""
+    def scheduled_update(self, dt, firstTime=False):
+        """Called every dt seconds."""
         pos = self.get('pos', None)
         if pos is None:
             return # TODO: zero stats
         speed = self.get('speed', None)
-        if speed is None or speed <= self.minimalSpeed:
+        if speed is None or speed <= self.minimal_speed:
             # we have no data, or the speed is below the threshold (we are not moving)
             return
         average = 0
-        if speed > self.maxSpeed:
-            self.maxSpeed = speed
+        if speed > self.max_speed:
+            self.max_speed = speed
         self.avg1 += speed
         self.avg2 += dt
         average = self.avg1 / self.avg2
 
-        self.set('maxSpeed', self.maxSpeed)
+        self.set('max_speed', self.max_speed)
         self.set('avgSpeed', average)
 
-    def getCurrentSpeedString(self):
-        """return current speed as string with the current unit
-        EXAMPLE: "88 mph" or "1000 km/h" """
-        speedString = "speed unknown"
-        units = self.m.get('units', None)
-        kmhSpeed = self.get('speed', None)
-        if units and kmhSpeed is not None:
-            speedString = units.km2CurrentUnitPerHourString(kmhSpeed)
-        elif units: # speed unknown, just return something like "? km/h"
-            speedString = "? %s" % units.currentUnitPerHourString()
-        return speedString
+    def get_current_speed_string(self):
+        """Return current speed as string with the current unit.
 
-    def getAverageSpeedString(self):
-        """return current average speed as string with the currently unit"""
-        speedString = "?"
-        units = self.m.get('units', None)
-        kmhAverageSpeed = self.get('avgSpeed', None)
-        if units and kmhAverageSpeed is not None:
-            speedString = units.km2CurrentUnitPerHourString(kmhAverageSpeed, dp=0)
-        elif units: # speed unknown, just return something like "? km/h"
-            speedString = "? %s" % units.currentUnitPerHourString()
-        return speedString
+        EXAMPLE: "88 mph" or "1000 km/h"
 
-    def getMaxSpeedString(self):
-        """return current average speed as string with the currently unit"""
-        speedString = "?"
+        :return: current speed in currently selected unit
+        :rtype: str
+        """
+        speed_string = "speed unknown"
         units = self.m.get('units', None)
-        kmhMaxSpeed = self.get('maxSpeed', None)
-        if units and kmhMaxSpeed is not None:
-            speedString = units.km2CurrentUnitPerHourString(kmhMaxSpeed, dp=0)
+        kmh_speed = self.get('speed', None)
+        if units and kmh_speed is not None:
+            speed_string = units.km2CurrentUnitPerHourString(kmh_speed)
         elif units: # speed unknown, just return something like "? km/h"
-            speedString = "? %s" % units.currentUnitPerHourString()
-        return speedString
+            speed_string = "? %s" % units.currentUnitPerHourString()
+        return speed_string
+
+    def get_average_speed_string(self):
+        """Return current average speed as string with the currently selected unit.
+
+        :return: current average speed in selected unit
+        :rtype: str
+        """
+        speed_string = "?"
+        units = self.m.get('units', None)
+        kmh_average_speed = self.get('avgSpeed', None)
+        if units and kmh_average_speed is not None:
+            speed_string = units.km2CurrentUnitPerHourString(kmh_average_speed, dp=0)
+        elif units: # speed unknown, just return something like "? km/h"
+            speed_string = "? %s" % units.currentUnitPerHourString()
+        return speed_string
+
+    def get_max_speed_string(self):
+        """return current average speed as string with the currently unit"""
+        speed_string = "?"
+        units = self.m.get('units', None)
+        kmh_max_speed = self.get('max_speed', None)
+        if units and kmh_max_speed is not None:
+            speed_string = units.km2CurrentUnitPerHourString(kmh_max_speed, dp=0)
+        elif units: # speed unknown, just return something like "? km/h"
+            speed_string = "? %s" % units.currentUnitPerHourString()
+        return speed_string
 
     @property
     def current_speed(self):
@@ -133,9 +142,13 @@ class Stats(RanaModule):
         :rtype: float
         """
 
-        return self.get('maxSpeed', -1)
+        return self.get('max_speed', -1)
 
-    def getSpeedStatsDict(self):
+    @max_speed.setter
+    def max_speed(self, value):
+        self._max_speed = value
+
+    def get_speed_stats_dict(self):
         """Return a dictionary with speed stats.
 
         Like this, speed statistics can be displayed atomically.
