@@ -695,10 +695,28 @@ ApplicationWindow {
         // populate the layer tree
         rWin.layerTree.clear()
         var lTree = values.layerTree
+
+        // Since around Qt 5.15/Fedora 33 it looks
+        // like just assigning the layers data structure that
+        // comes from PyOtherSide causes a weird crash somewhere deep
+        // in Qt. So let's just work around that for now by re-creating the
+        // data structure here in QML.
         for (var i=0; i<lTree.length; i++) {
-            rWin.layerTree.append(lTree[i])
+            var layerGroup = {"id": lTree[i].id,
+                          "label": lTree[i].label,
+                          "layers": []
+                           }
+            for (var j=0; j<lTree[i].layers.length; j++) {
+
+                var layer = lTree[i].layers[j]
+                layerGroup.layers.push({
+                    "id" : "" + lTree[i].layers[j].id,
+                    "label" : "" + lTree[i].layers[j].label
+                })
+            }
+            rWin.layerTree.append(layerGroup)
+
         }
-        rWin.log.info("layer tree loaded")
         // set the layer dict
         rWin.layerDict = values.dictOfLayerDicts
         rWin.log.info("layer dict loaded")
