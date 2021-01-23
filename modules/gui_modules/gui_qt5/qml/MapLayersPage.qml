@@ -74,9 +74,25 @@ BasePage {
                     id : sliderWrapper
                     width : lGrid.cellWidth
                     height : opacitySlider.height
+                    TextButton {
+                        id : removeLayerButton
+                        width : 64 * rWin.c.style.m
+                        anchors.right : parent.right
+                        height : parent.height
+                        text : "❌"
+                        visible : index != 0
+
+                        onClicked : {
+                            rWin.log.info("removing layer " + index)
+                            rWin.mapPage.removeMapLayerByIndex(index)
+                        }
+
+
+
+                    }
                     Slider {
                         id : opacitySlider
-                        width : lGrid.cellWidth
+                        width : lGrid.cellWidth - removeLayerButton.width
                         anchors.verticalCenter : parent.verticalCenter
                         stepSize : 0.1
                         maximumValue : 1.0
@@ -118,11 +134,11 @@ BasePage {
                     width : actionGrid.cellWidth
                     height : isLastItem ? lGrid.height : 0
                     visible : layersLW.model.count > 1
-                    text : qsTr("<b>remove</b>")
+                    text : qsTr("<b>back to map</b>")
                     onClicked : {
-                        rWin.log.info("remove layer")
-                        // remove the last layer
-                        rWin.mapPage.removeMapLayerByIndex(layersLW.model.count - 1)
+                        rWin.log.info("back to map from map overlays page")
+                        // go back to the map page
+                        rWin.push(null, !rWin.animate)
                     }
                 }
             }
