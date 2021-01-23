@@ -124,9 +124,20 @@ BasePage {
                 Button {
                     width : actionGrid.cellWidth
                     height : isLastItem ? lGrid.height : 0
-                    text : qsTr("<b>add</b>")
+                    text : qsTr("<b>add layer</b>")
                     onClicked : {
                         rWin.log.info("add layer")
+
+                        // open the layer selection dialog
+                        // and tell it what is the number of the layer
+                        // to be set
+                        var layerSelector = Qt.createComponent("MapLayerPage.qml")
+                        rWin.pushPage(layerSelector,
+                                      {layerIndex : layersLW.model.count,
+                                       returnToMap : false},
+                                       rWin.animate)
+
+
                         rWin.mapPage.appendMapLayer("openptmap_overlay", "OSM Transit Overlay", 1.0)
                     }
                 }
