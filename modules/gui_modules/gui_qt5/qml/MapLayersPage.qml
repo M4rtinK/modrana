@@ -136,9 +136,6 @@ BasePage {
                                       {layerIndex : layersLW.model.count,
                                        returnToMap : false},
                                        rWin.animate)
-
-
-                        rWin.mapPage.appendMapLayer("openptmap_overlay", "OSM Transit Overlay", 1.0)
                     }
                 }
                 Button {
