@@ -28,13 +28,7 @@ from core import utils
 import logging
 log = logging.getLogger("mod.theme")
 
-# for some reason one import method works
-# on Fremantle and other everywhere (?) else"""
-try:
-    from configobj import ConfigObj # everywhere
-except Exception:
-    log.exception("alternative configobj import method failed")
-    from configobj import ConfigObj # Fremantle
+from configobj import ConfigObj
 
 THEME_CONFIG_FILENAME = "theme.conf"
 
