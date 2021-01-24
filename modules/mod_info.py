@@ -19,7 +19,6 @@
 #---------------------------------------------------------------------------
 from modules.base_module import RanaModule
 from core.point import Point
-import math
 from core.i18n import _
 
 def getModule(*args, **kwargs):
@@ -103,86 +102,3 @@ class Info(RanaModule):
         elif message == "clearPoint":
             self._dirPoint = None
             self.set("directionPointLatLon" ,None)
-
-    # from SGTL
-    # TODO: move to appropriate place
-    def _bearingTo(self, pos, target, currentBearing):
-
-        lat1 = math.radians(pos.lat)
-        lat2 = math.radians(target.lat)
-        lon1 = math.radians(pos.lon)
-        lon2 = math.radians(target.lon)
-
-        dlon = math.radians(target.lon - pos.lon)
-        y = math.sin(dlon) * math.cos(lat2)
-        x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1)*math.cos(lat2)*math.cos(dlon)
-        bearing = math.degrees(math.atan2(y, x))
-        bearing = (-180 + currentBearing - bearing) % 360
-        return bearing
-
-    def _getDirectionAngle(self):
-        angle = 0.0
-        pos = self.get("pos", None)
-        bearing = self.get("bearing", None)
-        if pos and bearing is not None and self._dirPoint:
-            lat, lon = pos
-            posPoint = Point(lat, lon)
-            angle = self._bearingTo(posPoint, self._dirPoint, bearing)
-        return angle
-
-
-    def _drawDirectionIndicator(self, cr, x1, y1, side, angle):
-        # looks like some of the menu drawing functions does not
-        # call stroke() at the end of drawing
-        # TODO: find which one is it and remove stroke() from here
-        cr.stroke()
-
-        cr.set_source_rgb(1.0, 1.0, 0.0)
-        cr.save()
-        cr.translate(x1, y1)
-        cr.rotate(math.radians(angle))
-        # inside area
-        cr.move_to(0, side/2.0) # tip of the arrow
-        cr.line_to(-side/3.0, -side/2.0) # left extreme
-        cr.line_to(0, -side/5.0) # arrow inset
-        cr.line_to(side/3.0, -side/2.0) # right extreme
-        cr.fill()
-        cr.set_source_rgb(0.0, 0.0, 0.0)
-        cr.set_line_width(6)
-        cr.move_to(0, side/2.0) # tip of the arrow
-        cr.line_to(-side/3.0, -side/2.0) # left extreme
-        cr.line_to(0, -side/5.0) # arrow inset
-        cr.line_to(side/3.0, -side/2.0) # right extreme
-        cr.close_path()
-        cr.stroke()
-
-        # draw middle indicator
-        cr.set_source_rgb(0.0, 0.0, 0.0)
-        cr.arc(0, 0, 16, 0, 2.0 * math.pi)
-        cr.fill()
-
-
-        cr.restore()
-
-
-
-
-
-
-        #
-        #cr.set_source_rgb(1.0, 1.0, 0.0)
-        #cr.save()
-        #cr.translate(x1, y1)
-        #cr.rotate(math.radians(angle))
-        #cr.move_to(-10, 15)
-        #cr.line_to(10, 15)
-        #cr.line_to(0, -15)
-        #cr.fill()
-        #cr.set_source_rgb(0.0, 0.0, 0.0)
-        #cr.set_line_width(3)
-        #cr.move_to(-10, 15)
-        #cr.line_to(10, 15)
-        #cr.line_to(0, -15)
-        #cr.close_path()
-        #cr.stroke()
-        #cr.restore()
