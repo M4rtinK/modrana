@@ -19,26 +19,14 @@ Confirmed to run on:
 
 - desktop PCs
 - the Jolla smartphone and other Sailfish OS devices
-- Nokia N900
-- Android 4.0+ devices
-- Nokia N9 & N950
-- Neo FreeRunner
-- Smart Q7
+- the PINE64 PinePhone 
+- Nokia N900 (deprecated since release ?)
+- Android 4.0+ devices 
+- Nokia N9 & N950 (deprecated since ?)
+- Neo FreeRunner (deprecated since release ?)
 
 Dependencies
 ============
-
-- Python 2.5+ (including Python 3.2+)
-
-GTK GUI
--------
-
-- PyGTK
-- PyCairo
-- Python-Location (N900)
-
-Qt 5/QML GUI
-------------
 
 - Qt 5.1+
 - Python 3.2+
@@ -81,3 +69,4 @@ Resources
 - `translation project on Transifex <https://www.transifex.com/martink/modrana>`_
 - `Sailfish OS package on OpenRepos <https://openrepos.net/content/martink/modrana-0>`_
 - `nightly packages for Fedora <https://copr.fedorainfracloud.org/coprs/m4rtink/modrana-nightly>`_
+- `unoffical PKGBUILD script for Arch Linux and Manjaro <https://framagit.org/linmobapps/pkgbuilds/-/tree/main/modrana-git>`_

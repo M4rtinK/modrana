@@ -9,3 +9,4 @@ Exec=/usr/bin/modrana
 Icon=modrana
 Categories=Navigation;
 Terminal=false
+X-Purism-FormFactor=Workstation;Mobile;

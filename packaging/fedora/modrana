@@ -1,3 +1,4 @@
 #!/bin/sh
 
-modrana-gtk "$@"
+cd /usr/share/modrana/run
+./qt5.sh
