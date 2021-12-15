@@ -1,4 +1,6 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="nl_BE" version="2.1">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="nl_BE">
 <context>
     <name>BaseMapPage</name>
     <message>
@@ -929,17 +931,17 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIDeletePage.qml" line="11"/>
         <source>Delete this POI ?</source>
-        <translation type="unfinished"/>
+        <translation>Dit NP verwijderen?</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIDeletePage.qml" line="12"/>
         <source>Delete POI</source>
-        <translation type="unfinished"/>
+        <translation>NP verwijderen</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIDeletePage.qml" line="37"/>
         <source>Cancel</source>
-        <translation type="unfinished"/>
+        <translation>Annuleren</translation>
     </message>
 </context>
 <context>
@@ -977,7 +979,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/POIPage.qml" line="59"/>
         <source>Delete POI from database</source>
-        <translation type="unfinished"/>
+        <translation>NP verwijderen uit database</translation>
     </message>
 </context>
 <context>
@@ -1051,7 +1053,7 @@
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="19"/>
         <source>POI name not set</source>
-        <translation type="unfinished"/>
+        <translation>NP-naam niet opgegeven</translation>
     </message>
     <message>
         <location filename="../modules/gui_modules/gui_qt5/qml/SavePointPage.qml" line="37"/>
