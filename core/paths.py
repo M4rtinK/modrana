@@ -240,6 +240,10 @@ class Paths(object):
         else:
             return self._assurePath(path)
 
+    def get_tracklog_folder_path(self):
+        #FIXME: shortcut for QML access, do this differently
+        return self.tracklog_folder_path
+
     @property
     def map_folder_path(self):
         """return a path to folder for map data storage"""

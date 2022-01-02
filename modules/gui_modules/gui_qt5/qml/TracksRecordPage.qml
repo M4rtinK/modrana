@@ -11,7 +11,7 @@ BasePage {
     property bool ready : true
     property bool recording : false
     property bool paused : false
-    property string realTracklogFolder : rWin.dcall("modrana.gui.modrana.paths.getTracklogsFolderPath",
+    property string realTracklogFolder : rWin.dcall("modrana.gui.modrana.paths.get_tracklog_folder_path",
                                          [], "unknown", function(v){realTracklogFolder = v})
     property string tracklogFolder : symlinkSwitch.checked ? "~/Documents/modrana_tracklogs" : rtPage.realTracklogFolder
     property string recordingText : rtPage.paused ? qsTr("Tracklog recording paused") : qsTr("Recording a tracklog")
