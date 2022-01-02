@@ -97,51 +97,6 @@ class StorePOI(RanaModule):
             self.log.exception("loading POI from file failed")
             return None
 
-    def handleMessage(self, message, messageType, args):
-        if messageType == 'ms' and message == 'deletePOI':
-            # remove a poi with given id from database
-            if args:
-                poi_db_index = int(args)
-                if self._db:
-                    self._db.delete_poi(poi_db_index)  # remove the poi from database
-                # notify the showPOI module, that it might need to rebuild its menus
-                self.sendMessage('showPOI:listMenusDirty')
-        elif messageType == 'ms' and message == 'setCatAndCommit':
-            # set category and as this is the last needed input,
-            # commit the new POI to the database
-            cat_db_index = int(args)
-            # set the category to the one the user just selected
-            self.tempOnlinePOI.db_category_index = int(args)
-            # commit the new online result based POI to db
-            self.tempOnlinePOI.commit()
-            # signal that the showPOI menus may need to be regenerated
-            self.sendMessage('showPOI:listMenusDirty')
-            if not self._db:
-                self.log.error("can't set category: POI database not available")
-                return
-            category_info = self._db.get_category_from_index(cat_db_index)
-            category_name = category_info[1]
-            poi_name = self.tempOnlinePOI.name
-            # NOTE: False means the the variable is unset, as None means the map screen
-            if self.menuNameAfterStorageComplete == False:
-                self.set('menu', 'search#searchResultsItem')
-            else:
-                self.set('menu', self.menuNameAfterStorageComplete)
-
-            self.sendMessage('ml:notification:m:%s has been saved to %s;5' % (poi_name, category_name))
-
-        elif message == "reconnectToDb":
-            # this means, that we need to reconnect the database
-            # * this is used for example when the user changed
-            #   the default POI database path
-            self._db.disconnect_from_database()
-            self.connect_to_database()
-
-        elif message == "dumpToCSV":
-            # dump db to CSV file
-            self.set('menu', None)
-            self._dump_to_CSV()
-
     def _dump_to_CSV(self):
         """Dump the database content as a CSV file"""
         units = self.m.get('units', None)
