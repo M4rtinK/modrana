@@ -49,40 +49,6 @@ class LoadTracklogs(RanaModule):
     def firstTime(self):
         self._create_basic_folder_structure()
 
-    def handleMessage(self, message, messageType, args):
-        if message == 'loadActive':
-            # load the active tracklog
-            path = self.get('activeTracklogPath', None)
-            if path is not None and self._tracklog_list:
-                self.log.info("* loading tracklog:\n%s", path)
-
-                # Zeroth, is the tracklog already loaded ?
-                if path not in self.tracklogs.keys():
-                    # First, is the cache loaded ?
-                    if self.cache == {}:
-                        self._load_cache()
-                    else:
-                        self.log.warning("not loading tracklog cache (already loaded)")
-                        # Second, try to load the tracklog (if its not loaded)
-
-                    try:
-                        self.load_tracklog(path)
-                        self.log.info("tracklog successfully loaded")
-                    except Exception:
-                        self.log.exception("loading tracklog from path: %s failed", path)
-
-                    # Third, assure consistency of the cache
-                    self.log.info("** Assuring tracklog cache consistency")
-                    self.save()
-                    self._clean_cache()
-                    self.log.info("** Tracklog cache consistency assured")
-                #    elif message == 'renameActiveTracklog':
-                #      activeTracklog = self.get_active_tracklog()
-                #      if activeTracklog:
-                #        pass
-                #        # get current tracklog filename, sans extension
-                #        # start an entry box
-
     def _get_tf_sub_path(self, subPath):
         """Return a tracklog folder sub path.
 
