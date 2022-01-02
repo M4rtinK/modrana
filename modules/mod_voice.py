@@ -60,15 +60,13 @@ class Voice(RanaModule):
         else:
             return ""
 
-    def handleMessage(self, message, messageType, args):
-        if messageType == "ms" and message == "resetStringToDefault" and "args":
-            self.resetStringToDefault(args)
-        elif message == "voiceTest":
-            if self.get('soundEnabled', True):
-                self.notify("Voice output test in progress", 3000)
-                self.say("test. test. Can you hear me now ? Good.", "en")
-            else:
-                self.notify("Sound output disabled, can't test", 2000)
+    def voice_test(self):
+        #TODO UI support
+        if self.get('soundEnabled', True):
+            self.notify("Voice output test in progress", 3000)
+            self.say("test. test. Can you hear me now ? Good.", "en")
+        else:
+            self.notify("Sound output disabled, can't test", 2000)
 
     def espeakSay(self, plaintextMessage, distanceMeters, forceLanguageCode=False):
         """say routing messages through espeak"""
