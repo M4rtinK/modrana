@@ -49,6 +49,7 @@ class FlexibleDefaultDict(defaultdict):
     def __init__(self, factory):
         defaultdict.__init__(self)
         self.factory = factory
+
     def __missing__(self, key):
         self[key] = self.factory(key)
         return self[key]
