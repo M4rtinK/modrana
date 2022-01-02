@@ -88,17 +88,3 @@ class Info(RanaModule):
     def email_address(self):
         """ModRana project email address."""
         return "modrana@gmail.com"
-
-    def handleMessage(self, message, messageType, args):
-        if message == "setPoint":
-            # open the coordinates entry dialog
-            entry = self.m.get('textEntry', None)
-            if entry:
-                initialText = ""
-                dirPoint = self.get("directionPointLatLon", None)
-                if dirPoint:
-                    initialText = "%f,%f" % dirPoint
-                entry.entryBox(self, 'directionPointCoordinates', 'Coordinates (Example: 1.23,4.56)', initialText=initialText)
-        elif message == "clearPoint":
-            self._dirPoint = None
-            self.set("directionPointLatLon" ,None)
