@@ -91,48 +91,6 @@ class Tracklog(RanaModule):
         # eq, due to modRana or device crashing
         self._rescueLogs()
 
-    def handleMessage(self, message, messageType, args):
-        if message == "startLogging":
-            self.log.info("starting track logging")
-            # start a new log
-            if not self.loggingEnabled:
-                self.startLogging(self.get('logNameEntry', ""))
-            # or resume an existing one
-            elif self.loggingEnabled == True & self.loggingPaused == True:
-                self.log.info("resuming track logging")
-                self.loggingPaused = False
-
-        elif message == "pauseLogging":
-            self.pauseLogging()
-
-        elif message == "stopLogging":
-            self.log.info("stopping track logging")
-            self.stopLogging()
-
-        elif message == 'nameInput':
-            entry = self.m.get('textEntry', None)
-            if entry is None:
-                self.log.error("error, text entry module is not loaded")
-                return
-            entryText = ""
-            logNameEntry = self.get('logNameEntry', None)
-            if logNameEntry:
-                entryText = logNameEntry
-            entry.entryBox(self, 'logNameEntry', 'Write tracklog name', entryText)
-
-        elif message == 'clearTrace':
-            self.clearTrace()
-
-        elif message == 'setupColorMenu':
-            m = self.m.get('showTracklogs', None)
-            if m:
-                m.setupChooseDistColorMenu('tracklog', '|tracklog:colorFromRegister|set:menu:None')
-
-        elif message == 'colorFromRegister':
-            # set the color from the color register
-            colorName = self.get('distinctColorRegister', 'blue')
-            self.traceColor = colorName
-
     def startLogging(self, name="", logType='gpx'):
         """Start a new log file
 
