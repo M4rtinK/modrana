@@ -117,7 +117,7 @@ class OSMScoutServerLocalSearch(POIProvider):
             term = term.encode("utf-8")
             params = {
                 'limit': maxResults,
-                'query': term,
+                'poitype': term,
                 'radius': radius,
                 'lat' : around.lat,
                 'lng' : around.lon
