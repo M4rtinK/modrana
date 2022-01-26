@@ -90,16 +90,12 @@ install:
 	cp packaging/icons/modrana/64x64/modrana.png $(DESTDIR)/usr/share/icons/hicolor/64x64/apps/
 	cp packaging/icons/modrana/128x128/modrana.png $(DESTDIR)/usr/share/icons/hicolor/128x128/apps/
 	cp packaging/icons/modrana/256x256/modrana.png $(DESTDIR)/usr/share/icons/hicolor/256x256/apps/
-	cp packaging/fedora/modrana-qml.png $(DESTDIR)/usr/share/icons/hicolor/64x64/apps/
 	# install the desktop file
 	-mkdir -p $(DESTDIR)/usr/share/applications/
 	cp packaging/fedora/modrana.desktop $(DESTDIR)/usr/share/applications/
-	cp packaging/fedora/modrana-qt5.desktop $(DESTDIR)/usr/share/applications/
 	# install the startup scripts
 	-mkdir -p $(DESTDIR)/usr/bin
 	cp packaging/fedora/modrana $(DESTDIR)/usr/bin/
-	cp packaging/fedora/modrana-gtk $(DESTDIR)/usr/bin/
-	cp packaging/fedora/modrana-qt5 $(DESTDIR)/usr/bin/
 	# install the launcher
 	cp run/launcher/modrana $(DESTDIR)/usr/bin/
 
