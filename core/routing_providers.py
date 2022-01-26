@@ -5,6 +5,7 @@ from core import constants
 from core.way import Way
 
 from urllib.request import urlopen
+from urllib.parse import quote
 
 try:
     import json
@@ -313,7 +314,7 @@ class OSMScoutServerRouting(RoutingProvider):
                 'directions_options': { 'language': route_params.language },
                 'locations': locations
             }
-            queryUrl = OSM_SCOUT_SERVER_ROUTING_URL + "json=" + json.dumps(params)
+            queryUrl = OSM_SCOUT_SERVER_ROUTING_URL + "json=" + quote(json.dumps(params))
             reply = urlopen(queryUrl)
             
             if reply:
